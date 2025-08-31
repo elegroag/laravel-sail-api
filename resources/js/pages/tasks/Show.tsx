@@ -14,7 +14,7 @@ export default function Show({ task }: Props) {
   ];
 
   return (
-    <AppLayout breadcrumbs={breadcrumbs}>
+    <AppLayout title="Tarea" breadcrumbs={breadcrumbs}>
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">{task.title}</h1>
         <div className="flex items-center gap-3">

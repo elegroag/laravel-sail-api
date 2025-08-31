@@ -16,7 +16,7 @@ class WebController extends Controller
 {
     public function dashboard()
     {
-        return Inertia::render('Dashboard');
+        return Inertia::render('Web/Dashboard');
     }
 
     public function empresas()
@@ -24,6 +24,25 @@ class WebController extends Controller
         $empresas = Empresa::with('trabajadores')->get();
         return Inertia::render('Empresas/Index', [
             'empresas' => new EmpresaCollection($empresas)
+        ]);
+    }
+
+    public function empresasCreate()
+    {
+        return Inertia::render('Empresas/Create');
+    }
+
+    public function empresasEdit($id)
+    {
+        return Inertia::render('Empresas/Edit', [
+            'empresa' => Empresa::findOrFail($id)
+        ]);
+    }
+
+    public function empresasShow($id)
+    {
+        return Inertia::render('Empresas/Show', [
+            'empresa' => Empresa::findOrFail($id)
         ]);
     }
 
@@ -35,11 +54,49 @@ class WebController extends Controller
         ]);
     }
 
+    public function trabajadoresCreate()
+    {
+        return Inertia::render('Trabajadores/Create');
+    }
+
+    public function trabajadoresEdit($id)
+    {
+        return Inertia::render('Trabajadores/Edit', [
+            'trabajador' => Trabajador::findOrFail($id)
+        ]);
+    }
+
+    public function trabajadoresShow($id)
+    {
+        return Inertia::render('Trabajadores/Show', [
+            'trabajador' => Trabajador::findOrFail($id)
+        ]);
+    }
+
     public function nucleosFamiliares()
     {
         $nucleosFamiliares = NucleoFamiliar::with('trabajador.empresa')->get();
         return Inertia::render('NucleosFamiliares/Index', [
             'nucleos_familiares' => new NucleoFamiliarCollection($nucleosFamiliares)
+        ]);
+    }
+
+    public function nucleosFamiliaresCreate()
+    {
+        return Inertia::render('NucleosFamiliares/Create');
+    }
+
+    public function nucleosFamiliaresEdit($id)
+    {
+        return Inertia::render('NucleosFamiliares/Edit', [
+            'nucleo_familiar' => NucleoFamiliar::findOrFail($id)
+        ]);
+    }
+
+    public function nucleosFamiliaresShow($id)
+    {
+        return Inertia::render('NucleosFamiliares/Show', [
+            'nucleo_familiar' => NucleoFamiliar::findOrFail($id)
         ]);
     }
 

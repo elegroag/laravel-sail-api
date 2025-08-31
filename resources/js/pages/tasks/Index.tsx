@@ -20,7 +20,7 @@ export default function Index({ tasks }: Props) {
   };
 
   return (
-    <AppLayout breadcrumbs={breadcrumbs}>
+    <AppLayout title="Tareas" breadcrumbs={breadcrumbs}>
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Tareas</h1>
         <Link href={route('tasks.create')} prefetch className="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:opacity-90">

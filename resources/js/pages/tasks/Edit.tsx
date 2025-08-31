@@ -26,7 +26,7 @@ export default function Edit({ task }: Props) {
   };
 
   return (
-    <AppLayout breadcrumbs={breadcrumbs}>
+    <AppLayout title="Editar tarea" breadcrumbs={breadcrumbs}>
       <h1 className="mb-4 text-xl font-semibold">Editar tarea</h1>
       <TaskForm data={data} setData={setData} processing={processing} errors={errors as Record<string, string>} onSubmit={submit} submitLabel="Actualizar" showCompleted />
     </AppLayout>

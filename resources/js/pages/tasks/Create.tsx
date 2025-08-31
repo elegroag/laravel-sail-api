@@ -18,7 +18,7 @@ export default function Create() {
   };
 
   return (
-    <AppLayout breadcrumbs={breadcrumbs}>
+    <AppLayout title="Crear tarea" breadcrumbs={breadcrumbs}>
       <h1 className="mb-4 text-xl font-semibold">Crear tarea</h1>
       <TaskForm data={data} setData={setData} processing={processing} errors={errors as Record<string, string>} onSubmit={submit} submitLabel="Crear" />
     </AppLayout>
