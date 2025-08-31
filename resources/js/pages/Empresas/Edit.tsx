@@ -117,9 +117,7 @@ export default function Edit({ empresa }: Props) {
                                     name="nombre"
                                     id="nombre"
                                     required
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-                                        errors.nombre ? 'border-red-300' : ''
-                                    }`}
+                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${errors.nombre ? 'border-red-300' : ''}`}
                                     value={formData.nombre}
                                     onChange={handleChange}
                                 />
@@ -138,9 +136,7 @@ export default function Edit({ empresa }: Props) {
                                     name="rut"
                                     id="rut"
                                     required
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-                                        errors.rut ? 'border-red-300' : ''
-                                    }`}
+                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${errors.rut ? 'border-red-300' : ''}`}
                                     value={formData.rut}
                                     onChange={handleChange}
                                 />
@@ -159,14 +155,30 @@ export default function Edit({ empresa }: Props) {
                                     name="direccion"
                                     id="direccion"
                                     required
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-                                        errors.direccion ? 'border-red-300' : ''
-                                    }`}
+                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${errors.direccion ? 'border-red-300' : ''}`}
                                     value={formData.direccion}
                                     onChange={handleChange}
                                 />
                                 {errors.direccion && (
                                     <p className="mt-1 text-sm text-red-600">{errors.direccion}</p>
+                                )}
+                            </div>
+
+                            {/* Email */}
+                            <div className="col-span-6 sm:col-span-3">
+                                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                                    Email
+                                </label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    id="email"
+                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${errors.email ? 'border-red-300' : ''}`}
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                />
+                                {errors.email && (
+                                    <p className="mt-1 text-sm text-red-600">{errors.email}</p>
                                 )}
                             </div>
 
@@ -179,30 +191,10 @@ export default function Edit({ empresa }: Props) {
                                     type="tel"
                                     name="telefono"
                                     id="telefono"
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                                     value={formData.telefono}
                                     onChange={handleChange}
                                 />
-                            </div>
-
-                            {/* Email */}
-                            <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                                    Email
-                                </label>
-                                <input
-                                    type="email"
-                                    name="email"
-                                    id="email"
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-                                        errors.email ? 'border-red-300' : ''
-                                    }`}
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                />
-                                {errors.email && (
-                                    <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-                                )}
                             </div>
 
                             {/* Sector Económico */}
@@ -214,7 +206,7 @@ export default function Edit({ empresa }: Props) {
                                     type="text"
                                     name="sector_economico"
                                     id="sector_economico"
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                                     value={formData.sector_economico}
                                     onChange={handleChange}
                                 />
@@ -230,9 +222,7 @@ export default function Edit({ empresa }: Props) {
                                     name="numero_empleados"
                                     id="numero_empleados"
                                     min="0"
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-                                        errors.numero_empleados ? 'border-red-300' : ''
-                                    }`}
+                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${errors.numero_empleados ? 'border-red-300' : ''}`}
                                     value={formData.numero_empleados}
                                     onChange={handleChange}
                                 />
@@ -249,7 +239,7 @@ export default function Edit({ empresa }: Props) {
                                 <select
                                     name="estado"
                                     id="estado"
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                                     value={formData.estado}
                                     onChange={handleChange}
                                 >
@@ -267,7 +257,7 @@ export default function Edit({ empresa }: Props) {
                                     name="descripcion"
                                     id="descripcion"
                                     rows={3}
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                                     value={formData.descripcion}
                                     onChange={handleChange}
                                 />

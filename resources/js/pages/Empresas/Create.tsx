@@ -79,7 +79,7 @@ export default function Create() {
                         <div className="grid grid-cols-6 gap-6">
                             {/* Nombre */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Nombre *
                                 </label>
                                 <input
@@ -87,7 +87,7 @@ export default function Create() {
                                     name="nombre"
                                     id="nombre"
                                     required
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
                                         errors.nombre ? 'border-red-300' : ''
                                     }`}
                                     value={formData.nombre}
@@ -100,7 +100,7 @@ export default function Create() {
 
                             {/* RUT */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="rut" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="rut" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     RUT *
                                 </label>
                                 <input
@@ -108,7 +108,7 @@ export default function Create() {
                                     name="rut"
                                     id="rut"
                                     required
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
                                         errors.rut ? 'border-red-300' : ''
                                     }`}
                                     value={formData.rut}
@@ -121,7 +121,7 @@ export default function Create() {
 
                             {/* Dirección */}
                             <div className="col-span-6">
-                                <label htmlFor="direccion" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="direccion" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Dirección *
                                 </label>
                                 <input
@@ -129,7 +129,7 @@ export default function Create() {
                                     name="direccion"
                                     id="direccion"
                                     required
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
                                         errors.direccion ? 'border-red-300' : ''
                                     }`}
                                     value={formData.direccion}
@@ -142,14 +142,14 @@ export default function Create() {
 
                             {/* Teléfono */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="telefono" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="telefono" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Teléfono
                                 </label>
                                 <input
                                     type="tel"
                                     name="telefono"
                                     id="telefono"
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                                     value={formData.telefono}
                                     onChange={handleChange}
                                 />
@@ -157,14 +157,14 @@ export default function Create() {
 
                             {/* Email */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Email
                                 </label>
                                 <input
                                     type="email"
                                     name="email"
                                     id="email"
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
                                         errors.email ? 'border-red-300' : ''
                                     }`}
                                     value={formData.email}
@@ -177,14 +177,14 @@ export default function Create() {
 
                             {/* Sector Económico */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="sector_economico" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="sector_economico" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Sector Económico
                                 </label>
                                 <input
                                     type="text"
                                     name="sector_economico"
                                     id="sector_economico"
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                                     value={formData.sector_economico}
                                     onChange={handleChange}
                                 />
@@ -192,7 +192,7 @@ export default function Create() {
 
                             {/* Número de Empleados */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="numero_empleados" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="numero_empleados" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Número de Empleados
                                 </label>
                                 <input
@@ -200,7 +200,7 @@ export default function Create() {
                                     name="numero_empleados"
                                     id="numero_empleados"
                                     min="0"
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
                                         errors.numero_empleados ? 'border-red-300' : ''
                                     }`}
                                     value={formData.numero_empleados}
@@ -213,13 +213,13 @@ export default function Create() {
 
                             {/* Estado */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="estado" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="estado" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Estado
                                 </label>
                                 <select
                                     name="estado"
                                     id="estado"
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                                     value={formData.estado}
                                     onChange={handleChange}
                                 >
@@ -230,14 +230,14 @@ export default function Create() {
 
                             {/* Descripción */}
                             <div className="col-span-6">
-                                <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Descripción
                                 </label>
                                 <textarea
                                     name="descripcion"
                                     id="descripcion"
                                     rows={3}
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                                     value={formData.descripcion}
                                     onChange={handleChange}
                                 />

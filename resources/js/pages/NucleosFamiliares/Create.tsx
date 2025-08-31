@@ -95,7 +95,7 @@ export default function Create({ trabajadores }: Props) {
                         <div className="grid grid-cols-6 gap-6">
                             {/* Nombres */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="nombres" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="nombres" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Nombres *
                                 </label>
                                 <input
@@ -103,7 +103,7 @@ export default function Create({ trabajadores }: Props) {
                                     name="nombres"
                                     id="nombres"
                                     required
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
                                         errors.nombres ? 'border-red-300' : ''
                                     }`}
                                     value={formData.nombres}
@@ -116,7 +116,7 @@ export default function Create({ trabajadores }: Props) {
 
                             {/* Apellidos */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="apellidos" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="apellidos" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Apellidos *
                                 </label>
                                 <input
@@ -124,7 +124,7 @@ export default function Create({ trabajadores }: Props) {
                                     name="apellidos"
                                     id="apellidos"
                                     required
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
                                         errors.apellidos ? 'border-red-300' : ''
                                     }`}
                                     value={formData.apellidos}
@@ -137,14 +137,14 @@ export default function Create({ trabajadores }: Props) {
 
                             {/* RUT */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="rut" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="rut" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     RUT
                                 </label>
                                 <input
                                     type="text"
                                     name="rut"
                                     id="rut"
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
                                         errors.rut ? 'border-red-300' : ''
                                     }`}
                                     value={formData.rut}
@@ -157,14 +157,14 @@ export default function Create({ trabajadores }: Props) {
 
                             {/* Fecha de Nacimiento */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="fecha_nacimiento" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="fecha_nacimiento" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Fecha de Nacimiento
                                 </label>
                                 <input
                                     type="date"
                                     name="fecha_nacimiento"
                                     id="fecha_nacimiento"
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                                     value={formData.fecha_nacimiento}
                                     onChange={handleChange}
                                 />
@@ -172,13 +172,13 @@ export default function Create({ trabajadores }: Props) {
 
                             {/* Género */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="genero" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="genero" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Género
                                 </label>
                                 <select
                                     name="genero"
                                     id="genero"
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                                     value={formData.genero}
                                     onChange={handleChange}
                                 >
@@ -191,14 +191,14 @@ export default function Create({ trabajadores }: Props) {
 
                             {/* Parentesco */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="parentesco" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="parentesco" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Parentesco *
                                 </label>
                                 <select
                                     name="parentesco"
                                     id="parentesco"
                                     required
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
                                         errors.parentesco ? 'border-red-300' : ''
                                     }`}
                                     value={formData.parentesco}
@@ -219,14 +219,14 @@ export default function Create({ trabajadores }: Props) {
 
                             {/* Teléfono */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="telefono" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="telefono" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Teléfono
                                 </label>
                                 <input
                                     type="tel"
                                     name="telefono"
                                     id="telefono"
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                                     value={formData.telefono}
                                     onChange={handleChange}
                                 />
@@ -234,14 +234,14 @@ export default function Create({ trabajadores }: Props) {
 
                             {/* Email */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Email
                                 </label>
                                 <input
                                     type="email"
                                     name="email"
                                     id="email"
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
                                         errors.email ? 'border-red-300' : ''
                                     }`}
                                     value={formData.email}
@@ -254,13 +254,13 @@ export default function Create({ trabajadores }: Props) {
 
                             {/* Estado Civil */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="estado_civil" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="estado_civil" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Estado Civil
                                 </label>
                                 <select
                                     name="estado_civil"
                                     id="estado_civil"
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                                     value={formData.estado_civil}
                                     onChange={handleChange}
                                 >
@@ -274,14 +274,14 @@ export default function Create({ trabajadores }: Props) {
 
                             {/* Ocupación */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="ocupacion" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="ocupacion" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Ocupación
                                 </label>
                                 <input
                                     type="text"
                                     name="ocupacion"
                                     id="ocupacion"
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                                     value={formData.ocupacion}
                                     onChange={handleChange}
                                 />
@@ -298,7 +298,7 @@ export default function Create({ trabajadores }: Props) {
                                         checked={formData.dependiente_economico}
                                         onChange={handleChange}
                                     />
-                                    <label htmlFor="dependiente_economico" className="ml-2 block text-sm text-gray-900">
+                                    <label htmlFor="dependiente_economico" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
                                         Dependiente económico
                                     </label>
                                 </div>
@@ -306,14 +306,14 @@ export default function Create({ trabajadores }: Props) {
 
                             {/* Trabajador */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="trabajador_id" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="trabajador_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Trabajador *
                                 </label>
                                 <select
                                     name="trabajador_id"
                                     id="trabajador_id"
                                     required
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
                                         errors.trabajador_id ? 'border-red-300' : ''
                                     }`}
                                     value={formData.trabajador_id}
@@ -333,14 +333,14 @@ export default function Create({ trabajadores }: Props) {
 
                             {/* Dirección */}
                             <div className="col-span-6">
-                                <label htmlFor="direccion" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="direccion" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Dirección
                                 </label>
                                 <input
                                     type="text"
                                     name="direccion"
                                     id="direccion"
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                                     value={formData.direccion}
                                     onChange={handleChange}
                                 />

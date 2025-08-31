@@ -132,7 +132,7 @@ export default function Edit({ nucleo_familiar, trabajadores }: Props) {
                         <div className="grid grid-cols-6 gap-6">
                             {/* Nombres */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="nombres" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="nombres" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Nombres *
                                 </label>
                                 <input
@@ -153,7 +153,7 @@ export default function Edit({ nucleo_familiar, trabajadores }: Props) {
 
                             {/* Apellidos */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="apellidos" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="apellidos" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Apellidos *
                                 </label>
                                 <input
@@ -174,7 +174,7 @@ export default function Edit({ nucleo_familiar, trabajadores }: Props) {
 
                             {/* RUT */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="rut" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="rut" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     RUT
                                 </label>
                                 <input
@@ -194,7 +194,7 @@ export default function Edit({ nucleo_familiar, trabajadores }: Props) {
 
                             {/* Fecha de Nacimiento */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="fecha_nacimiento" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="fecha_nacimiento" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Fecha de Nacimiento
                                 </label>
                                 <input
@@ -209,7 +209,7 @@ export default function Edit({ nucleo_familiar, trabajadores }: Props) {
 
                             {/* Género */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="genero" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="genero" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Género
                                 </label>
                                 <select
@@ -228,7 +228,7 @@ export default function Edit({ nucleo_familiar, trabajadores }: Props) {
 
                             {/* Parentesco */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="parentesco" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="parentesco" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Parentesco *
                                 </label>
                                 <select
@@ -256,7 +256,7 @@ export default function Edit({ nucleo_familiar, trabajadores }: Props) {
 
                             {/* Teléfono */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="telefono" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="telefono" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Teléfono
                                 </label>
                                 <input
@@ -271,7 +271,7 @@ export default function Edit({ nucleo_familiar, trabajadores }: Props) {
 
                             {/* Email */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Email
                                 </label>
                                 <input
@@ -291,7 +291,7 @@ export default function Edit({ nucleo_familiar, trabajadores }: Props) {
 
                             {/* Estado Civil */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="estado_civil" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="estado_civil" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Estado Civil
                                 </label>
                                 <select
@@ -311,7 +311,7 @@ export default function Edit({ nucleo_familiar, trabajadores }: Props) {
 
                             {/* Ocupación */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="ocupacion" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="ocupacion" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Ocupación
                                 </label>
                                 <input
@@ -335,7 +335,7 @@ export default function Edit({ nucleo_familiar, trabajadores }: Props) {
                                         checked={formData.dependiente_economico}
                                         onChange={handleChange}
                                     />
-                                    <label htmlFor="dependiente_economico" className="ml-2 block text-sm text-gray-900">
+                                    <label htmlFor="dependiente_economico" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
                                         Dependiente económico
                                     </label>
                                 </div>
@@ -343,7 +343,7 @@ export default function Edit({ nucleo_familiar, trabajadores }: Props) {
 
                             {/* Trabajador */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="trabajador_id" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="trabajador_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Trabajador *
                                 </label>
                                 <select
@@ -370,7 +370,7 @@ export default function Edit({ nucleo_familiar, trabajadores }: Props) {
 
                             {/* Dirección */}
                             <div className="col-span-6">
-                                <label htmlFor="direccion" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="direccion" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Dirección
                                 </label>
                                 <input

@@ -132,7 +132,7 @@ export default function Edit({ trabajador, empresas }: Props) {
                         <div className="grid grid-cols-6 gap-6">
                             {/* Nombres */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="nombres" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="nombres" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Nombres *
                                 </label>
                                 <input
@@ -153,7 +153,7 @@ export default function Edit({ trabajador, empresas }: Props) {
 
                             {/* Apellidos */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="apellidos" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="apellidos" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Apellidos *
                                 </label>
                                 <input
@@ -174,7 +174,7 @@ export default function Edit({ trabajador, empresas }: Props) {
 
                             {/* RUT */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="rut" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="rut" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     RUT *
                                 </label>
                                 <input
@@ -195,7 +195,7 @@ export default function Edit({ trabajador, empresas }: Props) {
 
                             {/* Email */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Email
                                 </label>
                                 <input
@@ -215,7 +215,7 @@ export default function Edit({ trabajador, empresas }: Props) {
 
                             {/* Teléfono */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="telefono" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="telefono" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Teléfono
                                 </label>
                                 <input
@@ -230,7 +230,7 @@ export default function Edit({ trabajador, empresas }: Props) {
 
                             {/* Fecha de Nacimiento */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="fecha_nacimiento" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="fecha_nacimiento" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Fecha de Nacimiento
                                 </label>
                                 <input
@@ -245,7 +245,7 @@ export default function Edit({ trabajador, empresas }: Props) {
 
                             {/* Género */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="genero" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="genero" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Género
                                 </label>
                                 <select
@@ -264,7 +264,7 @@ export default function Edit({ trabajador, empresas }: Props) {
 
                             {/* Empresa */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="empresa_id" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="empresa_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Empresa *
                                 </label>
                                 <select
@@ -291,7 +291,7 @@ export default function Edit({ trabajador, empresas }: Props) {
 
                             {/* Dirección */}
                             <div className="col-span-6">
-                                <label htmlFor="direccion" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="direccion" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Dirección
                                 </label>
                                 <input
@@ -306,7 +306,7 @@ export default function Edit({ trabajador, empresas }: Props) {
 
                             {/* Cargo */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="cargo" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="cargo" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Cargo
                                 </label>
                                 <input
@@ -321,7 +321,7 @@ export default function Edit({ trabajador, empresas }: Props) {
 
                             {/* Salario */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="salario" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="salario" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Salario
                                 </label>
                                 <input
@@ -343,7 +343,7 @@ export default function Edit({ trabajador, empresas }: Props) {
 
                             {/* Fecha de Ingreso */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="fecha_ingreso" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="fecha_ingreso" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Fecha de Ingreso
                                 </label>
                                 <input
@@ -358,7 +358,7 @@ export default function Edit({ trabajador, empresas }: Props) {
 
                             {/* Fecha de Salida */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="fecha_salida" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="fecha_salida" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Fecha de Salida
                                 </label>
                                 <input
@@ -373,7 +373,7 @@ export default function Edit({ trabajador, empresas }: Props) {
 
                             {/* Estado */}
                             <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="estado" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="estado" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Estado
                                 </label>
                                 <select
