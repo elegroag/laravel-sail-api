@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 
 type Props = {
     empresas: {
@@ -15,6 +15,26 @@ type Props = {
 
 export default function Index({ empresas }: Props) {
     const { data, meta } = empresas;
+
+    const handleDelete = async (empresaId: number, empresaNombre: string) => {
+        if (!confirm(`¿Estás seguro de que deseas eliminar la empresa "${empresaNombre}"? Esta acción no se puede deshacer.`)) {
+            return;
+        }
+
+        try {
+            await router.delete(`/api/empresas/${empresaId}`, {
+                onSuccess: () => {
+                    // La página se recargará automáticamente con los datos actualizados
+                },
+                onError: () => {
+                    alert('Error al eliminar la empresa. Por favor, inténtalo de nuevo.');
+                }
+            });
+        } catch (error) {
+            console.error('Error al eliminar empresa:', error);
+            alert('Error al eliminar la empresa. Por favor, inténtalo de nuevo.');
+        }
+    };
 
     return (
         <AppLayout title="Empresas">
@@ -115,6 +135,12 @@ export default function Index({ empresas }: Props) {
                                             >
                                                 Editar
                                             </Link>
+                                            <button
+                                                onClick={() => handleDelete(empresa.id, empresa.nombre)}
+                                                className="text-red-600 hover:text-red-900 text-sm font-medium"
+                                            >
+                                                Eliminar
+                                            </button>
                                         </div>
                                     </div>
                                 </div>

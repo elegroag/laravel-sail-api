@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 
 type Props = {
     trabajadores: {
@@ -22,6 +22,26 @@ type Props = {
 export default function Index({ trabajadores }: Props) {
     const { data, meta } = trabajadores;
 
+    const handleDelete = async (trabajadorId: number, trabajadorNombre: string) => {
+        if (!confirm(`¿Estás seguro de que deseas eliminar al trabajador "${trabajadorNombre}"? Esta acción no se puede deshacer.`)) {
+            return;
+        }
+
+        try {
+            await router.delete(`/api/trabajadores/${trabajadorId}`, {
+                onSuccess: () => {
+                    // La página se recargará automáticamente con los datos actualizados
+                },
+                onError: () => {
+                    alert('Error al eliminar el trabajador. Por favor, inténtalo de nuevo.');
+                }
+            });
+        } catch (error) {
+            console.error('Error al eliminar trabajador:', error);
+            alert('Error al eliminar el trabajador. Por favor, inténtalo de nuevo.');
+        }
+    };
+
     return (
         <AppLayout title="Trabajadores">
             <div className="bg-white shadow overflow-hidden sm:rounded-md">
@@ -35,7 +55,7 @@ export default function Index({ trabajadores }: Props) {
                         </p>
                     </div>
                     <Link
-                        href="/trabajadores/create"
+                        href="/web/trabajadores/create"
                         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
                     >
                         Nuevo Trabajador
@@ -142,17 +162,23 @@ export default function Index({ trabajadores }: Props) {
                                         </div>
                                         <div className="flex space-x-2">
                                             <Link
-                                                href={`/trabajadores/${trabajador.id}`}
+                                                href={`/web/trabajadores/${trabajador.id}`}
                                                 className="text-green-600 hover:text-green-900 text-sm font-medium"
                                             >
                                                 Ver
                                             </Link>
                                             <Link
-                                                href={`/trabajadores/${trabajador.id}/edit`}
+                                                href={`/web/trabajadores/${trabajador.id}/edit`}
                                                 className="text-gray-600 hover:text-gray-900 text-sm font-medium"
                                             >
                                                 Editar
                                             </Link>
+                                            <button
+                                                onClick={() => handleDelete(trabajador.id, `${trabajador.nombres} ${trabajador.apellidos}`)}
+                                                className="text-red-600 hover:text-red-900 text-sm font-medium"
+                                            >
+                                                Eliminar
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -170,7 +196,7 @@ export default function Index({ trabajadores }: Props) {
                         <p className="mt-1 text-sm text-gray-500">Comienza creando un nuevo trabajador.</p>
                         <div className="mt-6">
                             <Link
-                                href="/trabajadores/create"
+                                href="/web/trabajadores/create"
                                 className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
                             >
                                 Nuevo Trabajador

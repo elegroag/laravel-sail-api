@@ -1,8 +1,23 @@
 import AppLayout from '@/layouts/app-layout';
 import { Link, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-export default function Create() {
+type Props = {
+    empresa: {
+        id: number;
+        nombre: string;
+        rut: string;
+        direccion: string;
+        telefono: string;
+        email: string;
+        sector_economico: string;
+        numero_empleados: number;
+        descripcion: string;
+        estado: string;
+    };
+};
+
+export default function Edit({ empresa }: Props) {
     const [formData, setFormData] = useState({
         nombre: '',
         rut: '',
@@ -17,6 +32,21 @@ export default function Create() {
 
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [processing, setProcessing] = useState(false);
+
+    // Cargar datos de la empresa al montar el componente
+    useEffect(() => {
+        setFormData({
+            nombre: empresa.nombre || '',
+            rut: empresa.rut || '',
+            direccion: empresa.direccion || '',
+            telefono: empresa.telefono || '',
+            email: empresa.email || '',
+            sector_economico: empresa.sector_economico || '',
+            numero_empleados: empresa.numero_empleados?.toString() || '',
+            descripcion: empresa.descripcion || '',
+            estado: empresa.estado || 'activa'
+        });
+    }, [empresa]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -38,7 +68,7 @@ export default function Create() {
         setProcessing(true);
 
         try {
-            await router.post('/api/empresas', formData, {
+            await router.put(`/api/empresas/${empresa.id}`, formData, {
                 onSuccess: () => {
                     router.visit('/web/empresas');
                 },
@@ -50,21 +80,21 @@ export default function Create() {
                 }
             });
         } catch (error) {
-            console.error('Error al crear empresa:', error);
+            console.error('Error al actualizar empresa:', error);
             setProcessing(false);
         }
     };
 
     return (
-        <AppLayout title="Crear Empresa">
+        <AppLayout title="Editar Empresa">
             <div className="bg-white shadow overflow-hidden sm:rounded-md">
                 <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
                     <div>
                         <h3 className="text-lg leading-6 font-medium text-gray-900">
-                            Crear Empresa
+                            Editar Empresa
                         </h3>
                         <p className="mt-1 max-w-2xl text-sm text-gray-500">
-                            Formulario para crear una nueva empresa
+                            Modificar los datos de la empresa
                         </p>
                     </div>
                     <Link
@@ -250,7 +280,7 @@ export default function Create() {
                                 disabled={processing}
                                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {processing ? 'Guardando...' : 'Guardar Empresa'}
+                                {processing ? 'Actualizando...' : 'Actualizar Empresa'}
                             </button>
                         </div>
                     </form>

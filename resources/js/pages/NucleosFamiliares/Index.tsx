@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 
 type Props = {
     nucleos_familiares: {
@@ -19,6 +19,26 @@ type Props = {
 export default function Index({ nucleos_familiares }: Props) {
     const { data, meta } = nucleos_familiares;
 
+    const handleDelete = async (familiarId: number, familiarNombre: string) => {
+        if (!confirm(`¿Estás seguro de que deseas eliminar a "${familiarNombre}" del núcleo familiar? Esta acción no se puede deshacer.`)) {
+            return;
+        }
+
+        try {
+            await router.delete(`/api/nucleos-familiares/${familiarId}`, {
+                onSuccess: () => {
+                    // La página se recargará automáticamente con los datos actualizados
+                },
+                onError: () => {
+                    alert('Error al eliminar el familiar. Por favor, inténtalo de nuevo.');
+                }
+            });
+        } catch (error) {
+            console.error('Error al eliminar núcleo familiar:', error);
+            alert('Error al eliminar el familiar. Por favor, inténtalo de nuevo.');
+        }
+    };
+
     return (
         <AppLayout title="Núcleos Familiares">
             <div className="bg-white shadow overflow-hidden sm:rounded-md">
@@ -32,7 +52,7 @@ export default function Index({ nucleos_familiares }: Props) {
                         </p>
                     </div>
                     <Link
-                        href="/nucleos-familiares/create"
+                        href="/web/nucleos-familiares/create"
                         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
                     >
                         Nuevo Familiar
@@ -139,17 +159,23 @@ export default function Index({ nucleos_familiares }: Props) {
                                         </div>
                                         <div className="flex space-x-2">
                                             <Link
-                                                href={`/nucleos-familiares/${familiar.id}`}
+                                                href={`/web/nucleos-familiares/${familiar.id}`}
                                                 className="text-purple-600 hover:text-purple-900 text-sm font-medium"
                                             >
                                                 Ver
                                             </Link>
                                             <Link
-                                                href={`/nucleos-familiares/${familiar.id}/edit`}
+                                                href={`/web/nucleos-familiares/${familiar.id}/edit`}
                                                 className="text-gray-600 hover:text-gray-900 text-sm font-medium"
                                             >
                                                 Editar
                                             </Link>
+                                            <button
+                                                onClick={() => handleDelete(familiar.id, familiar.nombre_completo)}
+                                                className="text-red-600 hover:text-red-900 text-sm font-medium"
+                                            >
+                                                Eliminar
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -177,7 +203,7 @@ export default function Index({ nucleos_familiares }: Props) {
                         <p className="mt-1 text-sm text-gray-500">Comienza agregando un familiar de un trabajador.</p>
                         <div className="mt-6">
                             <Link
-                                href="/nucleos-familiares/create"
+                                href="/web/nucleos-familiares/create"
                                 className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
                             >
                                 Nuevo Familiar

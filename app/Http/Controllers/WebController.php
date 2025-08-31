@@ -56,20 +56,23 @@ class WebController extends Controller
 
     public function trabajadoresCreate()
     {
-        return Inertia::render('Trabajadores/Create');
+        return Inertia::render('Trabajadores/Create', [
+            'empresas' => Empresa::select('id', 'nombre')->get()
+        ]);
     }
 
     public function trabajadoresEdit($id)
     {
         return Inertia::render('Trabajadores/Edit', [
-            'trabajador' => Trabajador::findOrFail($id)
+            'trabajador' => Trabajador::findOrFail($id),
+            'empresas' => Empresa::select('id', 'nombre')->get()
         ]);
     }
 
     public function trabajadoresShow($id)
     {
         return Inertia::render('Trabajadores/Show', [
-            'trabajador' => Trabajador::findOrFail($id)
+            'trabajador' => Trabajador::with(['empresa', 'nucleosFamiliares'])->findOrFail($id)
         ]);
     }
 
@@ -83,20 +86,23 @@ class WebController extends Controller
 
     public function nucleosFamiliaresCreate()
     {
-        return Inertia::render('NucleosFamiliares/Create');
+        return Inertia::render('NucleosFamiliares/Create', [
+            'trabajadores' => Trabajador::select('id', 'nombres', 'apellidos')->get()
+        ]);
     }
 
     public function nucleosFamiliaresEdit($id)
     {
         return Inertia::render('NucleosFamiliares/Edit', [
-            'nucleo_familiar' => NucleoFamiliar::findOrFail($id)
+            'nucleo_familiar' => NucleoFamiliar::findOrFail($id),
+            'trabajadores' => Trabajador::select('id', 'nombres', 'apellidos')->get()
         ]);
     }
 
     public function nucleosFamiliaresShow($id)
     {
         return Inertia::render('NucleosFamiliares/Show', [
-            'nucleo_familiar' => NucleoFamiliar::findOrFail($id)
+            'nucleo_familiar' => NucleoFamiliar::with('trabajador.empresa')->findOrFail($id)
         ]);
     }
 
