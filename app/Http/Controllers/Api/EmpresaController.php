@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Empresa;
+use App\Http\Resources\EmpresaResource;
+use App\Http\Resources\EmpresaCollection;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
@@ -13,21 +15,10 @@ class EmpresaController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): JsonResponse
+    public function index(): EmpresaCollection
     {
-        try {
-            $empresas = Empresa::with('trabajadores')->get();
-            return response()->json([
-                'success' => true,
-                'data' => $empresas,
-                'message' => 'Empresas obtenidas exitosamente'
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al obtener empresas: ' . $e->getMessage()
-            ], 500);
-        }
+        $empresas = Empresa::with('trabajadores')->get();
+        return new EmpresaCollection($empresas);
     }
 
     /**
@@ -50,11 +41,13 @@ class EmpresaController extends Controller
 
             $empresa = Empresa::create($validatedData);
 
-            return response()->json([
-                'success' => true,
-                'data' => $empresa,
-                'message' => 'Empresa creada exitosamente'
-            ], 201);
+            return (new EmpresaResource($empresa))
+                ->additional([
+                    'success' => true,
+                    'message' => 'Empresa creada exitosamente'
+                ])
+                ->response()
+                ->setStatusCode(201);
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
@@ -72,21 +65,10 @@ class EmpresaController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id): JsonResponse
+    public function show(string $id): EmpresaResource
     {
-        try {
-            $empresa = Empresa::with('trabajadores.nucleosFamiliares')->findOrFail($id);
-            return response()->json([
-                'success' => true,
-                'data' => $empresa,
-                'message' => 'Empresa obtenida exitosamente'
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Empresa no encontrada'
-            ], 404);
-        }
+        $empresa = Empresa::with('trabajadores.nucleosFamiliares')->findOrFail($id);
+        return new EmpresaResource($empresa);
     }
 
     /**
@@ -111,11 +93,12 @@ class EmpresaController extends Controller
 
             $empresa->update($validatedData);
 
-            return response()->json([
-                'success' => true,
-                'data' => $empresa,
-                'message' => 'Empresa actualizada exitosamente'
-            ], 200);
+            return (new EmpresaResource($empresa))
+                ->additional([
+                    'success' => true,
+                    'message' => 'Empresa actualizada exitosamente'
+                ])
+                ->response();
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
