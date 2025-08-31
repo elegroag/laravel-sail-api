@@ -91,19 +91,29 @@ export default function Edit({ nucleo_familiar, trabajadores }: Props) {
         setProcessing(true);
 
         try {
-            await router.put(`/api/nucleos-familiares/${nucleo_familiar.id}`, formData, {
-                onSuccess: () => {
-                    router.visit('/web/nucleos-familiares');
+            const response = await fetch(`/api/nucleos-familiares/${nucleo_familiar.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
                 },
-                onError: (errors) => {
-                    setErrors(errors);
-                },
-                onFinish: () => {
-                    setProcessing(false);
-                }
+                body: JSON.stringify(formData)
             });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                router.visit('/web/nucleos-familiares');
+            } else {
+                if (data.errors) {
+                    setErrors(data.errors);
+                } else {
+                    console.error('Error desconocido:', data);
+                }
+            }
         } catch (error) {
             console.error('Error al actualizar núcleo familiar:', error);
+        } finally {
             setProcessing(false);
         }
     };

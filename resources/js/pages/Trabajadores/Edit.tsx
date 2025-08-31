@@ -91,19 +91,29 @@ export default function Edit({ trabajador, empresas }: Props) {
         setProcessing(true);
 
         try {
-            await router.put(`/api/trabajadores/${trabajador.id}`, formData, {
-                onSuccess: () => {
-                    router.visit('/web/trabajadores');
+            const response = await fetch(`/api/trabajadores/${trabajador.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
                 },
-                onError: (errors) => {
-                    setErrors(errors);
-                },
-                onFinish: () => {
-                    setProcessing(false);
-                }
+                body: JSON.stringify(formData)
             });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                router.visit('/web/trabajadores');
+            } else {
+                if (data.errors) {
+                    setErrors(data.errors);
+                } else {
+                    console.error('Error desconocido:', data);
+                }
+            }
         } catch (error) {
             console.error('Error al actualizar trabajador:', error);
+        } finally {
             setProcessing(false);
         }
     };

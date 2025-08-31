@@ -54,19 +54,29 @@ export default function Create({ trabajadores }: Props) {
         setProcessing(true);
 
         try {
-            await router.post('/api/nucleos-familiares', formData, {
-                onSuccess: () => {
-                    router.visit('/web/nucleos-familiares');
+            const response = await fetch('/api/nucleos-familiares', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
                 },
-                onError: (errors) => {
-                    setErrors(errors);
-                },
-                onFinish: () => {
-                    setProcessing(false);
-                }
+                body: JSON.stringify(formData)
             });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                router.visit('/web/nucleos-familiares');
+            } else {
+                if (data.errors) {
+                    setErrors(data.errors);
+                } else {
+                    console.error('Error desconocido:', data);
+                }
+            }
         } catch (error) {
             console.error('Error al crear núcleo familiar:', error);
+        } finally {
             setProcessing(false);
         }
     };
