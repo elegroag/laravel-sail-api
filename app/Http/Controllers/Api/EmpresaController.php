@@ -1,0 +1,153 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\Empresa;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
+
+class EmpresaController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(): JsonResponse
+    {
+        try {
+            $empresas = Empresa::with('trabajadores')->get();
+            return response()->json([
+                'success' => true,
+                'data' => $empresas,
+                'message' => 'Empresas obtenidas exitosamente'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener empresas: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request): JsonResponse
+    {
+        try {
+            $validatedData = $request->validate([
+                'nombre' => 'required|string|max:255',
+                'rut' => 'required|string|unique:empresas,rut|max:255',
+                'direccion' => 'required|string|max:255',
+                'telefono' => 'nullable|string|max:255',
+                'email' => 'nullable|email|max:255',
+                'sector_economico' => 'nullable|string|max:255',
+                'numero_empleados' => 'nullable|integer|min:0',
+                'descripcion' => 'nullable|string',
+                'estado' => 'nullable|in:activa,inactiva'
+            ]);
+
+            $empresa = Empresa::create($validatedData);
+
+            return response()->json([
+                'success' => true,
+                'data' => $empresa,
+                'message' => 'Empresa creada exitosamente'
+            ], 201);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error de validación',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al crear empresa: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id): JsonResponse
+    {
+        try {
+            $empresa = Empresa::with('trabajadores.nucleosFamiliares')->findOrFail($id);
+            return response()->json([
+                'success' => true,
+                'data' => $empresa,
+                'message' => 'Empresa obtenida exitosamente'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Empresa no encontrada'
+            ], 404);
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id): JsonResponse
+    {
+        try {
+            $empresa = Empresa::findOrFail($id);
+
+            $validatedData = $request->validate([
+                'nombre' => 'sometimes|required|string|max:255',
+                'rut' => 'sometimes|required|string|max:255|unique:empresas,rut,' . $id,
+                'direccion' => 'sometimes|required|string|max:255',
+                'telefono' => 'nullable|string|max:255',
+                'email' => 'nullable|email|max:255',
+                'sector_economico' => 'nullable|string|max:255',
+                'numero_empleados' => 'nullable|integer|min:0',
+                'descripcion' => 'nullable|string',
+                'estado' => 'nullable|in:activa,inactiva'
+            ]);
+
+            $empresa->update($validatedData);
+
+            return response()->json([
+                'success' => true,
+                'data' => $empresa,
+                'message' => 'Empresa actualizada exitosamente'
+            ], 200);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error de validación',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar empresa: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id): JsonResponse
+    {
+        try {
+            $empresa = Empresa::findOrFail($id);
+            $empresa->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Empresa eliminada exitosamente'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar empresa: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+}
