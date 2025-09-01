@@ -2,12 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Adapter\ModelBase;
 
-class Empresa extends Model
+class Empresa extends ModelBase
 {
-    use HasFactory;
 
     protected $fillable = [
         'nombre',
