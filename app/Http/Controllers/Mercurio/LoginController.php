@@ -47,14 +47,20 @@ class LoginController extends ApplicationController
     {
     }
 
-    public function autenticarAction(Request $request, Response $response)
+    public function authenticateAction(Request $request, Response $response)
     {
         try {
+            // Sanitización ligera
             $tipo = $request->input("tipo");
             $documento = $request->input("documento");
             $coddoc = $request->input("coddoc");
             $clave = $request->input("clave");
             $res = False;
+
+            // Validación básica de requeridos
+            if ($tipo === '' || $documento === '' || $coddoc === '') {
+                throw new DebugException("Error de acceso, los parámetros tipo, documento y coddoc son requeridos.", 422);
+            }
 
             switch ($tipo) {
                 case 'E':
@@ -102,6 +108,14 @@ class LoginController extends ApplicationController
 
             if ($mercurio07 == False) {
                 throw new DebugException("Error acceso incorrecto. Los datos no corresponden a un usuario registrado en el sistema.", 501);
+            }
+
+            // Validar estado activo si existe campo estado
+            if (method_exists($mercurio07, 'getEstado')) {
+                $estado = $mercurio07->getEstado();
+                if (!empty($estado) && $estado !== 'A') {
+                    throw new DebugException("La cuenta no se encuentra activa para iniciar sesión.", 403);
+                }
             }
 
             if ($clave === 'xxxx') {
@@ -171,8 +185,11 @@ class LoginController extends ApplicationController
                 }
             }
 
-            if ($mercurio07->getClave() != md5(password_hash_old(strval($clave)))) {
-                throw new DebugException("Error el valor de la clave no es valido para ingresar a la plataforma.", 503);
+            // Comparación segura del hash de clave (esquema actual: md5(password_hash_old(clave)))
+            $expectedHash = md5(password_hash_old((string) $clave));
+            $storedHash = (string) $mercurio07->getClave();
+            if (!hash_equals($storedHash, $expectedHash)) {
+                throw new DebugException("Error el valor de la clave no es válido para ingresar a la plataforma.", 503);
             }
 
             $auth = new SessionCookies(
@@ -205,7 +222,7 @@ class LoginController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    public function salirAction()
+    public function logoutAction()
     {
         SessionCookies::destroyIdentity();
         redirect("login/index");
@@ -231,12 +248,10 @@ class LoginController extends ApplicationController
                 case 'E':
                     $autentica = new AutenticaEmpresa();
                     $res = $autentica->comprobarSISU($documento, $coddoc);
-                    
                     break;
                 case 'T':
                     $autentica = new AutenticaTrabajador();
                     $res = $autentica->comprobarSISU($documento, $coddoc);
-                    
                     break;
                 case 'I':
                     $autentica = new AutenticaIndependiente();
@@ -292,7 +307,7 @@ class LoginController extends ApplicationController
                 "msj" => $error->getMessage() . ' ' . $error->getLine()
             );
         }
-        return $this->renderObject($response, false);
+        return $this->renderObject($response);
     }
 
     /**
@@ -303,7 +318,6 @@ class LoginController extends ApplicationController
      */
     public function registroAction(Request $request)
     {
-        clearstatcache();
         $this->setResponse("ajax");
         try {
             AuthCSRF::Valid();
@@ -338,7 +352,6 @@ class LoginController extends ApplicationController
                     $signupEntity = new SignupDomestico();
                     break;
                 case 'P':
-
                     $signupParticular = new SignupParticular();
                     $signupParticular->settings(
                         new RequestParams(
@@ -354,7 +367,6 @@ class LoginController extends ApplicationController
                         )
                     );
                     $signupParticular->createUserMercurio();
-                    
                     $solicitud = $this->Mercurio07->findFirst("coddoc='{$coddoc}' and documento='{$cedrep}' and tipo='{$tipo}'");
                     break;
                 default:
@@ -446,7 +458,7 @@ class LoginController extends ApplicationController
         $this->renderObject($response);
     }
 
-    public function download_docsAction(Request $request, Response $response)
+    public function downloadDocumentsAction(Request $request)
     {
         $archivo = $request->route('archivo');
         $fichero = "public/docs/formulario_mercurio/" . $archivo;

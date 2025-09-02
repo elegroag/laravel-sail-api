@@ -18,10 +18,6 @@ class SessionCookies
         $this->estado = $arguments['estado'];
     }
 
-    public function init()
-    {
-    }
-
     /**
      * authenticate function
      * @return bool
@@ -129,10 +125,89 @@ class SessionCookies
         $data = rtrim(strtr(base64_encode($json), '+/', '-_'), '=');
 
         // Clave de firma desde app.key
+        $secret = self::secretKey();
+        $sig = hash_hmac('sha256', $data, $secret);
+        return $data . '.' . $sig;
+    }
+
+    /**
+     * Retorna la identidad si la cookie es válida; null si no lo es
+     * Estructura de retorno: [ 'valid' => bool, 'payload' => array, 'user' => Model|null ]
+     */
+    public static function user(): ?array
+    {
+        // Obtener nombre de cookie usando una instancia temporal (mantener compatibilidad)
+        $instance = new self("model: Mercurio07", "tipo:", "coddoc:", "documento:", "estado:");
+        $name = $instance->cookieName();
+        if (!isset($_COOKIE[$name])) {
+            return null;
+        }
+
+        $raw = (string) $_COOKIE[$name];
+        $parts = explode('.', $raw, 2);
+        if (count($parts) !== 2) {
+            return null;
+        }
+        [$data, $sig] = $parts;
+
+        // Verificar firma
+        $expected = hash_hmac('sha256', $data, self::secretKey());
+        if (!hash_equals($expected, $sig)) {
+            return null;
+        }
+
+        // Decodificar payload
+        $json = self::b64url_decode($data);
+        if ($json === null) {
+            return null;
+        }
+        $payload = json_decode($json, true);
+        if (!is_array($payload)) {
+            return null;
+        }
+
+        // Validar vencimiento
+        $issuedAt = (int) ($payload['ts'] ?? 0);
+        $lifetime = function_exists('config') ? (int) (config('session.lifetime', 120) * 60) : 7200;
+        if ($issuedAt <= 0 || (time() - $issuedAt) > $lifetime) {
+            return null;
+        }
+
+        // (Opcional) verificar que el usuario aún exista
+        $model = $payload['m'] ?? 'Mercurio07';
+        $tipo = $payload['t'] ?? null;
+        $coddoc = $payload['c'] ?? null;
+        $documento = $payload['d'] ?? null;
+        $userModel = null;
+        if ($model && $tipo && $coddoc && $documento) {
+            $modelClass = '\\App\\Models\\' . ltrim(trim($model));
+            if (class_exists($modelClass)) {
+                $cond = " tipo='{$tipo}' AND coddoc='{$coddoc}' AND documento='{$documento}'";
+                $userModel = (new $modelClass())->findFirst($cond);
+            }
+        }
+
+        return [
+            'valid' => true,
+            'payload' => $payload,
+            'user' => $userModel,
+        ];
+    }
+
+    /**
+     * Retorna true si existe una identidad válida en la cookie
+     */
+    public static function check(): bool
+    {
+        return self::user() !== null;
+    }
+
+    // ========= Helpers estáticos =========
+    private static function secretKey(): string
+    {
         $secret = null;
         if (function_exists('config')) {
             $secret = config('app.key');
-            // En Laravel APP_KEY puede venir con el prefijo base64:
             if (is_string($secret) && str_starts_with($secret, 'base64:')) {
                 $decoded = base64_decode(substr($secret, 7), true);
                 if ($decoded !== false) {
@@ -141,11 +216,19 @@ class SessionCookies
             }
         }
         if (empty($secret)) {
-            // Fallback inseguro pero funcional en entornos sin config cargada
             $secret = 'insecure-fallback-secret';
         }
+        return (string) $secret;
+    }
 
-        $sig = hash_hmac('sha256', $data, $secret);
-        return $data . '.' . $sig;
+    private static function b64url_decode(string $data): ?string
+    {
+        $replaced = strtr($data, '-_', '+/');
+        $pad = strlen($replaced) % 4;
+        if ($pad) {
+            $replaced .= str_repeat('=', 4 - $pad);
+        }
+        $bin = base64_decode($replaced, true);
+        return $bin === false ? null : $bin;
     }
 }
