@@ -2,6 +2,13 @@
 
 namespace App\Services\PreparaFormularios;
 
+use App\Exceptions\DebugException;
+use App\Library\Collections\ParamsTrabajador;
+use App\Models\Mercurio30;
+use App\Models\Mercurio32;
+use App\Models\Mercurio34;
+use App\Services\Utils\Comman;
+
 class TrabajadorFormulario
 {
     private $documento;
@@ -102,7 +109,7 @@ class TrabajadorFormulario
         }
 
         $conyuge_otra = false;
-        $beneficiarios = $this->Mercurio34->find(" cedtra='{$mercurio31->getCedtra()}' and documento='{$this->documento}' and coddoc='{$this->coddoc}' and estado IN('T','P')");
+        $beneficiarios = (new Mercurio34)->find(" cedtra='{$mercurio31->getCedtra()}' and documento='{$this->documento}' and coddoc='{$this->coddoc}' and estado IN('T','P')");
         if ($beneficiarios) {
             foreach ($beneficiarios as $beneficiario) {
                 if ($beneficiario->getCedcon() && $beneficiario->getParent() == '1') {

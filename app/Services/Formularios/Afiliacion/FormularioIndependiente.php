@@ -1,6 +1,11 @@
 <?php
 namespace App\Services\Formularios\Afiliacion;
 
+use App\Exceptions\DebugException;
+use App\Library\Collections\ParamsIndependiente;
+use App\Library\Collections\ParamsTrabajador;
+use App\Services\Formularios\Documento;
+
 class FormularioIndependiente extends Documento
 {
     /**
@@ -30,8 +35,8 @@ class FormularioIndependiente extends Documento
         $this->pdf->SetCreator(utf8_decode("Plataforma Web: comfacaenlinea.com.co, COMFACA"));
         $this->pdf->SetKeywords('COMFACA');
 
-        $page1 = Core::getInitialPath() . 'public/docs/form/trabajador/form-001-tra-p01.png';
-        $this->pdf->ImageAlpha($page1, 0, 0, 210, 297, '');
+        $page1 = storage_path('public/docs/form/trabajador/form-001-tra-p01.png');
+        $this->pdf->Image($page1, 0, 0, 210, 297, '');
 
         $this->pdf->SetAutoPageBreak(false, 0);
         $this->tipoAfiliado();
@@ -47,8 +52,8 @@ class FormularioIndependiente extends Documento
                 array('lb' => 'Autoriza datos', 'texto' => 'X', 'x' => 70, 'y' => 277),
             )
         );
-        $page = Core::getInitialPath() . 'public/docs/sello-firma.png';
-        $this->pdf->ImageAlpha($page, 160, 275, 30, 20, '');
+        $page = storage_path('public/docs/sello-firma.png');
+        $this->pdf->Image($page, 160, 275, 30, 20, '');
         return $this;
     }
 

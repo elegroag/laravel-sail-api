@@ -1,7 +1,12 @@
 <?php
 
 namespace App\Services\FormulariosAdjuntos;
-
+use App\Library\Collections\ParamsEmpresa;
+use App\Library\Tcpdf\KumbiaPDF;
+use App\Models\Mercurio16;
+use App\Services\Formularios\FactoryDocuments;
+use App\Services\PreparaFormularios\CifrarDocumento;
+use App\Services\Utils\Comman;
 
 class DatosEmpresaService
 {
@@ -16,14 +21,12 @@ class DatosEmpresaService
     public function __construct($request)
     {
         $this->request = $request;
-        Core::importLibrary("ParamsEmpresa", "Collections");
-        Core::importLibrary("FactoryDocuments", "Formularios");
         $this->initialize();
     }
 
     private function initialize()
     {
-        $this->lfirma = $this->Mercurio16->findFirst("documento='{$this->request['documento']}' AND  coddoc='{$this->request['coddoc']}'");
+        $this->lfirma = (new Mercurio16)->findFirst("documento='{$this->request['documento']}' AND  coddoc='{$this->request['coddoc']}'");
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
             array(
@@ -40,7 +43,7 @@ class DatosEmpresaService
     public function formulario()
     {
         $file = strtotime('now') . "_{$this->request['nit']}.pdf";
-        KumbiaPDF::setBackgroundImage(Core::getInitialPath() . 'public/docs/form/empresa/form-empresa.jpg');
+        KumbiaPDF::setBackgroundImage(public_path('docs/form/empresa/form-empresa.jpg'));
 
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearFormulario('actualizadatos');
@@ -56,7 +59,7 @@ class DatosEmpresaService
 
         $cifrarDocumento = new CifrarDocumento();
         $outPdf = $cifrarDocumento->cifrar(
-            Core::getInitialPath() . 'public/temp/' . $file,
+            storage_path('temp/' . $file),
             $this->lfirma->getKeyprivate()
         );
 

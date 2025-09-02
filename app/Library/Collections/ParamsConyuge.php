@@ -1,4 +1,5 @@
 <?php
+namespace App\Library\Collections;
 
 class ParamsConyuge
 {

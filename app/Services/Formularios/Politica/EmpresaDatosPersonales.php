@@ -2,7 +2,10 @@
 
 namespace App\Services\Formularios\Politica;
 
+use App\Exceptions\DebugException;
+use App\Library\Collections\ParamsEmpresa;
 use App\Services\Formularios\DocumentoAdapter;
+use Carbon\Carbon;
 
 class EmpresaDatosPersonales extends DocumentoAdapter
 {
@@ -35,16 +38,16 @@ class EmpresaDatosPersonales extends DocumentoAdapter
         $this->pdf->SetCreator("Plataforma Web: comfacaenlinea.com.co, COMFACA");
         $this->pdf->SetKeywords('COMFACA');
 
-        $imagen = Core::getInitialPath() . 'public/docs/formulario_mercurio/datos_personales_empresas_p0.jpg';
+        $imagen = public_path('docs/formulario_mercurio/datos_personales_empresas_p0.jpg');
         $this->addBackground($imagen);
-        $selloFirma = Core::getInitialPath() . 'public/docs/sello-firma.png';
+        $selloFirma = public_path('docs/sello-firma.png');
         $this->pdf->Image($selloFirma, 160, 275, 30, 20, '', '', '', false, 300, '', false, false, 0);
 
         $this->pdf->AddPage();
-        $imagen = Core::getInitialPath() . 'public/docs/formulario_mercurio/datos_personales_empresas_p1.jpg';
+        $imagen = public_path('docs/formulario_mercurio/datos_personales_empresas_p1.jpg');
         $this->addBackground($imagen);
         $this->bloqueEmpresa($this->empresa);
-        $selloFirma = Core::getInitialPath() . 'public/docs/sello-firma.png';
+        $selloFirma = public_path('docs/sello-firma.png');
         $this->pdf->Image($selloFirma, 160, 265, 30, 20, '', '', '', false, 300, '', false, false, 0);
     }
 
@@ -66,7 +69,7 @@ class EmpresaDatosPersonales extends DocumentoAdapter
         $ciudad = (!$this->empresa->getCodzon()) ? 'Florencia' : $_codciu[$this->empresa->getCodzon()];
         $coddorepleg = $this->empresa->getCoddocreplegArray();
         $tipo_documento = $coddorepleg[$this->empresa->getTipdoc()];
-        $today = new Date();
+        $today = Carbon::now();
 
         $this->pdf->SetFont('helvetica', '', 9);
         $datos = array(

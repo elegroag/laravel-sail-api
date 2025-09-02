@@ -100,9 +100,8 @@ class ConyugeService
         $archivos = array();
         $mercurio13 = (new Mercurio13)->find("tipopc = '{$this->tipopc}'");
 
-        $db = (object) DbBase::rawConnect();
-
-
+        $db = DbBase::rawConnect();
+        
         $mercurio10 = $db->fetchOne("SELECT item, estado, campos_corregir
         FROM mercurio10
         WHERE numero='{$solicitud->getId()}' AND tipopc='{$this->tipopc}' ORDER BY item DESC LIMIT 1");

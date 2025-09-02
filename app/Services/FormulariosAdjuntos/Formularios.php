@@ -2,7 +2,7 @@
 
 namespace App\Services\FormulariosAdjuntos;
 
-use App\Services\FormulariosAdjuntos\FactoryDocuments;
+use App\Services\Formularios\FactoryDocuments;
 
 class Formularios
 {

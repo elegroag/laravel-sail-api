@@ -6,9 +6,9 @@ use App\Exceptions\DebugException;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Services\Utils\Comman;
+use App\Services\Utils\CrearUsuario;
 use App\Services\Utils\Generales;
 use App\Services\Utils\SenderEmail;
-use CrearUsuario;
 
 class SignupFoninnez
 {
@@ -43,7 +43,7 @@ class SignupFoninnez
 
     public function settings(...$argv)
     {
-        $params = $this->getParams($argv);
+        $params = get_params_destructures($argv);
         foreach ($params as $prop => $valor) if (property_exists($this, $prop)) $this->$prop = "{$valor}";
     }
 
@@ -141,21 +141,5 @@ class SignupFoninnez
         $seed = str_split('1234567890');
         shuffle($seed);
         foreach (array_rand($seed, 4) as $k) $this->codigo_verify .= $seed[$k];
-    }
-
-    private function getParams($data)
-    {
-        $params = [];
-        if (is_array($data) && count($data) > 0) {
-            foreach ($data as $item) {
-                if (stristr($item, ':') === FALSE) {
-                    $params[0] = $item;
-                    continue;
-                }
-                $name = substr($item, 0, strpos($item, ':'));
-                $params[$name] = substr($item, strpos($item, ':') + 1);
-            }
-        }
-        return $params;
     }
 }

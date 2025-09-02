@@ -35,3 +35,27 @@ if (!function_exists('get_initials')) {
         return $initials;
     }
 }
+
+if (!function_exists('get_params_destructures')) {
+    /**
+     * get_params_destructures function
+     *
+     * @param array $data
+     * @return array
+     */
+    function get_params_destructures(array $data): array
+    {
+        $params = [];
+        if (is_array($data) && count($data) > 0) {
+            foreach ($data as $item) {
+                if (stristr($item, ':') === FALSE) {
+                    $params[0] = $item;
+                    continue;
+                }
+                $name = substr($item, 0, strpos($item, ':'));
+                $params[$name] = substr($item, strpos($item, ':') + 1);
+            }
+        }
+        return $params;
+    }
+}

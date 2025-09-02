@@ -2,6 +2,8 @@
 
 namespace App\Services\PreparaFormularios;
 
+use App\Exceptions\DebugException;
+
 class CifrarDocumento
 {
 
@@ -73,7 +75,7 @@ class CifrarDocumento
 
         // Guardar el archivo PDF con la firma digital
         $nombrePdf = strtoupper(uniqid('FSA')) . '.pdf';
-        $pathOut = Core::getInitialPath() . 'public/temp/' . $nombrePdf;
+        $pathOut = storage_path('temp/' . $nombrePdf);
 
         file_put_contents($pathOut, $contenidoPDFConFirma);
 

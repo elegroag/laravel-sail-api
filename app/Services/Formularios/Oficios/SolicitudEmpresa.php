@@ -2,7 +2,10 @@
 
 namespace App\Services\Formularios\Oficios;
 
+use App\Exceptions\DebugException;
+use App\Library\Collections\ParamsEmpresa;
 use App\Services\Formularios\DocumentoAdapter;
+use Carbon\Carbon;
 
 class SolicitudEmpresa extends DocumentoAdapter
 {
@@ -29,7 +32,7 @@ class SolicitudEmpresa extends DocumentoAdapter
         $this->pdf->SetKeywords('COMFACA');
 
         $this->bloqueEmpresa();
-        $selloFirma = Core::getInitialPath() . 'public/docs/sello-firma.png';
+        $selloFirma = public_path('docs/sello-firma.png');
         $this->pdf->Image($selloFirma, 160, 265, 30, 20, '', '', '', false, 300, '', false, false, 0);
     }
 
@@ -42,7 +45,7 @@ class SolicitudEmpresa extends DocumentoAdapter
     function bloqueEmpresa()
     {
         $_codciu = ParamsEmpresa::getCiudades();
-        $today = new Date();
+        $today = Carbon::now();
         if ($this->empresa->getCiupri() == NULL) {
             $this->empresa->setCiupri($this->empresa->getCodciu());
         }

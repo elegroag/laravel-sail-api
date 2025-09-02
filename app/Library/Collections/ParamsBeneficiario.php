@@ -1,4 +1,7 @@
 <?php
+
+namespace App\Library\Collections;
+
 class ParamsBeneficiario
 {
     static $zonas;

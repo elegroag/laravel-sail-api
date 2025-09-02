@@ -2,6 +2,9 @@
 
 namespace App\Services\PreparaFormularios;
 
+use App\Exceptions\DebugException;
+use App\Models\Mercurio16;
+
 class GestionFirmas
 {
 
@@ -16,10 +19,7 @@ class GestionFirmas
 
     public function __construct($argv)
     {
-        $this->pathOut = Core::getInitialPath() .
-            'public/storage/' .
-            $argv['documento'] . 'F' .
-            $argv['coddoc'] . '/';
+        $this->pathOut = storage_path('temp/' . $argv['documento'] . 'F' . $argv['coddoc'] . '/');
 
         if (!is_dir($this->pathOut)) mkdir($this->pathOut, 0776, true);
         if (is_dir($this->pathOut)) chmod($this->pathOut, 0776);
@@ -39,7 +39,7 @@ class GestionFirmas
     public function guardarFirma($imagenBase64, $usuario)
     {
 
-        $lfirma = $this->Mercurio16->findFirst(" documento='{$usuario->getDocumento()}' AND coddoc='{$usuario->getCoddoc()}'");
+        $lfirma = (new Mercurio16)->findFirst(" documento='{$usuario->getDocumento()}' AND coddoc='{$usuario->getCoddoc()}'");
 
         // Decodificar la imagen base64
         $imagen = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $imagenBase64));
@@ -48,17 +48,17 @@ class GestionFirmas
         $nombreImagen = uniqid('FI') . '.png';
 
         // Ruta donde se guardarán las imágenes
-        $rutaImagen = Core::getInitialPath() . 'public/temp/' . $nombreImagen;
+        $rutaImagen = storage_path('temp/' . $nombreImagen);
 
         // Guardar la imagen en el servidor
         if (file_put_contents($rutaImagen, $imagen)) {
             // La imagen se guardó exitosamente
             $filepath = $this->resizeImagen($rutaImagen);
 
-            $filepath = str_replace(Core::getInitialPath() . 'public/', '', $filepath);
+            $filepath = str_replace(storage_path('temp/'), '', $filepath);
 
             if ($lfirma) {
-                $previus = Core::getInitialPath() . 'public/' . $lfirma->getFirma();
+                $previus = storage_path('temp/') . $lfirma->getFirma();
                 if (file_exists($previus)) unlink($previus);
 
                 $lfirma->setFirma($filepath);
@@ -74,7 +74,7 @@ class GestionFirmas
             }
             $lfirma->save();
 
-            $this->lfirma = $this->Mercurio16->findFirst("
+            $this->lfirma = (new Mercurio16)->findFirst("
                 documento='{$usuario->getDocumento()}' AND
                 coddoc='{$usuario->getCoddoc()}'
             ");
@@ -82,7 +82,7 @@ class GestionFirmas
             return true;
         } else {
             // Hubo un error al guardar la imagen
-            throw new Exception("Error al guardar la imagen.", 501);
+            throw new DebugException("Error al guardar la imagen.", 501);
         }
     }
 
@@ -98,7 +98,7 @@ class GestionFirmas
     {
 
         if (file_exists($filepath) == false) {
-            throw new Exception("Error la imagen no está disponible para el Resize.", 1);
+            throw new DebugException("Error la imagen no está disponible para el Resize.", 1);
         }
         // Crear una imagen desde el archivo original
         $imagen = imagecreatefrompng($filepath);
@@ -145,7 +145,7 @@ class GestionFirmas
     public function generarClaves()
     {
         if ($this->lfirma->getKeyprivate()) {
-            if (file_exists(Core::getInitialPath() . 'public/' . $this->lfirma->getKeyprivate())) {
+            if (file_exists(storage_path('temp/' . $this->lfirma->getKeyprivate()))) {
                 return array(
                     'private' => $this->lfirma->getKeyprivate(),
                     'public' => $this->lfirma->getKeypublic(),
@@ -178,10 +178,10 @@ class GestionFirmas
         file_put_contents($this->pathOut . $namePrivada,  $clavePrivada);
         file_put_contents($this->pathOut . $namePublica,  $clavePublica);
 
-        $path = str_replace(Core::getInitialPath() . 'public/', '', $this->pathOut . $namePrivada);
+        $path = str_replace(storage_path('temp/'), '', $this->pathOut . $namePrivada);
         $this->lfirma->setKeyprivate($path);
 
-        $path = str_replace(Core::getInitialPath() . 'public/', '', $this->pathOut . $namePublica);
+        $path = str_replace(storage_path('temp/'), '', $this->pathOut . $namePublica);
         $this->lfirma->setKeypublic($path);
         $this->lfirma->save();
 

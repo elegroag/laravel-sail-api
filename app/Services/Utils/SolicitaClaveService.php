@@ -2,6 +2,15 @@
 
 namespace App\Services\Utils;
 
+use App\Exceptions\DebugException;
+use App\Models\Gener18;
+use App\Models\Mercurio01;
+use App\Models\Mercurio02;
+use App\Models\Mercurio07;
+use App\Models\Mercurio19;
+use App\Models\Mercurio30;
+use Carbon\Carbon;
+
 class SolicitaClaveService
 {
 
@@ -10,6 +19,7 @@ class SolicitaClaveService
     private $coddoc;
     private $email;
     private $codigo;
+    private $coddoc_detalle;
 
     public function __construct($argv)
     {
@@ -52,7 +62,7 @@ class SolicitaClaveService
                         }
                     }
                     if ($sucursal_activa == false) {
-                        throw new Exception("No es posible continuar con la solicitud, ya qué, el afiliado no se encuentra activo. " .
+                        throw new DebugException("No es posible continuar con la solicitud, ya qué, el afiliado no se encuentra activo. " .
                             "Se requiere de validar el estado de la empresa, las sucursales y los aportes realizados a la CAJA.", 503);
                     }
                 }
@@ -75,11 +85,11 @@ class SolicitaClaveService
                 $afiliado = ($rqs['success']) ? $rqs['data'] : false;
             }
         } else {
-            throw new Exception("No es posible continuar no se identifica el tipo de documento.", 503);
+            throw new DebugException("No es posible continuar no se identifica el tipo de documento.", 503);
         }
 
         if (!$afiliado) {
-            throw new Exception("No es posible continuar con la solicitud, ya qué, el afiliado no se encuentra actualmente " .
+            throw new DebugException("No es posible continuar con la solicitud, ya qué, el afiliado no se encuentra actualmente " .
                 "registrado en el sistema principal de subsidio que dispone la CAJA.", 503);
         }
 
@@ -87,32 +97,31 @@ class SolicitaClaveService
         $mclave = $cl[0];
         $pass =  $cl[1];
         $nombre = ($this->tipo == "T") ? $afiliado['priape'] . ' ' . $afiliado['segape'] . ' ' . $afiliado['prinom'] . ' ' . $afiliado['segnom'] : $afiliado['razsoc'];
-        $mercurio07 = $this->Mercurio07->findFirst("tipo='{$this->tipo}' AND documento='{$this->documento}' AND coddoc='{$this->coddoc}'");
+        $mercurio07 = (new Mercurio07)->findFirst("tipo='{$this->tipo}' AND documento='{$this->documento}' AND coddoc='{$this->coddoc}'");
         if ($mercurio07) {
             if (trim(strtolower($mercurio07->getEmail())) != trim(strtolower($this->email))) {
-                throw new Exception("La dirección de email no es igual a la que tenemos registrada." .
+                throw new DebugException("La dirección de email no es igual a la que tenemos registrada." .
                     " Y por tal motivo, no se puede restablecer la clave de acceso.  El indicio de email que está registrado es: " .
                     mask_email($mercurio07->getEmail()), 503);
             }
-            $this->Mercurio07->updateAll("clave='{$mclave}'", "conditions: tipo='{$this->tipo}' AND email='{$this->email}' AND documento='{$this->documento}'");
+            (new Mercurio07)->updateAll("clave='{$mclave}'", "conditions: tipo='{$this->tipo}' AND email='{$this->email}' AND documento='{$this->documento}'");
         } else {
             ///validacion extra para empresas
             if ($this->tipo == "E") {
                 //otros registros previos, con otro codigo de documento coddoc, tipdoc
-                $mercurio07 = $this->Mercurio07->findFirst("tipo='E' AND documento='{$this->documento}'");
+                $mercurio07 = (new Mercurio07)->findFirst("tipo='E' AND documento='{$this->documento}'");
                 if ($mercurio07) {
-                    throw new Exception("Error el tipo de documento no coincide con el registro disponible de la empresa. {$this->documento}", 503);
+                    throw new DebugException("Error el tipo de documento no coincide con el registro disponible de la empresa. {$this->documento}", 503);
                 }
             }
         }
 
         if (trim(strtolower($afiliado['email'])) != trim(strtolower($this->email))) {
-            throw new Exception("La dirección de email no es igual a la que tenemos registrada." .
+            throw new DebugException("La dirección de email no es igual a la que tenemos registrada." .
                 " Y por tal motivo, no se puede restablecer la clave de acceso. El indicio de email que está registrado es: " . mask_email($afiliado['email']), 503);
         }
 
         $this->crear_usuario($nombre, $this->email, '18001', $mclave);
-        $this->endTransa();
 
         $mtipoDocumentos = new Gener18();
         $entity = $mtipoDocumentos->findFirst(" coddoc='{$afiliado['coddoc']}'");
@@ -142,22 +151,23 @@ class SolicitaClaveService
             )
         );
 
-        $html = View::render("login/tmp/mail", $arreglo);
+        $html = view("login/tmp/mail", $arreglo)->render();
+
         $asunto = "Solicitud de clave sistema Comfaca En Línea";
-        $email_caja = $this->Mercurio01->findFirst();
-        $emisor = array(
-            "email" => $email_caja->getEmail(),
-            "clave" => $email_caja->getClave()
+        $email_caja = (new Mercurio01)->findFirst();
+
+        $senderEmail = new SenderEmail();
+        $senderEmail->setters(
+            "emisor_email: {$email_caja->getEmail()}",
+            "emisor_clave: {$email_caja->getClave()}",
+            "asunto: {$asunto}"
+        );
+        $senderEmail->send(
+            $this->email,
+            $html
         );
 
-        $this->send_email($emisor, $asunto, $html, array(
-            array(
-                "email" => $this->email,
-                "nombre" => $nombre
-            )
-        ));
-
-        $afiliadoUser = $this->Mercurio07->findFirst(" tipo='{$this->tipo}' AND documento='{$this->documento}' AND coddoc='{$this->coddoc}'");
+        $afiliadoUser = (new Mercurio07)->findFirst(" tipo='{$this->tipo}' AND documento='{$this->documento}' AND coddoc='{$this->coddoc}'");
         return $afiliadoUser;
     }
 
@@ -179,39 +189,13 @@ class SolicitaClaveService
         return array(md5($mclave), $pass);
     }
 
-    function send_email($emisor, $asunto, $mensaje, $destinatarios)
-    {
-        Core::importFromLibrary("Swift", "Swift.php");
-        Core::importFromLibrary("Swift", "Swift/Connection/SMTP.php");
-        $smtp = new Swift_Connection_SMTP(
-            "smtp.gmail.com",
-            Swift_Connection_SMTP::PORT_SECURE,
-            Swift_Connection_SMTP::ENC_TLS
-        );
-        $smtp->setUsername($emisor['email']);
-        $smtp->setPassword($emisor['clave']);
-        $smsj = new Swift_Message();
-        $smsj->setSubject($asunto);
-        $smsj->setContentType("text/html");
-        $smsj->setBody($mensaje);
-        $swift = new Swift($smtp);
-        $email = new Swift_RecipientList();
-        foreach ($destinatarios as $ai => $destinatario) {
-            if ($this->production == false) {
-                $destinatario['email'] = $this->email_pruebas;
-            }
-            $email->addTo($destinatario['email'], $destinatario['nombre']);
-        }
-        $swift->send($smsj, $email, new Swift_Address($emisor['email']));
-    }
 
     function crear_usuario($repleg, $email, $codciu, $mclave)
     {
-        $today = new Date();
-        $mercurio07 = $this->Mercurio07->findFirst(" tipo='{$this->tipo}' and coddoc='{$this->coddoc}' and documento='{$this->documento}' ");
+        $today = Carbon::now();
+        $mercurio07 = (new Mercurio07)->findFirst(" tipo='{$this->tipo}' and coddoc='{$this->coddoc}' and documento='{$this->documento}' ");
         if ($mercurio07 == false) {
             $mercurio07 = new Mercurio07;
-            $mercurio07->setTransaction(self::$transaction);
             $mercurio07->setTipo($this->tipo);
             $mercurio07->setCoddoc($this->coddoc);
             $mercurio07->setDocumento($this->documento);
@@ -230,13 +214,12 @@ class SolicitaClaveService
         if (!$mercurio07->save()) {
             $msj = "";
             foreach ($mercurio07->getMessages() as $m07) $msj .= $m07->getMessage() . "\n";
-            throw new Exception("Error \n" . $msj, 503);
+            throw new DebugException("Error \n" . $msj, 503);
         }
 
-        $mercurio19 = $this->Mercurio19->findFirst(" tipo='{$this->tipo}' and coddoc='{$this->coddoc}' and documento='{$this->documento}'");
+        $mercurio19 = (new Mercurio19())->findFirst(" tipo='{$this->tipo}' and coddoc='{$this->coddoc}' and documento='{$this->documento}'");
         if ($mercurio19 == false) {
             $mercurio19 = new Mercurio19();
-            $mercurio19->setTransaction(self::$transaction);
             $mercurio19->setTipo($this->tipo);
             $mercurio19->setCoddoc($this->coddoc);
             $mercurio19->setDocumento($this->documento);
@@ -246,7 +229,7 @@ class SolicitaClaveService
         if (!$mercurio19->save()) {
             $msj = "";
             foreach ($mercurio19->getMessages() as $m19) $msj .= $m19->getMessage() . "\n";
-            throw new Exception("Error \n" . $msj, 503);
+            throw new DebugException("Error \n" . $msj, 503);
         }
 
         return true;
@@ -254,7 +237,7 @@ class SolicitaClaveService
 
     function crearEmpresa($datos)
     {
-        $mercurio30 = $this->Mercurio30->findFirst(" nit='{$datos['nit']}' AND tipo='E' AND coddoc='{$datos['coddoc']}' ");
+        $mercurio30 = (new Mercurio30)->findFirst(" nit='{$datos['nit']}' AND tipo='E' AND coddoc='{$datos['coddoc']}' ");
         if (!$mercurio30) {
 
             $usuario = 450;
@@ -297,7 +280,7 @@ class SolicitaClaveService
             if (!$mercurio30->save()) {
                 $msj = "";
                 foreach ($mercurio30->getMessages() as $m30) $msj .= $m30->getMessage() . "\n";
-                throw new Exception("Error \n" . $msj, 503);
+                throw new DebugException("Error \n" . $msj, 503);
             }
         }
     }

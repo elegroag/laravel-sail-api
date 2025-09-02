@@ -3,6 +3,17 @@
 namespace App\Services\FormulariosAdjuntos;
 
 use App\Models\Mercurio16;
+use App\Library\Collections\ParamsTrabajador;
+use App\Library\Collections\ParamsBeneficiario;
+use App\Models\Mercurio31;
+use App\Models\Mercurio32;
+use App\Models\Mercurio36;
+use App\Models\Mercurio38;
+use App\Models\Mercurio41;
+use App\Services\Entidades\TrabajadorService;
+use App\Services\Formularios\FactoryDocuments;
+use App\Services\PreparaFormularios\CifrarDocumento;
+use App\Services\Utils\Comman;
 
 class BeneficiarioAdjuntoService
 {
@@ -19,9 +30,6 @@ class BeneficiarioAdjuntoService
     public function __construct($request)
     {
         $this->request = $request;
-        Core::importLibrary("ParamsTrabajador", "Collections");
-        Core::importLibrary("ParamsBeneficiario", "Collections");
-        Core::importLibrary("FactoryDocuments", "Formularios");
         $this->initialize();
     }
 
@@ -72,7 +80,7 @@ class BeneficiarioAdjuntoService
                 $mtrabajador = new Mercurio31();
                 break;
             default:
-                $trabajador = $this->Mercurio31->findFirst(
+                $trabajador = (new Mercurio31())->findFirst(
                     " documento='{$this->request->getDocumento()}' and " .
                         " coddoc='{$this->request->getCoddoc()}' and " .
                         " cedtra='{$this->request->getCedtra()}' and " .
@@ -185,7 +193,7 @@ class BeneficiarioAdjuntoService
     function cifrarDocumento()
     {
         $cifrarDocumento = new CifrarDocumento();
-        $this->outPdf = $cifrarDocumento->cifrar(Core::getInitialPath() . 'public/temp/' . $this->filename, $this->lfirma->getKeyprivate());
+        $this->outPdf = $cifrarDocumento->cifrar(storage_path('temp/' . $this->filename), $this->lfirma->getKeyprivate());
         $this->fhash = $cifrarDocumento->getFhash();
     }
 

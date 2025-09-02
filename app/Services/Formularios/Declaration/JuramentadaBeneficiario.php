@@ -2,7 +2,12 @@
 
 namespace App\Services\Formularios\Declaration;
 
+use App\Exceptions\DebugException;
+use App\Library\Collections\ParamsBeneficiario;
+use App\Library\Collections\ParamsTrabajador;
+use App\Models\Gener18;
 use App\Services\Formularios\Documento;
+use Carbon\Carbon;
 
 class JuramentadaBeneficiario extends Documento
 {
@@ -39,8 +44,8 @@ class JuramentadaBeneficiario extends Documento
 
         switch ($this->parent) {
             case '1':
-                $page = Core::getInitialPath() . 'public/docs/form/declaraciones/declaracion_jura_hijo.png';
-                $this->pdf->ImageAlpha($page, 0, 0, 210, 297, '');
+                $page = storage_path('public/docs/form/declaraciones/declaracion_jura_hijo.png');
+                $this->pdf->Image($page, 0, 0, 210, 297, '');
                 // es hijastro
                 if ($this->beneficiario->getTiphij() == 2) {
                     $this->bloqueHijastro();
@@ -51,21 +56,21 @@ class JuramentadaBeneficiario extends Documento
                 $this->bloqueDescoBio();
                 break;
             case '4':
-                $page = Core::getInitialPath() . 'public/docs/form/declaraciones/declaracion_jura_custodia.png';
-                $this->pdf->ImageAlpha($page, 0, 0, 210, 297, '');
+                $page = storage_path('public/docs/form/declaraciones/declaracion_jura_custodia.png');
+                $this->pdf->Image($page, 0, 0, 210, 297, '');
                 $this->bloqueCustodia();
                 $this->pdf->SetXY(13, 175);
                 $this->bloqueDescoBio();
                 break;
             case '3': //padre
             case '2': //hermano
-                $page = Core::getInitialPath() . 'public/docs/form/declaraciones/declaracion_jura_padres.png';
-                $this->pdf->ImageAlpha($page, 0, 0, 210, 297, '');
+                $page = storage_path('public/docs/form/declaraciones/declaracion_jura_padres.png');
+                $this->pdf->Image($page, 0, 0, 210, 297, '');
                 $this->bloqueBeneficiarioPadre();
                 break;
             case '5': //cuidador persona discapacitada
-                $page = Core::getInitialPath() . 'public/docs/form/declaraciones/declaracion_jura_cuidador.png';
-                $this->pdf->ImageAlpha($page, 0, 0, 210, 297, '');
+                $page = storage_path('public/docs/form/declaraciones/declaracion_jura_cuidador.png');
+                $this->pdf->Image($page, 0, 0, 210, 297, '');
                 $this->bloqueBeneficiarioCuidador();
                 break;
             default:
@@ -73,8 +78,8 @@ class JuramentadaBeneficiario extends Documento
         }
 
         $this->bloqueTrabajador();
-        $page = Core::getInitialPath() . 'public/docs/sello-firma.png';
-        $this->pdf->ImageAlpha($page, 160, 275, 30, 20, '');
+        $page = storage_path('public/docs/sello-firma.png');
+        $this->pdf->Image($page, 160, 275, 30, 20, '');
     }
 
     function bloqueBeneficiarioCuidador()
@@ -132,7 +137,7 @@ class JuramentadaBeneficiario extends Documento
     function bloqueTrabajador()
     {
         $nomtra = capitalize($this->trabajador->getPrinom() . ' ' . $this->trabajador->getSegnom() . ' ' . $this->trabajador->getPriape() . ' ' . $this->trabajador->getSegape());
-        $today = new Date();
+        $today = Carbon::now();
         $_codciu = ParamsBeneficiario::getCiudades();
         $ciudad = ($this->trabajador->getCodzon()) ? $_codciu[$this->trabajador->getCodzon()] : 'Florencia';
         $mtipoDocumentos = new Gener18();
@@ -142,9 +147,9 @@ class JuramentadaBeneficiario extends Documento
         $this->pdf->SetFont('Arial', '', 8.5);
         $datos = array(
             array('lb' => 'Nombre trabajador', 'texto' => capitalize($nomtra), 'x' => 20, 'y' => 35),
-            array('lb' => 'Año', 'texto' => $today->getYear(), 'x' => 122, 'y' => 22),
-            array('lb' => 'Mes', 'texto' => $today->getMonth(), 'x' => 134, 'y' => 22),
-            array('lb' => 'Dia', 'texto' => $today->getDay(), 'x' => 144, 'y' => 22),
+            array('lb' => 'Año', 'texto' => $today->format('Y'), 'x' => 122, 'y' => 22),
+            array('lb' => 'Mes', 'texto' => $today->format('m'), 'x' => 134, 'y' => 22),
+            array('lb' => 'Dia', 'texto' => $today->format('d'), 'x' => 144, 'y' => 22),
             array('lb' => 'Ciudad', 'texto' => capitalize($ciudad), 'x' => 152, 'y' => 22),
             array('lb' => 'TipoDoc trabajador', 'texto' => capitalize($detdoc), 'x' => 72, 'y' => 42),
             array('lb' => 'Numero documento', 'texto' => capitalize($this->trabajador->getCedtra()), 'x' => 156, 'y' => 42)

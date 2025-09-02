@@ -2,6 +2,12 @@
 
 namespace App\Services\FormulariosAdjuntos;
 
+use App\Library\Collections\ParamsEmpresa;
+use App\Models\Mercurio16;
+use App\Services\Formularios\FactoryDocuments;
+use App\Services\PreparaFormularios\CifrarDocumento;
+use App\Services\Utils\Comman;
+
 class IndependienteAdjuntoService
 {
     private $request;
@@ -13,8 +19,6 @@ class IndependienteAdjuntoService
     public function __construct($request)
     {
         $this->request = $request;
-        Core::importLibrary("ParamsEmpresa", "Collections");
-        Core::importLibrary("FactoryDocuments", "Formularios");
         $this->initialize();
     }
 
@@ -87,7 +91,7 @@ class IndependienteAdjuntoService
 
     public function formulario()
     {
-        $conyuge = $this->Mercurio32->findFirst(" documento='{$this->request->getDocumento()}' and " .
+        $conyuge = (new Mercurio32)->findFirst(" documento='{$this->request->getDocumento()}' and " .
             "coddoc='{$this->request->getCoddoc()}' and " .
             "cedtra='{$this->request->getCedtra()}' and " .
             "comper='S'
@@ -112,7 +116,7 @@ class IndependienteAdjuntoService
     function cifrarDocumento()
     {
         $cifrarDocumento = new CifrarDocumento();
-        $this->outPdf = $cifrarDocumento->cifrar(Core::getInitialPath() . 'public/temp/' . $this->filename, $this->lfirma->getKeyprivate());
+        $this->outPdf = $cifrarDocumento->cifrar(public_path('temp/' . $this->filename), $this->lfirma->getKeyprivate());
         $this->fhash = $cifrarDocumento->getFhash();
     }
 

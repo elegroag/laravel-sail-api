@@ -1,4 +1,6 @@
 <?php
+namespace App\Library\Collections;
+
 class ParamsEmpresa
 {
     static $calidad_empresa;

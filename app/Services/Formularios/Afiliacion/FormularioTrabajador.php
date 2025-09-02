@@ -2,6 +2,10 @@
 
 namespace App\Services\Formularios\Afiliacion;
 
+use App\Exceptions\DebugException;
+use App\Library\Collections\ParamsTrabajador;
+use App\Services\Formularios\Documento;
+
 class FormularioTrabajador extends Documento
 {
 
@@ -37,14 +41,14 @@ class FormularioTrabajador extends Documento
         $this->empresa = $this->request->getParam('empresa');
         $this->trabajador = $this->request->getParam('trabajador');
 
-        $this->pdf->SetTitle(utf8_decode("Formulario afiliación del trabajador {$this->trabajador->getCedtra()}, COMFACA"));
-        $this->pdf->SetAuthor(utf8_decode("{$this->trabajador->getPriape()} {$this->trabajador->getSegape()} {$this->trabajador->getPrinom()} {$this->trabajador->getSegnom()}, COMFACA"));
-        $this->pdf->SetSubject(utf8_decode("Formulario de afiliación a COMFACA"));
-        $this->pdf->SetCreator(utf8_decode("Plataforma Web: comfacaenlinea.com.co, COMFACA"));
+        $this->pdf->SetTitle("Formulario afiliación del trabajador {$this->trabajador->getCedtra()}, COMFACA");
+        $this->pdf->SetAuthor("{$this->trabajador->getPriape()} {$this->trabajador->getSegape()} {$this->trabajador->getPrinom()} {$this->trabajador->getSegnom()}, COMFACA");
+        $this->pdf->SetSubject("Formulario de afiliación a COMFACA");
+        $this->pdf->SetCreator("Plataforma Web: comfacaenlinea.com.co, COMFACA");
         $this->pdf->SetKeywords('COMFACA');
 
-        $page = Core::getInitialPath() . 'public/docs/form/trabajador/form-001-tra-p01.png';
-        $this->pdf->ImageAlpha($page, 0, 0, 210, 297, '');
+        $page = storage_path('public/docs/form/trabajador/form-001-tra-p01.png');
+        $this->pdf->Image($page, 0, 0, 210, 297, '');
         $this->tipoAfiliado();
         $this->dataEmpleador();
         $this->dataTrabajador();
@@ -54,8 +58,8 @@ class FormularioTrabajador extends Documento
         }
         $this->autorizaDatos();
 
-        $page = Core::getInitialPath() . 'public/docs/sello-firma.png';
-        $this->pdf->ImageAlpha($page, 160, 275, 30, 20, '');
+        $page = storage_path('public/docs/sello-firma.png');
+        $this->pdf->Image($page, 160, 275, 30, 20, '');
         return $this;
     }
 

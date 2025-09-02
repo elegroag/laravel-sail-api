@@ -2,6 +2,13 @@
 
 namespace App\Services\FormulariosAdjuntos;
 
+use App\Exceptions\DebugException;
+use App\Library\Collections\ParamsEmpresa;
+use App\Models\Mercurio16;
+use App\Models\Mercurio30;
+use App\Services\Formularios\FactoryDocuments;
+use App\Services\PreparaFormularios\CifrarDocumento;
+use App\Services\Utils\Comman;
 
 class TrabajadorAdjuntoService
 {
@@ -24,8 +31,7 @@ class TrabajadorAdjuntoService
 
     public function __construct($request)
     {
-        Core::importLibrary("ParamsEmpresa", "Collections");
-        Core::importLibrary("FactoryDocuments", "Formularios");
+
         $this->request = $request;
         $this->initialize();
     }
@@ -104,9 +110,9 @@ class TrabajadorAdjuntoService
 
     public function formulario()
     {
-        if (!$this->lfirma) throw new Exception("Error no hay firma digital", 501);
+        if (!$this->lfirma) throw new DebugException("Error no hay firma digital", 501);
 
-        $conyuge = $this->Mercurio32->findFirst(" documento='{$this->request->getDocumento()}' and " .
+        $conyuge = (new Mercurio32)->findFirst(" documento='{$this->request->getDocumento()}' and " .
             "coddoc='{$this->request->getCoddoc()}' and " .
             "cedtra='{$this->request->getCedtra()}' and " .
             "comper='S'
@@ -123,7 +129,7 @@ class TrabajadorAdjuntoService
             )
         );
 
-        if ($procesadorComando->isJson() == false) throw new Exception("Error al consultar la empresa", 501);
+        if ($procesadorComando->isJson() == false) throw new DebugException("Error al consultar la empresa", 501);
         $out = $procesadorComando->getObject();
         $empresa = new Mercurio30();
         $empresa->createAttributes($out->data);
@@ -150,7 +156,7 @@ class TrabajadorAdjuntoService
     function cifrarDocumento()
     {
         $cifrarDocumento = new CifrarDocumento();
-        $this->outPdf = $cifrarDocumento->cifrar(Core::getInitialPath() . 'public/temp/' . $this->filename, $this->lfirma->getKeyprivate());
+        $this->outPdf = $cifrarDocumento->cifrar(public_path('temp/' . $this->filename), $this->lfirma->getKeyprivate());
         $this->fhash = $cifrarDocumento->getFhash();
     }
 

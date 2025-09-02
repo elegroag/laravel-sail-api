@@ -2,6 +2,8 @@
 
 namespace App\Services\PreparaFormularios;
 
+use App\Models\Mercurio16;
+
 class GestionFirmaNoImage
 {
 
@@ -20,13 +22,13 @@ class GestionFirmaNoImage
         $this->documento = $param['documento'];
         $this->coddoc = $param['coddoc'];
 
-        $this->pathOut = Core::getInitialPath() . 'storage/' . $this->documento . 'F' . $this->coddoc . '/';
+        $this->pathOut = storage_path('temp/' . $this->documento . 'F' . $this->coddoc . '/');
         if (!is_dir($this->pathOut)) mkdir($this->pathOut, 0775, true);
     }
 
     public function hasFirma()
     {
-        $has = ((new Mercurio16)->count(
+        $has = ((new Mercurio16)->getCount(
             "*",
             "conditions: documento='{$this->documento}' AND coddoc='{$this->coddoc}'"
         ) > 0) ? true : false;
@@ -102,8 +104,8 @@ class GestionFirmaNoImage
         $this->lfirma->save();
 
         return array(
-            'private' => $this->clavePrivada,
-            'public' => $this->clavePublica
+            'private' => $clavePrivada,
+            'public' => $clavePublica
         );
     }
 

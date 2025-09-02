@@ -3,6 +3,9 @@
 namespace App\Services\Formularios\Oficios;
 
 use App\Services\Formularios\Documento;
+use Carbon\Carbon;
+use App\Exceptions\DebugException;
+use App\Library\Collections\ParamsFacultativo;
 
 class SolicitudFacultativo extends Documento
 {
@@ -26,12 +29,12 @@ class SolicitudFacultativo extends Documento
             throw new DebugException("Error el facultativo no esté disponible", 501);
         }
 
-        $page = Core::getInitialPath() . 'public/docs/form/oficios/oficio_solicitud_afiliacion.jpg';
+        $page = public_path('docs/form/oficios/oficio_solicitud_afiliacion.jpg');
         $this->pdf->Image($page, 0, 0, 210, 297, '');
 
         $this->facultativo = $this->request->getParam('facultativo');
         $this->bloqueEmpresa();
-        $selloFirma = Core::getInitialPath() . 'public/docs/sello-firma.png';
+        $selloFirma = public_path('docs/sello-firma.png');
         $this->pdf->Image($selloFirma, 160, 265, 30, 20, '', '', '', false, 300, '', false, false, 0);
     }
 
@@ -46,13 +49,13 @@ class SolicitudFacultativo extends Documento
         $_codciu = ParamsFacultativo::getCiudades();
         $nombre = capitalize($this->facultativo->getPrinom() . ' ' . $this->facultativo->getSegnom() . ' ' . $this->facultativo->getPriape() . ' ' . $this->facultativo->getSegape());
 
-        $today = new Date();
+        $today = Carbon::now();
         $ciudad = ($this->facultativo->getCodciu()) ? $_codciu[$this->facultativo->getCodciu()] : 'Florencia';
         $coddorepleg = $this->facultativo->getCoddocreplegArray();
         $tipo_documento = ($this->facultativo->getTipdoc()) ? $coddorepleg[$this->facultativo->getTipdoc()] : 'CC';
         $ciudad_labora = (!$this->facultativo->getCodzon()) ? 'Florencia' : $_codciu[$this->facultativo->getCodzon()];
 
-        $fecini = new Date($this->facultativo->getFecini());
+        $fecini = Carbon::parse($this->facultativo->getFecini());
         $this->pdf->SetFont('helvetica', '', 9);
         $datos = array(
             array('lb' => 'Ciudad', 'texto' => $ciudad, 'x' => 36, 'y' => 40),

@@ -2,6 +2,15 @@
 
 namespace App\Services\FormulariosAdjuntos;
 
+use App\Models\Mercurio16;
+use App\Services\Utils\Comman;
+
+use App\Library\Collections\ParamsEmpresa;
+use App\Library\Tcpdf\KumbiaPDF;
+use App\Models\Tranoms;
+use App\Services\Formularios\FactoryDocuments;
+use App\Services\PreparaFormularios\CifrarDocumento;
+
 
 class EmpresaAdjuntoService
 {
@@ -14,8 +23,6 @@ class EmpresaAdjuntoService
     public function __construct($request)
     {
         $this->request = $request;
-        Core::importLibrary("ParamsEmpresa", "Collections");
-        Core::importLibrary("FactoryDocuments", "Formularios");
         $this->initialize();
     }
 
@@ -60,8 +67,8 @@ class EmpresaAdjuntoService
     public function cartaSolicitud()
     {
         $this->filename = "carta_solicitud_empresa_{$this->request->getNit()}.pdf";
-        KumbiaPDF::setBackgroundImage(Core::getInitialPath() . 'public/docs/form/oficios/oficio_solicitud_empresa.jpg');
-        KumbiaPDF::setFooterImage(Core::getInitialPath() . 'public/' . $this->lfirma->getFirma());
+        KumbiaPDF::setBackgroundImage(public_path('form/oficios/oficio_solicitud_empresa.jpg'));
+        KumbiaPDF::setFooterImage(public_path('docs/' . $this->lfirma->getFirma()));
 
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearOficio('empresa');
@@ -81,7 +88,7 @@ class EmpresaAdjuntoService
     public function formulario()
     {
         $this->filename = "formulario_empresa_{$this->request->getNit()}.pdf";
-        KumbiaPDF::setBackgroundImage(Core::getInitialPath() . 'public/docs/form/empresa/form-empresa.jpg');
+        KumbiaPDF::setBackgroundImage(public_url('docs/form/empresa/form-empresa.jpg'));
 
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearFormulario('empresa');
@@ -101,9 +108,9 @@ class EmpresaAdjuntoService
     public function trabajadoresNomina()
     {
         KumbiaPDF::setBackgroundImage(false);
-        KumbiaPDF::setFooterImage(Core::getInitialPath() . 'public/' . $this->lfirma->getFirma());
+        KumbiaPDF::setFooterImage(public_url('docs/' . $this->lfirma->getFirma()));
 
-        $tranoms = $this->Tranoms->find(" request='{$this->request->getId()}'");
+        $tranoms = (new Tranoms)->find(" request='{$this->request->getId()}'");
         $this->filename = "tranom_empresa_{$this->request->getNit()}.pdf";
 
         $fabrica = new FactoryDocuments();
@@ -126,7 +133,7 @@ class EmpresaAdjuntoService
     function cifrarDocumento()
     {
         $cifrarDocumento = new CifrarDocumento();
-        $this->outPdf = $cifrarDocumento->cifrar(Core::getInitialPath() . 'public/temp/' . $this->filename, $this->lfirma->getKeyprivate());
+        $this->outPdf = $cifrarDocumento->cifrar(public_path('temp/' . $this->filename), $this->lfirma->getKeyprivate());
         $this->fhash = $cifrarDocumento->getFhash();
     }
 

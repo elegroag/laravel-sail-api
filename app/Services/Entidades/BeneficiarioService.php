@@ -96,8 +96,7 @@ class BeneficiarioService
         if ($solicitud == false) return false;
         $archivos = array();
 
-        $db = (object) DbBase::rawConnect();
-
+        $db = DbBase::rawConnect();
 
         $mercurio10 = $db->fetchOne("SELECT item, estado, campos_corregir
         FROM mercurio10
@@ -138,7 +137,8 @@ class BeneficiarioService
             "load_archivos" => $archivos,
             "path" => $mercurio01->getPath(),
             "puede_borrar" => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true
-        ]);
+        ])->render();
+        
         return $html;
     }
 

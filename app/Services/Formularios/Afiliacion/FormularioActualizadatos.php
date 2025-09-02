@@ -2,7 +2,9 @@
 
 namespace App\Services\Formularios\Afiliacion;
 
+use App\Library\Collections\ParamsEmpresa;
 use App\Services\Formularios\Documento;
+
 
 class FormularioActualizadatos extends Documento
 {
@@ -12,21 +14,21 @@ class FormularioActualizadatos extends Documento
         $empresa = $this->request->getParam('empresa');
         $campos = $this->request->getParam('campos');
 
-        $this->pdf->SetTitle(utf8_decode("Formulario afiliación de empresa con NIT {$empresa['nit']}, COMFACA"));
-        $this->pdf->SetAuthor(utf8_decode("{$empresa['repleg']}, COMFACA"));
-        $this->pdf->SetSubject(utf8_decode("Formulario de afiliación a COMFACA"));
-        $this->pdf->SetCreator(utf8_decode("Plataforma Web: comfacaenlinea.com.co, COMFACA"));
+        $this->pdf->SetTitle("Formulario afiliación de empresa con NIT {$empresa['nit']}, COMFACA");
+        $this->pdf->SetAuthor("{$empresa['repleg']}, COMFACA");
+        $this->pdf->SetSubject("Formulario de afiliación a COMFACA");
+        $this->pdf->SetCreator("Plataforma Web: comfacaenlinea.com.co, COMFACA");
         $this->pdf->SetKeywords('COMFACA');
 
         $this->pdf->Image('public/docs/formulario_mercurio/fomulario_actualizacion_empresa_parte_1.jpg', 0, 0, "216", "280");
         $this->bloqueEmpresa($empresa, $campos);
-        $page = Core::getInitialPath() . 'public/docs/sello-firma.png';
-        $this->pdf->ImageAlpha($page, 160, 275, 30, 20, '');
+        $page = storage_path('public/docs/sello-firma.png');
+        $this->pdf->Image($page, 160, 275, 30, 20, '');
 
         $this->pdf->AddPage();
         $this->pdf->Image('public/docs/formulario_mercurio/fomulario_actualizacion_empresa_parte_2.jpg', 0, 0, "216", "280");
-        $page = Core::getInitialPath() . 'public/docs/sello-firma.png';
-        $this->pdf->ImageAlpha($page, 160, 275, 30, 20, '');
+        $page = storage_path('public/docs/sello-firma.png');
+        $this->pdf->Image($page, 160, 275, 30, 20, '');
     }
 
     function bloqueEmpresa($empresa, $campos)

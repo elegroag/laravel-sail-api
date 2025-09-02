@@ -2,9 +2,12 @@
 
 namespace App\Services\Formularios\Afiliacion;
 
-use App\Services\Formularios\DocumentoAdapter;
+use App\Exceptions\DebugException;
+use App\Library\Collections\ParamsEmpresa;
+use App\Services\Formularios\Documento;
+use Carbon\Carbon;
 
-class FormularioEmpresa extends DocumentoAdapter
+class FormularioEmpresa extends Documento
 {
 
     private $empresa;
@@ -28,7 +31,7 @@ class FormularioEmpresa extends DocumentoAdapter
         $this->pdf->SetCreator("Plataforma Web: comfacaenlinea.com.co, COMFACA");
         $this->pdf->SetKeywords('COMFACA');
         $this->bloqueEmpresa();
-        $selloFirma = Core::getInitialPath() . 'public/docs/sello-firma.png';
+        $selloFirma = storage_path('public/docs/sello-firma.png');
         $this->pdf->Image($selloFirma, 160, 265, 30, 20, '', '', '', false, 300, '', false, false, 0);
     }
 
@@ -47,15 +50,15 @@ class FormularioEmpresa extends DocumentoAdapter
         $_codact = ParamsEmpresa::getActividades();
         $_coddep = ParamsEmpresa::getDepartamentos();
 
-        $today = new Date();
+        $today = Carbon::now();
         if ($this->empresa->getCiupri() == NULL) {
             $this->empresa->setCiupri($this->empresa->getCodciu());
         }
 
         $this->pdf->SetXY(162, 43);
-        $this->pdf->Cell(12, 4, $today->getDay(), 0, 0, 'C');
-        $this->pdf->Cell(12, 4, $today->getMonth(), 0, 0, 'C');
-        $this->pdf->Cell(15, 4, $today->getYear(), 0, 0, 'C');
+        $this->pdf->Cell(12, 4, $today->format('d'), 0, 0, 'C');
+        $this->pdf->Cell(12, 4, $today->format('m'), 0, 0, 'C');
+        $this->pdf->Cell(15, 4, $today->format('Y'), 0, 0, 'C');
 
         $cc = "";
         $ti = "";
@@ -97,7 +100,7 @@ class FormularioEmpresa extends DocumentoAdapter
         $this->pdf->Cell(15, 5, $this->empresa->getDigver(), 0, 0, 'C');
 
         $this->pdf->SetXY(8, 71);
-        $this->pdf->Cell(195, 5, Tag::capitalize($this->empresa->getRazsoc()), 0, 0, 'L');
+        $this->pdf->Cell(195, 5, capitalize($this->empresa->getRazsoc()), 0, 0, 'L');
 
         /**
          * linea x
@@ -182,7 +185,7 @@ class FormularioEmpresa extends DocumentoAdapter
         $this->pdf->setXY(9, 117);
         $this->pdf->SetFont('helvetica', '', 8);
 
-        $this->pdf->Cell(142, 5, Tag::capitalize(@$_codact[$this->empresa->getCodact()]), 0, 0, 'L');
+        $this->pdf->Cell(142, 5, capitalize(@$_codact[$this->empresa->getCodact()]), 0, 0, 'L');
         $this->pdf->Cell(35, 5, $this->empresa->getCodact(), 0, 0, 'L');
 
 
@@ -191,7 +194,7 @@ class FormularioEmpresa extends DocumentoAdapter
          */
         $this->pdf->SetXY(9, 126);
         $this->pdf->Cell(95, 5, @$_codzon[$this->empresa->getCodzon()], 0, 0, 'L');
-        $this->pdf->Cell(100, 5, Tag::capitalize($this->empresa->getRazsoc()), 0, 0, 'L');
+        $this->pdf->Cell(100, 5, capitalize($this->empresa->getRazsoc()), 0, 0, 'L');
 
         /**
          * linea x
@@ -211,7 +214,7 @@ class FormularioEmpresa extends DocumentoAdapter
          * linea x
          */
         $this->pdf->setXY(9, 150);
-        $this->pdf->Cell(195, 5, Tag::capitalize($this->empresa->getRepleg()), 0, 0, 'L');
+        $this->pdf->Cell(195, 5, capitalize($this->empresa->getRepleg()), 0, 0, 'L');
 
         $this->pdf->setY(158);
         $this->pdf->setX(10);

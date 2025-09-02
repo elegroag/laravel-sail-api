@@ -19,7 +19,7 @@ class ModelBase extends Model
 
     public function findFirst(...$data)
     {
-        $params = $this->getParams($data);
+        $params = get_params_destructures($data);
         $query = DB::table($this->getTable());
 
         if (isset($params['conditions'])) {
@@ -100,7 +100,7 @@ class ModelBase extends Model
 
     public function find(...$data)
     {
-        $params = $this->getParams($data);
+        $params = get_params_destructures($data);
         $query = DB::table($this->getTable());
 
         if (isset($params['conditions'])) {
@@ -155,7 +155,7 @@ class ModelBase extends Model
 
     public function maximum(...$data)
     {
-        $params = $this->getParams($data);
+        $params = get_params_destructures($data);
         // determine column
         if (isset($params['column'])) {
             $column = $params['column'];
@@ -232,7 +232,7 @@ class ModelBase extends Model
 
     public function minimum(...$data)
     {
-        $params = $this->getParams($data);
+        $params = get_params_destructures($data);
         // determine column
         if (isset($params['column'])) {
             $column = $params['column'];
@@ -306,25 +306,9 @@ class ModelBase extends Model
         return $minimum;
     }
 
-    private function getParams($data)
-    {
-        $params = [];
-        if (is_array($data) && count($data) > 0) {
-            foreach ($data as $item) {
-                if (stristr($item, ':') === FALSE) {
-                    $params[0] = $item;
-                    continue;
-                }
-                $name = substr($item, 0, strpos($item, ':'));
-                $params[$name] = substr($item, strpos($item, ':') + 1);
-            }
-        }
-        return $params;
-    }
-
     public function updateAll(...$data)
     {
-        $params = $this->getParams($data);
+        $params = get_params_destructures($data);
         $query = DB::table($this->getTable());
 
         if (isset($params['conditions'])) {
@@ -394,7 +378,7 @@ class ModelBase extends Model
 
     public function deleteAll(...$data)
     {
-        $params = $this->getParams($data);
+        $params = get_params_destructures($data);
         $query = DB::table($this->getTable());
 
         if (isset($params['conditions'])) {
@@ -431,7 +415,7 @@ class ModelBase extends Model
 
     public function getCount(...$argv)
     {
-        $params = $this->getParams($argv);
+        $params = get_params_destructures($argv);
         $query = DB::table($this->getTable());
 
         if (isset($params[0]) && trim($params[0]) !== '') {

@@ -19,12 +19,14 @@ class ProcesadorComandos
 
     public function __construct($component, $procesador = 'p7')
     {
-        $this->userAuth = Auth::getActiveIdentity();
+        if (session()->has('documento')) {
+            $this->userAuth = session()->all();
+        }
         if (!isset($this->userAuth['usuario'])) $this->userAuth['usuario'] = ((isset($this->userAuth['documento'])) ? $this->userAuth['documento'] : 1);
         $this->procesador = $procesador;
         $this->Comandos = $component->Comandos;
         $this->ComandoEstructuras = $component->ComandoEstructuras;
-        $this->outPutFile = '/var/www/html/' . Core::getInstanceName() . '/public/temp/' . $this->userAuth['usuario'] . '_' . strtotime('now') . '.log';
+        $this->outPutFile = storage_path('logs/' . $this->userAuth['usuario'] . '_' . strtotime('now') . '.log');
         $this->procesarAsyncrono = '';
     }
 
@@ -143,7 +145,7 @@ class ProcesadorComandos
             "/({{metodo}})/" => isset($params['metodo']) ? $params['metodo'] : '',
             "/({{params}})/" => isset($params['params']) ? (($base64) ? base64_encode(json_encode($params['params'])) : $params['params']) : '',
             "/({{user}})/" => $this->userAuth['usuario'],
-            "/({{sistema}})/" => Core::getInstanceName(),
+            "/({{sistema}})/" => env('APP_NAME'),
             "/({{env}})/" => isset($params['env']) ? $params['env'] : '1',
             "/({{comando}})/" => isset($params['comando']) ? $params['comando'] : ''
         );

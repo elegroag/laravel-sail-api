@@ -2,7 +2,12 @@
 
 namespace App\Services\Formularios\Afiliacion;
 
+use App\Exceptions\DebugException;
+use App\Library\Collections\ParamsBeneficiario;
+use App\Library\Collections\ParamsTrabajador;
+use App\Models\Gener18;
 use App\Services\Formularios\Documento;
+use Carbon\Carbon;
 
 class FormularioBeneficiario extends Documento
 {
@@ -43,16 +48,16 @@ class FormularioBeneficiario extends Documento
         $this->trabajador =  $this->request->getParam('trabajador');
         $this->bioconyu =  $this->request->getParam('bioconyu');
 
-        $this->pdf->SetTitle(utf8_decode("Formulario adición del beneficiario {$this->beneficiario->getNumdoc()}, COMFACA"));
-        $this->pdf->SetAuthor(utf8_decode("{$this->trabajador->getPriape()} {$this->trabajador->getSegape()} {$this->trabajador->getPrinom()} {$this->trabajador->getSegnom()}, COMFACA"));
-        $this->pdf->SetSubject(utf8_decode("Formulario de adición a COMFACA"));
-        $this->pdf->SetCreator(utf8_decode("Plataforma Web: comfacaenlinea.com.co, COMFACA"));
+        $this->pdf->SetTitle("Formulario adición del beneficiario {$this->beneficiario->getNumdoc()}, COMFACA");
+        $this->pdf->SetAuthor("{$this->trabajador->getPriape()} {$this->trabajador->getSegape()} {$this->trabajador->getPrinom()} {$this->trabajador->getSegnom()}, COMFACA");
+        $this->pdf->SetSubject("Formulario de adición a COMFACA");
+        $this->pdf->SetCreator("Plataforma Web: comfacaenlinea.com.co, COMFACA");
         $this->pdf->SetKeywords('COMFACA');
 
         $this->parent =  $this->beneficiario->getParent();
         $this->pdf->SetFont('Arial', '', 8.5);
 
-        $this->pdf->ImageAlpha(Core::getInitialPath() . 'public/docs/form/beneficiarios/form_adicion_beneficiario.png', 0, 0, 210, 297, '');
+        $this->pdf->Image(storage_path('public/docs/form/beneficiarios/form_adicion_beneficiario.png'), 0, 0, 210, 297, '');
         $this->pdf->SetAutoPageBreak(false, 0);
 
         $this->headerForm();
@@ -80,8 +85,8 @@ class FormularioBeneficiario extends Documento
                 array('lb' => 'Acepta politica', 'texto' => 'X', 'x' => 168, 'y' => 263.5)
             )
         );
-        $page = Core::getInitialPath() . 'public/docs/sello-firma.png';
-        $this->pdf->ImageAlpha($page, 160, 275, 30, 20, '');
+        $page = storage_path('public/docs/sello-firma.png');
+        $this->pdf->Image($page, 160, 275, 30, 20, '');
         return $this;
     }
 
@@ -89,12 +94,12 @@ class FormularioBeneficiario extends Documento
     {
         $_codciu = ParamsTrabajador::getCiudades();
         $ciudad = ($this->trabajador->getCodzon()) ? $_codciu[$this->trabajador->getCodzon()] : 'Florencia';
-        $today = new Date();
+        $today = Carbon::now();
         $this->pdf->SetFont('helvetica', '', 8.6);
         $datos = array(
-            array('lb' => 'Año', 'texto' => $today->getYear(), 'x' => 116, 'y' => 26),
-            array('lb' => 'Mes', 'texto' => $today->getMonth(), 'x' => 130, 'y' => 26),
-            array('lb' => 'Dia', 'texto' => $today->getDay(), 'x' => 140, 'y' => 26),
+            array('lb' => 'Año', 'texto' => $today->format('Y'), 'x' => 116, 'y' => 26),
+            array('lb' => 'Mes', 'texto' => $today->format('m'), 'x' => 130, 'y' => 26),
+            array('lb' => 'Dia', 'texto' => $today->format('d'), 'x' => 140, 'y' => 26),
             array('lb' => 'Ciudad', 'texto' => $ciudad, 'x' => 150, 'y' => 26),
         );
         $this->addBloq($datos);

@@ -2,6 +2,11 @@
 
 namespace App\Services\Formularios\Afiliacion;
 
+use App\Exceptions\DebugException;
+use App\Library\Collections\ParamsConyuge;
+use App\Models\Gener18;
+use App\Services\Formularios\Documento;
+
 class FormularioConyuge extends Documento
 {
     /**
@@ -31,14 +36,14 @@ class FormularioConyuge extends Documento
         $this->conyuge = $this->request->getParam('conyuge');
         $this->trabajador = $this->request->getParam('trabajador');
 
-        $this->pdf->SetTitle(utf8_decode("Formulario adición del cónyuge {$this->trabajador->getCedtra()}, COMFACA"));
-        $this->pdf->SetAuthor(utf8_decode("{$this->trabajador->getPriape()} {$this->trabajador->getSegape()} {$this->trabajador->getPrinom()} {$this->trabajador->getSegnom()}, COMFACA"));
-        $this->pdf->SetSubject(utf8_decode("Formulario de adición a COMFACA"));
-        $this->pdf->SetCreator(utf8_decode("Plataforma Web: comfacaenlinea.com.co, COMFACA"));
+        $this->pdf->SetTitle("Formulario adición del cónyuge {$this->trabajador->getCedtra()}, COMFACA");
+        $this->pdf->SetAuthor("{$this->trabajador->getPriape()} {$this->trabajador->getSegape()} {$this->trabajador->getPrinom()} {$this->trabajador->getSegnom()}, COMFACA");
+        $this->pdf->SetSubject("Formulario de adición a COMFACA");
+        $this->pdf->SetCreator("Plataforma Web: comfacaenlinea.com.co, COMFACA");
         $this->pdf->SetKeywords('COMFACA');
 
-        $page1 = Core::getInitialPath() . 'public/docs/form/conyuge/formulario_adicion_conyuge.png';
-        $this->pdf->ImageAlpha($page1, 0, 0, 210, 297);
+        $page1 = storage_path('public/docs/form/conyuge/formulario_adicion_conyuge.png');
+        $this->pdf->Image($page1, 0, 0, 210, 297);
         $this->pdf->SetAutoPageBreak(false, 0);
         $this->headerForm();
         $this->dataTrabajador();
@@ -49,8 +54,8 @@ class FormularioConyuge extends Documento
                 array('lb' => 'Acepta politica', 'texto' => 'X', 'x' => 168, 'y' => 263.5)
             )
         );
-        $page = Core::getInitialPath() . 'public/docs/sello-firma.png';
-        $this->pdf->ImageAlpha($page, 160, 275, 30, 20, '');
+        $page = storage_path('public/docs/sello-firma.png');
+        $this->pdf->Image($page, 160, 275, 30, 20, '');
         return $this;
     }
 
@@ -58,12 +63,12 @@ class FormularioConyuge extends Documento
     {
         $_codciu = ParamsConyuge::getCiudades();
         $ciudad = ($this->conyuge->getCodzon()) ? $_codciu[$this->conyuge->getCodzon()] : 'Florencia';
-        $today = new Date();
+        $today = Carbon::now();
         $this->pdf->SetFont('helvetica', '', 8.6);
         $datos = array(
-            array('lb' => 'Año', 'texto' => $today->getYear(), 'x' => 116, 'y' => 25),
-            array('lb' => 'Mes', 'texto' => $today->getMonth(), 'x' => 130, 'y' => 25),
-            array('lb' => 'Dia', 'texto' => $today->getDay(), 'x' => 140, 'y' => 25),
+            array('lb' => 'Año', 'texto' => $today->format('Y'), 'x' => 116, 'y' => 25),
+            array('lb' => 'Mes', 'texto' => $today->format('m'), 'x' => 130, 'y' => 25),
+            array('lb' => 'Dia', 'texto' => $today->format('d'), 'x' => 140, 'y' => 25),
             array('lb' => 'Ciudad', 'texto' => $ciudad, 'x' => 150, 'y' => 25),
         );
         $this->addBloq($datos);

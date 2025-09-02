@@ -2,9 +2,11 @@
 
 namespace App\Services\Formularios\Politica;
 
-use App\Services\Formularios\DocumentoAdapter;
+use App\Exceptions\DebugException;
+use App\Library\Collections\ParamsTrabajador;
+use App\Services\Formularios\Documento;
 
-class TrabajadorDatosPersonales extends DocumentoAdapter
+class TrabajadorDatosPersonales extends Documento
 {
 
     /**
@@ -38,13 +40,13 @@ class TrabajadorDatosPersonales extends DocumentoAdapter
         $this->pdf->SetCreator("Plataforma Web: comfacaenlinea.com.co, COMFACA");
         $this->pdf->SetKeywords('COMFACA');
 
-        $imagen = Core::getInitialPath() . 'public/docs/form/datos-personales/datos-personales-trabajador-01.jpg';
+        $imagen = public_path('docs/form/datos-personales/datos-personales-trabajador-01.jpg');
         $this->addBackground($imagen);
-        $selloFirma = Core::getInitialPath() . 'public/docs/sello-firma.png';
+        $selloFirma = public_path('docs/sello-firma.png');
         $this->pdf->Image($selloFirma, 160, 275, 30, 20, '', '', '', false, 300, '', false, false, 0);
 
         $this->pdf->AddPage();
-        $imagen = Core::getInitialPath() . 'public/docs/form/datos-personales/datos-personales-trabajador-02.jpg';
+        $imagen = public_path('docs/form/datos-personales/datos-personales-trabajador-02.jpg');
         $this->addBackground($imagen);
         $this->bloqueEmpresa();
         $this->pdf->Image($selloFirma, 160, 265, 30, 20, '', '', '', false, 300, '', false, false, 0);

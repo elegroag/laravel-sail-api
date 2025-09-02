@@ -2,6 +2,18 @@
 
 namespace App\Services\FormulariosAdjuntos;
 
+use App\Exceptions\DebugException;
+use App\Library\Collections\ParamsConyuge;
+use App\Models\Mercurio07;
+use App\Models\Mercurio16;
+use App\Models\Mercurio31;
+use App\Models\Mercurio36;
+use App\Models\Mercurio38;
+use App\Models\Mercurio41;
+use App\Services\Entidades\TrabajadorService;
+use App\Services\Formularios\FactoryDocuments;
+use App\Services\PreparaFormularios\CifrarDocumento;
+use App\Services\Utils\Comman;
 
 class ConyugeAdjuntoService
 {
@@ -23,8 +35,6 @@ class ConyugeAdjuntoService
     public function __construct($request)
     {
         $this->request = $request;
-        Core::importLibrary("ParamsConyuge", "Collections");
-        Core::importLibrary("FactoryDocuments", "Formularios");
         $this->initialize();
     }
 
@@ -47,7 +57,7 @@ class ConyugeAdjuntoService
 
     public function formulario()
     {
-        $solicitante = $this->Mercurio07->findFirst(
+        $solicitante = (new Mercurio07)->findFirst(
             "documento='{$this->request->getDocumento()}' and " .
                 "coddoc='{$this->request->getCoddoc()}' and " .
                 "tipo='{$this->request->getTipo()}'"
@@ -91,7 +101,7 @@ class ConyugeAdjuntoService
                 $mtrabajador = new Mercurio31();
                 break;
             default:
-                $trabajador = $this->Mercurio31->findFirst(
+                $trabajador = (new Mercurio31())->findFirst(
                     " documento='{$this->request->getDocumento()}' and " .
                         " coddoc='{$this->request->getCoddoc()}' and " .
                         " cedtra='{$this->request->getCedtra()}' and " .
@@ -146,7 +156,7 @@ class ConyugeAdjuntoService
     function cifrarDocumento()
     {
         $cifrarDocumento = new CifrarDocumento();
-        $this->outPdf = $cifrarDocumento->cifrar(Core::getInitialPath() . 'public/temp/' . $this->filename, $this->lfirma->getKeyprivate());
+        $this->outPdf = $cifrarDocumento->cifrar(storage_path('temp/' . $this->filename), $this->lfirma->getKeyprivate());
         $this->fhash = $cifrarDocumento->getFhash();
     }
 

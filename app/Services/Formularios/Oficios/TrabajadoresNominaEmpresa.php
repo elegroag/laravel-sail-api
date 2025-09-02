@@ -3,6 +3,9 @@
 namespace App\Services\Formularios\Oficios;
 
 use App\Services\Formularios\DocumentoAdapter;
+use App\Exceptions\DebugException;
+use App\Services\Utils\Table;
+
 
 class TrabajadoresNominaEmpresa extends DocumentoAdapter
 {
@@ -21,8 +24,6 @@ class TrabajadoresNominaEmpresa extends DocumentoAdapter
      */
     public function main()
     {
-        Core::importLibrary('Table', 'Pagination');
-
         if (!$this->request->getParam('empresa')) {
             throw new DebugException("Error la empresa no esté disponible", 501);
         }
@@ -37,7 +38,7 @@ class TrabajadoresNominaEmpresa extends DocumentoAdapter
         $this->pdf->SetKeywords('COMFACA');
 
         $this->bloqueEmpresa();
-        $selloFirma = Core::getInitialPath() . 'public/docs/sello-firma.png';
+        $selloFirma = public_path('docs/sello-firma.png');
         $this->pdf->Image($selloFirma, 160, 265, 30, 20, '', '', '', false, 300, '', false, false, 0);
     }
 

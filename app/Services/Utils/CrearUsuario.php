@@ -2,6 +2,7 @@
 
 namespace App\Services\Utils;
 
+use App\Exceptions\DebugException;
 use App\Models\Mercurio07;
 use App\Models\Mercurio19;
 use Carbon\Carbon;
@@ -26,7 +27,7 @@ class CrearUsuario
 
     public function setters(...$params)
     {
-        $arguments = $this->getParams($params);
+        $arguments = get_params_destructures($params);
         foreach ($arguments as $prop => $valor) if (property_exists($this, $prop)) $this->$prop = "{$valor}";
         return $this;
     }
@@ -60,7 +61,7 @@ class CrearUsuario
         if (!$mercurio07->save()) {
             $msj = "";
             foreach ($mercurio07->getMessages() as $m07) $msj .= $m07->getMessage() . "\n";
-            throw new Exception("Error " . $msj, 503);
+            throw new DebugException("Error " . $msj, 503);
         }
         return $mercurio07;
     }
@@ -91,24 +92,8 @@ class CrearUsuario
         if (!$mercurio19->save()) {
             $msj = "";
             foreach ($mercurio19->getMessages() as $m07) $msj .= $m07->getMessage() . "\n";
-            throw new Exception("Error " . $msj, 503);
+            throw new DebugException("Error " . $msj, 503);
         }
         return true;
-    }
-
-    private function getParams($data)
-    {
-        $params = [];
-        if (is_array($data) && count($data) > 0) {
-            foreach ($data as $item) {
-                if (stristr($item, ':') === FALSE) {
-                    $params[0] = $item;
-                    continue;
-                }
-                $name = substr($item, 0, strpos($item, ':'));
-                $params[$name] = substr($item, strpos($item, ':') + 1);
-            }
-        }
-        return $params;
     }
 }

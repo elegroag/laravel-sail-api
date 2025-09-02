@@ -3,6 +3,9 @@
 namespace App\Services\Formularios\Oficios;
 
 use App\Services\Formularios\Documento;
+use App\Exceptions\DebugException;
+use App\Library\Collections\ParamsPensionado;
+use Carbon\Carbon;
 
 class SolicitudPensionado extends Documento
 {
@@ -26,12 +29,12 @@ class SolicitudPensionado extends Documento
             throw new DebugException("Error el pensionado no esté disponible", 501);
         }
 
-        $page = Core::getInitialPath() . 'public/docs/form/oficios/oficio_solicitud_afiliacion.jpg';
+        $page = public_path('docs/form/oficios/oficio_solicitud_afiliacion.jpg');
         $this->pdf->Image($page, 0, 0, 210, 297, '');
 
         $this->pensionado = $this->request->getParam('pensionado');
         $this->bloqueEmpresa();
-        $selloFirma = Core::getInitialPath() . 'public/docs/sello-firma.png';
+        $selloFirma = public_path('docs/sello-firma.png');
         $this->pdf->Image($selloFirma, 160, 265, 30, 20, '', '', '', false, 300, '', false, false, 0);
     }
 
@@ -46,13 +49,13 @@ class SolicitudPensionado extends Documento
         $_codciu = ParamsPensionado::getCiudades();
         $nombre = capitalize($this->pensionado->getPrinom() . ' ' . $this->pensionado->getSegnom() . ' ' . $this->pensionado->getPriape() . ' ' . $this->pensionado->getSegape());
 
-        $today = new Date();
+        $today = Carbon::now();
         $ciudad = ($this->pensionado->getCodciu()) ? $_codciu[$this->pensionado->getCodciu()] : 'Florencia';
         $coddorepleg = $this->pensionado->getCoddocreplegArray();
         $tipo_documento = ($this->pensionado->getTipdoc()) ? $coddorepleg[$this->pensionado->getTipdoc()] : 'CC';
         $ciudad_labora = (!$this->pensionado->getCodzon()) ? 'Florencia' : $_codciu[$this->pensionado->getCodzon()];
 
-        $fecini = new Date($this->pensionado->getFecini());
+        $fecini = Carbon::parse($this->pensionado->getFecini());
         $this->pdf->SetFont('helvetica', '', 9);
         $datos = array(
             array('lb' => 'Ciudad', 'texto' => $ciudad, 'x' => 36, 'y' => 40),

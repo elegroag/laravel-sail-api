@@ -2,7 +2,11 @@
 
 namespace App\Services\Formularios\Declaration;
 
+use App\Exceptions\DebugException;
+use App\Library\Collections\ParamsConyuge;
+use App\Models\Gener18;
 use App\Services\Formularios\Documento;
+use Carbon\Carbon;
 
 class JuramentadaConyuge extends Documento
 {
@@ -33,15 +37,15 @@ class JuramentadaConyuge extends Documento
             throw new DebugException("Error el conyuge no esté disponible", 501);
         }
 
-        $page = Core::getInitialPath() . 'public/docs/form/declaraciones/declaracion_jura_conyuge.png';
-        $this->pdf->ImageAlpha($page, 0, 0, 210, 297, '');
+        $page = public_path() . 'docs/form/declaraciones/declaracion_jura_conyuge.png';
+        $this->pdf->Image($page, 0, 0, 210, 297, '');
 
         $this->conyuge = $this->request->getParam('conyuge');
         $this->trabajador = $this->request->getParam('trabajador');
         $this->bloqueTrabajador();
         $this->bloqueConyuge();
-        $page = Core::getInitialPath() . 'public/docs/sello-firma.png';
-        $this->pdf->ImageAlpha($page, 160, 275, 30, 20, '');
+        $page = public_path() . 'docs/sello-firma.png';
+        $this->pdf->Image($page, 160, 275, 30, 20, '');
     }
 
     /**
@@ -54,7 +58,7 @@ class JuramentadaConyuge extends Documento
     {
         $_codciu = ParamsConyuge::getCiudades();
         $nomtra = capitalize($this->trabajador->getPrinom() . ' ' . $this->trabajador->getSegnom() . ' ' . $this->trabajador->getPriape() . ' ' . $this->trabajador->getSegape());
-        $today = new Date();
+        $today = Carbon::now();
         $ciudad = ($this->conyuge->getCodzon()) ? $_codciu[$this->conyuge->getCodzon()] : 'Florencia';
         $mtipoDocumentos = new Gener18();
         $mtidocs = $mtipoDocumentos->findFirst(" coddoc='{$this->trabajador->getTipdoc()}'");
