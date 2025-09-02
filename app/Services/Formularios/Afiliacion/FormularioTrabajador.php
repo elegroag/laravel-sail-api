@@ -1,5 +1,6 @@
 <?php
-Core::importLibrary('Documento', 'Formularios');
+
+namespace App\Services\Formularios\Afiliacion;
 
 class FormularioTrabajador extends Documento
 {
@@ -161,7 +162,7 @@ class FormularioTrabajador extends Documento
     {
         if ($this->trabajador->getTipafi() == '3') {
             $x = 150;
-            //2% 
+            //2%
         } elseif ($this->trabajador->getTipafi() == '65') {
             //0.6%
             $x = 155;

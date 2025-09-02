@@ -1,14 +1,19 @@
 <?php
-require_once "Library/Excel/Main.php";
 
-class GeneralService 
+namespace App\Services\Utils;
+
+use App\Exceptions\DebugException;
+use App\Models\Mercurio02;
+use App\Services\Api\PortalMercurio;
+
+require_once "legacy/Excel/Main.php";
+
+class GeneralService
 {
 
     protected $numpaginate = 5;
 
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public function converserialize($str, $indice)
     {
@@ -180,7 +185,7 @@ class GeneralService
     public function sendEmail2($correo, $nombre = '', $asunto, $msj, $file = '')
     {
         Core::importFromLibrary("phpmailer", "class.phpmailer.php");
-        $mercurio02 = $this->Mercurio02->findFirst();
+        $mercurio02 = (new Mercurio02())->findFirst();
         $mcontenido  = "";
         $mcontenido .= "<div style='padding:0px;margin:0px'>";
         $mcontenido .= "<table width='100%' bgcolor='#EEEEEE' cellpadding='0' cellspacing='0' border='0'>";

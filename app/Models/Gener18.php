@@ -1,7 +1,9 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
+
 class Gener18 extends ModelBase
 {
 
@@ -15,59 +17,52 @@ class Gener18 extends ModelBase
         'codrua',
     ];
 
+    /**
+     * @param string $coddoc
+     */
+    public function setCoddoc($coddoc)
+    {
+        $this->coddoc = $coddoc;
+    }
+
+    /**
+     * @param string $detdoc
+     */
+    public function setDetdoc($detdoc)
+    {
+        $this->detdoc = $detdoc;
+    }
+
+    /**
+     * @param string $detdoc
+     */
+    public function setCodrua($codrua)
+    {
+        $this->codrua = $codrua;
+    }
 
 
-	protected $coddoc;
-	protected $detdoc;
-	protected $codrua;
+    /**
+     * @return string
+     */
+    public function getCodrua()
+    {
+        return $this->codrua;
+    }
 
+    /**
+     * @return string
+     */
+    public function getCoddoc()
+    {
+        return $this->coddoc;
+    }
 
-	/**
-	 * @param string $coddoc
-	 */
-	public function setCoddoc($coddoc)
-	{
-		$this->coddoc = $coddoc;
-	}
-
-	/**
-	 * @param string $detdoc
-	 */
-	public function setDetdoc($detdoc)
-	{
-		$this->detdoc = $detdoc;
-	}
-
-	/**
-	 * @param string $detdoc
-	 */
-	public function setCodrua($codrua)
-	{
-		$this->codrua = $codrua;
-	}
-
-
-	/**
-	 * @return string
-	 */
-	public function getCodrua()
-	{
-		return $this->codrua;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getCoddoc()
-	{
-		return $this->coddoc;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getDetdoc()
-	{
-		return $this->detdoc;
-	}
+    /**
+     * @return string
+     */
+    public function getDetdoc()
+    {
+        return $this->detdoc;
+    }
 }

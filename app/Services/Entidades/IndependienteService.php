@@ -1,8 +1,26 @@
 <?php
-class IndependienteService 
+
+namespace App\Services\Entidades;
+
+use App\Exceptions\DebugException;
+use App\Models\Adapter\DbBase;
+use App\Models\Mercurio01;
+use App\Models\Mercurio07;
+use App\Models\Mercurio10;
+use App\Models\Mercurio12;
+use App\Models\Mercurio14;
+use App\Models\Mercurio37;
+use App\Models\Mercurio41;
+use App\Services\Utils\Comman;
+use ParamsIndependiente;
+use ParamsTrabajador;
+
+class IndependienteService
 {
     private $tipopc = 13;
     private $tipsoc = '08';
+    private $user;
+    private $db;
 
     /**
      * __construct function
@@ -11,6 +29,10 @@ class IndependienteService
      */
     public function __construct()
     {
+        if (session()->has('documento')) {
+            $this->user = session()->all();
+        }
+        $this->db = DbBase::rawConnect();
     }
 
     /**
@@ -20,40 +42,38 @@ class IndependienteService
      */
     public function findAllByEstado($estado = '')
     {
-        $user = Auth::getActiveIdentity();
-
         //usuario empresa, unica solicitud de afiliación
-        $documento = $user['documento'];
-        $coddoc = $user['coddoc'];
+        $documento = $this->user['documento'];
+        $coddoc = $this->user['coddoc'];
 
         if (empty($estado)) {
             $conditions = "and m41.estado NOT IN('I') ";
         } else {
             $conditions = "and m41.estado='{$estado}' ";
         }
-        $sql = "SELECT 
-            m41.*, 
-            concat_ws(' ', m41.prinom, m41.segnom, m41.priape, m41.segape) as razsoc, 
-            concat_ws(' ', m41.prinom, m41.segnom, m41.priape, m41.segape) as repleg, 
-            m41.codzon, 
-            m41.codciu, 
-            (SELECT COUNT(*) FROM mercurio10 as me10 WHERE me10.tipopc='{$this->tipopc}' and m41.id = me10.numero) as cantidad_eventos, 
+        $sql = "SELECT
+            m41.*,
+            concat_ws(' ', m41.prinom, m41.segnom, m41.priape, m41.segape) as razsoc,
+            concat_ws(' ', m41.prinom, m41.segnom, m41.priape, m41.segape) as repleg,
+            m41.codzon,
+            m41.codciu,
+            (SELECT COUNT(*) FROM mercurio10 as me10 WHERE me10.tipopc='{$this->tipopc}' and m41.id = me10.numero) as cantidad_eventos,
             (SELECT MAX(fecsis) FROM mercurio10 as mr10 WHERE mr10.tipopc='{$this->tipopc}' and m41.id = mr10.numero) as fecha_ultima_solicitud,
-            (CASE 
-                WHEN m41.estado = 'T' THEN 'Temporal' 
-                WHEN m41.estado = 'D' THEN 'Devuelto' 
-                WHEN m41.estado = 'A' THEN 'Aprobado' 
-                WHEN m41.estado = 'X' THEN 'Rechazado' 
-                WHEN m41.estado = 'P' THEN 'Pendiente de validación' 
-                WHEN m41.estado = 'I' THEN 'Inactiva' 
-            END) as estado_detalle, 
-            'NATURAL' as tipo_persona, 
+            (CASE
+                WHEN m41.estado = 'T' THEN 'Temporal'
+                WHEN m41.estado = 'D' THEN 'Devuelto'
+                WHEN m41.estado = 'A' THEN 'Aprobado'
+                WHEN m41.estado = 'X' THEN 'Rechazado'
+                WHEN m41.estado = 'P' THEN 'Pendiente de validación'
+                WHEN m41.estado = 'I' THEN 'Inactiva'
+            END) as estado_detalle,
+            'NATURAL' as tipo_persona,
             m41.coddoc as tipo_documento,
-            gener09.detzon as detalle_zona 
-            FROM mercurio41 as m41 
-            LEFT JOIN gener09 ON gener09.codzon = m41.codzon 
-            WHERE m41.documento='{$documento}' and 
-            m41.coddoc='{$coddoc}' {$conditions} 
+            gener09.detzon as detalle_zona
+            FROM mercurio41 as m41
+            LEFT JOIN gener09 ON gener09.codzon = m41.codzon
+            WHERE m41.documento='{$documento}' and
+            m41.coddoc='{$coddoc}' {$conditions}
             ORDER BY m41.fecini ASC;";
 
         $solicitudes = $this->db->inQueryAssoc($sql);
@@ -98,11 +118,11 @@ class IndependienteService
         $archivos = array();
 
         $db = (object) DbBase::rawConnect();
-        $db->setFetchMode(DbBase::DB_ASSOC);
 
-        $mercurio10 = $db->fetchOne("SELECT item, estado, campos_corregir 
-        FROM mercurio10 
-        WHERE numero='{$solicitud->getId()}' AND tipopc='{$this->tipopc}' 
+
+        $mercurio10 = $db->fetchOne("SELECT item, estado, campos_corregir
+        FROM mercurio10
+        WHERE numero='{$solicitud->getId()}' AND tipopc='{$this->tipopc}'
         ORDER BY item DESC LIMIT 1");
 
         $corregir = false;
@@ -113,10 +133,10 @@ class IndependienteService
             }
         }
 
-        $mercurio14 = $this->Mercurio14->find("tipopc='{$this->tipopc}' AND tipsoc='{$this->tipsoc}'");
+        $mercurio14 = (new Mercurio14)->find("tipopc='{$this->tipopc}' AND tipsoc='{$this->tipsoc}'");
         foreach ($mercurio14 as $m14) {
-            $m12 = $this->Mercurio12->findFirst("coddoc='{$m14->getCoddoc()}'");
-            $mercurio37 = $this->Mercurio37->findFirst("tipopc='{$this->tipopc}' and numero='{$solicitud->getId()}' and coddoc='{$m14->getCoddoc()}'");
+            $m12 = (new Mercurio12)->findFirst("coddoc='{$m14->getCoddoc()}'");
+            $mercurio37 = (new Mercurio37)->findFirst("tipopc='{$this->tipopc}' and numero='{$solicitud->getId()}' and coddoc='{$m14->getCoddoc()}'");
             $corrige = false;
             if ($corregir) {
                 if (in_array($m12->getCoddoc(), $corregir)) {
@@ -124,7 +144,7 @@ class IndependienteService
                 }
             }
             $obliga = ($m14->getObliga() == "S") ? "<br><small class='text-danger'>Obligatorio</small>" : "";
-            $archivo = new stdClass;
+            $archivo = new \stdClass;
             $archivo->obliga = $obliga;
             $archivo->id = $solicitud->getId();
             $archivo->coddoc = $m14->getCoddoc();
@@ -134,12 +154,13 @@ class IndependienteService
             $archivos[] = $archivo;
         }
 
-        $mercurio01 = $this->Mercurio01->findFirst();
-        $html = View::render("independiente/tmp/archivos_requeridos", array(
+        $mercurio01 = (new Mercurio01)->findFirst();
+        $html = view("partials/archivos_requeridos", array(
             "load_archivos" => $archivos,
             "path" => $mercurio01->getPath(),
             "puede_borrar" => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true
-        ));
+        ))->render();
+
         return $html;
     }
 
@@ -151,17 +172,13 @@ class IndependienteService
      */
     public function dataArchivosRequeridos($solicitud)
     {
-        Core::importHelper('files');
-
-        $this->db->setFetchMode(DbBase::DB_ASSOC);
-
         if ($solicitud == false || is_null($solicitud)) return false;
         $archivos = array();
 
-        $mercurio10 = $this->db->fetchOne("SELECT item, estado, campos_corregir 
-        FROM mercurio10 
-        WHERE numero='{$solicitud->getId()}' AND 
-        tipopc='{$this->tipopc}' 
+        $mercurio10 = $this->db->fetchOne("SELECT item, estado, campos_corregir
+        FROM mercurio10
+        WHERE numero='{$solicitud->getId()}' AND
+        tipopc='{$this->tipopc}'
         ORDER BY item DESC LIMIT 1");
 
         $corregir = false;
@@ -172,10 +189,10 @@ class IndependienteService
             }
         }
 
-        $mercurio14 = $this->Mercurio14->find("tipopc='{$this->tipopc}' AND tipsoc='{$this->tipsoc}' ", "order: auto_generado DESC");
+        $mercurio14 = (new Mercurio14)->find("tipopc='{$this->tipopc}' AND tipsoc='{$this->tipsoc}' ", "order: auto_generado DESC");
         foreach ($mercurio14 as $m14) {
-            $m12 = $this->Mercurio12->findFirst("coddoc='{$m14->getCoddoc()}'");
-            $mercurio37 = $this->Mercurio37->findFirst("tipopc='{$this->tipopc}' and numero='{$solicitud->getId()}' and coddoc='{$m14->getCoddoc()}'");
+            $m12 = (new Mercurio12)->findFirst("coddoc='{$m14->getCoddoc()}'");
+            $mercurio37 = (new Mercurio37)->findFirst("tipopc='{$this->tipopc}' and numero='{$solicitud->getId()}' and coddoc='{$m14->getCoddoc()}'");
             $corrige = false;
             if ($corregir) {
                 if (in_array($m12->getCoddoc(), $corregir)) $corrige = true;
@@ -190,7 +207,7 @@ class IndependienteService
             $archivos[] = $archivo;
         }
 
-        $mercurio01 = $this->Mercurio01->findFirst();
+        $mercurio01 = (new Mercurio01)->findFirst();
         $archivos_descargar = oficios_requeridos('I');
         return array(
             "disponibles" => $archivos_descargar,
@@ -207,7 +224,7 @@ class IndependienteService
      */
     public function loadDisplay($solicitud)
     {
-        Tag::displayTo("cedtra", $solicitud->getCedtra());
+        /* Tag::displayTo("cedtra", $solicitud->getCedtra());
         Tag::displayTo("tipdoc", $solicitud->getTipdoc());
         Tag::displayTo("telefono", $solicitud->getTelefono());
         Tag::displayTo("celular", $solicitud->getCelular());
@@ -242,12 +259,12 @@ class IndependienteService
         Tag::displayTo("fecnac", ($solicitud->getFecnac() instanceof Date) ? $solicitud->getFecnac()->getUsingFormatDefault() : '');
         Tag::displayTo("fecini", ($solicitud->getFecini() instanceof Date) ? $solicitud->getFecini()->getUsingFormatDefault() : '');
         Tag::displayTo("pub_indigena_id",  $solicitud->getPub_indigena_id());
-        Tag::displayTo("resguardo_id",  $solicitud->getResguardo_id());
+        Tag::displayTo("resguardo_id",  $solicitud->getResguardo_id()); */
     }
 
     public function loadDisplaySubsidio($trabajador)
     {
-        Tag::displayTo("cedtra", $trabajador['cedtra']);
+        /*  Tag::displayTo("cedtra", $trabajador['cedtra']);
         Tag::displayTo("tipdoc", $trabajador['tipdoc']);
         Tag::displayTo("telefono", $trabajador['telefono']);
         Tag::displayTo("celular", $trabajador['celular']);
@@ -278,7 +295,7 @@ class IndependienteService
         Tag::displayTo("peretn", $trabajador['peretn']);
         Tag::displayTo("tippag", $trabajador['tippag']);
         Tag::displayTo("numcue", $trabajador['numcue']);
-        Tag::displayTo("fecnac", $trabajador['fecnac']);
+        Tag::displayTo("fecnac", $trabajador['fecnac']); */
     }
 
     /**
@@ -291,10 +308,8 @@ class IndependienteService
     {
         $independiente = $this->findById($id);
         if ($independiente != false) {
-            $independiente->setTransaction(self::$transaction);
             $independiente->createAttributes($data);
-            $this->salvar($independiente, __LINE__);
-            return $independiente;
+            return $independiente->save();
         }
         return false;
     }
@@ -309,9 +324,8 @@ class IndependienteService
     {
         $independiente = $this->findById($id);
         if ($independiente) {
-            $independiente->setTransaction(self::$transaction);
             $independiente->createAttributes($data);
-            return $this->salvar($independiente, __LINE__);
+            return $independiente->save();
         } else {
             return false;
         }
@@ -324,14 +338,13 @@ class IndependienteService
      */
     public function create($data)
     {
-        $id = $this->Mercurio41->maximum('id') + 1;
+        $id = (new Mercurio41)->maximum('id') + 1;
         $independiente = new Mercurio41();
-        $independiente->setTransaction(self::$transaction);
         $independiente->createAttributes($data);
         $independiente->setId($id);
 
-        $this->Mercurio37->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
-        $this->Mercurio10->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
+        (new Mercurio37)->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
+        (new Mercurio10)->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
         return $independiente;
     }
 
@@ -345,8 +358,7 @@ class IndependienteService
     {
         $independiente = $this->create($data);
         $independiente->setEstado("T");
-        $this->salvar($independiente, __LINE__);
-        return $independiente;
+        return $independiente->save();
     }
 
     /**
@@ -356,7 +368,7 @@ class IndependienteService
      */
     public function findById($id)
     {
-        return $this->Mercurio41->findFirst("id='{$id}'");
+        return (new Mercurio41)->findFirst("id='{$id}'");
     }
 
     public function consultaSeguimiento($id)
@@ -368,8 +380,8 @@ class IndependienteService
         }
         return array(
             'seguimientos' => $seguimientos,
-            'campos_disponibles' => $this->Mercurio41->CamposDisponibles(),
-            'estados_detalles' => $this->Mercurio10->getArrayEstados()
+            'campos_disponibles' => (new Mercurio41)->CamposDisponibles(),
+            'estados_detalles' => (new Mercurio10)->getArrayEstados()
         );
     }
 
@@ -383,25 +395,25 @@ class IndependienteService
      */
     public function enviarCaja($senderValidationCaja, $id, $usuario)
     {
-        $mercurio41 = $this->Mercurio41->findFirst("id='{$id}'");
-        $cm37 = $this->Mercurio37->count(
+        $mercurio41 = (new Mercurio41)->findFirst("id='{$id}'");
+        $cm37 = (new Mercurio37)->getCount(
             "tipopc='{$this->tipopc}' AND " .
                 "numero='{$id}' AND " .
                 "coddoc IN(SELECT coddoc FROM mercurio14 WHERE tipopc='{$this->tipopc}' AND tipsoc='{$this->tipsoc}' AND obliga='S')"
         );
 
-        $cm14 = $this->Mercurio14->count("*", "conditions: tipopc='{$this->tipopc}' and tipsoc='{$this->tipsoc}' and obliga='S'");
+        $cm14 = (new Mercurio14)->getCount("*", "conditions: tipopc='{$this->tipopc}' and tipsoc='{$this->tipsoc}' and obliga='S'");
         if ($cm37 < $cm14) {
-            throw new Exception("Adjunte los archivos obligatorios", 500);
+            throw new DebugException("Adjunte los archivos obligatorios", 500);
         }
 
-        $this->Mercurio41->updateAll("usuario='{$usuario}', estado='P'", "conditions: id='{$id}'");
+        (new Mercurio41)->updateAll("usuario='{$usuario}', estado='P'", "conditions: id='{$id}'");
 
-        $ai = $this->Mercurio10->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
+        $ai = (new Mercurio10)->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
 
         $entity = (object) $mercurio41->getArray();
         $entity->item = $ai;
-        $solicitante = $this->Mercurio07->findFirst(" documento='{$mercurio41->getDocumento()}' and coddoc='{$mercurio41->getCoddoc()}' and tipo='{$mercurio41->getTipo()}'");
+        $solicitante = (new Mercurio07)->findFirst(" documento='{$mercurio41->getDocumento()}' and coddoc='{$mercurio41->getCoddoc()}' and tipo='{$mercurio41->getTipo()}'");
         $entity->repleg = $solicitante->getNombre();
         $entity->razsoc = $solicitante->getNombre();
         $entity->nit = $solicitante->getDocumento();

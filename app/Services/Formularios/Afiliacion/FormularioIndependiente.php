@@ -1,5 +1,5 @@
 <?php
-Core::importLibrary('Documento', 'Formularios');
+namespace App\Services\Formularios\Afiliacion;
 
 class FormularioIndependiente extends Documento
 {
@@ -169,7 +169,7 @@ class FormularioIndependiente extends Documento
     {
         if ($this->independiente->getTipafi() == '3') {
             $x = 150;
-            //2% 
+            //2%
         } elseif ($this->independiente->getTipafi() == '65') {
             //0.6%
             $x = 155;

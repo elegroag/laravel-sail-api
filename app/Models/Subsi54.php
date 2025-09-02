@@ -1,7 +1,9 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
+
 class Subsi54 extends ModelBase
 {
 
@@ -14,12 +16,6 @@ class Subsi54 extends ModelBase
         'tipsoc',
         'detalle',
     ];
-
-
-
-    protected $id;
-    protected $tipsoc;
-    protected $detalle;
 
     public function getId()
     {

@@ -1,5 +1,8 @@
 <?php
-Core::importLibrary('Documento', 'Formularios');
+
+namespace App\Services\Formularios\Declaration;
+
+use App\Services\Formularios\Documento;
 
 class JuramentadaBeneficiario extends Documento
 {
@@ -267,7 +270,7 @@ class JuramentadaBeneficiario extends Documento
 
     function bloqueDescoBio()
     {
-        //N => Si conoce los datos del padre o madre biologico diferente al trabajador 
+        //N => Si conoce los datos del padre o madre biologico diferente al trabajador
         if ($this->beneficiario->getBiodesco() == 'N') {
             $bio_cedula = $this->beneficiario->getBiocedu();
             if ($bio_cedula || strlen($this->beneficiario->getBioprinom()) > 0) {

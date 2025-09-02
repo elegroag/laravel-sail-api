@@ -1,11 +1,32 @@
 <?php
-class ConyugeService 
+
+namespace App\Services\Entidades;
+
+use App\Exceptions\DebugException;
+use App\Models\Adapter\DbBase;
+use App\Models\Mercurio01;
+use App\Models\Mercurio07;
+use App\Models\Mercurio10;
+use App\Models\Mercurio12;
+use App\Models\Mercurio13;
+use App\Models\Mercurio32;
+use App\Models\Mercurio37;
+use App\Services\Utils\Comman;
+use ParamsTrabajador;
+
+class ConyugeService
 {
 
     private $tipopc = '3';
+    private $user;
+    private $db;
+
     public function __construct()
     {
-
+        if (session()->has('documento')) {
+            $this->user = session()->all();
+        }
+        $this->db = DbBase::rawConnect();
     }
 
     /**
@@ -15,24 +36,22 @@ class ConyugeService
      */
     public function findAllByEstado($estado = '')
     {
-        $user = Auth::getActiveIdentity();
-
         //usuario empresa, unica solicitud de afiliación
-        $documento = $user['documento'];
-        $coddoc = $user['coddoc'];
+        $documento = $this->user['documento'];
+        $coddoc = $this->user['coddoc'];
 
-        if ($this->Mercurio32->count(
+        if ((new Mercurio32)->getCount(
             "*",
             "conditions: documento='{$documento}' and coddoc='{$coddoc}'"
         ) > 0) {
             $conditions = (empty($estado)) ? " AND m32.estado NOT IN('I') " : " AND m32.estado='{$estado}' ";
 
-            $this->db->setFetchMode(DbBase::DB_ASSOC);
+
             return $this->db->inQueryAssoc(
-                "SELECT m32.*, 
+                "SELECT m32.*,
                 (SELECT COUNT(*) FROM mercurio10 as me10 WHERE me10.tipopc='{$this->tipopc}' and m32.id = me10.numero) as 'cantidad_eventos',
                 (SELECT MAX(fecsis) FROM mercurio10 as mr10 WHERE mr10.tipopc='{$this->tipopc}' and m32.id = mr10.numero) as 'fecha_ultima_solicitud',
-                (CASE 
+                (CASE
                     WHEN m32.estado = 'T' THEN 'Temporal en edición'
                     WHEN m32.estado = 'D' THEN 'Devuelto'
                     WHEN m32.estado = 'A' THEN 'Aprobado'
@@ -41,7 +60,7 @@ class ConyugeService
                     WHEN m32.estado = 'I' THEN 'Inactiva'
                 END) as estado_detalle,
                 coddoc as tipo_documento
-                FROM mercurio32 as m32 
+                FROM mercurio32 as m32
                 WHERE m32.documento='{$documento}' AND m32.coddoc='{$coddoc}' {$conditions}
                 ORDER BY m32.fecsol ASC;"
             );
@@ -79,13 +98,13 @@ class ConyugeService
     public function archivosRequeridos($solicitud)
     {
         $archivos = array();
-        $mercurio13 = $this->Mercurio13->find("tipopc = '{$this->tipopc}'");
+        $mercurio13 = (new Mercurio13)->find("tipopc = '{$this->tipopc}'");
 
         $db = (object) DbBase::rawConnect();
-        $db->setFetchMode(DbBase::DB_ASSOC);
 
-        $mercurio10 = $db->fetchOne("SELECT item, estado, campos_corregir 
-        FROM mercurio10 
+
+        $mercurio10 = $db->fetchOne("SELECT item, estado, campos_corregir
+        FROM mercurio10
         WHERE numero='{$solicitud->getId()}' AND tipopc='{$this->tipopc}' ORDER BY item DESC LIMIT 1");
 
         $corregir = false;
@@ -96,16 +115,16 @@ class ConyugeService
             }
         }
         foreach ($mercurio13 as $m13) {
-            $m12 = $this->Mercurio12->findFirst("coddoc='{$m13->getCoddoc()}'");
-            $mercurio37 = $this->Mercurio37->findFirst("tipopc='{$this->tipopc}' and numero='{$solicitud->getId()}' and coddoc='{$m13->getCoddoc()}'");
+            $m12 = (new Mercurio12)->findFirst("coddoc='{$m13->getCoddoc()}'");
+            $mercurio37 = (new Mercurio37)->findFirst("tipopc='{$this->tipopc}' and numero='{$solicitud->getId()}' and coddoc='{$m13->getCoddoc()}'");
             if ($corregir) {
                 if (in_array($m12->getCoddoc(), $corregir)) {
-                    $this->Mercurio37->deleteAll("tipopc='{$this->tipopc}' AND numero='{$solicitud->getId()}' AND coddoc='{$m13->getCoddoc()}'");
+                    (new Mercurio37)->deleteAll("tipopc='{$this->tipopc}' AND numero='{$solicitud->getId()}' AND coddoc='{$m13->getCoddoc()}'");
                     $mercurio37 = false;
                 }
             }
             $obliga = ($m13->getObliga() == "S") ? "<br><small class='text-danger'>Obligatorio</small>" : "";
-            $archivo = new stdClass;
+            $archivo = new \stdClass;
             $archivo->obliga = $obliga;
             $archivo->id = $solicitud->getId();
             $archivo->coddoc = $m13->getCoddoc();
@@ -113,28 +132,26 @@ class ConyugeService
             $archivo->diponible = ($mercurio37) ? $mercurio37->getArchivo() : false;
             $archivos[] = $archivo;
         }
-        $mercurio01 = $this->Mercurio01->findFirst();
-        $html = View::render("conyuge/tmp/archivos_requeridos", array(
+        $mercurio01 = (new Mercurio01)->findFirst();
+        $html = view("conyuge/tmp/archivos_requeridos", array(
             "load_archivos" => $archivos,
             "path" => $mercurio01->getPath(),
             "puede_borrar" => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true
-        ));
+        ))->render();
+
         return $html;
     }
 
     public function dataArchivosRequeridos($solicitud)
     {
-        Core::importHelper('files');
-
         if ($solicitud == false) return false;
         $archivos = array();
 
-        $db = (object) DbBase::rawConnect();
-        $db->setFetchMode(DbBase::DB_ASSOC);
+        $db = DbBase::rawConnect();
 
-        $mercurio10 = $db->fetchOne("SELECT item, estado, campos_corregir 
-        FROM mercurio10 
-        WHERE numero='{$solicitud->getId()}' AND tipopc='{$this->tipopc}' 
+        $mercurio10 = $db->fetchOne("SELECT item, estado, campos_corregir
+        FROM mercurio10
+        WHERE numero='{$solicitud->getId()}' AND tipopc='{$this->tipopc}'
         ORDER BY item DESC LIMIT 1");
 
         $corregir = false;
@@ -145,10 +162,10 @@ class ConyugeService
             }
         }
 
-        $mercurio13 = $this->Mercurio13->find("tipopc='{$this->tipopc}'", "order: auto_generado DESC");
+        $mercurio13 = (new Mercurio13)->find("tipopc='{$this->tipopc}'", "order: auto_generado DESC");
         foreach ($mercurio13 as $m13) {
-            $m12 = $this->Mercurio12->findFirst("coddoc='{$m13->getCoddoc()}'");
-            $mercurio37 = $this->Mercurio37->findFirst("tipopc='{$this->tipopc}' and numero='{$solicitud->getId()}' and coddoc='{$m13->getCoddoc()}'");
+            $m12 = (new Mercurio12)->findFirst("coddoc='{$m13->getCoddoc()}'");
+            $mercurio37 = (new Mercurio37)->findFirst("tipopc='{$this->tipopc}' and numero='{$solicitud->getId()}' and coddoc='{$m13->getCoddoc()}'");
             $corrige = false;
             if ($corregir) {
                 if (in_array($m12->getCoddoc(), $corregir)) {
@@ -164,7 +181,7 @@ class ConyugeService
             $archivos[] = $archivo;
         }
 
-        $mercurio01 = $this->Mercurio01->findFirst();
+        $mercurio01 = (new Mercurio01)->findFirst();
         $archivos_descargar = oficios_requeridos('C');
         return array(
             "disponibles" => $archivos_descargar,
@@ -181,7 +198,7 @@ class ConyugeService
      */
     public function loadDisplay($solicitud)
     {
-        Tag::displayTo("cedtra", $solicitud->getCedtra());
+        /*  Tag::displayTo("cedtra", $solicitud->getCedtra());
         Tag::displayTo("tipdoc", $solicitud->getTipdoc());
         Tag::displayTo("nit", $solicitud->getNit());
         Tag::displayTo("telefono", $solicitud->getTelefono());
@@ -230,7 +247,7 @@ class ConyugeService
         Tag::displayTo("fecing", ($solicitud->getFecing() instanceof Date) ? $solicitud->getFecing()->getUsingFormatDefault() : '');
         Tag::displayTo("labora_otra_empresa",  $solicitud->getOtraEmpresa());
         Tag::displayTo("pub_indigena_id",  $solicitud->getPubIndigenaId());
-        Tag::displayTo("resguardo_id",  $solicitud->getResguardoId());
+        Tag::displayTo("resguardo_id",  $solicitud->getResguardoId()); */
     }
 
 
@@ -241,7 +258,7 @@ class ConyugeService
      */
     public function loadDisplaySubsidio($trabajador)
     {
-        Tag::displayTo("nit", $trabajador['nit']);
+        /* Tag::displayTo("nit", $trabajador['nit']);
         Tag::displayTo("telefono", $trabajador['telefono']);
         Tag::displayTo("email", $trabajador['email']);
         Tag::displayTo("segnom", $trabajador['segnom']);
@@ -252,7 +269,7 @@ class ConyugeService
         Tag::displayTo("celular", $trabajador['telr']);
         Tag::displayTo("celpri", $trabajador['telt']);
         Tag::displayTo("dirpri", $trabajador['dirpri']);
-        Tag::displayTo("emailpri", $trabajador['mailr']);
+        Tag::displayTo("emailpri", $trabajador['mailr']); */
     }
 
     /**
@@ -265,9 +282,8 @@ class ConyugeService
     {
         $solicitud = $this->findById($id);
         if ($solicitud) {
-            $solicitud->setTransaction(self::$transaction);
             $solicitud->createAttributes($data);
-            return $this->salvar($solicitud, __LINE__);
+            return $solicitud->save();
         } else {
             return false;
         }
@@ -280,14 +296,13 @@ class ConyugeService
      */
     public function create($data)
     {
-        $id = $this->Mercurio32->maximum('id') + 1;
+        $id = (new Mercurio32)->maximum('id') + 1;
         $conyuge = new Mercurio32();
-        $conyuge->setTransaction(self::$transaction);
         $conyuge->createAttributes($data);
         $conyuge->setId($id);
 
-        $this->Mercurio37->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
-        $this->Mercurio10->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
+        (new Mercurio37)->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
+        (new Mercurio10)->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
         return $conyuge;
     }
 
@@ -300,8 +315,7 @@ class ConyugeService
     {
         $conyuge = $this->create($data);
         $conyuge->setEstado("T");
-        $this->salvar($conyuge, __LINE__);
-        return $conyuge;
+        return $conyuge->save();
     }
 
     /**
@@ -311,7 +325,7 @@ class ConyugeService
      */
     public function findById($id)
     {
-        return $this->Mercurio32->findFirst("id='{$id}'");
+        return (new Mercurio32)->findFirst("id='{$id}'");
     }
 
     /**
@@ -324,26 +338,26 @@ class ConyugeService
      */
     public function enviarCaja($senderValidationCaja, $id, $usuario)
     {
-        $solicitud = $this->Mercurio32->findFirst("id='{$id}'");
+        $solicitud = (new Mercurio32)->findFirst("id='{$id}'");
 
-        $cm37 = $this->Mercurio37->count(
+        $cm37 = (new Mercurio37)->getCount(
             "tipopc='{$this->tipopc}' AND " .
                 "numero='{$id}' AND " .
                 "coddoc IN(SELECT coddoc FROM mercurio13 WHERE tipopc='{$this->tipopc}' and obliga='S')"
         );
 
-        $cm13 = $this->Mercurio13->count("*", "conditions: tipopc='{$this->tipopc}' and obliga='S'");
+        $cm13 = (new Mercurio13)->getCount("*", "conditions: tipopc='{$this->tipopc}' and obliga='S'");
         if ($cm37 < $cm13) {
-            throw new Exception("Adjunte los archivos obligatorios", 500);
+            throw new DebugException("Adjunte los archivos obligatorios", 500);
         }
 
-        $this->Mercurio32->updateAll("usuario='{$usuario}', estado='P'", "conditions: id='{$id}'");
+        (new Mercurio32)->updateAll("usuario='{$usuario}', estado='P'", "conditions: id='{$id}'");
 
-        $ai = $this->Mercurio10->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
+        $ai = (new Mercurio10)->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
 
         $entity = (object) $solicitud->getArray();
         $entity->item = $ai;
-        $solicitante = $this->Mercurio07->findFirst(" documento='{$solicitud->getDocumento()}' and coddoc='{$solicitud->getCoddoc()}' and tipo='{$solicitud->getTipo()}'");
+        $solicitante = (new Mercurio07)->findFirst(" documento='{$solicitud->getDocumento()}' and coddoc='{$solicitud->getCoddoc()}' and tipo='{$solicitud->getTipo()}'");
         $entity->repleg = $solicitante->getNombre();
         $entity->razsoc = $solicitante->getNombre();
         $entity->nit = $solicitante->getDocumento();
@@ -379,8 +393,8 @@ class ConyugeService
         }
         return array(
             'seguimientos' => $seguimientos,
-            'campos_disponibles' => $this->Mercurio32->CamposDisponibles(),
-            'estados_detalles' => $this->Mercurio10->getArrayEstados()
+            'campos_disponibles' => (new Mercurio32)->CamposDisponibles(),
+            'estados_detalles' => (new Mercurio10)->getArrayEstados()
         );
     }
 
@@ -399,11 +413,11 @@ class ConyugeService
 
     public function findRequestByDocumentoCoddoc($documento, $coddoc)
     {
-        $datos = $this->db->inQueryAssoc("SELECT cedcon as 'cedula', CONCAT_WS('', prinom, segnom, priape, segape) as 'nombre_completo' 
-        FROM mercurio32  
-        WHERE 
-        documento='{$documento}' and 
-        coddoc='{$coddoc}' and 
+        $datos = $this->db->inQueryAssoc("SELECT cedcon as 'cedula', CONCAT_WS('', prinom, segnom, priape, segape) as 'nombre_completo'
+        FROM mercurio32
+        WHERE
+        documento='{$documento}' and
+        coddoc='{$coddoc}' and
         estado NOT IN('X','I')");
 
         if (is_array($datos) === True) {
@@ -415,10 +429,10 @@ class ConyugeService
 
     public function findRequestByCedtra($cedtra)
     {
-        $this->db->setFetchMode(DbBase::DB_ASSOC);
-        $datos = $this->db->inQueryAssoc("SELECT cedcon as 'cedula', CONCAT_WS('', prinom, segnom, priape, segape) as 'nombre_completo' 
-        FROM mercurio32  
-        WHERE 
+
+        $datos = $this->db->inQueryAssoc("SELECT cedcon as 'cedula', CONCAT_WS('', prinom, segnom, priape, segape) as 'nombre_completo'
+        FROM mercurio32
+        WHERE
         cedtra='{$cedtra}' AND estado NOT IN('X','I')");
         return (is_array($datos) === True) ? $datos :  false;
     }

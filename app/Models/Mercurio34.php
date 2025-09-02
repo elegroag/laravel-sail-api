@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Adapter\DbBase;
@@ -65,62 +66,6 @@ class Mercurio34 extends ModelBase
         'biourbana',
         'biodesco',
     ];
-
-
-
-    protected $id;
-    protected $log;
-    protected $nit;
-    protected $cedtra;
-    protected $cedcon;
-    protected $numdoc;
-    protected $tipdoc;
-    protected $priape;
-    protected $segape;
-    protected $prinom;
-    protected $segnom;
-    protected $fecnac;
-    protected $ciunac;
-    protected $sexo;
-    protected $parent;
-    protected $huerfano;
-    protected $tiphij;
-    protected $nivedu;
-    protected $captra;
-    protected $tipdis;
-    protected $calendario;
-    protected $usuario;
-    protected $estado;
-    protected $codest;
-    protected $motivo;
-    protected $fecest;
-    protected $codben;
-    protected $tipo;
-    protected $coddoc;
-    protected $documento;
-    protected $cedacu;
-    protected $fecsol;
-    protected $resguardo_id;
-    protected $pub_indigena_id;
-    protected $peretn;
-    protected $celular;
-    protected $codban;
-    protected $tipcue;
-    protected $numcue;
-    protected $tippag;
-
-    protected $biocedu;
-    protected $biotipdoc;
-    protected $bioprinom;
-    protected $biosegnom;
-    protected $biopriape;
-    protected $biosegape;
-    protected $bioemail;
-    protected $biophone;
-    protected $biocodciu;
-    protected $biodire;
-    protected $biourbana;
-    protected $biodesco;
 
     public function setBiodesco($biodesco)
     {
@@ -547,7 +492,7 @@ class Mercurio34 extends ModelBase
 
     /**
      * Devuelve el valor del campo fecnac
-     
+
      */
     public function getFecnac()
     {
@@ -684,7 +629,7 @@ class Mercurio34 extends ModelBase
 
     /**
      * Devuelve el valor del campo fecest
-     
+
      */
     public function getFecest()
     {

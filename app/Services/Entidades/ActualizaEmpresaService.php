@@ -1,5 +1,8 @@
 <?php
 
+namespace App\Services\Entidades;
+
+use App\Exceptions\DebugException;
 use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio12;
@@ -10,7 +13,7 @@ use App\Models\Mercurio10;
 use App\Models\Mercurio07;
 use App\Services\Utils\Comman;
 
-class ActualizaEmpresaService 
+class ActualizaEmpresaService
 {
 
     private $tipopc = "5";
@@ -47,33 +50,33 @@ class ActualizaEmpresaService
             $where = "solis.documento='{$documento}' AND solis.coddoc='{$coddoc}' AND solis.estado='{$estado}' ";
         }
 
-        $mercurio47 = $this->db->inQueryAssoc("SELECT solis.*, 
-            (CASE 
+        $mercurio47 = $this->db->inQueryAssoc("SELECT solis.*,
+            (CASE
                 WHEN solis.estado = 'T' THEN 'Temporal en edición'
                 WHEN solis.estado = 'D' THEN 'Devuelto'
                 WHEN solis.estado = 'A' THEN 'Aprobado'
                 WHEN solis.estado = 'X' THEN 'Rechazado'
                 WHEN solis.estado = 'P' THEN 'Pendiente De Validación CAJA'
                 WHEN solis.estado = 'I' THEN 'Inactiva'
-            END) as estado_detalle 
+            END) as estado_detalle
             FROM mercurio47 as solis
-            WHERE {$where} 
+            WHERE {$where}
             ORDER BY solis.id DESC;
         ");
 
         foreach ($mercurio47 as $ai => $row) {
-            $rqs = $this->db->fetchOne("SELECT count(mercurio10.numero) as cantidad 
-                FROM mercurio10 
+            $rqs = $this->db->fetchOne("SELECT count(mercurio10.numero) as cantidad
+                FROM mercurio10
                 LEFT JOIN mercurio47 ON mercurio47.id = mercurio10.numero
-                WHERE mercurio10.tipopc='{$this->tipopc}' AND 
-                mercurio47.id ='{$row['id']}' 
+                WHERE mercurio10.tipopc='{$this->tipopc}' AND
+                mercurio47.id ='{$row['id']}'
             ");
 
-            $trayecto = $this->db->fetchOne("SELECT max(mercurio10.item), mercurio10.*  
-                FROM mercurio10 
+            $trayecto = $this->db->fetchOne("SELECT max(mercurio10.item), mercurio10.*
+                FROM mercurio10
                 LEFT JOIN mercurio47 ON mercurio47.id=mercurio10.numero
-                WHERE mercurio10.tipopc='{$this->tipopc}' AND 
-                mercurio47.id ='{$row['id']}' LIMIT 1 
+                WHERE mercurio10.tipopc='{$this->tipopc}' AND
+                mercurio47.id ='{$row['id']}' LIMIT 1
             ");
 
             $mercurio47[$ai] = $row;
@@ -115,9 +118,9 @@ class ActualizaEmpresaService
 
         $db = DbBase::rawConnect();
 
-        $mercurio10 = $db->fetchOne("SELECT item, estado, campos_corregir 
-        FROM mercurio10 
-        WHERE numero='{$solicitud->getId()}' AND tipopc='{$this->tipopc}' 
+        $mercurio10 = $db->fetchOne("SELECT item, estado, campos_corregir
+        FROM mercurio10
+        WHERE numero='{$solicitud->getId()}' AND tipopc='{$this->tipopc}'
         ORDER BY item DESC LIMIT 1");
 
         $corregir = false;
@@ -139,7 +142,7 @@ class ActualizaEmpresaService
                 }
             }
             $obliga = ($m14->getObliga() == "S") ? "<br><small class='text-danger'>Obligatorio</small>" : "";
-            $archivo = new stdClass;
+            $archivo = new \stdClass;
             $archivo->obliga = $obliga;
             $archivo->id = $solicitud->getId();
             $archivo->coddoc = $m14->getCoddoc();
@@ -170,14 +173,14 @@ class ActualizaEmpresaService
         if ($solicitud == false || is_null($solicitud)) return false;
         $archivos = array();
 
-        $mercurio10 = $this->db->fetchOne("SELECT 
-            item, 
-            estado, 
-            campos_corregir 
-            FROM mercurio10 
-            WHERE numero='{$solicitud->getId()}' AND 
-            tipopc='{$this->tipopc}' 
-            ORDER BY item DESC 
+        $mercurio10 = $this->db->fetchOne("SELECT
+            item,
+            estado,
+            campos_corregir
+            FROM mercurio10
+            WHERE numero='{$solicitud->getId()}' AND
+            tipopc='{$this->tipopc}'
+            ORDER BY item DESC
             LIMIT 1
         ");
 
@@ -361,15 +364,15 @@ class ActualizaEmpresaService
     {
         $solicitud = (new Mercurio47)->findFirst("id='{$id}'");
 
-        $cm37 = (new Mercurio37)->count(
+        $cm37 = (new Mercurio37)->getCount(
             "tipopc='{$this->tipopc}' AND " .
                 "numero='{$id}' AND " .
                 "coddoc IN(SELECT coddoc FROM mercurio14 WHERE tipopc='{$this->tipopc}' and obliga='S')"
         );
 
-        $cm14 = (new Mercurio14)->count("*", "conditions: tipopc='{$this->tipopc}' and obliga='S'");
+        $cm14 = (new Mercurio14)->getCount("*", "conditions: tipopc='{$this->tipopc}' and obliga='S'");
         if ($cm37 < $cm14) {
-            throw new Exception("Adjunte los archivos obligatorios", 500);
+            throw new DebugException("Adjunte los archivos obligatorios", 500);
         }
 
         (new Mercurio47)->updateAll("usuario='{$usuario}', estado='P'", "conditions: id='{$id}'");

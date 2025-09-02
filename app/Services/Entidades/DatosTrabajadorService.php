@@ -1,11 +1,31 @@
 <?php
-class DatosTrabajadorService 
+
+namespace App\Services\Entidades;
+
+use App\Exceptions\DebugException;
+use App\Models\Adapter\DbBase;
+use App\Models\Mercurio01;
+use App\Models\Mercurio07;
+use App\Models\Mercurio10;
+use App\Models\Mercurio12;
+use App\Models\Mercurio13;
+use App\Models\Mercurio37;
+use App\Models\Mercurio47;
+use App\Services\Utils\Comman;
+use ParamsTrabajador;
+
+class DatosTrabajadorService
 {
 
     private $tipopc = 14;
+    private $user;
+    private $db;
     public function __construct()
     {
-
+        if (session()->has('documento')) {
+            $this->user = session()->all();
+        }
+        $this->db = DbBase::rawConnect();
     }
 
     /**
@@ -15,10 +35,9 @@ class DatosTrabajadorService
      */
     public function findAllByEstado($estado = '')
     {
-        $user = Auth::getActiveIdentity();
         //usuario empresa, unica solicitud de afiliación
-        $documento = $user['documento'];
-        $coddoc = $user['coddoc'];
+        $documento = $this->user['documento'];
+        $coddoc = $this->user['coddoc'];
 
         if (is_null($estado) || $estado == '') {
             $where = " solis.documento='{$documento}' AND solis.coddoc='{$coddoc}' ";
@@ -26,40 +45,40 @@ class DatosTrabajadorService
             $where = "solis.documento='{$documento}' AND solis.coddoc='{$coddoc}' AND solis.estado='{$estado}' ";
         }
 
-        $mercurio47 = $this->db->inQueryAssoc("SELECT solis.*, 
-            (CASE 
+        $mercurio47 = $this->db->inQueryAssoc("SELECT solis.*,
+            (CASE
                 WHEN solis.estado = 'T' THEN 'Temporal en edición'
                 WHEN solis.estado = 'D' THEN 'Devuelto'
                 WHEN solis.estado = 'A' THEN 'Aprobado'
                 WHEN solis.estado = 'X' THEN 'Rechazado'
                 WHEN solis.estado = 'P' THEN 'Pendiente De Validación CAJA'
                 WHEN solis.estado = 'I' THEN 'Inactiva'
-            END) as estado_detalle 
+            END) as estado_detalle
             FROM mercurio47 as solis
-            WHERE {$where} 
+            WHERE {$where}
             ORDER BY solis.id DESC;
         ");
 
         foreach ($mercurio47 as $ai => $row) {
-            $rqs = $this->db->fetchOne("SELECT count(mercurio10.numero) as cantidad 
-                FROM mercurio10 
+            $rqs = $this->db->fetchOne("SELECT count(mercurio10.numero) as cantidad
+                FROM mercurio10
                 LEFT JOIN mercurio47 ON mercurio47.id = mercurio10.numero
-                WHERE mercurio10.tipopc='{$this->tipopc}' AND 
-                mercurio47.id ='{$row['id']}' 
+                WHERE mercurio10.tipopc='{$this->tipopc}' AND
+                mercurio47.id ='{$row['id']}'
             ");
 
-            $trayecto = $this->db->fetchOne("SELECT max(mercurio10.item), mercurio10.*  
-                FROM mercurio10 
+            $trayecto = $this->db->fetchOne("SELECT max(mercurio10.item), mercurio10.*
+                FROM mercurio10
                 LEFT JOIN mercurio47 ON mercurio47.id=mercurio10.numero
-                WHERE mercurio10.tipopc='{$this->tipopc}' AND 
-                mercurio47.id ='{$row['id']}' LIMIT 1 
+                WHERE mercurio10.tipopc='{$this->tipopc}' AND
+                mercurio47.id ='{$row['id']}' LIMIT 1
             ");
 
             $mercurio47[$ai] = $row;
             $mercurio47[$ai]["cantidad_eventos"] = $rqs['cantidad'];
             $mercurio47[$ai]["fecha_ultima_solicitud"] = $trayecto['fecsis'];
-            $mercurio47[$ai]["estado_detalle"] = $this->Mercurio47->getEstadoInArray($row['estado']);
-            $mercurio47[$ai]["tipo_actualizacion_detalle"] = $this->Mercurio47->getTipoActualizacionInArray($row['tipo_actualizacion']);
+            $mercurio47[$ai]["estado_detalle"] = (new Mercurio47)->getEstadoInArray($row['estado']);
+            $mercurio47[$ai]["tipo_actualizacion_detalle"] = (new Mercurio47)->getTipoActualizacionInArray($row['tipo_actualizacion']);
         }
         return $mercurio47;
     }
@@ -97,11 +116,11 @@ class DatosTrabajadorService
         $archivos = array();
 
         $db = (object) DbBase::rawConnect();
-        $db->setFetchMode(DbBase::DB_ASSOC);
 
-        $mercurio10 = $db->fetchOne("SELECT item, estado, campos_corregir 
-        FROM mercurio10 
-        WHERE numero='{$solicitud->getId()}' AND tipopc='{$this->tipopc}' 
+
+        $mercurio10 = $db->fetchOne("SELECT item, estado, campos_corregir
+        FROM mercurio10
+        WHERE numero='{$solicitud->getId()}' AND tipopc='{$this->tipopc}'
         ORDER BY item DESC LIMIT 1");
 
         $corregir = false;
@@ -112,11 +131,11 @@ class DatosTrabajadorService
             }
         }
 
-        $mercurio13 = $this->Mercurio13->find("tipopc='{$this->tipopc}'", "order: auto_generado DESC");
+        $mercurio13 = (new Mercurio13)->find("tipopc='{$this->tipopc}'", "order: auto_generado DESC");
 
         foreach ($mercurio13 as $m13) {
-            $m12 = $this->Mercurio12->findFirst("coddoc='{$m13->getCoddoc()}'");
-            $mercurio37 = $this->Mercurio37->findFirst("tipopc='{$this->tipopc}' and numero='{$solicitud->getId()}' and coddoc='{$m13->getCoddoc()}'");
+            $m12 = (new Mercurio12)->findFirst("coddoc='{$m13->getCoddoc()}'");
+            $mercurio37 = (new Mercurio37)->findFirst("tipopc='{$this->tipopc}' and numero='{$solicitud->getId()}' and coddoc='{$m13->getCoddoc()}'");
             $corrige = false;
             if ($corregir) {
                 if (in_array($m12->getCoddoc(), $corregir)) {
@@ -125,7 +144,7 @@ class DatosTrabajadorService
             }
 
             $obliga = ($m13->getObliga() == "S") ? "<br><small class='text-danger'>Obligatorio</small>" : "";
-            $archivo = new stdClass;
+            $archivo = new \stdClass;
             $archivo->obliga = $obliga;
             $archivo->id = $solicitud->getId();
             $archivo->coddoc = $m13->getCoddoc();
@@ -135,12 +154,13 @@ class DatosTrabajadorService
             $archivos[] = $archivo;
         }
 
-        $mercurio01 = $this->Mercurio01->findFirst();
-        $html = View::render("empresa/tmp/archivos_requeridos", array(
+        $mercurio01 = (new Mercurio01)->findFirst();
+        $html = view("empresa/tmp/archivos_requeridos", array(
             "load_archivos" => $archivos,
             "path" => $mercurio01->getPath(),
             "puede_borrar" => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true
-        ));
+        ))->render();
+
         return $html;
     }
 
@@ -151,19 +171,17 @@ class DatosTrabajadorService
      */
     public function dataArchivosRequeridos($solicitud)
     {
-        Core::importHelper('files');
         if ($solicitud == false) return false;
         $archivos = array();
 
-        $this->db->setFetchMode(DbBase::DB_ASSOC);
-        $mercurio10 = $this->db->fetchOne("SELECT 
-            item, 
-            estado, 
-            campos_corregir 
-            FROM mercurio10 
-            WHERE numero='{$solicitud->getId()}' AND 
-            tipopc='{$this->tipopc}' 
-            ORDER BY item DESC 
+        $mercurio10 = $this->db->fetchOne("SELECT
+            item,
+            estado,
+            campos_corregir
+            FROM mercurio10
+            WHERE numero='{$solicitud->getId()}' AND
+            tipopc='{$this->tipopc}'
+            ORDER BY item DESC
             LIMIT 1
         ");
 
@@ -175,10 +193,10 @@ class DatosTrabajadorService
             }
         }
 
-        $mercurio13 = $this->Mercurio13->find("tipopc='{$this->tipopc}'", "order: auto_generado DESC");
+        $mercurio13 = (new Mercurio13)->find("tipopc='{$this->tipopc}'", "order: auto_generado DESC");
         foreach ($mercurio13 as $m13) {
-            $m12 = $this->Mercurio12->findFirst("coddoc='{$m13->getCoddoc()}'");
-            $mercurio37 = $this->Mercurio37->findFirst("tipopc='{$this->tipopc}' and numero='{$solicitud->getId()}' and coddoc='{$m13->getCoddoc()}'");
+            $m12 = (new Mercurio12)->findFirst("coddoc='{$m13->getCoddoc()}'");
+            $mercurio37 = (new Mercurio37)->findFirst("tipopc='{$this->tipopc}' and numero='{$solicitud->getId()}' and coddoc='{$m13->getCoddoc()}'");
             $corrige = false;
             if ($corregir) {
                 if (in_array($m12->getCoddoc(), $corregir)) {
@@ -195,7 +213,7 @@ class DatosTrabajadorService
             $archivos[] = $archivo;
         }
 
-        $mercurio01 = $this->Mercurio01->findFirst();
+        $mercurio01 = (new Mercurio01)->findFirst();
         $archivos_descargar = oficios_requeridos('T');
         return array(
             "disponibles" => $archivos_descargar,
@@ -212,7 +230,7 @@ class DatosTrabajadorService
      */
     public function loadDisplay($solicitud)
     {
-        Tag::displayTo("cedtra", $solicitud->getCedtra());
+        /*  Tag::displayTo("cedtra", $solicitud->getCedtra());
         Tag::displayTo("tipdoc", $solicitud->getTipdoc());
         Tag::displayTo("nit", $solicitud->getNit());
         Tag::displayTo("telefono", $solicitud->getTelefono());
@@ -261,7 +279,7 @@ class DatosTrabajadorService
         Tag::displayTo("fecing", ($solicitud->getFecing() instanceof Date) ? $solicitud->getFecing()->getUsingFormatDefault() : '');
         Tag::displayTo("labora_otra_empresa",  $solicitud->getOtraEmpresa());
         Tag::displayTo("pub_indigena_id",  $solicitud->getPubIndigenaId());
-        Tag::displayTo("resguardo_id",  $solicitud->getResguardoId());
+        Tag::displayTo("resguardo_id",  $solicitud->getResguardoId()); */
     }
 
 
@@ -272,7 +290,7 @@ class DatosTrabajadorService
      */
     public function loadDisplaySubsidio($trabajador)
     {
-        Tag::displayTo("nit", $trabajador['nit']);
+        /* Tag::displayTo("nit", $trabajador['nit']);
         Tag::displayTo("telefono", $trabajador['telefono']);
         Tag::displayTo("email", $trabajador['email']);
         Tag::displayTo("segnom", $trabajador['segnom']);
@@ -283,7 +301,7 @@ class DatosTrabajadorService
         Tag::displayTo("celular", $trabajador['telr']);
         Tag::displayTo("celpri", $trabajador['telt']);
         Tag::displayTo("dirpri", $trabajador['dirpri']);
-        Tag::displayTo("emailpri", $trabajador['mailr']);
+        Tag::displayTo("emailpri", $trabajador['mailr']); */
     }
 
     /**
@@ -296,9 +314,8 @@ class DatosTrabajadorService
     {
         $solicitud = $this->findById($id);
         if ($solicitud) {
-            $solicitud->setTransaction(self::$transaction);
             $solicitud->createAttributes($data);
-            return $this->salvar($solicitud, __LINE__);
+            return $solicitud->save();
         } else {
             return false;
         }
@@ -311,14 +328,13 @@ class DatosTrabajadorService
      */
     public function create($data)
     {
-        $id = $this->Mercurio47->maximum('id') + 1;
+        $id = (new Mercurio47)->maximum('id') + 1;
         $trabajador = new Mercurio47();
-        $trabajador->setTransaction(self::$transaction);
         $trabajador->createAttributes($data);
         $trabajador->setId($id);
 
-        $this->Mercurio37->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
-        $this->Mercurio10->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
+        (new Mercurio37)->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
+        (new Mercurio10)->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
         return $trabajador;
     }
 
@@ -332,8 +348,7 @@ class DatosTrabajadorService
     {
         $trabajador = $this->create($data);
         $trabajador->setEstado("T");
-        $this->salvar($trabajador, __LINE__);
-        return $trabajador;
+        return $trabajador->save();
     }
 
     /**
@@ -343,7 +358,7 @@ class DatosTrabajadorService
      */
     public function findById($id)
     {
-        return $this->Mercurio47->findFirst("id='{$id}'");
+        return (new Mercurio47)->findFirst("id='{$id}'");
     }
 
     /**
@@ -356,26 +371,26 @@ class DatosTrabajadorService
      */
     public function enviarCaja($senderValidationCaja, $id, $usuario)
     {
-        $solicitud = $this->Mercurio47->findFirst("id='{$id}'");
+        $solicitud = (new Mercurio47)->findFirst("id='{$id}'");
 
-        $cm37 = $this->Mercurio37->count(
+        $cm37 = (new Mercurio37)->getCount(
             "tipopc='{$this->tipopc}' AND " .
                 "numero='{$id}' AND " .
                 "coddoc IN(SELECT coddoc FROM mercurio13 WHERE tipopc='{$this->tipopc}' AND obliga='S')"
         );
 
-        $cm13 = $this->Mercurio13->count("*", "conditions: tipopc='{$this->tipopc}' and obliga='S'");
+        $cm13 = (new Mercurio13)->getCount("*", "conditions: tipopc='{$this->tipopc}' and obliga='S'");
         if ($cm37 < $cm13) {
-            throw new Exception("Adjunte los archivos obligatorios", 500);
+            throw new DebugException("Adjunte los archivos obligatorios", 500);
         }
 
-        $this->Mercurio47->updateAll("usuario='{$usuario}', estado='P'", "conditions: id='{$id}'");
+        (new Mercurio47)->updateAll("usuario='{$usuario}', estado='P'", "conditions: id='{$id}'");
 
-        $ai = $this->Mercurio10->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
+        $ai = (new Mercurio10)->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
 
         $entity = (object) $solicitud->getArray();
         $entity->item = $ai;
-        $solicitante = $this->Mercurio07->findFirst(" documento='{$solicitud->getDocumento()}' and coddoc='{$solicitud->getCoddoc()}' and tipo='{$solicitud->getTipo()}'");
+        $solicitante = (new Mercurio07)->findFirst(" documento='{$solicitud->getDocumento()}' and coddoc='{$solicitud->getCoddoc()}' and tipo='{$solicitud->getTipo()}'");
         $entity->repleg = $solicitante->getNombre();
         $entity->razsoc = $solicitante->getNombre();
         $entity->nit = $solicitante->getDocumento();
@@ -408,8 +423,8 @@ class DatosTrabajadorService
         }
         return array(
             'seguimientos' => $seguimientos,
-            'campos_disponibles' => $this->Mercurio47->CamposDisponibles(),
-            'estados_detalles' => $this->Mercurio10->getArrayEstados()
+            'campos_disponibles' => (new Mercurio47)->CamposDisponibles(),
+            'estados_detalles' => (new Mercurio10)->getArrayEstados()
         );
     }
 
@@ -429,7 +444,7 @@ class DatosTrabajadorService
     /**
      * findRequestByDocuCod function
      * @changed [2023-12-00]
-     * buscar solicitudes por trabajadores que se tengan registradas por la empresa x  
+     * buscar solicitudes por trabajadores que se tengan registradas por la empresa x
      * @author elegroag <elegroag@ibero.edu.co>
      * @param [type] $documento
      * @param [type] $coddoc
@@ -437,11 +452,11 @@ class DatosTrabajadorService
      */
     public function findRequestByDocumentoCoddoc($documento, $coddoc)
     {
-        $datos = $this->db->inQueryAssoc("SELECT cedtra as 'cedula', CONCAT_WS('', prinom, segnom, priape, segape) as 'nombre_completo' 
-        FROM mercurio47  
-        WHERE 
-        documento='{$documento}' and 
-        coddoc='{$coddoc}' and 
+        $datos = $this->db->inQueryAssoc("SELECT cedtra as 'cedula', CONCAT_WS('', prinom, segnom, priape, segape) as 'nombre_completo'
+        FROM mercurio47
+        WHERE
+        documento='{$documento}' and
+        coddoc='{$coddoc}' and
         estado NOT IN('X','I')");
 
         if (is_array($datos) === True) {

@@ -1,5 +1,9 @@
 <?php
-class ConyugeAdjuntoService 
+
+namespace App\Services\FormulariosAdjuntos;
+
+
+class ConyugeAdjuntoService
 {
     /**
      * request variable
@@ -18,7 +22,6 @@ class ConyugeAdjuntoService
 
     public function __construct($request)
     {
-        parent::__construct();
         $this->request = $request;
         Core::importLibrary("ParamsConyuge", "Collections");
         Core::importLibrary("FactoryDocuments", "Formularios");

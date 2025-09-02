@@ -1,11 +1,12 @@
-<?php 
+<?php
+
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
 
 class AfiliadoHabil extends ModelBase
 {
-    
+
     protected $table = 'afiliado_habil';
     public $timestamps = false;
     protected $primaryKey = 'id';
@@ -18,14 +19,6 @@ class AfiliadoHabil extends ModelBase
         'pin',
         'codser',
     ];
-
-    protected $id;
-    protected $cedtra;
-    protected $docben;
-    protected $categoria;
-    protected $nomben;
-    protected $pin;
-    protected $codser;
 
     public function getPin()
     {

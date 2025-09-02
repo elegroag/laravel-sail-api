@@ -1,5 +1,8 @@
 <?php
-Core::importLibrary('Documento', 'Formularios');
+
+namespace App\Services\Formularios\Oficios;
+
+use App\Services\Formularios\Documento;
 
 class SolicitudPensionado extends Documento
 {
@@ -100,7 +103,7 @@ class SolicitudPensionado extends Documento
     {
         if ($this->pensionado->getTipafi() == '10') {
             $v = 'PENSIONADO 2%';
-            //2% 
+            //2%
         } elseif ($this->pensionado->getTipafi() == '64') {
             //0.6%
             $v = 'PENSIONADO 0.6%';

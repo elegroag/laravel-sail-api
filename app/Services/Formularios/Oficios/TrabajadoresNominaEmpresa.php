@@ -1,5 +1,8 @@
 <?php
-Core::importLibrary('DocumentoAdapter', 'Formularios');
+
+namespace App\Services\Formularios\Oficios;
+
+use App\Services\Formularios\DocumentoAdapter;
 
 class TrabajadoresNominaEmpresa extends DocumentoAdapter
 {

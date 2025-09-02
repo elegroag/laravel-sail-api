@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
@@ -7,7 +8,7 @@ class Gener08 extends ModelBase
 {
 
     protected $table = 'gener08';
-    
+
     public $timestamps = false;
 
     protected $primaryKey = 'id';
@@ -16,10 +17,6 @@ class Gener08 extends ModelBase
         'codciu',
         'detciu',
     ];
-
-    protected $id;
-    protected $codzon;
-    protected $detzon;
 
     public function getId()
     {

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Adapter\DbBase;
@@ -62,57 +63,6 @@ class Mercurio32 extends ModelBase
         'peretn',
         'zoneurbana',
     ];
-
-
-
-    protected $id;
-    protected $log;
-    protected $cedtra;
-    protected $cedcon;
-    protected $tipdoc;
-    protected $priape;
-    protected $segape;
-    protected $prinom;
-    protected $segnom;
-    protected $fecnac;
-    protected $ciunac;
-    protected $sexo;
-    protected $estciv;
-    protected $comper;
-    protected $tiecon;
-    protected $ciures;
-    protected $codzon;
-    protected $tipviv;
-    protected $direccion;
-    protected $barrio;
-    protected $telefono;
-    protected $celular;
-    protected $email;
-    protected $nivedu;
-    protected $fecing;
-    protected $codocu;
-    protected $salario;
-    protected $captra;
-    protected $usuario;
-    protected $estado;
-    protected $codest;
-    protected $motivo;
-    protected $fecest;
-    protected $tipo;
-    protected $coddoc;
-    protected $documento;
-    protected $fecsol;
-    protected $tipsal;
-    protected $tippag;
-    protected $numcue;
-    protected $empresalab;
-    protected $resguardo_id;
-    protected $pub_indigena_id;
-    protected $codban;
-    protected $tipcue;
-    protected $tipdis;
-    protected $peretn;
-    protected $zoneurbana;
 
     public function setZoneurbana($zoneurbana)
     {
@@ -305,7 +255,7 @@ class Mercurio32 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo fecnac
-    
+
      */
     public function setFecnac($fecnac)
     {
@@ -502,7 +452,7 @@ class Mercurio32 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo fecest
-     
+
      */
     public function setFecest($fecest)
     {
@@ -628,7 +578,7 @@ class Mercurio32 extends ModelBase
 
     /**
      * Devuelve el valor del campo fecnac
-     
+
      */
     public function getFecnac()
     {
@@ -763,7 +713,7 @@ class Mercurio32 extends ModelBase
 
     /**
      * Devuelve el valor del campo fecing
-     
+
      */
     public function getFecing()
     {
@@ -842,7 +792,7 @@ class Mercurio32 extends ModelBase
 
     /**
      * Devuelve el valor del campo fecest
-     
+
      */
     public function getFecest()
     {

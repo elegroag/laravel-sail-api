@@ -1,5 +1,8 @@
 <?php
-class GestionFirmas 
+
+namespace App\Services\PreparaFormularios;
+
+class GestionFirmas
 {
 
     private $pathOut;
@@ -13,7 +16,6 @@ class GestionFirmas
 
     public function __construct($argv)
     {
-        parent::__construct();
         $this->pathOut = Core::getInitialPath() .
             'public/storage/' .
             $argv['documento'] . 'F' .
@@ -72,9 +74,9 @@ class GestionFirmas
             }
             $lfirma->save();
 
-            $this->lfirma = $this->Mercurio16->findFirst(" 
-                documento='{$usuario->getDocumento()}' AND 
-                coddoc='{$usuario->getCoddoc()}'  
+            $this->lfirma = $this->Mercurio16->findFirst("
+                documento='{$usuario->getDocumento()}' AND
+                coddoc='{$usuario->getCoddoc()}'
             ");
 
             return true;

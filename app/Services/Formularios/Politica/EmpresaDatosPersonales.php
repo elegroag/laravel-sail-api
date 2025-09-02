@@ -1,5 +1,8 @@
 <?php
-Core::importLibrary('DocumentoAdapter', 'Formularios');
+
+namespace App\Services\Formularios\Politica;
+
+use App\Services\Formularios\DocumentoAdapter;
 
 class EmpresaDatosPersonales extends DocumentoAdapter
 {

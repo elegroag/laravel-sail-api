@@ -1,5 +1,8 @@
 <?php
-Core::importLibrary("FactoryDocuments", "Formularios");
+
+namespace App\Services\FormulariosAdjuntos;
+
+use App\Services\FormulariosAdjuntos\FactoryDocuments;
 
 class Formularios
 {

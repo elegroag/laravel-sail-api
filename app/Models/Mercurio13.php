@@ -1,7 +1,9 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
+
 class Mercurio13 extends ModelBase
 {
 
@@ -15,24 +17,6 @@ class Mercurio13 extends ModelBase
         'obliga',
         'auto_generado',
     ];
-
-
-
-    /**
-     * @var string
-     */
-    protected $tipopc;
-
-    /**
-     * @var integer
-     */
-    protected $coddoc;
-
-    /**
-     * @var string
-     */
-    protected $obliga;
-
 
     /**
      * Metodo para establecer el valor del campo tipopc

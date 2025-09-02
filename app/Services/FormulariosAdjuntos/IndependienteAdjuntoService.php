@@ -1,5 +1,8 @@
 <?php
-class IndependienteAdjuntoService 
+
+namespace App\Services\FormulariosAdjuntos;
+
+class IndependienteAdjuntoService
 {
     private $request;
     private $lfirma;
@@ -9,7 +12,6 @@ class IndependienteAdjuntoService
 
     public function __construct($request)
     {
-        parent::__construct();
         $this->request = $request;
         Core::importLibrary("ParamsEmpresa", "Collections");
         Core::importLibrary("FactoryDocuments", "Formularios");

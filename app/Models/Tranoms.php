@@ -1,11 +1,12 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
 
 class Tranoms extends ModelBase
 {
-    
+
     protected $table = 'tranoms';
     public $timestamps = false;
     protected $primaryKey = 'id';
@@ -19,17 +20,6 @@ class Tranoms extends ModelBase
         'cartra',
         'request',
     ];
-
-
-
-    protected $cedtra;
-    protected $nomtra;
-    protected $apetra;
-    protected $saltra;
-    protected $fectra;
-    protected $cartra;
-    protected $request;
-
 
     public function getCedtra()
     {

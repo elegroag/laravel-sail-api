@@ -1,13 +1,14 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
-use Carbon\Carbon;  
+use Carbon\Carbon;
 
 class Mercurio10 extends ModelBase
 {
 
-    protected $table = 'mercurio10';   
+    protected $table = 'mercurio10';
     public $timestamps = false;
     protected $primaryKey = 'id';
 
@@ -21,18 +22,6 @@ class Mercurio10 extends ModelBase
         'codest',
         'campos_corregir',
     ];
-
-
-
-    protected $tipopc;
-    protected $numero;
-    protected $item;
-    protected $estado;
-    protected $nota;
-    protected $fecsis;
-    protected $codest;
-    protected $campos_corregir;
-
 
     public function setCamposCorregir($campos_corregir)
     {
@@ -86,7 +75,7 @@ class Mercurio10 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo fecsis
-     
+
      */
     public function setFecsis($fecsis)
     {
@@ -147,7 +136,7 @@ class Mercurio10 extends ModelBase
 
     /**
      * Devuelve el valor del campo fecsis
-     
+
      */
     public function getFecsis()
     {

@@ -1,6 +1,8 @@
 <?php
 
-class SolicitaClaveService 
+namespace App\Services\Utils;
+
+class SolicitaClaveService
 {
 
     private $tipo;
@@ -11,7 +13,6 @@ class SolicitaClaveService
 
     public function __construct($argv)
     {
-        parent::__construct();
         $this->tipo = $argv['tipo'];
         $this->documento = $argv['documento'];
         $this->coddoc = $argv['coddoc'];
@@ -21,7 +22,6 @@ class SolicitaClaveService
 
     public function main()
     {
-        $this->setTransa();
         $afiliado = false;
         if (
             $this->tipo == "E" ||
@@ -58,7 +58,7 @@ class SolicitaClaveService
                 }
             }
         } elseif ($this->tipo == "T") {
-            //tipo trabajadores para consultas y auto-gestión 
+            //tipo trabajadores para consultas y auto-gestión
             $procesadorComando = Comman::Api();
             $procesadorComando->runCli(
                 array(

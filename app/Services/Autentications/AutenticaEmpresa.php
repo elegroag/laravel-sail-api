@@ -1,12 +1,14 @@
 <?php
+
 namespace App\Services\Autentications;
+
 use App\Models\Mercurio07;
 use App\Models\Mercurio30;
 use App\Models\Mercurio31;
 use App\Models\Mercurio32;
 use App\Models\Mercurio34;
 use App\Services\Utils\Generales;
-use CrearUsuario;
+use App\Services\Utils\CrearUsuario;
 
 class AutenticaEmpresa extends AutenticaGeneral
 {

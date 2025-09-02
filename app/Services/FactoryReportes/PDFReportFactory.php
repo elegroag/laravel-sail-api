@@ -1,6 +1,6 @@
 <?php
-require_service('FactoryReportes/ReportFactory');
-require_service('FactoryReportes/PDFReportGenerator');
+
+namespace App\Services\FactoryReportes;
 
 class PDFReportFactory implements ReportFactory
 {

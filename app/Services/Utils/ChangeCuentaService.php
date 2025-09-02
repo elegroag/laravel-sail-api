@@ -1,10 +1,11 @@
 <?php
+
 namespace App\Services\Utils;
 
 use App\Exceptions\AuthException;
 use App\Models\Mercurio07;
 
-class ChangeCuentaService 
+class ChangeCuentaService
 {
 
     /**

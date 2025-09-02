@@ -1,5 +1,11 @@
 <?php
-require_service('Signup/SignupInterface');
+
+namespace App\Services\Signup;
+
+use App\Models\Mercurio10;
+use App\Models\Mercurio30;
+use App\Models\Mercurio37;
+use App\Models\Tranoms;
 
 class SignupEmpresas  implements SignupInterface
 {
@@ -11,10 +17,7 @@ class SignupEmpresas  implements SignupInterface
     private $tipopc = 2;
 
 
-    public function __construct()
-    {
-        parent::__construct();
-    }
+    public function __construct() {}
 
 
     public function getTipopc()
@@ -47,7 +50,7 @@ class SignupEmpresas  implements SignupInterface
     {
         $id = (new Mercurio30())->maximum('id') + 1;
         $this->solicitud = new Mercurio30();
-        $this->solicitud->setTransaction(self::$transaction);
+
         $this->solicitud->createAttributes($data);
 
         $this->solicitud->setId($id);
@@ -127,7 +130,7 @@ class SignupEmpresas  implements SignupInterface
         $this->solicitud->setPrinom($prinom);
         $this->solicitud->setSegnom($segnom);
 
-        $this->salvar($this->solicitud, __LINE__);
+        $this->solicitud->save();
 
         (new Mercurio37())->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
         (new Mercurio10())->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");

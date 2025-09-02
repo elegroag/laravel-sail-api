@@ -1,9 +1,10 @@
 <?php
+
 namespace App\Services\Autentications;
 
 use App\Models\Mercurio07;
 use App\Services\Utils\Generales;
-use CrearUsuario;
+use App\Services\Utils\CrearUsuario;
 
 class AutenticaTrabajador extends AutenticaGeneral
 {

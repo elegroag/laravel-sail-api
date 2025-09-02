@@ -1,11 +1,13 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
+use App\Services\Request;
 
 class Notificaciones extends ModelBase
 {
-    
+
     protected $table = 'notificaciones';
     public $timestamps = false;
     protected $primaryKey = 'id';
@@ -23,7 +25,7 @@ class Notificaciones extends ModelBase
 
 
 
-    public function __construct(Request $request = null)
+    public function __construct(Request|null $request = null)
     {
         parent::__construct();
         if ($request instanceof Request) {
@@ -38,16 +40,6 @@ class Notificaciones extends ModelBase
             $this->hora = $request->getParam('hora');
         }
     }
-
-    protected $id;
-    protected $titulo;
-    protected $descri;
-    protected $user;
-    protected $estado;
-    protected $progre;
-    protected $result;
-    protected $dia;
-    protected $hora;
 
     public function setId($id)
     {

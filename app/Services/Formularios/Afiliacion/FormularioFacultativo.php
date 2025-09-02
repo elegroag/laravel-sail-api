@@ -1,5 +1,6 @@
 <?php
-Core::importLibrary('Documento', 'Formularios');
+
+namespace App\Services\Formularios\Afiliacion;
 
 class FormularioFacultativo extends Documento
 {
@@ -163,8 +164,8 @@ class FormularioFacultativo extends Documento
 
     function posTipoAfiliado()
     {
-        if (!$this->facultativo->getTipafi() == '63') {
-            //2% 
+        if (!$ths->facultativo->getTipafi() == '63') {
+            //2%
             $x = 156;
             $y = 36;
         } else {

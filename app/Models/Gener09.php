@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
@@ -14,10 +15,6 @@ class Gener09 extends ModelBase
         'codzon',
         'detzon',
     ];
-
-    protected $id;
-    protected $codzon;
-    protected $detzon;
 
     public function getId()
     {

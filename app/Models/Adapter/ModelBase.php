@@ -413,20 +413,39 @@ class ModelBase extends Model
         return $query->delete();
     }
 
-    public function getArray(){
+    public function getArray()
+    {
         return $this->toArray();
     }
 
     public function setCreateAttributes($clase, $data = null)
     {
-        if(is_array($data) || is_object($data))
-        {
-            foreach ($data as $prop => $valor)
-            {
-                if(property_exists($clase, $prop)){
+        if (is_array($data) || is_object($data)) {
+            foreach ($data as $prop => $valor) {
+                if (property_exists($clase, $prop)) {
                     $clase->$prop = "$valor";
                 }
             }
         }
+    }
+
+    public function getCount(...$argv)
+    {
+        $params = $this->getParams($argv);
+        $query = DB::table($this->getTable());
+
+        if (isset($params[0]) && trim($params[0]) !== '') {
+            $item = $params[0];
+            $query->select("count($item) as num");
+        }
+
+        if (isset($params['conditions'])) {
+            $conditions = $params['conditions'];
+            if (is_array($conditions)) {
+                $conditions = implode(",", $conditions);
+            }
+            $query->whereRaw($conditions);
+        }
+        return $query->first()->num;
     }
 }

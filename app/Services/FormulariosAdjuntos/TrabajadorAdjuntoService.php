@@ -1,5 +1,9 @@
 <?php
-class TrabajadorAdjuntoService 
+
+namespace App\Services\FormulariosAdjuntos;
+
+
+class TrabajadorAdjuntoService
 {
 
     private $filename;
@@ -20,7 +24,6 @@ class TrabajadorAdjuntoService
 
     public function __construct($request)
     {
-        parent::__construct();
         Core::importLibrary("ParamsEmpresa", "Collections");
         Core::importLibrary("FactoryDocuments", "Formularios");
         $this->request = $request;

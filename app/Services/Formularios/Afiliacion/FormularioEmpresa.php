@@ -1,5 +1,8 @@
 <?php
-Core::importLibrary('DocumentoAdapter', 'Formularios');
+
+namespace App\Services\Formularios\Afiliacion;
+
+use App\Services\Formularios\DocumentoAdapter;
 
 class FormularioEmpresa extends DocumentoAdapter
 {

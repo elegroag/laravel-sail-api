@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
@@ -21,18 +22,6 @@ class Mercurio19 extends ModelBase
         'intentos',
         'token',
     ];
-
-
-
-    protected $tipo;
-    protected $coddoc;
-    protected $documento;
-    protected $codigo;
-    protected $codver;
-    protected $respuesta;
-    protected $inicio;
-    protected $intentos;
-    protected $token;
 
     public function __construct(
         $tipo = null,

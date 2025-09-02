@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
@@ -25,21 +26,6 @@ class Mercurio07 extends ModelBase
         'estado',
         'fecha_syncron',
     ];
-
-
-
-    protected $tipo;
-    protected $coddoc;
-    protected $documento;
-    protected $nombre;
-    protected $email;
-    protected $clave;
-    protected $feccla;
-    protected $autoriza;
-    protected $codciu;
-    protected $fecreg;
-    protected $estado;
-    protected $fecha_syncron;
 
     public function setFechaSyncron($fecha_syncron)
     {

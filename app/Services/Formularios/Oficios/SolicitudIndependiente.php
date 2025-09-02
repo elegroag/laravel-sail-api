@@ -1,5 +1,8 @@
 <?php
-Core::importLibrary('Documento', 'Formularios');
+
+namespace App\Services\Formularios\Oficios;
+
+use App\Services\Formularios\Documento;
 
 class SolicitudIndependiente extends Documento
 {

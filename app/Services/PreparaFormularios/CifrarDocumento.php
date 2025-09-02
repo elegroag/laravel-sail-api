@@ -1,15 +1,14 @@
 <?php
 
-class CifrarDocumento 
+namespace App\Services\PreparaFormularios;
+
+class CifrarDocumento
 {
 
     private $fhash;
     private $algoritmo;
 
-    public function __construct()
-    {
-        parent::__construct();
-    }
+    public function __construct() {}
 
     /**
      * Define o algoritmo de criptografia a ser utilizado.

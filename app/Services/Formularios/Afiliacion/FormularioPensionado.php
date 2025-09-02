@@ -1,5 +1,6 @@
 <?php
-Core::importLibrary('Documento', 'Formularios');
+
+namespace App\Services\Formularios\Afiliacion;
 
 class FormularioPensionado extends Documento
 {
@@ -172,7 +173,7 @@ class FormularioPensionado extends Documento
         if ($this->pensionado->getTipafi() == '10') {
             $x = 195;
             $y = 35.6;
-            //2% 
+            //2%
         } elseif ($this->pensionado->getTipafi() == '64') {
             //0.6%
             $x = 190;

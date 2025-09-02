@@ -1,6 +1,6 @@
 <?php
-require_service('FactoryReportes/ExcelReportGenerator');
-require_service('FactoryReportes/ReportFactory');
+
+namespace App\Services\FactoryReportes;
 
 class ExcelReportFactory implements ReportFactory
 {

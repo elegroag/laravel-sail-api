@@ -1,12 +1,34 @@
 <?php
-class FacultativoService 
+
+namespace App\Services\Entidades;
+
+use App\Exceptions\DebugException;
+use App\Models\Adapter\DbBase;
+use App\Models\Mercurio01;
+use App\Models\Mercurio07;
+use App\Models\Mercurio10;
+use App\Models\Mercurio12;
+use App\Models\Mercurio14;
+use App\Models\Mercurio36;
+use App\Models\Mercurio37;
+use App\Services\Utils\Comman;
+use ParamsFacultativo;
+use ParamsTrabajador;
+
+class FacultativoService
 {
 
     private $tipopc = 10;
     private $tipsoc = '08';
+    private $user;
+    private $db;
 
     public function __construct()
     {
+        if (session()->has('documento')) {
+            $this->user = session()->all();
+        }
+        $this->db = DbBase::rawConnect();
     }
 
     /**
@@ -16,22 +38,20 @@ class FacultativoService
      */
     public function findAllByEstado($estado = '')
     {
-        $user = Auth::getActiveIdentity();
-
         //usuario empresa, unica solicitud de afiliación
-        $documento = $user['documento'];
-        $coddoc = $user['coddoc'];
+        $documento = $this->user['documento'];
+        $coddoc = $this->user['coddoc'];
 
         if (empty($estado)) {
             $conditions = "and solis.estado NOT IN('I') ";
         } else {
             $conditions = "and solis.estado='{$estado}' ";
         }
-        $sql = "SELECT solis.*,  
+        $sql = "SELECT solis.*,
             CONCAT_WS(' ', solis.priape, solis.segape, solis.prinom, solis.segnom) as razsoc,
             (SELECT COUNT(*) FROM mercurio10 as me10 WHERE me10.tipopc='{$this->tipopc}' and solis.id = me10.numero) as cantidad_eventos,
             (SELECT MAX(fecsis) FROM mercurio10 as mr10 WHERE mr10.tipopc='{$this->tipopc}' and solis.id = mr10.numero) as fecha_ultima_solicitud,
-            (CASE 
+            (CASE
                 WHEN solis.estado = 'T' THEN 'Temporal en edición'
                 WHEN solis.estado = 'D' THEN 'Devuelto'
                 WHEN solis.estado = 'A' THEN 'Aprobado'
@@ -39,11 +59,11 @@ class FacultativoService
                 WHEN solis.estado = 'P' THEN 'Pendiente De Validación CAJA'
                 WHEN solis.estado = 'I' THEN 'Inactiva'
             END) as estado_detalle,
-            'NATURAL' as tipo_persona, 
+            'NATURAL' as tipo_persona,
             solis.coddoc as tipo_documento,
-            gener09.detzon as detalle_zona 
-            FROM mercurio36 as solis 
-            LEFT JOIN gener09 ON gener09.codzon = solis.codzon 
+            gener09.detzon as detalle_zona
+            FROM mercurio36 as solis
+            LEFT JOIN gener09 ON gener09.codzon = solis.codzon
             WHERE solis.documento='{$documento}' and solis.coddoc='{$coddoc}' {$conditions}
             ORDER BY solis.fecsol ASC;";
 
@@ -83,11 +103,10 @@ class FacultativoService
         $archivos = array();
 
         $db = (object) DbBase::rawConnect();
-        $db->setFetchMode(DbBase::DB_ASSOC);
 
-        $mercurio10 = $db->fetchOne("SELECT item, estado, campos_corregir 
-        FROM mercurio10 
-        WHERE numero='{$solicitud->getId()}' AND tipopc='{$this->tipopc}' 
+        $mercurio10 = $db->fetchOne("SELECT item, estado, campos_corregir
+        FROM mercurio10
+        WHERE numero='{$solicitud->getId()}' AND tipopc='{$this->tipopc}'
         ORDER BY item DESC LIMIT 1");
 
         $corregir = false;
@@ -98,10 +117,10 @@ class FacultativoService
             }
         }
 
-        $mercurio14 = $this->Mercurio14->find("tipopc='{$this->tipopc}' and tipsoc='{$this->tipsoc}'", "order: auto_generado DESC");
+        $mercurio14 = (new Mercurio14)->find("tipopc='{$this->tipopc}' and tipsoc='{$this->tipsoc}'", "order: auto_generado DESC");
         foreach ($mercurio14 as $m14) {
-            $m12 = $this->Mercurio12->findFirst("coddoc='{$m14->getCoddoc()}'");
-            $mercurio37 = $this->Mercurio37->findFirst("tipopc='{$this->tipopc}' and numero='{$solicitud->getId()}' and coddoc='{$m14->getCoddoc()}'");
+            $m12 = (new Mercurio12)->findFirst("coddoc='{$m14->getCoddoc()}'");
+            $mercurio37 = (new Mercurio37)->findFirst("tipopc='{$this->tipopc}' and numero='{$solicitud->getId()}' and coddoc='{$m14->getCoddoc()}'");
             $corrige = false;
             if ($corregir) {
                 if (in_array($m12->getCoddoc(), $corregir)) {
@@ -109,7 +128,7 @@ class FacultativoService
                 }
             }
             $obliga = ($m14->getObliga() == "S") ? "<br><small class='text-danger'>Obligatorio</small>" : "";
-            $archivo = new stdClass;
+            $archivo = new \stdClass;
             $archivo->obliga = $obliga;
             $archivo->id = $solicitud->getId();
             $archivo->coddoc = $m14->getCoddoc();
@@ -119,12 +138,13 @@ class FacultativoService
             $archivos[] = $archivo;
         }
 
-        $mercurio01 = $this->Mercurio01->findFirst();
-        $html = View::render("pensionado/tmp/archivos_requeridos", array(
+        $mercurio01 = (new Mercurio01)->findFirst();
+        $html = view("partials/archivos_requeridos", [
             "load_archivos" => $archivos,
             "path" => $mercurio01->getPath(),
             "puede_borrar" => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true
-        ));
+        ])->render();
+
         return $html;
     }
 
@@ -135,24 +155,24 @@ class FacultativoService
      */
     public function loadDisplay($solicitud)
     {
-        Tag::displayTo("calemp", "P");
+        /* Tag::displayTo("calemp", "P");
         Tag::displayTo("codact", "201010");
         Tag::displayTo("id", $solicitud->getId());
         Tag::displayTo("calemp", $solicitud->getCalemp());
         Tag::displayTo("codact", $solicitud->getCodact());
         Tag::displayTo("codcaj", $solicitud->getCodcaj());
-        Tag::displayTo("coddocrepleg", $solicitud->getCoddocrepleg());
+        Tag::displayTo("coddocrepleg", $solicitud->getCoddocrepleg()); */
     }
 
     public function loadDisplaySubsidio($empresa)
     {
-        Tag::displayTo("calemp", "P");
+        /* Tag::displayTo("calemp", "P");
         Tag::displayTo("codact", "201010");
         Tag::displayTo("calemp", 'P');
         Tag::displayTo("cedtra", $empresa['cedrep']);
         Tag::displayTo("codact", $empresa['codact']);
         Tag::displayTo("codcaj", $empresa['codcaj']);
-        Tag::displayTo("coddocrepleg", $empresa['coddocrepleg']);
+        Tag::displayTo("coddocrepleg", $empresa['coddocrepleg']); */
     }
 
     /**
@@ -165,10 +185,8 @@ class FacultativoService
     {
         $empresa = $this->findById($id);
         if ($empresa != false) {
-            $empresa->setTransaction(self::$transaction);
             $empresa->createAttributes($data);
-            $this->salvar($empresa, __LINE__);
-            return $empresa;
+            return $empresa->save();
         }
         return false;
     }
@@ -183,9 +201,8 @@ class FacultativoService
     {
         $solicitud = $this->findById($id);
         if ($solicitud) {
-            $solicitud->setTransaction(self::$transaction);
             $solicitud->createAttributes($data);
-            return $this->salvar($solicitud, __LINE__);
+            return $solicitud->save();
         } else {
             return false;
         }
@@ -200,12 +217,11 @@ class FacultativoService
     {
         $id = (new Mercurio36)->maximum('id') + 1;
         $facultativo = new Mercurio36();
-        $facultativo->setTransaction(self::$transaction);
         $facultativo->createAttributes($data);
         $facultativo->setId($id);
 
-        $this->Mercurio37->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
-        $this->Mercurio10->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
+        (new Mercurio37)->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
+        (new Mercurio10)->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
         return $facultativo;
     }
 
@@ -218,8 +234,7 @@ class FacultativoService
     {
         $facultativo = $this->create($data);
         $facultativo->setEstado("T");
-        $this->salvar($facultativo, __LINE__);
-        return $facultativo;
+        return $facultativo->save();
     }
 
     /**
@@ -244,15 +259,15 @@ class FacultativoService
     {
         $solicitud = (new Mercurio36)->findFirst("id='{$id}'");
 
-        $cm37 = (new Mercurio37)->count(
+        $cm37 = (new Mercurio37)->getCount(
             "tipopc='{$this->tipopc}' AND " .
                 "numero='{$id}' AND " .
                 "coddoc IN(SELECT coddoc FROM mercurio14 WHERE tipopc='{$this->tipopc}' AND tipsoc='{$this->tipsoc}' AND obliga='S')"
         );
 
-        $cm14 = (new Mercurio14)->count("*", "conditions: tipopc='{$this->tipopc}' and tipsoc='{$this->tipsoc}' and obliga='S'");
+        $cm14 = (new Mercurio14)->getCount("*", "conditions: tipopc='{$this->tipopc}' and tipsoc='{$this->tipsoc}' and obliga='S'");
         if ($cm37 < $cm14) {
-            throw new Exception("Adjunte los archivos obligatorios", 500);
+            throw new DebugException("Adjunte los archivos obligatorios", 500);
         }
 
         (new Mercurio36)->updateAll("usuario='{$usuario}', estado='P'", "conditions: id='{$id}'");
@@ -279,23 +294,21 @@ class FacultativoService
         }
         return array(
             'seguimientos' => $seguimientos,
-            'campos_disponibles' => $this->Mercurio36->CamposDisponibles(),
-            'estados_detalles' => $this->Mercurio10->getArrayEstados()
+            'campos_disponibles' => (new Mercurio36)->CamposDisponibles(),
+            'estados_detalles' => (new Mercurio10)->getArrayEstados()
         );
     }
 
     public function dataArchivosRequeridos($solicitud)
     {
-        Core::importHelper('files');
         if ($solicitud == false) return false;
         $archivos = array();
 
-        $db = (object) DbBase::rawConnect();
-        $db->setFetchMode(DbBase::DB_ASSOC);
+        $db = DbBase::rawConnect();
 
-        $mercurio10 = $db->fetchOne("SELECT item, estado, campos_corregir 
-        FROM mercurio10 
-        WHERE numero='{$solicitud->getId()}' AND tipopc='{$this->tipopc}' 
+        $mercurio10 = $db->fetchOne("SELECT item, estado, campos_corregir
+        FROM mercurio10
+        WHERE numero='{$solicitud->getId()}' AND tipopc='{$this->tipopc}'
         ORDER BY item DESC LIMIT 1");
 
         $corregir = false;
@@ -306,10 +319,10 @@ class FacultativoService
             }
         }
 
-        $mercurio14 = $this->Mercurio14->find(" tipopc='{$this->tipopc}'", "order: auto_generado DESC");
+        $mercurio14 = (new Mercurio14)->find(" tipopc='{$this->tipopc}'", "order: auto_generado DESC");
         foreach ($mercurio14 as $m14) {
-            $m12 = $this->Mercurio12->findFirst("coddoc='{$m14->getCoddoc()}'");
-            $mercurio37 = $this->Mercurio37->findFirst("tipopc='{$this->tipopc}' and numero='{$solicitud->getId()}' and coddoc='{$m14->getCoddoc()}'");
+            $m12 = (new Mercurio12)->findFirst("coddoc='{$m14->getCoddoc()}'");
+            $mercurio37 = (new Mercurio37)->findFirst("tipopc='{$this->tipopc}' and numero='{$solicitud->getId()}' and coddoc='{$m14->getCoddoc()}'");
             $corrige = false;
             if ($corregir) {
                 if (in_array($m12->getCoddoc(), $corregir)) $corrige = true;
@@ -324,7 +337,7 @@ class FacultativoService
             $archivos[] = $archivo;
         }
 
-        $mercurio01 = $this->Mercurio01->findFirst();
+        $mercurio01 = (new Mercurio01)->findFirst();
         $archivos_descargar = oficios_requeridos('O');
         return array(
             "disponibles" => $archivos_descargar,
@@ -336,7 +349,6 @@ class FacultativoService
 
     public function paramsApi()
     {
-        Services::Init();
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
             array(

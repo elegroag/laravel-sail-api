@@ -1,7 +1,9 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
+
 class Mercurio16 extends ModelBase
 {
 
@@ -17,16 +19,6 @@ class Mercurio16 extends ModelBase
         'keyprivate',
         'keypublic',
     ];
-
-
-
-    protected $id;
-    protected $documento;
-    protected $fecha;
-    protected $firma;
-    protected $coddoc;
-    protected $keyprivate;
-    protected $keypublic;
 
     public function __construct()
     {

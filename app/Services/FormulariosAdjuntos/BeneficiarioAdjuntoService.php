@@ -1,5 +1,10 @@
 <?php
-class BeneficiarioAdjuntoService 
+
+namespace App\Services\FormulariosAdjuntos;
+
+use App\Models\Mercurio16;
+
+class BeneficiarioAdjuntoService
 {
     /**
      * request variable
@@ -13,7 +18,6 @@ class BeneficiarioAdjuntoService
 
     public function __construct($request)
     {
-        parent::__construct();
         $this->request = $request;
         Core::importLibrary("ParamsTrabajador", "Collections");
         Core::importLibrary("ParamsBeneficiario", "Collections");

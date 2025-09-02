@@ -1,12 +1,14 @@
 <?php
-class TrabajadorFormulario 
+
+namespace App\Services\PreparaFormularios;
+
+class TrabajadorFormulario
 {
     private $documento;
     private $coddoc;
 
     public function __construct($argv)
     {
-        parent::__construct();
         $this->documento = $argv['documento'];
         $this->coddoc = $argv['coddoc'];
     }

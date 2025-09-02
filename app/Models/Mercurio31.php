@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Adapter\DbBase;
@@ -79,72 +80,6 @@ class Mercurio31 extends ModelBase
         'fecafi',
     ];
 
-
-    protected $id;
-    protected $log;
-    protected $nit;
-    protected $razsoc;
-    protected $cedtra;
-    protected $tipdoc;
-    protected $priape;
-    protected $segape;
-    protected $prinom;
-    protected $segnom;
-    protected $fecnac;
-    protected $ciunac;
-    protected $sexo;
-    protected $orisex;
-    protected $estciv;
-    protected $cabhog;
-    protected $codciu;
-    protected $codzon;
-    protected $direccion;
-    protected $barrio;
-    protected $telefono;
-    protected $celular;
-    protected $fax;
-    protected $email;
-    protected $fecsol;
-    protected $fecing;
-    protected $salario;
-    protected $tipsal;
-    protected $captra;
-    protected $tipdis;
-    protected $nivedu;
-    protected $rural;
-    protected $horas;
-    protected $tipcon;
-    protected $trasin;
-    protected $vivienda;
-    protected $tipafi;
-    protected $profesion;
-    protected $cargo;
-    protected $autoriza;
-    protected $usuario;
-    protected $estado;
-    protected $codest;
-    protected $motivo;
-    protected $fecest;
-    protected $tipo;
-    protected $coddoc;
-    protected $documento;
-    protected $facvul;
-    protected $peretn;
-    protected $dirlab;
-    protected $ciulab;
-    protected $ruralt;
-    protected $comision;
-    protected $tipjor;
-    protected $codsuc;
-    protected $tippag;
-    protected $numcue;
-    protected $otra_empresa;
-    protected $fecha_giro;
-    protected $resguardo_id;
-    protected $pub_indigena_id;
-    protected $codban;
-    protected $tipcue;
-    protected $fecafi;
 
     public function setFecafi($fecafi)
     {
@@ -506,7 +441,7 @@ class Mercurio31 extends ModelBase
     }
     /**
      * Metodo para establecer el valor del campo fecing
-     
+
      */
     public function setFecing($fecing)
     {
@@ -663,7 +598,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo fecest
-    
+
      */
     public function setFecest($fecest)
     {
@@ -910,7 +845,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo fecing
-     
+
      */
     public function getFecsol()
     {

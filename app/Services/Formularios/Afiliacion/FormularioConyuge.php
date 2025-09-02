@@ -1,5 +1,6 @@
 <?php
-Core::importLibrary('Documento', 'Formularios');
+
+namespace App\Services\Formularios\Afiliacion;
 
 class FormularioConyuge extends Documento
 {
@@ -190,7 +191,7 @@ class FormularioConyuge extends Documento
     {
         if ($this->conyuge->getTipafi() == '3') {
             $x = 150;
-            //2% 
+            //2%
         } elseif ($this->conyuge->getTipafi() == '65') {
             //0.6%
             $x = 155;

@@ -1,7 +1,9 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
+
 class Mercurio14 extends ModelBase
 {
 
@@ -16,14 +18,6 @@ class Mercurio14 extends ModelBase
         'obliga',
         'auto_generado',
     ];
-
-
-
-    protected $tipopc;
-    protected $tipsoc;
-    protected $coddoc;
-    protected $obliga;
-    protected $auto_generado;
 
     public function setAuto_generado($auto_generado)
     {

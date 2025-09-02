@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
@@ -18,15 +19,6 @@ class PinesAfiliado extends ModelBase
         'fecha',
         'codser',
     ];
-
-
-    protected $id;
-    protected $pin;
-    protected $cedtra;
-    protected $docben;
-    protected $estado;
-    protected $fecha;
-    protected $codser;
 
     public function getDocben()
     {
@@ -97,6 +89,4 @@ class PinesAfiliado extends ModelBase
     {
         return $this->codser;
     }
-
-
 }

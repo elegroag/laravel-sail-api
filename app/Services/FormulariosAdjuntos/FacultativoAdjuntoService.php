@@ -1,6 +1,9 @@
 <?php
 
-class FacultativoAdjuntoService 
+namespace App\Services\FormulariosAdjuntos;
+
+
+class FacultativoAdjuntoService
 {
     private $request;
     private $lfirma;
@@ -10,7 +13,6 @@ class FacultativoAdjuntoService
 
     public function __construct($request)
     {
-        parent::__construct();
         $this->request = $request;
         Core::importLibrary("ParamsFacultativo", "Collections");
         Core::importLibrary("FactoryDocuments", "Formularios");
@@ -19,9 +21,9 @@ class FacultativoAdjuntoService
 
     private function initialize()
     {
-        $this->lfirma = $this->Mercurio16->findFirst(" 
-            documento='{$this->request->getDocumento()}' AND  
-            coddoc='{$this->request->getCoddoc()}' 
+        $this->lfirma = $this->Mercurio16->findFirst("
+            documento='{$this->request->getDocumento()}' AND
+            coddoc='{$this->request->getCoddoc()}'
         ");
 
         $procesadorComando = Comman::Api();

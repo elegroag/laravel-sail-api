@@ -1,10 +1,12 @@
 <?php
 
+namespace App\Services\Utils;
+
 use App\Models\Mercurio07;
 use App\Models\Mercurio19;
 use Carbon\Carbon;
 
-class CrearUsuario 
+class CrearUsuario
 {
     private $today;
     private $tipo;

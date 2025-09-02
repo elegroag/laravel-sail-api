@@ -1,5 +1,8 @@
 <?php
-Core::importLibrary("tcpdf", "TCPDF");
+
+namespace App\Services\FactoryReportes;
+
+use TCPDF;
 
 class Tpdf extends TCPDF
 {
@@ -46,7 +49,7 @@ class Tpdf extends TCPDF
             $this->SetY(8);
             $this->SetTextColor(0);
             $this->SetFont('helvetica', 'B', 12);
-            $this->Cell(self::$pX, 5, utf8_decode(self::$titulo), 0, 0, '', 0, '');
+            $this->Cell(self::$pX, 5, self::$titulo, 0, 0, '', 0, '');
         }
     }
 

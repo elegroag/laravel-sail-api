@@ -1,10 +1,12 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
+
 class Mercurio15 extends ModelBase
 {
-    
+
     protected $table = 'mercurio15';
     public $timestamps = false;
     protected $primaryKey = 'id';
@@ -16,33 +18,36 @@ class Mercurio15 extends ModelBase
         'tipo_rural',
     ];
 
-    private $id;
-    private $estado;
-    private $detalle;
-    private $tipo_rural;
-
-    public function getId(){
+    public function getId()
+    {
         return $this->id;
     }
-    public function setId($id){
+    public function setId($id)
+    {
         $this->id = $id;
     }
-    public function getEstado(){
+    public function getEstado()
+    {
         return $this->estado;
     }
-    public function setEstado($estado){
+    public function setEstado($estado)
+    {
         $this->estado = $estado;
     }
-    public function getDetalle(){
+    public function getDetalle()
+    {
         return $this->detalle;
     }
-    public function setDetalle($detalle){
+    public function setDetalle($detalle)
+    {
         $this->detalle = $detalle;
     }
-    public function getTipoRural(){
+    public function getTipoRural()
+    {
         return $this->tipo_rural;
     }
-    public function setTipoRural($tipo_rural){
+    public function setTipoRural($tipo_rural)
+    {
         $this->tipo_rural = $tipo_rural;
     }
 }

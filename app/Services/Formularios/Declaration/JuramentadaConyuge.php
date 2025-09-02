@@ -1,5 +1,8 @@
 <?php
-Core::importLibrary('Documento', 'Formularios');
+
+namespace App\Services\Formularios\Declaration;
+
+use App\Services\Formularios\Documento;
 
 class JuramentadaConyuge extends Documento
 {

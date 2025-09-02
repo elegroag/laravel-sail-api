@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
@@ -22,20 +23,6 @@ class Mercurio33 extends ModelBase
         'usuario',
         'actualizacion',
     ];
-
-
-    protected $id;
-    protected $tipo;
-    protected $coddoc;
-    protected $documento;
-    protected $campo;
-    protected $antval;
-    protected $valor;
-    protected $estado;
-    protected $motivo;
-    protected $fecest;
-    protected $usuario;
-    protected $actualizacion;
 
     public function __construct(
         $id = null,

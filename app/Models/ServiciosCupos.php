@@ -1,7 +1,9 @@
-<?php 
+<?php
+
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
+
 class ServiciosCupos extends ModelBase
 {
 
@@ -15,13 +17,6 @@ class ServiciosCupos extends ModelBase
         'estado',
         'servicio',
     ];
-
-
-    protected $id;
-    protected $codser;
-    protected $cupos;
-    protected $estado;
-    protected $servicio;
 
     public function getId()
     {
@@ -72,6 +67,4 @@ class ServiciosCupos extends ModelBase
     {
         $this->servicio = $servicio;
     }
-
-
 }

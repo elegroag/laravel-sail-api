@@ -1,5 +1,8 @@
 <?php
-Core::importLibrary('Documento', 'Formularios');
+
+namespace App\Services\Formularios\Afiliacion;
+
+use App\Services\Formularios\Documento;
 
 class FormularioActualizadatos extends Documento
 {

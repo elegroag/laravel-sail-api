@@ -1,5 +1,10 @@
 <?php
-require_once 'SignupInterface.php';
+
+namespace App\Services\Signup;
+
+use App\Models\Mercurio10;
+use App\Models\Mercurio37;
+use App\Models\Mercurio38;
 
 class SignupPensionados  implements SignupInterface
 {
@@ -11,10 +16,7 @@ class SignupPensionados  implements SignupInterface
     protected $solicitud;
     private $tipopc = 9;
 
-    public function __construct()
-    {
-        parent::__construct();
-    }
+    public function __construct() {}
 
     public function getTipopc()
     {
@@ -23,7 +25,7 @@ class SignupPensionados  implements SignupInterface
 
     public function findByDocumentTemp($documento, $coddoc, $calemp = '')
     {
-        $this->solicitud = $this->Mercurio38->findFirst(
+        $this->solicitud = (new Mercurio38())->findFirst(
             "coddoc='{$coddoc}' and " .
                 "documento='{$documento}' and " .
                 "cedtra='{$documento}' and " .
@@ -42,9 +44,8 @@ class SignupPensionados  implements SignupInterface
      */
     public function createSignupService($data)
     {
-        $id = $this->Mercurio38->maximum('id') + 1;
+        $id = (new Mercurio38())->maximum('id') + 1;
         $this->solicitud = new Mercurio38();
-        $this->solicitud->setTransaction(self::$transaction);
         $this->solicitud->createAttributes($data);
         $this->solicitud->setId($id);
 
@@ -138,11 +139,10 @@ class SignupPensionados  implements SignupInterface
         $this->solicitud->setNumcue(0);
         $this->solicitud->setCargo(0);
         $this->solicitud->setCaptra('N');
+        $this->solicitud->save();
 
-        $this->salvar($this->solicitud, __LINE__);
-
-        $this->Mercurio37->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
-        $this->Mercurio10->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
+        (new Mercurio37())->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
+        (new Mercurio10())->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
     }
 
     public function getSolicitud()

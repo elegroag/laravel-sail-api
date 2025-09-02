@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Adapter\DbBase;
@@ -7,7 +8,7 @@ use Carbon\Carbon;
 
 class Mercurio41 extends ModelBase
 {
-    
+
     protected $table = 'mercurio41';
     public $timestamps = false;
     protected $primaryKey = 'id';
@@ -65,61 +66,6 @@ class Mercurio41 extends ModelBase
         'codban',
         'tipcue',
     ];
-
-
-
-    protected $id;
-    protected $tipo;
-    protected $coddoc;
-    protected $documento;
-    protected $calemp;
-    protected $log;
-    protected $cedtra;
-    protected $tipdoc;
-    protected $priape;
-    protected $segape;
-    protected $prinom;
-    protected $segnom;
-    protected $fecnac;
-    protected $ciunac;
-    protected $sexo;
-    protected $estciv;
-    protected $cabhog;
-    protected $codciu;
-    protected $codzon;
-    protected $direccion;
-    protected $barrio;
-    protected $telefono;
-    protected $celular;
-    protected $email;
-    protected $fecini;
-    protected $salario;
-    protected $captra;
-    protected $tipdis;
-    protected $nivedu;
-    protected $rural;
-    protected $vivienda;
-    protected $tipafi;
-    protected $autoriza;
-    protected $motivo;
-    protected $codact;
-    protected $fecsol;
-    protected $estado;
-    protected $codest;
-    protected $fecest;
-    protected $usuario;
-    protected $coddocrepleg;
-    protected $peretn;
-    protected $resguardo_id;
-    protected $pub_indigena_id;
-    protected $facvul;
-    protected $orisex;
-    protected $tippag;
-    protected $numcue;
-    protected $codcaj;
-    protected $cargo;
-    protected $codban;
-    protected $tipcue;
 
     public function setTipcue($tipcue)
     {

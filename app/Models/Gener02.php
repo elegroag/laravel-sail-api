@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
@@ -22,17 +23,6 @@ class Gener02 extends ModelBase
         'cedtra',
         'clave',
     ];
-
-    protected $usuario;
-    protected $nombre;
-    protected $tipfun;
-    protected $email;
-    protected $login;
-    protected $acceso;
-    protected $criptada;
-    protected $estado;
-    protected $cedtra;
-    protected $clave;
 
     public function getClave()
     {

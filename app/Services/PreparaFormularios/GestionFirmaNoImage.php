@@ -1,5 +1,8 @@
 <?php
-class GestionFirmaNoImage 
+
+namespace App\Services\PreparaFormularios;
+
+class GestionFirmaNoImage
 {
 
     private $pathOut;
@@ -14,7 +17,6 @@ class GestionFirmaNoImage
 
     public function __construct($param)
     {
-        parent::__construct();
         $this->documento = $param['documento'];
         $this->coddoc = $param['coddoc'];
 

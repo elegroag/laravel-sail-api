@@ -1,5 +1,10 @@
 <?php
-require_once 'SignupInterface.php';
+
+namespace App\Services\Signup;
+
+use App\Models\Mercurio10;
+use App\Models\Mercurio36;
+use App\Models\Mercurio37;
 
 class SignupFacultativos  implements SignupInterface
 {
@@ -10,10 +15,7 @@ class SignupFacultativos  implements SignupInterface
     protected $solicitud;
     private $tipopc = 10;
 
-    public function __construct()
-    {
-        parent::__construct();
-    }
+    public function __construct() {}
 
     public function getTipopc()
     {
@@ -22,9 +24,9 @@ class SignupFacultativos  implements SignupInterface
 
     public function findByDocumentTemp($documento, $coddoc, $calemp = '')
     {
-        $this->solicitud = $this->Mercurio36->findFirst(
-            "coddoc='{$this->coddoc}' and " .
-                "documento='{$this->documento}' and " .
+        $this->solicitud = (new Mercurio36())->findFirst(
+            "coddoc='{$coddoc}' and " .
+                "documento='{$documento}' and " .
                 "estado='T'"
         );
         if ($this->solicitud == FALSE) {
@@ -40,9 +42,8 @@ class SignupFacultativos  implements SignupInterface
      */
     public function createSignupService($data)
     {
-        $id = $this->Mercurio36->maximum('id') + 1;
+        $id = (new Mercurio36())->maximum('id') + 1;
         $this->solicitud = new Mercurio36();
-        $this->solicitud->setTransaction(self::$transaction);
         $this->solicitud->createAttributes($data);
 
         $this->solicitud->setId($id);
@@ -133,10 +134,10 @@ class SignupFacultativos  implements SignupInterface
         $this->solicitud->setSegape($segape);
         $this->solicitud->setPrinom($prinom);
         $this->solicitud->setSegnom($segnom);
-        $this->salvar($this->solicitud, __LINE__);
+        $this->solicitud->save();
 
-        $this->Mercurio37->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
-        $this->Mercurio10->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
+        (new Mercurio37())->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
+        (new Mercurio10())->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
     }
 
     public function getSolicitud()

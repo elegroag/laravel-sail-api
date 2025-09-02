@@ -19,30 +19,6 @@ class Mercurio37 extends ModelBase
         'fhash',
     ];
 
-
-
-    /**
-     * @var string
-     */
-    protected $tipopc;
-
-    /**
-     * @var integer
-     */
-    protected $numero;
-
-    /**
-     * @var integer
-     */
-    protected $coddoc;
-
-    /**
-     * @var string
-     */
-    protected $archivo;
-
-    protected $fhash;
-
     public function setFhash($fhash)
     {
         $this->fhash = $fhash;

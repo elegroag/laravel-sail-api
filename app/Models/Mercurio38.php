@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Adapter\DbBase;
@@ -71,74 +72,6 @@ class Mercurio38 extends ModelBase
         'numcue',
         'fecsol',
     ];
-
-
-
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    ///data modelo trabajador
-    protected $id;
-    protected $tipo;
-    protected $coddoc;
-    protected $documento;
-
-    protected $nit;
-    protected $log;
-    protected $cedtra;
-    protected $tipdoc;
-    protected $priape;
-    protected $segape;
-    protected $prinom;
-    protected $segnom;
-    protected $fecnac;
-    protected $ciunac;
-    protected $sexo;
-    protected $estciv;
-    protected $cabhog;
-    protected $codciu;
-    protected $codzon;
-    protected $direccion;
-    protected $barrio;
-    protected $telefono;
-    protected $celular;
-    protected $email;
-    protected $fecing;
-    protected $salario;
-    protected $captra;
-    protected $tipdis;
-    protected $nivedu;
-    protected $rural;
-    protected $vivienda;
-    protected $tipafi;
-    protected $autoriza;
-    protected $codact;
-    protected $calemp;
-    protected $usuario;
-    protected $estado;
-    protected $codest;
-    protected $motivo;
-    protected $fecest;
-    protected $orisex;
-    protected $repleg;
-    protected $fecini;
-    protected $tipsoc;
-    protected $tipemp;
-    protected $coddocrepleg;
-    protected $codcaj;
-    protected $tipper;
-    protected $resguardo_id;
-    protected $pub_indigena_id;
-    protected $facvul;
-    protected $peretn;
-    protected $codban;
-    protected $tipcue;
-    protected $tippag;
-    protected $cargo;
-    protected $numcue;
-    protected $fecsol;
 
     public function getFecsol()
     {
@@ -477,7 +410,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo fecnac
-    
+
      */
     public function setFecnac($fecnac)
     {
@@ -585,7 +518,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo fecing
-    
+
      */
     public function setFecing($fecing)
     {
@@ -720,7 +653,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo fecest
-    
+
      */
     public function setFecest($fecest)
     {
@@ -829,7 +762,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo fecnac
-     
+
      */
     public function getFecnac()
     {
@@ -937,7 +870,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo fecing
-     
+
      */
     public function getFecing()
     {
@@ -1083,7 +1016,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo fecest
-     
+
      */
     public function getFecest()
     {

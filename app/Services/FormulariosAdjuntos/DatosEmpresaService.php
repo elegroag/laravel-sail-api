@@ -1,5 +1,9 @@
 <?php
-class DatosEmpresaService 
+
+namespace App\Services\FormulariosAdjuntos;
+
+
+class DatosEmpresaService
 {
     /**
      * request variable
@@ -11,7 +15,6 @@ class DatosEmpresaService
 
     public function __construct($request)
     {
-        parent::__construct();
         $this->request = $request;
         Core::importLibrary("ParamsEmpresa", "Collections");
         Core::importLibrary("FactoryDocuments", "Formularios");

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services\Entidades;
 
 use App\Exceptions\DebugException;
@@ -10,9 +11,10 @@ use App\Models\Mercurio12;
 use App\Models\Mercurio13;
 use App\Models\Mercurio37;
 use App\Models\Mercurio01;
-use Comman;
+use App\Services\Utils\Comman;
+use ParamsTrabajador;
 
-class TrabajadorService 
+class TrabajadorService
 {
 
     private $tipopc = '1';
@@ -20,7 +22,9 @@ class TrabajadorService
     private $db;
     public function __construct()
     {
-        $this->user = Auth::getActiveIdentity();
+        if (session()->has('documento')) {
+            $this->user = session()->all();
+        }
         $this->db = DbBase::rawConnect();
     }
 
@@ -31,11 +35,10 @@ class TrabajadorService
      */
     public function findAllByEstado($estado = '')
     {
-        //usuario empresa, unica solicitud de afiliación
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
 
-        if ((new Mercurio31)->count(
+        if ((new Mercurio31)->getCount(
             "*",
             "conditions: documento='{$documento}' and coddoc='{$coddoc}'"
         ) > 0) {
@@ -48,10 +51,10 @@ class TrabajadorService
 
 
             return $this->db->inQueryAssoc(
-                "SELECT m31.*, 
+                "SELECT m31.*,
                 (SELECT COUNT(*) FROM mercurio10 as me10 WHERE me10.tipopc='13' and m31.id = me10.numero) as cantidad_eventos,
                 (SELECT MAX(fecsis) FROM mercurio10 as mr10 WHERE mr10.tipopc='13' and m31.id = mr10.numero) as fecha_ultima_solicitud,
-                (CASE 
+                (CASE
                     WHEN m31.estado = 'T' THEN 'Temporal en edición'
                     WHEN m31.estado = 'D' THEN 'Devuelto'
                     WHEN m31.estado = 'A' THEN 'Aprobado'
@@ -59,8 +62,8 @@ class TrabajadorService
                     WHEN m31.estado = 'P' THEN 'Pendiente De Validación CAJA'
                     WHEN m31.estado = 'I' THEN 'Inactiva'
                 END) as estado_detalle,
-                coddoc as tipo_documento 
-                FROM mercurio31 as m31 
+                coddoc as tipo_documento
+                FROM mercurio31 as m31
                 WHERE m31.documento='{$documento}' and m31.coddoc='{$coddoc}' {$conditions}
                 ORDER BY m31.fecsol ASC;"
             );
@@ -102,9 +105,9 @@ class TrabajadorService
 
         $db = DbBase::rawConnect();
 
-        $mercurio10 = $db->fetchOne("SELECT item, estado, campos_corregir 
-        FROM mercurio10 
-        WHERE numero='{$solicitud->getId()}' AND tipopc='{$this->tipopc}' 
+        $mercurio10 = $db->fetchOne("SELECT item, estado, campos_corregir
+        FROM mercurio10
+        WHERE numero='{$solicitud->getId()}' AND tipopc='{$this->tipopc}'
         ORDER BY item DESC LIMIT 1");
 
         $corregir = false;
@@ -139,24 +142,24 @@ class TrabajadorService
         }
 
         $mercurio01 = (new Mercurio01)->findFirst();
-        $html = View::render("empresa/tmp/archivos_requeridos", array(
+        $html = view("empresa/tmp/archivos_requeridos", array(
             "load_archivos" => $archivos,
             "path" => $mercurio01->getPath(),
             "puede_borrar" => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true
-        ));
+        ))->render();
+
         return $html;
     }
 
     public function dataArchivosRequeridos($solicitud)
     {
-        Core::importHelper('files');
 
         if ($solicitud == false) return false;
         $archivos = array();
 
-        $mercurio10 = $this->db->fetchOne("SELECT item, estado, campos_corregir 
-        FROM mercurio10 
-        WHERE numero='{$solicitud->getId()}' AND tipopc='{$this->tipopc}' 
+        $mercurio10 = $this->db->fetchOne("SELECT item, estado, campos_corregir
+        FROM mercurio10
+        WHERE numero='{$solicitud->getId()}' AND tipopc='{$this->tipopc}'
         ORDER BY item DESC LIMIT 1");
 
         $corregir = false;
@@ -204,7 +207,7 @@ class TrabajadorService
      */
     public function loadDisplay($solicitud)
     {
-        Tag::displayTo("cedtra", $solicitud->getCedtra());
+        /*  Tag::displayTo("cedtra", $solicitud->getCedtra());
         Tag::displayTo("tipdoc", $solicitud->getTipdoc());
         Tag::displayTo("nit", $solicitud->getNit());
         Tag::displayTo("telefono", $solicitud->getTelefono());
@@ -253,7 +256,7 @@ class TrabajadorService
         Tag::displayTo("fecing", ($solicitud->getFecing() instanceof Date) ? $solicitud->getFecing()->getUsingFormatDefault() : '');
         Tag::displayTo("labora_otra_empresa",  $solicitud->getOtraEmpresa());
         Tag::displayTo("pub_indigena_id",  $solicitud->getPubIndigenaId());
-        Tag::displayTo("resguardo_id",  $solicitud->getResguardoId());
+        Tag::displayTo("resguardo_id",  $solicitud->getResguardoId()); */
     }
 
 
@@ -264,7 +267,7 @@ class TrabajadorService
      */
     public function loadDisplaySubsidio($trabajador)
     {
-        Tag::displayTo("nit", $trabajador['nit']);
+        /*  Tag::displayTo("nit", $trabajador['nit']);
         Tag::displayTo("telefono", $trabajador['telefono']);
         Tag::displayTo("email", $trabajador['email']);
         Tag::displayTo("segnom", $trabajador['segnom']);
@@ -275,7 +278,7 @@ class TrabajadorService
         Tag::displayTo("celular", $trabajador['telr']);
         Tag::displayTo("celpri", $trabajador['telt']);
         Tag::displayTo("dirpri", $trabajador['dirpri']);
-        Tag::displayTo("emailpri", $trabajador['mailr']);
+        Tag::displayTo("emailpri", $trabajador['mailr']); */
     }
 
     /**
@@ -346,13 +349,13 @@ class TrabajadorService
     {
         $solicitud = (new Mercurio31)->findFirst("id='{$id}'");
 
-        $cm37 = (new Mercurio37)->count(
+        $cm37 = (new Mercurio37)->getCount(
             "tipopc='{$this->tipopc}' AND " .
                 "numero='{$id}' AND " .
                 "coddoc IN(SELECT coddoc FROM mercurio13 WHERE tipopc='{$this->tipopc}' AND obliga='S')"
         );
 
-        $cm13 = (new Mercurio13)->count("*", "conditions: tipopc='{$this->tipopc}' and obliga='S'");
+        $cm13 = (new Mercurio13)->getCount("*", "conditions: tipopc='{$this->tipopc}' and obliga='S'");
         if ($cm37 < $cm13) {
             throw new DebugException("Adjunte los archivos obligatorios", 500);
         }
@@ -426,7 +429,7 @@ class TrabajadorService
     /**
      * findRequestByDocuCod function
      * @changed [2023-12-00]
-     * buscar solicitudes por trabajadores que se tengan registradas por la empresa x  
+     * buscar solicitudes por trabajadores que se tengan registradas por la empresa x
      * @author elegroag <elegroag@ibero.edu.co>
      * @param [type] $documento
      * @param [type] $coddoc
@@ -436,12 +439,12 @@ class TrabajadorService
     {
 
         $datos = $this->db->inQueryAssoc(
-            "SELECT cedtra as 'cedula', 
-            CONCAT_WS('', prinom, segnom, priape, segape) as 'nombre_completo' 
-            FROM mercurio31 
-            WHERE 
-            documento='{$documento}' and 
-            coddoc='{$coddoc}' and 
+            "SELECT cedtra as 'cedula',
+            CONCAT_WS('', prinom, segnom, priape, segape) as 'nombre_completo'
+            FROM mercurio31
+            WHERE
+            documento='{$documento}' and
+            coddoc='{$coddoc}' and
             estado NOT IN('X','I')"
         );
         return (is_array($datos) === True) ? $datos : false;

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Adapter\DbBase;
@@ -21,19 +22,6 @@ class Mercurio47 extends ModelBase
         'tipo_actualizacion',
         'usuario',
     ];
-
-
-
-    protected $id;
-    protected $documento;
-    protected $tipo;
-    protected $coddoc;
-    protected $fecha_solicitud;
-    protected $fecha_estado;
-    protected $estado;
-    protected $tipo_actualizacion;
-    protected $usuario;
-
 
     public function setUsuario($usuario)
     {

@@ -1,5 +1,9 @@
 <?php
-class PensionadoAdjuntoService 
+
+namespace App\Services\FormulariosAdjuntos;
+
+
+class PensionadoAdjuntoService
 {
     private $request;
     private $lfirma;
@@ -10,7 +14,6 @@ class PensionadoAdjuntoService
 
     public function __construct($request)
     {
-        parent::__construct();
         $this->request = $request;
         Core::importLibrary("ParamsPensionado", "Collections");
         Core::importLibrary("FactoryDocuments", "Formularios");

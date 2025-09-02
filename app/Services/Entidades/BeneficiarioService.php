@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services\Entidades;
 
 use App\Exceptions\DebugException;
@@ -12,7 +13,7 @@ use App\Models\Mercurio34;
 use App\Models\Mercurio37;
 use App\Services\Utils\Comman;
 
-class BeneficiarioService 
+class BeneficiarioService
 {
 
     private $tipopc = '4';
@@ -37,17 +38,17 @@ class BeneficiarioService
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
 
-        if ((new Mercurio34)->count(
+        if ((new Mercurio34)->getCount(
             "*",
             "conditions: documento='{$documento}' AND coddoc='{$coddoc}'"
         ) > 0) {
             $conditions = (empty($estado)) ? " AND m34.estado NOT IN('I') " : " AND m34.estado='{$estado}' ";
-            
+
             return $this->db->inQueryAssoc(
-                "SELECT m34.*, 
+                "SELECT m34.*,
                 (SELECT COUNT(*) FROM mercurio10 as me10 WHERE me10.tipopc='{$this->tipopc}' and m34.id = me10.numero) as 'cantidad_eventos',
                 (SELECT MAX(fecsis) FROM mercurio10 as mr10 WHERE mr10.tipopc='{$this->tipopc}' and m34.id = mr10.numero) as 'fecha_ultima_solicitud',
-                (CASE 
+                (CASE
                     WHEN m34.estado = 'T' THEN 'Temporal en edición'
                     WHEN m34.estado = 'D' THEN 'Devuelto'
                     WHEN m34.estado = 'A' THEN 'Aprobado'
@@ -56,7 +57,7 @@ class BeneficiarioService
                     WHEN m34.estado = 'I' THEN 'Inactiva'
                 END) as estado_detalle,
                 coddoc as tipo_documento
-                FROM mercurio34 as m34 
+                FROM mercurio34 as m34
                 WHERE m34.documento='{$documento}' and m34.coddoc='{$coddoc}' {$conditions}
                 ORDER BY m34.fecsol ASC;"
             );
@@ -72,7 +73,6 @@ class BeneficiarioService
      */
     public function buscarEmpresaSubsidio($nit)
     {
-
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
             array(
@@ -97,11 +97,11 @@ class BeneficiarioService
         $archivos = array();
 
         $db = (object) DbBase::rawConnect();
-        
 
-        $mercurio10 = $db->fetchOne("SELECT item, estado, campos_corregir 
-        FROM mercurio10 
-        WHERE numero='{$solicitud->getId()}' AND tipopc='{$this->tipopc}' 
+
+        $mercurio10 = $db->fetchOne("SELECT item, estado, campos_corregir
+        FROM mercurio10
+        WHERE numero='{$solicitud->getId()}' AND tipopc='{$this->tipopc}'
         ORDER BY item DESC LIMIT 1");
 
         $corregir = false;
@@ -201,7 +201,6 @@ class BeneficiarioService
         Tag::displayTo("resguardo_id",  $solicitud->getResguardoId()); */
     }
 
-
     /**
      * loadDisplaySubsidio function
      * @param array $trabajador
@@ -222,7 +221,7 @@ class BeneficiarioService
         Tag::displayTo("dirpri", $trabajador['dirpri']);
         Tag::displayTo("emailpri", $trabajador['mailr']);
         */
-    } 
+    }
 
     /**
      * updateByFormData function
@@ -293,13 +292,13 @@ class BeneficiarioService
     {
         $solicitud = (new Mercurio34)->findFirst("id='{$id}'");
 
-        $cm37 = (new Mercurio37)->count(
+        $cm37 = (new Mercurio37)->getCount(
             "tipopc='{$this->tipopc}' AND " .
                 "numero='{$id}' AND " .
                 "coddoc IN(SELECT coddoc FROM mercurio13 WHERE tipopc='{$this->tipopc}' AND obliga='S')"
         );
 
-        $cm13 = (new Mercurio13)->count("*", "conditions: tipopc='{$this->tipopc}' AND obliga='S'");
+        $cm13 = (new Mercurio13)->getCount("*", "conditions: tipopc='{$this->tipopc}' AND obliga='S'");
         if ($cm37 < $cm13) {
             throw new DebugException("Adjunte los archivos obligatorios", 500);
         }
@@ -317,7 +316,6 @@ class BeneficiarioService
         $entity->email = $solicitante->getEmail();
         $senderValidationCaja->send($this->tipopc, $entity);
     }
-
 
     public function buscarBeneficiarioSubsidio($numdoc)
     {
@@ -346,9 +344,9 @@ class BeneficiarioService
 
         $db =  DbBase::rawConnect();
 
-        $mercurio10 = $db->fetchOne("SELECT item, estado, campos_corregir 
-        FROM mercurio10 
-        WHERE numero='{$solicitud->getId()}' AND tipopc='{$this->tipopc}' 
+        $mercurio10 = $db->fetchOne("SELECT item, estado, campos_corregir
+        FROM mercurio10
+        WHERE numero='{$solicitud->getId()}' AND tipopc='{$this->tipopc}'
         ORDER BY item DESC LIMIT 1");
 
         $corregir = false;

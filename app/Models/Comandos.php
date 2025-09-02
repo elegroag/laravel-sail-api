@@ -1,11 +1,13 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
 
-class Comandos extends ModelBase {
+class Comandos extends ModelBase
+{
 
-    protected $table = 'comandos';  
+    protected $table = 'comandos';
     public $timestamps = false;
     protected $primaryKey = 'id';
 
@@ -22,19 +24,8 @@ class Comandos extends ModelBase {
         'resultado',
     ];
 
-    protected $id;
-    protected $fecha_runner;
-    protected $hora_runner;
-    protected $usuario;
-    protected $progreso;
-    protected $estado;
-    protected $proceso;
-    protected $linea_comando;
-    protected $estructura;
-    protected $parametros;
-    protected $resultado;
-
-    public function setResultado($resultado){
+    public function setResultado($resultado)
+    {
         $this->resultado = $resultado;
     }
 
@@ -43,7 +34,8 @@ class Comandos extends ModelBase {
         return $this->resultado;
     }
 
-    public function setId($id){
+    public function setId($id)
+    {
         $this->id = $id;
     }
 
@@ -51,8 +43,9 @@ class Comandos extends ModelBase {
     {
         return $this->id;
     }
- 
-    public function setFechaRunner($fecha_runner){
+
+    public function setFechaRunner($fecha_runner)
+    {
         $this->fecha_runner = $fecha_runner;
     }
 
@@ -60,8 +53,9 @@ class Comandos extends ModelBase {
     {
         return $this->fecha_runner;
     }
-    
-    public function setHoraRunner($hora_runner){
+
+    public function setHoraRunner($hora_runner)
+    {
         $this->hora_runner = $hora_runner;
     }
 
@@ -69,8 +63,9 @@ class Comandos extends ModelBase {
     {
         return $this->hora_runner;
     }
-    
-    public function setUsuario($usuario){
+
+    public function setUsuario($usuario)
+    {
         $this->usuario = $usuario;
     }
 
@@ -78,8 +73,9 @@ class Comandos extends ModelBase {
     {
         return $this->usuario;
     }
-    
-    public function setProgreso($progreso){
+
+    public function setProgreso($progreso)
+    {
         $this->progreso = $progreso;
     }
 
@@ -87,8 +83,9 @@ class Comandos extends ModelBase {
     {
         return $this->progreso;
     }
-    
-    public function setEstado($estado){
+
+    public function setEstado($estado)
+    {
         $this->estado = $estado;
     }
 
@@ -96,8 +93,9 @@ class Comandos extends ModelBase {
     {
         return $this->estado;
     }
-    
-    public function setProceso($proceso){
+
+    public function setProceso($proceso)
+    {
         $this->proceso = $proceso;
     }
 
@@ -105,8 +103,9 @@ class Comandos extends ModelBase {
     {
         return $this->proceso;
     }
-    
-    public function setLineaComando($linea_comando){
+
+    public function setLineaComando($linea_comando)
+    {
         $this->linea_comando = $linea_comando;
     }
 
@@ -114,8 +113,9 @@ class Comandos extends ModelBase {
     {
         return $this->linea_comando;
     }
-    
-    public function setEstructura($estructura){
+
+    public function setEstructura($estructura)
+    {
         $this->estructura = $estructura;
     }
 
@@ -123,51 +123,51 @@ class Comandos extends ModelBase {
     {
         return $this->estructura;
     }
-    
-    public function setParametros($parametros){
+
+    public function setParametros($parametros)
+    {
         $this->parametros = $parametros;
-    }    
+    }
 
     public function getParametros()
     {
         return $this->parametros;
     }
-    
+
     public function getEstadosArray()
     {
         return array(
-            'P'=> 'Pendiente',
-            'F'=> 'Finalizado',
-            'X'=> 'Cancelado',
-            'E'=> 'Ejecución'
+            'P' => 'Pendiente',
+            'F' => 'Finalizado',
+            'X' => 'Cancelado',
+            'E' => 'Ejecución'
         );
     }
 
-    public function getEstadoDetalle($estado='')
+    public function getEstadoDetalle($estado = '')
     {
-        if(!empty($estado)){
+        if (!empty($estado)) {
             $this->estado = $estado;
         }
         switch ($this->estado) {
             case 'P':
                 return 'Pendiente';
-            break;
+                break;
             case 'F':
                 return 'Finalizado';
-            break;
+                break;
             case 'C':
                 return 'Cancelado';
-            break;
+                break;
             case 'E':
                 return 'Ejecución';
-            break;
+                break;
         }
     }
 
     public function initialize()
     {
-        $this->hasMany("id","comandos","estructura");
-        $this->belongsTo("id","comandos","estructura");
+        $this->hasMany("id", "comandos", "estructura");
+        $this->belongsTo("id", "comandos", "estructura");
     }
-
 }

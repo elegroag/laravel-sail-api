@@ -1,6 +1,6 @@
 <?php
-require_service('FactoryReportes/ReportGenerator');
-require_service('FactoryReportes/Tpdf');
+
+namespace App\Services\FactoryReportes;
 
 class PDFReportGenerator implements ReportGenerator
 {
@@ -16,7 +16,7 @@ class PDFReportGenerator implements ReportGenerator
 
     public function initializa()
     {
-        $this->filepath = Core::getInitialPath() . "public/temp/{$this->file}.pdf";
+        $this->filepath = storage_path() . "temp/{$this->file}.pdf";
         Tpdf::setInicializa(self::$orientation, $this->title, ((self::$orientation == 'L') ? 15 : 10));
         self::$pdf = new Tpdf();
         self::$pdf->SetMargins(((self::$orientation == 'L') ? 8 : self::$x_with), ((self::$orientation == 'L') ? 20 : 30), self::$xr_with);
@@ -33,8 +33,8 @@ class PDFReportGenerator implements ReportGenerator
     }
 
     /**
-     * addLine function 
-     * @return void 
+     * addLine function
+     * @return void
      */
     public function addLine($data, $fsize = 8)
     {

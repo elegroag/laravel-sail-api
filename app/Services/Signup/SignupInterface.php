@@ -1,4 +1,8 @@
 <?php
+
+namespace App\Services\Signup;
+
+
 interface SignupInterface
 {
 

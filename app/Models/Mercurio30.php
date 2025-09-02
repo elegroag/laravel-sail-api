@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Adapter\DbBase;
@@ -65,61 +66,6 @@ class Mercurio30 extends ModelBase
         'documento_representante_sat',
         'numero_transaccion',
     ];
-
-
-
-    protected $id;
-    protected $fecsol;
-    protected $log;
-    protected $nit;
-    protected $tipdoc;
-    protected $razsoc;
-    protected $sigla;
-    protected $digver;
-    protected $calemp;
-    protected $cedrep;
-    protected $repleg;
-    protected $direccion;
-    protected $codciu;
-    protected $codzon;
-    protected $telefono;
-    protected $celular;
-    protected $fax;
-    protected $email;
-    protected $codact;
-    protected $fecini;
-    protected $tottra;
-    protected $valnom;
-    protected $tipsoc;
-    protected $estado;
-    protected $codest;
-    protected $motivo;
-    protected $fecest;
-    protected $usuario;
-    protected $dirpri;
-    protected $ciupri;
-    protected $telpri;
-    protected $celpri;
-    protected $emailpri;
-    protected $tipo;
-    protected $coddoc;
-    protected $documento;
-    protected $tipemp;
-    protected $tipper;
-    protected $prinom;
-    protected $segnom;
-    protected $priape;
-    protected $segape;
-    protected $matmer;
-    protected $coddocrepleg;
-    protected $priaperepleg;
-    protected $segaperepleg;
-    protected $prinomrepleg;
-    protected $segnomrepleg;
-    protected $codcaj;
-    protected $fecha_aprobacion_sat;
-    protected $documento_representante_sat;
-    protected $numero_transaccion;
 
     public function getFecsol()
     {

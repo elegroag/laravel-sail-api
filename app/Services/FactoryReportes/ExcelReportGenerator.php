@@ -1,6 +1,13 @@
 <?php
-require_service('FactoryReportes/ReportGenerator');
-Core::importLibrary("Main", "Excel");
+
+namespace App\Services\FactoryReportes;
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+
 
 class ExcelReportGenerator implements ReportGenerator
 {
@@ -15,9 +22,9 @@ class ExcelReportGenerator implements ReportGenerator
 
     public function initializa()
     {
-        $this->filepath = ($this->path) ? "{$this->path}/{$this->file}.xls" : Core::getInitialPath() . "public/temp/{$this->file}.xls";
-        self::$SpreadSheet = new Spreadsheet_Excel_Writer($this->filepath);
-        self::$excel = self::$SpreadSheet->addWorksheet('Reporte');
+        $this->filepath = ($this->path) ? "{$this->path}/{$this->file}.xls" : storage_path() . "/temp/{$this->file}.xls";
+        self::$SpreadSheet = new Spreadsheet();
+        self::$excel = self::$SpreadSheet->getActiveSheet();
 
         self::$j = 0;
         if ($this->title) $this->addTitle();
@@ -26,11 +33,11 @@ class ExcelReportGenerator implements ReportGenerator
 
     public function addTitle($title = '', $position = 0)
     {
-        $columnStyle = self::$SpreadSheet->addFormat(array(
-            'fontfamily' => 'Verdana',
-            'size' => 13,
-            'border' => 0
-        ));
+        $columnStyle = self::$SpreadSheet->getStyle(self::$j, 0)->getFont()->setName('Verdana');
+        $columnStyle->setSize(13);
+        $columnStyle->setBold(true);
+        $columnStyle->setItalic(false);
+        $columnStyle->setColor('000000');
 
         $title = ($title != '') ? $title : $this->title;
         $position = ($position) ? $position : (count($this->columns) - 1);
@@ -60,13 +67,12 @@ class ExcelReportGenerator implements ReportGenerator
      */
     public function addLine($data, $fsize = 10, $cborder = 1)
     {
-        $columnStyle = self::$SpreadSheet->addFormat(array(
-            'fontfamily' => 'Verdana',
-            'size' => $fsize,
-            'border' => $cborder,
-            'bordercolor' => 'black',
-            "halign" => 'left'
-        ));
+        $columnStyle = self::$SpreadSheet->getStyle(self::$j, 0)->getFont()->setName('Verdana');
+        $columnStyle->setSize($fsize);
+        $columnStyle->setBold(false);
+        $columnStyle->setItalic(false);
+        $columnStyle->setColor('000000');
+
         $i = 0;
         foreach ($data as $val) self::$excel->write(self::$j, $i++, $val, $columnStyle);
         self::$j++;
@@ -74,13 +80,11 @@ class ExcelReportGenerator implements ReportGenerator
 
     public function addHeader($subtitle, $col, $fsize = 9, $cborder = 1)
     {
-        $columnStyle = self::$SpreadSheet->addFormat(array(
-            'fontfamily' => 'Verdana',
-            'size' => $fsize,
-            'border' => $cborder,
-            'bordercolor' => 'black',
-            "halign" => 'left'
-        ));
+        $columnStyle = self::$SpreadSheet->getStyle(self::$j, 0)->getFont()->setName('Verdana');
+        $columnStyle->setSize($fsize);
+        $columnStyle->setBold(false);
+        $columnStyle->setItalic(false);
+        $columnStyle->setColor('000000');
 
         self::$excel->setMerge(self::$j, 0, 0, $col);
         self::$excel->write(self::$j, 0, $subtitle, $columnStyle);
@@ -89,13 +93,11 @@ class ExcelReportGenerator implements ReportGenerator
 
     public function addPage($name, $titlePage, $fsize = 11, $col = 1)
     {
-        $titleStyle = self::$SpreadSheet->addFormat(array(
-            'fontfamily' => 'Verdana',
-            'size' => $fsize,
-            'border' => 0,
-            'bordercolor' => 'black',
-            "halign" => 'left'
-        ));
+        $titleStyle = self::$SpreadSheet->getStyle(self::$j, 0)->getFont()->setName('Verdana');
+        $titleStyle->setSize($fsize);
+        $titleStyle->setBold(false);
+        $titleStyle->setItalic(false);
+        $titleStyle->setColor('000000');
 
         self::$excel = self::$SpreadSheet->addWorksheet($name);
         self::$excel->setMerge(0, 0, 0, $col - 1);
@@ -106,30 +108,26 @@ class ExcelReportGenerator implements ReportGenerator
     public function addColumns($columns, $fsize = 11)
     {
         $this->columns = $columns;
-        $columnTitle = self::$SpreadSheet->addFormat(array(
-            'fontfamily' => 'Verdana',
-            'size' => $fsize,
-            'fgcolor' => 12,
-            'border' => 1,
-            'bordercolor' => 'black',
-            "halign" => 'center'
-        ));
+        $columnTitle = self::$SpreadSheet->getStyle(self::$j, 0)->getFont()->setName('Verdana');
+        $columnTitle->setSize($fsize);
+        $columnTitle->setBold(false);
+        $columnTitle->setItalic(false);
+        $columnTitle->setColor('000000');
+        $columnTitle->setAlignment('center');
 
         $i = 0;
         foreach ($columns as $ai => $column) {
-            $value = ucfirst(utf8_decode($column[0]));
+            $value = ucfirst($column[0]);
             self::$excel->setColumn($column[1], $column[2], $column[3]);
             self::$excel->write(self::$j, $i++, $value, $columnTitle);
         }
         self::$j++;
     }
 
-    /**
-     * outFile function
-     * @return string
-     */
     public function outFile()
     {
+        $writer = new Xlsx(self::$SpreadSheet);
+        $writer->save($this->filepath);
         self::$SpreadSheet->close();
         self::$excel = null;
         self::$j = 0;

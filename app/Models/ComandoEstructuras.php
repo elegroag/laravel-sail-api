@@ -1,9 +1,11 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
 
-class ComandoEstructuras extends ModelBase {
+class ComandoEstructuras extends ModelBase
+{
 
     protected $table = 'comando_estructuras';
     public $timestamps = false;
@@ -20,18 +22,6 @@ class ComandoEstructuras extends ModelBase {
         'asyncro',
     ];
 
-
-
-    protected $id;
-    protected $procesador;
-    protected $estructura;
-    protected $variables;
-    protected $tipo;
-    protected $sistema;
-    protected $env;
-    protected $descripcion;
-    protected $asyncro;
-    
     public function setAsyncro($asyncro)
     {
         $this->asyncro = $asyncro;
@@ -46,7 +36,7 @@ class ComandoEstructuras extends ModelBase {
     {
         $this->id = $id;
     }
-    
+
     public function getId()
     {
         return $this->id;
@@ -115,7 +105,7 @@ class ComandoEstructuras extends ModelBase {
     public function getDescripcion()
     {
         return $this->descripcion;
-    }   
+    }
 
     public function setDescripcion($descripcion)
     {
@@ -125,7 +115,7 @@ class ComandoEstructuras extends ModelBase {
     public function getProcesadorArray()
     {
         return array(
-            'php'   => 'PHP5.4', 
+            'php'   => 'PHP5.4',
             'p7'    => 'PHP7.3',
             'py'    => 'PYTHON3',
             'javac' => 'JAVA COMPILER',
@@ -133,33 +123,33 @@ class ComandoEstructuras extends ModelBase {
         );
     }
 
-    public function getProcesadorDetalle($procesador='')
+    public function getProcesadorDetalle($procesador = '')
     {
-        if(!empty($procesador)){
+        if (!empty($procesador)) {
             $this->procesador = $procesador;
         }
         switch ($this->procesador) {
             case 'p7':
                 return 'PHP7.3';
-            break;
+                break;
             case 'php':
                 return 'PHP5.4';
-            break;
+                break;
             case 'py':
                 return 'PYTHON3';
-            break;
+                break;
             case 'javac':
                 return 'JAVA COMPILER';
-            break;
+                break;
             case 'npm':
                 return 'NODE.JS';
-            break;
+                break;
         }
     }
 
     public function initialize()
     {
-        $this->hasMany("estructura","comandos","id");
-        $this->belongsTo("estructura","comandos","id");
+        $this->hasMany("estructura", "comandos", "id");
+        $this->belongsTo("estructura", "comandos", "id");
     }
 }
