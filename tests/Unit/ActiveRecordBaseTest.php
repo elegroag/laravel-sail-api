@@ -6,7 +6,7 @@ use Tests\TestCase;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Models\Adapter\ActiveRecordBase;
+use App\Models\Adapter\DbBase;
 use Illuminate\Support\Facades\DB;
 
 class ActiveRecordBaseTest extends TestCase
@@ -30,7 +30,7 @@ class ActiveRecordBaseTest extends TestCase
 
     public function test_insert_and_fetch()
     {
-        $ar = new ActiveRecordBase();
+        $ar = DbBase::rawConnect();
 
         $empresaId = DB::table('empresas')->first()->id;
 
@@ -47,7 +47,7 @@ class ActiveRecordBaseTest extends TestCase
 
     public function test_inQuery_and_fetchArray()
     {
-        $ar = new ActiveRecordBase();
+        $ar = DbBase::rawConnect();
         DB::table('trabajadores')->insert([
             'nombres' => 'X',
             'apellidos' => 'Y',
@@ -75,7 +75,7 @@ class ActiveRecordBaseTest extends TestCase
 
     public function test_update_and_delete_and_transactions()
     {
-        $ar = new ActiveRecordBase();
+        $ar = DbBase::rawConnect();
         DB::table('trabajadores')->insert([
             'nombres' => 'T',
             'apellidos' => 'U',

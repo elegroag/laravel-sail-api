@@ -1,0 +1,94 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "lib": [
+            "ES2020",
+            "DOM",
+            "DOM.Iterable"
+        ],
+        "allowUmdGlobalAccess": true,
+        "noImplicitAny": false,
+        "strictNullChecks": false,
+        "noImplicitOverride": true,
+        "strictPropertyInitialization": false,
+        "strictFunctionTypes": false,
+        "noImplicitThis": false,
+        "module": "UMD",
+        "target": "ES2020",
+        "checkJs": true,
+        "diagnostics": true,
+        "moduleResolution": "node",
+        "strict": true,
+        "noEmit": true,
+        "isolatedModules": true,
+        "allowJs": true,
+        "alwaysStrict": true,
+        "skipLibCheck": true,
+        "noUnusedParameters": true,
+        "noUnusedLocals": true,
+        "moduleDetection": "force",
+        "allowImportingTsExtensions": true,
+        "paths": {
+            "@/": [
+                "src/"
+            ],
+            "$": [
+                "./assets/jquery/jquery.js"
+            ],
+            "bootstrap": [
+                "./assets/bootstrap/js/bootstrap.bundle.js"
+            ],
+            "_": [
+                "./assets/underscore/underscore-umd.js"
+            ],
+            "Backbone": [
+                "./assets/backbone/backbone.js"
+            ],
+            "Swal": [
+                "./assets/sweetalert2/dist/sweetalert2.all.js"
+            ],
+            "Konva": [
+                "./assets/konva/konva.js"
+            ],
+            "DataTable": [
+                "./assets/datatables.net/js/dataTables.js"
+            ],
+            "Noty": [
+                "./assets/noty/noty.js"
+            ],
+            "select2": [
+                "./assets/select2/js/select2.js"
+            ],
+            "validate": [
+                "./assets/validators/jquery.validate.js"
+            ]
+        }
+    },
+    "exclude": [
+        "./img",
+        "./css",
+        "./docs",
+        "./files",
+        "./secureimage",
+        "./temp",
+        "./javascript/**/*.js",
+        "./src/Cajas/**/*.js",
+        "./src/Sat/**/*.js"
+    ],
+    "include": [
+        "./src/**/*.js"
+    ],
+    "typeAcquisition": {
+        "enable": true,
+        "include": [
+            "jquery",
+            "backbone",
+            "underscore",
+            "select2",
+            "sweetalert2",
+            "noty",
+            "bootstrap",
+            "Chart"
+        ]
+    }
+}

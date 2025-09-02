@@ -7,6 +7,10 @@ use App\Models\Adapter\ModelBase;
 class Empresa extends ModelBase
 {
 
+    protected $table = 'empresas';      
+    public $timestamps = false;
+    protected $primaryKey = 'id';
+
     protected $fillable = [
         'nombre',
         'rut',

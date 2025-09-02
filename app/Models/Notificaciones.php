@@ -1,0 +1,141 @@
+<?php
+namespace App\Models;
+
+use App\Models\Adapter\ModelBase;
+
+class Notificaciones extends ModelBase
+{
+    
+    protected $table = 'notificaciones';
+    public $timestamps = false;
+    protected $primaryKey = 'id';
+
+    protected $fillable = [
+        'titulo',
+        'descri',
+        'user',
+        'estado',
+        'progre',
+        'result',
+        'dia',
+        'hora',
+    ];
+
+
+
+    public function __construct(Request $request = null)
+    {
+        parent::__construct();
+        if ($request instanceof Request) {
+            $this->id = $request->getParam('id');
+            $this->titulo = $request->getParam('titulo');
+            $this->descri = $request->getParam('descri');
+            $this->user = $request->getParam('user');
+            $this->estado = $request->getParam('estado');
+            $this->progre = $request->getParam('progre');
+            $this->result = $request->getParam('result');
+            $this->dia = $request->getParam('dia');
+            $this->hora = $request->getParam('hora');
+        }
+    }
+
+    protected $id;
+    protected $titulo;
+    protected $descri;
+    protected $user;
+    protected $estado;
+    protected $progre;
+    protected $result;
+    protected $dia;
+    protected $hora;
+
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
+
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    public function setTitulo($titulo)
+    {
+        $this->titulo = $titulo;
+    }
+
+    public function getTitulo()
+    {
+        return $this->titulo;
+    }
+
+    public function setDescri($descri)
+    {
+        $this->descri = $descri;
+    }
+
+    public function getDescri()
+    {
+        return $this->descri;
+    }
+
+    public function setUser($user)
+    {
+        $this->user = $user;
+    }
+
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    public function setEstado($estado)
+    {
+        $this->estado = $estado;
+    }
+
+    public function getEstado()
+    {
+        return $this->estado;
+    }
+
+    public function setProgre($progre)
+    {
+        $this->progre = $progre;
+    }
+
+    public function getProgre()
+    {
+        return $this->progre;
+    }
+
+    public function setResult($result)
+    {
+        $this->result = $result;
+    }
+
+    public function getResult()
+    {
+        return $this->result;
+    }
+
+    public function setDia($dia)
+    {
+        $this->dia = $dia;
+    }
+
+    public function getDia()
+    {
+        return $this->dia;
+    }
+
+    public function setHora($hora)
+    {
+        $this->hora = $hora;
+    }
+
+    public function getHora()
+    {
+        return $this->hora;
+    }
+}

@@ -1,0 +1,183 @@
+<?php
+namespace App\Models;
+
+use App\Models\Adapter\ModelBase;
+
+class Mercurio33 extends ModelBase
+{
+    protected $table = 'mercurio33';
+    public $timestamps = false;
+    protected $primaryKey = 'id';
+
+    protected $fillable = [
+        'tipo',
+        'coddoc',
+        'documento',
+        'campo',
+        'antval',
+        'valor',
+        'estado',
+        'motivo',
+        'fecest',
+        'usuario',
+        'actualizacion',
+    ];
+
+
+    protected $id;
+    protected $tipo;
+    protected $coddoc;
+    protected $documento;
+    protected $campo;
+    protected $antval;
+    protected $valor;
+    protected $estado;
+    protected $motivo;
+    protected $fecest;
+    protected $usuario;
+    protected $actualizacion;
+
+    public function __construct(
+        $id = null,
+        $tipo = null,
+        $coddoc = null,
+        $documento = null,
+        $campo = null,
+        $antval = null,
+        $valor = null,
+        $estado = null,
+        $motivo = null,
+        $fecest = null,
+        $usuario = null,
+        $actualizacion = null
+    ) {
+        $this->id = $id;
+        $this->tipo = $tipo;
+        $this->coddoc = $coddoc;
+        $this->documento = $documento;
+        $this->campo = $campo;
+        $this->antval = $antval;
+        $this->valor = $valor;
+        $this->estado = $estado;
+        $this->motivo = $motivo;
+        $this->fecest = $fecest;
+        $this->usuario = $usuario;
+        $this->actualizacion = $actualizacion;
+    }
+
+    public function getEstadoDetalle()
+    {
+        $return = "";
+        if ($this->estado == "T") $return = "TEMPORAL";
+        if ($this->estado == "D") $return = "DEVUELTO";
+        if ($this->estado == "A") $return = "APROBADO";
+        if ($this->estado == "X") $return = "RECHAZADO";
+        if ($this->estado == "P") $return = "PENDIENTE";
+        return $return;
+    }
+
+    public function createAttributes($data)
+    {
+        parent::setCreateAttributes($this, $data);
+    }
+
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
+
+    public function setTipo($tipo)
+    {
+        $this->tipo = $tipo;
+    }
+
+    public function setCoddoc($coddoc)
+    {
+        $this->coddoc = $coddoc;
+    }
+
+    public function setDocumento($documento)
+    {
+        $this->documento = $documento;
+    }
+
+    public function setCampo($campo)
+    {
+        $this->campo = $campo;
+    }
+
+    public function setAntval($antval)
+    {
+        $this->antval = $antval;
+    }
+
+    public function setValor($valor)
+    {
+        $this->valor = $valor;
+    }
+
+    public function setEstado($estado)
+    {
+        $this->estado = $estado;
+    }
+
+    public function setMotivo($motivo)
+    {
+        $this->motivo = $motivo;
+    }
+
+    public function setFecest($fecest)
+    {
+        $this->fecest = $fecest;
+    }
+
+    public function setUsuario($usuario)
+    {
+        $this->usuario = $usuario;
+    }
+
+    public function setActualizacion($actualizacion)
+    {
+        $this->actualizacion = $actualizacion;
+    }
+
+    public function getCampo()
+    {
+        return $this->campo;
+    }
+
+    public function getAntval()
+    {
+        return $this->antval;
+    }
+
+    public function getValor()
+    {
+        return $this->valor;
+    }
+
+    public function getFecest()
+    {
+        return $this->fecest;
+    }
+
+    public function getMotivo()
+    {
+        return $this->motivo;
+    }
+
+    public function __get($property)
+    {
+        if (property_exists($this, $property)) {
+            return $this->$property;
+        }
+    }
+
+    public function __set($property, $value)
+    {
+        if (property_exists($this, $property)) {
+            $this->$property = $value;
+        }
+        return $this;
+    }
+}

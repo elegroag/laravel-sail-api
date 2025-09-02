@@ -5,10 +5,12 @@ namespace App\Models\Adapter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Thiagoprz\CompositeKey\HasCompositeKey;
 
 class ModelBase extends Model
 {
     use HasFactory;
+    use HasCompositeKey;
 
     public function __construct()
     {
@@ -409,5 +411,22 @@ class ModelBase extends Model
             }
         }
         return $query->delete();
+    }
+
+    public function getArray(){
+        return $this->toArray();
+    }
+
+    public function setCreateAttributes($clase, $data = null)
+    {
+        if(is_array($data) || is_object($data))
+        {
+            foreach ($data as $prop => $valor)
+            {
+                if(property_exists($clase, $prop)){
+                    $clase->$prop = "$valor";
+                }
+            }
+        }
     }
 }

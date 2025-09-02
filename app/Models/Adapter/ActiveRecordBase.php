@@ -4,7 +4,7 @@ namespace App\Models\Adapter;
 
 use Illuminate\Support\Facades\DB;
 
-class ActiveRecordBase
+class ModelBaseBase
 {
 
     public function find(string $table, string $where = "", string $fields = "*", $orderBy = "1")

@@ -46,3 +46,4 @@ Route::get('/web/nucleos-familiares/{id}', [WebController::class, 'nucleosFamili
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
+require __DIR__ . '/mercurio.php';
