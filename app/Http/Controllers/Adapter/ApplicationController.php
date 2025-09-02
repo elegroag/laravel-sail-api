@@ -6,19 +6,8 @@ use App\Http\Controllers\Controller;
 
 class ApplicationController extends Controller
 {
-    public $request;
     private $models = array();
     
-    public function __construct()
-    {
-        $this->request = request();
-    }
-    
-    public function getPostParam($name)
-    {
-        return $this->request->input($name);
-    }
-
     public function __get(string $name='')
     {
         if (class_exists($name, false)) {

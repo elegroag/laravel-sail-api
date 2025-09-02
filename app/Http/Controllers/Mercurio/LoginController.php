@@ -50,10 +50,10 @@ class LoginController extends ApplicationController
     public function autenticarAction(Request $request, Response $response)
     {
         try {
-            $tipo = $request->input("tipo", "striptags", "extraspaces");
-            $documento = $request->input("documento", "striptags", "extraspaces");
-            $coddoc = $request->input("coddoc", "striptags", "extraspaces");
-            $clave = $request->input("clave", "extraspaces");
+            $tipo = $request->input("tipo");
+            $documento = $request->input("documento");
+            $coddoc = $request->input("coddoc");
+            $clave = $request->input("clave");
             $res = False;
 
             switch ($tipo) {
@@ -172,12 +172,19 @@ class LoginController extends ApplicationController
             }
 
             if ($mercurio07->getClave() != md5(password_hash_old(strval($clave)))) {
-                throw new \Exception("Error el valor de la clave no es valido para ingresar a la plataforma.", 503);
+                throw new DebugException("Error el valor de la clave no es valido para ingresar a la plataforma.", 503);
             }
 
-            $auth = new SessionCookies('model', "class: Mercurio07", "tipo: {$tipo}", "coddoc: {$coddoc}", "documento: {$documento}", "estado: A");
+            $auth = new SessionCookies(
+                "model: Mercurio07", 
+                "tipo: {$tipo}", 
+                "coddoc: {$coddoc}", 
+                "documento: {$documento}", 
+                "estado: A"
+            );
+            
             if (!$auth->authenticate()) {
-                throw new \Exception("Error acceso incorrecto. No se logra completar la autenticación", 504);
+                throw new DebugException("Error acceso incorrecto. No se logra completar la autenticación", 504);
             } else {
                 $this->autoFirma($documento, $coddoc);
                 $msj = "La autenticación se ha completado con éxito.";
@@ -188,7 +195,7 @@ class LoginController extends ApplicationController
                 );
 
             }
-        } catch (\Exception $e) {
+        } catch (DebugException $e) {
             $response = array(
                 "success" => false,
                 "msj" => $e->getMessage() . ' ' . $e->getLine() . ' ' . basename($e->getFile())
@@ -210,7 +217,7 @@ class LoginController extends ApplicationController
      * Opción solo para el caso de olvido de clave, para empresas o afiliados comfaca.
      * @return void
      */
-    public function recuperar_claveAction(Request $request)
+    public function recuperarClaveAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
@@ -405,14 +412,12 @@ class LoginController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function guia_afiliationAction() {}
-
-    public function guia_videosAction()
+    public function guiaVideosAction()
     {
         # $this->setParamToView("path_externo", "https://www.comfacaenlinea.com.co/public/");
     }
 
-    public function valida_emailAction(Request $request)
+    public function validaEmailAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
@@ -441,8 +446,9 @@ class LoginController extends ApplicationController
         $this->renderObject($response);
     }
 
-    public function download_docsAction($archivo)
+    public function download_docsAction(Request $request, Response $response)
     {
+        $archivo = $request->route('archivo');
         $fichero = "public/docs/formulario_mercurio/" . $archivo;
         $ext = substr(strrchr($archivo, "."), 1);
         if (file_exists($fichero)) {
@@ -462,7 +468,7 @@ class LoginController extends ApplicationController
         }
     }
 
-    public function fuera_servicioAction()
+    public function fueraServicioAction()
     {
         $this->setResponse("empty");
         $msj = "El sistema se encuentra en estado de actualización y mantenimiento.<br/> 
@@ -473,7 +479,7 @@ class LoginController extends ApplicationController
         $this->setParamToView("nota", $msj); */
     }
 
-    public function integracion_servicioAction()
+    public function integracionServicioAction()
     {
         $this->setResponse('ajax');
         return $this->renderObject(
@@ -749,27 +755,7 @@ class LoginController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    function autoFirma($documento, $coddoc)
-    {
-        $gestionFirmas = new GestionFirmaNoImage(
-            array(
-                "documento" => $documento,
-                "coddoc" => $coddoc
-            )
-        );
-        if ($gestionFirmas->hasFirma() == False) {
-            $gestionFirmas->guardarFirma();
-            $gestionFirmas->generarClaves();
-        } else {
-            $firma = $gestionFirmas->getFirma();
-            if (is_null($firma->getKeypublic()) || is_null($firma->getKeyprivate())) {
-                $gestionFirmas->guardarFirma();
-                $gestionFirmas->generarClaves();
-            }
-        }
-    }
-
-    public function cambio_correoAction(Request $request)
+    public function cambioCorreoAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
@@ -852,4 +838,25 @@ class LoginController extends ApplicationController
         }
         return $this->renderObject($salida);
     }
+
+    function autoFirma($documento, $coddoc)
+    {
+        $gestionFirmas = new GestionFirmaNoImage(
+            array(
+                "documento" => $documento,
+                "coddoc" => $coddoc
+            )
+        );
+        if ($gestionFirmas->hasFirma() == False) {
+            $gestionFirmas->guardarFirma();
+            $gestionFirmas->generarClaves();
+        } else {
+            $firma = $gestionFirmas->getFirma();
+            if (is_null($firma->getKeypublic()) || is_null($firma->getKeyprivate())) {
+                $gestionFirmas->guardarFirma();
+                $gestionFirmas->generarClaves();
+            }
+        }
+    }
+
 }
