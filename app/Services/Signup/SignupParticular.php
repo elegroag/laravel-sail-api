@@ -8,9 +8,9 @@ use App\Models\Mercurio07;
 use App\Models\Mercurio30;
 use App\Services\Request;
 use App\Services\Utils\Comman;
+use App\Services\Utils\CrearUsuario;
 use App\Services\Utils\Generales;
 use App\Services\Utils\SenderEmail;
-use CrearUsuario;
 
 class SignupParticular
 {

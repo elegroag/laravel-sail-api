@@ -93,3 +93,21 @@ if (!function_exists('decrypt')) {
         return $token;
     }
 }
+
+if (!function_exists('generaCode')) {
+    function generaCode(int|null $length = null)
+    {
+        $code = "";
+        if (!$length) {
+            $seed = str_split('1234567890');
+            shuffle($seed);
+            foreach (array_rand($seed, 4) as $k) $code .= $seed[$k];
+            return $code;
+        } else {
+            $seed = str_split('abcdefghijklmnopqrstuvwxyz1234567890');
+            shuffle($seed);
+            foreach (array_rand($seed, $length) as $k) $code .= $seed[$k];
+        }
+        return $code;
+    }
+}

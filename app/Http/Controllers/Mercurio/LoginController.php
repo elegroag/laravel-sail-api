@@ -1,13 +1,37 @@
 <?php
 namespace App\Http\Controllers\Mercurio;
 
+use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
+use App\Library\Auth\AuthCSRF;
+use App\Library\Auth\AuthJwt;
+use App\Library\Auth\SessionCookies;
 use App\Models\Gener09;
 use App\Models\Gener18;
+use App\Models\Mercurio01;
 use App\Models\Mercurio07;
+use App\Models\Mercurio19;
+use App\Models\Mercurio30;
 use App\Models\Subsi54;
+use App\Services\Autentications\AutenticaEmpresa;
+use App\Services\Autentications\AutenticaTrabajador;
+use App\Services\Autentications\AutenticaIndependiente;
+use App\Services\Autentications\AutenticaPensionado;
+use App\Services\Autentications\AutenticaFacultativo;
+use App\Services\Autentications\AutenticaParticular;
+use App\Services\Entidades\NotificacionService;
+use App\Services\PreparaFormularios\GestionFirmaNoImage;
+use App\Services\Signup\SignupDomestico;
+use App\Services\Signup\SignupEmpresas;
+use App\Services\Signup\SignupFacultativos;
+use App\Services\Signup\SignupIndependientes;
+use App\Services\Signup\SignupParticular;
+use App\Services\Signup\SignupPensionados;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Services\Request as RequestParams;
+use App\Services\Utils\AsignarFuncionario;
+use App\Services\Utils\SenderEmail;
 
 class LoginController extends ApplicationController
 {
@@ -26,50 +50,39 @@ class LoginController extends ApplicationController
     public function autenticarAction(Request $request, Response $response)
     {
         try {
-            $tipo = $this->getPostParam("tipo", "striptags", "extraspaces");
-            $documento = $this->getPostParam("documento", "striptags", "extraspaces");
-            $coddoc = $this->getPostParam("coddoc", "striptags", "extraspaces");
-            $clave = $this->getPostParam("clave", "extraspaces");
+            $tipo = $request->input("tipo", "striptags", "extraspaces");
+            $documento = $request->input("documento", "striptags", "extraspaces");
+            $coddoc = $request->input("coddoc", "striptags", "extraspaces");
+            $clave = $request->input("clave", "extraspaces");
             $res = False;
 
             switch ($tipo) {
                 case 'E':
-                    $autentica = $services->get('AutenticaEmpresa', true);
+                    $autentica = new AutenticaEmpresa();
                     $res = $autentica->comprobarSISU($documento, $coddoc);
-                    $autentica->endTransa();
                     break;
                 case 'T':
-                    $autentica = $services->get('AutenticaTrabajador', true);
+                    $autentica = new AutenticaTrabajador();
                     $res = $autentica->comprobarSISU($documento, $coddoc);
-                    $autentica->endTransa();
                     break;
                 case 'I':
-                    $autentica = $services->get('AutenticaIndependiente', true);
+                    $autentica = new AutenticaIndependiente();
                     $res = $autentica->comprobarSISU($documento, $coddoc);
-                    $autentica->endTransa();
                     break;
                 case 'O':
-                    $autentica = $services->get('AutenticaPensionado', true);
+                    $autentica = new AutenticaPensionado();
                     $res = $autentica->comprobarSISU($documento, $coddoc);
-                    $autentica->endTransa();
                     break;
                 case 'F':
-                    $autentica = $services->get('AutenticaFacultativo', true);
+                    $autentica = new AutenticaFacultativo();
                     $res = $autentica->comprobarSISU($documento, $coddoc);
-                    $autentica->endTransa();
                     break;
                 case 'P':
-                    $autentica = $services->get('AutenticaParticular', true);
+                    $autentica = new AutenticaParticular();
                     $res = $autentica->comprobarSISU($documento, $coddoc);
-                    $autentica->endTransa();
-                    break;
-                case 'N':
-                    $autentica = $services->get('AutenticaFoninnez', true);
-                    $res = $autentica->comprobarSISU($documento, $coddoc);
-                    $autentica->endTransa();
                     break;
                 default:
-                    throw new Exception("Error de acceso, el tipo ingreso es requerido.", 501);
+                    throw new DebugException("Error de acceso, el tipo ingreso es requerido.", 501);
                     break;
             }
 
@@ -88,27 +101,27 @@ class LoginController extends ApplicationController
             if ($mercurio07 == False) $mercurio07 = $autentica->getAfiliado();
 
             if ($mercurio07 == False) {
-                throw new Exception("Error acceso incorrecto. Los datos no corresponden a un usuario registrado en el sistema.", 501);
+                throw new DebugException("Error acceso incorrecto. Los datos no corresponden a un usuario registrado en el sistema.", 501);
             }
 
             if ($clave === 'xxxx') {
 
                 if ($tipo == 'N' || $tipo == 'P') {
-                    throw new Exception("Alerta. El usuario ya posee un registro en plataforma y requiere de ingresar con la clave valida.", 501);
+                    throw new DebugException("Alerta. El usuario ya posee un registro en plataforma y requiere de ingresar con la clave valida.", 501);
                 } else {
                     //create validation mediante token
-                    $codigoVerify = $this->generaCode();
+                    $codigoVerify = generaCode();
                     $autentica->verificaPin($mercurio07, $codigoVerify);
 
                     $authJwt = new AuthJwt();
                     $token = $authJwt->SimpleToken();
 
-                    $user19 = (new Mercurio19)->findFirst("documento='{$documento}' AND coddoc='{$coddoc}' AND tipo='{$tipo}'");
+                    $user19 = (new Mercurio19())->findFirst("documento='{$documento}' AND coddoc='{$coddoc}' AND tipo='{$tipo}'");
                     $inicio  = date('Y-m-d H:i:s');
                     if ($user19) {
-                        $momento = new DateTime($user19->getInicio());
+                        $momento = new \DateTime($user19->getInicio());
                         // Obtener el momento actual
-                        $ahora = new DateTime("now");
+                        $ahora = new \DateTime("now");
                         // Calcular la diferencia
                         $diferencia = $momento->diff($ahora);
                         // Convertir la diferencia a minutos
@@ -136,7 +149,7 @@ class LoginController extends ApplicationController
                         if (!$user19->save()) {
                             $msj = '';
                             foreach ($user19->getMessages() as $message)  $msj .= ' ' . $message->getMessage();
-                            throw new Exception("Error al guardar Token Access, {$msj}", 501);
+                            throw new DebugException("Error al guardar Token Access, {$msj}", 501);
                         }
                     }
 
@@ -162,7 +175,7 @@ class LoginController extends ApplicationController
                 throw new \Exception("Error el valor de la clave no es valido para ingresar a la plataforma.", 503);
             }
 
-            $auth = new Auth('model', "class: Mercurio07", "tipo: {$tipo}", "coddoc: {$coddoc}", "documento: {$documento}", "estado: A");
+            $auth = new SessionCookies('model', "class: Mercurio07", "tipo: {$tipo}", "coddoc: {$coddoc}", "documento: {$documento}", "estado: A");
             if (!$auth->authenticate()) {
                 throw new \Exception("Error acceso incorrecto. No se logra completar la autenticación", 504);
             } else {
@@ -187,8 +200,8 @@ class LoginController extends ApplicationController
 
     public function salirAction()
     {
-        Auth::destroyIdentity();
-        Router::rTa("login/index");
+        SessionCookies::destroyIdentity();
+        redirect("login/index");
         exit;
     }
 
@@ -197,50 +210,41 @@ class LoginController extends ApplicationController
      * Opción solo para el caso de olvido de clave, para empresas o afiliados comfaca.
      * @return void
      */
-    public function recuperar_claveAction()
+    public function recuperar_claveAction(Request $request)
     {
         $this->setResponse("ajax");
-        $services = Services::Init();
         try {
-            $documento = $this->getPostParam('documento', "addslaches", "extraspaces", "striptags");
-            $coddoc = $this->getPostParam('coddoc', "addslaches", "extraspaces", "striptags");
-            $email = strtolower($this->getPostParam('email', "addslaches", "extraspaces", "striptags"));
-            $tipo = $this->getPostParam('tipo', "addslaches", "extraspaces", "striptags");
+            $documento = $request->input('documento');
+            $coddoc = $request->input('coddoc');
+            $email = strtolower($request->input('email'));
+            $tipo = $request->input('tipo');
 
             $res = False;
             switch ($tipo) {
                 case 'E':
-                    $autentica = $services->get('AutenticaEmpresa', true);
+                    $autentica = new AutenticaEmpresa();
                     $res = $autentica->comprobarSISU($documento, $coddoc);
-                    $autentica->endTransa();
+                    
                     break;
                 case 'T':
-                    $autentica = $services->get('AutenticaTrabajador', true);
+                    $autentica = new AutenticaTrabajador();
                     $res = $autentica->comprobarSISU($documento, $coddoc);
-                    $autentica->endTransa();
+                    
                     break;
                 case 'I':
-                    $autentica = $services->get('AutenticaIndependiente', true);
+                    $autentica = new AutenticaIndependiente();
                     $res = $autentica->comprobarSISU($documento, $coddoc);
-                    $autentica->endTransa();
                     break;
                 case 'O':
-                    $autentica = $services->get('AutenticaPensionado', true);
+                    $autentica = new AutenticaPensionado();
                     $res = $autentica->comprobarSISU($documento, $coddoc);
-                    $autentica->endTransa();
                     break;
                 case 'P':
-                    $autentica = $services->get('AutenticaParticular', true);
+                    $autentica = new AutenticaParticular();
                     $res = $autentica->comprobarSISU($documento, $coddoc);
-                    $autentica->endTransa();
-                    break;
-                case 'N':
-                    $autentica = $services->get('AutenticaFoninnez', true);
-                    $res = $autentica->comprobarSISU($documento, $coddoc);
-                    $autentica->endTransa();
                     break;
                 default:
-                    throw new Exception("Error de acceso, el tipo ingreso es requerido.", 501);
+                    throw new DebugException("Error de acceso, el tipo ingreso es requerido.", 501);
                     break;
             }
 
@@ -255,18 +259,18 @@ class LoginController extends ApplicationController
 
             $mercurio07 = $autentica->getAfiliado();
             if ($mercurio07 == False) {
-                throw new Exception("Error acceso incorrecto. Los datos no corresponden a un usuario registrado en el sistema.", 501);
+                throw new DebugException("Error acceso incorrecto. Los datos no corresponden a un usuario registrado en el sistema.", 501);
             }
 
             $usuarioEmail = trim(strtolower($mercurio07->getEmail()));
             if ($usuarioEmail != $email) {
-                throw new Exception("Error, la dirección de email no es igual a la que tenemos registrada. " .
+                throw new DebugException("Error, la dirección de email no es igual a la que tenemos registrada. " .
                     "Y por tal motivo, no se puede restablecer la clave de acceso.  El indicio de email que está registrado es: " . mask_email($mercurio07->getEmail()), 503);
             }
 
             $res = $autentica->cambiarClave();
             if ($res == False) {
-                throw new Exception("Error no es posible el cambiar la clave del usuario, el afiliado no es valido", 501);
+                throw new DebugException("Error no es posible el cambiar la clave del usuario, el afiliado no es valido", 501);
             }
 
             $this->autoFirma($mercurio07->getDocumento(), $mercurio07->getCoddoc());
@@ -275,7 +279,7 @@ class LoginController extends ApplicationController
                 "success" => true,
                 "msj" => "El proceso se completo con éxito. Se envío un correo a su cuenta con su nueva clave."
             );
-        } catch (Exception $error) {
+        } catch (DebugException $error) {
             $response = array(
                 "success" => false,
                 "msj" => $error->getMessage() . ' ' . $error->getLine()
@@ -290,48 +294,47 @@ class LoginController extends ApplicationController
      * @author elegroag <elegroag@ibero.edu.co>
      * @return void
      */
-    public function registroAction()
+    public function registroAction(Request $request)
     {
-        $services = Services::Init();
         clearstatcache();
         $this->setResponse("ajax");
         try {
             AuthCSRF::Valid();
-            $cedrep = $this->getPostParam('cedrep', "addslaches", "alpha", "extraspaces", "striptags");
-            $coddoc = $this->getPostParam('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
-            $repleg = $this->getPostParam('repleg', "addslaches", "extraspaces", "striptags");
-            $email = $this->getPostParam('email', "addslaches", "extraspaces", "striptags");
-            $codciu = $this->getPostParam('codciu', "addslaches", "extraspaces", "striptags");
-            $tipper = $this->getPostParam('tipper', "addslaches", "extraspaces", "striptags");
-            $telefono = $this->getPostParam('telefono', "addslaches", "extraspaces", "striptags");
-            $tipo = $this->getPostParam('tipo', "addslaches", "extraspaces", "striptags");
-            $calemp = $this->getPostParam('calemp', "addslaches", "extraspaces", "striptags");
-            $tipsoc = $this->getPostParam('tipsoc', "addslaches", "extraspaces", "striptags");
-            $razsoc = $this->getPostParam('razsoc', "addslaches", "extraspaces", "striptags");
-            $coddocrepleg = $this->getPostParam('coddocrepleg', "addslaches", "alpha", "extraspaces", "striptags");
-            $nit = $this->getPostParam('nit', "addslaches", "alpha", "extraspaces", "striptags");
+            $cedrep = $request->input('cedrep');
+            $coddoc = $request->input('coddoc');
+            $repleg = $request->input('repleg');
+            $email = $request->input('email');
+            $codciu = $request->input('codciu');
+            $tipper = $request->input('tipper');
+            $telefono = $request->input('telefono');
+            $tipo = $request->input('tipo');
+            $calemp = $request->input('calemp');
+            $tipsoc = $request->input('tipsoc');
+            $razsoc = $request->input('razsoc');
+            $coddocrepleg = $request->input('coddocrepleg');
+            $nit = $request->input('nit');
 
             switch ($tipo) {
                 case 'E':
-                    $signupEntity = $services->get('SignupEmpresas', true);
+                    $signupEntity = new SignupEmpresas();
                     break;
                 case 'I':
-                    $signupEntity = $services->get('SignupIndependientes', true);
+                    $signupEntity = new SignupIndependientes();
                     break;
                 case 'F':
-                    $signupEntity = $services->get('SignupFacultativos', true);
+                    $signupEntity = new SignupFacultativos();
                     break;
                 case 'O':
-                    $signupEntity = $services->get('SignupPensionados', true);
+                    $signupEntity = new SignupPensionados();
                     break;
                 case 'S':
-                    $signupEntity = $services->get('SignupDomestico', true);
+                    $signupEntity = new SignupDomestico();
                     break;
                 case 'P':
-                    $signupParticular = new SignupParticular(false);
-                    $signupParticular->setTransa();
+
+                    $signupParticular = new SignupParticular();
                     $signupParticular->settings(
-                        new Request(
+                        new RequestParams(
                             array(
                                 "documento" => $cedrep,
                                 "coddoc" => $coddoc,
@@ -344,21 +347,21 @@ class LoginController extends ApplicationController
                         )
                     );
                     $signupParticular->createUserMercurio();
-                    $signupParticular->endTransa();
+                    
                     $solicitud = $this->Mercurio07->findFirst("coddoc='{$coddoc}' and documento='{$cedrep}' and tipo='{$tipo}'");
                     break;
                 default:
-                    throw new Exception("Error el tipo de afiliación es requerido", 1);
+                    throw new DebugException("Error el tipo de afiliación es requerido", 1);
                     break;
             }
 
             if ($tipo !== 'P') {
-                $this->asignarFuncionario = $services->get('AsignarFuncionario');
+                $this->asignarFuncionario = new AsignarFuncionario();
                 $usuario = $this->asignarFuncionario->asignar($signupEntity->getTipopc(), $codciu);
 
                 $signupParticular = new SignupParticular($signupEntity);
                 $signupParticular->main(
-                    new Request(
+                    new RequestParams(
                         array(
                             "nit" => $nit,
                             "cedrep" => $cedrep,
@@ -377,8 +380,6 @@ class LoginController extends ApplicationController
                         )
                     )
                 );
-
-                $signupParticular->endTransa();
                 $solicitud = $signupEntity->getSolicitud();
             }
 
@@ -394,7 +395,7 @@ class LoginController extends ApplicationController
                 "tipafi" => $tipo,
                 "id" => ($tipo == 'P') ? $solicitud->getDocumento() : $solicitud->getId()
             );
-        } catch (Exception $e) {
+        } catch (DebugException $e) {
             $response = array(
                 "success" => false,
                 "msj" => $e->getMessage() . "<br/> También puedes comunicar a soporte técnico el problema presentado, dirección soportesistemas.comfaca@gmail.com, línea 4366300 ext 1012",
@@ -408,42 +409,36 @@ class LoginController extends ApplicationController
 
     public function guia_videosAction()
     {
-        $this->setParamToView("path_externo", "https://www.comfacaenlinea.com.co/public/");
+        # $this->setParamToView("path_externo", "https://www.comfacaenlinea.com.co/public/");
     }
 
-    public function valida_emailAction()
+    public function valida_emailAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
-            try {
-                $email = trim(strtoupper($this->getPostParam('email')));
-                $documento = trim($this->getPostParam('documento'));
-                $nit = trim($this->getPostParam('nit'));
+                $email = trim(strtoupper($request->input('email')));
+                $documento = trim($request->input('documento'));
+                $nit = trim($request->input('nit'));
 
                 $l = (new Mercurio30)->count(
                     "*",
                     "conditions: UPPER(email)='{$email}' AND documento NOT IN('{$documento}','{$nit}')"
                 );
                 if ($l > 0) {
-                    throw new Exception("Error, ya se encuentra un registro con el email ingresado: " . mask_email($email), 501);
+                    throw new DebugException("Error, ya se encuentra un registro con el email ingresado: " . mask_email($email), 501);
                 }
                 $response = array(
                     "success" => true,
                     "msj" => "El email está disponible para el registro"
                 );
-            } catch (DbException $e) {
-                $response = array(
-                    "success" => false,
-                    "msj" => $e->getMessage()
-                );
-            }
-        } catch (Exception $err) {
+
+        } catch (DebugException $err) {
             $response = array(
                 "success" => false,
                 "msj" => $err->getMessage()
             );
         }
-        $this->renderText(json_encode($response));
+        $this->renderObject($response);
     }
 
     public function download_docsAction($archivo)
@@ -462,31 +457,31 @@ class LoginController extends ApplicationController
             readfile($fichero);
             exit;
         } else {
-            $this->redirect('login/index');
+            redirect('login/index');
             exit();
         }
     }
 
     public function fuera_servicioAction()
     {
-        $this->setTemplateAfter('none');
+        $this->setResponse("empty");
         $msj = "El sistema se encuentra en estado de actualización y mantenimiento.<br/> 
         Con el fin de corregir errores y actualizar a versiones más seguras y óptimas que buscan la satisfacción de sus usuarios.</br>";
+       /* 
         $this->setParamToView("hora_inicia", "3:30");
         $this->setParamToView("hora_finaliza", "4:30");
-        $this->setParamToView("nota", $msj);
+        $this->setParamToView("nota", $msj); */
     }
 
     public function integracion_servicioAction()
     {
         $this->setResponse('ajax');
-        Core::ConfigMode();
         return $this->renderObject(
             array(
                 "success" => true,
                 "data" => array(
-                    'fuera_servicio' => Core::$modeIntegration,
-                    'msj' => (Core::$modeIntegration == true) ? 'El servicio está suspendido temporalmente.' : 'La ventana de mantenimiento se ha completado con éxito. Muchas gracias por la espera.'
+                    'fuera_servicio' => env('APP_MODE_INTEGRATION', false),
+                    'msj' => (env('APP_MODE_INTEGRATION', false) == true) ? 'El servicio está suspendido temporalmente.' : 'La ventana de mantenimiento se ha completado con éxito. Muchas gracias por la espera.'
                 )
             )
         );
@@ -571,31 +566,29 @@ class LoginController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function verifyAction()
+    public function verifyAction(Request $request)
     {
         $this->setResponse("ajax");
-        Services::Init();
         try {
-            Core::middlewares('AuthJwt');
             $authJwt = new AuthJwt(1000);
             $authJwt->CheckSimpleToken();
 
-            $documento = sanetizar($this->getPostParam('documento', "addslaches", "alpha", "extraspaces", "striptags"));
-            $coddoc = sanetizar($this->getPostParam('coddoc', "addslaches", "alpha", "extraspaces", "striptags"));
-            $tipo = sanetizar($this->getPostParam('tipo', "addslaches", "extraspaces", "striptags"));
-            $tipafi = sanetizar($this->getPostParam('tipafi', "addslaches", "extraspaces", "striptags"));
-            $id = sanetizar($this->getPostParam('id', "addslaches", "extraspaces", "striptags"));
+            $documento = $request->input('documento');
+            $coddoc = $request->input('coddoc');
+            $tipo = $request->input('tipo');
+            $tipafi = $request->input('tipafi');
+            $id = $request->input('id');
 
             $code = array(
-                sanetizar($this->getPostParam('code_1', "addslaches", "alpha", "extraspaces", "striptags")),
-                sanetizar($this->getPostParam('code_2', "addslaches", "alpha", "extraspaces", "striptags")),
-                sanetizar($this->getPostParam('code_3', "addslaches", "alpha", "extraspaces", "striptags")),
-                sanetizar($this->getPostParam('code_4', "addslaches", "alpha", "extraspaces", "striptags")),
+                $request->input('code_1', "addslashes", "alpha", "extraspaces", "striptags"),
+                $request->input('code_2', "addslashes", "alpha", "extraspaces", "striptags"),
+                $request->input('code_3', "addslashes", "alpha", "extraspaces", "striptags"),
+                $request->input('code_4', "addslashes", "alpha", "extraspaces", "striptags"),
             );
 
             $user07 = (new Mercurio07)->findFirst(" documento='{$documento}' and coddoc='{$coddoc}' and tipo='{$tipo}'");
             if (!$user07) {
-                throw new Exception("Error no es valido el usuario particular", 301);
+                throw new DebugException("Error no es valido el usuario particular", 301);
             }
 
             $error = '';
@@ -604,9 +597,9 @@ class LoginController extends ApplicationController
                 $error .= "Error el token ya no es valido para continuar. \n";
             }
 
-            $momento = new DateTime($user19->getInicio());
+            $momento = new \DateTime($user19->getInicio());
             // Obtener el momento actual
-            $ahora = new DateTime("now");
+            $ahora = new \DateTime("now");
             // Calcular la diferencia
             $diferencia = $momento->diff($ahora);
             // Convertir la diferencia a minutos
@@ -620,7 +613,7 @@ class LoginController extends ApplicationController
 
             if (strlen($error) == 0 && $diferenciaEnMinutos > 5) {
                 //volver a generar PIN
-                $codigoVerify = $this->generaCode();
+                $codigoVerify = generaCode();
                 $inicio  = date('Y-m-d H:i:s');
                 $intentos = '0';
 
@@ -681,7 +674,7 @@ class LoginController extends ApplicationController
                     )
                 );
 
-                $auth = new Auth(
+                $auth = new SessionCookies(
                     'model',
                     "class: Mercurio07",
                     "tipo: {$tipo}",
@@ -691,7 +684,7 @@ class LoginController extends ApplicationController
                 );
 
                 if (!$auth->authenticate()) {
-                    throw new Exception("Error en la autenticación del usuario", 501);
+                    throw new DebugException("Error en la autenticación del usuario", 501);
                 }
 
                 $salida = array(
@@ -716,7 +709,7 @@ class LoginController extends ApplicationController
                     "msj" => $error
                 );
             }
-        } catch (Exception $err) {
+        } catch (DebugException $err) {
             $salida = array(
                 "success" => false,
                 "msj" => $err->getMessage()
@@ -725,14 +718,13 @@ class LoginController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function tokenParticularAction()
+    public function tokenParticularAction(Request $request)
     {
-        Core::middlewares('AuthJwt');
         $this->setResponse("ajax");
         try {
-            $documento = sanetizar($this->getPostParam('documento', "addslaches", "alpha", "extraspaces", "striptags"));
-            $coddoc = sanetizar($this->getPostParam('coddoc', "addslaches", "alpha", "extraspaces", "striptags"));
-            $tipo = sanetizar($this->getPostParam('tipo', "addslaches", "extraspaces", "striptags"));
+            $documento = sanetizar($request->input('documento'));
+            $coddoc = sanetizar($request->input('coddoc'));
+            $tipo = sanetizar($request->input('tipo'));
 
             $authJwt = new AuthJwt();
             $token = $authJwt->SimpleToken();
@@ -741,29 +733,20 @@ class LoginController extends ApplicationController
                 $user19->setToken($token);
                 $user19->save();
             } else {
-                throw new Exception("Error los parametros de acceso no son validos para solicitar token", 301);
+                throw new DebugException("Error los parametros de acceso no son validos para solicitar token", 301);
             }
 
             $salida = array(
                 "success" => true,
                 "token" => $token,
             );
-        } catch (Exception $err) {
+        } catch (DebugException $err) {
             $salida = array(
                 "success" => false,
                 "msj" => $err->getMessage()
             );
         }
         return $this->renderObject($salida);
-    }
-
-    function generaCode()
-    {
-        $codigo_verify = "";
-        $seed = str_split('1234567890');
-        shuffle($seed);
-        foreach (array_rand($seed, 4) as $k) $codigo_verify .= $seed[$k];
-        return $codigo_verify;
     }
 
     function autoFirma($documento, $coddoc)
@@ -786,24 +769,22 @@ class LoginController extends ApplicationController
         }
     }
 
-    public function cambio_correoAction()
+    public function cambio_correoAction(Request $request)
     {
-        Core::middlewares('AuthJwt');
         $this->setResponse("ajax");
         try {
-            $documento = sanetizar($this->getPostParam('documento', "addslaches", "alpha", "extraspaces", "striptags"));
-            $coddoc = sanetizar($this->getPostParam('coddoc', "addslaches", "alpha", "extraspaces", "striptags"));
-            $tipo = sanetizar($this->getPostParam('tipo', "addslaches", "extraspaces", "striptags"));
-            $email = $this->getPostParam('email', "addslaches", "alpha", "extraspaces", "striptags");
-            $telefono = sanetizar($this->getPostParam('telefono', "addslaches", "alpha", "extraspaces", "striptags"));
-            $novedad = $this->getPostParam('novedad', "addslaches", "alpha", "extraspaces", "striptags");
+            $documento = $request->input('documento');
+            $coddoc = $request->input('coddoc');
+            $tipo = $request->input('tipo');
+            $email = $request->input('email');
+            $telefono = $request->input('telefono');
+            $novedad = $request->input('novedad');
 
             $notificacion = new NotificacionService();
-            $notificacion->setTransa();
-
+            
             $user07 = (new Mercurio07)->findFirst(" documento='{$documento}' and coddoc='{$coddoc}' and tipo='{$tipo}'");
             if (!$user07) {
-                throw new Exception("Error los parametros de acceso no son validos para solicitar token", 301);
+                throw new DebugException("Error los parametros de acceso no son validos para solicitar token", 301);
             }
 
             $emailCaja = (new Mercurio01)->findFirst();
@@ -858,13 +839,12 @@ class LoginController extends ApplicationController
                 $html
             );
 
-            $notificacion->endTransa();
             $salida = array(
                 "success" => true,
                 "msj" => "Se ha enviado la solicitud de cambio de correo, pronto se contactara con usted para confirmar el cambio. " .
                     "Este proceso puede tardar ya que se requiere de la confirmación de la persona que solicita el cambio por seguridad de la informacion.",
             );
-        } catch (Exception $err) {
+        } catch (DebugException $err) {
             $salida = array(
                 "success" => false,
                 "msj" => $err->getMessage()

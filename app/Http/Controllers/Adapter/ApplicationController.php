@@ -44,6 +44,9 @@ class ApplicationController extends Controller
 			case 'json':
                 header('Content-Type: application/json; charset=utf-8');
 				break;
+            case 'empty':
+                header('Content-Type: text/plain; charset=utf-8');
+                break;
 		}
 		return null;
 	}

@@ -10,7 +10,7 @@ use App\Services\Utils\CrearUsuario;
 use App\Services\Utils\Generales;
 use App\Services\Utils\SenderEmail;
 
-class SignupFoninnez
+class SignupDomestico
 {
 
     public $coddoc;
