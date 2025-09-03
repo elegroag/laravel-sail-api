@@ -2,6 +2,7 @@
 namespace App\Library\ProcesadorComandos;
 
 use App\Exceptions\DebugException;
+use App\Models\ComandoEstructuras;
 use App\Models\Comandos;
 
 class ProcesadorComandos
@@ -17,15 +18,15 @@ class ProcesadorComandos
     private $proceso;
     private $procesarAsyncrono;
 
-    public function __construct($component, $procesador = 'p7')
+    public function __construct($procesador = 'p7')
     {
         if (session()->has('documento')) {
             $this->userAuth = session()->all();
         }
         if (!isset($this->userAuth['usuario'])) $this->userAuth['usuario'] = ((isset($this->userAuth['documento'])) ? $this->userAuth['documento'] : 1);
         $this->procesador = $procesador;
-        $this->Comandos = $component->Comandos;
-        $this->ComandoEstructuras = $component->ComandoEstructuras;
+        $this->Comandos = new Comandos();
+        $this->ComandoEstructuras = new ComandoEstructuras();
         $this->outPutFile = storage_path('logs/' . $this->userAuth['usuario'] . '_' . strtotime('now') . '.log');
         $this->procesarAsyncrono = '';
     }

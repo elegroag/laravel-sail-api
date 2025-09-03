@@ -2,8 +2,6 @@
 namespace App\Services\Utils;
 
 use App\Library\ProcesadorComandos\ProcesadorComandos;
-use App\Models\ComandoEstructuras;
-use App\Models\Comandos;
 use App\Services\Api\ApiSubsidio;
 use App\Services\Api\PortalMercurio;
 
@@ -13,14 +11,22 @@ class Comman
     protected $app;
     public $models;
 
+    public function initEnvironment()
+    {
+        $this->app = [
+            "cli" => env('USE_CLI', false),
+            "mode" => env('API_MODE', 'development'),
+            "host_portal_dev" => env('HOST_PORTAL_DEV', 'http://localhost:8000'),
+            "host_portal_pro" => env('HOST_PORTAL_PRO', 'http://localhost:8000'),
+            "portal" => env('PORTAL', 'Portal'),
+            "portal_key" => env('PORTAL_KEY', 'PortalKey'),
+            "encryption" => env('API_ENCRYPTION', 'ApiEncryption'),
+        ];
+    }
 
     public function __construct()
     {
-        $con = (object) CoreConfig::readFromActiveApplication('config.ini');
-        $this->app = $con->apisisu;
-        $this->models = new stdClass();
-        $this->models->Comandos = new Comandos;
-        $this->models->ComandoEstructuras = new ComandoEstructuras;
+        $this->initEnvironment();
     }
 
     /**
@@ -51,7 +57,7 @@ class Comman
     {
         $comman = new Comman();
         if ($comman->app->cli) {
-            $comman->procesadorComandos = new ProcesadorComandos($comman->models, $procesador);
+            $comman->procesadorComandos = new ProcesadorComandos($procesador);
             return $comman->procesadorComandos;
         } else {
             return $comman;
@@ -76,8 +82,8 @@ class Comman
      */
     public static function Cli($procesador = 'p7')
     {
-        $comman = new Comman();
-        $comman->procesadorComandos = new ProcesadorComandos($comman->models, $procesador);
+        $comman = self::init($procesador);
+        $comman->procesadorComandos = new ProcesadorComandos($procesador);
         return $comman->procesadorComandos;
     }
 

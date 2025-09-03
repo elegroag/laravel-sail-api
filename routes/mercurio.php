@@ -18,4 +18,4 @@ Route::get('/mercurio/paramsLogin/', [LoginController::class, 'paramsLoginAction
 Route::get('/mercurio/valida_email/', [LoginController::class, 'validaEmailAction']);
 Route::get('/mercurio/integracion_servicio/', [LoginController::class, 'integracionServicioAction']);
 Route::get('/mercurio/guia_videos/', [LoginController::class, 'guiaVideosAction']);
-Route::get('/mercurio/download_docs/', [LoginController::class, 'downloadDocumentsAction']);
+Route::get('/mercurio/download_docs/{archivo}', [LoginController::class, 'downloadDocumentsAction']);
