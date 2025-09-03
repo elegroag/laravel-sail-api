@@ -1,6 +1,5 @@
 import { $App } from '@/App';
 import { Region } from '@/Common/Region';
-import loading from '@/Componentes/Views/Loading';
 import { is_email } from '@/Core';
 import LayoutLogin from './views/LayoutLogin';
 import RegisterView from './views/RegisterView';
@@ -33,33 +32,19 @@ export default class Register {
         $('#render_sesion').fadeOut();
     }
 
-    __registerServer(transfer = {}) {
-        const { callback, data, token } = transfer;
-        $.ajax({
-            method: 'POST',
-            dataType: 'JSON',
-            cache: false,
+    __registerServer({ callback, data }) {
+        this.#App.trigger('syncro', {
             url: this.#App.url('mercurio/registro'),
-            data: data,
-            beforeSend: (xhr) => {
-                loading.show();
-                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-            },
-        })
-            .done((response) => {
-                loading.hide();
-                if (response.success) {
+            data,
+            callback: (response = undefined) => {
+                if (response && response.success === true) {
                     return callback(response);
                 } else {
                     this.#App.trigger('alert:error', { message: response.msj });
                 }
                 return callback(false);
-            })
-            .fail((err) => {
-                loading.hide();
-                this.#App.trigger('alert:error', { message: err.responseText });
-                return callback(false);
-            });
+            },
+        });
     }
 
     __validaEmail() {

@@ -11,6 +11,7 @@ use App\Services\Utils\Comman;
 use App\Services\Utils\CrearUsuario;
 use App\Services\Utils\Generales;
 use App\Services\Utils\SenderEmail;
+use Carbon\Carbon;
 
 class SignupParticular
 {
@@ -209,11 +210,11 @@ class SignupParticular
     {
         $coddoc_detalle = Generales::TipoDocumento($usuario);
         $url_activa = env("APP_URL");
-        $date = new \DateTime('now');
+        $date = Carbon::now();
         $html = view(
-            "login/tmp/mail",
+            "templates/tmp_register",
             array(
-                "fecha" => date_format($date, "d - M - Y"),
+                "fecha" => $date->format("d - M - Y"),
                 "asunto" => "Acceso a usuario particular, Comfaca En Linea",
                 "tipo" => 'Usuario Particular',
                 "nombre" => $this->nombre,
@@ -241,13 +242,7 @@ class SignupParticular
             "asunto: {$asunto}"
         );
 
-        $senderEmail->send(
-            array(array(
-                "email" => $usuario->getEmail(),
-                "nombre" => $usuario->getNombre()
-            )),
-            $html
-        );
+        $senderEmail->send($usuario->getEmail(), $html);
     }
 
     function generaCode()

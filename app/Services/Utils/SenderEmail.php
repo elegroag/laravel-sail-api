@@ -16,14 +16,26 @@ class SenderEmail
 
     private function configureSMTP()
     {
-        // Configuración del servidor SMTP de Gmail
+        // Configuración del servidor SMTP (por defecto Gmail)
         $this->mail->isSMTP();
-        $this->mail->Host = 'smtp.gmail.com';
+        $this->mail->Host = env('EMAIL_HOST', 'smtp.gmail.com');
         $this->mail->SMTPAuth = true;
-        $this->mail->Username = $this->emisor_email; // ¡Cambia esto por tu correo de Gmail!
-        $this->mail->Password = $this->emisor_clave; // ¡Cambia esto por tu contraseña de aplicación!
-        $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-        $this->mail->Port = 465;
+        $this->mail->Username = env('EMAIL_ACCOUNT', $this->emisor_email);
+        $this->mail->Password = env('EMAIL_KEY', $this->emisor_clave);
+
+        // Encripción y puerto configurables: tls->587, ssl->465
+        $encryption = strtolower(env('EMAIL_ENCRYPTION', 'tls'));
+        if (in_array($encryption, ['ssl', 'smtps'])) {
+            $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // SSL implícito
+            $this->mail->Port = (int) env('EMAIL_PORT', 465);
+        } else {
+            $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // STARTTLS
+            $this->mail->Port = (int) env('EMAIL_PORT', 587);
+        }
+
+        // Opcionales para entornos restrictivos
+        $this->mail->SMTPAutoTLS = true;
+        $this->mail->Timeout = (int) env('EMAIL_TIMEOUT', 15);
         $this->mail->CharSet = 'UTF-8';
     }
 

@@ -23,6 +23,7 @@ class CrearUsuario
     public function __construct()
     {
         $this->today = Carbon::parse('now');
+        $this->codciu = '18001';
     }
 
     public function setters(...$params)

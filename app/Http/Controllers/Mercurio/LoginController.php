@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Library\Auth\AuthCSRF;
 use App\Library\Auth\AuthJwt;
 use App\Library\Auth\SessionCookies;
+use App\Models\Adapter\DbBase;
 use App\Models\Gener09;
 use App\Models\Gener18;
 use App\Models\Mercurio01;
@@ -43,6 +43,12 @@ class LoginController extends ApplicationController
      */
     protected $asignarFuncionario;
 
+    protected $db;
+
+    public function __construct()
+    {
+        $this->db = DbBase::rawConnect();
+    }
 
     public function indexAction()
     {
@@ -324,9 +330,8 @@ class LoginController extends ApplicationController
      */
     public function registroAction(Request $request)
     {
-        $this->setResponse("ajax");
         try {
-            AuthCSRF::Valid();
+            $this->db->begin();
             $cedrep = $request->input('cedrep');
             $coddoc = $request->input('coddoc');
             $repleg = $request->input('repleg');
@@ -420,12 +425,14 @@ class LoginController extends ApplicationController
                 "tipafi" => $tipo,
                 "id" => ($tipo == 'P') ? $solicitud->getDocumento() : $solicitud->getId()
             );
+            $this->db->commit();
         } catch (DebugException $e) {
             $response = array(
                 "success" => false,
                 "msj" => $e->getMessage() . "<br/> También puedes comunicar a soporte técnico el problema presentado, dirección soportesistemas.comfaca@gmail.com, línea 4366300 ext 1012",
                 "error" => $e->getMessage() . ' ' . $e->getLine() . ' ' . $e->getFile()
             );
+            $this->db->rollBack();
         }
         return $this->renderObject($response, false);
     }

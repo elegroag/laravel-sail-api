@@ -49,11 +49,11 @@ if (!function_exists('get_params_destructures')) {
         if (is_array($data) && count($data) > 0) {
             foreach ($data as $item) {
                 if (stristr($item, ':') === FALSE) {
-                    $params[0] = $item;
+                    $params[0] = trim($item);
                     continue;
                 }
                 $name = substr($item, 0, strpos($item, ':'));
-                $params[$name] = substr($item, strpos($item, ':') + 1);
+                $params[$name] = trim(substr($item, strpos($item, ':') + 1));
             }
         }
         return $params;
