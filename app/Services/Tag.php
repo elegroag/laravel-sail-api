@@ -8,10 +8,27 @@ class Tag
     public static function image(...$data)
     {
         $params = get_params_destructures($data);
-        $attributes = 'src="' . $params['src'] .
-            '" alt="' . (isset($params['alt']) ? $params['alt'] : ' ') .
-            '" class="' . (isset($params['class']) ? $params['class'] : ' ') .
-            '" style="' . (isset($params['style']) ? $params['style'] : ' ') . '" ';
+
+        $attributes = "";
+        if (isset($params['src'])) {
+            $attributes .= 'src="../img/' . $params['src'] . '"';
+        } else {
+            if (isset($params[0])) {
+                $attributes .= " src=\"../img/$params[0]\"";
+            }
+        }
+
+        if (isset($params['alt'])) {
+            $attributes .= 'alt="' . $params['alt'] . '"';
+        }
+
+        if (isset($params['class'])) {
+            $attributes .= 'class="' . $params['class'] . '" ';
+        }
+
+        if (isset($params['style'])) {
+            $attributes .= 'style="' . $params['style'] . '" ';
+        }
 
         if (isset($params['onclick'])) {
             $attributes .= 'onClick="' . $params['onclick'] . '" ';

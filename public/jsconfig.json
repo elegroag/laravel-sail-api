@@ -29,8 +29,8 @@
         "moduleDetection": "force",
         "allowImportingTsExtensions": true,
         "paths": {
-            "@/": [
-                "src/"
+            "@/*": [
+                "./src/*"
             ],
             "$": [
                 "./assets/jquery/jquery.js"

@@ -5,6 +5,10 @@ import { defineConfig } from 'vite';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const _name = process.env.MODULE;
 
+const camelCase = (str) => {
+    return str.replace(/\b\w/g, (l) => l.toUpperCase());
+};
+
 export default defineConfig({
     mode: 'development', // o production
     root: '.',
@@ -12,20 +16,21 @@ export default defineConfig({
     build: {
         chunkSizeWarningLimit: 300,
         sourcemap: true,
-        outDir: resolve(__dirname, `../resources/mercurio/build`),
+        emptyOutDir: false,
+        outDir: resolve(__dirname, `mercurio/build/`),
         rollupOptions: {
             input: {
                 main: resolve(__dirname, `src/Mercurio/${_name}/main.js`),
             },
             output: {
-                entryFileNames: `${_name.toLowerCase()}.js`,
-                assetFileNames: `${_name.toLowerCase()}.[ext]`,
+                entryFileNames: `${camelCase(_name)}.js`,
+                assetFileNames: `${camelCase(_name)}.[ext]`,
             },
         },
     },
     resolve: {
         alias: {
-            '@/': resolve(__dirname, 'src'),
+            '@': resolve(__dirname, 'src'),
             'src/': resolve(__dirname, 'src'),
         },
     },

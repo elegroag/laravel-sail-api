@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
@@ -199,13 +200,13 @@ class LoginController extends ApplicationController
             }
 
             $auth = new SessionCookies(
-                "model: Mercurio07", 
-                "tipo: {$tipo}", 
-                "coddoc: {$coddoc}", 
-                "documento: {$documento}", 
+                "model: Mercurio07",
+                "tipo: {$tipo}",
+                "coddoc: {$coddoc}",
+                "documento: {$documento}",
                 "estado: A"
             );
-            
+
             if (!$auth->authenticate()) {
                 throw new DebugException("Error acceso incorrecto. No se logra completar la autenticación", 504);
             } else {
@@ -216,7 +217,6 @@ class LoginController extends ApplicationController
                     "location" => 'principal/index',
                     "msj" => $msj
                 );
-
             }
         } catch (DebugException $e) {
             $response = array(
@@ -439,22 +439,21 @@ class LoginController extends ApplicationController
     {
         $this->setResponse("ajax");
         try {
-                $email = trim(strtoupper($request->input('email')));
-                $documento = trim($request->input('documento'));
-                $nit = trim($request->input('nit'));
+            $email = trim(strtoupper($request->input('email')));
+            $documento = trim($request->input('documento'));
+            $nit = trim($request->input('nit'));
 
-                $l = (new Mercurio30)->count(
-                    "*",
-                    "conditions: UPPER(email)='{$email}' AND documento NOT IN('{$documento}','{$nit}')"
-                );
-                if ($l > 0) {
-                    throw new DebugException("Error, ya se encuentra un registro con el email ingresado: " . mask_email($email), 501);
-                }
-                $response = array(
-                    "success" => true,
-                    "msj" => "El email está disponible para el registro"
-                );
-
+            $l = (new Mercurio30)->count(
+                "*",
+                "conditions: UPPER(email)='{$email}' AND documento NOT IN('{$documento}','{$nit}')"
+            );
+            if ($l > 0) {
+                throw new DebugException("Error, ya se encuentra un registro con el email ingresado: " . mask_email($email), 501);
+            }
+            $response = array(
+                "success" => true,
+                "msj" => "El email está disponible para el registro"
+            );
         } catch (DebugException $err) {
             $response = array(
                 "success" => false,
@@ -489,9 +488,9 @@ class LoginController extends ApplicationController
     public function fueraServicioAction()
     {
         $this->setResponse("empty");
-        $msj = "El sistema se encuentra en estado de actualización y mantenimiento.<br/> 
+        $msj = "El sistema se encuentra en estado de actualización y mantenimiento.<br/>
         Con el fin de corregir errores y actualizar a versiones más seguras y óptimas que buscan la satisfacción de sus usuarios.</br>";
-       /* 
+        /*
         $this->setParamToView("hora_inicia", "3:30");
         $this->setParamToView("hora_finaliza", "4:30");
         $this->setParamToView("nota", $msj); */
@@ -511,7 +510,7 @@ class LoginController extends ApplicationController
         );
     }
 
-    public function paramsLoginAction()
+    public function paramsLoginAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
@@ -647,7 +646,7 @@ class LoginController extends ApplicationController
                 );
 
                 $html = "Utiliza el siguiente código de verificación, para confirmar el propietario de la dirección de correo:<br/>
-                        <span style=\"font-size:16px;color:#333\">CÓDIGO DE VERIFICACIÓN: </span><br/> 
+                        <span style=\"font-size:16px;color:#333\">CÓDIGO DE VERIFICACIÓN: </span><br/>
                         <span style=\"font-size:30px;color:#11cdef\"><b>{$codigoVerify}</b></span>";
 
                 $asunto = "Generación nuevo PIN plataforma Comfaca En Línea";
@@ -716,7 +715,7 @@ class LoginController extends ApplicationController
                     "token" =>  base64_encode($tk[0] . '|' . $tk[1]),
                     "isValid" => true,
                     "location" => "principal/index",
-                    "msj" => "El proceso de registro como persona particular, se ha completado con éxito, 
+                    "msj" => "El proceso de registro como persona particular, se ha completado con éxito,
                     vamos a continuar.<br/><p class='text-center'><i class='fa fa-arrow-down fa-2x' aria-hidden='true'></i></p>",
                 );
             } else {
@@ -785,7 +784,7 @@ class LoginController extends ApplicationController
             $novedad = $request->input('novedad');
 
             $notificacion = new NotificacionService();
-            
+
             $user07 = (new Mercurio07)->findFirst(" documento='{$documento}' and coddoc='{$coddoc}' and tipo='{$tipo}'");
             if (!$user07) {
                 throw new DebugException("Error los parametros de acceso no son validos para solicitar token", 301);
@@ -876,5 +875,4 @@ class LoginController extends ApplicationController
             }
         }
     }
-
 }

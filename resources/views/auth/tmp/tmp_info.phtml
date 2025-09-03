@@ -1,7 +1,12 @@
+<?php
+
+use App\Services\Tag;
+?>
 <div class="card shadow-sm border-0 rounded-4 mb-4" style="max-width: 800px; margin: 0rem auto;">
     <div class="card-header py-2 rounded-top">
         <h4 class="text-center text-primary mb-0">Comfaca en línea</h4>
-        <img src="logo-min.png" class="img-fluid mx-auto d-block mb-4 rounded" style="width:180px" />
+        <?= Tag::image("logo-min.png", "class: img-fluid mx-auto d-block mb-4 rounded", "style: width:180px"); ?>
+
         <p class="text-left mb-4">
             <span class='text-info'>Comfaca en línea</span> es la plataforma principal de afiliación, gestión y consulta disponibles para los usuarios afiliados y personas residentes en el departamento del Caquetá.
         </p>

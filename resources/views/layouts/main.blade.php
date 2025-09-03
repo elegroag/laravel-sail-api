@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>@yield('title','Dashboard')</title>
     @vite(['resources/css/app.css','resources/js/app.js'])
 </head>
-<body class="flex h-screen">
 
+<body class="flex h-screen">
+    @include('templates.loading')
     {{-- Sidebar --}}
     <aside class="w-64 bg-gray-800 text-white p-4">
         <h2 class="text-lg font-bold mb-4">Mi App</h2>
@@ -34,4 +36,5 @@
     </div>
 
 </body>
+
 </html>
