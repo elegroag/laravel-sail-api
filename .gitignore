@@ -43,3 +43,4 @@ yarn-error.log
 /public/node_modules
 /public/theme/fonts
 /resources/mercurio/build
+/public/mercurio/build
