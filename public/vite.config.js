@@ -12,7 +12,7 @@ export default defineConfig({
     build: {
         chunkSizeWarningLimit: 300,
         sourcemap: true,
-        outDir: resolve(__dirname, `../resources/mercurio/js/${_name.toLowerCase()}`),
+        outDir: resolve(__dirname, `../resources/mercurio/build`),
         rollupOptions: {
             input: {
                 main: resolve(__dirname, `src/Mercurio/${_name}/main.js`),

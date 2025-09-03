@@ -34,8 +34,12 @@ yarn-error.log
 /storage/app
 /storage/framework
 /storage/logs
-legacy/PHPExcel/
-legacy/setasign/
-legacy/swiftmailer/
-legacy/phpmailer/
+/legacy/PHPExcel/
+/legacy/setasign/
+/legacy/swiftmailer/
+/legacy/phpmailer/
 /bootstrap/cache/
+/public/assets
+/public/mercurio/build
+/public/node_modules
+/public/theme/fonts

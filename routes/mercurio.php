@@ -3,11 +3,13 @@
 use App\Http\Controllers\Mercurio\LoginController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/mercurio/login/', [LoginController::class, 'index']);
+Route::get('/mercurio/login', [LoginController::class, 'indexAction'])->name('login');
 Route::post('/mercurio/autenticar/', [LoginController::class, 'authenticateAction']);
 Route::post('/mercurio/salir/', [LoginController::class, 'logoutAction']);
 Route::post('/mercurio/recuperar_clave/', [LoginController::class, 'recuperarClaveAction']);
 Route::post('/mercurio/registro/', [LoginController::class, 'registroAction']);
+
+Route::get('/mercurio/show_registro', [LoginController::class, 'showRegisterAction'])->name('register');
 Route::get('/mercurio/fuera_servicio/', [LoginController::class, 'fueraServicioAction']);
 
 Route::get('/mercurio/verify/', [LoginController::class, 'verifyAction']);

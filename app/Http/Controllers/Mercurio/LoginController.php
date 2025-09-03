@@ -45,6 +45,12 @@ class LoginController extends ApplicationController
 
     public function indexAction()
     {
+        return view('auth.login');
+    }
+
+    public function showRegisterAction()
+    {
+        return view('auth.register');
     }
 
     public function authenticateAction(Request $request, Response $response)

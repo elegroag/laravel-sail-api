@@ -1,0 +1,214 @@
+#sw-full {
+	height: 450px;
+}
+
+#boneLayout {
+	padding-bottom: 1.5rem;
+}
+
+.swiper-slide {
+	background-position: bottom;
+	background-size: cover;
+	background-repeat: no-repeat;
+	color: #fff !important;
+	/* height: 500px; */
+}
+
+body {
+	background-color: #ffffff;
+}
+
+.fill-footer {
+	fill: #77ba5b;
+}
+
+.form-login {
+	margin-top: -420px;
+}
+
+.form-login .card {
+	z-index: 999;
+}
+
+.red,
+label.error {
+	color: rgb(238, 23, 23);
+	font-size: .81rem;
+	border-color: none;
+	background-color: transparent !important;
+	padding-top: 1px;
+	display: none;
+}
+
+.btn.btn-primary.active {
+	background-color: #337016 !important;
+	border-color: #337016 !important;
+}
+
+.text_password {
+	font-size: 1.3em;
+	font-weight: 600;
+}
+
+.input-group-alternative .form-control,
+.input-group-alternative .input-group-text {
+	border: 1px solid #ededed;
+}
+
+.input-group-alternative label.error {
+	position: absolute;
+	bottom: -20px;
+	left: 5px;
+}
+
+.choices__list .choices__list--dropdown .is-active {
+	z-index: 9 !important;
+}
+
+#navbar-main {
+	background-color: transparent;
+}
+
+.navdtxt {
+	font-family: 'roboto-bold', sans-serif;
+	line-height: 1em;
+	color: #fff9d6;
+	font-size: 1.55rem !important;
+	text-shadow: 0px 0px 0 rgb(203, 203, 203), 1px -1px 0 rgb(162, 162, 162), 2px -2px 1px rgba(0, 0, 0, 0.1), 2px -2px 1px rgba(0, 0, 0, 0.5), 0px 0px 1px rgba(0, 0, 0, .2);
+}
+
+/* Estilo para el navbar */
+.navbar {
+	top: 0;
+	width: 100%;
+	overflow: auto;
+}
+
+/* Estilo para los enlaces del navbar */
+.navbar a {
+	float: left;
+	text-align: center;
+	padding: 12px;
+	color: white;
+	text-decoration: none;
+	font-size: 17px;
+}
+
+/* Estilo para los enlaces del navbar al pasar el mouse */
+.navbar a:hover {
+	background-color: rgb(18, 133, 144, 0.25);
+	color: #f1f1f1;
+}
+
+.navbar a.navbar-brand:hover {
+	background-color: transparent
+}
+
+/* Estilo para el enlace activo (puedes cambiar el color según tus preferencias) */
+.active {
+	background-color: #337016;
+}
+
+/* Estilo para el sidebar */
+.sidebar {
+	height: 100%;
+	width: 260px;
+	position: fixed;
+	top: 0;
+	left: -260px;
+	background-color: rgb(17 106 114, .7);
+	overflow-x: hidden;
+	transition: 0.3s;
+	padding-top: 60px;
+	z-index: 1;
+}
+
+/* Estilo para los íconos del sidebar */
+.sidebar a {
+	padding: 10px 25px;
+	text-decoration: none;
+	font-size: 1rem;
+	color: #f1f1f1;
+	display: block;
+	transition: 0.3s;
+	width: 100%;
+	text-align: left;
+}
+
+/* Estilo para los íconos del sidebar al pasar el mouse */
+.sidebar a:hover {
+	color: #f1f1f1;
+}
+
+/* Estilo para mostrar el sidebar al hacer clic en el botón de menú */
+.open-sidebar {
+	left: 0;
+}
+
+.in-put-code {
+	border: 2px solid #ededed;
+	box-shadow: none;
+	padding: 10px;
+	-webkit-appearance: none;
+	-ms-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	outline: none;
+	font-size: 2.2rem;
+	font-family: 'opensans-bold', sans-serif;
+	color: #73b7ff;
+	text-align: center;
+	cursor: pointer;
+}
+
+.in-put-code:active,
+.in-put-code:focus {
+	border: 2px solid #73b7ff;
+}
+
+.form-group {
+	margin-bottom: 12px;
+	margin-top: 12px;
+}
+
+.form-control.invalid {
+	border: 1px solid red !important;
+}
+
+.input-group {
+	z-index: 0;
+}
+
+.form-group .validation-error {
+	position: relative;
+	left: 5px;
+	bottom: -2px;
+	color: red;
+	font-size: 12px;
+}
+
+.choices .choices__inner {
+	font-size: .85rem !important;
+	height: calc(1.5rem + 1px) !important;
+	padding: 5px !important;
+}
+
+#footer-login {
+	position: fixed;
+	bottom: 0;
+	width: 100%;
+	padding: 10px 0;
+	text-align: center;
+	font-size: 14px;
+	color: #6c757d;
+	z-index: -1;
+}
+
+#footer-login a {
+	color: #007bff;
+	text-decoration: none;
+}
+
+#footer-login a:hover {
+	text-decoration: underline;
+}

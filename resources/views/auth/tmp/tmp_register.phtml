@@ -1,0 +1,145 @@
+<div class='card-header'>
+    <h4 class="text-primary text-center">
+        <span style="margin-right:5px;line-height:1.7;"></span>
+        Registro En Plataforma
+    </h4>
+</div>
+<div class='p-3'>
+    <div class='card-header pt-3 pb-1'>
+        <div class="col-auto">
+            <p>Completa todos los campos requeridos para hacer el registro al sistema e ingresar para realizar la solicitud de afiliación.<br />
+                NOTA: "El presente registro no garantiza la afiliación".</p>
+        </div>
+    </div>
+
+    <div class="card-body px-lg-5 py-lg-3 bg-white">
+        <form id="formRegister" name="formRegister" autocomplete="off" role="form">
+        <div class='row'>
+            <div class="col-5 mb-2">
+                <div class="form-group" group-for='tipo'>
+                    <div class="form-group mb-2">
+                        <label class='form-control-label'>Tipo de afiliación <i class="text-danger">*</i></label>
+                        <span id='component_tipo'></span>
+                    </div>
+                    <a href="https://comfaca.com/afiliaciones-personas" style='font-size:.9rem; width:100%' target="_blank">Más información de los tipos de afiliación aquí</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-2 fg-calemp">
+                <div class="form-group" group-for='calemp'>
+                    <label class='form-control-label'>En calidad <i class="text-danger">*</i></label>
+                    <span id='component_calemp'></span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-2 fg-tipper">
+                <div class="form-group" group-for='tipper'>
+                    <label class='form-control-label'>Tipo persona <i class="text-danger">*</i></label>
+                    <span id='component_tipper'></span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-2">
+                <div class="form-group" group-for='coddoc'>
+                    <label class="form-control-label" for="coddoc">Tipo documento <span toggle-event='call'></span> <i class="text-danger">*</i></label>
+                    <span id='component_coddoc'></span>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-2 fg-nit">
+                <div class="form-group" group-for='nit'>
+                    <label class="form-control-label" for="nit">NIT sin digito de verificación <i class="text-danger">*</i></label>
+                    <input type='number' class="form-control" id="nit" name="nit" placeholder="nit aquí..." type="number">
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-2 fg-razsoc">
+                <div class="form-group" group-for='razsoc'>
+                    <label class="form-control-label" for="razsoc">Razón social <span toggle-event='call'></span><i class="text-danger">*</i></label>
+                    <input type='text' class="form-control" id="razsoc" name="razsoc" placeholder="razon social aquí..." style="text-transform: uppercase" />
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-2">
+                <div class="form-group" group-for='repleg'>
+                    <label class="form-control-label" for="repleg">Nombre <span toggle-event='repre'></span> <i class="text-danger">*</i></label>
+                    <input type='text' class="form-control" id="repleg" name="repleg" placeholder="nombre aquí..." type="text" style="text-transform: uppercase" />
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-2 fg-coddocrepleg">
+                <div class="form-group" group-for='coddocrepleg'>
+                    <label class="form-control-label" for="coddocrepleg">Tipo documento <span toggle-event='repre'></span> <i class="text-danger">*</i></label>
+                    <span id='component_coddocrepleg'></span>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-2">
+                <div class="form-group" group-for='cedrep'>
+                    <label class="form-control-label" for="cedrep">Identificación <span toggle-event='repre'></span> <i class="text-danger">*</i></label>
+                    <input type='number' class="form-control" id="cedrep" name="cedrep" placeholder="documento representante legal" type="number" />
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-2">
+                <div class="form-group" group-for='email'>
+                    <label class="form-control-label" for="email">Correo electrónico <span toggle-event='call'></span><i class="text-danger">*</i></label>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="email de contacto para afiliación" required>
+                    <label id="email-error" class="error" for="email"></label>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-2">
+                <div class="form-group" group-for='telefono'>
+                    <label class="form-control-label" for="telefono">Teléfono o celular <i class="text-danger">*</i></label>
+                    <input type='number' class="form-control" id="telefono" name="telefono" placeholder="teléfono" type="number" />
+                    <label id="telefono-error" class="error" for="telefono"></label>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-2">
+                <div class="form-group" group-for='codciu'>
+                    <label class="form-control-label" for="codciu">Ciudad sucursal (CAQUETÁ)<i class="text-danger">*</i></label>
+                    <span id='component_codciu'></span>
+                </div>
+            </div>
+            <div class="col-md-4 mb-2 fg-tipsoc">
+                <div class="form-group" group-for='tipsoc'>
+                    <label class='form-control-label'>Tipo sociedad <span toggle-event='call'></span> <i class="text-danger">*</i></label>
+                    <span id='component_tipsoc'></span>
+                </div>
+            </div>
+            <div class="col-md-12 mb-2">
+                <div class="form-group" group-for='terminos'>
+                    <div class="custom-control custom-control-alternative custom-checkbox mt-2 mb-4">
+                        <input class="custom-control-input" id="terminos" name="terminos" type="checkbox">
+                        <label class="custom-control-label" for="terminos">
+                            <span class="text">Acepta términos y condiciones<i class="text-danger">*</i></span>
+                            <br />
+                        </label>
+                        <label id="terminos-error" class="error" for="terminos"></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-12">
+                <div class="form-group text-center">
+                    <button type="button" class="btn btn-primary mt-4 my-2" id='btnRegistrar'><i class="fas fa-hand-point-up"></i> Continuar</button>
+                    <button type="button" class="btn btn-sm btn-secondary mt-4 my-2" id="btnRegresar">
+                        <span class="btn-inner--icon"><i class="ni ni-fat-remove mr-1 fa-2x"></i></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        </form>
+    </div>
+
+    <div class="card-footer">
+        <div class="text-center">
+            <a href="#" data-toggle='tofile' data-file='Guia_afiliaciones_por_comfaca_en_linea.pdf'>
+                <img src="Mercurio/guia.png" class="img-responsive" style="width:200px">
+                <br />Descarga la guía de afiliación aquí
+            </a>
+        </div>
+    </div>
+</div>

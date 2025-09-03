@@ -1,0 +1,97 @@
+/* Estilos para el módulo de Mora Presunta */
+
+/* Estilos para los botones de sucursal */
+#sucursal-tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+#sucursal-tabs .btn-sucursal {
+    text-align: left;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease-in-out;
+}
+
+#sucursal-tabs .btn-sucursal:hover {
+    transform: translateX(5px);
+}
+
+#sucursal-tabs .btn-sucursal.active {
+    font-weight: 600;
+    box-shadow: 0 0 0 2px rgba(50, 115, 220, 0.25);
+}
+
+/* Estilos para la lista de períodos */
+#periodo-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+#periodo-list .list-group-item {
+    border-left: none;
+    border-right: none;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+#periodo-list .list-group-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(5px);
+}
+
+#periodo-list .list-group-item.active {
+    background-color: #5e72e4;
+    border-color: #5e72e4;
+    font-weight: 600;
+}
+
+/* Estilos para la tabla */
+.table-responsive {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa;
+    z-index: 10;
+}
+
+/* Estilos para los badges */
+.badge {
+    font-size: 0.8rem;
+    padding: 0.35em 0.65em;
+    font-weight: 600;
+}
+
+/* Estilos para el título de la vista */
+#current-view-title {
+    font-size: 1.5rem;
+    color: #32325d;
+    font-weight: 600;
+}
+
+/* Estilos para las tarjetas */
+.card {
+    border: none;
+    box-shadow: 0 0 2rem 0 rgba(136, 152, 170, 0.15);
+    margin-bottom: 1.5rem;
+    border-radius: 0.5rem;
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1rem 1.5rem;
+    border-top-left-radius: 0.5rem !important;
+    border-top-right-radius: 0.5rem !important;
+}
+
+/* Estilos para el mensaje cuando no hay datos */
+.text-center {
+    text-align: center;
+    color: #6c757d;
+    padding: 2rem;
+}
