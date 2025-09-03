@@ -1,0 +1,44 @@
+<?php
+$array_tipos = [
+    '' => 'N/A',
+    'P' => 'Particular',
+    'E' => 'Empresa',
+    'T' => 'Trabajador'
+];
+?>
+<nav class="sidenav navbar navbar-vertical fixed-left navbar-expand-xs navbar-light" id="sidenav-main">
+    <div class="scrollbar-inner">
+        <div class="sidenav-header d-flex align-items-center p-3">
+            <a class="navbar-brand m-0" href="<?php echo route('principal.index'); ?>">
+                <?php echo \App\Services\Tag::image("logo-min.png", "class: navbar-brand-img"); ?>
+            </a>
+            <div class="ms-auto">
+                <div class="sidenav-toggler d-none d-xl-block" data-action="sidenav-unpin" data-bs-target="#sidenav-main">
+                    <div class="sidenav-toggler-inner">
+                        <i class="sidenav-toggler-line"></i>
+                        <i class="sidenav-toggler-line"></i>
+                        <i class="sidenav-toggler-line"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="navbar-inner">
+            <div class="collapse navbar-collapse" id="sidenav-collapse-main">
+                <div class="position-relative">
+                    <div class="p-3">
+                        <div class="nav-link p-0 mb-2">
+                            <span class="nav-link-text fw-bold">
+                                COMFACA EN LÍNEA<br>
+                                <small class="text-muted">Usuario tipo: <span class="text-primary"><?php echo isset($array_tipos[$_tipo]) ? htmlspecialchars($array_tipos[$_tipo]) : 'N/A'; ?></span></small>
+                            </span>
+                        </div>
+                    </div>
+                    <hr class="my-2">
+                    <ul class="navbar-nav">
+                        <?php echo $menu; ?>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>

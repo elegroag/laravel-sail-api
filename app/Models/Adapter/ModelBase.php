@@ -418,11 +418,6 @@ class ModelBase extends Model
         $params = get_params_destructures($argv);
         $query = DB::table($this->getTable());
 
-        if (isset($params[0]) && trim($params[0]) !== '') {
-            $item = $params[0];
-            $query->select("count($item) as num");
-        }
-
         if (isset($params['conditions'])) {
             $conditions = $params['conditions'];
             if (is_array($conditions)) {
@@ -430,6 +425,17 @@ class ModelBase extends Model
             }
             $query->whereRaw($conditions);
         }
-        return $query->first()->num;
+        // Si se envía una columna usarla, en otro caso usar '*'
+        $item = isset($params[0]) ? trim($params[0]) : '';
+
+        // Evitar que Laravel cite `count(*)` como columna, usar selectRaw o count()
+        if ($item === '' || $item === '*') {
+            // Cuenta simple
+            return (int) $query->count();
+        }
+
+        // Para expresiones como DISTINCT o columnas específicas
+        $query->selectRaw("count($item) as num");
+        return (int) ($query->value('num') ?? 0);
     }
 }

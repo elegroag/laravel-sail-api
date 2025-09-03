@@ -59,3 +59,8 @@ if (!function_exists('get_params_destructures')) {
         return $params;
     }
 }
+
+require_once __DIR__ . '/format.php';
+require_once __DIR__ . '/flash.php';
+require_once __DIR__ . '/files.php';
+require_once __DIR__ . '/hashes.php';

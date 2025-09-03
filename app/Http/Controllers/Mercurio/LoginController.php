@@ -110,7 +110,7 @@ class LoginController extends ApplicationController
                 );
             }
 
-            $mercurio07 = $this->Mercurio07->findFirst(" tipo='{$tipo}' AND documento='{$documento}' AND coddoc='{$coddoc}'");
+            $mercurio07 = (new Mercurio07)->findFirst(" tipo='{$tipo}' AND documento='{$documento}' AND coddoc='{$coddoc}'");
             if ($mercurio07 == False) $mercurio07 = $autentica->getAfiliado();
 
             if ($mercurio07 == False) {
@@ -373,7 +373,7 @@ class LoginController extends ApplicationController
                         )
                     );
                     $signupParticular->createUserMercurio();
-                    $solicitud = $this->Mercurio07->findFirst("coddoc='{$coddoc}' and documento='{$cedrep}' and tipo='{$tipo}'");
+                    $solicitud = (new Mercurio07)->findFirst("coddoc='{$coddoc}' and documento='{$cedrep}' and tipo='{$tipo}'");
                     break;
                 default:
                     throw new DebugException("Error el tipo de afiliación es requerido", 1);
@@ -443,7 +443,7 @@ class LoginController extends ApplicationController
             $documento = trim($request->input('documento'));
             $nit = trim($request->input('nit'));
 
-            $l = (new Mercurio30)->count(
+            $l = (new Mercurio30)->getCount(
                 "*",
                 "conditions: UPPER(email)='{$email}' AND documento NOT IN('{$documento}','{$nit}')"
             );
@@ -460,7 +460,7 @@ class LoginController extends ApplicationController
                 "msj" => $err->getMessage()
             );
         }
-        $this->renderObject($response);
+        return $this->renderObject($response);
     }
 
     public function downloadDocumentsAction(Request $request)
@@ -751,7 +751,7 @@ class LoginController extends ApplicationController
 
             $authJwt = new AuthJwt();
             $token = $authJwt->SimpleToken();
-            $user19 = $this->Mercurio19->findFirst(" documento='{$documento}' and coddoc='{$coddoc}' and tipo='{$tipo}'");
+            $user19 = (new Mercurio19)->findFirst(" documento='{$documento}' and coddoc='{$coddoc}' and tipo='{$tipo}'");
             if ($user19) {
                 $user19->setToken($token);
                 $user19->save();

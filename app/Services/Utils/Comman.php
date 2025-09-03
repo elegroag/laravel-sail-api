@@ -13,15 +13,14 @@ class Comman
 
     public function initEnvironment()
     {
-        $this->app = [
-            "cli" => env('USE_CLI', false),
-            "mode" => env('API_MODE', 'development'),
-            "host_portal_dev" => env('HOST_PORTAL_DEV', 'http://localhost:8000'),
-            "host_portal_pro" => env('HOST_PORTAL_PRO', 'http://localhost:8000'),
-            "portal" => env('PORTAL', 'Portal'),
-            "portal_key" => env('PORTAL_KEY', 'PortalKey'),
-            "encryption" => env('API_ENCRYPTION', 'ApiEncryption'),
-        ];
+        $this->app = new \stdClass(); 
+        $this->app->cli = env('USE_CLI', false);
+        $this->app->mode = env('API_MODE', 'development');
+        $this->app->host_portal_dev = env('HOST_PORTAL_DEV', 'http://localhost:8000');
+        $this->app->host_portal_pro = env('HOST_PORTAL_PRO', 'http://localhost:8000');
+        $this->app->portal = env('PORTAL', 'Portal');
+        $this->app->portal_key = env('PORTAL_KEY', 'PortalKey');
+        $this->app->encryption = env('API_ENCRYPTION', 'ApiEncryption');
     }
 
     public function __construct()

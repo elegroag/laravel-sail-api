@@ -177,7 +177,7 @@ export default class EmailChangeView extends ModelView {
 		}
 
 		this.#App.trigger('syncro', {
-			url: this.#App.url('cambio_correo'),
+			url: this.#App.url('mercurio/cambio_correo'),
 			data: entity.toJSON(),
 			callback: (response) => {
 				target.removeAttr('disabled');

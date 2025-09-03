@@ -99,7 +99,7 @@ export default class RegisterView extends Backbone.View {
         }
 
         $App.trigger('syncro', {
-            url: $App.url('valida_email'),
+            url: $App.url('mercurio/valida_email'),
             data: {
                 email: _email,
                 documento: _cedrep,
