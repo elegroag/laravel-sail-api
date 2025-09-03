@@ -3,7 +3,7 @@
     "version": "0.0.1",
     "description": "minificador de subsidio",
     "main": "index.js",
-    "packageManager": "pnpm@10.5.2",
+    "packageManager": "pnpm@10.15.0",
     "scripts": {
         "start": "vite --watch",
         "build": " npm-run-all --parallel build:login build:principal build:trabajadores build:conyuges build:empresas build:beneficiarios build:independientes build:facultativos build:datosTrabajador build:dashboard build:actualizaDatos build:certificados build:pensionados build:servicioDomestico build:usuario build:notificaciones build:consultasEmpresa build:consultasTrabajador build:coberturaServicios build:firma build:consultaNucleo build:moraPresunta build:trabajadoresEmpresa build:aportesEmpresa build:nominasEmpresa",
