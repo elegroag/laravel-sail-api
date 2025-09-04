@@ -58,7 +58,7 @@ class ControllerPrincipal {
     __buscarServicios(transfer) {
         const { callback, silent } = transfer;
         this.App.trigger('syncro', {
-            url: this.App.url('mercurio/servicios'),
+            url: this.App.url('principal/servicios'),
             data: {},
             silent,
             callback: (response) => {
@@ -75,7 +75,7 @@ class ControllerPrincipal {
 
     __syncroSolicitudes() {
         this.App.trigger('syncro', {
-            url: this.App.url('mercurio/actualizaEstadoSolicitudes'),
+            url: this.App.url('principal/actualizaEstadoSolicitudes'),
             data: {},
             callback: (response) => {
                 if (response.success) {
@@ -87,7 +87,7 @@ class ControllerPrincipal {
 
     __validaSyncro() {
         this.App.trigger('syncro', {
-            url: this.App.url('mercurio/valida_syncro'),
+            url: this.App.url('principal/valida_syncro'),
             data: {},
             callback: (response) => {
                 if (response.success) {

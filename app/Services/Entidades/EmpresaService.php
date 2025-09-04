@@ -3,6 +3,7 @@
 namespace App\Services\Entidades;
 
 use App\Exceptions\DebugException;
+use App\Library\Collections\ParamsEmpresa;
 use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio10;
@@ -12,7 +13,6 @@ use App\Models\Mercurio30;
 use App\Models\Mercurio37;
 use App\Models\Tranoms;
 use App\Services\Utils\Comman;
-use ParamsEmpresa;
 
 class EmpresaService
 {
@@ -434,7 +434,10 @@ class EmpresaService
             throw new DebugException("Adjunte los archivos obligatorios", 500);
         }
 
-        (new Mercurio30)->updateAll("usuario='{$usuario}', estado='P'", "conditions: id='{$id}'");
+        Mercurio30::where('id', $id)->update([
+            'usuario' => $usuario,
+            'estado' => 'P',
+        ]);
 
         $ai = (new Mercurio10)->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
 

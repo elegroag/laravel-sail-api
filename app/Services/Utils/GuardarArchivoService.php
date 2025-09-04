@@ -98,9 +98,10 @@ class GuardarArchivoService
                     }
                 }
                 $campos_corregir = (count($nuevos) > 0) ? implode(';', $nuevos) : "";
-                (new Mercurio10)->updateAll(
-                    "campos_corregir='{$campos_corregir}'", 
-                    "conditions: numero='{$this->id}' AND tipopc='{$this->tipopc}' AND item='{$mercurio10['item']}'");
+                Mercurio10::where('numero', $this->id)
+                    ->where('tipopc', $this->tipopc)
+                    ->where('item', $mercurio10['item'])
+                    ->update(['campos_corregir' => $campos_corregir]);
             }
         }
 
@@ -116,7 +117,7 @@ class GuardarArchivoService
         if ($_FILES[$name]) {
             ob_clean();
 
-            $dir = Core::getInitialPath() . '' . $dir;
+            $dir = storage_path('temp') . '' . $dir;
             return move_uploaded_file($_FILES[$name]['tmp_name'], htmlspecialchars("$dir/{$_FILES[$name]['name']}"));
         } else {
             return false;

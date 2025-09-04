@@ -2,7 +2,6 @@
 namespace App\Services\Menu;
 
 use App\Models\Adapter\DbBase;
-use App\Models\Mercurio01;
 
 class Menu
 {
@@ -10,7 +9,6 @@ class Menu
     private $currentUrl;
     private $breadcrumbs;
     private $menuItems;
-    private $typeheadItems;
     private $tipo;
     private $db;
 
@@ -32,7 +30,6 @@ class Menu
         $this->currentUrl = request()->path();
         $this->breadcrumbs = "";
         $this->menuItems = "";
-        $this->typeheadItems = [];
     }
 
     private function getMenuItems($parentId)
@@ -52,7 +49,8 @@ class Menu
             $query .= " AND parent_id = " . intval($parentId);
         }
         $query .= " ORDER BY position ASC";
-        return $this->db->inQueryAssoc($query);
+        $sql = $this->db->inQueryAssoc($query);
+        return $sql;
     }
 
     private function normalizeTitle($title)
@@ -95,7 +93,7 @@ class Menu
             }
 
             $childHtml .= $this->buildChildMenuItem($child, $childActive);
-            $this->addTypeheadItem($menu['title'], $child);
+            
         }
 
         $activeClass = $isActive ? 'active' : '';
@@ -122,7 +120,7 @@ class Menu
 
         return "
             <li class='nav-item'>
-                <a data-id='{$title}' href='" . route($child['default_url']) . "'
+                <a data-id='{$title}' href='" . $child['default_url'] . "'
                    class='nav-link {$activeClass}'>
                     {$child['title']}
                 </a>
@@ -132,25 +130,14 @@ class Menu
     private function buildSingleMenuItem($menu, $title, $icon, $linkText, $isActive)
     {
         $activeClass = $isActive ? 'active' : '';
-        $this->addTypeheadItem("Principal", $menu);
 
         return "
             <li class='nav-item'>
-                <a class='nav-link {$activeClass}' href='" . route($menu['default_url']) . "'>
+                <a class='nav-link {$activeClass}' href='" . $menu['default_url'] . "'>
                     {$icon}
                     {$linkText}
                 </a>
             </li>";
-    }
-
-    private function addTypeheadItem($division, $item)
-    {
-        $this->typeheadItems[] = [
-            "division" => $division,
-            "detalle" => $item['title'],
-            "nota" => $item['nota'],
-            "url" => route($item['default_url'])
-        ];
     }
 
     public function mainMenu()
@@ -161,7 +148,7 @@ class Menu
             $this->menuItems .= $this->buildMenuItem($menu, true);
         }
 
-        return [$this->menuItems, $this->breadcrumbs, $this->typeheadItems];
+        return [$this->menuItems, $this->breadcrumbs];
     }
 
     public static function showMenu()

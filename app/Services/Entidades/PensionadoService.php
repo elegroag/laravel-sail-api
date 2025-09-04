@@ -273,7 +273,10 @@ class PensionadoService
             throw new DebugException("Adjunte los archivos obligatorios", 500);
         }
 
-        (new Mercurio38)->updateAll("usuario='{$usuario}', estado='P'", "conditions: id='{$id}'");
+        Mercurio38::where('id', $id)->update([
+            'usuario' => $usuario,
+            'estado' => 'P'
+        ]);
 
         $ai = (new Mercurio10)->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
 

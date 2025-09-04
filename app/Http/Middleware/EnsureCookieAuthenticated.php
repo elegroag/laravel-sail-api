@@ -18,7 +18,6 @@ class EnsureCookieAuthenticated
     public function handle(Request $request, Closure $next)
     {
         if (!SessionCookies::check()) {
-            // Si es API/JSON devolvemos 401, en caso contrario redirigimos a login
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
@@ -28,12 +27,20 @@ class EnsureCookieAuthenticated
             return redirect('login/index');
         }
 
-        // Opcional: podemos inyectar el usuario validado en el request
-        $identity = SessionCookies::user();
-        if ($identity && isset($identity['user'])) {
-            // No sobreescribimos auth() de Laravel; dejamos un atributo para consumo interno
-            $request->attributes->set('mercurio_user', $identity['user']);
-            $request->attributes->set('mercurio_identity', $identity['payload']);
+        $tipo = session()->has('tipo') ? session('tipo') : null;
+        $user = session()->has('user') ? session('user') : null;
+
+        if ($user && $user != null && $tipo && $tipo != null) {
+            $request->attributes->set('mercurio_user', $user);
+            $request->attributes->set('mercurio_tipo', $tipo);
+        }else{
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No autenticado.'
+                ], 401);
+            }
+            return redirect('login/index');
         }
 
         return $next($request);

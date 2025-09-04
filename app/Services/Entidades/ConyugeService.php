@@ -3,6 +3,7 @@
 namespace App\Services\Entidades;
 
 use App\Exceptions\DebugException;
+use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
@@ -12,7 +13,6 @@ use App\Models\Mercurio13;
 use App\Models\Mercurio32;
 use App\Models\Mercurio37;
 use App\Services\Utils\Comman;
-use ParamsTrabajador;
 
 class ConyugeService
 {
@@ -350,7 +350,10 @@ class ConyugeService
             throw new DebugException("Adjunte los archivos obligatorios", 500);
         }
 
-        (new Mercurio32)->updateAll("usuario='{$usuario}', estado='P'", "conditions: id='{$id}'");
+        Mercurio32::where('id', $id)->update([
+            'usuario' => $usuario,
+            'estado' => 'P',
+        ]);
 
         $ai = (new Mercurio10)->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
 

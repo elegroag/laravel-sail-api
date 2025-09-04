@@ -1,0 +1,161 @@
+<?php
+namespace App\Http\Controllers\Mercurio;
+
+use App\Exceptions\DebugException;
+use App\Http\Controllers\Adapter\ApplicationController;
+use App\Library\Auth\AuthJwt;
+use App\Library\Auth\SessionCookies;
+use App\Models\Adapter\DbBase;
+
+class NotificacionesController extends ApplicationController
+{
+
+    protected $db;
+    protected $user;
+    protected $tipo;
+
+    public function __construct()
+    {   
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+    }
+
+    public function indexAction()
+    {
+        $this->setParamToView("hide_header", true);
+        $this->setParamToView("title", "Reportar errores y problemas");
+    }
+
+    public function procesarNotificacionAction()
+    {
+        $this->setResponse("ajax");
+        try {
+            $user = Auth::getActiveIdentity();
+            $documento = $user['documento'];
+            $servicio = $request->input('servicio', "addslaches", "alpha", "extraspaces", "striptags");
+            $telefono = $request->input('telefono', "addslaches", "alpha", "extraspaces", "striptags");
+            $nota = $request->input('nota');
+            $novedad = $request->input('novedad', "addslaches", "alpha", "extraspaces", "striptags");
+            $solicitante = (new Mercurio07)->findFirst("documento='{$documento}'");
+            $notificacion = new NotificacionService();
+            $notificacion->setTransa();
+
+            $filepath = '';
+            if (isset($_FILES['file'])) {
+                $file = $_FILES['file'];
+                $tmp_name = $file["tmp_name"];
+                $name =  basename($file["name"]);
+
+                $rename =  $documento . '_' . date("YmdHis") . '_' . sanetizar($name);
+                $filepath = TEMP_PATH . "{$rename}";
+
+                if (file_exists($filepath)) {
+                    unlink($filepath);
+                }
+
+                if (!move_uploaded_file($tmp_name, $filepath)) {
+                    throw new Exception("Error no es posible el cargue del archivo", 1);
+                }
+            }
+
+            $novedades = $this->leerNovedades();
+            $valor_novedad = $novedades["{$novedad}"];
+
+            $servicios = $this->leerServicios();
+            $valor_servicio = $servicios["{$servicio}"];
+
+            $fecha = date('Y-m-d');
+            $html = "
+                <h4>Notificaciones para soporte técnico del sistema Comfaca En Línea</h4>
+                <p>
+                Documento: {$documento}<br/>
+                Telefono: {$telefono}<br/>
+                Email: {$solicitante->getEmail()}<br/>
+                Nombre: {$solicitante->getNombre()}<br/>
+                TIPO: {$solicitante->getTipo()}<br/>
+                </p>
+                <p>
+                Fecha: {$fecha}<br/>
+                Novedad: {$valor_novedad}<br/>
+                Servicios: {$valor_servicio}<br/>
+                </p>
+                <b>Nota:</b> {$nota}
+            ";
+            $asunto = "[COMFACAONLINE][NOTA] notificación reportada {$documento}";
+
+            $emailCaja = $this->Mercurio01->findFirst();
+            $senderEmail = new SenderEmail();
+            $senderEmail->setters(
+                "emisor_email: {$emailCaja->getEmail()}",
+                "emisor_clave: {$emailCaja->getClave()}",
+                "asunto: {$asunto}"
+            );
+            $senderEmail->send(
+                array(
+                    array(
+                        "email" => "soportesistemas.comfaca@gmail.com",
+                        "nombre" => "soportesistemas.comfaca"
+                    )
+                ),
+                $html,
+                $filepath
+            );
+
+            $tipo = $solicitante->getTipo();
+            if ($tipo == 'T') {
+                $funcionario = (new AsignarFuncionario)->asignar('1', $solicitante->getCodciu());
+            } else {
+                $funcionario = (new AsignarFuncionario)->asignar('2', $solicitante->getCodciu());
+            }
+            $notificacion->createNotificacion(
+                array(
+                    'titulo' => 'Feedback, se reporta una novedad en el sistema, para soporte',
+                    'descripcion' => "Documento: {$documento}<br/>Email: {$solicitante->getEmail()}<br/>Nombre: {$solicitante->getNombre()}<br/>NOTA: $nota",
+                    'user' => $funcionario,
+                )
+            );
+
+            $notificacion->endTransa();
+            $salida = array(
+                "msj" => "Proceso se ha completado con éxito",
+                "success" => true,
+
+            );
+        } catch (DebugException $e) {
+            $salida = array(
+                "success" => false,
+                "msj" => $e->getMessage() . ' Linea: ' . $err->getLine() . ' File: ' . basename($err->getFile())
+            );
+        }
+        return $this->renderObject($salida, false);
+    }
+
+    function leerServicios()
+    {
+        return array(
+            "" => "Ninguno",
+            "1" => "Solicitud afiliación de empresas",
+            "2" => "Solicitud afiliación de trabajadores",
+            "3" => "Solicitud afiliación de conyuges",
+            "4" => "Solicitud afiliación de beneficiarios",
+            "5" => "Solicitud actualización de datos"
+        );
+    }
+
+    function leerNovedades()
+    {
+        return array(
+            "" => "Ninguno",
+            "1" => "Recomendación",
+            "2" => "Inconsistencia en la información",
+            "3" => "Error en al ingresar a una funcionalidad",
+            "4" => "Error en respuesta de un envío para validación",
+            "5" => "Error en los datos de la empresa",
+            "6" => "Error en los datos del trabajador",
+            "7" => "Error en los datos del conyuge",
+            "8" => "Error en los datos del beneficiario",
+            "9" => "Error en la solicitud actualización de datos"
+        );
+    }
+}

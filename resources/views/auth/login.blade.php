@@ -3,8 +3,6 @@
 @section('title', 'Iniciar Sesión')
 
 @section('content')
-@csrf
-
 <link rel="stylesheet" href="{{ asset('mercurio/css/login.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
 
@@ -21,7 +19,7 @@
 </script>
 
 <script type="text/template" id='tmp_verification'>
-    {{ App\Services\View::renderView("auth/tmp/tmp_verification") }}
+    @include('auth/tmp/tmp_verification')
 </script>
 
 <script type="text/template" id='tmp_layout'>

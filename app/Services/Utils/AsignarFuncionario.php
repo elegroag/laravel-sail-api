@@ -31,15 +31,14 @@ class AsignarFuncionario
             "conditions: codofi = '{$codofi}' and tipopc='{$tipopc}' and usuario > $usuario"
         );
 
-        (new Mercurio08())->updateAll(
-            "orden='0'",
-            "conditions: codofi = '{$codofi}' and tipopc='{$tipopc}' "
-        );
+        Mercurio08::where('codofi', $codofi)
+            ->where('tipopc', $tipopc)
+            ->update(['orden' => '0']);
 
-        (new Mercurio08())->updateAll(
-            "orden='1'",
-            "conditions: codofi = '{$codofi}' and tipopc='{$tipopc}' and usuario='{$usuario_orden}'"
-        );
+        Mercurio08::where('codofi', $codofi)
+            ->where('tipopc', $tipopc)
+            ->where('usuario', $usuario_orden)
+            ->update(['orden' => '1']);
 
         if (is_null($usuario) || $usuario == '') {
             throw new DebugException("No se puede realizar el registro, no hay funcionarios disponibles, comuniquese con el área de atención al cliente", 503);

@@ -3,6 +3,8 @@
 namespace App\Services\Entidades;
 
 use App\Exceptions\DebugException;
+use App\Library\Collections\ParamsFacultativo;
+use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
@@ -12,8 +14,6 @@ use App\Models\Mercurio14;
 use App\Models\Mercurio36;
 use App\Models\Mercurio37;
 use App\Services\Utils\Comman;
-use ParamsFacultativo;
-use ParamsTrabajador;
 
 class FacultativoService
 {
@@ -270,7 +270,10 @@ class FacultativoService
             throw new DebugException("Adjunte los archivos obligatorios", 500);
         }
 
-        (new Mercurio36)->updateAll("usuario='{$usuario}', estado='P'", "conditions: id='{$id}'");
+        Mercurio36::where('id', $id)->update([
+            'usuario' => $usuario,
+            'estado' => 'P',
+        ]);
 
         $ai = (new Mercurio10)->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
 

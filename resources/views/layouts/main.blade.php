@@ -39,7 +39,8 @@
 
 <body class="bg-gray-100 flex items-center justify-center h-screen">
     @include('templates.loading')
-    @yield('content')
+
+    @yield('content-main')
 
     <script type="text/javascript" src="{{ asset('assets/plugins/js.cookie.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/jquery/jquery.scrollbar.min.js') }}"></script>
@@ -47,8 +48,8 @@
     <script type="text/javascript" src="{{ asset('assets/bootstrap/js/bootstrap-datepicker.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/bootstrap/js/bootstrap-datepicker-es.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/validators/jquery.validate.min.js') }}"></script>
-    <script src="{{ asset('assets/validators/messages_es.min.js') }}"></script>
 
+    <script src="{{ asset('assets/validators/messages_es.min.js') }}"></script>
     <script src="{{ asset('assets/argon/headroom.js') }}"></script>
     <script src="{{ asset('assets/argon/argon.js') }}"></script>
 

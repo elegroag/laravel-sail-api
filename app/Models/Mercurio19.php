@@ -9,7 +9,7 @@ class Mercurio19 extends ModelBase
 
     protected $table = 'mercurio19';
     public $timestamps = false;
-    protected $primaryKey = 'id';
+    protected $primaryKey = ['tipo', 'coddoc', 'documento'];
 
     protected $fillable = [
         'tipo',
@@ -22,30 +22,6 @@ class Mercurio19 extends ModelBase
         'intentos',
         'token',
     ];
-
-    public function __construct(
-        $tipo = null,
-        $coddoc = null,
-        $documento = null,
-        $codigo = null,
-        $respuesta = null,
-        $intentos = null,
-        $inicio = null,
-        $token = null,
-        $codver = null
-    ) {
-        parent::__construct();
-
-        $this->tipo = $tipo;
-        $this->coddoc = $coddoc;
-        $this->documento = $documento;
-        $this->codigo = $codigo;
-        $this->respuesta = $respuesta;
-        $this->inicio = $inicio;
-        $this->intentos = $intentos;
-        $this->token = $token;
-        $this->codver = $codver;
-    }
 
     public function setCodver($codver)
     {

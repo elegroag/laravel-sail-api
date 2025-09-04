@@ -23,20 +23,22 @@ class PrincipalController extends ApplicationController
 {
     protected $db;
     protected $user;
+    protected $tipo;
 
     public function __construct()
-    {
-        parent::__construct();        
+    {   
         $this->db = DbBase::rawConnect();
-        if (session()->has('documento')) {
-            $this->user = session()->all();
-        }
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
     public function indexAction()
     {
+        if ($this->user == null) {
+            return redirect()->route('login');
+        }
         return view('principal.index', [
-            'tipo' => $this->user['tipo'],
+            'tipo' => $this->tipo,
             'documento' => $this->user['documento'],
             'nombre' => $this->user['nombre'],
             'title' => "Panel Principal"
@@ -260,8 +262,11 @@ class PrincipalController extends ApplicationController
             $out = $procesadorComando->toArray();
             $salida_beneficiarios = $out;
 
-            $hoy = date('Y-m-d');
-            (new Mercurio07)->updateAll("fecha_syncron='{$hoy}'", "conditions: documento='{$documento}' AND coddoc='{$coddoc}' AND tipo='{$tipo}'");
+            $hoy = Carbon::now()->format('Y-m-d');
+            Mercurio07::where('documento', $documento)
+                ->where('coddoc', $coddoc)
+                ->where('tipo', $tipo)
+                ->update(['fecha_syncron' => $hoy]);
 
             $salida = array(
                 "success" => true,
@@ -314,7 +319,7 @@ class PrincipalController extends ApplicationController
         try {
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
-            $tipo = $this->user['tipo'];
+            $tipo = $this->tipo;
             $servicios = array();
             switch ($tipo) {
                 case 'E':
@@ -629,20 +634,20 @@ class PrincipalController extends ApplicationController
         } catch (DebugException $err) {
             $salida = array(
                 'success' => false,
-                'msj' => $err->getMessage()
+                'msj' => $e->getMessage()
             );
         }
         return $this->renderObject($salida, false);
     }
 
-    public function valida_syncroAction()
+    public function validaSyncroAction()
     {
         $this->setResponse("ajax");
         
         try {
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
-            $tipo = $this->user['tipo'];
+            $tipo = $this->tipo;
     
             $hoy = date('Y-m-d');
             $solicitante =  (new Mercurio07)->findFirst(" documento='{$documento}' and coddoc='{$coddoc}' and tipo='{$tipo}'");
@@ -651,9 +656,9 @@ class PrincipalController extends ApplicationController
                 $solicitante->save();
             }
 
-            $hoy = date('Y-m-d H:i:s');
-            $dif =  $this->db->fetchOne("SELECT DATEDIFF('{$hoy}', '{$solicitante->getFechaSyncron()}') AS 'dias'");
-            $interval = $dif['dias'];
+            $hoy = Carbon::now();
+            $dif = $hoy->diff(Carbon::parse($solicitante->getFechaSyncron()));
+            $interval = $dif->days;
             $salida = array(
                 'success' => true,
                 'msj' => 'Consulta realizada con éxito',
@@ -665,7 +670,7 @@ class PrincipalController extends ApplicationController
         } catch (DebugException $err) {
             $salida = array(
                 'success' => false,
-                'msj' => $err->getMessage()
+                'msj' => $e->getMessage()
             );
         }
         return $this->renderObject($salida, false);
@@ -680,18 +685,18 @@ class PrincipalController extends ApplicationController
      * @param string $calemp
      * @return void
      */
-    public function ingresoDirigidoAction($token = '')
+    public function ingresoDirigidoAction(Request $request)
     {
         $this->setResponse("view");
-
         try {
-            $tk = explode('|', base64_decode($token));
+            $dataVerify = $request->input('dataVerify');
+            $tk = explode('|', base64_decode($dataVerify));
 
             if (count($tk) !== 2) {
                 throw new DebugException("El identificador de la empresa no es correcto", 404);
             }
 
-            $data = decrypt($tk[0], $tk[1]);
+            $data = Kdecrypt($tk[0], $tk[1]);
             if ($data == false) {
                 throw new DebugException("El identificador de la empresa no es correcto", 404);
             }
@@ -755,10 +760,9 @@ class PrincipalController extends ApplicationController
             if ($solicitud == false) {
                 throw new DebugException("La identificación de la solicitud no es correcto", 404);
             }
-
-            $user07 = (new Mercurio07)->findFirst("documento='{$token->documento}' and coddoc='{$token->coddoc}' and tipo='{$token->tipo}'");
+         
             $auth = new SessionCookies(
-                "model: Mercurio07",
+                "model: mercurio07",
                 "tipo: {$token->tipo}",
                 "coddoc: {$token->coddoc}",
                 "documento: {$token->documento}",
@@ -782,7 +786,7 @@ class PrincipalController extends ApplicationController
             return redirect()->to($url);
 
         } catch (DebugException $err) {
-            set_flashdata("error", array("msj" => $err->getMessage()));
+            set_flashdata("error", array("msj" => $e->getMessage()));
             return redirect()->to("login/index");
         }
     }
@@ -838,7 +842,7 @@ class PrincipalController extends ApplicationController
         } catch (DebugException $err) {
             $salida = array(
                 "success" => false,
-                "msj" => $err->getMessage()
+                "msj" => $e->getMessage()
             );
         }
         return $this->renderObject($salida);

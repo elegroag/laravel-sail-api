@@ -4,6 +4,9 @@ namespace App\Services\Utils;
 
 use App\Exceptions\DebugException;
 use App\Models\Mercurio02;
+use App\Models\Mercurio04;
+use App\Models\Mercurio05;
+use App\Models\Mercurio08;
 use App\Services\Api\PortalMercurio;
 
 require_once "legacy/Excel/Main.php";
@@ -653,7 +656,7 @@ class GeneralService
         $response .= "</div>";
         $response .= $col;
         $response .= "<label class='form-control-label'>Zona</label>";
-        $response .= "<p class='pl-2 description'>" . $_codzon[$mercurio38->getCodzon()] . "</p>";
+        $response .= "<p class='pl-2 description'>" . $_codciu[$mercurio38->getCodzon()] . "</p>";
         $response .= "</div>";
         $response .= $col;
         $response .= "<label class='form-control-label'>Direccion</label>";
@@ -1360,6 +1363,7 @@ class GeneralService
         $response .= "</tbody>";
         $response .= "</table>";
         $response .= "</div>";
+
         return $response;
     }
 
@@ -1948,24 +1952,28 @@ class GeneralService
 
     public function asignarFuncionario($tipopc, $codciu)
     {
-        $this->startTrans("mercurio08");
-        $mercurio05 = $this->Mercurio05->findFirst("codciu = '$codciu'");
+        $mercurio05 = (new Mercurio05)->findFirst("codciu = '$codciu'");
         if ($mercurio05 == false) {
-            $mercurio04 = $this->Mercurio04->findFirst("principal='S'");
+            $mercurio04 = (new Mercurio04)->findFirst("principal='S'");
             $codofi = $mercurio04->getCodofi();
         } else {
             $codofi = $mercurio05->getCodofi();
         }
-        $mercurio08 = $this->Mercurio08->findFirst("codofi = '$codofi' and tipopc='{$tipopc}' and orden='1'");
+        $mercurio08 = (new Mercurio08)->findFirst("codofi = '$codofi' and tipopc='{$tipopc}' and orden='1'");
         if ($mercurio08 == false) {
-            $usuario = $this->Mercurio08->minimum("usuario", "conditions: codofi = '{$codofi}' and tipopc='{$tipopc}' ");
+            $usuario = (new Mercurio08)->minimum("usuario", "conditions: codofi = '{$codofi}' and tipopc='{$tipopc}' ");
         } else {
             $usuario = $mercurio08->getUsuario();
         }
         if ($usuario == "") return "";
-        $usuario_orden = $this->Mercurio08->minimum("usuario", "conditions: codofi = '{$codofi}' and tipopc='{$tipopc}' and usuario > {$usuario}");
-        $this->Mercurio08->updateAll("orden='0'", "conditions: codofi = '{$codofi}' and tipopc='{$tipopc}' ");
-        $this->Mercurio08->updateAll("orden='1'", "conditions: codofi = '{$codofi}' and tipopc='{$tipopc}' and usuario='{$usuario_orden}'");
+        $usuario_orden = (new Mercurio08)->minimum("usuario", "conditions: codofi = '{$codofi}' and tipopc='{$tipopc}' and usuario > {$usuario}");
+        Mercurio08::where('codofi', $codofi)
+            ->where('tipopc', $tipopc)
+            ->update(['orden' => '0']);
+        Mercurio08::where('codofi', $codofi)
+            ->where('tipopc', $tipopc)
+            ->where('usuario', $usuario_orden)
+            ->update(['orden' => '1']);
         return $usuario;
     }
 

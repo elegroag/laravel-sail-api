@@ -1,6 +1,10 @@
 <?php
 namespace App\Library\Auth;
 
+use App\Exceptions\AuthException;
+use App\Models\Gener02;
+use JwtManager;
+
 class AuthJwt
 {
     protected $jwt;
@@ -17,8 +21,6 @@ class AuthJwt
 
     public function __construct($expire = 7200)
     {
-        Core::importHelper('hash');
-        Core::importLibrary('JwtManager', 'JWT');
         if ($expire) {
             $this->expire = $expire;
         }
@@ -59,7 +61,7 @@ class AuthJwt
     {
         $this->loadHeaders(false);
 
-        if (IS_AJAX) {
+        if (is_ajax()) {
             throw new AuthException("El acceso AJAX no es correcto al servicio solicitado", 404);
         }
         /**
@@ -119,7 +121,7 @@ class AuthJwt
     {
         try {
             $this->loadHeaders(true);
-            if (!IS_AJAX) {
+            if (!is_ajax()) {
                 throw new AuthException("El acceso no es correcto al servicio", 404);
             }
 
@@ -179,7 +181,7 @@ class AuthJwt
     public function SimpleToken()
     {
         $this->loadHeaders(true);
-        if (!IS_AJAX) {
+        if (!is_ajax()) {
             throw new AuthException("El acceso no es correcto al servicio, la solicitud no es REST", 404);
         }
         if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
@@ -198,33 +200,36 @@ class AuthJwt
         ));
     }
 
-    public function CheckSimpleToken()
+    public function findToken()
     {
-        $this->loadHeaders(true);
-        if (!IS_AJAX) {
-            throw new AuthException("El acceso no es correcto al servicio", 404);
-        }
-
         $authorization = (isset($this->headers['Authorization'])) ? $this->headers['Authorization'] : null;
         if (is_null($authorization) == false) {
             if (preg_match('/^bearer/i', $authorization)) {
-
                 $this->token = trim(preg_replace('/^bearer/i', "", $authorization));
-
-                $res = $this->jwt->check($this->token);
-                if ($res) {
-                    $data = $this->jwt->show($this->token);
-                    if ($data->ip) {
-                        return true;
-                    }
-                } else {
-                    throw new AuthException("Error el token no es valido para su ingreso", 5);
-                }
             } else {
                 throw new AuthException("Error no hay un token de validación", 5);
             }
         } else {
             throw new AuthException("No se ha recepcionado las credenciales de acceso.", 6);
+        }
+        return $this->token;
+    }
+
+    public function CheckSimpleToken($token)
+    {
+        $this->loadHeaders(true);
+        if (!is_ajax()) {
+            throw new AuthException("El acceso no es correcto al servicio", 404);
+        }
+        $token = (is_null($token)) ? $this->findToken() : $token;
+        $res = $this->jwt->check($token);
+        if ($res) {
+            $data = $this->jwt->show($token);
+            if ($data->ip) {
+                return true;
+            }
+        } else {
+            throw new AuthException("Error el token no es valido para su ingreso", 5);
         }
     }
 

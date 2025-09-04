@@ -32,35 +32,19 @@ export default class Verification {
         $('#render_sesion').fadeOut('fast');
     }
 
-    __procesarVerify(transfer = {}) {
-        const { data, token, callback } = transfer;
-        $.ajax({
-            method: 'POST',
-            dataType: 'JSON',
-            cache: false,
+    __procesarVerify({ data, callback }) {
+        this.#App.trigger('syncro', {
             url: this.#App.url('mercurio/verify'),
-            data: data,
-            beforeSend: (xhr) => {
-                loading.show();
-                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-            },
-        })
-            .done((response) => {
-                loading.hide();
-                if (response) {
+            data,
+            callback: (response = undefined) => {
+                if (response && response.success === true) {
                     return callback(response);
                 } else {
-                    this.#App.trigger('alert:error', {
-                        message: 'Error al procesar la solicitud, no hay una respuesta del servidor.',
-                    });
+                    this.#App.trigger('alert:error', { message: response.msj });
                 }
                 return callback(false);
-            })
-            .fail((err) => {
-                loading.hide();
-                this.#App.trigger('alert:error', { message: err.responseText });
-                return callback(false);
-            });
+            },
+        });
     }
 
     destroy() {

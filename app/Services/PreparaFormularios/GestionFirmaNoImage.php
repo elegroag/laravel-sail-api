@@ -73,6 +73,12 @@ class GestionFirmaNoImage
      */
     public function generarClaves()
     {
+        $this->lfirma = new Mercurio16();
+        $this->lfirma->setDocumento($this->documento);
+        $this->lfirma->setCoddoc($this->coddoc);
+        $this->lfirma->setFecha(date('Y-m-d'));
+        $this->lfirma->setFirma('N/A');
+        
         if ($this->lfirma->getKeyprivate() && $this->lfirma->getKeypublic()) {
             return array(
                 'private' => $this->lfirma->getKeyprivate(),

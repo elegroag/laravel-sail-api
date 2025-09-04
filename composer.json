@@ -35,9 +35,10 @@
             "Database\\Seeders\\": "database/seeders/"
         },
         "files": [
-            "app/Helpers/helpers.php",
-            "app/Helpers/files.php",
-            "app/Helpers/hashes.php"
+            "./legacy/JWT/JwtManager.php",
+            "./app/Helpers/helpers.php",
+            "./app/Helpers/files.php",
+            "./app/Helpers/hashes.php"
         ]
     },
     "autoload-dev": {

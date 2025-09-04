@@ -1,12 +1,11 @@
 @extends('layouts.main')
 
-@section('title', 'Iniciar Sesión')
-
-@section('content')
+@section('content-main')
 @php
 use App\Services\Menu\Menu;
 
-$user = session()->all();
+$tipo = session()->get('tipo');
+$user = session()->get('user');
 list($menu, $migas) = Menu::showMenu();
 @endphp
 
@@ -16,14 +15,14 @@ list($menu, $migas) = Menu::showMenu();
 
 <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.css') }}" />
 
-{{ View::renderView("layout/tmp-bone/sidebar", array('menu' => $menu, '_tipo' => $user['tipo'])) }}
+@include('templates.sidebar', array('menu' => $menu, '_tipo' => $tipo))
 
 <div class="main-content" id="panel">
-    {{ View::render("layout/tmp-bone/navbar", array('user_name' => Tag::capitalize($user['nombre']))); }}
+@include('templates.navbar', array('user_name' => capitalize($user['nombre'])))
     @yield('content')
-    {{ View::renderView("layout/tmp-bone/footer") }}
+@include('templates.footer')
 </div>
 
-{{ View::renderView("layout/tmp-bone/modal") }}
+@include('templates.modal')
 
 @endsection

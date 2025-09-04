@@ -33,6 +33,7 @@ use Illuminate\Http\Response;
 use App\Services\Request as RequestParams;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\SenderEmail;
+use Carbon\Carbon;
 
 class LoginController extends ApplicationController
 {
@@ -159,10 +160,15 @@ class LoginController extends ApplicationController
                             $intentos = $user19->getIntentos() ? $user19->getIntentos() + 1 : 0;
                         }
 
-                        (new Mercurio19)->updateAll(
-                            "intentos='{$intentos}', inicio='{$inicio}', codver='{$codigoVerify}', token='{$token}'",
-                            "conditions: documento='{$documento}' AND coddoc='{$coddoc}' AND tipo='{$tipo}'"
-                        );
+                        Mercurio19::where('documento', $documento)
+                            ->where('coddoc', $coddoc)
+                            ->where('tipo', $tipo)
+                            ->update([
+                                'intentos' => (int) $intentos,
+                                'inicio'   => $inicio,
+                                'codver'   => (string) $codigoVerify,
+                                'token'    => (string) $token,
+                            ]);
                     } else {
                         $user19 = new Mercurio19();
                         $user19->setTipo($tipo);
@@ -206,7 +212,7 @@ class LoginController extends ApplicationController
             }
 
             $auth = new SessionCookies(
-                "model: Mercurio07",
+                "model: mercurio07",
                 "tipo: {$tipo}",
                 "coddoc: {$coddoc}",
                 "documento: {$documento}",
@@ -461,10 +467,10 @@ class LoginController extends ApplicationController
                 "success" => true,
                 "msj" => "El email está disponible para el registro"
             );
-        } catch (DebugException $err) {
+        } catch (DebugException $e) {
             $response = array(
                 "success" => false,
-                "msj" => $err->getMessage()
+                "msj" => $e->getMessage()
             );
         }
         return $this->renderObject($response);
@@ -510,8 +516,8 @@ class LoginController extends ApplicationController
             array(
                 "success" => true,
                 "data" => array(
-                    'fuera_servicio' => env('APP_MODE_INTEGRATION', false),
-                    'msj' => (env('APP_MODE_INTEGRATION', false) == true) ? 'El servicio está suspendido temporalmente.' : 'La ventana de mantenimiento se ha completado con éxito. Muchas gracias por la espera.'
+                    'fuera_servicio' => env('APP_INTEGRATION', false),
+                    'msj' => (env('APP_INTEGRATION', false) == true) ? 'El servicio está suspendido temporalmente.' : 'La ventana de mantenimiento se ha completado con éxito. Muchas gracias por la espera.'
                 )
             )
         );
@@ -590,7 +596,7 @@ class LoginController extends ApplicationController
         } catch (\Exception $err) {
             $salida = array(
                 "success" => false,
-                "msj" => $err->getMessage()
+                "msj" => $e->getMessage()
             );
         }
         return $this->renderObject($salida, false);
@@ -600,14 +606,15 @@ class LoginController extends ApplicationController
     {
         $this->setResponse("ajax");
         try {
-            $authJwt = new AuthJwt(1000);
-            $authJwt->CheckSimpleToken();
-
+            $token = $request->input('token');
             $documento = $request->input('documento');
             $coddoc = $request->input('coddoc');
             $tipo = $request->input('tipo');
             $tipafi = $request->input('tipafi');
             $id = $request->input('id');
+
+            $authJwt = new AuthJwt();
+            $authJwt->CheckSimpleToken($token);
 
             $code = array(
                 $request->input('code_1', "addslashes", "alpha", "extraspaces", "striptags"),
@@ -623,7 +630,7 @@ class LoginController extends ApplicationController
 
             $error = '';
             $user19 = (new Mercurio19)->findFirst(" documento='{$documento}' and coddoc='{$coddoc}' and tipo='{$tipo}'");
-            if ($authJwt->getToken() != $user19->getToken()) {
+            if ($token != $user19->getToken()) {
                 $error .= "Error el token ya no es valido para continuar. \n";
             }
 
@@ -641,16 +648,20 @@ class LoginController extends ApplicationController
                 $error .= "Ha superado el número de intentos permitidos para acceder a la cuenta con PIN de seguridad. Espera un poco más, han pasado {$diferenciaEnMinutos} minutos para poder volver acceder. \n";
             }
 
-            if (strlen($error) == 0 && $diferenciaEnMinutos > 5) {
+            if (strlen($error) == 0 && $diferenciaEnMinutos >= 5) {
                 //volver a generar PIN
                 $codigoVerify = generaCode();
-                $inicio  = date('Y-m-d H:i:s');
+                $inicio  = Carbon::now()->format('Y-m-d H:i:s');
                 $intentos = '0';
 
-                (new Mercurio19)->updateAll(
-                    " inicio='{$inicio}', intentos='{$intentos}', codver='{$codigoVerify}'",
-                    "conditions: documento='{$documento}' and coddoc='{$coddoc}' and tipo='{$tipo}'"
-                );
+                Mercurio19::where('documento', $documento)
+                    ->where('coddoc', $coddoc)
+                    ->where('tipo', $tipo)
+                    ->update([
+                        'inicio'   => $inicio,
+                        'intentos' => (int) $intentos,
+                        'codver'   => (string) $codigoVerify,
+                    ]);
 
                 $html = "Utiliza el siguiente código de verificación, para confirmar el propietario de la dirección de correo:<br/>
                         <span style=\"font-size:16px;color:#333\">CÓDIGO DE VERIFICACIÓN: </span><br/>
@@ -665,14 +676,7 @@ class LoginController extends ApplicationController
                     "asunto: {$asunto}"
                 );
 
-                $senderEmail->send(
-                    array(array(
-                        "email" => $user07->getEmail(),
-                        "nombre" => $user07->getNombre()
-                    )),
-                    $html
-                );
-
+                $senderEmail->send($user07->getEmail(), $html);
                 $error .= "Ha superado el tiempo de validación y es necesario volver a generar un nuevo PIN, y se ha enviado a la dirección de correo registrada en la plataforma. Por favor comprobar en el buzon del correo e ingresar el nuevo PIN.\n";
             }
 
@@ -682,17 +686,20 @@ class LoginController extends ApplicationController
                     $inicio  = date('Y-m-d H:i:s');
                     $intentos = $user19->getIntentos() + 1;
 
-                    (new Mercurio19())->updateAll(
-                        " inicio='{$inicio}', intentos='{$intentos}' ",
-                        "conditions: documento='{$documento}' and coddoc='{$coddoc}' and tipo='{$tipo}'"
-                    );
+                    Mercurio19::where('documento', $documento)
+                        ->where('coddoc', $coddoc)
+                        ->where('tipo', $tipo)
+                        ->update([
+                            'inicio'   => $inicio,
+                            'intentos' => (int) $intentos,
+                        ]);
 
                     $error .= "Error el código no es valido para continuar. {$codver} = {$user19->getCodver()} \n";
                 }
             }
 
             if (strlen($error) == 0) {
-                $tk = encrypt(
+                $tk = Kencrypt(
                     json_encode(
                         array(
                             "documento" => $documento,
@@ -704,16 +711,11 @@ class LoginController extends ApplicationController
                     )
                 );
 
-                $auth = new SessionCookies(
-                    'model',
-                    "class: Mercurio07",
-                    "tipo: {$tipo}",
-                    "coddoc: {$coddoc}",
-                    "documento: {$documento}",
-                    "estado: A"
-                );
-
-                if (!$auth->authenticate()) {
+                if (!Mercurio07::where("documento", $documento)
+                    ->where("coddoc", $coddoc)
+                    ->where("tipo", $tipo)
+                    ->where("estado", "A")
+                    ->exists()) {
                     throw new DebugException("Error en la autenticación del usuario", 501);
                 }
 
@@ -726,12 +728,12 @@ class LoginController extends ApplicationController
                     vamos a continuar.<br/><p class='text-center'><i class='fa fa-arrow-down fa-2x' aria-hidden='true'></i></p>",
                 );
             } else {
-
                 $token = $authJwt->SimpleToken();
-                (new Mercurio19)->updateAll(
-                    " token='{$token}' ",
-                    "conditions: documento='{$documento}' and coddoc='{$coddoc}' and tipo='{$tipo}'"
-                );
+                Mercurio19::where('documento', $documento)
+                    ->where('coddoc', $coddoc)
+                    ->where('tipo', $tipo)
+                    ->update(['token' => (string) $token]);
+
                 $salida = array(
                     "success" => true,
                     "isValid" => false,
@@ -739,10 +741,10 @@ class LoginController extends ApplicationController
                     "msj" => $error
                 );
             }
-        } catch (DebugException $err) {
+        } catch (DebugException $e) {
             $salida = array(
                 "success" => false,
-                "msj" => $err->getMessage()
+                "msj" => $e->getMessage()
             );
         }
         return $this->renderObject($salida);
@@ -758,10 +760,15 @@ class LoginController extends ApplicationController
 
             $authJwt = new AuthJwt();
             $token = $authJwt->SimpleToken();
-            $user19 = (new Mercurio19)->findFirst(" documento='{$documento}' and coddoc='{$coddoc}' and tipo='{$tipo}'");
+
+            $user19 = Mercurio19::where("documento", $documento)
+                ->where("coddoc", $coddoc)
+                ->where("tipo", $tipo)
+                ->first();
+
             if ($user19) {
                 $user19->setToken($token);
-                $user19->save();
+                $user19->update();
             } else {
                 throw new DebugException("Error los parametros de acceso no son validos para solicitar token", 301);
             }
@@ -770,10 +777,10 @@ class LoginController extends ApplicationController
                 "success" => true,
                 "token" => $token,
             );
-        } catch (DebugException $err) {
+        } catch (DebugException $e) {
             $salida = array(
                 "success" => false,
-                "msj" => $err->getMessage()
+                "msj" => $e->getMessage()
             );
         }
         return $this->renderObject($salida);
@@ -854,10 +861,10 @@ class LoginController extends ApplicationController
                 "msj" => "Se ha enviado la solicitud de cambio de correo, pronto se contactara con usted para confirmar el cambio. " .
                     "Este proceso puede tardar ya que se requiere de la confirmación de la persona que solicita el cambio por seguridad de la informacion.",
             );
-        } catch (DebugException $err) {
+        } catch (DebugException $e) {
             $salida = array(
                 "success" => false,
-                "msj" => $err->getMessage()
+                "msj" => $e->getMessage()
             );
         }
         return $this->renderObject($salida);

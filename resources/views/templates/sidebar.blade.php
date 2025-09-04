@@ -1,16 +1,18 @@
-<?php
+@php
 $array_tipos = [
     '' => 'N/A',
     'P' => 'Particular',
     'E' => 'Empresa',
     'T' => 'Trabajador'
 ];
-?>
+@endphp
 <nav class="sidenav navbar navbar-vertical fixed-left navbar-expand-xs navbar-light" id="sidenav-main">
     <div class="scrollbar-inner">
         <div class="sidenav-header d-flex align-items-center p-3">
-            <a class="navbar-brand m-0" href="<?php echo route('principal.index'); ?>">
-                <?php echo \App\Services\Tag::image("logo-min.png", "class: navbar-brand-img"); ?>
+            <a class="navbar-brand m-0" href="{{ route('principal.index') }}">
+                @php
+                echo App\Services\Tag::image("logo-min.png", "class: navbar-brand-img");
+                @endphp
             </a>
             <div class="ms-auto">
                 <div class="sidenav-toggler d-none d-xl-block" data-action="sidenav-unpin" data-bs-target="#sidenav-main">
@@ -29,13 +31,16 @@ $array_tipos = [
                         <div class="nav-link p-0 mb-2">
                             <span class="nav-link-text fw-bold">
                                 COMFACA EN LÍNEA<br>
-                                <small class="text-muted">Usuario tipo: <span class="text-primary"><?php echo isset($array_tipos[$_tipo]) ? htmlspecialchars($array_tipos[$_tipo]) : 'N/A'; ?></span></small>
+                                <small class="text-muted">Usuario tipo: <span class="text-primary">
+                                    {{ isset($array_tipos[$_tipo]) ? htmlspecialchars($array_tipos[$_tipo]) : 'N/A' }}</span></small>
                             </span>
                         </div>
                     </div>
                     <hr class="my-2">
                     <ul class="navbar-nav">
-                        <?php echo $menu; ?>
+                        @php
+                        echo $menu;
+                        @endphp
                     </ul>
                 </div>
             </div>

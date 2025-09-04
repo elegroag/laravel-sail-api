@@ -311,12 +311,41 @@ class ModelBase extends Model
         $params = get_params_destructures($data);
         $query = DB::table($this->getTable());
 
+        // Helper para detectar array asociativo
+        $isAssoc = function ($arr) {
+            if (!is_array($arr)) return false;
+            return array_keys($arr) !== range(0, count($arr) - 1);
+        };
+
+        // Condiciones con bindings seguros cuando sea posible
         if (isset($params['conditions'])) {
             $conditions = $params['conditions'];
             if (is_array($conditions)) {
-                $conditions = implode(",", $conditions);
+                if ($isAssoc($conditions)) {
+                    // Asociativo: [col => val]
+                    foreach ($conditions as $col => $val) {
+                        $query->where($col, $val);
+                    }
+                } else {
+                    // Lista: ["col=val", ...]
+                    foreach ($conditions as $cond) {
+                        if (!is_string($cond) || strpos($cond, '=') === false) continue;
+                        [$col, $val] = array_map('trim', explode('=', $cond, 2));
+                        // Normalizar valor
+                        if (strcasecmp($val, 'NULL') === 0) {
+                            $query->whereNull($col);
+                        } else {
+                            if ((str_starts_with($val, "'") && str_ends_with($val, "'")) || (str_starts_with($val, '"') && str_ends_with($val, '"'))) {
+                                $val = substr($val, 1, -1);
+                            }
+                            $query->where($col, $val);
+                        }
+                    }
+                }
+            } else {
+                // String crudo: compatibilidad retro
+                $query->whereRaw($conditions);
             }
-            $query->whereRaw($conditions);
         }
         // Parse set values. Accept formats:
         // - set:col1=val1,col2=val2
@@ -324,26 +353,30 @@ class ModelBase extends Model
         $updateData = [];
         if (isset($params['set'])) {
             $sets = $params['set'];
-            $setItems = is_array($sets) ? $sets : explode(',', $sets);
-            foreach ($setItems as $item) {
-                if (!is_string($item)) continue;
-                if (strpos($item, '=') === false) continue;
-                [$col, $val] = array_map('trim', explode('=', $item, 2));
-                // normalize value
-                if (strcasecmp($val, 'NULL') === 0) {
-                    $value = null;
-                } elseif (is_numeric($val)) {
-                    // numeric types
-                    $value = (strpos($val, '.') !== false) ? (float)$val : (int)$val;
-                } else {
-                    // strip surrounding single/double quotes if present
-                    if ((str_starts_with($val, "'") && str_ends_with($val, "'")) || (str_starts_with($val, '"') && str_ends_with($val, '"'))) {
-                        $value = substr($val, 1, -1);
+            if ($isAssoc($sets)) {
+                // Arreglo asociativo directo
+                $updateData = $sets;
+            } else {
+                // Lista o string: "col=val,col2=val2"
+                $setItems = is_array($sets) ? $sets : explode(',', $sets);
+                foreach ($setItems as $item) {
+                    if (!is_string($item)) continue;
+                    if (strpos($item, '=') === false) continue;
+                    [$col, $val] = array_map('trim', explode('=', $item, 2));
+                    // normalizar valor
+                    if (strcasecmp($val, 'NULL') === 0) {
+                        $value = null;
+                    } elseif (is_numeric($val)) {
+                        $value = (strpos($val, '.') !== false) ? (float)$val : (int)$val;
                     } else {
-                        $value = $val;
+                        if ((str_starts_with($val, "'") && str_ends_with($val, "'")) || (str_starts_with($val, '"') && str_ends_with($val, '"'))) {
+                            $value = substr($val, 1, -1);
+                        } else {
+                            $value = $val;
+                        }
                     }
+                    $updateData[$col] = $value;
                 }
-                $updateData[$col] = $value;
             }
         } elseif (isset($params[0]) && is_string($params[0]) && strpos($params[0], '=') !== false) {
             // fallback: first param contains set clause

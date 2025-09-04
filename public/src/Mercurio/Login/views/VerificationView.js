@@ -71,25 +71,26 @@ export default class VerificationView extends Backbone.View {
         e.preventDefault();
         const params = this.model;
         $App.trigger('syncro', {
-            url: $App.url('tokenParticular'),
+            url: $App.url('mercurio/tokenParticular'),
             data: params,
             callback: (response) => {
                 if (response) {
                     if (response.success) {
-                        const token = response.token;
                         this.trigger('send:verify', {
                             data: {
+                                token: response.token,
                                 code_1: this.getInput('code_1'),
                                 code_2: this.getInput('code_2'),
                                 code_3: this.getInput('code_3'),
                                 code_4: this.getInput('code_4'),
                                 ...params,
                             },
-                            token: token,
-                            callback: (response = {}) => {
-                                if (response.success == true) {
-                                    if (response.isValid == true) {
-                                        window.location.href = $App.kumbiaURL('mercurio/principal/ingresoDirigido/' + response.token);
+                            callback: (response) => {
+                                if (response && response.success === true) {
+                                    if (response.isValid === true) {
+                                        this.$el.find('#formVerify').attr('action', $App.url('principal/ingreso_dirigido'));
+                                        this.$el.find('input[name="dataVerify"]').val(response.token);
+                                        this.$el.find('#formVerify').submit();
                                     } else {
                                         $App.trigger('alert:error', {
                                             message: response.msj,

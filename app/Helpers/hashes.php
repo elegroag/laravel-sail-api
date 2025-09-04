@@ -74,8 +74,8 @@ if (!function_exists('generate_key')) {
 }
 
 
-if (!function_exists('encrypt')) {
-    function encrypt($token)
+if (!function_exists('Kencrypt')) {
+    function Kencrypt($token)
     {
         $iv = "";
         $seed = str_split('1234567890123456');
@@ -86,8 +86,8 @@ if (!function_exists('encrypt')) {
     }
 }
 
-if (!function_exists('decrypt')) {
-    function decrypt($encryptedData, $iv)
+if (!function_exists('Kdecrypt')) {
+    function Kdecrypt($encryptedData, $iv)
     {
         $token = openssl_decrypt($encryptedData, 'AES-256-CTR', '8QGTBVnqGh5A4a2WST0ztVU0eB9p2lSHwWWXy1GlSAhPoXyNMw-2023', 0, $iv);
         return $token;

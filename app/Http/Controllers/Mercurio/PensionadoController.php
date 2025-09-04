@@ -1,0 +1,960 @@
+<?php
+
+namespace App\Http\Controllers\Mercurio;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Exceptions\AuthException;
+use App\Exceptions\DebugException;
+use App\Http\Controllers\Adapter\ApplicationController;
+use App\Library\Collections\ParamsPensionado;
+use App\Library\Collections\ParamsTrabajador;
+
+use App\Models\Adapter\DbBase;
+use App\Models\Gener09;
+use App\Models\Gener18;
+use App\Models\Mercurio01;
+use App\Models\Mercurio37;
+use App\Models\Mercurio38;
+use App\Models\Mercurio07;
+use App\Models\Mercurio10;
+use App\Models\Mercurio31;
+use App\Models\Subsi54;
+
+use App\Services\Entidades\PensionadoService;
+use App\Services\Entidades\TrabajadorService;
+use App\Services\FormulariosAdjuntos\PensionadoAdjuntoService;
+
+use App\Services\Utils\AsignarFuncionario;
+use App\Services\Utils\ChangeCuentaService;
+use App\Services\Utils\Comman;
+use App\Services\Utils\GeneralService;
+use App\Services\Utils\GuardarArchivoService;
+use App\Services\Utils\SenderValidationCaja;
+use Carbon\Carbon;
+
+class PensionadoController extends ApplicationController
+{
+    /**
+     * pensionadoService variable
+     * @var PensionadoService
+     */
+    protected $pensionadoService;
+
+    /**
+     * trabajadorService variable
+     * @var TrabajadorService
+     */
+    protected $trabajadorService;
+
+    /**
+     * asignarFuncionario variable
+     * @var AsignarFuncionario
+     */
+    protected $asignarFuncionario;
+
+    protected $tipopc = "9";
+    protected $db;
+    protected $user;
+    protected $tipo;
+   
+    public function __construct()
+    {
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+    }
+
+    /**
+     * indexAction function
+     * @return \Illuminate\View\View
+     */
+    public function indexAction()
+    {
+        return view('pensionado.index', [
+            "title"=> "Afiliación Pensionados",
+            "calemp" => "P",
+            "tipper" => "N",
+            "cedtra" => parent::getActUser("documento"),
+            "coddoc" => parent::getActUser("coddoc")
+        ]);
+    }
+
+    /**
+     * actualizarAction function
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function actualizarAction(Request $request)
+    {
+        $this->setResponse("ajax");
+        try {
+            $id = $request->input('id');
+            $params = $this->serializeData($request);
+            $params['tipo'] = parent::getActUser("tipo");
+            $params['coddoc'] = parent::getActUser("coddoc");
+            $params['documento'] = parent::getActUser("documento");
+            $params['estado'] = 'T';
+
+            $this->pensionadoService = new PensionadoService();
+            $this->asignarFuncionario = new AsignarFuncionario();
+            $params['usuario'] = $this->asignarFuncionario->asignar($this->tipopc, parent::getActUser("codciu"));
+
+            $this->pensionadoService->updateByFormData($id, $params);
+            $pensionado = $this->pensionadoService->findById($id);
+            $data = $pensionado->getArray();
+
+            $response = [
+                'success' => true,
+                'msj' => 'Registro actualizado con éxito',
+                'data' => $data
+            ];
+        } catch (DebugException $e) {
+            $response = [
+                'success' => false,
+                'msj' => $e->getMessage()
+            ];
+        }
+        return $this->renderObject($response, false);
+    }
+
+    /**
+     * guardarAction function
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function guardarAction(Request $request)
+    {
+        $this->setResponse("ajax");
+        $pensionadoService = new PensionadoService();
+        
+        try {
+            $asignarFuncionario = new AsignarFuncionario();
+            $id = $request->input('id');
+            $params = $this->serializeData($request);
+            $params['tipo'] = parent::getActUser("tipo");
+            $params['coddoc'] = parent::getActUser("coddoc");
+            $params['documento'] = parent::getActUser("documento");
+            $params['usuario'] = $asignarFuncionario->asignar($this->tipopc, parent::getActUser("codciu"));
+
+            if (is_null($id) || $id == '') {
+                $params['id'] = null;
+                $params['estado'] = 'T';
+                $pensionado = $pensionadoService->createByFormData($params);
+                $id = $pensionado->getId();
+            } else {
+                $res = $pensionadoService->updateByFormData($id, $params);
+                if ($res == false) {
+                    throw new DebugException("Error no se actualizaron los datos", 301);
+                }
+                $pensionado = $pensionadoService->findById($id);
+            }
+
+            // Buscar los parámetros por API
+            $pensionadoService->paramsApi();
+
+            $pensionadoAdjuntoService = new PensionadoAdjuntoService($pensionado);
+            
+            // Procesar formulario
+            $out = $pensionadoAdjuntoService->formulario()->getResult();
+            (new GuardarArchivoService([
+                'tipopc' => $this->tipopc,
+                'coddoc' => 1,
+                'id' => $pensionado->getId()
+            ]))->salvarDatos($out);
+
+            // Procesar tratamiento de datos
+            $out = $pensionadoAdjuntoService->tratamientoDatos()->getResult();
+            (new GuardarArchivoService([
+                'tipopc' => $this->tipopc,
+                'coddoc' => 25,
+                'id' => $pensionado->getId()
+            ]))->salvarDatos($out);
+
+            // Procesar carta de solicitud
+            $out = $pensionadoAdjuntoService->cartaSolicitud()->getResult();
+            (new GuardarArchivoService([
+                'tipopc' => $this->tipopc,
+                'coddoc' => 24,
+                'id' => $pensionado->getId()
+            ]))->salvarDatos($out);
+
+            $response = [
+                'success' => true,
+                'msj' => 'Registro completado con éxito',
+                'data' => $pensionado->getArray()
+            ];
+        } catch (DebugException $e) {
+            $response = [
+                'success' => false,
+                'msj' => $e->getMessage()
+            ];
+        }
+        
+        return $this->renderObject($response, false);
+    }
+
+    /**
+     * serializeData function
+     * @param Request $request
+     * @return array
+     */
+    protected function serializeData(Request $request)
+    {
+        $fecsol = Carbon::now();
+        return [
+            'fecsol' => $fecsol->format('Y-m-d'),
+            'cedtra' => $request->input('cedtra', ''),
+            'tipdoc' => $request->input('tipdoc', ''),
+            'priape' => $request->input('priape', ''),
+            'segape' => $request->input('segape', ''),
+            'prinom' => $request->input('prinom', ''),
+            'segnom' => $request->input('segnom', ''),
+            'fecnac' => $request->input('fecnac', ''),
+            'ciunac' => $request->input('ciunac', ''),
+            'sexo' => $request->input('sexo', ''),
+            'estciv' => $request->input('estciv', ''),
+            'cabhog' => $request->input('cabhog', ''),
+            'codciu' => $request->input('codciu', ''),
+            'codzon' => $request->input('codzon', ''),
+            'direccion' => $request->input('direccion', ''),
+            'barrio' => $request->input('barrio', ''),
+            'telefono' => $request->input('telefono', ''),
+            'celular' => $request->input('celular', ''),
+            'email' => $request->input('email', ''),
+            'fecini' => $request->input('fecini', ''),
+            'salario' => $request->input('salario', ''),
+            'captra' => $request->input('captra', ''),
+            'tipdis' => $request->input('tipdis', ''),
+            'nivedu' => $request->input('nivedu', ''),
+            'rural' => $request->input('rural', ''),
+            'vivienda' => $request->input('vivienda', ''),
+            'tipafi' => $request->input('tipafi', ''),
+            'autoriza' => $request->input('autoriza', ''),
+            'calemp' => 'P',
+            'codact' => $request->input('codact', ''),
+            'tippag' => $request->input('tippag', ''),
+            'cargo' => $request->input('cargo', ''),
+            'tipcue' => $request->input('tipcue', ''),
+            'numcue' => $request->input('numcue', ''),
+            'resguardo_id' => $request->input('resguardo_id', ''),
+            'peretn' => $request->input('peretn', ''),
+            'pub_indigena_id' => $request->input('pub_indigena_id', ''),
+            'codban' => $request->input('codban', ''),
+            'codcaj' => $request->input('codcaj', ''),
+            'coddocrepleg' => $request->input('coddocrepleg', ''),
+            'facvul' => $request->input('facvul', ''),
+            'orisex' => $request->input('orisex', '')
+        ];
+    }
+
+    /**
+     * validaAction function
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function validaAction(Request $request)
+    {
+        $this->setResponse("ajax");
+        
+        try {
+            $cedtra = $request->input('cedrep');
+            $solicitud = (new Mercurio38())->findFirst("documento='{$cedtra}' AND estado IN('A','I')");
+
+            $solicitudPrevia = $solicitud ? $solicitud->getArray() : false;
+
+            // Obtener información de la empresa
+            $procesadorComando = Comman::Api();
+            $procesadorComando->runCli([
+                "servicio" => "ComfacaEmpresas",
+                "metodo" => "informacion_empresa",
+                "params" => ["nit" => $cedtra]
+            ]);
+
+            $empresa = $procesadorComando->toArray();
+            $empresa = !empty($empresa['data']) ? $empresa['data'] : false;
+
+            // Obtener información del trabajador
+            $procesadorComando = Comman::Api();
+            $procesadorComando->runCli([
+                "servicio" => "ComfacaEmpresas",
+                "metodo" => "informacion_trabajador",
+                "params" => ['cedtra' => $cedtra]
+            ]);
+
+            $trabajador = $procesadorComando->toArray();
+            $trabajador = !empty($trabajador['data']) ? $trabajador['data'] : false;
+
+            $response = [
+                "success" => true,
+                "solicitud_previa" => $solicitudPrevia,
+                "empresa" => $empresa,
+                "trabajador" => $trabajador
+            ];
+        } catch (DebugException $e) {
+            $response = [
+                "success" => false,
+                "msj" => "No se pudo validar la información: " . $e->getMessage()
+            ];
+        }
+        
+        return $this->renderObject($response, false);
+    }
+
+    /**
+     * borrarArchivoAction function
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function borrarArchivoAction(Request $request)
+    {
+        $this->setResponse("ajax");
+        
+        try {
+            $numero = $request->input('id');
+            $coddoc = $request->input('coddoc');
+
+            $mercurio01 = (new Mercurio01())->findFirst();
+            $mercurio37 = (new Mercurio37())->findFirst("tipopc='{$this->tipopc}' AND numero='{$numero}' AND coddoc='{$coddoc}'");
+
+            if ($mercurio37) {
+                $filepath = storage_path($mercurio01->getPath() . $mercurio37->getArchivo());
+                if (file_exists($filepath)) {
+                    unlink($filepath);
+                }
+                (new Mercurio37())->deleteAll("tipopc='{$this->tipopc}' AND numero='{$numero}' AND coddoc='{$coddoc}'");
+            }
+
+            $response = [
+                'success' => true,
+                'msj' => 'El archivo se eliminó correctamente'
+            ];
+        } catch (\Exception $e) {
+            $response = [
+                'success' => false,
+                'msj' => 'Error al eliminar el archivo: ' . $e->getMessage()
+            ];
+        }
+        
+        return $this->renderObject($response, false);
+    }
+
+    /**
+     * guardarArchivoAction function
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function guardarArchivoAction(Request $request)
+    {
+        $this->setResponse("ajax");
+        
+        try {
+            $id = $request->input('id');
+            $coddoc = $request->input('coddoc');
+
+            $guardarArchivoService = new GuardarArchivoService([
+                'tipopc' => $this->tipopc,
+                'coddoc' => $coddoc,
+                'id' => $id
+            ]);
+            
+            $mercurio37 = $guardarArchivoService->main();
+            $mercurio37 = (new Mercurio37())->findFirst("tipopc='{$this->tipopc}' AND numero='{$id}' AND coddoc='{$coddoc}'");
+            
+            if (!$mercurio37) {
+                throw new \Exception('No se pudo encontrar el archivo guardado');
+            }
+
+            $response = [
+                'success' => true,
+                'msj' => 'Archivo procesado correctamente',
+                'data' => $mercurio37->getArray()
+            ];
+        } catch (\Exception $e) {
+            $response = [
+                'success' => false,
+                'msj' => 'Error al procesar el archivo: ' . $e->getMessage()
+            ];
+        }
+        
+        return $this->renderObject($response, false);
+    }
+
+    /**
+     * enviarCajaAction function
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function enviarCajaAction(Request $request)
+    {
+        $this->setResponse("ajax");
+        
+        try {
+            $id = $request->input('id');
+            
+            DB::beginTransaction();
+            
+            $pensionadoService = new PensionadoService();
+            $usuario = $this->getCurrentUser();
+            
+            if (!$usuario) {
+                throw new \Exception('No se pudo obtener la información del usuario actual');
+            }
+            
+            $pensionadoService->enviarCaja(new SenderValidationCaja(), $id, $usuario);
+            
+            DB::commit();
+
+            $response = [
+                'success' => true,
+                'msj' => 'El envío de la solicitud se ha completado con éxito'
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $response = [
+                'success' => false,
+                'msj' => 'Error al enviar a caja: ' . $e->getMessage()
+            ];
+        }
+        
+        return $this->renderObject($response);
+    }
+    
+    /**
+     * Obtiene el usuario actual
+     * @return mixed
+     * @throws \Exception
+     */
+    /**
+     * Obtiene el usuario actual
+     * 
+     * @return mixed
+     * @throws \Exception
+     */
+    protected function getCurrentUser()
+    {
+        if (!class_exists('AsignarFuncionario')) {
+            throw new \RuntimeException('La clase AsignarFuncionario no está disponible');
+        }
+        
+        $asignarFuncionario = new AsignarFuncionario();
+        return $asignarFuncionario->asignar(
+            $this->tipopc ?? 'WEB', 
+            $this->getActUser("codciu") ?? ''
+        );
+    }
+
+    /**
+     * nuevaAction function
+     * @param integer $id
+     * @param integer $documento
+     * @return void
+     */
+    public function nuevaAction($id = 0, $documento = 0)
+    {
+        $this->pensionadoService = new PensionadoService();
+        $this->trabajadorService = new TrabajadorService();
+        $user = $this->user;
+        if ($documento == 0) {
+            $documento = $user['documento'];
+        }
+        $coddoc = $user['coddoc'];
+        $tipo = $user['tipo'];
+
+        //$this->setParamToView("hide_header", true);
+        $sindepe = false;
+        $title = "Nueva Solicitud Pensionado";
+
+        $mercurio07 = (new Mercurio07())->findFirst("tipo='{$tipo}' and documento='{$documento}' and coddoc='{$coddoc}' and estado='A'");
+        $this->_loadParametros();
+
+        if ($id != 0) {
+            $sindepe = (new Mercurio38())->findFirst("id='{$id}' AND documento='{$documento}' and estado NOT IN('I','X')");
+            if ($sindepe == false) {
+                set_flashdata("error", array(
+                    "msj" => "El registro de afiliado no está disponible para su ingreso.",
+                    "code" => '505'
+                ));
+                redirect("principal.index");
+                exit;
+            }
+            $this->pensionadoService->loadDisplay($sindepe);
+        } else {
+            ///nuevo registro
+            $rqs = $this->pensionadoService->buscarEmpresaSubsidio($documento);
+            if ($rqs) {
+                $empresa = (count($rqs['data']) > 0) ? $rqs['data'] : false;
+                $this->pensionadoService->loadDisplaySubsidio($empresa);
+            } else {
+                $previus = (new Mercurio38())->findFirst("documento='{$documento}'");
+                if ($previus) $this->pensionadoService->loadDisplay($previus);
+            }
+            $trabaPrevius = (new Mercurio31())->findFirst("cedtra='{$documento}'");
+            if ($trabaPrevius) $this->trabajadorService->loadDisplay($trabaPrevius);
+        }
+
+      /*   Tag::displayTo("coddoc", $mercurio07->getCoddoc());
+        Tag::displayTo("tipdoc", $mercurio07->getCoddoc());
+        Tag::displayTo("cedrep", $mercurio07->getDocumento());
+        Tag::displayTo("email", $mercurio07->getEmail());
+        Tag::displayTo("razsoc", $mercurio07->getNombre());
+        Tag::displayTo("nit", $mercurio07->getDocumento()); */
+
+       /*  $this->setParamToView("mercurio38", $sindepe);
+        $this->setParamToView("show_archivos_requeridos", $this->pensionadoService->archivosRequeridos($sindepe));
+        $this->setParamToView("title", $title); */
+    }
+
+    /**
+     * _loadParametros function
+     * @return void
+     */
+    function _loadParametros()
+    {
+        $tipo = parent::getActUser("tipo");
+        $procesadorComando = Comman::Api();
+        $procesadorComando->runCli(
+            array(
+                "servicio" => "ComfacaAfilia",
+                "metodo" => "parametros_empresa"
+            ),
+            false
+        );
+
+        $paramsPensionado = new ParamsPensionado();
+       /*  $paramsPensionado->setDatosCaptura($procesadorComando->toArray());
+        $this->setParamToView("_coddoc", ParamsPensionado::getTipoDocumentos());
+        $this->setParamToView("_calemp", ParamsPensionado::getCalidadEmpresa());
+        $this->setParamToView("_codciu", ParamsPensionado::getCiudades());
+        $this->setParamToView("_codzon", ParamsPensionado::getZonas());
+        $this->setParamToView("_codact", ParamsPensionado::getActividades());
+        $this->setParamToView("_tipsoc", ParamsPensionado::getTipoSociedades());
+        $this->setParamToView("_tipemp", ParamsPensionado::getTipoEmpresa());
+        $this->setParamToView("_codcaj", ParamsPensionado::getCodigoCajas());
+        $this->setParamToView("_ciupri", ParamsPensionado::getCiudades());
+        $this->setParamToView("_coddocrepleg", ParamsPensionado::getCodruaDocumentos());
+        $this->setParamToView("tipo", $tipo);
+        $this->setParamToView("tipopc", $this->tipopc); */
+
+        $procesadorComando = Comman::Api();
+        $procesadorComando->runCli(
+            array(
+                "servicio" => "ComfacaAfilia",
+                "metodo" => "parametros_trabajadores"
+            ),
+            false
+        );
+
+        $paramsTrabajador = new ParamsTrabajador();
+        $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
+
+        $_tipsal = (new Mercurio31())->getTipsalArray();
+       /*  $this->setParamToView("_tipsal", $_tipsal);
+        $this->setParamToView("_sexo", ParamsTrabajador::getSexos());
+        $this->setParamToView("_estciv", ParamsTrabajador::getEstadoCivil());
+        $this->setParamToView("_cabhog", ParamsTrabajador::getCabezaHogar());
+        $this->setParamToView("_captra", ParamsTrabajador::getCapacidadTrabajar());
+        $this->setParamToView("_tipdis", ParamsTrabajador::getTipoDiscapacidad());
+        $this->setParamToView("_nivedu", ParamsTrabajador::getNivelEducativo());
+        $this->setParamToView("_rural", ParamsTrabajador::getRural());
+        $this->setParamToView("_tipcon", ParamsTrabajador::getTipoContrato());
+        $this->setParamToView("_trasin", ParamsTrabajador::getSindicalizado());
+        $this->setParamToView("_vivienda", ParamsTrabajador::getVivienda());
+        $this->setParamToView("_tipafi", ParamsTrabajador::getTipoAfiliado());
+        $this->setParamToView("_cargo", ParamsTrabajador::getOcupaciones());
+        $this->setParamToView("_orisex", ParamsTrabajador::getOrientacionSexual());
+        $this->setParamToView("_facvul", ParamsTrabajador::getVulnerabilidades());
+        $this->setParamToView("_peretn", ParamsTrabajador::getPertenenciaEtnicas());
+        $this->setParamToView("_ciunac", ParamsTrabajador::getCiudades());
+        $this->setParamToView("_labora_otra_empresa", ParamsTrabajador::getLaboraOtraEmpresa());
+        $this->setParamToView("_tippag", ParamsTrabajador::getTipoPago());
+        $this->setParamToView("_resguardos", ParamsTrabajador::getResguardos());
+        $this->setParamToView("_pueblos_indigenas", ParamsTrabajador::getPueblosIndigenas());
+        $this->setParamToView("_bancos", ParamsTrabajador::getBancos()); */
+    }
+
+    public function reloadArchivosAction(Request $request)
+    {
+        $this->setResponse("ajax");
+        $this->pensionadoService = new PensionadoService;
+        try {
+            $cedtra = $request->input('cedtra');
+            $id = $request->input('id');
+
+            $mercurio38 = (new Mercurio38())->findFirst("cedtra='{$cedtra}' and id='{$id}'");
+
+            if (!$mercurio38) {
+                throw new DebugException("La solicitud no está disponible actualizar el documento adjunto", 501);
+            } else {
+
+                $salida = array(
+                    "documentos_adjuntos" => $this->pensionadoService->archivosRequeridos($mercurio38),
+                    "success" => true
+                );
+            }
+        } catch (DebugException $e) {
+            $salida = array(
+                "success" => false,
+                "msj" => $e->getMessage()
+            );
+        }
+        return $this->renderObject($salida);
+    }
+
+    /**
+     * cancelarSolicitud function
+     * @return void
+     */
+    public function cancelarSolicitudAction(Request $request)
+    {
+        $this->setResponse("ajax");
+        try {
+            $user = $this->user;
+            $documento = $this->user['documento'];
+            $coddoc = $this->user['coddoc'];
+
+            $id = $request->input('id');
+
+            $m41 = (new Mercurio38())->findFirst("id='{$id}' AND documento='{$documento}' and coddoc='{$coddoc}'");
+            if ($m41) {
+                if ($m41->getEstado() != 'T') {
+                    (new Mercurio10())->deleteAll("numero='{$id}' AND tipopc='{$this->tipopc}'");
+                }
+                (new Mercurio38())->deleteAll("id='{$id}'");
+            }
+            $salida = array(
+                "success" => true,
+                "msj" => "El registro se borro con éxito del sistema."
+            );
+        } catch (DebugException $e) {
+            $salida = array(
+                "success" => false,
+                "msj" => $e->getMessage()
+            );
+        }
+        $this->renderObject(json_encode($salida, JSON_NUMERIC_CHECK));
+    }
+
+    public function downloadFileAction($archivo = "")
+    {
+        $this->setResponse('view');
+        $fichero = "public/temp/" . $archivo;
+        return $this->renderFile($fichero);
+    }
+
+    public function paramsAction()
+    {
+        $this->setResponse("ajax");
+
+        try {
+            $mtipoDocumentos = new Gener18();
+            $tipoDocumentos = array();
+
+            foreach ($mtipoDocumentos->find() as $mtipo) {
+                if ($mtipo->getCoddoc() == '7' || $mtipo->getCoddoc() == '2' || $mtipo->getCoddoc() == '3') continue;
+                $tipoDocumentos["{$mtipo->getCoddoc()}"] = $mtipo->getDetdoc();
+            }
+
+            $msubsi54 = new Subsi54();
+            $tipsoc = array();
+            foreach ($msubsi54->find() as $entity) {
+                $tipsoc["{$entity->getTipsoc()}"] = $entity->getDetalle();
+            }
+
+            $coddoc = array();
+            foreach ($mtipoDocumentos->find() as $entity) {
+                if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') continue;
+                $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
+            }
+
+            $coddocrepleg = array();
+            foreach ($mtipoDocumentos->find() as $entity) {
+                if ($entity->getCodrua() == 'TI' || $entity->getCodrua() == 'RC') continue;
+                $coddocrepleg["{$entity->getCodrua()}"] = $entity->getDetdoc();
+            }
+
+            $codciu = array();
+            $mgener09 = new Gener09();
+            foreach ($mgener09->find("*", "conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
+                $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
+            }
+
+            $pensionadoService = new PensionadoService();
+            $pensionadoService->paramsApi();
+
+            $mtipafi = ParamsTrabajador::getTipoAfiliado();
+            $tipo_afiliados = array();
+            foreach ($mtipafi as $key => $tipo) {
+                if ($key == '10' || $key == '64' || $key == '66' || $key == '67') {
+                    $tipo_afiliados[$key] = $tipo;
+                }
+            }
+
+            $coddoc = $tipoDocumentos;
+            $data = array(
+                'tipdoc' => $coddoc,
+                'tipper' => $this->Mercurio30->getTipperArray(),
+                'tipsoc' => $tipsoc,
+                'calemp' => $this->Mercurio30->getCalempArray(),
+                'codciu' => $codciu,
+                'coddocrepleg' => $coddocrepleg,
+                'codzon' => ParamsPensionado::getZonas(),
+                'codact' => ParamsPensionado::getActividades(),
+                'tipemp' => ParamsPensionado::getTipoEmpresa(),
+                'codcaj' => ParamsPensionado::getCodigoCajas(),
+                'ciupri' => ParamsPensionado::getCiudades(),
+                'sexo' => ParamsTrabajador::getSexos(),
+                'estciv' => ParamsTrabajador::getEstadoCivil(),
+                'cabhog' => ParamsTrabajador::getCabezaHogar(),
+                'captra' => ParamsTrabajador::getCapacidadTrabajar(),
+                'tipdis' => ParamsTrabajador::getTipoDiscapacidad(),
+                'nivedu' => ParamsTrabajador::getNivelEducativo(),
+                'rural' => ParamsTrabajador::getRural(),
+                'tipcon' => ParamsTrabajador::getTipoContrato(),
+                'trasin' => ParamsTrabajador::getSindicalizado(),
+                'vivienda' => ParamsTrabajador::getVivienda(),
+                'tipafi' => $tipo_afiliados,
+                'cargo' => ParamsTrabajador::getOcupaciones(),
+                'orisex' => ParamsTrabajador::getOrientacionSexual(),
+                'facvul' => ParamsTrabajador::getVulnerabilidades(),
+                'peretn' => ParamsTrabajador::getPertenenciaEtnicas(),
+                'ciunac' => ParamsPensionado::getCiudades(),
+                'labora_otra_empresa' => ParamsTrabajador::getLaboraOtraEmpresa(),
+                'tippag' => ParamsTrabajador::getTipoPago(),
+                'resguardo_id' => ParamsTrabajador::getResguardos(),
+                'pub_indigena_id' => ParamsTrabajador::getPueblosIndigenas(),
+                'codban' => ParamsTrabajador::getBancos(),
+                'tipsal' =>  $this->Mercurio31->getTipsalArray(),
+                'tipcue' => ParamsTrabajador::getTipoCuenta(),
+                'ruralt' => ParamsTrabajador::getRural(),
+                "autoriza" => array("S" => "SI", "N" => "NO")
+            );
+
+            $salida = array(
+                "success" => true,
+                "data" => $data,
+                "msj" => 'OK'
+            );
+        } catch (DebugException $e) {
+            $salida = array(
+                "success" => false,
+                "msj" => $e->getMessage()
+            );
+        }
+        return $this->renderObject($salida, false);
+    }
+
+    public function searchRequestAction($id)
+    {
+        $this->setResponse("ajax");
+        try {
+            if (is_null($id)) {
+                throw new DebugException("Error no hay solicitud a buscar", 301);
+            }
+            $documento = parent::getActUser("documento");
+            $coddoc = parent::getActUser("coddoc");
+
+            $solicitud = (new Mercurio38())->findFirst(" id='{$id}' AND documento='{$documento}' AND coddoc='{$coddoc}'");
+            if ($solicitud == False) {
+                throw new DebugException("Error la solicitud no está disponible para acceder.", 301);
+            } else {
+                $data = $solicitud->getArray();
+            }
+            $salida = array(
+                "success" => true,
+                "data" => $data,
+                "msj" => 'OK'
+            );
+        } catch (DebugException $e) {
+            $salida = array(
+                "success" => false,
+                "msj" => $e->getMessage()
+            );
+        }
+        return $this->renderObject($salida, false);
+    }
+
+    public function consultaDocumentosAction($id)
+    {
+        $this->setResponse("ajax");
+        try {
+            $documento = parent::getActUser("documento");
+            $coddoc = parent::getActUser("coddoc");
+            $pensionadoService = new PensionadoService();
+
+            $sindepe = (new Mercurio38())->findFirst("id='{$id}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado NOT IN('I','X')");
+            if ($sindepe == false) {
+                throw new DebugException("Error no se puede identificar el propietario de la solicitud", 301);
+            }
+            $salida = array(
+                'success' => true,
+                'data' => $pensionadoService->dataArchivosRequeridos($sindepe),
+                'msj' => 'OK'
+            );
+        } catch (DebugException $e) {
+            $salida = array(
+                "success" => false,
+                "msj" => $e->getMessage()
+            );
+        }
+        return $this->renderObject($salida, false);
+    }
+
+    public function borrarAction(Request $request)
+    {
+        $this->setResponse("ajax");
+        $generales = new GeneralService();
+        $generales->startTrans('mercurio41');
+        try {
+
+                $documento = parent::getActUser("documento");
+                $coddoc = parent::getActUser("coddoc");
+
+                $id = $request->input('id');
+                $solicitud = (new Mercurio38())->findFirst("id='{$id}' and documento='{$documento}' and coddoc='{$coddoc}'");
+                if ($solicitud) {
+                    if ($solicitud->getEstado() != 'T') (new Mercurio10())->deleteAll("numero='{$id}' AND tipopc='{$this->tipopc}'");
+                }
+                (new Mercurio38())->deleteAll("id='{$id}' and documento='{$documento}' and coddoc='{$coddoc}'");
+                $generales->finishTrans();
+                $response = array(
+                    'success' => true,
+                    'msj' => 'Ok'
+                );
+           
+        } catch (DebugException $e) {
+            $response = array(
+                'success' => false,
+                'msj' => $e->getMessage()
+            );
+        }
+        return $this->renderObject($response, false);
+    }
+
+    public function renderTableAction($estado = '')
+    {
+        $this->setResponse("view");
+        $this->pensionadoService = new PensionadoService();
+        $html = view(
+            "pensionado/tmp/solicitudes",
+            array(
+                "path" => base_path(),
+                "pensionados" => $this->pensionadoService->findAllByEstado($estado)
+            )
+        )->render();
+
+        return $this->renderText($html);
+    }
+
+    public function seguimientoAction($id)
+    {
+        $this->setResponse("ajax");
+        try {
+            $pensionadoService = new PensionadoService();
+            $out = $pensionadoService->consultaSeguimiento($id);
+            $salida = array(
+                "success" => true,
+                "data" => $out
+            );
+        } catch (DebugException $e) {
+            $salida = array('success' => false, 'msj' => $e->getMessage());
+        }
+        return $this->renderObject($salida);
+    }
+
+    public function descargar_formularioAction($id)
+    {
+        $this->setResponse("ajax");
+        
+        try {
+            if (!is_numeric($id)) {
+                throw new \InvalidArgumentException('ID de solicitud no válido');
+            }
+            
+            $pensionadoService = new PensionadoService();
+            //$formulario = $pensionadoService->descargarFormulario($id);
+            
+            if (empty($formulario)) {
+                throw new \RuntimeException('No se pudo generar el formulario');
+            }
+            
+            $response = [
+                'success' => true,
+                'formulario' => $formulario
+            ];
+        } catch (\Exception $e) {
+            $response = [
+                'success' => false,
+                'msj' => 'Error al descargar el formulario: ' . $e->getMessage()
+            ];
+        }
+        
+        return $this->renderObject($response);
+    }
+
+    /**
+     * Administra la cuenta de un pensionado
+     * 
+     * @param string $id ID de la solicitud
+     * @return mixed
+     * @throws \Exception
+     */
+    public function administrar_cuentaAction($id = '')
+    {
+        $this->setResponse("view");
+        
+        try {
+            if (empty($id)) {
+                throw new \InvalidArgumentException('El ID de la solicitud es requerido');
+            }
+            
+            // Obtener la solicitud
+            $solicitud = (new Mercurio38())->findFirst("id='{$id}' and estado='A'");
+            
+            if (!$solicitud) {
+                throw new \RuntimeException('No se encontró la solicitud solicitada');
+            }
+            
+            // Preparar datos del usuario
+            $userData = [
+                'id' => $id,
+                'cedtra' => $solicitud->cedtra,
+                'tipopc' => $this->tipopc,
+                'codciu' => $this->getActUser('codciu'),
+                'codusu' => $this->getActUser('codusu'),
+                'codpai' => $this->getActUser('codpai'),
+                'codemp' => $this->getActUser('codemp'),
+                'codofi' => $this->getActUser('codofi'),
+                'codrol' => $this->getActUser('codrol')
+            ];
+            
+            $request = new Request($userData);
+            $change = new ChangeCuentaService();
+            
+            if ($change->initializa($request)) {
+                set_flashdata("success", [
+                    "msj" => "La administración de la cuenta se ha inicializado con éxito.",
+                    "code" => 200
+                ]);
+                redirect('principal/index');
+                return;
+            }
+            
+            throw new \RuntimeException('No se pudo inicializar la administración de la cuenta');
+            
+        } catch (AuthException $e) {
+            set_flashdata("error", [
+                "msj" => $e->getMessage(),
+                "code" => $e->getCode() ?: 505
+            ]);
+            redirect('empresa/index');
+        } catch (\Exception $e) {
+            set_flashdata("error", [
+                "msj" => 'Error al procesar la solicitud: ' . $e->getMessage(),
+                "code" => 500
+            ]);
+            redirect('principal/index');
+        }
+    }
+
+}

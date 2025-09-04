@@ -1,5 +1,5 @@
 <?php
-include 'Firebase/JWT.php';
+require_once __DIR__ . '/Firebase/JWT.php';
 
 class JwtManager
 {

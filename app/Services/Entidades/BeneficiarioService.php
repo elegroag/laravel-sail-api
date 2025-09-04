@@ -303,7 +303,11 @@ class BeneficiarioService
             throw new DebugException("Adjunte los archivos obligatorios", 500);
         }
 
-        (new Mercurio34)->updateAll("usuario='{$usuario}', estado='P'", "conditions: id='{$id}'");
+        Mercurio34::where('id', $id)
+            ->update([
+                'usuario' => (string) $usuario,
+                'estado'  => 'P',
+            ]);
 
         $ai = (new Mercurio10)->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
 

@@ -97,4 +97,26 @@ class ApplicationController extends Controller
         );
     }
 
+    /**
+     * Retorna el usuario activo desde la sesión.
+     * Equivalente migrado de getActUser usado en controladores Kumbia.
+     * Si se pasa $key, retorna ese campo dentro de session('user').
+     */
+    public static function getActUser(?string $key = null)
+    {
+        if (!session()->has('user')) {
+            return null;
+        }
+        $user = session('user');
+        if ($key === null) {
+            return $user;
+        }
+        return $user[$key] ?? null;
+    }
+
+    public function renderText($html){
+        header('Content-Type: text/html; charset=utf-8');
+        echo $html;
+    }
+
 }

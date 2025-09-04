@@ -104,7 +104,10 @@ class SolicitaClaveService
                     " Y por tal motivo, no se puede restablecer la clave de acceso.  El indicio de email que está registrado es: " .
                     mask_email($mercurio07->getEmail()), 503);
             }
-            (new Mercurio07)->updateAll("clave='{$mclave}'", "conditions: tipo='{$this->tipo}' AND email='{$this->email}' AND documento='{$this->documento}'");
+            Mercurio07::where('tipo', $this->tipo)
+                ->where('email', $this->email)
+                ->where('documento', $this->documento)
+                ->update(['clave' => $mclave]);
         } else {
             ///validacion extra para empresas
             if ($this->tipo == "E") {

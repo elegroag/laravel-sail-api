@@ -10,7 +10,8 @@ class Mercurio07 extends ModelBase
 
     protected $table = 'mercurio07';
     public $timestamps = false;
-    protected $primaryKey = 'id';
+    public $incrementing = false;
+    protected $primaryKey = ['documento', 'coddoc', 'tipo'];
 
     protected $fillable = [
         'tipo',

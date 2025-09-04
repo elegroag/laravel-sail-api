@@ -3,7 +3,7 @@
         <div class='card-header'>
             <h4 class="text-center p-4">Verificación PIN - Email</h4>
             <center>
-            <img src="Mercurio/verification.jpg" class="img-responsive" style="width:200px" />    
+            <img src="{{ asset('img/Mercurio/verification.jpg') }}" class="img-responsive" style="width:200px" />    
             </center> <br />
             <p class="text-justify mt-3">
                 <span>Ingrese el código de verificación de 4 dígitos que le enviamos por correo electrónico.</span><br />
@@ -27,3 +27,8 @@
         </div>
     </div>
 </div>
+
+<form id="formVerify" action="#" method="POST">
+    @csrf
+    <input type="hidden" name="dataVerify" id="dataVerify" />
+</form>
