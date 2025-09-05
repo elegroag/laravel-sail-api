@@ -264,7 +264,7 @@
                 <br />
 
                 <div class="row">
-                    @if($estado == 'T' || $estado == 'D' || $estado == null)
+                    <% if($estado == 'T' || $estado == 'D' || $estado == null){ %>
                     <div class="col-6">
                         <fieldset>
                             <legend>Relaciona trabajadores en nomina</legend>
@@ -333,7 +333,7 @@
 
                         </fieldset>
                     </div>
-                    @endif
+                    <% } %>
                     <div class="col-6">
                         <fieldset>
                             <legend>Trabajadores en nomina</legend>
@@ -352,7 +352,7 @@
                 </div>
             </form>
 
-            @if($estado == 'T' || $estado == 'D' || $estado == null)
+            <% if($estado == 'T' || $estado == 'D' || $estado == null){  %>
             <div class="row justify-content-center">
                 <div class="col-3">
                     <button type="button" class="btn btn-primary btn-block" id='guardar_ficha'>
@@ -360,7 +360,7 @@
                     </button>
                 </div>
             </div>
-            @endif
+            <% } %>
         </div>
     </div>
     <div class="tab-pane fade" id="seguimiento" role="tabpanel" aria-labelledby="seguimiento-tab">...</div>

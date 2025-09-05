@@ -1,15 +1,14 @@
 @section('styles')
-    @vite(['resources/js/Mercurio/vendors/datatables.net.bs5/css/dataTables.bootstrap5.min.css'])
+    <link rel="stylesheet" href="{{ asset('assets/datatables.net-bs5/css/dataTables.bootstrap5.min.css') }}">
 @endsection
 
-@section('scripts')
-    @vite([
-        'resources/js/Mercurio/vendors/datatables.net/js/dataTables.min.js',
-        'resources/js/Mercurio/vendors/datatables.net.bs5/js/dataTables.bootstrap5.min.js'
-    ])
-@endsection
-
+@section('content')
 <div id='boneLayout'></div>
+@endsection
+
+@push('scripts')
+<script src="{{ asset('assets/datatables.net/js/dataTables.min.js') }}"></script>
+<script src="{{ asset('assets/datatables.net-bs5/js/dataTables.bootstrap5.min.js') }}"></script>
 
 <script type="text/template" id='tmp_layout'>
     @include('templates.tmp_layout')
@@ -55,4 +54,6 @@
     @include('empresa.tmp.tmp_tranom')
 </script>
 
-@vite(['resources/js/Mercurio/empresas/empresas.build.js'])
+<script src="{{ asset('mercurio/Empresas.js') }}"></script>
+
+@endpush
