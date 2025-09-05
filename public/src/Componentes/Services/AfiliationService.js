@@ -28,7 +28,7 @@ class AfiliationService {
         const silent = transfer.silent || false;
 
         $App.trigger('syncro', {
-            url: $App.url('params'),
+            url: $App.url('params', window.ServerController ?? 'principal'),
             data: {},
             silent,
             callback: (response) => {
@@ -47,7 +47,7 @@ class AfiliationService {
     serachRequestServer(transfer = {}) {
         const { id, callback } = transfer;
         $App.trigger('syncro', {
-            url: $App.url('searchRequest/' + id),
+            url: $App.url('searchRequest/' + id, window.ServerController ?? 'principal'),
             data: {},
             callback: (response) => {
                 if (response) {
@@ -61,7 +61,7 @@ class AfiliationService {
     sendRadicado(transfer = {}) {
         const { model, callback } = transfer;
         $App.trigger('syncro', {
-            url: $App.url('enviarCaja'),
+            url: $App.url('enviarCaja', window.ServerController ?? 'principal'),
             data: model.toJSON(),
             callback: (response) => {
                 if (response) {
@@ -115,8 +115,8 @@ class AfiliationService {
     digitVer(_data = {}) {
         const { nit, callback } = _data;
         $App.trigger('syncro', {
-            url: 'digito_verification',
-            data: { documento: nit },
+            url: $App.url('digito_verification', window.ServerController ?? 'principal'),
+            data: { documento: nit, nit: nit },
             callback: (response) => {
                 if (response) {
                     return callback(response);
@@ -129,7 +129,7 @@ class AfiliationService {
     validePk(transfer = {}) {
         const { data, callback } = transfer;
         $App.trigger('syncro', {
-            url: $App.url('valida'),
+            url: $App.url('valida', window.ServerController ?? 'principal'),
             data: data,
             silent: true,
             callback: (response) => {
@@ -160,9 +160,9 @@ class AfiliationService {
 
     saveFormData(transfer = {}) {
         const { entity, callback } = transfer;
-        const url = 'guardar';
+
         $App.trigger('syncro', {
-            url,
+            url: $App.url('guardar', window.ServerController ?? 'principal'),
             data: entity.toJSON(),
             callback: (response) => {
                 if (response) {
@@ -181,7 +181,7 @@ class AfiliationService {
             callback: (status) => {
                 if (status) {
                     $App.trigger('syncro', {
-                        url: $App.url('borrar'),
+                        url: $App.url('borrar', window.ServerController ?? 'principal'),
                         data: { id },
                         callback: (response) => {
                             if (response) {

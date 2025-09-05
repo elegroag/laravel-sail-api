@@ -10,8 +10,11 @@ class Mercurio30 extends ModelBase
 {
 
     protected $table = 'mercurio30';
-    public $timestamps = false;
     protected $primaryKey = 'id';
+
+    public $incrementing = true;
+    public $keyType = 'int';
+    public $timestamps = false;
 
     protected $fillable = [
         'fecsol',

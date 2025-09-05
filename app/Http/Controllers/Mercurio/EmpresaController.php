@@ -18,12 +18,14 @@ use App\Models\Mercurio31;
 use App\Models\Subsi54;
 use App\Services\Entidades\EmpresaService;
 use App\Services\FormulariosAdjuntos\DatosEmpresaService;
+use App\Services\FormulariosAdjuntos\EmpresaAdjuntoService;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
 use App\Services\Utils\GeneralService;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class EmpresaController extends ApplicationController
 {
@@ -96,51 +98,80 @@ class EmpresaController extends ApplicationController
      */
     public function guardarAction(Request $request)
     {
-        $this->setResponse('ajax');
         $service = new EmpresaService();
         try {
-            $id = $this->clp($request, 'id');
+            $this->db->begin();
+            $id = $request->input('id', null);
             $params = $request->all();
 
-            if (empty($id)) {
-                $saved = $service->createByFormData($params);
-                if (!$saved) throw new DebugException('No se pudo crear la solicitud', 500);
-                $solicitud = $service->findById($saved->getId());
+            if (is_null($id)) {
+                $empresa = $service->createByFormData($params);
             } else {
-                $ok = $service->updateByFormData((int) $id, $params);
+                $ok = $service->updateByFormData($id, $params);
                 if ($ok === false) throw new DebugException('No se pudo actualizar la solicitud', 500);
-                $solicitud = $service->findById((int) $id);
+                $empresa = $service->findById($id);
             }
 
-            // Generación de documentos adjuntos automáticos si aplica
-            try {
-                $service->paramsApi();
-                $datosEmpresaService = new DatosEmpresaService([
-                    'documento' => session()->has('user') ? (session('user')['documento'] ?? null) : null,
-                    'coddoc' => session()->has('user') ? (session('user')['coddoc'] ?? null) : null,
-                    'nit' => $this->clp($request, 'nit'),
-                    'empresa' => $solicitud ? $solicitud->getArray() : [],
-                    'campos' => $params,
-                ]);
-                $out = $datosEmpresaService->formulario();
-                // Guardar adjunto generado
-                (new GuardarArchivoService([
+            if ($empresa) {
+                $service->addTrabajadoresNomina($request->input('tranoms'), $empresa->getId());
+            }
+
+            $empresaAdjuntoService = new EmpresaAdjuntoService($empresa);
+            $out = $empresaAdjuntoService->formulario()->getResult();
+            (new GuardarArchivoService(
+                array(
                     'tipopc' => $this->tipopc,
                     'coddoc' => 1,
-                    'id' => $solicitud->getId(),
-                ]))->salvarDatos($out);
-            } catch (\Throwable $t) {
-                // no bloquear el flujo si falla la generación del PDF
-            }
+                    'id' => $empresa->getId()
+                )
+            ))->salvarDatos($out);
 
-            return $this->renderObject([
+
+            $out = $empresaAdjuntoService->tratamientoDatos()->getResult();
+            (new GuardarArchivoService(
+                array(
+                    'tipopc' => $this->tipopc,
+                    'coddoc' => 25,
+                    'id' => $empresa->getId()
+                )
+            ))->salvarDatos($out);
+
+
+            $out = $empresaAdjuntoService->cartaSolicitud()->getResult();
+            (new GuardarArchivoService(
+                array(
+                    'tipopc' => $this->tipopc,
+                    'coddoc' => 24,
+                    'id' => $empresa->getId()
+                )
+            ))->salvarDatos($out);
+
+            $out = $empresaAdjuntoService->trabajadoresNomina()->getResult();
+            (new GuardarArchivoService(
+                array(
+                    'tipopc' => $this->tipopc,
+                    'coddoc' => 11,
+                    'id' => $empresa->getId()
+                )
+            ))->salvarDatos($out);
+
+            ob_end_clean();
+
+            $salida = array(
                 'success' => true,
-                'msj' => 'Proceso se ha completado con éxito',
-                'data' => $solicitud ? $solicitud->getArray() : null
-            ]);
-        } catch (\Exception $e) {
-            return $this->renderObject(['success' => false, 'msj' => $e->getMessage()]);
+                'msj' => 'Registro completado con éxito',
+                'data' => $empresa->toArray()
+            );
+
+            $this->db->commit();
+        } catch (DebugException $e) {
+            $this->db->rollBack();
+            $salida = [
+                'success' => false,
+                'msj' => $e->getMessage()
+            ];
         }
+        return $this->renderObject($salida);
     }
 
     /**
@@ -381,35 +412,53 @@ class EmpresaController extends ApplicationController
         try {
             $nit = $this->clp($request, 'nit');
             if (!$nit) throw new DebugException('El nit es requerido', 422);
+
             $service = new EmpresaService();
             $dv = $service->digver($nit);
-            return $this->renderObject(['success' => true, 'dv' => $dv]);
-        } catch (\Exception $e) {
-            return $this->renderObject(['success' => false, 'msj' => $e->getMessage()]);
+
+            $salida = [
+                'success' => true,
+                'digver' => $dv
+            ];
+        } catch (DebugException $e) {
+            $salida = [
+                'success' => false,
+                'msj' => $e->getMessage()
+            ];
         }
+        return $this->renderObject($salida);
     }
 
     /**
      * GET /empresa/search_request/{id}
      */
-    public function searchRequestAction($id)
+    public function searchRequestAction(Request $request, Response $response, $id)
     {
         $this->setResponse('ajax');
         try {
             if (empty($id)) throw new DebugException('Error no hay solicitud a buscar', 422);
-            $user = session()->has('user') ? session('user') : [];
-            $documento = (string) ($user['documento'] ?? '');
-            $coddoc = (string) ($user['coddoc'] ?? '');
+
+            $documento = $this->user['documento'] ?? '';
+            $coddoc = $this->user['coddoc'] ?? '';
 
             $solicitud = (new Mercurio30())->findFirst(" id='{$id}' AND documento='{$documento}' AND coddoc='{$coddoc}'");
             if ($solicitud == false) {
                 throw new DebugException('Error la solicitud no está disponible para acceder.', 404);
             }
             $data = method_exists($solicitud, 'getArray') ? $solicitud->getArray() : [];
-            return $this->renderObject(['success' => true, 'data' => $data, 'msj' => 'OK']);
-        } catch (\Exception $e) {
-            return $this->renderObject(['success' => false, 'msj' => $e->getMessage()]);
+
+            $salida = [
+                'success' => true,
+                'data' => $data,
+                'msj' => 'OK'
+            ];
+        } catch (DebugException $e) {
+            $salida = [
+                'success' => false,
+                'msj' => $e->getMessage()
+            ];
         }
+        return $this->renderObject($salida);
     }
 
     /**
@@ -419,9 +468,9 @@ class EmpresaController extends ApplicationController
     {
         $this->setResponse('ajax');
         try {
-            $user = session()->has('user') ? session('user') : [];
-            $documento = (string) ($user['documento'] ?? '');
-            $coddoc = (string) ($user['coddoc'] ?? '');
+
+            $documento = $this->user['documento'] ?? '';
+            $coddoc = $this->user['coddoc'] ?? '';
             $service = new EmpresaService();
 
             $mempresa = (new Mercurio30())->findFirst(" id='{$id}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado NOT IN('I','X')");
@@ -432,10 +481,13 @@ class EmpresaController extends ApplicationController
                 'data' => $service->dataArchivosRequeridos($mempresa),
                 'msj' => 'OK'
             ];
-            return $this->renderObject($salida);
-        } catch (\Exception $e) {
-            return $this->renderObject(['success' => false, 'msj' => $e->getMessage()]);
+        } catch (DebugException $e) {
+            $salida = [
+                'success' => false,
+                'msj' => $e->getMessage()
+            ];
         }
+        return $this->renderObject($salida);
     }
 
     /**
@@ -444,27 +496,63 @@ class EmpresaController extends ApplicationController
     public function borrarAction(Request $request)
     {
         $this->setResponse('ajax');
-        $generales = new GeneralService();
-        $generales->startTrans('mercurio30');
         try {
-            try {
-                $user = session()->has('user') ? session('user') : [];
-                $documento = (string) ($user['documento'] ?? '');
-                $coddoc = (string) ($user['coddoc'] ?? '');
-                $id = $this->clp($request, 'id');
+            $this->db->begin();
+            $documento = $this->user['documento'] ?? '';
+            $coddoc = $this->user['coddoc'] ?? '';
 
-                $m30 = (new Mercurio30())->findFirst("id='{$id}' and documento='{$documento}' and coddoc='{$coddoc}'");
-                if ($m30) {
-                    if ($m30->getEstado() != 'T') (new Mercurio10())->deleteAll("numero='{$id}' AND tipopc='{$this->tipopc}'");
-                }
-                (new Mercurio30())->deleteAll("id='{$id}' and documento='{$documento}' and coddoc='{$coddoc}'");
-                $generales->finishTrans();
-                return $this->renderObject(['success' => true, 'msj' => 'Ok']);
-            } catch (\Exception $e) {
-                $generales->errorTrans($e->getMessage());
+            $id = $this->clp($request, 'id');
+
+            $m30 = (new Mercurio30())->findFirst("id='{$id}' and documento='{$documento}' and coddoc='{$coddoc}'");
+            if ($m30) {
+                if ($m30->getEstado() != 'T') Mercurio10::where("numero", $id)->where("tipopc", $this->tipopc)->delete();
             }
-        } catch (\Exception $e) {
-            return $this->renderObject(['success' => false, 'msj' => $e->getMessage()]);
+            Mercurio30::where("id", $id)
+                ->where("documento", $documento)
+                ->where("coddoc", $coddoc)
+                ->delete();
+
+            $this->db->commit();
+            $salida = [
+                'success' => true,
+                'msj' => 'Ok'
+            ];
+        } catch (DebugException $e) {
+            $this->db->rollBack();
+            $salida = [
+                'success' => false,
+                'msj' => $e->getMessage()
+            ];
         }
+        return $this->renderObject($salida);
+    }
+
+
+    public function validaAction(Request $request)
+    {
+        $this->setResponse("ajax");
+        try {
+            $nit = $this->clp($request, 'nit');
+            $solicitud_previa = (new Mercurio30())->getCount("*", "conditions: estado IN('P','T','D') AND nit='{$nit}'");
+            $empresa = false;
+
+            $empresaService = new EmpresaService;
+            $rqs = $empresaService->buscarEmpresaSubsidio($nit);
+            if ($rqs) {
+                $empresa = (count($rqs['data']) > 0) ? $rqs['data'] : false;
+            }
+
+            $response = array(
+                "success" => true,
+                "solicitud_previa" => ($solicitud_previa > 0) ? true : false,
+                "empresa" => $empresa
+            );
+        } catch (DebugException $err) {
+            $response = array(
+                "success" => false,
+                "msj" => $err->getMessage()
+            );
+        }
+        return $this->renderObject($response);
     }
 }

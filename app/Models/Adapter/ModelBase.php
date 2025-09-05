@@ -12,9 +12,9 @@ class ModelBase extends Model
     use HasFactory;
     use HasCompositeKey;
 
-    public function __construct()
+    public function __construct($attributes = [])
     {
-        parent::__construct();
+        parent::__construct($attributes);
     }
 
     public function findFirst(...$data)

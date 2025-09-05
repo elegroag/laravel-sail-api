@@ -428,4 +428,43 @@ class Tag
 
         return '<a ' . $attributes . ' >' . $content . '</a>';
     }
+
+    public static function addressField(...$data)
+    {
+        $params = get_params_destructures($data);
+        $name = '';
+        if (isset($params['name'])) {
+            $name = $params['name'];
+        } else {
+            $name = $params[0];
+        }
+        $value = '';
+        if (isset($params['value'])) {
+            $value = $params['value'];
+            unset($params['value']);
+        }
+
+        $code = "<div class='input-group'>";
+        $code .= "<div class='input-group-prepend'>";
+        $code .= " ";
+
+        if (isset($params['event'])) {
+            $code .= "<button class='btn btn-sm btn-icon btn-primary' type='button' data-name='{$name}' data-toggle=\"address\"><i class='fas fa-pen'></i></button>";
+        } else {
+            $code .= "<button class='btn btn-sm btn-icon btn-primary' type='button' onclick=\"openAddress('{$name}')\"><i class='fas fa-pen'></i></button>";
+        }
+
+        $code .= "</div>";
+        $code .= "<input type='text' name='{$name}' id='{$name}' value='$value' readonly ";
+
+        foreach ($params as $key => $value) {
+            if (!is_numeric($key)) {
+                $code .= "$key='$value' ";
+            }
+        }
+        $code .= " />";
+        $code .= "</div>\r\n";
+
+        return $code;
+    }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services\Utils;
 
 use App\Exceptions\DebugException;
@@ -7,7 +8,7 @@ use App\Models\Mercurio01;
 use App\Models\Mercurio10;
 use App\Models\Mercurio37;
 
-class GuardarArchivoService 
+class GuardarArchivoService
 {
     private $tipopc;
     private $coddoc;
@@ -24,7 +25,7 @@ class GuardarArchivoService
 
     public function main()
     {
-        $mercurio01 = (new Mercurio01())->findFirst();
+        $mercurio01 = Mercurio01::first();
 
         $time = strtotime('now');
         if (is_null($_FILES)) {
@@ -39,7 +40,7 @@ class GuardarArchivoService
         $name = $this->tipopc . "_" . $this->id . "_{$this->coddoc}_{$time}." . end($extension);
         $_FILES[$item]['name'] = $name;
 
-        $estado = $this->uploadFile($item, $mercurio01->getPath());
+        $estado = $this->uploadFile($item, $mercurio01->path ?? base_path('storage/temp/'));
         if ($estado != false) {
             $mercurio37 = $this->salvarDatos($name);
         } else {
@@ -71,7 +72,7 @@ class GuardarArchivoService
             $mercurio37->setFhash($fhash);
         }
 
-        if (!$mercurio37->save()){
+        if (!$mercurio37->save()) {
             throw new DebugException("Error al guardar el archivo", 301);
         }
 

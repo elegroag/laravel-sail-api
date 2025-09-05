@@ -1,7 +1,11 @@
+@php
+    use App\Services\Tag;
+@endphp
+
 <div class="tab-content" id="pills-tabContent">
     <div class="tab-pane fade show active" id="datos_solicitud" role="tabpanel" aria-labelledby="datos_solicitud-tab">
         <div class="card-body">
-            <form id="formRequest" class="validation_form" autocomplete="off" novalidate class="mb-3">
+            <form id="formRequest" class="validation_form" autocomplete="off">
                 <div class="d-none">
                     <input type="number" id="id" name="id" class="d-none" />
                     <input type="text" id="tipdoc" name="tipdoc" class="d-none" />
@@ -58,7 +62,7 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='dirpri'>
                                         <label for="dirpri" class="control-label">Dirección comercial:</label>
-                                        <input type="text" id="dirpri" name="dirpri" class="form-control" placeholder="dirección comercial" />
+                                        @php echo Tag::addressField("dirpri", "class: form-control", "placeholder: dirección comercial", "event: address"); @endphp
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -220,7 +224,7 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='direccion'>
                                         <label for="direccion" class="control-label">Dirección notificación:</label>
-                                        <input type="text" id="direccion" name="direccion" class="form-control" placeholder="dirección notificación" />
+                                        @php echo Tag::addressField("direccion", "class: form-control", "placeholder: dirección notificación", "event: address"); @endphp
                                     </div>
                                 </div>
 
@@ -353,8 +357,8 @@
             </form>
 
             <% if(estado == 'T' || estado == 'D' || estado == null){  %>
-            <div class="row justify-content-center">
-                <div class="col-3">
+            <div class="row justify-content-center mt-4">
+                <div class="col-auto">
                     <button type="button" class="btn btn-primary btn-block" id='guardar_ficha'>
                         <i class="fas fa-save"></i> Guardar y continuar
                     </button>

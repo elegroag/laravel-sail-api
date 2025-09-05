@@ -12,6 +12,7 @@ use App\Models\Mercurio14;
 use App\Models\Mercurio30;
 use App\Models\Mercurio37;
 use App\Models\Tranoms;
+use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
 
 class EmpresaService
@@ -303,35 +304,21 @@ class EmpresaService
     {
         $empresa = $this->findById($id);
         if ($empresa != false) {
-            $empresa->createAttributes($data);
+            // Usar asignación masiva para actualizar los atributos
+            $empresa->fill($data);
+
+            // Establecer el representante legal
             $empresa->setRepleg($data['priape'] . ' ' . $data['segape'] . ' ' . $data['prinom'] . ' ' . $data['segnom']);
 
-            if ($data['direccion'] == $data['dirpri']) {
-                $empresa->setDirpri($data['direccion']);
-            } else {
-                $empresa->setDirpri($data['dirpri']);
-            }
-            $empresa->setCiupri($data['ciupri']);
-            if ($data['telefono'] == $data['telpri']) {
-                $empresa->setTelpri($data['telefono']);
-            } else {
-                $empresa->setTelpri($data['telpri']);
-            }
-            if ($data['celular'] == $data['celpri']) {
-                $empresa->setCelpri($data['celular']);
-            } else {
-                $empresa->setCelpri($data['celpri']);
-            }
-            if ($data['email'] == $data['emailpri']) {
-                $empresa->setEmailpri(null);
-            } else {
-                $empresa->setEmailpri($data['emailpri']);
-            }
-            if ($data['codciu'] == $data['ciupri']) {
-                $empresa->setCiupri(null);
-            } else {
-                $empresa->setCiupri($data['ciupri']);
-            }
+            // Asignar funcionario
+            $user = (new AsignarFuncionario())->asignar($this->tipopc, $data['codciu']);
+            $empresa->setUsuario($user);
+
+            $empresa->setTipo(session('tipo'));
+            $empresa->setCoddoc($this->user['coddoc']);
+            $empresa->setDocumento($this->user['documento']);
+
+            // Establecer estado y fecha de solicitud
             $empresa->setEstado("T");
             $empresa->setFecsol(date('Y-m-d'));
 
@@ -348,42 +335,25 @@ class EmpresaService
      */
     public function create($data)
     {
-        $id = (new Mercurio30)->maximum('id') + 1;
-        $empresa = new Mercurio30();
-        $empresa->createAttributes($data);
-        $empresa->setId($id);
+        $empresa = new Mercurio30($data);
         $empresa->setRepleg($data['priape'] . ' ' . $data['segape'] . ' ' . $data['prinom'] . ' ' . $data['segnom']);
 
-        if ($data['direccion'] == $data['dirpri']) {
-            $empresa->setDirpri(null);
-        } else {
-            $empresa->setDirpri($data['dirpri']);
-        }
-        $empresa->setCiupri($data['ciupri']);
-        if ($data['telefono'] == $data['telpri']) {
-            $empresa->setTelpri(null);
-        } else {
-            $empresa->setTelpri($data['telpri']);
-        }
-        if ($data['celular'] == $data['celpri']) {
-            $empresa->setCelpri(null);
-        } else {
-            $empresa->setCelpri($data['celpri']);
-        }
-        if ($data['email'] == $data['emailpri']) {
-            $empresa->setEmailpri(null);
-        } else {
-            $empresa->setEmailpri($data['emailpri']);
-        }
-        if ($data['codciu'] == $data['ciupri']) {
-            $empresa->setCiupri(null);
-        } else {
-            $empresa->setCiupri($data['ciupri']);
-        }
+        $user = (new AsignarFuncionario())->asignar($this->tipopc, $data['codciu']);
+        $empresa->setUsuario($user);
 
-        (new Mercurio37)->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
-        (new Mercurio10)->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
-        (new Tranoms)->deleteAll(" request='{$id}'");
+        $empresa->setTipo(session('tipo'));
+
+        $empresa->setCoddoc($this->user['coddoc']);
+
+        $empresa->setDocumento($this->user['documento']);
+
+        $empresa->setMatmer(substr($data['matmer'], 0, 12));
+
+        $empresa->setFax('18001');
+
+        Mercurio37::where('tipopc', $this->tipopc)->where('numero', $empresa->id)->delete();
+        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $empresa->id)->delete();
+        Tranoms::where('request', $empresa->id)->delete();
         return $empresa;
     }
 
@@ -396,7 +366,9 @@ class EmpresaService
     {
         $empresa = $this->create($data);
         $empresa->setEstado("T");
-        return $empresa->save();
+        $empresa->setLog("0");
+        $empresa->save();
+        return $empresa;
     }
 
     /**
@@ -406,7 +378,7 @@ class EmpresaService
      */
     public function findById($id)
     {
-        return (new Mercurio30)->findFirst("id='{$id}'");
+        return Mercurio30::where("id", $id)->first();
     }
 
     /**
@@ -419,7 +391,7 @@ class EmpresaService
      */
     public function enviarCaja($senderValidationCaja, $id, $usuario)
     {
-        $solicitud = (new Mercurio30)->findFirst("id='{$id}'");
+        $solicitud = $this->findById($id);
 
         $cm37 = (new Mercurio37)->getCount(
             "tipopc='{$this->tipopc}' AND " .

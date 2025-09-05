@@ -45,6 +45,7 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
 
     Route::post('mercurio/principal/valida_syncro', [PrincipalController::class, 'validaSyncroAction'])->name('valida_syncro');
     Route::post('mercurio/principal/servicios', [PrincipalController::class, 'serviciosAction'])->name('servicios');
+    Route::post('mercurio/principal/listaAdress', [PrincipalController::class, 'listaAdressAction']);
 
     Route::get('mercurio/movimientos/historial', [MovimientosController::class, 'historialAction'])->name('movimientos.historial');
     Route::get('mercurio/movimientos/cambio_email_view', [MovimientosController::class, 'cambioEmailViewAction'])->name('movimientos.cambio_email_view');
@@ -81,13 +82,16 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
     Route::post('/mercurio/empresa/params', [EmpresaController::class, 'paramsAction']);
     Route::get('/mercurio/empresa/download_temp/{archivo}', [EmpresaController::class, 'downloadFileAction']);
     Route::get('/mercurio/empresa/download_docs/{archivo}', [EmpresaController::class, 'downloadDocsAction']);
-    Route::get('/mercurio/empresa/digito_verification', [EmpresaController::class, 'digitoVerificationAction']);
+
     Route::get('/mercurio/empresa/search_request/{id}', [EmpresaController::class, 'searchRequestAction']);
     Route::get('/mercurio/empresa/consulta_documentos/{id}', [EmpresaController::class, 'consultaDocumentosAction']);
     Route::post('/mercurio/empresa/borrar', [EmpresaController::class, 'borrarAction']);
     Route::post('/mercurio/empresas/params', [EmpresaController::class, 'paramsAction']);
     Route::post('/mercurio/empresa/renderTable', [EmpresaController::class, 'renderTableAction']);
     Route::post('/mercurio/empresa/renderTable/{estado}', [EmpresaController::class, 'renderTableAction']);
+
+    Route::post('/mercurio/empresa/valida', [EmpresaController::class, 'validaAction']);
+    Route::post('/mercurio/empresa/digito_verification', [EmpresaController::class, 'digitoVerificationAction']);
 });
 
 

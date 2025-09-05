@@ -57,6 +57,11 @@
     @include('mercurio/empresa/tmp/tmp_tranom')
 </script>
 
+<script>
+    const _TITULO = "{{ $title }}";
+    window.ServerController = 'empresa';
+</script>
+
 <script src="{{ asset('mercurio/build/Empresas.js') }}"></script>
 
 @endpush
