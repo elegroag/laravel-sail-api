@@ -264,7 +264,7 @@
                 <br />
 
                 <div class="row">
-                    <% if($estado == 'T' || $estado == 'D' || $estado == null){ %>
+                    <% if(estado == 'T' || estado == 'D' || estado == null){ %>
                     <div class="col-6">
                         <fieldset>
                             <legend>Relaciona trabajadores en nomina</legend>
@@ -352,7 +352,7 @@
                 </div>
             </form>
 
-            <% if($estado == 'T' || $estado == 'D' || $estado == null){  %>
+            <% if(estado == 'T' || estado == 'D' || estado == null){  %>
             <div class="row justify-content-center">
                 <div class="col-3">
                     <button type="button" class="btn btn-primary btn-block" id='guardar_ficha'>
@@ -367,6 +367,6 @@
     <div class="tab-pane fade" id="documentos_adjuntos" role="tabpanel" aria-labelledby="documentos_adjuntos-tab">...</div>
     <div class="tab-pane fade" id="firma" role="tabpanel" aria-labelledby="firma-tab">...</div>
     <div class="tab-pane fade" id="enviar_radicado" role="tabpanel" aria-labelledby="enviar_radicado-tab">
-        @include('mercurio/templates/tmp_send_radicado')
+        @include('mercurio.templates.tmp_send_radicado')
     </div>
 </div>

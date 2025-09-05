@@ -58,7 +58,7 @@ export default class DatosTrabajadorView extends Backbone.View {
             cancelButtonText: 'NO',
         }).then((result) => {
             if (result.value) {
-                let _url = $App.kumbiaURL('mercurio/' + target.attr('data-href'));
+                let _url = $App.kumbiaURL('' + target.attr('data-href'));
                 window.location.href = _url;
             }
         });

@@ -214,7 +214,7 @@ class AfiliationService {
 
     validaFirmas(callback) {
         $App.trigger('syncro', {
-            url: $App.kumbiaURL('mercurio/firmas/show'),
+            url: $App.kumbiaURL('firmas/show'),
             data: {},
             callback: (response) => {
                 if (response) {

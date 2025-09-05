@@ -34,7 +34,7 @@ export default class Verification {
 
     __procesarVerify({ data, callback }) {
         this.#App.trigger('syncro', {
-            url: this.#App.url('mercurio/verify'),
+            url: this.#App.url('verify'),
             data,
             callback: (response = undefined) => {
                 if (response && response.success === true) {

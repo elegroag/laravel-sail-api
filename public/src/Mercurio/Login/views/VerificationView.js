@@ -71,7 +71,7 @@ export default class VerificationView extends Backbone.View {
         e.preventDefault();
         const params = this.model;
         $App.trigger('syncro', {
-            url: $App.url('mercurio/tokenParticular'),
+            url: $App.url('tokenParticular'),
             data: params,
             callback: (response) => {
                 if (response) {

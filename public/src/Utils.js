@@ -5,9 +5,12 @@ const $Kumbia = {
 };
 
 class Utils {
-    static getKumbiaURL(url) {
-        if (typeof url == 'undefined') url = '';
-        return $Kumbia.path + url;
+    static getKumbiaURL(url = '') {
+        if ($Kumbia.app != '') {
+            return $Kumbia.path + '/' + $Kumbia.app + '/' + url;
+        } else {
+            return $Kumbia.path + '/' + url;
+        }
     }
 
     static getAppURL(url) {

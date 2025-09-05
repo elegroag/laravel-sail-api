@@ -53,7 +53,7 @@ class TrabajadoresView extends Backbone.View {
                 'Se requiere de confirmar que estás de acuerdo en el cambio de cuenta para administrar la empresa seleccionada. Esta opción le permitirá afiliar trabajadores, cónyuges y beneficiarios',
             callback: (status) => {
                 if (status) {
-                    const _url = $App.kumbiaURL('mercurio/' + target.attr('data-href'));
+                    const _url = $App.kumbiaURL('' + target.attr('data-href'));
                     window.location.href = _url;
                 }
             },

@@ -9,16 +9,17 @@ $user = session()->get('user');
 list($menu, $migas) = Menu::showMenu();
 @endphp
 
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('theme/argon-mercurio.css') }}" />
+    <link rel="stylesheet" href="{{ asset('mercurio/css/mercurio.css') }}" />
+@endpush
+
 @include('partials.flash')
-
-<link rel="stylesheet" href="{{ asset('mercurio/css/mercurio.css') }}" />
-
-<link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.css') }}" />
 
 @include('templates.sidebar', array('menu' => $menu, '_tipo' => $tipo))
 
 <div class="main-content" id="panel">
-@include('templates.navbar', array('user_name' => capitalize($user['nombre'])))
+@include('templates.navbar', array('user_name' => capitalize($user['nombre'])))    
     @yield('content')
 @include('templates.footer')
 </div>

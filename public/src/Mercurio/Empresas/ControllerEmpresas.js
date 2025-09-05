@@ -34,15 +34,15 @@ class ControllerEmpresas extends ControllerRequest {
 
     __paramsServer({ callback = undefined, silent = false }) {
         $App.trigger('syncro', {
-            url: $App.url('mercurio/empresas/params'),
+            url: $App.url('empresas/params'),
             silent,
             callback: (response) => {
                 if (response && response.success === true) {
                     if (_.isNull($App.Collections.formParams)) $App.Collections.formParams = [];
                     _.extend($App.Collections.formParams, response.data);
-                    return callback !== false ? callback(response.msj) : '';
+                    return callback !== false ? callback(response.msj) : null;
                 }
-                return callback !== false ? callback(false) : '';
+                return callback !== false ? callback(false) : null;
             },
         });
     }

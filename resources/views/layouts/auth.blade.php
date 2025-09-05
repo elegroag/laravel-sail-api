@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     @php
         $path = env('APP_URL').':'.env('APP_PORT');
-        $app = env('APP_NAME');
+        $app = 'mercurio';
     @endphp
     <meta
         name="csrf-token"

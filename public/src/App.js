@@ -173,11 +173,13 @@ const $App = {
         }
     },
     url(method = '', controller = undefined) {
-        return this.kumbiaURL((controller ?? '') + '/' + method);
+        if (controller) {
+            return $Kumbia.path + '/' + $Kumbia.app + '/' + controller + '/' + method;
+        }
+        return $Kumbia.path + '/' + $Kumbia.app + '/' + method;
     },
-    kumbiaURL: (url) => {
-        if (_.isUndefined(url) === true) url = '';
-        return $Kumbia.path + url;
+    kumbiaURL: (url = '') => {
+        return $Kumbia.path + '/' + $Kumbia.app + '/' + url;
     },
     ajaxKumbia(transfer = {}) {
         const { url, data = {}, callback, silent = false } = transfer;
@@ -187,7 +189,7 @@ const $App = {
         $.ajax({
             type: 'POST',
             data: data,
-            url: this.kumbiaURL(url),
+            url: this.url(url),
             dataType: 'html',
             processData: true,
             contentType: 'application/x-www-form-urlencoded',
@@ -196,6 +198,7 @@ const $App = {
                 if (silent == false) loading.show();
                 xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
                 if (csrf.length > 0) {
+                    xhr.setRequestHeader('X-CSRF-TOKEN', csrf);
                     xhr.setRequestHeader('Authorization', 'Bearer ' + csrf);
                 }
             },

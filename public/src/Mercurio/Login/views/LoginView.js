@@ -160,7 +160,7 @@ export default class LoginView extends ModelView {
         }
 
         this.#App.trigger('syncro', {
-            url: this.#App.url('mercurio/autenticar'),
+            url: this.#App.url('autenticar'),
             data: entity.toJSON(),
             callback: (response) => {
                 target.removeAttr('disabled');
@@ -175,7 +175,7 @@ export default class LoginView extends ModelView {
                                 message: response.msj,
                                 callback: (status) => {
                                     if (status) {
-                                        window.location.href = this.#App.url('mercurio/registro_empresa');
+                                        window.location.href = this.#App.url('registro_empresa');
                                     }
                                 },
                             });

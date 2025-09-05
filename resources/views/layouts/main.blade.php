@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     @php
         $path = env('APP_URL').':'.env('APP_PORT');
-        $app = env('APP_NAME');
+        $app = 'mercurio';
     @endphp
     <meta
         name="csrf-token"
@@ -25,8 +25,7 @@
     <link rel="stylesheet" href="{{ asset('theme/headroom.css') }}" />
     <link rel="stylesheet" href="{{ asset('theme/nucleo.css') }}" />
     <link rel="stylesheet" href="{{ asset('theme/nucleo.svg.css') }}" />
-    <link rel="stylesheet" href="{{ asset('theme/argon-mercurio.css') }}" />
-
+    
     <script type="text/javascript" src="{{ asset('assets/jquery/jquery.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/sweetalert2/dist/sweetalert2.all.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/underscore/underscore-umd-min.js') }}"></script>

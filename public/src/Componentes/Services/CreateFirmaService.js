@@ -93,7 +93,7 @@ class CreateFirmaService {
                 const data = new FormData();
                 data.append('imagen', dataUrl);
                 $App.trigger('upload', {
-                    url: $App.kumbiaURL('mercurio/firmas/guardar'),
+                    url: $App.kumbiaURL('firmas/guardar'),
                     silen: false,
                     data: data,
                     callback: (response) => {

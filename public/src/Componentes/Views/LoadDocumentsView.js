@@ -157,7 +157,7 @@ class LoadDocumentsView extends Backbone.View {
         const filename = target.attr('data-href');
         const _filepath = btoa('public/temp/' + filename);
         $App.trigger('syncro', {
-            url: $App.kumbiaURL('mercurio/principal/file_existe_global/' + _filepath),
+            url: $App.kumbiaURL('principal/file_existe_global/' + _filepath),
             callback: (resultado) => {
                 if (resultado) {
                     if (resultado.success) {

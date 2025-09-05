@@ -34,7 +34,7 @@ export default class Register {
 
     __registerServer({ callback, data }) {
         this.#App.trigger('syncro', {
-            url: this.#App.url('mercurio/registro'),
+            url: this.#App.url('registro'),
             data,
             callback: (response = undefined) => {
                 if (response && response.success === true) {
@@ -75,7 +75,7 @@ export default class Register {
         }
 
         this.#App.trigger('syncro', {
-            url: this.#App.url('mercurio/valida_email'),
+            url: this.#App.url('valida_email'),
             data: {
                 email: _email,
                 documento: _cedrep,

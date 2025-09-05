@@ -79,7 +79,7 @@ class ControllerLogin extends Controller {
         const { callback, silent = false } = transfer;
 
         this.App.trigger('syncro', {
-            url: this.App.url('mercurio/paramsLogin'),
+            url: this.App.url('paramsLogin'),
             data: {},
             silent,
             callback: (response = {}) => {

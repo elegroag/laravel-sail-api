@@ -99,7 +99,7 @@ export default class RegisterView extends Backbone.View {
         }
 
         $App.trigger('syncro', {
-            url: $App.url('mercurio/valida_email'),
+            url: $App.url('valida_email'),
             data: {
                 email: _email,
                 documento: _cedrep,
@@ -268,7 +268,7 @@ export default class RegisterView extends Backbone.View {
 
     sesionPersona(event) {
         event.preventDefault();
-        window.location.href = $App.kumbiaURL('mercurio/login/ingreso_persona');
+        window.location.href = $App.kumbiaURL('login/ingreso_persona');
     }
 
     addComponent(model = {}) {

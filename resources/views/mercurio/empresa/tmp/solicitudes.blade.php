@@ -1,3 +1,16 @@
+@if(count($empresas) == 0)
+    <caption>
+        ¡No hay solicitudes disponibles para mostrar!
+    </caption>
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+@endif
+
 @foreach ($empresas as $solicitud)
     <tr>
         <td>

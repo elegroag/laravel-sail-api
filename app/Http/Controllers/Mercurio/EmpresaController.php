@@ -4,11 +4,18 @@ namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
+use App\Library\Collections\ParamsEmpresa;
+use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
+use App\Models\Gener09;
+use App\Models\Gener18;
 use App\Models\Mercurio01;
+use App\Models\Mercurio07;
 use App\Models\Mercurio30;
 use App\Models\Mercurio37;
 use App\Models\Mercurio10;
+use App\Models\Mercurio31;
+use App\Models\Subsi54;
 use App\Services\Entidades\EmpresaService;
 use App\Services\FormulariosAdjuntos\DatosEmpresaService;
 use App\Services\Utils\AsignarFuncionario;
@@ -32,12 +39,7 @@ class EmpresaController extends ApplicationController
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    /**
-     * Tipo de proceso caja (tipopc) para Empresa
-     * 2: Empresa
-     */
     protected $tipopc = '2';
-
 
     public function indexAction()
     {
@@ -46,6 +48,24 @@ class EmpresaController extends ApplicationController
             'documento' => $this->user['documento'],
             'title' => 'Afiliación de empresas'
         ]);
+    }
+
+    public function renderTableAction(Request $request)
+    {
+        $this->setResponse("view");
+        $estado = $request->input('estado', '');
+        $empresaService = new EmpresaService();
+
+        $data = $empresaService->findAllByEstado($estado);
+        $html = view(
+            "mercurio/empresa/tmp/solicitudes",
+            [
+                "path" => base_path(),
+                "empresas" => $data
+            ]
+        )->render();
+
+        return $this->renderText($html);
     }
 
     /**
@@ -231,19 +251,99 @@ class EmpresaController extends ApplicationController
         }
     }
 
-    /**
-     * POST /empresa/params
-     */
     public function paramsAction()
     {
-        $this->setResponse('ajax');
+        $this->setResponse("ajax");
         try {
-            $service = new EmpresaService();
-            $service->paramsApi();
-            return $this->renderObject(['success' => true]);
-        } catch (DebugException $e) {
-            return $this->renderObject(['success' => false, 'msj' => $e->getMessage()]);
+            $mtipoDocumentos = new Gener18();
+            $tipoDocumentos = array();
+
+            foreach ($mtipoDocumentos->find() as $mtipo) {
+                if ($mtipo->getCoddoc() == '7' || $mtipo->getCoddoc() == '2') continue;
+                $tipoDocumentos["{$mtipo->getCoddoc()}"] = $mtipo->getDetdoc();
+            }
+
+            $msubsi54 = new Subsi54();
+            $tipsoc = array();
+            foreach ($msubsi54->find() as $entity) {
+                if ($entity->getTipsoc() == '08') continue;
+                $tipsoc["{$entity->getTipsoc()}"] = $entity->getDetalle();
+            }
+
+            $coddoc = array();
+            foreach ($mtipoDocumentos->find() as $entity) {
+                if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') continue;
+                $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
+            }
+
+            $coddocrepleg = array();
+            foreach ($mtipoDocumentos->find() as $entity) {
+                if ($entity->getCodrua() == 'TI' || $entity->getCodrua() == 'RC') continue;
+                $coddocrepleg["{$entity->getCodrua()}"] = $entity->getDetdoc();
+            }
+
+            $codciu = array();
+            $mgener09 = new Gener09();
+            foreach ($mgener09->find("*", "conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
+                $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
+            }
+
+            $procesadorComando = Comman::Api();
+            $procesadorComando->runCli(
+                array(
+                    "servicio" => "ComfacaAfilia",
+                    "metodo" => "parametros_empresa"
+                )
+            );
+
+            $paramsEmpresa = new ParamsEmpresa();
+            $paramsEmpresa->setDatosCaptura($procesadorComando->toArray());
+
+            $procesadorComando = Comman::Api();
+            $procesadorComando->runCli(
+                array(
+                    "servicio" => "ComfacaAfilia",
+                    "metodo" => "parametros_trabajadores"
+                ),
+                false
+            );
+            $paramsTrabajador = new ParamsTrabajador();
+            $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
+
+            $tipafi = (new Mercurio07())->getArrayTipos();
+            $coddoc = $tipoDocumentos;
+            $data = array(
+                'tipafi' => $tipafi,
+                'coddoc' => $coddoc,
+                'tipper' => (new Mercurio30())->getTipperArray(),
+                'tipsoc' => $tipsoc,
+                'calemp' => (new Mercurio30())->getCalempArray(),
+                'codciu' => $codciu,
+                'coddocrepleg' => $coddocrepleg,
+                'codzon' => ParamsEmpresa::getZonas(),
+                'codact' => ParamsEmpresa::getActividades(),
+                'tipemp' => ParamsEmpresa::getTipoEmpresa(),
+                'codcaj' => ParamsEmpresa::getCodigoCajas(),
+                'ciupri' => ParamsEmpresa::getCiudades(),
+                'ciunac' => ParamsEmpresa::getCiudades(),
+                'tipsal' => (new Mercurio31())->getTipsalArray(),
+                "autoriza" => array("S" => "SI", "N" => "NO"),
+                "ciupri" => ParamsEmpresa::getCiudades()
+            );
+
+            $salida = array(
+                "success" => true,
+                "data" => $data,
+                "msj" => 'OK'
+            );
+        } catch (DebugException $err) {
+            $salida = array(
+                "success" => false,
+                "msj" => $err->getMessage()
+            );
         }
+
+        return $this->renderObject($salida);
     }
 
     /**

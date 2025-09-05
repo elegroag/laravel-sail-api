@@ -10,9 +10,7 @@ $array_tipos = [
     <div class="scrollbar-inner">
         <div class="sidenav-header d-flex align-items-center p-3">
             <a class="navbar-brand m-0" href="{{ route('principal.index') }}">
-                @php
-                echo App\Services\Tag::image("logo-min.png", "class: navbar-brand-img");
-                @endphp
+                <img src="{{ asset('img/Mercurio/logo-min.png') }}" class="img img-center" width="130px" alt="Logo">
             </a>
             <div class="ms-auto">
                 <div class="sidenav-toggler d-none d-xl-block" data-action="sidenav-unpin" data-bs-target="#sidenav-main">

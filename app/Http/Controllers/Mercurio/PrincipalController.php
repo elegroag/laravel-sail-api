@@ -342,7 +342,7 @@ class PrincipalController extends ApplicationController
                                     'temporales' => (new Mercurio31)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
                                 ),
                                 'icon' => 'T',
-                                'url' => 'mercurio/trabajador/index',
+                                'url' => 'trabajador/index',
                                 'imagen' => 'trabajadores.jpg',
                             ),
                             array(
@@ -355,7 +355,7 @@ class PrincipalController extends ApplicationController
                                     'temporales' => (new Mercurio32)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
                                 ),
                                 'icon' => 'C',
-                                'url' => 'mercurio/conyuge/index',
+                                'url' => 'conyuge/index',
                                 'imagen' => 'conyuges.jpg',
                             ),
                             array(
@@ -368,7 +368,7 @@ class PrincipalController extends ApplicationController
                                     'temporales' => (new Mercurio34)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
                                 ),
                                 'icon' => 'B',
-                                'url' => 'mercurio/beneficiario/index',
+                                'url' => 'beneficiario/index',
                                 'imagen' => 'beneficiarios.jpg',
                             ),
                             array(
@@ -381,7 +381,7 @@ class PrincipalController extends ApplicationController
                                     'temporales' => (new Mercurio47)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
                                 ),
                                 'icon' => 'B',
-                                'url' => 'mercurio/actualizadatos/index',
+                                'url' => 'actualizadatos/index',
                                 'imagen' => 'datos_basicos.jpg',
                             )
                         ),
@@ -389,22 +389,22 @@ class PrincipalController extends ApplicationController
                         'consultas' => array(
                             array(
                                 'name' => 'Consulta Trabajadores',
-                                'url' => 'mercurio/subsidioemp/consulta_trabajadores_view',
+                                'url' => 'subsidioemp/consulta_trabajadores_view',
                                 'imagen' => 'consulta_trabajadores.jpg',
                             ),
                             array(
                                 'name' => 'Consulta de gíro',
-                                'url' => 'mercurio/subsidioemp/consulta_giro_view',
+                                'url' => 'subsidioemp/consulta_giro_view',
                                 'imagen' => 'consulta_giro.jpg',
                             ),
                             array(
                                 'name' => 'Consulta de aportes',
-                                'url' => 'mercurio/subsidioemp/consulta_aportes_view',
+                                'url' => 'subsidioemp/consulta_aportes_view',
                                 'imagen' => 'consulta_aportes.jpg',
                             ),
                             array(
                                 'name' => 'Consulta de nominas',
-                                'url' => 'mercurio/subsidioemp/consulta_nomina_view',
+                                'url' => 'subsidioemp/consulta_nomina_view',
                                 'imagen' => 'consulta_aportes.jpg',
                             )
                         )
@@ -423,7 +423,7 @@ class PrincipalController extends ApplicationController
                                     'temporales' => (new Mercurio30)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
                                 ),
                                 'icon' => 'E',
-                                'url' => 'mercurio/empresa/index',
+                                'url' => 'empresa/index',
                                 'imagen' => 'empresas.jpg',
                             ),
                             array(
@@ -436,7 +436,7 @@ class PrincipalController extends ApplicationController
                                     'temporales' => (new Mercurio41)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
                                 ),
                                 'icon' => 'I',
-                                'url' => 'mercurio/independiente/index',
+                                'url' => 'independiente/index',
                                 'imagen' => 'independiente.jpg',
                             ),
                             array(
@@ -449,7 +449,7 @@ class PrincipalController extends ApplicationController
                                     'temporales' => (new Mercurio38)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
                                 ),
                                 'icon' => 'P',
-                                'url' => 'mercurio/pensionado/index',
+                                'url' => 'pensionado/index',
                                 'imagen' => 'pensionado.jpg',
                             ),
                             array(
@@ -462,14 +462,14 @@ class PrincipalController extends ApplicationController
                                     'temporales' => (new Mercurio36)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
                                 ),
                                 'icon' => 'F',
-                                'url' => 'mercurio/facultativo/index',
+                                'url' => 'facultativo/index',
                                 'imagen' => 'facultativo.jpg',
                             )
                         ),
                         'productos' => array(
                             array(
                                 'name' => 'P. Complemento_nutricional',
-                                'url' => 'mercurio/productos/complemento_nutricional',
+                                'url' => 'productos/complemento_nutricional',
                                 'imagen' => 'complemento.jpg',
                             )
                         ),

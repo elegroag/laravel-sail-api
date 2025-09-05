@@ -17,7 +17,7 @@ use App\Services\Utils\Comman;
 class EmpresaService
 {
 
-    private $tipopc = "2";
+    private $tipopc = "2";  // tipo de solicitud
     private $user;
     private $db;
 
@@ -28,9 +28,7 @@ class EmpresaService
      */
     public function __construct()
     {
-        if (session()->has('documento')) {
-            $this->user = session()->all();
-        }
+        $this->user = session('user');
         $this->db = DbBase::rawConnect();
     }
 
