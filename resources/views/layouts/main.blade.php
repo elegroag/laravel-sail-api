@@ -34,7 +34,7 @@
     <script type="text/javascript" src="{{ asset('assets/bootstrap/js/popper.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/noty/noty.js') }}"></script>
-
+    @stack('css')
 </head>
 
 <body class="bg-gray-100 flex items-center justify-center h-screen">
@@ -52,7 +52,7 @@
     <script src="{{ asset('assets/validators/messages_es.min.js') }}"></script>
     <script src="{{ asset('assets/argon/headroom.js') }}"></script>
     <script src="{{ asset('assets/argon/argon.js') }}"></script>
-
+    @stack('scripts')
 </body>
 
 </html>
