@@ -31,25 +31,14 @@ class TrabajadorController extends ApplicationController
     }
 
     /**
-     * Helper para limpiar entrada similar a clp() de Kumbia
-     */
-    private function clp(Request $request, string $name, $default = null)
-    {
-        $val = $request->input($name, $default);
-        if (is_string($val)) {
-            $val = trim(strip_tags($val));
-        }
-        return $val;
-    }
-
-    /**
      * GET /trabajador/index (Opcional, placeholder)
      */
     public function indexAction()
     {
-        return $this->renderObject([
-            'success' => true,
-            'msj' => 'Afiliación trabajadores (endpoint base)'
+        return view('mercurio/trabajador/index', [
+            'tipo' => $this->tipo,
+            'documento' => $this->documento,
+            'title' => 'Afiliación de trabajadores'
         ]);
     }
 

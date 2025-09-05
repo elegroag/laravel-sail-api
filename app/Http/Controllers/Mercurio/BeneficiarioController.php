@@ -80,7 +80,7 @@ class BeneficiarioController extends ApplicationController
         }
         return view('mercurio/beneficiario/index', [
             'tipo' => $this->tipo,
-            'documento' => $this->documento,
+            'documento' => $this->user['documento'],
             'title' => 'Afiliación de beneficiarios'
         ]);
     }
@@ -401,25 +401,6 @@ class BeneficiarioController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    /**
-     * Clean input data
-     * 
-     * @param string|null $input
-     * @return string
-     */
-    protected function cleanInput($input)
-    {
-        if ($input === null) {
-            return '';
-        }
-        
-        $input = addslashes($input);
-        $input = trim($input);
-        $input = strip_tags($input);
-        
-        return $input;
-    }
-
     function mapper()
     {
         return array(
@@ -705,52 +686,52 @@ class BeneficiarioController extends ApplicationController
         $request = request();
 
         return array(
-            'id' => $this->cleanInput($request->input('id')),
-            'usuario' => $asignarFuncionario->asignar($this->tipopc, parent::getActUser("codciu")),
-            'log' => parent::getActUser("documento"),
+            'id' => $this->clp($request, 'id'),
+            'usuario' => $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']),
+            'log' => $this->user['documento'],
             'fecsol' => $fecsol->format('Y-m-d'),
-            'nit' => $this->cleanInput($request->input('nit')),
-            'cedtra' => $this->cleanInput($request->input('cedtra')),
-            'cedcon' => $this->cleanInput($request->input('cedcon')),
-            'tipdoc' => $this->cleanInput($request->input('tipdoc')),
-            'numdoc' => $this->cleanInput($request->input('numdoc')),
-            'priape' => $this->cleanInput($request->input('priape')),
-            'segape' => $this->cleanInput($request->input('segape')),
-            'prinom' => $this->cleanInput($request->input('prinom')),
-            'segnom' => $this->cleanInput($request->input('segnom')),
-            'fecnac' => $this->cleanInput($request->input('fecnac')),
-            'ciunac' => $this->cleanInput($request->input('ciunac')),
-            'sexo' => $this->cleanInput($request->input('sexo')),
-            'parent' => $this->cleanInput($request->input('parent')),
-            'huerfano' => $this->cleanInput($request->input('huerfano')),
-            'tiphij' => $this->cleanInput($request->input('tiphij')),
-            'nivedu' => $this->cleanInput($request->input('nivedu')),
-            'captra' => $this->cleanInput($request->input('captra')),
-            'tipdis' => $this->cleanInput($request->input('tipdis')),
-            'calendario' => $this->cleanInput($request->input('calendario')),
-            'cedacu' => $this->cleanInput($request->input('cedacu')),
-            'biocedu' => $this->cleanInput($request->input('biocedu')),
-            'biotipdoc' => $this->cleanInput($request->input('biotipdoc')),
-            'biocodciu' => $this->cleanInput($request->input('biocodciu')),
-            'biodesco' => $this->cleanInput($request->input('biodesco')),
-            'biodire' => $this->cleanInput($request->input('biodire')),
-            'bioemail' => $this->cleanInput($request->input('bioemail')),
-            'biophone' => $this->cleanInput($request->input('biophone')),
-            'biopriape' => $this->cleanInput($request->input('biopriape')),
-            'bioprinom' => $this->cleanInput($request->input('bioprinom')),
-            'biosegape' => $this->cleanInput($request->input('biosegape')),
-            'biosegnom' => $this->cleanInput($request->input('biosegnom')),
-            'biourbana' => $this->cleanInput($request->input('biourbana')),
-            'peretn' => $this->cleanInput($request->input('peretn')),
-            'resguardo_id' => $this->cleanInput($request->input('resguardo_id')),
-            'pub_indigena_id' => $this->cleanInput($request->input('pub_indigena_id')),
-            'tippag' => $this->cleanInput($request->input('tippag')),
-            'tipcue' => $this->cleanInput($request->input('tipcue')),
-            'numcue' => $this->cleanInput($request->input('numcue')),
-            'codban' => $this->cleanInput($request->input('codban')),
-            'tipo' => parent::getActUser("tipo"),
-            'coddoc' => parent::getActUser("coddoc"),
-            'documento' => parent::getActUser("documento")
+            'nit' => $this->clp($request, 'nit'),
+            'cedtra' => $this->clp($request, 'cedtra'),
+            'cedcon' => $this->clp($request, 'cedcon'),
+            'tipdoc' => $this->clp($request, 'tipdoc'),
+            'numdoc' => $this->clp($request, 'numdoc'),
+            'priape' => $this->clp($request, 'priape'),
+            'segape' => $this->clp($request, 'segape'),
+            'prinom' => $this->clp($request, 'prinom'),
+            'segnom' => $this->clp($request, 'segnom'),
+            'fecnac' => $this->clp($request, 'fecnac'),
+            'ciunac' => $this->clp($request, 'ciunac'),
+            'sexo' => $this->clp($request, 'sexo'),
+            'parent' => $this->clp($request, 'parent'),
+            'huerfano' => $this->clp($request, 'huerfano'),
+            'tiphij' => $this->clp($request, 'tiphij'),
+            'nivedu' => $this->clp($request, 'nivedu'),
+            'captra' => $this->clp($request, 'captra'),
+            'tipdis' => $this->clp($request, 'tipdis'),
+            'calendario' => $this->clp($request, 'calendario'),
+            'cedacu' => $this->clp($request, 'cedacu'),
+            'biocedu' => $this->clp($request, 'biocedu'),
+            'biotipdoc' => $this->clp($request, 'biotipdoc'),
+            'biocodciu' => $this->clp($request, 'biocodciu'),
+            'biodesco' => $this->clp($request, 'biodesco'),
+            'biodire' => $this->clp($request, 'biodire'),
+            'bioemail' => $this->clp($request, 'bioemail'),
+            'biophone' => $this->clp($request, 'biophone'),
+            'biopriape' => $this->clp($request, 'biopriape'),
+            'bioprinom' => $this->clp($request, 'bioprinom'),
+            'biosegape' => $this->clp($request, 'biosegape'),
+            'biosegnom' => $this->clp($request, 'biosegnom'),
+            'biourbana' => $this->clp($request, 'biourbana'),
+            'peretn' => $this->clp($request, 'peretn'),
+            'resguardo_id' => $this->clp($request, 'resguardo_id'),
+            'pub_indigena_id' => $this->clp($request, 'pub_indigena_id'),
+            'tippag' => $this->clp($request, 'tippag'),
+            'tipcue' => $this->clp($request, 'tipcue'),
+            'numcue' => $this->clp($request, 'numcue'),
+            'codban' => $this->clp($request, 'codban'),
+            'tipo' => $this->tipo,
+            'coddoc' => $this->user['coddoc'],
+            'documento' => $this->user['documento']
         );
     }
 
@@ -820,8 +801,8 @@ class BeneficiarioController extends ApplicationController
     {
         $this->setResponse("ajax");
         try {
-            $documento = parent::getActUser("documento");
-            $coddoc = parent::getActUser("coddoc");
+            $documento = $this->user['documento'];
+            $coddoc = $this->user['coddoc'];
             $benService = new BeneficiarioService();
 
             $sindepe = $this->Mercurio34->findFirst("id='{$id}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado NOT IN('I','X')");
@@ -847,8 +828,8 @@ class BeneficiarioController extends ApplicationController
         try {
             $paramsTrabajador = new ParamsTrabajador();
             $adicionPersonaCargo =  true;
-            $tipo = parent::getActUser("tipo");
-            $documento = parent::getActUser('documento');
+            $tipo = $this->user['tipo'];
+            $documento = $this->user['documento'];
 
             $procesadorComando = Comman::Api();
             $procesadorComando->runCli(

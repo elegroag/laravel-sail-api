@@ -1,5 +1,20 @@
+@extends('layouts.bone')
 
+@push('styles')
 <script src="{{ asset('assets/summernote/summernote-bs5/css/summernote-bs5.min.css') }}"></script>
+@endpush
+
+@section('content')
+<div class='card-header' id='afiliacion_header'>
+    <h3>REPORTAR</h3>
+</div>
+
+<div class="col-auto m-2">
+    <div id='boneLayout'></div>
+</div>
+@endsection
+
+@push('scripts')
 <script src="{{ asset('assets/summernote/summernote-bs5/js/summernote-bs5.min.js') }}"></script>
 <script src="{{ asset('assets/summernote/lang/summernote-es-ES.min.js') }}"></script>
 
@@ -75,14 +90,10 @@
     </div>
 </script>
 
-<div class='card-header' id='afiliacion_header'>
-    <h3>REPORTAR</h3>
-</div>
+<script src="{{ asset('mercurio/Notificaciones.js') }}"></script>
+@endpush
 
-<div class="col-auto m-2">
-    <div id='boneLayout'></div>
-</div>
-
+@section('styles')
 <style>
     label.error {
         color: red;
@@ -99,5 +110,4 @@
         max-width: initial;
     }
 </style>
-
-<script src="{{ asset('mercurio/Notificaciones.js') }}"></script>
+@endsection

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Adapter;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 
 class ApplicationController extends Controller
 {
@@ -117,6 +118,33 @@ class ApplicationController extends Controller
     public function renderText($html){
         header('Content-Type: text/html; charset=utf-8');
         echo $html;
+    }
+
+    /**
+     * Clean input data
+     * 
+     * @param string|null $input
+     * @return string
+     */
+    protected function cleanInput($input)
+    {
+        if ($input === null) {
+            return '';
+        }
+        if (is_string($input)) {
+            $input = addslashes($input);
+            $input = trim($input);
+            $input = strip_tags($input);
+        }
+        return $input;
+    }
+
+    /**
+     * Helper para limpiar entrada similar a clp() de Kumbia
+     */
+    protected function clp(Request $request, string $name, $default = '')
+    {
+        return $this->cleanInput($request->input($name, $default));
     }
 
 }

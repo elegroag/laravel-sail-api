@@ -1,11 +1,12 @@
 <?php
+
 namespace App\Services\Utils;
 
 use App\Library\ProcesadorComandos\ProcesadorComandos;
 use App\Services\Api\ApiSubsidio;
 use App\Services\Api\PortalMercurio;
 
-class Comman 
+class Comman
 {
     protected $procesadorComandos = null;
     protected $app;
@@ -13,11 +14,13 @@ class Comman
 
     public function initEnvironment()
     {
-        $this->app = new \stdClass(); 
+        $this->app = new \stdClass();
         $this->app->cli = env('USE_CLI', false);
         $this->app->mode = env('API_MODE', 'development');
         $this->app->host_portal_dev = env('HOST_PORTAL_DEV', 'http://localhost:8000');
         $this->app->host_portal_pro = env('HOST_PORTAL_PRO', 'http://localhost:8000');
+        $this->app->host_api_dev = env('HOST_API_DEV', 'http://localhost:8000');
+        $this->app->host_api_pro = env('HOST_API_PRO', 'http://localhost:8000');
         $this->app->portal = env('PORTAL', 'Portal');
         $this->app->portal_key = env('PORTAL_KEY', 'PortalKey');
         $this->app->encryption = env('API_ENCRYPTION', 'ApiEncryption');

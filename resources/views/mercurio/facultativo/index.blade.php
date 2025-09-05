@@ -1,3 +1,5 @@
+@extends('layouts.bone')
+
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.min.css') }}">
 @endpush
@@ -51,7 +53,8 @@
 </script>
 
 <script>
-    const _TITULO = "<?= $title ?>";
+    const _TITULO = "{{ $title }}";
 </script>
 
 <script src="{{ asset('mercurio/Facultativos.js') }}"></script>
+@endpush

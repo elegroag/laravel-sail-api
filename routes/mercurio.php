@@ -30,7 +30,7 @@ Route::post('/mercurio/download_docs/{archivo}', [LoginController::class, 'downl
 
 # Principal 
 Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
-    
+
     Route::get('/principal/index', [PrincipalController::class, 'indexAction'])->name('principal.index');
     Route::get('/principal/dashboard_trabajador', [PrincipalController::class, 'dashboardTrabajadorAction'])->name('principal.dashboard_trabajador');
     Route::get('/principal/dashboard_empresa', [PrincipalController::class, 'dashboardEmpresaAction'])->name('principal.dashboard_empresa');
@@ -49,7 +49,7 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
     Route::get('/movimientos/historial', [MovimientosController::class, 'historialAction'])->name('movimientos.historial');
     Route::get('/movimientos/cambio_email_view', [MovimientosController::class, 'cambioEmailViewAction'])->name('movimientos.cambio_email_view');
     Route::get('/movimientos/cambio_clave_view', [MovimientosController::class, 'cambioClaveViewAction'])->name('movimientos.cambio_clave_view');
-    
+
     // Firmas (migrado desde Kumbia)
     Route::get('/firmas/index', [FirmasController::class, 'indexAction'])->name('firmas.index');
     Route::post('/firmas/guardar', [FirmasController::class, 'guardarAction'])->name('firmas.guardar');
@@ -70,18 +70,39 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
 
 // Empresa (migrado desde Kumbia)
 Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
-    Route::post('/empresa/buscar_empresa', [EmpresaController::class, 'buscarEmpresaAction']);
-    Route::post('/empresa/guardar', [EmpresaController::class, 'guardarAction']);
-    Route::post('/empresa/borrar_archivo', [EmpresaController::class, 'borrarArchivoAction']);
-    Route::post('/empresa/guardar_archivo', [EmpresaController::class, 'guardarArchivoAction']);
-    Route::get('/empresa/archivos_requeridos/{id}', [EmpresaController::class, 'archivosRequeridosAction']);
-    Route::post('/empresa/enviar_caja', [EmpresaController::class, 'enviarCajaAction']);
-    Route::get('/empresa/seguimiento/{id}', [EmpresaController::class, 'seguimientoAction']);
-    Route::post('/empresa/params', [EmpresaController::class, 'paramsAction']);
-    Route::get('/empresa/download_temp/{archivo}', [EmpresaController::class, 'downloadFileAction']);
-    Route::get('/empresa/download_docs/{archivo}', [EmpresaController::class, 'downloadDocsAction']);
-    Route::get('/empresa/digito_verification', [EmpresaController::class, 'digitoVerificationAction']);
-    Route::get('/empresa/search_request/{id}', [EmpresaController::class, 'searchRequestAction']);
-    Route::get('/empresa/consulta_documentos/{id}', [EmpresaController::class, 'consultaDocumentosAction']);
-    Route::post('/empresa/borrar', [EmpresaController::class, 'borrarAction']);
+    Route::get('/mercurio/empresa/index', [EmpresaController::class, 'indexAction']);
+    Route::post('/mercurio/empresa/buscar_empresa', [EmpresaController::class, 'buscarEmpresaAction']);
+    Route::post('/mercurio/empresa/guardar', [EmpresaController::class, 'guardarAction']);
+    Route::post('/mercurio/empresa/borrar_archivo', [EmpresaController::class, 'borrarArchivoAction']);
+    Route::post('/mercurio/empresa/guardar_archivo', [EmpresaController::class, 'guardarArchivoAction']);
+    Route::get('/mercurio/empresa/archivos_requeridos/{id}', [EmpresaController::class, 'archivosRequeridosAction']);
+    Route::post('/mercurio/empresa/enviar_caja', [EmpresaController::class, 'enviarCajaAction']);
+    Route::get('/mercurio/empresa/seguimiento/{id}', [EmpresaController::class, 'seguimientoAction']);
+    Route::post('/mercurio/empresa/params', [EmpresaController::class, 'paramsAction']);
+    Route::get('/mercurio/empresa/download_temp/{archivo}', [EmpresaController::class, 'downloadFileAction']);
+    Route::get('/mercurio/empresa/download_docs/{archivo}', [EmpresaController::class, 'downloadDocsAction']);
+    Route::get('/mercurio/empresa/digito_verification', [EmpresaController::class, 'digitoVerificationAction']);
+    Route::get('/mercurio/empresa/search_request/{id}', [EmpresaController::class, 'searchRequestAction']);
+    Route::get('/mercurio/empresa/consulta_documentos/{id}', [EmpresaController::class, 'consultaDocumentosAction']);
+    Route::post('/mercurio/empresa/borrar', [EmpresaController::class, 'borrarAction']);
+    Route::post('/mercurio/empresas/params', [EmpresaController::class, 'paramsAction']);
+});
+
+
+// Trabajador (migrado desde Kumbia)
+Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
+    Route::post('/trabajador/buscar_trabajador', [TrabajadorController::class, 'buscarTrabajadorAction']);
+    Route::post('/trabajador/guardar', [TrabajadorController::class, 'guardarAction']);
+    Route::post('/trabajador/borrar_archivo', [TrabajadorController::class, 'borrarArchivoAction']);
+    Route::post('/trabajador/guardar_archivo', [TrabajadorController::class, 'guardarArchivoAction']);
+    Route::get('/trabajador/archivos_requeridos/{id}', [TrabajadorController::class, 'archivosRequeridosAction']);
+    Route::post('/trabajador/enviar_caja', [TrabajadorController::class, 'enviarCajaAction']);
+    Route::get('/trabajador/seguimiento/{id}', [TrabajadorController::class, 'seguimientoAction']);
+    Route::post('/trabajador/params', [TrabajadorController::class, 'paramsAction']);
+    Route::get('/trabajador/download_temp/{archivo}', [TrabajadorController::class, 'downloadFileAction']);
+    Route::get('/trabajador/download_docs/{archivo}', [TrabajadorController::class, 'downloadDocsAction']);
+    Route::get('/trabajador/digito_verification', [TrabajadorController::class, 'digitoVerificationAction']);
+    Route::get('/trabajador/search_request/{id}', [TrabajadorController::class, 'searchRequestAction']);
+    Route::get('/trabajador/consulta_documentos/{id}', [TrabajadorController::class, 'consultaDocumentosAction']);
+    Route::post('/trabajador/borrar', [TrabajadorController::class, 'borrarAction']);
 });

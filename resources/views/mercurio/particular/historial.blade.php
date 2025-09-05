@@ -1,4 +1,6 @@
+@extends('layouts.bone')
 
+@section('content')
 <div class="card-body">
 
     <div class="nav-wrapper">
@@ -67,3 +69,4 @@
         </div>
     </div>
 </div>
+@endsection

@@ -55,7 +55,9 @@ class FacultativoController extends ApplicationController
     public function indexAction()
     {
         return view("facultativo/index", [
-            "title" => "Afiliación Facultativos"
+            "title" => "Afiliación Facultativos",
+            'tipo' => $this->tipo,
+            'documento' => $this->user['documento'],
         ]);
     }
 

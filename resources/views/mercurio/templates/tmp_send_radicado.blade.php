@@ -15,7 +15,7 @@
             </div>
             <div class="col-xs-12 col-md-5">
                 <div class="mb-2">
-                    <?= Tag::image("send_mail.jpg", "class: img-responsive", "style: width:400px"); ?>
+                    <img src="{{ asset('img/Mecurio/send_mail.jpg') }}" class="img-responsive" style="width:400px" />
                 </div>
             </div>
         </div>

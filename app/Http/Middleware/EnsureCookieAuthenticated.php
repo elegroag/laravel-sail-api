@@ -24,7 +24,7 @@ class EnsureCookieAuthenticated
                     'message' => 'No autenticado.'
                 ], 401);
             }
-            return redirect('login/index');
+            return redirect('mercurio/login');
         }
 
         $tipo = session()->has('tipo') ? session('tipo') : null;
@@ -40,7 +40,7 @@ class EnsureCookieAuthenticated
                     'message' => 'No autenticado.'
                 ], 401);
             }
-            return redirect('login/index');
+            return redirect('mercurio/login');
         }
 
         return $next($request);

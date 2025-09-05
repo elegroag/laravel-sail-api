@@ -1,10 +1,13 @@
 <?php
+
 namespace App\Services\Api;
 
 use App\Exceptions\DebugException;
 use App\Library\APIClient\APIClient;
 use App\Library\APIClient\BasicAuth;
-use App\Models\Adapter\DbBase;
+use App\Models\ApiEndpoint;
+use App\Models\Gener02;
+
 use function App\Library\APIClient\mapper_sisu_api;
 
 class ApiSubsidio extends ApiAbstract
@@ -14,7 +17,6 @@ class ApiSubsidio extends ApiAbstract
     {
         parent::__construct();
         $this->app = $app;
-        $this->db = DbBase::rawConnect();
     }
 
     public function send($attr)
@@ -41,21 +43,25 @@ class ApiSubsidio extends ApiAbstract
             );
         }
 
-        $userApi = $this->db->fetchOne("SELECT * FROM gener02 WHERE usuario='2'");
-        $basicAuth = new BasicAuth('2', $userApi['clave']);
+        $userApi = Gener02::where('usuario', '2')->first();
+        $basicAuth = new BasicAuth('2', $userApi->clave);
 
         if (is_null($metodo) || $metodo === '') {
             throw new DebugException("Error no es valido el metodo de acceso API ", 501);
         }
 
         if ($this->app->mode == "development") {
-            $hostConnection = "{$this->app->host_dev}/";
+            $hostConnection = "{$this->app->host_api_dev}/";
         } else {
             // $basicAuth->encript($this->app->encryption, $this->app->portal_clave);
-            $hostConnection = "{$this->app->host_pro}/";
+            $hostConnection = "{$this->app->host_api_pro}/";
         }
 
-        $url = mapper_sisu_api($servicio) . "/{$metodo}";
+        $endpoint = ApiEndpoint::where('connection_name', 'api-clisisu')
+            ->where('service_name', $servicio)
+            ->first();
+
+        $url =  "{$endpoint->endpoint_name}/{$metodo}";
         $this->lineaComando =  $hostConnection . "\n" . $url . "\n" . json_encode($params);
 
         $api = new APIClient($basicAuth, $hostConnection,  $url);

@@ -18,7 +18,7 @@ class ServiciosView extends Backbone.View {
         const template = _.template(this.template);
         const path = $("[name='csrf-token']").attr('path');
 
-        this.model.url = $App.kumbiaURL(this.model.url);
+        this.model.url = $App.url(this.model.url);
         this.model.imagen = path + '/img/Mercurio/' + this.model.imagen;
         this.$el.html(template(this.model));
         return this;

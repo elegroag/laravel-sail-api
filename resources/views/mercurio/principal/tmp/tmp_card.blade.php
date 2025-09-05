@@ -7,7 +7,7 @@
                 <span class="fas"><%= icon%></span>
             </div>
             <p class="card-category"><%= name%></p>
-            <img src='<%= imagen%>' class="img img-principal" />
+            <img src='<%= imagen%>' class="img img-principal" width="100" height="100"/>
         </div>
         <div class="card-footer border-0">
             <div class="stats">
@@ -33,7 +33,7 @@
     <a href="<%= url%>" data-type="profile">
         <div class="card-header card-header-warning card-header-icon">
             <p class="card-category"><%= name%></p>
-            <img src='<%= imagen%>' class="img img-principal" />
+            <img src='<%= imagen%>' class="img img-principal" width="100" height="100" />
         </div>
     </a>
 </div>
@@ -46,7 +46,7 @@
     <a href="<%= url%>" data-type="profile">
         <div class="card-header card-header-warning card-header-icon pt-3">
             <p class="card-category"><%= name%></p>
-            <img src='<%= imagen%>' class="img img-principal" />
+            <img src='<%= imagen%>' class="img img-principal" width="100" height="100" />
         </div>
     </a>
 </div>

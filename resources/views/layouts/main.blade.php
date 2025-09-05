@@ -34,7 +34,7 @@
     <script type="text/javascript" src="{{ asset('assets/bootstrap/js/popper.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/noty/noty.js') }}"></script>
-    @stack('css')
+    @stack('styles')
 </head>
 
 <body class="bg-gray-100 flex items-center justify-center h-screen">

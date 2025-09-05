@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
@@ -26,7 +27,7 @@ class PrincipalController extends ApplicationController
     protected $tipo;
 
     public function __construct()
-    {   
+    {
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
@@ -37,7 +38,7 @@ class PrincipalController extends ApplicationController
         if ($this->user == null) {
             return redirect()->route('login');
         }
-        return view('principal.index', [
+        return view('mercurio/principal/index', [
             'tipo' => $this->tipo,
             'documento' => $this->user['documento'],
             'nombre' => $this->user['nombre'],
@@ -50,7 +51,10 @@ class PrincipalController extends ApplicationController
         return view('principal.dashboard_empresa', [
             'help' => false,
             'title' => "Dashboard Empresas",
-            'hide_header' => true
+            'hide_header' => true,
+            'tipo' => $this->tipo,
+            'documento' => $this->user['documento'],
+            'nombre' => $this->user['nombre'],
         ]);
     }
 
@@ -59,7 +63,10 @@ class PrincipalController extends ApplicationController
         return view('principal.dashboard_trabajador', [
             'help' => false,
             'title' => "Dashboard Trabajadores",
-            'hide_header' => true
+            'hide_header' => true,
+            'tipo' => $this->tipo,
+            'documento' => $this->user['documento'],
+            'nombre' => $this->user['nombre'],
         ]);
     }
 
@@ -335,7 +342,7 @@ class PrincipalController extends ApplicationController
                                     'temporales' => (new Mercurio31)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
                                 ),
                                 'icon' => 'T',
-                                'url' => 'trabajador/index',
+                                'url' => 'mercurio/trabajador/index',
                                 'imagen' => 'trabajadores.jpg',
                             ),
                             array(
@@ -348,7 +355,7 @@ class PrincipalController extends ApplicationController
                                     'temporales' => (new Mercurio32)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
                                 ),
                                 'icon' => 'C',
-                                'url' => 'conyuge/index',
+                                'url' => 'mercurio/conyuge/index',
                                 'imagen' => 'conyuges.jpg',
                             ),
                             array(
@@ -361,7 +368,7 @@ class PrincipalController extends ApplicationController
                                     'temporales' => (new Mercurio34)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
                                 ),
                                 'icon' => 'B',
-                                'url' => 'beneficiario/index',
+                                'url' => 'mercurio/beneficiario/index',
                                 'imagen' => 'beneficiarios.jpg',
                             ),
                             array(
@@ -374,7 +381,7 @@ class PrincipalController extends ApplicationController
                                     'temporales' => (new Mercurio47)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
                                 ),
                                 'icon' => 'B',
-                                'url' => 'actualizadatos/index',
+                                'url' => 'mercurio/actualizadatos/index',
                                 'imagen' => 'datos_basicos.jpg',
                             )
                         ),
@@ -382,22 +389,22 @@ class PrincipalController extends ApplicationController
                         'consultas' => array(
                             array(
                                 'name' => 'Consulta Trabajadores',
-                                'url' => 'subsidioemp/consulta_trabajadores_view',
+                                'url' => 'mercurio/subsidioemp/consulta_trabajadores_view',
                                 'imagen' => 'consulta_trabajadores.jpg',
                             ),
                             array(
                                 'name' => 'Consulta de gíro',
-                                'url' => 'subsidioemp/consulta_giro_view',
+                                'url' => 'mercurio/subsidioemp/consulta_giro_view',
                                 'imagen' => 'consulta_giro.jpg',
                             ),
                             array(
                                 'name' => 'Consulta de aportes',
-                                'url' => 'subsidioemp/consulta_aportes_view',
+                                'url' => 'mercurio/subsidioemp/consulta_aportes_view',
                                 'imagen' => 'consulta_aportes.jpg',
                             ),
                             array(
                                 'name' => 'Consulta de nominas',
-                                'url' => 'subsidioemp/consulta_nomina_view',
+                                'url' => 'mercurio/subsidioemp/consulta_nomina_view',
                                 'imagen' => 'consulta_aportes.jpg',
                             )
                         )
@@ -416,7 +423,7 @@ class PrincipalController extends ApplicationController
                                     'temporales' => (new Mercurio30)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
                                 ),
                                 'icon' => 'E',
-                                'url' => 'empresa/index',
+                                'url' => 'mercurio/empresa/index',
                                 'imagen' => 'empresas.jpg',
                             ),
                             array(
@@ -429,7 +436,7 @@ class PrincipalController extends ApplicationController
                                     'temporales' => (new Mercurio41)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
                                 ),
                                 'icon' => 'I',
-                                'url' => 'independiente/index',
+                                'url' => 'mercurio/independiente/index',
                                 'imagen' => 'independiente.jpg',
                             ),
                             array(
@@ -442,7 +449,7 @@ class PrincipalController extends ApplicationController
                                     'temporales' => (new Mercurio38)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
                                 ),
                                 'icon' => 'P',
-                                'url' => 'pensionado/index',
+                                'url' => 'mercurio/pensionado/index',
                                 'imagen' => 'pensionado.jpg',
                             ),
                             array(
@@ -455,14 +462,14 @@ class PrincipalController extends ApplicationController
                                     'temporales' => (new Mercurio36)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
                                 ),
                                 'icon' => 'F',
-                                'url' => 'facultativo/index',
+                                'url' => 'mercurio/facultativo/index',
                                 'imagen' => 'facultativo.jpg',
                             )
                         ),
                         'productos' => array(
                             array(
                                 'name' => 'P. Complemento_nutricional',
-                                'url' => 'productos/complemento_nutricional',
+                                'url' => 'mercurio/productos/complemento_nutricional',
                                 'imagen' => 'complemento.jpg',
                             )
                         ),
@@ -631,7 +638,7 @@ class PrincipalController extends ApplicationController
                 'msj' => 'Proceso completado con éxito',
                 'data' => $servicios
             );
-        } catch (DebugException $err) {
+        } catch (DebugException $e) {
             $salida = array(
                 'success' => false,
                 'msj' => $e->getMessage()
@@ -643,12 +650,12 @@ class PrincipalController extends ApplicationController
     public function validaSyncroAction()
     {
         $this->setResponse("ajax");
-        
+
         try {
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
             $tipo = $this->tipo;
-    
+
             $hoy = date('Y-m-d');
             $solicitante =  (new Mercurio07)->findFirst(" documento='{$documento}' and coddoc='{$coddoc}' and tipo='{$tipo}'");
             if ($solicitante->getFechaSyncron() == '' || is_null($solicitante->getFechaSyncron())) {
@@ -667,7 +674,7 @@ class PrincipalController extends ApplicationController
                     'syncron' => ($interval >= 10) ? true : false
                 )
             );
-        } catch (DebugException $err) {
+        } catch (DebugException $e) {
             $salida = array(
                 'success' => false,
                 'msj' => $e->getMessage()
@@ -760,7 +767,7 @@ class PrincipalController extends ApplicationController
             if ($solicitud == false) {
                 throw new DebugException("La identificación de la solicitud no es correcto", 404);
             }
-         
+
             $auth = new SessionCookies(
                 "model: mercurio07",
                 "tipo: {$token->tipo}",
@@ -784,8 +791,7 @@ class PrincipalController extends ApplicationController
             );
 
             return redirect()->to($url);
-
-        } catch (DebugException $err) {
+        } catch (DebugException $e) {
             set_flashdata("error", array("msj" => $e->getMessage()));
             return redirect()->to("login/index");
         }
@@ -839,7 +845,7 @@ class PrincipalController extends ApplicationController
                 'msj' => 'Proceso completado con éxito',
                 'data' => $out
             );
-        } catch (DebugException $err) {
+        } catch (DebugException $e) {
             $salida = array(
                 "success" => false,
                 "msj" => $e->getMessage()

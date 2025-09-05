@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\EmpresaController;
 use App\Http\Controllers\Api\TrabajadorController;
 use App\Http\Controllers\Api\NucleoFamiliarController;
+use App\Http\Controllers\Api\ApiEndpointController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,6 +26,15 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::apiResource('empresas', EmpresaController::class);
 Route::apiResource('trabajadores', TrabajadorController::class);
 Route::apiResource('nucleos-familiares', NucleoFamiliarController::class);
+
+// Rutas API para gestión de endpoints
+Route::apiResource('api-endpoints', ApiEndpointController::class);
+
+// Ruta para actualizar solo el nombre de conexión
+Route::put('api-endpoints/service/{serviceName}/connection-name', [ApiEndpointController::class, 'updateConnectionName']);
+
+// Ruta para sincronizar con valores por defecto
+Route::post('api-endpoints/sync-defaults', [ApiEndpointController::class, 'syncDefaults']);
 
 // Rutas adicionales para relaciones específicas
 Route::get('empresas/{empresa}/trabajadores', [TrabajadorController::class, 'index'])

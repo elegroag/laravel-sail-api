@@ -367,6 +367,6 @@
     <div class="tab-pane fade" id="documentos_adjuntos" role="tabpanel" aria-labelledby="documentos_adjuntos-tab">...</div>
     <div class="tab-pane fade" id="firma" role="tabpanel" aria-labelledby="firma-tab">...</div>
     <div class="tab-pane fade" id="enviar_radicado" role="tabpanel" aria-labelledby="enviar_radicado-tab">
-        @include('templates/tmp_send_radicado')
+        @include('mercurio/templates/tmp_send_radicado')
     </div>
 </div>

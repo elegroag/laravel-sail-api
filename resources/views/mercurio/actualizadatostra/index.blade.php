@@ -1,16 +1,12 @@
-@extends('layouts.app')
-
-@section('content')
-@php
-$user = Auth::user();
-$tipo = $user->tipo;
-@endphp
+@extends('layouts.bone')
 
 @push('css')
     <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.min.css') }}">
 @endpush
 
+@section('content')
 <div id='boneLayout'></div>
+@endsection
 
 @push('scripts')
     <script src="{{ asset('assets/datatables.net/js/dataTables.min.js') }}"></script>
@@ -54,4 +50,4 @@ $tipo = $user->tipo;
 
     <script src="{{ asset('mercurio/build/ActualizaDatosTrabajador.js') }}"></script>
 @endpush
-@endsection
+

@@ -26,7 +26,7 @@ class EmpresaController extends ApplicationController
     protected $tipo;
 
     public function __construct()
-    {   
+    {
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
@@ -38,16 +38,14 @@ class EmpresaController extends ApplicationController
      */
     protected $tipopc = '2';
 
-    private function clp(Request $request, string $name, $default = null)
-    {
-        $val = $request->input($name, $default);
-        if (is_string($val)) $val = trim(strip_tags($val));
-        return $val;
-    }
 
     public function indexAction()
     {
-        return $this->renderObject(['success' => true, 'msj' => 'Afiliación Empresas (endpoint base)']);
+        return view('mercurio/empresa/index', [
+            'tipo' => $this->tipo,
+            'documento' => $this->user['documento'],
+            'title' => 'Afiliación de empresas'
+        ]);
     }
 
     /**
@@ -243,7 +241,7 @@ class EmpresaController extends ApplicationController
             $service = new EmpresaService();
             $service->paramsApi();
             return $this->renderObject(['success' => true]);
-        } catch (\Exception $e) {
+        } catch (DebugException $e) {
             return $this->renderObject(['success' => false, 'msj' => $e->getMessage()]);
         }
     }

@@ -1,3 +1,6 @@
+@extends('layouts.bone')
+
+@section('content')
 <div class="header bg-gradient-primary pb-9">
     <div class="container-fluid">
         <div class="header-body p-4">
@@ -118,7 +121,8 @@
         </div>
     </div>
 </div>
+@endsection
 
-@php
-    echo Tag::javascriptInclude('Mercurio/certificados/certificados.build');
-@endphp
+@push('scripts')
+    <script src="{{ asset('mercurio/certificados/certificados.build.js') }}"></script>
+@endpush

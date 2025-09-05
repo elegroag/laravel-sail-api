@@ -1,3 +1,6 @@
+@extends('layouts.bone')
+
+@section('content')
 <div class="card mb-0">
 	<div class="card-body">
 		<form id="form" class="validation_form" autocomplete="off" novalidate>
@@ -18,5 +21,8 @@
 		</form>
 	</div>
 </div>
+@endsection
 
+@push('scripts')
 <script src="{{ asset('mercurio/CambioEmail.js') }}"></script>
+@endpush
