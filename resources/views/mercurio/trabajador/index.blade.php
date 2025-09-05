@@ -1,10 +1,17 @@
+@extends('layouts.bone')
+
+@push('styles')
 <link href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.min.css') }}" rel="stylesheet">
 <link href="{{ asset('javascript/Mercurio/trabajadores/trabajadores.build.css') }}" rel="stylesheet">
+@endpush
 
+@section('content')
+    <div id='boneLayout'></div>
+@endsection
+
+@push('scripts')
 <script src="{{ asset('assets/datatables.net/js/dataTables.min.js') }}"></script>
 <script src="{{ asset('assets/datatables.net.bs5/js/dataTables.bootstrap5.min.js') }}"></script>
-
-<div id='boneLayout'></div>
 
 <script type="text/template" id='tmp_layout'>
     @include('templates.tmp_layout')
@@ -51,3 +58,4 @@
 </script>
 
 <script src="{{ asset('mercurio/Trabajadores.js') }}"></script>
+@endpush

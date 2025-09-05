@@ -1,12 +1,12 @@
-@extends('layouts.app')
-
-@section('content')
+@extends('layouts.bone')
 
 @push('css')
     <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.min.css') }}">
 @endpush
 
-<div id='boneLayout'></div>
+@section('content')
+    <div id='boneLayout'></div>
+@endsection
 
 @push('scripts')
     <script src="{{ asset('assets/datatables.net/js/dataTables.min.js') }}"></script>
@@ -59,4 +59,4 @@
     <script src="{{ asset('mercurio/build/ActualizaDatos.js') }}"></script>
 
 @endpush
-@endsection
+

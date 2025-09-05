@@ -1,0 +1,34 @@
+{
+	"folders": [
+		{
+			"path":"./",
+		},
+		{
+			"path": "app/Http/Controllers/",
+			"name": "Controllers"
+		},
+		{
+			"path": "app/Models/",
+			"name": "Models"
+		},
+		{
+			"path": "app/Services/",
+			"name": "Services"
+		},
+		{
+			"path": "app/Helpers/",
+			"name": "Helpers"
+		},
+		{
+			"path": "resources/views/",
+			"name": "Views"
+		},
+		{
+			"path": "public/src/",
+			"name": "Src"
+		}
+	],
+	settings: {
+		
+	}
+}

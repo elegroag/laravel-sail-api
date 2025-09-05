@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.bone')
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.min.css') }}">
@@ -6,6 +6,12 @@
 
 @section('content')
 <div id='boneLayout'></div>
+@endsection
+
+@push('scripts')
+
+<script src="{{ asset('assets/datatables.net/js/dataTables.min.js') }}"></script>
+<script src="{{ asset('assets/datatables.net-bs5/js/dataTables.bootstrap5.min.js') }}"></script>
 
 <script type="text/template" id='tmp_layout'>
     @include('templates.tmp_layout')
@@ -46,11 +52,6 @@
 <script type="text/template" id='tmp_create_firma'>
     @include('templates.tmp_create_firma')
 </script>
-@endsection
 
-@push('scripts')
-    <script src="{{ asset('assets/datatables.net/js/dataTables.min.js') }}"></script>
-    <script src="{{ asset('assets/datatables.net-bs5/js/dataTables.bootstrap5.min.js') }}"></script>
-
-    <script src="{{ asset('mercurio/Conyuges.js') }}"></script>
+<script src="{{ asset('mercurio/Conyuges.js') }}"></script>
 @endpush

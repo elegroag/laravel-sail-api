@@ -1,3 +1,5 @@
+@extends('layouts.bone')
+
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.min.css') }}">
 @endpush
