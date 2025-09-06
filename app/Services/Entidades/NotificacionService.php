@@ -2,45 +2,37 @@
 
 namespace App\Services\Entidades;
 
-use App\Models\Adapter\DbBase;
 use App\Models\Notificaciones;
-use App\Services\Request;
 
 class NotificacionService
 {
     protected $user;
-    protected $db;
 
     public function __construct()
     {
-        if (session()->has('documento')) {
-            $this->user = session()->all();
-        }
-        $this->db = DbBase::rawConnect();
+        $this->user = session('user');
     }
 
-    public function getNotificacionesByUser($user)
+    public function getNotificacionesByUser($usuario)
     {
-        return (new Notificaciones)->find("user='{$user}'", "order: id DESC",  "limit: 50");
+        return Notificaciones::where('user', $usuario)
+            ->orderBy('id', 'DESC')
+            ->limit(50)
+            ->get();
     }
 
     public function createNotificacion($data)
     {
-        $notificacion = new Notificaciones(
-            new Request(
-                array(
-                    'id' => null,
-                    'titulo' => $data['titulo'],
-                    'descri' => $data['descripcion'],
-                    'user'   => $data['user'],
-                    'estado' => 'P',
-                    'result' => '',
-                    'dia' => date('Y-m-d'),
-                    'hora' => date('H:i:s'),
-                    'progre' => 0
-                )
-            )
-        );
+        $notificacion = new Notificaciones([
+            'titulo' => $data['titulo'],
+            'descri' => $data['descripcion'],
+            'user'   => $data['user'],
+            'estado' => 'P',
+            'result' => '',
+            'dia' => date('Y-m-d'),
+            'hora' => date('H:i:s'),
+            'progre' => 0
+        ]);
         $notificacion->save();
         return $notificacion;
     }

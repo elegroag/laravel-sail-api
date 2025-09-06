@@ -23,21 +23,6 @@ class Notificaciones extends ModelBase
         'hora',
     ];
 
-    public function __construct(Request|null $request = null)
-    {
-        if ($request instanceof Request) {
-            $this->id = $request->getParam('id');
-            $this->titulo = $request->getParam('titulo');
-            $this->descri = $request->getParam('descri');
-            $this->user = $request->getParam('user');
-            $this->estado = $request->getParam('estado');
-            $this->progre = $request->getParam('progre');
-            $this->result = $request->getParam('result');
-            $this->dia = $request->getParam('dia');
-            $this->hora = $request->getParam('hora');
-        }
-    }
-
     public function setId($id)
     {
         $this->id = $id;

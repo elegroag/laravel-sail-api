@@ -3,6 +3,8 @@
 namespace App\Services\Entidades;
 
 use App\Exceptions\DebugException;
+use App\Library\Collections\ParamsPensionado;
+use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
@@ -12,8 +14,6 @@ use App\Models\Mercurio14;
 use App\Models\Mercurio37;
 use App\Models\Mercurio38;
 use App\Services\Utils\Comman;
-use ParamsPensionado;
-use ParamsTrabajador;
 
 class PensionadoService
 {
@@ -24,9 +24,7 @@ class PensionadoService
 
     public function __construct()
     {
-        if (session()->has('documento')) {
-            $this->user = session()->all();
-        }
+        $this->user = session('user');
         $this->db = DbBase::rawConnect();
     }
 
@@ -103,25 +101,28 @@ class PensionadoService
         if ($solicitud == false) return false;
         $archivos = array();
 
-        $db = DbBase::rawConnect();
 
-        $mercurio10 = $db->fetchOne("SELECT item, estado, campos_corregir
-        FROM mercurio10
-        WHERE numero='{$solicitud->getId()}' AND tipopc='{$this->tipopc}'
-        ORDER BY item DESC LIMIT 1");
+        $mercurio10 = (new Mercurio10)->where([
+            ['numero', '=', $solicitud->getId()],
+            ['tipopc', '=', $this->tipopc]
+        ])->orderBy('item', 'desc')->first();
 
         $corregir = false;
-        if ($mercurio10) {
-            if ($mercurio10['estado'] == 'D') {
-                $campos = $mercurio10['campos_corregir'];
-                $corregir = explode(";", $campos);
-            }
+        if ($mercurio10 && $mercurio10->estado == 'D') {
+            $campos = $mercurio10->campos_corregir;
+            $corregir = explode(";", $campos);
         }
 
-        $mercurio14 = (new Mercurio14)->find("tipopc='{$this->tipopc}'");
+        $mercurio14 = Mercurio14::where('tipopc', $this->tipopc)->get();
+
         foreach ($mercurio14 as $m14) {
-            $m12 = (new Mercurio12)->findFirst("coddoc='{$m14->getCoddoc()}'");
-            $mercurio37 = (new Mercurio37)->findFirst("tipopc='{$this->tipopc}' and numero='{$solicitud->getId()}' and coddoc='{$m14->getCoddoc()}'");
+            $m12 = Mercurio12::where('coddoc', $m14->getCoddoc())->first();
+
+            $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)
+                ->where('numero',  $solicitud->getId())
+                ->where('coddoc', $m14->getCoddoc())
+                ->first();
+
             $corrige = false;
             if ($corregir) {
                 if (in_array($m12->getCoddoc(), $corregir)) {
@@ -139,7 +140,7 @@ class PensionadoService
             $archivos[] = $archivo;
         }
 
-        $mercurio01 = (new Mercurio01)->findFirst();
+        $mercurio01 = Mercurio01::first();
         $html = view("pensionado/tmp/archivos_requeridos",  array(
             "load_archivos" => $archivos,
             "path" => $mercurio01->getPath(),
@@ -185,7 +186,7 @@ class PensionadoService
     {
         $empresa = $this->findById($id);
         if ($empresa != false) {
-            $empresa->createAttributes($data);
+            $empresa->fill($data);
             $empresa->save();
             return $empresa;
         }
@@ -202,7 +203,7 @@ class PensionadoService
     {
         $solicitud = $this->findById($id);
         if ($solicitud) {
-            $solicitud->createAttributes($data);
+            $solicitud->fill($data);
             $solicitud->save();
             return $solicitud;
         } else {
@@ -217,13 +218,12 @@ class PensionadoService
      */
     public function create($data)
     {
-        $id = (new Mercurio38)->maximum('id') + 1;
-        $pensionado = new Mercurio38();
-        $pensionado->createAttributes($data);
-        $pensionado->setId($id);
+        $pensionado = new Mercurio38($data);
+        $pensionado->save();
+        $id = $pensionado->getId();
 
-        (new Mercurio37)->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
-        (new Mercurio10)->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
+        Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
+        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
         return $pensionado;
     }
 
@@ -234,9 +234,9 @@ class PensionadoService
      */
     public function createByFormData($data)
     {
+        $data['estado'] = 'T';
+        $data['log'] = '0';
         $pensionado = $this->create($data);
-        $pensionado->setEstado("T");
-        $pensionado->save();
         return $pensionado;
     }
 
@@ -247,7 +247,7 @@ class PensionadoService
      */
     public function findById($id)
     {
-        return (new Mercurio38)->findFirst("id='{$id}'");
+        return Mercurio38::where('id', $id)->first();
     }
 
     /**
@@ -260,15 +260,19 @@ class PensionadoService
      */
     public function enviarCaja($senderValidationCaja, $id, $usuario)
     {
-        $solicitud = (new Mercurio38)->findFirst("id='{$id}'");
+        $solicitud = $this->findById($id);
 
         $cm37 = (new Mercurio37)->getCount(
-            "tipopc='{$this->tipopc}' AND " .
+            "*",
+            "conditions: tipopc='{$this->tipopc}' AND " .
                 "numero='{$id}' AND " .
                 "coddoc IN(SELECT coddoc FROM mercurio14 WHERE tipopc='{$this->tipopc}' AND tipsoc='{$this->tipsoc}' AND obliga='S')"
         );
 
-        $cm14 = (new Mercurio14)->getCount("*", "conditions: tipopc='{$this->tipopc}' and tipsoc='{$this->tipsoc}' and obliga='S'");
+        $cm14 = (new Mercurio14)->getCount(
+            "*",
+            "conditions: tipopc='{$this->tipopc}' and tipsoc='{$this->tipsoc}' and obliga='S'"
+        );
         if ($cm37 < $cm14) {
             throw new DebugException("Adjunte los archivos obligatorios", 500);
         }
@@ -278,26 +282,37 @@ class PensionadoService
             'estado' => 'P'
         ]);
 
-        $ai = (new Mercurio10)->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
+        $ai = Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->max('item') + 1;
 
-        $entity = (object) $solicitud->getArray();
-        $entity->item = $ai;
-        $solicitante = (new Mercurio07)->findFirst(" documento='{$solicitud->getDocumento()}' and coddoc='{$solicitud->getCoddoc()}' and tipo='{$solicitud->getTipo()}'");
-        $entity->repleg = $solicitante->getNombre();
-        $entity->razsoc = $solicitante->getNombre();
-        $entity->nit = $solicitante->getDocumento();
-        $entity->email = $solicitante->getEmail();
-        $senderValidationCaja->send($this->tipopc, $entity);
+        $solicitud->item = $ai;
+        $solicitante = Mercurio07::where([
+            ['documento', '=', $solicitud->getDocumento()],
+            ['coddoc', '=', $solicitud->getCoddoc()],
+            ['tipo', '=', $solicitud->getTipo()]
+        ])->first();
+
+        $solicitud->repleg = $solicitante->getNombre();
+        $solicitud->razsoc = $solicitante->getNombre();
+        $solicitud->nit = $solicitante->getDocumento();
+        $solicitud->email = $solicitante->getEmail();
+
+        $senderValidationCaja->send($this->tipopc, $solicitud);
     }
 
 
     public function consultaSeguimiento($id)
     {
-        $seguimientos = $this->db->inQueryAssoc("SELECT * FROM mercurio10 WHERE numero='{$id}' AND tipopc='{$this->tipopc}' ORDER BY item DESC");
-        foreach ($seguimientos as $ai => $row) {
-            $campos = explode(';', $row['campos_corregir']);
-            $seguimientos[$ai]['corregir'] = $campos;
-        }
+        $seguimientos = Mercurio10::where('numero', $id)
+            ->where('tipopc', $this->tipopc)
+            ->orderBy('item', 'desc')
+            ->get()
+            ->map(function ($row) {
+                $campos = explode(';', $row->campos_corregir);
+                $row->corregir = $campos;
+                return $row;
+            })
+            ->toArray();
+
         return array(
             'seguimientos' => $seguimientos,
             'campos_disponibles' => (new Mercurio38)->CamposDisponibles(),
@@ -310,26 +325,30 @@ class PensionadoService
         if ($solicitud == false) return false;
         $archivos = array();
 
-        $db = DbBase::rawConnect();
 
-
-        $mercurio10 = $db->fetchOne("SELECT item, estado, campos_corregir
-        FROM mercurio10
-        WHERE numero='{$solicitud->getId()}' AND tipopc='{$this->tipopc}'
-        ORDER BY item DESC LIMIT 1");
+        $mercurio10 = Mercurio10::where([
+            ['numero', '=', $solicitud->getId()],
+            ['tipopc', '=', $this->tipopc]
+        ])->orderBy('item', 'desc')->first();
 
         $corregir = false;
-        if ($mercurio10) {
-            if ($mercurio10['estado'] == 'D') {
-                $campos = $mercurio10['campos_corregir'];
-                $corregir = explode(";", $campos);
-            }
+        if ($mercurio10 && $mercurio10->estado == 'D') {
+            $campos = $mercurio10->campos_corregir;
+            $corregir = explode(";", $campos);
         }
 
-        $mercurio14 = (new Mercurio14)->find("tipopc='{$this->tipopc}'", "order: auto_generado DESC");
+        $mercurio14 = Mercurio14::where('tipopc', $this->tipopc)->orderBy('auto_generado', 'desc')->get();
+
         foreach ($mercurio14 as $m14) {
-            $m12 = (new Mercurio12)->findFirst("coddoc='{$m14->getCoddoc()}'");
-            $mercurio37 = (new Mercurio37)->findFirst("tipopc='{$this->tipopc}' and numero='{$solicitud->getId()}' and coddoc='{$m14->getCoddoc()}'");
+
+            $m12 = Mercurio12::where('coddoc', $m14->getCoddoc())->first();
+
+            $mercurio37 = Mercurio37::where([
+                ['tipopc', '=', $this->tipopc],
+                ['numero', '=', $solicitud->getId()],
+                ['coddoc', '=', $m14->getCoddoc()]
+            ])->first();
+
             $corrige = false;
             if ($corregir) {
                 if (in_array($m12->getCoddoc(), $corregir)) {
@@ -337,7 +356,7 @@ class PensionadoService
                 }
             }
 
-            $archivo = $m14->getArray();
+            $archivo = $m14->toArray();
             $archivo['obliga'] = ($m14->getObliga() == "S") ? "<br><small class='text-danger'>Obligatorio</small>" : "";
             $archivo['id'] = $solicitud->getId();
             $archivo['detalle'] = capitalize($m12->getDetalle());
@@ -346,7 +365,7 @@ class PensionadoService
             $archivos[] = $archivo;
         }
 
-        $mercurio01 = (new Mercurio01)->findFirst();
+        $mercurio01 = Mercurio01::first();
         $archivos_descargar = oficios_requeridos('O');
         return array(
             "disponibles" => $archivos_descargar,
@@ -363,8 +382,7 @@ class PensionadoService
             array(
                 "servicio" => "ComfacaAfilia",
                 "metodo" => "parametros_empresa"
-            ),
-            false
+            )
         );
 
         $paramsPensionado = new ParamsPensionado();
@@ -375,9 +393,9 @@ class PensionadoService
             array(
                 "servicio" => "ComfacaAfilia",
                 "metodo" => "parametros_trabajadores"
-            ),
-            false
+            )
         );
+
         $paramsTrabajador = new ParamsTrabajador();
         $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
     }
