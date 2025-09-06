@@ -70,8 +70,8 @@ class EmpresaAdjuntoService
     public function cartaSolicitud()
     {
         $this->filename = "carta_solicitud_empresa_{$this->request->getNit()}.pdf";
-        KumbiaPDF::setBackgroundImage(public_path('form/oficios/oficio_solicitud_empresa.jpg'));
-        KumbiaPDF::setFooterImage(public_path('docs/' . $this->lfirma->getFirma()));
+        KumbiaPDF::setBackgroundImage(public_path('img/form/oficios/oficio_solicitud_empresa.jpg'));
+        KumbiaPDF::setFooterImage(false);
 
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearOficio('empresa');
@@ -91,7 +91,7 @@ class EmpresaAdjuntoService
     public function formulario()
     {
         $this->filename = "formulario_empresa_{$this->request->getNit()}.pdf";
-        KumbiaPDF::setBackgroundImage(public_url('docs/form/empresa/form-empresa.jpg'));
+        KumbiaPDF::setBackgroundImage(public_path('img/form/empresa/form-empresa.jpg'));
 
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearFormulario('empresa');
@@ -111,9 +111,10 @@ class EmpresaAdjuntoService
     public function trabajadoresNomina()
     {
         KumbiaPDF::setBackgroundImage(false);
-        KumbiaPDF::setFooterImage(public_url('docs/' . $this->lfirma->getFirma()));
+        KumbiaPDF::setFooterImage(public_path('img/firmas/sello-firma.png'));
 
-        $tranoms = (new Tranoms)->find(" request='{$this->request->getId()}'");
+        $tranoms = Tranoms::where('request', $this->request->getId())->get();
+
         $this->filename = "tranom_empresa_{$this->request->getNit()}.pdf";
 
         $fabrica = new FactoryDocuments();

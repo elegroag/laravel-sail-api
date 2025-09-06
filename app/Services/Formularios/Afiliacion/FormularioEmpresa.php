@@ -26,12 +26,13 @@ class FormularioEmpresa extends Documento
         }
         $this->empresa = $this->request->getParam('empresa');
         $this->pdf->SetTitle("Formulario afiliación de empresa {$this->empresa->getRepleg()}, COMFACA");
-        $this->pdf->SetAuthor("{$this->empresa->getPriape()} {$this->empresa->getSegape()} {$this->empresa->getPrinom()} {$this->empresa->getSegnom()}, COMFACA");
+        $autor = "{$this->empresa->getPriape()} {$this->empresa->getSegape()} {$this->empresa->getPrinom()} {$this->empresa->getSegnom()}";
+        $this->pdf->SetAuthor($autor);
         $this->pdf->SetSubject("Formulario de afiliación a COMFACA");
         $this->pdf->SetCreator("Plataforma Web: comfacaenlinea.com.co, COMFACA");
         $this->pdf->SetKeywords('COMFACA');
         $this->bloqueEmpresa();
-        $selloFirma = storage_path('public/docs/sello-firma.png');
+        $selloFirma = public_path('img/firmas/sello-firma.png');
         $this->pdf->Image($selloFirma, 160, 265, 30, 20, '', '', '', false, 300, '', false, false, 0);
     }
 

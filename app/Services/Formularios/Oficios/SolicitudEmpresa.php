@@ -26,13 +26,14 @@ class SolicitudEmpresa extends Documento
         }
         $this->empresa = $this->request->getParam('empresa');
         $this->pdf->SetTitle("Solicitud de afiliación con NIT {$this->empresa->getNit()}, COMFACA");
-        $this->pdf->SetAuthor("{$this->empresa->getPriape()} {$this->empresa->getSegape()} {$this->empresa->getPrinom()} {$this->empresa->getSegnom()}, COMFACA");
+        $autor = "{$this->empresa->getPriape()} {$this->empresa->getSegape()} {$this->empresa->getPrinom()} {$this->empresa->getSegnom()}";
+        $this->pdf->SetAuthor($autor);
         $this->pdf->SetSubject("Carta de solicitud de afiliación a COMFACA");
         $this->pdf->SetCreator("Plataforma Web: comfacaenlinea.com.co, COMFACA");
         $this->pdf->SetKeywords('COMFACA');
 
         $this->bloqueEmpresa();
-        $selloFirma = public_path('docs/sello-firma.png');
+        $selloFirma = public_path('img/firmas/sello-firma.png');
         $this->pdf->Image($selloFirma, 160, 265, 30, 20, '', '', '', false, 300, '', false, false, 0);
     }
 
@@ -57,8 +58,8 @@ class SolicitudEmpresa extends Documento
         $this->pdf->SetX(34);
         $this->pdf->Cell(33, 5, (!$this->empresa->getCodciu()) ? 'Florencia' : $_codciu[$this->empresa->getCodciu()], 0, 0, 'L');
         $this->pdf->SetX(162);
-        $this->pdf->Cell(8, 4, $today->locale('es')->dayName, 0, 0, 'C');
-        $this->pdf->Cell(6, 4, $today->locale('es')->monthName, 0, 0, 'C');
+        $this->pdf->Cell(8, 4, $today->format('Y'), 0, 0, 'C');
+        $this->pdf->Cell(6, 4, $today->format('m'), 0, 0, 'C');
         $this->pdf->Cell(6, 4, $today->format('d'), 0, 0, 'C');
 
 
@@ -84,7 +85,7 @@ class SolicitudEmpresa extends Documento
         $this->pdf->SetY(109);
         $this->pdf->SetX(28);
         $this->pdf->Cell(14, 4, $today->format('d'), 0, 0, 'L');
-        $this->pdf->Cell(12, 4, $today->locale('es')->monthName, 0, 0, 'L');
+        $this->pdf->Cell(12, 4, $today->format('m'), 0, 0, 'L');
         $this->pdf->Cell(10, 4, $today->format('Y'), 0, 0, 'L');
 
         /**

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Library\Tcpdf;
 
 use TCPDF;
@@ -35,12 +36,12 @@ class KumbiaPDF extends TCPDF
         self::$x_with = $x_with;
     }
 
-    public static function setBackgroundImage($image)
+    public static function setBackgroundImage(string|null $image = null)
     {
         self::$backgroundImage = $image;
     }
 
-    public static function setFooterImage($image)
+    public static function setFooterImage(string|null $image = null)
     {
         self::$footerImage = $image;
     }

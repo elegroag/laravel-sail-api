@@ -888,4 +888,19 @@ class LoginController extends ApplicationController
             }
         }
     }
+
+    public function showPdfAction(Request $request)
+    {
+        $filename = $request->input('filename');
+        $path = storage_path('temp/' . $filename);
+
+        if (!file_exists($path)) {
+            return response()->json(['success' => false]);
+        }
+
+        return response()->file($path, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $filename . '"'
+        ]);
+    }
 }

@@ -44,17 +44,12 @@ class SenderValidationCaja
             )
         );
 
-        $html = view("empresa/tmp/mailcaja", $arreglo)->render();
-
-        $destinatarios = array(array(
-            "email" => (env('APP_ENV') == 'production') ? $entity->email : $this->email_pruebas,
-            "nombre" => $entity->repleg
-        ));
-
-        $this->sendEmail("Proceso Afiliación Caja de Compensación Familiar COMFACA", $html, $destinatarios);
+        $html = view("emails/mail-caja", $arreglo)->render();
+        $destinatario = (env('APP_ENV') == 'production') ? $entity->email : $this->email_pruebas;
+        $this->sendEmail("Proceso Afiliación Caja de Compensación Familiar COMFACA", $html, $destinatario);
     }
 
-    function sendEmail($asunto, $html, $destinatarios)
+    function sendEmail($asunto, $html, $destinatario)
     {
         $emailCaja = (new Mercurio01)->findFirst();
         $senderEmail = new SenderEmail();
@@ -65,7 +60,7 @@ class SenderValidationCaja
         );
 
         $senderEmail->send(
-            $destinatarios,
+            $destinatario,
             $html
         );
     }

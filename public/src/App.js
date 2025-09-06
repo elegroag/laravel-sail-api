@@ -190,8 +190,7 @@ const $App = {
             type: 'POST',
             data: data,
             url: this.url(url),
-            dataType: 'html',
-            processData: true,
+            processData: false,
             contentType: 'application/x-www-form-urlencoded',
             cache: false,
             beforeSend: (xhr) => {
@@ -247,6 +246,7 @@ const $App = {
                 if (silent == false) loading.show();
                 xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
                 if (csrf.length > 0) {
+                    xhr.setRequestHeader('X-CSRF-TOKEN', csrf);
                     xhr.setRequestHeader('Authorization', 'Bearer ' + csrf);
                 }
             },

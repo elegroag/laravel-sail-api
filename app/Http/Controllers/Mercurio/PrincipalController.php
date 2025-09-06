@@ -19,6 +19,7 @@ use App\Models\Mercurio47;
 use App\Services\Utils\Comman;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class PrincipalController extends ApplicationController
 {
@@ -192,18 +193,15 @@ class PrincipalController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function fileExisteGlobalAction(Request $request)
+    public function fileExisteGlobalAction(Request $request, Response $response, string $filepath)
     {
-        $filepath = $request->input('filepath');
-        $this->setResponse("ajax");
         $archivo = base64_decode($filepath);
-        if (preg_match('/(public)(\/)(temp)/i', $archivo) == false) {
-            $fichero = "public/temp/{$archivo}";
+        if (preg_match('/(storage)(\/)(temp)/i', $archivo) == false) {
+            $fichero = storage_path('temp/' . $archivo);
         } else {
-            $fichero = $archivo;
-            $archivo = basename($archivo);
+            $fichero = storage_path($archivo);
         }
-        if (file_exists(public_path() . '' . $fichero)) {
+        if (file_exists($fichero)) {
             return $this->renderObject(array("success" => true));
         } else {
             return $this->renderObject(array("success" => false));

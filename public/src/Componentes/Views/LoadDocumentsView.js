@@ -153,26 +153,28 @@ class LoadDocumentsView extends Backbone.View {
 
     verArchivo(event) {
         event.preventDefault();
-        var target = $(event.currentTarget);
+        const target = $(event.currentTarget);
         const filename = target.attr('data-href');
-        const _filepath = btoa('public/temp/' + filename);
-        $App.trigger('syncro', {
-            url: $App.kumbiaURL('principal/file_existe_global/' + _filepath),
-            callback: (resultado) => {
-                if (resultado) {
-                    if (resultado.success) {
-                        const url = ('../public/temp/' + filename).replace('//', '/');
-                        window.open($App.kumbiaURL(url), filename, 'width=900,height=750,toobal=no,statusbar=no,scrollbars=yes menuvar=yes');
-                    } else {
-                        Swal.fire({
-                            title: 'Notificación',
-                            text: 'El archivo no se logra localizar en el servidor',
-                            icon: 'warning',
-                            showConfirmButton: false,
-                            timer: 10000,
-                        });
-                    }
-                }
+
+        $.ajax({
+            url: $App.url('documentos/ver-pdf'),
+            method: 'POST',
+            data: { filename: filename },
+            xhrFields: {
+                responseType: 'blob',
+            },
+            beforeSend: (xhr) => {
+                const csrf = document.querySelector("[name='csrf-token']").getAttribute('content');
+                xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                xhr.setRequestHeader('X-CSRF-TOKEN', csrf);
+                xhr.setRequestHeader('Authorization', 'Bearer ' + csrf);
+            },
+            success: (data) => {
+                const url = URL.createObjectURL(data);
+                window.open(url, filename, 'width=900,height=750,toolbar=no,location=no,status=no,menubar=no,scrollbars=yes');
+            },
+            error: () => {
+                $App.trigger('alert:error', { message: 'No se pudo cargar el documento' });
             },
         });
     }

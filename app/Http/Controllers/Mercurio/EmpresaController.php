@@ -217,14 +217,19 @@ class EmpresaController extends ApplicationController
             ]);
             $mercurio37 = $guardarArchivoService->main();
 
-            return $this->renderObject([
+            $salida = [
                 'success' => true,
                 'msj' => 'Ok archivo procesado',
                 'data' => method_exists($mercurio37, 'getArray') ? $mercurio37->getArray() : null,
-            ]);
+            ];
         } catch (DebugException $e) {
-            return $this->renderObject(['success' => false, 'msj' => $e->getMessage()]);
+            $salida = [
+                'success' => false,
+                'msj' => $e->getMessage()
+            ];
         }
+
+        return $this->renderObject($salida);
     }
 
     /**
@@ -260,25 +265,40 @@ class EmpresaController extends ApplicationController
             $service = new EmpresaService();
             $service->enviarCaja(new SenderValidationCaja(), $id, $usuario);
 
-            return $this->renderObject(['success' => true, 'msj' => 'El envío de la solicitud se ha completado con éxito']);
+            $salida = [
+                'success' => true,
+                'msj' => 'El envío de la solicitud se ha completado con éxito'
+            ];
         } catch (DebugException $e) {
-            return $this->renderObject(['success' => false, 'msj' => $e->getMessage()]);
+            $salida = [
+                'success' => false,
+                'msj' => $e->getMessage()
+            ];
         }
+
+        return $this->renderObject($salida);
     }
 
     /**
      * GET /empresa/seguimiento/{id}
      */
-    public function seguimientoAction($id)
+    public function seguimientoAction(Request $request, Response $response, int $id)
     {
         $this->setResponse('ajax');
         try {
             $service = new EmpresaService();
             $out = $service->consultaSeguimiento($id);
-            return $this->renderObject(['success' => true, 'data' => $out]);
+            $salida = [
+                'success' => true,
+                'data' => $out
+            ];
         } catch (DebugException $e) {
-            return $this->renderObject(['success' => false, 'msj' => $e->getMessage()]);
+            $salida = [
+                'success' => false,
+                'msj' => $e->getMessage()
+            ];
         }
+        return $this->renderObject($salida);
     }
 
     public function paramsAction()

@@ -29,6 +29,7 @@ Route::post('/mercurio/valida_email', [LoginController::class, 'validaEmailActio
 Route::get('/mercurio/integracion_servicio', [LoginController::class, 'integracionServicioAction']);
 Route::get('/mercurio/guia_videos', [LoginController::class, 'guiaVideosAction']);
 Route::post('/mercurio/download_docs/{archivo}', [LoginController::class, 'downloadDocumentsAction']);
+Route::post('/mercurio/documentos/ver-pdf', [LoginController::class, 'showPdfAction'])->name('documentos.ver-pdf');
 
 # Principal
 Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
@@ -37,7 +38,8 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
     Route::get('mercurio/principal/dashboard_trabajador', [PrincipalController::class, 'dashboardTrabajadorAction'])->name('principal.dashboard_trabajador');
     Route::get('mercurio/principal/dashboard_empresa', [PrincipalController::class, 'dashboardEmpresaAction'])->name('principal.dashboard_empresa');
 
-    Route::post('mercurio/principal/file_existe_global', [PrincipalController::class, 'fileExisteGlobalAction']);
+    Route::post('mercurio/principal/file_existe_global/{filepath}', [PrincipalController::class, 'fileExisteGlobalAction']);
+
     Route::post('mercurio/principal/traer_aportes_empresa', [PrincipalController::class, 'traerAportesEmpresaAction']);
     Route::post('mercurio/principal/traer_giro_empresa', [PrincipalController::class, 'traerGiroEmpresaAction']);
     Route::post('mercurio/principal/traer_categorias_empresa', [PrincipalController::class, 'traerCategoriasEmpresaAction']);

@@ -25,8 +25,6 @@ class GuardarArchivoService
 
     public function main()
     {
-        $mercurio01 = Mercurio01::first();
-
         $time = strtotime('now');
         if (is_null($_FILES)) {
             throw new DebugException("Error no hay archivos disponibles en servidor", 301);
@@ -40,7 +38,7 @@ class GuardarArchivoService
         $name = $this->tipopc . "_" . $this->id . "_{$this->coddoc}_{$time}." . end($extension);
         $_FILES[$item]['name'] = $name;
 
-        $estado = $this->uploadFile($item, $mercurio01->path ?? base_path('storage/temp/'));
+        $estado = $this->uploadFile($item, 'temp/');
         if ($estado != false) {
             $mercurio37 = $this->salvarDatos($name);
         } else {
@@ -59,7 +57,11 @@ class GuardarArchivoService
             $name = $params;
             $fhash = null;
         }
-        $mercurio37 = (new Mercurio37)->findFirst("tipopc='{$this->tipopc}' and numero='{$this->id}' and coddoc='{$this->coddoc}'");
+        $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)
+            ->where('numero', $this->id)
+            ->where('coddoc', $this->coddoc)
+            ->first();
+
         if ($mercurio37) {
             $mercurio37->setArchivo($name);
             $mercurio37->setFhash($fhash);
@@ -76,40 +78,28 @@ class GuardarArchivoService
             throw new DebugException("Error al guardar el archivo", 301);
         }
 
-        $mercurio10 = $this->db->fetchOne("SELECT 
-            item, 
-            estado, 
-            campos_corregir 
-            FROM mercurio10 
-            WHERE numero='{$this->id}' AND 
-            tipopc='{$this->tipopc}' 
-            ORDER BY item DESC 
-            LIMIT 1;
-        ");
+        $mercurio10 = Mercurio10::where('numero', $this->id)
+            ->where('tipopc', $this->tipopc)
+            ->orderBy('item', 'desc')
+            ->first();
 
         if ($mercurio10) {
             //los campos devueltos se borran
-            if ($mercurio10['estado'] == 'D') {
-                $campos = $mercurio10['campos_corregir'];
-                $corregir = explode(";", $campos);
-                $nuevos = array();
-                foreach ($corregir as $row) {
-                    if (intval($row) != intval($this->coddoc)) {
-                        $nuevos[] = $row;
-                    }
-                }
+            if ($mercurio10->estado == 'D') {
+                $corregir = explode(";", $mercurio10->campos_corregir);
+                $nuevos = array_filter($corregir, function ($row) {
+                    return intval($row) != intval($this->coddoc);
+                });
                 $campos_corregir = (count($nuevos) > 0) ? implode(';', $nuevos) : "";
-                Mercurio10::where('numero', $this->id)
-                    ->where('tipopc', $this->tipopc)
-                    ->where('item', $mercurio10['item'])
-                    ->update(['campos_corregir' => $campos_corregir]);
+                $mercurio10->campos_corregir = $campos_corregir;
+                $mercurio10->save();
             }
         }
 
         return $mercurio37;
     }
 
-    function uploadFile($name, $dir)
+    function uploadFile($name, string|null $dir = null)
     {
         if (!isset($_FILES[$name])) {
             return false;
@@ -118,8 +108,8 @@ class GuardarArchivoService
         if ($_FILES[$name]) {
             ob_clean();
 
-            $dir = storage_path('temp') . '' . $dir;
-            return move_uploaded_file($_FILES[$name]['tmp_name'], htmlspecialchars("$dir/{$_FILES[$name]['name']}"));
+            $dir = storage_path($dir ?? 'temp/');
+            return move_uploaded_file($_FILES[$name]['tmp_name'], $dir . htmlspecialchars($_FILES[$name]['name']));
         } else {
             return false;
         }
