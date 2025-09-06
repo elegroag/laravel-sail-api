@@ -28,7 +28,10 @@ class EmpresaAdjuntoService
 
     private function initialize()
     {
-        $this->lfirma = (new Mercurio16)->findFirst("documento='{$this->request->getDocumento()}' AND coddoc='{$this->request->getCoddoc()}'");
+        $this->lfirma = Mercurio16::where('documento', $this->request->getDocumento())
+            ->where('coddoc', $this->request->getCoddoc())
+            ->first();
+
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
             array(
@@ -133,7 +136,7 @@ class EmpresaAdjuntoService
     function cifrarDocumento()
     {
         $cifrarDocumento = new CifrarDocumento();
-        $this->outPdf = $cifrarDocumento->cifrar(public_path('temp/' . $this->filename), $this->lfirma->getKeyprivate());
+        $this->outPdf = $cifrarDocumento->cifrar($this->filename, $this->lfirma->getKeyprivate());
         $this->fhash = $cifrarDocumento->getFhash();
     }
 

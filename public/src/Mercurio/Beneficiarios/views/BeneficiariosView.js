@@ -20,7 +20,7 @@ class BeneficiariosView extends Backbone.View {
         this.$el.html(template());
 
         this.trigger('load:table', {
-            url: this.model.tipo ? 'beneficiario/renderTable/' + this.model.tipo : 'beneficiario/renderTable',
+            url: this.model.tipo ? 'beneficiario/render_table/' + this.model.tipo : 'beneficiario/render_table',
             callback: (html) => {
                 this.$el.find('#consulta').html(html);
                 this.__initTable();

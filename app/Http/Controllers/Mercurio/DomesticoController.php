@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
@@ -27,7 +28,7 @@ class DomesticoController extends ApplicationController
     protected $tipo;
 
     public function __construct()
-    {   
+    {
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
@@ -84,7 +85,7 @@ class DomesticoController extends ApplicationController
     public function indexAction()
     {
         $help = "Esta opcion permite manejar los ";
-      
+
 
         $ps = Comman::Api();
         $ps->runCli(
@@ -121,8 +122,8 @@ class DomesticoController extends ApplicationController
             $_tipafi = array();
             foreach ($datos_captura['tipafi'] as $data) $_tipafi[$data['tipafi']] = $data['detalle'];
         }
-      
-       
+
+
 
         return view('mercurio.domestico.index', [
             "help" => $help,
@@ -171,7 +172,7 @@ class DomesticoController extends ApplicationController
             $id = $request->input('id');
             $mercurio40 = $this->Mercurio40->findFirst("id = '$id'");
             if ($mercurio40 == false) $mercurio40 = new Mercurio40();
-           
+
             $response = $mercurio40->getArray();
         } catch (DebugException $e) {
             $response = [
@@ -185,106 +186,105 @@ class DomesticoController extends ApplicationController
     public function guardarAction(Request $request)
     {
         try {
-                $generalService = new GeneralService();
-                $this->setResponse("ajax");
-                $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
-                $cedtra = $request->input('cedtra', "addslaches", "extraspaces", "striptags");
-                $tipdoc = $request->input('tipdoc', "addslaches", "alpha", "extraspaces", "striptags");
-                $priape = $request->input('priape', "addslaches", "extraspaces", "striptags");
-                $segape = $request->input('segape', "addslaches", "extraspaces", "striptags");
-                $prinom = $request->input('prinom', "addslaches", "extraspaces", "striptags");
-                $segnom = $request->input('segnom', "addslaches", "extraspaces", "striptags");
-                $fecnac = $request->input('fecnac', "addslaches", "extraspaces", "striptags");
-                $ciunac = $request->input('ciunac', "addslaches", "extraspaces", "striptags");
-                $sexo = $request->input('sexo', "addslaches", "extraspaces", "striptags");
-                $estciv = $request->input('estciv', "addslaches", "extraspaces", "striptags");
-                $cabhog = $request->input('cabhog', "addslaches", "extraspaces", "striptags");
-                $codciu = $request->input('codciu', "addslaches", "extraspaces", "striptags");
-                $codzon = $request->input('codzon', "addslaches", "extraspaces", "striptags");
-                $direccion = $request->input('direccion', "addslaches", "extraspaces", "striptags");
-                $barrio = $request->input('barrio', "addslaches", "extraspaces", "striptags");
-                $telefono = $request->input('telefono', "addslaches", "extraspaces", "striptags");
-                $celular = $request->input('celular', "addslaches", "extraspaces", "striptags");
-                $fax = $request->input('fax', "addslaches", "extraspaces", "striptags");
-                $email = $request->input('email', "addslaches", "extraspaces", "striptags");
-                $fecing = $request->input('fecing', "addslaches", "extraspaces", "striptags");
-                $salario = $request->input('salario', "addslaches", "extraspaces", "striptags");
-                $captra = $request->input('captra', "addslaches", "extraspaces", "striptags");
-                $tipdis = $request->input('tipdis', "addslaches", "extraspaces", "striptags");
-                $nivedu = $request->input('nivedu', "addslaches", "extraspaces", "striptags");
-                $rural = $request->input('rural', "addslaches", "extraspaces", "striptags");
-                $vivienda = $request->input('vivienda', "addslaches", "extraspaces", "striptags");
-                $tipafi = $request->input('tipafi', "addslaches", "extraspaces", "striptags");
-                $autoriza = $request->input('autoriza', "addslaches", "extraspaces", "striptags");
-                $calemp = $request->input('calemp', "addslaches", "extraspaces", "striptags");
-                $codact = $request->input('codact', "addslaches", "extraspaces", "striptags");
-                $modelos = array("Mercurio20", "Mercurio40");
-                #$Transaccion = parent::startTrans($modelos);
-                #$response = parent::startFunc();
-               
-                $id_log = $generalService->registrarLog(true, "Afiliacion Trabajador", "");
-                if ($id == "") {
-                    $mercurio40 = new Mercurio40();
-                    $mercurio40->setId(0);
-                    $mercurio40->setLog($id_log);
-                } else {
-                    $mercurio40 = $this->Mercurio40->findFirst("id = '$id'");
-                }
-                #$mercurio40->setTransaction($Transaccion);
-                $mercurio40->setCedtra($cedtra);
-                $mercurio40->setTipdoc($tipdoc);
-                $mercurio40->setPriape($priape);
-                $mercurio40->setSegape($segape);
-                $mercurio40->setPrinom($prinom);
-                $mercurio40->setSegnom($segnom);
-                $mercurio40->setFecnac($fecnac);
-                $mercurio40->setCiunac($ciunac);
-                $mercurio40->setSexo($sexo);
-                $mercurio40->setEstciv($estciv);
-                $mercurio40->setCabhog($cabhog);
-                $mercurio40->setCodciu($codciu);
-                $mercurio40->setCodzon($codzon);
-                $mercurio40->setDireccion($direccion);
-                $mercurio40->setBarrio($barrio);
-                $mercurio40->setTelefono($telefono);
-                $mercurio40->setCelular($celular);
-                $mercurio40->setFax($fax);
-                $mercurio40->setEmail($email);
-                $mercurio40->setFecing($fecing);
-                $mercurio40->setSalario($salario);
-                $mercurio40->setCaptra($captra);
-                $mercurio40->setTipdis($tipdis);
-                $mercurio40->setNivedu($nivedu);
-                $mercurio40->setRural($rural);
-                $mercurio40->setVivienda($vivienda);
-                $mercurio40->setTipafi($tipafi);
-                $mercurio40->setAutoriza($autoriza);
-                $mercurio40->setCalemp($calemp);
-                $mercurio40->setCodact($codact);
-                $mercurio40->setEstado("T");
+            $generalService = new GeneralService();
+            $this->setResponse("ajax");
+            $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
+            $cedtra = $request->input('cedtra', "addslaches", "extraspaces", "striptags");
+            $tipdoc = $request->input('tipdoc', "addslaches", "alpha", "extraspaces", "striptags");
+            $priape = $request->input('priape', "addslaches", "extraspaces", "striptags");
+            $segape = $request->input('segape', "addslaches", "extraspaces", "striptags");
+            $prinom = $request->input('prinom', "addslaches", "extraspaces", "striptags");
+            $segnom = $request->input('segnom', "addslaches", "extraspaces", "striptags");
+            $fecnac = $request->input('fecnac', "addslaches", "extraspaces", "striptags");
+            $ciunac = $request->input('ciunac', "addslaches", "extraspaces", "striptags");
+            $sexo = $request->input('sexo', "addslaches", "extraspaces", "striptags");
+            $estciv = $request->input('estciv', "addslaches", "extraspaces", "striptags");
+            $cabhog = $request->input('cabhog', "addslaches", "extraspaces", "striptags");
+            $codciu = $request->input('codciu', "addslaches", "extraspaces", "striptags");
+            $codzon = $request->input('codzon', "addslaches", "extraspaces", "striptags");
+            $direccion = $request->input('direccion', "addslaches", "extraspaces", "striptags");
+            $barrio = $request->input('barrio', "addslaches", "extraspaces", "striptags");
+            $telefono = $request->input('telefono', "addslaches", "extraspaces", "striptags");
+            $celular = $request->input('celular', "addslaches", "extraspaces", "striptags");
+            $fax = $request->input('fax', "addslaches", "extraspaces", "striptags");
+            $email = $request->input('email', "addslaches", "extraspaces", "striptags");
+            $fecing = $request->input('fecing', "addslaches", "extraspaces", "striptags");
+            $salario = $request->input('salario', "addslaches", "extraspaces", "striptags");
+            $captra = $request->input('captra', "addslaches", "extraspaces", "striptags");
+            $tipdis = $request->input('tipdis', "addslaches", "extraspaces", "striptags");
+            $nivedu = $request->input('nivedu', "addslaches", "extraspaces", "striptags");
+            $rural = $request->input('rural', "addslaches", "extraspaces", "striptags");
+            $vivienda = $request->input('vivienda', "addslaches", "extraspaces", "striptags");
+            $tipafi = $request->input('tipafi', "addslaches", "extraspaces", "striptags");
+            $autoriza = $request->input('autoriza', "addslaches", "extraspaces", "striptags");
+            $calemp = $request->input('calemp', "addslaches", "extraspaces", "striptags");
+            $codact = $request->input('codact', "addslaches", "extraspaces", "striptags");
+            $modelos = array("Mercurio20", "Mercurio40");
+            #$Transaccion = parent::startTrans($modelos);
+            #$response = parent::startFunc();
 
-                $asignarFuncionario = new AsignarFuncionario();
+            $id_log = $generalService->registrarLog(true, "Afiliacion Trabajador", "");
+            if ($id == "") {
+                $mercurio40 = new Mercurio40();
+                $mercurio40->setId(0);
+                $mercurio40->setLog($id_log);
+            } else {
+                $mercurio40 = $this->Mercurio40->findFirst("id = '$id'");
+            }
+            #$mercurio40->setTransaction($Transaccion);
+            $mercurio40->setCedtra($cedtra);
+            $mercurio40->setTipdoc($tipdoc);
+            $mercurio40->setPriape($priape);
+            $mercurio40->setSegape($segape);
+            $mercurio40->setPrinom($prinom);
+            $mercurio40->setSegnom($segnom);
+            $mercurio40->setFecnac($fecnac);
+            $mercurio40->setCiunac($ciunac);
+            $mercurio40->setSexo($sexo);
+            $mercurio40->setEstciv($estciv);
+            $mercurio40->setCabhog($cabhog);
+            $mercurio40->setCodciu($codciu);
+            $mercurio40->setCodzon($codzon);
+            $mercurio40->setDireccion($direccion);
+            $mercurio40->setBarrio($barrio);
+            $mercurio40->setTelefono($telefono);
+            $mercurio40->setCelular($celular);
+            $mercurio40->setFax($fax);
+            $mercurio40->setEmail($email);
+            $mercurio40->setFecing($fecing);
+            $mercurio40->setSalario($salario);
+            $mercurio40->setCaptra($captra);
+            $mercurio40->setTipdis($tipdis);
+            $mercurio40->setNivedu($nivedu);
+            $mercurio40->setRural($rural);
+            $mercurio40->setVivienda($vivienda);
+            $mercurio40->setTipafi($tipafi);
+            $mercurio40->setAutoriza($autoriza);
+            $mercurio40->setCalemp($calemp);
+            $mercurio40->setCodact($codact);
+            $mercurio40->setEstado("T");
 
-                $usuario = $asignarFuncionario->asignar($this->tipopc, parent::getActUser("codciu"));
-                if ($usuario == "") {
-                    $response = "No se puede realizar el registro,Comuniquese con la Atencion al cliente";
-                    return $this->renderObject($response);
-                }
+            $asignarFuncionario = new AsignarFuncionario();
 
-                $mercurio40->setUsuario($usuario);
-                $mercurio40->setTipo(parent::getActUser("tipo"));
-                $mercurio40->setCoddoc(parent::getActUser("coddoc"));
-                $mercurio40->setDocumento(parent::getActUser("documento"));
-                $mercurio40->save();
-                
-                # parent::finishTrans();
-                $response = "Creacion Con Exito";
-                return $this->renderText(json_encode($response));
-           
+            $usuario = $asignarFuncionario->asignar($this->tipopc, parent::getActUser("codciu"));
+            if ($usuario == "") {
+                $response = "No se puede realizar el registro,Comuniquese con la Atencion al cliente";
+                return $this->renderObject($response);
+            }
+
+            $mercurio40->setUsuario($usuario);
+            $mercurio40->setTipo(parent::getActUser("tipo"));
+            $mercurio40->setCoddoc(parent::getActUser("coddoc"));
+            $mercurio40->setDocumento(parent::getActUser("documento"));
+            $mercurio40->save();
+
+            # parent::finishTrans();
+            $response = "Creacion Con Exito";
+            return $this->renderText(json_encode($response));
         } catch (DebugException $e) {
             $response = [
                 'success' => false,
-                'error' => $e->getMessage() 
+                'error' => $e->getMessage()
             ];
         }
         return $this->renderObject($response);
@@ -297,11 +297,12 @@ class DomesticoController extends ApplicationController
             $cedtra = $request->input('cedtra');
             $l = $this->Mercurio40->count("*", "conditions: cedtra = '$cedtra' and estado in ('T','A','P')");
             if ($l > 0) {
-                throw new DebugException("La Conyuge ya se encuentra", 1);                
+                throw new DebugException("La Conyuge ya se encuentra", 1);
             }
 
             $response = [
-                'success' => true, 'msj' => 'Proceso completado con éxito.'
+                'success' => true,
+                'msj' => 'Proceso completado con éxito.'
             ];
         } catch (DebugException $e) {
             $response = [
@@ -377,73 +378,71 @@ class DomesticoController extends ApplicationController
     {
         try {
 
-                $this->setResponse("ajax");
-                $numero = $request->input('numero', "addslaches", "alpha", "extraspaces", "striptags");
-                $coddoc = $request->input('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
-                $modelos = array("mercurio37");
-                
-                
-                $mercurio01 = $this->Mercurio01->findFirst();
-                $mercurio37 = $this->Mercurio37->findFirst("tipopc='{$this->tipopc}' and numero='$numero' and coddoc='$coddoc'");
-                unlink($mercurio01->getPath() . $mercurio37->getArchivo());
-                
-                $this->Mercurio37->deleteAll("tipopc='{$this->tipopc}' and numero='$numero' and coddoc='$coddoc'");
-                
+            $this->setResponse("ajax");
+            $numero = $request->input('numero', "addslaches", "alpha", "extraspaces", "striptags");
+            $coddoc = $request->input('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
+            $modelos = array("mercurio37");
 
-                $response = [
-                    'success' => true,
-                    'msj' => "Se borro con Exito el archivo"
-                ];
+
+            $mercurio01 = $this->Mercurio01->findFirst();
+            $mercurio37 = $this->Mercurio37->findFirst("tipopc='{$this->tipopc}' and numero='$numero' and coddoc='$coddoc'");
+            unlink($mercurio01->getPath() . $mercurio37->getArchivo());
+
+            $this->Mercurio37->deleteAll("tipopc='{$this->tipopc}' and numero='$numero' and coddoc='$coddoc'");
+
+
+            $response = [
+                'success' => true,
+                'msj' => "Se borro con Exito el archivo"
+            ];
         } catch (DebugException $e) {
             $response = [
                 'success' => false,
-                'error'=> $e->getMessage()
+                'error' => $e->getMessage()
             ];
         }
         return $this->renderObject($response);
-
     }
 
     public function guardarArchivoAction(Request $request)
     {
         try {
-            
-                $this->setResponse("ajax");
-                $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
-                $coddoc = $request->input('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
-                $mercurio01 = $this->Mercurio01->findFirst();
-                $modelos = array("mercurio37");
-                #$Transaccion = parent::startTrans($modelos);
-                #$response = parent::startFunc();
-                $mercurio37 = new Mercurio37();
-                #$mercurio37->setTransaction($Transaccion);
-                $mercurio37->setTipopc($this->tipopc);
-                $mercurio37->setNumero($id);
-                $mercurio37->setCoddoc($coddoc);
-                $time = strtotime('now');
 
-                if (isset($_FILES['archivo_' . $coddoc]['name']) && $_FILES['archivo_' . $coddoc]['name'] != "") {
-                    $extension = explode(".", $_FILES['archivo_' . $coddoc]['name']);
-                    $name = $this->tipopc . "_" . $id . "_{$coddoc}_{$time}." . end($extension);
-                    $_FILES['archivo_' . $coddoc]['name'] = $name;
-                    #$estado = $this->uploadFile("archivo_" . $coddoc, $mercurio01->getPath());
-                    /* if ($estado != false) {
+            $this->setResponse("ajax");
+            $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
+            $coddoc = $request->input('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
+            $mercurio01 = $this->Mercurio01->findFirst();
+            $modelos = array("mercurio37");
+            #$Transaccion = parent::startTrans($modelos);
+            #$response = parent::startFunc();
+            $mercurio37 = new Mercurio37();
+            #$mercurio37->setTransaction($Transaccion);
+            $mercurio37->setTipopc($this->tipopc);
+            $mercurio37->setNumero($id);
+            $mercurio37->setCoddoc($coddoc);
+            $time = strtotime('now');
+
+            if (isset($_FILES['archivo_' . $coddoc]['name']) && $_FILES['archivo_' . $coddoc]['name'] != "") {
+                $extension = explode(".", $_FILES['archivo_' . $coddoc]['name']);
+                $name = $this->tipopc . "_" . $id . "_{$coddoc}_{$time}." . end($extension);
+                $_FILES['archivo_' . $coddoc]['name'] = $name;
+                #$estado = $this->uploadFile("archivo_" . $coddoc, $mercurio01->getPath());
+                /* if ($estado != false) {
 
                         $mercurio37->setArchivo($name);
-                        $mercurio37->save();                           
+                        $mercurio37->save();
                         $response = "Se adjunto con exito el archivo";
                     } else {
                         throw new DebugException("No se cargo: Tamano del archivo muy grande o No es Valido");
                     } */
-                } else {
-                    $response = "No se cargo el archivo";
-                }
-                
-                $response = [
-                    'success' => true,
-                    'msj' => $response
-                ];           
+            } else {
+                $response = "No se cargo el archivo";
+            }
 
+            $response = [
+                'success' => true,
+                'msj' => $response
+            ];
         } catch (DebugException $e) {
             $response = [
                 'success' => false,
@@ -460,7 +459,7 @@ class DomesticoController extends ApplicationController
             $this->setResponse("ajax");
             $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
             $today = Carbon::now();
-                            
+
             if ($this->Mercurio37->count("tipopc='$this->tipopc' and numero='$id' and coddoc in (select coddoc from mercurio13 where tipopc='{$this->tipopc}' and obliga='S')") < $this->Mercurio13->count("*", "conditions: tipopc='$this->tipopc' and obliga='S'")) {
                 $response = "Adjunte los archivos obligatorios";
                 return $this->renderText(json_encode($response));
@@ -475,9 +474,9 @@ class DomesticoController extends ApplicationController
             $mercurio10->setItem($item);
             $mercurio10->setEstado("P");
             $mercurio10->setNota("Envio a la Caja para Verificacion");
-            $mercurio10->setFecsis($today->getUsingFormatDefault());
+            $mercurio10->setFecsis($today->format('Y-m-d'));
             $mercurio10->save();
-    
+
             $response = "Se envio con Exito";
         } catch (DebugException $e) {
             $response = [
@@ -487,5 +486,4 @@ class DomesticoController extends ApplicationController
         }
         return $this->renderObject($response);
     }
-
 }

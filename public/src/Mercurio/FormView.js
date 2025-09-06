@@ -188,7 +188,7 @@ export class FormView extends Backbone.View {
             $('#show_modal_generic').html(view.render().el);
         } else {
             this.App.trigger('syncro', {
-                url: this.App.kumbiaURL('principal/listaAdress'),
+                url: this.App.kumbiaURL('principal/lista_adress'),
                 data: {},
                 silent: true,
                 callback: (response) => {
@@ -209,7 +209,7 @@ export class FormView extends Backbone.View {
 
     __renderDocumentos() {
         this.App.trigger('syncro', {
-            url: this.App.url('consultaDocumentos/' + this.model.get('id')),
+            url: this.App.url('consulta_documentos/' + this.model.get('id'), window.ServerController ?? 'empresa'),
             data: {},
             callback: (response) => {
                 if (response.success) {
@@ -236,7 +236,7 @@ export class FormView extends Backbone.View {
 
     __renderSeguimiento() {
         this.App.trigger('syncro', {
-            url: this.App.url('seguimiento/' + this.model.get('id')),
+            url: this.App.url('seguimiento/' + this.model.get('id'), window.ServerController ?? 'empresa'),
             data: {},
             callback: (response) => {
                 if (response.success) {

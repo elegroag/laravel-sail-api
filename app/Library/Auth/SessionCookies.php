@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Library\Auth;
 
 use App\Models\Adapter\DbBase;
@@ -46,16 +47,16 @@ class SessionCookies
 
         // Definimos una clave unificada 'user' y campos planos para compatibilidad
         $userData = [
-            'documento' => $usuario->documento,
-            'coddoc' => $usuario->coddoc,
-            'nombre' => $usuario->nombre,
-            'email' => $usuario->email,
+            'documento' => $usuario['documento'],
+            'coddoc' => $usuario['coddoc'],
+            'nombre' => $usuario['nombre'],
+            'email' => $usuario['email'],
             'ts' => time(),
         ];
 
         session()->regenerate();
         session()->put('user', $userData);
-        session()->put('tipo', $usuario->tipo);
+        session()->put('tipo', $usuario['tipo']);
         return true;
     }
 

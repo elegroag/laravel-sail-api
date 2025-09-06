@@ -20,7 +20,7 @@ class TrabajadoresView extends Backbone.View {
         this.$el.html(template());
 
         this.trigger('load:table', {
-            url: this.model['tipo'] ? 'trabajador/renderTable/' + this.model['tipo'] : 'trabajador/renderTable',
+            url: this.model['tipo'] ? 'trabajador/render_table/' + this.model['tipo'] : 'trabajador/render_table',
             callback: (html) => {
                 this.$el.find('#consulta').html(html);
                 this.__initTable();

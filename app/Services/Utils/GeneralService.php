@@ -7,7 +7,9 @@ use App\Models\Mercurio02;
 use App\Models\Mercurio04;
 use App\Models\Mercurio05;
 use App\Models\Mercurio08;
+use App\Models\Mercurio20;
 use App\Services\Api\PortalMercurio;
+use Carbon\Carbon;
 
 require_once "legacy/Excel/Main.php";
 
@@ -125,38 +127,33 @@ class GeneralService
 
     public function createReport($model, $_fields, $query = '1=1', $title = 'Reporte', $format = 'P')
     {
-        try {
-            $table = ucfirst($model);
-            $table = new $table();
-            $format = strtolower($format);
-            if ($format == 'p') {
-                $report = new UserReportPdf($title, $_fields);
-                $ext = ".pdf";
-            } elseif ($format == 'e') {
-                $report = new UserReportExcel($title, $_fields);
-                $ext = ".xls";
-            }
-            $report->startReport();
-            foreach ($table->find($query) as $mtable) {
-                foreach ($_fields as $key => $value) {
-                    $get = "get" . ucFirst($key) . "Detalle";
-                    if (method_exists($mtable, $get))
-                        $report->Put($key, $mtable->$get());
-                    else
-                        $report->Put($key, $mtable->readAttribute($key));
-                }
-                $report->OutputToReport();
-            }
-            $file = "public/temp/reportes/reportes" . $ext;
-            if ($format == "excel")
-                $report->FinishReport($file, "F");
-            else
-                $report->FinishReport($file, "D");
-            return $file;
-        } catch (exception $e) {
-            Debug::addVariable("a", print_r($e->getMessage(), true));
-            throw new DebugException(0);
+        $table = ucfirst($model);
+        $table = new $table();
+        $format = strtolower($format);
+        if ($format == 'p') {
+            $report = new UserReportPdf($title, $_fields);
+            $ext = ".pdf";
+        } elseif ($format == 'e') {
+            $report = new UserReportExcel($title, $_fields);
+            $ext = ".xls";
         }
+        $report->startReport();
+        foreach ($table->find($query) as $mtable) {
+            foreach ($_fields as $key => $value) {
+                $get = "get" . ucFirst($key) . "Detalle";
+                if (method_exists($mtable, $get))
+                    $report->Put($key, $mtable->$get());
+                else
+                    $report->Put($key, $mtable->readAttribute($key));
+            }
+            $report->OutputToReport();
+        }
+        $file = "public/temp/reportes/reportes" . $ext;
+        if ($format == "excel")
+            $report->FinishReport($file, "F");
+        else
+            $report->FinishReport($file, "D");
+        return $file;
     }
 
     /**
@@ -171,8 +168,7 @@ class GeneralService
      */
     public function webService($funcion, $params)
     {
-        $con = (object) CoreConfig::readFromActiveApplication('config.ini');
-        $portalMercurio =  new PortalMercurio($con->apisisu);
+        /* $portalMercurio =  new PortalMercurio();
         $portalMercurio->send(array(
             'servicio' => $funcion,
             'params' => $params
@@ -182,7 +178,7 @@ class GeneralService
             return $portalMercurio->toArray();
         } else {
             return false;
-        }
+        } */
     }
 
     public function sendEmail2($correo, $nombre = '', $asunto, $msj, $file = '')
@@ -388,7 +384,6 @@ class GeneralService
         $swift->send($message, $email, new Swift_Address($email_salida));
         return true;
     }
-
 
     public function consultaEmpresa($mercurio30)
     {
@@ -1921,8 +1916,8 @@ class GeneralService
 
     public function registrarLog($tx, $accion, $nota = "")
     {
-        $user = Auth::getActiveIdentity();
-        $tipo = $user['tipo'];
+        $user = session('user');
+        $tipo = session('tipo');
         $coddoc = $user['coddoc'];
         $documento = $user['documento'];
 
@@ -1930,9 +1925,8 @@ class GeneralService
             $modelos = array("mercurio20");
             $Transaccion = $this->startTrans($modelos);
         }
-        $today = new Date();
+        $today = Carbon::now();
         $mercurio20 = new Mercurio20();
-        if ($tx == true) $mercurio20->setTransaction($Transaccion);
 
         if ($tipo == "no_data") $tipo = "";
         if ($coddoc == "no_data") $coddoc = "";
@@ -1942,7 +1936,7 @@ class GeneralService
         $mercurio20->setCoddoc($coddoc);
         $mercurio20->setDocumento($documento);
         $mercurio20->setIp($_SERVER["REMOTE_ADDR"]);
-        $mercurio20->setFecha($today->getUsingFormatDefault());
+        $mercurio20->setFecha($today->format('Y-m-d'));
         $mercurio20->setHora(date("H:i"));
         $mercurio20->setAccion($accion);
         $mercurio20->setNota($nota);
@@ -1977,38 +1971,11 @@ class GeneralService
         return $usuario;
     }
 
-    /**
-     * startTrans function
-     * @changed [2023-12-00]
-     *
-     * @author elegroag <elegroag@ibero.edu.co>
-     * @param [type] $models
-     * @return ActiveRecordTransaction
-     */
-    function startTrans($models)
-    {
-        $this->setTransa();
-        if (is_array($models)) {
-            foreach ($models as $model) {
-                $entity = ucfirst($model);
-                $this->$entity->setTransaction(self::$transaction);
-            }
-        } else {
-            $entity = ucfirst($models);
-            $this->$entity->setTransaction(self::$transaction);
-        }
-        return self::$transaction;
-    }
+    function startTrans($models) {}
 
-    public function errorTrans($message = '',  $linea = '')
-    {
-        $this->closeTransa($message, $linea);
-    }
+    public function errorTrans($message = '',  $linea = '') {}
 
-    public function finishTrans()
-    {
-        $this->endTransa();
-    }
+    public function finishTrans() {}
 
     public function createReport2($model, $_fields, $title = 'Reporte', $format = 'P')
     {
@@ -2084,7 +2051,7 @@ class GeneralService
 
         foreach ($datosMer as $register) {
             foreach ($_fields as $key => $value) {
-                Debug::addVariable("keyvalue", $key);
+                dump("keyvalue", $key);
 
                 if (isset($register[$key])) {
                     if ($key == 'coddan') {

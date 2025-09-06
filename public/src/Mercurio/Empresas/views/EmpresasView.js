@@ -18,7 +18,7 @@ class EmpresasView extends Backbone.View {
     render() {
         const template = _.template(this.template);
         this.$el.html(template());
-        const url = this.model.tipo ? 'empresa/renderTable/' + this.model.tipo : 'empresa/renderTable';
+        const url = this.model.tipo ? 'empresa/render_table/' + this.model.tipo : 'empresa/render_table';
 
         this.trigger('load:table', {
             url,

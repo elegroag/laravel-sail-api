@@ -4,10 +4,10 @@ namespace App\Services\Formularios\Politica;
 
 use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsEmpresa;
-use App\Services\Formularios\DocumentoAdapter;
+use App\Services\Formularios\Documento;
 use Carbon\Carbon;
 
-class EmpresaDatosPersonales extends DocumentoAdapter
+class EmpresaDatosPersonales extends Documento
 {
 
     /**
@@ -80,7 +80,7 @@ class EmpresaDatosPersonales extends DocumentoAdapter
             array('lb' => 'Tipo documento representante', 'texto' => $this->empresa->getCoddocrepleg(), 'x' => 75, 'y' => 112),
             array('lb' => 'Documento representante', 'texto' => $this->empresa->getCedrep(), 'x' => 148, 'y' => 112),
             array('lb' => 'Ciudad', 'texto' => $ciudad, 'x' => 55, 'y' => 120),
-            array('lb' => 'Fecha', 'texto' => $today->getUsingFormatDefault(), 'x' => 148, 'y' => 120),
+            array('lb' => 'Fecha', 'texto' => $today->format('Y-m-d'), 'x' => 148, 'y' => 120),
             array('lb' => 'Dirección', 'texto' => $this->empresa->getDireccion(), 'x' => 75, 'y' => 130),
             array('lb' => 'Telefono', 'texto' => $this->empresa->getTelefono(), 'x' => 75, 'y' => 136),
             array('lb' => 'Celular', 'texto' => $this->empresa->getCelular(), 'x' => 148, 'y' => 136),

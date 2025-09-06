@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Services\FormulariosAdjuntos;
+
 use App\Library\Collections\ParamsPensionado;
 use App\Models\Mercurio16;
 use App\Models\Mercurio32;
@@ -118,7 +119,7 @@ class PensionadoAdjuntoService
     function cifrarDocumento()
     {
         $cifrarDocumento = new CifrarDocumento();
-        $this->outPdf = $cifrarDocumento->cifrar(public_path('temp/' . $this->filename), $this->lfirma->getKeyprivate());
+        $this->outPdf = $cifrarDocumento->cifrar($this->filename, $this->lfirma->getKeyprivate());
         $this->fhash = $cifrarDocumento->getFhash();
     }
 

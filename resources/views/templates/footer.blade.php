@@ -10,7 +10,7 @@
 
                 $db = DbBase::rawConnect();
                 $xhost =  $db->fetchOne("SELECT @@hostname AS hostname");
-                echo "<span style='margin:2px; margin-left: 10px; color:#444'>DB: {$xquery->database_name} - {$xhost->hostname}</span>";
+                echo "<span style='margin:2px; margin-left: 10px; color:#444'>DB: {$xquery['database_name']} - {$xhost['hostname']}</span>";
                 @endphp
                 MODO: {{ (env('APP_ENV') == 'development') ? 'Desarrollo' : 'Producción' }}
             </div>

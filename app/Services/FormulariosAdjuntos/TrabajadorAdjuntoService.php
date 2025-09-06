@@ -6,6 +6,7 @@ use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsEmpresa;
 use App\Models\Mercurio16;
 use App\Models\Mercurio30;
+use App\Models\Mercurio32;
 use App\Services\Formularios\FactoryDocuments;
 use App\Services\PreparaFormularios\CifrarDocumento;
 use App\Services\Utils\Comman;
@@ -38,9 +39,10 @@ class TrabajadorAdjuntoService
 
     public function initialize()
     {
-        $this->lfirma = (new Mercurio16)->findFirst(
-            "documento='{$this->request->getDocumento()}' AND coddoc='{$this->request->getCoddoc()}'"
-        );
+        $this->lfirma = Mercurio16::where([
+            'documento' => $this->request->getDocumento(),
+            'coddoc' => $this->request->getCoddoc()
+        ])->first();
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
@@ -112,11 +114,12 @@ class TrabajadorAdjuntoService
     {
         if (!$this->lfirma) throw new DebugException("Error no hay firma digital", 501);
 
-        $conyuge = (new Mercurio32)->findFirst(" documento='{$this->request->getDocumento()}' and " .
-            "coddoc='{$this->request->getCoddoc()}' and " .
-            "cedtra='{$this->request->getCedtra()}' and " .
-            "comper='S'
-        ");
+        $conyuge = Mercurio32::where([
+            'documento' => $this->request->getDocumento(),
+            'coddoc' => $this->request->getCoddoc(),
+            'cedtra' => $this->request->getCedtra(),
+            'comper' => 'S'
+        ])->first();
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
@@ -131,8 +134,7 @@ class TrabajadorAdjuntoService
 
         if ($procesadorComando->isJson() == false) throw new DebugException("Error al consultar la empresa", 501);
         $out = $procesadorComando->getObject();
-        $empresa = new Mercurio30();
-        $empresa->createAttributes($out->data);
+        $empresa = new Mercurio30($out->data);
 
         $this->filename = strtotime('now') . "_{$this->request->getCedtra()}.pdf";
         $fabrica = new FactoryDocuments();
@@ -156,7 +158,7 @@ class TrabajadorAdjuntoService
     function cifrarDocumento()
     {
         $cifrarDocumento = new CifrarDocumento();
-        $this->outPdf = $cifrarDocumento->cifrar(public_path('temp/' . $this->filename), $this->lfirma->getKeyprivate());
+        $this->outPdf = $cifrarDocumento->cifrar($this->filename, $this->lfirma->getKeyprivate());
         $this->fhash = $cifrarDocumento->getFhash();
     }
 

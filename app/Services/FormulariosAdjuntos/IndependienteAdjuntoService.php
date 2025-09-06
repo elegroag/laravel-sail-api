@@ -4,6 +4,7 @@ namespace App\Services\FormulariosAdjuntos;
 
 use App\Library\Collections\ParamsEmpresa;
 use App\Models\Mercurio16;
+use App\Models\Mercurio32;
 use App\Services\Formularios\FactoryDocuments;
 use App\Services\PreparaFormularios\CifrarDocumento;
 use App\Services\Utils\Comman;
@@ -24,7 +25,11 @@ class IndependienteAdjuntoService
 
     private function initialize()
     {
-        $this->lfirma = (new Mercurio16)->findFirst("documento='{$this->request->getDocumento()}' AND coddoc='{$this->request->getCoddoc()}'");
+        $this->lfirma = Mercurio16::where([
+            'documento' => $this->request->getDocumento(),
+            'coddoc' => $this->request->getCoddoc()
+        ])->first();
+
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
             array(
@@ -91,11 +96,12 @@ class IndependienteAdjuntoService
 
     public function formulario()
     {
-        $conyuge = (new Mercurio32)->findFirst(" documento='{$this->request->getDocumento()}' and " .
-            "coddoc='{$this->request->getCoddoc()}' and " .
-            "cedtra='{$this->request->getCedtra()}' and " .
-            "comper='S'
-        ");
+        $conyuge = Mercurio32::where([
+            'documento' => $this->request->getDocumento(),
+            'coddoc' => $this->request->getCoddoc(),
+            'cedtra' => $this->request->getCedtra(),
+            'comper' => 'S'
+        ])->first();
 
         $this->filename = "formulario_independiente_{$this->request->getCedtra()}.pdf";
         $fabrica = new FactoryDocuments();
@@ -116,7 +122,7 @@ class IndependienteAdjuntoService
     function cifrarDocumento()
     {
         $cifrarDocumento = new CifrarDocumento();
-        $this->outPdf = $cifrarDocumento->cifrar(public_path('temp/' . $this->filename), $this->lfirma->getKeyprivate());
+        $this->outPdf = $cifrarDocumento->cifrar($this->filename, $this->lfirma->getKeyprivate());
         $this->fhash = $cifrarDocumento->getFhash();
     }
 

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
@@ -141,7 +142,7 @@ class ConyugeController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function traerConyugueAction(Request $request )
+    public function traerConyugueAction(Request $request)
     {
         $this->setResponse("ajax");
         $cedcon = $request->input("cedcon");
@@ -262,17 +263,17 @@ class ConyugeController extends ApplicationController
         }
 
         foreach ($mercurio32 as $ai => $row) {
-            $rqs = $db->fetchOne("SELECT count(mercurio10.numero) as cantidad 
-                FROM mercurio10 
+            $rqs = $db->fetchOne("SELECT count(mercurio10.numero) as cantidad
+                FROM mercurio10
                 LEFT JOIN mercurio32 ON mercurio32.id=mercurio10.numero
-                WHERE mercurio10.tipopc='{$this->tipopc}' AND 
-                mercurio32.id ='{$row['id']}' 
+                WHERE mercurio10.tipopc='{$this->tipopc}' AND
+                mercurio32.id ='{$row['id']}'
             ");
-            $trayecto = $db->fetchOne("SELECT max(mercurio10.item), mercurio10.*  
-                FROM mercurio10 
+            $trayecto = $db->fetchOne("SELECT max(mercurio10.item), mercurio10.*
+                FROM mercurio10
                 LEFT JOIN mercurio32 ON mercurio32.id=mercurio10.numero
-                WHERE mercurio10.tipopc='{$this->tipopc}' AND 
-                mercurio32.id ='{$row['id']}' LIMIT 1 
+                WHERE mercurio10.tipopc='{$this->tipopc}' AND
+                mercurio32.id ='{$row['id']}' LIMIT 1
             ");
 
             $mercurio32[$ai] = $row;
@@ -305,10 +306,10 @@ class ConyugeController extends ApplicationController
     function serializeData(Request $request)
     {
         $asignarFuncionario = new AsignarFuncionario();
-        $usuario = $asignarFuncionario->asignar($this->tipopc, parent::getActUser("codciu"));
+        $usuario = $asignarFuncionario->asignar($this->tipopc, $request->input('codzon'));
         $fecsol = Carbon::now();
         return array(
-            'fecsol' => $fecsol->getUsingFormatDefault(),
+            'fecsol' => $fecsol->format('Y-m-d'),
             'cedtra' => $request->input('cedtra'),
             'cedcon' => $request->input('cedcon'),
             'tipdoc' => $request->input('tipdoc'),
@@ -336,7 +337,7 @@ class ConyugeController extends ApplicationController
             'autoriza' => $request->input('autoriza'),
             'numcue' => $request->input('numcue'),
             'tippag' => $request->input('tippag'),
-            'log' => parent::getActUser("documento"),
+            'log' => $this->user['documento'],
             'comper' => $request->input('comper'),
             'tiecon' => $request->input('tiecon'),
             'ciures' => $request->input('ciures'),
@@ -347,9 +348,9 @@ class ConyugeController extends ApplicationController
             'peretn' => $request->input('peretn'),
             'resguardo_id' => $request->input('resguardo_id'),
             'pub_indigena_id' => $request->input('pub_indigena_id'),
-            'tipo' => parent::getActUser("tipo"),
-            'coddoc' => parent::getActUser("coddoc"),
-            'documento' => parent::getActUser("documento"),
+            'tipo' => $this->tipo,
+            'coddoc' => $this->user['coddoc'],
+            'documento' => $this->user['documento'],
             'usuario' => $usuario
         );
     }
@@ -358,7 +359,7 @@ class ConyugeController extends ApplicationController
     {
         $this->setResponse("ajax");
         $conyugeService = new ConyugeService();
-        
+
         try {
             $id = $request->input('id');
             $params = $this->serializeData($request);
@@ -402,14 +403,13 @@ class ConyugeController extends ApplicationController
                 "success" => true,
                 "data" => $solicitud->getArray()
             );
-
         } catch (DebugException $erro) {
             //$conyugeService->closeTransa($erro->getMessage());
             $salida = [
                 'success' => false,
-                'error' => $erro->getMessage() 
+                'error' => $erro->getMessage()
             ];
-        }    
+        }
         return $this->renderObject($salida, false);
     }
 
@@ -657,7 +657,6 @@ class ConyugeController extends ApplicationController
                 "solicitud_previa" => ($solicitud_previa > 0) ? true : false,
                 "conyuge" => $conyuge
             );
-            
         } catch (DebugException $e) {
             $response = array(
                 "success" => false,

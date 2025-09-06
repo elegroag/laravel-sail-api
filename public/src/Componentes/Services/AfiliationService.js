@@ -47,7 +47,7 @@ class AfiliationService {
     serachRequestServer(transfer = {}) {
         const { id, callback } = transfer;
         $App.trigger('syncro', {
-            url: $App.url('searchRequest/' + id, window.ServerController ?? 'principal'),
+            url: $App.url('search_request/' + id, window.ServerController ?? 'principal'),
             data: {},
             callback: (response) => {
                 if (response) {
@@ -61,7 +61,7 @@ class AfiliationService {
     sendRadicado(transfer = {}) {
         const { model, callback } = transfer;
         $App.trigger('syncro', {
-            url: $App.url('enviarCaja', window.ServerController ?? 'principal'),
+            url: $App.url('enviar_caja', window.ServerController ?? 'principal'),
             data: model.toJSON(),
             callback: (response) => {
                 if (response) {

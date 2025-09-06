@@ -9,8 +9,13 @@ class CifrarDocumento
 
     private $fhash;
     private $algoritmo;
+    private $storagePath;
 
-    public function __construct() {}
+    public function __construct()
+    {
+        //set default storage path
+        $this->storagePath = storage_path('temp/');
+    }
 
     /**
      * Define o algoritmo de criptografia a ser utilizado.
@@ -20,6 +25,12 @@ class CifrarDocumento
     public function setAlgoritmo($algorithm)
     {
         $this->algoritmo = $algorithm;
+        return $this;
+    }
+
+    public function setStoragePath($storagePath)
+    {
+        $this->storagePath = $storagePath;
         return $this;
     }
 
@@ -33,7 +44,7 @@ class CifrarDocumento
      * @author elegroag <elegroag@ibero.edu.co>
      * @return string
      */
-    public function cifrar($pdf, $strClavePrivada)
+    public function cifrar($filename, $strClavePrivada)
     {
         if (!$this->algoritmo) $this->algoritmo = OPENSSL_ALGO_SHA256;
 
@@ -43,7 +54,7 @@ class CifrarDocumento
         }
 
         // Contenido del archivo PDF
-        $contenidoPDF = file_get_contents($pdf);
+        $contenidoPDF = file_get_contents($this->storagePath . $filename);
         // Cargar la clave privada
         $keyClavePrivada = openssl_pkey_get_private($strClavePrivada);
 
@@ -75,7 +86,7 @@ class CifrarDocumento
 
         // Guardar el archivo PDF con la firma digital
         $nombrePdf = strtoupper(uniqid('FSA')) . '.pdf';
-        $pathOut = storage_path('temp/' . $nombrePdf);
+        $pathOut = $this->storagePath . $nombrePdf;
 
         file_put_contents($pathOut, $contenidoPDFConFirma);
 
@@ -94,14 +105,14 @@ class CifrarDocumento
      * @param string $strClavePublica
      * @return int
      */
-    public function comprobar($pdf, $strClavePublica)
+    public function comprobar($filename, $strClavePublica)
     {
         if (!$this->algoritmo) $this->algoritmo = OPENSSL_ALGO_SHA256;
 
         $tamanioFirma = 256;
         // Leer el contenido del archivo PDF
 
-        $contenidoPDF = file_get_contents($pdf);
+        $contenidoPDF = file_get_contents($this->storagePath . $filename);
         // Extraer la firma digital incrustada (últimos bytes del archivo)
 
         $firmaDigital = substr($contenidoPDF, - ($tamanioFirma), $tamanioFirma);

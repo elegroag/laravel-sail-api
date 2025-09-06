@@ -35,7 +35,10 @@ class BeneficiarioAdjuntoService
 
     private function initialize()
     {
-        $this->lfirma = (new Mercurio16)->findFirst("documento='{$this->request->getDocumento()}' AND coddoc='{$this->request->getCoddoc()}'");
+        $this->lfirma = Mercurio16::where([
+            'documento' => $this->request->getDocumento(),
+            'coddoc' => $this->request->getCoddoc()
+        ])->first();
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
@@ -151,7 +154,12 @@ class BeneficiarioAdjuntoService
     {
         if (!$this->request->getCedcon()) return false;
 
-        $mconyuge = (new Mercurio32)->findFirst(" cedcon='{$this->request->getCedcon()}' AND documento='{$this->request->getDocumento()}' AND coddoc='{$this->request->getCoddoc()}'");
+        $mconyuge = Mercurio32::where([
+            'cedcon' => $this->request->getCedcon(),
+            'documento' => $this->request->getDocumento(),
+            'coddoc' => $this->request->getCoddoc()
+        ])->first();
+
         if (!$mconyuge) {
             $procesadorComando = Comman::Api();
             $procesadorComando->runCli(
@@ -193,7 +201,7 @@ class BeneficiarioAdjuntoService
     function cifrarDocumento()
     {
         $cifrarDocumento = new CifrarDocumento();
-        $this->outPdf = $cifrarDocumento->cifrar(storage_path('temp/' . $this->filename), $this->lfirma->getKeyprivate());
+        $this->outPdf = $cifrarDocumento->cifrar($this->filename, $this->lfirma->getKeyprivate());
         $this->fhash = $cifrarDocumento->getFhash();
     }
 

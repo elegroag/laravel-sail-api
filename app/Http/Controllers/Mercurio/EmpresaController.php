@@ -96,11 +96,11 @@ class EmpresaController extends ApplicationController
      * POST /empresa/guardar
      * Crea o actualiza la solicitud de afiliación de empresa
      */
-    public function guardarAction(Request $request)
+    public function guardarAction(Request $request, Response $response)
     {
         $service = new EmpresaService();
+        $this->db->begin();
         try {
-            $this->db->begin();
             $id = $request->input('id', null);
             $params = $request->all();
 
@@ -112,9 +112,10 @@ class EmpresaController extends ApplicationController
                 $empresa = $service->findById($id);
             }
 
-            if ($empresa) {
-                $service->addTrabajadoresNomina($request->input('tranoms'), $empresa->getId());
-            }
+            $service->addTrabajadoresNomina(
+                $request->input('tranoms'),
+                $empresa->getId()
+            );
 
             $empresaAdjuntoService = new EmpresaAdjuntoService($empresa);
             $out = $empresaAdjuntoService->formulario()->getResult();
@@ -126,7 +127,6 @@ class EmpresaController extends ApplicationController
                 )
             ))->salvarDatos($out);
 
-
             $out = $empresaAdjuntoService->tratamientoDatos()->getResult();
             (new GuardarArchivoService(
                 array(
@@ -135,7 +135,6 @@ class EmpresaController extends ApplicationController
                     'id' => $empresa->getId()
                 )
             ))->salvarDatos($out);
-
 
             $out = $empresaAdjuntoService->cartaSolicitud()->getResult();
             (new GuardarArchivoService(
@@ -157,11 +156,11 @@ class EmpresaController extends ApplicationController
 
             ob_end_clean();
 
-            $salida = array(
+            $salida = [
                 'success' => true,
                 'msj' => 'Registro completado con éxito',
                 'data' => $empresa->toArray()
-            );
+            ];
 
             $this->db->commit();
         } catch (DebugException $e) {
@@ -196,7 +195,7 @@ class EmpresaController extends ApplicationController
             }
 
             return $this->renderObject(['success' => true, 'msj' => 'El archivo se borro de forma correcta']);
-        } catch (\Exception $e) {
+        } catch (DebugException $e) {
             return $this->renderObject(['success' => false, 'msj' => $e->getMessage()]);
         }
     }
@@ -223,7 +222,7 @@ class EmpresaController extends ApplicationController
                 'msj' => 'Ok archivo procesado',
                 'data' => method_exists($mercurio37, 'getArray') ? $mercurio37->getArray() : null,
             ]);
-        } catch (\Exception $e) {
+        } catch (DebugException $e) {
             return $this->renderObject(['success' => false, 'msj' => $e->getMessage()]);
         }
     }
@@ -240,7 +239,7 @@ class EmpresaController extends ApplicationController
             if (!$solicitud) throw new DebugException('No existe la solicitud', 404);
             $data = $service->dataArchivosRequeridos($solicitud);
             return $this->renderObject(['success' => true, 'data' => $data]);
-        } catch (\Exception $e) {
+        } catch (DebugException $e) {
             return $this->renderObject(['success' => false, 'msj' => $e->getMessage()]);
         }
     }
@@ -262,7 +261,7 @@ class EmpresaController extends ApplicationController
             $service->enviarCaja(new SenderValidationCaja(), $id, $usuario);
 
             return $this->renderObject(['success' => true, 'msj' => 'El envío de la solicitud se ha completado con éxito']);
-        } catch (\Exception $e) {
+        } catch (DebugException $e) {
             return $this->renderObject(['success' => false, 'msj' => $e->getMessage()]);
         }
     }
@@ -277,7 +276,7 @@ class EmpresaController extends ApplicationController
             $service = new EmpresaService();
             $out = $service->consultaSeguimiento($id);
             return $this->renderObject(['success' => true, 'data' => $out]);
-        } catch (\Exception $e) {
+        } catch (DebugException $e) {
             return $this->renderObject(['success' => false, 'msj' => $e->getMessage()]);
         }
     }
@@ -432,7 +431,7 @@ class EmpresaController extends ApplicationController
     /**
      * GET /empresa/search_request/{id}
      */
-    public function searchRequestAction(Request $request, Response $response, $id)
+    public function searchRequestAction(Request $request, Response $response, int $id)
     {
         $this->setResponse('ajax');
         try {

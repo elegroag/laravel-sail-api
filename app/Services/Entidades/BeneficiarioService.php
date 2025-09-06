@@ -147,65 +147,6 @@ class BeneficiarioService
     }
 
     /**
-     * loadDisplay function
-     * @param Mercurio34 $solicitud
-     * @return void
-     */
-    public function loadDisplay($solicitud)
-    {
-        /* Tag::displayTo("cedtra", $solicitud->getCedtra());
-        Tag::displayTo("tipdoc", $solicitud->getTipdoc());
-        Tag::displayTo("nit", $solicitud->getNit());
-        Tag::displayTo("telefono", $solicitud->getTelefono());
-        Tag::displayTo("celular", $solicitud->getCelular());
-        Tag::displayTo("email", $solicitud->getEmail());
-        Tag::displayTo("prinom", $solicitud->getPrinom());
-        Tag::displayTo("segnom", $solicitud->getSegnom());
-        Tag::displayTo("priape", $solicitud->getPriape());
-        Tag::displayTo("segape", $solicitud->getSegape());
-        Tag::displayTo("razsoc", $solicitud->getRazsoc());
-        Tag::displayTo("direccion", $solicitud->getDireccion());
-        Tag::displayTo("sexo", $solicitud->getSexo());
-        Tag::displayTo("codciu", $solicitud->getCodciu());
-        Tag::displayTo("codzon", $solicitud->getCodzon());
-        Tag::displayTo("ciunac", $solicitud->getCiunac());
-        Tag::displayTo("orisex", (!$solicitud->getOrisex()) ? '1' : $solicitud->getOrisex());
-        Tag::displayTo("estciv", (!$solicitud->getEstciv()) ? '1' : $solicitud->getEstciv());
-        Tag::displayTo("cabhog", (!$solicitud->getcabhog()) ? 'N' :  $solicitud->getcabhog());
-        Tag::displayTo("barrio", $solicitud->getBarrio());
-        Tag::displayTo("salario", $solicitud->getSalario());
-        Tag::displayTo("tipsal", $solicitud->getTipsal());
-        Tag::displayTo("captra", (!$solicitud->getCaptra()) ? 'N' : $solicitud->getCaptra());
-        Tag::displayTo("tipdis", (!$solicitud->getTipdis()) ? '00' : $solicitud->getTipdis());
-        Tag::displayTo("nivedu", $solicitud->getNivedu());
-        Tag::displayTo("rural", $solicitud->getRural());
-        Tag::displayTo("horas", (!$solicitud->getHoras()) ? '240' : $solicitud->getHoras());
-        Tag::displayTo("tipcon", $solicitud->getTipcon());
-        Tag::displayTo("trasin", (!$solicitud->getTrasin()) ? 'N' : $solicitud->getTrasin());
-        Tag::displayTo("vivienda", $solicitud->getVivienda());
-        Tag::displayTo("tipafi", (!$solicitud->getTipafi()) ? '1' : $solicitud->getTipafi());
-        Tag::displayTo("profesion", $solicitud->getProfesion());
-        Tag::displayTo("cargo", $solicitud->getCargo());
-        Tag::displayTo("autoriza", (!$solicitud->getAutoriza()) ? 'S' : $solicitud->getAutoriza());
-        Tag::displayTo("usuario", $solicitud->getUsuario());
-        Tag::displayTo("facvul", (!$solicitud->getFacvul()) ? '12' : $solicitud->getFacvul());
-        Tag::displayTo("peretn", (!$solicitud->getPeretn()) ? '7' : $solicitud->getPeretn());
-        Tag::displayTo("dirlab", $solicitud->getDirlab());
-        Tag::displayTo("ciulab", $solicitud->getCiulab());
-        Tag::displayTo("ruralt", $solicitud->getRuralt());
-        Tag::displayTo("comision", (!$solicitud->getComision()) ? 'N' : $solicitud->getComision());
-        Tag::displayTo("tipjor", (!$solicitud->getTipjor()) ? 'C' : $solicitud->getTipjor());
-        Tag::displayTo("codsuc", $solicitud->getCodsuc());
-        Tag::displayTo("tippag", $solicitud->getTippag());
-        Tag::displayTo("numcue", $solicitud->getNumcue());
-        Tag::displayTo("fecnac", ($solicitud->getFecnac() instanceof Date) ? $solicitud->getFecnac()->getUsingFormatDefault() : '');
-        Tag::displayTo("fecing", ($solicitud->getFecing() instanceof Date) ? $solicitud->getFecing()->getUsingFormatDefault() : '');
-        Tag::displayTo("labora_otra_empresa",  $solicitud->getOtraEmpresa());
-        Tag::displayTo("pub_indigena_id",  $solicitud->getPubIndigenaId());
-        Tag::displayTo("resguardo_id",  $solicitud->getResguardoId()); */
-    }
-
-    /**
      * loadDisplaySubsidio function
      * @param array $trabajador
      * @return void

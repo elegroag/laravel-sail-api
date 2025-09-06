@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services\Formularios;
 
 use App\Exceptions\DebugException;
@@ -41,7 +42,7 @@ abstract class Documento
 
         $background = $this->request->getParam('background');
         if ($background) {
-            KumbiaPDF::setBackgroundImage(storage_path('public/' . $background));
+            KumbiaPDF::setBackgroundImage(public_path('public/files/' . $background));
         }
 
         $rfirma = $this->request->getParam('rfirma');

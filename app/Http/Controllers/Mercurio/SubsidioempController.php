@@ -1,11 +1,23 @@
 <?php
+
 namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Auth\AuthJwt;
 use App\Library\Auth\SessionCookies;
+use App\Library\Collections\ParamsBeneficiario;
+use App\Library\Collections\ParamsConyuge;
+use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio10;
+use App\Models\Mercurio33;
+use App\Models\Mercurio35;
+use App\Services\Utils\AsignarFuncionario;
+use App\Services\Utils\Comman;
+use App\Services\Utils\GeneralService;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class SubsidioempController extends ApplicationController
 {
@@ -15,28 +27,22 @@ class SubsidioempController extends ApplicationController
     protected $tipo;
 
     public function __construct()
-    {   
+    {
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
     public function indexAction()
     {
-        $this->setParamToView("title", "Subsidio Empresa");
+        return view("mercurio/subsidioemp/index", [
+            "title" => "Subsidio Empresa"
+        ]);
     }
 
-    public function beforeFilter()
-    {
-        parent::beforeFilter();
-        
-    }
 
     public function historialAction()
     {
-        $this->setParamToView("hide_header", true);
-        $this->setParamToView("help", false);
-        $this->setParamToView("title", "Historial");
-        Tag::setDocumentTitle('Historial');
+
         $mercurio31 = $this->Mercurio31->find("nit='" . parent::getActUser("documento") . "'", "order: id DESC");
         $mercurio33 = $this->Mercurio33->find("tipo='" . parent::getActUser("tipo") . "' and coddoc='" . parent::getActUser("coddoc") . "' and documento='" . parent::getActUser("documento") . "'", "order: id DESC");
         $mercurio35 = $this->Mercurio35->find("nit='" . parent::getActUser("documento") . "'", "order: id DESC");
@@ -208,22 +214,28 @@ class SubsidioempController extends ApplicationController
         $actualizacion_basico .= "</tbody>";
         $actualizacion_basico .= "</table>";
 
-        $this->setParamToView("html_afiliacion", $html_afiliacion);
-        $this->setParamToView("html_retiro", $html_retiro);
-        $this->setParamToView("html_afiliacion_beneficiario", $html_afiliacion_beneficiario);
-        $this->setParamToView("html_afiliacion_conyuge", $html_afiliacion_conyuge);
-        $this->setParamToView("actualizacion_basico", $actualizacion_basico);
+        return view("mercurio/subsidioemp/historial", [
+            "hide_header" => true,
+            "help" => false,
+            "title" => "Historial",
+            "html_afiliacion" => $html_afiliacion,
+            "html_retiro" => $html_retiro,
+            "html_afiliacion_beneficiario" => $html_afiliacion_beneficiario,
+            "html_afiliacion_conyuge" => $html_afiliacion_conyuge,
+            "actualizacion_basico" => $actualizacion_basico
+        ]);
     }
 
     public function consulta_trabajadores_viewAction()
     {
-        $this->setParamToView("hide_header", true);
-        $this->setParamToView("help", false);
-        $this->setParamToView("title", "Consulta Trabajadores");
-        Tag::setDocumentTitle('Consulta Trabajadores');
+        return view("mercurio/subsidioemp/consulta_trabajadores", [
+            "hide_header" => true,
+            "help" => false,
+            "title" => "Consulta Trabajadores"
+        ]);
     }
 
-    public function consulta_trabajadoresAction()
+    public function consulta_trabajadoresAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
@@ -245,9 +257,10 @@ class SubsidioempController extends ApplicationController
 
             $out = $ps->toArray();
             if (!$out['success'] || count($out['data']) == 0) {
-                throw new Exception("Error no hay respuesta del servidor SISU", 501);
+                throw new DebugException("Error no hay respuesta del servidor SISU", 501);
             }
-            $html = View::render('subsidioemp/tmp/tmp_afiliados', array('trabajadores' => $out['data']));
+
+            $html = view('subsidioemp/tmp/tmp_afiliados', array('trabajadores' => $out['data']))->render();
             $response = array(
                 'flag' => true,
                 'success' => true,
@@ -264,17 +277,18 @@ class SubsidioempController extends ApplicationController
 
     public function consulta_giro_viewAction()
     {
-        $this->setParamToView("hide_header", true);
-        $this->setParamToView("help", false);
-        $this->setParamToView("title", "Consulta Giro");
-        Tag::setDocumentTitle('Consulta Giro');
+        return view("mercurio/subsidioemp/consulta_giro", [
+            "hide_header" => true,
+            "help" => false,
+            "title" => "Consulta Giro"
+        ]);
     }
 
-    public function consulta_giroAction()
+    public function consulta_giroAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
-            $nit = parent::getActUser("documento");
+            $nit = $this->user['documento'];
             $perini = $request->input('perini');
             $perfin = $request->input('perfin');
 
@@ -316,13 +330,14 @@ class SubsidioempController extends ApplicationController
 
     public function consulta_nomina_viewAction()
     {
-        $this->setParamToView("hide_header", true);
-        $this->setParamToView("help", false);
-        $this->setParamToView("title", "Consulta Nomina");
-        Tag::setDocumentTitle('Consulta Nomina');
+        return view("mercurio/subsidioemp/consulta_nomina", [
+            "hide_header" => true,
+            "help" => false,
+            "title" => "Consulta Nomina"
+        ]);
     }
 
-    public function consulta_nominaAction()
+    public function consulta_nominaAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
@@ -343,16 +358,16 @@ class SubsidioempController extends ApplicationController
 
             $out = $ps->toArray();
             if (!$out['success'] || count($out['data']) == 0) {
-                throw new Exception("Error no hay respuesta del servidor SISU", 501);
+                throw new DebugException("Error no hay respuesta del servidor SISU", 501);
             }
 
-            $html = View::render('subsidioemp/tmp/tmp_nomina', array('nominas' => $out['data']));
+            $html = view('subsidioemp/tmp/tmp_nomina', array('nominas' => $out['data']))->render();
             $response = array(
                 'flag' => true,
                 'success' => true,
                 'data' => $html
             );
-        } catch (DbException $e) {
+        } catch (DebugException $e) {
             $response = array(
                 'success' => false,
                 'msj' => $e->getMessage() . ' ' . $e->getLine()
@@ -363,13 +378,14 @@ class SubsidioempController extends ApplicationController
 
     public function consulta_aportes_viewAction()
     {
-        $this->setParamToView("hide_header", true);
-        $this->setParamToView("help", false);
-        $this->setParamToView("title", "Consulta Aportes");
-        Tag::setDocumentTitle('Consulta Aportes');
+        return view("mercurio/subsidioemp/consulta_aportes", [
+            "hide_header" => true,
+            "help" => false,
+            "title" => "Consulta Aportes"
+        ]);
     }
 
-    public function consulta_aportesAction()
+    public function consulta_aportesAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
@@ -393,16 +409,16 @@ class SubsidioempController extends ApplicationController
 
             $out = $ps->toArray();
             if (!$out['success'] || count($out['data']) == 0) {
-                throw new Exception("Error no hay respuesta del servidor SISU", 501);
+                throw new DebugException("Error no hay respuesta del servidor SISU", 501);
             }
 
-            $html = View::render('subsidioemp/tmp/tmp_aportes', array('aportes' => $out['data']));
+            $html = view('subsidioemp/tmp/tmp_aportes', array('aportes' => $out['data']))->render();
             $response = array(
                 'flag' => true,
                 'success' => true,
                 'data' => $html
             );
-        } catch (DbException $e) {
+        } catch (DebugException $e) {
             $response = array(
                 'success' => false,
                 'msj' => $e->getMessage() . ' ' . $e->getLine()
@@ -413,10 +429,11 @@ class SubsidioempController extends ApplicationController
 
     public function consulta_mora_presuntaAction()
     {
-        $this->setParamToView("hide_header", true);
-        $this->setParamToView("help", false);
-        $this->setParamToView("title", "Consulta Mora Presunta");
-        Tag::setDocumentTitle('Consulta Mora Presunta');
+        return view("mercurio/subsidioemp/consulta_mora_presunta", [
+            "hide_header" => true,
+            "help" => false,
+            "title" => "Consulta Mora Presunta"
+        ]);
     }
 
     public function mora_presuntaAction()
@@ -480,10 +497,6 @@ class SubsidioempController extends ApplicationController
 
     public function novedad_retiro_viewAction()
     {
-        $this->setParamToView("hide_header", true);
-        $this->setParamToView("help", false);
-        $this->setParamToView("title", "Novedad Retiro");
-        Tag::setDocumentTitle('Novedad Retiro');
 
         $ps = Comman::Api();
         $ps->runCli(
@@ -502,13 +515,17 @@ class SubsidioempController extends ApplicationController
         foreach ($out['data'] as $mcodest) {
             $_codest[$mcodest['codest']] = $mcodest['detalle'];
         }
-        $this->setParamToView("codest", $_codest);
+        return view("mercurio/subsidioemp/novedad_retiro", [
+            "hide_header" => true,
+            "help" => false,
+            "title" => "Novedad Retiro",
+            "codest" => $_codest
+        ]);
     }
 
-    public function buscar_trabajadorAction()
+    public function buscar_trabajadorAction(Request $request)
     {
         try {
-            $this->setResponse("ajax");
             $cedtra = $request->input("cedtra");
 
             $ps = Comman::Api();
@@ -540,105 +557,99 @@ class SubsidioempController extends ApplicationController
         }
     }
 
-    public function novedad_retiroAction()
+    public function novedad_retiroAction(Request $request)
     {
         try {
-            try {
-                $this->setResponse("ajax");
-                $cedtra = $request->input('cedtra', "addslaches", "alpha", "extraspaces", "striptags");
-                $nombre = $request->input('nombre', "addslaches", "alpha", "extraspaces", "striptags");
-                $codest = $request->input('codest', "addslaches", "alpha", "extraspaces", "striptags");
-                $fecafi = $request->input('fecafi', "addslaches", "extraspaces", "striptags");
-                $fecret = $request->input('fecret', "addslaches", "extraspaces", "striptags");
-                $nota = $request->input('nota', "addslaches", "alpha", "extraspaces", "striptags");
-                $today = new Date();
 
-                if (Date::compareDates($fecafi, $fecret) > 0) {
-                    $response = parent::errorFunc("La fecha de retiro no puede ser menor a la de afiliacion");
-                    return $this->renderText(json_encode($response));
-                }
-                if (Date::compareDates($fecret, $today) > 0) {
-                    $response = parent::errorFunc("La fecha de retiro no puede ser mayor a la de hoy");
-                    return $this->renderText(json_encode($response));
-                }
-                $today = new Date();
-                $modelos = array("mercurio08", "mercurio10", "mercurio20", "Mercurio35");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
-                $generalService = new GeneralService();
-                $id_log = $generalService->registrarLog(true, "retiro trabajador", "");
-                $mercurio35 = new Mercurio35();
-                $mercurio35->setTransaction($Transaccion);
-                $mercurio35->setId(0);
-                $mercurio35->setLog($id_log);
-                $mercurio35->setNit(parent::getActUser("documento"));
-                $mercurio35->setTipdoc(parent::getActUser("coddoc"));
-                $mercurio35->setCedtra($cedtra);
-                $mercurio35->setNomtra($nombre);
-                $mercurio35->setCodest($codest);
-                $mercurio35->setFecret($fecret);
-                $mercurio35->setNota($nota);
-                $mercurio35->setEstado("P");
-                $asignarFuncionario = new AsignarFuncionario();
-                $usuario = $asignarFuncionario->asignar("7", parent::getActUser("codciu"));
-                if ($usuario == "") {
-                    $response = parent::errorFunc("No se puede realizar el registro,Comuniquese con la Atencion al cliente");
-                    return $this->renderText(json_encode($response));
-                }
-                $mercurio35->setUsuario($usuario);
-                $mercurio35->setTipo(parent::getActUser("tipo"));
-                $mercurio35->setCoddoc(parent::getActUser("coddoc"));
-                $mercurio35->setDocumento(parent::getActUser("documento"));
-                $mercurio01 = $this->Mercurio01->findFirst();
+            $this->setResponse("ajax");
+            $cedtra = $request->input('cedtra', "addslaches", "alpha", "extraspaces", "striptags");
+            $nombre = $request->input('nombre', "addslaches", "alpha", "extraspaces", "striptags");
+            $codest = $request->input('codest', "addslaches", "alpha", "extraspaces", "striptags");
+            $fecafi = $request->input('fecafi', "addslaches", "extraspaces", "striptags");
+            $fecret = $request->input('fecret', "addslaches", "extraspaces", "striptags");
+            $nota = $request->input('nota', "addslaches", "alpha", "extraspaces", "striptags");
+            $today = Carbon::now();
 
-                if (isset($_FILES['archivo']['name']) && $_FILES['archivo']['name'] != "") {
-                    $extension = explode(".", $_FILES['archivo']['name']);
-                    $name = "{$mercurio35->getNit()}_{$mercurio35->getCedtra()}_{$id_log}_retiro." . end($extension);
-                    $_FILES['archivo']['name'] = $name;
-                    $estado = $this->uploadFile("archivo", $mercurio01->getPath());
-                    if ($estado != false) {
-                        $mercurio35->setArchivo($name);
-                        if (!$mercurio35->save()) {
-                            parent::setLogger($mercurio35->getMessages());
-                            parent::ErrorTrans();
-                        }
-                        $item = $this->Mercurio10->maximum("item", "conditions: tipopc = '7' and numero='{$mercurio35->getId()}'") + 1;
-                        $mercurio10 = new Mercurio10();
-                        $mercurio10->setTransaction($Transaccion);
-                        $mercurio10->setTipopc("7");
-                        $mercurio10->setNumero($mercurio35->getId());
-                        $mercurio10->setItem($item);
-                        $mercurio10->setEstado("P");
-                        $mercurio10->setNota("Envio a la Caja para Verificacion");
-                        $mercurio10->setFecsis($today->getUsingFormatDefault());
-                        if (!$mercurio10->save()) {
-                            parent::setLogger($mercurio10->getMessages());
-                            parent::ErrorTrans();
-                        }
-                        $response = parent::successFunc("Se adjunto con exito el archivo");
-                    } else {
-                        $response = parent::errorFunc("No se cargo: Tamano del archivo muy grande o No es Valido");
-                    }
-                } else {
-                    $response = parent::errorFunc("No se cargo el archivo");
-                }
-                $asunto = "Retiro Trabajador";
-                $msj  = "acabas de utilizar nuestra opcion de retirar un trabajador. Nuestro Equipo revisara la novedad";
-                $generalService = new GeneralService();
-                $generalService->sendEmail(parent::getActUser("email"), parent::getActUser("nombre"), $asunto, $msj, "");
-
-                parent::finishTrans();
-                return $this->renderText(json_encode($response));
-            } catch (DbException $e) {
-                return $this->renderText(
-                    json_encode(array('success' => false, 'msj' => $e->getMessage()))
-                );
+            if (Carbon::compareDates($fecafi, $fecret) > 0) {
+                $response = "La fecha de retiro no puede ser menor a la de afiliacion";
+                return $this->renderObject($response);
             }
-        } catch (TransactionFailed $e) {
-            return $this->renderText(
-                json_encode(array('success' => false, 'msj' => $e->getMessage()))
-            );
+            if (Carbon::compareDates($fecret, $today) > 0) {
+                $response = "La fecha de retiro no puede ser mayor a la de hoy";
+                return $this->renderObject($response);
+            }
+            $today = Carbon::now();
+            $modelos = array("mercurio08", "mercurio10", "mercurio20", "Mercurio35");
+            #$Transaccion = parent::startTrans($modelos);
+            #$response = parent::startFunc();
+            $generalService = new GeneralService();
+            $id_log = $generalService->registrarLog(true, "retiro trabajador", "");
+            $mercurio35 = new Mercurio35();
+            #$mercurio35->setTransaction($Transaccion);
+            $mercurio35->setId(0);
+            $mercurio35->setLog($id_log);
+            $mercurio35->setNit(parent::getActUser("documento"));
+            $mercurio35->setTipdoc(parent::getActUser("coddoc"));
+            $mercurio35->setCedtra($cedtra);
+            $mercurio35->setNomtra($nombre);
+            $mercurio35->setCodest($codest);
+            $mercurio35->setFecret($fecret);
+            $mercurio35->setNota($nota);
+            $mercurio35->setEstado("P");
+            $asignarFuncionario = new AsignarFuncionario();
+            $usuario = $asignarFuncionario->asignar("7", parent::getActUser("codciu"));
+
+            if ($usuario == "") {
+                $response = "No se puede realizar el registro,Comuniquese con la Atencion al cliente";
+                return $this->renderObject($response);
+            }
+            $mercurio35->setUsuario($usuario);
+            $mercurio35->setTipo(parent::getActUser("tipo"));
+            $mercurio35->setCoddoc(parent::getActUser("coddoc"));
+            $mercurio35->setDocumento(parent::getActUser("documento"));
+            $mercurio01 = $this->Mercurio01->findFirst();
+
+            if (isset($_FILES['archivo']['name']) && $_FILES['archivo']['name'] != "") {
+                $extension = explode(".", $_FILES['archivo']['name']);
+                $name = "{$mercurio35->getNit()}_{$mercurio35->getCedtra()}_{$id_log}_retiro." . end($extension);
+                $_FILES['archivo']['name'] = $name;
+
+                $estado = UploadFile::upload("archivo", $mercurio01->getPath());
+                if ($estado != false) {
+                    $mercurio35->setArchivo($name);
+                    $mercurio35->save();
+
+                    $item = $this->Mercurio10->maximum("item", "conditions: tipopc = '7' and numero='{$mercurio35->getId()}'") + 1;
+                    $mercurio10 = new Mercurio10();
+                    #$mercurio10->setTransaction($Transaccion);
+                    $mercurio10->setTipopc("7");
+                    $mercurio10->setNumero($mercurio35->getId());
+                    $mercurio10->setItem($item);
+                    $mercurio10->setEstado("P");
+                    $mercurio10->setNota("Envio a la Caja para Verificacion");
+                    $mercurio10->setFecsis($today->format('Y-m-d'));
+                    $mercurio10->save();
+
+                    $response = "Se adjunto con exito el archivo";
+                } else {
+                    $response = "No se cargo: Tamano del archivo muy grande o No es Valido";
+                }
+            } else {
+                $response = "No se cargo el archivo";
+            }
+            $asunto = "Retiro Trabajador";
+            $msj  = "acabas de utilizar nuestra opcion de retirar un trabajador. Nuestro Equipo revisara la novedad";
+            $generalService = new GeneralService();
+            $generalService->sendEmail(parent::getActUser("email"), parent::getActUser("nombre"), $asunto, $msj, "");
+
+            #parent::finishTrans();
+            $salida = array('success' => true, 'msj' => $response);
+        } catch (DebugException $e) {
+            $salida = array('success' => false, 'msj' => $e->getMessage());
         }
+        return $this->renderObject(
+            $salida
+        );
     }
 
     /**
@@ -647,19 +658,15 @@ class SubsidioempController extends ApplicationController
      */
     public function actualiza_datos_basicos_viewAction()
     {
-        $this->setParamToView("hide_header", true);
-        $this->setParamToView("help", false);
-
         set_flashdata("error", array(
             "msj" => "El modulo de actualización de datos está en mantenimiento.",
             "code" => '505'
         ));
-        Router::rTa("principal/index");
+        redirect()->route("principal.index");
         exit;
 
         $mercurio28 = $this->Mercurio28->find("tipo='" . parent::getActUser("tipo") . "'", "order: orden");
         foreach ($mercurio28 as $mmercurio28) {
-
             $campos[$mmercurio28->getCampo()] = $mmercurio28->getDetalle();
         }
 
@@ -675,18 +682,24 @@ class SubsidioempController extends ApplicationController
             $this->loadDisplaySubsidio($empresa);
         }
         $mercurio14 = $this->Mercurio14->find("tipopc ='5'");
-        $this->setParamToView("datosBasicos", $empresa);
-        $this->setParamToView("archivos_adjuntar", $mercurio14);
-        $this->setParamToView("title", "Solicitud actualizar datos basicos");
+
+        return view("mercurio/subsidioemp/tmp/actualiza_datos_basicos", [
+            "path" => base_path(),
+            "empresa" => $empresa,
+            "archivos_adjuntar" => $mercurio14,
+            "datosBasicos" => $empresa,
+            "title" => "Solicitud actualizar datos basicos"
+        ]);
     }
 
-    public function actualiza_datos_basicosAction()
+    public function actualiza_datos_basicosAction(Request $request)
     {
         $cedtra = $request->input('cedtra', "addslaches", "alpha", "extraspaces", "striptags");
         $modelos = array("mercurio08", "mercurio10", "mercurio20", "mercurio33", "mercurio37");
-        $Transaccion = parent::startTrans($modelos);
-        $response = parent::startFunc();
-        $today = new Date();
+        #$Transaccion = parent::startTrans($modelos);
+        # $response = parent::startFunc();
+        $today = Carbon::now();
+
         $flag_email = false;
         $generalService = new GeneralService();
         $id_log = $generalService->registrarLog(true, "actualización datos basicos", "");
@@ -699,8 +712,7 @@ class SubsidioempController extends ApplicationController
         $asignarFuncionario = new AsignarFuncionario();
         $usuario = $asignarFuncionario->asignar($tipopc, parent::getActUser("codciu"));
         if ($usuario == "") {
-            $response = parent::errorFunc("No se puede realizar el registro, comuniquese con la atención al cliente");
-            return $this->renderText(json_encode($response));
+            return $this->renderObject(['success' => false, 'msj' => 'No se puede realizar el registro, comuniquese con la atención al cliente']);
         }
         foreach ($mercurio28 as $mmercurio28) {
             $antval = $request->input($mmercurio28->getCampo() . "_ant");
@@ -713,7 +725,7 @@ class SubsidioempController extends ApplicationController
             if ($repleg == "") continue;
             if ($antval == $valor) continue;
             $mercurio33 = new Mercurio33();
-            $mercurio33->setTransaction($Transaccion);
+            #$mercurio33->setTransaction($Transaccion);
             $mercurio33->setId(0);
             $mercurio33->setLog($id_log);
             $mercurio33->setTipo(parent::getActUser("tipo"));
@@ -725,24 +737,21 @@ class SubsidioempController extends ApplicationController
             $mercurio33->setEstado("P");
             $mercurio33->setUsuario($usuario);
             $flag_email = true;
-            if (!$mercurio33->save()) {
-                parent::setLogger($mercurio33->getMessages());
-                parent::ErrorTrans();
-            }
+            $mercurio33->save();
+
             $item = $this->Mercurio10->maximum("item", "conditions: tipopc = '5' and numero='{$mercurio33->getId()}'") + 1;
             $mercurio10 = new Mercurio10();
-            $mercurio10->setTransaction($Transaccion);
+            #$mercurio10->setTransaction($Transaccion);
             $mercurio10->setTipopc("5");
             $mercurio10->setNumero($mercurio33->getId());
             $mercurio10->setItem($item);
             $mercurio10->setEstado("P");
             $mercurio10->setNota("Envio a la caja para verificación");
-            $mercurio10->setFecsis($today->getUsingFormatDefault());
-            if (!$mercurio10->save()) {
-                parent::setLogger($mercurio10->getMessages());
-                parent::ErrorTrans();
-            }
+            $mercurio10->setFecsis($today->format('Y-m-d'));
+            $mercurio10->save();
+
             $mercurio01 = $this->Mercurio01->findFirst();
+
             foreach ($this->Mercurio14->find("tipopc='5'") as $m14) {
                 $coddoc = $m14->getCoddoc();
                 $mercurio37 = new Mercurio37();
@@ -807,7 +816,7 @@ class SubsidioempController extends ApplicationController
 
     public function afilia_masiva_trabajadorAction()
     {
-        
+
         $this->setResponse("ajax");
 
         try {
@@ -1138,7 +1147,7 @@ class SubsidioempController extends ApplicationController
 
     public function activacion_masiva_trabajadorAction()
     {
-        
+
         try {
             try {
                 $this->setResponse("ajax");
@@ -1152,8 +1161,8 @@ class SubsidioempController extends ApplicationController
                     return $this->renderText(json_encode($response));
                 }
                 $modelos = array("mercurio10", "mercurio20", "mercurio31", "mercurio46");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                # $Transaccion = parent::startTrans($modelos);
+
                 $tipopc = 1;
 
                 $ps = Comman::Api();
@@ -1172,12 +1181,12 @@ class SubsidioempController extends ApplicationController
                 $datos_captura = $datos_captura['data'];
                 $_autoriza[] = "SI";
                 $_autoriza[] = "NO";
-                $today = new Date();
+                $today = Carbon::now();
                 $mensajes_error = "";
                 $error = false;
                 $l = 0;
                 $file = file("public/temp/" . $_FILES['archivo']['name']);
-                $today = new Date();
+
                 $array = array();
                 $aprobados = 0;
                 $apro = array("subsi15" => array(), "subsi168" => array());
@@ -1294,9 +1303,9 @@ class SubsidioempController extends ApplicationController
                     $mercurio31->setDocumento(parent::getActUser("documento"));
                     $params = array_merge($mercurio31->getArray(), $_POST, array("fecafi" => $fecafi, "codsuc" => $datos_trabajador["data"]["codsuc"], "codlis" => $datos_trabajador["data"]["codlis"], "vendedor" => $datos_trabajador["data"]["vendedor"], "empleador" => $datos_trabajador["data"]["empleador"]));
 
-                    $servicio = 
+                    $servicio =
 
-                    $procesadorComando = Comman::Api();
+                        $procesadorComando = Comman::Api();
                     $procesadorComando->runPortal(array("servicio" => "activacion_masiva", "params" => $params));
                     $result = $procesadorComando->toArray();
 
@@ -1315,7 +1324,7 @@ class SubsidioempController extends ApplicationController
                     $mercurio10->setItem(2);
                     $mercurio10->setEstado("A");
                     $mercurio10->setNota("Afiliación exitosa");
-                    $mercurio10->setFecsis($today->getUsingFormatDefault());
+                    $mercurio10->setFecsis($today->format('Y-m-d'));
                     if (!$mercurio10->save()) {
                         parent::setLogger($mercurio10->getMessages());
                         parent::ErrorTrans();
@@ -1325,7 +1334,7 @@ class SubsidioempController extends ApplicationController
                     $mercurio46->setId(0);
                     $mercurio46->setLog($id_log);
                     $mercurio46->setNit(parent::getActUser("documento"));
-                    $mercurio46->setFecsis($today->getUsingFormatDefault());
+                    $mercurio46->setFecsis($today->format('Y-m-d'));
                     $mercurio46->setArchivo($_FILES['archivo']['name']);
                     if (!$mercurio46->save()) {
                         parent::setLogger($mercurio46->getMessages());
@@ -1572,7 +1581,7 @@ class SubsidioempController extends ApplicationController
 
     function loadDisplaySubsidio($empresa)
     {
-        Tag::displayTo("tipdoc", $empresa['coddoc']);
+        /* Tag::displayTo("tipdoc", $empresa['coddoc']);
         Tag::displayTo("digver", $empresa['digver']);
         Tag::displayTo("nit", $empresa['nit']);
         Tag::displayTo("sigla", $empresa['sigla']);
@@ -1599,7 +1608,7 @@ class SubsidioempController extends ApplicationController
         Tag::displayTo("tipsoc", $empresa['tipsoc']);
         Tag::displayTo("codact", $empresa['codact']);
         Tag::displayTo("tipemp", $empresa['tipemp']);
-        Tag::displayTo("codcaj", $empresa['codcaj']);
+        Tag::displayTo("codcaj", $empresa['codcaj']); */
     }
 
     function buscarEmpresaSubsidio($nit)

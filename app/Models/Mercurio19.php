@@ -12,6 +12,7 @@ class Mercurio19 extends ModelBase
 
     protected $table = 'mercurio19';
     public $timestamps = false;
+    protected $primaryKey = 'documento';
 
     protected $fillable = [
         'tipo',

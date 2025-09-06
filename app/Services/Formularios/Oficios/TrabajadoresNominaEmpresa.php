@@ -2,12 +2,12 @@
 
 namespace App\Services\Formularios\Oficios;
 
-use App\Services\Formularios\DocumentoAdapter;
 use App\Exceptions\DebugException;
+use App\Services\Formularios\Documento;
 use App\Services\Utils\Table;
 
 
-class TrabajadoresNominaEmpresa extends DocumentoAdapter
+class TrabajadoresNominaEmpresa extends Documento
 {
 
     private $tranoms;

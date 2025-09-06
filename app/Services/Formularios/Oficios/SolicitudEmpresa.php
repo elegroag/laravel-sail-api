@@ -4,10 +4,10 @@ namespace App\Services\Formularios\Oficios;
 
 use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsEmpresa;
-use App\Services\Formularios\DocumentoAdapter;
+use App\Services\Formularios\Documento;
 use Carbon\Carbon;
 
-class SolicitudEmpresa extends DocumentoAdapter
+class SolicitudEmpresa extends Documento
 {
 
     private $empresa;
@@ -57,9 +57,9 @@ class SolicitudEmpresa extends DocumentoAdapter
         $this->pdf->SetX(34);
         $this->pdf->Cell(33, 5, (!$this->empresa->getCodciu()) ? 'Florencia' : $_codciu[$this->empresa->getCodciu()], 0, 0, 'L');
         $this->pdf->SetX(162);
-        $this->pdf->Cell(8, 4, $today->getYear(), 0, 0, 'C');
-        $this->pdf->Cell(6, 4, $today->getMonth(), 0, 0, 'C');
-        $this->pdf->Cell(6, 4, $today->getDay(), 0, 0, 'C');
+        $this->pdf->Cell(8, 4, $today->locale('es')->dayName, 0, 0, 'C');
+        $this->pdf->Cell(6, 4, $today->locale('es')->monthName, 0, 0, 'C');
+        $this->pdf->Cell(6, 4, $today->format('d'), 0, 0, 'C');
 
 
         /**
@@ -83,9 +83,9 @@ class SolicitudEmpresa extends DocumentoAdapter
         $this->pdf->SetFont('helvetica', '', 8);
         $this->pdf->SetY(109);
         $this->pdf->SetX(28);
-        $this->pdf->Cell(14, 4, $today->getDay(), 0, 0, 'L');
-        $this->pdf->Cell(12, 4, $today->getMonth() + 1, 0, 0, 'L');
-        $this->pdf->Cell(10, 4, $today->getYear(), 0, 0, 'L');
+        $this->pdf->Cell(14, 4, $today->format('d'), 0, 0, 'L');
+        $this->pdf->Cell(12, 4, $today->locale('es')->monthName, 0, 0, 'L');
+        $this->pdf->Cell(10, 4, $today->format('Y'), 0, 0, 'L');
 
         /**
          * linia x
