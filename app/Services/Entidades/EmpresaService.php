@@ -104,25 +104,29 @@ class EmpresaService
         if ($solicitud == false) return false;
         $archivos = array();
 
-        $db = DbBase::rawConnect();
-
-        $mercurio10 = $db->fetchOne("SELECT item, estado, campos_corregir
-        FROM mercurio10
-        WHERE numero='{$solicitud->getId()}' AND tipopc='{$this->tipopc}'
-        ORDER BY item DESC LIMIT 1");
+        $mercurio10 = Mercurio10::where('numero', $solicitud->getId())
+            ->where('tipopc', $this->tipopc)
+            ->orderBy('item', 'desc')
+            ->first();
 
         $corregir = false;
-        if ($mercurio10) {
-            if ($mercurio10['estado'] == 'D') {
-                $campos = $mercurio10['campos_corregir'];
-                $corregir = explode(";", $campos);
-            }
+        if ($mercurio10 && $mercurio10->estado == 'D') {
+            $campos = $mercurio10->campos_corregir;
+            $corregir = explode(";", $campos);
         }
 
-        $mercurio14 = (new Mercurio14)->find("tipopc='{$this->tipopc}' AND tipsoc='{$solicitud->getTipsoc()}'");
+        $mercurio14 = Mercurio14::where('tipopc', $this->tipopc)
+            ->where('tipsoc', $solicitud->getTipsoc())
+            ->get();
+
         foreach ($mercurio14 as $m14) {
-            $m12 = (new Mercurio12)->findFirst("coddoc='{$m14->getCoddoc()}'");
-            $mercurio37 = (new Mercurio37)->findFirst("tipopc='{$this->tipopc}' and numero='{$solicitud->getId()}' and coddoc='{$m14->getCoddoc()}'");
+            $m12 = Mercurio12::where('coddoc', $m14->coddoc)->first();
+
+            $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)
+                ->where('numero', $solicitud->getId())
+                ->where('coddoc', $m14->getCoddoc())
+                ->first();
+
             $corrige = false;
             if ($corregir) {
                 if (in_array($m12->getCoddoc(), $corregir)) {
@@ -140,7 +144,7 @@ class EmpresaService
             $archivos[] = $archivo;
         }
 
-        $mercurio01 = (new Mercurio01)->findFirst();
+        $mercurio01 = Mercurio01::first();
         $html = view("empresa/tmp/archivos_requeridos", [
             "load_archivos" => $archivos,
             "path" => $mercurio01->getPath(),
@@ -159,28 +163,31 @@ class EmpresaService
         if ($solicitud == false || is_null($solicitud)) return false;
         $archivos = array();
 
-        $mercurio10 = $this->db->fetchOne("SELECT
-        item,
-        estado,
-        campos_corregir
-        FROM mercurio10
-        WHERE numero='{$solicitud->getId()}' AND
-        tipopc='{$this->tipopc}'
-        ORDER BY item DESC
-        LIMIT 1");
+        $mercurio10 = Mercurio10::where('numero', $solicitud->getId())
+            ->where('tipopc', $this->tipopc)
+            ->orderBy('item', 'desc')
+            ->first();
 
         $corregir = false;
-        if ($mercurio10) {
-            if ($mercurio10['estado'] == 'D') {
-                $campos = $mercurio10['campos_corregir'];
-                $corregir = explode(";", $campos);
-            }
+        if ($mercurio10 && $mercurio10->estado == 'D') {
+            $campos = $mercurio10->campos_corregir;
+            $corregir = explode(";", $campos);
         }
 
-        $mercurio14 = (new Mercurio14)->find("tipopc='{$this->tipopc}' AND tipsoc='{$solicitud->getTipsoc()}'", "order: auto_generado DESC");
+        $mercurio14 = (new Mercurio14)->where('tipopc', $this->tipopc)
+            ->where('tipsoc', $solicitud->getTipsoc())
+            ->orderBy('auto_generado', 'desc')
+            ->get();
+
         foreach ($mercurio14 as $m14) {
-            $m12 = (new Mercurio12)->findFirst("coddoc='{$m14->getCoddoc()}'");
-            $mercurio37 = (new Mercurio37)->findFirst("tipopc='{$this->tipopc}' and numero='{$solicitud->getId()}' and coddoc='{$m14->getCoddoc()}'");
+
+            $m12 = Mercurio12::where('coddoc', $m14->getCoddoc())->first();
+
+            $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)
+                ->where('numero', $solicitud->getId())
+                ->where('coddoc', $m14->getCoddoc())
+                ->first();
+
             $corrige = false;
 
             if ($corregir) {
@@ -196,7 +203,7 @@ class EmpresaService
             $archivos[] = $archivo;
         }
 
-        $mercurio01 = (new Mercurio01)->findFirst();
+        $mercurio01 = Mercurio01::first();
         $archivos_descargar = oficios_requeridos('E');
         return array(
             "disponibles" => $archivos_descargar,
@@ -394,7 +401,8 @@ class EmpresaService
         $solicitud = $this->findById($id);
 
         $cm37 = (new Mercurio37)->getCount(
-            "tipopc='{$this->tipopc}' AND " .
+            "*",
+            "conditions: tipopc='{$this->tipopc}' AND " .
                 "numero='{$id}' AND " .
                 "coddoc IN(SELECT coddoc FROM mercurio14 WHERE tipopc='{$this->tipopc}' AND tipsoc='{$solicitud->getTipsoc()}' AND obliga='S')"
         );
@@ -409,21 +417,28 @@ class EmpresaService
             'estado' => 'P',
         ]);
 
-        $ai = (new Mercurio10)->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
+        $ai = Mercurio10::where('tipopc', $this->tipopc)
+            ->where('numero', $id)
+            ->max('item') + 1;
 
-        $entity = (object) $solicitud->getArray();
-        $entity->item = $ai;
-        $senderValidationCaja->send($this->tipopc, $entity);
+        $solicitud->item = $ai;
+        $senderValidationCaja->send($this->tipopc, $solicitud);
     }
 
 
     public function consultaSeguimiento($id)
     {
-        $seguimientos = $this->db->inQueryAssoc("SELECT * FROM mercurio10 WHERE numero='{$id}' AND tipopc='{$this->tipopc}' ORDER BY item DESC");
-        foreach ($seguimientos as $ai => $row) {
-            $campos = explode(';', $row['campos_corregir']);
-            $seguimientos[$ai]['corregir'] = $campos;
-        }
+        $seguimientos = Mercurio10::where('numero', $id)
+            ->where('tipopc', $this->tipopc)
+            ->orderBy('item', 'desc')
+            ->get()
+            ->map(function ($row) {
+                $campos = explode(';', $row->campos_corregir);
+                $row->corregir = $campos;
+                return $row;
+            })
+            ->toArray();
+
         return array(
             'seguimientos' => $seguimientos,
             'campos_disponibles' => (new Mercurio30)->CamposDisponibles(),
@@ -454,44 +469,39 @@ class EmpresaService
         foreach ($tranoms as $row) {
             $cedtras[] = $row['cedtra'];
 
-            $tranom = (new Tranoms)->findFirst(" request='{$id}' AND cedtra='{$row['cedtra']}'");
+            $tranom = Tranoms::where('request', $id)
+                ->where('cedtra', $row['cedtra'])
+                ->first();
+
             if (!$tranom) {
-                $trabajadorNomina =  new Tranoms();
-                $trabajadorNomina->createAttributes(
-                    array(
-                        'cedtra' => sanetizar($row['cedtra']),
-                        'nomtra' => sanetizar_input($row['nomtra']),
-                        'apetra' => sanetizar_input($row['apetra']),
-                        'saltra' => sanetizar($row['saltra']),
-                        'fectra' => sanetizar_date($row['fectra']),
-                        'cartra' => sanetizar_input($row['cartra']),
-                        'request' => $id
-                    )
-                );
-                $trabajadorNomina->save();
+                $tranom =  new Tranoms([
+                    'cedtra' => sanetizar($row['cedtra']),
+                    'nomtra' => sanetizar_input($row['nomtra']),
+                    'apetra' => sanetizar_input($row['apetra']),
+                    'saltra' => sanetizar($row['saltra']),
+                    'fectra' => sanetizar_date($row['fectra']),
+                    'cartra' => sanetizar_input($row['cartra']),
+                    'request' => $id
+                ]);
+                $tranom->save();
             } else {
-                $tranom->createAttributes(
-                    array(
+                $tranom->fill(
+                    [
                         'cedtra' => sanetizar($row['cedtra']),
                         'nomtra' => sanetizar_input($row['nomtra']),
                         'apetra' => sanetizar_input($row['apetra']),
                         'saltra' => sanetizar($row['saltra']),
                         'fectra' => sanetizar_date($row['fectra']),
                         'cartra' => sanetizar_input($row['cartra'])
-                    )
+                    ]
                 );
                 $tranom->save();
             }
         }
 
-        $tranoms = $this->db->inQueryAssoc("SELECT cedtra FROM tranoms WHERE request='{$id}'");
-        if ($tranoms && count($cedtras) > 0) {
-            foreach ($tranoms as $row) {
-                if (in_array($row['cedtra'], $cedtras) === false) {
-                    (new Tranoms)->deleteAll(" request='{$id}' AND cedtra='{$row['cedtra']}'");
-                }
-            }
-        }
+        Tranoms::where('request', $id)
+            ->whereNotIn('cedtra', $cedtras)
+            ->delete();
     }
 
     public function paramsApi()

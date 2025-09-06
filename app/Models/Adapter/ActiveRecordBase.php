@@ -6,8 +6,15 @@ use Illuminate\Support\Facades\DB;
 
 class ActiveRecordBase
 {
-
-    public function find(string $table, string $where = "", string $fields = "*", $orderBy = "1")
+    /**
+     * function find
+     * @param string $table
+     * @param string $where
+     * @param string $fields
+     * @param string $orderBy
+     * @return array
+     */
+    public function find(string $table, string $where = "", string $fields = "*", $orderBy = "1"): array
     {
         $query = DB::table($table)->selectRaw($fields);
         if ($where != "") {
@@ -16,31 +23,46 @@ class ActiveRecordBase
         if ($orderBy != "") {
             $query = $query->orderByRaw($orderBy);
         }
-        return $query->get();
+        return $query->get()->toArray();
     }
 
-    public function fetchAll(string $sqlQuery)
+    /**
+     * function fetchAll
+     * @param string $sqlQuery
+     * @return array
+     */
+    public function fetchAll(string $sqlQuery): array
     {
         return DB::select($sqlQuery);
     }
 
-    public function inQueryAssoc(string $sqlQuery)
+    /**
+     * function inQueryAssoc
+     * @param string $sqlQuery
+     * @return array|null
+     */
+    public function inQueryAssoc(string $sqlQuery): array|null
     {
         $results = DB::select($sqlQuery);
         return json_decode(json_encode($results), true);
     }
 
-    public function inQueryNum(string $sqlQuery)
+    public function inQueryNum(string $sqlQuery): array|null
     {
         $results = DB::select($sqlQuery);
         return json_decode(json_encode($results), false);
     }
 
-    public function fetchOne(string $sqlQuery)
+    /**
+     * function fetchOne
+     * @param string $sqlQuery
+     * @return array|null
+     */
+    public function fetchOne(string $sqlQuery): array|null
     {
         $results = DB::select($sqlQuery);
         if (count($results) > 0) {
-            return $results[0];
+            return json_decode(json_encode($results[0]), true);
         } else {
             return null;
         }

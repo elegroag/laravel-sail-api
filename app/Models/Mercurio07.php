@@ -239,4 +239,24 @@ class Mercurio07 extends ModelBase
     {
         parent::setCreateAttributes($this, $data);
     }
+
+    public function empresas()
+    {
+        return $this->hasMany(Mercurio30::class, 'documento', 'documento');
+    }
+
+    public function trabajadores()
+    {
+        return $this->hasMany(Mercurio31::class, 'documento', 'documento');
+    }
+
+    public function conyuges()
+    {
+        return $this->hasMany(Mercurio32::class, 'documento', 'documento');
+    }
+
+    public function beneficiarios()
+    {
+        return $this->hasMany(Mercurio34::class, 'documento', 'documento');
+    }
 }

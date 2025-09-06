@@ -1139,4 +1139,9 @@ class Mercurio31 extends ModelBase
     {
         parent::setCreateAttributes($this, $data);
     }
+
+    public function solicitante()
+    {
+        return $this->belongsTo(Mercurio07::class, 'documento', 'documento');
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Adapter\DbBase;
 use App\Models\Adapter\ModelBase;
+use App\Models\Mercurio07;
 use Carbon\Carbon;
 
 class Mercurio30 extends ModelBase
@@ -660,5 +661,10 @@ class Mercurio30 extends ModelBase
     public function createAttributes($data)
     {
         parent::setCreateAttributes($this, $data);
+    }
+
+    public function solicitante()
+    {
+        return $this->belongsTo(Mercurio07::class, 'documento', 'documento');
     }
 }
