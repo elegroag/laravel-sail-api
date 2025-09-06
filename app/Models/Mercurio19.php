@@ -3,13 +3,15 @@
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
+use App\Models\Adapter\ValidateWithRules;
+use Illuminate\Validation\Rule;
 
 class Mercurio19 extends ModelBase
 {
+    use ValidateWithRules;
 
     protected $table = 'mercurio19';
     public $timestamps = false;
-    protected $primaryKey = ['tipo', 'coddoc', 'documento'];
 
     protected $fillable = [
         'tipo',
@@ -22,6 +24,23 @@ class Mercurio19 extends ModelBase
         'intentos',
         'token',
     ];
+
+    protected function rules()
+    {
+        return [
+            'documento' => 'required|numeric|min:5',
+            'coddoc' => 'required|numeric|min:1',
+            'tipo' => 'required|string|min:0',
+            '_id' => [
+                'required|string',
+                Rule::unique('mercurio19')->where(function ($query) {
+                    return $query->where('documento', $this->documento)
+                        ->where('coddoc', $this->coddoc)
+                        ->where('tipo', $this->tipo);
+                }),
+            ],
+        ];
+    }
 
     public function setCodver($codver)
     {

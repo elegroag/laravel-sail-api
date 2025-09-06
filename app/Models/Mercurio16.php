@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
+use App\Models\Adapter\ValidateWithRules;
+use Illuminate\Validation\Rule;
 
 class Mercurio16 extends ModelBase
 {
+    use ValidateWithRules;
 
     protected $table = 'mercurio16';
     protected $primaryKey = 'id';
@@ -21,6 +24,24 @@ class Mercurio16 extends ModelBase
         'keyprivate',
         'keypublic'
     ];
+
+    protected function rules()
+    {
+        return [
+            'documento' => 'required|numeric|min:5',
+            'coddoc' => 'required|numeric|min:1',
+            '_id' => [
+                'required|string',
+                Rule::unique('mercurio16')->where(function ($query) {
+                    if ($this->exists) {
+                        $query->where('id', '!=', $this->id);
+                    }
+                    return $query->where('documento', $this->documento)
+                        ->where('coddoc', $this->coddoc);
+                }),
+            ],
+        ];
+    }
 
     public function setKeypublic($keypublic)
     {

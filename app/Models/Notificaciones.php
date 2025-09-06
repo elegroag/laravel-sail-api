@@ -23,11 +23,8 @@ class Notificaciones extends ModelBase
         'hora',
     ];
 
-
-
     public function __construct(Request|null $request = null)
     {
-        parent::__construct();
         if ($request instanceof Request) {
             $this->id = $request->getParam('id');
             $this->titulo = $request->getParam('titulo');

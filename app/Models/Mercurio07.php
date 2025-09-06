@@ -39,12 +39,6 @@ class Mercurio07 extends ModelBase
             '_id' => [
                 'required|string',
                 Rule::unique('mercurio07')->where(function ($query) {
-                    /*
-                    La propiedad id no existe en el modelo
-                    if ($this->exists) {
-                        $query->where('id', '!=', $this->id);
-                    } */
-
                     return $query->where('documento', $this->documento)
                         ->where('coddoc', $this->coddoc)
                         ->where('tipo', $this->tipo);
