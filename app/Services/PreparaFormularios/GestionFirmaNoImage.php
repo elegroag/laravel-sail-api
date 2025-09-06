@@ -28,12 +28,14 @@ class GestionFirmaNoImage
 
     public function hasFirma()
     {
-        $has = ((new Mercurio16)->getCount(
-            "*",
-            "conditions: documento='{$this->documento}' AND coddoc='{$this->coddoc}'"
-        ) > 0) ? true : false;
+        $has = (Mercurio16::where("documento", $this->documento)
+            ->where("coddoc", $this->coddoc)
+            ->count() > 0) ? true : false;
+
         if ($has) {
-            $this->lfirma = (new Mercurio16)->findFirst("documento='{$this->documento}' AND coddoc='{$this->coddoc}'");
+            $this->lfirma = Mercurio16::where("documento", $this->documento)
+                ->where("coddoc", $this->coddoc)
+                ->first();
         }
         return $has;
     }
@@ -50,15 +52,21 @@ class GestionFirmaNoImage
      */
     public function guardarFirma()
     {
-        $this->lfirma = (new Mercurio16)->findFirst("documento='{$this->documento}' AND coddoc='{$this->coddoc}'");
+        $this->lfirma = Mercurio16::where("documento", $this->documento)
+            ->where("coddoc", $this->coddoc)
+            ->first();
+
         if (!$this->lfirma) {
-            $this->lfirma = new Mercurio16();
-            $this->lfirma->setDocumento($this->documento);
-            $this->lfirma->setCoddoc($this->coddoc);
-            $this->lfirma->setFecha(date('Y-m-d'));
-            $this->lfirma->setFirma('N/A');
-            $this->lfirma->setKeyprivate(null);
-            $this->lfirma->setKeypublic(null);
+            $this->lfirma = new Mercurio16(
+                [
+                    'documento' => $this->documento,
+                    'coddoc' => $this->coddoc,
+                    'fecha' => date('Y-m-d'),
+                    'firma' => 'N/A',
+                    'keyprivate' => null,
+                    'keypublic' => null,
+                ]
+            );
             $this->lfirma->save();
         }
         return true;
@@ -73,16 +81,23 @@ class GestionFirmaNoImage
      */
     public function generarClaves()
     {
-        $this->lfirma = new Mercurio16();
-        $this->lfirma->setDocumento($this->documento);
-        $this->lfirma->setCoddoc($this->coddoc);
-        $this->lfirma->setFecha(date('Y-m-d'));
-        $this->lfirma->setFirma('N/A');
-        
-        if ($this->lfirma->getKeyprivate() && $this->lfirma->getKeypublic()) {
-            return array(
-                'private' => $this->lfirma->getKeyprivate(),
-                'public' => $this->lfirma->getKeypublic(),
+        if ($this->lfirma) {
+            if ($this->lfirma->getKeyprivate() && $this->lfirma->getKeypublic()) {
+                return array(
+                    'private' => $this->lfirma->getKeyprivate(),
+                    'public' => $this->lfirma->getKeypublic(),
+                );
+            }
+        } else {
+            $this->lfirma = new Mercurio16(
+                [
+                    'documento' => $this->documento,
+                    'coddoc' => $this->coddoc,
+                    'fecha' => date('Y-m-d'),
+                    'firma' => 'N/A',
+                    'keyprivate' => null,
+                    'keypublic' => null,
+                ]
             );
         }
 

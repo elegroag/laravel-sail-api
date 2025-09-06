@@ -4,14 +4,16 @@ namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
 use Carbon\Carbon;
+use App\Models\Adapter\ValidateWithRules;
+use Illuminate\Validation\Rule;
 
 class Mercurio07 extends ModelBase
 {
+    use ValidateWithRules;
 
     protected $table = 'mercurio07';
     public $timestamps = false;
     public $incrementing = false;
-    protected $primaryKey = ['documento', 'coddoc', 'tipo'];
 
     protected $fillable = [
         'tipo',
@@ -27,6 +29,29 @@ class Mercurio07 extends ModelBase
         'estado',
         'fecha_syncron',
     ];
+
+    protected function rules()
+    {
+        return [
+            'documento' => 'required|numeric|min:5',
+            'coddoc' => 'required|numeric|min:1',
+            'tipo' => 'required|string|min:0',
+            '_id' => [
+                'required|string',
+                Rule::unique('mercurio07')->where(function ($query) {
+                    /*
+                    La propiedad id no existe en el modelo
+                    if ($this->exists) {
+                        $query->where('id', '!=', $this->id);
+                    } */
+
+                    return $query->where('documento', $this->documento)
+                        ->where('coddoc', $this->coddoc)
+                        ->where('tipo', $this->tipo);
+                }),
+            ],
+        ];
+    }
 
     public function setFechaSyncron($fecha_syncron)
     {

@@ -5,14 +5,12 @@ namespace App\Models\Adapter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use Thiagoprz\CompositeKey\HasCompositeKey;
 
 class ModelBase extends Model
 {
     use HasFactory;
-    use HasCompositeKey;
 
-    public function __construct($attributes = [])
+    public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
     }

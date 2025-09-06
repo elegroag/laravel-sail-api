@@ -243,8 +243,7 @@ class LoginController extends ApplicationController
     public function logoutAction()
     {
         SessionCookies::destroyIdentity();
-        redirect("login/index");
-        exit;
+        redirect()->to("mercurio/login");
     }
 
     /**
@@ -593,7 +592,7 @@ class LoginController extends ApplicationController
                 'components' => $components,
                 "msj" => 'Consulta de params OK'
             );
-        } catch (\Exception $err) {
+        } catch (DebugException $e) {
             $salida = array(
                 "success" => false,
                 "msj" => $e->getMessage()

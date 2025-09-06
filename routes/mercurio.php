@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/mercurio/login', [LoginController::class, 'indexAction'])->name('login');
 Route::post('/mercurio/autenticar', [LoginController::class, 'authenticateAction']);
 Route::post('/mercurio/salir', [LoginController::class, 'logoutAction'])->name('login.salir');
+Route::get('/mercurio/salir', [LoginController::class, 'logoutAction']);
+
 Route::post('/mercurio/recuperar_clave', [LoginController::class, 'recuperarClaveAction']);
 Route::post('/mercurio/registro', [LoginController::class, 'registroAction']);
 Route::post('/mercurio/paramsLogin', [LoginController::class, 'paramsLoginAction']);
@@ -28,7 +30,7 @@ Route::get('/mercurio/integracion_servicio', [LoginController::class, 'integraci
 Route::get('/mercurio/guia_videos', [LoginController::class, 'guiaVideosAction']);
 Route::post('/mercurio/download_docs/{archivo}', [LoginController::class, 'downloadDocumentsAction']);
 
-# Principal 
+# Principal
 Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
 
     Route::get('mercurio/principal/index', [PrincipalController::class, 'indexAction'])->name('principal.index');

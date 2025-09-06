@@ -730,10 +730,10 @@ class PrincipalController extends ApplicationController
                     }
                     if ($token->id == '' || is_null($token->id)) {
                         $solicitud = (new Mercurio07)->findFirst(" documento='{$token->documento}' and coddoc='{$token->coddoc}' and tipo='{$token->tipo}'");
-                        $url = "empresa/index";
+                        $url = "mercurio/empresa/index";
                     } else {
                         $solicitud = (new Mercurio30)->findFirst(" id='{$token->id}' and documento='{$token->documento}' and coddoc='{$token->coddoc}'");
-                        $url = "empresa/index#proceso/{$token->id}";
+                        $url = "mercurio/empresa/index#proceso/{$token->id}";
                     }
                     break;
                 case 'I':
@@ -741,26 +741,26 @@ class PrincipalController extends ApplicationController
                         throw new DebugException("El identificador de la empresa no es correcto", 404);
                     }
                     $solicitud = (new Mercurio41)->findFirst(" id='{$token->id}' and documento='{$token->documento}' and coddoc='{$token->coddoc}'");
-                    $url = "independiente/index#proceso/{$token->id}";
+                    $url = "mercurio/independiente/index#proceso/{$token->id}";
                     break;
                 case 'O':
                     if ($token->id == '' || $token->documento == '' || $token->tipo == '' || $token->coddoc == '') {
                         throw new DebugException("El identificador de la empresa no es correcto", 404);
                     }
                     $solicitud = (new  Mercurio38)->findFirst(" id='{$token->id}' and documento='{$token->documento}' and coddoc='{$token->coddoc}'");
-                    $url = "pensionado/index#proceso/{$token->id}";
+                    $url = "mercurio/pensionado/index#proceso/{$token->id}";
                     break;
                 case 'F':
                     if ($token->id == '' || $token->documento == '' || $token->tipo == '' || $token->coddoc == '') {
                         throw new DebugException("El identificador de la empresa no es correcto", 404);
                     }
                     $solicitud = (new  Mercurio36)->findFirst(" id='{$token->id}' and documento='{$token->documento}' and coddoc='{$token->coddoc}'");
-                    $url = "facultativo/index#proceso/{$token->id}";
+                    $url = "mercurio/facultativo/index#proceso/{$token->id}";
                     break;
                 default:
                     // Ingreso usuario particular
                     $solicitud = (new Mercurio07)->findFirst(" documento='{$token->documento}' and coddoc='{$token->coddoc}' and tipo='{$token->tipo}'");
-                    $url = "principal/index";
+                    $url = "mercurio/principal/index";
                     break;
             }
 
@@ -793,7 +793,7 @@ class PrincipalController extends ApplicationController
             return redirect()->to($url);
         } catch (DebugException $e) {
             set_flashdata("error", array("msj" => $e->getMessage()));
-            return redirect()->to("login/index");
+            return redirect()->to("mercurio/login");
         }
     }
 

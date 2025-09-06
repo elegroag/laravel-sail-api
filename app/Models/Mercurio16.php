@@ -8,8 +8,10 @@ class Mercurio16 extends ModelBase
 {
 
     protected $table = 'mercurio16';
-    public $timestamps = false;
     protected $primaryKey = 'id';
+
+    public $incrementing = true;
+    public $timestamps = false;
 
     protected $fillable = [
         'documento',
@@ -17,13 +19,8 @@ class Mercurio16 extends ModelBase
         'firma',
         'coddoc',
         'keyprivate',
-        'keypublic',
+        'keypublic'
     ];
-
-    public function __construct()
-    {
-        parent::__construct();
-    }
 
     public function setKeypublic($keypublic)
     {
@@ -88,10 +85,5 @@ class Mercurio16 extends ModelBase
     public function getFecha()
     {
         return $this->fecha;
-    }
-
-    public function createAttributes($data)
-    {
-        parent::setCreateAttributes($this, $data);
     }
 }
