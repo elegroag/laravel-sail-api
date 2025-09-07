@@ -29,13 +29,13 @@ class FormularioPensionado extends Documento
         }
         $this->pensionado = $this->request->getParam('pensionado');
 
-        $this->pdf->SetTitle(utf8_decode("Formulario afiliación del pensionado {$this->pensionado->getCedtra()}, COMFACA"));
-        $this->pdf->SetAuthor(utf8_decode("{$this->pensionado->getPriape()} {$this->pensionado->getSegape()} {$this->pensionado->getPrinom()} {$this->pensionado->getSegnom()}, COMFACA"));
-        $this->pdf->SetSubject(utf8_decode("Formulario de afiliación a COMFACA"));
-        $this->pdf->SetCreator(utf8_decode("Plataforma Web: comfacaenlinea.com.co, COMFACA"));
+        $this->pdf->SetTitle("Formulario afiliación del pensionado {$this->pensionado->getCedtra()}, COMFACA");
+        $this->pdf->SetAuthor("{$this->pensionado->getPriape()} {$this->pensionado->getSegape()} {$this->pensionado->getPrinom()} {$this->pensionado->getSegnom()}, COMFACA");
+        $this->pdf->SetSubject("Formulario de afiliación a COMFACA");
+        $this->pdf->SetCreator("Plataforma Web: comfacaenlinea.com.co, COMFACA");
         $this->pdf->SetKeywords('COMFACA');
 
-        $page1 = storage_path('public/docs/form/trabajador/form-001-tra-p01.png');
+        $page1 = public_path('img/form/trabajador/form-001-tra-p01.png');
         $this->pdf->Image($page1, 0, 0, 210, 297, '');
 
         $this->pdf->SetAutoPageBreak(false, 0);
@@ -53,7 +53,7 @@ class FormularioPensionado extends Documento
                 array('lb' => 'Autoriza datos', 'texto' => 'X', 'x' => 70, 'y' => 277),
             )
         );
-        $page = storage_path('public/docs/sello-firma.png');
+        $page = public_path('img/firmas/sello-firma.png');
         $this->pdf->Image($page, 160, 275, 30, 20, '');
 
         return $this;

@@ -38,7 +38,7 @@ class TrabajadoresNominaEmpresa extends Documento
         $this->pdf->SetKeywords('COMFACA');
 
         $this->bloqueEmpresa();
-        $selloFirma = public_path('docs/sello-firma.png');
+        $selloFirma = public_path('img/firmas/sello-firma.png');
         $this->pdf->Image($selloFirma, 160, 265, 30, 20, '', '', '', false, 300, '', false, false, 0);
     }
 
