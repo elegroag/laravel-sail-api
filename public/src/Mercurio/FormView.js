@@ -283,14 +283,14 @@ export class FormView extends Backbone.View {
     }
 
     actualizaForm(silent = void 0) {
-        _.each(this.model.toJSON(), (valor, key) => {
-            if (_.isEmpty(valor) == true || _.isUndefined(valor) == true) {
-            } else {
-                let _type = this.$el.find(`[name='${key}']`).attr('type');
+        $.each(this.model.toJSON(), (key, valor) => {
+            const inputElement = this.$el.find(`[name="${key}"]`);
+            if (inputElement.length) {
+                let _type = inputElement.attr('type');
                 if (_type === 'radio' || _type === 'checkbox') {
+                    inputElement.prop('checked', valor == 'S');
                 } else {
-                    this.setInput(key, valor);
-                    this.$el.find(`[for="${key}"]`).addClass('top');
+                    inputElement.val(valor);
                 }
             }
         });

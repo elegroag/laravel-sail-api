@@ -121,7 +121,7 @@ class ConyugeAdjuntoService
             $out = $trabajadorService->buscarTrabajadorSubsidio($this->request->getCedtra());
             if ($out) {
                 $trabajador = clone $mtrabajador;
-                $trabajador->createAttributes($out);
+                $trabajador->fill($out);
             }
         }
 

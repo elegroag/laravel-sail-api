@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
@@ -33,7 +34,7 @@ class BeneficiarioController extends ApplicationController
     protected $tipopc = "4";
     protected $db;
     protected $user;
-    protected $tipo; 
+    protected $tipo;
 
     public function __construct()
     {
@@ -89,7 +90,7 @@ class BeneficiarioController extends ApplicationController
     {
         $this->setResponse("ajax");
         $cedtra = $request->input("cedtra");
-        
+
         $cedcons = array();
         $mercurio32 = $this->Mercurio32->find(" cedtra='{$cedtra}'");
         foreach ($mercurio32 as $conyuge) {
@@ -142,7 +143,6 @@ class BeneficiarioController extends ApplicationController
                 "success" => true,
                 "msj" => "El archivo se borro de forma correcta"
             );
-        
         } catch (DebugException $e) {
             $response = array(
                 "success" => false,
@@ -212,17 +212,16 @@ class BeneficiarioController extends ApplicationController
     public function borrarAction(Request $request)
     {
         try {
-                $this->setResponse("ajax");
-                $id = $request->input('id');
-                $mercurio34 = $this->Mercurio34->findFirst("id = '$id'");
-                $modelos = array("Mercurio34");
-                //$Transaccion = parent::startTrans($modelos);
-                //$response = parent::startFunc();
-                $this->Mercurio34->deleteAll("id = '$id'");
-                //parent::finishTrans();
-                $response = "Borrado Con Exito";
-                return $this->renderObject(json_encode($response));
-            
+            $this->setResponse("ajax");
+            $id = $request->input('id');
+            $mercurio34 = $this->Mercurio34->findFirst("id = '$id'");
+            $modelos = array("Mercurio34");
+            //$Transaccion = parent::startTrans($modelos);
+            //$response = parent::startFunc();
+            $this->Mercurio34->deleteAll("id = '$id'");
+            //parent::finishTrans();
+            $response = "Borrado Con Exito";
+            return $this->renderObject(json_encode($response));
         } catch (DebugException $e) {
             $response = "No se puede Borrar el Registro";
         }
@@ -238,25 +237,25 @@ class BeneficiarioController extends ApplicationController
         $coddoc = parent::getActUser("coddoc");
 
         if (empty($estado)) {
-            $beneficiarios = $this->db->fetchAll("SELECT * FROM mercurio34 
+            $beneficiarios = $this->db->fetchAll("SELECT * FROM mercurio34
 			WHERE  tipo='{$tipo}' AND coddoc='{$coddoc}' AND documento='{$documento}' AND estado IN('T','D','P','A','X') ORDER BY id, estado DESC");
         } else {
-            $beneficiarios = $this->db->fetchAll("SELECT * FROM mercurio34 
+            $beneficiarios = $this->db->fetchAll("SELECT * FROM mercurio34
 			WHERE tipo='{$tipo}' AND coddoc='{$coddoc}' AND documento='{$documento}' AND estado='{$estado}' ORDER BY id DESC");
         }
 
         foreach ($beneficiarios as $ai => $row) {
-            $rqs = $this->db->fetchOne("SELECT count(mercurio10.numero) as cantidad 
-                FROM mercurio10 
+            $rqs = $this->db->fetchOne("SELECT count(mercurio10.numero) as cantidad
+                FROM mercurio10
                 LEFT JOIN mercurio34 ON mercurio34.id=mercurio10.numero
-                WHERE mercurio10.tipopc='{$this->tipopc}' AND 
-                mercurio34.id ='{$row['id']}' 
+                WHERE mercurio10.tipopc='{$this->tipopc}' AND
+                mercurio34.id ='{$row['id']}'
             ");
-            $trayecto = $this->db->fetchOne("SELECT max(mercurio10.item), mercurio10.*  
-                FROM mercurio10 
+            $trayecto = $this->db->fetchOne("SELECT max(mercurio10.item), mercurio10.*
+                FROM mercurio10
                 LEFT JOIN mercurio34 ON mercurio34.id=mercurio10.numero
-                WHERE mercurio10.tipopc='{$this->tipopc}' AND 
-                mercurio34.id ='{$row['id']}' LIMIT 1 
+                WHERE mercurio10.tipopc='{$this->tipopc}' AND
+                mercurio34.id ='{$row['id']}' LIMIT 1
             ");
 
             $beneficiarios[$ai] = $row;
@@ -375,10 +374,7 @@ class BeneficiarioController extends ApplicationController
                 }
             }
 
-            $conyuguesPendientes = (new Mercurio32)->find(
-                "*",
-                "conditions: documento='{$documento}' AND estado NOT IN('I','X')"
-            );
+            $conyuguesPendientes = (new Mercurio32)->getFind("documento='{$documento}' AND estado NOT IN('I','X')");
             foreach ($conyuguesPendientes as $conCp) {
                 if (!isset($_cedcon[$conCp->getCedcon()])) {
                     $_cedcon[$conCp->getCedcon()] = $conCp->getCedcon() . ' - ' . $conCp->getPrinom() . ' ' . $conCp->getSegnom() . ' ' . $conCp->getPriape() . ' ' . $conCp->getSegape();
@@ -673,7 +669,8 @@ class BeneficiarioController extends ApplicationController
         } catch (DebugException $e) {
             $response = array(
                 "success" => false,
-                "msj" => $e->getMessage());
+                "msj" => $e->getMessage()
+            );
         }
 
         return $this->renderObject($response);
@@ -758,7 +755,7 @@ class BeneficiarioController extends ApplicationController
                     throw new DebugException("Error no se actualizo los datos", 301);
                 }
             }
-            
+
             //$benefiService->endTransa();
             $solicitud = $benefiService->findById($id);
 
@@ -1013,7 +1010,6 @@ class BeneficiarioController extends ApplicationController
 
             return redirect('beneficiario.index');
         }
-
     }
 
     public function guardarArchivoAction(Request $request)

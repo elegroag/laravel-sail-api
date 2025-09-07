@@ -96,7 +96,7 @@ class ModelBase extends Model
         }
     }
 
-    public function find(...$data)
+    public function getFind(...$data)
     {
         $params = get_params_destructures($data);
         $query = DB::table($this->getTable());

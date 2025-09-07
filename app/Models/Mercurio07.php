@@ -6,14 +6,17 @@ use App\Models\Adapter\ModelBase;
 use Carbon\Carbon;
 use App\Models\Adapter\ValidateWithRules;
 use Illuminate\Validation\Rule;
+use Thiagoprz\CompositeKey\HasCompositeKey;
 
 class Mercurio07 extends ModelBase
 {
+    use HasCompositeKey;
     use ValidateWithRules;
 
     protected $table = 'mercurio07';
     public $timestamps = false;
     public $incrementing = false;
+    protected $primaryKey = ['documento', 'coddoc', 'tipo'];
 
     protected $fillable = [
         'tipo',

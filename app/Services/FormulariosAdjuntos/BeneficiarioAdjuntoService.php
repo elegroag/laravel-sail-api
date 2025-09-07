@@ -103,7 +103,7 @@ class BeneficiarioAdjuntoService
             $data = $trabajadorService->buscarTrabajadorSubsidio($this->request->getCedtra());
             if ($data) {
                 $trabajador = clone $mtrabajador;
-                $trabajador->createAttributes($data);
+                $trabajador->fill($data);
             }
         }
         return $trabajador;
@@ -176,8 +176,7 @@ class BeneficiarioAdjuntoService
             }
 
             if ($data) {
-                $mconyuge = new Mercurio32();
-                $mconyuge->createAttributes($data);
+                $mconyuge = new Mercurio32($data);
             } else {
                 $mconyuge = new Mercurio32();
             }

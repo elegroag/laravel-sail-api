@@ -48,40 +48,35 @@ class SignupEmpresas  implements SignupInterface
      */
     public function createSignupService($data)
     {
-        $id = (new Mercurio30())->maximum('id') + 1;
-        $this->solicitud = new Mercurio30();
+        $solicitud = new Mercurio30($data);
 
-        $this->solicitud->createAttributes($data);
-
-        $this->solicitud->setId($id);
-        $this->solicitud->setDocumento($data['documento']);
-        $this->solicitud->setCoddoc($data['coddoc']);
-        $this->solicitud->setTipo($data['tipo']);
-
-        $this->solicitud->setEmailpri($data['email']);
-        $this->solicitud->setCelular($data['telefono']);
-        $this->solicitud->getCelpri($data['telefono']);
-        $this->solicitud->setTelpri($data['telefono']);
-        $this->solicitud->setDigver('0');
-        $this->solicitud->setDireccion("CR");
-        $this->solicitud->setSigla("");
-        $this->solicitud->setTottra(1);
-        $this->solicitud->setDirpri("");
-        $this->solicitud->setPrinom("");
-        $this->solicitud->setSegnom("");
-        $this->solicitud->setPriape("");
-        $this->solicitud->setSegape("");
-        $this->solicitud->setMatmer("");
-        $this->solicitud->setLog('0');
-        $this->solicitud->setEstado("T");
-        $this->solicitud->setFecini(date('Y-m-d'));
-        $this->solicitud->setValnom(0);
-        $this->solicitud->setCodact('0000');
-        $this->solicitud->setFecini(date('Y-m-d'));
-        $this->solicitud->setTottra(1);
-        $this->solicitud->setCodcaj(13);
-        $this->solicitud->setCodest(NULL);
-        $this->solicitud->setTipemp('E');
+        $solicitud->setDocumento($data['documento']);
+        $solicitud->setCoddoc($data['coddoc']);
+        $solicitud->setTipo($data['tipo']);
+        $solicitud->setEmailpri($data['email']);
+        $solicitud->setCelular($data['telefono']);
+        $solicitud->getCelpri($data['telefono']);
+        $solicitud->setTelpri($data['telefono']);
+        $solicitud->setDigver('0');
+        $solicitud->setDireccion("CR");
+        $solicitud->setSigla("");
+        $solicitud->setTottra(1);
+        $solicitud->setDirpri("");
+        $solicitud->setPrinom("");
+        $solicitud->setSegnom("");
+        $solicitud->setPriape("");
+        $solicitud->setSegape("");
+        $solicitud->setMatmer("");
+        $solicitud->setLog('0');
+        $solicitud->setEstado("T");
+        $solicitud->setFecini(date('Y-m-d'));
+        $solicitud->setValnom(0);
+        $solicitud->setCodact('0000');
+        $solicitud->setFecini(date('Y-m-d'));
+        $solicitud->setTottra(1);
+        $solicitud->setCodcaj(13);
+        $solicitud->setCodest(NULL);
+        $solicitud->setTipemp('E');
 
         $segnom = '';
         $segape = '';
@@ -125,16 +120,17 @@ class SignupEmpresas  implements SignupInterface
             }
         }
 
-        $this->solicitud->setPriape($priape);
-        $this->solicitud->setSegape($segape);
-        $this->solicitud->setPrinom($prinom);
-        $this->solicitud->setSegnom($segnom);
+        $solicitud->setPriape($priape);
+        $solicitud->setSegape($segape);
+        $solicitud->setPrinom($prinom);
+        $solicitud->setSegnom($segnom);
+        $solicitud->save();
 
-        $this->solicitud->save();
+        Mercurio37::where("tipopc", $this->tipopc)->where("numero", $solicitud->getId())->delete();
+        Mercurio10::where("tipopc", $this->tipopc)->where("numero", $solicitud->getId())->delete();
+        Tranoms::where("request", $solicitud->getId())->delete();
 
-        (new Mercurio37())->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
-        (new Mercurio10())->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
-        (new Tranoms())->deleteAll(" request='{$id}'");
+        $this->solicitud = $solicitud;
     }
 
     public function getSolicitud()

@@ -79,7 +79,7 @@ class FormularioActualizadatos extends Documento
         $this->pdf->Cell(60, 5, $_coddep["{$departamento}"], 0, 0, 'L');
 
         //telefono
-        $this->pdf->SetFont('Arial', '', 9);
+        $this->pdf->SetFont('helvetica', '', 9);
         $this->pdf->setY(119);
         $this->pdf->setX(27);
         $this->pdf->Cell(60, 5, @$campos['telefono'], 0, 0, 'L');
@@ -91,7 +91,7 @@ class FormularioActualizadatos extends Documento
         $this->pdf->setX(123);
         $this->pdf->Cell(65, 5, @$campos['email'], 0, 0, 'L');
 
-        $this->pdf->SetFont('Arial', '', 9);
+        $this->pdf->SetFont('helvetica', '', 9);
 
         //marcar x
         $this->pdf->setY(151);
@@ -117,7 +117,7 @@ class FormularioActualizadatos extends Documento
         $this->pdf->Cell(60, 5, $_coddep["{$departamento}"], 0, 0, 'L');
 
         //telefono fijo
-        $this->pdf->SetFont('Arial', '', 9);
+        $this->pdf->SetFont('helvetica', '', 9);
         $this->pdf->setY(180);
         $this->pdf->setX(27);
         $this->pdf->Cell(60, 5, @$campos['telpri'], 0, 0, 'L');

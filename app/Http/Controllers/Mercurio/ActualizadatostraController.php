@@ -1,4 +1,5 @@
 <?
+
 namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
@@ -29,12 +30,12 @@ class ActualizadatostraController extends ApplicationController
     protected $tipo;
 
     public function __construct()
-    {   
+    {
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
-   
+
 
     public function indexAction()
     {
@@ -53,32 +54,32 @@ class ActualizadatostraController extends ApplicationController
             $mtipoDocumentos = new Gener18();
             $tipoDocumentos = array();
 
-            foreach ($mtipoDocumentos->find() as $mtipo) {
+            foreach ($mtipoDocumentos->all() as $mtipo) {
                 if ($mtipo->getCoddoc() == '7' || $mtipo->getCoddoc() == '2') continue;
                 $tipoDocumentos["{$mtipo->getCoddoc()}"] = $mtipo->getDetdoc();
             }
 
             $msubsi54 = new Subsi54();
             $tipsoc = array();
-            foreach ($msubsi54->find() as $entity) {
+            foreach ($msubsi54->all() as $entity) {
                 $tipsoc["{$entity->getTipsoc()}"] = $entity->getDetalle();
             }
 
             $coddoc = array();
-            foreach ($mtipoDocumentos->find() as $entity) {
+            foreach ($mtipoDocumentos->all() as $entity) {
                 if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') continue;
                 $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
             }
 
             $coddocrepleg = array();
-            foreach ($mtipoDocumentos->find() as $entity) {
+            foreach ($mtipoDocumentos->all() as $entity) {
                 if ($entity->getCodrua() == 'TI' || $entity->getCodrua() == 'RC') continue;
                 $coddocrepleg["{$entity->getCodrua()}"] = $entity->getDetdoc();
             }
 
             $codciu = array();
             $mgener09 = new Gener09();
-            foreach ($mgener09->find("*", "conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
+            foreach ($mgener09->getFind("conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
                 $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
             }
 
@@ -181,18 +182,18 @@ class ActualizadatostraController extends ApplicationController
         }
 
         foreach ($mercurio47 as $ai => $row) {
-            $rqs = $this->db->fetchOne("SELECT count(mercurio10.numero) as cantidad 
-                FROM mercurio10 
+            $rqs = $this->db->fetchOne("SELECT count(mercurio10.numero) as cantidad
+                FROM mercurio10
                 LEFT JOIN mercurio47 ON mercurio47.id = mercurio10.numero
-                WHERE mercurio10.tipopc='{$this->tipopc}' AND 
-                mercurio47.id ='{$row['id']}' 
+                WHERE mercurio10.tipopc='{$this->tipopc}' AND
+                mercurio47.id ='{$row['id']}'
             ");
 
-            $trayecto = $this->db->fetchOne("SELECT max(mercurio10.item), mercurio10.*  
-                FROM mercurio10 
+            $trayecto = $this->db->fetchOne("SELECT max(mercurio10.item), mercurio10.*
+                FROM mercurio10
                 LEFT JOIN mercurio47 ON mercurio47.id=mercurio10.numero
-                WHERE mercurio10.tipopc='{$this->tipopc}' AND 
-                mercurio47.id ='{$row['id']}' LIMIT 1 
+                WHERE mercurio10.tipopc='{$this->tipopc}' AND
+                mercurio47.id ='{$row['id']}' LIMIT 1
             ");
 
             $mercurio47[$ai] = $row;
@@ -242,7 +243,7 @@ class ActualizadatostraController extends ApplicationController
 
     function loadDisplaySubsidio($trabajador)
     {
-       /*  Tag::displayTo("nit", $trabajador['nit']);
+        /*  Tag::displayTo("nit", $trabajador['nit']);
         Tag::displayTo("cedtra", $trabajador['cedtra']);
         Tag::displayTo("telefono", $trabajador['telefono']);
         Tag::displayTo("email", $trabajador['email']);
@@ -295,62 +296,61 @@ class ActualizadatostraController extends ApplicationController
         //$datosTrabajadorService->setTransa();
 
         try {
-                $asignarFuncionario = new AsignarFuncionario();
-                $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
-                $tipo_actualizacion = $request->input('tipo_actualizacion');
-                $usuario = $asignarFuncionario->asignar($this->tipopc, parent::getActUser("codciu"));
-                $params = array(
-                    'documento' => parent::getActUser("documento"),
-                    'usuario' => $usuario,
-                    'tipo' =>  parent::getActUser("tipo"),
-                    'coddoc' =>  parent::getActUser("coddoc"),
-                    'fecha_solicitud' =>  date('Y-m-d'),
-                    'fecha_estado' =>  date('Y-m-d'),
-                    'tipo_actualizacion' =>  $tipo_actualizacion
-                );
+            $asignarFuncionario = new AsignarFuncionario();
+            $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
+            $tipo_actualizacion = $request->input('tipo_actualizacion');
+            $usuario = $asignarFuncionario->asignar($this->tipopc, parent::getActUser("codciu"));
+            $params = array(
+                'documento' => parent::getActUser("documento"),
+                'usuario' => $usuario,
+                'tipo' =>  parent::getActUser("tipo"),
+                'coddoc' =>  parent::getActUser("coddoc"),
+                'fecha_solicitud' =>  date('Y-m-d'),
+                'fecha_estado' =>  date('Y-m-d'),
+                'tipo_actualizacion' =>  $tipo_actualizacion
+            );
 
-                $solicitud = null;
-                if (is_null($id) || $id == "") {
-                    $data['id'] = null;
-                    $data['usuario'] = 2;
-                    $data['estado'] = 'T';
-                    $solicitud = $datosTrabajadorService->createByFormData($params);
-                    $id = $solicitud->getId();
-                } else {
-                    $res = $datosTrabajadorService->updateByFormData($id, $params);
-                    if ($res == false) {
-                        throw new DebugException("Error no se actualizo los datos", 301);
-                    }
+            $solicitud = null;
+            if (is_null($id) || $id == "") {
+                $data['id'] = null;
+                $data['usuario'] = 2;
+                $data['estado'] = 'T';
+                $solicitud = $datosTrabajadorService->createByFormData($params);
+                $id = $solicitud->getId();
+            } else {
+                $res = $datosTrabajadorService->updateByFormData($id, $params);
+                if ($res == false) {
+                    throw new DebugException("Error no se actualizo los datos", 301);
                 }
+            }
 
-                $campos = $this->db->inQueryAssoc("SELECT * FROM mercurio28 WHERE tipo='" . parent::getActUser("tipo") . "'");
-                foreach ($campos as $mercurio28) {
-                    $valor = $request->input($mercurio28['campo']);
-                    $mercurio33 = new Mercurio33();
-                    $mercurio33->id = 0;
-                    $mercurio33->log = $id;
-                    $mercurio33->tipo = parent::getActUser("tipo");
-                    $mercurio33->coddoc = parent::getActUser("coddoc");
-                    $mercurio33->documento = parent::getActUser("documento");
-                    $mercurio33->campo = $mercurio28['campo'];
-                    $mercurio33->antval = $valor;
-                    $mercurio33->valor = $valor;
-                    $mercurio33->estado = "P";
-                    $mercurio33->usuario = $usuario;
-                    $mercurio33->actualizacion = $id;
-                    $mercurio33->save();
-                }
+            $campos = $this->db->inQueryAssoc("SELECT * FROM mercurio28 WHERE tipo='" . parent::getActUser("tipo") . "'");
+            foreach ($campos as $mercurio28) {
+                $valor = $request->input($mercurio28['campo']);
+                $mercurio33 = new Mercurio33();
+                $mercurio33->id = 0;
+                $mercurio33->log = $id;
+                $mercurio33->tipo = parent::getActUser("tipo");
+                $mercurio33->coddoc = parent::getActUser("coddoc");
+                $mercurio33->documento = parent::getActUser("documento");
+                $mercurio33->campo = $mercurio28['campo'];
+                $mercurio33->antval = $valor;
+                $mercurio33->valor = $valor;
+                $mercurio33->estado = "P";
+                $mercurio33->usuario = $usuario;
+                $mercurio33->actualizacion = $id;
+                $mercurio33->save();
+            }
 
-                //$datosTrabajadorService->endTransa();
-                $solicitud = $datosTrabajadorService->findById($id);
+            //$datosTrabajadorService->endTransa();
+            $solicitud = $datosTrabajadorService->findById($id);
 
-                ob_end_clean();
-                $response = array(
-                    "msj" => "Proceso se ha completado con éxito",
-                    "success" => true,
-                    "data" => $solicitud->getArray()
-                );
-          
+            ob_end_clean();
+            $response = array(
+                "msj" => "Proceso se ha completado con éxito",
+                "success" => true,
+                "data" => $solicitud->getArray()
+            );
         } catch (DebugException $e) {
             $response = array(
                 'success' => false,
@@ -394,53 +394,51 @@ class ActualizadatostraController extends ApplicationController
         $generalService = new GeneralService();
         $id_log = $generalService->registrarLog(false, "actualización datos basicos", "");
         try {
-                $id = $request->input('id');
-                $coddoc = parent::getActUser("coddoc");
-                $documento = parent::getActUser("documento");
-                $tipo = parent::getActUser("tipo");
-                $solicitud = $this->db->fetchOne("SELECT * FROM mercurio47 WHERE id='{$id}' and documento='{$documento}'");
-                if (!$solicitud) {
-                    throw new DebugException("Error la solicitud no es correcta para continuar.", 501);
+            $id = $request->input('id');
+            $coddoc = parent::getActUser("coddoc");
+            $documento = parent::getActUser("documento");
+            $tipo = parent::getActUser("tipo");
+            $solicitud = $this->db->fetchOne("SELECT * FROM mercurio47 WHERE id='{$id}' and documento='{$documento}'");
+            if (!$solicitud) {
+                throw new DebugException("Error la solicitud no es correcta para continuar.", 501);
+            }
+
+            $campos = $this->db->fetchAll("SELECT * FROM mercurio28 WHERE tipo='{$tipo}'");
+            foreach ($campos as $mercurio28) {
+                $valor = $request->input($mercurio28['campo']);
+                if (empty($valor)) continue;
+
+                $mercurio33 = $this->db->fetchOne("SELECT * FROM mercurio33 WHERE documento = '{$documento}' and actualizacion = '{$id}' and campo = '{$mercurio28['campo']}'");
+                if ($mercurio33) {
+
+                    Mercurio33::where("id", $mercurio33['id'])
+                        ->where("documento", $documento)
+                        ->update(['valor' => $valor]);
+                } else {
+                    $mercurio33 = new Mercurio33();
+                    $mercurio33->setId(0);
+                    $mercurio33->setLog($id_log);
+                    $mercurio33->setTipo($tipo);
+                    $mercurio33->setCoddoc($coddoc);
+                    $mercurio33->setDocumento($documento);
+                    $mercurio33->setCampo($mercurio28['campo']);
+                    $mercurio33->setMotivo('');
+                    $mercurio33->setFecest(null);
+                    $mercurio33->setAntval($valor);
+                    $mercurio33->setValor($valor);
+                    $mercurio33->setEstado("P");
+                    $mercurio33->setUsuario($solicitud['usuario']);
+                    $mercurio33->setActualizacion($id);
+                    $mercurio33->save();
                 }
+            }
+            //parent::finishTrans();
 
-                $campos = $this->db->fetchAll("SELECT * FROM mercurio28 WHERE tipo='{$tipo}'");
-                foreach ($campos as $mercurio28) {
-                    $valor = $request->input($mercurio28['campo']);
-                    if (empty($valor)) continue;
-
-                    $mercurio33 = $this->db->fetchOne("SELECT * FROM mercurio33 WHERE documento = '{$documento}' and actualizacion = '{$id}' and campo = '{$mercurio28['campo']}'");
-                    if ($mercurio33) {
-
-                        Mercurio33::where("id", $mercurio33['id'])
-                            ->where("documento", $documento)
-                            ->update(['valor'=> $valor]);
-                            
-                    } else {
-                        $mercurio33 = new Mercurio33();
-                        $mercurio33->setId(0);
-                        $mercurio33->setLog($id_log);
-                        $mercurio33->setTipo($tipo);
-                        $mercurio33->setCoddoc($coddoc);
-                        $mercurio33->setDocumento($documento);
-                        $mercurio33->setCampo($mercurio28['campo']);
-                        $mercurio33->setMotivo('');
-                        $mercurio33->setFecest(null);
-                        $mercurio33->setAntval($valor);
-                        $mercurio33->setValor($valor);
-                        $mercurio33->setEstado("P");
-                        $mercurio33->setUsuario($solicitud['usuario']);
-                        $mercurio33->setActualizacion($id);
-                        $mercurio33->save();
-                    }
-                }
-                //parent::finishTrans();
-                
-                $salida = array(
-                    "msj" => "Proceso se ha completado con éxito",
-                    "success" => true,
-                    "id" => $id
-                );
-
+            $salida = array(
+                "msj" => "Proceso se ha completado con éxito",
+                "success" => true,
+                "id" => $id
+            );
         } catch (DebugException $er) {
             $salida = array(
                 "success" => false,
@@ -454,10 +452,10 @@ class ActualizadatostraController extends ApplicationController
     {
         $archivos = array();
         $mercurio13 = $this->Mercurio13->find("tipopc='{$this->tipopc}'");
-        
 
-        $mercurio10 = $this->db->fetchOne("SELECT item, estado, campos_corregir 
-        FROM mercurio10 
+
+        $mercurio10 = $this->db->fetchOne("SELECT item, estado, campos_corregir
+        FROM mercurio10
         WHERE numero='{$mercurio47->getId()}' AND tipopc='{$this->tipopc}' ORDER BY item DESC LIMIT 1");
 
         $corregir = false;
@@ -536,7 +534,6 @@ class ActualizadatostraController extends ApplicationController
             $this->Mercurio37->deleteAll("tipopc='{$this->tipopc}' and numero='{$numero}' and coddoc='{$coddoc}'");
 
             $response = "Se borro con éxito el archivo";
-
         } catch (DebugException $err) {
             $response = "No se puede realizar la opcion";
         }
@@ -557,10 +554,11 @@ class ActualizadatostraController extends ApplicationController
 
             $guardarArchivoService = new GuardarArchivoService(
                 array(
-                'tipopc' => $this->tipopc,
-                'coddoc' => $coddoc,
-                'id' => $id
-            ));
+                    'tipopc' => $this->tipopc,
+                    'coddoc' => $coddoc,
+                    'id' => $id
+                )
+            );
             $mercurio37 = $guardarArchivoService->main();
             $response = array(
                 'success' => true,
@@ -682,7 +680,7 @@ class ActualizadatostraController extends ApplicationController
         $pdf->AddPage();
         $pdf->SetTextColor(0);
         $pdf->SetFont('Arial', '', 9);
-        $pdf->Image(base_path(). 'public/docs/formulario_mercurio/fomulario_actualizacion_trabajador_parte_1.jpeg', 0, 0, "216", "280");
+        $pdf->Image(base_path() . 'public/docs/formulario_mercurio/fomulario_actualizacion_trabajador_parte_1.jpeg', 0, 0, "216", "280");
         $tipos_documentos = $this->getTiposDocumentos();
 
         $pdf->setY(57);

@@ -47,9 +47,9 @@ class TrabajadorFormulario
         if ($out = $pc->toArray()) {
             $datos_empresa = ($out['success'] == true) ? $out['data'] : false;
             if ($datos_empresa) {
-                $empresa = new Mercurio30();
+
                 $datos_empresa['telefono'] = ($datos_empresa['telr'] == '') ? $datos_empresa['telefono'] : $datos_empresa['telr'];
-                $empresa->createAttributes($datos_empresa);
+                $empresa = new Mercurio30($datos_empresa);
             }
         }
 
@@ -99,17 +99,16 @@ class TrabajadorFormulario
                     $out = $ps->toArray();
                     $data_conyuge =  ($out['success'] == true) ? $out['data'] : false;
                     if ($data_conyuge) {
-                        $conyuge_comper = new Mercurio32();
-                        $conyuge_comper->createAttributes($data_conyuge);
-                        $conyuge_comper->writeAttribute('tipdoc', $data_conyuge['coddoc']);
-                        $conyuge_comper->writeAttribute('ciures', $data_conyuge['codzon']);
+                        $conyuge_comper = new Mercurio32($data_conyuge);
+                        $conyuge_comper->setTipdoc($data_conyuge['coddoc']);
+                        $conyuge_comper->setCiures($data_conyuge['codzon']);
                     }
                 }
             }
         }
 
         $conyuge_otra = false;
-        $beneficiarios = (new Mercurio34)->find(" cedtra='{$mercurio31->getCedtra()}' and documento='{$this->documento}' and coddoc='{$this->coddoc}' and estado IN('T','P')");
+        $beneficiarios = (new Mercurio34)->getFind(" cedtra='{$mercurio31->getCedtra()}' and documento='{$this->documento}' and coddoc='{$this->coddoc}' and estado IN('T','P')");
         if ($beneficiarios) {
             foreach ($beneficiarios as $beneficiario) {
                 if ($beneficiario->getCedcon() && $beneficiario->getParent() == '1') {
@@ -136,10 +135,9 @@ class TrabajadorFormulario
                         $out = $ps->toArray();
                         if ($out['success'] == true) {
                             $data_other = $out['data'];
-                            $conyuge_otra = new Mercurio32();
-                            $conyuge_otra->createAttributes($data_other);
-                            $conyuge_otra->writeAttribute('tipdoc', $data_other['coddoc']);
-                            $conyuge_otra->writeAttribute('ciures', $data_other['codzon']);
+                            $conyuge_otra = new Mercurio32($data_other);
+                            $conyuge_otra->tipdoc = $data_other['coddoc'];
+                            $conyuge_otra->ciures = $data_other['codzon'];
                         } else {
                             $conyuge_otra = false;
                         }

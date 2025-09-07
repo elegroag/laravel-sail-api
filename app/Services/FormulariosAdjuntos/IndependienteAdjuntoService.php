@@ -3,6 +3,7 @@
 namespace App\Services\FormulariosAdjuntos;
 
 use App\Library\Collections\ParamsEmpresa;
+use App\Library\Tcpdf\KumbiaPDF;
 use App\Models\Mercurio16;
 use App\Models\Mercurio32;
 use App\Services\Formularios\FactoryDocuments;
@@ -78,14 +79,18 @@ class IndependienteAdjuntoService
 
         $out = $procesadorComando->toArray();
         $this->filename = "carta_solicitud_independiente_{$this->request->getCedtra()}.pdf";
+
+        KumbiaPDF::setBackgroundImage(false);
+        KumbiaPDF::setFooterImage(false);
+
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearOficio('independiente');
-        $documento->setParamsInit(array(
+        $documento->setParamsInit([
             'independiente' => $this->request,
             'firma' => $this->lfirma,
             'filename' => $this->filename,
             'previus' => $out['success'] ? $out['data'] : null
-        ));
+        ]);
 
         $documento->main();
         $documento->outPut();
@@ -104,14 +109,16 @@ class IndependienteAdjuntoService
         ])->first();
 
         $this->filename = "formulario_independiente_{$this->request->getCedtra()}.pdf";
+        KumbiaPDF::setBackgroundImage(public_path('img/form/trabajador/form-001-tra-p01.png'));
+
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearFormulario('independiente');
-        $documento->setParamsInit(array(
+        $documento->setParamsInit([
             'independiente' => $this->request,
             'conyuge' => $conyuge,
             'firma' => $this->lfirma,
             'filename' => $this->filename
-        ));
+        ]);
 
         $documento->main();
         $documento->outPut();
@@ -128,11 +135,11 @@ class IndependienteAdjuntoService
 
     public function getResult()
     {
-        return array(
+        return [
             "name" => $this->filename,
             "file" => basename($this->outPdf),
             'out' => $this->outPdf,
             'fhash' => $this->fhash
-        );
+        ];
     }
 }

@@ -531,20 +531,20 @@ class ConyugeController extends ApplicationController
             $mtipoDocumentos = new Gener18();
             $tipoDocumentos = array();
 
-            foreach ($mtipoDocumentos->find() as $mtipo) {
+            foreach ($mtipoDocumentos->all() as $mtipo) {
                 if ($mtipo->getCoddoc() == '7' || $mtipo->getCoddoc() == '2') continue;
                 $tipoDocumentos["{$mtipo->getCoddoc()}"] = $mtipo->getDetdoc();
             }
 
             $coddoc = array();
-            foreach ($mtipoDocumentos->find() as $entity) {
+            foreach ($mtipoDocumentos->all() as $entity) {
                 if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') continue;
                 $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
             }
 
             $codciu = array();
             $mgener09 = new Gener09();
-            foreach ($mgener09->find("*", "conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
+            foreach ($mgener09->getFind("conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
                 $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
             }
 

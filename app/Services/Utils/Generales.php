@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services\Utils;
 
 use App\Models\Gener18;
@@ -35,7 +36,7 @@ class Generales
     {
         $mtipoDocumentos = new Gener18();
         $coddoc_detalle = "";
-        foreach ($mtipoDocumentos->find() as $entity) {
+        foreach ($mtipoDocumentos->getFind() as $entity) {
             if ($entity->getCoddoc() == $afiliado->getCoddoc()) {
                 $coddoc_detalle = $entity->getDetdoc();
                 break;
@@ -49,13 +50,12 @@ class Generales
         if (is_null($code) || $code == '') {
             return false;
         }
-        Core::importLibrary("securimage", "Securimage");
-        $securimage = new Securimage();
+        /* $securimage = new Securimage();
         if ($securimage->check($code) == true) {
             return true;
         } else {
             return false;
-        }
+        } */
     }
 
     public static function localTipoDocumento($coddoc)

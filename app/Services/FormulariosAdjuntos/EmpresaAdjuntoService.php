@@ -95,13 +95,11 @@ class EmpresaAdjuntoService
 
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearFormulario('empresa');
-        $documento->setParamsInit(
-            array(
-                'empresa' => $this->request,
-                'firma' => $this->lfirma,
-                'filename' => $this->filename
-            )
-        );
+        $documento->setParamsInit([
+            'empresa' => $this->request,
+            'firma' => $this->lfirma,
+            'filename' => $this->filename
+        ]);
         $documento->main();
         $documento->outPut();
         $this->cifrarDocumento();
@@ -120,14 +118,12 @@ class EmpresaAdjuntoService
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearOficio('trabajador_nomina');
 
-        $documento->setParamsInit(
-            array(
-                'empresa' => $this->request,
-                'firma' => $this->lfirma,
-                'filename' => $this->filename,
-                'tranoms' => $tranoms
-            )
-        );
+        $documento->setParamsInit([
+            'empresa' => $this->request,
+            'firma' => $this->lfirma,
+            'filename' => $this->filename,
+            'tranoms' => $tranoms
+        ]);
         $documento->main();
         $documento->outPut();
         $this->cifrarDocumento();
@@ -143,11 +139,11 @@ class EmpresaAdjuntoService
 
     public function getResult()
     {
-        return array(
+        return [
             "name" => $this->filename,
             "file" => basename($this->outPdf),
             'out' => $this->outPdf,
             'fhash' => $this->fhash
-        );
+        ];
     }
 }

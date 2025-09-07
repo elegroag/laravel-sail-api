@@ -251,7 +251,7 @@ class FormularioBeneficiario extends Documento
 
     function dataMedioPago()
     {
-        $this->pdf->SetFont('Arial', '', 9);
+        $this->pdf->SetFont('helvetica', '', 9);
         $this->pdf->SetTextColor('65', '65', '65');
         $mbanco = ParamsTrabajador::getBancos();
 

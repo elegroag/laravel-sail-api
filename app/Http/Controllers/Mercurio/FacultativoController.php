@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Mercurio;
+
 use App\Exceptions\AuthException;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
@@ -46,7 +48,7 @@ class FacultativoController extends ApplicationController
     protected $tipo;
 
     public function __construct()
-    {   
+    {
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
@@ -108,7 +110,7 @@ class FacultativoController extends ApplicationController
         $this->setResponse("ajax");
         $facultativoService = new FacultativoService();
         # $facultativoService->setTransa();
-       
+
         try {
             $id = $request->input('id', "addslaches", "extraspaces", "striptags");
             $params = $this->serializeData($request);
@@ -344,7 +346,7 @@ class FacultativoController extends ApplicationController
         try {
             $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
             $coddoc = $request->input('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
-            
+
             $guardarArchivoService = new GuardarArchivoService(array(
                 'tipopc' => $this->tipopc,
                 'coddoc' => $coddoc,
@@ -402,10 +404,10 @@ class FacultativoController extends ApplicationController
     {
         ///public/docs/formulario_mercurio/formulario_independiente.png
         $this->setResponse("ajax");
-       
+
         $mercurio36 = (new Mercurio36())->findFirst("id='{$id}'");
 
-        
+
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
@@ -440,7 +442,7 @@ class FacultativoController extends ApplicationController
     public function reloadArchivosAction(Request $request)
     {
         $this->setResponse("ajax");
-        
+
         $this->facultativoService = new FacultativoService;
         try {
             $cedtra = $request->input('cedtra');
@@ -519,32 +521,32 @@ class FacultativoController extends ApplicationController
             $mtipoDocumentos = new Gener18();
             $tipoDocumentos = array();
 
-            foreach ($mtipoDocumentos->find() as $mtipo) {
+            foreach ($mtipoDocumentos->all() as $mtipo) {
                 if ($mtipo->getCoddoc() == '7' || $mtipo->getCoddoc() == '2' || $mtipo->getCoddoc() == '3') continue;
                 $tipoDocumentos["{$mtipo->getCoddoc()}"] = $mtipo->getDetdoc();
             }
 
             $msubsi54 = new Subsi54();
             $tipsoc = array();
-            foreach ($msubsi54->find() as $entity) {
+            foreach ($msubsi54->all() as $entity) {
                 $tipsoc["{$entity->getTipsoc()}"] = $entity->getDetalle();
             }
 
             $coddoc = array();
-            foreach ($mtipoDocumentos->find() as $entity) {
+            foreach ($mtipoDocumentos->all() as $entity) {
                 if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') continue;
                 $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
             }
 
             $coddocrepleg = array();
-            foreach ($mtipoDocumentos->find() as $entity) {
+            foreach ($mtipoDocumentos->all() as $entity) {
                 if ($entity->getCodrua() == 'TI' || $entity->getCodrua() == 'RC') continue;
                 $coddocrepleg["{$entity->getCodrua()}"] = $entity->getDetdoc();
             }
 
             $codciu = array();
             $mgener09 = new Gener09();
-            foreach ($mgener09->find("*", "conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
+            foreach ($mgener09->getFind("conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
                 $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
             }
 
@@ -744,7 +746,6 @@ class FacultativoController extends ApplicationController
                 ));
 
                 return redirect('principal.index');
-                
             }
         } catch (AuthException $e) {
             set_flashdata("error", array(

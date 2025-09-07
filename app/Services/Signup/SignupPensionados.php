@@ -44,10 +44,7 @@ class SignupPensionados  implements SignupInterface
      */
     public function createSignupService($data)
     {
-        $id = (new Mercurio38())->maximum('id') + 1;
-        $this->solicitud = new Mercurio38();
-        $this->solicitud->createAttributes($data);
-        $this->solicitud->setId($id);
+        $this->solicitud = new Mercurio38($data);
 
         $this->solicitud->setDocumento($data['documento']);
         $this->solicitud->setCoddoc($data['coddoc']);
@@ -140,9 +137,10 @@ class SignupPensionados  implements SignupInterface
         $this->solicitud->setCargo(0);
         $this->solicitud->setCaptra('N');
         $this->solicitud->save();
+        $id = $this->solicitud->getId();
 
-        (new Mercurio37())->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
-        (new Mercurio10())->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
+        Mercurio37::where("tipopc", $this->tipopc)->where("numero", $id)->delete();
+        Mercurio10::where("tipopc", $this->tipopc)->where("numero", $id)->delete();
     }
 
     public function getSolicitud()

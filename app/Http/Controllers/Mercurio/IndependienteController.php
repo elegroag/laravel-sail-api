@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\AuthException;
@@ -11,6 +12,8 @@ use App\Models\Adapter\DbBase;
 use App\Models\Gener09;
 use App\Models\Gener18;
 use App\Models\Mercurio10;
+use App\Models\Mercurio30;
+use App\Models\Mercurio31;
 use App\Models\Mercurio41;
 use App\Models\Subsi54;
 use App\Services\Entidades\IndependienteService;
@@ -24,6 +27,7 @@ use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class IndependienteController extends ApplicationController
 {
@@ -42,7 +46,7 @@ class IndependienteController extends ApplicationController
     protected $db;
     protected $user;
     protected $tipo;
-   
+
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
@@ -57,8 +61,8 @@ class IndependienteController extends ApplicationController
      */
     public function indexAction()
     {
-        view('independiente.index', [
-            "title"=> "Afiliación Independientes",
+        return view('mercurio/independiente/index', [
+            "title" => "Afiliación Independientes",
             "calemp" => "I",
             "tipper" => "N",
             "cedtra" => parent::getActUser("documento"),
@@ -66,19 +70,20 @@ class IndependienteController extends ApplicationController
         ]);
     }
 
-    public function renderTableAction($estado = '')
+    public function renderTableAction(Request $request, Response $response, string $estado = '')
     {
         $this->setResponse("view");
-        $this->independienteService = new IndependienteService();
+
+        $independienteService = new IndependienteService();
         $html = view(
-            "independiente/tmp/solicitudes",
+            "mercurio/independiente/tmp/solicitudes",
             array(
                 "path" => base_path(),
-                "empresas" => $this->independienteService->findAllByEstado($estado)
+                "empresas" => $independienteService->findAllByEstado($estado)
             )
         )->render();
 
-        return $this->renderObject($html);
+        return $this->renderText($html);
     }
 
     /**
@@ -87,15 +92,20 @@ class IndependienteController extends ApplicationController
      * @param [type] $documento
      * @return void
      */
-    public function showAction($id, $documento)
+    public function showAction(Request $request, Response $response, int $id, int $documento)
     {
         $this->setResponse("ajax");
-        $mercurio41 = $this->Mercurio41->findFirst(" id='{$id}' and documento='{$documento}'");
+
+        $mercurio41 = Mercurio41::where("id", $id)->where("documento", $documento)->first();
+
         if ($mercurio41 == false) $mercurio41 = new Mercurio41();
-        return $this->renderObject(array(
-            "success" => true,
-            "entity" => $mercurio41->getArray()
-        ), false);
+
+        return $this->renderObject(
+            [
+                "success" => true,
+                "entity" => $mercurio41->toArray()
+            ]
+        );
     }
 
     /**
@@ -108,35 +118,26 @@ class IndependienteController extends ApplicationController
     public function guardarAction(Request $request)
     {
         $this->setResponse("ajax");
+        $this->db->begin();
+
         $independienteService = new IndependienteService();
-        //$independienteService->setTransa();
         try {
-            $asignarFuncionario = new AsignarFuncionario();
+
             $id = $request->input('id');
             $params = $this->serializeData($request);
-            $params['tipo'] = parent::getActUser("tipo");
-            $params['coddoc'] = parent::getActUser("coddoc");
-            $params['documento'] = parent::getActUser("documento");
-            $params['usuario'] = $asignarFuncionario->asignar($this->tipopc, parent::getActUser("codciu"));
 
             if (is_null($id) || $id == '') {
-                $params['id'] = null;
-                $params['estado'] = 'T';
                 $independiente = $independienteService->createByFormData($params);
-                $id = $independiente->getId();
             } else {
-                $res = $independienteService->updateByFormData($id, $params);
-                if ($res == false) {
-                    throw new DebugException("Error no se actualizo los datos", 301);
-                }
+                $ok = $independienteService->updateByFormData($id, $params);
+                if ($ok === false) throw new DebugException('No se pudo actualizar la solicitud', 500);
+                $independiente = $independienteService->findById($id);
             }
-            //$independienteService->endTransa();
 
-            //buscar los parametros por api
             $independienteService->paramsApi();
 
-            $independiente = $independienteService->findById($id);
             $independienteAdjuntoService = new IndependienteAdjuntoService($independiente);
+
             $out = $independienteAdjuntoService->formulario()->getResult();
             (new GuardarArchivoService(
                 array(
@@ -167,18 +168,20 @@ class IndependienteController extends ApplicationController
 
             ob_end_clean();
 
-            $response = array(
+            $response = [
                 'success' => true,
                 'msj' => 'Registro completado con éxito',
-                'data' => $independiente->getArray()
-            );
+                'data' => $independiente->toArray()
+            ];
+            $this->db->commit();
         } catch (DebugException $e) {
-            $response = array(
+            $this->db->rollBack();
+            $response = [
                 'success' => false,
                 'msj' => $e->getMessage()
-            );
+            ];
         }
-        return $this->renderObject($response, false);
+        return $this->renderObject($response);
     }
 
 
@@ -225,6 +228,7 @@ class IndependienteController extends ApplicationController
     {
         $fecsol = Carbon::now();
         return [
+            'tipo' => $this->tipo,
             'fecsol' => $fecsol->format('Y-m-d'),
             'cedtra' => $request->input('cedtra', ''),
             'tipdoc' => $request->input('tipdoc', ''),
@@ -465,7 +469,6 @@ class IndependienteController extends ApplicationController
                 "name" => $file,
                 "url" => 'independinte/downloadFile/' . $file
             );
-
         } catch (DebugException $e) {
             $salida = array(
                 'success' => false,
@@ -474,133 +477,6 @@ class IndependienteController extends ApplicationController
         }
         return $this->renderObject($salida);
     }
-
-    /**
-     * _loadParametros function
-     * @return void
-     */
-    function _loadParametros()
-    {
-        $tipo = $this->tipo;
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "parametros_empresa"
-            ),
-            false
-        );
-
-        $paramsPensionado = new ParamsIndependiente();
-        $paramsPensionado->setDatosCaptura($procesadorComando->toArray());
-        /*$this->setParamToView("_tipper", ParamsIndependiente::getTipoPersona());
-        $this->setParamToView("_coddoc", ParamsIndependiente::getTipoDocumentos());
-        $this->setParamToView("_calemp", ParamsIndependiente::getCalidadEmpresa());
-        $this->setParamToView("_codciu", ParamsIndependiente::getCiudades());
-        $this->setParamToView("_codzon", ParamsIndependiente::getZonas());
-        $this->setParamToView("_codact", ParamsIndependiente::getActividades());
-        $this->setParamToView("_tipsoc", ParamsIndependiente::getTipoSociedades());
-        $this->setParamToView("_tipemp", ParamsIndependiente::getTipoEmpresa());
-        $this->setParamToView("_codcaj", ParamsIndependiente::getCodigoCajas());
-        $this->setParamToView("_ciupri", ParamsIndependiente::getCiudades());
-        $this->setParamToView("_coddocrepleg", ParamsIndependiente::getCodruaDocumentos());
-        $this->setParamToView("tipo", $tipo);
-        $this->setParamToView("tipopc", $this->tipopc); */
-
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "parametros_trabajadores"
-            ),
-            false
-        );
-
-        $_tipsal = $this->Mercurio31->getTipsalArray();
-        $paramsTrabajador = new ParamsTrabajador();
-        $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
-      /*   $this->setParamToView("_tipsal", $_tipsal);
-        $this->setParamToView("_sexo", ParamsTrabajador::getSexos());
-        $this->setParamToView("_estciv", ParamsTrabajador::getEstadoCivil());
-        $this->setParamToView("_cabhog", ParamsTrabajador::getCabezaHogar());
-        $this->setParamToView("_captra", ParamsTrabajador::getCapacidadTrabajar());
-        $this->setParamToView("_tipdis", ParamsTrabajador::getTipoDiscapacidad());
-        $this->setParamToView("_nivedu", ParamsTrabajador::getNivelEducativo());
-        $this->setParamToView("_rural", ParamsTrabajador::getRural());
-        $this->setParamToView("_tipcon", ParamsTrabajador::getTipoContrato());
-        $this->setParamToView("_trasin", ParamsTrabajador::getSindicalizado());
-        $this->setParamToView("_vivienda", ParamsTrabajador::getVivienda());
-        $this->setParamToView("_tipafi", ParamsTrabajador::getTipoAfiliado());
-        $this->setParamToView("_cargo", ParamsTrabajador::getOcupaciones());
-        $this->setParamToView("_orisex", ParamsTrabajador::getOrientacionSexual());
-        $this->setParamToView("_facvul", ParamsTrabajador::getVulnerabilidades());
-        $this->setParamToView("_peretn", ParamsTrabajador::getPertenenciaEtnicas());
-        $this->setParamToView("_ciunac", ParamsIndependiente::getCiudades());
-        $this->setParamToView("_labora_otra_empresa", ParamsTrabajador::getLaboraOtraEmpresa());
-        $this->setParamToView("_tippag", ParamsTrabajador::getTipoPago());
-        $this->setParamToView("_resguardos", ParamsTrabajador::getResguardos());
-        $this->setParamToView("_pueblos_indigenas", ParamsTrabajador::getPueblosIndigenas());
-        $this->setParamToView("_bancos", ParamsTrabajador::getBancos()); */
-    }
-
-    /**
-     * nuevaAction function
-     * @param integer $id
-     * @param integer $documento
-     * @return void
-     */
-    public function nuevaAction($id = 0, $documento = 0)
-    {
-        $this->independienteService = new IndependienteService;
-        if ($documento == 0) {
-            $documento = $this->user['documento'];
-        }
-        $coddoc = $this->user['coddoc'];
-        $tipo = $this->tipo;
-
-        $sindepe = false;
-        $title = "Nueva Solicitud Independiente";
-
-        $mercurio07 = $this->Mercurio07->findFirst("tipo='{$tipo}' and documento='{$documento}' and coddoc='{$coddoc}' and estado='A'");
-        $this->_loadParametros();
-
-        if ($id != 0) {
-            $sindepe = $this->Mercurio41->findFirst("id='{$id}' AND documento='{$documento}' and estado NOT IN('I','X')");
-            if ($sindepe == false) {
-                set_flashdata("error", array(
-                    "msj" => "El registro de afiliado no está disponible para su ingreso.",
-                    "code" => '505'
-                ));
-
-                redirect("principal.index");
-                exit;
-            }
-            $this->independienteService->loadDisplay($sindepe);
-        } else {
-            ///nuevo registro
-            $rqs = $this->independienteService->buscarEmpresaSubsidio($documento);
-            if ($rqs) {
-                $empresa = (count($rqs['data']) > 0) ? $rqs['data'] : false;
-                $this->independienteService->loadDisplaySubsidio($empresa);
-            } else {
-                $previus = $this->Mercurio41->findFirst("documento='{$documento}'");
-                if ($previus) $this->independienteService->loadDisplay($previus);
-            }
-        }
-
-        return view('independintes.nuevo', [
-            "mercurio41" => $sindepe,
-            "show_archivos_requeridos" => $this->independienteService->archivosRequeridos($sindepe),
-            "title" => $title,
-            "coddoc" => $mercurio07->getCoddoc(),
-            "tipdoc" => $mercurio07->getCoddoc(),
-            "email" => $mercurio07->getEmail(),
-            "razsoc" => $mercurio07->getNombre(),
-            "cedtra" => $mercurio07->getDocumento(),
-            "hide_header", true
-        ]);
-    }
-
 
     public function seguimientoAction($id)
     {
@@ -659,32 +535,32 @@ class IndependienteController extends ApplicationController
             $mtipoDocumentos = new Gener18();
             $tipoDocumentos = array();
 
-            foreach ($mtipoDocumentos->find() as $mtipo) {
+            foreach ($mtipoDocumentos->all() as $mtipo) {
                 if ($mtipo->getCoddoc() == '7' || $mtipo->getCoddoc() == '2' || $mtipo->getCoddoc() == '3') continue;
                 $tipoDocumentos["{$mtipo->getCoddoc()}"] = $mtipo->getDetdoc();
             }
 
             $msubsi54 = new Subsi54();
             $tipsoc = array();
-            foreach ($msubsi54->find() as $entity) {
+            foreach ($msubsi54->all() as $entity) {
                 $tipsoc["{$entity->getTipsoc()}"] = $entity->getDetalle();
             }
 
             $coddoc = array();
-            foreach ($mtipoDocumentos->find() as $entity) {
+            foreach ($mtipoDocumentos->all() as $entity) {
                 if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') continue;
                 $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
             }
 
             $coddocrepleg = array();
-            foreach ($mtipoDocumentos->find() as $entity) {
+            foreach ($mtipoDocumentos->all() as $entity) {
                 if ($entity->getCodrua() == 'TI' || $entity->getCodrua() == 'RC') continue;
                 $coddocrepleg["{$entity->getCodrua()}"] = $entity->getDetdoc();
             }
 
             $codciu = array();
             $mgener09 = new Gener09();
-            foreach ($mgener09->find("*", "conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
+            foreach ($mgener09->getFind("conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
                 $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
             }
 
@@ -702,9 +578,9 @@ class IndependienteController extends ApplicationController
             $coddoc = $tipoDocumentos;
             $data = array(
                 'tipdoc' => $coddoc,
-                'tipper' => $this->Mercurio30->getTipperArray(),
+                'tipper' => (new Mercurio30)->getTipperArray(),
                 'tipsoc' => $tipsoc,
-                'calemp' => $this->Mercurio30->getCalempArray(),
+                'calemp' => (new Mercurio30)->getCalempArray(),
                 'codciu' => $codciu,
                 'coddocrepleg' => $coddocrepleg,
                 'codzon' => ParamsIndependiente::getZonas(),
@@ -733,7 +609,7 @@ class IndependienteController extends ApplicationController
                 'resguardo_id' => ParamsTrabajador::getResguardos(),
                 'pub_indigena_id' => ParamsTrabajador::getPueblosIndigenas(),
                 'codban' => ParamsTrabajador::getBancos(),
-                'tipsal' =>  $this->Mercurio31->getTipsalArray(),
+                'tipsal' => (new Mercurio31())->getTipsalArray(),
                 'tipcue' => ParamsTrabajador::getTipoCuenta(),
                 'ruralt' => ParamsTrabajador::getRural(),
                 "autoriza" => array("S" => "SI", "N" => "NO")
@@ -753,60 +629,64 @@ class IndependienteController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function searchRequestAction($id)
+    public function searchRequestAction(Request $request, Response $response, int $id)
     {
         $this->setResponse("ajax");
         try {
             if (is_null($id)) {
                 throw new DebugException("Error no hay solicitud a buscar", 301);
             }
-            $documento = parent::getActUser("documento");
-            $coddoc = parent::getActUser("coddoc");
+            $documento = $this->user["documento"];
+            $coddoc = $this->user["coddoc"];
 
-            $solicitud = $this->Mercurio41->findFirst(" id='{$id}' AND documento='{$documento}' AND coddoc='{$coddoc}'");
+            $solicitud = Mercurio41::where("id", $id)
+                ->where("documento", $documento)
+                ->where("coddoc", $coddoc)->first();
+
             if ($solicitud == False) {
                 throw new DebugException("Error la solicitud no está disponible para acceder.", 301);
             } else {
-                $data = $solicitud->getArray();
+                $data = $solicitud->toArray();
             }
-            $salida = array(
+
+            $salida = [
                 "success" => true,
                 "data" => $data,
                 "msj" => 'OK'
-            );
+            ];
         } catch (DebugException $e) {
-            $salida = array(
+            $salida = [
                 "success" => false,
                 "msj" => $e->getMessage()
-            );
+            ];
         }
-        return $this->renderObject($salida, false);
+        return $this->renderObject($salida);
     }
 
     public function consultaDocumentosAction($id)
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         try {
-            $documento = parent::getActUser("documento");
-            $coddoc = parent::getActUser("coddoc");
-            $independienteService = new IndependienteService();
 
-            $sindepe = $this->Mercurio41->findFirst("id='{$id}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado NOT IN('I','X')");
-            if ($sindepe == false) {
-                throw new DebugException("Error no se puede identificar el propietario de la solicitud", 301);
-            }
-            $salida = array(
+            $documento = $this->user['documento'] ?? '';
+            $coddoc = $this->user['coddoc'] ?? '';
+            $service = new IndependienteService();
+
+            $sindepe = (new Mercurio41())->findFirst(" id='{$id}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado NOT IN('I','X')");
+            if ($sindepe == false) throw new DebugException('Error no se puede identificar el propietario de la solicitud', 404);
+
+            $salida = [
                 'success' => true,
-                'data' => $independienteService->dataArchivosRequeridos($sindepe),
+                'data' => $service->dataArchivosRequeridos($sindepe),
                 'msj' => 'OK'
-            );
+            ];
         } catch (DebugException $e) {
-            $salida = array(
-                "success" => false,
-                "msj" => $e->getMessage()
-            );
+            $salida = [
+                'success' => false,
+                'msj' => $e->getMessage()
+            ];
         }
-        return $this->renderObject($salida, false);
+        return $this->renderObject($salida);
     }
 
     public function cartaSolicitudAction($archivo = "")
@@ -832,7 +712,7 @@ class IndependienteController extends ApplicationController
 
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
-            
+
             $id = $request->input('id');
 
             $m41 = (new Mercurio41())->findFirst("id='{$id}' and documento='{$documento}' and coddoc='{$coddoc}'");
@@ -845,7 +725,6 @@ class IndependienteController extends ApplicationController
                 'success' => true,
                 'msj' => 'Ok'
             );
-
         } catch (DebugException $e) {
             $response = array(
                 'success' => false,

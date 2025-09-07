@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
@@ -18,7 +19,7 @@ class UsuarioController extends ApplicationController
     protected $tipo;
 
     public function __construct()
-    {   
+    {
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
@@ -37,20 +38,20 @@ class UsuarioController extends ApplicationController
         try {
             $mtipoDocumentos = new Gener18();
             $coddoc = array();
-            foreach ($mtipoDocumentos->find() as $entity) {
+            foreach ($mtipoDocumentos->all() as $entity) {
                 if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') continue;
                 $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
             }
 
             $coddocrepleg = array();
-            foreach ($mtipoDocumentos->find() as $entity) {
+            foreach ($mtipoDocumentos->all() as $entity) {
                 if ($entity->getCodrua() == 'TI' || $entity->getCodrua() == 'RC') continue;
                 $coddocrepleg["{$entity->getCodrua()}"] = $entity->getDetdoc();
             }
 
             $codciu = array();
             $mgener09 = new Gener09();
-            foreach ($mgener09->find("*", "conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
+            foreach ($mgener09->getFind("conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
                 $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
             }
 
@@ -80,14 +81,14 @@ class UsuarioController extends ApplicationController
         try {
             $mtipoDocumentos = new Gener18();
             $mcoddoc = array();
-            foreach ($mtipoDocumentos->find() as $entity) {
+            foreach ($mtipoDocumentos->all() as $entity) {
                 if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') continue;
                 $mcoddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
             }
 
             $mcodciu = array();
             $mgener09 = new Gener09();
-            foreach ($mgener09->find("*", "conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
+            foreach ($mgener09->getFind("conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
                 $mcodciu["{$entity->getCodzon()}"] = $entity->getDetzon();
             }
 

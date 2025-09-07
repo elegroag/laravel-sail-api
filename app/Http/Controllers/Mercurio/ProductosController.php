@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
@@ -17,7 +18,7 @@ class ProductosController extends ApplicationController
     protected $tipo;
 
     public function __construct()
-    {   
+    {
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
@@ -153,7 +154,7 @@ class ProductosController extends ApplicationController
     function misCuposAplicados($codser)
     {
         $cedtra =  parent::getActUser('documento');
-        $pinesAfiliados = (new PinesAfiliado())->find("cedtra='{$cedtra}' and codser='{$codser}' ");
+        $pinesAfiliados = (new PinesAfiliado())->getFind("cedtra='{$cedtra}' and codser='{$codser}' ");
         $pines = array();
 
         if ($pinesAfiliados) {
@@ -167,7 +168,7 @@ class ProductosController extends ApplicationController
     function afiliadosBeneficiarios($codser)
     {
         $cedtra =  parent::getActUser('documento');
-        $afiliadoHabiles = (new AfiliadoHabil)->find("cedtra='{$cedtra}' and codser='{$codser}' ");
+        $afiliadoHabiles = (new AfiliadoHabil)->getFind("cedtra='{$cedtra}' and codser='{$codser}' ");
         $habiles = array();
         if ($afiliadoHabiles) {
             $ai = 0;

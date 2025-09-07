@@ -185,7 +185,7 @@ const $App = {
         const { url, data = {}, callback, silent = false } = transfer;
         // eslint-disable-next-line quotes
         const csrf = document.querySelector("[name='csrf-token']").getAttribute('content');
-
+        console.log(data);
         $.ajax({
             type: 'POST',
             data: data,

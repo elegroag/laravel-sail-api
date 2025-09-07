@@ -119,7 +119,7 @@ class AutenticaEmpresa extends AutenticaGeneral
                     $soliPrevias->save();
                 }
 
-                $soliPrevTraba = (new Mercurio31)->find("tipo='{$this->tipo}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado='A'");
+                $soliPrevTraba = (new Mercurio31)->getFind("tipo='{$this->tipo}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado='A'");
                 if ($soliPrevTraba) {
                     foreach ($soliPrevTraba as $soli) {
                         $soli->setEstado('I');
@@ -128,7 +128,7 @@ class AutenticaEmpresa extends AutenticaGeneral
                     }
                 }
 
-                $soliPrevCon = (new Mercurio32)->find("tipo='{$this->tipo}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado='A'");
+                $soliPrevCon = (new Mercurio32)->getFind("tipo='{$this->tipo}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado='A'");
                 if ($soliPrevCon) {
                     foreach ($soliPrevCon as $soli) {
                         $soli->setEstado('I');
@@ -137,7 +137,7 @@ class AutenticaEmpresa extends AutenticaGeneral
                     }
                 }
 
-                $soliPrevBen = (new Mercurio34)->find("tipo='{$this->tipo}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado='A'");
+                $soliPrevBen = (new Mercurio34)->getFind("tipo='{$this->tipo}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado='A'");
                 if ($soliPrevBen) {
                     foreach ($soliPrevBen as $soli) {
                         $soli->setEstado('I');

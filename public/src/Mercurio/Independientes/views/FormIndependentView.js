@@ -1,413 +1,394 @@
-import { $App } from '../../../App';
-import { ComponentModel } from '../../../Componentes/Models/ComponentModel';
-import { FormView } from '../../FormView';
-import { IndependienteModel } from '../models/IndependienteModel';
-import { eventsFormControl } from '../../../Core';
 import flatpickr from 'flatpickr';
 import { Spanish } from 'flatpickr/dist/l10n/es';
+import { $App } from '../../../App';
+import { ComponentModel } from '../../../Componentes/Models/ComponentModel';
+import { eventsFormControl } from '../../../Core';
+import { FormView } from '../../FormView';
+import { IndependienteModel } from '../models/IndependienteModel';
 
 export class FormIndependentView extends FormView {
-	#choiceComponents = null;
+    #choiceComponents = null;
 
-	constructor(options = {}) {
-		super({
-			...options,
-			onRender: (el={}) => this.#afterRender(el)
-		});
-		this.viewComponents = [];
-		this.#choiceComponents = [];
-	}
+    constructor(options = {}) {
+        super({
+            ...options,
+            onRender: (el = {}) => this.#afterRender(el),
+        });
+        this.viewComponents = [];
+        this.#choiceComponents = [];
+    }
 
-	get events() {
-		return {
-			'click #guardar_ficha': 'saveFormData',
-			'click #cancel': 'cancel',
-			'focusout #telefono, #digver': 'isNumber',
-			'focusout #cedtra': 'validePk',
-			'change #tipdoc': 'changeTipoDocumento',
-			'click [data-toggle="address"]': 'openAddress',
-			'click #btEnviarRadicado': 'enviarRadicado',
-			'change #peretn': 'changePeretn',
-			'change #tippag': 'changeTippag',
-		};
-	}
+    get events() {
+        return {
+            'click #guardar_ficha': 'saveFormData',
+            'click #cancel': 'cancel',
+            'focusout #telefono, #digver': 'isNumber',
+            'focusout #cedtra': 'validePk',
+            'change #tipdoc': 'changeTipoDocumento',
+            'click [data-toggle="address"]': 'openAddress',
+            'click #btEnviarRadicado': 'enviarRadicado',
+            'change #peretn': 'changePeretn',
+            'change #tippag': 'changeTippag',
+        };
+    }
 
-	#afterRender($el = {}) {
-		_.each(this.collection, (component) => {
-			if (component.name == 'ruralt') component.type = 'radio';
-			if (component.name == 'rural') component.type = 'radio';
-			if (component.name == 'autoriza') component.type = 'radio';
+    #afterRender($el = {}) {
+        _.each(this.collection, (component) => {
+            if (component.name == 'ruralt') component.type = 'radio';
+            if (component.name == 'rural') component.type = 'radio';
+            if (component.name == 'autoriza') component.type = 'radio';
 
-			const view = this.addComponent(
-				new ComponentModel({
-					disabled: false,
-					readonly: false,
-					order: 0,
-					target: 1,
-					searchType: 'local',
-					...component,
-					valor: this.model.get(component.name),
-				}),
-				component.type,
-			);
+            const view = this.addComponent(
+                new ComponentModel({
+                    disabled: false,
+                    readonly: false,
+                    order: 0,
+                    target: 1,
+                    searchType: 'local',
+                    ...component,
+                    valor: this.model.get(component.name),
+                }),
+                component.type,
+            );
 
-			this.viewComponents.push(view);
-			this.$el.find('#component_' + component.name).html(view.$el);
-		});
+            this.viewComponents.push(view);
+            this.$el.find('#component_' + component.name).html(view.$el);
+        });
 
-		this.form.validate({
-			...IndependienteModel.Rules,
-			highlight: function (element) {
-				$(element).removeClass('is-valid').addClass('is-invalid');
-			},
-			unhighlight: function (element) {
-				$(element).removeClass('is-invalid').addClass('is-valid');
-			},
-		});
+        this.form.validate({
+            ...IndependienteModel.Rules,
+            highlight: function (element) {
+                $(element).removeClass('is-valid').addClass('is-invalid');
+            },
+            unhighlight: function (element) {
+                $(element).removeClass('is-invalid').addClass('is-valid');
+            },
+        });
 
-		this.selectores = this.$el.find(
-			'#tipdoc, #tipsoc, #ciupri, #codzon, #codciu, #codact, #coddocrepleg, #ciunac, #cargo, #pub_indigena_id, #resguardo_id',
-		);
+        this.selectores = this.$el.find(
+            '#tipdoc, #tipsoc, #ciupri, #codzon, #codciu, #codact, #coddocrepleg, #ciunac, #cargo, #pub_indigena_id, #resguardo_id',
+        );
 
-		if (this.model.get('id') !== null) {
-			_.each(this.model.toJSON(), (valor, key) => {
-				if (!(_.isEmpty(valor) == true || _.isUndefined(valor) == true))
-					this.$el.find(`[name="${key}"]`).val(valor);
-			});
-			this.$el.find('#cedtra').attr('readonly', true);
+        if (this.model.get('id') !== null) {
+            $.each(this.model.toJSON(), (key, valor) => {
+                const inputElement = this.$el.find(`[name="${key}"]`);
+                if (inputElement.length) {
+                    inputElement.val(valor);
+                }
+            });
 
-			if (this.model.get('tippag') == 'A' || this.model.get('tippag') == 'D') {
-				this.form.find('#show_numcue').removeClass('d-none');
-				this.form.find('#show_codban').removeClass('d-none');
-				this.form.find('#show_tipcue').removeClass('d-none');
-			} else {
-				this.$el.find('#numcue').rules('remove', 'required');
-				this.$el.find('#codban').rules('remove', 'required');
-				this.$el.find('#tipcue').rules('remove', 'required');
+            this.$el.find('#cedtra').attr('readonly', true);
 
-				IndependienteModel.changeRulesProperty([
-					{ rule: 'numcue', prop: 'required', value: false },
-					{ rule: 'codban', prop: 'required', value: false },
-					{ rule: 'tipcue', prop: 'required', value: false },
-				]);
-			}
+            if (this.model.get('tippag') == 'A' || this.model.get('tippag') == 'D') {
+                this.form.find('#show_numcue').removeClass('d-none');
+                this.form.find('#show_codban').removeClass('d-none');
+                this.form.find('#show_tipcue').removeClass('d-none');
+            } else {
+                this.$el.find('#numcue').rules('remove', 'required');
+                this.$el.find('#codban').rules('remove', 'required');
+                this.$el.find('#tipcue').rules('remove', 'required');
 
-			if (this.model.get('peretn') == '3') {
-				this.$el.find('.show-peretn').removeClass('d-none');
-			} else {
-				this.$el.find('.show-peretn').addClass('d-none');
-				this.$el.find('#resguardo_id').val('2');
-				this.$el.find('#pub_indigena_id').val('2');
-			}
+                IndependienteModel.changeRulesProperty([
+                    { rule: 'numcue', prop: 'required', value: false },
+                    { rule: 'codban', prop: 'required', value: false },
+                    { rule: 'tipcue', prop: 'required', value: false },
+                ]);
+            }
 
-			this.selectores.trigger('change');
-			setTimeout(() => this.form.valid(), 200);
+            if (this.model.get('peretn') == '3') {
+                this.$el.find('.show-peretn').removeClass('d-none');
+            } else {
+                this.$el.find('.show-peretn').addClass('d-none');
+                this.$el.find('#resguardo_id').val('2');
+                this.$el.find('#pub_indigena_id').val('2');
+            }
 
-			$.each(this.selectores, (index, element) => {
-				this.#choiceComponents[element.name] = new Choices(element);
-				const name = this.model.get(element.name);
-				if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
-			});
-		} else {
-			$.each(this.selectores, (index, element) => this.#choiceComponents[element.name] = new Choices(element));
-		}
+            this.selectores.trigger('change');
+            setTimeout(() => this.form.valid(), 200);
 
-		eventsFormControl(this.$el);
+            $.each(this.selectores, (index, element) => {
+                this.#choiceComponents[element.name] = new Choices(element);
+                const name = this.model.get(element.name);
+                if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
+            });
+        } else {
+            $.each(this.selectores, (index, element) => (this.#choiceComponents[element.name] = new Choices(element)));
+        }
 
-		flatpickr(this.$el.find('#fecnac, #fecini'), {
-			enableTime: false,
-			dateFormat: 'Y-m-d',
-			locale: Spanish,
-		});
-	}
+        eventsFormControl(this.$el);
 
-	changeTipoDocumento(e) {
-		let tipdoc = $(e.currentTarget).val();
-		let coddocrepleg = IndependienteModel.changeTipdoc(tipdoc);
-		this.$el.find('#coddocrepleg').val(coddocrepleg);
-	}
+        flatpickr(this.$el.find('#fecnac, #fecini'), {
+            enableTime: false,
+            dateFormat: 'Y-m-d',
+            locale: Spanish,
+        });
+    }
 
-	saveFormData(event) {
-		event.preventDefault();
-		const target = this.$el.find(event.currentTarget);
-		target.attr('disabled', true);
+    changeTipoDocumento(e) {
+        let tipdoc = $(e.currentTarget).val();
+        let coddocrepleg = IndependienteModel.changeTipdoc(tipdoc);
+        this.$el.find('#coddocrepleg').val(coddocrepleg);
+    }
 
-		const _parent = this.$el.find('#peretn').val();
-		if (_parent != '3') {
-			this.$el.find('#resguardo_id').val('2');
-			this.$el.find('#pub_indigena_id').val('2');
-		}
+    saveFormData(event) {
+        event.preventDefault();
+        const target = this.$el.find(event.currentTarget);
+        target.attr('disabled', true);
 
-		let _err = 0;
-		if (this.form.valid() == false) _err++;
+        const _parent = this.$el.find('#peretn').val();
+        if (_parent != '3') {
+            this.$el.find('#resguardo_id').val('2');
+            this.$el.find('#pub_indigena_id').val('2');
+        }
 
-		if (_err > 0) {
-			target.removeAttr('disabled');
-			$App.trigger('alert:warning', {
-				message: 'Se requiere de resolver los campos requeridos para continuar.',
-			});
-			setTimeout(() => $('label.error').text(''), 6000);
-			return false;
-		}
+        let _err = 0;
+        if (this.form.valid() == false) _err++;
 
-		this.$el.find('#cedtra').removeAttr('disabled');
+        if (_err > 0) {
+            target.removeAttr('disabled');
+            $App.trigger('alert:warning', {
+                message: 'Se requiere de resolver los campos requeridos para continuar.',
+            });
+            setTimeout(() => $('label.error').text(''), 6000);
+            return false;
+        }
 
-		const entity = this.serializeModel(new IndependienteModel());
-		if (entity.get('numcue') == '') entity.set('numcue', '0');
+        this.$el.find('#cedtra').removeAttr('disabled');
 
-		if (entity.isValid() !== true) {
-			target.removeAttr('disabled');
-			$App.trigger('alert:warning', { message: entity.validationError.join(' ') });
-			setTimeout(() => $('label.error').text(''), 6000);
-			return false;
-		}
+        const entity = this.serializeModel(new IndependienteModel());
+        if (entity.get('numcue') == '') entity.set('numcue', '0');
 
-		$App.trigger('confirma', {
-			message: 'Confirma que desea guardar los datos del formulario.',
-			callback: (status) => {
-				if (status) {
-					this.trigger('form:save', {
-						entity: entity,
-						isNew: this.isNew,
-						callback: (response) => {
-							target.removeAttr('disabled');
-							this.$el.find('#cedtra').attr('disabled', true);
+        if (entity.isValid() !== true) {
+            target.removeAttr('disabled');
+            $App.trigger('alert:warning', { message: entity.validationError.join(' ') });
+            setTimeout(() => $('label.error').text(''), 6000);
+            return false;
+        }
 
-							if (response) {
-								if (response.success) {
-									$App.trigger('alert:success', { message: response.msj });
-									this.model.set({ id: parseInt(response.data.id) });
-									if (this.isNew === true) {
-										$App.router.navigate('proceso/' + this.model.get('id'), {
-											trigger: true,
-											replace: true,
-										});
-									} else {
-										const _tab = new bootstrap.Tab('a[href="#documentos_adjuntos"]');
-										_tab.show();
-									}
-								} else {
-									$App.trigger('alert:error', { message: response.msj });
-								}
-							}
-						},
-					});
-				} else {
-					target.removeAttr('disabled');
-				}
-			},
-		});
-	}
+        $App.trigger('confirma', {
+            message: 'Confirma que desea guardar los datos del formulario.',
+            callback: (status) => {
+                if (status) {
+                    this.trigger('form:save', {
+                        entity: entity,
+                        isNew: this.isNew,
+                        callback: (response) => {
+                            target.removeAttr('disabled');
+                            this.$el.find('#cedtra').attr('disabled', true);
 
-	nameRepleg() {
-		return (
-			this.getInput('#priape') +
-			' ' +
-			this.getInput('#segape') +
-			' ' +
-			this.getInput('#prinom') +
-			' ' +
-			this.getInput('#segnom')
-		);
-	}
+                            if (response) {
+                                if (response.success) {
+                                    $App.trigger('alert:success', { message: response.msj });
+                                    this.model.set({ id: parseInt(response.data.id) });
+                                    if (this.isNew === true) {
+                                        $App.router.navigate('proceso/' + this.model.get('id'), {
+                                            trigger: true,
+                                            replace: true,
+                                        });
+                                    } else {
+                                        const _tab = new bootstrap.Tab('a[href="#documentos_adjuntos"]');
+                                        _tab.show();
+                                    }
+                                } else {
+                                    $App.trigger('alert:error', { message: response.msj });
+                                }
+                            }
+                        },
+                    });
+                } else {
+                    target.removeAttr('disabled');
+                }
+            },
+        });
+    }
 
-	digver(e) {
-		e.preventDefault();
-		let cedtra = $(e.currentTarget).val();
-		if (cedtra === '') {
-			return false;
-		}
-		this.appController.trigger('form:digit', {
-			cedtra: cedtra,
-			callback: (entity) => {
-				console.log(entity);
-				$('#digver').val(entity.digver);
-			},
-		});
-	}
+    nameRepleg() {
+        return this.getInput('#priape') + ' ' + this.getInput('#segape') + ' ' + this.getInput('#prinom') + ' ' + this.getInput('#segnom');
+    }
 
-	validePk(e) {
-		e.preventDefault();
-		let cedtra = this.$el.find(e.currentTarget).val();
-		if (cedtra === '') return false;
+    digver(e) {
+        e.preventDefault();
+        let cedtra = $(e.currentTarget).val();
+        if (cedtra === '') {
+            return false;
+        }
+        this.appController.trigger('form:digit', {
+            cedtra: cedtra,
+            callback: (entity) => {
+                console.log(entity);
+                $('#digver').val(entity.digver);
+            },
+        });
+    }
 
-		$App.trigger('form:find', {
-			cedtra: cedtra,
-			callback: () => {
-				this.actualizaForm();
-				this.$el.find('#cedtra').attr('disabled', true);
+    validePk(e) {
+        e.preventDefault();
+        let cedtra = this.$el.find(e.currentTarget).val();
+        if (cedtra === '') return false;
 
-				$.each(this.selectores, (index, element) => {
-					const name = this.model.get(element.name);
-					if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
-				});
-			},
-		});
-	}
+        $App.trigger('form:find', {
+            cedtra: cedtra,
+            callback: () => {
+                this.actualizaForm();
+                this.$el.find('#cedtra').attr('disabled', true);
 
-	comfirmarSincronizar(model) {
-		this.model.entity = model;
+                $.each(this.selectores, (index, element) => {
+                    const name = this.model.get(element.name);
+                    if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
+                });
+            },
+        });
+    }
 
-		$('#codact').val(this.model.entity.get('codact'));
-		$('#calemp').val(this.model.entity.get('calemp'));
-		$('#cedtra').val(this.model.entity.get('cedtra'));
-		$('#direccion').val(this.model.entity.get('direccion'));
-		$('#codciu').val(this.model.entity.get('codciu'));
-		$('#codzon').val(this.model.entity.get('codzon'));
-		$('#telefono').val(this.model.entity.get('telefono'));
-		$('#celular').val(this.model.entity.get('celular'));
-		$('#email').val(this.model.entity.get('email'));
-		$('#prinom').val(this.model.entity.get('prinom'));
-		$('#segnom').val(this.model.entity.get('segnom'));
-		$('#priape').val(this.model.entity.get('priape'));
-		$('#segape').val(this.model.entity.get('segape'));
-		$('#codcaj').val(this.model.entity.get('codcaj'));
-		$('#coddoc').val(this.model.entity.get('tipdoc'));
+    comfirmarSincronizar(model) {
+        this.model.entity = model;
 
-		this.selectores.trigger('change');
+        $('#codact').val(this.model.entity.get('codact'));
+        $('#calemp').val(this.model.entity.get('calemp'));
+        $('#cedtra').val(this.model.entity.get('cedtra'));
+        $('#direccion').val(this.model.entity.get('direccion'));
+        $('#codciu').val(this.model.entity.get('codciu'));
+        $('#codzon').val(this.model.entity.get('codzon'));
+        $('#telefono').val(this.model.entity.get('telefono'));
+        $('#celular').val(this.model.entity.get('celular'));
+        $('#email').val(this.model.entity.get('email'));
+        $('#prinom').val(this.model.entity.get('prinom'));
+        $('#segnom').val(this.model.entity.get('segnom'));
+        $('#priape').val(this.model.entity.get('priape'));
+        $('#segape').val(this.model.entity.get('segape'));
+        $('#codcaj').val(this.model.entity.get('codcaj'));
+        $('#coddoc').val(this.model.entity.get('tipdoc'));
 
-		setTimeout(function () {
-			Swal.fire({
-				html: `<p style='font-size:14px'>El formulario se actualizo de forma correcta</p>`,
-				showConfirmButton: false,
-				timer: 2000,
-			});
-		}, 300);
-	}
+        this.selectores.trigger('change');
 
-	setModelUseEmpresa(empresa) {
-		let nombre;
-		if (empresa.priaperepleg == null) {
-			nombre =
-				empresa.priaperepleg +
-				' ' +
-				empresa.segaperepleg +
-				' ' +
-				empresa.prinomrepleg +
-				' ' +
-				empresa.segnomrepleg;
-		} else {
-			nombre =
-				empresa.priape +
-				' ' +
-				empresa.segape +
-				' ' +
-				empresa.prinom +
-				' ' +
-				empresa.segnom;
-		}
-		this.model.set({
-			cedtra: empresa.nit,
-			tipdoc: empresa.coddoc,
-			priape: empresa.priape,
-			segape: empresa.segape,
-			prinom: empresa.priape,
-			segnom: empresa.segape,
-			direccion: empresa.direccion,
-			codciu: empresa.codciu,
-			telefono: empresa.telefono,
-			email: empresa.email,
-			codzon: empresa.codzon,
-			celular: empresa.telr,
-			coddocrepleg: 'CC',
-		});
-	}
+        setTimeout(function () {
+            Swal.fire({
+                html: `<p style='font-size:14px'>El formulario se actualizo de forma correcta</p>`,
+                showConfirmButton: false,
+                timer: 2000,
+            });
+        }, 300);
+    }
 
-	setModelTrabajador(trabajador) {
-		this.model.set({
-			cedtra: trabajador.cedtra,
-			tipdoc: trabajador.coddoc,
-			priape: trabajador.priape,
-			segape: trabajador.segape,
-			prinom: trabajador.prinom,
-			segnom: trabajador.segnom,
-			direccion: trabajador.direccion,
-			codciu: trabajador.codciu,
-			telefono: trabajador.telefono,
-			email: trabajador.email,
-			codzon: trabajador.codzon,
-			rural: trabajador.rural,
-			cabhog: trabajador.cabhog,
-			captra: trabajador.captra,
-			tipdis: trabajador.tipdis,
-			salario: trabajador.salario,
-			sexo: trabajador.sexo,
-			estciv: trabajador.estciv,
-			vivienda: trabajador.vivienda,
-			nivedu: trabajador.nivedu,
-			vendedor: trabajador.vendedor,
-			tippag: trabajador.tippag,
-			codban: trabajador.codban,
-			numcue: trabajador.numcue,
-			tipcue: trabajador.tipcue,
-			fecnac: trabajador.fecnac,
-			ciunac: trabajador.ciunac,
-			cargo: trabajador.cargo,
-			orisex: trabajador.orisex,
-			facvul: trabajador.facvul,
-			peretn: trabajador.peretn,
-			resguardo_id: trabajador.resguardo_id,
-			pub_indigena_id: trabajador.pub_indigena_id,
-		});
-	}
+    setModelUseEmpresa(empresa) {
+        let nombre;
+        if (empresa.priaperepleg == null) {
+            nombre = empresa.priaperepleg + ' ' + empresa.segaperepleg + ' ' + empresa.prinomrepleg + ' ' + empresa.segnomrepleg;
+        } else {
+            nombre = empresa.priape + ' ' + empresa.segape + ' ' + empresa.prinom + ' ' + empresa.segnom;
+        }
+        this.model.set({
+            cedtra: empresa.nit,
+            tipdoc: empresa.coddoc,
+            priape: empresa.priape,
+            segape: empresa.segape,
+            prinom: empresa.priape,
+            segnom: empresa.segape,
+            direccion: empresa.direccion,
+            codciu: empresa.codciu,
+            telefono: empresa.telefono,
+            email: empresa.email,
+            codzon: empresa.codzon,
+            celular: empresa.telr,
+            coddocrepleg: 'CC',
+        });
+    }
 
-	changePeretn(e) {
-		let _parent = this.$el.find(e.currentTarget).val();
-		if (_parent == '3') {
-			this.$el.find('.show-peretn').removeClass('d-none');
-		} else {
-			this.$el.find('.show-peretn').addClass('d-none');
-			this.$el.find('#resguardo_id').val('2');
-			this.$el.find('#pub_indigena_id').val('2');
-		}
-	}
+    setModelTrabajador(trabajador) {
+        this.model.set({
+            cedtra: trabajador.cedtra,
+            tipdoc: trabajador.coddoc,
+            priape: trabajador.priape,
+            segape: trabajador.segape,
+            prinom: trabajador.prinom,
+            segnom: trabajador.segnom,
+            direccion: trabajador.direccion,
+            codciu: trabajador.codciu,
+            telefono: trabajador.telefono,
+            email: trabajador.email,
+            codzon: trabajador.codzon,
+            rural: trabajador.rural,
+            cabhog: trabajador.cabhog,
+            captra: trabajador.captra,
+            tipdis: trabajador.tipdis,
+            salario: trabajador.salario,
+            sexo: trabajador.sexo,
+            estciv: trabajador.estciv,
+            vivienda: trabajador.vivienda,
+            nivedu: trabajador.nivedu,
+            vendedor: trabajador.vendedor,
+            tippag: trabajador.tippag,
+            codban: trabajador.codban,
+            numcue: trabajador.numcue,
+            tipcue: trabajador.tipcue,
+            fecnac: trabajador.fecnac,
+            ciunac: trabajador.ciunac,
+            cargo: trabajador.cargo,
+            orisex: trabajador.orisex,
+            facvul: trabajador.facvul,
+            peretn: trabajador.peretn,
+            resguardo_id: trabajador.resguardo_id,
+            pub_indigena_id: trabajador.pub_indigena_id,
+        });
+    }
 
-	changeTippag(e) {
-		const target = this.getInput(e.currentTarget);
-		if (target == 'A' || target == 'D') {
-			this.$el.find('#show_numcue').removeClass('d-none');
-			this.$el.find('#show_codban').removeClass('d-none');
-			this.$el.find('#show_tipcue').removeClass('d-none');
-			if (target == 'D') {
-				this.setInput('codban', '51');
-				this.setInput('tipcue', 'A');
-				this.selectores.trigger('change');
-			}
+    changePeretn(e) {
+        let _parent = this.$el.find(e.currentTarget).val();
+        if (_parent == '3') {
+            this.$el.find('.show-peretn').removeClass('d-none');
+        } else {
+            this.$el.find('.show-peretn').addClass('d-none');
+            this.$el.find('#resguardo_id').val('2');
+            this.$el.find('#pub_indigena_id').val('2');
+        }
+    }
 
-			IndependienteModel.changeRulesProperty([
-				{ rule: 'numcue', prop: 'required', value: true },
-				{ rule: 'codban', prop: 'required', value: true },
-				{ rule: 'tipcue', prop: 'required', value: true },
-			]);
+    changeTippag(e) {
+        const target = this.getInput(e.currentTarget);
+        if (target == 'A' || target == 'D') {
+            this.$el.find('#show_numcue').removeClass('d-none');
+            this.$el.find('#show_codban').removeClass('d-none');
+            this.$el.find('#show_tipcue').removeClass('d-none');
+            if (target == 'D') {
+                this.setInput('codban', '51');
+                this.setInput('tipcue', 'A');
+                this.selectores.trigger('change');
+            }
 
-			this.$el.find('#numcue').rules('add', { required: true });
-			this.$el.find('#codban').rules('add', { required: true });
-			this.$el.find('#tipcue').rules('add', { required: true });
-		} else {
-			this.$el.find('#show_numcue').addClass('d-none');
-			this.$el.find('#show_codban').addClass('d-none');
-			this.$el.find('#show_tipcue').addClass('d-none');
+            IndependienteModel.changeRulesProperty([
+                { rule: 'numcue', prop: 'required', value: true },
+                { rule: 'codban', prop: 'required', value: true },
+                { rule: 'tipcue', prop: 'required', value: true },
+            ]);
 
-			IndependienteModel.changeRulesProperty([
-				{ rule: 'numcue', prop: 'required', value: false },
-				{ rule: 'codban', prop: 'required', value: false },
-				{ rule: 'tipcue', prop: 'required', value: false },
-			]);
+            this.$el.find('#numcue').rules('add', { required: true });
+            this.$el.find('#codban').rules('add', { required: true });
+            this.$el.find('#tipcue').rules('add', { required: true });
+        } else {
+            this.$el.find('#show_numcue').addClass('d-none');
+            this.$el.find('#show_codban').addClass('d-none');
+            this.$el.find('#show_tipcue').addClass('d-none');
 
-			this.$el.find('#numcue').rules('remove', 'required');
-			this.$el.find('#codban').rules('remove', 'required');
-			this.$el.find('#tipcue').rules('remove', 'required');
-		}
-	}
+            IndependienteModel.changeRulesProperty([
+                { rule: 'numcue', prop: 'required', value: false },
+                { rule: 'codban', prop: 'required', value: false },
+                { rule: 'tipcue', prop: 'required', value: false },
+            ]);
 
-	/**
-	 * @override
-	 */
-	remove() {
-		if (_.size(this.viewComponents) > 0) {
-			_.each(this.viewComponents, (view) => view.remove());
-		}
-		$.each(this.#choiceComponents, (choice) => choice.destroy());
-		FormView.prototype.remove.call(this, {});
-	}
+            this.$el.find('#numcue').rules('remove', 'required');
+            this.$el.find('#codban').rules('remove', 'required');
+            this.$el.find('#tipcue').rules('remove', 'required');
+        }
+    }
+
+    /**
+     * @override
+     */
+    remove() {
+        if (_.size(this.viewComponents) > 0) {
+            _.each(this.viewComponents, (view) => view.remove());
+        }
+        $.each(this.#choiceComponents, (choice) => choice.destroy());
+        FormView.prototype.remove.call(this, {});
+    }
 }

@@ -3,13 +3,18 @@
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
+use App\Models\Adapter\ValidateWithRules;
+use Illuminate\Validation\Rule;
+use Thiagoprz\CompositeKey\HasCompositeKey;
 
 class Mercurio37 extends ModelBase
 {
+    use HasCompositeKey;
+    use ValidateWithRules;
 
     protected $table = 'mercurio37';
     public $timestamps = false;
-    protected $primaryKey = 'id';
+    protected $primaryKey = ['tipopc', 'numero', 'coddoc'];
 
     protected $fillable = [
         'tipopc',
@@ -18,6 +23,23 @@ class Mercurio37 extends ModelBase
         'archivo',
         'fhash',
     ];
+
+    protected function rules()
+    {
+        return [
+            'tipopc' => 'required|numeric|min:1',
+            'numero' => 'required|numeric|min:1',
+            'coddoc' => 'required|numeric|min:1',
+            '_id' => [
+                'required|string',
+                Rule::unique('mercurio37')->where(function ($query) {
+                    return $query->where('tipopc', $this->tipopc)
+                        ->where('numero', $this->numero)
+                        ->where('coddoc', $this->coddoc);
+                }),
+            ],
+        ];
+    }
 
     public function setFhash($fhash)
     {

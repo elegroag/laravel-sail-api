@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services\Formularios\Afiliacion;
 
 use App\Exceptions\DebugException;
@@ -29,14 +30,11 @@ class FormularioIndependiente extends Documento
         }
         $this->independiente = $this->request->getParam('independiente');
 
-        $this->pdf->SetTitle(utf8_decode("Formulario afiliación del independiente {$this->independiente->getCedtra()}, COMFACA"));
-        $this->pdf->SetAuthor(utf8_decode("{$this->independiente->getPriape()} {$this->independiente->getSegape()} {$this->independiente->getPrinom()} {$this->independiente->getSegnom()}, COMFACA"));
-        $this->pdf->SetSubject(utf8_decode("Formulario de afiliación a COMFACA"));
-        $this->pdf->SetCreator(utf8_decode("Plataforma Web: comfacaenlinea.com.co, COMFACA"));
+        $this->pdf->SetTitle("Formulario afiliación del independiente {$this->independiente->getCedtra()}, COMFACA");
+        $this->pdf->SetAuthor("{$this->independiente->getPriape()} {$this->independiente->getSegape()} {$this->independiente->getPrinom()} {$this->independiente->getSegnom()}, COMFACA");
+        $this->pdf->SetSubject("Formulario de afiliación a COMFACA");
+        $this->pdf->SetCreator("Plataforma Web: comfacaenlinea.com.co, COMFACA");
         $this->pdf->SetKeywords('COMFACA');
-
-        $page1 = storage_path('public/docs/form/trabajador/form-001-tra-p01.png');
-        $this->pdf->Image($page1, 0, 0, 210, 297, '');
 
         $this->pdf->SetAutoPageBreak(false, 0);
         $this->tipoAfiliado();
@@ -52,14 +50,14 @@ class FormularioIndependiente extends Documento
                 array('lb' => 'Autoriza datos', 'texto' => 'X', 'x' => 70, 'y' => 277),
             )
         );
-        $page = storage_path('public/docs/sello-firma.png');
+        $page = public_path('img/firmas/sello-firma.png');
         $this->pdf->Image($page, 160, 275, 30, 20, '');
         return $this;
     }
 
     function tipoAfiliado()
     {
-        $this->pdf->SetFont('Arial', '', 9);
+        $this->pdf->SetFont('helvetica', '', 9);
         $datos = array(
             array('lb' => 'Tipo novedad', 'texto' => 'X', 'x' => 38, 'y' => 42),
             $this->posTipoAfiliado()
@@ -69,7 +67,7 @@ class FormularioIndependiente extends Documento
 
     function dataEmpleador()
     {
-        $this->pdf->SetFont('Arial', '', 7);
+        $this->pdf->SetFont('helvetica', '', 7);
         $razon_social = capitalize($this->independiente->getPriape() . ' ' . $this->independiente->getSegape() . ' ' . $this->independiente->getPrinom() . ' ' . $this->independiente->getSegnom());
         $datos = array(
             array('lb' => 'Razon social', 'texto' => $razon_social, 'x' => 9, 'y' => 54),
@@ -97,7 +95,7 @@ class FormularioIndependiente extends Documento
             $discapacidad = $mtidis[$tipdis];
         }
 
-        $this->pdf->SetFont('Arial', '', 8);
+        $this->pdf->SetFont('helvetica', '', 8);
         $datos = array(
             array('lb' => 'Cedula trabajador', 'texto' => $this->independiente->getCedtra(), 'x' => 10, 'y' => 76),
             $this->posTipoDocumento(),
@@ -132,7 +130,7 @@ class FormularioIndependiente extends Documento
 
     function dataLaboral()
     {
-        $this->pdf->SetFont('Arial', '', 8);
+        $this->pdf->SetFont('helvetica', '', 8);
         $mcargos = ParamsTrabajador::getOcupaciones();
         $cargo = ($this->independiente->getCargo()) ? $mcargos[$this->independiente->getCargo()] : '';
 

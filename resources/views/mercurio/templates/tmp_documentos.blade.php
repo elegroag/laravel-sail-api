@@ -21,7 +21,7 @@
             <div class="row col-auto">
                 <p class="p-1 text-gray">El adjunto que posee firma digital no se puede cambiar o borrar.
                     Para modificar la información del mismo, puede editar la "Ficha Principal De Registro". El sistema realiza la tarea de borrar el documento existente y crear uno nuevo con la respectiva firma.</p>
-                    <img src="{{ asset('img/Mecurio/firma_digital.png') }}" class="img-responsive" style="width:200px" />
+                    <img src="{{ asset('img/Mercurio/firma_digital.png') }}" class="img-responsive" style="width:200px" />
             </div>
         </fieldset>
     </div>

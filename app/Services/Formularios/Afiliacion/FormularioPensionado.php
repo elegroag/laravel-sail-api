@@ -61,7 +61,7 @@ class FormularioPensionado extends Documento
 
     function tipoAfiliado()
     {
-        $this->pdf->SetFont('Arial', '', 9);
+        $this->pdf->SetFont('helvetica', '', 9);
         $this->pdf->SetAutoPageBreak(false, 0);
         $datos = array(
             array('lb' => 'Tipo novedad', 'texto' => 'X', 'x' => 38, 'y' => 42),
@@ -72,7 +72,7 @@ class FormularioPensionado extends Documento
 
     function dataEmpleador()
     {
-        $this->pdf->SetFont('Arial', '', 7);
+        $this->pdf->SetFont('helvetica', '', 7);
         $razon_social = capitalize($this->pensionado->getPriape() . ' ' . $this->pensionado->getSegape() . ' ' . $this->pensionado->getPrinom() . ' ' . $this->pensionado->getSegnom());
         $datos = array(
             array('lb' => 'Razon social', 'texto' => $razon_social, 'x' => 9, 'y' => 54),

@@ -1,4 +1,5 @@
 <?
+
 namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
@@ -27,7 +28,7 @@ class ActualizadatosController extends ApplicationController
     protected $tipo;
 
     public function __construct()
-    {   
+    {
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
@@ -47,117 +48,117 @@ class ActualizadatosController extends ApplicationController
         $actualizaEmpresaService = new ActualizaEmpresaService();
         //$actualizaEmpresaService->setTransa();
         try {
-                $documento = $this->documento;
-                $coddoc = $this->coddoc;
-                $tipo = $this->tipo;
+            $documento = $this->documento;
+            $coddoc = $this->coddoc;
+            $tipo = $this->tipo;
 
-                $asignarFuncionario = new AsignarFuncionario();
-                
-                $id = $request->input('id');
+            $asignarFuncionario = new AsignarFuncionario();
 
-                $params = array(
-                    'fecha_solicitud' => date('Y-m-d'),
-                    'fecha_estado' => date('Y-m-d'),
-                    'estado' => 'T',
-                    'tipo_actualizacion' => 'E',
-                    'tipo' => $tipo,
-                    'coddoc'  => $coddoc,
-                    'documento'  => $documento,
-                    'usuario'  => $asignarFuncionario->asignar($this->tipopc, parent::getActUser("codciu")),
-                );
+            $id = $request->input('id');
 
-                if (is_null($id) || $id == '') {
-                    $params['id'] = null;
-                    $params['estado'] = 'T';
-                    $msolicitud = $actualizaEmpresaService->createByFormData($params);
-                    $soli = $msolicitud->getArray();
-                    $id = $soli['id'];
-                } else {
-                    $res = $actualizaEmpresaService->updateByFormData($id, $params);
-                    if (!$res) {
-                        throw new DebugException("Error no se actualizo los datos", 301);
-                    }
+            $params = array(
+                'fecha_solicitud' => date('Y-m-d'),
+                'fecha_estado' => date('Y-m-d'),
+                'estado' => 'T',
+                'tipo_actualizacion' => 'E',
+                'tipo' => $tipo,
+                'coddoc'  => $coddoc,
+                'documento'  => $documento,
+                'usuario'  => $asignarFuncionario->asignar($this->tipopc, parent::getActUser("codciu")),
+            );
+
+            if (is_null($id) || $id == '') {
+                $params['id'] = null;
+                $params['estado'] = 'T';
+                $msolicitud = $actualizaEmpresaService->createByFormData($params);
+                $soli = $msolicitud->getArray();
+                $id = $soli['id'];
+            } else {
+                $res = $actualizaEmpresaService->updateByFormData($id, $params);
+                if (!$res) {
+                    throw new DebugException("Error no se actualizo los datos", 301);
                 }
+            }
 
-                //$actualizaEmpresaService->endTransa();
-                $solicitud = $actualizaEmpresaService->findById($id);
+            //$actualizaEmpresaService->endTransa();
+            $solicitud = $actualizaEmpresaService->findById($id);
 
-                $this->Mercurio33->deleteAll(" documento='{$documento}' and coddoc='{$coddoc}'");
-                $campos = $this->Mercurio28->find(" tipo='{$tipo}'");
-                if ($campos) {
-                    foreach ($campos as $mercurio28) {
-                        $valor = $request->input($mercurio28->getCampo());
-                        if ($valor == '') continue;
+            $this->Mercurio33->deleteAll(" documento='{$documento}' and coddoc='{$coddoc}'");
+            $campos = $this->Mercurio28->find(" tipo='{$tipo}'");
+            if ($campos) {
+                foreach ($campos as $mercurio28) {
+                    $valor = $request->input($mercurio28->getCampo());
+                    if ($valor == '') continue;
 
-                        $mercurio33 = $this->Mercurio33->findFirst(" documento='{$documento}' and coddoc='{$coddoc}' and actualizacion='{$solicitud->getId()}' and campo='{$mercurio28->getCampo()}'");
-                        if ($mercurio33) {
-                            $mercurio33->valor = $valor;
-                            if (!$mercurio33->save()) {
-                                $msj = '';
-                                foreach ($mercurio33->getMessages() as $e) $msj .= $e->getMessage() . ', ';
-                                throw new DebugException("Error al guardar los valores {$msj}", 301);
-                            }
-                        } else {
-                            $mercurio33 = new Mercurio33();
-                            $mercurio33->id = null;
-                            $mercurio33->tipo = $mercurio28->getTipo();
-                            $mercurio33->coddoc = $coddoc;
-                            $mercurio33->documento = $documento;
-                            $mercurio33->campo = $mercurio28->getCampo();
-                            $mercurio33->antval = $valor;
-                            $mercurio33->valor = $valor;
-                            $mercurio33->estado = 'P';
-                            $mercurio33->motivo = '';
-                            $mercurio33->fecest = date('Y-m-d');
-                            $mercurio33->usuario = $solicitud->getUsuario();
-                            $mercurio33->actualizacion = $solicitud->getId();
+                    $mercurio33 = $this->Mercurio33->findFirst(" documento='{$documento}' and coddoc='{$coddoc}' and actualizacion='{$solicitud->getId()}' and campo='{$mercurio28->getCampo()}'");
+                    if ($mercurio33) {
+                        $mercurio33->valor = $valor;
+                        if (!$mercurio33->save()) {
+                            $msj = '';
+                            foreach ($mercurio33->getMessages() as $e) $msj .= $e->getMessage() . ', ';
+                            throw new DebugException("Error al guardar los valores {$msj}", 301);
+                        }
+                    } else {
+                        $mercurio33 = new Mercurio33();
+                        $mercurio33->id = null;
+                        $mercurio33->tipo = $mercurio28->getTipo();
+                        $mercurio33->coddoc = $coddoc;
+                        $mercurio33->documento = $documento;
+                        $mercurio33->campo = $mercurio28->getCampo();
+                        $mercurio33->antval = $valor;
+                        $mercurio33->valor = $valor;
+                        $mercurio33->estado = 'P';
+                        $mercurio33->motivo = '';
+                        $mercurio33->fecest = date('Y-m-d');
+                        $mercurio33->usuario = $solicitud->getUsuario();
+                        $mercurio33->actualizacion = $solicitud->getId();
 
-                            if (!$mercurio33->save()) {
-                                $msj = '';
-                                foreach ($mercurio33->getMessages() as $e) $msj .= $e->getMessage() . ', ';
-                                throw new DebugException("Error al crear el campo {$msj}", 301);
-                            }
+                        if (!$mercurio33->save()) {
+                            $msj = '';
+                            foreach ($mercurio33->getMessages() as $e) $msj .= $e->getMessage() . ', ';
+                            throw new DebugException("Error al crear el campo {$msj}", 301);
                         }
                     }
                 }
+            }
 
-                $data = array();
-                $mercurio33 = $this->Mercurio33->find(" documento='{$documento}' AND coddoc='{$coddoc}' AND actualizacion='{$id}'");
-                foreach ($mercurio33 as $m33) $data[$m33->campo] = $m33->valor;
-                $data = array_merge($solicitud->getArray(), $data);
+            $data = array();
+            $mercurio33 = $this->Mercurio33->find(" documento='{$documento}' AND coddoc='{$coddoc}' AND actualizacion='{$id}'");
+            foreach ($mercurio33 as $m33) $data[$m33->campo] = $m33->valor;
+            $data = array_merge($solicitud->getArray(), $data);
 
-                $out = $actualizaEmpresaService->buscarEmpresaSubsidio($documento);
-                $empresa = new Mercurio30;
-                $empresa->createAttributes($out['data']);
+            $out = $actualizaEmpresaService->buscarEmpresaSubsidio($documento);
+            $empresa = new Mercurio30;
+            $empresa->createAttributes($out['data']);
 
-                $actualizaEmpresaService = new DatosEmpresaService(
-                    array(
-                        'empresa' => $empresa->getArray(),
-                        'campos' => $data,
-                        'documento' => $documento,
-                        'coddoc' => $coddoc,
-                        'nit' => $documento,
-                    )
-                );
+            $actualizaEmpresaService = new DatosEmpresaService(
+                array(
+                    'empresa' => $empresa->getArray(),
+                    'campos' => $data,
+                    'documento' => $documento,
+                    'coddoc' => $coddoc,
+                    'nit' => $documento,
+                )
+            );
 
-                $out = $actualizaEmpresaService->formulario();
-                $file_name = $out["file"];
-                $coddoc_adjunto = 27;
+            $out = $actualizaEmpresaService->formulario();
+            $file_name = $out["file"];
+            $coddoc_adjunto = 27;
 
-                $guardarArchivoService = new GuardarArchivoService(
-                    array(
-                        'tipopc' => $this->tipopc,
-                        'coddoc' => $coddoc_adjunto,
-                        'id' => $solicitud->getId()
-                    )
-                );
-                $guardarArchivoService->salvarDatos($file_name);
+            $guardarArchivoService = new GuardarArchivoService(
+                array(
+                    'tipopc' => $this->tipopc,
+                    'coddoc' => $coddoc_adjunto,
+                    'id' => $solicitud->getId()
+                )
+            );
+            $guardarArchivoService->salvarDatos($file_name);
 
-                $response = array(
-                    'success' => true,
-                    'msj' => 'Registro completado con éxito',
-                    'data' => $data
-                );
+            $response = array(
+                'success' => true,
+                'msj' => 'Registro completado con éxito',
+                'data' => $data
+            );
         } catch (DebugException $err) {
             $response = array(
                 'success' => false,
@@ -176,32 +177,32 @@ class ActualizadatosController extends ApplicationController
             $mtipoDocumentos = new Gener18();
             $tipoDocumentos = array();
 
-            foreach ($mtipoDocumentos->find() as $mtipo) {
+            foreach ($mtipoDocumentos->all() as $mtipo) {
                 if ($mtipo->getCoddoc() == '7' || $mtipo->getCoddoc() == '2') continue;
                 $tipoDocumentos["{$mtipo->getCoddoc()}"] = $mtipo->getDetdoc();
             }
 
             $msubsi54 = new Subsi54();
             $tipsoc = array();
-            foreach ($msubsi54->find() as $entity) {
+            foreach ($msubsi54->all() as $entity) {
                 $tipsoc["{$entity->getTipsoc()}"] = $entity->getDetalle();
             }
 
             $coddoc = array();
-            foreach ($mtipoDocumentos->find() as $entity) {
+            foreach ($mtipoDocumentos->all() as $entity) {
                 if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') continue;
                 $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
             }
 
             $coddocrepleg = array();
-            foreach ($mtipoDocumentos->find() as $entity) {
+            foreach ($mtipoDocumentos->all() as $entity) {
                 if ($entity->getCodrua() == 'TI' || $entity->getCodrua() == 'RC') continue;
                 $coddocrepleg["{$entity->getCodrua()}"] = $entity->getDetdoc();
             }
 
             $zonas = array();
             $mgener09 = new Gener09();
-            foreach ($mgener09->find("*", "conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
+            foreach ($mgener09->getFind("conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
                 $zonas["{$entity->getCodzon()}"] = $entity->getDetzon();
             }
 
@@ -299,10 +300,10 @@ class ActualizadatosController extends ApplicationController
     {
         $archivos = array();
         $mercurio14 = $this->Mercurio14->find("tipopc='{$this->tipopc}'");
-        
 
-        $mercurio10 = $this->db->fetchOne("SELECT item, estado, campos_corregir 
-        FROM mercurio10 
+
+        $mercurio10 = $this->db->fetchOne("SELECT item, estado, campos_corregir
+        FROM mercurio10
         WHERE numero='{$mercurio47->getId()}' AND tipopc='{$this->tipopc}' ORDER BY item DESC LIMIT 1");
 
         $corregir = false;
@@ -338,7 +339,7 @@ class ActualizadatosController extends ApplicationController
             "puede_borrar" => ($mercurio47->getEstado() == 'P' || $mercurio47->getEstado() == 'A') ? false : true,
             "mercurio14" => $mercurio14
         ))->render();
-        
+
         return $html;
     }
 

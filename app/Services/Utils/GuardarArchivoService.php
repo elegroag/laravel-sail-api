@@ -74,9 +74,7 @@ class GuardarArchivoService
             $mercurio37->setFhash($fhash);
         }
 
-        if (!$mercurio37->save()) {
-            throw new DebugException("Error al guardar el archivo", 301);
-        }
+        $mercurio37->save();
 
         $mercurio10 = Mercurio10::where('numero', $this->id)
             ->where('tipopc', $this->tipopc)

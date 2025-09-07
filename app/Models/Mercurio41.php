@@ -10,8 +10,11 @@ class Mercurio41 extends ModelBase
 {
 
     protected $table = 'mercurio41';
-    public $timestamps = false;
     protected $primaryKey = 'id';
+
+    public $incrementing = true;
+    public $keyType = 'int';
+    public $timestamps = false;
 
     protected $fillable = [
         'tipo',
@@ -670,10 +673,5 @@ class Mercurio41 extends ModelBase
     public function getFecsolString()
     {
         return (isset($this->fecsol)) ? $this->fecsol : null;
-    }
-
-    public function createAttributes($data)
-    {
-        parent::setCreateAttributes($this, $data);
     }
 }

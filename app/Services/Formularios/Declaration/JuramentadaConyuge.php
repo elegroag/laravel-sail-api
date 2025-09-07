@@ -67,9 +67,9 @@ class JuramentadaConyuge extends Documento
         $this->pdf->SetFont('helvetica', '', 9);
         $datos = array(
             array('lb' => 'Nombre trabajador', 'texto' => capitalize($nomtra), 'x' => 20, 'y' => 30),
-            array('lb' => 'Año', 'texto' => $today->getYear(), 'x' => 122, 'y' => 21),
-            array('lb' => 'Mes', 'texto' => $today->getMonth(), 'x' => 134, 'y' => 21),
-            array('lb' => 'Dia', 'texto' => $today->getDay(), 'x' => 144, 'y' => 21),
+            array('lb' => 'Año', 'texto' => $today->format('Y'), 'x' => 122, 'y' => 21),
+            array('lb' => 'Mes', 'texto' => $today->format('m'), 'x' => 134, 'y' => 21),
+            array('lb' => 'Dia', 'texto' => $today->format('d'), 'x' => 144, 'y' => 21),
             array('lb' => 'Ciudad', 'texto' => $ciudad, 'x' => 152, 'y' => 21),
             array('lb' => 'TipoDoc trabajador', 'texto' => $detdoc, 'x' => 72, 'y' => 36),
             array('lb' => 'Numero documento', 'texto' => $this->trabajador->getCedtra(), 'x' => 156, 'y' => 36),

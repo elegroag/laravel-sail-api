@@ -48,22 +48,21 @@ class EmpresaController extends ApplicationController
         return view('mercurio/empresa/index', [
             'tipo' => $this->tipo,
             'documento' => $this->user['documento'],
+            'coddoc' => $this->user['coddoc'],
             'title' => 'Afiliación de empresas'
         ]);
     }
 
-    public function renderTableAction(Request $request)
+    public function renderTableAction(Request $request, Response $response, string $estado = '')
     {
         $this->setResponse("view");
-        $estado = $request->input('estado', '');
         $empresaService = new EmpresaService();
 
-        $data = $empresaService->findAllByEstado($estado);
         $html = view(
             "mercurio/empresa/tmp/solicitudes",
             [
                 "path" => base_path(),
-                "empresas" => $data
+                "empresas" => $empresaService->findAllByEstado($estado)
             ]
         )->render();
 
@@ -83,13 +82,16 @@ class EmpresaController extends ApplicationController
 
             $service = new EmpresaService();
             $salida = $service->buscarEmpresaSubsidio($nit);
+
             if ($salida === false) {
-                return $this->renderObject(['success' => false, 'msj' => 'No se encontró la empresa en subsidio']);
+                $salida = ['success' => false, 'msj' => 'No se encontró la empresa en subsidio'];
+            } else {
+                $salida = ['success' => true, 'data' => $salida['data']];
             }
-            return $this->renderObject(['success' => true, 'data' => $salida['data'] ?? null]);
-        } catch (\Exception $e) {
-            return $this->renderObject(['success' => false, 'msj' => $e->getMessage()]);
+        } catch (DebugException $e) {
+            $salida = ['success' => false, 'msj' => $e->getMessage()];
         }
+        return $this->renderObject($salida);
     }
 
     /**
@@ -102,7 +104,7 @@ class EmpresaController extends ApplicationController
         $this->db->begin();
         try {
             $id = $request->input('id', null);
-            $params = $request->all();
+            $params = $this->serializeData($request);
 
             if (is_null($id)) {
                 $empresa = $service->createByFormData($params);
@@ -308,33 +310,33 @@ class EmpresaController extends ApplicationController
             $mtipoDocumentos = new Gener18();
             $tipoDocumentos = array();
 
-            foreach ($mtipoDocumentos->find() as $mtipo) {
+            foreach ($mtipoDocumentos->all() as $mtipo) {
                 if ($mtipo->getCoddoc() == '7' || $mtipo->getCoddoc() == '2') continue;
                 $tipoDocumentos["{$mtipo->getCoddoc()}"] = $mtipo->getDetdoc();
             }
 
             $msubsi54 = new Subsi54();
             $tipsoc = array();
-            foreach ($msubsi54->find() as $entity) {
+            foreach ($msubsi54->all() as $entity) {
                 if ($entity->getTipsoc() == '08') continue;
                 $tipsoc["{$entity->getTipsoc()}"] = $entity->getDetalle();
             }
 
             $coddoc = array();
-            foreach ($mtipoDocumentos->find() as $entity) {
+            foreach ($mtipoDocumentos->all() as $entity) {
                 if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') continue;
                 $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
             }
 
             $coddocrepleg = array();
-            foreach ($mtipoDocumentos->find() as $entity) {
+            foreach ($mtipoDocumentos->all() as $entity) {
                 if ($entity->getCodrua() == 'TI' || $entity->getCodrua() == 'RC') continue;
                 $coddocrepleg["{$entity->getCodrua()}"] = $entity->getDetdoc();
             }
 
             $codciu = array();
             $mgener09 = new Gener09();
-            foreach ($mgener09->find("*", "conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
+            foreach ($mgener09->getFind("conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
                 $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
             }
 
@@ -573,5 +575,49 @@ class EmpresaController extends ApplicationController
             );
         }
         return $this->renderObject($response);
+    }
+
+    function serializeData(Request $request)
+    {
+        return array(
+            'nit' => $request->input('nit'),
+            'tipdoc' => $request->input('tipdoc'),
+            'razsoc' => $request->input('razsoc'),
+            'sigla' => $request->input('sigla'),
+            'digver' => $request->input('digver'),
+            'calemp' => 'E',
+            'cedrep' => $request->input('cedrep'),
+            'repleg' => $request->input('repleg'),
+            'direccion' => $request->input('direccion'),
+            'codciu' => $request->input('codciu'),
+            'codzon' => $request->input('codzon'),
+            'telefono' => $request->input('telefono'),
+            'celular' => $request->input('celular'),
+            'fax' => $request->input('fax'),
+            'email' => $request->input('email'),
+            'codact' => $request->input('codact'),
+            'fecini' => $request->input('fecini'),
+            'tottra' => $request->input('tottra'),
+            'valnom' => $request->input('valnom'),
+            'tipsoc' => $request->input('tipsoc'),
+            'dirpri' => $request->input('dirpri'),
+            'ciupri' => $request->input('ciupri'),
+            'telpri' => $request->input('telpri'),
+            'celpri' => $request->input('celpri'),
+            'emailpri' => $request->input('emailpri'),
+            'tipemp' => $request->input('tipemp'),
+            'tipper' => $request->input('tipper'),
+            'priape' => $request->input('priape'),
+            'segape' => $request->input('segape'),
+            'prinom' => $request->input('prinom'),
+            'segnom' => $request->input('segnom'),
+            'matmer' => $request->input('matmer'),
+            'codcaj' => $request->input('codcaj'),
+            'coddocrepleg' => $request->input('coddocrepleg'),
+            'log' => '0',
+            'tipo' => $this->tipo,
+            'coddoc' => $this->user['coddoc'],
+            'documento' => $this->user['documento']
+        );
     }
 }

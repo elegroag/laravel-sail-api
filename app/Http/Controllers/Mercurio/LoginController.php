@@ -243,7 +243,7 @@ class LoginController extends ApplicationController
     public function logoutAction()
     {
         SessionCookies::destroyIdentity();
-        redirect()->to("mercurio/login");
+        return redirect()->to("mercurio/login");
     }
 
     /**
@@ -528,30 +528,30 @@ class LoginController extends ApplicationController
         try {
             $tipoDocumentos = array();
 
-            foreach ((new Gener18())->find() as $mtipo) {
+            foreach (Gener18::all() as $mtipo) {
                 if ($mtipo->getCoddoc() == '7' || $mtipo->getCoddoc() == '2') continue;
                 $tipoDocumentos["{$mtipo->getCoddoc()}"] = $mtipo->getDetdoc();
             }
 
             $tipsoc = array();
-            foreach ((new Subsi54())->find() as $entity) {
+            foreach (Subsi54::all() as $entity) {
                 $tipsoc["{$entity->getTipsoc()}"] = $entity->getDetalle();
             }
 
             $coddoc = array();
-            foreach ((new Gener18())->find() as $entity) {
+            foreach (Gener18::all() as $entity) {
                 if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') continue;
                 $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
             }
 
             $coddocrepleg = array();
-            foreach ((new Gener18())->find() as $entity) {
+            foreach (Gener18::all() as $entity) {
                 if ($entity->getCodrua() == 'TI' || $entity->getCodrua() == 'RC') continue;
                 $coddocrepleg["{$entity->getCodrua()}"] = $entity->getDetdoc();
             }
 
             $_codciu = array();
-            foreach ((new Gener09())->find("*", "conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
+            foreach ((new Gener09())->getFind("*", "conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
                 $_codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
             }
 

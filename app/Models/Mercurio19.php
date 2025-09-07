@@ -5,14 +5,16 @@ namespace App\Models;
 use App\Models\Adapter\ModelBase;
 use App\Models\Adapter\ValidateWithRules;
 use Illuminate\Validation\Rule;
+use Thiagoprz\CompositeKey\HasCompositeKey;
 
 class Mercurio19 extends ModelBase
 {
     use ValidateWithRules;
+    use HasCompositeKey;
 
     protected $table = 'mercurio19';
     public $timestamps = false;
-    protected $primaryKey = 'documento';
+    protected $primaryKey = ['documento', 'coddoc', 'tipo'];
 
     protected $fillable = [
         'tipo',

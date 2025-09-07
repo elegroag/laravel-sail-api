@@ -13,6 +13,7 @@ use App\Models\Mercurio12;
 use App\Models\Mercurio14;
 use App\Models\Mercurio37;
 use App\Models\Mercurio41;
+use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
 
 class IndependienteService
@@ -265,6 +266,9 @@ class IndependienteService
     public function create($data)
     {
         $independiente = new Mercurio41($data);
+        $independiente->setCoddoc($this->user['coddoc']);
+        $independiente->setDocumento($this->user['documento']);
+        $independiente->setUsuario((new AsignarFuncionario())->asignar($this->tipopc, $data['codzon']));
         $independiente->save();
         $id = $independiente->getId();
 

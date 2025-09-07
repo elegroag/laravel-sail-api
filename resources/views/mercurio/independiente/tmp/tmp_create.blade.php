@@ -1,3 +1,7 @@
+@php
+    use App\Services\Tag;
+@endphp
+
 <div class="tab-content" id="pills-tabContent">
     <div class="tab-pane fade show active" id="datos_solicitud" role="tabpanel" aria-labelledby="datos_solicitud-tab">
         <div class="card-body">
@@ -14,7 +18,7 @@
                             <div class="row">
                                 <div class="form-group d-none">
                                     <label for="fecsol" class="control-label d-none">Fecha solicitud:</label>
-                                    <input class='form-control d-none' type="date" name='fecsol' id='fecsol' value="<?= date('Y-m-d') ?>">
+                                    <input class='form-control d-none' type="date" name='fecsol' id='fecsol' value="{{ date('Y-m-d') }}">
                                 </div>
                                 <div class="col-md-3" group-for='coddoc'>
                                     <div class="form-group ">
@@ -26,14 +30,25 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='cedtra'>
                                         <label for="cedtra" class="control-label">Identificación:</label>
-                                        <input type="number" name="cedtra" class="form-control" placeholder="Cedula representante" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                        <input
+                                            type="number"
+                                            name="cedtra"
+                                            id="cedtra"
+                                            class="form-control"
+                                            placeholder="Cedula representante"/>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='priape'>
                                         <label for="priape" class="control-label">Primer apellido:</label>
-                                        <input type="text" name="priape" class="form-control text-uppercase" placeholder="Primer Apellido" oninput="this.value = this.value.toUpperCase()">
+                                        <input
+                                            type="text"
+                                            name="priape"
+                                            id="priape"
+                                            class="form-control text-uppercase"
+                                            placeholder="Primer Apellido"
+                                            oninput="this.value = this.value.toUpperCase()">
                                         <label id="priape-error" class="error" for="priape"></label>
                                     </div>
                                 </div>
@@ -41,20 +56,25 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='segape'>
                                         <label for="segape" class="control-label">Segundo apellido:</label>
-                                        <input type="text" name="segape" class="form-control text-uppercase" placeholder="Segundo Apellido" oninput="this.value = this.value.toUpperCase()">
+                                        <input
+                                            type="text"
+                                            name="segape"
+                                            id="segape"
+                                            class="form-control text-uppercase"
+                                            placeholder="Segundo Apellido" oninput="this.value = this.value.toUpperCase()">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='prinom'>
                                         <label for="prinom" class="control-label">Primer nombre:</label>
-                                        <input type="text" name="prinom" class="form-control text-uppercase" placeholder="Primer Nombre" oninput="this.value = this.value.toUpperCase()">
+                                        <input type="text" name="prinom" id="prinom" class="form-control text-uppercase" placeholder="Primer Nombre" oninput="this.value = this.value.toUpperCase()">
                                         <label id="prinom-error" class="error" for="prinom"></label>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='segnom'>
                                         <label for="segnom" class="control-label">Segundo nombre:</label>
-                                        <input type="text" name="segnom" class="form-control text-uppercase" placeholder="Segundo Nombre" oninput="this.value = this.value.toUpperCase()">
+                                        <input type="text" name="segnom" id="segnom" class="form-control text-uppercase" placeholder="Segundo Nombre" oninput="this.value = this.value.toUpperCase()">
                                     </div>
                                 </div>
 
@@ -79,11 +99,7 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='fecini'>
                                         <label for="fecini" class="control-label ">Fecha inicio:</label>
-                                        <?= TagUser::calendar(
-                                            "fecini",
-                                            "class: btn calendar",
-                                            "placeholder: Fecha Inicial"
-                                        ); ?>
+                                        <input type="date" name="fecini" id="fecini" class="form-control" placeholder="Fecha Inicial">
                                     </div>
                                 </div>
 
@@ -97,11 +113,7 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='fecnac'>
                                         <label for="fecnac" class="control-label ">Fecha nacimiento</label>
-                                        <?= TagUser::calendar(
-                                            "fecnac",
-                                            "class: btn calendar",
-                                            "placeholder: AÑO-MES-DÍA"
-                                        ); ?>
+                                        <input type="date" name="fecnac" id="fecnac" class="form-control" placeholder="AÑO-MES-DÍA">
                                         <label id="fecnac-error" class="error" for="fecnac"></label>
                                     </div>
                                 </div>
@@ -161,21 +173,21 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='direccion'>
                                         <label for="direccion" class="control-label ">Dirección de residencia</label>
-                                        <?= TagUser::addressField("direccion", "class: form-control", "placeholder: Dirección"); ?>
+                                        @php echo Tag::addressField("direccion", "class: form-control", "placeholder: Dirección", "event: address"); @endphp
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='dirlab'>
                                         <label for="dirlab" class="control-label ">Dirección de trabajo</label>
-                                        <?= TagUser::addressField("dirlab", "class: form-control", "placeholder: Direccion Labor"); ?>
+                                        @php echo Tag::addressField("dirlab", "class: form-control", "placeholder: Direccion Labor", "event: address"); @endphp
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='salario'>
                                         <label for="salario" class="control-label">Salario</label>
-                                        <input type="number" name="salario" class="form-control" placeholder="Salario" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                        <input type="number" name="salario" id="salario" class="form-control" placeholder="Salario" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -257,7 +269,7 @@
                                 <div class="col-md-3 d-none" id='show_numcue'>
                                     <div class="form-group" group-for='numcue'>
                                         <label for="numcue" class="control-label ">Número de cuenta</label>
-                                        <input type="number" name="numcue" class="form-control" placeholder="Número de cuenta" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                        <input type="number" name="numcue" id="numcue" class="form-control" placeholder="Número de cuenta" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                                     </div>
                                 </div>
 
@@ -288,21 +300,21 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='email'>
                                         <label for="email" class="control-label">Email notificación</label>
-                                        <input type="email" name="email" class="form-control" placeholder="Email">
+                                        <input type="email" name="email" id="email" class="form-control" placeholder="Email">
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='telefono'>
                                         <label for="telefono" class="control-label">Telefono notificación con indicativo:</label>
-                                        <input type="number" name="telefono" class="form-control" placeholder="Telefono con Indicativo">
+                                        <input type="number" name="telefono" id="telefono" class="form-control" placeholder="Telefono con Indicativo">
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='celular'>
                                         <label for="celular" class="control-label">Celular notificación</label>
-                                        <input type="number" name="celular" class="form-control" placeholder="Celular">
+                                        <input type="number" name="celular" id="celular" class="form-control" placeholder="Celular">
                                     </div>
                                 </div>
 
@@ -354,6 +366,6 @@
     <div class="tab-pane fade" id="documentos_adjuntos" role="tabpanel" aria-labelledby="documentos_adjuntos-tab">...</div>
     <div class="tab-pane fade" id="firma" role="tabpanel" aria-labelledby="firma-tab">...</div>
     <div class="tab-pane fade" id="enviar_radicado" role="tabpanel" aria-labelledby="enviar_radicado-tab">
-        @include('templates.tmp_send_radicado')
+        @include('mercurio/templates/tmp_send_radicado')
     </div>
 </div>

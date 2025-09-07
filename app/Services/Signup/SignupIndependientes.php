@@ -44,12 +44,8 @@ class SignupIndependientes  implements SignupInterface
      */
     public function createSignupService($data)
     {
-        $id = (new Mercurio41)->maximum('id') + 1;
-        $this->solicitud = new Mercurio41();
+        $this->solicitud = new Mercurio41($data);
 
-        $this->solicitud->createAttributes($data);
-
-        $this->solicitud->setId($id);
         $this->solicitud->setCedtra($data['cedtra']);
         $this->solicitud->setDocumento($data['documento']);
         $this->solicitud->setUsuario($data['usuario']);
@@ -139,9 +135,15 @@ class SignupIndependientes  implements SignupInterface
         $this->solicitud->setPrinom($prinom);
         $this->solicitud->setSegnom($segnom);
         $this->solicitud->save();
+        $id = $this->solicitud->getId();
 
-        (new Mercurio37())->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
-        (new Mercurio10())->deleteAll(" tipopc='{$this->tipopc}' and numero='{$id}'");
+        Mercurio37::where('tipopc', $this->tipopc)
+            ->where('numero', $id)
+            ->delete();
+
+        Mercurio10::where('tipopc', $this->tipopc)
+            ->where('numero', $id)
+            ->delete();
     }
 
     public function getSolicitud()

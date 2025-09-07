@@ -295,7 +295,7 @@ class EmpresaService
     {
         $empresa = $this->findById($id);
         if ($empresa != false) {
-            $empresa->createAttributes($data);
+            $empresa->fill($data);
             return $empresa->save();
         }
         return false;
@@ -318,8 +318,7 @@ class EmpresaService
             $empresa->setRepleg($data['priape'] . ' ' . $data['segape'] . ' ' . $data['prinom'] . ' ' . $data['segnom']);
 
             // Asignar funcionario
-            $user = (new AsignarFuncionario())->asignar($this->tipopc, $data['codciu']);
-            $empresa->setUsuario($user);
+            $empresa->setUsuario((new AsignarFuncionario())->asignar($this->tipopc, $data['codzon']));
 
             $empresa->setTipo(session('tipo'));
             $empresa->setCoddoc($this->user['coddoc']);
@@ -345,8 +344,7 @@ class EmpresaService
         $empresa = new Mercurio30($data);
         $empresa->setRepleg($data['priape'] . ' ' . $data['segape'] . ' ' . $data['prinom'] . ' ' . $data['segnom']);
 
-        $user = (new AsignarFuncionario())->asignar($this->tipopc, $data['codciu']);
-        $empresa->setUsuario($user);
+        $empresa->setUsuario((new AsignarFuncionario())->asignar($this->tipopc, $data['codzon']));
 
         $empresa->setTipo(session('tipo'));
 

@@ -281,7 +281,7 @@ class JuramentadaBeneficiario extends Documento
             if ($bio_cedula || strlen($this->beneficiario->getBioprinom()) > 0) {
                 $bio_nombre = strtoupper($this->beneficiario->getBioprinom() . ' ' . $this->beneficiario->getBiosegnom() . ' ' . $this->beneficiario->getBiopriape() . ' ' . $this->beneficiario->getBiosegape());
                 $nombre = strtoupper($this->beneficiario->getPrinom() . ' ' . $this->beneficiario->getSegnom() . ' ' . $this->beneficiario->getPriape() . ' ' . $this->beneficiario->getSegape());
-                $this->pdf->SetFont('Arial', '', 9);
+                $this->pdf->SetFont('helvetica', '', 9);
                 $this->pdf->SetTextColor('65', '65', '65');
 
                 $html = "Declaro que desconozco la ubicación del señor(a): " .

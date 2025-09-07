@@ -50,7 +50,7 @@ class CertificadosController extends ApplicationController
             $beneficiarios = $out['data'];
             $certificadosPresentados = array();
             foreach ($beneficiarios as $ai => $beneficiario) {
-                $has = (new Mercurio45())->find(" codben='{$beneficiario['codben']}' and estado='P'");
+                $has = (new Mercurio45())->getFind("codben='{$beneficiario['codben']}' and estado='P'");
                 if ($has) {
                     $certificadosPresentados = $has;
                     $beneficiarios[$ai]['certificadoPendiente'] = true;

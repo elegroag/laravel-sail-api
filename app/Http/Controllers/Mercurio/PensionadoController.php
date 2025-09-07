@@ -57,7 +57,7 @@ class PensionadoController extends ApplicationController
     protected $db;
     protected $user;
     protected $tipo;
-   
+
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
@@ -72,7 +72,7 @@ class PensionadoController extends ApplicationController
     public function indexAction()
     {
         return view('pensionado.index', [
-            "title"=> "Afiliación Pensionados",
+            "title" => "Afiliación Pensionados",
             "calemp" => "P",
             "tipper" => "N",
             "cedtra" => parent::getActUser("documento"),
@@ -127,7 +127,7 @@ class PensionadoController extends ApplicationController
     {
         $this->setResponse("ajax");
         $pensionadoService = new PensionadoService();
-        
+
         try {
             $asignarFuncionario = new AsignarFuncionario();
             $id = $request->input('id');
@@ -154,7 +154,7 @@ class PensionadoController extends ApplicationController
             $pensionadoService->paramsApi();
 
             $pensionadoAdjuntoService = new PensionadoAdjuntoService($pensionado);
-            
+
             // Procesar formulario
             $out = $pensionadoAdjuntoService->formulario()->getResult();
             (new GuardarArchivoService([
@@ -190,7 +190,7 @@ class PensionadoController extends ApplicationController
                 'msj' => $e->getMessage()
             ];
         }
-        
+
         return $this->renderObject($response, false);
     }
 
@@ -256,7 +256,7 @@ class PensionadoController extends ApplicationController
     public function validaAction(Request $request)
     {
         $this->setResponse("ajax");
-        
+
         try {
             $cedtra = $request->input('cedrep');
             $solicitud = (new Mercurio38())->findFirst("documento='{$cedtra}' AND estado IN('A','I')");
@@ -297,7 +297,7 @@ class PensionadoController extends ApplicationController
                 "msj" => "No se pudo validar la información: " . $e->getMessage()
             ];
         }
-        
+
         return $this->renderObject($response, false);
     }
 
@@ -309,7 +309,7 @@ class PensionadoController extends ApplicationController
     public function borrarArchivoAction(Request $request)
     {
         $this->setResponse("ajax");
-        
+
         try {
             $numero = $request->input('id');
             $coddoc = $request->input('coddoc');
@@ -335,7 +335,7 @@ class PensionadoController extends ApplicationController
                 'msj' => 'Error al eliminar el archivo: ' . $e->getMessage()
             ];
         }
-        
+
         return $this->renderObject($response, false);
     }
 
@@ -347,7 +347,7 @@ class PensionadoController extends ApplicationController
     public function guardarArchivoAction(Request $request)
     {
         $this->setResponse("ajax");
-        
+
         try {
             $id = $request->input('id');
             $coddoc = $request->input('coddoc');
@@ -357,10 +357,10 @@ class PensionadoController extends ApplicationController
                 'coddoc' => $coddoc,
                 'id' => $id
             ]);
-            
+
             $mercurio37 = $guardarArchivoService->main();
             $mercurio37 = (new Mercurio37())->findFirst("tipopc='{$this->tipopc}' AND numero='{$id}' AND coddoc='{$coddoc}'");
-            
+
             if (!$mercurio37) {
                 throw new \Exception('No se pudo encontrar el archivo guardado');
             }
@@ -376,7 +376,7 @@ class PensionadoController extends ApplicationController
                 'msj' => 'Error al procesar el archivo: ' . $e->getMessage()
             ];
         }
-        
+
         return $this->renderObject($response, false);
     }
 
@@ -388,21 +388,21 @@ class PensionadoController extends ApplicationController
     public function enviarCajaAction(Request $request)
     {
         $this->setResponse("ajax");
-        
+
         try {
             $id = $request->input('id');
-            
+
             DB::beginTransaction();
-            
+
             $pensionadoService = new PensionadoService();
             $usuario = $this->getCurrentUser();
-            
+
             if (!$usuario) {
                 throw new \Exception('No se pudo obtener la información del usuario actual');
             }
-            
+
             $pensionadoService->enviarCaja(new SenderValidationCaja(), $id, $usuario);
-            
+
             DB::commit();
 
             $response = [
@@ -416,10 +416,10 @@ class PensionadoController extends ApplicationController
                 'msj' => 'Error al enviar a caja: ' . $e->getMessage()
             ];
         }
-        
+
         return $this->renderObject($response);
     }
-    
+
     /**
      * Obtiene el usuario actual
      * @return mixed
@@ -427,7 +427,7 @@ class PensionadoController extends ApplicationController
      */
     /**
      * Obtiene el usuario actual
-     * 
+     *
      * @return mixed
      * @throws \Exception
      */
@@ -436,10 +436,10 @@ class PensionadoController extends ApplicationController
         if (!class_exists('AsignarFuncionario')) {
             throw new \RuntimeException('La clase AsignarFuncionario no está disponible');
         }
-        
+
         $asignarFuncionario = new AsignarFuncionario();
         return $asignarFuncionario->asignar(
-            $this->tipopc ?? 'WEB', 
+            $this->tipopc ?? 'WEB',
             $this->getActUser("codciu") ?? ''
         );
     }
@@ -493,14 +493,14 @@ class PensionadoController extends ApplicationController
             if ($trabaPrevius) $this->trabajadorService->loadDisplay($trabaPrevius);
         }
 
-      /*   Tag::displayTo("coddoc", $mercurio07->getCoddoc());
+        /*   Tag::displayTo("coddoc", $mercurio07->getCoddoc());
         Tag::displayTo("tipdoc", $mercurio07->getCoddoc());
         Tag::displayTo("cedrep", $mercurio07->getDocumento());
         Tag::displayTo("email", $mercurio07->getEmail());
         Tag::displayTo("razsoc", $mercurio07->getNombre());
         Tag::displayTo("nit", $mercurio07->getDocumento()); */
 
-       /*  $this->setParamToView("mercurio38", $sindepe);
+        /*  $this->setParamToView("mercurio38", $sindepe);
         $this->setParamToView("show_archivos_requeridos", $this->pensionadoService->archivosRequeridos($sindepe));
         $this->setParamToView("title", $title); */
     }
@@ -522,7 +522,7 @@ class PensionadoController extends ApplicationController
         );
 
         $paramsPensionado = new ParamsPensionado();
-       /*  $paramsPensionado->setDatosCaptura($procesadorComando->toArray());
+        /*  $paramsPensionado->setDatosCaptura($procesadorComando->toArray());
         $this->setParamToView("_coddoc", ParamsPensionado::getTipoDocumentos());
         $this->setParamToView("_calemp", ParamsPensionado::getCalidadEmpresa());
         $this->setParamToView("_codciu", ParamsPensionado::getCiudades());
@@ -549,7 +549,7 @@ class PensionadoController extends ApplicationController
         $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
 
         $_tipsal = (new Mercurio31())->getTipsalArray();
-       /*  $this->setParamToView("_tipsal", $_tipsal);
+        /*  $this->setParamToView("_tipsal", $_tipsal);
         $this->setParamToView("_sexo", ParamsTrabajador::getSexos());
         $this->setParamToView("_estciv", ParamsTrabajador::getEstadoCivil());
         $this->setParamToView("_cabhog", ParamsTrabajador::getCabezaHogar());
@@ -650,32 +650,32 @@ class PensionadoController extends ApplicationController
             $mtipoDocumentos = new Gener18();
             $tipoDocumentos = array();
 
-            foreach ($mtipoDocumentos->find() as $mtipo) {
+            foreach ($mtipoDocumentos->all() as $mtipo) {
                 if ($mtipo->getCoddoc() == '7' || $mtipo->getCoddoc() == '2' || $mtipo->getCoddoc() == '3') continue;
                 $tipoDocumentos["{$mtipo->getCoddoc()}"] = $mtipo->getDetdoc();
             }
 
             $msubsi54 = new Subsi54();
             $tipsoc = array();
-            foreach ($msubsi54->find() as $entity) {
+            foreach ($msubsi54->all() as $entity) {
                 $tipsoc["{$entity->getTipsoc()}"] = $entity->getDetalle();
             }
 
             $coddoc = array();
-            foreach ($mtipoDocumentos->find() as $entity) {
+            foreach ($mtipoDocumentos->all() as $entity) {
                 if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') continue;
                 $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
             }
 
             $coddocrepleg = array();
-            foreach ($mtipoDocumentos->find() as $entity) {
+            foreach ($mtipoDocumentos->all() as $entity) {
                 if ($entity->getCodrua() == 'TI' || $entity->getCodrua() == 'RC') continue;
                 $coddocrepleg["{$entity->getCodrua()}"] = $entity->getDetdoc();
             }
 
             $codciu = array();
             $mgener09 = new Gener09();
-            foreach ($mgener09->find("*", "conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
+            foreach ($mgener09->getFind("conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
                 $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
             }
 
@@ -807,21 +807,20 @@ class PensionadoController extends ApplicationController
         $generales->startTrans('mercurio41');
         try {
 
-                $documento = parent::getActUser("documento");
-                $coddoc = parent::getActUser("coddoc");
+            $documento = parent::getActUser("documento");
+            $coddoc = parent::getActUser("coddoc");
 
-                $id = $request->input('id');
-                $solicitud = (new Mercurio38())->findFirst("id='{$id}' and documento='{$documento}' and coddoc='{$coddoc}'");
-                if ($solicitud) {
-                    if ($solicitud->getEstado() != 'T') (new Mercurio10())->deleteAll("numero='{$id}' AND tipopc='{$this->tipopc}'");
-                }
-                (new Mercurio38())->deleteAll("id='{$id}' and documento='{$documento}' and coddoc='{$coddoc}'");
-                $generales->finishTrans();
-                $response = array(
-                    'success' => true,
-                    'msj' => 'Ok'
-                );
-           
+            $id = $request->input('id');
+            $solicitud = (new Mercurio38())->findFirst("id='{$id}' and documento='{$documento}' and coddoc='{$coddoc}'");
+            if ($solicitud) {
+                if ($solicitud->getEstado() != 'T') (new Mercurio10())->deleteAll("numero='{$id}' AND tipopc='{$this->tipopc}'");
+            }
+            (new Mercurio38())->deleteAll("id='{$id}' and documento='{$documento}' and coddoc='{$coddoc}'");
+            $generales->finishTrans();
+            $response = array(
+                'success' => true,
+                'msj' => 'Ok'
+            );
         } catch (DebugException $e) {
             $response = array(
                 'success' => false,
@@ -865,19 +864,19 @@ class PensionadoController extends ApplicationController
     public function descargar_formularioAction($id)
     {
         $this->setResponse("ajax");
-        
+
         try {
             if (!is_numeric($id)) {
                 throw new \InvalidArgumentException('ID de solicitud no válido');
             }
-            
+
             $pensionadoService = new PensionadoService();
             //$formulario = $pensionadoService->descargarFormulario($id);
-            
+
             if (empty($formulario)) {
                 throw new \RuntimeException('No se pudo generar el formulario');
             }
-            
+
             $response = [
                 'success' => true,
                 'formulario' => $formulario
@@ -888,13 +887,13 @@ class PensionadoController extends ApplicationController
                 'msj' => 'Error al descargar el formulario: ' . $e->getMessage()
             ];
         }
-        
+
         return $this->renderObject($response);
     }
 
     /**
      * Administra la cuenta de un pensionado
-     * 
+     *
      * @param string $id ID de la solicitud
      * @return mixed
      * @throws \Exception
@@ -902,19 +901,19 @@ class PensionadoController extends ApplicationController
     public function administrar_cuentaAction($id = '')
     {
         $this->setResponse("view");
-        
+
         try {
             if (empty($id)) {
                 throw new \InvalidArgumentException('El ID de la solicitud es requerido');
             }
-            
+
             // Obtener la solicitud
             $solicitud = (new Mercurio38())->findFirst("id='{$id}' and estado='A'");
-            
+
             if (!$solicitud) {
                 throw new \RuntimeException('No se encontró la solicitud solicitada');
             }
-            
+
             // Preparar datos del usuario
             $userData = [
                 'id' => $id,
@@ -927,10 +926,10 @@ class PensionadoController extends ApplicationController
                 'codofi' => $this->getActUser('codofi'),
                 'codrol' => $this->getActUser('codrol')
             ];
-            
+
             $request = new Request($userData);
             $change = new ChangeCuentaService();
-            
+
             if ($change->initializa($request)) {
                 set_flashdata("success", [
                     "msj" => "La administración de la cuenta se ha inicializado con éxito.",
@@ -939,9 +938,8 @@ class PensionadoController extends ApplicationController
                 redirect('principal/index');
                 return;
             }
-            
+
             throw new \RuntimeException('No se pudo inicializar la administración de la cuenta');
-            
         } catch (AuthException $e) {
             set_flashdata("error", [
                 "msj" => $e->getMessage(),
@@ -956,5 +954,4 @@ class PensionadoController extends ApplicationController
             redirect('principal/index');
         }
     }
-
 }
