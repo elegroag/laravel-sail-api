@@ -80,7 +80,7 @@ class FormularioTrabajador extends Documento
 
     function dataLaboral()
     {
-        $this->pdf->SetFont('Arial', '', 8);
+        $this->pdf->SetFont('helvetica', '', 8);
         $mcargos = ParamsTrabajador::getOcupaciones();
         $cargo = ($this->trabajador->getCargo()) ? $mcargos[$this->trabajador->getCargo()] : '';
 
@@ -207,7 +207,7 @@ class FormularioTrabajador extends Documento
             $discapacidad = $mtidis[$tipdis];
         }
 
-        $this->pdf->SetFont('Arial', '', 8);
+        $this->pdf->SetFont('helvetica', '', 8);
         $datos = array(
             array('lb' => 'Cedula trabajador', 'texto' => $this->trabajador->getCedtra(), 'x' => 10, 'y' => 76),
             $this->posTipoDocumento(),
@@ -602,7 +602,7 @@ class FormularioTrabajador extends Documento
         if ($this->empresa->getCodzon()) {
             $this->pdf->Cell(3, 4, $zonas["{$this->empresa->getCodzon()}"], 0, 0, 'L');
         }
-        $this->pdf->SetFont('Arial', '', 6);
+        $this->pdf->SetFont('helvetica', '', 6);
         $this->pdf->setY(48.8);
         $this->pdf->setX(160);
         $this->pdf->Cell(3, 4, $this->empresa->getEmail(), 0, 0, 'L');

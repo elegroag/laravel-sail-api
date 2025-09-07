@@ -33,6 +33,7 @@ use App\Services\Utils\GeneralService;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
 use Carbon\Carbon;
+use GuzzleHttp\Psr7\Response;
 
 class PensionadoController extends ApplicationController
 {
@@ -128,21 +129,19 @@ class PensionadoController extends ApplicationController
     {
         $this->setResponse("ajax");
         $pensionadoService = new PensionadoService();
-
+        $this->db->begin();
         try {
             $asignarFuncionario = new AsignarFuncionario();
             $id = $request->input('id');
             $params = $this->serializeData($request);
-            $params['tipo'] = parent::getActUser("tipo");
-            $params['coddoc'] = parent::getActUser("coddoc");
-            $params['documento'] = parent::getActUser("documento");
-            $params['usuario'] = $asignarFuncionario->asignar($this->tipopc, parent::getActUser("codciu"));
+            $params['tipo'] = $this->tipo;
+            $params['coddoc'] = $this->user['coddoc'];
+            $params['documento'] = $this->user['documento'];
+
+            $params['usuario'] = $asignarFuncionario->asignar($this->tipopc, $request->input('codzon'));
 
             if (is_null($id) || $id == '') {
-                $params['id'] = null;
-                $params['estado'] = 'T';
                 $pensionado = $pensionadoService->createByFormData($params);
-                $id = $pensionado->getId();
             } else {
                 $res = $pensionadoService->updateByFormData($id, $params);
                 if ($res == false) {
@@ -185,14 +184,16 @@ class PensionadoController extends ApplicationController
                 'msj' => 'Registro completado con éxito',
                 'data' => $pensionado->getArray()
             ];
+            $this->db->commit();
         } catch (DebugException $e) {
             $response = [
                 'success' => false,
                 'msj' => $e->getMessage()
             ];
+            $this->db->rollBack();
         }
 
-        return $this->renderObject($response, false);
+        return $this->renderObject($response);
     }
 
     /**
@@ -703,15 +704,15 @@ class PensionadoController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function renderTableAction($estado = '')
+    public function renderTableAction(Request $request, Response $response, string $estado = '')
     {
         $this->setResponse("view");
-        $this->pensionadoService = new PensionadoService();
+        $pensionadoService = new PensionadoService();
         $html = view(
             "mercurio/pensionado/tmp/solicitudes",
             array(
                 "path" => base_path(),
-                "pensionados" => $this->pensionadoService->findAllByEstado($estado)
+                "pensionados" => $pensionadoService->findAllByEstado($estado)
             )
         )->render();
 

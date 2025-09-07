@@ -20,7 +20,7 @@ class TrabajadorController extends ApplicationController
 
     protected $db;
     protected $user;
-    protected $tipo; 
+    protected $tipo;
     protected $tipopc = '1';
 
     public function __construct()
@@ -57,16 +57,16 @@ class TrabajadorController extends ApplicationController
             $ps->runCli([
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',
-                'params' => [ 'nit' => $nit ]
+                'params' => ['nit' => $nit]
             ]);
             $datos = $ps->toArray();
 
             if (!isset($datos['data']) || count($datos['data']) == 0) {
-                $response = [ 'success' => false, 'msj' => 'El nit no existe' ];
+                $response = ['success' => false, 'msj' => 'El nit no existe'];
             } elseif (($datos['data']['estado'] ?? null) === 'I') {
-                $response = [ 'success' => false, 'msj' => 'La empresa esta inactiva no puede crear nuevos trabajadores' ];
+                $response = ['success' => false, 'msj' => 'La empresa esta inactiva no puede crear nuevos trabajadores'];
             } else {
-                $response = [ 'success' => true, 'msj' => '', 'data' => $datos['data']['razsoc'] ?? null ];
+                $response = ['success' => true, 'msj' => '', 'data' => $datos['data']['razsoc'] ?? null];
             }
             return $this->renderObject($response);
         } catch (DebugException $e) {
@@ -98,9 +98,9 @@ class TrabajadorController extends ApplicationController
                 (new Mercurio37())->deleteAll("tipopc='{$this->tipopc}' and numero='{$numero}' and coddoc='{$coddoc}'");
             }
 
-            $response = [ 'success' => true, 'msj' => 'El archivo se borro de forma correcta' ];
+            $response = ['success' => true, 'msj' => 'El archivo se borro de forma correcta'];
         } catch (\Exception $e) {
-            $response = [ 'success' => false, 'msj' => $e->getMessage() ];
+            $response = ['success' => false, 'msj' => $e->getMessage()];
         }
         return $this->renderObject($response);
     }
@@ -128,7 +128,7 @@ class TrabajadorController extends ApplicationController
                 'data' => method_exists($mercurio37, 'getArray') ? $mercurio37->getArray() : null,
             ];
         } catch (\Exception $e) {
-            $response = [ 'success' => false, 'msj' => $e->getMessage() ];
+            $response = ['success' => false, 'msj' => $e->getMessage()];
         }
         return $this->renderObject($response);
     }
@@ -141,44 +141,41 @@ class TrabajadorController extends ApplicationController
         $this->setResponse('ajax');
         $cedtra = $this->clp($request, 'cedtra');
         $nit = $this->clp($request, 'nit');
-        $mercurio31 = new Mercurio31();
+
         $datos_trabajador = [];
 
         $ps = Comman::Api();
         $ps->runCli([
             'servicio' => 'ComfacaEmpresas',
             'metodo' => 'informacion_trabajador',
-            'params' => [ 'cedtra' => $cedtra ]
+            'params' => [
+                'cedtra' => $cedtra
+            ]
         ]);
+
         $out = $ps->toArray();
         if (($out['success'] ?? false) && isset($out['data'])) {
             $datos_trabajador = $out['data'];
         }
 
-        foreach ($datos_trabajador as $key => $value) {
-            if (is_numeric($key)) continue;
-            if ($mercurio31->isAttribute($key)) {
-                $mercurio31->writeAttribute($key, (string) $value);
-                if (method_exists($mercurio31, 'setLog')) $mercurio31->setLog(1);
-            }
-        }
+        $mercurio31 = new Mercurio31($datos_trabajador);
+        $mercurio31->setLog('0');
 
         $response = [];
         $response['multi'] = false;
-        if (method_exists($mercurio31, 'getLog') && $mercurio31->getLog() == 1 && $mercurio31->getNit() != $nit) {
-            $response['multi'] = true;
-        }
+        if ($mercurio31->getNit() != $nit) $response['multi'] = true;
+
         $response['flag'] = true;
         if ($mercurio31->getNit() == $nit && $mercurio31->getEstado() == 'A') {
             $response['flag'] = false;
             $response['msg'] = 'El afiliado ya se encuentra registrado o Activo con la misma empresa.';
         }
-        if ($mercurio31->getCedtra() == '' /* && tipo == 'T' depende de session */) {
-            $mercurio31 = (new Mercurio31())->findFirst("cedtra='{$cedtra}'") ?: new Mercurio31();
-        }
-        if (method_exists($mercurio31, 'setFecing')) $mercurio31->setFecing('');
-        $response['data'] = method_exists($mercurio31, 'getArray') ? $mercurio31->getArray() : [];
 
+        if ($mercurio31->getCedtra() == '') {
+            $mercurio31 = Mercurio31::where('cedtra', $cedtra)->first() ?: new Mercurio31();
+        }
+
+        $response['data'] = $mercurio31->toArray();
         return $this->renderObject($response);
     }
 
@@ -192,7 +189,7 @@ class TrabajadorController extends ApplicationController
             $id = $this->clp($request, 'id');
 
             $trabajadorService = new TrabajadorService();
-            
+
 
             $asignarFuncionario = new AsignarFuncionario();
             // Nota: getActUser reemplazado por datos del request o autent. Ajustar si hay SessionCookies
@@ -200,11 +197,11 @@ class TrabajadorController extends ApplicationController
             $usuario = $asignarFuncionario->asignar($this->tipopc, $codciu);
 
             $trabajadorService->enviarCaja(new SenderValidationCaja(), $id, $usuario); // TODO: importar/clase correcta si existe
-            
 
-            $salida = [ 'success' => true, 'msj' => 'El envio de la solicitud se ha completado con éxito' ];
+
+            $salida = ['success' => true, 'msj' => 'El envio de la solicitud se ha completado con éxito'];
         } catch (\Exception $e) {
-            $salida = [ 'success' => false, 'msj' => $e->getMessage() ];
+            $salida = ['success' => false, 'msj' => $e->getMessage()];
         }
         return $this->renderObject($salida);
     }
@@ -218,9 +215,9 @@ class TrabajadorController extends ApplicationController
         try {
             $trabajadorService = new TrabajadorService();
             $out = $trabajadorService->consultaSeguimiento($id);
-            $salida = [ 'success' => true, 'data' => $out ];
+            $salida = ['success' => true, 'data' => $out];
         } catch (\Exception $e) {
-            $salida = [ 'success' => false, 'msj' => $e->getMessage() ];
+            $salida = ['success' => false, 'msj' => $e->getMessage()];
         }
         return $this->renderObject($salida);
     }

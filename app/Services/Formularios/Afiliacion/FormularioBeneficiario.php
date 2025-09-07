@@ -55,7 +55,7 @@ class FormularioBeneficiario extends Documento
         $this->pdf->SetKeywords('COMFACA');
 
         $this->parent =  $this->beneficiario->getParent();
-        $this->pdf->SetFont('Arial', '', 8.5);
+        $this->pdf->SetFont('helvetica', '', 8.5);
 
         $this->pdf->Image(storage_path('public/docs/form/beneficiarios/form_adicion_beneficiario.png'), 0, 0, 210, 297, '');
         $this->pdf->SetAutoPageBreak(false, 0);
@@ -161,7 +161,7 @@ class FormularioBeneficiario extends Documento
             $desco_x = 112;
         }
 
-        $this->pdf->SetFont('Arial', '', 8);
+        $this->pdf->SetFont('helvetica', '', 8);
         $datos = array(
             array('lb' => 'Documento', 'texto' => $this->beneficiario->getNumdoc(), 'x' => 10, 'y' => 125.5),
             array('lb' => 'Tipo documento', 'texto' => capitalize($detdoc), 'x' => 37, 'y' => 125.5),
@@ -204,7 +204,7 @@ class FormularioBeneficiario extends Documento
         $mtihij = ParamsBeneficiario::getTipoHijo();
         $tipo_hijo = $this->beneficiario->getTiphij() ? $mtihij[$this->beneficiario->getTiphij()] : '';
 
-        $this->pdf->SetFont('Arial', '', 8);
+        $this->pdf->SetFont('helvetica', '', 8);
         $datos = array(
             array('lb' => 'Documento', 'texto' => $this->beneficiario->getNumdoc(), 'x' => 10, 'y' => 125.5),
             array('lb' => 'Tipo documento', 'texto' => capitalize($detdoc), 'x' => 37, 'y' => 125.5),

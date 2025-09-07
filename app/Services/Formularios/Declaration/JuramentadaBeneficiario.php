@@ -94,7 +94,7 @@ class JuramentadaBeneficiario extends Documento
         $mtipdisca = ParamsBeneficiario::getTipoDiscapacidad();
         $discapacidad = ($this->beneficiario->getTipdis()) ? $mtipdisca[$this->beneficiario->getTipdis()] : 'No tiene';
 
-        $this->pdf->SetFont('Arial', '', 8.5);
+        $this->pdf->SetFont('helvetica', '', 8.5);
         $datos = array(
             array('lb' => 'Tipo novedad', 'texto' => 'X', 'x' => 168, 'y' => 62),
             array('lb' => 'Nombre beneficiario', 'texto' => substr($nombre, 0, 63), 'x' => 44, 'y' => 142),
@@ -119,7 +119,7 @@ class JuramentadaBeneficiario extends Documento
         $mtipdisca = ParamsBeneficiario::getTipoDiscapacidad();
         $discapacidad = ($this->beneficiario->getTipdis()) ? $mtipdisca[$this->beneficiario->getTipdis()] : 'No tiene';
 
-        $this->pdf->SetFont('Arial', '', 8.5);
+        $this->pdf->SetFont('helvetica', '', 8.5);
         $datos = array(
             $this->tipoNovedadPadre(),
             array('lb' => 'Nombre beneficiario', 'texto' => substr($nombre, 0, 63), 'x' => 44, 'y' => 111),
@@ -144,7 +144,7 @@ class JuramentadaBeneficiario extends Documento
         $mtidocs = $mtipoDocumentos->findFirst(" coddoc='{$this->trabajador->getTipdoc()}'");
         $detdoc = ($mtidocs) ? $mtidocs->getDetdoc() : 'Cedula de Ciudadania';
 
-        $this->pdf->SetFont('Arial', '', 8.5);
+        $this->pdf->SetFont('helvetica', '', 8.5);
         $datos = array(
             array('lb' => 'Nombre trabajador', 'texto' => capitalize($nomtra), 'x' => 20, 'y' => 35),
             array('lb' => 'Año', 'texto' => $today->format('Y'), 'x' => 122, 'y' => 22),
@@ -166,7 +166,7 @@ class JuramentadaBeneficiario extends Documento
         $mparent =  ParamsBeneficiario::getParentesco();
         $parentesco = $mparent[$this->beneficiario->getParent()];
 
-        $this->pdf->SetFont('Arial', '', 8.5);
+        $this->pdf->SetFont('helvetica', '', 8.5);
         $datos = array(
             $this->tipoNovedadHijo(),
             array('lb' => 'Nombre beneficiario', 'texto' => substr($nombre, 0, 63), 'x' => 44, 'y' => 105),
@@ -199,7 +199,7 @@ class JuramentadaBeneficiario extends Documento
             $pap_cedula = $this->beneficiario->getBiocedu();
         }
 
-        $this->pdf->SetFont('Arial', '', 8.5);
+        $this->pdf->SetFont('helvetica', '', 8.5);
         $datos = array(
             $this->tipoNovedadHijo(),
             array('lb' => 'Nombre beneficiario', 'texto' => substr($nombre, 0, 63), 'x' => 44, 'y' => 156),
@@ -236,7 +236,7 @@ class JuramentadaBeneficiario extends Documento
             $pap_cedula = $this->beneficiario->getBiocedu();
         }
 
-        $this->pdf->SetFont('Arial', '', 8.5);
+        $this->pdf->SetFont('helvetica', '', 8.5);
         $datos = array(
             array('lb' => 'Tipo novedad', 'texto' => 'X', 'x' => 160, 'y' => 62),
             array('lb' => 'Nombre beneficiario', 'texto' => substr($nombre, 0, 63), 'x' => 44, 'y' => 115),

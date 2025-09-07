@@ -14,6 +14,7 @@ use App\Models\Mercurio01;
 use App\Models\Mercurio10;
 use App\Models\Mercurio14;
 use App\Models\Mercurio28;
+use App\Models\Mercurio30;
 use App\Models\Mercurio31;
 use App\Models\Mercurio32;
 use App\Models\Mercurio33;
@@ -23,6 +24,7 @@ use App\Models\Mercurio37;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
+use App\Services\Utils\UploadFile;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -706,7 +708,6 @@ class SubsidioempController extends ApplicationController
         if ($rqs) {
 
             $empresa = (count($rqs['data']) > 0) ? $rqs['data'] : false;
-            $this->loadDisplaySubsidio($empresa);
         }
         $mercurio14 = Mercurio14::where('tipopc', '5')->get();
 
@@ -783,7 +784,7 @@ class SubsidioempController extends ApplicationController
 
             $mercurio01 = Mercurio01::first();
 
-            foreach ($Mercurio14::where('tipopc', '5')->get() as $m14) {
+            foreach (Mercurio14::where('tipopc', '5')->get() as $m14) {
                 $coddoc = $m14->getCoddoc();
                 $mercurio37 = new Mercurio37();
 
@@ -794,17 +795,17 @@ class SubsidioempController extends ApplicationController
                     $extension = explode(".", $_FILES['archivo_' . $coddoc]['name']);
                     $name = "5_" . $mercurio33->getId() . "_{$coddoc}." . end($extension);
                     $_FILES['archivo_' . $coddoc]['name'] = $name;
-                    $estado = $this->uploadFile("archivo_" . $coddoc, $mercurio01->getPath());
+                    $estado = UploadFile::upload("archivo_" . $coddoc, $mercurio01->getPath());
                     if ($estado != false) {
                         $mercurio37->setArchivo($name);
                         $mercurio37->save();
 
-                        $response = parent::successFunc("Se adjunto con exito el archivo");
+                        $response = ("Se adjunto con exito el archivo");
                     } else {
-                        $response = parent::errorFunc("No se cargo: tamano del archivo muy grande o no es valido");
+                        $response = ("No se cargo: tamano del archivo muy grande o no es valido");
                     }
                 } else {
-                    $response = parent::errorFunc("No se cargo el archivo");
+                    $response = ("No se cargo el archivo");
                 }
             }
         }
@@ -815,21 +816,17 @@ class SubsidioempController extends ApplicationController
             $generalService->sendEmail(parent::getActUser("email"), parent::getActUser("nombre"), $asunto, $msj, "");
         }
 
-        $response = parent::successFunc("Movimiento realizado con exito el archivo");
-        Router::routeTo("controller: principal", "action: index");
+        $response = "Movimiento realizado con exito el archivo";
+
         return $this->renderText(json_encode("Movimiento realizado con exito el archivo"));
     }
 
     public function afilia_masiva_trabajador_viewAction()
     {
-        //opcion no disponible temporalmente
-        Router::routeTo("controller: principal", "action: index");
-
-        $this->setParamToView("hide_header", true);
-        $this->setParamToView("help", false);
-
-        $this->setParamToView("title", "Afiliacion Masiva");
-        Tag::setDocumentTitle('Afiliacion Masiva');
+        return view("mercurio/subsidioemp/tmp/afilia_masiva_trabajador", [
+            "path" => base_path(),
+            "title" => "Afiliacion Masiva"
+        ]);
     }
 
     public function errorCarga($l, $cedtra, $nombre, $nota)
@@ -843,263 +840,19 @@ class SubsidioempController extends ApplicationController
         return $html;
     }
 
-    public function afilia_masiva_trabajadorAction()
-    {
-
-        $this->setResponse("ajax");
-
-        try {
-            try {
-                if (!isset($_FILES['archivo']['name']) && $_FILES['archivo']['name'] == "") {
-                    $response = parent::errorFunc("No se cargo el archivo");
-                    return $this->renderText(json_encode($response));
-                }
-                $estado = $this->uploadFile("archivo", "public/temp/");
-                if ($estado == false) {
-                    $response = parent::errorFunc("No se cargo el archivo");
-                    return $this->renderText(json_encode($response));
-                }
-                $modelos = array("mercurio10", "mercurio20", "mercurio31");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
-                $tipopc = 1;
-
-
-                $ps = Comman::Api();
-                $ps->runCli(
-                    array(
-                        "servicio" => "PoblacionAfilia",
-                        "metodo" => "captura_trabajador"
-                    )
-                );
-
-                $out = $ps->toArray();
-                if (!$out['success']) {
-                    throw new DebugException($out['msj']);
-                }
-                $datos_captura = $out['data'];
-                $_coddoc = array();
-                foreach ($datos_captura['coddoc'] as $data) $_coddoc[$data['coddoc']] = $data['detalle'];
-                $_sexo = array();
-                foreach ($datos_captura['sexo'] as $data) $_sexo[$data['sexo']] = $data['detalle'];
-                $_estciv = array();
-                foreach ($datos_captura['estciv'] as $data) $_estciv[$data['estciv']] = $data['detalle'];
-                $_cabhog = array();
-                foreach ($datos_captura['cabhog'] as $data) $_cabhog[$data['cabhog']] = $data['detalle'];
-                $_codciu = array();
-                foreach ($datos_captura['codciu'] as $data) $_codciu[$data['codciu']] = $data['detalle'];
-                $_codzon = array();
-                foreach ($datos_captura['codzon'] as $data) $_codzon[$data['codzon']] = $data['detalle'];
-                $_captra = array();
-                foreach ($datos_captura['captra'] as $data) $_captra[$data['captra']] = $data['detalle'];
-                $_tipdis = array();
-                foreach ($datos_captura['tipdis'] as $data) $_tipdis[$data['tipdis']] = $data['detalle'];
-                $_nivedu = array();
-                foreach ($datos_captura['nivedu'] as $data) $_nivedu[$data['nivedu']] = $data['detalle'];
-                $_rural = array();
-                foreach ($datos_captura['rural'] as $data) $_rural[$data['rural']] = $data['detalle'];
-                $_tipcon = array();
-                foreach ($datos_captura['tipcon'] as $data) $_tipcon[$data['tipcon']] = $data['detalle'];
-                $_trasin = array();
-                foreach ($datos_captura['trasin'] as $data) $_trasin[$data['trasin']] = $data['detalle'];
-                $_vivienda = array();
-                foreach ($datos_captura['vivienda'] as $data) $_vivienda[$data['vivienda']] = $data['detalle'];
-                $_tipafi = array();
-                foreach ($datos_captura['tipafi'] as $data) $_tipafi[$data['tipafi']] = $data['detalle'];
-                $_autoriza[] = "SI";
-                $_autoriza[] = "NO";
-                $today = new Date();
-                $mensajes_error = "";
-                $l = 0;
-                $file = file("public/temp/" . $_FILES['archivo']['name']);
-                foreach ($file as $mlinea) {
-                    $l++;
-                    $datos = preg_split("/\|/", $mlinea);
-                    $tipdoc = strtoupper(trim($datos[0]));
-                    $cedtra = strtoupper(trim($datos[1]));
-                    $priape = strtoupper(trim($datos[2]));
-                    $segape = strtoupper(trim($datos[3]));
-                    $prinom = strtoupper(trim($datos[4]));
-                    $segnom = strtoupper(trim($datos[5]));
-                    $fecnac = strtoupper(trim($datos[6]));
-                    $ciunac = strtoupper(trim($datos[7]));
-                    $sexo = strtoupper(trim($datos[8]));
-                    $estciv = strtoupper(trim($datos[9]));
-                    $cabhog = strtoupper(trim($datos[10]));
-                    $codciu = strtoupper(trim($datos[11]));
-                    $codzon = strtoupper(trim($datos[12]));
-                    $direccion = strtoupper(trim($datos[13]));
-                    $barrio = strtoupper(trim($datos[14]));
-                    $telefono = strtoupper(trim($datos[15]));
-                    $celular = strtoupper(trim($datos[16]));
-                    $fax = strtoupper(trim($datos[17]));
-                    $email = strtoupper(trim($datos[18]));
-                    $fecing = strtoupper(trim($datos[19]));
-                    $salario = strtoupper(trim($datos[20]));
-                    $captra = strtoupper(trim($datos[21]));
-                    $tipdis = strtoupper(trim($datos[22]));
-                    $nivedu = strtoupper(trim($datos[23]));
-                    $rural = strtoupper(trim($datos[24]));
-                    $horas = strtoupper(trim($datos[25]));
-                    $tipcon = strtoupper(trim($datos[26]));
-                    $trasin = strtoupper(trim($datos[27]));
-                    $vivienda = strtoupper(trim($datos[28]));
-                    $tipafi = strtoupper(trim($datos[29]));
-                    $profesion = strtoupper(trim($datos[30]));
-                    $cargo = strtoupper(trim($datos[31]));
-                    $autoriza = strtoupper(trim($datos[32]));
-                    $nombre = $priape . " " . $segape . " " . $prinom . " " . $segnom;
-                    $key_tipdoc = array_search($tipdoc, $_coddoc);
-                    $key_ciunac = array_search($ciunac, $_codciu);
-                    $key_sexo = array_search($sexo, $_sexo);
-                    $key_estciv = array_search($estciv, $_estciv);
-                    $key_cabhog = array_search($cabhog, $_cabhog);
-                    $key_codciu = array_search($codciu, $_codciu);
-                    $key_codzon = array_search($codzon, $_codciu);
-                    $key_captra = array_search($captra, $_captra);
-                    $key_tipdis = array_search($tipdis, $_tipdis);
-                    $key_nivedu = array_search($nivedu, $_nivedu);
-                    $key_rural = array_search($rural, $_rural);
-                    $key_tipcon = array_search($tipcon, $_tipcon);
-                    $key_trasin = array_search($trasin, $_trasin);
-                    $key_vivienda = array_search($vivienda, $_vivienda);
-                    $key_tipafi = array_search($tipafi, $_tipafi);
-                    $key_autoriza = array_search($autoriza, $_autoriza);
-                    if ((new Mercurio31)->getCount(
-                        "*",
-                        "conditions: tipo='" . parent::getActUser('tipo') . "' and coddoc = '" . parent::getActUser("coddoc") . "' and documento='" . parent::getActUser("documento") . "' and cedtra='$cedtra' and estado<>'X'"
-                    ) > 0) $mensajes_error .= self::errorCarga($l, $cedtra, $nombre, "Ya tiene un formulario presentado");
-                    if ($key_tipdoc === false) $mensajes_error .= self::errorCarga($l, $cedtra, $nombre, "Tipo de Documento No existe $tipdoc");
-                    if ($key_ciunac === false) $mensajes_error .= self::errorCarga($l, $cedtra, $nombre, "Ciudad de Nacimiento No existe $ciunac");
-                    if ($key_sexo === false) $mensajes_error .= self::errorCarga($l, $cedtra, $nombre, "Sezo No existe $sexo");
-                    if ($key_estciv === false) $mensajes_error .= self::errorCarga($l, $cedtra, $nombre, "Estado Civil No existe $estciv");
-                    if ($key_cabhog === false) $mensajes_error .= self::errorCarga($l, $cedtra, $nombre, "Cabeza de hogar No existe $cabhog");
-                    if ($key_codciu === false) $mensajes_error .= self::errorCarga($l, $cedtra, $nombre, "Ciudad No existe $codciu");
-                    if ($key_codzon === false) $mensajes_error .= self::errorCarga($l, $cedtra, $nombre, "Zona No existe $codzon");
-                    if ($key_captra === false) $mensajes_error .= self::errorCarga($l, $cedtra, $nombre, "Capacidad Trabajo No existe $captra");
-                    if ($key_tipdis === false) $mensajes_error .= self::errorCarga($l, $cedtra, $nombre, "Tipo Discapacidad No existe $tipdis");
-                    if ($key_nivedu === false) $mensajes_error .= self::errorCarga($l, $cedtra, $nombre, "nivel educacion No existe $nivedu");
-                    if ($key_rural === false) $mensajes_error .= self::errorCarga($l, $cedtra, $nombre, "rural No existe $rural");
-                    if ($key_tipcon === false) $mensajes_error .= self::errorCarga($l, $cedtra, $nombre, "Tipo de Contrato No existe $tipcon");
-                    if ($key_trasin === false) $mensajes_error .= self::errorCarga($l, $cedtra, $nombre, "Trabajador sindicalizado No existe $trasin");
-                    if ($key_vivienda === false) $mensajes_error .= self::errorCarga($l, $cedtra, $nombre, "Vivienda No existe $vivienda");
-                    if ($key_tipafi === false) $mensajes_error .= self::errorCarga($l, $cedtra, $nombre, "Tipo de Afiliado No existe $tipafi");
-                    if ($key_autoriza === false) $mensajes_error .= self::errorCarga($l, $cedtra, $nombre, "Autoriza No existe $autoriza");
-                    if (filter_var($email, FILTER_VALIDATE_EMAIL) == false) $mensajes_error .= self::errorCarga($l, $cedtra, $nombre, "Email no tiene formato valido $email");
-                    try {
-                        $fecha = new Date($fecnac);
-                    } catch (DateException $e) {
-                        $mensajes_error .= self::errorCarga($l, $cedtra, $nombre, "Fecha Nacimiento no tiene formato valido $fecnac");
-                    }
-                    try {
-                        $fecha = new Date($fecing);
-                    } catch (DateException $e) {
-                        $mensajes_error .= self::errorCarga($l, $cedtra, $nombre, "Fecha Ingreso no tiene formato valido  $fecing");
-                    }
-                    if ($mensajes_error == "") {
-                        $generalService = new GeneralService();
-                        $id_log = $generalService->registrarLog(true, "Afiliacion Trabajador", "");
-                        $mercurio31 = new Mercurio31();
-                        $mercurio31->setTransaction($Transaccion);
-                        $mercurio31->setId(0);
-                        $mercurio31->setLog($id_log);
-                        $mercurio31->setNit(parent::getActUser("documento"));
-                        $mercurio31->setRazsoc(parent::getActUser("nombre"));
-                        $mercurio31->setCedtra($cedtra);
-                        $mercurio31->setTipdoc($_coddoc[$key_tipdoc]);
-                        $mercurio31->setPriape($priape);
-                        $mercurio31->setSegape($segape);
-                        $mercurio31->setPrinom($prinom);
-                        $mercurio31->setSegnom($segnom);
-                        $mercurio31->setFecnac($fecnac);
-                        //  $mercurio31->setFecnac(date("Y-m-d",strtotime($fecnac)));
-                        $mercurio31->setCiunac($_codciu[$key_ciunac]);
-                        $mercurio31->setSexo($_sexo[$key_sexo]);
-                        $mercurio31->setEstciv($_estciv[$key_estciv]);
-                        $mercurio31->setCabhog($_cabhog[$key_cabhog]);
-                        $mercurio31->setCodciu($_codciu[$key_codciu]);
-                        $mercurio31->setCodzon($_codciu[$key_codzon]);
-                        $mercurio31->setDireccion($direccion);
-                        $mercurio31->setBarrio($barrio);
-                        $mercurio31->setTelefono($telefono);
-                        $mercurio31->setCelular($celular);
-                        $mercurio31->setFax($fax);
-                        $mercurio31->setEmail($email);
-                        $mercurio31->setFecing($fecing);
-                        // $mercurio31->setFecing(date("Y-m-d",strtotime($fecing)));
-                        $mercurio31->setSalario($salario);
-                        $mercurio31->setCaptra($_captra[$key_captra]);
-                        $mercurio31->setTipdis($_tipdis[$key_tipdis]);
-                        $mercurio31->setNivedu($_nivedu[$key_nivedu]);
-                        $mercurio31->setRural($_rural[$key_rural]);
-                        $mercurio31->setHoras($horas);
-                        $mercurio31->setTipcon($_tipcon[$key_tipcon]);
-                        $mercurio31->setTrasin($_trasin[$key_trasin]);
-                        $mercurio31->setVivienda($_vivienda[$key_vivienda]);
-                        $mercurio31->setTipafi($_tipafi[$key_tipafi]);
-                        $mercurio31->setProfesion($profesion);
-                        $mercurio31->setCargo($cargo);
-                        $mercurio31->setAutoriza($_autoriza[$key_autoriza]);
-                        $mercurio31->setEstado("T");
-                        $asignarFuncionario = new AsignarFuncionario();
-                        $usuario = $asignarFuncionario->asignar($tipopc, parent::getActUser("codciu"));
-                        if ($usuario == "") {
-                            $response = parent::errorFunc("No se puede realizar el registro,Comuniquese con la Atencion al cliente");
-                            return $this->renderText(json_encode($response));
-                        }
-                        $mercurio31->setUsuario($usuario);
-                        $mercurio31->setTipo(parent::getActUser("tipo"));
-                        $mercurio31->setCoddoc(parent::getActUser("coddoc"));
-                        $mercurio31->setDocumento(parent::getActUser("documento"));
-                        if (!$mercurio31->save()) {
-                            parent::setLogger($mercurio31->getMessages());
-                            parent::ErrorTrans();
-                        }
-                    }
-                }
-                $html = "";
-                $html .= "<table class='table'>";
-                $html .= "<thead>";
-                $html .= "<tr>";
-                $html .= "<th>Linea</th>";
-                $html .= "<th>Cedula</th>";
-                $html .= "<th>Nombre</th>";
-                $html .= "<th>Nota</th>";
-                $html .= "</tr>";
-                $html .= "</thead>";
-                $html .= "<tbody>";
-                $html .= $mensajes_error;
-                $html .= "<tbody>";
-                $html .= "</table>";
-                if ($mensajes_error == "") {
-                    parent::finishTrans();
-                    $response = parent::successFunc("Se digitaron $l trabajador con exito", $html);
-                } else {
-                    $response = parent::errorFunc("No se pudo realizar la accion", $html);
-                }
-                return $this->renderText(json_encode($response));
-            } catch (DbException $e) {
-                parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
-            }
-        } catch (TransactionFailed $e) {
-            $response = parent::errorFunc("No se pudo realizar la accion xxx");
-            return $this->renderText(json_encode($response));
-        }
-    }
-
     public function ejemplo_planilla_masivaAction()
     {
         $file = "public/docs/" . "ejemplo_planilla_masiva.xlsx";
-        header("location: " . Core::getInstancePath() . "/{$file}");
     }
 
     public function certificado_afiliacion_viewAction()
     {
-        $this->setParamToView("hide_header", true);
-        $this->setParamToView("help", false);
-        $this->setParamToView("title", "Certificado Afiliacion");
-        Tag::setDocumentTitle('Certificado Afiliacion');
+        return view("subsidioemp/certificado_afiliacion", [
+            "hide_header" => true,
+            "help" => false,
+            "title" => "Certificado Afiliacion",
+            "document_title" => "Certificado Afiliacion"
+        ]);
     }
 
     public function certificado_afiliacionAction()
@@ -1112,12 +865,6 @@ class SubsidioempController extends ApplicationController
 
     public function certificado_para_trabajador_viewAction()
     {
-        $this->setParamToView("hide_header", true);
-        $this->setParamToView("help", false);
-        $this->setParamToView("title", "Certificado Afiliacion");
-        Tag::setDocumentTitle('Certificado Afiliacion');
-
-
         $ps = Comman::Api();
         $ps->runCli(
             array(
@@ -1140,16 +887,22 @@ class SubsidioempController extends ApplicationController
             $_cedtra[$msubsi15['cedtra']] = $msubsi15['nombre'];
         }
 
-        $this->setParamToView("_cedtra", $_cedtra);
-        $this->setParamToView("tipo", array(
-            "A" => "Certificado Afiliacion Principal",
-            "I" => "Certificacion Con Nucleo",
-            "T" => "Certificacion de Multiafiliacion",
-            "P" => "Reporte trabajador en planillas"
-        ));
+        return view("subsidioemp/certificado_para_trabajador", [
+            "hide_header" => true,
+            "help" => false,
+            "title" => "Certificado Para Trabajador",
+            "document_title" => "Certificado Para Trabajador",
+            "_cedtra" => $_cedtra,
+            "tipo" => array(
+                "A" => "Certificado Afiliacion Principal",
+                "I" => "Certificacion Con Nucleo",
+                "T" => "Certificacion de Multiafiliacion",
+                "P" => "Reporte trabajador en planillas"
+            )
+        ]);
     }
 
-    public function certificado_para_trabajadorAction()
+    public function certificado_para_trabajadorAction(Request $request)
     {
         $generalService = new GeneralService();
         $tipo = $request->input("tipo");
@@ -1162,399 +915,16 @@ class SubsidioempController extends ApplicationController
     public function ejemplo_planilla_activacion_masivaAction()
     {
         $file = "public/docs/" . "ejemplo_planilla_activacion_masiva.csv";
-        header("location: " . Core::getInstancePath() . "/{$file}");
     }
 
     public function activacion_masiva_trabajador_viewAction()
     {
-        //opcion no disponible
-        Router::routeTo("controller: principal", "action: index");
-
-        $this->setParamToView("hide_header", true);
-        $this->setParamToView("help", false);
-        $this->setParamToView("title", "Activacion Masiva");
-        Tag::setDocumentTitle('Activacion Masiva');
-    }
-
-
-    public function activacion_masiva_trabajadorAction()
-    {
-
-        try {
-            try {
-                $this->setResponse("ajax");
-                if (!isset($_FILES['archivo']['name']) && $_FILES['archivo']['name'] == "") {
-                    $response = parent::errorFunc("No se cargo el archivo");
-                    return $this->renderText(json_encode($response));
-                }
-                $estado = $this->uploadFile("archivo", "public/temp/");
-                if ($estado == false) {
-                    $response = parent::errorFunc("No se cargo el archivo");
-                    return $this->renderText(json_encode($response));
-                }
-                $modelos = array("mercurio10", "mercurio20", "mercurio31", "mercurio46");
-                # $Transaccion = parent::startTrans($modelos);
-
-                $tipopc = 1;
-
-                $ps = Comman::Api();
-                $ps->runCli(
-                    array(
-                        "servicio" => "PoblacionAfilia",
-                        "metodo" => "captura_trabajador"
-                    )
-                );
-                $datos_captura = $ps->toArray();
-
-                if (!$datos_captura['success']) {
-                    throw new DebugException($datos_captura['msj']);
-                }
-
-                $datos_captura = $datos_captura['data'];
-                $_autoriza[] = "SI";
-                $_autoriza[] = "NO";
-                $today = Carbon::now();
-                $mensajes_error = "";
-                $error = false;
-                $l = 0;
-                $file = file("public/temp/" . $_FILES['archivo']['name']);
-
-                $array = array();
-                $aprobados = 0;
-                $apro = array("subsi15" => array(), "subsi168" => array());
-                $errores = array("subsi15" => array(), "subsi168" => array(), "formato_fecha" => array());
-                $actmult = array("s168act" => array());
-                $verifico = 0;
-                foreach ($file as $mlinea) {
-                    $datos = preg_split("/;/", $mlinea);
-                    if (isset($datos[1]) == false) {
-                        $datos = preg_split("/,/", $mlinea);
-                        if (isset($datos[1]) == false) {
-                            continue;
-                        }
-                    };
-                    $cedtra = trim($datos[0]);
-                    $fecafi = trim($datos[1]);
-                    $valida_fecha = date('Y-m-d', strtotime("$fecafi"));
-                    if ($valida_fecha == '1969-12-31') {
-                        $errores['formato_fecha'][] = array("linea" => $l, "cedtra" => $cedtra, "nota" => "El formato de la fecha no es valido, porfavor verfiquelo.");
-                        continue;
-                    }
-                    $l++;
-                    if ($cedtra == "" && $fecafi == "") continue;
-
-                    $ps = Comman::Api();
-                    $ps->runCli(
-                        array(
-                            "servicio" => "PoblacionAfiliada",
-                            "metodo" => "datosTrabajadorTodos",
-                            "params" =>  array("cedtra" => $cedtra)
-                        )
-                    );
-
-                    $datos_trabajador = $ps->toArray();
-                    if ($datos_trabajador['success'] == false) {
-                        $errores['subsi15'][] = array("linea" => $l, "cedtra" => $cedtra, "nota" => $datos_trabajador['msj']);
-                        continue;
-                    }
-
-                    $mercurio31 = new Mercurio31();
-                    foreach ($datos_trabajador['data'] as $key => $value) {
-                        $mercurio31->setLog(1);
-                        if ($mercurio31->isAttribute(strval($key)))
-                            $mercurio31->writeAttribute(strval($key), "$value");
-                        if ($key == 'coddoc')
-                            $mercurio31->writeAttribute("tipdoc", "$value");
-                    }
-
-                    $nombre = $mercurio31->getNombre();
-                    if (Mercurio31::where('cedtra', $cedtra)
-                        ->where('nit', parent::getActUser("documento"))
-                        ->whereIn('estado', ['T', 'P'])
-                        ->count() > 0
-                    ) {
-                        $errores['subsi15'][] = array("linea" => $l, "cedtra" => $cedtra, "nombre" => $nombre, "nota" => "El Trabajador ya tiene una solicitud creada1.");
-                        continue;
-                    }
-                    if ($mercurio31->getCedtra() == '') {
-                        $errores['subsi15'][] = array("linea" => $l, "cedtra" => $cedtra, "nombre" => $nombre, "nota" => "El Trabajador no existe en nuestro sistema.");
-                        continue;
-                    }
-                    if ($mercurio31->getNit() == parent::getActUser("documento") && $mercurio31->getEstado() == 'A') {
-                        $errores['subsi15'][] = array("linea" => $l, "cedtra" => $cedtra, "nombre" => $nombre, "nota" => "El Trabajador esta activo en la misma empresa.");
-                        continue;
-                    }
-
-                    if ($mercurio31->getNit() != parent::getActUser("documento") &&  $mercurio31->getEstado() == 'A' && isset($datos_trabajador['data']['s168'])  && $datos_trabajador['data']['s168'][0] == 0) {
-                        $errores['subsi15'][] = array("linea" => $l, "cedtra" => $cedtra, "nombre" => $nombre, "nota" => "El Trabajador esta activo en otra empresa.");
-                        continue;
-                    }
-
-                    if ($mercurio31->getEstado() == 'M') {
-                        $errores['subsi15'][] = array("linea" => $l, "cedtra" => $cedtra, "nombre" => $nombre, "nota" => "El Trabajador Fallecio.");
-                        continue;
-                    }
-                    //Verifica Multiafiliacion
-                    $ps = Comman::Api();
-                    $ps->runCli(
-                        array(
-                            "servicio" => "PoblacionAfiliada",
-                            "metodo" => "verifica_multiafiliacion",
-                            "params" => array("nit" => parent::getActUser("documento"), "cedtra" => $cedtra)
-                        )
-                    );
-                    $multiafiliacion = $ps->toArray();
-                    if ($multiafiliacion['data']['s168'] > 0) {
-                        $actmult['s168act'][] = array("linea" => $l, "cedtra" => $cedtra, "nombre" => $nombre, "nota" => "El trabajador se encuentra activo por multiafiliacion en esta empresa.");
-                        continue;
-                    }
-                    if ($mercurio31->getNit() != parent::getActUser("documento") &&  $multiafiliacion['data']['subsi168'] == 0) {
-                        $errores['subsi15'][] = array("linea" => $l, "cedtra" => $cedtra, "nombre" => $nombre, "nota" => "El trabajador no se encuentra afiliado a esta empresa.");
-                        continue;
-                    }
-                    $generalService = new GeneralService();
-                    $id_log = $generalService->registrarLog(true, "Afiliacion Trabajador", "");
-                    $mercurio31->setTransaction($Transaccion);
-                    $mercurio31->setId(0);
-                    $mercurio31->setLog($id_log);
-                    $mercurio31->setNit(parent::getActUser("documento"));
-                    $mercurio31->setRazsoc(parent::getActUser("nombre"));
-                    $mercurio31->setEstado("A");
-                    $mercurio31->setAutoriza("S");
-                    $mercurio31->setFecsol($today->getDate());
-                    $mercurio31->setFecing($today->getDate());
-                    $mercurio31->setTipafi("01");
-                    $mercurio31->setCodest(NULL);
-                    $asignarFuncionario = new AsignarFuncionario();
-                    $usuario = $asignarFuncionario->asignar($tipopc, parent::getActUser("codciu"));
-
-                    if ($usuario == "") {
-                        $response = parent::errorFunc("No se puede realizar el registro,Comuniquese con la Atencion al cliente");
-                        $error = false;
-                        return $this->renderText(json_encode($response));
-                    }
-                    $mercurio31->setUsuario($usuario);
-                    $mercurio31->setTipo(parent::getActUser("tipo"));
-                    $mercurio31->setCoddoc(parent::getActUser("coddoc"));
-                    $mercurio31->setDocumento(parent::getActUser("documento"));
-                    $params = array_merge($mercurio31->getArray(), $_POST, array("fecafi" => $fecafi, "codsuc" => $datos_trabajador["data"]["codsuc"], "codlis" => $datos_trabajador["data"]["codlis"], "vendedor" => $datos_trabajador["data"]["vendedor"], "empleador" => $datos_trabajador["data"]["empleador"]));
-
-                    $servicio =
-
-                        $procesadorComando = Comman::Api();
-                    $procesadorComando->runPortal(array("servicio" => "activacion_masiva", "params" => $params));
-                    $result = $procesadorComando->toArray();
-
-                    if ($result['flag'] == false) {
-                        $response = parent::errorFunc($result['msg']);
-                        return $this->renderText(json_encode($response));
-                    }
-                    if (!$mercurio31->save()) {
-                        parent::setLogger($mercurio31->getMessages());
-                        parent::ErrorTrans();
-                    }
-                    $mercurio10 = new Mercurio10();
-                    $mercurio10->setTransaction($Transaccion);
-                    $mercurio10->setTipopc(1);
-                    $mercurio10->setNumero($mercurio31->getId());
-                    $mercurio10->setItem(2);
-                    $mercurio10->setEstado("A");
-                    $mercurio10->setNota("Afiliación exitosa");
-                    $mercurio10->setFecsis($today->format('Y-m-d'));
-                    if (!$mercurio10->save()) {
-                        parent::setLogger($mercurio10->getMessages());
-                        parent::ErrorTrans();
-                    }
-                    $mercurio46 = new Mercurio46();
-                    $mercurio46->setTransaction($Transaccion);
-                    $mercurio46->setId(0);
-                    $mercurio46->setLog($id_log);
-                    $mercurio46->setNit(parent::getActUser("documento"));
-                    $mercurio46->setFecsis($today->format('Y-m-d'));
-                    $mercurio46->setArchivo($_FILES['archivo']['name']);
-                    if (!$mercurio46->save()) {
-                        parent::setLogger($mercurio46->getMessages());
-                        parent::ErrorTrans();
-                    }
-                    $aprobados++;
-                    $array[] = $cedtra;
-                    if (isset($result['data']['subsi15']['cedtra']) != false) {
-                        $apro['subsi15'][] = $result['data']['subsi15'];
-                    }
-                    if (isset($result['data']['subsi168']['cedtra']) != false) {
-                        $apro['subsi168'][] = $result['data']['subsi168'];
-                    }
-                }
-                $aprobados = count($apro['subsi15']) + count($apro['subsi168']);
-                $html = "";
-                $html .= "<h2>Aceptados</h2>";
-                $html .= "<table class='table'>";
-                $html .= "<thead>";
-                $html .= "<tr>";
-                $html .= "<th>Linea</th>";
-                $html .= "<th>Afiliacion</th>";
-                $html .= "<th>Cedula</th>";
-                $html .= "</tr>";
-                $html .= "</thead>";
-                $html .= "<tbody>";
-                $aux = 1;
-                foreach ($apro['subsi15'] as $value) {
-                    if (isset($value["cedtra"]) == false) continue;
-                    $html .= "<tr>";
-                    $html .= "<td>" . $aux++ . "</td>";
-                    $html .= "<td>Afiliacion Principal</td>";
-                    $html .= "<td>" . $value["cedtra"] . "</td>";
-                    $html .= "</tr>";
-                }
-                foreach ($apro['subsi168'] as $value) {
-                    if (isset($value["cedtra"]) == false) continue;
-                    $html .= "<tr>";
-                    $html .= "<td>" . $aux++ . "</td>";
-                    $html .= "<td>Multifialiacion</td>";
-                    $html .= "<td>" . $value["cedtra"] . "</td>";
-                    $html .= "</tr>";
-                }
-                $html .= "<tr>";
-                $html .= "<td>" . $aux++ . "</td>";
-                $html .= "<td>Total - Afiliacion Principal</td>";
-                $html .= "<td>" . count($apro['subsi15']) . "</td>";
-                $html .= "</tr>";
-                $html .= "<tr>";
-                $html .= "<td>" . $aux++ . "</td>";
-                $html .= "<td>Total - Multiafiliacion</td>";
-                $html .= "<td>" . count($apro['subsi168']) . "</td>";
-                $html .= "</tr>";
-                $html .= "<tbody>";
-                $html .= "</table>";
-                $html .= "<h2>Error</h2>";
-                $html .= "<table class='table'>";
-                $html .= "<thead>";
-                $html .= "<tr>";
-                $html .= "<th>Linea</th>";
-                $html .= "<th>Cedula</th>";
-                $html .= "<th>Nombre</th>";
-                $html .= "<th>Nota</th>";
-                $html .= "</tr>";
-                $html .= "</thead>";
-                $html .= "<tbody>";
-                $html .= $errores;
-                $html .= "<tbody>";
-                $html .= "</table>";
-
-                $today = new Date();
-                $mancho = 220; //A4 P
-                $mdatos = 160; //suma campos
-                $mlineas = 26; //lines por hoja
-                $info = array();
-                $author = array("Reporte Por Sistemas y Soluciones");
-                $this->setResponse('view');
-                $pdf = new FPDFLibrary("P", 'mm', 'Letter');
-                $pdf->AddPage();
-                $pdf->SetTextColor(0);
-                $pdf->Image('public/img/Mercurio/comfaca.jpg', 15, 10, "50", "30");
-                $pdf->Ln();
-                $pdf->Ln();
-                $pdf->SetFont('Arial', 'B', 10);
-                $pdf->SetY(25);
-                $pdf->SetX(round(($mancho - $mdatos) / 2));
-                $pdf->cell(150, 4, "REPORTE ACTIVACION MASIVA - NIT: " . parent::getActUser("documento") . " FECHA: " . $today, 0, 0, 'C', 0);
-                $pdf->Ln();
-                $pdf->Ln();
-                $pdf->Ln();
-                $pdf->SetX(round(($mancho - $mdatos) / 2));
-                $pdf->Cell(150, 4, "ACEPTADOS", 0, 0, 'C', 0);
-                $pdf->Ln();
-                $pdf->Ln();
-                $pdf->Ln();
-                $pdf->SetFont('Arial', 'B', 10);
-                $pdf->setX(40);
-                $pdf->cell(45, 4, "Linea", 1, 0, 'C', 0);
-                $pdf->cell(45, 4, "Afiliacion", 1, 0, 'C', 0);
-                $pdf->cell(45, 4, "Cedula", 1, 1, 'C', 0);
-                $aux2 = 1;
-                $pdf->SetFont('Arial', '', 8);
-                foreach ($apro['subsi15'] as $value) {
-                    if (isset($value["cedtra"]) == false) continue;
-                    $pdf->setX(40);
-                    $pdf->cell(45, 4, $aux2++, 1, 0, 'C', 0);
-                    $pdf->cell(45, 4, "Afiliacion Principal", 1, 0, 'C', 0);
-                    $pdf->cell(45, 4, $value["cedtra"], 1, 1, 'C', 0);
-                }
-                foreach ($apro['subsi168'] as $value) {
-                    if (isset($value["cedtra"]) == false) continue;
-                    $pdf->setX(40);
-                    $pdf->cell(45, 4, $aux2++, 1, 0, 'C', 0);
-                    $pdf->cell(45, 4, "Multifialiacion", 1, 0, 'C', 0);
-                    $pdf->cell(45, 4, $value["cedtra"], 1, 1, 'C', 0);
-                }
-                $pdf->Ln();
-                $pdf->Ln();
-                $pdf->SetFont('Arial', 'B', 10);
-                $pdf->setX(80);
-                $pdf->Cell(50, 4, "NOVEDADES", 0, 0, 'C', 0);
-                $pdf->Ln();
-                $pdf->Ln();
-                $pdf->setX(18);
-                $pdf->cell(30, 4, "Linea", 1, 0, 'C', 0);
-                $pdf->cell(30, 4, "Cedula", 1, 0, 'C', 0);
-                $pdf->cell(30, 4, "Nombre", 1, 0, 'C', 0);
-                $pdf->cell(90, 4, "Nota", 1, 1, 'C', 0);
-                $pdf->SetFont('Arial', '', 8);
-                foreach ($errores['subsi15'] as $value) {
-                    $pdf->setX(18);
-                    $pdf->cell(30, 4, $aux2++, 1, 0, 'C', 0);
-                    $pdf->cell(30, 4, $value["cedtra"], 1, 0, 'C', 0);
-                    $pdf->cell(30, 4, $value["nombre"], 1, 0, 'C', 0);
-                    $pdf->cell(90, 4, $value["nota"], 1, 1, 'C', 0);
-                }
-                foreach ($errores['formato_fecha'] as $value) {
-                    $pdf->setX(18);
-                    $pdf->cell(30, 4, $aux2++, 1, 0, 'C', 0);
-                    $pdf->cell(30, 4, $value["cedtra"], 1, 0, 'C', 0);
-                    $pdf->cell(30, 4, "", 1, 0, 'C', 0);
-                    $pdf->cell(90, 4, $value["nota"], 1, 1, 'C', 0);
-                }
-                $pdf->Ln();
-                $pdf->Ln();
-                $pdf->SetFont('Arial', 'B', 10);
-                $pdf->setX(80);
-                $pdf->Cell(50, 4, "ACTIVOS MULTIAFILIACION", 0, 0, 'C', 0);
-                $pdf->Ln();
-                $pdf->Ln();
-                $pdf->setX(18);
-                $pdf->cell(30, 4, "Linea", 1, 0, 'C', 0);
-                $pdf->cell(30, 4, "Cedula", 1, 0, 'C', 0);
-                $pdf->cell(30, 4, "Nombre", 1, 0, 'C', 0);
-                $pdf->cell(90, 4, "Nota", 1, 1, 'C', 0);
-                $pdf->SetFont('Arial', '', 8);
-                foreach ($actmult['s168act'] as $value) {
-                    $pdf->setX(18);
-                    $pdf->cell(30, 4, $aux2++, 1, 0, 'C', 0);
-                    $pdf->cell(30, 4, $value["cedtra"], 1, 0, 'C', 0);
-                    $pdf->cell(30, 4, $value["nombre"], 1, 0, 'C', 0);
-                    $pdf->cell(90, 4, $value["nota"], 1, 1, 'C', 0);
-                }
-
-                $file = "public/temp/" . "activacion_masiva" . ".pdf";
-                $pdf->Output($file, "F");
-
-                if ($error == false) {
-                    parent::finishTrans();
-                    $response = parent::successFunc("Se digitaron $aprobados trabajador con exito", $html);
-                    $response["file"] = $file;
-                    return $this->renderText(json_encode($response));
-                } else {
-                    $response = parent::errorFunc("No se pudo realizar la accion.", $html);
-                    return $this->renderText(json_encode($response));
-                }
-            } catch (DbException $e) {
-                parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
-            }
-        } catch (TransactionFailed $e) {
-            $response = parent::errorFunc("No se pudo realizar la accion activa masiva");
-            return $this->renderText(json_encode($response));
-        }
+        return view("subsidioemp/activacion_masiva_trabajador", [
+            "hide_header" => true,
+            "help" => false,
+            "title" => "Activacion Masiva",
+            "document_title" => "Activacion Masiva"
+        ]);
     }
 
     function load_parametros_view()
@@ -1602,49 +972,19 @@ class SubsidioempController extends ApplicationController
         $_tipemp = array();
         foreach ($datos_captura['tipo_empresa'] as $data) $_tipemp["{$data['estado']}"] = $data['detalle'];
 
-        $this->setParamToView("_tipper", $_tipper);
-        $this->setParamToView("_coddoc", $_coddoc);
-        $this->setParamToView("_calemp", $_calemp);
-        $this->setParamToView("_codciu", $_codciu);
-        $this->setParamToView("_codzon", $_codzon);
-        $this->setParamToView("_codact", $_codact);
-        $this->setParamToView("_tipsoc", $_tipsoc);
-        $this->setParamToView("_tipemp", $_tipemp);
-        $this->setParamToView("_codcaj", $_codcaj);
-        $this->setParamToView("_ciupri", $_ciupri);
-        $this->setParamToView("tipo", parent::getActUser("tipo"));
-    }
-
-    function loadDisplaySubsidio($empresa)
-    {
-        /* Tag::displayTo("tipdoc", $empresa['coddoc']);
-        Tag::displayTo("digver", $empresa['digver']);
-        Tag::displayTo("nit", $empresa['nit']);
-        Tag::displayTo("sigla", $empresa['sigla']);
-        Tag::displayTo("calemp", $empresa['calemp']);
-        Tag::displayTo("cedrep", $empresa['cedrep']);
-        Tag::displayTo("repleg", $empresa['repleg']);
-        Tag::displayTo("telefono", $empresa['telefono']);
-        Tag::displayTo("fax", $empresa['fax']);
-        Tag::displayTo("email", $empresa['email']);
-        Tag::displayTo("tottra", $empresa['tottra']);
-        Tag::displayTo("ciupri", $empresa['ciupri']);
-        Tag::displayTo("prinom", $empresa['prinom']);
-        Tag::displayTo("segnom", $empresa['segnom']);
-        Tag::displayTo("priape", $empresa['priape']);
-        Tag::displayTo("segape", $empresa['segape']);
-        Tag::displayTo("priaperepleg", $empresa['priaperepleg']);
-        Tag::displayTo("segnomrepleg", $empresa['segnomrepleg']);
-        Tag::displayTo("prinomrepleg", $empresa['prinomrepleg']);
-        Tag::displayTo("segaperepleg", $empresa['segaperepleg']);
-        Tag::displayTo("razsoc", $empresa['razsoc']);
-        Tag::displayTo("tipper", $empresa['tipper']);
-        Tag::displayTo("matmer", $empresa['matmer']);
-        Tag::displayTo("direccion", $empresa['direccion']);
-        Tag::displayTo("tipsoc", $empresa['tipsoc']);
-        Tag::displayTo("codact", $empresa['codact']);
-        Tag::displayTo("tipemp", $empresa['tipemp']);
-        Tag::displayTo("codcaj", $empresa['codcaj']); */
+        return [
+            "_tipper" => $_tipper,
+            "_coddoc" => $_coddoc,
+            "_calemp" => $_calemp,
+            "_codciu" => $_codciu,
+            "_codzon" => $_codzon,
+            "_codact" => $_codact,
+            "_tipsoc" => $_tipsoc,
+            "_tipemp" => $_tipemp,
+            "_codcaj" => $_codcaj,
+            "_ciupri" => $_ciupri,
+            "tipo" => session("tipo")
+        ];
     }
 
     function buscarEmpresaSubsidio($nit)
@@ -1665,13 +1005,9 @@ class SubsidioempController extends ApplicationController
         }
     }
 
-    function consulta_nucleoAction()
+    function consulta_nucleoAction(Request $request)
     {
         try {
-            Core::importLibrary("ParamsTrabajador", "Collections");
-            Core::importLibrary("ParamsConyuge", "Collections");
-            Core::importLibrary("ParamsBeneficiario", "Collections");
-
             $this->setResponse("ajax");
             $cedtra = $request->input("cedtra");
             $ps = Comman::Api();
@@ -1737,7 +1073,7 @@ class SubsidioempController extends ApplicationController
                 "_trasin" => ParamsTrabajador::getSindicalizado(),
                 "_vivienda" => ParamsTrabajador::getVivienda(),
                 "_tipafi" => ParamsTrabajador::getTipoAfiliado(),
-                "_estado" => ParamsTrabajador::getEstados(),
+                "_estado" => (new Mercurio31())->getEstados(),
                 "_comper" => ParamsConyuge::getCompaneroPermanente(),
                 "_parent" => ParamsBeneficiario::getParentesco(),
                 "_huerfano" => ParamsBeneficiario::getHuerfano(),
@@ -1746,7 +1082,7 @@ class SubsidioempController extends ApplicationController
                 "_huerfano" => ParamsBeneficiario::getHuerfano(),
                 "_tiphij" => ParamsBeneficiario::getTipoHijo(),
                 "_calendario" => ParamsBeneficiario::getCalendario(),
-                '_codcat' => ParamsTrabajador::getCategoria(),
+                '_codcat' => (new Mercurio31)->getCategoria(),
             );
 
             $salida = array(

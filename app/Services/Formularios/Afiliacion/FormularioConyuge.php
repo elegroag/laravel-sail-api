@@ -82,7 +82,7 @@ class FormularioConyuge extends Documento
 
         $nombtra = capitalize($this->trabajador->getPrinom() . ' ' . $this->trabajador->getSegnom() . ' ' . $this->trabajador->getPriape() . ' ' . $this->trabajador->getSegape());
 
-        $this->pdf->SetFont('Arial', '', 8.5);
+        $this->pdf->SetFont('helvetica', '', 8.5);
         $datos = array(
             array('lb' => 'Adicion personas', 'texto' => 'X', 'x' => 45, 'y' => 52),
             array('lb' => 'Cedula trabajador', 'texto' => $this->trabajador->getCedtra(), 'x' => 11, 'y' => 74),
@@ -122,7 +122,7 @@ class FormularioConyuge extends Documento
 
         $empresalab = ($this->conyuge->getEmpresalab()) ? $this->conyuge->getEmpresalab() : 'NO APLICA';
 
-        $this->pdf->SetFont('Arial', '', 8.5);
+        $this->pdf->SetFont('helvetica', '', 8.5);
         $datos = array(
             array('lb' => 'Cedula', 'texto' => $this->conyuge->getCedcon(), 'x' => 11, 'y' => 90),
             array('lb' => 'Tipo documento', 'texto' => $detdoc, 'x' => 35, 'y' => 90),

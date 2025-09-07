@@ -65,7 +65,7 @@ class FormularioActualizadatos extends Documento
         $this->pdf->setX(27);
         $this->pdf->Cell(60, 5, @$campos['dirpri'], 0, 0, 'L');
 
-        $this->pdf->SetFont('Arial', '', 7.7);
+        $this->pdf->SetFont('helvetica', '', 7.7);
         $this->pdf->setX(85);
         $this->pdf->Cell(60, 5, @$campos['barrio_notificacion'], 0, 0, 'L');
 
@@ -87,7 +87,7 @@ class FormularioActualizadatos extends Documento
         $this->pdf->setX(85);
         $this->pdf->Cell(60, 5, @$campos['celular'], 0, 0, 'L');
 
-        $this->pdf->SetFont('Arial', '', 7.5);
+        $this->pdf->SetFont('helvetica', '', 7.5);
         $this->pdf->setX(123);
         $this->pdf->Cell(65, 5, @$campos['email'], 0, 0, 'L');
 
@@ -103,7 +103,7 @@ class FormularioActualizadatos extends Documento
         $this->pdf->setX(26);
         $this->pdf->Cell(60, 5, @$campos['direccion'], 0, 0, 'L');
 
-        $this->pdf->SetFont('Arial', '', 7.7);
+        $this->pdf->SetFont('helvetica', '', 7.7);
         $this->pdf->setX(77);
         $this->pdf->Cell(60, 5, @$campos['barrio_comercial'], 0, 0, 'L');
 

@@ -236,6 +236,7 @@ class PensionadoService
     {
         $data['estado'] = 'T';
         $data['log'] = '0';
+        $data['id'] = null;
         $pensionado = $this->create($data);
         return $pensionado;
     }

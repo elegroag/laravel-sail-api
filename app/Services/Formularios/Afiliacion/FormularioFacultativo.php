@@ -94,7 +94,7 @@ class FormularioFacultativo extends Documento
             $discapacidad = $mtidis[$tipdis];
         }
 
-        $this->pdf->SetFont('Arial', '', 8);
+        $this->pdf->SetFont('helvetica', '', 8);
         $datos = array(
             array('lb' => 'Cedula trabajador', 'texto' => $this->facultativo->getCedtra(), 'x' => 10, 'y' => 76),
             $this->posTipoDocumento(),
@@ -129,7 +129,7 @@ class FormularioFacultativo extends Documento
 
     function dataLaboral()
     {
-        $this->pdf->SetFont('Arial', '', 8);
+        $this->pdf->SetFont('helvetica', '', 8);
         $mcargos = ParamsTrabajador::getOcupaciones();
         $cargo = ($this->facultativo->getCargo()) ? $mcargos[$this->facultativo->getCargo()] : '';
 

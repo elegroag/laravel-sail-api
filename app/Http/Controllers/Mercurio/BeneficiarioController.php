@@ -191,7 +191,7 @@ class BeneficiarioController extends ApplicationController
     {
         $this->setResponse("ajax");
         $numdoc = $request->input("numdoc");
-        $mercurio34 = new Mercurio34();
+
         $datos_beneficiario = array();
 
         $ps = Comman::Api();
@@ -208,13 +208,8 @@ class BeneficiarioController extends ApplicationController
         if ($out['success'] == true) {
             $datos_beneficiario = $out['data'];
         }
-
-        foreach ($datos_beneficiario as $key => $value) {
-            if (is_numeric($key)) continue;
-            if ($mercurio34->isAttribute($key))
-                $mercurio34->writeAttribute($key, "$value");
-        }
-        return $this->renderObject($mercurio34->getArray(), false);
+        $mercurio34 = new Mercurio34($datos_beneficiario);
+        return $this->renderObject($mercurio34->toArray());
     }
 
     public function borrarAction(Request $request)
@@ -877,13 +872,11 @@ class BeneficiarioController extends ApplicationController
                 $datos_trabajador = ($out['success'] == true) ? $out['data'] : null;
                 if ($datos_trabajador) {
                     if ($datos_trabajador['nit'] == $nit) {
-                        $mercurio31 = new Mercurio31();
-                        foreach ($datos_trabajador as $key => $value) {
-                            if ($mercurio31->isAttribute($key)) $mercurio31->writeAttribute($key, "$value");
-                            if ($key == 'fecafi') $mercurio31->writeAttribute('fecing', "$value");
-                            if ($key == 'tipcot') $mercurio31->writeAttribute('tipafi', "$value");
-                            if ($key == 'coddoc') $mercurio31->writeAttribute('tipdoc', "$value");
-                        }
+
+                        $mercurio31 = new Mercurio31($datos_trabajador);
+                        $mercurio31->fecing = $datos_trabajador['fecafi'];
+                        $mercurio31->tipafi = $datos_trabajador['tipcot'];
+                        $mercurio31->tipdoc = $datos_trabajador['coddoc'];
                     }
                 }
             }
@@ -957,12 +950,9 @@ class BeneficiarioController extends ApplicationController
                             }
                         }
                         if ($has > 0) {
-                            $mercurio32 = new Mercurio32();
-                            foreach ($datos_conyuge as $key => $value) {
-                                if ($mercurio32->isAttribute($key)) $mercurio32->writeAttribute($key, "$value");
-                                if ($key == 'coddoc') $mercurio32->writeAttribute('tipdoc', "$value");
-                                if ($key == 'codzon') $mercurio32->writeAttribute('ciures', "$value");
-                            }
+                            $mercurio32 = new Mercurio32($datos_conyuge);
+                            $mercurio32->tipdoc = $datos_conyuge['coddoc'];
+                            $mercurio32->ciures = $datos_conyuge['codzon'];
                         }
                     }
                 }
@@ -991,12 +981,9 @@ class BeneficiarioController extends ApplicationController
                                 }
                             }
                             if ($has > 0) {
-                                $mercurio32 = new Mercurio32();
-                                foreach ($datos_conyuge as $key => $value) {
-                                    if ($mercurio32->isAttribute($key)) $mercurio32->writeAttribute($key, "$value");
-                                    if ($key == 'coddoc') $mercurio32->writeAttribute('tipdoc', "$value");
-                                    if ($key == 'codzon') $mercurio32->writeAttribute('ciures', "$value");
-                                }
+                                $mercurio32 = new Mercurio32($datos_conyuge);
+                                $mercurio32->tipdoc = $datos_conyuge['coddoc'];
+                                $mercurio32->ciures = $datos_conyuge['codzon'];
                             }
                         }
                     }

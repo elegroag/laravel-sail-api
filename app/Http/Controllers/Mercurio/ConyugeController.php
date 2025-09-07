@@ -151,7 +151,7 @@ class ConyugeController extends ApplicationController
     {
         $this->setResponse("ajax");
         $cedcon = $request->input("cedcon");
-        $mercurio32 = new Mercurio32();
+
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
@@ -164,13 +164,11 @@ class ConyugeController extends ApplicationController
             )
         );
 
+        $mercurio32 = new Mercurio32();
         $out = $procesadorComando->toArray();
         if ($out['success']) {
             $datos_conyuge = $out['data'];
-            foreach ($datos_conyuge as $key => $value) {
-                if (is_numeric($key)) continue;
-                if ($mercurio32->isAttribute($key)) $mercurio32->writeAttribute($key, "{$value}");
-            }
+            $mercurio32 = new Mercurio32($datos_conyuge);
         }
 
         $procesadorComando->runCli(
@@ -186,10 +184,8 @@ class ConyugeController extends ApplicationController
         $out = $procesadorComando->toArray();
         if ($out['success']) {
             $datos_trabajador = $out['data'];
-            foreach ($datos_trabajador as $key => $value) {
-                if (is_numeric($key)) continue;
-                if ($mercurio32->isAttribute($key)) $mercurio32->writeAttribute($key, "{$value}");
-            }
+            $mercurio32 = new Mercurio32($datos_trabajador);
+            $mercurio32->setTipdoc($datos_trabajador['coddoc']);
         }
 
         $this->renderObject($mercurio32->toArray());
