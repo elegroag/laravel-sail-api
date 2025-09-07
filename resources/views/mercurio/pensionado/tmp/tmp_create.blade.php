@@ -1,26 +1,22 @@
 @php
     use App\Services\Tag;
+    $fecsol = date('Y-m-d');
 @endphp
-
 <div class="tab-content" id="pills-tabContent">
     <div class="tab-pane fade show active" id="datos_solicitud" role="tabpanel" aria-labelledby="datos_solicitud-tab">
         <div class="card-body">
-            <form id="formRequest" class="validation_form" autocomplete="off" novalidate>
+            <form id="formRequest" class="validation_form" autocomplete="off">
                 <div class="d-none">
                     <input type="number" name="id" class="d-none"/>
                     <input type="text" name="calemp" class="d-none" value="P" />
-                    <input type="text" name="coddocrepleg" class="d-none" value="" />
+                    <input type="text" name="coddocrepleg" class="d-none" value="CC"/>
+                    <input type="text" name="fecsol" id="fecsol" class="d-none" value="{{ $fecsol }}"/>
                 </div>
                 <div class="row">
                     <div class="col-12">
                         <fieldset>
                             <legend>Datos afiliado pensionado</legend>
                             <div class="row">
-                                <div class="form-group d-none">
-                                    <label for="fecsol" class="control-label d-none">Fecha solicitud:</label>
-                                    <input class='form-control d-none' type="date" name='fecsol' id='fecsol' value="<?= date('Y-m-d') ?>">
-                                </div>
-
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='tipdoc'>
                                         <label for="tipdoc" class="control-label">Tipo documento:</label>

@@ -285,7 +285,7 @@ export class FormView extends Backbone.View {
     actualizaForm(silent = void 0) {
         $.each(this.model.toJSON(), (key, valor) => {
             const inputElement = this.$el.find(`[name="${key}"]`);
-            if (inputElement.length) {
+            if (inputElement.length && valor) {
                 let _type = inputElement.attr('type');
                 if (_type === 'radio' || _type === 'checkbox') {
                     inputElement.prop('checked', valor == 'S');

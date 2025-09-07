@@ -54,7 +54,6 @@ class Mercurio38 extends ModelBase
         'motivo',
         'fecest',
         'orisex',
-        'repleg',
         'fecini',
         'tipsoc',
         'tipemp',
@@ -219,25 +218,6 @@ class Mercurio38 extends ModelBase
     public function getTipper()
     {
         return $this->tipper;
-    }
-
-    /**
-     * setRepleg function
-     * @param string $repleg
-     * @return void
-     */
-    public function setRepleg($repleg)
-    {
-        $this->repleg = $repleg;
-    }
-
-    /**
-     * getRepleg function
-     * @return string
-     */
-    public function getRepleg()
-    {
-        return $this->repleg;
     }
 
     /**

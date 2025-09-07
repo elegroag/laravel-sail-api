@@ -44,8 +44,14 @@ class SignupPensionados  implements SignupInterface
      */
     public function createSignupService($data)
     {
-        $this->solicitud = new Mercurio38($data);
+        $repleg = $data['repleg'];
+        unset($data['repleg']); //dato no hace parte del modelo
+        unset($data['tipper']); //dato no hace parte del modelo
+        unset($data['tipsoc']); //dato no hace parte del modelo
+        unset($data['tipemp']); //dato no hace parte del modelo
+        unset($data['nit']); //dato no hace parte del modelo
 
+        $this->solicitud = new Mercurio38($data);
         $this->solicitud->setDocumento($data['documento']);
         $this->solicitud->setCoddoc($data['coddoc']);
         $this->solicitud->setTipo($data['tipo']);
@@ -55,8 +61,8 @@ class SignupPensionados  implements SignupInterface
 
         $segnom = '';
         $segape = '';
-        if (strlen($data['repleg']) > 0) {
-            $exp = explode(" ", trim($data['repleg']));
+        if (strlen($repleg) > 0) {
+            $exp = explode(" ", trim($repleg));
             switch (count($exp)) {
                 case 6:
                 case 7:
@@ -105,7 +111,6 @@ class SignupPensionados  implements SignupInterface
         $this->solicitud->setUsuario($data['usuario']);
         $this->solicitud->setCoddocrepleg($data['coddocrepleg']);
         $this->solicitud->setEmail($data['email']);
-        $this->solicitud->setRepleg($data['repleg']);
         $this->solicitud->setCalemp($data['calemp']);
         $this->solicitud->setTipafi('3');
         $this->solicitud->setFecnac(date('Y-m-d'));
@@ -119,13 +124,9 @@ class SignupPensionados  implements SignupInterface
         $this->solicitud->setRural('N');
         $this->solicitud->setAutoriza('S');
         $this->solicitud->setLog('0');
-        $this->solicitud->setTipemp('P');
         $this->solicitud->setDireccion("CR");
         $this->solicitud->setEstado("T");
-        $this->solicitud->setCodcaj(13);
-        $this->solicitud->setTipper('N');
         $this->solicitud->setCodact('0000');
-        $this->solicitud->setTipsoc('00');
         $this->solicitud->setCodest(NULL);
         $this->solicitud->setPeretn(7);
         $this->solicitud->setResguardo_id(2);

@@ -72,7 +72,7 @@ export class FormIndependentView extends FormView {
         if (this.model.get('id') !== null) {
             $.each(this.model.toJSON(), (key, valor) => {
                 const inputElement = this.$el.find(`[name="${key}"]`);
-                if (inputElement.length) {
+                if (inputElement.length && valor) {
                     inputElement.val(valor);
                 }
             });

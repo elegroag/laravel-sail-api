@@ -1,319 +1,317 @@
-import { $App } from '../../../App';
-import { ComponentModel } from '../../../Componentes/Models/ComponentModel';
-import { FormView } from '../../FormView';
-import { eventsFormControl } from '../../../Core';
-import { PensionadoModel } from '../models/PensionadoModel';
 import flatpickr from 'flatpickr';
 import { Spanish } from 'flatpickr/dist/l10n/es';
+import { $App } from '../../../App';
+import { ComponentModel } from '../../../Componentes/Models/ComponentModel';
+import { eventsFormControl } from '../../../Core';
+import { FormView } from '../../FormView';
+import { PensionadoModel } from '../models/PensionadoModel';
 
 class FormPensionadoView extends FormView {
-	#choiceComponents = null;
+    #choiceComponents = null;
 
-	constructor(options = {}) {
-		super({
-			...options,
-			onRender: (el={}) => this.#afterRender(el)
-		});
-		this.viewComponents = [];
-		this.#choiceComponents = [];
-	}
+    constructor(options = {}) {
+        super({
+            ...options,
+            onRender: (el = {}) => this.#afterRender(el),
+        });
+        this.viewComponents = [];
+        this.#choiceComponents = [];
+    }
 
-	get events() {
-		return {
-			'click #guardar_ficha': 'saveFormData',
-			'click #cancel': 'cancel',
-			'focusout #telefono, #digver': 'isNumber',
-			'focusout #cedtra': 'validePk',
-			'change #tipdoc': 'changeTipoDocumento',
-			'click [data-toggle="address"]': 'openAddress',
-			'click #btEnviarRadicado': 'enviarRadicado',
-			'change #peretn': 'changePeretn',
-			'change #tippag': 'changeTippag',
-		};
-	}
+    get events() {
+        return {
+            'click #guardar_ficha': 'saveFormData',
+            'click #cancel': 'cancel',
+            'focusout #telefono, #digver': 'isNumber',
+            'focusout #cedtra': 'validePk',
+            'change #tipdoc': 'changeTipoDocumento',
+            'click [data-toggle="address"]': 'openAddress',
+            'click #btEnviarRadicado': 'enviarRadicado',
+            'change #peretn': 'changePeretn',
+            'change #tippag': 'changeTippag',
+        };
+    }
 
-	#afterRender($el = {}) {
-		_.each(this.collection, (component) => {
-			if (component.name == 'ruralt') component.type = 'radio';
-			if (component.name == 'rural') component.type = 'radio';
-			if (component.name == 'autoriza') component.type = 'radio';
+    #afterRender($el = {}) {
+        _.each(this.collection, (component) => {
+            if (component.name == 'ruralt') component.type = 'radio';
+            if (component.name == 'rural') component.type = 'radio';
+            if (component.name == 'autoriza') component.type = 'radio';
 
-			const view = this.addComponent(
-				new ComponentModel({
-					disabled: false,
-					readonly: false,
-					order: 0,
-					target: 1,
-					searchType: 'local',
-					...component,
-					valor: this.model.get(component.name),
-				}),
-				component.type,
-			);
-			this.$el.find('#component_' + component.name).html(view.$el);
-		});
+            const view = this.addComponent(
+                new ComponentModel({
+                    disabled: false,
+                    readonly: false,
+                    order: 0,
+                    target: 1,
+                    searchType: 'local',
+                    ...component,
+                    valor: this.model.get(component.name),
+                }),
+                component.type,
+            );
+            this.$el.find('#component_' + component.name).html(view.$el);
+        });
 
-		this.form.validate({
-			...PensionadoModel.Rules,
-			highlight: function (element) {
-				$(element).removeClass('is-valid').addClass('is-invalid');
-			},
-			unhighlight: function (element) {
-				$(element).removeClass('is-invalid').addClass('is-valid');
-			},
-		});
+        this.form.validate({
+            ...PensionadoModel.Rules,
+            highlight: function (element) {
+                $(element).removeClass('is-valid').addClass('is-invalid');
+            },
+            unhighlight: function (element) {
+                $(element).removeClass('is-invalid').addClass('is-valid');
+            },
+        });
 
-		this.selectores = this.$el.find(
-			'#tipdoc, #tipsoc, #ciupri, #codzon, #codciu, #codact, #coddocrepleg, #ciunac, #cargo, #pub_indigena_id, #resguardo_id',
-		);
+        this.selectores = this.$el.find(
+            '#tipdoc, #tipsoc, #ciupri, #codzon, #codciu, #codact, #coddocrepleg, #ciunac, #cargo, #pub_indigena_id, #resguardo_id',
+        );
 
-		if (this.model.get('id') !== null) {
-			_.each(this.model.toJSON(), (valor, key) => {
-				if (!(_.isEmpty(valor) == true || _.isUndefined(valor) == true))
-					this.$el.find(`[name="${key}"]`).val(valor);
-			});
+        if (this.model.get('id') !== null) {
+            $.each(this.model.toJSON(), (key, valor) => {
+                const inputElement = this.$el.find(`[name="${key}"]`);
+                if (inputElement.length && valor) {
+                    inputElement.val(valor);
+                }
+            });
 
-			if (this.model.get('tippag') == 'A' || this.model.get('tippag') == 'D') {
-				this.form.find('#show_numcue').removeClass('d-none');
-				this.form.find('#show_codban').removeClass('d-none');
-				this.form.find('#show_tipcue').removeClass('d-none');
-			} else {
-				this.$el.find('#numcue').rules('remove', 'required');
-				this.$el.find('#codban').rules('remove', 'required');
-				this.$el.find('#tipcue').rules('remove', 'required');
+            if (this.model.get('tippag') == 'A' || this.model.get('tippag') == 'D') {
+                this.form.find('#show_numcue').removeClass('d-none');
+                this.form.find('#show_codban').removeClass('d-none');
+                this.form.find('#show_tipcue').removeClass('d-none');
+            } else {
+                this.$el.find('#numcue').rules('remove', 'required');
+                this.$el.find('#codban').rules('remove', 'required');
+                this.$el.find('#tipcue').rules('remove', 'required');
 
-				PensionadoModel.changeRulesProperty([
-					{ rule: 'numcue', prop: 'required', value: false },
-					{ rule: 'codban', prop: 'required', value: false },
-					{ rule: 'tipcue', prop: 'required', value: false },
-				]);
-			}
+                PensionadoModel.changeRulesProperty([
+                    { rule: 'numcue', prop: 'required', value: false },
+                    { rule: 'codban', prop: 'required', value: false },
+                    { rule: 'tipcue', prop: 'required', value: false },
+                ]);
+            }
 
-			if (this.model.get('peretn') == '3') {
-				this.$el.find('.show-peretn').removeClass('d-none');
-			} else {
-				this.$el.find('.show-peretn').addClass('d-none');
-				this.$el.find('#resguardo_id').val('2');
-				this.$el.find('#pub_indigena_id').val('2');
-			}
+            if (this.model.get('peretn') == '3') {
+                this.$el.find('.show-peretn').removeClass('d-none');
+            } else {
+                this.$el.find('.show-peretn').addClass('d-none');
+                this.$el.find('#resguardo_id').val('2');
+                this.$el.find('#pub_indigena_id').val('2');
+            }
 
-			this.selectores.trigger('change');
-			this.$el.find('#cedtra').attr('disabled', true);
-			setTimeout(() => this.form.valid(), 200);
+            this.selectores.trigger('change');
+            this.$el.find('#cedtra').attr('disabled', true);
+            setTimeout(() => this.form.valid(), 200);
 
-			$.each(this.selectores, (index, element) => {
-				this.#choiceComponents[element.name] = new Choices(element);
-				const name = this.model.get(element.name);
-				if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
-			});
-		} else {
-			$.each(this.selectores, (index, element) => this.#choiceComponents[element.name] = new Choices(element));
-		}
+            $.each(this.selectores, (index, element) => {
+                this.#choiceComponents[element.name] = new Choices(element);
+                const name = this.model.get(element.name);
+                if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
+            });
+        } else {
+            $.each(this.selectores, (index, element) => (this.#choiceComponents[element.name] = new Choices(element)));
+        }
 
-		eventsFormControl(this.$el);
+        eventsFormControl(this.$el);
 
-		flatpickr(this.$el.find('#fecnac, #fecini'), {
-			enableTime: false,
-			dateFormat: 'Y-m-d',
-			locale: Spanish,
-		});
-		return this;
-	}
+        flatpickr(this.$el.find('#fecnac, #fecini'), {
+            enableTime: false,
+            dateFormat: 'Y-m-d',
+            locale: Spanish,
+        });
 
-	changeTipoDocumento(e) {
-		let tipdoc = $(e.currentTarget).val();
-		let coddocrepleg = PensionadoModel.changeTipdoc(tipdoc);
-		this.$el.find('#coddocrepleg').val(coddocrepleg);
-	}
+        eventsFormControl($el);
+    }
 
-	serializeData() {
-		var data;
-		if (this.model.entity instanceof PensionadoModel) {
-			data = this.model.entity.toJSON();
-		}
-		return data;
-	}
+    changeTipoDocumento(e) {
+        let tipdoc = $(e.currentTarget).val();
+        let coddocrepleg = PensionadoModel.changeTipdoc(tipdoc);
+        this.$el.find('#coddocrepleg').val(coddocrepleg);
+    }
 
-	saveFormData(event) {
-		event.preventDefault();
-		var target = this.$el.find(event.currentTarget);
-		target.attr('disabled', true);
+    serializeData() {
+        var data;
+        if (this.model.entity instanceof PensionadoModel) {
+            data = this.model.entity.toJSON();
+        }
+        return data;
+    }
 
-		const _parent = this.$el.find('#peretn').val();
-		if (_parent != '3') {
-			this.$el.find('#resguardo_id').val('2');
-			this.$el.find('#pub_indigena_id').val('2');
-		}
+    saveFormData(event) {
+        event.preventDefault();
+        var target = this.$el.find(event.currentTarget);
+        target.attr('disabled', true);
 
-		if (this.$el.find('#tippag').val() == 'T') {
-			this.$el.find('#numcue').val('0');
-		}
+        const _parent = this.$el.find('#peretn').val();
+        if (_parent != '3') {
+            this.$el.find('#resguardo_id').val('2');
+            this.$el.find('#pub_indigena_id').val('2');
+        }
 
-		let _err = 0;
-		if (this.form.valid() == false) _err++;
+        if (this.$el.find('#tippag').val() == 'T') {
+            this.$el.find('#numcue').val('0');
+        }
 
-		if (_err > 0) {
-			target.removeAttr('disabled');
-			$App.trigger('alert:warning', {
-				message: 'Se requiere de resolver los campos requeridos para continuar.',
-			});
-			setTimeout(() => $('label.error').text(''), 6000);
-			return false;
-		}
+        let _err = 0;
+        if (this.form.valid() == false) _err++;
 
-		this.$el.find('#cedtra').removeAttr('disabled');
+        if (_err > 0) {
+            target.removeAttr('disabled');
+            $App.trigger('alert:warning', {
+                message: 'Se requiere de resolver los campos requeridos para continuar.',
+            });
+            setTimeout(() => $('label.error').text(''), 6000);
+            return false;
+        }
 
-		const entity = this.serializeModel(new PensionadoModel());
+        this.$el.find('#cedtra').removeAttr('disabled');
 
-		if (entity.isValid() !== true) {
-			target.removeAttr('disabled');
-			$App.trigger('alert:warning', { message: entity.validationError.join(' ') });
-			setTimeout(() => $('label.error').text(''), 6000);
-			return false;
-		}
+        console.log(this.getInput('[name="fecsol"]'));
 
-		entity.set('repleg', this.nameRepleg());
-		this.$el.find('#repleg').val(entity.get('repleg'));
+        const entity = this.serializeModel(new PensionadoModel());
 
-		$App.trigger('confirma', {
-			message: 'Confirma que desea guardar los datos del formulario.',
-			callback: (status) => {
-				if (status) {
-					this.trigger('form:save', {
-						entity: entity,
-						isNew: this.isNew,
-						callback: (response) => {
-							target.removeAttr('disabled');
-							this.$el.find('#cedtra').attr('disabled', true);
+        if (entity.isValid() !== true) {
+            console.log(entity.validationError);
+            target.removeAttr('disabled');
+            $App.trigger('alert:warning', { message: entity.validationError.join(' ') });
+            setTimeout(() => $('label.error').text(''), 6000);
+            return false;
+        }
 
-							if (response) {
-								if (response.success) {
-									$App.trigger('alert:success', { message: response.msj });
-									this.model.set({ id: parseInt(response.data.id) });
-									if (this.isNew === true) {
-										$App.router.navigate('proceso/' + this.model.get('id'), {
-											trigger: true,
-											replace: true,
-										});
-									} else {
-										const _tab = new bootstrap.Tab('a[href="#documentos_adjuntos"]');
-										_tab.show();
-									}
-								} else {
-									$App.trigger('alert:error', { message: response.msj });
-								}
-							}
-						},
-					});
-				} else {
-					target.removeAttr('disabled');
-				}
-			},
-		});
-	}
+        entity.set('repleg', this.nameRepleg());
+        this.$el.find('#repleg').val(entity.get('repleg'));
 
-	nameRepleg() {
-		return (
-			this.getInput('#priape') +
-			' ' +
-			this.getInput('#segape') +
-			' ' +
-			this.getInput('#prinom') +
-			' ' +
-			this.getInput('#segnom')
-		);
-	}
+        $App.trigger('confirma', {
+            message: 'Confirma que desea guardar los datos del formulario.',
+            callback: (status) => {
+                if (status) {
+                    this.trigger('form:save', {
+                        entity: entity,
+                        isNew: this.isNew,
+                        callback: (response) => {
+                            target.removeAttr('disabled');
+                            this.$el.find('#cedtra').attr('disabled', true);
 
-	digver(e) {
-		e.preventDefault();
-		let cedtra = $(e.currentTarget).val();
-		if (cedtra === '') {
-			return false;
-		}
-		this.appController.trigger('form:digit', {
-			cedtra: cedtra,
-			callback: (entity) => {
-				console.log(entity);
-				$('#digver').val(entity.digver);
-			},
-		});
-	}
+                            if (response) {
+                                if (response.success) {
+                                    $App.trigger('alert:success', { message: response.msj });
+                                    this.model.set({ id: parseInt(response.data.id) });
+                                    if (this.isNew === true) {
+                                        $App.router.navigate('proceso/' + this.model.get('id'), {
+                                            trigger: true,
+                                            replace: true,
+                                        });
+                                    } else {
+                                        const _tab = new bootstrap.Tab('a[href="#documentos_adjuntos"]');
+                                        _tab.show();
+                                    }
+                                } else {
+                                    $App.trigger('alert:error', { message: response.msj });
+                                }
+                            }
+                        },
+                    });
+                } else {
+                    target.removeAttr('disabled');
+                }
+            },
+        });
+    }
 
-	validePk(e) {
-		e.preventDefault();
-		let cedtra = this.$el.find(e.currentTarget).val();
-		if (cedtra === '')  return false;
-		$App.trigger('form:find', {
-			cedtra: cedtra,
-			callback: (entity) => {
-				this.actualizaForm();
-				$.each(this.selectores, (index, element) => {
-					const name = this.model.get(element.name);
-					if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
-				});
-			},
-		});
-	}
+    nameRepleg() {
+        return this.getInput('#priape') + ' ' + this.getInput('#segape') + ' ' + this.getInput('#prinom') + ' ' + this.getInput('#segnom');
+    }
 
-	changePeretn(e) {
-		let _parent = this.$el.find(e.currentTarget).val();
-		if (_parent == '3') {
-			this.$el.find('.show-peretn').removeClass('d-none');
-		} else {
-			this.$el.find('.show-peretn').addClass('d-none');
-			this.$el.find('#resguardo_id').val('2');
-			this.$el.find('#pub_indigena_id').val('2');
-		}
-	}
+    digver(e) {
+        e.preventDefault();
+        let cedtra = $(e.currentTarget).val();
+        if (cedtra === '') {
+            return false;
+        }
+        this.appController.trigger('form:digit', {
+            cedtra: cedtra,
+            callback: (entity) => {
+                console.log(entity);
+                $('#digver').val(entity.digver);
+            },
+        });
+    }
 
-	changeTippag(e) {
-		const target = this.getInput(e.currentTarget);
-		if (target == 'A' || target == 'D') {
-			this.$el.find('#show_numcue').removeClass('d-none');
-			this.$el.find('#show_codban').removeClass('d-none');
-			this.$el.find('#show_tipcue').removeClass('d-none');
-			if (target == 'D') {
-				this.setInput('codban', '51');
-				this.setInput('tipcue', 'A');
-				this.selectores.trigger('change');
-			}
+    validePk(e) {
+        e.preventDefault();
+        let cedtra = this.$el.find(e.currentTarget).val();
+        if (cedtra === '') return false;
+        $App.trigger('form:find', {
+            cedtra: cedtra,
+            callback: (entity) => {
+                this.actualizaForm();
+                $.each(this.selectores, (index, element) => {
+                    const name = this.model.get(element.name);
+                    if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
+                });
+            },
+        });
+    }
 
-			PensionadoModel.changeRulesProperty([
-				{ rule: 'numcue', prop: 'required', value: true },
-				{ rule: 'codban', prop: 'required', value: true },
-				{ rule: 'tipcue', prop: 'required', value: true },
-			]);
+    changePeretn(e) {
+        let _parent = this.$el.find(e.currentTarget).val();
+        if (_parent == '3') {
+            this.$el.find('.show-peretn').removeClass('d-none');
+        } else {
+            this.$el.find('.show-peretn').addClass('d-none');
+            this.$el.find('#resguardo_id').val('2');
+            this.$el.find('#pub_indigena_id').val('2');
+        }
+    }
 
-			this.$el.find('#numcue').rules('add', { required: true });
-			this.$el.find('#codban').rules('add', { required: true });
-			this.$el.find('#tipcue').rules('add', { required: true });
-		} else {
-			this.$el.find('#show_numcue').addClass('d-none');
-			this.$el.find('#show_codban').addClass('d-none');
-			this.$el.find('#show_tipcue').addClass('d-none');
+    changeTippag(e) {
+        const target = this.getInput(e.currentTarget);
+        if (target == 'A' || target == 'D') {
+            this.$el.find('#show_numcue').removeClass('d-none');
+            this.$el.find('#show_codban').removeClass('d-none');
+            this.$el.find('#show_tipcue').removeClass('d-none');
+            if (target == 'D') {
+                this.setInput('codban', '51');
+                this.setInput('tipcue', 'A');
+                this.selectores.trigger('change');
+            }
 
-			PensionadoModel.changeRulesProperty([
-				{ rule: 'numcue', prop: 'required', value: false },
-				{ rule: 'codban', prop: 'required', value: false },
-				{ rule: 'tipcue', prop: 'required', value: false },
-			]);
+            PensionadoModel.changeRulesProperty([
+                { rule: 'numcue', prop: 'required', value: true },
+                { rule: 'codban', prop: 'required', value: true },
+                { rule: 'tipcue', prop: 'required', value: true },
+            ]);
 
-			this.$el.find('#numcue').rules('remove', 'required');
-			this.$el.find('#codban').rules('remove', 'required');
-			this.$el.find('#tipcue').rules('remove', 'required');
-		}
-	}
+            this.$el.find('#numcue').rules('add', { required: true });
+            this.$el.find('#codban').rules('add', { required: true });
+            this.$el.find('#tipcue').rules('add', { required: true });
+        } else {
+            this.$el.find('#show_numcue').addClass('d-none');
+            this.$el.find('#show_codban').addClass('d-none');
+            this.$el.find('#show_tipcue').addClass('d-none');
 
-	/**
-	 * @override
-	 */
-	remove() {
-		if (_.size(this.viewComponents) > 0) {
-			_.each(this.viewComponents, (view) => view.remove());
-		}
-		FormView.prototype.remove.call(this, {});
-		$.each(this.#choiceComponents, (choice) => choice.destroy());
-	}
+            PensionadoModel.changeRulesProperty([
+                { rule: 'numcue', prop: 'required', value: false },
+                { rule: 'codban', prop: 'required', value: false },
+                { rule: 'tipcue', prop: 'required', value: false },
+            ]);
+
+            this.$el.find('#numcue').rules('remove', 'required');
+            this.$el.find('#codban').rules('remove', 'required');
+            this.$el.find('#tipcue').rules('remove', 'required');
+        }
+    }
+
+    /**
+     * @override
+     */
+    remove() {
+        if (_.size(this.viewComponents) > 0) {
+            _.each(this.viewComponents, (view) => view.remove());
+        }
+        FormView.prototype.remove.call(this, {});
+        $.each(this.#choiceComponents, (choice) => choice.destroy());
+    }
 }
 
 export { FormPensionadoView };

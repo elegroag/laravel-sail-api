@@ -124,18 +124,24 @@ const $App = {
                     xhr.setRequestHeader('Authorization', 'Bearer ' + csrf);
                 }
             },
-            success: (response) => {
+            success: (response, textStatus, jqXHR) => {
                 if (silent == false) loading.hide();
-                return callback(response);
-            },
-            error: (err) => {
-                const keys = _.keys(err);
-                if (silent == false) loading.hide();
-                if (_.indexOf(keys, 'responseText') !== -1) {
-                    console.log(err.responseText);
-                    this.trigger('alert:error', { message: err.responseText });
+                console.log('Status Text:', textStatus);
+                console.log('HTTP Status Code:', jqXHR.status);
+                if (jqXHR.status >= 200 && jqXHR.status <= 210) {
+                    return callback(response);
                 } else {
-                    console.log(err);
+                    throw new Error('Error ' + textStatus);
+                }
+            },
+            error: (err, textStatus, jqXHR) => {
+                if (silent == false) loading.hide();
+                console.log('Status Text:', textStatus);
+                console.log('HTTP Status Code:', jqXHR.status);
+                console.log('Response Text:', jqXHR.responseText);
+                if (jqXHR.status > 210) {
+                    this.trigger('alert:error', { message: jqXHR.responseText });
+                } else {
                     this.trigger('alert:error', { message: err });
                 }
                 return callback(false);
@@ -202,9 +208,13 @@ const $App = {
                 }
             },
         })
-            .done((response) => {
+            .done((response, textStatus, jqXHR) => {
                 if (silent == false) loading.hide();
-                return callback(response);
+                if (jqXHR.status >= 200 && jqXHR.status <= 210) {
+                    return callback(response);
+                } else {
+                    throw new Error('Error ' + textStatus);
+                }
             })
             .fail((err) => {
                 if (silent == false) loading.hide();

@@ -150,33 +150,6 @@ class PensionadoService
     }
 
     /**
-     * loadDisplay function
-     * @param Mercurio38 $solicitud
-     * @return void
-     */
-    public function loadDisplay($solicitud)
-    {
-        /* Tag::displayTo("calemp", "P");
-        Tag::displayTo("codact", "201010");
-        Tag::displayTo("id", $solicitud->getId());
-        Tag::displayTo("calemp", $solicitud->getCalemp());
-        Tag::displayTo("codact", $solicitud->getCodact());
-        Tag::displayTo("codcaj", $solicitud->getCodcaj());
-        Tag::displayTo("coddocrepleg", $solicitud->getCoddocrepleg()); */
-    }
-
-    public function loadDisplaySubsidio($empresa)
-    {
-        /* Tag::displayTo("calemp", "P");
-        Tag::displayTo("codact", "201010");
-        Tag::displayTo("calemp", 'P');
-        Tag::displayTo("cedtra", $empresa['cedrep']);
-        Tag::displayTo("codact", $empresa['codact']);
-        Tag::displayTo("codcaj", $empresa['codcaj']);
-        Tag::displayTo("coddocrepleg", $empresa['coddocrepleg']); */
-    }
-
-    /**
      * update function
      * @param integer $id
      * @param array $data
