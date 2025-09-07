@@ -485,7 +485,7 @@ class EmpresaController extends ApplicationController
     /**
      * GET /empresa/consulta_documentos/{id}
      */
-    public function consultaDocumentosAction($id)
+    public function consultaDocumentosAction(Request $request, Response $response, int $id)
     {
         $this->setResponse('ajax');
         try {
@@ -494,7 +494,12 @@ class EmpresaController extends ApplicationController
             $coddoc = $this->user['coddoc'] ?? '';
             $service = new EmpresaService();
 
-            $mempresa = (new Mercurio30())->findFirst(" id='{$id}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado NOT IN('I','X')");
+            $mempresa = Mercurio30::where('id', $id)
+                ->where('documento', $documento)
+                ->where('coddoc', $coddoc)
+                ->whereNotIn('estado', ['I', 'X'])
+                ->first();
+
             if ($mempresa == false) throw new DebugException('Error no se puede identificar el propietario de la solicitud', 404);
 
             $salida = [

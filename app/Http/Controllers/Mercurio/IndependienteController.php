@@ -11,9 +11,11 @@ use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
 use App\Models\Gener09;
 use App\Models\Gener18;
+use App\Models\Mercurio01;
 use App\Models\Mercurio10;
 use App\Models\Mercurio30;
 use App\Models\Mercurio31;
+use App\Models\Mercurio37;
 use App\Models\Mercurio41;
 use App\Models\Subsi54;
 use App\Services\Entidades\IndependienteService;
@@ -283,7 +285,9 @@ class IndependienteController extends ApplicationController
         $this->setResponse("ajax");
         try {
             $cedtra = $request->input('cedtra');
-            $solicitud = $this->Mercurio41->findFirst(" documento='{$cedtra}' and estado IN('A','I')");
+            $solicitud = Mercurio41::where('documento', $cedtra)
+                ->whereIn('estado', ['A', 'I'])
+                ->first();
 
             $solicitudPrevia = false;
             if ($solicitud) {
@@ -344,15 +348,21 @@ class IndependienteController extends ApplicationController
             $numero = $request->input('id');
             $coddoc = $request->input('coddoc');
 
-            $mercurio01 = $this->Mercurio01->findFirst();
-            $mercurio37 = $this->Mercurio37->findFirst("tipopc='{$this->tipopc}' and numero='{$numero}' and coddoc='{$coddoc}'");
+            $mercurio01 = Mercurio01::first();
+            $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)
+                ->where('numero', $numero)
+                ->where('coddoc', $coddoc)
+                ->first();
 
             $filepath = base_path() . '' . $mercurio01->getPath() . $mercurio37->getArchivo();
             if (file_exists($filepath)) {
                 unlink(base_path() . '' . $mercurio01->getPath() . $mercurio37->getArchivo());
             }
 
-            $this->Mercurio37->deleteAll("tipopc='{$this->tipopc}' and numero='{$numero}' and coddoc='{$coddoc}'");
+            Mercurio37::where('tipopc', $this->tipopc)
+                ->where('numero', $numero)
+                ->where('coddoc', $coddoc)
+                ->delete();
 
             $response = array(
                 "success" => true,
@@ -441,7 +451,7 @@ class IndependienteController extends ApplicationController
         $this->setResponse("ajax");
         try {
 
-            $mercurio41 = $this->Mercurio41->findFirst("id='{$id}'");
+            $mercurio41 = Mercurio41::where('id', $id)->first();
             $procesadorComando = Comman::Api();
             $procesadorComando->runCli(
                 array(
@@ -478,18 +488,18 @@ class IndependienteController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function seguimientoAction($id)
+    public function seguimientoAction(Request $request, Response $response, int $id)
     {
         $this->setResponse("ajax");
         try {
             $independienteService = new IndependienteService();
             $out = $independienteService->consultaSeguimiento($id);
-            $salida = array(
+            $salida = [
                 "success" => true,
                 "data" => $out
-            );
+            ];
         } catch (DebugException $e) {
-            $salida = array('success' => false, 'msj' => $e->getMessage());
+            $salida = ['success' => false, 'msj' => $e->getMessage()];
         }
         return $this->renderObject($salida, false);
     }
@@ -509,7 +519,9 @@ class IndependienteController extends ApplicationController
             $cedtra = $request->input('cedtra');
             $id = $request->input('id');
 
-            $mercurio41 = $this->Mercurio41->findFirst("cedtra='{$cedtra}' and id='{$id}'");
+            $mercurio41 = Mercurio41::where('cedtra', $cedtra)
+                ->where('id', $id)
+                ->first();
 
             if (!$mercurio41) {
                 throw new DebugException("La empresa no está disponible para notificar por email", 501);
@@ -663,7 +675,7 @@ class IndependienteController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function consultaDocumentosAction($id)
+    public function consultaDocumentosAction(Request $request, Response $response, int $id)
     {
         $this->setResponse('ajax');
         try {
@@ -672,7 +684,12 @@ class IndependienteController extends ApplicationController
             $coddoc = $this->user['coddoc'] ?? '';
             $service = new IndependienteService();
 
-            $sindepe = (new Mercurio41())->findFirst(" id='{$id}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado NOT IN('I','X')");
+            $sindepe = Mercurio41::where('id', $id)
+                ->where('documento', $documento)
+                ->where('coddoc', $coddoc)
+                ->whereNotIn('estado', ['I', 'X'])
+                ->first();
+
             if ($sindepe == false) throw new DebugException('Error no se puede identificar el propietario de la solicitud', 404);
 
             $salida = [

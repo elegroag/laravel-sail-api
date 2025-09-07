@@ -27,16 +27,6 @@ class ActiveRecordBase
     }
 
     /**
-     * function fetchAll
-     * @param string $sqlQuery
-     * @return array
-     */
-    public function fetchAll(string $sqlQuery): array
-    {
-        return DB::select($sqlQuery);
-    }
-
-    /**
      * function inQueryAssoc
      * @param string $sqlQuery
      * @return array|null

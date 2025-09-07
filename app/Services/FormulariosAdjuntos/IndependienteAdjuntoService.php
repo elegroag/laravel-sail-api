@@ -46,16 +46,19 @@ class IndependienteAdjuntoService
 
     public function tratamientoDatos()
     {
-        $this->filename = "tratamiento_datos_empresa_{$this->request->getCedtra()}.pdf";
+        $this->filename = "tratamiento_datos_independiente_{$this->request->getCedtra()}.pdf";
+        KumbiaPDF::setFooterImage(false);
+
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearPolitica('independiente');
-        $documento->setParamsInit(array(
+
+        $documento->setParamsInit([
             'independiente' => $this->request,
             'firma' => $this->lfirma,
             'filename' => $this->filename,
             'background' => false,
             'rfirma' => false
-        ));
+        ]);
         $documento->main();
         $documento->outPut();
         $this->cifrarDocumento();
@@ -80,7 +83,7 @@ class IndependienteAdjuntoService
         $out = $procesadorComando->toArray();
         $this->filename = "carta_solicitud_independiente_{$this->request->getCedtra()}.pdf";
 
-        KumbiaPDF::setBackgroundImage(false);
+        KumbiaPDF::setBackgroundImage(public_path('img/form/oficios/oficio_solicitud_afiliacion.jpg'));
         KumbiaPDF::setFooterImage(false);
 
         $fabrica = new FactoryDocuments();

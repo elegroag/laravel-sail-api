@@ -37,12 +37,12 @@ class ActiveRecordBaseTest extends TestCase
         $inserted = $ar->insert('trabajadores', ['Juan', 'Perez', '12345678-9', 'j@e.com', '2000-01-01', 'masculino', 'Dir', 'Dev', 1000.00, '2024-01-01', $empresaId], ['nombres', 'apellidos', 'rut', 'email', 'fecha_nacimiento', 'genero', 'direccion', 'cargo', 'salario', 'fecha_ingreso', 'empresa_id'], true);
         $this->assertTrue($inserted);
 
-        $all = $ar->fetchAll('SELECT nombres, apellidos, salario FROM trabajadores');
+        $all = $ar->inQueryAssoc('SELECT nombres, apellidos, salario FROM trabajadores');
         $this->assertGreaterThanOrEqual(1, count($all));
 
         $one = $ar->fetchOne("SELECT nombres, apellidos FROM trabajadores WHERE rut = '12345678-9'");
         $this->assertNotNull($one);
-        $this->assertEquals('Juan', $one->nombres);
+        $this->assertEquals('Juan', $one['nombres']);
     }
 
     public function test_inQuery_and_fetchArray()

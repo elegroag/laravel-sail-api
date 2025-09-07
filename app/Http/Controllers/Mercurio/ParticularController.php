@@ -1,17 +1,22 @@
 <?php
+
 namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
-
+use App\Models\Mercurio30;
+use App\Models\Mercurio36;
+use App\Models\Mercurio38;
+use App\Models\Mercurio39;
+use App\Models\Mercurio40;
 
 class ParticularController extends ApplicationController
 {
 
     protected $db;
     protected $user;
-    protected $tipo; 
+    protected $tipo;
 
     public function __construct()
     {
@@ -29,11 +34,13 @@ class ParticularController extends ApplicationController
 
     public function historialAction()
     {
-        $mercurio30 = $this->Mercurio30->find("nit='" . parent::getActUser("documento") . "'", "order: id DESC");
-        $mercurio36 = $this->Mercurio36->find("cedtra='" . parent::getActUser("documento") . "'", "order: id DESC");
-        $mercurio38 = $this->Mercurio38->find("cedtra='" . parent::getActUser("documento") . "'", "order: id DESC");
-        $mercurio39 = $this->Mercurio39->find("cedtra='" . parent::getActUser("documento") . "'", "order: id DESC");
-        $mercurio40 = $this->Mercurio40->find("cedtra='" . parent::getActUser("documento") . "'", "order: id DESC");
+        $documento = $this->user['documento'];
+
+        $mercurio30 = Mercurio30::where('nit', $documento)->orderBy('id', 'DESC')->get();
+        $mercurio36 = Mercurio36::where('cedtra', $documento)->orderBy('id', 'DESC')->get();
+        $mercurio38 = Mercurio38::where('cedtra', $documento)->orderBy('id', 'DESC')->get();
+        $mercurio39 = Mercurio39::where('cedtra', $documento)->orderBy('id', 'DESC')->get();
+        $mercurio40 = Mercurio40::where('cedtra', $documento)->orderBy('id', 'DESC')->get();
 
         $html_empresa  = "<table class='table table-hover align-items-center table-bordered'>";
         $html_empresa .= "<thead >";
@@ -179,7 +186,7 @@ class ParticularController extends ApplicationController
         }
         $html_domestico .= "</tbody>";
         $html_domestico .= "</table>";
-      
+
         return view("particular.historial", [
             "title" => "Historial",
             "html_empresa" => $html_empresa,

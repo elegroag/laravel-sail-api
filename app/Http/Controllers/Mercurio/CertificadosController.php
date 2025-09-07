@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Mercurio;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio01;
 use App\Models\Mercurio10;
 use App\Models\Mercurio45;
 use App\Services\Utils\AsignarFuncionario;
@@ -79,21 +80,24 @@ class CertificadosController extends ApplicationController
             $codcer = $request->input('codcer');
             $nomcer = $request->input('nomcer');
 
-            $id_mercurio45 = (new Mercurio45)->maximum("id") + 1;
+            $id_mercurio45 = Mercurio45::max('id') + 1;
 
-            if ($this->Mercurio45->count("*", "conditions: codben='$codben' and codcer='$codcer' and estado <> 'X'") > 0) {
+            if ((new Mercurio45)->getCount(
+                "*",
+                "conditions: codben='$codben' and codcer='$codcer' and estado <> 'X'"
+            ) > 0) {
                 $response = "Ya tiene un certificado presentando, por favor espere a su aprobacion";
                 return $this->renderObject($response);
             }
-            $mercurio01 = $this->Mercurio01->findFirst();
-            $modelos = array("mercurio20", "mercurio45");
-            //$Transaccion = parent::startTrans($modelos);
+
+            $mercurio01 = Mercurio01::first();
+
             $today = Carbon::now();
 
             $generalService = new GeneralService();
             $id_log = $generalService->registrarLog(true, "Presentacion Certificados", "");
             $mercurio45 = new Mercurio45();
-            //$mercurio45->setTransaction($Transaccion);
+
             $mercurio45->setId($id_mercurio45);
             $mercurio45->setLog($id_log);
             $mercurio45->setCedtra(parent::getActUser("documento"));
@@ -128,7 +132,10 @@ class CertificadosController extends ApplicationController
                     $mercurio45->setArchivo($name);
                     $mercurio45->save();
 
-                    $item = $this->Mercurio10->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$mercurio45->getId()}'") + 1;
+                    $item = Mercurio10::where('tipopc', $this->tipopc)
+                        ->where('numero', $mercurio45->getId())
+                        ->max('item') + 1;
+
                     $mercurio10 = new Mercurio10();
                     //$mercurio10->setTransaction($Transaccion);
                     $mercurio10->setTipopc($this->tipopc);

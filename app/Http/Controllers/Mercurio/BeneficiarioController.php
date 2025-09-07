@@ -12,6 +12,9 @@ use App\Models\Mercurio30;
 use App\Models\Mercurio31;
 use App\Models\Mercurio32;
 use App\Models\Gener09;
+use App\Models\Mercurio01;
+use App\Models\Mercurio10;
+use App\Models\Mercurio37;
 use App\Services\Entidades\BeneficiarioService;
 use App\Services\Entidades\TrabajadorService;
 use App\Services\Entidades\ConyugeService;
@@ -91,11 +94,13 @@ class BeneficiarioController extends ApplicationController
         $this->setResponse("ajax");
         $cedtra = $request->input("cedtra");
 
-        $cedcons = array();
-        $mercurio32 = $this->Mercurio32->find(" cedtra='{$cedtra}'");
-        foreach ($mercurio32 as $conyuge) {
-            $cedcons[$conyuge->getCedcon()] = $conyuge->getCedcon() . "-" . $conyuge->getPriape() . " " . $conyuge->getSegape() . " " . $conyuge->getPrinom();
-        }
+        $cedcons = Mercurio32::where('cedtra', $cedtra)
+            ->get(['cedcon', 'priape', 'segape', 'prinom'])
+            ->pluck('cedcon', 'priape', 'segape', 'prinom')
+            ->map(function ($conyuge) {
+                return $conyuge->cedcon . "-" . $conyuge->priape . " " . $conyuge->segape . " " . $conyuge->prinom;
+            })
+            ->toArray();
 
         $ps = Comman::Api();
         $ps->runCli(
@@ -129,15 +134,18 @@ class BeneficiarioController extends ApplicationController
             $numero = $this->cleanInput($request->input('id'));
             $coddoc = $this->cleanInput($request->input('coddoc'));
 
-            $mercurio01 = $this->Mercurio01->findFirst();
-            $mercurio37 = $this->Mercurio37->findFirst("tipopc='{$this->tipopc}' and numero='{$numero}' and coddoc='{$coddoc}'");
+            $mercurio01 = Mercurio01::first();
+            $mercurio37 = Mercurio37::where("tipopc='{$this->tipopc}' and numero='{$numero}' and coddoc='{$coddoc}'")->first();
 
             $filepath = base_path() . '' . $mercurio01->getPath() . $mercurio37->getArchivo();
             if (file_exists($filepath)) {
                 unlink(base_path() . '' . $mercurio01->getPath() . $mercurio37->getArchivo());
             }
 
-            $this->Mercurio37->deleteAll("tipopc='{$this->tipopc}' and numero='{$numero}' and coddoc='{$coddoc}'");
+            Mercurio37::where('tipopc', $this->tipopc)
+                ->where('numero', $numero)
+                ->where('coddoc', $coddoc)
+                ->delete();
 
             $response = array(
                 "success" => true,
@@ -214,12 +222,8 @@ class BeneficiarioController extends ApplicationController
         try {
             $this->setResponse("ajax");
             $id = $request->input('id');
-            $mercurio34 = $this->Mercurio34->findFirst("id = '$id'");
-            $modelos = array("Mercurio34");
-            //$Transaccion = parent::startTrans($modelos);
-            //$response = parent::startFunc();
-            $this->Mercurio34->deleteAll("id = '$id'");
-            //parent::finishTrans();
+            Mercurio34::where('id', $id)->delete();
+
             $response = "Borrado Con Exito";
             return $this->renderObject(json_encode($response));
         } catch (DebugException $e) {
@@ -237,10 +241,10 @@ class BeneficiarioController extends ApplicationController
         $coddoc = parent::getActUser("coddoc");
 
         if (empty($estado)) {
-            $beneficiarios = $this->db->fetchAll("SELECT * FROM mercurio34
+            $beneficiarios = $this->db->inQueryAssoc("SELECT * FROM mercurio34
 			WHERE  tipo='{$tipo}' AND coddoc='{$coddoc}' AND documento='{$documento}' AND estado IN('T','D','P','A','X') ORDER BY id, estado DESC");
         } else {
-            $beneficiarios = $this->db->fetchAll("SELECT * FROM mercurio34
+            $beneficiarios = $this->db->inQueryAssoc("SELECT * FROM mercurio34
 			WHERE tipo='{$tipo}' AND coddoc='{$coddoc}' AND documento='{$documento}' AND estado='{$estado}' ORDER BY id DESC");
         }
 
@@ -292,12 +296,12 @@ class BeneficiarioController extends ApplicationController
             $documento = parent::getActUser("documento");
             $id = $request->input('id');
 
-            $m34 = $this->Mercurio34->findFirst("id='{$id}' AND documento='{$documento}' ");
+            $m34 = Mercurio34::where('id', $id)->where('documento', $documento)->first();
             if ($m34) {
                 if ($m34->getEstado() != 'T') {
-                    $this->Mercurio10->deleteAll("numero='{$id}' AND tipopc='{$this->tipopc}'");
+                    Mercurio10::where('numero', $id)->where('tipopc', $this->tipopc)->delete();
                 }
-                $this->Mercurio34->deleteAll("id='{$id}' AND documento='{$documento}' ");
+                Mercurio34::where('id', $id)->where('documento', $documento)->delete();
             }
             $salida = array(
                 "success" => true,
@@ -346,7 +350,7 @@ class BeneficiarioController extends ApplicationController
                     $datos_captura = $out['data'];
                 }
             } else {
-                $empresa = $this->Mercurio30->findFirst("documento='{$documento}' AND estado='A'");
+                $empresa = Mercurio30::where('documento', $documento)->where('estado', 'A')->first();
                 $nit = ($empresa) ? $empresa->getNit() : $documento;
                 $procesadorComando->runCli(
                     array(
@@ -580,7 +584,7 @@ class BeneficiarioController extends ApplicationController
                     "trabajadores" => $cedtras,
                     "conyuges" => $conyuges,
                     'list_conyuges' => $listConyuges,
-                    "convive" => $this->Mercurio34->getConvive(),
+                    "convive" => (new Mercurio34())->getConvive(),
                     'list_afiliados' => $listAfiliados
                 ),
                 "msj" => 'OK'
@@ -618,7 +622,11 @@ class BeneficiarioController extends ApplicationController
             $documento = parent::getActUser("documento");
             $coddoc = parent::getActUser("coddoc");
 
-            $solicitud = $this->Mercurio34->findFirst(" id='{$id}' AND documento='{$documento}' AND coddoc='{$coddoc}'");
+            $solicitud = Mercurio34::where('id', $id)
+                ->where('documento', $documento)
+                ->where('coddoc', $coddoc)
+                ->first();
+
             if ($solicitud == False) {
                 throw new DebugException("Error la solicitud no está disponible para acceder.", 301);
             } else {
@@ -802,7 +810,12 @@ class BeneficiarioController extends ApplicationController
             $coddoc = $this->user['coddoc'];
             $benService = new BeneficiarioService();
 
-            $sindepe = $this->Mercurio34->findFirst("id='{$id}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado NOT IN('I','X')");
+            $sindepe = Mercurio34::where('id', $id)
+                ->where('documento', $documento)
+                ->where('coddoc', $coddoc)
+                ->whereNotIn('estado', ['I', 'X'])
+                ->first();
+
             if ($sindepe == false) {
                 throw new DebugException("Error no se puede identificar el propietario de la solicitud", 301);
             }
@@ -840,7 +853,7 @@ class BeneficiarioController extends ApplicationController
             $datos_captura = $procesadorComando->toArray();
             $paramsTrabajador->setDatosCaptura($datos_captura);
 
-            $mercurio34 = $this->Mercurio34->findBySql("SELECT * FROM mercurio34 WHERE id='{$id}'");
+            $mercurio34 = Mercurio34::find($id);
             $cedtra = $mercurio34->getCedtra();
 
             $nit = ($mercurio34->getNit()) ? $mercurio34->getNit() : 0;
@@ -876,7 +889,11 @@ class BeneficiarioController extends ApplicationController
             }
 
             if ($mercurio31 == false) {
-                $mercurio31 = $this->Mercurio31->findBySql("SELECT * FROM mercurio31 WHERE documento='{$documento}' and cedtra='{$cedtra}' and nit='{$nit}' ORDER BY fecsol DESC;");
+                $mercurio31 = Mercurio31::where('documento', $documento)
+                    ->where('cedtra', $cedtra)
+                    ->where('nit', $nit)
+                    ->orderBy('fecsol', 'desc')
+                    ->first();
             }
 
             if ($mercurio31 == false) {
@@ -911,7 +928,11 @@ class BeneficiarioController extends ApplicationController
             /*para beneficiarios hijos buscar conyuge*/
             $mercurio32 = false;
             if ($mercurio34->getParent() == 1) {
-                $mercurio32 = $this->Mercurio32->findFirst("cedtra='{$cedtra}' AND estado NOT IN('I','X') AND cedcon='{$mercurio34->getCedcon()}'");
+                $mercurio32 = Mercurio32::where('cedtra', $cedtra)
+                    ->where('estado', 'not in', ['I', 'X'])
+                    ->where('cedcon', $mercurio34->getCedcon())
+                    ->first();
+
                 if (!$mercurio32) {
 
                     $procesadorComando->runCli(
@@ -983,10 +1004,10 @@ class BeneficiarioController extends ApplicationController
             }
 
             //buscar mas beneficiarios al formulario
-            $beneficiariosTodos = $this->Mercurio34->find(
-                " mercurio34.* ",
-                "conditions: mercurio34.cedtra='{$cedtra}' AND mercurio34.estado IN('P','D','T') AND mercurio34.documento='{$documento}'"
-            );
+            $beneficiariosTodos = Mercurio34::where('cedtra', $cedtra)
+                ->whereIn('estado', ['P', 'D', 'T'])
+                ->where('documento', $documento)
+                ->get();
 
             $file = "formulario_afiliacion_acargo{$cedtra}.pdf";
             $formularios = new Formularios();

@@ -593,7 +593,7 @@ class Mercurio41 extends ModelBase
     public function CamposDisponibles()
     {
         $db = DbBase::rawConnect();
-        $rqs = $db->fetchAll("SELECT * FROM mercurio12");
+        $rqs = $db->inQueryAssoc("SELECT * FROM mercurio12");
         $data = array();
         foreach ($rqs as $ai => $row) $data[$row['coddoc']] = $row['detalle'];
         return $data;

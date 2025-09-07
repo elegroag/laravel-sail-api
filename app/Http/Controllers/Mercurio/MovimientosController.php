@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
@@ -22,7 +23,7 @@ class MovimientosController extends ApplicationController
     protected $tipo;
 
     public function __construct()
-    {   
+    {
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
@@ -64,23 +65,22 @@ class MovimientosController extends ApplicationController
         $this->setResponse("ajax");
 
         try {
-            
-                $email = $request->input('email', "addslaches", "extraspaces", "striptags");
-                $modelos = array("mercurio07");
-                # $Transaccion = parent::startTrans($modelos);
-                # $response = parent::startFunc();
-                $this->Mercurio07->updateAll("email='$email'", "conditions: tipo='" . parent::getActUser("tipo") . "' and documento = '" . parent::getActUser("documento") . "'");
-                $asunto = "Cambio de Email";
-                $msj  = "acabas de utilizar nuestro servicio de cambio de email de aviso. Te informamos que fue exitoso";
-                $generalService = new GeneralService();
-                $generalService->sendEmail(parent::getActUser("email"), parent::getActUser("nombre"), $asunto, $msj, "");
-                # parent::finishTrans();
 
-                $response = "Cambio de Email de Aviso con Exito";
+            $email = $request->input('email', "addslaches", "extraspaces", "striptags");
 
-                $generalService->registrarLog(false, "Cambio de Email", "");
-                return $this->renderText(json_encode($response));
-            
+            Mercurio07::where('tipo', parent::getActUser("tipo"))
+                ->where('documento', parent::getActUser("documento"))
+                ->update(['email' => $email]);
+
+            $asunto = "Cambio de Email";
+            $msj  = "acabas de utilizar nuestro servicio de cambio de email de aviso. Te informamos que fue exitoso";
+            $generalService = new GeneralService();
+            $generalService->sendEmail(parent::getActUser("email"), parent::getActUser("nombre"), $asunto, $msj, "");
+
+            $response = "Cambio de Email de Aviso con Exito";
+
+            $generalService->registrarLog(false, "Cambio de Email", "");
+            return $this->renderText(json_encode($response));
         } catch (DebugException $e) {
             $response = "No se pudo realizar la accion";
         }
@@ -91,7 +91,8 @@ class MovimientosController extends ApplicationController
     public function cambio_clave_viewAction()
     {
         return view('movimientos.cambio_clave', [
-            "title", "Cambio Clave"
+            "title",
+            "Cambio Clave"
         ]);
     }
 
@@ -167,18 +168,17 @@ class MovimientosController extends ApplicationController
 
             $asunto = "Cambio De Clave Portal Comfaca En Línea";
             $email_caja = (new Mercurio01)->findFirst();
-            
+
             $sender_email = new SenderEmail();
             $sender_email->setters(
-                "asunto:".$asunto, 
-                "emisor_email:".$email_caja->getEmail(), 
-                "emisor_clave:".$email_caja->getClave()
+                "asunto:" . $asunto,
+                "emisor_email:" . $email_caja->getEmail(),
+                "emisor_clave:" . $email_caja->getClave()
             );
             $sender_email->send($mercurio07->getEmail(), $html);
             $generalService = new GeneralService();
             $generalService->registrarLog(false, "Cambio de Clave", "");
             $response = "Cambio de clave se ha realizado con éxito.";
-                
         } catch (DebugException $e) {
             $response = "No se pudo realizar la accion";
         }

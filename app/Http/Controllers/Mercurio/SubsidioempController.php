@@ -10,9 +10,16 @@ use App\Library\Collections\ParamsBeneficiario;
 use App\Library\Collections\ParamsConyuge;
 use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio01;
 use App\Models\Mercurio10;
+use App\Models\Mercurio14;
+use App\Models\Mercurio28;
+use App\Models\Mercurio31;
+use App\Models\Mercurio32;
 use App\Models\Mercurio33;
+use App\Models\Mercurio34;
 use App\Models\Mercurio35;
+use App\Models\Mercurio37;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
@@ -42,13 +49,30 @@ class SubsidioempController extends ApplicationController
 
     public function historialAction()
     {
+        $tipo = $this->tipo;
+        $coddoc = $this->user['coddoc'];
+        $documento = $this->user['documento'];
 
-        $mercurio31 = $this->Mercurio31->find("nit='" . parent::getActUser("documento") . "'", "order: id DESC");
-        $mercurio33 = $this->Mercurio33->find("tipo='" . parent::getActUser("tipo") . "' and coddoc='" . parent::getActUser("coddoc") . "' and documento='" . parent::getActUser("documento") . "'", "order: id DESC");
-        $mercurio35 = $this->Mercurio35->find("nit='" . parent::getActUser("documento") . "'", "order: id DESC");
+        $mercurio31 = Mercurio31::where('nit', $documento)->orderBy('id', 'desc')->get();
+        $mercurio33 = Mercurio33::where([
+            ['tipo', $tipo],
+            ['coddoc', $coddoc],
+            ['documento', $documento]
+        ])->orderBy('id', 'desc')->get();
 
-        $mercurio32 = $this->Mercurio32->find("tipo='" . parent::getActUser("tipo") . "' and coddoc='" . parent::getActUser("coddoc") . "' and documento='" . parent::getActUser("documento") . "'", "order: id DESC");
-        $mercurio34 = $this->Mercurio34->find("tipo='" . parent::getActUser("tipo") . "' and coddoc='" . parent::getActUser("coddoc") . "' and documento='" . parent::getActUser("documento") . "'", "order: id DESC");
+        $mercurio35 = Mercurio35::where('nit', $documento)->orderBy('id', 'desc')->get();
+
+        $mercurio32 = Mercurio32::where([
+            'tipo' => $tipo,
+            'coddoc' => $coddoc,
+            'documento' => $documento,
+        ])->orderBy('id', 'desc')->first();
+
+        $mercurio34 = Mercurio34::where([
+            'tipo' => $tipo,
+            'coddoc' => $coddoc,
+            'documento' => $documento,
+        ])->orderBy('id', 'desc')->get();
 
         $html_afiliacion  = "<table class='table table-hover align-items-center table-bordered'>";
         $html_afiliacion .= "<thead>";
@@ -201,7 +225,7 @@ class SubsidioempController extends ApplicationController
             $actualizacion_basico .= "</tr>";
         }
         foreach ($mercurio33 as $mmercurio33) {
-            $mmercurio28 = $this->Mercurio28->findFirst("campo='{$mmercurio33->campo}'");
+            $mmercurio28 = Mercurio28::where('campo', $mmercurio33->campo)->first();
             $actualizacion_basico .= "<tr>";
             $actualizacion_basico .= "<td>{$mmercurio28->getDetalle()}</td>";
             $actualizacion_basico .= "<td>{$mmercurio33->antval}</td>";
@@ -607,7 +631,7 @@ class SubsidioempController extends ApplicationController
             $mercurio35->setTipo(parent::getActUser("tipo"));
             $mercurio35->setCoddoc(parent::getActUser("coddoc"));
             $mercurio35->setDocumento(parent::getActUser("documento"));
-            $mercurio01 = $this->Mercurio01->findFirst();
+            $mercurio01 = Mercurio01::first();
 
             if (isset($_FILES['archivo']['name']) && $_FILES['archivo']['name'] != "") {
                 $extension = explode(".", $_FILES['archivo']['name']);
@@ -619,7 +643,10 @@ class SubsidioempController extends ApplicationController
                     $mercurio35->setArchivo($name);
                     $mercurio35->save();
 
-                    $item = $this->Mercurio10->maximum("item", "conditions: tipopc = '7' and numero='{$mercurio35->getId()}'") + 1;
+                    $item = Mercurio10::where('tipopc', '7')
+                        ->where('numero', $mercurio35->getId())
+                        ->max('item') + 1;
+
                     $mercurio10 = new Mercurio10();
                     #$mercurio10->setTransaction($Transaccion);
                     $mercurio10->setTipopc("7");
@@ -665,14 +692,14 @@ class SubsidioempController extends ApplicationController
         redirect()->route("principal.index");
         exit;
 
-        $mercurio28 = $this->Mercurio28->find("tipo='" . parent::getActUser("tipo") . "'", "order: orden");
+        $mercurio28 = Mercurio28::where('tipo', parent::getActUser("tipo"))->orderBy('orden')->get();
         foreach ($mercurio28 as $mmercurio28) {
             $campos[$mmercurio28->getCampo()] = $mmercurio28->getDetalle();
         }
 
         $this->load_parametros_view();
         $documento = parent::getActUser('documento');
-        $solicitante = $this->Mercurio30->findFirst(" documento='{$documento}' ");
+        $solicitante = Mercurio30::where('documento', $documento)->first();
 
         $empresa = false;
         $rqs = $this->buscarEmpresaSubsidio($solicitante->getNit());
@@ -681,7 +708,7 @@ class SubsidioempController extends ApplicationController
             $empresa = (count($rqs['data']) > 0) ? $rqs['data'] : false;
             $this->loadDisplaySubsidio($empresa);
         }
-        $mercurio14 = $this->Mercurio14->find("tipopc ='5'");
+        $mercurio14 = Mercurio14::where('tipopc', '5')->get();
 
         return view("mercurio/subsidioemp/tmp/actualiza_datos_basicos", [
             "path" => base_path(),
@@ -703,7 +730,8 @@ class SubsidioempController extends ApplicationController
         $flag_email = false;
         $generalService = new GeneralService();
         $id_log = $generalService->registrarLog(true, "actualización datos basicos", "");
-        $mercurio28 = $this->Mercurio28->find("tipo='" . parent::getActUser("tipo") . "'");
+        $mercurio28 = Mercurio28::where('tipo', parent::getActUser("tipo"))->get();
+
         if (parent::getActUser("tipo") == 'T') {
             $tipopc = 14;
         } else {
@@ -739,7 +767,10 @@ class SubsidioempController extends ApplicationController
             $flag_email = true;
             $mercurio33->save();
 
-            $item = $this->Mercurio10->maximum("item", "conditions: tipopc = '5' and numero='{$mercurio33->getId()}'") + 1;
+            $item = Mercurio10::where('tipopc', '5')
+                ->where('numero', $mercurio33->getId())
+                ->max('item') + 1;
+
             $mercurio10 = new Mercurio10();
             #$mercurio10->setTransaction($Transaccion);
             $mercurio10->setTipopc("5");
@@ -750,12 +781,12 @@ class SubsidioempController extends ApplicationController
             $mercurio10->setFecsis($today->format('Y-m-d'));
             $mercurio10->save();
 
-            $mercurio01 = $this->Mercurio01->findFirst();
+            $mercurio01 = Mercurio01::first();
 
-            foreach ($this->Mercurio14->find("tipopc='5'") as $m14) {
+            foreach ($Mercurio14::where('tipopc', '5')->get() as $m14) {
                 $coddoc = $m14->getCoddoc();
                 $mercurio37 = new Mercurio37();
-                $mercurio37->setTransaction($Transaccion);
+
                 $mercurio37->setTipopc("5");
                 $mercurio37->setNumero($mercurio33->getId());
                 $mercurio37->setCoddoc($coddoc);
@@ -766,10 +797,8 @@ class SubsidioempController extends ApplicationController
                     $estado = $this->uploadFile("archivo_" . $coddoc, $mercurio01->getPath());
                     if ($estado != false) {
                         $mercurio37->setArchivo($name);
-                        if (!$mercurio37->save()) {
-                            parent::setLogger($mercurio37->getMessages());
-                            parent::ErrorTrans();
-                        }
+                        $mercurio37->save();
+
                         $response = parent::successFunc("Se adjunto con exito el archivo");
                     } else {
                         $response = parent::errorFunc("No se cargo: tamano del archivo muy grande o no es valido");
@@ -785,7 +814,7 @@ class SubsidioempController extends ApplicationController
             $generalService = new GeneralService();
             $generalService->sendEmail(parent::getActUser("email"), parent::getActUser("nombre"), $asunto, $msj, "");
         }
-        parent::finishTrans();
+
         $response = parent::successFunc("Movimiento realizado con exito el archivo");
         Router::routeTo("controller: principal", "action: index");
         return $this->renderText(json_encode("Movimiento realizado con exito el archivo"));
@@ -936,7 +965,10 @@ class SubsidioempController extends ApplicationController
                     $key_vivienda = array_search($vivienda, $_vivienda);
                     $key_tipafi = array_search($tipafi, $_tipafi);
                     $key_autoriza = array_search($autoriza, $_autoriza);
-                    if ($this->Mercurio31->count("*", "conditions: tipo='" . parent::getActUser('tipo') . "' and coddoc = '" . parent::getActUser("coddoc") . "' and documento='" . parent::getActUser("documento") . "' and cedtra='$cedtra' and estado<>'X'") > 0) $mensajes_error .= self::errorCarga($l, $cedtra, $nombre, "Ya tiene un formulario presentado");
+                    if ((new Mercurio31)->getCount(
+                        "*",
+                        "conditions: tipo='" . parent::getActUser('tipo') . "' and coddoc = '" . parent::getActUser("coddoc") . "' and documento='" . parent::getActUser("documento") . "' and cedtra='$cedtra' and estado<>'X'"
+                    ) > 0) $mensajes_error .= self::errorCarga($l, $cedtra, $nombre, "Ya tiene un formulario presentado");
                     if ($key_tipdoc === false) $mensajes_error .= self::errorCarga($l, $cedtra, $nombre, "Tipo de Documento No existe $tipdoc");
                     if ($key_ciunac === false) $mensajes_error .= self::errorCarga($l, $cedtra, $nombre, "Ciudad de Nacimiento No existe $ciunac");
                     if ($key_sexo === false) $mensajes_error .= self::errorCarga($l, $cedtra, $nombre, "Sezo No existe $sexo");
@@ -1236,7 +1268,11 @@ class SubsidioempController extends ApplicationController
                     }
 
                     $nombre = $mercurio31->getNombre();
-                    if ($this->Mercurio31->count("*", "conditions: cedtra='$cedtra' AND nit = '" . parent::getActUser("documento") . "'  AND estado in ('T','P')") > 0) {
+                    if (Mercurio31::where('cedtra', $cedtra)
+                        ->where('nit', parent::getActUser("documento"))
+                        ->whereIn('estado', ['T', 'P'])
+                        ->count() > 0
+                    ) {
                         $errores['subsi15'][] = array("linea" => $l, "cedtra" => $cedtra, "nombre" => $nombre, "nota" => "El Trabajador ya tiene una solicitud creada1.");
                         continue;
                     }

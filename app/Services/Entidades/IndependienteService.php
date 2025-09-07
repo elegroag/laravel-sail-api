@@ -301,17 +301,17 @@ class IndependienteService
         return Mercurio41::where('id', $id)->first();
     }
 
-    public function consultaSeguimiento($id)
+    public function consultaSeguimiento(int $id)
     {
         $seguimientos = Mercurio10::where('numero', $id)
             ->where('tipopc', $this->tipopc)
-            ->orderBy('item', 'desc')
-            ->get();
+            ->orderByDesc('item')
+            ->get()
+            ->map(function ($seguimiento) {
+                $seguimiento->corregir = explode(';', $seguimiento->campos_corregir);
+                return $seguimiento;
+            });
 
-        foreach ($seguimientos as $seguimiento) {
-            $campos = explode(';', $seguimiento->campos_corregir);
-            $seguimiento->corregir = $campos;
-        }
         return array(
             'seguimientos' => $seguimientos,
             'campos_disponibles' => (new Mercurio41)->CamposDisponibles(),

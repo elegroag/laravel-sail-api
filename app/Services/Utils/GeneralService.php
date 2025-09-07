@@ -3,6 +3,7 @@
 namespace App\Services\Utils;
 
 use App\Exceptions\DebugException;
+use App\Models\Mercurio01;
 use App\Models\Mercurio02;
 use App\Models\Mercurio04;
 use App\Models\Mercurio05;
@@ -10,8 +11,6 @@ use App\Models\Mercurio08;
 use App\Models\Mercurio20;
 use App\Services\Api\PortalMercurio;
 use Carbon\Carbon;
-
-require_once "legacy/Excel/Main.php";
 
 class GeneralService
 {
@@ -125,65 +124,33 @@ class GeneralService
         return $html;
     }
 
-    public function createReport($model, $_fields, $query = '1=1', $title = 'Reporte', $format = 'P')
-    {
-        $table = ucfirst($model);
-        $table = new $table();
-        $format = strtolower($format);
-        if ($format == 'p') {
-            $report = new UserReportPdf($title, $_fields);
-            $ext = ".pdf";
-        } elseif ($format == 'e') {
-            $report = new UserReportExcel($title, $_fields);
-            $ext = ".xls";
-        }
-        $report->startReport();
-        foreach ($table->find($query) as $mtable) {
-            foreach ($_fields as $key => $value) {
-                $get = "get" . ucFirst($key) . "Detalle";
-                if (method_exists($mtable, $get))
-                    $report->Put($key, $mtable->$get());
-                else
-                    $report->Put($key, $mtable->readAttribute($key));
-            }
-            $report->OutputToReport();
-        }
-        $file = "public/temp/reportes/reportes" . $ext;
-        if ($format == "excel")
-            $report->FinishReport($file, "F");
-        else
-            $report->FinishReport($file, "D");
-        return $file;
-    }
+    public function createReport($model, $_fields, $query = '1=1', $title = 'Reporte', $format = 'P') {}
 
-    /**
-     * webService function
-     * $servidor = "172.168.0.40";
-     * $servidor = "186.119.116.228:8091";
-     * $servidor = "172.168.0.11";
-     * $servidor = "186.119.116.228:8096";
-     * @param [type] $funcion
-     * @param [type] $param
-     * @return void
-     */
     public function webService($funcion, $params)
     {
-        /* $portalMercurio =  new PortalMercurio();
-        $portalMercurio->send(array(
-            'servicio' => $funcion,
-            'params' => $params
-        ));
+        $app = [
+            "mode" => env('API_MODE'),
+            "host_portal_dev" => env('HOST_PORTAL_DEV'),
+            "host_portal_pro" => env('HOST_PORTAL_PRO'),
+            "portal" => env('PORTAL')
+        ];
+        $portalMercurio =  new PortalMercurio(json_decode(json_encode($app), true));
+        $portalMercurio->send(
+            [
+                'servicio' => $funcion,
+                'params' => $params
+            ]
+        );
 
         if ($portalMercurio->isJson()) {
             return $portalMercurio->toArray();
         } else {
             return false;
-        } */
+        }
     }
 
     public function sendEmail2($correo, $nombre = '', $asunto, $msj, $file = '')
     {
-        Core::importFromLibrary("phpmailer", "class.phpmailer.php");
         $mercurio02 = (new Mercurio02())->findFirst();
         $mcontenido  = "";
         $mcontenido .= "<div style='padding:0px;margin:0px'>";
@@ -212,8 +179,6 @@ class GeneralService
         $mcontenido .= "<tr>";
         $mcontenido .= "<td bgcolor='#FFFFFF' style='padding:15px 20px 25px;border: none;border-top:none;border-bottom:none'>";
         $mcontenido .= "<div style='font-family:Helvetica,Arial;font-size:14px;font-style:italic;color:black;'>";
-
-
         $mcontenido .= " <table align='center' width='100%' border='0'>";
         $mcontenido .= "<tr>";
         $mcontenido .= "<td bgcolor='#FFFFFF' style='padding:15px 20px 25px;border: none;border-top:none;border-bottom:none'>";
@@ -221,10 +186,6 @@ class GeneralService
         $mcontenido .= "</td>";
         $mcontenido .= "</tr>";
         $mcontenido .= "</table>";
-
-
-
-
         $mcontenido .= "</div>";
         $mcontenido .= "</td>";
         $mcontenido .= "</tr>";
@@ -260,37 +221,24 @@ class GeneralService
         $mcontenido .= "</table>";
         $mcontenido .= "</div>";
 
-        $mail = new PHPMailer();
-        $mail->From = "Comfaca en Linea";
-        $mail->FromName = "Comfaca en Linea";
-        $mail->Mailer = 'smtp.gmail.com';
-        $mail->SMTPAuth = true;
-        $mail->SMTPSecure = "tls";
-        $mail->Username = strtolower("comfacaenlinea@gmail.com");
-        $mail->Password = "comfaca2019";
-        $mail->Username = strtolower("asesor.afiliaciones@comfaca.com");
-        $mail->Password = "afiliaemp2018";
-        $mail->Port = 587;
-        $mail->Host = "smtp.gmail.com";
-        $mail->SMTPDebug = 1;
-        $mail->AddReplyTo("asesor.afiliaciones@comfaca.com", "Mercurio");
-        $mail->AddReplyTo("comfacaenlinea@gmail.com", "Mercurio");
-        $mail->AddAddress($correo, $nombre);
-        $mail->WordWrap = 50;
-        $mail->IsHTML(true);
-        $mail->Subject = $asunto;
-        $mail->Body = $mcontenido;
-        $mail->AltBody = "";
-        if ($file != "") {
-            $mail->addAttachment($file, "carta.pdf");
-        }
-        $mail->Send();
+        $mercurio01 = Mercurio01::first();
+
+        $senderEmail = new SenderEmail();
+        $senderEmail->setters(
+            "asunto: $asunto",
+            "emisor_email: {$mercurio01->getEmail()}",
+            "emisor_clave: {$mercurio01->getClave()}",
+            "emisor_nombre: COMFACA"
+        );
+
+        $files = (is_array($file) == false) ? [$file] : $file;
+        $senderEmail->send($correo, $mcontenido, $files);
         return true;
     }
 
     public function sendEmail($correo, $nombre = '', $asunto, $msj, $file = '')
     {
-        $mercurio02 = $this->Mercurio02->findFirst();
+        $mercurio02 = Mercurio02::first();
         $mcontenido  = "";
         $mcontenido .= "<div style='padding:0px;margin:0px'>";
         $mcontenido .= "<table width='100%' bgcolor='#EEEEEE' cellpadding='0' cellspacing='0' border='0'>";
@@ -360,38 +308,30 @@ class GeneralService
         $mcontenido .= "</table>";
         $mcontenido .= "</div>";
 
-        Core::importFromLibrary("Swift", "Swift.php");
-        Core::importFromLibrary("Swift", "Swift/Connection/SMTP.php");
-        $smtp = new Swift_Connection_SMTP("smtp.gmail.com", Swift_Connection_SMTP::PORT_SECURE, Swift_Connection_SMTP::ENC_TLS);
-        $mercurio01 = $this->Mercurio01->findFirst();
-        $email_salida = $mercurio01->getEmail();
-        $smtp->setUsername($email_salida);
-        $smtp->setPassword(trim($mercurio01->getClave()));
+        $mercurio01 = Mercurio01::first();
 
-        $message = new Swift_Message($asunto);
-        $message->setSubject($asunto);
-        $bodyMessage = new Swift_Message_Part(nl2br(utf8n($mcontenido)), "text/html");
-        $bodyMessage->setCharset("UTF-8");
-        $message->attach($bodyMessage);
-        $swift = new Swift($smtp);
-        $email = new Swift_RecipientList();
-        $email->addTo($correo, $nombre);
-        if ($file != '') {
-            $swiftfile = new Swift_File($file);
-            $attachment = new Swift_Message_Attachment($swiftfile);
-            $message->attach($attachment);
-        }
-        $swift->send($message, $email, new Swift_Address($email_salida));
+        $senderEmail = new SenderEmail();
+        $senderEmail->setters(
+            "asunto: $asunto",
+            "emisor_email: {$mercurio01->getEmail()}",
+            "emisor_clave: {$mercurio01->getClave()}",
+            "emisor_nombre: COMFACA"
+        );
+
+        $files = (is_array($file) == false) ? [$file] : $file;
+        $senderEmail->send($correo, $mcontenido, $files);
         return true;
     }
 
     public function consultaEmpresa($mercurio30)
     {
         $tipopc = 2;
-        $mercurio01 = $this->Mercurio01->findFirst();
-        $mercurio37 = $this->Mercurio37->find("tipopc = '$tipopc' and numero = '{$mercurio30->getId()}'");
+        $mercurio01 = \App\Models\Mercurio01::first();
+        $mercurio37 = \App\Models\Mercurio37::where('tipopc', $tipopc)
+            ->where('numero', $mercurio30->getId())
+            ->first();
 
-        Services::Init();
+
         $procesadorComando = Comman::Api();
         $procesadorComando->runPortal(array("servicio" => "captura_empresa", "params" => null));
         $datos_captura = $procesadorComando->toArray();
@@ -522,7 +462,7 @@ class GeneralService
 
 
         foreach ($mercurio37 as $mmercurio37) {
-            $mercurio12 = $this->Mercurio12->findFirst("coddoc='{$mmercurio37->getCoddoc()}'");
+            $mercurio12 = \App\Models\Mercurio12::where('coddoc', $mmercurio37->getCoddoc())->first();
             $response .= "<div class='btn-group col-md-4 mb-2'>";
             $response .= "<button class='btn btn-icon btn-block btn-outline-default' type='button' onclick=\"verArchivo('{$mercurio01->getPath()}','{$mmercurio37->getArchivo()}')\">";
             $response .= "<span class='btn-inner--icon'><i class='fas fa-file-download'></i></span>";
@@ -548,7 +488,10 @@ class GeneralService
         $response .= "</tr>";
         $response .= "</thead>";
         $response .= "<tbody>";
-        $mercurio10 = $this->Mercurio10->find("tipopc = '$tipopc' and numero='{$mercurio30->getId()}'", "order: item ASC");
+        $mercurio10 = \App\Models\Mercurio10::where('tipopc', $tipopc)
+            ->where('numero', $mercurio30->getId())
+            ->orderBy('item', 'ASC')
+            ->get();
         if ($mercurio10->count() == 0) {
             $response .= "<tr>";
             $response .= "<td colspan=2>NO HAY DATOS DE SEGUIMIENTO</td>";
@@ -571,10 +514,12 @@ class GeneralService
     public function consultaPensionado($mercurio38)
     {
         $tipopc = "9";
-        $mercurio01 = $this->Mercurio01->findFirst();
-        $mercurio37 = $this->Mercurio37->find("tipopc = '$tipopc' and numero = '{$mercurio38->getId()}'");
+        $mercurio01 = \App\Models\Mercurio01::first();
+        $mercurio37 = \App\Models\Mercurio37::where('tipopc', $tipopc)
+            ->where('numero', $mercurio38->getId())
+            ->get();
 
-        Services::Init();
+
         $procesadorComando = Comman::Api();
         $procesadorComando->runPortal(array("servicio" => "captura_trabajador", "params" => null));
         $datos_captura = $procesadorComando->toArray();
@@ -722,7 +667,7 @@ class GeneralService
 
 
         foreach ($mercurio37 as $mmercurio37) {
-            $mercurio12 = $this->Mercurio12->findFirst("coddoc='{$mmercurio37->getCoddoc()}'");
+            $mercurio12 = \App\Models\Mercurio12::where('coddoc', $mmercurio37->getCoddoc())->first();
             $response .= "<div class='btn-group col-md-4 mb-2'>";
             $response .= "<button class='btn btn-icon btn-block btn-outline-default' type='button' onclick=\"verArchivo('{$mercurio01->getPath()}','{$mmercurio37->getArchivo()}')\">";
             $response .= "<span class='btn-inner--icon'><i class='fas fa-file-download'></i></span>";
@@ -749,7 +694,11 @@ class GeneralService
         $response .= "</tr>";
         $response .= "</thead>";
         $response .= "<tbody>";
-        $mercurio10 = $this->Mercurio10->find("tipopc = '$tipopc' and numero='{$mercurio38->getId()}'", "order: item ASC");
+
+        $mercurio10 = \App\Models\Mercurio10::where('tipopc', $tipopc)
+            ->where('numero', $mercurio38->getId())
+            ->orderBy('item', 'ASC')
+            ->get();
         if ($mercurio10->count() == 0) {
             $response .= "<tr>";
             $response .= "<td colspan=2>NO HAY DATOS DE SEGUIMIENTO</td>";
@@ -771,10 +720,12 @@ class GeneralService
     public function consultaFacultativo($mercurio36)
     {
         $tipopc = "10";
-        $mercurio01 = $this->Mercurio01->findFirst();
-        $mercurio37 = $this->Mercurio37->find("tipopc = '$tipopc' and numero = '{$mercurio36->getId()}'");
+        $mercurio01 = \App\Models\Mercurio01::first();
+        $mercurio37 = \App\Models\Mercurio37::where('tipopc', $tipopc)
+            ->where('numero', $mercurio36->getId())
+            ->get();
 
-        Services::Init();
+
         $procesadorComando = Comman::Api();
         $procesadorComando->runPortal(array("servicio" => "captura_trabajador", "params" => null));
         $datos_captura = $procesadorComando->toArray();
@@ -921,7 +872,7 @@ class GeneralService
 
 
         foreach ($mercurio37 as $mmercurio37) {
-            $mercurio12 = $this->Mercurio12->findFirst("coddoc='{$mmercurio37->getCoddoc()}'");
+            $mercurio12 = \App\Models\Mercurio12::where('coddoc', $mmercurio37->getCoddoc())->first();
             $response .= "<div class='btn-group col-md-4 mb-2'>";
             $response .= "<button class='btn btn-icon btn-block btn-outline-default' type='button' onclick=\"verArchivo('{$mercurio01->getPath()}','{$mmercurio37->getArchivo()}')\">";
             $response .= "<span class='btn-inner--icon'><i class='fas fa-file-download'></i></span>";
@@ -947,7 +898,10 @@ class GeneralService
         $response .= "</tr>";
         $response .= "</thead>";
         $response .= "<tbody>";
-        $mercurio10 = $this->Mercurio10->find("tipopc = '$tipopc' and numero='{$mercurio36->getId()}'", "order: item ASC");
+        $mercurio10 = \App\Models\Mercurio10::where('tipopc', $tipopc)
+            ->where('numero', $mercurio36->getId())
+            ->orderBy('item', 'ASC')
+            ->get();
         if ($mercurio10->count() == 0) {
             $response .= "<tr>";
             $response .= "<td colspan=2>NO HAY DATOS DE SEGUIMIENTO</td>";
@@ -969,10 +923,12 @@ class GeneralService
     public function consultaComunitaria($mercurio39)
     {
         $tipopc = "11";
-        $mercurio01 = $this->Mercurio01->findFirst();
-        $mercurio37 = $this->Mercurio37->find("tipopc = '$tipopc' and numero = '{$mercurio39->getId()}'");
+        $mercurio01 = \App\Models\Mercurio01::first();
+        $mercurio37 = \App\Models\Mercurio37::where('tipopc', $tipopc)
+            ->where('numero', $mercurio39->getId())
+            ->get();
 
-        Services::Init();
+
         $procesadorComando = Comman::Api();
         $procesadorComando->runPortal(array("servicio" => "captura_trabajador", "params" => null));
         $datos_captura = $procesadorComando->toArray();
@@ -1119,7 +1075,7 @@ class GeneralService
 
 
         foreach ($mercurio37 as $mmercurio37) {
-            $mercurio12 = $this->Mercurio12->findFirst("coddoc='{$mmercurio37->getCoddoc()}'");
+            $mercurio12 = \App\Models\Mercurio12::where('coddoc', $mmercurio37->getCoddoc())->first();
             $response .= "<div class='btn-group col-md-4 mb-2'>";
             $response .= "<button class='btn btn-icon btn-block btn-outline-default' type='button' onclick=\"verArchivo('{$mercurio01->getPath()}','{$mmercurio37->getArchivo()}')\">";
             $response .= "<span class='btn-inner--icon'><i class='fas fa-file-download'></i></span>";
@@ -1145,7 +1101,10 @@ class GeneralService
         $response .= "</tr>";
         $response .= "</thead>";
         $response .= "<tbody>";
-        $mercurio10 = $this->Mercurio10->find("tipopc = '$tipopc' and numero='{$mercurio39->getId()}'", "order: item ASC");
+        $mercurio10 = \App\Models\Mercurio10::where('tipopc', $tipopc)
+            ->where('numero', $mercurio39->getId())
+            ->orderBy('item', 'ASC')
+            ->get();
         if ($mercurio10->count() == 0) {
             $response .= "<tr>";
             $response .= "<td colspan=2>NO HAY DATOS DE SEGUIMIENTO</td>";
@@ -1167,10 +1126,12 @@ class GeneralService
     public function consultaDomestico($mercurio40)
     {
         $tipopc = "12";
-        $mercurio01 = $this->Mercurio01->findFirst();
-        $mercurio37 = $this->Mercurio37->find("tipopc = '$tipopc' and numero = '{$mercurio40->getId()}'");
+        $mercurio01 = \App\Models\Mercurio01::first();
+        $mercurio37 = \App\Models\Mercurio37::where('tipopc', $tipopc)
+            ->where('numero', $mercurio40->getId())
+            ->first();
 
-        Services::Init();
+
         $procesadorComando = Comman::Api();
         $procesadorComando->runPortal(array("servicio" => "captura_trabajador", "params" => null));
         $datos_captura = $procesadorComando->toArray();
@@ -1317,7 +1278,7 @@ class GeneralService
 
 
         foreach ($mercurio37 as $mmercurio37) {
-            $mercurio12 = $this->Mercurio12->findFirst("coddoc='{$mmercurio37->getCoddoc()}'");
+            $mercurio12 = \App\Models\Mercurio12::where('coddoc', $mmercurio37->getCoddoc())->first();
             $response .= "<div class='btn-group col-md-4 mb-2'>";
             $response .= "<button class='btn btn-icon btn-block btn-outline-default' type='button' onclick=\"verArchivo('{$mercurio01->getPath()}','{$mmercurio37->getArchivo()}')\">";
             $response .= "<span class='btn-inner--icon'><i class='fas fa-file-download'></i></span>";
@@ -1343,7 +1304,7 @@ class GeneralService
         $response .= "</tr>";
         $response .= "</thead>";
         $response .= "<tbody>";
-        $mercurio10 = $this->Mercurio10->find("tipopc = '$tipopc' and numero='{$mercurio40->getId()}'", "order: item ASC");
+        $mercurio10 = \App\Models\Mercurio10::where('tipopc', $tipopc)->where('numero', $mercurio40->getId())->orderBy('item', 'asc')->get();
         if ($mercurio10->count() == 0) {
             $response .= "<tr>";
             $response .= "<td colspan=2>NO HAY DATOS DE SEGUIMIENTO</td>";
@@ -1365,10 +1326,12 @@ class GeneralService
     public function consultaTrabajador($mercurio31)
     {
         $tipopc = "1";
-        $mercurio01 = $this->Mercurio01->findFirst();
-        $mercurio37 = $this->Mercurio37->find("tipopc = '$tipopc' and numero = '{$mercurio31->getId()}'");
+        $mercurio01 = \App\Models\Mercurio01::first();
+        $mercurio37 = \App\Models\Mercurio37::where('tipopc', $tipopc)
+            ->where('numero', $mercurio31->getId())
+            ->get();
 
-        Services::Init();
+
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runPortal(array("servicio" => "captura_trabajador"));
@@ -1545,7 +1508,7 @@ class GeneralService
 
 
         foreach ($mercurio37 as $mmercurio37) {
-            $mercurio12 = $this->Mercurio12->findFirst("coddoc='{$mmercurio37->getCoddoc()}'");
+            $mercurio12 = \App\Models\Mercurio12::where('coddoc', $mmercurio37->getCoddoc())->first();
             $response .= "<div class='btn-group col-md-4 mb-2'>";
             $response .= "<button class='btn btn-icon btn-block btn-outline-default' type='button' onclick=\"verArchivo('{$mercurio01->getPath()}','{$mmercurio37->getArchivo()}')\">";
             $response .= "<span class='btn-inner--icon'><i class='fas fa-file-download'></i></span>";
@@ -1571,7 +1534,10 @@ class GeneralService
         $response .= "</tr>";
         $response .= "</thead>";
         $response .= "<tbody>";
-        $mercurio10 = $this->Mercurio10->find("tipopc = '$tipopc' and numero='{$mercurio31->getId()}'", "order: item ASC");
+        $mercurio10 = \App\Models\Mercurio10::where('tipopc', $tipopc)
+            ->where('numero', $mercurio31->getId())
+            ->orderBy('item', 'ASC')
+            ->get();
         if ($mercurio10->count() == 0) {
             $response .= "<tr>";
             $response .= "<td colspan=2>NO HAY DATOS DE SEGUIMIENTO</td>";
@@ -1593,10 +1559,11 @@ class GeneralService
     public function consultaConyuge($mercurio32)
     {
         $tipopc = "3";
-        $mercurio01 = $this->Mercurio01->findFirst();
-        $mercurio37 = $this->Mercurio37->find("tipopc = '$tipopc' and numero = '{$mercurio32->getId()}'");
+        $mercurio01 = \App\Models\Mercurio01::first();
+        $mercurio37 = \App\Models\Mercurio37::where('tipopc', $tipopc)
+            ->where('numero', $mercurio32->getId())
+            ->first();
 
-        Services::Init();
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runPortal(array("servicio" => "captura_conyuge"));
@@ -1721,7 +1688,7 @@ class GeneralService
 
 
         foreach ($mercurio37 as $mmercurio37) {
-            $mercurio12 = $this->Mercurio12->findFirst("coddoc='{$mmercurio37->getCoddoc()}'");
+            $mercurio12 = \App\Models\Mercurio12::where('coddoc', $mmercurio37->getCoddoc())->first();
             $response .= "<div class='btn-group col-md-4 mb-2'>";
             $response .= "<button class='btn btn-icon btn-block btn-outline-default' type='button' onclick=\"verArchivo('{$mercurio01->getPath()}','{$mmercurio37->getArchivo()}')\">";
             $response .= "<span class='btn-inner--icon'><i class='fas fa-file-download'></i></span>";
@@ -1747,7 +1714,10 @@ class GeneralService
         $response .= "</tr>";
         $response .= "</thead>";
         $response .= "<tbody>";
-        $mercurio10 = $this->Mercurio10->find("tipopc = '$tipopc' and numero='{$mercurio32->getId()}'", "order: item ASC");
+        $mercurio10 = \App\Models\Mercurio10::where('tipopc', $tipopc)
+            ->where('numero', $mercurio32->getId())
+            ->orderBy('item', 'ASC')
+            ->get();
         if ($mercurio10->count() == 0) {
             $response .= "<tr>";
             $response .= "<td colspan=2>NO HAY DATOS DE SEGUIMIENTO</td>";
@@ -1769,10 +1739,10 @@ class GeneralService
     public function consultaBeneficiario($mercurio34)
     {
         $tipopc = "4";
-        $mercurio01 = $this->Mercurio01->findFirst();
-        $mercurio37 = $this->Mercurio37->find("tipopc = '$tipopc' and numero = '{$mercurio34->getId()}'");
-
-        Services::Init();
+        $mercurio01 = \App\Models\Mercurio01::first();
+        $mercurio37 = \App\Models\Mercurio37::where('tipopc', $tipopc)
+            ->where('numero', $mercurio34->getId())
+            ->first();
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runPortal(array("servicio" => "captura_beneficiario"));
@@ -1804,7 +1774,7 @@ class GeneralService
 
         $col = "<div class='col-md-4 border-top border-right'>";
 
-        Debug::addVariable("sss", $mercurio34->getCedcon());
+        dump("sss", $mercurio34->getCedcon());
         $response = "";
         $response .= "<h6 class='heading-small text-muted mb-4'>Datos Beneficiario</h6>";
 
@@ -1871,7 +1841,7 @@ class GeneralService
         $response .= "<div class='row pl-lg-4'>";
 
         foreach ($mercurio37 as $mmercurio37) {
-            $mercurio12 = $this->Mercurio12->findFirst("coddoc='{$mmercurio37->getCoddoc()}'");
+            $mercurio12 = \App\Models\Mercurio12::where('coddoc', $mmercurio37->getCoddoc())->first();
             $response .= "<div class='btn-group col-md-4 mb-2'>";
             $response .= "<button class='btn btn-icon btn-block btn-outline-default' type='button' onclick=\"verArchivo('{$mercurio01->getPath()}','{$mmercurio37->getArchivo()}')\">";
             $response .= "<span class='btn-inner--icon'><i class='fas fa-file-download'></i></span>";
@@ -1896,7 +1866,10 @@ class GeneralService
         $response .= "</tr>";
         $response .= "</thead>";
         $response .= "<tbody>";
-        $mercurio10 = $this->Mercurio10->find("tipopc = '$tipopc' and numero='{$mercurio34->getId()}'", "order: item ASC");
+        $mercurio10 = \App\Models\Mercurio10::where('tipopc', $tipopc)
+            ->where('numero', $mercurio34->getId())
+            ->orderBy('item', 'ASC')
+            ->get();
         if ($mercurio10->count() == 0) {
             $response .= "<tr>";
             $response .= "<td colspan=2>NO HAY DATOS DE SEGUIMIENTO</td>";
@@ -1976,185 +1949,4 @@ class GeneralService
     public function errorTrans($message = '',  $linea = '') {}
 
     public function finishTrans() {}
-
-    public function createReport2($model, $_fields, $title = 'Reporte', $format = 'P')
-    {
-        $format = strtolower($format);
-        if ($format == 'p') {
-            $report = new UserReportPdf($title, $_fields);
-            $ext = ".pdf";
-        } elseif ($format == 'e') {
-            $report = new UserReportExcel($title, $_fields);
-            $ext = ".xls";
-        }
-        $report->startReport();
-        switch ($model) {
-            case 'mercurio80':
-                $tabla = $this->webService("datosMer80", "");
-                break;
-            case 'mercurio81':
-                $tabla = $this->webService("datosMer81", "");
-                break;
-            case 'mercurio82':
-                $tabla = $this->webService("datosMer82", "");
-                break;
-            default:
-                $tabla = $this->webService("datosMer83", "");
-                break;
-        }
-        if (!$tabla) {
-            throw new DebugException("Error en la consulta de datos", 501);
-        }
-        $datosMer = $tabla['data']['info'];
-
-        $capturaXml = $this->webService("captura_xml", array());
-        $datos_captura = $capturaXml['data'];
-
-        $_codins = array();
-        foreach ($datos_captura['codins'] as $data) $_codins[$data['codins']] = utf8n($data['detalle']);
-        $_codinf = array();
-        foreach ($datos_captura['codinf'] as $data) $_codinf[$data['codinf']] = utf8n($data['detalle']);
-        $_tipgen = array();
-        foreach ($datos_captura['tipgen'] as $data) $_tipgen[$data['tipgen']] = $data['detalle'];
-        $_divpol = array();
-        foreach ($datos_captura['divpol'] as $data) $_divpol[$data['divpol']] = $data['detalle'];
-        $_codetn = array();
-        foreach ($datos_captura['codetn'] as $data) $_codetn[$data['codetn']] = $data['detalle'];
-        $_codpob = array();
-        foreach ($datos_captura['codpob'] as $data) $_codpob[$data['codpob']] = $data['detalle'];
-        $_facvul = array();
-        foreach ($datos_captura['facvul'] as $data) $_facvul[$data['facvul']] = $data['detalle'];
-        $_tipjor = array();
-        foreach ($datos_captura['tipjor'] as $data) $_tipjor[$data['tipjor']] = $data['detalle'];
-        $_codres = array();
-        foreach ($datos_captura['codres'] as $data) $_codres[$data['codres']] = $data['detalle'];
-        $_codpue = array();
-        foreach ($datos_captura['codpue'] as $data) $_codpue[$data['codpue']] = $data['detalle'];
-        $_nivedu = array();
-        foreach ($datos_captura['graesc'] as $data) $_nivedu[$data['graesc']] = $data['detalle'];
-        $_codgra = array();
-        foreach ($datos_captura['codgra'] as $data) $_codgra[$data['codgra']] = $data['detalle'];
-        $_profesor = array();
-        foreach ($datos_captura['profesor'] as $data) $_profesor[$data['profesor']] = $data['detalle'];
-        $_colegio = array();
-        foreach ($datos_captura['colegio'] as $data) $_colegio[$data['colegio']] = $data['detalle'] . "-" . $data['nombre'];
-        $_modain = array();
-        foreach ($datos_captura['modain'] as $data) $_modain[$data['modain']] = $data['detalle'];
-        $_modser = array();
-        foreach ($datos_captura['modser'] as $data) $_modser[$data['modser']] = $data['detalle'];
-        $_modjec = array();
-        foreach ($datos_captura['modjec'] as $data) $_modjec[$data['modjec']] = $data['detalle'];
-        $_tipben = array();
-        foreach ($datos_captura['tipben'] as $data) $_tipben[$data['tipben']] = $data['detalle'];
-        $_tipide = array();
-        foreach ($datos_captura['tipide'] as $data) $_tipide[$data['tipide']] = $data['detalle'];
-
-        foreach ($datosMer as $register) {
-            foreach ($_fields as $key => $value) {
-                dump("keyvalue", $key);
-
-                if (isset($register[$key])) {
-                    if ($key == 'coddan') {
-
-                        $report->Put($key, $_codins[$register[$key]]);
-                    } else if ($key == 'sede') {
-
-                        $report->Put($key, $_codins[$register[$key]]);
-                    } else if ($key == 'codinf') {
-
-                        $report->Put($key, $_codinf[$register[$key]]);
-                    } else if ($key == 'ciunacben') {
-
-                        if (isset($_divpol[$register[$key]])) {
-                            $report->Put($key, $_divpol[$register[$key]]);
-                        } else {
-                            $report->Put($key, "");
-                        }
-                    } else if ($key == 'ciuresben') {
-                        if (isset($_divpol[$register[$key]])) {
-                            $report->Put($key, $_divpol[$register[$key]]);
-                        } else {
-                            $report->Put($key, "");
-                        }
-                    } else if ($key == 'tipgenben') {
-
-                        $report->Put($key, $_tipgen[$register[$key]]);
-                    } else if ($key == 'codgru') {
-
-                        $report->Put($key, $_codetn[$register[$key]]);
-                    } else if ($key == 'codpob') {
-
-                        $report->Put($key, $_codpob[$register[$key]]);
-                    } else if ($key == 'facvul') {
-
-                        $report->Put($key, $_facvul[$register[$key]]);
-                    } else if ($key == 'tipjor') {
-
-                        $report->Put($key, $_tipjor[$register[$key]]);
-                    } else if ($key == 'codres') {
-
-                        $report->Put($key, $_codres[$register[$key]]);
-                    } else if ($key == 'codpue') {
-
-                        $report->Put($key, @$_codpue[$register[$key]]);
-                    } else if ($key == 'nivedu') {
-
-                        $report->Put($key, $_nivedu[$register[$key]]);
-                    } else if ($key == 'codgra') {
-                        if (isset($_codgra[$register[$key]])) {
-
-                            $report->Put($key, $_codgra[$register[$key]]);
-                        } else {
-                            $report->Put($key, "");
-                        }
-                    } else if ($key == 'profesor') {
-
-                        $report->Put($key, $_profesor[$register[$key]]);
-                    } else if ($key == 'colegio') {
-                        if (isset($_colegio[$register[$key]])) {
-
-                            $report->Put($key, $_colegio[$register[$key]]);
-                        } else {
-                            $report->Put($key, "");
-                        }
-                    } else if ($key == 'modain') {
-                        if (isset($_modain[$register[$key]])) {
-
-                            $report->Put($key, $_modain[$register[$key]]);
-                        } else {
-
-                            $report->Put($key, "");
-                        }
-                    } else if ($key == 'modjec') {
-                        if (isset($_modjec[$register[$key]])) {
-
-                            $report->Put($key, $_modjec[$register[$key]]);
-                        } else {
-
-                            $report->Put($key, "");
-                        }
-                    } else if ($key == 'modser') {
-
-                        $report->Put($key, $_modser[$register[$key]]);
-                    } else if ($key == 'tipben') {
-
-                        $report->Put($key, $_tipben[$register[$key]]);
-                    } else if ($key == 'tipideben') {
-
-                        $report->Put($key, $_tipide[$register[$key]]);
-                    } else {
-
-                        $report->Put($key, $register[$key]);
-                    }
-                } else {
-                    $report->Put($key, "");
-                }
-            }
-            $report->OutputToReport();
-        }
-
-        $file = "public/temp/reportes/reportes" . $ext;
-        ob_clean();
-        $report->FinishReport($file, "D");
-    }
 }

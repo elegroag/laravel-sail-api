@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
@@ -6,6 +7,13 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Auth\AuthJwt;
 use App\Library\Auth\SessionCookies;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio01;
+use App\Models\Mercurio07;
+use App\Services\Entidades\NotificacionService;
+use App\Services\Utils\AsignarFuncionario;
+use App\Services\Utils\SenderEmail;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class NotificacionesController extends ApplicationController
 {
@@ -15,7 +23,7 @@ class NotificacionesController extends ApplicationController
     protected $tipo;
 
     public function __construct()
-    {   
+    {
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
@@ -23,23 +31,25 @@ class NotificacionesController extends ApplicationController
 
     public function indexAction()
     {
-        $this->setParamToView("hide_header", true);
-        $this->setParamToView("title", "Reportar errores y problemas");
+        return view('notificaciones.index', [
+            'hide_header' => true,
+            'title' => 'Reportar errores y problemas'
+        ]);
     }
 
-    public function procesarNotificacionAction()
+    public function procesarNotificacionAction(Request $request, Response $response)
     {
         $this->setResponse("ajax");
         try {
-            $user = Auth::getActiveIdentity();
+            $user = $this->user;
             $documento = $user['documento'];
             $servicio = $request->input('servicio', "addslaches", "alpha", "extraspaces", "striptags");
             $telefono = $request->input('telefono', "addslaches", "alpha", "extraspaces", "striptags");
             $nota = $request->input('nota');
             $novedad = $request->input('novedad', "addslaches", "alpha", "extraspaces", "striptags");
-            $solicitante = (new Mercurio07)->findFirst("documento='{$documento}'");
+            $solicitante = Mercurio07::where('documento', $documento)->first();
             $notificacion = new NotificacionService();
-            $notificacion->setTransa();
+
 
             $filepath = '';
             if (isset($_FILES['file'])) {
@@ -48,14 +58,14 @@ class NotificacionesController extends ApplicationController
                 $name =  basename($file["name"]);
 
                 $rename =  $documento . '_' . date("YmdHis") . '_' . sanetizar($name);
-                $filepath = TEMP_PATH . "{$rename}";
+                $filepath = storage_path("temp/{$rename}");
 
                 if (file_exists($filepath)) {
                     unlink($filepath);
                 }
 
                 if (!move_uploaded_file($tmp_name, $filepath)) {
-                    throw new Exception("Error no es posible el cargue del archivo", 1);
+                    throw new DebugException("Error no es posible el cargue del archivo", 1);
                 }
             }
 
@@ -84,22 +94,19 @@ class NotificacionesController extends ApplicationController
             ";
             $asunto = "[COMFACAONLINE][NOTA] notificación reportada {$documento}";
 
-            $emailCaja = $this->Mercurio01->findFirst();
+            $emailCaja = Mercurio01::first();
+
             $senderEmail = new SenderEmail();
             $senderEmail->setters(
                 "emisor_email: {$emailCaja->getEmail()}",
                 "emisor_clave: {$emailCaja->getClave()}",
                 "asunto: {$asunto}"
             );
+
             $senderEmail->send(
-                array(
-                    array(
-                        "email" => "soportesistemas.comfaca@gmail.com",
-                        "nombre" => "soportesistemas.comfaca"
-                    )
-                ),
+                "soportesistemas.comfaca@gmail.com",
                 $html,
-                $filepath
+                [$filepath]
             );
 
             $tipo = $solicitante->getTipo();
@@ -116,7 +123,6 @@ class NotificacionesController extends ApplicationController
                 )
             );
 
-            $notificacion->endTransa();
             $salida = array(
                 "msj" => "Proceso se ha completado con éxito",
                 "success" => true,
@@ -125,7 +131,7 @@ class NotificacionesController extends ApplicationController
         } catch (DebugException $e) {
             $salida = array(
                 "success" => false,
-                "msj" => $e->getMessage() . ' Linea: ' . $err->getLine() . ' File: ' . basename($err->getFile())
+                "msj" => $e->getMessage() . ' Linea: ' . $e->getLine() . ' File: ' . basename($e->getFile())
             );
         }
         return $this->renderObject($salida, false);

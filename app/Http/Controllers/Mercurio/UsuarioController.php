@@ -9,6 +9,7 @@ use App\Library\Auth\SessionCookies;
 use App\Models\Adapter\DbBase;
 use App\Models\Gener09;
 use App\Models\Gener18;
+use App\Models\Mercurio07;
 use App\Services\Utils\Generales;
 use Illuminate\Http\Request;
 
@@ -55,7 +56,7 @@ class UsuarioController extends ApplicationController
                 $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
             }
 
-            $tipo = $this->Mercurio07->getArrayTipos();
+            $tipo = (new Mercurio07())->getArrayTipos();
             $salida = array(
                 "success" => true,
                 "data" => array(
@@ -92,12 +93,16 @@ class UsuarioController extends ApplicationController
                 $mcodciu["{$entity->getCodzon()}"] = $entity->getDetzon();
             }
 
-            $mtipos = $this->Mercurio07->getArrayTipos();
+            $mtipos = (new Mercurio07())->getArrayTipos();
             $documento = parent::getActUser("documento");
             $tipo = parent::getActUser("tipo");
             $coddoc = parent::getActUser("coddoc");
 
-            $msubsi07 = $this->Mercurio07->findFirst(" documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}' ");
+            $msubsi07 = Mercurio07::where('documento', $documento)
+                ->where('tipo', $tipo)
+                ->where('coddoc', $coddoc)
+                ->first();
+
             $entity = $msubsi07->getArray();
 
             $entity['coddoc_detalle'] = $mcoddoc[$coddoc];
@@ -134,12 +139,22 @@ class UsuarioController extends ApplicationController
             $old_coddoc = $this->user['coddoc'];
             $old_tipo = $this->tipo;
 
-            $msubsi07 = $this->Mercurio07->findFirst(" documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}' AND (tipo != '{$old_tipo}' AND coddoc != '{$old_coddoc}')");
+            $msubsi07 = Mercurio07::where('documento', $documento)
+                ->where('tipo', $tipo)
+                ->where('coddoc', $coddoc)
+                ->where('tipo', '!=', $old_tipo)
+                ->where('coddoc', '!=', $old_coddoc)
+                ->first();
+
             if ($msubsi07) {
                 throw new DebugException("Error el registro de usuario ya existe registrado", 501);
             }
 
-            $msubsi07 = $this->Mercurio07->findFirst(" documento='{$documento}' AND tipo='{$old_tipo}' AND coddoc='{$old_coddoc}'");
+            $msubsi07 = Mercurio07::where('documento', $documento)
+                ->where('tipo', $old_tipo)
+                ->where('coddoc', $old_coddoc)
+                ->first();
+
             $msubsi07->setTipo($tipo);
             $msubsi07->setEmail($email);
             $msubsi07->setCodciu($codciu);

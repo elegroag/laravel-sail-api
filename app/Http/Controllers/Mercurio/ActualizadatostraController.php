@@ -10,7 +10,15 @@ use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
 use App\Models\Gener09;
 use App\Models\Gener18;
+use App\Models\Mercurio01;
+use App\Models\Mercurio07;
+use App\Models\Mercurio10;
+use App\Models\Mercurio12;
+use App\Models\Mercurio13;
+use App\Models\Mercurio30;
+use App\Models\Mercurio31;
 use App\Models\Mercurio33;
+use App\Models\Mercurio37;
 use App\Models\Mercurio47;
 use App\Models\Subsi54;
 use App\Services\Entidades\DatosTrabajadorService;
@@ -116,14 +124,14 @@ class ActualizadatostraController extends ApplicationController
                 }
             }
 
-            $tipafi = $this->Mercurio07->getArrayTipos();
+            $tipafi = (new Mercurio07())->getArrayTipos();
             $coddoc = $tipoDocumentos;
             $data = array(
                 'tipafi' => $tipafi,
                 'tipdoc' => $coddoc,
-                'tipper' => $this->Mercurio30->getTipperArray(),
+                'tipper' => (new Mercurio30())->getTipperArray(),
                 'tipsoc' => $tipsoc,
-                'calemp' => $this->Mercurio30->getCalempArray(),
+                'calemp' => (new Mercurio30())->getCalempArray(),
                 'codciu' => $codciu,
                 'codzon' => $codciu,
                 'respo_tipdoc' => $coddoc,
@@ -148,7 +156,7 @@ class ActualizadatostraController extends ApplicationController
                 'resguardo_id' => ParamsTrabajador::getResguardos(),
                 'pub_indigena_id' => ParamsTrabajador::getPueblosIndigenas(),
                 'codban' => ParamsTrabajador::getBancos(),
-                'tipsal' =>  $this->Mercurio31->getTipsalArray(),
+                'tipsal' => (new Mercurio31())->getTipsalArray(),
                 'tipcue' => ParamsTrabajador::getTipoCuenta(),
                 'ruralt' => ParamsTrabajador::getRural(),
                 'tipjor' => array("C" => "COMPLETA", "M" => "MEDIA", "P" => "PARCIAL"),
@@ -176,9 +184,9 @@ class ActualizadatostraController extends ApplicationController
     {
         $documento =  parent::getActUser("documento");
         if (empty($estado)) {
-            $mercurio47 = $this->db->fetchAll("SELECT * FROM mercurio47 WHERE documento='{$documento}' AND estado IN('T','D','P','A','X') ORDER BY id, estado DESC");
+            $mercurio47 = $this->db->inQueryAssoc("SELECT * FROM mercurio47 WHERE documento='{$documento}' AND estado IN('T','D','P','A','X') ORDER BY id, estado DESC");
         } else {
-            $mercurio47 = $this->db->fetchAll("SELECT * FROM mercurio47 WHERE documento='{$documento}' AND estado='{$estado}' ORDER BY id DESC");
+            $mercurio47 = $this->db->inQueryAssoc("SELECT * FROM mercurio47 WHERE documento='{$documento}' AND estado='{$estado}' ORDER BY id DESC");
         }
 
         foreach ($mercurio47 as $ai => $row) {
@@ -199,8 +207,8 @@ class ActualizadatostraController extends ApplicationController
             $mercurio47[$ai] = $row;
             $mercurio47[$ai]["cantidad_eventos"] = $rqs['cantidad'];
             $mercurio47[$ai]["fecha_ultima_solicitud"] = $trayecto['fecsis'];
-            $mercurio47[$ai]["estado_detalle"] = $this->Mercurio47->getEstadoInArray($row['estado']);
-            $mercurio47[$ai]["tipo_actualizacion_detalle"] = $this->Mercurio47->getTipoActualizacionInArray($row['tipo_actualizacion']);
+            $mercurio47[$ai]["estado_detalle"] = (new Mercurio47())->getEstadoInArray($row['estado']);
+            $mercurio47[$ai]["tipo_actualizacion_detalle"] = (new Mercurio47())->getTipoActualizacionInArray($row['tipo_actualizacion']);
         }
         return $mercurio47;
     }
@@ -365,13 +373,17 @@ class ActualizadatostraController extends ApplicationController
         $this->setResponse("ajax");
         try {
             $id = $request->input('id');
-            $solicitud = $this->Mercurio47->findFirst("id='{$id}'");
+            $solicitud = Mercurio47::where('id', $id)->first();
+
             if ($solicitud) {
                 if ($solicitud->getEstado() != 'T') {
-                    $this->Mercurio10->deleteAll("numero='{$id}' AND tipopc='{$this->tipopc}'");
+                    Mercurio10::where('numero', $id)
+                        ->where('tipopc', $this->tipopc)
+                        ->delete();
                 }
-                $this->Mercurio33->deleteAll("actualizacion='{$id}'");
-                $this->Mercurio47->deleteAll("id='{$id}'");
+
+                Mercurio33::where('actualizacion', $id)->delete();
+                Mercurio47::where('id', $id)->delete();
             }
             $salida = array(
                 "success" => true,
@@ -389,21 +401,22 @@ class ActualizadatostraController extends ApplicationController
     public function editar_solicitudAction(Request $request)
     {
         $this->setResponse("ajax");
-        $modelos = array("mercurio33", "mercurio47");
-        //$Transaccion = parent::startTrans($modelos);
+
         $generalService = new GeneralService();
         $id_log = $generalService->registrarLog(false, "actualización datos basicos", "");
         try {
             $id = $request->input('id');
-            $coddoc = parent::getActUser("coddoc");
-            $documento = parent::getActUser("documento");
-            $tipo = parent::getActUser("tipo");
+
+            $coddoc = $this->user['coddoc'];
+            $documento = $this->user['documento'];
+            $tipo = $this->tipo;
+
             $solicitud = $this->db->fetchOne("SELECT * FROM mercurio47 WHERE id='{$id}' and documento='{$documento}'");
             if (!$solicitud) {
                 throw new DebugException("Error la solicitud no es correcta para continuar.", 501);
             }
 
-            $campos = $this->db->fetchAll("SELECT * FROM mercurio28 WHERE tipo='{$tipo}'");
+            $campos = $this->db->inQueryAssoc("SELECT * FROM mercurio28 WHERE tipo='{$tipo}'");
             foreach ($campos as $mercurio28) {
                 $valor = $request->input($mercurio28['campo']);
                 if (empty($valor)) continue;
@@ -451,23 +464,27 @@ class ActualizadatostraController extends ApplicationController
     function archivos_requeridos($mercurio47)
     {
         $archivos = array();
-        $mercurio13 = $this->Mercurio13->find("tipopc='{$this->tipopc}'");
+        $mercurio13 = Mercurio13::where("tipopc", $this->tipopc)->get();
 
-
-        $mercurio10 = $this->db->fetchOne("SELECT item, estado, campos_corregir
-        FROM mercurio10
-        WHERE numero='{$mercurio47->getId()}' AND tipopc='{$this->tipopc}' ORDER BY item DESC LIMIT 1");
+        $mercurio10 = Mercurio10::where('numero', $mercurio47->getId())
+            ->where('tipopc', $this->tipopc)
+            ->orderBy('item', 'desc')
+            ->first();
 
         $corregir = false;
-        if ($mercurio10) {
-            if ($mercurio10['estado'] == 'D') {
-                $campos = $mercurio10['campos_corregir'];
-                $corregir = explode(";", $campos);
-            }
+        if ($mercurio10 && $mercurio10->getEstado() == 'D') {
+            $campos = $mercurio10->getCamposCorregir();
+            $corregir = explode(";", $campos);
         }
+
         foreach ($mercurio13 as $m13) {
-            $m12 = $this->Mercurio12->findFirst("coddoc='{$m13->getCoddoc()}'");
-            $mercurio37 = $this->Mercurio37->findFirst("tipopc='{$this->tipopc}' and numero='{$mercurio47->getId()}' and coddoc='{$m13->getCoddoc()}'");
+            $m12 = Mercurio12::where('coddoc', $m13->getCoddoc())->first();
+
+            $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)
+                ->where('numero', $mercurio47->getId())
+                ->where('coddoc', $m13->getCoddoc())
+                ->first();
+
             $corrige = false;
             if ($corregir) {
                 if (in_array($m12->getCoddoc(), $corregir)) {
@@ -484,7 +501,8 @@ class ActualizadatostraController extends ApplicationController
             $archivo->corrige = $corrige;
             $archivos[] = $archivo;
         }
-        $mercurio01 = $this->Mercurio01->findFirst();
+
+        $mercurio01 = Mercurio01::first();
         $html = view("actualizadatos/tmp/archivos_requeridos", array(
             "load_archivos" => $archivos,
             "path" => $mercurio01->getPath(),
@@ -501,7 +519,7 @@ class ActualizadatostraController extends ApplicationController
         try {
             $documento = parent::getActUser("documento");
             $id = $request->input('id');
-            $mercurio47 = $this->Mercurio47->findFirst(" id='{$id}' and documento='{$documento}'");
+            $mercurio47 = Mercurio47::where('id', $id)->where('documento', $documento)->first();
             if (!$mercurio47) {
                 throw new DebugException("No se requiere de ninguna acción", 501);
             } else {
@@ -523,15 +541,23 @@ class ActualizadatostraController extends ApplicationController
     {
         try {
             $this->setResponse("ajax");
-            $numero = $request->input('numero', "addslaches", "alpha", "extraspaces", "striptags");
-            $coddoc = $request->input('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
-            //$response = parent::startFunc();
-            $mercurio01 = $this->Mercurio01->findFirst();
-            $mercurio37 = $this->Mercurio37->findFirst("tipopc='{$this->tipopc}' and numero='{$numero}' and coddoc='{$coddoc}'");
+            $numero = $request->input('numero');
+            $coddoc = $request->input('coddoc');
+
+            $mercurio01 = Mercurio01::first();
+            $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)
+                ->where('numero', $numero)
+                ->where('coddoc', $coddoc)
+                ->first();
+
             if (file_exists($mercurio01->getPath() . $mercurio37->getArchivo())) {
                 unlink($mercurio01->getPath() . $mercurio37->getArchivo());
             }
-            $this->Mercurio37->deleteAll("tipopc='{$this->tipopc}' and numero='{$numero}' and coddoc='{$coddoc}'");
+
+            Mercurio37::where('tipopc', $this->tipopc)
+                ->where('numero', $numero)
+                ->where('coddoc', $coddoc)
+                ->delete();
 
             $response = "Se borro con éxito el archivo";
         } catch (DebugException $err) {
@@ -628,11 +654,11 @@ class ActualizadatostraController extends ApplicationController
     {
         $this->setResponse("view");
         $documento = parent::getActUser("documento");
-        $mercurio47 = $this->Mercurio47->findFirst("id='{$id}' and documento='{$documento}'");
+        $mercurio47 = Mercurio47::where('id', $id)->where('documento', $documento)->first();
         if (!$mercurio47) {
         } else {
             $campos = new \stdClass;
-            $mercurio33 = $this->db->fetchAll("SELECT * FROM mercurio33 WHERE actualizacion='{$id}'");
+            $mercurio33 = $this->db->inQueryAssoc("SELECT * FROM mercurio33 WHERE actualizacion='{$id}'");
             foreach ($mercurio33 as $ai => $row) {
                 $campos->$row['campo'] = $row['valor'];
             }
@@ -796,15 +822,18 @@ class ActualizadatostraController extends ApplicationController
             $documento = parent::getActUser("documento");
             $coddoc = parent::getActUser("coddoc");
 
-            $mmercurio47 = $this->Mercurio47->findFirst(" id='{$id}' AND documento='{$documento}' AND coddoc='{$coddoc}'");
+            $mmercurio47 = Mercurio47::where('id', $id)
+                ->where('documento', $documento)
+                ->where('coddoc', $coddoc)
+                ->first();
+
             if ($mmercurio47 == False) {
                 throw new DebugException("Error la solicitud no está disponible para acceder.", 301);
             } else {
                 $solicitud = $mmercurio47->getArray();
             }
             $data = array();
-            $mercurio33 = $this->Mercurio33->find(" actualizacion='{$mmercurio47->getId()}'");
-            foreach ($mercurio33 as $m33) $data[$m33->campo] = $m33->valor;
+            $data = Mercurio33::where('actualizacion', $mmercurio47->getId())->get()->pluck('valor', 'campo')->toArray();
 
             $solicitud = array_merge($data, $solicitud);
             $salida = array(

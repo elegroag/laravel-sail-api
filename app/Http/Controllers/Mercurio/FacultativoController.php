@@ -13,6 +13,8 @@ use App\Models\Gener09;
 use App\Models\Gener18;
 use App\Models\Mercurio01;
 use App\Models\Mercurio10;
+use App\Models\Mercurio30;
+use App\Models\Mercurio31;
 use App\Models\Mercurio36;
 use App\Models\Mercurio37;
 use App\Models\Subsi54;
@@ -583,9 +585,9 @@ class FacultativoController extends ApplicationController
             $coddoc = $tipoDocumentos;
             $data = array(
                 'tipdoc' => $coddoc,
-                'tipper' => $this->Mercurio30->getTipperArray(),
+                'tipper' => (new Mercurio30())->getTipperArray(),
                 'tipsoc' => $tipsoc,
-                'calemp' => $this->Mercurio30->getCalempArray(),
+                'calemp' => (new Mercurio30())->getCalempArray(),
                 'codciu' => $codciu,
                 'coddocrepleg' => $coddocrepleg,
                 'codzon' => ParamsFacultativo::getZonas(),
@@ -614,7 +616,7 @@ class FacultativoController extends ApplicationController
                 'resguardo_id' => ParamsTrabajador::getResguardos(),
                 'pub_indigena_id' => ParamsTrabajador::getPueblosIndigenas(),
                 'codban' => ParamsTrabajador::getBancos(),
-                'tipsal' =>  $this->Mercurio31->getTipsalArray(),
+                'tipsal' => (new Mercurio31())->getTipsalArray(),
                 'tipcue' => ParamsTrabajador::getTipoCuenta(),
                 'ruralt' => ParamsTrabajador::getRural(),
                 "autoriza" => array("S" => "SI", "N" => "NO")

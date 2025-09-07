@@ -7,7 +7,10 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Auth\AuthJwt;
 use App\Library\Auth\SessionCookies;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio01;
 use App\Models\Mercurio10;
+use App\Models\Mercurio12;
+use App\Models\Mercurio13;
 use App\Models\Mercurio37;
 use App\Models\Mercurio40;
 use App\Services\Utils\AsignarFuncionario;
@@ -151,26 +154,14 @@ class DomesticoController extends ApplicationController
         ]);
     }
 
-    public function buscarAction(Request $request)
-    {
-        $generalService = new GeneralService();
-        $this->setResponse("ajax");
-        $pagina = $request->input('pagina');
-        if ($pagina == "") $pagina = 1;
-        # $paginate = Tag::paginate($this->Mercurio40->find("$this->query and tipo='" . parent::getActUser("tipo") . "' and documento='" . parent::getActUser('documento') . "' and estado in ('T','D')"), $pagina, $this->cantidad_pagina);
-        #$html = self::showTabla($paginate);
-        # $html_paginate = $generalService->showPaginate($paginate);
-        #$response['consulta'] = $html;
-        # $response['paginate'] = $html_paginate;
-        #$this->renderText(json_encode($response));
-    }
+    public function buscarAction(Request $request) {}
 
     public function editarAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
             $id = $request->input('id');
-            $mercurio40 = $this->Mercurio40->findFirst("id = '$id'");
+            $mercurio40 = Mercurio40::where('id', $id)->first();
             if ($mercurio40 == false) $mercurio40 = new Mercurio40();
 
             $response = $mercurio40->getArray();
@@ -229,7 +220,7 @@ class DomesticoController extends ApplicationController
                 $mercurio40->setId(0);
                 $mercurio40->setLog($id_log);
             } else {
-                $mercurio40 = $this->Mercurio40->findFirst("id = '$id'");
+                $mercurio40 = Mercurio40::where('id', $id)->first();
             }
             #$mercurio40->setTransaction($Transaccion);
             $mercurio40->setCedtra($cedtra);
@@ -295,7 +286,10 @@ class DomesticoController extends ApplicationController
         $this->setResponse("ajax");
         try {
             $cedtra = $request->input('cedtra');
-            $l = $this->Mercurio40->count("*", "conditions: cedtra = '$cedtra' and estado in ('T','A','P')");
+            $l = Mercurio40::where('cedtra', $cedtra)
+                ->whereIn('estado', ['T', 'A', 'P'])
+                ->count();
+
             if ($l > 0) {
                 throw new DebugException("La Conyuge ya se encuentra", 1);
             }
@@ -318,7 +312,7 @@ class DomesticoController extends ApplicationController
     {
         $this->setResponse("ajax");
         $id = $request->input('id');
-        $mercurio40 = $this->Mercurio40->findFirst("id='$id'");
+        $mercurio40 = Mercurio40::where('id', $id)->first();
         $response = "";
         #$response .= parent::consultaDomestico($mercurio40);
         $response .= "<hr class='my-3'>";
@@ -333,11 +327,18 @@ class DomesticoController extends ApplicationController
         $response .= "</thead>";
         $response .= "<tbody>";
 
-        $mercurio01 = $this->Mercurio01->findFirst();
-        $mercurio13 = $this->Mercurio13->find("tipopc = '$this->tipopc'");
+        $mercurio01 = Mercurio01::first();
+        $mercurio13 = Mercurio13::where('tipopc', $this->tipopc)->get();
+
         foreach ($mercurio13 as $mmercurio13) {
-            $mercurio12 = $this->Mercurio12->findFirst("coddoc='{$mmercurio13->getCoddoc()}'");
-            $mercurio37 = $this->Mercurio37->findFirst("tipopc='{$this->tipopc}' and numero='{$mercurio40->getId()}' and coddoc='{$mmercurio13->getCoddoc()}'");
+
+            $mercurio12 = Mercurio12::where('coddoc', $mmercurio13->getCoddoc())->first();
+
+            $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)
+                ->where('numero', $mercurio40->getId())
+                ->where('coddoc', $mmercurio13->getCoddoc())
+                ->first();
+
             if ($mercurio37 == false) {
                 $obliga = "";
                 if ($mmercurio13->getObliga() == "S") $obliga = "<br><small class='text-muted'>Obligatorio</small>";
@@ -384,11 +385,18 @@ class DomesticoController extends ApplicationController
             $modelos = array("mercurio37");
 
 
-            $mercurio01 = $this->Mercurio01->findFirst();
-            $mercurio37 = $this->Mercurio37->findFirst("tipopc='{$this->tipopc}' and numero='$numero' and coddoc='$coddoc'");
+            $mercurio01 = Mercurio01::first();
+            $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)
+                ->where('numero', $numero)
+                ->where('coddoc', $coddoc)
+                ->first();
+
             unlink($mercurio01->getPath() . $mercurio37->getArchivo());
 
-            $this->Mercurio37->deleteAll("tipopc='{$this->tipopc}' and numero='$numero' and coddoc='$coddoc'");
+            Mercurio37::where('tipopc', $this->tipopc)
+                ->where('numero', $numero)
+                ->where('coddoc', $coddoc)
+                ->delete();
 
 
             $response = [
@@ -409,14 +417,12 @@ class DomesticoController extends ApplicationController
         try {
 
             $this->setResponse("ajax");
-            $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
-            $coddoc = $request->input('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
-            $mercurio01 = $this->Mercurio01->findFirst();
-            $modelos = array("mercurio37");
-            #$Transaccion = parent::startTrans($modelos);
-            #$response = parent::startFunc();
+            $id = $request->input('id');
+            $coddoc = $request->input('coddoc');
+
+            $mercurio01 = Mercurio01::first();
+
             $mercurio37 = new Mercurio37();
-            #$mercurio37->setTransaction($Transaccion);
             $mercurio37->setTipopc($this->tipopc);
             $mercurio37->setNumero($id);
             $mercurio37->setCoddoc($coddoc);
@@ -460,15 +466,23 @@ class DomesticoController extends ApplicationController
             $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
             $today = Carbon::now();
 
-            if ($this->Mercurio37->count("tipopc='$this->tipopc' and numero='$id' and coddoc in (select coddoc from mercurio13 where tipopc='{$this->tipopc}' and obliga='S')") < $this->Mercurio13->count("*", "conditions: tipopc='$this->tipopc' and obliga='S'")) {
+            if ((new Mercurio37)->getCount(
+                "*",
+                "conditions: tipopc='$this->tipopc' and numero='$id' and coddoc in (select coddoc from mercurio13 where tipopc='{$this->tipopc}' and obliga='S')"
+            ) < (new Mercurio13)->getCount(
+                "*",
+                "conditions: tipopc='$this->tipopc' and obliga='S'"
+            )) {
                 $response = "Adjunte los archivos obligatorios";
                 return $this->renderText(json_encode($response));
             }
 
-            $this->Mercurio40->updateAll("estado='P'", "conditions: id='$id'");
-            $item = $this->Mercurio10->maximum("item", "conditions: tipopc='$this->tipopc' and numero='$id'") + 1;
+            Mercurio40::where('id', $id)->update(['estado' => 'P']);
+            $item = Mercurio10::where('tipopc', $this->tipopc)
+                ->where('numero', $id)
+                ->max('item') + 1;
+
             $mercurio10 = new Mercurio10();
-            #$mercurio10->setTransaction($Transaccion);
             $mercurio10->setTipopc($this->tipopc);
             $mercurio10->setNumero($id);
             $mercurio10->setItem($item);

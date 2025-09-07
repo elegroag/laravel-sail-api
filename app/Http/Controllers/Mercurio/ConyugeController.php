@@ -9,6 +9,8 @@ use App\Models\Adapter\DbBase;
 use App\Models\Gener09;
 use App\Models\Gener18;
 use App\Models\Mercurio01;
+use App\Models\Mercurio10;
+use App\Models\Mercurio31;
 use App\Models\Mercurio32;
 use App\Models\Mercurio37;
 use App\Services\Entidades\ConyugeService;
@@ -99,7 +101,10 @@ class ConyugeController extends ApplicationController
             if (file_exists($filepath)) {
                 unlink(storage_path() . '' . $mercurio01->getPath() . $mercurio37->getArchivo());
             }
-            $this->Mercurio37->deleteAll("tipopc='{$this->tipopc}' and numero='{$numero}' and coddoc='{$coddoc}'");
+            Mercurio37::where('tipopc', $this->tipopc)
+                ->where('numero', $numero)
+                ->where('coddoc', $coddoc)
+                ->delete();
 
             $response = array(
                 "success" => true,
@@ -257,9 +262,9 @@ class ConyugeController extends ApplicationController
         $coddoc = parent::getActUser("coddoc");
 
         if (empty($estado)) {
-            $mercurio32 = $db->fetchAll("SELECT * FROM mercurio32 WHERE  tipo='{$tipo}' AND coddoc='{$coddoc}' AND documento='{$documento}' AND estado IN('T','D','P','A','X') ORDER BY id, estado DESC");
+            $mercurio32 = $db->inQueryAssoc("SELECT * FROM mercurio32 WHERE  tipo='{$tipo}' AND coddoc='{$coddoc}' AND documento='{$documento}' AND estado IN('T','D','P','A','X') ORDER BY id, estado DESC");
         } else {
-            $mercurio32 = $db->fetchAll("SELECT * FROM mercurio32 WHERE tipo='{$tipo}' AND coddoc='{$coddoc}' AND documento='{$documento}' AND estado='{$estado}' ORDER BY id DESC");
+            $mercurio32 = $db->inQueryAssoc("SELECT * FROM mercurio32 WHERE tipo='{$tipo}' AND coddoc='{$coddoc}' AND documento='{$documento}' AND estado='{$estado}' ORDER BY id DESC");
         }
 
         foreach ($mercurio32 as $ai => $row) {
@@ -484,12 +489,12 @@ class ConyugeController extends ApplicationController
             $documento =  parent::getActUser("documento");
             $id = $request->input('id');
 
-            $m32 = $this->Mercurio32->findFirst("id='{$id}' AND documento='{$documento}'");
+            $m32 = Mercurio32::where('id', $id)->where('documento', $documento)->first();
             if ($m32) {
                 if ($m32->getEstado() != 'T') {
-                    $this->Mercurio10->deleteAll("numero='{$id}' AND tipopc='{$this->tipopc}'");
+                    Mercurio10::where('numero', $id)->where('tipopc', $this->tipopc)->delete();
                 }
-                $this->Mercurio32->deleteAll("id='{$id}' AND documento='{$documento}'");
+                Mercurio32::where('id', $id)->where('documento', $documento)->delete();
             }
             $salida = array(
                 "success" => true,
@@ -556,7 +561,7 @@ class ConyugeController extends ApplicationController
                 )
             );
 
-            $tipsal = $this->Mercurio32->getTipsalArray();
+            $tipsal = (new Mercurio32)->getTipsalArray();
             $tipsal["@"] = "NINGUNO";
 
             $paramsConyuge = new ParamsConyuge();
@@ -676,7 +681,11 @@ class ConyugeController extends ApplicationController
             $documento = parent::getActUser("documento");
             $coddoc = parent::getActUser("coddoc");
 
-            $solicitud = $this->Mercurio32->findFirst(" id='{$id}' AND documento='{$documento}' AND coddoc='{$coddoc}'");
+            $solicitud = Mercurio32::where('id', $id)
+                ->where('documento', $documento)
+                ->where('coddoc', $coddoc)
+                ->first();
+
             if ($solicitud == False) {
                 throw new DebugException("Error la solicitud no está disponible para acceder.", 301);
             } else {
@@ -704,7 +713,12 @@ class ConyugeController extends ApplicationController
             $coddoc = parent::getActUser("coddoc");
             $conService = new ConyugeService();
 
-            $sindepe = $this->Mercurio32->findFirst("id='{$id}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado NOT IN('I','X')");
+            $sindepe = Mercurio32::where('id', $id)
+                ->where('documento', $documento)
+                ->where('coddoc', $coddoc)
+                ->whereNotIn('estado', ['I', 'X'])
+                ->first();
+
             if ($sindepe == false) {
                 throw new DebugException("Error no se puede identificar el propietario de la solicitud", 301);
             }
@@ -729,12 +743,19 @@ class ConyugeController extends ApplicationController
             $documento = parent::getActUser('documento');
             $coddoc = parent::getActUser('coddoc');
 
-            $mercurio32 = $this->Mercurio32->findFirst("id='{$id}' and documento='{$documento}' and coddoc='{$coddoc}'");
+            $mercurio32 = Mercurio32::where('id', $id)
+                ->where('documento', $documento)
+                ->where('coddoc', $coddoc)
+                ->first();
             if (!$mercurio32) {
                 throw new DebugException("Error no se puede generar el fomulario a la solicitud no es valida", 301);
             }
 
-            $mercurio31 = $this->Mercurio31->findFirst(" cedtra='{$mercurio32->getCedtra()}' and documento='{$documento}' and coddoc='{$coddoc}'");
+            $mercurio31 = Mercurio31::where('cedtra', $mercurio32->getCedtra())
+                ->where('documento', $documento)
+                ->where('coddoc', $coddoc)
+                ->first();
+
             if (!$mercurio31) {
                 throw new DebugException("Error no se puede generar el fomulario a la solicitud no es valida", 301);
             }

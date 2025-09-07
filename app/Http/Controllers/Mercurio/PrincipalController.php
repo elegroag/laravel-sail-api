@@ -302,7 +302,7 @@ class PrincipalController extends ApplicationController
     {
         try {
             $this->setResponse("ajax");
-            $adress =  $this->db->fetchAll("SELECT * FROM mercurio15 WHERE 1=1");
+            $adress =  $this->db->inQueryAssoc("SELECT * FROM mercurio15 WHERE 1=1");
             $salida = array(
                 "success" => true,
                 "data" => $adress,

@@ -8,8 +8,17 @@ use App\Library\Collections\ParamsEmpresa;
 use App\Models\Adapter\DbBase;
 use App\Models\Gener09;
 use App\Models\Gener18;
+use App\Models\Mercurio01;
+use App\Models\Mercurio07;
+use App\Models\Mercurio10;
+use App\Models\Mercurio12;
+use App\Models\Mercurio14;
+use App\Models\Mercurio28;
 use App\Models\Mercurio30;
+use App\Models\Mercurio31;
 use App\Models\Mercurio33;
+use App\Models\Mercurio37;
+use App\Models\Mercurio47;
 use App\Models\Subsi54;
 use App\Services\Entidades\ActualizaEmpresaService;
 use App\Services\FormulariosAdjuntos\DatosEmpresaService;
@@ -83,21 +92,25 @@ class ActualizadatosController extends ApplicationController
             //$actualizaEmpresaService->endTransa();
             $solicitud = $actualizaEmpresaService->findById($id);
 
-            $this->Mercurio33->deleteAll(" documento='{$documento}' and coddoc='{$coddoc}'");
-            $campos = $this->Mercurio28->find(" tipo='{$tipo}'");
+            Mercurio33::where('documento', $documento)
+                ->where('coddoc', $coddoc)
+                ->delete();
+
+            $campos = Mercurio28::where("tipo", $tipo)->get();
             if ($campos) {
                 foreach ($campos as $mercurio28) {
                     $valor = $request->input($mercurio28->getCampo());
                     if ($valor == '') continue;
 
-                    $mercurio33 = $this->Mercurio33->findFirst(" documento='{$documento}' and coddoc='{$coddoc}' and actualizacion='{$solicitud->getId()}' and campo='{$mercurio28->getCampo()}'");
+                    $mercurio33 = Mercurio33::where('documento', $documento)
+                        ->where('coddoc', $coddoc)
+                        ->where('actualizacion', $solicitud->getId())
+                        ->where('campo', $mercurio28->getCampo())
+                        ->first();
+
                     if ($mercurio33) {
                         $mercurio33->valor = $valor;
-                        if (!$mercurio33->save()) {
-                            $msj = '';
-                            foreach ($mercurio33->getMessages() as $e) $msj .= $e->getMessage() . ', ';
-                            throw new DebugException("Error al guardar los valores {$msj}", 301);
-                        }
+                        $mercurio33->save();
                     } else {
                         $mercurio33 = new Mercurio33();
                         $mercurio33->id = null;
@@ -112,24 +125,24 @@ class ActualizadatosController extends ApplicationController
                         $mercurio33->fecest = date('Y-m-d');
                         $mercurio33->usuario = $solicitud->getUsuario();
                         $mercurio33->actualizacion = $solicitud->getId();
-
-                        if (!$mercurio33->save()) {
-                            $msj = '';
-                            foreach ($mercurio33->getMessages() as $e) $msj .= $e->getMessage() . ', ';
-                            throw new DebugException("Error al crear el campo {$msj}", 301);
-                        }
+                        $mercurio33->save();
                     }
                 }
             }
 
             $data = array();
-            $mercurio33 = $this->Mercurio33->find(" documento='{$documento}' AND coddoc='{$coddoc}' AND actualizacion='{$id}'");
-            foreach ($mercurio33 as $m33) $data[$m33->campo] = $m33->valor;
+            $mercurio33 = Mercurio33::where('documento', $documento)
+                ->where('coddoc', $coddoc)
+                ->where('actualizacion', $id)
+                ->get();
+
+            if ($mercurio33) {
+                foreach ($mercurio33 as $m33) $data[$m33->campo] = $m33->valor;
+            }
             $data = array_merge($solicitud->getArray(), $data);
 
             $out = $actualizaEmpresaService->buscarEmpresaSubsidio($documento);
-            $empresa = new Mercurio30;
-            $empresa->createAttributes($out['data']);
+            $empresa = new Mercurio30($out['data']);
 
             $actualizaEmpresaService = new DatosEmpresaService(
                 array(
@@ -233,15 +246,15 @@ class ActualizadatosController extends ApplicationController
                 }
             }
 
-            $tipafi = $this->Mercurio07->getArrayTipos();
+            $tipafi = (new Mercurio07())->getArrayTipos();
             $coddoc = $tipoDocumentos;
             $data = array(
                 'tipafi' => $tipafi,
                 'coddoc' => $coddoc,
                 'tipdoc' => $coddoc,
-                'tipper' => $this->Mercurio30->getTipperArray(),
+                'tipper' => (new Mercurio30())->getTipperArray(),
                 'tipsoc' => $tipsoc,
-                'calemp' => $this->Mercurio30->getCalempArray(),
+                'calemp' => (new Mercurio30())->getCalempArray(),
                 'codciu' => ParamsEmpresa::getCiudades(),
                 'coddocrepleg' => $coddocrepleg,
                 'codzon' => $zonas,
@@ -250,7 +263,7 @@ class ActualizadatosController extends ApplicationController
                 'codcaj' => ParamsEmpresa::getCodigoCajas(),
                 'ciupri' => ParamsEmpresa::getCiudades(),
                 'ciunac' => ParamsEmpresa::getCiudades(),
-                'tipsal' =>  $this->Mercurio31->getTipsalArray(),
+                'tipsal' => (new Mercurio31())->getTipsalArray(),
                 "autoriza" => array("S" => "SI", "N" => "NO"),
                 "ciupri" => ParamsEmpresa::getCiudades(),
                 'codsuc' => $list_sucursales
@@ -275,13 +288,13 @@ class ActualizadatosController extends ApplicationController
         $this->setResponse("ajax");
         try {
             $id = $request->input('id');
-            $solicitud = $this->Mercurio47->findFirst("id='{$id}'");
+            $solicitud = Mercurio47::where("id", $id)->first();
             if ($solicitud) {
                 if ($solicitud->getEstado() != 'T') {
-                    $this->Mercurio10->deleteAll("numero='{$id}' AND tipopc='{$this->tipopc}'");
+                    Mercurio10::where("numero", $id)->where("tipopc", $this->tipopc)->delete();
                 }
-                $this->Mercurio33->deleteAll("actualizacion='{$id}'");
-                $this->Mercurio47->deleteAll("id='{$id}'");
+                Mercurio33::where("actualizacion", $id)->delete();
+                Mercurio47::where("id", $id)->delete();
             }
             $salida = array(
                 "success" => true,
@@ -299,7 +312,7 @@ class ActualizadatosController extends ApplicationController
     function archivos_requeridos($mercurio47)
     {
         $archivos = array();
-        $mercurio14 = $this->Mercurio14->find("tipopc='{$this->tipopc}'");
+        $mercurio14 = Mercurio14::where("tipopc", $this->tipopc)->get();
 
 
         $mercurio10 = $this->db->fetchOne("SELECT item, estado, campos_corregir
@@ -314,8 +327,8 @@ class ActualizadatosController extends ApplicationController
             }
         }
         foreach ($mercurio14 as $m14) {
-            $m12 = $this->Mercurio12->findFirst("coddoc='{$m14->getCoddoc()}'");
-            $mercurio37 = $this->Mercurio37->findFirst("tipopc='{$this->tipopc}' and numero='{$mercurio47->getId()}' and coddoc='{$m14->getCoddoc()}'");
+            $m12 = Mercurio12::where("coddoc", $m14->getCoddoc())->first();
+            $mercurio37 = Mercurio37::where("tipopc", $this->tipopc)->where("numero", $mercurio47->getId())->where("coddoc", $m14->getCoddoc())->first();
             $corrige = false;
             if ($corregir) {
                 if (in_array($m12->getCoddoc(), $corregir)) {
@@ -332,7 +345,7 @@ class ActualizadatosController extends ApplicationController
             $archivo->corrige = $corrige;
             $archivos[] = $archivo;
         }
-        $mercurio01 = $this->Mercurio01->findFirst();
+        $mercurio01 = Mercurio01::first();
         $html = view("actualizadatos/tmp/archivos_requeridos", array(
             "load_archivos" => $archivos,
             "path" => $mercurio01->getPath(),
@@ -350,15 +363,15 @@ class ActualizadatosController extends ApplicationController
             $numero = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
             $coddoc = $request->input('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
 
-            $mercurio01 = $this->Mercurio01->findFirst();
-            $mercurio37 = $this->Mercurio37->findFirst("tipopc='{$this->tipopc}' and numero='{$numero}' and coddoc='{$coddoc}'");
+            $mercurio01 = Mercurio01::first();
+            $mercurio37 = Mercurio37::where("tipopc", $this->tipopc)->where("numero", $numero)->where("coddoc", $coddoc)->first();
 
             $filepath = base_path() . '' . $mercurio01->getPath() . $mercurio37->getArchivo();
             if (file_exists($filepath)) {
                 unlink(base_path() . '' . $mercurio01->getPath() . $mercurio37->getArchivo());
             }
 
-            $this->Mercurio37->deleteAll("tipopc='{$this->tipopc}' and numero='{$numero}' and coddoc='{$coddoc}'");
+            Mercurio37::where("tipopc", $this->tipopc)->where("numero", $numero)->where("coddoc", $coddoc)->delete();
 
             $response = array(
                 "success" => true,
@@ -433,13 +446,11 @@ class ActualizadatosController extends ApplicationController
     {
         $this->setResponse("view");
         $documento = parent::getActUser("documento");
-        $mercurio47 = $this->Mercurio47->findFirst("id='{$id}' and documento='{$documento}'");
+        $mercurio47 = Mercurio47::where("id", $id)->where("documento", $documento)->first();
         if ($mercurio47) {
-            $campos = new \stdClass();
-            $mercurio33 = $this->db->inQueryAssoc("SELECT * FROM mercurio33 WHERE actualizacion='{$id}'");
-            foreach ($mercurio33 as $row) {
-                $campos->$row['campo'] = $row['valor'];
-            }
+            $campos = Mercurio33::where('actualizacion', $id)->get()->mapWithKeys(function ($row) {
+                return [$row->campo => $row->valor];
+            })->toArray();
         }
 
         $procesadorComando = Comman::Api();
@@ -525,14 +536,14 @@ class ActualizadatosController extends ApplicationController
             $documento = parent::getActUser("documento");
             $coddoc = parent::getActUser("coddoc");
 
-            $mmercurio47 = $this->Mercurio47->findFirst(" id='{$id}' AND documento='{$documento}' AND coddoc='{$coddoc}'");
+            $mmercurio47 = Mercurio47::where("id", $id)->where("documento", $documento)->where("coddoc", $coddoc)->first();
             if ($mmercurio47 == False) {
                 throw new DebugException("Error la solicitud no está disponible para acceder.", 301);
             } else {
                 $solicitud = $mmercurio47->getArray();
             }
             $data = array();
-            $mercurio33 = $this->Mercurio33->find(" actualizacion='{$mmercurio47->getId()}'");
+            $mercurio33 = Mercurio33::where("actualizacion", $mmercurio47->getId())->get();
             foreach ($mercurio33 as $m33) $data[$m33->campo] = $m33->valor;
 
             $solicitud = array_merge($data, $solicitud);
@@ -579,8 +590,12 @@ class ActualizadatosController extends ApplicationController
             $coddoc = parent::getActUser("coddoc");
             $empresaService = new ActualizaEmpresaService();
 
-            $sql = "id='{$id}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado NOT IN('I','X')";
-            $sindepe = $this->Mercurio47->findFirst($sql);
+            $sindepe = Mercurio47::where('id', $id)
+                ->where('documento', $documento)
+                ->where('coddoc', $coddoc)
+                ->whereNotIn('estado', ['I', 'X'])
+                ->first();
+
             if (!$sindepe) {
                 throw new DebugException("Error no se puede identificar ID", 301);
             }

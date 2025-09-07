@@ -1,11 +1,24 @@
 <?php
+
 namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Auth\AuthJwt;
 use App\Library\Auth\SessionCookies;
+use App\Library\Collections\ParamsBeneficiario;
+use App\Library\Collections\ParamsConyuge;
+use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio28;
+use App\Models\Mercurio31;
+use App\Models\Mercurio32;
+use App\Models\Mercurio33;
+use App\Models\Mercurio34;
+use App\Models\Mercurio45;
+use App\Services\Utils\Comman;
+use App\Services\Utils\GeneralService;
+use Illuminate\Http\Request;
 
 class SubsidioController extends ApplicationController
 {
@@ -15,7 +28,7 @@ class SubsidioController extends ApplicationController
     protected $tipo;
 
     public function __construct()
-    {   
+    {
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
@@ -23,39 +36,47 @@ class SubsidioController extends ApplicationController
 
     public function indexAction()
     {
-        $this->setParamToView("title", "Subsidio");
+        return view("mercurio/subsidio/index", [
+            "title" => "Subsidio"
+        ]);
     }
 
     public function historialAction()
     {
-        $help = "Esta opcion permite manejar los ";
-        $this->setParamToView("help", $help);
-        $this->setParamToView("title", "Historial");
-        Tag::setDocumentTitle('Historial');
-        $mercurio32 = $this->Mercurio32->find(
-            "tipo='" . parent::getActUser("tipo") . "' and coddoc='" .
-                parent::getActUser("coddoc") . "' and documento='" .
-                parent::getActUser("documento") . "'",
-            "order: id DESC"
-        );
-        $mercurio33 = $this->Mercurio33->find(
-            "tipo='" . parent::getActUser("tipo") . "' and coddoc='" .
-                parent::getActUser("coddoc") . "' and documento='" .
-                parent::getActUser("documento") . "'",
-            "order: id DESC"
-        );
-        $mercurio34 = $this->Mercurio34->find(
-            "tipo='" . parent::getActUser("tipo") . "' and coddoc='" .
-                parent::getActUser("coddoc") . "' and documento='" .
-                parent::getActUser("documento") . "'",
-            "order: id DESC"
-        );
-        $mercurio45 = $this->Mercurio45->find(
-            "tipo='" . parent::getActUser("tipo") . "' and coddoc='" .
-                parent::getActUser("coddoc") . "' and documento='" .
-                parent::getActUser("documento") . "'",
-            "order: id DESC"
-        );
+        $tipo = session()->get('tipo');
+        $documento = $this->user['documento'];
+        $coddoc = $this->user['coddoc'];
+
+        $mercurio32 = Mercurio32::where([
+            'tipo' => $tipo,
+            'coddoc' => $coddoc,
+            'documento' => $documento
+        ])
+            ->orderBy('id', 'desc')
+            ->first();
+
+        $mercurio33 = Mercurio33::where([
+            'tipo' => $tipo,
+            'coddoc' => $coddoc,
+            'documento' => $documento,
+        ])
+            ->orderBy('id', 'desc')
+            ->first();
+        $mercurio34 = Mercurio34::where([
+            'tipo' => $tipo,
+            'coddoc' => $coddoc,
+            'documento' => $documento
+        ])
+            ->orderBy('id', 'desc')
+            ->first();
+
+        $mercurio45 = Mercurio45::where([
+            'tipo' => $tipo,
+            'coddoc' => $coddoc,
+            'documento' => $documento
+        ])
+            ->orderBy('id', 'desc')
+            ->first();
 
         $actualizacion_basico  = "<table class='table table-hover align-items-center table-bordered'>";
         $actualizacion_basico .= "<thead>";
@@ -76,7 +97,8 @@ class SubsidioController extends ApplicationController
             $actualizacion_basico .= "</tr>";
         } else {
             foreach ($mercurio33 as $mmercurio33) {
-                $mmercurio28 = (new Mercurio28)->findFirst("campo='{$mmercurio33->getCampo()}'");
+                $mmercurio28 = Mercurio28::where('campo', $mmercurio33->getCampo())->first();
+
                 if (!$mmercurio28) continue;
                 $actualizacion_basico .= "<tr>";
                 $actualizacion_basico .= "<td>{$mmercurio28->getDetalle()}</td>";
@@ -181,10 +203,13 @@ class SubsidioController extends ApplicationController
 
 
 
-        $this->setParamToView("actualizacion_basico", $actualizacion_basico);
-        $this->setParamToView("html_afiliacion_beneficiario", $html_afiliacion_beneficiario);
-        $this->setParamToView("html_afiliacion_conyuge", $html_afiliacion_conyuge);
-        $this->setParamToView("html_certificados", $html_certificados);
+        return view("mercurio/subsidio/historial", [
+            "title" => "Historial",
+            "actualizacion_basico" => $actualizacion_basico,
+            "html_afiliacion_beneficiario" => $html_afiliacion_beneficiario,
+            "html_afiliacion_conyuge" => $html_afiliacion_conyuge,
+            "html_certificados" => $html_certificados
+        ]);
     }
 
     /**
@@ -194,18 +219,14 @@ class SubsidioController extends ApplicationController
      */
     public function consulta_nucleo_viewAction($cedtra = '')
     {
-        $this->setParamToView("hide_header", true);
-        $this->setParamToView("help", false);
-        $this->setParamToView("title", "Consulta nucleo familiar");
-        $this->setParamToView("cedtra", $cedtra);
+        return view("mercurio/subsidio/consulta_nucleo", [
+            "title" => "Consulta nucleo familiar",
+            "cedtra" => $cedtra
+        ]);
     }
 
     public function consulta_nucleoAction()
     {
-        Core::importLibrary("ParamsTrabajador", "Collections");
-        Core::importLibrary("ParamsConyuge", "Collections");
-        Core::importLibrary("ParamsBeneficiario", "Collections");
-
         $this->setResponse("ajax");
         $cedtra = parent::getActUser("documento");
         $ps = Comman::Api();
@@ -284,7 +305,7 @@ class SubsidioController extends ApplicationController
                         "_trasin" => ParamsTrabajador::getSindicalizado(),
                         "_vivienda" => ParamsTrabajador::getVivienda(),
                         "_tipafi" => ParamsTrabajador::getTipoAfiliado(),
-                        "_estado" => ParamsTrabajador::getEstados(),
+                        "_estado" => (new Mercurio31())->getEstados(),
                         "_comper" => ParamsConyuge::getCompaneroPermanente(),
                         "_parent" => ParamsBeneficiario::getParentesco(),
                         "_huerfano" => ParamsBeneficiario::getHuerfano(),
@@ -293,7 +314,7 @@ class SubsidioController extends ApplicationController
                         "_huerfano" => ParamsBeneficiario::getHuerfano(),
                         "_tiphij" => ParamsBeneficiario::getTipoHijo(),
                         "_calendario" => ParamsBeneficiario::getCalendario(),
-                        '_codcat' => ParamsTrabajador::getCategoria(),
+                        '_codcat' => (new Mercurio31())->getCategoria(),
                     )
                 )
             )
@@ -302,13 +323,12 @@ class SubsidioController extends ApplicationController
 
     public function consulta_giro_viewAction()
     {
-        $this->setParamToView("hide_header", true);
-        $this->setParamToView("help", false);
-        $this->setParamToView("title", "Consulta Giro");
-        Tag::setDocumentTitle('Consulta Giro');
+        return view("mercurio/subsidio/consulta_giro", [
+            "title" => "Consulta Giro"
+        ]);
     }
 
-    public function consulta_giroAction()
+    public function consulta_giroAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
@@ -353,13 +373,12 @@ class SubsidioController extends ApplicationController
 
     public function consulta_no_giro_viewAction()
     {
-        $this->setParamToView("hide_header", true);
-        $this->setParamToView("help", false);
-        $this->setParamToView("title", "Consulta No Giro");
-        Tag::setDocumentTitle('Consulta No Giro');
+        return view("mercurio/subsidio/consulta_no_giro", [
+            "title" => "Consulta No Giro"
+        ]);
     }
 
-    public function consulta_no_giroAction()
+    public function consulta_no_giroAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
@@ -403,13 +422,12 @@ class SubsidioController extends ApplicationController
 
     public function consulta_planilla_trabajador_viewAction()
     {
-        $this->setParamToView("hide_header", true);
-        $this->setParamToView("help", false);
-        $this->setParamToView("title", "Planillas Pila");
-        Tag::setDocumentTitle('Planillas Pila');
+        return view("mercurio/subsidio/consulta_planilla_trabajador", [
+            "title" => "Planillas Pila"
+        ]);
     }
 
-    public function consulta_planilla_trabajadorAction()
+    public function consulta_planilla_trabajadorAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
@@ -452,9 +470,6 @@ class SubsidioController extends ApplicationController
 
     public function consulta_tarjetaAction()
     {
-        $this->setParamToView("hide_header", true);
-        $this->setParamToView("help", false);
-        $this->setParamToView("title", "Consulta Saldos");
         $ps = Comman::Api();
         $ps->runCli(
             array(
@@ -471,24 +486,27 @@ class SubsidioController extends ApplicationController
         } else {
             $response = $out['data'];
         }
-        $this->setParamToView("saldos", $response);
+
+        return view("mercurio/subsidio/consulta_tarjeta", [
+            "title" => "Consulta Saldos",
+            "saldos" => $response
+        ]);
     }
 
     public function certificado_afiliacion_viewAction()
     {
-        $this->setParamToView("hide_header", true);
-        $this->setParamToView("help", false);
-        $this->setParamToView("title", "Certificado Afiliacion");
-        $this->setParamToView('tipo', array(
-            "A" => "Certificado Afiliacion Principal",
-            "I" => "Certificacion Con Nucleo",
-            "T" => "Certificacion de Multiafiliacion",
-            "P" => "Reporte trabajador en planillas"
-        ));
-        Tag::setDocumentTitle('Certificado Afiliacion');
+        return view("mercurio/subsidio/certificado_afiliacion", [
+            "title" => "Certificado Afiliacion",
+            "tipo" => array(
+                "A" => "Certificado Afiliacion Principal",
+                "I" => "Certificacion Con Nucleo",
+                "T" => "Certificacion de Multiafiliacion",
+                "P" => "Reporte trabajador en planillas"
+            )
+        ]);
     }
 
-    public function certificado_afiliacionAction()
+    public function certificado_afiliacionAction(Request $request)
     {
         $generalService = new GeneralService();
         $tipo = $request->input("tipo");

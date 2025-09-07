@@ -18,6 +18,7 @@ use App\Models\Mercurio37;
 use App\Models\Mercurio38;
 use App\Models\Mercurio07;
 use App\Models\Mercurio10;
+use App\Models\Mercurio30;
 use App\Models\Mercurio31;
 use App\Models\Subsi54;
 
@@ -71,7 +72,7 @@ class PensionadoController extends ApplicationController
      */
     public function indexAction()
     {
-        return view('pensionado.index', [
+        return view('mercurio.pensionado.index', [
             "title" => "Afiliación Pensionados",
             "calemp" => "P",
             "tipper" => "N",
@@ -444,134 +445,6 @@ class PensionadoController extends ApplicationController
         );
     }
 
-    /**
-     * nuevaAction function
-     * @param integer $id
-     * @param integer $documento
-     * @return void
-     */
-    public function nuevaAction($id = 0, $documento = 0)
-    {
-        $this->pensionadoService = new PensionadoService();
-        $this->trabajadorService = new TrabajadorService();
-        $user = $this->user;
-        if ($documento == 0) {
-            $documento = $user['documento'];
-        }
-        $coddoc = $user['coddoc'];
-        $tipo = $user['tipo'];
-
-        //$this->setParamToView("hide_header", true);
-        $sindepe = false;
-        $title = "Nueva Solicitud Pensionado";
-
-        $mercurio07 = (new Mercurio07())->findFirst("tipo='{$tipo}' and documento='{$documento}' and coddoc='{$coddoc}' and estado='A'");
-        $this->_loadParametros();
-
-        if ($id != 0) {
-            $sindepe = (new Mercurio38())->findFirst("id='{$id}' AND documento='{$documento}' and estado NOT IN('I','X')");
-            if ($sindepe == false) {
-                set_flashdata("error", array(
-                    "msj" => "El registro de afiliado no está disponible para su ingreso.",
-                    "code" => '505'
-                ));
-                redirect("principal.index");
-                exit;
-            }
-            $this->pensionadoService->loadDisplay($sindepe);
-        } else {
-            ///nuevo registro
-            $rqs = $this->pensionadoService->buscarEmpresaSubsidio($documento);
-            if ($rqs) {
-                $empresa = (count($rqs['data']) > 0) ? $rqs['data'] : false;
-                $this->pensionadoService->loadDisplaySubsidio($empresa);
-            } else {
-                $previus = (new Mercurio38())->findFirst("documento='{$documento}'");
-                if ($previus) $this->pensionadoService->loadDisplay($previus);
-            }
-            $trabaPrevius = (new Mercurio31())->findFirst("cedtra='{$documento}'");
-            if ($trabaPrevius) $this->trabajadorService->loadDisplay($trabaPrevius);
-        }
-
-        /*   Tag::displayTo("coddoc", $mercurio07->getCoddoc());
-        Tag::displayTo("tipdoc", $mercurio07->getCoddoc());
-        Tag::displayTo("cedrep", $mercurio07->getDocumento());
-        Tag::displayTo("email", $mercurio07->getEmail());
-        Tag::displayTo("razsoc", $mercurio07->getNombre());
-        Tag::displayTo("nit", $mercurio07->getDocumento()); */
-
-        /*  $this->setParamToView("mercurio38", $sindepe);
-        $this->setParamToView("show_archivos_requeridos", $this->pensionadoService->archivosRequeridos($sindepe));
-        $this->setParamToView("title", $title); */
-    }
-
-    /**
-     * _loadParametros function
-     * @return void
-     */
-    function _loadParametros()
-    {
-        $tipo = parent::getActUser("tipo");
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "parametros_empresa"
-            ),
-            false
-        );
-
-        $paramsPensionado = new ParamsPensionado();
-        /*  $paramsPensionado->setDatosCaptura($procesadorComando->toArray());
-        $this->setParamToView("_coddoc", ParamsPensionado::getTipoDocumentos());
-        $this->setParamToView("_calemp", ParamsPensionado::getCalidadEmpresa());
-        $this->setParamToView("_codciu", ParamsPensionado::getCiudades());
-        $this->setParamToView("_codzon", ParamsPensionado::getZonas());
-        $this->setParamToView("_codact", ParamsPensionado::getActividades());
-        $this->setParamToView("_tipsoc", ParamsPensionado::getTipoSociedades());
-        $this->setParamToView("_tipemp", ParamsPensionado::getTipoEmpresa());
-        $this->setParamToView("_codcaj", ParamsPensionado::getCodigoCajas());
-        $this->setParamToView("_ciupri", ParamsPensionado::getCiudades());
-        $this->setParamToView("_coddocrepleg", ParamsPensionado::getCodruaDocumentos());
-        $this->setParamToView("tipo", $tipo);
-        $this->setParamToView("tipopc", $this->tipopc); */
-
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "parametros_trabajadores"
-            ),
-            false
-        );
-
-        $paramsTrabajador = new ParamsTrabajador();
-        $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
-
-        $_tipsal = (new Mercurio31())->getTipsalArray();
-        /*  $this->setParamToView("_tipsal", $_tipsal);
-        $this->setParamToView("_sexo", ParamsTrabajador::getSexos());
-        $this->setParamToView("_estciv", ParamsTrabajador::getEstadoCivil());
-        $this->setParamToView("_cabhog", ParamsTrabajador::getCabezaHogar());
-        $this->setParamToView("_captra", ParamsTrabajador::getCapacidadTrabajar());
-        $this->setParamToView("_tipdis", ParamsTrabajador::getTipoDiscapacidad());
-        $this->setParamToView("_nivedu", ParamsTrabajador::getNivelEducativo());
-        $this->setParamToView("_rural", ParamsTrabajador::getRural());
-        $this->setParamToView("_tipcon", ParamsTrabajador::getTipoContrato());
-        $this->setParamToView("_trasin", ParamsTrabajador::getSindicalizado());
-        $this->setParamToView("_vivienda", ParamsTrabajador::getVivienda());
-        $this->setParamToView("_tipafi", ParamsTrabajador::getTipoAfiliado());
-        $this->setParamToView("_cargo", ParamsTrabajador::getOcupaciones());
-        $this->setParamToView("_orisex", ParamsTrabajador::getOrientacionSexual());
-        $this->setParamToView("_facvul", ParamsTrabajador::getVulnerabilidades());
-        $this->setParamToView("_peretn", ParamsTrabajador::getPertenenciaEtnicas());
-        $this->setParamToView("_ciunac", ParamsTrabajador::getCiudades());
-        $this->setParamToView("_labora_otra_empresa", ParamsTrabajador::getLaboraOtraEmpresa());
-        $this->setParamToView("_tippag", ParamsTrabajador::getTipoPago());
-        $this->setParamToView("_resguardos", ParamsTrabajador::getResguardos());
-        $this->setParamToView("_pueblos_indigenas", ParamsTrabajador::getPueblosIndigenas());
-        $this->setParamToView("_bancos", ParamsTrabajador::getBancos()); */
-    }
 
     public function reloadArchivosAction(Request $request)
     {
@@ -693,9 +566,9 @@ class PensionadoController extends ApplicationController
             $coddoc = $tipoDocumentos;
             $data = array(
                 'tipdoc' => $coddoc,
-                'tipper' => $this->Mercurio30->getTipperArray(),
+                'tipper' => (new Mercurio30())->getTipperArray(),
                 'tipsoc' => $tipsoc,
-                'calemp' => $this->Mercurio30->getCalempArray(),
+                'calemp' => (new Mercurio30())->getCalempArray(),
                 'codciu' => $codciu,
                 'coddocrepleg' => $coddocrepleg,
                 'codzon' => ParamsPensionado::getZonas(),
@@ -724,7 +597,7 @@ class PensionadoController extends ApplicationController
                 'resguardo_id' => ParamsTrabajador::getResguardos(),
                 'pub_indigena_id' => ParamsTrabajador::getPueblosIndigenas(),
                 'codban' => ParamsTrabajador::getBancos(),
-                'tipsal' =>  $this->Mercurio31->getTipsalArray(),
+                'tipsal' => (new Mercurio31())->getTipsalArray(),
                 'tipcue' => ParamsTrabajador::getTipoCuenta(),
                 'ruralt' => ParamsTrabajador::getRural(),
                 "autoriza" => array("S" => "SI", "N" => "NO")
@@ -835,7 +708,7 @@ class PensionadoController extends ApplicationController
         $this->setResponse("view");
         $this->pensionadoService = new PensionadoService();
         $html = view(
-            "pensionado/tmp/solicitudes",
+            "mercurio/pensionado/tmp/solicitudes",
             array(
                 "path" => base_path(),
                 "pensionados" => $this->pensionadoService->findAllByEstado($estado)
