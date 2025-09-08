@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services\Menu;
 
 use App\Models\Adapter\DbBase;
@@ -93,7 +94,6 @@ class Menu
             }
 
             $childHtml .= $this->buildChildMenuItem($child, $childActive);
-            
         }
 
         $activeClass = $isActive ? 'active' : '';
@@ -118,9 +118,12 @@ class Menu
         $activeClass = $isActive ? 'active' : '';
         $title = strtolower(str_replace(' ', '_', $child['title']));
 
+        $app = $child['codapl'] == 'ME' ? 'mercurio' : 'caja';
+        $path = env('APP_URL') . ':' . env('APP_PORT') . '/' . $app;
+
         return "
             <li class='nav-item'>
-                <a data-id='{$title}' href='" . $child['default_url'] . "'
+                <a data-id='{$title}' href='{$path}/" . $child['default_url'] . "'
                    class='nav-link {$activeClass}'>
                     {$child['title']}
                 </a>
@@ -131,9 +134,12 @@ class Menu
     {
         $activeClass = $isActive ? 'active' : '';
 
+        $app = $menu['codapl'] == 'ME' ? 'mercurio' : 'caja';
+        $path = env('APP_URL') . ':' . env('APP_PORT') . '/' . $app;
+
         return "
             <li class='nav-item'>
-                <a class='nav-link {$activeClass}' href='" . $menu['default_url'] . "'>
+                <a class='nav-link {$activeClass}' href='{$path}/" . $menu['default_url'] . "'>
                     {$icon}
                     {$linkText}
                 </a>

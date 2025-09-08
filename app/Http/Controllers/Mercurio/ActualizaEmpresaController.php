@@ -1,4 +1,4 @@
-<?
+<?php
 
 namespace App\Http\Controllers\Mercurio;
 
@@ -29,7 +29,7 @@ use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
 use Illuminate\Http\Request;
 
-class ActualizadatosController extends ApplicationController
+class ActualizaEmpresaController extends ApplicationController
 {
     protected $tipopc = "5";
     protected $db;
@@ -45,8 +45,12 @@ class ActualizadatosController extends ApplicationController
 
     public function indexAction()
     {
-        return view('actualizadatos.index', [
-            'title' => 'Solicitud de actualización de datos'
+        return view('mercurio.actualizadatos.index', [
+            'title' => 'Solicitud de actualización de datos',
+            'documento' => $this->user['documento'],
+            'coddoc' => $this->user['coddoc'],
+            'codciu' => $this->user['codciu'],
+            'tipo' => $this->tipo
         ]);
     }
 
@@ -172,7 +176,7 @@ class ActualizadatosController extends ApplicationController
                 'msj' => 'Registro completado con éxito',
                 'data' => $data
             );
-        } catch (DebugException $err) {
+        } catch (DebugException $e) {
             $response = array(
                 'success' => false,
                 'msj' => $e->getMessage()
@@ -487,7 +491,7 @@ class ActualizadatosController extends ApplicationController
         $this->setResponse("view");
         $actualizaEmpresaService = new ActualizaEmpresaService();
         $html = view(
-            "actualizadatos/tmp/solicitudes",
+            "mercurio/actualizadatos/tmp/solicitudes",
             array(
                 "path" => base_path(),
                 "solicitudes" => $actualizaEmpresaService->findAllByEstado($estado)

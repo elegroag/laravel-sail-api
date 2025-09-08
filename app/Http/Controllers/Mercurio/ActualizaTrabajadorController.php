@@ -30,7 +30,7 @@ use App\Services\Utils\SenderValidationCaja;
 use Illuminate\Http\Request;
 use TCPDF;
 
-class ActualizadatostraController extends ApplicationController
+class ActualizaTrabajadorController extends ApplicationController
 {
     protected $tipopc = 14;
     protected $db;
@@ -47,7 +47,7 @@ class ActualizadatostraController extends ApplicationController
 
     public function indexAction()
     {
-        return view('actualizadatostra.index', [
+        return view('mercurio.actualizadatostra.index', [
             'title' => 'Solicitud de actualización de datos',
             'cedtra' => $this->user
         ]);
@@ -57,7 +57,7 @@ class ActualizadatostraController extends ApplicationController
     {
         $this->setResponse("ajax");
         try {
-            $nit = parent::getActUser("documento");
+            $nit = $this->user["documento"];
 
             $mtipoDocumentos = new Gener18();
             $tipoDocumentos = array();
@@ -247,30 +247,6 @@ class ActualizadatostraController extends ApplicationController
             );
         }
         return $this->renderObject($salida, false);
-    }
-
-    function loadDisplaySubsidio($trabajador)
-    {
-        /*  Tag::displayTo("nit", $trabajador['nit']);
-        Tag::displayTo("cedtra", $trabajador['cedtra']);
-        Tag::displayTo("telefono", $trabajador['telefono']);
-        Tag::displayTo("email", $trabajador['email']);
-        Tag::displayTo("codzon", $trabajador['codzon']);
-        Tag::displayTo("prinom", $trabajador['prinom']);
-        Tag::displayTo("segnom", $trabajador['segnom']);
-        Tag::displayTo("priape", $trabajador['priape']);
-        Tag::displayTo("segape", $trabajador['segape']);
-        Tag::displayTo("direccion", $trabajador['direccion']);
-        Tag::displayTo("codciu", $trabajador['codciu']); */
-    }
-
-    public function loadDisplay($mercurio33)
-    {
-        foreach ($mercurio33 as $mercurio) {
-            $row = $mercurio->getArray();
-            $campo = $row['campo'];
-            //Tag::displayTo("{$campo}", $row['valor']);
-        }
     }
 
     function buscarEmpresaSubsidio($nit)

@@ -2,7 +2,6 @@
     <div class="tab-pane fade show active" id="datos_solicitud" role="tabpanel" aria-labelledby="datos_solicitud-tab">
         <div class="card-body">
             <form id="formRequest" class="validation_form" autocomplete="off" novalidate>
-                @csrf
                 <div class="d-none">
                     <input type="number" name="id" class="d-none" oninput="this.value=this.value.replace(/[^0-9]/g,'');">
                     <input type="text" name="codsuc" class="d-none">
@@ -212,20 +211,20 @@
             </form>
         </div>
 
-        @if (isset($estado) && ($estado == 'T' || $estado == 'D' || $estado == null))
-        <div class="card-footer">
-            <div class="col-12">
-                <button type="button" class="btn btn-primary" id='guardar_ficha'>
-                    <i class="fas fa-save"></i> Guardar
-                </button>
+        <% if (estado == 'T' || estado == 'D' || estado == void 0) { %>
+            <div class="card-footer">
+                <div class="col-12">
+                    <button type="button" class="btn btn-primary" id='guardar_ficha'>
+                        <i class="fas fa-save"></i> Guardar
+                    </button>
+                </div>
             </div>
-        </div>
-        @endif
+        <% } %>
     </div>
     <div class="tab-pane fade" id="seguimiento" role="tabpanel" aria-labelledby="seguimiento-tab">...</div>
     <div class="tab-pane fade" id="documentos_adjuntos" role="tabpanel" aria-labelledby="documentos_adjuntos-tab">...</div>
     <div class="tab-pane fade" id="firma" role="tabpanel" aria-labelledby="firma-tab">...</div>
     <div class="tab-pane fade" id="enviar_radicado" role="tabpanel" aria-labelledby="enviar_radicado-tab">
-        {{ @include('templates.tmp_send_radicado') }}
+        @include('mercurio.templates.tmp_send_radicado')
     </div>
 </div>
