@@ -1,7 +1,16 @@
-<?php
-echo View::getContent();
-echo TagUser::help($title, $help);
-?>
+@extends('layouts.dash')
+
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.css') }}">
+@endpush
+
+@push('scripts')
+    <script src="{{ asset('assets/datatables.net/js/dataTables.min.js') }}"></script>
+    <script src="{{ asset('assets/datatables.net.bs5/js/dataTables.bootstrap5.min.js') }}"></script>
+@endpush
+
+@section('content')
 <div class="card-body">
 
     <div class="nav-wrapper">
@@ -39,34 +48,34 @@ echo TagUser::help($title, $help);
                 <div class="tab-pane fade show active" id="tabs-icons-text-1" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
                     <hr />
                     <div class="row">
-                        <?php echo $html_afiliacion; ?>
+                        {!! $html_afiliacion !!}
                     </div>
                 </div>
                 <div class="tab-pane fade" id="tabs-icons-text-2" role="tabpanel" aria-labelledby="tabs-icons-text-2-tab">
                     <hr />
                     <div class="row">
-                        <?php echo $html_retiro; ?>
+                        {!! $html_retiro !!}
                     </div>
                 </div>
                 <div class="tab-pane fade" id="tabs-icons-text-3" role="tabpanel" aria-labelledby="tabs-icons-text-3-tab">
                     <hr />
                     <div class="row">
-                        <?php echo $actualizacion_basico; ?>
+                        {!! $actualizacion_basico !!}
                     </div>
                 </div>
                 <div class="tab-pane fade" id="tabs-icons-text-4" role="tabpanel" aria-labelledby="tabs-icons-text-4-tab">
                     <hr />
                     <div class="row">
-                        <?php echo $html_afiliacion_conyuge; ?>
+                        {!! $html_afiliacion_conyuge !!}
                     </div>
                 </div>
                 <div class="tab-pane fade" id="tabs-icons-text-5" role="tabpanel" aria-labelledby="tabs-icons-text-5-tab">
                     <hr />
                     <div class="row">
-                        <?php echo $html_afiliacion_beneficiario; ?>
+                        {!! $html_afiliacion_beneficiario !!}
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+@endsection

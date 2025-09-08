@@ -47,3 +47,12 @@ Route::get('/web/nucleos-familiares/{id}', [WebController::class, 'nucleosFamili
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
 require __DIR__ . '/mercurio.php';
+require __DIR__ . '/empresa.php';
+require __DIR__ . '/trabajador.php';
+require __DIR__ . '/conyuge.php';
+require __DIR__ . '/beneficiario.php';
+require __DIR__ . '/facultativo.php';
+require __DIR__ . '/pensionado.php';
+require __DIR__ . '/independiente.php';
+require __DIR__ . '/datos_empresa.php';
+require __DIR__ . '/datos_trabajador.php';

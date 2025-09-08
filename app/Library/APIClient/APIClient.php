@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Library\APIClient;
 
 use App\Exceptions\AuthException;
@@ -85,7 +86,7 @@ class APIClient
         if (is_null($result) || $this->statusCode >= 400) {
             $error = curl_error($ch);
             curl_close($ch);
-            throw new AuthException("Error access Api, detalles: " . $error, 501);
+            throw new DebugException("Error access Api, detalles: " . $error, 501);
         } else {
             curl_close($ch);
             if ($this->auth instanceof AuthClientInterface) {

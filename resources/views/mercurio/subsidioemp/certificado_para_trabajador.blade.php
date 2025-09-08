@@ -1,8 +1,10 @@
-<?php
-echo View::getContent();
-echo TagUser::help($title, $help);
-?>
+@extends('layouts.dash')
 
+@push('scripts')
+<script src="{{ asset('Mercurio/consultasempresa/consultasempresa.build.js') }}"></script>
+@endpush
+
+@section('content')
 <div class="card mb-0">
     <div class="card-body">
         <?php echo Tag::form("subsidioemp/certificado_para_trabajador", "id: form", "class: validation_form", "autocomplete: off", "novalidate"); ?>
@@ -30,4 +32,4 @@ echo TagUser::help($title, $help);
     </div>
 </div>
 
-<?= Tag::javascriptInclude('Mercurio/consultasempresa/consultasempresa.build'); ?>
+@endsection

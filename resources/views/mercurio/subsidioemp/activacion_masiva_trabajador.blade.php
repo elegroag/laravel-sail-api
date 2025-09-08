@@ -1,8 +1,10 @@
-<?php
-echo View::getContent();
-echo TagUser::help($title, $help);
-echo Tag::addJavascript('Mercurio/core/upload');
-?>
+@extends('layouts.dash')
+
+@push('scripts')
+<script src="{{ asset('Mercurio/core/upload.js') }}"></script>
+@endpush
+
+@section('content')
 
 <div class="card mb-0">
     <div class="card-body">
@@ -39,4 +41,5 @@ echo Tag::addJavascript('Mercurio/core/upload');
 <div id='consulta' class='table-responsive'>
 </div>
 
-<?= Tag::javascriptInclude('Mercurio/consultasempresa/consultasempresa.build'); ?>
+<script src="{{ asset('Mercurio/consultasempresa/consultasempresa.build.js') }}"></script>
+@endsection

@@ -1,4 +1,4 @@
-@extends('layouts.bone')
+@extends('layouts.dash')
 
 @section('content')
 <div class="card mb-0">

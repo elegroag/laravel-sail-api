@@ -209,7 +209,7 @@ class ConyugeController extends ApplicationController
         exit;
     }
 
-    public function download_docsAction($archivo = "")
+    public function downloadDocumentosAction($archivo = "")
     {
         $fichero = "public/docs/formulario_mercurio/" . $archivo;
         $ext = substr(strrchr($archivo, "."), 1);
@@ -800,5 +800,59 @@ class ConyugeController extends ApplicationController
             $salida = array('success' => false, 'msj' => $e->getMessage());
         }
         return $this->renderObject($salida, false);
+    }
+
+    public function buscarTrabajadorAction(Request $request)
+    {
+        $this->setResponse("ajax");
+        try {
+
+            $cedtra = $request->input("cedtra");
+            $ps = Comman::Api();
+            $ps->runCli(array(
+                "servicio" => "PoblacionAfiliada",
+                "metodo" => "datosTrabajador",
+                "params" => array("cedtra" => $cedtra)
+            ));
+
+            $out = $ps->toArray();
+            if (!$out['success']) {
+                $salida = array(
+                    'flag' => false,
+                    'success' => false,
+                    'msj' => $out['msj']
+                );
+            }
+
+            $subsi15 = $out['data'];
+            if (count($subsi15) == 0) {
+                $salida = array(
+                    'flag' => false,
+                    'success' => false,
+                    'msj' => "No Existe la cedula dada"
+                );
+            }
+
+            if ($subsi15['nit'] != $this->user['documento']) {
+                $salida = array(
+                    'flag' => false,
+                    'success' => false,
+                    'msj' => "el trabajador no esta registrado a su empresa"
+                );
+            }
+
+            $salida = array(
+                'flag' => true,
+                'success' => true,
+                'data' => $subsi15
+            );
+        } catch (DebugException $e) {
+            $salida = array(
+                'flag' => false,
+                'success' => false,
+                'msj' => $e->getMessage()
+            );
+        }
+        return $this->renderObject($salida);
     }
 }

@@ -65,7 +65,7 @@ class Menu
         $isActive = ($menu['default_url'] == $this->currentUrl);
 
         if ($isActive) {
-            $this->breadcrumbs = "<li class='breadcrumb-item active' aria-current='page'>{$menu['title']}</li>";
+            $this->breadcrumbs = "<li class='breadcrumb-item active' aria-current='page'><a href=\"#\">{$menu['title']}</a></li>";
         }
 
         $icon = "<i class='{$menu['icon']} {$menu['color']}'></i>";
@@ -90,7 +90,7 @@ class Menu
             $childActive = ($child['default_url'] == $this->currentUrl);
             if ($childActive) {
                 $isActive = true;
-                $this->breadcrumbs .= "<li class='breadcrumb-item active'>{$child['title']}</li>";
+                $this->breadcrumbs .= "<li class='breadcrumb-item active'><a href=\"#\">{$child['title']}</a></li>";
             }
 
             $childHtml .= $this->buildChildMenuItem($child, $childActive);

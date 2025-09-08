@@ -42,40 +42,37 @@ class MovimientosController extends ApplicationController
         $generalService = new GeneralService();
         $generalService->registrarLog(false, "Historial", "");
         if ($this->tipo == "E") {
-            return redirect("subsidioemp.historial");
+            return redirect()->to("mercurio/subsidioemp/historial");
         }
         if ($this->tipo  == "T") {
-            return redirect("subsidio.historial");
+            return redirect()->to("mercurio/subsidio/historial");
         }
         if ($this->tipo == "P") {
-            return redirect("particular.historial");
+            return redirect()->to("mercurio/particular/historial");
         }
     }
 
-    public function cambio_email_viewAction()
+    public function cambioEmailViewAction()
     {
-        return view("perfil.cambio_email", [
+        return view("mercurio.movimientos.cambio_email", [
             "title" => "Cambio Email",
             "email" => "email"
         ]);
     }
 
-    public function cambio_emailAction(Request $request)
+    public function cambioEmailAction(Request $request)
     {
         $this->setResponse("ajax");
-
         try {
-
-            $email = $request->input('email', "addslaches", "extraspaces", "striptags");
-
-            Mercurio07::where('tipo', parent::getActUser("tipo"))
-                ->where('documento', parent::getActUser("documento"))
+            $email = $request->input('email');
+            $user = Mercurio07::where('tipo', $this->tipo)
+                ->where('documento', $this->user['documento'])
                 ->update(['email' => $email]);
 
             $asunto = "Cambio de Email";
             $msj  = "acabas de utilizar nuestro servicio de cambio de email de aviso. Te informamos que fue exitoso";
             $generalService = new GeneralService();
-            $generalService->sendEmail(parent::getActUser("email"), parent::getActUser("nombre"), $asunto, $msj, "");
+            $generalService->sendEmail($user['email'], $user['nombre'], $asunto, $msj, "");
 
             $response = "Cambio de Email de Aviso con Exito";
 
@@ -88,28 +85,30 @@ class MovimientosController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    public function cambio_clave_viewAction()
+    public function cambioClaveViewAction()
     {
-        return view('movimientos.cambio_clave', [
-            "title",
-            "Cambio Clave"
+        return view('mercurio.movimientos.cambio_clave', [
+            "title" => "Cambio Clave"
         ]);
     }
 
-    public function cambio_claveAction(Request $request)
+    public function cambioClaveAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
-            $claant = $request->input('claant', "addslaches", "extraspaces", "striptags");
-            $clave = $request->input('clave', "addslaches", "extraspaces", "striptags");
-            $clacon = $request->input('clacon', "addslaches", "extraspaces", "striptags");
-            # $response = parent::startFunc();
+            $claant = $request->input('claant');
+            $clave = $request->input('clave');
+            $clacon = $request->input('clacon');
 
-            $tipo = parent::getActUser("tipo");
-            $documento = parent::getActUser("documento");
-            $coddoc = parent::getActUser("coddoc");
 
-            $mercurio07 = (new Mercurio07)->findFirst("tipo='{$tipo}' AND documento='{$documento}' AND coddoc='{$coddoc}'");
+            $tipo = $this->tipo;
+            $documento = $this->user['documento'];
+            $coddoc = $this->user['coddoc'];
+
+            $mercurio07 = Mercurio07::where('tipo', $tipo)
+                ->where('documento', $documento)
+                ->where('coddoc', $coddoc)
+                ->first();
 
             $claant = password_hash_old($claant);
             $claant = md5("" . $claant);
@@ -127,7 +126,10 @@ class MovimientosController extends ApplicationController
             $mclave = password_hash_old($clave);
             $mclave = md5("" . $mclave);
 
-            (new Mercurio07)->updateAll("clave='{$mclave}'", "conditions: tipo='{$tipo}' AND documento='{$documento}' AND coddoc='{$coddoc}'");
+            Mercurio07::where('tipo', $tipo)
+                ->where('documento', $documento)
+                ->where('coddoc', $coddoc)
+                ->update(['clave' => $mclave]);
 
             $ps = Comman::Api();
             $ps->runCli(
@@ -145,7 +147,8 @@ class MovimientosController extends ApplicationController
                 }
             }
 
-            $mercurio02 = (new Mercurio02)->findFirst();
+            $mercurio02 = Mercurio02::first();
+
             $params = array(
                 "titulo" => "Cordial saludo, señor@ {$mercurio07->getNombre()}",
                 "msj" => "Bienvenido a La Caja de Compensación Familiar del Caqueta COMFACA, " .
@@ -164,10 +167,10 @@ class MovimientosController extends ApplicationController
                 )
             );
 
-            $html = view("login/tmp/mail", $params)->render();
+            $html = view("emails/change-clave", $params)->render();
 
             $asunto = "Cambio De Clave Portal Comfaca En Línea";
-            $email_caja = (new Mercurio01)->findFirst();
+            $email_caja = Mercurio01::first();
 
             $sender_email = new SenderEmail();
             $sender_email->setters(
@@ -175,9 +178,11 @@ class MovimientosController extends ApplicationController
                 "emisor_email:" . $email_caja->getEmail(),
                 "emisor_clave:" . $email_caja->getClave()
             );
+
             $sender_email->send($mercurio07->getEmail(), $html);
             $generalService = new GeneralService();
             $generalService->registrarLog(false, "Cambio de Clave", "");
+
             $response = "Cambio de clave se ha realizado con éxito.";
         } catch (DebugException $e) {
             $response = "No se pudo realizar la accion";

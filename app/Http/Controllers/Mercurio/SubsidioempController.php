@@ -48,33 +48,35 @@ class SubsidioempController extends ApplicationController
         ]);
     }
 
-
     public function historialAction()
     {
         $tipo = $this->tipo;
         $coddoc = $this->user['coddoc'];
         $documento = $this->user['documento'];
 
-        $mercurio31 = Mercurio31::where('nit', $documento)->orderBy('id', 'desc')->get();
+        $mercurio31 = Mercurio31::where('nit', $documento)
+            ->orderBy('id', 'desc');
+
         $mercurio33 = Mercurio33::where([
             ['tipo', $tipo],
             ['coddoc', $coddoc],
             ['documento', $documento]
-        ])->orderBy('id', 'desc')->get();
+        ])->orderBy('id', 'desc');
 
-        $mercurio35 = Mercurio35::where('nit', $documento)->orderBy('id', 'desc')->get();
+        $mercurio35 = Mercurio35::where('nit', $documento)
+            ->orderBy('id', 'desc');
 
         $mercurio32 = Mercurio32::where([
             'tipo' => $tipo,
             'coddoc' => $coddoc,
             'documento' => $documento,
-        ])->orderBy('id', 'desc')->first();
+        ])->orderBy('id', 'desc');
 
         $mercurio34 = Mercurio34::where([
             'tipo' => $tipo,
             'coddoc' => $coddoc,
             'documento' => $documento,
-        ])->orderBy('id', 'desc')->get();
+        ])->orderBy('id', 'desc');
 
         $html_afiliacion  = "<table class='table table-hover align-items-center table-bordered'>";
         $html_afiliacion .= "<thead>";
@@ -88,13 +90,13 @@ class SubsidioempController extends ApplicationController
         $html_afiliacion .= "</tr>";
         $html_afiliacion .= "</thead>";
         $html_afiliacion .= "<tbody class='list'>";
-        if (count($mercurio31) == 0) {
+        if ($mercurio31->count() == 0) {
             $html_afiliacion .= "<tr align='center'>";
             $html_afiliacion .= "<td colspan=6><label>No hay datos para mostrar</label></td>";
             $html_afiliacion .= "<tr>";
             $html_afiliacion .= "</tr>";
         }
-        foreach ($mercurio31 as $mmercurio31) {
+        foreach ($mercurio31->get() as $mmercurio31) {
             $html_afiliacion .= "<tr>";
             $html_afiliacion .= "<td>{$mmercurio31->getCedtra()}</td>";
             $html_afiliacion .= "<td>{$mmercurio31->getPriape()} {$mmercurio31->getPrinom()}</td>";
@@ -118,13 +120,13 @@ class SubsidioempController extends ApplicationController
         $html_retiro .= "</tr>";
         $html_retiro .= "</thead>";
         $html_retiro .= "<tbody class='list'>";
-        if (count($mercurio35) == 0) {
+        if ($mercurio35->count() == 0) {
             $html_retiro .= "<tr align='center'>";
             $html_retiro .= "<td colspan=5><label>No hay datos para mostrar</label></td>";
             $html_retiro .= "<tr>";
             $html_retiro .= "</tr>";
         }
-        foreach ($mercurio35 as $mmercurio35) {
+        foreach ($mercurio35->get() as $mmercurio35) {
             $html_retiro .= "<tr>";
             $html_retiro .= "<td>{$mmercurio35->getCedtra()}</td>";
             $html_retiro .= "<td>{$mmercurio35->getNomtra()}</td>";
@@ -150,7 +152,7 @@ class SubsidioempController extends ApplicationController
         $html_afiliacion_conyuge .= "</thead>";
         $html_afiliacion_conyuge .= "<tbody class='list'>";
 
-        if (count($mercurio32) == 0) {
+        if ($mercurio32->count() == 0) {
             $html_afiliacion_conyuge .= "<tr align='center'>";
             $html_afiliacion_conyuge .= "<td colspan=6><label>No hay datos para mostrar</label></td>";
             $html_afiliacion_conyuge .= "<tr>";
@@ -158,7 +160,7 @@ class SubsidioempController extends ApplicationController
         } else {
 
             if ($mercurio32) {
-                foreach ($mercurio32 as $mmercurio32) {
+                foreach ($mercurio32->get() as $mmercurio32) {
                     $html_afiliacion_conyuge .= "<tr>";
                     $html_afiliacion_conyuge .= "<td>{$mmercurio32->getCedtra()}</td>";
                     $html_afiliacion_conyuge .= "<td>{$mmercurio32->getCedcon()}</td>";
@@ -187,13 +189,13 @@ class SubsidioempController extends ApplicationController
         $html_afiliacion_beneficiario .= "</tr>";
         $html_afiliacion_beneficiario .= "</thead>";
         $html_afiliacion_beneficiario .= "<tbody class='list'>";
-        if (count($mercurio34) == 0) {
+        if ($mercurio34->count() == 0) {
             $html_afiliacion_beneficiario .= "<tr align='center'>";
             $html_afiliacion_beneficiario .= "<td colspan=6><label>No hay datos para mostrar</label></td>";
             $html_afiliacion_beneficiario .= "<tr>";
             $html_afiliacion_beneficiario .= "</tr>";
         }
-        foreach ($mercurio34 as $mmercurio34) {
+        foreach ($mercurio34->get() as $mmercurio34) {
             $html_afiliacion_beneficiario .= "<tr>";
             $html_afiliacion_beneficiario .= "<td>{$mmercurio34->getCedtra()}</td>";
             $html_afiliacion_beneficiario .= "<td>{$mmercurio34->getNumdoc()}</td>";
@@ -220,13 +222,13 @@ class SubsidioempController extends ApplicationController
         $actualizacion_basico .= "</tr>";
         $actualizacion_basico .= "</thead>";
         $actualizacion_basico .= "<tbody class='list'>";
-        if (count($mercurio33) == 0) {
+        if ($mercurio33->count() == 0) {
             $actualizacion_basico .= "<tr align='center'>";
             $actualizacion_basico .= "<td colspan=6><label>No hay datos para mostrar</label></td>";
             $actualizacion_basico .= "<tr>";
             $actualizacion_basico .= "</tr>";
         }
-        foreach ($mercurio33 as $mmercurio33) {
+        foreach ($mercurio33->get() as $mmercurio33) {
             $mmercurio28 = Mercurio28::where('campo', $mmercurio33->campo)->first();
             $actualizacion_basico .= "<tr>";
             $actualizacion_basico .= "<td>{$mmercurio28->getDetalle()}</td>";
@@ -252,21 +254,24 @@ class SubsidioempController extends ApplicationController
         ]);
     }
 
-    public function consulta_trabajadores_viewAction()
+    public function consultaTrabajadoresViewAction()
     {
         return view("mercurio/subsidioemp/consulta_trabajadores", [
             "hide_header" => true,
             "help" => false,
-            "title" => "Consulta Trabajadores"
+            "title" => "Consulta Trabajadores",
+            'documento' => $this->user['documento'],
+            'coddoc' => $this->user['coddoc'],
+            'tipo' => $this->tipo
         ]);
     }
 
-    public function consulta_trabajadoresAction(Request $request)
+    public function consultaTrabajadoresAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
             $estado = $request->input("estado");
-            $nit = $request->input("nit") ? $request->input("nit") : parent::getActUser("documento");
+            $nit = $request->input("nit") ? $request->input("nit") : $this->user['documento'];
             $estado = $estado == "T" ? "" : $estado;
 
             $ps = Comman::Api();
@@ -286,7 +291,11 @@ class SubsidioempController extends ApplicationController
                 throw new DebugException("Error no hay respuesta del servidor SISU", 501);
             }
 
-            $html = view('subsidioemp/tmp/tmp_afiliados', array('trabajadores' => $out['data']))->render();
+            $html = view(
+                'mercurio/subsidioemp/tmp/tmp_afiliados',
+                array('trabajadores' => $out['data'])
+            )->render();
+
             $response = array(
                 'flag' => true,
                 'success' => true,
@@ -301,7 +310,7 @@ class SubsidioempController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function consulta_giro_viewAction()
+    public function consultaGiroViewAction()
     {
         return view("mercurio/subsidioemp/consulta_giro", [
             "hide_header" => true,
@@ -310,7 +319,7 @@ class SubsidioempController extends ApplicationController
         ]);
     }
 
-    public function consulta_giroAction(Request $request)
+    public function consultaGiroAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
@@ -354,7 +363,7 @@ class SubsidioempController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    public function consulta_nomina_viewAction()
+    public function consultaNominaViewAction()
     {
         return view("mercurio/subsidioemp/consulta_nomina", [
             "hide_header" => true,
@@ -363,12 +372,11 @@ class SubsidioempController extends ApplicationController
         ]);
     }
 
-    public function consulta_nominaAction(Request $request)
+    public function consultaNominaAction(Request $request)
     {
-        $this->setResponse("ajax");
         try {
             $periodo = $request->input("periodo");
-            $nit = parent::getActUser("documento");
+            $nit = $this->user['documento'];
 
             $ps = Comman::Api();
             $ps->runCli(
@@ -387,7 +395,12 @@ class SubsidioempController extends ApplicationController
                 throw new DebugException("Error no hay respuesta del servidor SISU", 501);
             }
 
-            $html = view('subsidioemp/tmp/tmp_nomina', array('nominas' => $out['data']))->render();
+            $html = view(
+                'mercurio/subsidioemp/tmp/tmp_nomina',
+                array('nominas' => $out['data'])
+            )->render();
+
+
             $response = array(
                 'flag' => true,
                 'success' => true,
@@ -399,10 +412,10 @@ class SubsidioempController extends ApplicationController
                 'msj' => $e->getMessage() . ' ' . $e->getLine()
             );
         }
-        return $this->renderObject($response, false);
+        return $this->renderObject($response);
     }
 
-    public function consulta_aportes_viewAction()
+    public function consultaAportesViewAction()
     {
         return view("mercurio/subsidioemp/consulta_aportes", [
             "hide_header" => true,
@@ -411,14 +424,14 @@ class SubsidioempController extends ApplicationController
         ]);
     }
 
-    public function consulta_aportesAction(Request $request)
+    public function consultaAportesAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
 
             $perini = $request->input("perini");
             $perfin = $request->input("perfin");
-            $nit = parent::getActUser("documento");
+            $nit = $this->user['documento'];
 
             $ps = Comman::Api();
             $ps->runCli(
@@ -438,7 +451,11 @@ class SubsidioempController extends ApplicationController
                 throw new DebugException("Error no hay respuesta del servidor SISU", 501);
             }
 
-            $html = view('subsidioemp/tmp/tmp_aportes', array('aportes' => $out['data']))->render();
+            $html = view(
+                'mercurio/subsidioemp/tmp/tmp_aportes',
+                array('aportes' => $out['data'])
+            )->render();
+
             $response = array(
                 'flag' => true,
                 'success' => true,

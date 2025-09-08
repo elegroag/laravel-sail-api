@@ -1,10 +1,15 @@
-<?php
-echo View::getContent();
-echo TagUser::help($title, $help);
-?>
-<?= Tag::Assets('datatables.net.bs5/css/dataTables.bootstrap5.min', 'css') ?>
-<?= Tag::Assets('datatables.net/js/dataTables.min', 'js') ?>
-<?= Tag::Assets('datatables.net.bs5/js/dataTables.bootstrap5.min', 'js') ?>
+@extends('layouts.dash')
+
+@push('styles')
+<link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.min.css') }}">
+@endpush
+
+@push('scripts')
+<script src="{{ asset('assets/datatables.net/js/dataTables.min.js') }}"></script>
+<script src="{{ asset('assets/datatables.net.bs5/js/dataTables.bootstrap5.min.js') }}"></script>
+@endpush
+
+@section('content')
 
 <style>
     #dataTable {
@@ -88,13 +93,13 @@ echo TagUser::help($title, $help);
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="perini" class="form-control-label">Periodo Inicial</label>
-                        <?php echo TagUser::periodo("perini", "placeholder: Periodo Inicial", "class: form-control", "value: " . date('Ym', strtotime('-3 month'))); ?>
+                        <input type="text" id="perini" class="form-control" placeholder="Periodo Inicial">
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="perfin" class="form-control-label">Periodo Final</label>
-                        <?php echo TagUser::periodo("perfin", "placeholder: Periodo Final", "class: form-control", "value: " . date('Ym')); ?>
+                        <input type="text" id="perfin" class="form-control" placeholder="Periodo Final">
                     </div>
                 </div>
             </div>
@@ -104,4 +109,5 @@ echo TagUser::help($title, $help);
 
 <div id='consulta' class='table-responsive'></div>
 
-<?= Tag::javascriptInclude('Mercurio/consultasempresa/consultasempresa.build'); ?>
+<script src="{{ asset('mercurio/build/ConsultasEmpresa.js') }}"></script>
+@endsection

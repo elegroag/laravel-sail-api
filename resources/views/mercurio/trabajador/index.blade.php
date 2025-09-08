@@ -10,8 +10,8 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('assets/datatables.net/js/dataTables.min.js') }}"></script>
-    <script src="{{ asset('assets/datatables.net.bs5/js/dataTables.bootstrap5.min.js') }}"></script>
+<script src="{{ asset('assets/datatables.net/js/dataTables.min.js') }}"></script>
+<script src="{{ asset('assets/datatables.net.bs5/js/dataTables.bootstrap5.min.js') }}"></script>
 
 <script type="text/template" id='tmp_layout'>
     @include('mercurio/templates.tmp_layout')

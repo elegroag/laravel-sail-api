@@ -1,5 +1,10 @@
-<?php echo View::getContent(); ?>
-<?= Tag::stylesheetLink('Mercurio/mercurio'); ?>
+@extends('layouts.dash')
+
+@push('styles')
+<link rel="stylesheet" href="{{ asset('assets/mercurio/mercurio.css') }}">
+@endpush
+
+@section('content')
 
 <script id='tmp_card_header' type="text/template">
     <div class="row">
@@ -341,3 +346,4 @@
         });
     }
 </script>
+@endsection
