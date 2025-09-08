@@ -79,7 +79,7 @@ class FacultativoController extends ApplicationController
 
             $this->facultativoService = new FacultativoService;
             $this->asignarFuncionario = new AsignarFuncionario;
-            $params['usuario'] = $this->asignarFuncionario->asignar($this->tipopc, parent::getActUser("codciu"));
+            $params['usuario'] = $this->asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
 
             $this->facultativoService->updateByFormData($id, $params);
             # $this->facultativoService->endTransa();
@@ -122,7 +122,7 @@ class FacultativoController extends ApplicationController
             $params['documento'] = $this->user['documento'];
 
             $this->asignarFuncionario = new AsignarFuncionario();
-            $params['usuario'] = $this->asignarFuncionario->asignar($this->tipopc, $params['codzon']);
+            $params['usuario'] = $this->asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
 
             if (is_null($id) || $id == '') {
                 $facultativo = $facultativoService->createByFormData($params);
@@ -379,7 +379,7 @@ class FacultativoController extends ApplicationController
             # $facultativoService->setTransa();
 
             $asignarFuncionario = new AsignarFuncionario();
-            $usuario = $asignarFuncionario->asignar($this->tipopc, parent::getActUser("codciu"));
+            $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
 
             $facultativoService->enviarCaja(new SenderValidationCaja(), $id, $usuario);
             # $facultativoService->endTransa();

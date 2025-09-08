@@ -253,6 +253,7 @@ class IndependienteService
         $independiente = $this->findById($id);
         if ($independiente) {
             $independiente->fill($data);
+            $independiente->setUsuario((new AsignarFuncionario())->asignar($this->tipopc, $this->user['codciu']));
             return $independiente->save();
         }
         return false;
@@ -268,7 +269,7 @@ class IndependienteService
         $independiente = new Mercurio41($data);
         $independiente->setCoddoc($this->user['coddoc']);
         $independiente->setDocumento($this->user['documento']);
-        $independiente->setUsuario((new AsignarFuncionario())->asignar($this->tipopc, $data['codzon']));
+        $independiente->setUsuario((new AsignarFuncionario())->asignar($this->tipopc, $this->user['codciu']));
         $independiente->save();
         $id = $independiente->getId();
 

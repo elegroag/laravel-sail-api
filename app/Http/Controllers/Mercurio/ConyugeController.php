@@ -308,7 +308,7 @@ class ConyugeController extends ApplicationController
     function serializeData(Request $request)
     {
         $asignarFuncionario = new AsignarFuncionario();
-        $usuario = $asignarFuncionario->asignar($this->tipopc, $request->input('codzon'));
+        $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
         $fecsol = Carbon::now();
         return array(
             'fecsol' => $fecsol->format('Y-m-d'),
@@ -461,7 +461,7 @@ class ConyugeController extends ApplicationController
             //$conygueService->setTransa();
 
             $asignarFuncionario = new AsignarFuncionario();
-            $usuario = $asignarFuncionario->asignar($this->tipopc, parent::getActUser("codciu"));
+            $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
 
             $conygueService->enviarCaja(new SenderValidationCaja(), $id, $usuario);
             //$conygueService->endTransa();

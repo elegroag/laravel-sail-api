@@ -51,6 +51,7 @@ class SessionCookies
             'coddoc' => $usuario['coddoc'],
             'nombre' => $usuario['nombre'],
             'email' => $usuario['email'],
+            'codciu' => $usuario['codciu'],
             'ts' => time(),
         ];
 

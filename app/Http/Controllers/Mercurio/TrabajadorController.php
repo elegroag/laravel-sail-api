@@ -201,18 +201,10 @@ class TrabajadorController extends ApplicationController
         $this->setResponse('ajax');
         try {
             $id = $this->clp($request, 'id');
-
             $trabajadorService = new TrabajadorService();
-
-
             $asignarFuncionario = new AsignarFuncionario();
-            // Nota: getActUser reemplazado por datos del request o autent. Ajustar si hay SessionCookies
-            $codciu = $this->clp($request, 'codciu');
-            $usuario = $asignarFuncionario->asignar($this->tipopc, $codciu);
-
+            $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
             $trabajadorService->enviarCaja(new SenderValidationCaja(), $id, $usuario); // TODO: importar/clase correcta si existe
-
-
             $salida = ['success' => true, 'msj' => 'El envio de la solicitud se ha completado con éxito'];
         } catch (\Exception $e) {
             $salida = ['success' => false, 'msj' => $e->getMessage()];
@@ -542,7 +534,7 @@ class TrabajadorController extends ApplicationController
             'tipcue' => $request->get('tipcue'),
             'tippag' => $request->get('tippag'),
             'log' =>  '0',
-            'usuario' => $asignarFuncionario->asignar($this->tipopc, $request->get('codzon'))
+            'usuario' => $asignarFuncionario->asignar($this->tipopc, $this->user['codciu'])
         );
     }
 

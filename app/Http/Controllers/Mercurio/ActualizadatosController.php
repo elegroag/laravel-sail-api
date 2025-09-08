@@ -73,7 +73,7 @@ class ActualizadatosController extends ApplicationController
                 'tipo' => $tipo,
                 'coddoc'  => $coddoc,
                 'documento'  => $documento,
-                'usuario'  => $asignarFuncionario->asignar($this->tipopc, parent::getActUser("codciu")),
+                'usuario'  => $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']),
             );
 
             if (is_null($id) || $id == '') {
@@ -423,7 +423,7 @@ class ActualizadatosController extends ApplicationController
             //$actualizaService->setTransa();
 
             $asignarFuncionario = new AsignarFuncionario();
-            $usuario = $asignarFuncionario->asignar($this->tipopc, parent::getActUser("codciu"));
+            $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
 
             $actualizaService->enviarCaja(new SenderValidationCaja(), $id, $usuario);
             //$actualizaService->endTransa();

@@ -214,78 +214,6 @@ class EmpresaService
     }
 
     /**
-     * loadDisplay function
-     * @param Mercurio30 $solicitud
-     * @return void
-     */
-    public function loadDisplay($solicitud)
-    {
-        /* Tag::displayTo("nit", $solicitud->getNit());
-        Tag::displayTo("tipdoc", $solicitud->getTipdoc());
-        Tag::displayTo("digver", $this->digver($solicitud->getNit()));
-        Tag::displayTo("id", $solicitud->getId());
-        Tag::displayTo("sigla", $solicitud->getSigla());
-        Tag::displayTo("calemp", $solicitud->getCalemp());
-        Tag::displayTo("cedrep", $solicitud->getCedrep());
-        Tag::displayTo("repleg", $solicitud->getRepleg());
-        Tag::displayTo("telefono", $solicitud->getTelefono());
-        Tag::displayTo("celular", $solicitud->getCelular());
-        Tag::displayTo("email", $solicitud->getEmail());
-        Tag::displayTo("fecini", $solicitud->getFeciniString());
-        Tag::displayTo("tottra", $solicitud->getTottra());
-        Tag::displayTo("valnom", $solicitud->getValnom());
-        Tag::displayTo("dirpri", $solicitud->getDirpri());
-        Tag::displayTo("ciupri", $solicitud->getCiupri());
-        Tag::displayTo("celpri", $solicitud->getCelpri());
-        Tag::displayTo("emailpri", $solicitud->getEmailpri());
-        Tag::displayTo("prinom", $solicitud->getPrinom());
-        Tag::displayTo("segnom", $solicitud->getSegnom());
-        Tag::displayTo("priape", $solicitud->getPriape());
-        Tag::displayTo("segape", $solicitud->getSegape());
-        Tag::displayTo("razsoc", $solicitud->getRazsoc());
-        Tag::displayTo("tipper", $solicitud->getTipper());
-        Tag::displayTo("matmer", $solicitud->getMatmer());
-        Tag::displayTo("direccion", $solicitud->getDireccion());
-        Tag::displayTo("tipsoc", $solicitud->getTipsoc());
-        Tag::displayTo("codact", $solicitud->getCodact());
-        Tag::displayTo("tipemp", $solicitud->getTipemp());
-        Tag::displayTo("codcaj", $solicitud->getCodcaj());
-        Tag::displayTo("coddocrepleg", $solicitud->getCoddocrepleg()); */
-    }
-
-    function loadDisplaySubsidio($empresa)
-    {
-        /*  Tag::displayTo("tipdoc", $empresa['coddoc']);
-        Tag::displayTo("digver", $empresa['digver']);
-        Tag::displayTo("nit", $empresa['nit']);
-        Tag::displayTo("sigla", $empresa['sigla']);
-        Tag::displayTo("calemp", $empresa['calemp']);
-        Tag::displayTo("cedrep", $empresa['cedrep']);
-        Tag::displayTo("repleg", $empresa['repleg']);
-        Tag::displayTo("telefono", $empresa['telefono']);
-        Tag::displayTo("email", $empresa['email']);
-        Tag::displayTo("tottra", $empresa['tottra']);
-        Tag::displayTo("ciupri", $empresa['ciupri']);
-        Tag::displayTo("prinom", $empresa['prinom']);
-        Tag::displayTo("segnom", $empresa['segnom']);
-        Tag::displayTo("priape", $empresa['priape']);
-        Tag::displayTo("segape", $empresa['segape']);
-        Tag::displayTo("razsoc", $empresa['razsoc']);
-        Tag::displayTo("tipper", $empresa['tipper']);
-        Tag::displayTo("matmer", $empresa['matmer']);
-        Tag::displayTo("direccion", $empresa['direccion']);
-        Tag::displayTo("tipsoc", $empresa['tipsoc']);
-        Tag::displayTo("codact", $empresa['codact']);
-        Tag::displayTo("tipemp", $empresa['tipemp']);
-        Tag::displayTo("codcaj", $empresa['codcaj']);
-        Tag::displayTo("coddocrepleg", $empresa['coddocrepleg']);
-        Tag::displayTo("celular", $empresa['telr']);
-        Tag::displayTo("celpri", $empresa['telt']);
-        Tag::displayTo("dirpri", $empresa['dirpri']);
-        Tag::displayTo("emailpri", $empresa['mailr']); */
-    }
-
-    /**
      * update function
      * @param integer $id
      * @param array $data
@@ -318,7 +246,7 @@ class EmpresaService
             $empresa->setRepleg($data['priape'] . ' ' . $data['segape'] . ' ' . $data['prinom'] . ' ' . $data['segnom']);
 
             // Asignar funcionario
-            $empresa->setUsuario((new AsignarFuncionario())->asignar($this->tipopc, $data['codzon']));
+            $empresa->setUsuario((new AsignarFuncionario())->asignar($this->tipopc, $this->user['codciu']));
 
             $empresa->setTipo(session('tipo'));
             $empresa->setCoddoc($this->user['coddoc']);
@@ -344,7 +272,7 @@ class EmpresaService
         $empresa = new Mercurio30($data);
         $empresa->setRepleg($data['priape'] . ' ' . $data['segape'] . ' ' . $data['prinom'] . ' ' . $data['segnom']);
 
-        $empresa->setUsuario((new AsignarFuncionario())->asignar($this->tipopc, $data['codzon']));
+        $empresa->setUsuario((new AsignarFuncionario())->asignar($this->tipopc, $this->user['codciu']));
 
         $empresa->setTipo(session('tipo'));
 

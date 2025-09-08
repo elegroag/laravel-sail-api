@@ -392,7 +392,7 @@ class LoginController extends ApplicationController
 
             if ($tipo !== 'P') {
                 $this->asignarFuncionario = new AsignarFuncionario();
-                $usuario = $this->asignarFuncionario->asignar($signupEntity->getTipopc(), $codciu);
+                $usuario = $this->asignarFuncionario->asignar($signupEntity->getTipopc(), $this->user['codciu']);
 
                 $signupParticular = new SignupParticular($signupEntity);
                 $signupParticular->main(

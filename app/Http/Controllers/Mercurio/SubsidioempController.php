@@ -623,16 +623,17 @@ class SubsidioempController extends ApplicationController
             $mercurio35->setNota($nota);
             $mercurio35->setEstado("P");
             $asignarFuncionario = new AsignarFuncionario();
-            $usuario = $asignarFuncionario->asignar("7", parent::getActUser("codciu"));
+            $usuario = $asignarFuncionario->asignar("7", $this->user['codciu']);
 
             if ($usuario == "") {
                 $response = "No se puede realizar el registro,Comuniquese con la Atencion al cliente";
                 return $this->renderObject($response);
             }
             $mercurio35->setUsuario($usuario);
-            $mercurio35->setTipo(parent::getActUser("tipo"));
-            $mercurio35->setCoddoc(parent::getActUser("coddoc"));
-            $mercurio35->setDocumento(parent::getActUser("documento"));
+            $mercurio35->setTipo($this->tipo);
+
+            $mercurio35->setCoddoc($this->user['coddoc']);
+            $mercurio35->setDocumento($this->user['documento']);
             $mercurio01 = Mercurio01::first();
 
             if (isset($_FILES['archivo']['name']) && $_FILES['archivo']['name'] != "") {
@@ -739,7 +740,7 @@ class SubsidioempController extends ApplicationController
             $tipopc = 5;
         }
         $asignarFuncionario = new AsignarFuncionario();
-        $usuario = $asignarFuncionario->asignar($tipopc, parent::getActUser("codciu"));
+        $usuario = $asignarFuncionario->asignar($tipopc, $this->user['codciu']);
         if ($usuario == "") {
             return $this->renderObject(['success' => false, 'msj' => 'No se puede realizar el registro, comuniquese con la atención al cliente']);
         }

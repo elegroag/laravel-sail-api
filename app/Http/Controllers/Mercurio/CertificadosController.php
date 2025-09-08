@@ -109,7 +109,7 @@ class CertificadosController extends ApplicationController
             $mercurio45->setFecha($today->format('Y-m-d'));
 
             $asignarFuncionario = new AsignarFuncionario();
-            $usuario = $asignarFuncionario->asignar($this->tipopc, parent::getActUser("codciu"));
+            $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
 
             if ($usuario == "") {
                 $response = "No se puede realizar el registro (No hay usuario disponible para la atenci&oacute;n de la solicitud.),Comuniquese con la Atencion al cliente";

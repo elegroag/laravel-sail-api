@@ -307,12 +307,12 @@ class ActualizadatostraController extends ApplicationController
             $asignarFuncionario = new AsignarFuncionario();
             $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
             $tipo_actualizacion = $request->input('tipo_actualizacion');
-            $usuario = $asignarFuncionario->asignar($this->tipopc, parent::getActUser("codciu"));
+            $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
             $params = array(
-                'documento' => parent::getActUser("documento"),
+                'documento' => $this->user['documento'],
                 'usuario' => $usuario,
-                'tipo' =>  parent::getActUser("tipo"),
-                'coddoc' =>  parent::getActUser("coddoc"),
+                'tipo' =>  $this->tipo,
+                'coddoc' =>  $this->user['coddoc'],
                 'fecha_solicitud' =>  date('Y-m-d'),
                 'fecha_estado' =>  date('Y-m-d'),
                 'tipo_actualizacion' =>  $tipo_actualizacion
@@ -613,7 +613,7 @@ class ActualizadatostraController extends ApplicationController
             //$datosService->setTransa();
 
             $asignarFuncionario = new AsignarFuncionario();
-            $usuario = $asignarFuncionario->asignar($this->tipopc, parent::getActUser("codciu"));
+            $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
             $datosService->enviarCaja(new SenderValidationCaja(), $id, $usuario);
 
             //$datosService->endTransa();

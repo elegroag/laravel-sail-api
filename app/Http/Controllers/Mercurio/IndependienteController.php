@@ -201,7 +201,7 @@ class IndependienteController extends ApplicationController
 
             $this->independienteService = new IndependienteService();
             $this->asignarFuncionario = new AsignarFuncionario();
-            $params['usuario'] = $this->asignarFuncionario->asignar($this->tipopc, parent::getActUser("codciu"));
+            $params['usuario'] = $this->asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
             $this->independienteService->updateByFormData($id, $params);
             //$this->independienteService->endTransa();
 
@@ -423,7 +423,7 @@ class IndependienteController extends ApplicationController
             //$independienteService->setTransa();
 
             $asignarFuncionario = new AsignarFuncionario();
-            $usuario = $asignarFuncionario->asignar($this->tipopc, parent::getActUser("codciu"));
+            $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
 
             $independienteService->enviarCaja(new SenderValidationCaja(), $id, $usuario);
             //$independienteService->endTransa();

@@ -259,10 +259,9 @@ class EmpresaController extends ApplicationController
         $this->setResponse('ajax');
         try {
             $id = (int) $this->clp($request, 'id');
-            $codciu = $this->clp($request, 'codciu');
 
             $asignarFuncionario = new AsignarFuncionario();
-            $usuario = $asignarFuncionario->asignar($this->tipopc, $codciu);
+            $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
 
             $service = new EmpresaService();
             $service->enviarCaja(new SenderValidationCaja(), $id, $usuario);

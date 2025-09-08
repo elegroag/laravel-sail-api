@@ -38,6 +38,7 @@ class BeneficiarioController extends ApplicationController
     protected $db;
     protected $user;
     protected $tipo;
+    protected $codciu;
 
     public function __construct()
     {
@@ -171,7 +172,7 @@ class BeneficiarioController extends ApplicationController
             //$beneficiarioService->setTransa();
 
             $asignarFuncionario = new AsignarFuncionario();
-            $usuario = $asignarFuncionario->asignar($this->tipopc, parent::getActUser("codciu"));
+            $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
 
             $beneficiarioService->enviarCaja(new SenderValidationCaja(), $id, $usuario);
             //$beneficiarioService->endTransa();
@@ -597,14 +598,14 @@ class BeneficiarioController extends ApplicationController
     {
         $this->setResponse("view");
         $benService = new BeneficiarioService();
-        $html = View::render(
-            "beneficiario/tmp/solicitudes",
+        $html = view(
+            "mercurio/beneficiario/tmp/solicitudes",
             array(
                 "path" => base_path(),
                 "beneficiarios" => $benService->findAllByEstado($estado)
             )
-        );
-        return $this->renderObject($html);
+        )->render();
+        return $this->renderText($html);
     }
 
     public function searchRequestAction($id)
@@ -679,16 +680,13 @@ class BeneficiarioController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    function serializeData()
+    function serializeData(Request $request)
     {
         $fecsol = Carbon::now();
         $asignarFuncionario = new AsignarFuncionario();
-        $request = request();
-
         return array(
-            'id' => $this->clp($request, 'id'),
             'usuario' => $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']),
-            'log' => $this->user['documento'],
+            'log' => '0',
             'fecsol' => $fecsol->format('Y-m-d'),
             'nit' => $this->clp($request, 'nit'),
             'cedtra' => $this->clp($request, 'cedtra'),
@@ -728,10 +726,7 @@ class BeneficiarioController extends ApplicationController
             'tippag' => $this->clp($request, 'tippag'),
             'tipcue' => $this->clp($request, 'tipcue'),
             'numcue' => $this->clp($request, 'numcue'),
-            'codban' => $this->clp($request, 'codban'),
-            'tipo' => $this->tipo,
-            'coddoc' => $this->user['coddoc'],
-            'documento' => $this->user['documento']
+            'codban' => $this->clp($request, 'codban')
         );
     }
 
@@ -739,28 +734,24 @@ class BeneficiarioController extends ApplicationController
     {
         $this->setResponse("ajax");
         $benefiService = new BeneficiarioService();
-        //$benefiService->setTransa();
+        $this->db->begin();
         try {
             $id = $this->cleanInput($request->input('id'));
-            $params = $this->serializeData();
+            $params = $this->serializeData($request);
+            $params['tipo'] = $this->tipo;
+            $params['coddoc'] = $this->user['coddoc'];
+            $params['documento'] = $this->user['documento'];
 
             $solicitud = null;
             if (is_null($id) || $id == '') {
-                $params['id'] = null;
-                $params['usuario'] = 2;
-                $params['estado'] = 'T';
                 $solicitud = $benefiService->createByFormData($params);
-                $soli = $solicitud->getArray();
-                $id = $soli['id'];
             } else {
                 $res = $benefiService->updateByFormData($id, $params);
                 if ($res == false) {
                     throw new DebugException("Error no se actualizo los datos", 301);
                 }
+                $solicitud = $benefiService->findById($id);
             }
-
-            //$benefiService->endTransa();
-            $solicitud = $benefiService->findById($id);
 
             $beneficiarioAdjuntoService = new BeneficiarioAdjuntoService($solicitud);
             $out = $beneficiarioAdjuntoService->formulario()->getResult();
@@ -781,17 +772,19 @@ class BeneficiarioController extends ApplicationController
                 )
             ))->salvarDatos($out);
 
-            $salida = array(
+            $salida = [
                 "msj" => "Proceso se ha completado con éxito",
                 "success" => true,
                 "data" => $solicitud->getArray()
-            );
+            ];
+
+            $this->db->commit();
         } catch (DebugException $erro) {
-            //$benefiService->closeTransa($erro->getMessage());
             $salida = [
                 "error" => $erro->getMessage(),
                 "success" => false,
             ];
+            $this->db->rollBack();
         }
 
         return $this->renderObject($salida);

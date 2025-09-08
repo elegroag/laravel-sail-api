@@ -257,7 +257,7 @@ class DomesticoController extends ApplicationController
 
             $asignarFuncionario = new AsignarFuncionario();
 
-            $usuario = $asignarFuncionario->asignar($this->tipopc, parent::getActUser("codciu"));
+            $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
             if ($usuario == "") {
                 $response = "No se puede realizar el registro,Comuniquese con la Atencion al cliente";
                 return $this->renderObject($response);

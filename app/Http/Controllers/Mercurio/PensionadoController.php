@@ -100,7 +100,7 @@ class PensionadoController extends ApplicationController
 
             $this->pensionadoService = new PensionadoService();
             $this->asignarFuncionario = new AsignarFuncionario();
-            $params['usuario'] = $this->asignarFuncionario->asignar($this->tipopc, parent::getActUser("codciu"));
+            $params['usuario'] = $this->asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
 
             $this->pensionadoService->updateByFormData($id, $params);
             $pensionado = $this->pensionadoService->findById($id);
@@ -138,7 +138,7 @@ class PensionadoController extends ApplicationController
             $params['coddoc'] = $this->user['coddoc'];
             $params['documento'] = $this->user['documento'];
 
-            $params['usuario'] = $asignarFuncionario->asignar($this->tipopc, $request->input('codzon'));
+            $params['usuario'] = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
 
             if (is_null($id) || $id == '') {
                 $pensionado = $pensionadoService->createByFormData($params);
