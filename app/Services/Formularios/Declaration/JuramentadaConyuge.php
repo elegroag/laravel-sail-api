@@ -37,14 +37,11 @@ class JuramentadaConyuge extends Documento
             throw new DebugException("Error el conyuge no esté disponible", 501);
         }
 
-        $page = public_path() . 'docs/form/declaraciones/declaracion_jura_conyuge.png';
-        $this->pdf->Image($page, 0, 0, 210, 297, '');
-
         $this->conyuge = $this->request->getParam('conyuge');
         $this->trabajador = $this->request->getParam('trabajador');
         $this->bloqueTrabajador();
         $this->bloqueConyuge();
-        $page = public_path() . 'docs/sello-firma.png';
+        $page = public_path('img/firmas/sello-firma.png');
         $this->pdf->Image($page, 160, 275, 30, 20, '');
     }
 

@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Mercurio\BeneficiarioController;
+use App\Http\Controllers\Mercurio\ConyugeController;
 use App\Http\Controllers\Mercurio\LoginController;
 use App\Http\Controllers\Mercurio\MovimientosController;
 use App\Http\Controllers\Mercurio\PrincipalController;
@@ -62,6 +64,8 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
     Route::get('mercurio/firmas/index', [FirmasController::class, 'indexAction'])->name('firmas.index');
     Route::post('mercurio/firmas/guardar', [FirmasController::class, 'guardarAction'])->name('firmas.guardar');
     Route::get('mercurio/firmas/show', [FirmasController::class, 'showAction'])->name('firmas.show');
+
+    Route::post('mercurio/principal/actualiza_estado_solicitudes', [PrincipalController::class, 'actualizaEstadoSolicitudesAction']);
 });
 
 Route::post('mercurio/principal/ingreso_dirigido', [PrincipalController::class, 'ingresoDirigidoAction']);
@@ -126,7 +130,6 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
     Route::post('/mercurio/independiente/digito_verification', [IndependienteController::class, 'digitoVerificationAction']);
 });
 
-
 // Pensionado (migrado desde Kumbia)
 Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
     Route::get('/mercurio/pensionado/index', [PensionadoController::class, 'indexAction']);
@@ -143,15 +146,17 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
 
     Route::post('/mercurio/pensionado/search_request/{id}', [PensionadoController::class, 'searchRequestAction']);
     Route::post('/mercurio/pensionado/consulta_documentos/{id}', [PensionadoController::class, 'consultaDocumentosAction']);
+
     Route::post('/mercurio/pensionado/borrar', [PensionadoController::class, 'borrarAction']);
+    Route::post('/mercurio/pensionado/borrar/{id}', [PensionadoController::class, 'borrarAction']);
     Route::post('/mercurio/pensionado/params', [PensionadoController::class, 'paramsAction']);
+
     Route::post('/mercurio/pensionado/render_table', [PensionadoController::class, 'renderTableAction']);
     Route::post('/mercurio/pensionado/render_table/{estado}', [PensionadoController::class, 'renderTableAction']);
 
     Route::post('/mercurio/pensionado/valida', [PensionadoController::class, 'validaAction']);
     Route::post('/mercurio/pensionado/digito_verification', [PensionadoController::class, 'digitoVerificationAction']);
 });
-
 
 // Facultativo (migrado desde Kumbia)
 Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
@@ -170,6 +175,8 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
     Route::post('/mercurio/facultativo/search_request/{id}', [FacultativoController::class, 'searchRequestAction']);
     Route::post('/mercurio/facultativo/consulta_documentos/{id}', [FacultativoController::class, 'consultaDocumentosAction']);
     Route::post('/mercurio/facultativo/borrar', [FacultativoController::class, 'borrarAction']);
+    Route::post('/mercurio/facultativo/borrar/{id}', [FacultativoController::class, 'borrarAction']);
+
     Route::post('/mercurio/facultativo/params', [FacultativoController::class, 'paramsAction']);
     Route::post('/mercurio/facultativo/render_table', [FacultativoController::class, 'renderTableAction']);
     Route::post('/mercurio/facultativo/render_table/{estado}', [FacultativoController::class, 'renderTableAction']);
@@ -178,9 +185,9 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
     Route::post('/mercurio/facultativo/digito_verification', [FacultativoController::class, 'digitoVerificationAction']);
 });
 
-
 // Trabajador (migrado desde Kumbia)
 Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
+    Route::get('/mercurio/trabajador/index', [TrabajadorController::class, 'indexAction']);
     Route::post('mercurio/trabajador/buscar_trabajador', [TrabajadorController::class, 'buscarTrabajadorAction']);
     Route::post('mercurio/trabajador/guardar', [TrabajadorController::class, 'guardarAction']);
     Route::post('mercurio/trabajador/borrar_archivo', [TrabajadorController::class, 'borrarArchivoAction']);
@@ -188,11 +195,65 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
     Route::get('mercurio/trabajador/archivos_requeridos/{id}', [TrabajadorController::class, 'archivosRequeridosAction']);
     Route::post('mercurio/trabajador/enviar_caja', [TrabajadorController::class, 'enviarCajaAction']);
     Route::get('mercurio/trabajador/seguimiento/{id}', [TrabajadorController::class, 'seguimientoAction']);
+
     Route::post('mercurio/trabajador/params', [TrabajadorController::class, 'paramsAction']);
+    Route::post('mercurio/trabajador/render_table', [TrabajadorController::class, 'renderTableAction']);
+    Route::post('mercurio/trabajador/render_table/{estado}', [TrabajadorController::class, 'renderTableAction']);
+    Route::post('mercurio/trabajador/search_request/{id}', [TrabajadorController::class, 'searchRequestAction']);
+    Route::post('mercurio/trabajador/consulta_documentos/{id}', [TrabajadorController::class, 'consultaDocumentosAction']);
+    Route::post('mercurio/trabajador/valida', [TrabajadorController::class, 'validaAction']);
+
     Route::get('mercurio/trabajador/download_temp/{archivo}', [TrabajadorController::class, 'downloadFileAction']);
     Route::get('mercurio/trabajador/download_docs/{archivo}', [TrabajadorController::class, 'downloadDocsAction']);
-    Route::get('mercurio/trabajador/digito_verification', [TrabajadorController::class, 'digitoVerificationAction']);
-    Route::get('mercurio/trabajador/search_request/{id}', [TrabajadorController::class, 'searchRequestAction']);
-    Route::get('mercurio/trabajador/consulta_documentos/{id}', [TrabajadorController::class, 'consultaDocumentosAction']);
     Route::post('mercurio/trabajador/borrar', [TrabajadorController::class, 'borrarAction']);
+    Route::post('mercurio/trabajador/borrar/{id}', [TrabajadorController::class, 'borrarAction']);
+});
+
+
+// Conyuge (migrado desde Kumbia)
+Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
+    Route::get('/mercurio/conyuge/index', [ConyugeController::class, 'indexAction']);
+    Route::post('mercurio/conyuge/buscar_trabajador', [ConyugeController::class, 'buscarTrabajadorAction']);
+    Route::post('mercurio/conyuge/guardar', [ConyugeController::class, 'guardarAction']);
+    Route::post('mercurio/conyuge/borrar_archivo', [ConyugeController::class, 'borrarArchivoAction']);
+    Route::post('mercurio/conyuge/guardar_archivo', [ConyugeController::class, 'guardarArchivoAction']);
+    Route::get('mercurio/conyuge/archivos_requeridos/{id}', [ConyugeController::class, 'archivosRequeridosAction']);
+    Route::post('mercurio/conyuge/enviar_caja', [ConyugeController::class, 'enviarCajaAction']);
+    Route::get('mercurio/conyuge/seguimiento/{id}', [ConyugeController::class, 'seguimientoAction']);
+
+    Route::post('mercurio/conyuge/params', [ConyugeController::class, 'paramsAction']);
+    Route::post('mercurio/conyuge/render_table', [ConyugeController::class, 'renderTableAction']);
+    Route::post('mercurio/conyuge/render_table/{estado}', [ConyugeController::class, 'renderTableAction']);
+    Route::post('mercurio/conyuge/search_request/{id}', [ConyugeController::class, 'searchRequestAction']);
+    Route::post('mercurio/conyuge/consulta_documentos/{id}', [ConyugeController::class, 'consultaDocumentosAction']);
+    Route::post('mercurio/conyuge/valida', [ConyugeController::class, 'validaAction']);
+
+    Route::get('mercurio/conyuge/download_temp/{archivo}', [ConyugeController::class, 'downloadFileAction']);
+    Route::get('mercurio/conyuge/download_docs/{archivo}', [ConyugeController::class, 'downloadDocsAction']);
+    Route::post('mercurio/conyuge/borrar', [ConyugeController::class, 'borrarAction']);
+    Route::post('mercurio/conyuge/borrar/{id}', [ConyugeController::class, 'borrarAction']);
+});
+
+//  Beneficiario (migrado desde Kumbia)
+Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
+    Route::get('/mercurio/beneficiario/index', [BeneficiarioController::class, 'indexAction']);
+    Route::post('mercurio/beneficiario/buscar_trabajador', [BeneficiarioController::class, 'buscarTrabajadorAction']);
+    Route::post('mercurio/beneficiario/guardar', [BeneficiarioController::class, 'guardarAction']);
+    Route::post('mercurio/beneficiario/borrar_archivo', [BeneficiarioController::class, 'borrarArchivoAction']);
+    Route::post('mercurio/beneficiario/guardar_archivo', [BeneficiarioController::class, 'guardarArchivoAction']);
+    Route::get('mercurio/beneficiario/archivos_requeridos/{id}', [BeneficiarioController::class, 'archivosRequeridosAction']);
+    Route::post('mercurio/beneficiario/enviar_caja', [BeneficiarioController::class, 'enviarCajaAction']);
+    Route::get('mercurio/beneficiario/seguimiento/{id}', [BeneficiarioController::class, 'seguimientoAction']);
+
+    Route::post('mercurio/beneficiario/params', [BeneficiarioController::class, 'paramsAction']);
+    Route::post('mercurio/beneficiario/render_table', [BeneficiarioController::class, 'renderTableAction']);
+    Route::post('mercurio/beneficiario/render_table/{estado}', [BeneficiarioController::class, 'renderTableAction']);
+    Route::post('mercurio/beneficiario/search_request/{id}', [BeneficiarioController::class, 'searchRequestAction']);
+    Route::post('mercurio/beneficiario/consulta_documentos/{id}', [BeneficiarioController::class, 'consultaDocumentosAction']);
+    Route::post('mercurio/beneficiario/valida', [BeneficiarioController::class, 'validaAction']);
+
+    Route::get('mercurio/beneficiario/download_temp/{archivo}', [BeneficiarioController::class, 'downloadFileAction']);
+    Route::get('mercurio/beneficiario/download_docs/{archivo}', [BeneficiarioController::class, 'downloadDocsAction']);
+    Route::post('mercurio/beneficiario/borrar', [BeneficiarioController::class, 'borrarAction']);
+    Route::post('mercurio/beneficiario/borrar/{id}', [BeneficiarioController::class, 'borrarAction']);
 });

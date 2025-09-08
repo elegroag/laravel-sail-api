@@ -48,6 +48,7 @@ class FacultativoAdjuntoService
     public function tratamientoDatos()
     {
         $this->filename = "tratamiento_datos_facultativo_{$this->request->getCedtra()}.pdf";
+        KumbiaPDF::setBackgroundImage(false);
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearPolitica('facultativo');
         $documento->setParamsInit(array(
@@ -81,7 +82,9 @@ class FacultativoAdjuntoService
 
         $out = $procesadorComando->toArray();
         $this->filename = "carta_solicitud_facultativo_{$this->request->getCedtra()}.pdf";
+        KumbiaPDF::setBackgroundImage(false);
         $fabrica = new FactoryDocuments();
+
         $documento = $fabrica->crearOficio('facultativo');
         $documento->setParamsInit(array(
             'facultativo' => $this->request,
@@ -107,6 +110,8 @@ class FacultativoAdjuntoService
         ])->first();
 
         $this->filename = "formulario_facultativo_{$this->request->getCedtra()}.pdf";
+        KumbiaPDF::setBackgroundImage(public_path('img/form/trabajador/form-001-tra-p01.png'));
+
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearFormulario('facultativo');
         $documento->setParamsInit(array(
@@ -122,7 +127,6 @@ class FacultativoAdjuntoService
         $this->cifrarDocumento();
         return $this;
     }
-
 
     function cifrarDocumento()
     {

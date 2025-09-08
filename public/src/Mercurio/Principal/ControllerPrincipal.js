@@ -75,7 +75,7 @@ class ControllerPrincipal {
 
     __syncroSolicitudes() {
         this.App.trigger('syncro', {
-            url: this.App.url('principal/actualizaEstadoSolicitudes'),
+            url: this.App.url('principal/actualiza_estado_solicitudes'),
             data: {},
             callback: (response) => {
                 if (response.success) {

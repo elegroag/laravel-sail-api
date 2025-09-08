@@ -9,10 +9,12 @@ use Illuminate\Support\Facades\DB;
 class ModelBase extends Model
 {
     use HasFactory;
+    protected $db;
 
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
+        $this->db = DbBase::rawConnect();
     }
 
     public function findFirst(...$data)

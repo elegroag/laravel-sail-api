@@ -45,7 +45,7 @@ class ConyugeController extends ApplicationController
     public function indexAction()
     {
         $tipo = $this->tipo;
-
+        $empresa = null;
         if (
             $tipo == 'E' ||
             $tipo == 'I' ||
@@ -83,7 +83,8 @@ class ConyugeController extends ApplicationController
         return view('mercurio.conyuge.index', [
             'documento' => $this->user['documento'],
             'tipo' => $this->tipo,
-            'title' => "Afiliación de cónyuges"
+            'title' => "Afiliación de cónyuges",
+            'empresa' => $empresa
         ]);
     }
 
@@ -606,18 +607,18 @@ class ConyugeController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function renderTableAction(Request $request, Response $response, string $estado)
+    public function renderTableAction(Request $request, Response $response, string $estado = '')
     {
         $this->setResponse("view");
         $conyugeService = new ConyugeService();
         $html = View(
-            "conyuge/tmp/solicitudes",
+            "mercurio/conyuge/tmp/solicitudes",
             array(
                 "path" => base_path(),
                 "conyuges" => $conyugeService->findAllByEstado($estado)
             )
         )->render();
-        return $this->renderObject($html);
+        return $this->renderText($html);
     }
 
     public function validaAction(Request $request, Response $response)

@@ -212,14 +212,16 @@ class PrincipalController extends ApplicationController
     {
         try {
             $this->setResponse("ajax");
+
             if (get_flashdata_item("Syncron") == true) {
                 return $this->renderObject(array(
                     "success" => true,
                     "msj" => "Y se realizo la actualización de las solicitudes",
                 ), false);
             }
+            $tipo = $this->tipo;
+
             $coddoc = $this->user['coddoc'];
-            $tipo = $this->user['tipo'];
             $documento = $this->user['documento'];
 
             $procesadorComando = Comman::Api();

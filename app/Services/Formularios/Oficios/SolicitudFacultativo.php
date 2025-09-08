@@ -29,12 +29,12 @@ class SolicitudFacultativo extends Documento
             throw new DebugException("Error el facultativo no esté disponible", 501);
         }
 
-        $page = public_path('docs/form/oficios/oficio_solicitud_afiliacion.jpg');
+        $page = public_path('img/form/oficios/oficio_solicitud_afiliacion.jpg');
         $this->pdf->Image($page, 0, 0, 210, 297, '');
 
         $this->facultativo = $this->request->getParam('facultativo');
         $this->bloqueEmpresa();
-        $selloFirma = public_path('docs/sello-firma.png');
+        $selloFirma = public_path('img/firmas/sello-firma.png');
         $this->pdf->Image($selloFirma, 160, 265, 30, 20, '', '', '', false, 300, '', false, false, 0);
     }
 

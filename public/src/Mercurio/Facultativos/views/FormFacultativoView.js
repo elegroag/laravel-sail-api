@@ -4,7 +4,6 @@ import { $App } from '../../../App';
 import { ComponentModel } from '../../../Componentes/Models/ComponentModel';
 import { eventsFormControl } from '../../../Core';
 import { FormView } from '../../FormView';
-import { TraNomCollection } from '../../Trabajadores/collections/TrabajadoresCollection';
 import { FacultativoModel } from '../models/FacultativoModel';
 
 export class FormFacultativoView extends FormView {
@@ -15,8 +14,6 @@ export class FormFacultativoView extends FormView {
             ...options,
             onRender: (el = {}) => this.#afterRender(el),
         });
-        this.trabajadoresNomina = new TraNomCollection();
-        this.viewTranom = null;
         this.viewComponents = [];
         this.#choiceComponents = [];
     }
@@ -69,7 +66,6 @@ export class FormFacultativoView extends FormView {
         this.selectores = this.$el.find(
             '#tipdoc, #tipsoc, #ciupri, #codzon, #codciu, #codact, #coddocrepleg, #ciunac, #cargo, #pub_indigena_id, #resguardo_id',
         );
-        _.each(this.selectores, (element) => new Choices(element));
 
         if (this.model.get('id') !== null) {
             $.each(this.model.toJSON(), (key, valor) => {
@@ -107,6 +103,7 @@ export class FormFacultativoView extends FormView {
             this.$el.find('#cedtra').attr('disabled', true);
 
             setTimeout(() => this.form.valid(), 200);
+
             $.each(this.selectores, (index, element) => {
                 this.#choiceComponents[element.name] = new Choices(element);
                 const name = this.model.get(element.name);
@@ -116,13 +113,13 @@ export class FormFacultativoView extends FormView {
             $.each(this.selectores, (index, element) => (this.#choiceComponents[element.name] = new Choices(element)));
         }
 
-        eventsFormControl(this.$el);
         flatpickr(this.$el.find('#fecnac, #fecini'), {
             enableTime: false,
             dateFormat: 'Y-m-d',
             locale: Spanish,
         });
-        return this;
+
+        eventsFormControl(this.$el);
     }
 
     changeTipoDocumento(e) {

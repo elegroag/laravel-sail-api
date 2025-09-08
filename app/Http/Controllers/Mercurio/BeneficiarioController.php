@@ -48,6 +48,9 @@ class BeneficiarioController extends ApplicationController
 
     public function indexAction()
     {
+        $empresa = null;
+        $documento = $this->user['documento'];
+
         if (
             $this->tipo == 'E' ||
             $this->tipo == 'I' ||
@@ -59,7 +62,7 @@ class BeneficiarioController extends ApplicationController
                 array(
                     "servicio" => "ComfacaEmpresas",
                     "metodo" => "informacion_empresa",
-                    "params" => array('nit' => parent::getActUser("documento"))
+                    "params" => array('nit' => $documento)
                 )
             );
 
@@ -69,8 +72,7 @@ class BeneficiarioController extends ApplicationController
                     "msj" => 'Error al acceder al servicio de consulta de empresa.',
                     "code" => 401
                 ));
-                redirect('principal/index');
-                exit;
+                return redirect('principal/index');
             }
 
             if ($empresa['data']['estado'] === 'I') {
@@ -78,14 +80,14 @@ class BeneficiarioController extends ApplicationController
                     "msj" => 'La empresa ya no está activa para realizar afiliación de beneficiarios.',
                     "code" => 401
                 ));
-                redirect('principal/index');
-                exit;
+                return redirect('principal/index');
             }
         }
         return view('mercurio/beneficiario/index', [
             'tipo' => $this->tipo,
-            'documento' => $this->user['documento'],
-            'title' => 'Afiliación de beneficiarios'
+            'documento' => $documento,
+            'title' => 'Afiliación de beneficiarios',
+            'empresa' => $empresa
         ]);
     }
 
@@ -496,10 +498,11 @@ class BeneficiarioController extends ApplicationController
     {
         $this->setResponse("ajax");
         try {
-            $nombre = parent::getActUser("nombre");
-            $documento = parent::getActUser("documento");
-            $tipo = parent::getActUser("tipo");
-            $coddoc = parent::getActUser("coddoc");
+            $tipo = $this->tipo;
+
+            $nombre = $this->user['nombre'];
+            $documento = $this->user['documento'];
+            $coddoc = $this->user['coddoc'];
 
             $listAfiliados = false;
             $listConyuges = false;
@@ -532,11 +535,7 @@ class BeneficiarioController extends ApplicationController
                 $conyuges = $conyugeService->findRequestByCedtra($documento);
             }
 
-            $codciu = array();
-            $mgener09 = new Gener09();
-            foreach ($mgener09->find("*", "conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
-                $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
-            }
+            $codzons = Gener09::where('codzon', '>=', 18000)->where('codzon', '<=', 19000)->pluck('detzon', 'codzon')->toArray();
 
             $procesadorComando = Comman::Api();
             $procesadorComando->runCli(
@@ -574,6 +573,7 @@ class BeneficiarioController extends ApplicationController
                     'tippag' => ParamsBeneficiario::getTipoPago(),
                     'codban' => ParamsBeneficiario::getBancos(),
                     'tipcue' => ParamsBeneficiario::getTipoCuenta(),
+                    'codzon' => $codzons,
                     'biourbana' => $biourbana,
                     'biodesco' => $biodesco,
                     "trabajadores" => $cedtras,

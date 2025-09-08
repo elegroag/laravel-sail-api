@@ -47,8 +47,6 @@ class FormularioTrabajador extends Documento
         $this->pdf->SetCreator("Plataforma Web: comfacaenlinea.com.co, COMFACA");
         $this->pdf->SetKeywords('COMFACA');
 
-        $page = storage_path('public/docs/form/trabajador/form-001-tra-p01.png');
-        $this->pdf->Image($page, 0, 0, 210, 297, '');
         $this->tipoAfiliado();
         $this->dataEmpleador();
         $this->dataTrabajador();
@@ -58,7 +56,7 @@ class FormularioTrabajador extends Documento
         }
         $this->autorizaDatos();
 
-        $page = storage_path('public/docs/sello-firma.png');
+        $page = public_path('img/firmas/sello-firma.png');
         $this->pdf->Image($page, 160, 275, 30, 20, '');
         return $this;
     }

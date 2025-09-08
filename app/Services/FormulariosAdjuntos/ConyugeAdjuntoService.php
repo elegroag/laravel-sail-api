@@ -4,6 +4,7 @@ namespace App\Services\FormulariosAdjuntos;
 
 use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsConyuge;
+use App\Library\Tcpdf\KumbiaPDF;
 use App\Models\Mercurio07;
 use App\Models\Mercurio16;
 use App\Models\Mercurio31;
@@ -64,6 +65,8 @@ class ConyugeAdjuntoService
         );
 
         $this->filename = strtotime('now') . "_{$this->request->getCedcon()}.pdf";
+        KumbiaPDF::setBackgroundImage(public_path('img/form/conyuge/formulario_adicion_conyuge.png'));
+
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearFormulario('conyuge');
         $documento->setParamsInit(
@@ -135,6 +138,7 @@ class ConyugeAdjuntoService
     public function declaraJurament()
     {
         $this->filename = strtotime('now') . "_{$this->request->getCedcon()}.pdf";
+        KumbiaPDF::setBackgroundImage(public_path('img/form/declaraciones/declaracion_jura_conyuge.png'));
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearDeclaracion('conyuge');
 

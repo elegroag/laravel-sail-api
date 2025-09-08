@@ -63,8 +63,15 @@ class AutenticaEmpresa extends AutenticaGeneral
         /**
          * buscar usuario de empresa en mercurio
          */
-        $usuarioParticular = (new Mercurio07)->findFirst("tipo='P' AND documento='{$documento}' AND coddoc='{$coddoc}'");
-        $usuarioEmpresa = (new Mercurio07)->findFirst("tipo='{$this->tipo}' AND documento='{$documento}' AND coddoc='{$coddoc}'");
+        $usuarioParticular = Mercurio07::where('tipo', 'P')
+            ->where('documento', $documento)
+            ->where('coddoc', $coddoc)
+            ->first();
+
+        $usuarioEmpresa = Mercurio07::where('tipo', $this->tipo)
+            ->where('documento', $documento)
+            ->where('coddoc', $coddoc)
+            ->first();
 
         /**
          * Si está registrada la empresa en sisu, en estado inactivo
@@ -112,14 +119,24 @@ class AutenticaEmpresa extends AutenticaGeneral
                  * Si existe el usuario de mercurio, dado que la empresa está inactiva en sisu.
                  * se inactivan todas las solicitudes vigentes, dado que la empresa este inactiva en sisu
                  */
-                $soliPrevias = (new Mercurio30)->findFirst("tipo='{$this->tipo}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado='A'");
+                $soliPrevias = Mercurio30::where('tipo', $this->tipo)
+                    ->where('documento', $documento)
+                    ->where('coddoc', $coddoc)
+                    ->where('estado', 'A')
+                    ->first();
+
                 if ($soliPrevias) {
                     $soliPrevias->setEstado('I');
                     $soliPrevias->setFecest(date('Y-m-d'));
                     $soliPrevias->save();
                 }
 
-                $soliPrevTraba = (new Mercurio31)->getFind("tipo='{$this->tipo}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado='A'");
+                $soliPrevTraba = Mercurio31::where('tipo', $this->tipo)
+                    ->where('documento', $documento)
+                    ->where('coddoc', $coddoc)
+                    ->where('estado', 'A')
+                    ->get();
+
                 if ($soliPrevTraba) {
                     foreach ($soliPrevTraba as $soli) {
                         $soli->setEstado('I');
@@ -128,7 +145,11 @@ class AutenticaEmpresa extends AutenticaGeneral
                     }
                 }
 
-                $soliPrevCon = (new Mercurio32)->getFind("tipo='{$this->tipo}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado='A'");
+                $soliPrevCon = Mercurio32::where('tipo', $this->tipo)
+                    ->where('documento', $documento)
+                    ->where('coddoc', $coddoc)
+                    ->where('estado', 'A')
+                    ->get();
                 if ($soliPrevCon) {
                     foreach ($soliPrevCon as $soli) {
                         $soli->setEstado('I');
@@ -137,7 +158,12 @@ class AutenticaEmpresa extends AutenticaGeneral
                     }
                 }
 
-                $soliPrevBen = (new Mercurio34)->getFind("tipo='{$this->tipo}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado='A'");
+                $soliPrevBen = Mercurio34::where('tipo', $this->tipo)
+                    ->where('documento', $documento)
+                    ->where('coddoc', $coddoc)
+                    ->where('estado', 'A')
+                    ->get();
+
                 if ($soliPrevBen) {
                     foreach ($soliPrevBen as $soli) {
                         $soli->setEstado('I');

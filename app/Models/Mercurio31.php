@@ -13,6 +13,11 @@ class Mercurio31 extends ModelBase
     public $timestamps = false;
     protected $primaryKey = 'id';
 
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
+    }
+
     protected $fillable = [
         'log',
         'nit',
@@ -79,7 +84,6 @@ class Mercurio31 extends ModelBase
         'tipcue',
         'fecafi',
     ];
-
 
     public function setFecafi($fecafi)
     {
@@ -1122,8 +1126,7 @@ class Mercurio31 extends ModelBase
 
     public function CamposDisponibles()
     {
-        $db = DbBase::rawConnect();
-        $rqs = $db->inQueryAssoc("SELECT * FROM mercurio12");
+        $rqs = $this->db->inQueryAssoc("SELECT * FROM mercurio12");
         $data = array();
         foreach ($rqs as $ai => $row) $data[$row['coddoc']] = $row['detalle'];
         return $data;
@@ -1133,11 +1136,6 @@ class Mercurio31 extends ModelBase
     {
         $data = $this->CamposDisponibles();
         return $data["{$campo}"];
-    }
-
-    public function createAttributes($data)
-    {
-        parent::setCreateAttributes($this, $data);
     }
 
     public function solicitante()

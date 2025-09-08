@@ -6,6 +6,7 @@ use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsConyuge;
 use App\Models\Gener18;
 use App\Services\Formularios\Documento;
+use Carbon\Carbon;
 
 class FormularioConyuge extends Documento
 {
@@ -42,8 +43,6 @@ class FormularioConyuge extends Documento
         $this->pdf->SetCreator("Plataforma Web: comfacaenlinea.com.co, COMFACA");
         $this->pdf->SetKeywords('COMFACA');
 
-        $page1 = storage_path('public/docs/form/conyuge/formulario_adicion_conyuge.png');
-        $this->pdf->Image($page1, 0, 0, 210, 297);
         $this->pdf->SetAutoPageBreak(false, 0);
         $this->headerForm();
         $this->dataTrabajador();
@@ -54,7 +53,7 @@ class FormularioConyuge extends Documento
                 array('lb' => 'Acepta politica', 'texto' => 'X', 'x' => 168, 'y' => 263.5)
             )
         );
-        $page = storage_path('public/docs/sello-firma.png');
+        $page = public_path('img/firmas/sello-firma.png');
         $this->pdf->Image($page, 160, 275, 30, 20, '');
         return $this;
     }

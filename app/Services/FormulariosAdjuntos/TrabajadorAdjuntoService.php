@@ -4,6 +4,7 @@ namespace App\Services\FormulariosAdjuntos;
 
 use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsEmpresa;
+use App\Library\Tcpdf\KumbiaPDF;
 use App\Models\Mercurio16;
 use App\Models\Mercurio30;
 use App\Models\Mercurio32;
@@ -60,6 +61,7 @@ class TrabajadorAdjuntoService
     public function tratamientoDatos()
     {
         $this->filename = "tratamiento_datos_trabajador_{$this->request->getCedtra()}.pdf";
+        KumbiaPDF::setBackgroundImage(false);
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearPolitica('trabajador');
         $documento->setParamsInit(
@@ -95,6 +97,7 @@ class TrabajadorAdjuntoService
 
         $out = $procesadorComando->toArray();
         $this->filename = "carta_solicitud_independiente_{$this->request->getCedtra()}.pdf";
+        KumbiaPDF::setBackgroundImage(false);
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearOficio('trabajador');
         $documento->setParamsInit(array(
@@ -137,6 +140,8 @@ class TrabajadorAdjuntoService
         $empresa = new Mercurio30($out->data);
 
         $this->filename = strtotime('now') . "_{$this->request->getCedtra()}.pdf";
+        KumbiaPDF::setBackgroundImage(public_path('img/form/trabajador/form-001-tra-p01.png'));
+
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearFormulario('trabajador');
         $documento->setParamsInit(

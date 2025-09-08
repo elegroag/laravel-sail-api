@@ -37,16 +37,16 @@ class FacultativoDatosPersonales extends Documento
         $this->pdf->SetCreator("Plataforma Web: comfacaenlinea.com.co, COMFACA");
         $this->pdf->SetKeywords('COMFACA');
 
-        $imagen = public_path('docs/form/datos-personales/datos-personales-trabajador-01.jpg');
+        $imagen = public_path('img/form/datos-personales/datos-personales-trabajador-01.jpg');
         $this->addBackground($imagen);
         $selloFirma = public_path('docs/sello-firma.png');
         $this->pdf->Image($selloFirma, 160, 275, 30, 20, '', '', '', false, 300, '', false, false, 0);
 
         $this->pdf->AddPage();
-        $imagen = public_path('docs/form/datos-personales/datos-personales-trabajador-02.jpg');
+        $imagen = public_path('img/form/datos-personales/datos-personales-trabajador-02.jpg');
         $this->addBackground($imagen);
         $this->bloqueEmpresa($this->facultativo);
-        $selloFirma = public_path('docs/sello-firma.png');
+        $selloFirma = public_path('img/firmas/sello-firma.png');
         $this->pdf->Image($selloFirma, 160, 265, 30, 20, '', '', '', false, 300, '', false, false, 0);
     }
 

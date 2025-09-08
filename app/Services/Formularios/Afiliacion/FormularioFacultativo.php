@@ -35,9 +35,6 @@ class FormularioFacultativo extends Documento
         $this->pdf->SetCreator("Plataforma Web: comfacaenlinea.com.co, COMFACA");
         $this->pdf->SetKeywords('COMFACA');
 
-        $page1 = storage_path('public/docs/form/trabajador/form-001-tra-p01.png');
-        $this->pdf->Image($page1, 0, 0, 210, 297, '');
-
         $this->pdf->SetAutoPageBreak(false, 0);
         $this->tipoAfiliado();
         $this->dataEmpleador();
@@ -49,7 +46,8 @@ class FormularioFacultativo extends Documento
                 array('lb' => 'Autoriza datos', 'texto' => 'X', 'x' => 70, 'y' => 277),
             )
         );
-        $page = storage_path('public/docs/sello-firma.png');
+
+        $page = public_path('img/firmas/sello-firma.png');
         $this->pdf->Image($page, 160, 275, 30, 20, '');
         return $this;
     }
@@ -169,7 +167,7 @@ class FormularioFacultativo extends Documento
 
     function posTipoAfiliado()
     {
-        if (!$ths->facultativo->getTipafi() == '63') {
+        if (!$this->facultativo->getTipafi() == '63') {
             //2%
             $x = 156;
             $y = 36;
