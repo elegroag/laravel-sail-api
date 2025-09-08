@@ -1,11 +1,15 @@
+@php
+    use App\Services\Tag;
+    $fecsol = date('Y-m-d');
+@endphp
 <div class="tab-content" id="pills-tabContent">
     <div class="tab-pane fade show active" id="datos_solicitud" role="tabpanel" aria-labelledby="datos_solicitud-tab">
         <div class="card-body">
             <form id="formRequest" class="validation_form" autocomplete="off" novalidate>
             <div class="d-none">
-                <input type="number" name="id" class="d-none" oninput="this.value=this.value.replace(/[^0-9]/g,'');">
-                <input type="text" name="calemp" class="d-none text-uppercase" value="F">
-                <input type="text" name="coddocrepleg" class="d-none text-uppercase" value="">
+                <input type="number" name="id" class="d-none"/>
+                <input type="text" name="calemp" class="d-none text-uppercase" value="F"/>
+                <input type="text" name="coddocrepleg" class="d-none text-uppercase" value=""/>
             </div>
             <div class="row">
                 <div class="col-12">
@@ -14,7 +18,7 @@
                         <div class="row">
                             <div class="form-group d-none">
                                 <label for="fecsol" class="control-label d-none">Fecha solicitud:</label>
-                                <input class='form-control d-none' type="date" name='fecsol' id='fecsol' value="<?= date('Y-m-d') ?>">
+                                <input class='form-control d-none' type="date" name='fecsol' id='fecsol' value="{{ $fecsol }}">
                             </div>
 
                             <div class="col-md-3">
@@ -80,11 +84,7 @@
                             <div class="col-md-3">
                                 <div class="form-group" group-for='fecini'>
                                     <label for="fecini" class="control-label">Fecha inicio:</label>
-                                    <?= Tag::calendar(
-                                        "fecini",
-                                        "class: btn calendar",
-                                        "placeholder: Fecha Inicial"
-                                    ); ?>
+                                    <input type="date" name="fecini" class="form-control" placeholder="Fecha Inicial">
                                 </div>
                             </div>
 
@@ -98,11 +98,7 @@
                             <div class="col-md-3">
                                 <div class="form-group" group-for='fecnac'>
                                     <label for="fecnac" class="control-label">Fecha nacimiento</label>
-                                    <?= Tag::calendar(
-                                        "fecnac",
-                                        "class: btn calendar",
-                                        "placeholder: AÑO-MES-DÍA"
-                                    ); ?>
+                                    <input type="date" name="fecnac" class="form-control" placeholder="Fecha nacimiento">
                                     <label id="fecnac-error" class="error" for="fecnac"></label>
                                 </div>
                             </div>
@@ -169,14 +165,14 @@
                             <div class="col-md-3">
                                 <div class="form-group" group-for='direccion'>
                                     <label for="direccion" class="control-label ">Dirección de residencia</label>
-                                    <?= Tag::addressField("direccion", "class: form-control", "placeholder: Dirección"); ?>
+                                    <?= Tag::addressField("direccion", "class: form-control", "placeholder: Dirección", "event: render"); ?>
                                 </div>
                             </div>
 
                             <div class="col-md-3">
                                 <div class="form-group" group-for='dirlab'>
                                     <label for="dirlab" class="control-label">Dirección de trabajo</label>
-                                    <?= Tag::addressField("dirlab", "class: form-control", "placeholder: Direccion Labor"); ?>
+                                    <?= Tag::addressField("dirlab", "class: form-control", "placeholder: Direccion Labor", "event: render"); ?>
                                 </div>
                             </div>
 
@@ -362,6 +358,6 @@
     <div class="tab-pane fade" id="documentos_adjuntos" role="tabpanel" aria-labelledby="documentos_adjuntos-tab">...</div>
     <div class="tab-pane fade" id="firma" role="tabpanel" aria-labelledby="firma-tab">...</div>
     <div class="tab-pane fade" id="enviar_radicado" role="tabpanel" aria-labelledby="enviar_radicado-tab">
-        @include('templates.tmp_send_radicado')
+        @include('mercurio/templates.tmp_send_radicado')
     </div>
 </div>

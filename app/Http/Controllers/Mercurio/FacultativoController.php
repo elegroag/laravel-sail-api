@@ -58,7 +58,7 @@ class FacultativoController extends ApplicationController
 
     public function indexAction()
     {
-        return view("facultativo/index", [
+        return view("mercurio/facultativo/index", [
             "title" => "Afiliación Facultativos",
             'tipo' => $this->tipo,
             'documento' => $this->user['documento'],
@@ -69,9 +69,9 @@ class FacultativoController extends ApplicationController
     {
         $this->setResponse("ajax");
         try {
-            $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
+            $id = $request->input('id');
             $params = $this->serializeData($request);
-            $params['id'] = $id;
+
             $params['tipo'] = parent::getActUser("tipo");
             $params['coddoc'] = parent::getActUser("coddoc");
             $params['documento'] = parent::getActUser("documento");
@@ -111,37 +111,30 @@ class FacultativoController extends ApplicationController
     {
         $this->setResponse("ajax");
         $facultativoService = new FacultativoService();
-        # $facultativoService->setTransa();
+        $this->db->begin();
 
         try {
             $id = $request->input('id', "addslaches", "extraspaces", "striptags");
             $params = $this->serializeData($request);
-            $params['tipo'] = parent::getActUser("tipo");
-            $params['coddoc'] = parent::getActUser("coddoc");
-            $params['documento'] = parent::getActUser("documento");
-            $params['estado'] = 'T';
+
+            $params['tipo'] = $this->tipo;
+            $params['coddoc'] = $this->user['coddoc'];
+            $params['documento'] = $this->user['documento'];
 
             $this->asignarFuncionario = new AsignarFuncionario();
-            $params['usuario'] = $this->asignarFuncionario->asignar($this->tipopc, parent::getActUser("codciu"));
+            $params['usuario'] = $this->asignarFuncionario->asignar($this->tipopc, $params['codzon']);
 
             if (is_null($id) || $id == '') {
-                $params['id'] = null;
-                $params['estado'] = 'T';
                 $facultativo = $facultativoService->createByFormData($params);
-                $soli = $facultativo->getArray();
-                $id = $soli['id'];
             } else {
                 $res = $facultativoService->updateByFormData($id, $params);
                 if ($res == false) {
                     throw new DebugException("Error no se actualizo los datos", 301);
                 }
+                $facultativo = $facultativoService->findById($id);
             }
 
-            # $facultativoService->endTransa();
-
-            $facultativo = $facultativoService->findById($id);
             $facultativoService->paramsApi();
-
             $facultativoAdjuntoService = new FacultativoAdjuntoService($facultativo);
             $out = $facultativoAdjuntoService->formulario()->getResult();
             (new GuardarArchivoService(
@@ -177,13 +170,15 @@ class FacultativoController extends ApplicationController
                 'msj' => 'Registro completado con éxito',
                 'data' => $data
             );
+            $this->db->commit();
         } catch (DebugException $e) {
             $response = array(
                 'success' => false,
                 'msj' => $e->getMessage()
             );
+            $this->db->rollBack();
         }
-        return $this->renderObject($response, false);
+        return $this->renderObject($response);
     }
 
     /**
@@ -193,50 +188,50 @@ class FacultativoController extends ApplicationController
     function serializeData(Request $request)
     {
         return array(
-            'coddocrepleg' => $request->input('coddocrepleg', "addslaches", "extraspaces", "striptags"),
-            'cedtra' => $request->input('cedtra', "addslaches", "extraspaces", "striptags"),
-            'rural' => $request->input('rural', "addslaches", "extraspaces", "striptags"),
-            'vivienda' => $request->input('vivienda', "addslaches", "extraspaces", "striptags"),
-            'tipafi' => $request->input('tipafi', "addslaches", "extraspaces", "striptags"),
-            'fecini' => $request->input('fecini', "extraspaces"),
-            'tippag' => $request->input('tippag', "addslaches", "extraspaces", "striptags"),
-            'cargo' => $request->input('cargo', "addslaches", "extraspaces", "striptags"),
-            'resguardo_id' => $request->input('resguardo_id', "addslaches", "extraspaces", "striptags"),
-            'peretn' => $request->input('peretn', "addslaches", "extraspaces", "striptags"),
-            'pub_indigena_id' => $request->input('pub_indigena_id', "addslaches", "extraspaces", "striptags"),
-            'cedtra' => $request->input('cedtra', "addslaches", "extraspaces", "striptags"),
-            'tipdoc' => $request->input('tipdoc', "addslaches", "alpha", "extraspaces", "striptags"),
-            'priape' => $request->input('priape', "addslaches", "extraspaces", "striptags"),
-            'segape' => $request->input('segape', "addslaches", "extraspaces", "striptags"),
-            'prinom' => $request->input('prinom', "addslaches", "extraspaces", "striptags"),
-            'segnom' => $request->input('segnom', "addslaches", "extraspaces", "striptags"),
-            'fecnac' => $request->input('fecnac', "addslaches", "extraspaces", "striptags"),
-            'ciunac' => $request->input('ciunac', "addslaches", "extraspaces", "striptags"),
-            'sexo' => $request->input('sexo', "addslaches", "extraspaces", "striptags"),
-            'estciv' => $request->input('estciv', "addslaches", "extraspaces", "striptags"),
-            'cabhog' => $request->input('cabhog', "addslaches", "extraspaces", "striptags"),
-            'codciu' => $request->input('codciu', "addslaches", "extraspaces", "striptags"),
-            'codzon' => $request->input('codzon', "addslaches", "extraspaces", "striptags"),
-            'direccion' => $request->input('direccion', "addslaches", "extraspaces", "striptags"),
-            'barrio' => $request->input('barrio', "addslaches", "extraspaces", "striptags"),
-            'telefono' => $request->input('telefono', "addslaches", "extraspaces", "striptags"),
-            'celular' => $request->input('celular', "addslaches", "extraspaces", "striptags"),
-            'email' => $request->input('email', "addslaches", "extraspaces", "striptags"),
-            'salario' => $request->input('salario', "addslaches", "extraspaces", "striptags"),
-            'captra' => $request->input('captra', "addslaches", "extraspaces", "striptags"),
-            'tipdis' => $request->input('tipdis', "addslaches", "extraspaces", "striptags"),
-            'nivedu' => $request->input('nivedu', "addslaches", "extraspaces", "striptags"),
-            'vivienda' => $request->input('vivienda', "addslaches", "extraspaces", "striptags"),
-            'autoriza' => $request->input('autoriza', "addslaches", "extraspaces", "striptags"),
-            'codact' => $request->input('codact', "addslaches", "extraspaces", "striptags"),
-            'codcaj' => $request->input('codcaj', "addslaches", "extraspaces", "striptags"),
-            'facvul' => $request->input('facvul', "addslaches", "extraspaces", "striptags"),
-            'orisex' => $request->input('orisex', "addslaches", "extraspaces", "striptags"),
-            'codban' => $request->input('codban', "addslaches", "extraspaces", "striptags"),
+            'coddocrepleg' => $request->input('coddocrepleg'),
+            'cedtra' => $request->input('cedtra'),
+            'rural' => $request->input('rural'),
+            'vivienda' => $request->input('vivienda'),
+            'tipafi' => $request->input('tipafi'),
+            'fecini' => $request->input('fecini'),
+            'tippag' => $request->input('tippag'),
+            'cargo' => $request->input('cargo'),
+            'resguardo_id' => $request->input('resguardo_id'),
+            'peretn' => $request->input('peretn'),
+            'pub_indigena_id' => $request->input('pub_indigena_id'),
+            'cedtra' => $request->input('cedtra'),
+            'tipdoc' => $request->input('tipdoc'),
+            'priape' => $request->input('priape'),
+            'segape' => $request->input('segape'),
+            'prinom' => $request->input('prinom'),
+            'segnom' => $request->input('segnom'),
+            'fecnac' => $request->input('fecnac'),
+            'ciunac' => $request->input('ciunac'),
+            'sexo' => $request->input('sexo'),
+            'estciv' => $request->input('estciv'),
+            'cabhog' => $request->input('cabhog'),
+            'codciu' => $request->input('codciu'),
+            'codzon' => $request->input('codzon'),
+            'direccion' => $request->input('direccion'),
+            'barrio' => $request->input('barrio'),
+            'telefono' => $request->input('telefono'),
+            'celular' => $request->input('celular'),
+            'email' => $request->input('email'),
+            'salario' => $request->input('salario'),
+            'captra' => $request->input('captra'),
+            'tipdis' => $request->input('tipdis'),
+            'nivedu' => $request->input('nivedu'),
+            'vivienda' => $request->input('vivienda'),
+            'autoriza' => $request->input('autoriza'),
+            'codact' => $request->input('codact'),
+            'codcaj' => $request->input('codcaj'),
+            'facvul' => $request->input('facvul'),
+            'orisex' => $request->input('orisex'),
+            'codban' => $request->input('codban'),
             'calemp' => 'F',
-            'tipcue' => $request->input('tipcue', "addslaches", "extraspaces", "striptags"),
-            'numcue' => $request->input('numcue', "addslaches", "extraspaces", "striptags"),
-            'cargo' => $request->input('cargo', "addslaches", "extraspaces", "striptags"),
+            'tipcue' => $request->input('tipcue'),
+            'numcue' => $request->input('numcue'),
+            'cargo' => $request->input('cargo'),
             'fecsol' => date('Y-m-d'),
         );
     }
@@ -250,12 +245,12 @@ class FacultativoController extends ApplicationController
         $this->setResponse("ajax");
         try {
 
-            $cedtra = $request->input('cedtra', "addslaches", "alpha", "extraspaces", "striptags");
-            $solicitud = (new Mercurio36())->findFirst(" documento='{$cedtra}' and estado IN('A','I')");
+            $cedtra = $request->input('cedtra');
+            $solicitud = Mercurio36::where("documento", $cedtra)->whereIn("estado", ['A', 'I'])->first();
 
             $solicitudPrevia = false;
             if ($solicitud) {
-                $solicitudPrevia = $solicitud->getArray();
+                $solicitudPrevia = $solicitud->toArray();
             }
 
             $procesadorComando = Comman::Api();
@@ -697,7 +692,7 @@ class FacultativoController extends ApplicationController
         $this->setResponse("view");
         $this->facultativoService = new FacultativoService();
         $html = view(
-            "facultativo/tmp/solicitudes",
+            "mercurio/facultativo/tmp/solicitudes",
             array(
                 "path" => base_path(),
                 "facultativos" => $this->facultativoService->findAllByEstado($estado)

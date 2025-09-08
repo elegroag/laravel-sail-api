@@ -127,7 +127,7 @@ class PensionadoController extends ApplicationController
      */
     public function guardarAction(Request $request)
     {
-        $this->setResponse("ajax");
+        //$this->setResponse("ajax");
         $pensionadoService = new PensionadoService();
         $this->db->begin();
         try {

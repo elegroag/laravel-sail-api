@@ -1,3 +1,16 @@
+@if(count($facultativos) == 0)
+    <caption>
+        ¡No hay solicitudes disponibles para mostrar!
+    </caption>
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+@endif
+
 @foreach ($facultativos as $solicitud)
     <tr>
         <td>
@@ -20,11 +33,6 @@
                             <i class='fas fa-hand-pointer'></i> OK
                         </button>
                     </span>
-                    <span style='margin-left:2px'>
-                        <button type="button" class='btn btn-sm btn-primary' data-toggle='event-cuenta' data-cid="{{ $solicitud['id'] }}">
-                            <i class='fas fa-cog text-white'></i> Administrar
-                        </button>
-                    </span>
                 @else
                     @if ($solicitud['estado'] != 'X')
                         <span style='margin-left:2px'>
@@ -45,21 +53,21 @@
             </div>
         </td>
         <td>
-            <p class="text-sm mb-0">
-                {{ $solicitud['cedtra'] }} {{ capitalize($solicitud['razsoc']) }} {{ $solicitud['tipo_persona'] }} De {{ $solicitud['detalle_zona'] }}
+            <p class="text-sm  mb-0">
+                Identificación {{ $solicitud['cedtra'] }} {{ capitalize($solicitud['razsoc']) }} {{ $solicitud['tipo_persona'] }}<br />De {{ $solicitud['detalle_zona'] }}
             </p>
         </td>
         <td>
-            <p class="text-sm mb-0">{{ $solicitud['estado_detalle'] }}</p>
+            <p class="text-sm  mb-0">{{ $solicitud['estado_detalle'] }}</p>
         </td>
         <td>
-            <p class="text-sm mb-0">
+            <p class="text-sm  mb-0">
                 {{ ($solicitud['fecha_ultima_solicitud']) ? $solicitud['fecha_ultima_solicitud'] : "<br/>No se ha realizado ningún envío para validación" }}
                 N° {{ $solicitud['cantidad_eventos'] }}
             </p>
         </td>
         <td>
-            <p class="text-sm mb-0">{{ $solicitud['fecest'] }}</p>
+            <p class="text-sm  mb-0">{{ $solicitud['fecest'] }}</p>
         </td>
     </tr>
 @endforeach
