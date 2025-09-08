@@ -224,7 +224,7 @@ class PerfilView extends Backbone.View {
                                         cancelButtonColor: '#fc8c72',
                                         confirmButtonText: 'SI, Continuar!',
                                     }).then((result) => {
-                                        window.location.href = $App.kumbiaURL('login/salir');
+                                        window.location.href = $App.url('salir');
                                     });
                                 } else {
                                     $App.trigger('alert:error', { message: response.msj });

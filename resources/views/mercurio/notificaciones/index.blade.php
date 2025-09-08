@@ -1,21 +1,21 @@
 @extends('layouts.bone')
 
 @push('styles')
-<script src="{{ asset('assets/summernote/summernote-bs5/css/summernote-bs5.min.css') }}"></script>
+<link rel="stylesheet" href="{{ asset('assets/summernote/summernote-bs5.min.css') }}">
 @endpush
 
 @section('content')
-<div class='card-header' id='afiliacion_header'>
+<div class='card-header p-3' id='afiliacion_header'>
     <h3>REPORTAR</h3>
 </div>
 
 <div class="col-auto m-2">
-    <div id='boneLayout'></div>
+    <div class='card p-3' id='boneLayout'></div>
 </div>
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/summernote/summernote-bs5/js/summernote-bs5.min.js') }}"></script>
+<script src="{{ asset('assets/summernote/summernote-bs5.min.js') }}"></script>
 <script src="{{ asset('assets/summernote/lang/summernote-es-ES.min.js') }}"></script>
 
 <script type='text/template' id='tmp_formulario'>
@@ -77,7 +77,7 @@
             </div>
             <div class="col-md-4">
                 <div class="card">
-                    <?php echo Tag::image("Mercurio/2022-09-05-10-34-01AM.jpeg", "class: navbar-brand-img"); ?>
+                    <img src="{{ asset('img/Mercurio/2022-09-05-10-34-01AM.jpeg') }}" class="card-img-top" alt="...">
                     <div class="card-body">
                         <h5 class="card-title"></h5>
                         <p class="card-text text-left">Con el fin de mejorar la experiencia de los usuarios en la plataforma "Comfaca En Línea",
@@ -90,7 +90,12 @@
     </div>
 </script>
 
-<script src="{{ asset('mercurio/Notificaciones.js') }}"></script>
+<script>
+    const _TITULO = "{{ $title }}";
+    window.ServerController = 'notificaciones';
+</script>
+
+<script src="{{ asset('mercurio/build/Notificaciones.js') }}"></script>
 @endpush
 
 @section('styles')

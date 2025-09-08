@@ -1,5 +1,10 @@
-<div id='boneLayout'></div>
+@extends('layouts.bone')
 
+@section('content')
+<div id='boneLayout'></div>
+@endsection
+
+@push('scripts')
 <script type="text/template" id='tmp_layout'>
     <div class="row m-2">
         <div class="col-xs-12 col-md-6">
@@ -17,7 +22,13 @@
 </script>
 
 <script type="text/template" id='tmp_perfil'>
-    @include('usuario.tmp.tmp_perfil')
+    @include('mercurio/usuario/tmp/tmp_perfil')
 </script>
 
-<script src="{{ asset('mercurio/Usuario.js') }}"></script>
+<script>
+    const _TITULO = "{{ $title }}";
+    window.ServerController = 'usuario';
+</script>
+
+<script src="{{ asset('mercurio/build/Usuario.js') }}"></script>
+@endpush

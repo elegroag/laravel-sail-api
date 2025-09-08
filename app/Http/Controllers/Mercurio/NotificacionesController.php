@@ -31,9 +31,12 @@ class NotificacionesController extends ApplicationController
 
     public function indexAction()
     {
-        return view('notificaciones.index', [
+        return view('mercurio.notificaciones.index', [
             'hide_header' => true,
-            'title' => 'Reportar errores y problemas'
+            'title' => 'Reportar errores y problemas',
+            'documento' => $this->user['documento'],
+            'codciu' => $this->user['codciu'],
+            'tipo' => $this->tipo
         ]);
     }
 
@@ -41,15 +44,14 @@ class NotificacionesController extends ApplicationController
     {
         $this->setResponse("ajax");
         try {
-            $user = $this->user;
-            $documento = $user['documento'];
-            $servicio = $request->input('servicio', "addslaches", "alpha", "extraspaces", "striptags");
-            $telefono = $request->input('telefono', "addslaches", "alpha", "extraspaces", "striptags");
+            $documento = $this->user['documento'];
+            $servicio = $request->input('servicio');
+            $telefono = $request->input('telefono');
             $nota = $request->input('nota');
-            $novedad = $request->input('novedad', "addslaches", "alpha", "extraspaces", "striptags");
+            $novedad = $request->input('novedad');
+
             $solicitante = Mercurio07::where('documento', $documento)->first();
             $notificacion = new NotificacionService();
-
 
             $filepath = '';
             if (isset($_FILES['file'])) {

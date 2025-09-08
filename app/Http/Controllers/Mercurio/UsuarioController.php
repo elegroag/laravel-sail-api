@@ -29,7 +29,10 @@ class UsuarioController extends ApplicationController
     public function indexAction()
     {
         return view('mercurio.usuario.index', [
-            'title' => 'Perfil usuario'
+            'title' => 'Perfil usuario',
+            'documento' => $this->user['documento'],
+            'coddoc' => $this->user['coddoc'],
+            'tipo' => $this->tipo
         ]);
     }
 
@@ -76,34 +79,35 @@ class UsuarioController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function show_perfilAction()
+    public function showPerfilAction()
     {
         $this->setResponse("ajax");
         try {
-            $mtipoDocumentos = new Gener18();
+            $documento = $this->user['documento'];
+            $coddoc = $this->user['coddoc'];
+            $tipo = $this->tipo;
+
+            $mtipoDocumentos = Gener18::all();
             $mcoddoc = array();
-            foreach ($mtipoDocumentos->all() as $entity) {
+            foreach ($mtipoDocumentos as $entity) {
                 if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') continue;
                 $mcoddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
             }
 
             $mcodciu = array();
-            $mgener09 = new Gener09();
-            foreach ($mgener09->getFind("conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
-                $mcodciu["{$entity->getCodzon()}"] = $entity->getDetzon();
+            $mgener09 = Gener09::whereBetween('codzon', ['18000', '19000'])->get();
+            foreach ($mgener09 as $entity) {
+                $mcodciu["{$entity->codzon}"] = $entity->detzon;
             }
 
             $mtipos = (new Mercurio07())->getArrayTipos();
-            $documento = parent::getActUser("documento");
-            $tipo = parent::getActUser("tipo");
-            $coddoc = parent::getActUser("coddoc");
 
             $msubsi07 = Mercurio07::where('documento', $documento)
                 ->where('tipo', $tipo)
                 ->where('coddoc', $coddoc)
                 ->first();
 
-            $entity = $msubsi07->getArray();
+            $entity = $msubsi07->toArray();
 
             $entity['coddoc_detalle'] = $mcoddoc[$coddoc];
             $entity['tipo_detalle'] = $mtipos[$tipo];

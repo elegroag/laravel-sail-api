@@ -12,7 +12,9 @@ use App\Http\Controllers\Mercurio\EmpresaController;
 use App\Http\Controllers\Mercurio\FacultativoController;
 use App\Http\Controllers\Mercurio\FirmasController;
 use App\Http\Controllers\Mercurio\IndependienteController;
+use App\Http\Controllers\Mercurio\NotificacionesController;
 use App\Http\Controllers\Mercurio\PensionadoController;
+use App\Http\Controllers\Mercurio\UsuarioController;
 use App\Http\Middleware\EnsureCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
@@ -302,4 +304,16 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
 
     Route::post('/mercurio/actualizadatostra/valida', [ActualizaTrabajadorController::class, 'validaAction']);
     Route::post('/mercurio/actualizadatostra/digito_verification', [ActualizaTrabajadorController::class, 'digitoVerificationAction']);
+});
+
+// Movimientos
+Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
+    Route::get('/mercurio/usuario/index', [UsuarioController::class, 'indexAction'])->name('usuario.index');
+    Route::get('/mercurio/movimientos/historial', [MovimientosController::class, 'historialAction'])->name('movimientos.historial');
+    Route::get('/mercurio/firmas/index', [FirmasController::class, 'indexAction'])->name('firmas.index');
+    Route::get('/mercurio/notificaciones/index', [NotificacionesController::class, 'indexAction'])->name('notificaciones.index');
+    Route::post('/mercurio/notificaciones/procesar_notificacion', [NotificacionesController::class, 'procesarNotificacionAction']);
+    Route::post('/mercurio/usuario/show_perfil', [UsuarioController::class, 'showPerfilAction']);
+    Route::post('/mercurio/usuario/params', [UsuarioController::class, 'paramsAction']);
+    Route::post('/mercurio/usuario/guardar', [UsuarioController::class, 'guardarAction']);
 });
