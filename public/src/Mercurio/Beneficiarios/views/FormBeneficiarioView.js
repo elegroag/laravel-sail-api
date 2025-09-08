@@ -277,11 +277,11 @@ export class FormBeneficiarioView extends FormView {
     }
 
     changeParent(e) {
-        const parent = this.getInput(e.currentTarget);
+        const parent = this.getInput('#parent');
         if (parent == '1' || parent == '4') {
             this.$el.find('#show_mother').removeClass('d-none');
             this.__hasBiologico(true);
-            this.__changeTipHijo(parent == '4');
+            this.__changeTipHijo(parent == 4);
         } else {
             this.$el.find('#show_mother').addClass('d-none');
             this.__hasBiologico(false);
@@ -322,7 +322,7 @@ export class FormBeneficiarioView extends FormView {
     }
 
     __hasBiologico(status) {
-        if (status === false) {
+        if (status === true) {
             BeneficiarioModel.changeRulesProperty([
                 { rule: 'biocedu', prop: 'required', value: true },
                 { rule: 'biotipdoc', prop: 'required', value: true },

@@ -47,18 +47,16 @@ class FormularioBeneficiario extends Documento
         $this->beneficiario = $this->request->getParam('beneficiario');
         $this->trabajador =  $this->request->getParam('trabajador');
         $this->bioconyu =  $this->request->getParam('bioconyu');
+        $autor = "{$this->trabajador->getPriape()} {$this->trabajador->getSegape()} {$this->trabajador->getPrinom()} {$this->trabajador->getSegnom()}, COMFACA";
 
         $this->pdf->SetTitle("Formulario adición del beneficiario {$this->beneficiario->getNumdoc()}, COMFACA");
-        $this->pdf->SetAuthor("{$this->trabajador->getPriape()} {$this->trabajador->getSegape()} {$this->trabajador->getPrinom()} {$this->trabajador->getSegnom()}, COMFACA");
+        $this->pdf->SetAuthor($autor);
         $this->pdf->SetSubject("Formulario de adición a COMFACA");
         $this->pdf->SetCreator("Plataforma Web: comfacaenlinea.com.co, COMFACA");
         $this->pdf->SetKeywords('COMFACA');
 
         $this->parent =  $this->beneficiario->getParent();
         $this->pdf->SetFont('helvetica', '', 8.5);
-
-        $this->pdf->Image(storage_path('public/docs/form/beneficiarios/form_adicion_beneficiario.png'), 0, 0, 210, 297, '');
-        $this->pdf->SetAutoPageBreak(false, 0);
 
         $this->headerForm();
         $this->dataTrabajador();

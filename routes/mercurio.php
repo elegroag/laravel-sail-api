@@ -35,6 +35,7 @@ Route::get('/mercurio/integracion_servicio', [LoginController::class, 'integraci
 Route::get('/mercurio/guia_videos', [LoginController::class, 'guiaVideosAction']);
 Route::post('/mercurio/download_docs/{archivo}', [LoginController::class, 'downloadDocumentsAction']);
 Route::post('/mercurio/documentos/ver-pdf', [LoginController::class, 'showPdfAction'])->name('documentos.ver-pdf');
+Route::post('mercurio/principal/ingreso_dirigido', [PrincipalController::class, 'ingresoDirigidoAction']);
 
 # Principal
 Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
@@ -66,18 +67,6 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
     Route::get('mercurio/firmas/show', [FirmasController::class, 'showAction'])->name('firmas.show');
 
     Route::post('mercurio/principal/actualiza_estado_solicitudes', [PrincipalController::class, 'actualizaEstadoSolicitudesAction']);
-});
-
-Route::post('mercurio/principal/ingreso_dirigido', [PrincipalController::class, 'ingresoDirigidoAction']);
-
-// Trabajador (migrado desde Kumbia)
-Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
-    Route::post('mercurio/trabajador/valide_nit', [TrabajadorController::class, 'valideNitAction']);
-    Route::post('mercurio/trabajador/borrar_archivo', [TrabajadorController::class, 'borrarArchivoAction']);
-    Route::post('mercurio/trabajador/guardar_archivo', [TrabajadorController::class, 'guardarArchivoAction']);
-    Route::post('mercurio/trabajador/traer_trabajador', [TrabajadorController::class, 'traerTrabajadorAction']);
-    Route::post('mercurio/trabajador/enviar_caja', [TrabajadorController::class, 'enviarCajaAction']);
-    Route::get('mercurio/trabajador/seguimiento/{id}', [TrabajadorController::class, 'seguimientoAction']);
 });
 
 // Empresa (migrado desde Kumbia)
@@ -207,6 +196,9 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
     Route::get('mercurio/trabajador/download_docs/{archivo}', [TrabajadorController::class, 'downloadDocsAction']);
     Route::post('mercurio/trabajador/borrar', [TrabajadorController::class, 'borrarAction']);
     Route::post('mercurio/trabajador/borrar/{id}', [TrabajadorController::class, 'borrarAction']);
+
+    Route::post('mercurio/trabajador/valide_nit', [TrabajadorController::class, 'valideNitAction']);
+    Route::post('mercurio/trabajador/traer_trabajador', [TrabajadorController::class, 'traerTrabajadorAction']);
 });
 
 

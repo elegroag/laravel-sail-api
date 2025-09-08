@@ -7,7 +7,7 @@ class GestionAdjuntoService {
     borrarArchivo(transfer = {}) {
         const { data, callback } = transfer;
         $App.trigger('syncro', {
-            url: $App.url('borrarArchivo'),
+            url: $App.url('borrar_archivo', window.ServerController ?? 'principal'),
             data,
             callback: (response) => {
                 if (response) {

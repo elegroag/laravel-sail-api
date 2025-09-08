@@ -134,15 +134,13 @@ class BeneficiarioController extends ApplicationController
     {
         $this->setResponse("ajax");
         try {
-            $numero = $this->cleanInput($request->input('id'));
-            $coddoc = $this->cleanInput($request->input('coddoc'));
+            $numero = $this->clp($request, 'id');
+            $coddoc = $this->clp($request, 'coddoc');
+            $mercurio37 = Mercurio37::where("tipopc", $this->tipopc)->where("numero", $numero)->where("coddoc", $coddoc)->first();
 
-            $mercurio01 = Mercurio01::first();
-            $mercurio37 = Mercurio37::where("tipopc='{$this->tipopc}' and numero='{$numero}' and coddoc='{$coddoc}'")->first();
-
-            $filepath = base_path() . '' . $mercurio01->getPath() . $mercurio37->getArchivo();
+            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
             if (file_exists($filepath)) {
-                unlink(base_path() . '' . $mercurio01->getPath() . $mercurio37->getArchivo());
+                unlink($filepath);
             }
 
             Mercurio37::where('tipopc', $this->tipopc)
@@ -732,7 +730,7 @@ class BeneficiarioController extends ApplicationController
 
     public function guardarAction(Request $request)
     {
-        $this->setResponse("ajax");
+        //$this->setResponse("ajax");
         $benefiService = new BeneficiarioService();
         $this->db->begin();
         try {
@@ -1017,25 +1015,28 @@ class BeneficiarioController extends ApplicationController
     {
         $this->setResponse("ajax");
         try {
-            $coddoc = $this->cleanInput($request->input('coddoc'));
+            $id = $this->clp($request, 'id');
+            $coddoc = $this->clp($request, 'coddoc');
 
-            $guardarArchivoService = new GuardarArchivoService(array(
+            $guardarArchivoService = new GuardarArchivoService([
                 'tipopc' => $this->tipopc,
                 'coddoc' => $coddoc,
-            ));
+                'id' => $id,
+            ]);
+
             $mercurio37 = $guardarArchivoService->main();
-            $response = array(
+            $response = [
                 'success' => true,
                 'msj' => 'Ok archivo procesado',
-                'data' => $mercurio37->getArray()
-            );
+                'data' => $mercurio37->toArray()
+            ];
         } catch (DebugException $ert) {
-            $response = array(
+            $response = [
                 'success' => false,
                 'msj' => $ert->getMessage()
-            );
+            ];
         }
-        return $this->renderObject($response, false);
+        return $this->renderObject($response);
     }
 
     public function seguimientoAction($id)

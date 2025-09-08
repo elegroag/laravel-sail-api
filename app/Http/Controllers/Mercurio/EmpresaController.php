@@ -180,26 +180,33 @@ class EmpresaController extends ApplicationController
      */
     public function borrarArchivoAction(Request $request)
     {
-        $this->setResponse('ajax');
+        $this->setResponse("ajax");
         try {
             $numero = $this->clp($request, 'id');
             $coddoc = $this->clp($request, 'coddoc');
+            $mercurio37 = Mercurio37::where("tipopc", $this->tipopc)->where("numero", $numero)->where("coddoc", $coddoc)->first();
 
-            $mercurio01 = (new Mercurio01())->findFirst();
-            $mercurio37 = (new Mercurio37())->findFirst("tipopc='{$this->tipopc}' and numero='{$numero}' and coddoc='{$coddoc}'");
-
-            if ($mercurio01 && $mercurio37) {
-                $filepath = base_path('') . '/' . ltrim($mercurio01->getPath() . $mercurio37->getArchivo(), '/');
-                if (file_exists($filepath)) {
-                    @unlink($filepath);
-                }
-                (new Mercurio37())->deleteAll("tipopc='{$this->tipopc}' and numero='{$numero}' and coddoc='{$coddoc}'");
+            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
+            if (file_exists($filepath)) {
+                unlink($filepath);
             }
 
-            return $this->renderObject(['success' => true, 'msj' => 'El archivo se borro de forma correcta']);
+            Mercurio37::where('tipopc', $this->tipopc)
+                ->where('numero', $numero)
+                ->where('coddoc', $coddoc)
+                ->delete();
+
+            $response = array(
+                "success" => true,
+                "msj" => "El archivo se borro de forma correcta"
+            );
         } catch (DebugException $e) {
-            return $this->renderObject(['success' => false, 'msj' => $e->getMessage()]);
+            $response = array(
+                "success" => false,
+                "msj" => $e->getMessage()
+            );
         }
+        return $this->renderObject($response, false);
     }
 
     /**

@@ -360,18 +360,19 @@ class ActualizadatosController extends ApplicationController
     {
         $this->setResponse("ajax");
         try {
-            $numero = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
-            $coddoc = $request->input('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
-
-            $mercurio01 = Mercurio01::first();
+            $numero = $this->clp($request, 'id');
+            $coddoc = $this->clp($request, 'coddoc');
             $mercurio37 = Mercurio37::where("tipopc", $this->tipopc)->where("numero", $numero)->where("coddoc", $coddoc)->first();
 
-            $filepath = base_path() . '' . $mercurio01->getPath() . $mercurio37->getArchivo();
+            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
             if (file_exists($filepath)) {
-                unlink(base_path() . '' . $mercurio01->getPath() . $mercurio37->getArchivo());
+                unlink($filepath);
             }
 
-            Mercurio37::where("tipopc", $this->tipopc)->where("numero", $numero)->where("coddoc", $coddoc)->delete();
+            Mercurio37::where('tipopc', $this->tipopc)
+                ->where('numero', $numero)
+                ->where('coddoc', $coddoc)
+                ->delete();
 
             $response = array(
                 "success" => true,

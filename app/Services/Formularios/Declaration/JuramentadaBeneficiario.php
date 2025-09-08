@@ -41,11 +41,8 @@ class JuramentadaBeneficiario extends Documento
         $this->beneficiario = $this->request->getParam('beneficiario');
         $this->trabajador = $this->request->getParam('trabajador');
         $this->parent =  $this->beneficiario->getParent();
-
         switch ($this->parent) {
             case '1':
-                $page = storage_path('public/docs/form/declaraciones/declaracion_jura_hijo.png');
-                $this->pdf->Image($page, 0, 0, 210, 297, '');
                 // es hijastro
                 if ($this->beneficiario->getTiphij() == 2) {
                     $this->bloqueHijastro();
@@ -56,29 +53,22 @@ class JuramentadaBeneficiario extends Documento
                 $this->bloqueDescoBio();
                 break;
             case '4':
-                $page = storage_path('public/docs/form/declaraciones/declaracion_jura_custodia.png');
-                $this->pdf->Image($page, 0, 0, 210, 297, '');
                 $this->bloqueCustodia();
                 $this->pdf->SetXY(13, 175);
                 $this->bloqueDescoBio();
                 break;
             case '3': //padre
             case '2': //hermano
-                $page = storage_path('public/docs/form/declaraciones/declaracion_jura_padres.png');
-                $this->pdf->Image($page, 0, 0, 210, 297, '');
                 $this->bloqueBeneficiarioPadre();
                 break;
             case '5': //cuidador persona discapacitada
-                $page = storage_path('public/docs/form/declaraciones/declaracion_jura_cuidador.png');
-                $this->pdf->Image($page, 0, 0, 210, 297, '');
                 $this->bloqueBeneficiarioCuidador();
                 break;
             default:
                 break;
         }
-
         $this->bloqueTrabajador();
-        $page = storage_path('public/docs/sello-firma.png');
+        $page = public_path('img/form/sello-firma.png');
         $this->pdf->Image($page, 160, 275, 30, 20, '');
     }
 

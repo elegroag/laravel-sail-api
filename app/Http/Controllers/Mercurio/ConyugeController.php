@@ -92,16 +92,15 @@ class ConyugeController extends ApplicationController
     {
         $this->setResponse("ajax");
         try {
-            $numero = $request->input('id');
-            $coddoc = $request->input('coddoc');
+            $numero = $this->clp($request, 'id');
+            $coddoc = $this->clp($request, 'coddoc');
+            $mercurio37 = Mercurio37::where("tipopc", $this->tipopc)->where("numero", $numero)->where("coddoc", $coddoc)->first();
 
-            $mercurio01 = (new Mercurio01)->findFirst();
-            $mercurio37 = (new Mercurio37)->findFirst("tipopc='{$this->tipopc}' and numero='{$numero}' and coddoc='{$coddoc}'");
-
-            $filepath = storage_path() . '' . $mercurio01->getPath() . $mercurio37->getArchivo();
+            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
             if (file_exists($filepath)) {
-                unlink(storage_path() . '' . $mercurio01->getPath() . $mercurio37->getArchivo());
+                unlink($filepath);
             }
+
             Mercurio37::where('tipopc', $this->tipopc)
                 ->where('numero', $numero)
                 ->where('coddoc', $coddoc)

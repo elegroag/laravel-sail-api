@@ -311,33 +311,31 @@ class PensionadoController extends ApplicationController
     public function borrarArchivoAction(Request $request)
     {
         $this->setResponse("ajax");
-
         try {
-            $numero = $request->input('id');
-            $coddoc = $request->input('coddoc');
+            $numero = $this->clp($request, 'id');
+            $coddoc = $this->clp($request, 'coddoc');
+            $mercurio37 = Mercurio37::where("tipopc", $this->tipopc)->where("numero", $numero)->where("coddoc", $coddoc)->first();
 
-            $mercurio01 = (new Mercurio01())->findFirst();
-            $mercurio37 = (new Mercurio37())->findFirst("tipopc='{$this->tipopc}' AND numero='{$numero}' AND coddoc='{$coddoc}'");
-
-            if ($mercurio37) {
-                $filepath = storage_path($mercurio01->getPath() . $mercurio37->getArchivo());
-                if (file_exists($filepath)) {
-                    unlink($filepath);
-                }
-                (new Mercurio37())->deleteAll("tipopc='{$this->tipopc}' AND numero='{$numero}' AND coddoc='{$coddoc}'");
+            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
+            if (file_exists($filepath)) {
+                unlink($filepath);
             }
 
-            $response = [
-                'success' => true,
-                'msj' => 'El archivo se eliminó correctamente'
-            ];
-        } catch (\Exception $e) {
-            $response = [
-                'success' => false,
-                'msj' => 'Error al eliminar el archivo: ' . $e->getMessage()
-            ];
-        }
+            Mercurio37::where('tipopc', $this->tipopc)
+                ->where('numero', $numero)
+                ->where('coddoc', $coddoc)
+                ->delete();
 
+            $response = array(
+                "success" => true,
+                "msj" => "El archivo se borro de forma correcta"
+            );
+        } catch (DebugException $e) {
+            $response = array(
+                "success" => false,
+                "msj" => $e->getMessage()
+            );
+        }
         return $this->renderObject($response, false);
     }
 

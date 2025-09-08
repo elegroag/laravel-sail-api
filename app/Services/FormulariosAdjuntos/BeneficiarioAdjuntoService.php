@@ -5,6 +5,7 @@ namespace App\Services\FormulariosAdjuntos;
 use App\Models\Mercurio16;
 use App\Library\Collections\ParamsTrabajador;
 use App\Library\Collections\ParamsBeneficiario;
+use App\Library\Tcpdf\KumbiaPDF;
 use App\Models\Mercurio31;
 use App\Models\Mercurio32;
 use App\Models\Mercurio36;
@@ -68,44 +69,52 @@ class BeneficiarioAdjuntoService
     {
         $trabajador = false;
         $mtrabajador = false;
-        switch (trim($this->request->getTipo())) {
+        switch (session('tipo')) {
             case 'I':
-                $mtrabajador = new Mercurio41();
+                $mtrabajador = Mercurio41::where('cedtra', $this->request->getCedtra())
+                    ->where('documento', $this->request->getDocumento())
+                    ->where('coddoc', $this->request->getCoddoc())
+                    ->first();
                 break;
             case 'O':
-                $mtrabajador = new Mercurio38();
+                $mtrabajador = Mercurio38::where('cedtra', $this->request->getCedtra())
+                    ->where('documento', $this->request->getDocumento())
+                    ->where('coddoc', $this->request->getCoddoc())
+                    ->first();
                 break;
             case 'F':
-                $mtrabajador = new Mercurio36();
+                $mtrabajador = Mercurio36::where('cedtra', $this->request->getCedtra())
+                    ->where('documento', $this->request->getDocumento())
+                    ->where('coddoc', $this->request->getCoddoc())
+                    ->first();
                 break;
             case 'T':
             case 'E':
-                $mtrabajador = new Mercurio31();
+                $mtrabajador = Mercurio31::where('cedtra', $this->request->getCedtra())
+                    ->where('documento', $this->request->getDocumento())
+                    ->where('coddoc', $this->request->getCoddoc())
+                    ->first();
                 break;
             default:
-                $trabajador = (new Mercurio31())->findFirst(
-                    " documento='{$this->request->getDocumento()}' and " .
-                        " coddoc='{$this->request->getCoddoc()}' and " .
-                        " cedtra='{$this->request->getCedtra()}' and " .
-                        " estado IN('A','P','T')"
-                );
+                $trabajador = Mercurio31::where('cedtra', $this->request->getCedtra())
+                    ->where('documento', $this->request->getDocumento())
+                    ->where('coddoc', $this->request->getCoddoc())
+                    ->whereIn('estado', ['A', 'P', 'T'])
+                    ->first();
                 break;
         }
 
-        if (!$trabajador && $mtrabajador) {
-            $trabajador = $mtrabajador->findFirst(
-                " cedtra='{$this->request->getCedtra()}' AND documento='{$this->request->getDocumento()}' AND coddoc='{$this->request->getCoddoc()}'"
-            );
-        }
 
-        if (!$trabajador && $mtrabajador) {
-            $trabajadorService = new TrabajadorService();
-            $data = $trabajadorService->buscarTrabajadorSubsidio($this->request->getCedtra());
-            if ($data) {
+        $trabajadorService = new TrabajadorService();
+        $data = $trabajadorService->buscarTrabajadorSubsidio($this->request->getCedtra());
+        if ($data) {
+            if ($mtrabajador) {
                 $trabajador = clone $mtrabajador;
-                $trabajador->fill($data);
+            } else {
+                $trabajador = new Mercurio31();
             }
         }
+
         return $trabajador;
     }
 
@@ -113,6 +122,7 @@ class BeneficiarioAdjuntoService
     public function formulario()
     {
         $this->filename = "formulario_beneficiario_{$this->request->getNumdoc()}.pdf";
+        KumbiaPDF::setBackgroundImage(public_path('img/form/beneficiarios/form_adicion_beneficiario.png'));
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearFormulario('beneficiario');
         $documento->setParamsInit(
@@ -133,7 +143,27 @@ class BeneficiarioAdjuntoService
     public function declaraJurament()
     {
         $this->filename = "declaracion_hijo_{$this->request->getNumdoc()}.pdf";
+        $parent = $this->request->getParent();
+        switch ($parent) {
+            case '1':
+                $page = public_path('img/form/declaraciones/declaracion_jura_hijo.png');
+                break;
+            case '4':
+                $page = public_path('img/form/declaraciones/declaracion_jura_custodia.png');
+                break;
+            case '3': //padre
+            case '2': //hermano
+                $page = public_path('img/form/declaraciones/declaracion_jura_padres.png');
+                break;
+            case '5': //cuidador persona discapacitada
+                $page = public_path('img/form/declaraciones/declaracion_jura_cuidador.png');
+                break;
+            default:
+                break;
+        }
+        KumbiaPDF::setBackgroundImage($page);
         $fabrica = new FactoryDocuments();
+
         $documento = $fabrica->crearDeclaracion('beneficiario');
         $documento->setParamsInit(
             array(

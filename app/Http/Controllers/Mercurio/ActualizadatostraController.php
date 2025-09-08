@@ -539,19 +539,15 @@ class ActualizadatostraController extends ApplicationController
 
     public function borrarArchivoAction(Request $request)
     {
+        $this->setResponse("ajax");
         try {
-            $this->setResponse("ajax");
-            $numero = $request->input('numero');
-            $coddoc = $request->input('coddoc');
+            $numero = $this->clp($request, 'id');
+            $coddoc = $this->clp($request, 'coddoc');
+            $mercurio37 = Mercurio37::where("tipopc", $this->tipopc)->where("numero", $numero)->where("coddoc", $coddoc)->first();
 
-            $mercurio01 = Mercurio01::first();
-            $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)
-                ->where('numero', $numero)
-                ->where('coddoc', $coddoc)
-                ->first();
-
-            if (file_exists($mercurio01->getPath() . $mercurio37->getArchivo())) {
-                unlink($mercurio01->getPath() . $mercurio37->getArchivo());
+            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
+            if (file_exists($filepath)) {
+                unlink($filepath);
             }
 
             Mercurio37::where('tipopc', $this->tipopc)
@@ -559,11 +555,17 @@ class ActualizadatostraController extends ApplicationController
                 ->where('coddoc', $coddoc)
                 ->delete();
 
-            $response = "Se borro con éxito el archivo";
-        } catch (DebugException $err) {
-            $response = "No se puede realizar la opcion";
+            $response = array(
+                "success" => true,
+                "msj" => "El archivo se borro de forma correcta"
+            );
+        } catch (DebugException $e) {
+            $response = array(
+                "success" => false,
+                "msj" => $e->getMessage()
+            );
         }
-        return $this->renderText(json_encode($response));
+        return $this->renderObject($response, false);
     }
 
     /**

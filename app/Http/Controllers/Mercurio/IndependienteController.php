@@ -345,18 +345,13 @@ class IndependienteController extends ApplicationController
     {
         $this->setResponse("ajax");
         try {
-            $numero = $request->input('id');
-            $coddoc = $request->input('coddoc');
+            $numero = $this->clp($request, 'id');
+            $coddoc = $this->clp($request, 'coddoc');
+            $mercurio37 = Mercurio37::where("tipopc", $this->tipopc)->where("numero", $numero)->where("coddoc", $coddoc)->first();
 
-            $mercurio01 = Mercurio01::first();
-            $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)
-                ->where('numero', $numero)
-                ->where('coddoc', $coddoc)
-                ->first();
-
-            $filepath = base_path() . '' . $mercurio01->getPath() . $mercurio37->getArchivo();
+            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
             if (file_exists($filepath)) {
-                unlink(base_path() . '' . $mercurio01->getPath() . $mercurio37->getArchivo());
+                unlink($filepath);
             }
 
             Mercurio37::where('tipopc', $this->tipopc)
