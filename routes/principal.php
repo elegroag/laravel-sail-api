@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Mercurio\CertificadosController;
 use App\Http\Controllers\Mercurio\PrincipalController;
 use App\Http\Controllers\Mercurio\MovimientosController;
 use App\Http\Controllers\Mercurio\FirmasController;
@@ -31,4 +32,7 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
     Route::get('mercurio/movimientos/cambio_clave_view', [MovimientosController::class, 'cambioClaveViewAction'])->name('movimientos.cambio_clave_view');
 
     Route::post('mercurio/principal/actualiza_estado_solicitudes', [PrincipalController::class, 'actualizaEstadoSolicitudesAction']);
+
+    Route::get('mercurio/certificados/index', [CertificadosController::class, 'indexAction']);
+    Route::post('mercurio/certificados/guardar', [CertificadosController::class, 'guardarAction']);
 });

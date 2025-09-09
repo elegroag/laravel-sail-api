@@ -20,7 +20,7 @@
                                 <p style="color:#333 !important; text-align: left; font-size: 15px;"><br>Cordial Saludo, Señor(a)<br></p>
                                 <p style="color:#333 !important; text-align:justify; font-size: 14px;">
                                     La Caja De Compensación Familiar del Caquetá COMFACA, se permite informar:<br>
-                                    {{ $msj }}
+                                    @php echo $msj @endphp
                                 </p>
                                 <p><br></p>
                                 <p style="text-align:left;font-size:15px;color:#333 !important">Atentamente,<br></p>

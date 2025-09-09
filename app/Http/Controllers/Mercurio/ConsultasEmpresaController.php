@@ -29,7 +29,7 @@ use App\Services\Utils\UploadFile;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
-class SubsidioempController extends ApplicationController
+class ConsultasEmpresaController extends ApplicationController
 {
 
     protected $db;

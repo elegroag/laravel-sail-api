@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Mercurio\ConsultasEmpresaController;
 use App\Http\Controllers\Mercurio\LoginController;
 use App\Http\Controllers\Mercurio\MovimientosController;
 use App\Http\Controllers\Mercurio\PrincipalController;
@@ -49,17 +50,17 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
 
 //Consultas de empresas
 Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
-    Route::get('/mercurio/subsidioemp/consulta_trabajadores_view', [SubsidioempController::class, 'consultaTrabajadoresViewAction']);
-    Route::get('/mercurio/subsidioemp/consulta_giro_view', [SubsidioEmpController::class, 'consultaGiroViewAction']);
-    Route::get('/mercurio/subsidioemp/consulta_aportes_view', [SubsidioEmpController::class, 'consultaAportesViewAction']);
-    Route::get('/mercurio/subsidioemp/consulta_nomina_view', [SubsidioEmpController::class, 'consultaNominaViewAction']);
+    Route::get('/mercurio/subsidioemp/consulta_trabajadores_view', [ConsultasEmpresaController::class, 'consultaTrabajadoresViewAction']);
+    Route::get('/mercurio/subsidioemp/consulta_giro_view', [ConsultasEmpresaController::class, 'consultaGiroViewAction']);
+    Route::get('/mercurio/subsidioemp/consulta_aportes_view', [ConsultasEmpresaController::class, 'consultaAportesViewAction']);
+    Route::get('/mercurio/subsidioemp/consulta_nomina_view', [ConsultasEmpresaController::class, 'consultaNominaViewAction']);
 
-    Route::post('/mercurio/consulta_nomina', [SubsidioEmpController::class, 'consultaNominaAction']);
-    Route::post('/mercurio/consulta_aportes', [SubsidioEmpController::class, 'consultaAportesAction']);
-    Route::post('/mercurio/consulta_giro', [SubsidioEmpController::class, 'consultaGiroAction']);
-    Route::post('/mercurio/consulta_trabajadores', [SubsidioEmpController::class, 'consultaTrabajadoresAction']);
+    Route::post('/mercurio/consulta_nomina', [ConsultasEmpresaController::class, 'consultaNominaAction']);
+    Route::post('/mercurio/consulta_aportes', [ConsultasEmpresaController::class, 'consultaAportesAction']);
+    Route::post('/mercurio/consulta_giro', [ConsultasEmpresaController::class, 'consultaGiroAction']);
+    Route::post('/mercurio/consulta_trabajadores', [ConsultasEmpresaController::class, 'consultaTrabajadoresAction']);
 
-    Route::get('/mercurio/subsidioemp/historial', [SubsidioEmpController::class, 'historialAction'])->name('subsidioemp.historial');
-    Route::get('/mercurio/subsidio/historial', [SubsidioController::class, 'historialAction'])->name('subsidio.historial');
+    Route::get('/mercurio/subsidioemp/historial', [ConsultasEmpresaController::class, 'historialAction'])->name('subsidioemp.historial');
+    Route::get('/mercurio/subsidio/historial', [ConsultasEmpresaController::class, 'historialAction'])->name('subsidio.historial');
     Route::get('/mercurio/particular/historial', [ParticularController::class, 'historialAction'])->name('particular.historial');
 });

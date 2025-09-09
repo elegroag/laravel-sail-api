@@ -1,3 +1,7 @@
+@php
+    use App\Services\Tag;
+    use App\Services\Request;
+@endphp
 @extends('layouts.bone')
 
 @section('content')
@@ -46,9 +50,9 @@
                                             <td>
                                                 <p style="font-size: .92rem;">{{ Tag::capitalize($certPresentado->getNombre()) }}</p>
                                             </td>
-                                            <td>{{ Tag::capitalize($certPresentado->getNomcer()) }}</td>
+                                            <td>{{ capitalize($certPresentado->getNomcer()) }}</td>
                                             <td>{{ $certPresentado->getFecha() }}</td>
-                                            <td>{{ Tag::capitalize($certPresentado->getEstadoDetalle()) }}</td>
+                                            <td>{{ capitalize($certPresentado->getEstadoDetalle()) }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -68,7 +72,7 @@
                             @foreach($subsi22 as $beneficiarioCerti)
                                 @php
                                     $certDisponibles = array();
-                                    if ($beneficiarioCerti['certificadoPendiente'] == true) {
+                                    if (!empty($beneficiarioCerti['certificadoPendiente'])) {
                                         foreach ($beneficiarioCerti['codcer'] as $ai => $value) {
                                             $has = 0;
                                             foreach ($beneficiarioCerti['certificados'] as $certificado) {
@@ -88,7 +92,7 @@
                                 <div class='row'>
                                     <div class='col ml-auto'>
                                         <p style="font-size: 0.92rem;">
-                                            Nombre: {{ Tag::capitalize($beneficiarioCerti['nombre']) }}<br />
+                                            Nombre: {{ capitalize($beneficiarioCerti['nombre']) }}<br />
                                             {{ (count($certDisponibles) == 0) ? 'Los certificados estan pendiente de validación' : $beneficiarioCerti['ultfec'] }}
                                         </p>
                                     </div>
@@ -96,18 +100,37 @@
                                 @if(count($certDisponibles) > 0)
                                     <div class='row'>
                                         <div class='col-md-5 ml-auto'>
-                                            {{ Tag::selectStatic("codcer_" . $beneficiarioCerti['codben'], $certDisponibles, "use_dummy: true", "dummyValue: ", "class: form-control"); }}
+                                            @php echo Tag::selectStatic(new Request(
+                                                [
+                                                   "name"=> "codcer_" . $beneficiarioCerti['codben'], 
+                                                   "options"=> $certDisponibles, 
+                                                   "use_dummy"=> true,
+                                                   "class"=> "form-control"
+                                                ]
+                                            )); @endphp
                                         </div>
                                         <div class='col-md-4'>
                                             <div class='custom-file'>
-                                                <input type='file' class='custom-file-input' id='archivo_<?= $beneficiarioCerti['codben'] ?>' name='archivo_<?= $beneficiarioCerti['codben'] ?>' accept='application/pdf, image/*'>
-                                                <label style="font-size: 0.8rem;" class='custom-file-label' for='customFileLang'>Selecionar documento aquí...</label>
+                                                <input type='file' class='custom-file-input' 
+                                                    id='archivo_{{ $beneficiarioCerti['codben'] }}' 
+                                                    name='archivo_{{ $beneficiarioCerti['codben'] }}' 
+                                                    accept='application/pdf, image/*'>
+                                                
+                                                <label 
+                                                    style="font-size: 0.8rem;" 
+                                                    class='custom-file-label' 
+                                                    for='customFileLang'>Selecionar documento aquí...</label>
                                             </div>
                                         </div>
                                         <div class='col-md-auto mr-auto'>
-                                            <button class='btn btn-icon btn-primary' type='button' onclick="guardar('<?= $beneficiarioCerti['codben'] ?>','<?= $beneficiarioCerti['nombre'] ?>')">
-                                                <span class='btn-inner--icon'><i class='fas fa-plus'></i></span>
-                                                <span class='btn-inner--text'>Adjuntar</span>
+                                            <button 
+                                                class='btn btn-icon btn-primary' 
+                                                type='button' 
+                                                id="btnSalvarCertificado" 
+                                                data-codben="{{ $beneficiarioCerti['codben'] }}"    
+                                                data-nombre="{{ $beneficiarioCerti['nombre'] }}">
+                                                    <span class='btn-inner--icon'><i class='fas fa-plus'></i></span>
+                                                    <span class='btn-inner--text'>Adjuntar</span>
                                             </button>
                                         </div>
                                     </div>
@@ -124,5 +147,11 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('mercurio/certificados/certificados.build.js') }}"></script>
+    <script>
+        const _TITULO = "{{ $title }}";
+        window.ServerController = 'certificados';
+    </script>
+
+    <script src="{{ asset('core/upload.js') }}"></script>
+    <script src="{{ asset('mercurio/build/Certificados.js') }}"></script>
 @endpush

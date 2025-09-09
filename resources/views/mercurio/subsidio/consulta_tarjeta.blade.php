@@ -1,7 +1,3 @@
-<?php
-echo View::getContent();
-echo TagUser::help($title, $help);
-?>
 <div class="card-body">
     <div class="nav-wrapper">
         <ul class="nav nav-pills" id="tabs-icons-text" role="tablist">

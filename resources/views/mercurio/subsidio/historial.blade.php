@@ -1,7 +1,3 @@
-<?php
-echo View::getContent();
-echo TagUser::help($title, $help);
-?>
 
 <div class="card-body">
     <div class="nav-wrapper">
@@ -34,25 +30,25 @@ echo TagUser::help($title, $help);
                 <div class="tab-pane fade show active" id="tabs-icons-text-1" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
 
                     <div class="row">
-                        <?php echo $actualizacion_basico; ?>
+                        {!! $actualizacion_basico !!}
                     </div>
                 </div>
                 <div class="tab-pane fade" id="tabs-icons-text-2" role="tabpanel" aria-labelledby="tabs-icons-text-2-tab">
 
                     <div class="row">
-                        <?php echo $html_afiliacion_beneficiario; ?>
+                        {!! $html_afiliacion_beneficiario !!}
                     </div>
                 </div>
                 <div class="tab-pane fade" id="tabs-icons-text-3" role="tabpanel" aria-labelledby="tabs-icons-text-3-tab">
 
                     <div class="row">
-                        <?php echo $html_afiliacion_conyuge; ?>
+                        {!! $html_afiliacion_conyuge !!}
                     </div>
                 </div>
                 <div class="tab-pane fade" id="tabs-icons-text-4" role="tabpanel" aria-labelledby="tabs-icons-text-4-tab">
 
                     <div class="row">
-                        <?php echo $html_certificados; ?>
+                        {!! $html_certificados !!}
                     </div>
                 </div>
             </div>
@@ -61,4 +57,4 @@ echo TagUser::help($title, $help);
 </div>
 
 
-<?= Tag::javascriptInclude('Mercurio/build/build.consulta_trabajador'); ?>
+{!! Tag::javascriptInclude('Mercurio/build/build.consulta_trabajador') !!}

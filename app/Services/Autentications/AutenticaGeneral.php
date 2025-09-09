@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services\Autentications;
 
 use App\Models\Mercurio01;
@@ -116,7 +117,7 @@ class AutenticaGeneral
             USUARIO: {$this->afiliado->getDocumento()}<br/>
             CLAVE: {$clave}<br/>";
 
-        $html = view('emails.change-password', [
+        $html = view('emails.change-clave', [
             "titulo" => "Cordial saludo, señor@ {$nombre}",
             "msj" => $msj,
             "url_activa" => env('APP_URL') . '/Mercurio/Mercurio/login/index',
@@ -151,18 +152,20 @@ class AutenticaGeneral
     {
         $date = new \DateTime('now');
         $nombre = capitalize($usuario->getNombre());
-        $html = view('emails.verify-pin', 
-        [
-            "fecha" => date_format($date, "d - M - Y"),
-            "asunto" => "Acceso a usuario, Comfaca En Linea",
-            "tipo" => 'Usuario',
-            "nombre" => $nombre,
-            "razon" => $nombre,
-            "msj" => "El usuario ha realizado el registro mediante validación de PIN, al portal web Comfaca En Línea.<br/> 
+        $html = view(
+            'emails.verify-pin',
+            [
+                "fecha" => date_format($date, "d - M - Y"),
+                "asunto" => "Acceso a usuario, Comfaca En Linea",
+                "tipo" => 'Usuario',
+                "nombre" => $nombre,
+                "razon" => $nombre,
+                "msj" => "El usuario ha realizado el registro mediante validación de PIN, al portal web Comfaca En Línea.<br/> 
             Utiliza el siguiente código de verificación, para confirmar el propietario de la dirección de correo:<br/>
             <span style=\"font-size:16px;color:#333\">CÓDIGO DE VERIFICACIÓN: </span> 
             <span style=\"font-size:30px;color:#11cdef\"><b>{$codigo_verify}</b></span>",
-        ])->render();
+            ]
+        )->render();
 
         $asunto = "Comprobación usuario portal Comfaca En Linea COMFACA";
         $emailCaja = (new Mercurio01)->findFirst();

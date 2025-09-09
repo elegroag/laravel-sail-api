@@ -1,10 +1,10 @@
+@extends('layouts.dash')
 
-<?= Tag::Assets('datatables.net.bs5/css/dataTables.bootstrap5.min', 'css') ?>
-<?= Tag::Assets('datatables.net/js/dataTables.min', 'js') ?>
-<?= Tag::Assets('datatables.net.bs5/js/dataTables.bootstrap5.min', 'js') ?>
+@php
+use App\Services\Tag;
+@endphp
 
-
-
+@push('styles')
 <style>
     #dataTable {
         font-size: 0.7rem;
@@ -27,7 +27,16 @@
         vertical-align: middle;
     }
 </style>
+<link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.min.css') }}">
+@endpush
 
+@push('scripts')
+<script src="{{ asset('assets/datatables.net/js/dataTables.min.js') }}"></script>
+<script src="{{ asset('assets/datatables.net-bs5/js/dataTables.bootstrap5.min.js') }}"></script>
+<script src="{{ asset('mercurio/build/ConsultaGiro.js') }}"></script>
+@endpush
+
+@section('content')
 <script type="text/template" id="templateConsulta">
     <div class='p-2 m-0'>
         <p class='m-0'><span><b>Número de Cuotas:</b> <%= cuotas.reduce((total, item) => total + item.numcuo, 0) %></span><br/>
@@ -87,13 +96,13 @@
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="perini" class="form-control-label">Periodo Inicial</label>
-                        <?php echo TagUser::periodo("perini", "placeholder: Periodo Inicial", "class: form-control", "value: " . date('Ym', strtotime('-3 month'))); ?>
+                        <input type="date" name="perini" placeholder="Periodo Inicial" class="form-control" value="<?php echo date('Y-m-d', strtotime('-3 month')); ?>">
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="perfin" class="form-control-label">Periodo Final</label>
-                        <?php echo TagUser::periodo("perfin", "placeholder: Periodo Final", "class: form-control", "value: " . date('Ym')); ?>
+                        <input type="date" name="perfin" placeholder="Periodo Final" class="form-control" value="<?php echo date('Y-m-d'); ?>">
                     </div>
                 </div>
             </div>
@@ -101,7 +110,6 @@
     </div>
 </div>
 
-
 <div id='consulta' class='table-responsive'></div>
 
-<?= Tag::javascriptInclude('Mercurio/consultastrabajador/consultastrabajador.build'); ?>
+@endsection

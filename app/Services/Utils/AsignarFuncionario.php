@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services\Utils;
 
 use App\Exceptions\DebugException;
@@ -11,25 +12,31 @@ class AsignarFuncionario
 
     public function asignar($tipopc, $codciu)
     {
-        $mercurio05 = (new Mercurio05())->findFirst("codciu='{$codciu}'");
+        $mercurio05 = Mercurio05::where("codciu", $codciu)->first();
+
         if ($mercurio05 == false) {
-            $mercurio04 = (new Mercurio04())->findFirst("principal='S'");
+            $mercurio04 = Mercurio04::where("principal", "S")->first();
             $codofi = $mercurio04->getCodofi();
         } else {
             $codofi = $mercurio05->getCodofi();
         }
-        $mercurio08 = (new Mercurio08())->findFirst("codofi = '{$codofi}' and tipopc='{$tipopc}' and orden='1'");
+        $mercurio08 = Mercurio08::where("codofi", $codofi)
+            ->where("tipopc", $tipopc)
+            ->where("orden", "1")
+            ->first();
+
         if ($mercurio08 == false) {
-            $usuario = (new Mercurio08())->minimum("usuario", "conditions: codofi = '{$codofi}' and tipopc='{$tipopc}' ");
+            $usuario = Mercurio08::where("codofi", $codofi)->where("tipopc", $tipopc)->min("usuario");
         } else {
             $usuario = $mercurio08->getUsuario();
         }
 
         if ($usuario == "") return "";
-        $usuario_orden = (new Mercurio08())->minimum(
-            "usuario",
-            "conditions: codofi = '{$codofi}' and tipopc='{$tipopc}' and usuario > $usuario"
-        );
+
+        $usuario_orden = Mercurio08::where("codofi", $codofi)
+            ->where("tipopc", $tipopc)
+            ->where("usuario", ">", $usuario)
+            ->min('usuario');
 
         Mercurio08::where('codofi', $codofi)
             ->where('tipopc', $tipopc)

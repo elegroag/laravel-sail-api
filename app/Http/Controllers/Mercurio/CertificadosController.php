@@ -12,6 +12,7 @@ use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Logger;
+use App\Services\Utils\UploadFile;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -19,8 +20,6 @@ class CertificadosController extends ApplicationController
 {
 
     protected $tipopc = "8";
-    protected $query = "1=1";
-    protected $cantidad_pagina = 10;
     protected $db;
     protected $user;
     protected $tipo;
@@ -40,7 +39,7 @@ class CertificadosController extends ApplicationController
             array(
                 "servicio" => "Certificados",
                 "metodo" => "buscarCertificadosBeneficiario",
-                "params" =>  parent::getActUser("documento")
+                "params" =>  $this->user['documento']
             )
         );
 
@@ -52,7 +51,7 @@ class CertificadosController extends ApplicationController
             $beneficiarios = $out['data'];
             $certificadosPresentados = array();
             foreach ($beneficiarios as $ai => $beneficiario) {
-                $has = (new Mercurio45())->getFind("codben='{$beneficiario['codben']}' and estado='P'");
+                $has = Mercurio45::where("codben", $beneficiario['codben'])->where("estado", 'P')->count();
                 if ($has) {
                     $certificadosPresentados = $has;
                     $beneficiarios[$ai]['certificadoPendiente'] = true;
@@ -62,7 +61,7 @@ class CertificadosController extends ApplicationController
         }
 
         return view(
-            "mercurio/certificados",
+            "mercurio/certificados/index",
             array(
                 "certificadosPresentados" => $certificadosPresentados,
                 "subsi22" => $beneficiarios,
@@ -73,35 +72,33 @@ class CertificadosController extends ApplicationController
 
     public function guardarAction(Request $request)
     {
-        $this->setResponse("ajax");
+        $message = "";
+        $this->db->begin();
         try {
             $id = $request->input('id');
+            $documento = $this->user['documento'];
+            $coddoc = $this->user['coddoc'];
+            $tipo = $this->tipo;
+
             $codben = $request->input('codben');
             $nombre = $request->input('nombre');
             $codcer = $request->input('codcer');
             $nomcer = $request->input('nomcer');
 
-            $id_mercurio45 = Mercurio45::max('id') + 1;
-
             if ((new Mercurio45)->getCount(
                 "*",
                 "conditions: codben='$codben' and codcer='$codcer' and estado <> 'X'"
             ) > 0) {
-                $response = "Ya tiene un certificado presentando, por favor espere a su aprobacion";
-                return $this->renderObject($response);
+                $message = "Ya tiene un certificado presentando, por favor espere a su aprobacion";
+                return $this->renderObject($message);
             }
 
-            $mercurio01 = Mercurio01::first();
-
             $today = Carbon::now();
-
             $logger = new Logger();
             $id_log = $logger->registrarLog(true, "Presentacion Certificados", "");
             $mercurio45 = new Mercurio45();
-
-            $mercurio45->setId($id_mercurio45);
             $mercurio45->setLog($id_log);
-            $mercurio45->setCedtra(parent::getActUser("documento"));
+            $mercurio45->setCedtra($documento);
             $mercurio45->setCodben($codben);
             $mercurio45->setNombre($nombre);
             $mercurio45->setCodcer($codcer);
@@ -110,26 +107,30 @@ class CertificadosController extends ApplicationController
             $mercurio45->setFecha($today->format('Y-m-d'));
 
             $asignarFuncionario = new AsignarFuncionario();
-            $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
+            $usuario = $asignarFuncionario->asignar($this->tipopc, '18001');
 
             if ($usuario == "") {
-                $response = "No se puede realizar el registro (No hay usuario disponible para la atenci&oacute;n de la solicitud.),Comuniquese con la Atencion al cliente";
-                return $this->renderObject($response);
+                throw new DebugException(
+                    "No se puede realizar el registro, no hay usuario disponible para la atención de la solicitud." .
+                        " Comuniquese con la atencion al cliente",
+                    501
+                );
             }
 
             $mercurio45->setUsuario($usuario);
-            $mercurio45->setTipo(parent::getActUser("tipo"));
-            $mercurio45->setCoddoc(parent::getActUser("coddoc"));
-            $mercurio45->setDocumento(parent::getActUser("documento"));
+            $mercurio45->setTipo($tipo);
+            $mercurio45->setCoddoc($coddoc);
+            $mercurio45->setDocumento($documento);
 
             if (isset($_FILES['archivo_' . $codben]['name']) && $_FILES['archivo_' . $codben]['name'] != "") {
                 $extension = explode(".", $_FILES['archivo_' . $codben]['name']);
                 $name = $this->tipopc . "_" . $mercurio45->getId() . "." . end($extension);
                 $_FILES['archivo_' . $codben]['name'] = $name;
 
-                $estado = $this->uploadFile("archivo_" . $codben, $mercurio01->getPath());
+                $uploadFile = new UploadFile();
+                $estado = $uploadFile->upload("archivo_" . $codben, 'certificados');
 
-                if ($estado != false) {
+                if ($estado) {
                     $mercurio45->setArchivo($name);
                     $mercurio45->save();
 
@@ -138,7 +139,6 @@ class CertificadosController extends ApplicationController
                         ->max('item') + 1;
 
                     $mercurio10 = new Mercurio10();
-                    //$mercurio10->setTransaction($Transaccion);
                     $mercurio10->setTipopc($this->tipopc);
                     $mercurio10->setNumero($mercurio45->getId());
                     $mercurio10->setItem($item);
@@ -147,24 +147,27 @@ class CertificadosController extends ApplicationController
                     $mercurio10->setFecsis($today->format('Y-m-d'));
                     $mercurio10->save();
 
-                    $response = "Se adjunto con exito el archivo";
+                    $message = "Se adjunto con exito el archivo";
                 } else {
-                    $response = "No se cargo: Tamano del archivo muy grande o No es Valido";
+                    throw new DebugException("No se cargo: Tamano del archivo muy grande o No es Valido", 501);
                 }
             } else {
-                $response = "No se cargo el archivo";
+                throw new DebugException("No se cargo el archivo", 501);
             }
 
-            //parent::finishTrans();
+            $response = [
+                'success' => true,
+                'msj' => $message
+            ];
 
+            $this->db->commit();
         } catch (DebugException $e) {
             $response = [
                 'success' => false,
                 'error' => $e->getMessage()
             ];
+            $this->db->rollBack();
         }
         return $this->renderObject($response);
     }
-
-    public function uploadFile() {}
 }

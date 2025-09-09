@@ -31,7 +31,10 @@ class AutenticaTrabajador extends AutenticaGeneral
             array(
                 "servicio" => "ComfacaEmpresas",
                 "metodo" => "informacion_trabajador",
-                "params" => array('cedtra' => $documento)
+                "params" => array(
+                    'cedtra' => $documento,
+                    'coddoc' => $coddoc
+                )
             )
         );
 
@@ -50,7 +53,10 @@ class AutenticaTrabajador extends AutenticaGeneral
         }
 
         /// Si se encuentra el trabajador
-        $usuarioTrabajador = (new Mercurio07)->findFirst("tipo='T' AND documento='{$documento}' AND coddoc='{$coddoc}'");
+        $usuarioTrabajador = Mercurio07::where('tipo', 'T')
+            ->where('documento', $documento)
+            ->where('coddoc', $coddoc)
+            ->first();
 
         //trabajadores no inactivos y no muertos
         if ($afiliado['estado'] == 'I' || $afiliado['estado'] == 'M') {

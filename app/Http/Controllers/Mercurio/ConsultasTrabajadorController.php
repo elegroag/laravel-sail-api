@@ -21,7 +21,7 @@ use App\Services\Utils\GeneralService;
 use App\Services\Utils\Logger;
 use Illuminate\Http\Request;
 
-class SubsidioController extends ApplicationController
+class ConsultasTrabajadorController extends ApplicationController
 {
 
     protected $db;
@@ -218,7 +218,7 @@ class SubsidioController extends ApplicationController
      * @param string $cedtra
      * @return void
      */
-    public function consulta_nucleo_viewAction($cedtra = '')
+    public function consultaNucleoViewAction($cedtra = '')
     {
         return view("mercurio/subsidio/consulta_nucleo", [
             "title" => "Consulta nucleo familiar",
@@ -226,7 +226,7 @@ class SubsidioController extends ApplicationController
         ]);
     }
 
-    public function consulta_nucleoAction()
+    public function consultaNucleoAction()
     {
         $this->setResponse("ajax");
         $cedtra = parent::getActUser("documento");
@@ -322,14 +322,14 @@ class SubsidioController extends ApplicationController
         );
     }
 
-    public function consulta_giro_viewAction()
+    public function consultaGiroViewAction()
     {
         return view("mercurio/subsidio/consulta_giro", [
             "title" => "Consulta Giro"
         ]);
     }
 
-    public function consulta_giroAction(Request $request)
+    public function consultaGiroAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
@@ -372,14 +372,14 @@ class SubsidioController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    public function consulta_no_giro_viewAction()
+    public function consultaNoGiroViewAction()
     {
         return view("mercurio/subsidio/consulta_no_giro", [
             "title" => "Consulta No Giro"
         ]);
     }
 
-    public function consulta_no_giroAction(Request $request)
+    public function consultaNoGiroAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
@@ -421,14 +421,14 @@ class SubsidioController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    public function consulta_planilla_trabajador_viewAction()
+    public function consultaPlanillaTrabajadorViewAction()
     {
         return view("mercurio/subsidio/consulta_planilla_trabajador", [
             "title" => "Planillas Pila"
         ]);
     }
 
-    public function consulta_planilla_trabajadorAction(Request $request)
+    public function consultaPlanillaTrabajadorAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
@@ -469,7 +469,7 @@ class SubsidioController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    public function consulta_tarjetaAction()
+    public function consultaTarjetaAction()
     {
         $ps = Comman::Api();
         $ps->runCli(
@@ -494,7 +494,7 @@ class SubsidioController extends ApplicationController
         ]);
     }
 
-    public function certificado_afiliacion_viewAction()
+    public function certificadoAfiliacionViewAction()
     {
         return view("mercurio/subsidio/certificado_afiliacion", [
             "title" => "Certificado Afiliacion",
@@ -507,7 +507,7 @@ class SubsidioController extends ApplicationController
         ]);
     }
 
-    public function certificado_afiliacionAction(Request $request)
+    public function certificadoAfiliacionAction(Request $request)
     {
         $tipo = $request->input("tipo");
         $logger = new Logger();
