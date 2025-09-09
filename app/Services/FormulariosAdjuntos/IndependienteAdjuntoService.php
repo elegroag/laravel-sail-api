@@ -82,13 +82,12 @@ class IndependienteAdjuntoService
 
         $out = $procesadorComando->toArray();
         $this->filename = "carta_solicitud_independiente_{$this->request->getCedtra()}.pdf";
-
-        KumbiaPDF::setBackgroundImage(public_path('img/form/oficios/oficio_solicitud_afiliacion.jpg'));
-        KumbiaPDF::setFooterImage(false);
+        $background = 'img/form/oficios/oficio_solicitud_afiliacion.jpg';
 
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearOficio('independiente');
         $documento->setParamsInit([
+            'background' => $background,
             'independiente' => $this->request,
             'firma' => $this->lfirma,
             'filename' => $this->filename,

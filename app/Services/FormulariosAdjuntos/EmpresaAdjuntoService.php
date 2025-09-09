@@ -71,13 +71,14 @@ class EmpresaAdjuntoService
     public function cartaSolicitud()
     {
         $this->filename = "carta_solicitud_empresa_{$this->request->getNit()}.pdf";
-        KumbiaPDF::setBackgroundImage(public_path('img/form/oficios/oficio_solicitud_empresa.jpg'));
+        $background = 'img/form/oficios/oficio_solicitud_empresa.jpg';
         KumbiaPDF::setFooterImage(false);
 
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearOficio('empresa');
         $documento->setParamsInit(
             array(
+                'background' => $background,
                 'empresa' => $this->request,
                 'firma' => $this->lfirma,
                 'filename' => $this->filename
@@ -92,11 +93,11 @@ class EmpresaAdjuntoService
     public function formulario()
     {
         $this->filename = "formulario_empresa_{$this->request->getNit()}.pdf";
-        KumbiaPDF::setBackgroundImage(public_path('img/form/empresa/form-empresa.jpg'));
-
+        $background = 'img/form/empresa/form-empresa.jpg';
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearFormulario('empresa');
         $documento->setParamsInit([
+            'background' => $background,
             'empresa' => $this->request,
             'firma' => $this->lfirma,
             'filename' => $this->filename

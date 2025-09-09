@@ -28,13 +28,10 @@ class SolicitudIndependiente extends Documento
         if (!$this->request->getParam('independiente')) {
             throw new DebugException("Error el independiente no esté disponible", 501);
         }
-
-        $page = public_path('docs/form/oficios/oficio_solicitud_afiliacion.jpg');
-        $this->pdf->Image($page, 0, 0, 210, 297, '');
-
         $this->independiente = $this->request->getParam('independiente');
         $this->bloqueEmpresa();
-        $selloFirma = public_path('docs/sello-firma.png');
+
+        $selloFirma = public_path('img/firmas/sello-firma.png');
         $this->pdf->Image($selloFirma, 160, 265, 30, 20, '', '', '', false, 300, '', false, false, 0);
     }
 
@@ -57,49 +54,49 @@ class SolicitudIndependiente extends Documento
 
         $fecini = Carbon::parse($this->independiente->getFecini());
         $this->pdf->SetFont('helvetica', '', 9);
-        $datos = array(
-            array('lb' => 'Ciudad', 'texto' => $ciudad, 'x' => 36, 'y' => 40),
-            array('lb' => 'Año', 'texto' => $today->format('Y'), 'x' => 165, 'y' => 40),
-            array('lb' => 'Mes', 'texto' => $today->format('m'), 'x' => 174, 'y' => 40),
-            array('lb' => 'Dia', 'texto' => $today->format('d'), 'x' => 181, 'y' => 40),
-            array('lb' => 'Tipo afiliacion', 'texto' => 'Trabajador ' . capitalize($this->independiente->getCalempDetalle()), 'x' => 118, 'y' => 103),
-            array('lb' => 'Nombre', 'texto' => capitalize($nombre), 'x' => 22, 'y' => 110),
-            array('lb' => 'Dia', 'texto' => $fecini->format('d'), 'x' => 28, 'y' => 122),
-            array('lb' => 'Mes', 'texto' => $fecini->format('m'), 'x' => 42, 'y' => 122),
-            array('lb' => 'Año', 'texto' => $fecini->format('Y'), 'x' => 54, 'y' => 122),
-            $this->posAportes(),
-            array('lb' => 'Tipo', 'texto' => 'Trabajador Independiente', 'x' => 38, 'y' => 143),
-            array('lb' => 'Nombre', 'texto' => 'Nombre Trabajador: ' . capitalize($nombre), 'x' => 35, 'y' => 152),
-            array('lb' => 'Tipo documento', 'texto' => $tipo_documento, 'x' => 68, 'y' => 160),
-            array('lb' => 'Cedula', 'texto' => $this->independiente->getCedtra(), 'x' => 118, 'y' => 160),
-            array('lb' => 'Dirección', 'texto' => $this->independiente->getDireccion(), 'x' => 65, 'y' => 168),
-            array('lb' => 'Celular', 'texto' => $this->independiente->getCelular(), 'x' => 60, 'y' => 177.5),
-            array('lb' => 'Telefono', 'texto' => $this->independiente->getTelefono(), 'x' => 52, 'y' => 184),
-            array('lb' => 'Email', 'texto' => $this->independiente->getEmail(), 'x' => 111, 'y' => 184),
-            array('lb' => 'Ciudad laboral', 'texto' => $ciudad_labora, 'x' => 96, 'y' => 193),
-            $this->posAfiliaPrevius(),
-            $this->posPazYsalvo()
-        );
+        $datos = [
+            ['lb' => 'Ciudad', 'texto' => $ciudad, 'x' => 36, 'y' => 38],
+            ['lb' => 'Año', 'texto' => $today->format('Y'), 'x' => 165, 'y' => 38],
+            ['lb' => 'Mes', 'texto' => $today->format('m'), 'x' => 174, 'y' => 38],
+            ['lb' => 'Dia', 'texto' => $today->format('d'), 'x' => 181, 'y' => 38],
+            ['lb' => 'Tipo afiliacion', 'texto' => 'Trabajador ' . capitalize($this->independiente->getCalempDetalle()), 'x' => 118, 'y' => 101],
+            ['lb' => 'Nombre', 'texto' => capitalize($nombre), 'x' => 22, 'y' => 107],
+            ['lb' => 'Dia', 'texto' => $fecini->format('d'), 'x' => 28, 'y' => 119],
+            ['lb' => 'Mes', 'texto' => $fecini->format('m'), 'x' => 42, 'y' => 119],
+            ['lb' => 'Año', 'texto' => $fecini->format('Y'), 'x' => 54, 'y' => 119],
+            $this->posAportes(118),
+            ['lb' => 'Tipo', 'texto' => 'Trabajador Independiente', 'x' => 38, 'y' => 141],
+            ['lb' => 'Nombre', 'texto' => 'Nombre Trabajador: ' . capitalize($nombre), 'x' => 35, 'y' => 150],
+            ['lb' => 'Tipo documento', 'texto' => $tipo_documento, 'x' => 68, 'y' => 158],
+            ['lb' => 'Cedula', 'texto' => $this->independiente->getCedtra(), 'x' => 118, 'y' => 158],
+            ['lb' => 'Dirección', 'texto' => $this->independiente->getDireccion(), 'x' => 65, 'y' => 164],
+            ['lb' => 'Celular', 'texto' => $this->independiente->getCelular(), 'x' => 60, 'y' => 175],
+            ['lb' => 'Telefono', 'texto' => $this->independiente->getTelefono(), 'x' => 52, 'y' => 182],
+            ['lb' => 'Email', 'texto' => $this->independiente->getEmail(), 'x' => 111, 'y' => 182],
+            ['lb' => 'Ciudad laboral', 'texto' => $ciudad_labora, 'x' => 96, 'y' => 190],
+            $this->posAfiliaPrevius(190),
+            $this->posPazYsalvo(190)
+        ];
         $this->addBloq($datos);
         return $this->pdf;
     }
 
-    function posAfiliaPrevius()
+    function posAfiliaPrevius($y)
     {
         $x = 53;
         if ($this->request->getParam('previus')) {
             $x = 43.5;
         }
-        return array('lb' => 'Afiliacíon previa', 'texto' => 'X', 'x' => $x, 'y' => 207);
+        return ['lb' => 'Afiliacíon previa', 'texto' => 'X', 'x' => $x, 'y' => $y + 15];
     }
 
-    function posPazYsalvo()
+    function posPazYsalvo($y)
     {
         $x = 140;
         if ($this->request->getParam('previus')) {
             $x = 129;
         }
-        return array('lb' => 'Paz y salvo', 'texto' => 'X', 'x' => $x, 'y' => 217);
+        return array('lb' => 'Paz y salvo', 'texto' => 'X', 'x' => $x, 'y' => $y + 25);
     }
 
     function posAportes()

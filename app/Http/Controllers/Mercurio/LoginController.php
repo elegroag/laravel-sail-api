@@ -383,7 +383,11 @@ class LoginController extends ApplicationController
                         )
                     );
                     $signupParticular->createUserMercurio();
-                    $solicitud = (new Mercurio07)->findFirst("coddoc='{$coddoc}' and documento='{$cedrep}' and tipo='{$tipo}'");
+                    $solicitud = Mercurio07::where('coddoc', $coddoc)
+                        ->where('documento', $cedrep)
+                        ->where('tipo', $tipo)
+                        ->first();
+
                     break;
                 default:
                     throw new DebugException("Error el tipo de afiliación es requerido", 1);
@@ -392,7 +396,8 @@ class LoginController extends ApplicationController
 
             if ($tipo !== 'P') {
                 $this->asignarFuncionario = new AsignarFuncionario();
-                $usuario = $this->asignarFuncionario->asignar($signupEntity->getTipopc(), $this->user['codciu']);
+                //usa codciu para asignar funcionario 
+                $usuario = $this->asignarFuncionario->asignar($signupEntity->getTipopc(), $codciu);
 
                 $signupParticular = new SignupParticular($signupEntity);
                 $signupParticular->main(

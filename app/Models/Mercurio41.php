@@ -674,4 +674,9 @@ class Mercurio41 extends ModelBase
     {
         return (isset($this->fecsol)) ? $this->fecsol : null;
     }
+
+    public function getNombreCompleto()
+    {
+        return $this->priape . " " . $this->segape . " " . $this->prinom . " " . $this->segnom;
+    }
 }

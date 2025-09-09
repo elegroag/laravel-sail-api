@@ -25,12 +25,12 @@ class SignupIndependientes  implements SignupInterface
 
     public function findByDocumentTemp($documento, $coddoc, $calemp = '')
     {
-        $this->solicitud = (new Mercurio41())->findFirst(
-            "coddoc='{$coddoc}' and " .
-                "documento='{$documento}' and " .
-                "cedtra='{$documento}' and " .
-                "estado='T'"
-        );
+        $this->solicitud = Mercurio41::where('coddoc', $coddoc)
+            ->where('documento', $documento)
+            ->where('cedtra', $documento)
+            ->where('estado', 'T')
+            ->first();
+
         if ($this->solicitud == FALSE) {
             $this->solicitud = new Mercurio41();
         }
