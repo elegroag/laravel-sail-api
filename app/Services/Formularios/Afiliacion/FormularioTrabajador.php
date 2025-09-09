@@ -42,6 +42,8 @@ class FormularioTrabajador extends Documento
         $this->trabajador = $this->request->getParam('trabajador');
 
         $this->pdf->SetTitle("Formulario afiliación del trabajador {$this->trabajador->getCedtra()}, COMFACA");
+        // Desactivar salto automático de página para evitar páginas extra
+        $this->pdf->SetAutoPageBreak(false, 0);
         $this->pdf->SetAuthor("{$this->trabajador->getPriape()} {$this->trabajador->getSegape()} {$this->trabajador->getPrinom()} {$this->trabajador->getSegnom()}, COMFACA");
         $this->pdf->SetSubject("Formulario de afiliación a COMFACA");
         $this->pdf->SetCreator("Plataforma Web: comfacaenlinea.com.co, COMFACA");
@@ -57,7 +59,7 @@ class FormularioTrabajador extends Documento
         $this->autorizaDatos();
 
         $page = public_path('img/firmas/sello-firma.png');
-        $this->pdf->Image($page, 160, 275, 30, 20, '');
+        $this->pdf->Image($page, 160, 250, 30, 20, '');
         return $this;
     }
 
@@ -154,7 +156,7 @@ class FormularioTrabajador extends Documento
     {
         $this->pdf->SetFont('helvetica', '', 9);
         $datos = array(
-            array('lb' => 'Tipo novedad', 'texto' => 'X', 'x' => 38, 'y' => 42),
+            array('lb' => 'Tipo novedad', 'texto' => 'X', 'x' => 38, 'y' => 36),
             $this->posTipoAfiliado()
         );
         $this->addBloq($datos);
@@ -172,7 +174,7 @@ class FormularioTrabajador extends Documento
             //4%
             $x = 120;
         }
-        return array('lb' => 'Tipo afiliado', 'texto' => 'X', 'x' => $x, 'y' => 42);
+        return array('lb' => 'Tipo afiliado', 'texto' => 'X', 'x' => $x, 'y' => 36);
     }
 
     function dataEmpleador()
@@ -180,10 +182,10 @@ class FormularioTrabajador extends Documento
         $this->pdf->SetFont('helvetica', '', 7);
         $razon_social = capitalize($this->empresa->getRazsoc());
         $datos = array(
-            array('lb' => 'Razon social', 'texto' => $razon_social, 'x' => 9, 'y' => 54),
-            array('lb' => 'nit', 'texto' => $this->empresa->getNit(), 'x' => 158, 'y' => 54),
-            array('lb' => 'Sucursal', 'texto' => $razon_social, 'x' => 9, 'y' => 62),
-            array('lb' => 'Telefono', 'texto' => $this->empresa->getTelefono(), 'x' => 170, 'y' => 62),
+            array('lb' => 'Razon social', 'texto' => $razon_social, 'x' => 9, 'y' => 48),
+            array('lb' => 'nit', 'texto' => $this->empresa->getNit(), 'x' => 158, 'y' => 48),
+            array('lb' => 'Sucursal', 'texto' => $razon_social, 'x' => 9, 'y' => 48),
+            array('lb' => 'Telefono', 'texto' => $this->empresa->getTelefono(), 'x' => 170, 'y' => 48),
         );
         $this->addBloq($datos);
     }
@@ -207,32 +209,32 @@ class FormularioTrabajador extends Documento
 
         $this->pdf->SetFont('helvetica', '', 8);
         $datos = array(
-            array('lb' => 'Cedula trabajador', 'texto' => $this->trabajador->getCedtra(), 'x' => 10, 'y' => 76),
+            array('lb' => 'Cedula trabajador', 'texto' => $this->trabajador->getCedtra(), 'x' => 10, 'y' => 58),
             $this->posTipoDocumento(),
-            array('lb' => 'Celular', 'texto' => $this->trabajador->getTelefono(), 'x' => 82, 'y' => 76),
-            array('lb' => 'Email', 'texto' => $this->trabajador->getEmail(), 'x' => 125, 'y' => 76),
-            array('lb' => 'Primer apellido', 'texto' => $this->trabajador->getPriape(), 'x' => 10, 'y' => 83),
-            array('lb' => 'Segundo apellido', 'texto' => $this->trabajador->getSegape(), 'x' => 54, 'y' => 83),
-            array('lb' => 'Primer nombre', 'texto' => $this->trabajador->getPrinom(), 'x' => 105, 'y' => 83),
-            array('lb' => 'Segundo nombre', 'texto' => $this->trabajador->getSegnom(), 'x' => 155, 'y' => 83),
-            array('lb' => 'Fecha nacimiento año', 'texto' => substr($this->trabajador->getFecnac(), 0, 4), 'x' => 15, 'y' => 92),
-            array('lb' => 'Fecha nacimiento mes', 'texto' => substr($this->trabajador->getFecnac(), 5, 2), 'x' => 31, 'y' => 92),
-            array('lb' => 'Fecha nacimiento día', 'texto' => substr($this->trabajador->getFecnac(), 8, 2), 'x' => 45, 'y' => 92),
+            array('lb' => 'Celular', 'texto' => $this->trabajador->getTelefono(), 'x' => 82, 'y' => 58),
+            array('lb' => 'Email', 'texto' => $this->trabajador->getEmail(), 'x' => 125, 'y' => 58),
+            array('lb' => 'Primer apellido', 'texto' => $this->trabajador->getPriape(), 'x' => 10, 'y' => 75),
+            array('lb' => 'Segundo apellido', 'texto' => $this->trabajador->getSegape(), 'x' => 54, 'y' => 75),
+            array('lb' => 'Primer nombre', 'texto' => $this->trabajador->getPrinom(), 'x' => 105, 'y' => 75),
+            array('lb' => 'Segundo nombre', 'texto' => $this->trabajador->getSegnom(), 'x' => 155, 'y' => 75),
+            array('lb' => 'Fecha nacimiento año', 'texto' => substr($this->trabajador->getFecnac(), 0, 4), 'x' => 15, 'y' => 94),
+            array('lb' => 'Fecha nacimiento mes', 'texto' => substr($this->trabajador->getFecnac(), 5, 2), 'x' => 31, 'y' => 94),
+            array('lb' => 'Fecha nacimiento día', 'texto' => substr($this->trabajador->getFecnac(), 8, 2), 'x' => 45, 'y' => 94),
             $this->posSexo(),
             $this->posEstadoCivil(),
             $this->posZonaResidencial(),
-            array('lb' => 'Dirección recidencia', 'texto' => $this->trabajador->getDireccion(), 'x' => 10, 'y' => 100),
-            array('lb' => 'Barrio', 'texto' => $this->trabajador->getBarrio(), 'x' => 70, 'y' => 100),
-            array('lb' => 'Ciudad', 'texto' => capitalize($ciudad), 'x' => 153, 'y' => 100),
-            array('lb' => 'Resguardo', 'texto' => capitalize($resguardo), 'x' => 10, 'y' => 109),
-            array('lb' => 'Pueblo indigena', 'texto' => capitalize($pueblo), 'x' => 110, 'y' => 109),
+            array('lb' => 'Dirección recidencia', 'texto' => $this->trabajador->getDireccion(), 'x' => 10, 'y' => 92),
+            array('lb' => 'Barrio', 'texto' => $this->trabajador->getBarrio(), 'x' => 70, 'y' => 92),
+            array('lb' => 'Ciudad', 'texto' => capitalize($ciudad), 'x' => 153, 'y' => 92),
+            array('lb' => 'Resguardo', 'texto' => capitalize($resguardo), 'x' => 10, 'y' => 101),
+            array('lb' => 'Pueblo indigena', 'texto' => capitalize($pueblo), 'x' => 110, 'y' => 101),
             $this->posFactorVulnera(),
             $this->posPertenenciaEtnica(),
             $this->posNivelEscolar(),
             $this->posOriSexual(),
             $this->posTipoVivienda(),
             $this->posTieneDiscapacidad(),
-            array('lb' => 'Discapacidad', 'texto' => capitalize($discapacidad), 'x' => 136, 'y' => 167),
+            array('lb' => 'Discapacidad', 'texto' => capitalize($discapacidad), 'x' => 136, 'y' => 159),
         );
 
         $this->addBloq($datos);
@@ -245,7 +247,7 @@ class FormularioTrabajador extends Documento
         } else {
             $x = 174;
         }
-        return array('lb' => 'Discapacidad', 'texto' => 'X', 'x' => $x, 'y' => 163);
+        return array('lb' => 'Discapacidad', 'texto' => 'X', 'x' => $x, 'y' => 163 - 6);
     }
 
 
@@ -255,27 +257,27 @@ class FormularioTrabajador extends Documento
             case "P":
                 //"PROPIA",
                 $x = 128;
-                $y = 155;
+                $y = 155 - 6;
                 break;
             case "F":
                 //"FAMILIAR",
                 $x = 165;
-                $y = 155;
+                $y = 155 - 6;
                 break;
             case "A":
                 //"ARRENDADA",
                 $x = 128;
-                $y = 159;
+                $y = 159 - 6;
 
                 break;
             case "H":
                 //"HIPOTECA"
                 $x = 165;
-                $y = 159;
+                $y = 159 - 6;
                 break;
             default:
                 $x = 128;
-                $y = 159;
+                $y = 159 - 6;
                 break;
         }
         return array('lb' => 'Tipo vivienda', 'texto' => 'X', 'x' => $x, 'y' => $y);
@@ -286,19 +288,19 @@ class FormularioTrabajador extends Documento
         switch ($this->trabajador->getOrisex()) {
             case "2":
                 //"Homosexual",
-                $y = 158;
+                $y = 158 - 6;
                 break;
             case "3":
                 //"Bisexual",
-                $y = 162;
+                $y = 162 - 6;
                 break;
             case "4":
                 //"Información no disponible"
-                $y = 167;
+                $y = 167 - 6;
                 break;
             default:
                 //"Heterosexual",
-                $y = 155;
+                $y = 155 - 6;
                 break;
         }
         return array('lb' => 'Orientacion sexual', 'texto' => 'X', 'x' => 65, 'y' => $y);
@@ -309,12 +311,12 @@ class FormularioTrabajador extends Documento
         switch ($this->trabajador->getNivedu()) {
             case "1":
                 //"PREESCOLAR",
-                $y = 118;
+                $y = 118 - 6;
                 $x = 128;
                 break;
             case "2":
                 //"BASICA",
-                $y = 122;
+                $y = 122 - 6;
                 $x = 128;
                 break;
             case "3":
@@ -324,17 +326,17 @@ class FormularioTrabajador extends Documento
                 break;
             case "4":
                 //"MEDIA",
-                $y = 130;
+                $y = 130 - 6;
                 $x = 128;
                 break;
             case "6":
                 //"BÁSICA ADULTOS",
-                $y = 134;
+                $y = 134 - 6;
                 $x = 128;
                 break;
             case "7":
                 //"SECUNDARIA ADULTO",
-                $y = 138;
+                $y = 138 - 6;
                 $x = 128;
                 break;
             case "8":
@@ -354,17 +356,17 @@ class FormularioTrabajador extends Documento
                 break;
             case "12":
                 //"POSGRADO/MAESTRÍA",
-                $y = 122;
+                $y = 122 - 6;
                 $x = 165;
                 break;
             case "13":
                 //"NINGUNO",
-                $y = 138;
+                $y = 138 - 6;
                 $x = 165;
                 break;
             case "14":
                 //"INFORMACION NO DISPONIBLE"
-                $y = 146;
+                $y = 146 - 6;
                 $x = 165;
                 break;
         }
@@ -376,35 +378,35 @@ class FormularioTrabajador extends Documento
         switch ($this->trabajador->getPeretn()) {
             case "1":
                 //"Afrocolombiano",
-                $y = 118;
+                $y = 118 - 6;
                 break;
             case "2":
                 //"Comunidad negra",
-                $y = 122;
+                $y = 122 - 6;
                 break;
             case "3":
                 //"Indígena",
-                $y = 126;
+                $y = 126 - 6;
                 break;
             case "4":
                 //"Palanquero",
-                $y = 130;
+                $y = 130 - 6;
                 break;
             case "5":
                 //"Raizal del archipiélago de San Andrés, Providencia",
-                $y = 134;
+                $y = 134 - 6;
                 break;
             case "6":
                 //"Room/gitano",
-                $y = 138;
+                $y = 138 - 6;
                 break;
             case "7":
                 //"No se auto reconoce en ninguno de los anteriores",
-                $y = 142;
+                $y = 142 - 6;
                 break;
             default:
                 //"No Disponible"
-                $y = 146;
+                $y = 146 - 6;
                 break;
         }
         return array('lb' => 'Pertenencia etnica', 'texto' => 'X', 'x' => 65, 'y' => $y);
@@ -415,52 +417,52 @@ class FormularioTrabajador extends Documento
         switch ($this->trabajador->getFacvul()) {
             case "1":
                 //"Desplazado",
-                $y = 118;
+                $y = 118 - 6;
                 break;
             case "2":
                 //"Víctima del conflicto armado (No desplazado)",
-                $y = 122;
+                $y = 122 - 6;
                 break;
             case "3":
                 //"Desmovilizado o reinsertado",
-                $y = 126;
+                $y = 126 - 6;
                 break;
             case "4":
                 //"Hijo (as) de desmovilizados o reisertados",
-                $y = 130;
+                $y = 130 - 6;
                 break;
             case "5":
                 //"Damnificado desastre natural",
-                $y = 134;
+                $y = 134 - 6;
                 break;
             case "6":
                 //"Cabeza de familia",
-                $y = 138;
+                $y = 138 - 6;
                 break;
             case "7":
                 //"Hijo (as) de madres cabeza de familia",
-                $y = 142;
+                $y = 142 - 6;
                 break;
             case "8":
                 //"En condición de discapacidad",
-                $y = 146;
+                $y = 146 - 6;
                 break;
             case "9":
                 //"Población migrante",
-                $y = 150;
+                $y = 150 - 6;
                 break;
             case "10":
                 //"Población zonas frontera (Nacionales)",
-                $y = 154;
+                $y = 154 - 6;
                 break;
             case "11":
                 //"Ejercicio del trabajo sexual",
-                $y = 159;
+                $y = 159 - 6;
                 break;
             default:
                 //"No aplica",
                 //"No disponible"
-                $y = 163;
+                $y = 163 - 6;
                 break;
         }
 
@@ -482,7 +484,7 @@ class FormularioTrabajador extends Documento
                 $x = 181;
                 break;
         }
-        return array('lb' => 'Zona recidencial', 'texto' => 'X', 'x' => $x, 'y' => 90.5);
+        return array('lb' => 'Zona recidencial', 'texto' => 'X', 'x' => $x, 'y' => 90.5 - 6);
     }
 
     function posEstadoCivil()
@@ -514,7 +516,7 @@ class FormularioTrabajador extends Documento
                 break;
         }
 
-        return  array('lb' => 'Estado civil', 'texto' => 'X', 'x' => $x, 'y' => 92);
+        return  array('lb' => 'Estado civil', 'texto' => 'X', 'x' => $x, 'y' => 94);
     }
 
     function posSexo()
@@ -530,7 +532,7 @@ class FormularioTrabajador extends Documento
                 $x = 74;
                 break;
         }
-        return array('lb' => 'Sexo', 'texto' => 'X', 'x' => $x, 'y' => 92);
+        return array('lb' => 'Sexo', 'texto' => 'X', 'x' => $x, 'y' => 94);
     }
 
     function posTipoDocumento()
@@ -578,30 +580,30 @@ class FormularioTrabajador extends Documento
                 $y = 76;
                 break;
         }
-        return array('lb' => 'Tipo documento', 'texto' => 'X', 'x' => $x, 'y' => $y);
+        return array('lb' => 'Tipo documento', 'texto' => 'X', 'x' => $x, 'y' => $y - 6);
     }
 
     function bloqueEmpresa()
     {
         $zonas = ParamsTrabajador::getZonas();
-        $this->pdf->setY(43);
+        $this->pdf->setY(43 - 6);
         $this->pdf->setX(1);
         $this->pdf->Cell(105, 4, $this->empresa->getRazsoc(), 0, 0, 'C');
         $this->pdf->setX(155);
         $this->pdf->Cell(32, 4, $this->empresa->getNit(), 0, 0, 'C');
-        $this->pdf->setY(48.5);
+        $this->pdf->setY(48.5 - 6);
         $this->pdf->setX(20);
         $this->pdf->Cell(3, 4, $this->trabajador->getCodsuc(), 0, 0, 'L');
-        $this->pdf->setY(48.8);
+        $this->pdf->setY(48.8 - 6);
         $this->pdf->setX(60);
         $this->pdf->Cell(3, 4, $this->empresa->getTelefono(), 0, 0, 'L');
-        $this->pdf->setY(48.5);
+        $this->pdf->setY(48.5 - 6);
         $this->pdf->setX(110);
         if ($this->empresa->getCodzon()) {
             $this->pdf->Cell(3, 4, $zonas["{$this->empresa->getCodzon()}"], 0, 0, 'L');
         }
         $this->pdf->SetFont('helvetica', '', 6);
-        $this->pdf->setY(48.8);
+        $this->pdf->setY(48.8 - 6);
         $this->pdf->setX(160);
         $this->pdf->Cell(3, 4, $this->empresa->getEmail(), 0, 0, 'L');
         return $this->pdf;

@@ -32,6 +32,7 @@ abstract class Documento
         if (!file_exists($file)) {
             throw new DebugException("Error el documento no se genero de forma correcta", 501);
         }
+        $this->pdf = null;
         return $file;
     }
 
@@ -42,19 +43,20 @@ abstract class Documento
 
         $background = $this->request->getParam('background');
         if ($background) {
-            KumbiaPDF::setBackgroundImage(public_path('public/files/' . $background));
+            KumbiaPDF::setBackgroundImage(public_path($background));
         }
 
         $rfirma = $this->request->getParam('rfirma');
         if ($rfirma) {
             $mfirma = $this->request->getParam('firma');
-            KumbiaPDF::setFooterImage(storage_path('temp/' . $mfirma->getFirma()));
+            KumbiaPDF::setFooterImage(public_path('img/firmas/' . $mfirma->getFirma()));
         }
 
         $this->pdf = new KumbiaPDF(null, "P");
         $this->pdf->AddPage();
         $this->pdf->SetTextColor(1);
         $this->pdf->SetFont('helvetica', '', 9);
+        $this->pdf->SetMargins(10, 10, 10);
         return $this;
     }
 

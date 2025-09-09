@@ -24,14 +24,14 @@
                                 <div class="col-md-3">
                                     <div class='form-group' group-for='nit'>
                                         <label for='nit' class='control-label'>NIT</label>
-                                        <input type="number" name="nit" id="nit" class="form-control" readonly value="{{ $nit }}" />
+                                        @php echo $input_nits @endphp
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class='form-group' group-for='razsoc'>
                                         <label for='razsoc' class='control-label'>Razón social</label>
-                                        <input type="text" name="razsoc" id="razsoc" class="form-control" readonly value="{{ $razsoc }}" />
+                                        @php echo $input_razsoc @endphp
                                     </div>
                                 </div>
 

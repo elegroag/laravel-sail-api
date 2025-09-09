@@ -47,43 +47,50 @@ class Tag
         return '<img ' . $attributes . ' />';
     }
 
-    public static function selectStatic(...$data)
+    public static function selectStatic(Request $params)
     {
         $attributes = '';
-        $params = get_params_destructures($data);
-        if (isset($params[0])) {
-            $attributes .= " name=\"$params[0]\" id=\"$params[0]\"";
+        if ($params->getParam('name') != '') {
+            $attributes .= " name=\"{$params->getParam('name')}\"";
         }
 
-        if (isset($params['id'])) {
-            $attributes .= " id=\"$params[id]\"";
+        if ($params->getParam('id') != '') {
+            $attributes .= " id=\"{$params->getParam('id')}\"";
         }
 
-        if (isset($params['class'])) {
-            $attributes .= 'class="' . $params['class'] . '" ';
+        if ($params->getParam('class') != '') {
+            $attributes .= 'class="' . $params->getParam('class') . '" ';
         }
 
-        if (isset($params['style'])) {
-            $attributes .= 'style="' . $params['style'] . '" ';
+        if ($params->getParam('style') != '') {
+            $attributes .= 'style="' . $params->getParam('style') . '" ';
         }
 
-        if (isset($params['onchange'])) {
-            $attributes .= 'onchange="' . $params['onchange'] . '" ';
+        if ($params->getParam('onchange') != '') {
+            $attributes .= 'onchange="' . $params->getParam('onchange') . '" ';
         }
 
-        if (isset($params['event'])) {
-            $attributes .= 'data-toggle="' . $params['event'] . '" ';
+        if ($params->getParam('event') != '') {
+            $attributes .= 'data-toggle="' . $params->getParam('event') . '" ';
         }
 
-        if (isset($params['dummyText'])) {
-            $options = '<option value="@">' . $params['dummyText'] . '</option>';
+        if ($params->getParam('readonly') != '') {
+            $attributes .= 'readonly ';
+        }
+
+        if ($params->getParam('disabled') != '') {
+            $attributes .= 'disabled ';
+        }
+
+        if ($params->getParam('dummyText') != '') {
+            $options = '<option value="@">' . $params->getParam('dummyText') . '</option>';
         } else {
             $options = '';
         }
 
-        if (isset($params['options'])) {
-            foreach ($params['options'] as $key => $value) {
-                if (isset($params['value']) && $params['value'] == $key) {
+        if ($params->getParam('options') != '') {
+            foreach ($params->getParam('options') as $key => $value) {
+                if (isset($data['value']) && $data['value'] == $key) {
                     $options .= '<option value="' . $key . '" selected>' . $value . '</option>';
                 } else {
                     $options .= '<option value="' . $key . '">' . $value . '</option>';
@@ -245,6 +252,10 @@ class Tag
 
         if (isset($params['style'])) {
             $attributes .= 'style="' . $params['style'] . '" ';
+        }
+
+        if ($params['readonly'] != '') {
+            $attributes .= 'readonly ';
         }
 
         if (isset($params['name'])) {

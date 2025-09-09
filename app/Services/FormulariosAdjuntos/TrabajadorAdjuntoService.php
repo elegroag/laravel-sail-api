@@ -98,14 +98,15 @@ class TrabajadorAdjuntoService
         $out = $procesadorComando->toArray();
         $this->filename = "carta_solicitud_independiente_{$this->request->getCedtra()}.pdf";
         KumbiaPDF::setBackgroundImage(false);
+
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearOficio('trabajador');
-        $documento->setParamsInit(array(
+        $documento->setParamsInit([
             'trabajador' => $this->request,
             'firma' => $this->lfirma,
             'filename' => $this->filename,
             'previus' => $out['success'] ? $out['data'] : null
-        ));
+        ]);
 
         $documento->main();
         $documento->outPut();
@@ -136,23 +137,20 @@ class TrabajadorAdjuntoService
         );
 
         if ($procesadorComando->isJson() == false) throw new DebugException("Error al consultar la empresa", 501);
-        $out = $procesadorComando->getObject();
-        $empresa = new Mercurio30($out->data);
+        $out = $procesadorComando->toArray();
+        $empresa = new Mercurio30($out['data']);
 
         $this->filename = strtotime('now') . "_{$this->request->getCedtra()}.pdf";
-        KumbiaPDF::setBackgroundImage(public_path('img/form/trabajador/form-001-tra-p01.png'));
-
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearFormulario('trabajador');
-        $documento->setParamsInit(
-            array(
-                'trabajador' => $this->request,
-                'empresa' => $empresa,
-                'conyuge' => $conyuge,
-                'firma' => $this->lfirma,
-                'filename' => $this->filename
-            )
-        );
+        $documento->setParamsInit([
+            'background' => 'img/form/trabajador/form-001-tra-p01.png',
+            'trabajador' => $this->request,
+            'empresa' => $empresa,
+            'conyuge' => $conyuge,
+            'firma' => $this->lfirma,
+            'filename' => $this->filename
+        ]);
 
         $documento->main();
         $documento->outPut();

@@ -1,4 +1,3 @@
-import { $App } from '../../../App';
 import { ComponentModel } from '../../../Componentes/Models/ComponentModel';
 import { eventsFormControl } from '../../../Core';
 import { FormView } from '../../FormView';
@@ -66,6 +65,8 @@ class FormTrabajadorView extends FormView {
                 const inputElement = this.$el.find(`[name="${key}"]`);
                 if (inputElement.length && valor) {
                     inputElement.val(valor);
+                } else {
+                    inputElement.val('@');
                 }
             });
 
@@ -83,7 +84,7 @@ class FormTrabajadorView extends FormView {
             }
 
             if (this.model.isValid() === false) {
-                $App.trigger('alert:warning', {
+                this.App.trigger('alert:warning', {
                     message: 'Algunos de los campos son requeridos: ' + this.model.validationError.join(' '),
                 });
             }
@@ -149,7 +150,7 @@ class FormTrabajadorView extends FormView {
         if (this.form.valid() == false) _err++;
         if (_err > 0) {
             target.removeAttr('disabled');
-            $App.trigger('alert:warning', {
+            this.App.trigger('alert:warning', {
                 message: 'Se requiere de resolver los campos requeridos para continuar.',
             });
             setTimeout(() => $('label.error').text(''), 6000);
@@ -162,14 +163,14 @@ class FormTrabajadorView extends FormView {
 
         if (entity.isValid() === false) {
             target.removeAttr('disabled');
-            $App.trigger('alert:warning', {
+            this.App.trigger('alert:warning', {
                 message: 'Algunos de los campos son requeridos: ' + entity.validationError.join(' '),
             });
             setTimeout(() => $('label.error').text(''), 6000);
             return false;
         }
 
-        $App.trigger('confirma', {
+        this.App.trigger('confirma', {
             message: 'Confirma que desea guardar los datos del formulario.',
             callback: (status) => {
                 if (status) {
@@ -182,7 +183,7 @@ class FormTrabajadorView extends FormView {
 
                             if (response) {
                                 if (response.success) {
-                                    $App.trigger('alert:success', { message: response.msj });
+                                    this.App.trigger('alert:success', { message: response.msj });
                                     this.model.set({ id: parseInt(response.data.id) });
                                     if (this.isNew === true) {
                                         $App.router.navigate('proceso/' + this.model.get('id'), {
@@ -195,7 +196,7 @@ class FormTrabajadorView extends FormView {
                                         _tab.show();
                                     }
                                 } else {
-                                    $App.trigger('alert:error', { message: response.msj });
+                                    this.App.trigger('alert:error', { message: response.msj });
                                 }
                             }
                         },
@@ -220,7 +221,7 @@ class FormTrabajadorView extends FormView {
             },
             callback: (solicitud) => {
                 if (solicitud) {
-                    $App.trigger('confirma', {
+                    this.App.trigger('confirma', {
                         message:
                             'El sistema identifica información del afiliado en el sistema central de la Caja. ¿Desea que se actualice el presente formulario con los datos existentes?.',
                         callback: (status) => {

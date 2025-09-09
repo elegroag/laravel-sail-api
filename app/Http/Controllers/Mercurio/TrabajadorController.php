@@ -14,9 +14,12 @@ use App\Models\Mercurio10;
 use App\Models\Mercurio30;
 use App\Models\Mercurio31;
 use App\Models\Mercurio37;
+use App\Models\Mercurio38;
+use App\Models\Mercurio41;
 use App\Models\Subsi54;
 use App\Services\Entidades\TrabajadorService;
 use App\Services\FormulariosAdjuntos\TrabajadorAdjuntoService;
+use App\Services\Tag;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
@@ -25,6 +28,7 @@ use App\Services\Utils\SenderValidationCaja;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Services\Request as RequestParams;
 
 class TrabajadorController extends ApplicationController
 {
@@ -42,17 +46,46 @@ class TrabajadorController extends ApplicationController
     }
 
     /**
-     * GET /trabajador/index (Opcional, placeholder)
+     * GET /mercurio/trabajador/index
      */
     public function indexAction()
     {
+        if ($this->tipo !== 'E') return redirect()->route('mercurio.index');
+        $input_nits = null;
+
+        $xempresas = Mercurio30::where('documento', $this->user['documento'])
+            ->where('coddoc', $this->user['coddoc'])
+            ->get();
+
+        foreach ($xempresas as $key => $value) {
+            $nits["{$value->nit}"] = $value->nit;
+        }
+        $razsoc = ($xempresas->count() == 1) ? $xempresas[0]->razsoc : '';
+        $input_nits = Tag::selectStatic(
+            new RequestParams([
+                'name' => 'nit',
+                'class' => 'form-control top',
+                'id' => 'nit',
+                'options' => $nits,
+                'dummyText' => 'Seleccione un nit'
+            ])
+        );
+
+        $input_razsoc = Tag::textUpperField(
+            'name:razsoc',
+            'class:form-control',
+            'id:razsoc',
+            'readonly:1',
+            "value:{$razsoc}"
+        );
 
         return view('mercurio/trabajador/index', [
             'tipo' => $this->tipo,
-            'documento' => $this->documento,
+            'documento' => $this->user['documento'],
+            'coddoc' => $this->user['coddoc'],
             'title' => 'Afiliación de trabajadores',
-            'nit' => '',
-            'razsoc' => '',
+            'input_nits' => $input_nits,
+            'input_razsoc' => $input_razsoc
         ]);
     }
 
