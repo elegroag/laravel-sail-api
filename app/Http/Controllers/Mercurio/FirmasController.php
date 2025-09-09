@@ -37,9 +37,8 @@ class FirmasController extends ApplicationController
 
         $mfirma = (new Mercurio16())->findFirst(" documento='{$documento}' AND coddoc='{$coddoc}'");
         $content = $mfirma ? $mfirma->getKeypublic() : null;
-        
-        return $this->renderObject(['success' => true, 'msj' => 'OK']);
-        view('mercurio.firmas.index', [
+
+        return view('mercurio.firmas.index', [
             'hide_header' => true,
             'title' => 'Firma Dígital',
             'publicKey' => $content

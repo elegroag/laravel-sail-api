@@ -48,6 +48,7 @@ class IndependienteAdjuntoService
     {
         $this->filename = "tratamiento_datos_independiente_{$this->request->getCedtra()}.pdf";
         KumbiaPDF::setFooterImage(false);
+        KumbiaPDF::setBackgroundImage(false);
 
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearPolitica('independiente');
@@ -111,11 +112,12 @@ class IndependienteAdjuntoService
         ])->first();
 
         $this->filename = "formulario_independiente_{$this->request->getCedtra()}.pdf";
-        KumbiaPDF::setBackgroundImage(public_path('img/form/trabajador/form-001-tra-p01.png'));
+        $background = 'img/form/trabajador/form-001-tra-p01.png';
 
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearFormulario('independiente');
         $documento->setParamsInit([
+            'background' => $background,
             'independiente' => $this->request,
             'conyuge' => $conyuge,
             'firma' => $this->lfirma,

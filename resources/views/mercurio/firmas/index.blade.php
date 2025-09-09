@@ -1,62 +1,39 @@
-@extends('layouts.bone')
+@extends('layouts.dash')
 
 @section('content')
-
 <div id='boneLayout'>
-    <div class="header bg-gradient-primary pb-9">
-        <div class="container-fluid">
-            <div class="header-body p-4">
-                <div id='header_group_button'>
-                    <div class="col-md-6 col-auto">
-                        <h4 class="text-white d-inline-block mb-0">Firma Digital</h4>
-                    </div>
-                </div>
+    <div class="card-body m-3">
+        <div id="app" class="row">
+            <div class="col-md-6">
+                <h5 class="text-primary">Clave publica Firma Digital</h5>
+                <p>Para comprobar la autenticidad de un documento digital, puede hacer uso del siguiente certificado publico de firma digital.</p>
+                <code>
+                    {{$publicKey}}
+                </code>
             </div>
-        </div>
-    </div>
-
-    <div class="container-fluid mt--9 pb-4">
-        <div class="row">
-            <div class="col">
-                <div class="card">
-                    <div class='card-header bg-green-blue p-1' id='render_subeader'></div>
-                    <div class="card-body m-3">
-                        <div id="app" class="row">
-                            <div class="col-md-6">
-                                <h5 class="text-primary">Clave publica Firma Digital</h5>
-                                <p>Para comprobar la autenticidad de un documento digital, puede hacer uso del siguiente certificado publico de firma digital.</p>
-                                <code>
-                                    <?= $publicKey ?>
-                                </code>
-                            </div>
-                            <div class="col-md-6">
-                                <div id="fileUpload" class="file-container">
-                                    <label for="fileUpload-1" class="file-upload">
-                                        <div>
-                                            <b class="material-icons-outlined">Validar Documento</b>
-                                            <p>Arrastra y suelta archivo aquí</p>
-                                            <span>O</span>
-                                            <div>Click buscar archivos</div>
-                                        </div>
-                                        <input type="file" id="fileUpload-1" name="[]" multiple="" hidden="">
-                                    </label>
-                                </div>
-                            </div>
+            <div class="col-md-6">
+                <div id="fileUpload" class="file-container">
+                    <label for="fileUpload-1" class="file-upload">
+                        <div>
+                            <b class="material-icons-outlined">Validar Documento</b>
+                            <p>Arrastra y suelta archivo aquí</p>
+                            <span>O</span>
+                            <div>Click buscar archivos</div>
                         </div>
-                    </div>
+                        <input type="file" id="fileUpload-1" name="[]" multiple="" hidden="">
+                    </label>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 @endsection
 
-@section('scripts')
+@push('scripts')
     <script src="{{ asset('mercurio/build/Firmas.js') }}"></script>
-@endsection
+@endpush
 
-@section('styles')
+@push('styles')
 <style>
     :root {
         --file-container-bg: #eee;
@@ -177,4 +154,4 @@
         font-size: 1.125em;
     }
 </style>
-@endsection
+@endpush

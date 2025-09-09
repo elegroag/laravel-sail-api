@@ -187,7 +187,7 @@ class ParticularController extends ApplicationController
         $html_domestico .= "</tbody>";
         $html_domestico .= "</table>";
 
-        return view("particular.historial", [
+        return view("mercurio/particular/historial", [
             "title" => "Historial",
             "html_empresa" => $html_empresa,
             "html_facultativo" => $html_facultativo,

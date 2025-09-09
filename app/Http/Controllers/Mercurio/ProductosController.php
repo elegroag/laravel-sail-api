@@ -31,22 +31,22 @@ class ProductosController extends ApplicationController
      * codser = 27
      * @return void
      */
-    public function complemento_nutricionalAction()
+    public function complementoNutricionalAction()
     {
         $codser = '27';
-        $serviciosCupos = new ServiciosCupos();
-        $cupos_disponibles = $serviciosCupos->findFirst(" estado='A' and codser='{$codser}'");
+        $cupos_disponibles = ServiciosCupos::where("estado", 'A')
+            ->where("codser", $codser)
+            ->first();
 
         if ($cupos_disponibles == false) {
             set_flashdata("error", array(
                 "msj" => "El servicio no está disponible para el actual periodo.",
                 "code" => '505'
             ));
-            redirect("principal.index");
-            exit;
+            return redirect()->route("principal.index");
         }
 
-        $cupos_disponibles = $cupos_disponibles->getCupos();
+        $cupos_disponibles = ($cupos_disponibles) ? $cupos_disponibles->getCupos() : 0;
         $cupos = $this->misCuposAplicados($codser);
         $beneficiarios = $this->afiliadosBeneficiarios($codser);
 
@@ -153,16 +153,13 @@ class ProductosController extends ApplicationController
 
     function misCuposAplicados($codser)
     {
-        $cedtra =  parent::getActUser('documento');
-        $pinesAfiliados = (new PinesAfiliado())->getFind("cedtra='{$cedtra}' and codser='{$codser}' ");
-        $pines = array();
+        $pinesAfiliados = PinesAfiliado::where("cedtra", $this->user['documento'])
+            ->where("codser", $codser);
 
-        if ($pinesAfiliados) {
-            foreach ($pinesAfiliados as $pin) {
-                $pines[] = $pin->getArray();
-            }
+        if ($pinesAfiliados->exists()) {
+            return $pinesAfiliados->get()->toArray();
         }
-        return $pines;
+        return [];
     }
 
     function afiliadosBeneficiarios($codser)

@@ -144,7 +144,7 @@ class FormularioIndependiente extends Documento
             array('lb' => 'Direccion laboral', 'texto' => $this->independiente->getDireccion(), 'x' => 10, 'y' => 171),
             $this->posZonaLaboral(171),
             array('lb' => 'Otra empresa', 'texto' => 'X', 'x' => 25, 'y' => 179),
-            array('lb' => 'Ocupación', 'texto' => $cargo, 'x' => 117, 'y' => 179),
+            array('lb' => 'Ocupación', 'texto' => substr($cargo, 0, 64), 'x' => 117, 'y' => 179),
         );
         $this->addBloq($datos);
     }
@@ -158,8 +158,8 @@ class FormularioIndependiente extends Documento
             array('lb' => 'Nombre beneficio giro', 'texto' => $nombre, 'x' => 10, 'y' => 189),
             array('lb' => 'Documento beneficio giro', 'texto' => $this->independiente->getCedtra(), 'x' => 112, 'y' => 189),
             array('lb' => 'Tipo afiliado beneficio', 'texto' => 'X', 'x' => 164, 'y' => 189),
-            $this->posTipoPago(),
-            array('lb' => 'Número cuenta', 'texto' => $this->independiente->getNumcue(), 'x' => 52, 'y' => 197),
+            $this->posTipoPago(198),
+            array('lb' => 'Número cuenta', 'texto' => $this->independiente->getNumcue(), 'x' => 52, 'y' => 198),
             array('lb' => 'Banco', 'texto' => capitalize($banco), 'x' => 112, 'y' => 197),
         );
         $this->addBloq($datos);
@@ -541,7 +541,7 @@ class FormularioIndependiente extends Documento
         return array('lb' => 'Discapacidad', 'texto' => 'X', 'x' => $x, 'y' => $y);
     }
 
-    function posTipoPago()
+    function posTipoPago($y)
     {
         switch ($this->independiente->getTippag()) {
             case 'D':
@@ -554,6 +554,6 @@ class FormularioIndependiente extends Documento
                 $x = null;
                 break;
         }
-        return array('lb' => 'Tipo medio pago', 'texto' => ($x) ? 'X' : '', 'x' => $x, 'y' => 218);
+        return array('lb' => 'Tipo medio pago', 'texto' => ($x) ? 'X' : '', 'x' => $x, 'y' => $y);
     }
 }

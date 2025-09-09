@@ -38,31 +38,31 @@
                 <div class="tab-pane fade show active" id="tabs-icons-text-1" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
                     <hr />
                     <div class="row">
-                        {{ $html_empresa }}
+                        @php echo $html_empresa @endphp
                     </div>
                 </div>
                 <div class="tab-pane fade show " id="tabs-icons-text-2" role="tabpanel" aria-labelledby="tabs-icons-text-2-tab">
                     <hr />
                     <div class="row">
-                        {{ $html_facultativo }}
+                        @php echo $html_facultativo @endphp
                     </div>
                 </div>
                 <div class="tab-pane fade show " id="tabs-icons-text-3" role="tabpanel" aria-labelledby="tabs-icons-text-3-tab">
                     <hr />
                     <div class="row">
-                        {{ $html_pensionado }}
+                        @php echo $html_pensionado @endphp
                     </div>
                 </div>
                 <div class="tab-pane fade show " id="tabs-icons-text-4" role="tabpanel" aria-labelledby="tabs-icons-text-4-tab">
                     <hr />
                     <div class="row">
-                        {{ $html_comunitaria }}
+                        @php echo $html_comunitaria @endphp
                     </div>
                 </div>
                 <div class="tab-pane fade show " id="tabs-icons-text-5" role="tabpanel" aria-labelledby="tabs-icons-text-5-tab">
                     <hr />
                     <div class="row">
-                        {{ $html_domestico }}
+                        @php echo $html_domestico @endphp
                     </div>
                 </div>
             </div>

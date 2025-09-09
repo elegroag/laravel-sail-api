@@ -49,6 +49,7 @@ class EmpresaAdjuntoService
     {
         $this->filename = "tratamiento_datos_empresa_{$this->request->getNit()}.pdf";
         KumbiaPDF::setFooterImage(false);
+        KumbiaPDF::setBackgroundImage(false);
 
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearPolitica('empresa');

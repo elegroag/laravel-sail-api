@@ -33,11 +33,10 @@ class FacultativoAdjuntoService
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
+            [
                 "servicio" => "ComfacaAfilia",
                 "metodo" => "parametros_empresa"
-            ),
-            false
+            ]
         );
 
         $datos_captura =  $procesadorComando->toArray();
@@ -48,16 +47,20 @@ class FacultativoAdjuntoService
     public function tratamientoDatos()
     {
         $this->filename = "tratamiento_datos_facultativo_{$this->request->getCedtra()}.pdf";
+        KumbiaPDF::setFooterImage(false);
         KumbiaPDF::setBackgroundImage(false);
+
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearPolitica('facultativo');
-        $documento->setParamsInit(array(
-            'facultativo' => $this->request,
-            'firma' => $this->lfirma,
-            'filename' => $this->filename,
-            'background' => false,
-            'rfirma' => false
-        ));
+        $documento->setParamsInit(
+            [
+                'facultativo' => $this->request,
+                'firma' => $this->lfirma,
+                'filename' => $this->filename,
+                'background' => false,
+                'rfirma' => false
+            ]
+        );
         $documento->main();
         $documento->outPut();
 
@@ -69,11 +72,11 @@ class FacultativoAdjuntoService
     {
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
+            [
                 "servicio" => "ComfacaEmpresas",
                 "metodo" => "informacion_trabajador",
                 "params" => array('cedtra' => $this->request->getCedtra())
-            )
+            ]
         );
 
         if ($procesadorComando->isJson() == False) {
@@ -82,16 +85,18 @@ class FacultativoAdjuntoService
 
         $out = $procesadorComando->toArray();
         $this->filename = "carta_solicitud_facultativo_{$this->request->getCedtra()}.pdf";
-        KumbiaPDF::setBackgroundImage(false);
         $fabrica = new FactoryDocuments();
 
         $documento = $fabrica->crearOficio('facultativo');
-        $documento->setParamsInit(array(
-            'facultativo' => $this->request,
-            'firma' => $this->lfirma,
-            'filename' => $this->filename,
-            'previus' => $out['success'] ? $out['data'] : null
-        ));
+        $documento->setParamsInit(
+            [
+                'background' => 'img/form/oficios/oficio_solicitud_afiliacion.jpg',
+                'facultativo' => $this->request,
+                'firma' => $this->lfirma,
+                'filename' => $this->filename,
+                'previus' => $out['success'] ? $out['data'] : null
+            ]
+        );
 
         $documento->main();
         $documento->outPut();
@@ -110,16 +115,18 @@ class FacultativoAdjuntoService
         ])->first();
 
         $this->filename = "formulario_facultativo_{$this->request->getCedtra()}.pdf";
-        KumbiaPDF::setBackgroundImage(public_path('img/form/trabajador/form-001-tra-p01.png'));
 
         $fabrica = new FactoryDocuments();
         $documento = $fabrica->crearFormulario('facultativo');
-        $documento->setParamsInit(array(
-            'facultativo' => $this->request,
-            'conyuge' => $conyuge,
-            'firma' => $this->lfirma,
-            'filename' => $this->filename
-        ));
+        $documento->setParamsInit(
+            [
+                'background' => 'img/form/trabajador/form-001-tra-p01.png',
+                'facultativo' => $this->request,
+                'conyuge' => $conyuge,
+                'firma' => $this->lfirma,
+                'filename' => $this->filename,
+            ]
+        );
 
         $documento->main();
         $documento->outPut();
@@ -137,11 +144,11 @@ class FacultativoAdjuntoService
 
     public function getResult()
     {
-        return array(
+        return [
             "name" => $this->filename,
             "file" => basename($this->outPdf),
             'out' => $this->outPdf,
             'fhash' => $this->fhash
-        );
+        ];
     }
 }

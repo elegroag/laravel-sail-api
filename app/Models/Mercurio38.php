@@ -1055,11 +1055,6 @@ class Mercurio38 extends ModelBase
         return $data["{$campo}"];
     }
 
-    public function createAttributes($data)
-    {
-        parent::setCreateAttributes($this, $data);
-    }
-
     public function getCoddocreplegArray()
     {
         return array(
@@ -1102,5 +1097,10 @@ class Mercurio38 extends ModelBase
                 return null;
                 break;
         }
+    }
+
+    public function getNombreCompleto()
+    {
+        return $this->priape . " " . $this->segape . " " . $this->prinom . " " . $this->segnom;
     }
 }

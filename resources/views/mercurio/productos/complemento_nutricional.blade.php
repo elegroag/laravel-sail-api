@@ -1,24 +1,11 @@
+@extends('layouts.dash')
 
-<script type="text/template" id='tmp_registros'>
-    <tr>
-        <td>
-            <% if(hasPin == 1){%>
-                <button type="button" toggle='buscar' data-cid='<%=id%>' data-docu='<%=docben%>' class="btn btn-md btn-info">APLICADO</button>
-            <%}else{ %>
-                <button type="button" toggle='aplica' data-cid='<%=id%>' data-docu='<%=docben%>' class="btn btn-md btn-primary">APLICAR AQUÍ</button>
-            <% }%>
-        </td>
-        <td><%=nomben%></td>
-        <td><%=docben%></td>
-        <td><%=categoria%></td>
-    </tr>
-</script>
-
+@section('content')
 <div class="col mt-2">
     <div class="card">
         <div class='card-header' id='afiliacion_header'>
             <div id="botones" class="nav justify-content-end">
-                <a href="<?= $instancePath ?>principal/index" class='btn btn-sm btn-primary'><i class="fas fa-home fa-2x"></i> Salir</a>&nbsp;
+                <a href="{{ route('principal.index') }}" class='btn btn-sm btn-primary'><i class="fas fa-home fa-2x"></i> Salir</a>&nbsp;
             </div>
             <h4>COMPLEMENTO NUTRICIONAL</h4>
             <p>Adquiere el complemento nutricional para sus hijos, por una unica tarifa. Para más información puede ingresar al siguiente link y conocer los requisitos del producto:
@@ -70,7 +57,7 @@
                             </p>
                         </div>
                         <div class="card-body">
-                            <p class="text-center"><?= Tag::image("Mercurio/complemento.jpg", "class: navbar-brand-img img-responsive", "style: width:250px"); ?></p><br>
+                            <p class="text-center"><img src="{{ asset('img/Mercurio/complemento.jpg') }}" class="navbar-brand-img img-responsive" style="width:250px" /></p><br>
                             <p>Los cupos estan disponibles para toda la población del departamento del CAQUETA, qué cumplan con los requisitos del producto.</p>
                             <p>El programa de Salud y Nutrición, va dirigido para las madres gestantes y los niños que aún no hayan cumplido los 6 años. Los cupos son limitados.<br />Para más información puede ingresar al siguiente link:<br />
                                 <a href="https://comfaca.com/complemento-nutricional" target="blank">Información Complemento Nutricional COMFACA</a>
@@ -82,8 +69,27 @@
         </div>
     </div>
 </div>
+@endsection
+
+@push('scripts')
+<script type="text/template" id='tmp_registros'>
+    <tr>
+        <td>
+            <% if(hasPin == 1){%>
+                <button type="button" toggle='buscar' data-cid='<%=id%>' data-docu='<%=docben%>' class="btn btn-md btn-info">APLICADO</button>
+            <%}else{ %>
+                <button type="button" toggle='aplica' data-cid='<%=id%>' data-docu='<%=docben%>' class="btn btn-md btn-primary">APLICAR AQUÍ</button>
+            <% }%>
+        </td>
+        <td><%=nomben%></td>
+        <td><%=docben%></td>
+        <td><%=categoria%></td>
+    </tr>
+</script>
 
 <script type="text/javascript">
     const CODSER = "{{ $codser }}";
+    window.ServerController = 'productos';
 </script>
-<script src="{{ asset('mercurio/ComplementoNutricional.js') }}"></script>
+<script src="{{ asset('mercurio/build/ComplementoNutricional.js') }}"></script>
+@endpush

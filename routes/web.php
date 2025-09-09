@@ -58,3 +58,4 @@ require __DIR__ . '/datos_empresa.php';
 require __DIR__ . '/datos_trabajador.php';
 require __DIR__ . '/principal.php';
 require __DIR__ . '/firma.php';
+require __DIR__ . '/productos.php';
