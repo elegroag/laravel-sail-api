@@ -12,6 +12,7 @@ use App\Models\Mercurio02;
 use App\Models\Mercurio07;
 use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
+use App\Services\Utils\Logger;
 use App\Services\Utils\SenderEmail;
 use Illuminate\Http\Request;
 
@@ -39,8 +40,8 @@ class MovimientosController extends ApplicationController
 
     public function historialAction()
     {
-        $generalService = new GeneralService();
-        $generalService->registrarLog(false, "Historial", "");
+        $logger = new Logger();
+        $logger->registrarLog(false, "Historial", "");
         if ($this->tipo == "E") {
             return redirect()->to("mercurio/subsidioemp/historial");
         }
@@ -76,7 +77,8 @@ class MovimientosController extends ApplicationController
 
             $response = "Cambio de Email de Aviso con Exito";
 
-            $generalService->registrarLog(false, "Cambio de Email", "");
+            $logger = new Logger();
+            $logger->registrarLog(false, "Cambio de Email", "");
             return $this->renderText(json_encode($response));
         } catch (DebugException $e) {
             $response = "No se pudo realizar la accion";
@@ -180,8 +182,8 @@ class MovimientosController extends ApplicationController
             );
 
             $sender_email->send($mercurio07->getEmail(), $html);
-            $generalService = new GeneralService();
-            $generalService->registrarLog(false, "Cambio de Clave", "");
+            $logger = new Logger();
+            $logger->registrarLog(false, "Cambio de Clave", "");
 
             $response = "Cambio de clave se ha realizado con éxito.";
         } catch (DebugException $e) {

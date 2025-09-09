@@ -22,34 +22,12 @@ class Mercurio33 extends ModelBase
         'fecest',
         'usuario',
         'actualizacion',
+        'log'
     ];
 
-    public function __construct(
-        $id = null,
-        $tipo = null,
-        $coddoc = null,
-        $documento = null,
-        $campo = null,
-        $antval = null,
-        $valor = null,
-        $estado = null,
-        $motivo = null,
-        $fecest = null,
-        $usuario = null,
-        $actualizacion = null
-    ) {
-        $this->id = $id;
-        $this->tipo = $tipo;
-        $this->coddoc = $coddoc;
-        $this->documento = $documento;
-        $this->campo = $campo;
-        $this->antval = $antval;
-        $this->valor = $valor;
-        $this->estado = $estado;
-        $this->motivo = $motivo;
-        $this->fecest = $fecest;
-        $this->usuario = $usuario;
-        $this->actualizacion = $actualizacion;
+    public function __construct(array|null $attributes = [])
+    {
+        parent::__construct($attributes);
     }
 
     public function getEstadoDetalle()
@@ -151,20 +129,5 @@ class Mercurio33 extends ModelBase
     public function getMotivo()
     {
         return $this->motivo;
-    }
-
-    public function __get($property)
-    {
-        if (property_exists($this, $property)) {
-            return $this->$property;
-        }
-    }
-
-    public function __set($property, $value)
-    {
-        if (property_exists($this, $property)) {
-            $this->$property = $value;
-        }
-        return $this;
     }
 }

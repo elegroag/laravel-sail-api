@@ -26,6 +26,7 @@ use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\GuardarArchivoService;
+use App\Services\Utils\Logger;
 use App\Services\Utils\SenderValidationCaja;
 use Illuminate\Http\Request;
 use TCPDF;
@@ -378,8 +379,8 @@ class ActualizaTrabajadorController extends ApplicationController
     {
         $this->setResponse("ajax");
 
-        $generalService = new GeneralService();
-        $id_log = $generalService->registrarLog(false, "actualización datos basicos", "");
+        $logger = new Logger();
+        $id_log = $logger->registrarLog(false, "actualización datos basicos", "");
         try {
             $id = $request->input('id');
 

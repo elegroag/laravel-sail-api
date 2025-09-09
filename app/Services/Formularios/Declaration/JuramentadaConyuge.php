@@ -41,8 +41,9 @@ class JuramentadaConyuge extends Documento
         $this->trabajador = $this->request->getParam('trabajador');
         $this->bloqueTrabajador();
         $this->bloqueConyuge();
-        $page = public_path('img/firmas/sello-firma.png');
-        $this->pdf->Image($page, 160, 275, 30, 20, '');
+        $selloFirma = public_path('img/firmas/sello-firma.png');
+        $this->pdf->Image($selloFirma, 160, 265, 30, 20, '', '', '', false, 300, '', false, false, 0);
+        return $this;
     }
 
     /**
@@ -62,17 +63,17 @@ class JuramentadaConyuge extends Documento
         $detdoc = ($mtidocs) ? $mtidocs->getDetdoc() : 'Cedula de Ciudadania';
 
         $this->pdf->SetFont('helvetica', '', 9);
-        $datos = array(
-            array('lb' => 'Nombre trabajador', 'texto' => capitalize($nomtra), 'x' => 20, 'y' => 30),
-            array('lb' => 'Año', 'texto' => $today->format('Y'), 'x' => 122, 'y' => 21),
-            array('lb' => 'Mes', 'texto' => $today->format('m'), 'x' => 134, 'y' => 21),
-            array('lb' => 'Dia', 'texto' => $today->format('d'), 'x' => 144, 'y' => 21),
-            array('lb' => 'Ciudad', 'texto' => $ciudad, 'x' => 152, 'y' => 21),
-            array('lb' => 'TipoDoc trabajador', 'texto' => $detdoc, 'x' => 72, 'y' => 36),
-            array('lb' => 'Numero documento', 'texto' => $this->trabajador->getCedtra(), 'x' => 156, 'y' => 36),
+        $datos = [
+            ['lb' => 'Año', 'texto' => $today->format('Y'), 'x' => 122, 'y' => 17],
+            ['lb' => 'Mes', 'texto' => $today->format('m'), 'x' => 134, 'y' => 17],
+            ['lb' => 'Dia', 'texto' => $today->format('d'), 'x' => 144, 'y' => 17],
+            ['lb' => 'Ciudad', 'texto' => $ciudad, 'x' => 152, 'y' => 17],
+            ['lb' => 'Nombre trabajador', 'texto' => capitalize($nomtra), 'x' => 20, 'y' => 25],
+            ['lb' => 'TipoDoc trabajador', 'texto' => $detdoc, 'x' => 72, 'y' => 31],
+            ['lb' => 'Numero documento', 'texto' => $this->trabajador->getCedtra(), 'x' => 156, 'y' => 31],
             $this->posCompaPermanente(),
             $this->postEstadoCivil()
-        );
+        ];
         $this->addBloq($datos);
         return $this->pdf;
     }
@@ -85,20 +86,19 @@ class JuramentadaConyuge extends Documento
         $nomcony = capitalize($this->conyuge->getPrinom() . ' ' . $this->conyuge->getSegnom() . ' ' . $this->conyuge->getPriape() . ' ' . $this->conyuge->getSegape());
 
         $this->pdf->SetFont('helvetica', '', 9);
-        $datos = array(
-            array('lb' => 'Nombre conyuge', 'texto' => substr($nomcony, 0, 53), 'x' => 57, 'y' => 98),
-            array('lb' => 'Telefono conyuge', 'texto' => $this->conyuge->getTelefono(), 'x' => 172, 'y' => 98),
-            array('lb' => 'Tipo documento', 'texto' => $detdoc, 'x' => 64, 'y' => 105),
-            array('lb' => 'Cedula conyuge', 'texto' => $this->conyuge->getCedcon(), 'x' => 84, 'y' => 105),
-            array('lb' => 'Email conyuge', 'texto' => $this->conyuge->getEmail(), 'x' => 142, 'y' => 105),
-            array('lb' => 'Nombre conyuge', 'texto' => substr($nomcony, 0, 53), 'x' => 54, 'y' => 134),
-            array('lb' => 'Tipo documento', 'texto' => $detdoc, 'x' => 33, 'y' => 139),
-            array('lb' => 'Cedula conyuge', 'texto' => $this->conyuge->getCedcon(), 'x' => 60, 'y' => 139),
-            array('lb' => 'Tiempo convive', 'texto' => $this->conyuge->getTiecon(), 'x' => 33, 'y' => 144),
-            array('lb' => 'Meses convive', 'texto' => '1', 'x' => 53, 'y' => 144),
+        $datos = [
+            ['lb' => 'Nombre conyuge', 'texto' => substr($nomcony, 0, 53), 'x' => 57, 'y' => 88],
+            ['lb' => 'Telefono conyuge', 'texto' => $this->conyuge->getTelefono(), 'x' => 172, 'y' => 88],
+            ['lb' => 'Tipo documento', 'texto' => $detdoc, 'x' => 64, 'y' => 94],
+            ['lb' => 'Cedula conyuge', 'texto' => $this->conyuge->getCedcon(), 'x' => 84, 'y' => 94],
+            ['lb' => 'Email conyuge', 'texto' => $this->conyuge->getEmail(), 'x' => 142, 'y' => 94],
+            ['lb' => 'Nombre conyuge', 'texto' => substr($nomcony, 0, 53), 'x' => 54, 'y' => 120],
+            ['lb' => 'Tipo documento', 'texto' => $detdoc, 'x' => 33, 'y' => 125],
+            ['lb' => 'Cedula conyuge', 'texto' => $this->conyuge->getCedcon(), 'x' => 60, 'y' => 125],
+            ['lb' => 'Tiempo convive', 'texto' => $this->conyuge->getTiecon(), 'x' => 33, 'y' => 130],
+            ['lb' => 'Meses convive', 'texto' => '1', 'x' => 53, 'y' => 130],
             $this->posOcupacion()
-
-        );
+        ];
         $this->addBloq($datos);
         return $this->pdf;
     }
@@ -127,18 +127,18 @@ class JuramentadaConyuge extends Documento
                 $x = 174;
                 break;
         }
-        return array('lb' => 'Ocupacion', 'texto' => 'X', 'x' => $x, 'y' => 157);
+        return array('lb' => 'Ocupacion', 'texto' => 'X', 'x' => $x, 'y' => 142);
     }
 
     function posCompaPermanente()
     {
         $v = ($this->conyuge->getComper() == 'S') ? 'X' : '';
-        return array('lb' => 'Compañera permanente', 'texto' => $v, 'x' => 88, 'y' => 56);
+        return array('lb' => 'Compañera permanente', 'texto' => $v, 'x' => 88, 'y' => 49);
     }
 
     function postEstadoCivil()
     {
         $v = ($this->conyuge->getEstciv() == 2 || $this->conyuge->getEstciv() == 4) ? 'X' : '';
-        return array('lb' => 'Compañera union libre', 'texto' => $v, 'x' => 158.5, 'y' => 56);
+        return array('lb' => 'Compañera union libre', 'texto' => $v, 'x' => 158.5, 'y' => 50);
     }
 }

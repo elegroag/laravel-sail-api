@@ -63,7 +63,7 @@ class FormularioBeneficiario extends Documento
         switch ($this->parent) {
             case '1':
             case '4':
-                $this->dataMadreFueraUnion();
+                $this->dataFueraUnion();
                 $this->dataBeneficiarioHijo();
                 break;
             case '3': //padre
@@ -77,14 +77,12 @@ class FormularioBeneficiario extends Documento
                 break;
         }
 
-        $this->dataMedioPago();
-        $this->addBloq(
-            array(
-                array('lb' => 'Acepta politica', 'texto' => 'X', 'x' => 168, 'y' => 263.5)
-            )
-        );
-        $page = storage_path('public/docs/sello-firma.png');
-        $this->pdf->Image($page, 160, 275, 30, 20, '');
+        $this->dataMedioPago(142);
+        $this->addBloq([
+            ['lb' => 'Acepta politica', 'texto' => 'X', 'x' => 168, 'y' => 240]
+        ]);
+        $selloFirma = public_path('img/firmas/sello-firma.png');
+        $this->pdf->Image($selloFirma, 160, 265, 30, 20, '', '', '', false, 300, '', false, false, 0);
         return $this;
     }
 
@@ -94,29 +92,28 @@ class FormularioBeneficiario extends Documento
         $ciudad = ($this->trabajador->getCodzon()) ? $_codciu[$this->trabajador->getCodzon()] : 'Florencia';
         $today = Carbon::now();
         $this->pdf->SetFont('helvetica', '', 8.6);
-        $datos = array(
-            array('lb' => 'Año', 'texto' => $today->format('Y'), 'x' => 116, 'y' => 26),
-            array('lb' => 'Mes', 'texto' => $today->format('m'), 'x' => 130, 'y' => 26),
-            array('lb' => 'Dia', 'texto' => $today->format('d'), 'x' => 140, 'y' => 26),
-            array('lb' => 'Ciudad', 'texto' => $ciudad, 'x' => 150, 'y' => 26),
-        );
+        $datos = [
+            ['lb' => 'Año', 'texto' => $today->format('Y'), 'x' => 116, 'y' => 21.5],
+            ['lb' => 'Mes', 'texto' => $today->format('m'), 'x' => 130, 'y' => 21.5],
+            ['lb' => 'Dia', 'texto' => $today->format('d'), 'x' => 140, 'y' => 21.5],
+            ['lb' => 'Ciudad', 'texto' => $ciudad, 'x' => 150, 'y' => 21.5],
+        ];
         $this->addBloq($datos);
     }
 
     function dataTrabajador()
     {
-        $mtipoDocumentos = new Gener18();
-        $mtidocs = $mtipoDocumentos->findFirst(" coddoc='{$this->trabajador->getTipdoc()}'");
+        $mtidocs = Gener18::where("coddoc", $this->trabajador->getTipdoc())->first();
         $detdoc = ($mtidocs) ? $mtidocs->getDetdoc() : 'Cedula de ciudadania';
         $nombtra = capitalize($this->trabajador->getPrinom() . ' ' . $this->trabajador->getSegnom() . ' ' . $this->trabajador->getPriape() . ' ' . $this->trabajador->getSegape());
-        $y = 74;
-        $datos = array(
-            array('lb' => 'Adición', 'texto' => 'X', 'x' => 45, 'y' => 52),
-            array('lb' => 'Cedula trabajador', 'texto' => $this->trabajador->getCedtra(), 'x' => 10, 'y' => $y),
-            array('lb' => 'Tipo documento trabajador', 'texto' => $detdoc, 'x' => 35, 'y' => $y),
-            array('lb' => 'Nombre trabajador', 'texto' => substr($nombtra, 0, 55), 'x' => 93, 'y' => $y),
-            array('lb' => 'Empresa', 'texto' => $this->trabajador->getNit(), 'x' => 175, 'y' => $y),
-        );
+        $y = 65;
+        $datos = [
+            ['lb' => 'Adición', 'texto' => 'X', 'x' => 45, 'y' => 46],
+            ['lb' => 'Cedula trabajador', 'texto' => $this->trabajador->getCedtra(), 'x' => 10, 'y' => $y],
+            ['lb' => 'Tipo documento trabajador', 'texto' => $detdoc, 'x' => 35, 'y' => $y],
+            ['lb' => 'Nombre trabajador', 'texto' => substr($nombtra, 0, 55), 'x' => 93, 'y' => $y],
+            ['lb' => 'Empresa', 'texto' => $this->trabajador->getNit(), 'x' => 175, 'y' => $y],
+        ];
         $this->addBloq($datos);
     }
 
@@ -160,21 +157,21 @@ class FormularioBeneficiario extends Documento
         }
 
         $this->pdf->SetFont('helvetica', '', 8);
-        $datos = array(
-            array('lb' => 'Documento', 'texto' => $this->beneficiario->getNumdoc(), 'x' => 10, 'y' => 125.5),
-            array('lb' => 'Tipo documento', 'texto' => capitalize($detdoc), 'x' => 37, 'y' => 125.5),
-            array('lb' => 'Nombre beneficiario', 'texto' => substr($nombre, 0, 60), 'x' => 86, 'y' => 125.5),
-            array('lb' => 'Parentesco', 'texto' => $parentesco, 'x' => 173, 'y' => 125.5),
-            array('lb' => 'Pertenencia etnica', 'texto' => capitalize($etnica), 'x' => 10, 'y' => 135),
-            array('lb' => 'resguardo', 'texto' => capitalize(substr($resguardo, 0, 42)), 'x' => 65, 'y' => 135),
-            array('lb' => 'pueblo', 'texto' => capitalize(substr($pueblo, 0, 42)), 'x' => 125, 'y' => 135),
-            $this->posTieneDiscapacidad(),
-            array('lb' => 'Discapacidad', 'texto' => capitalize($discapacidad), 'x' => 39, 'y' => 145),
-            $this->posSexo(),
-            array('lb' => 'Fecha nacimiento', 'texto' => $this->beneficiario->getFecnac(), 'x' => 132, 'y' => 145),
-            array('lb' => 'Condición hijo', 'texto' => $tipo_hijo, 'x' => 163, 'y' => 145),
-            array('lb' => 'Desconoce ubicacion biologico', 'texto' => 'X', 'x' => $desco_x, 'y' => 181),
-        );
+        $datos = [
+            ['lb' => 'Documento', 'texto' => $this->beneficiario->getNumdoc(), 'x' => 10, 'y' => 112],
+            ['lb' => 'Tipo documento', 'texto' => capitalize($detdoc), 'x' => 37, 'y' => 112],
+            ['lb' => 'Nombre beneficiario', 'texto' => substr($nombre, 0, 60), 'x' => 86, 'y' => 112],
+            ['lb' => 'Parentesco', 'texto' => $parentesco, 'x' => 173, 'y' => 112],
+            ['lb' => 'Pertenencia etnica', 'texto' => capitalize($etnica), 'x' => 10, 'y' => 121.5],
+            ['lb' => 'resguardo', 'texto' => capitalize(substr($resguardo, 0, 42)), 'x' => 80, 'y' => 122.5],
+            ['lb' => 'pueblo', 'texto' => capitalize(substr($pueblo, 0, 42)), 'x' => 125, 'y' => 122],
+            $this->posTieneDiscapacidad(131),
+            ['lb' => 'Discapacidad', 'texto' => capitalize($discapacidad), 'x' => 39, 'y' => 131],
+            $this->posSexo(131),
+            ['lb' => 'Fecha nacimiento', 'texto' => $this->beneficiario->getFecnac(), 'x' => 132, 'y' => 131],
+            ['lb' => 'Condición hijo', 'texto' => $tipo_hijo, 'x' => 163, 'y' => 131],
+            ['lb' => 'Desconoce ubicacion biologico', 'texto' => 'X', 'x' => $desco_x, 'y' => 164],
+        ];
         $this->addBloq($datos);
     }
 
@@ -203,24 +200,24 @@ class FormularioBeneficiario extends Documento
         $tipo_hijo = $this->beneficiario->getTiphij() ? $mtihij[$this->beneficiario->getTiphij()] : '';
 
         $this->pdf->SetFont('helvetica', '', 8);
-        $datos = array(
-            array('lb' => 'Documento', 'texto' => $this->beneficiario->getNumdoc(), 'x' => 10, 'y' => 125.5),
-            array('lb' => 'Tipo documento', 'texto' => capitalize($detdoc), 'x' => 37, 'y' => 125.5),
-            array('lb' => 'Nombre beneficiario', 'texto' => substr($nombre, 0, 60), 'x' => 86, 'y' => 125.5),
-            array('lb' => 'Parentesco', 'texto' => $parentesco, 'x' => 173, 'y' => 125.5),
-            array('lb' => 'Pertenencia etnica', 'texto' => capitalize($etnica), 'x' => 10, 'y' => 135),
-            array('lb' => 'resguardo', 'texto' => capitalize(substr($resguardo, 0, 42)), 'x' => 65, 'y' => 135),
-            array('lb' => 'pueblo', 'texto' => capitalize(substr($pueblo, 0, 42)), 'x' => 125, 'y' => 135),
-            $this->posTieneDiscapacidad(),
-            array('lb' => 'Discapacidad', 'texto' => capitalize($discapacidad), 'x' => 39, 'y' => 145),
-            $this->posSexo(),
-            array('lb' => 'Fecha nacimiento', 'texto' => $this->beneficiario->getFecnac(), 'x' => 132, 'y' => 145),
-            array('lb' => 'Condición padre', 'texto' => $tipo_hijo, 'x' => 163, 'y' => 145),
-        );
+        $datos = [
+            ['lb' => 'Documento', 'texto' => $this->beneficiario->getNumdoc(), 'x' => 10, 'y' => 112],
+            ['lb' => 'Tipo documento', 'texto' => capitalize($detdoc), 'x' => 37, 'y' => 112],
+            ['lb' => 'Nombre beneficiario', 'texto' => substr($nombre, 0, 60), 'x' => 86, 'y' => 112],
+            ['lb' => 'Parentesco', 'texto' => $parentesco, 'x' => 173, 'y' => 112],
+            ['lb' => 'Pertenencia etnica', 'texto' => capitalize($etnica), 'x' => 10, 'y' => 121.5],
+            ['lb' => 'resguardo', 'texto' => capitalize(substr($resguardo, 0, 42)), 'x' => 65, 'y' => 121.5],
+            ['lb' => 'pueblo', 'texto' => capitalize(substr($pueblo, 0, 42)), 'x' => 125, 'y' => 121.5],
+            $this->posTieneDiscapacidad(121),
+            ['lb' => 'Discapacidad', 'texto' => capitalize($discapacidad), 'x' => 39, 'y' => 121],
+            $this->posSexo(121),
+            ['lb' => 'Fecha nacimiento', 'texto' => $this->beneficiario->getFecnac(), 'x' => 132, 'y' => 121],
+            ['lb' => 'Condición padre', 'texto' => $tipo_hijo, 'x' => 163, 'y' => 121],
+        ];
         $this->addBloq($datos);
     }
 
-    function dataMadreFueraUnion()
+    function dataFueraUnion()
     {
         if ($this->bioconyu) {
             $mciudad = ParamsBeneficiario::getCiudades();
@@ -230,24 +227,24 @@ class FormularioBeneficiario extends Documento
             $detdoc = ($mtidocs) ? $mtidocs->getDetdoc() : 'Cedula de ciudadania';
             $telefono = $this->bioconyu->getTelefono();
             $email = $this->bioconyu->getEmail();
-            $datos = array(
-                array('lb' => 'Documento', 'texto' => $this->bioconyu->getCedcon(), 'x' => 10, 'y' => 90),
-                array('lb' => 'TipoDoc', 'texto' => substr(capitalize($detdoc), 0, 44), 'x' => 34.5, 'y' => 90),
-                array('lb' => 'Celular', 'texto' => $telefono, 'x' => 93, 'y' => 90),
-                array('lb' => 'Email', 'texto' => $email, 'x' => 126, 'y' => 90),
-                array('lb' => 'Primer apellido', 'texto' => $this->bioconyu->getPriape(), 'x' => 10, 'y' => 100),
-                array('lb' => 'Segundo apellido', 'texto' => $this->bioconyu->getSegape(), 'x' => 60, 'y' => 100),
-                array('lb' => 'Primer nombre', 'texto' => $this->bioconyu->getPrinom(), 'x' => 110, 'y' => 100),
-                array('lb' => 'Segundo nombre', 'texto' => $this->bioconyu->getSegnom(), 'x' => 154, 'y' => 100),
-                array('lb' => 'Dirección recidencia', 'texto' => $this->bioconyu->getDireccion(), 'x' => 10, 'y' => 109.5),
-                array('lb' => 'Ciudad', 'texto' => capitalize($ciudad), 'x' => 118, 'y' => 109.5),
+            $datos = [
+                ['lb' => 'Documento', 'texto' => $this->bioconyu->getCedcon(), 'x' => 10, 'y' => 80],
+                ['lb' => 'TipoDoc', 'texto' => substr(capitalize($detdoc), 0, 44), 'x' => 34.5, 'y' => 80],
+                ['lb' => 'Celular', 'texto' => $telefono, 'x' => 93, 'y' => 80],
+                ['lb' => 'Email', 'texto' => $email, 'x' => 126, 'y' => 80],
+                ['lb' => 'Primer apellido', 'texto' => $this->bioconyu->getPriape(), 'x' => 10, 'y' => 89],
+                ['lb' => 'Segundo apellido', 'texto' => $this->bioconyu->getSegape(), 'x' => 60, 'y' => 89],
+                ['lb' => 'Primer nombre', 'texto' => $this->bioconyu->getPrinom(), 'x' => 110, 'y' => 89],
+                ['lb' => 'Segundo nombre', 'texto' => $this->bioconyu->getSegnom(), 'x' => 154, 'y' => 89],
+                ['lb' => 'Dirección recidencia', 'texto' => $this->bioconyu->getDireccion(), 'x' => 10, 'y' => 98],
+                ['lb' => 'Ciudad', 'texto' => capitalize($ciudad), 'x' => 118, 'y' => 98],
                 $this->posZonaResidencial()
-            );
+            ];
             $this->addBloq($datos);
         }
     }
 
-    function dataMedioPago()
+    function dataMedioPago($y)
     {
         $this->pdf->SetFont('helvetica', '', 9);
         $this->pdf->SetTextColor('65', '65', '65');
@@ -282,11 +279,10 @@ class FormularioBeneficiario extends Documento
         $tippag = ($this->beneficiario->getTippag()) ? $mtippga[$this->beneficiario->getTippag()] : '__________________';
 
         $html = "El trabajador " . $nombre . ", con " . $detdoc . " y número " . $numerocedtra .
-            ', solicita que el pago del subsidio cuota monetaria se realice a la cuenta ' . $numcue . ' del ' . $banco . ', ' .
-            'que corresponde al medio de pago ' . $tippag . '.';
-        $html_decode = mb_convert_encoding($html, "ISO-8859-1", "UTF-8");
-        $this->pdf->SetXY(10, 155);
-        $this->pdf->MultiCell(190, 5, $html_decode, 0, 'L', 0);
+            ', solicita que el pago del subsidio cuota monetaria se realice a la cuenta <b>' . $numcue . '</b> del <b>' . $banco . '</b>, ' .
+            'que corresponde al medio de pago <b>' . $tippag . '</b>.';
+
+        $this->pdf->MultiCell(190, 5, $html, 0, 'L', 0, 1, 10, $y, null, null, true);
     }
 
     function posTipoAfiliado()
@@ -352,7 +348,7 @@ class FormularioBeneficiario extends Documento
         return array('lb' => 'Tipo documento', 'texto' => 'X', 'x' => $x, 'y' => $y);
     }
 
-    function posSexo()
+    function posSexo($y)
     {
         switch ($this->beneficiario->getSexo()) {
             case 'M':
@@ -365,10 +361,10 @@ class FormularioBeneficiario extends Documento
                 $x = 127;
                 break;
         }
-        return array('lb' => 'Sexo', 'texto' => 'X', 'x' => $x, 'y' => 145);
+        return array('lb' => 'Sexo', 'texto' => 'X', 'x' => $x, 'y' => $y);
     }
 
-    function posEstadoCivil()
+    function posEstadoCivil($y)
     {
         switch ($this->beneficiario->getEstciv()) {
             case '4':
@@ -615,14 +611,14 @@ class FormularioBeneficiario extends Documento
         return array('lb' => 'Tipo vivienda', 'texto' => 'X', 'x' => $x, 'y' => $y);
     }
 
-    function posTieneDiscapacidad()
+    function posTieneDiscapacidad($y)
     {
         if ($this->beneficiario->getCaptra() == 'I') {
             $x = 16;
         } else {
             $x = 30;
         }
-        return array('lb' => 'Discapacidad', 'texto' => 'X', 'x' => $x, 'y' => 145);
+        return array('lb' => 'Discapacidad', 'texto' => 'X', 'x' => $x, 'y' => $y);
     }
 
     function posTipoPago()

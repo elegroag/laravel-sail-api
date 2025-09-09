@@ -26,6 +26,7 @@ use App\Services\FormulariosAdjuntos\Formularios;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
 use App\Services\Utils\GuardarArchivoService;
+use App\Services\Utils\Logger;
 use App\Services\Utils\SenderValidationCaja;
 use Illuminate\Http\Request;
 
@@ -57,13 +58,19 @@ class ActualizaEmpresaController extends ApplicationController
 
     public function guardarAction(Request $request)
     {
-        $this->setResponse("ajax");
+        $this->db->begin();
         $actualizaEmpresaService = new ActualizaEmpresaService();
-        //$actualizaEmpresaService->setTransa();
         try {
-            $documento = $this->documento;
-            $coddoc = $this->coddoc;
+            $documento = $this->user['documento'];
+            $coddoc = $this->user['coddoc'];
             $tipo = $this->tipo;
+
+            $logger = new Logger();
+            $log = $logger->registrarLog(
+                false,
+                "Guarda actualizacion datos trabajador",
+                json_encode($request->all())
+            );
 
             $asignarFuncionario = new AsignarFuncionario();
 
@@ -81,20 +88,14 @@ class ActualizaEmpresaController extends ApplicationController
             );
 
             if (is_null($id) || $id == '') {
-                $params['id'] = null;
-                $params['estado'] = 'T';
-                $msolicitud = $actualizaEmpresaService->createByFormData($params);
-                $soli = $msolicitud->getArray();
-                $id = $soli['id'];
+                $solicitud = $actualizaEmpresaService->createByFormData($params);
             } else {
                 $res = $actualizaEmpresaService->updateByFormData($id, $params);
                 if (!$res) {
                     throw new DebugException("Error no se actualizo los datos", 301);
                 }
+                $solicitud = $actualizaEmpresaService->findById($id);
             }
-
-            //$actualizaEmpresaService->endTransa();
-            $solicitud = $actualizaEmpresaService->findById($id);
 
             Mercurio33::where('documento', $documento)
                 ->where('coddoc', $coddoc)
@@ -117,7 +118,6 @@ class ActualizaEmpresaController extends ApplicationController
                         $mercurio33->save();
                     } else {
                         $mercurio33 = new Mercurio33();
-                        $mercurio33->id = null;
                         $mercurio33->tipo = $mercurio28->getTipo();
                         $mercurio33->coddoc = $coddoc;
                         $mercurio33->documento = $documento;
@@ -129,6 +129,7 @@ class ActualizaEmpresaController extends ApplicationController
                         $mercurio33->fecest = date('Y-m-d');
                         $mercurio33->usuario = $solicitud->getUsuario();
                         $mercurio33->actualizacion = $solicitud->getId();
+                        $mercurio33->log = $log;
                         $mercurio33->save();
                     }
                 }
@@ -147,42 +148,42 @@ class ActualizaEmpresaController extends ApplicationController
 
             $out = $actualizaEmpresaService->buscarEmpresaSubsidio($documento);
             $empresa = new Mercurio30($out['data']);
+            $empresa->setId($solicitud->getId());
 
             $actualizaEmpresaService = new DatosEmpresaService(
-                array(
-                    'empresa' => $empresa->getArray(),
+                [
+                    'empresa' => $empresa->toArray(),
                     'campos' => $data,
                     'documento' => $documento,
                     'coddoc' => $coddoc,
                     'nit' => $documento,
-                )
+                ]
             );
 
-            $out = $actualizaEmpresaService->formulario();
-            $file_name = $out["file"];
-            $coddoc_adjunto = 27;
-
-            $guardarArchivoService = new GuardarArchivoService(
+            $out = $actualizaEmpresaService->formulario()->getResult();
+            (new GuardarArchivoService(
                 array(
                     'tipopc' => $this->tipopc,
-                    'coddoc' => $coddoc_adjunto,
-                    'id' => $solicitud->getId()
+                    'coddoc' => 27,
+                    'id' => $empresa->getId()
                 )
-            );
-            $guardarArchivoService->salvarDatos($file_name);
+            ))->salvarDatos($out);
 
-            $response = array(
+            $response = [
                 'success' => true,
                 'msj' => 'Registro completado con éxito',
                 'data' => $data
-            );
+            ];
+            $this->db->commit();
         } catch (DebugException $e) {
-            $response = array(
+            $response = [
                 'success' => false,
                 'msj' => $e->getMessage()
-            );
+            ];
+            $this->db->rollBack();
         }
-        return $this->renderObject($response, false);
+
+        return $this->renderObject($response);
     }
 
     public function paramsAction()

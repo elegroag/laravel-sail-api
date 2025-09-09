@@ -15,6 +15,7 @@ use App\Services\Tag;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
+use App\Services\Utils\Logger;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -186,7 +187,9 @@ class ComunitariaController extends ApplicationController
             $modelos = array("Mercurio20", "Mercurio39");
             //$Transaccion = parent::startTrans($modelos);
             //$response = parent::startFunc();
-            $id_log = $generalService->registrarLog(true, "Afiliacion Trabajador", "");
+
+            $logger = new Logger();
+            $id_log = $logger->registrarLog(true, "Afiliacion Trabajador", "");
 
             if ($id == "") {
                 $mercurio39 = new Mercurio39();

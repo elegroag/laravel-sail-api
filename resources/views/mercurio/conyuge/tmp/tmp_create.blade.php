@@ -142,15 +142,9 @@
                                 </div>
 
                                 <div class="col-md-3 d-none" id="show_numcue">
-                                    <label for="numcue" class="control-label">Número de cuenta</label>
-                                    <div class="input-group mb-0" group-for='numcue'>
-                                        <input type="number" name="numcue" class="form-control" event="is_numeric">
-                                        <div class="input-group-append">
-                                            <button class="btn btn-sm btn-info" data-placement="top" data-bs-toggle="popover" data-content="Para validación de la cuenta se debe de adjuntar el documento del certificado de cuenta,
-                                                una vez se guarden los datos del formulario." type="button" id="bt_question_numcue">
-                                                <i class="fa fa-question"></i>
-                                            </button>
-                                        </div>
+                                    <div class="form-group" group-for='numcue'>
+                                        <label for="numcue" class="control-label">Número de cuenta</label>
+                                        <input type="number" name="numcue" class="form-control" event="is_numeric"/>
                                     </div>
                                 </div>
 

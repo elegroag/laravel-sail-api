@@ -20,15 +20,17 @@ class FormularioActualizadatos extends Documento
         $this->pdf->SetCreator("Plataforma Web: comfacaenlinea.com.co, COMFACA");
         $this->pdf->SetKeywords('COMFACA');
 
-        $this->pdf->Image('public/docs/formulario_mercurio/fomulario_actualizacion_empresa_parte_1.jpg', 0, 0, "216", "280");
+        $this->pdf->Image(public_path('img/form/actualiza/fomulario_actualizacion_empresa_parte_1.jpg'), 0, 0, "216", "280");
         $this->bloqueEmpresa($empresa, $campos);
-        $page = storage_path('public/docs/sello-firma.png');
-        $this->pdf->Image($page, 160, 275, 30, 20, '');
+        $selloFirma = public_path('img/firmas/sello-firma.png');
+        $this->pdf->Image($selloFirma, 160, 265, 30, 20, '', '', '', false, 300, '', false, false, 0);
 
         $this->pdf->AddPage();
-        $this->pdf->Image('public/docs/formulario_mercurio/fomulario_actualizacion_empresa_parte_2.jpg', 0, 0, "216", "280");
-        $page = storage_path('public/docs/sello-firma.png');
-        $this->pdf->Image($page, 160, 275, 30, 20, '');
+        $this->pdf->Image(public_path('img/form/actualiza/fomulario_actualizacion_empresa_parte_2.jpg'), 0, 0, "216", "280");
+
+        $selloFirma = public_path('img/firmas/sello-firma.png');
+        $this->pdf->Image($selloFirma, 160, 265, 30, 20, '', '', '', false, 300, '', false, false, 0);
+        return $this;
     }
 
     function bloqueEmpresa($empresa, $campos)
@@ -47,7 +49,7 @@ class FormularioActualizadatos extends Documento
 
         $this->pdf->setY(62);
         $this->pdf->setX(126);
-        $this->pdf->Cell(60, 5, $_codzon["{$campos['codzon']}"], 0, 0, 'L');
+        $this->pdf->Cell(60, 5, @$_codzon["{$campos['codzon']}"], 0, 0, 'L');
 
         $this->pdf->setY(73);
         $this->pdf->setX(27);
@@ -71,12 +73,12 @@ class FormularioActualizadatos extends Documento
 
         $this->pdf->setY(102);
         $this->pdf->setX(123);
-        $this->pdf->Cell(60, 5, $_codciu["{$campos['codciu']}"], 0, 0, 'L');
+        $this->pdf->Cell(60, 5, @$_codciu["{$campos['codciu']}"], 0, 0, 'L');
 
-        $departamento = substr($campos['codciu'], 0, 2);
+        $departamento = substr(@$campos['codciu'], 0, 2);
         $this->pdf->setY(107);
         $this->pdf->setX(150);
-        $this->pdf->Cell(60, 5, $_coddep["{$departamento}"], 0, 0, 'L');
+        $this->pdf->Cell(60, 5, @$_coddep["{$departamento}"], 0, 0, 'L');
 
         //telefono
         $this->pdf->SetFont('helvetica', '', 9);
@@ -109,12 +111,12 @@ class FormularioActualizadatos extends Documento
 
         $this->pdf->setY(163);
         $this->pdf->setX(110);
-        $this->pdf->Cell(60, 5, $_codciu["{$campos['ciupri']}"], 0, 0, 'L');
+        $this->pdf->Cell(60, 5, @$_codciu["{$campos['ciupri']}"], 0, 0, 'L');
 
-        $departamento = substr($campos['ciupri'], 0, 2);
+        $departamento = substr(@$campos['ciupri'], 0, 2);
         $this->pdf->setY(167);
         $this->pdf->setX(146);
-        $this->pdf->Cell(60, 5, $_coddep["{$departamento}"], 0, 0, 'L');
+        $this->pdf->Cell(60, 5, @$_coddep["{$departamento}"], 0, 0, 'L');
 
         //telefono fijo
         $this->pdf->SetFont('helvetica', '', 9);

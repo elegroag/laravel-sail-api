@@ -1887,36 +1887,6 @@ class GeneralService
         return $response;
     }
 
-    public function registrarLog($tx, $accion, $nota = "")
-    {
-        $user = session('user');
-        $tipo = session('tipo');
-        $coddoc = $user['coddoc'];
-        $documento = $user['documento'];
-
-        if ($tx == true) {
-            $modelos = array("mercurio20");
-            $Transaccion = $this->startTrans($modelos);
-        }
-        $today = Carbon::now();
-        $mercurio20 = new Mercurio20();
-
-        if ($tipo == "no_data") $tipo = "";
-        if ($coddoc == "no_data") $coddoc = "";
-        if ($documento == "no_data") $documento = "";
-        $mercurio20->setLog(0);
-        $mercurio20->setTipo($tipo);
-        $mercurio20->setCoddoc($coddoc);
-        $mercurio20->setDocumento($documento);
-        $mercurio20->setIp($_SERVER["REMOTE_ADDR"]);
-        $mercurio20->setFecha($today->format('Y-m-d'));
-        $mercurio20->setHora(date("H:i"));
-        $mercurio20->setAccion($accion);
-        $mercurio20->setNota($nota);
-        $mercurio20->save();
-        return $mercurio20->getLog();
-    }
-
     public function asignarFuncionario($tipopc, $codciu)
     {
         $mercurio05 = (new Mercurio05)->findFirst("codciu = '$codciu'");

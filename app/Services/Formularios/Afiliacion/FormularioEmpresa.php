@@ -34,6 +34,7 @@ class FormularioEmpresa extends Documento
         $this->bloqueEmpresa();
         $selloFirma = public_path('img/firmas/sello-firma.png');
         $this->pdf->Image($selloFirma, 160, 265, 30, 20, '', '', '', false, 300, '', false, false, 0);
+        return $this;
     }
 
     /**

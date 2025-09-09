@@ -53,8 +53,8 @@ class FormularioPensionado extends Documento
                 array('lb' => 'Autoriza datos', 'texto' => 'X', 'x' => 70, 'y' => 277),
             )
         );
-        $page = public_path('img/firmas/sello-firma.png');
-        $this->pdf->Image($page, 160, 275, 30, 20, '');
+        $selloFirma = public_path('img/firmas/sello-firma.png');
+        $this->pdf->Image($selloFirma, 160, 265, 30, 20, '', '', '', false, 300, '', false, false, 0);
 
         return $this;
     }

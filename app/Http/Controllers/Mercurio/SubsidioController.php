@@ -18,6 +18,7 @@ use App\Models\Mercurio34;
 use App\Models\Mercurio45;
 use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
+use App\Services\Utils\Logger;
 use Illuminate\Http\Request;
 
 class SubsidioController extends ApplicationController
@@ -508,9 +509,9 @@ class SubsidioController extends ApplicationController
 
     public function certificado_afiliacionAction(Request $request)
     {
-        $generalService = new GeneralService();
         $tipo = $request->input("tipo");
-        $generalService->registrarLog(false, "Certificado De Afiliacion", $tipo);
+        $logger = new Logger();
+        $logger->registrarLog(false, "Certificado De Afiliacion", $tipo);
         header("Location: https://comfacaenlinea.com.co/SYS/Subsidio/subflo/gene_certi_tra/$tipo/" . parent::getActUser("documento"));
     }
 }

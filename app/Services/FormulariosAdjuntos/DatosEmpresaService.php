@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Services\FormulariosAdjuntos;
+
 use App\Library\Collections\ParamsEmpresa;
 use App\Library\Tcpdf\KumbiaPDF;
 use App\Models\Mercurio16;
@@ -17,6 +18,9 @@ class DatosEmpresaService
      */
     private $request;
     private $lfirma;
+    private $filename;
+    private $outPdf;
+    private $fhash;
 
     public function __construct($request)
     {
@@ -26,7 +30,10 @@ class DatosEmpresaService
 
     private function initialize()
     {
-        $this->lfirma = (new Mercurio16)->findFirst("documento='{$this->request['documento']}' AND  coddoc='{$this->request['coddoc']}'");
+        $this->lfirma = Mercurio16::where("documento", $this->request['documento'])
+            ->where("coddoc", $this->request['coddoc'])
+            ->first();
+
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
             array(
@@ -42,7 +49,7 @@ class DatosEmpresaService
 
     public function formulario()
     {
-        $file = strtotime('now') . "_{$this->request['nit']}.pdf";
+        $this->filename = strtotime('now') . "_{$this->request['nit']}.pdf";
         KumbiaPDF::setBackgroundImage(public_path('docs/form/empresa/form-empresa.jpg'));
 
         $fabrica = new FactoryDocuments();
@@ -51,22 +58,30 @@ class DatosEmpresaService
             array(
                 'empresa' => $this->request['empresa'],
                 'campos' => $this->request['campos'],
-                'filename' => $file
+                'filename' => $this->filename
             )
         );
+
         $documento->main();
         $documento->outPut();
+        $this->cifrarDocumento();
+        return $this;
+    }
 
+    function cifrarDocumento()
+    {
         $cifrarDocumento = new CifrarDocumento();
-        $outPdf = $cifrarDocumento->cifrar(
-            storage_path('temp/' . $file),
-            $this->lfirma->getKeyprivate()
-        );
+        $this->outPdf = $cifrarDocumento->cifrar($this->filename, $this->lfirma->getKeyprivate());
+        $this->fhash = $cifrarDocumento->getFhash();
+    }
 
+    public function getResult()
+    {
         return array(
-            "name" => $file,
-            "file" => basename($outPdf),
-            'out' => $outPdf
+            "name" => $this->filename,
+            "file" => basename($this->outPdf),
+            'out' => $this->outPdf,
+            'fhash' => $this->fhash
         );
     }
 }

@@ -20,7 +20,7 @@ class Mercurio47 extends ModelBase
         'fecha_estado',
         'estado',
         'tipo_actualizacion',
-        'usuario',
+        'usuario'
     ];
 
     public function setUsuario($usuario)

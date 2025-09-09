@@ -41,7 +41,7 @@ class IndependienteDatoPersonales extends Documento
 
         $this->addBackground($imagen);
         $selloFirma = public_path('img/firmas/sello-firma.png');
-        $this->pdf->Image($selloFirma, 160, 275, 30, 20, '', '', '', false, 300, '', false, false, 0);
+        $this->pdf->Image($selloFirma, 160, 265, 30, 20, '', '', '', false, 300, '', false, false, 0);
 
         $this->pdf->AddPage();
         $imagen = public_path('img/form/datos-personales/datos-personales-trabajador-02.jpg');

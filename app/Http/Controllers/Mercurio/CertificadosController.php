@@ -11,6 +11,7 @@ use App\Models\Mercurio45;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
+use App\Services\Utils\Logger;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -94,8 +95,8 @@ class CertificadosController extends ApplicationController
 
             $today = Carbon::now();
 
-            $generalService = new GeneralService();
-            $id_log = $generalService->registrarLog(true, "Presentacion Certificados", "");
+            $logger = new Logger();
+            $id_log = $logger->registrarLog(true, "Presentacion Certificados", "");
             $mercurio45 = new Mercurio45();
 
             $mercurio45->setId($id_mercurio45);

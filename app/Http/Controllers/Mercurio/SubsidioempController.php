@@ -24,6 +24,7 @@ use App\Models\Mercurio37;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
+use App\Services\Utils\Logger;
 use App\Services\Utils\UploadFile;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -625,8 +626,8 @@ class SubsidioempController extends ApplicationController
             $modelos = array("mercurio08", "mercurio10", "mercurio20", "Mercurio35");
             #$Transaccion = parent::startTrans($modelos);
             #$response = parent::startFunc();
-            $generalService = new GeneralService();
-            $id_log = $generalService->registrarLog(true, "retiro trabajador", "");
+            $logger = new Logger();
+            $id_log = $logger->registrarLog(true, "retiro trabajador", "");
             $mercurio35 = new Mercurio35();
             #$mercurio35->setTransaction($Transaccion);
             $mercurio35->setId(0);
@@ -747,8 +748,8 @@ class SubsidioempController extends ApplicationController
         $today = Carbon::now();
 
         $flag_email = false;
-        $generalService = new GeneralService();
-        $id_log = $generalService->registrarLog(true, "actualización datos basicos", "");
+        $logger = new Logger();
+        $id_log = $logger->registrarLog(true, "actualización datos basicos", "");
         $mercurio28 = Mercurio28::where('tipo', parent::getActUser("tipo"))->get();
 
         if (parent::getActUser("tipo") == 'T') {
@@ -875,8 +876,8 @@ class SubsidioempController extends ApplicationController
 
     public function certificado_afiliacionAction()
     {
-        $generalService = new GeneralService();
-        $generalService->registrarLog(false, "Certificado De Afiliacion", "");
+        $logger = new Logger();
+        $logger->registrarLog(false, "Certificado De Afiliacion", "");
         header("Location: https://comfacaenlinea.com.co/SYS/Subsidio/subflo/gene_certi_emp/x/" . parent::getActUser("documento"));
     }
 
@@ -922,10 +923,10 @@ class SubsidioempController extends ApplicationController
 
     public function certificado_para_trabajadorAction(Request $request)
     {
-        $generalService = new GeneralService();
+        $logger = new Logger();
         $tipo = $request->input("tipo");
         $cedtra = $request->input("cedtra");
-        $generalService->registrarLog(false, "Certificado Para Trabajador", "$tipo - $cedtra");
+        $logger->registrarLog(false, "Certificado Para Trabajador", "$tipo - $cedtra");
         header("Location: https://comfacaenlinea.com.co/SYS/Subsidio/subflo/gene_certi_tra/{$tipo}/" . $cedtra);
     }
 

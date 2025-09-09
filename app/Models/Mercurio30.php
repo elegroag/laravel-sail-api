@@ -12,9 +12,7 @@ class Mercurio30 extends ModelBase
 
     protected $table = 'mercurio30';
     protected $primaryKey = 'id';
-
     public $incrementing = true;
-    public $keyType = 'int';
     public $timestamps = false;
 
     protected $fillable = [
@@ -658,10 +656,6 @@ class Mercurio30 extends ModelBase
         return (isset($this->fecini)) ? $this->fecini : null;
     }
 
-    public function createAttributes($data)
-    {
-        parent::setCreateAttributes($this, $data);
-    }
 
     public function solicitante()
     {

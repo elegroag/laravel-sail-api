@@ -1,4 +1,5 @@
 @php
+    use App\Services\Tag;
     $fecsol = date('Y-m-d');
 @endphp
 <div class="tab-content" id="pills-tabContent">
@@ -352,7 +353,14 @@
                                 <div class="col-md-3">
                                     <div class='form-group' group-for='direccion'>
                                         <label for="direccion" class="control-label ml-4">Dirección de residencia</label>
-                                        <input type="text" name="direccion" id="direccion" class="form-control" placeholder="dirección" />
+                                        @php echo Tag::addressField("direccion", "class: form-control", "placeholder: dirección", "event: address"); @endphp
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class='form-group' group-for='barrio'>
+                                        <label for="barrio" class="control-label">Barrio de residencia</label>
+                                        <input type="text" name="barrio" id="barrio" class="form-control" placeholder="Barrio" />
                                     </div>
                                 </div>
 

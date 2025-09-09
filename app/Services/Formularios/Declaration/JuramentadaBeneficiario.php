@@ -40,6 +40,9 @@ class JuramentadaBeneficiario extends Documento
         }
         $this->beneficiario = $this->request->getParam('beneficiario');
         $this->trabajador = $this->request->getParam('trabajador');
+
+        $this->bloqueTrabajador();
+
         $this->parent =  $this->beneficiario->getParent();
         switch ($this->parent) {
             case '1':
@@ -49,13 +52,11 @@ class JuramentadaBeneficiario extends Documento
                 } else {
                     $this->bloqueHijo();
                 }
-                $this->pdf->SetXY(13, 190);
-                $this->bloqueDescoBio();
+                $this->bloqueDescoBio(173);
                 break;
             case '4':
                 $this->bloqueCustodia();
-                $this->pdf->SetXY(13, 175);
-                $this->bloqueDescoBio();
+                $this->bloqueDescoBio(173);
                 break;
             case '3': //padre
             case '2': //hermano
@@ -67,9 +68,10 @@ class JuramentadaBeneficiario extends Documento
             default:
                 break;
         }
-        $this->bloqueTrabajador();
-        $page = public_path('img/form/sello-firma.png');
-        $this->pdf->Image($page, 160, 275, 30, 20, '');
+
+        $selloFirma = public_path('img/firmas/sello-firma.png');
+        $this->pdf->Image($selloFirma, 160, 265, 30, 20, '', '', '', false, 300, '', false, false, 0);
+        return $this;
     }
 
     function bloqueBeneficiarioCuidador()
@@ -85,15 +87,15 @@ class JuramentadaBeneficiario extends Documento
         $discapacidad = ($this->beneficiario->getTipdis()) ? $mtipdisca[$this->beneficiario->getTipdis()] : 'No tiene';
 
         $this->pdf->SetFont('helvetica', '', 8.5);
-        $datos = array(
-            array('lb' => 'Tipo novedad', 'texto' => 'X', 'x' => 168, 'y' => 62),
-            array('lb' => 'Nombre beneficiario', 'texto' => substr($nombre, 0, 63), 'x' => 44, 'y' => 142),
-            array('lb' => 'Parentesco', 'texto' => capitalize($parentesco), 'x' => 164, 'y' => 142),
-            array('lb' => 'Tipo documento', 'texto' => capitalize($detdoc), 'x' => 44, 'y' => 148),
-            array('lb' => 'Documento', 'texto' => $this->beneficiario->getNumdoc(), 'x' => 146, 'y' => 148),
-            array('lb' => 'Documento', 'texto' => ($this->beneficiario->getCaptra() == 'N') ? 'X' : '       X', 'x' => 44, 'y' => 154),
-            array('lb' => 'Documento', 'texto' => $discapacidad, 'x' => 88, 'y' => 154)
-        );
+        $datos = [
+            ['lb' => 'Tipo novedad', 'texto' => 'X', 'x' => 168, 'y' => 62],
+            ['lb' => 'Nombre beneficiario', 'texto' => substr($nombre, 0, 63), 'x' => 44, 'y' => 142],
+            ['lb' => 'Parentesco', 'texto' => capitalize($parentesco), 'x' => 164, 'y' => 142],
+            ['lb' => 'Tipo documento', 'texto' => capitalize($detdoc), 'x' => 44, 'y' => 148],
+            ['lb' => 'Documento', 'texto' => $this->beneficiario->getNumdoc(), 'x' => 146, 'y' => 148],
+            ['lb' => 'Documento', 'texto' => ($this->beneficiario->getCaptra() == 'N') ? 'X' : '       X', 'x' => 44, 'y' => 154],
+            ['lb' => 'Documento', 'texto' => $discapacidad, 'x' => 88, 'y' => 154]
+        ];
         $this->addBloq($datos);
     }
 
@@ -110,23 +112,23 @@ class JuramentadaBeneficiario extends Documento
         $discapacidad = ($this->beneficiario->getTipdis()) ? $mtipdisca[$this->beneficiario->getTipdis()] : 'No tiene';
 
         $this->pdf->SetFont('helvetica', '', 8.5);
-        $datos = array(
+        $datos = [
             $this->tipoNovedadPadre(),
-            array('lb' => 'Nombre beneficiario', 'texto' => substr($nombre, 0, 63), 'x' => 44, 'y' => 111),
-            array('lb' => 'Parentesco', 'texto' => capitalize($parentesco), 'x' => 164, 'y' => 111),
-            array('lb' => 'Tipo documento', 'texto' => capitalize($detdoc), 'x' => 44, 'y' => 116),
-            array('lb' => 'Documento', 'texto' => $this->beneficiario->getNumdoc(), 'x' => 146, 'y' => 116),
-            array('lb' => 'Email', 'texto' => capitalize($this->trabajador->getEmail()), 'x' => 44, 'y' => 123),
-            array('lb' => 'Numero telefono', 'texto' => $this->trabajador->getTelefono(), 'x' => 160, 'y' => 123),
-            array('lb' => 'Numero telefono', 'texto' => ($this->beneficiario->getCaptra() == 'N') ? '  X' : '        X', 'x' => 44, 'y' => 129),
-            array('lb' => 'Numero telefono', 'texto' => $discapacidad, 'x' => 85, 'y' => 129)
-        );
+            ['lb' => 'Nombre beneficiario', 'texto' => substr($nombre, 0, 63), 'x' => 44, 'y' => 94],
+            ['lb' => 'Parentesco', 'texto' => capitalize($parentesco), 'x' => 164, 'y' => 94],
+            ['lb' => 'Tipo documento', 'texto' => capitalize($detdoc), 'x' => 44, 'y' => 100],
+            ['lb' => 'Documento', 'texto' => $this->beneficiario->getNumdoc(), 'x' => 146, 'y' => 100],
+            ['lb' => 'Email', 'texto' => capitalize($this->trabajador->getEmail()), 'x' => 44, 'y' => 113],
+            ['lb' => 'Numero telefono', 'texto' => $this->trabajador->getTelefono(), 'x' => 160, 'y' => 113],
+            ['lb' => 'Numero telefono', 'texto' => ($this->beneficiario->getCaptra() == 'N') ? '  X' : '        X', 'x' => 44, 'y' => 119],
+            ['lb' => 'Numero telefono', 'texto' => $discapacidad, 'x' => 85, 'y' => 119]
+        ];
         $this->addBloq($datos);
     }
 
     function bloqueTrabajador()
     {
-        $nomtra = capitalize($this->trabajador->getPrinom() . ' ' . $this->trabajador->getSegnom() . ' ' . $this->trabajador->getPriape() . ' ' . $this->trabajador->getSegape());
+        $nomtra = capitalize($this->trabajador->getNombreCompleto());
         $today = Carbon::now();
         $_codciu = ParamsBeneficiario::getCiudades();
         $ciudad = ($this->trabajador->getCodzon()) ? $_codciu[$this->trabajador->getCodzon()] : 'Florencia';
@@ -135,15 +137,15 @@ class JuramentadaBeneficiario extends Documento
         $detdoc = ($mtidocs) ? $mtidocs->getDetdoc() : 'Cedula de Ciudadania';
 
         $this->pdf->SetFont('helvetica', '', 8.5);
-        $datos = array(
-            array('lb' => 'Nombre trabajador', 'texto' => capitalize($nomtra), 'x' => 20, 'y' => 35),
-            array('lb' => 'Año', 'texto' => $today->format('Y'), 'x' => 122, 'y' => 22),
-            array('lb' => 'Mes', 'texto' => $today->format('m'), 'x' => 134, 'y' => 22),
-            array('lb' => 'Dia', 'texto' => $today->format('d'), 'x' => 144, 'y' => 22),
-            array('lb' => 'Ciudad', 'texto' => capitalize($ciudad), 'x' => 152, 'y' => 22),
-            array('lb' => 'TipoDoc trabajador', 'texto' => capitalize($detdoc), 'x' => 72, 'y' => 42),
-            array('lb' => 'Numero documento', 'texto' => capitalize($this->trabajador->getCedtra()), 'x' => 156, 'y' => 42)
-        );
+        $datos = [
+            ['lb' => 'Año', 'texto' => $today->format('Y'), 'x' => 122, 'y' => 18],
+            ['lb' => 'Mes', 'texto' => $today->format('m'), 'x' => 134, 'y' => 18],
+            ['lb' => 'Dia', 'texto' => $today->format('d'), 'x' => 144, 'y' => 18],
+            ['lb' => 'Ciudad', 'texto' => capitalize($ciudad), 'x' => 152, 'y' => 18],
+            ['lb' => 'Nombre trabajador', 'texto' => capitalize($nomtra), 'x' => 20, 'y' => 29],
+            ['lb' => 'TipoDoc trabajador', 'texto' => capitalize($detdoc), 'x' => 72, 'y' => 35],
+            ['lb' => 'Numero documento', 'texto' => capitalize($this->trabajador->getCedtra()), 'x' => 156, 'y' => 35]
+        ];
         $this->addBloq($datos);
     }
 
@@ -157,13 +159,13 @@ class JuramentadaBeneficiario extends Documento
         $parentesco = $mparent[$this->beneficiario->getParent()];
 
         $this->pdf->SetFont('helvetica', '', 8.5);
-        $datos = array(
+        $datos = [
             $this->tipoNovedadHijo(),
-            array('lb' => 'Nombre beneficiario', 'texto' => substr($nombre, 0, 63), 'x' => 44, 'y' => 105),
-            array('lb' => 'Parentesco', 'texto' => capitalize($parentesco), 'x' => 164, 'y' => 105),
-            array('lb' => 'Tipo documento', 'texto' => capitalize($detdoc), 'x' => 44, 'y' => 111),
-            array('lb' => 'Documento', 'texto' => $this->beneficiario->getNumdoc(), 'x' => 146, 'y' => 111),
-        );
+            ['lb' => 'Nombre beneficiario', 'texto' => substr($nombre, 0, 63), 'x' => 44, 'y' => 94],
+            ['lb' => 'Parentesco', 'texto' => capitalize($parentesco), 'x' => 164, 'y' => 94],
+            ['lb' => 'Tipo documento', 'texto' => capitalize($detdoc), 'x' => 44, 'y' => 100],
+            ['lb' => 'Documento', 'texto' => $this->beneficiario->getNumdoc(), 'x' => 146, 'y' => 100],
+        ];
         $this->addBloq($datos);
     }
 
@@ -190,17 +192,17 @@ class JuramentadaBeneficiario extends Documento
         }
 
         $this->pdf->SetFont('helvetica', '', 8.5);
-        $datos = array(
+        $datos = [
             $this->tipoNovedadHijo(),
-            array('lb' => 'Nombre beneficiario', 'texto' => substr($nombre, 0, 63), 'x' => 44, 'y' => 156),
-            array('lb' => 'Parentesco', 'texto' => capitalize($parentesco), 'x' => 164, 'y' => 156),
-            array('lb' => 'Tipo documento', 'texto' => capitalize($detdoc), 'x' => 44, 'y' => 162),
-            array('lb' => 'Documento', 'texto' => $this->beneficiario->getNumdoc(), 'x' => 146, 'y' => 162),
-            array('lb' => 'Numero documento papa', 'texto' => $pap_cedula, 'x' => 85, 'y' => 169),
-            array('lb' => 'Tipo documento papa', 'texto' => $pap_tipdoc, 'x' => 70, 'y' => 175),
-            array('lb' => 'Numero documento mama', 'texto' => $mam_cedula, 'x' => 162, 'y' => 169),
-            array('lb' => 'Tipo documento mama', 'texto' => $mam_tipdoc, 'x' => 146, 'y' => 175)
-        );
+            ['lb' => 'Nombre beneficiario', 'texto' => substr($nombre, 0, 63), 'x' => 44, 'y' => 94],
+            ['lb' => 'Parentesco', 'texto' => capitalize($parentesco), 'x' => 164, 'y' => 94],
+            ['lb' => 'Tipo documento', 'texto' => capitalize($detdoc), 'x' => 44, 'y' => 100],
+            ['lb' => 'Documento', 'texto' => $this->beneficiario->getNumdoc(), 'x' => 146, 'y' => 100],
+            ['lb' => 'Numero documento papa', 'texto' => $pap_cedula, 'x' => 85, 'y' => 107],
+            ['lb' => 'Tipo documento papa', 'texto' => $pap_tipdoc, 'x' => 70, 'y' => 113],
+            ['lb' => 'Numero documento mama', 'texto' => $mam_cedula, 'x' => 162, 'y' => 107],
+            ['lb' => 'Tipo documento mama', 'texto' => $mam_tipdoc, 'x' => 146, 'y' => 113]
+        ];
         $this->addBloq($datos);
     }
 
@@ -227,17 +229,17 @@ class JuramentadaBeneficiario extends Documento
         }
 
         $this->pdf->SetFont('helvetica', '', 8.5);
-        $datos = array(
-            array('lb' => 'Tipo novedad', 'texto' => 'X', 'x' => 160, 'y' => 62),
-            array('lb' => 'Nombre beneficiario', 'texto' => substr($nombre, 0, 63), 'x' => 44, 'y' => 115),
-            array('lb' => 'Parentesco', 'texto' => capitalize($parentesco), 'x' => 165, 'y' => 115),
-            array('lb' => 'Tipo documento', 'texto' => capitalize($detdoc), 'x' => 44, 'y' => 120),
-            array('lb' => 'Documento', 'texto' => $this->beneficiario->getNumdoc(), 'x' => 146, 'y' => 120),
-            array('lb' => 'Numero documento papa', 'texto' => $pap_cedula, 'x' => 85, 'y' => 127),
-            array('lb' => 'Tipo documento papa', 'texto' => $pap_tipdoc, 'x' => 72, 'y' => 134),
-            array('lb' => 'Numero documento mama', 'texto' => $mam_cedula, 'x' => 162, 'y' => 127),
-            array('lb' => 'Tipo documento mama', 'texto' => $mam_tipdoc, 'x' => 147, 'y' => 134)
-        );
+        $datos = [
+            ['lb' => 'Tipo novedad', 'texto' => 'X', 'x' => 160, 'y' => 54],
+            ['lb' => 'Nombre beneficiario', 'texto' => substr($nombre, 0, 63), 'x' => 44, 'y' => 94],
+            ['lb' => 'Parentesco', 'texto' => capitalize($parentesco), 'x' => 165, 'y' => 94],
+            ['lb' => 'Tipo documento', 'texto' => capitalize($detdoc), 'x' => 44, 'y' => 100],
+            ['lb' => 'Documento', 'texto' => $this->beneficiario->getNumdoc(), 'x' => 146, 'y' => 100],
+            ['lb' => 'Numero documento papa', 'texto' => $pap_cedula, 'x' => 85, 'y' => 107],
+            ['lb' => 'Tipo documento papa', 'texto' => $pap_tipdoc, 'x' => 72, 'y' => 113],
+            ['lb' => 'Numero documento mama', 'texto' => $mam_cedula, 'x' => 162, 'y' => 107],
+            ['lb' => 'Tipo documento mama', 'texto' => $mam_tipdoc, 'x' => 147, 'y' => 113]
+        ];
         $this->addBloq($datos);
     }
 
@@ -248,7 +250,7 @@ class JuramentadaBeneficiario extends Documento
         } else {
             $x = 148;
         }
-        return array('lb' => 'Tipo novedad', 'texto' => 'X', 'x' => $x, 'y' => 62);
+        return ['lb' => 'Tipo novedad', 'texto' => 'X', 'x' => $x, 'y' => 54];
     }
 
     function tipoNovedadPadre()
@@ -260,10 +262,10 @@ class JuramentadaBeneficiario extends Documento
             //hermanos
             $x = 154;
         }
-        return array('lb' => 'Tipo novedad', 'texto' => 'X', 'x' => $x, 'y' => 61);
+        return ['lb' => 'Tipo novedad', 'texto' => 'X', 'x' => $x, 'y' => 54];
     }
 
-    function bloqueDescoBio()
+    function bloqueDescoBio($y)
     {
         //N => Si conoce los datos del padre o madre biologico diferente al trabajador
         if ($this->beneficiario->getBiodesco() == 'N') {
@@ -279,8 +281,7 @@ class JuramentadaBeneficiario extends Documento
                     ($nombre) . ", identificado con N: {$this->beneficiario->getNumdoc()}, por lo que no " .
                     "puedo aportar los datos relacionados con su certificación laboral y soy padre o madre unico responsable del menor.";
 
-                $html_decode = mb_convert_encoding($html, "ISO-8859-1", "UTF-8");
-                $this->pdf->MultiCell(184, 5, $html_decode, 0, 'L', 0);
+                $this->pdf->MultiCell(185, 5, $html, 0, 'L', 0, 1, 13, $y, null, null, true);
             }
         } else {
             $html = "Declaro que desconozco la ubicación del señor(a): _____________________________" .
@@ -288,8 +289,8 @@ class JuramentadaBeneficiario extends Documento
                 "______________________________________, identificado con N: _____________________________, por lo que no " .
                 "puedo aportar los datos relacionados con su certificación laboral y soy padre o madre unico responsable del menor.";
 
-            $html_decode = mb_convert_encoding($html, "ISO-8859-1", "UTF-8");
-            $this->pdf->MultiCell(184, 5, $html_decode, 0, 'L', 0);
+
+            $this->pdf->MultiCell(185, 5, $html, 0, 'L', 0, 1, 13, $y, null, null, true);
         }
     }
 }

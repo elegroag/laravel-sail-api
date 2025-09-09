@@ -11,7 +11,7 @@ class Mercurio20 extends ModelBase
 
     protected $table = 'mercurio20';
     public $timestamps = false;
-    protected $primaryKey = 'id';
+    protected $primaryKey = 'log';
 
     protected $fillable = [
         'log',

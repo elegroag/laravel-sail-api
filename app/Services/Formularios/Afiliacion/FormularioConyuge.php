@@ -38,42 +38,43 @@ class FormularioConyuge extends Documento
         $this->trabajador = $this->request->getParam('trabajador');
 
         $this->pdf->SetTitle("Formulario adición del cónyuge {$this->trabajador->getCedtra()}, COMFACA");
+        $this->pdf->SetAutoPageBreak(false, 0);
         $this->pdf->SetAuthor("{$this->trabajador->getPriape()} {$this->trabajador->getSegape()} {$this->trabajador->getPrinom()} {$this->trabajador->getSegnom()}, COMFACA");
         $this->pdf->SetSubject("Formulario de adición a COMFACA");
         $this->pdf->SetCreator("Plataforma Web: comfacaenlinea.com.co, COMFACA");
         $this->pdf->SetKeywords('COMFACA');
 
-        $this->pdf->SetAutoPageBreak(false, 0);
-        $this->headerForm();
-        $this->dataTrabajador();
-        $this->dataConyuge();
-        $this->dataMedioPago();
+        $this->headerForm(22);
+        $this->dataTrabajador(45);
+        $this->dataConyuge(80);
+        $this->dataMedioPago(152);
         $this->addBloq(
             array(
-                array('lb' => 'Acepta politica', 'texto' => 'X', 'x' => 168, 'y' => 263.5)
+                array('lb' => 'Acepta politica', 'texto' => 'X', 'x' => 168, 'y' => 239)
             )
         );
-        $page = public_path('img/firmas/sello-firma.png');
-        $this->pdf->Image($page, 160, 275, 30, 20, '');
+
+        $selloFirma = public_path('img/firmas/sello-firma.png');
+        $this->pdf->Image($selloFirma, 160, 250, 30, 20, '', '', '', false, 300, '', false, false, 0);
         return $this;
     }
 
-    public function headerForm()
+    public function headerForm($y)
     {
         $_codciu = ParamsConyuge::getCiudades();
         $ciudad = ($this->conyuge->getCodzon()) ? $_codciu[$this->conyuge->getCodzon()] : 'Florencia';
         $today = Carbon::now();
-        $this->pdf->SetFont('helvetica', '', 8.6);
+        $this->pdf->SetFont('helvetica', '', 9);
         $datos = array(
-            array('lb' => 'Año', 'texto' => $today->format('Y'), 'x' => 116, 'y' => 25),
-            array('lb' => 'Mes', 'texto' => $today->format('m'), 'x' => 130, 'y' => 25),
-            array('lb' => 'Dia', 'texto' => $today->format('d'), 'x' => 140, 'y' => 25),
-            array('lb' => 'Ciudad', 'texto' => $ciudad, 'x' => 150, 'y' => 25),
+            array('lb' => 'Año', 'texto' => $today->format('Y'), 'x' => 116, 'y' => $y),
+            array('lb' => 'Mes', 'texto' => $today->format('m'), 'x' => 130, 'y' => $y),
+            array('lb' => 'Dia', 'texto' => $today->format('d'), 'x' => 140, 'y' => $y),
+            array('lb' => 'Ciudad', 'texto' => $ciudad, 'x' => 150, 'y' => $y),
         );
         $this->addBloq($datos);
     }
 
-    public function dataTrabajador()
+    public function dataTrabajador($y)
     {
         $mtipoDocumentos = new Gener18();
         $mtidocs = $mtipoDocumentos->findFirst(" coddoc='{$this->trabajador->getTipdoc()}'");
@@ -83,17 +84,17 @@ class FormularioConyuge extends Documento
 
         $this->pdf->SetFont('helvetica', '', 8.5);
         $datos = array(
-            array('lb' => 'Adicion personas', 'texto' => 'X', 'x' => 45, 'y' => 52),
-            array('lb' => 'Cedula trabajador', 'texto' => $this->trabajador->getCedtra(), 'x' => 11, 'y' => 74),
-            array('lb' => 'Tipo documento', 'texto' => $detdoc, 'x' => 35, 'y' => 74),
-            array('lb' => 'Nombre trabajador', 'texto' => substr($nombtra, 0, 50), 'x' => 93, 'y' => 74),
-            array('lb' => 'NIT', 'texto' => $this->trabajador->getNit(), 'x' => 175, 'y' => 74),
+            array('lb' => 'Adicion personas', 'texto' => 'X', 'x' => 45, 'y' => $y),
+            array('lb' => 'Cedula trabajador', 'texto' => $this->trabajador->getCedtra(), 'x' => 11, 'y' => $y + 20),
+            array('lb' => 'Tipo documento', 'texto' => $detdoc, 'x' => 35, 'y' => $y + 20),
+            array('lb' => 'Nombre trabajador', 'texto' => substr($nombtra, 0, 50), 'x' => 93, 'y' => $y + 20),
+            array('lb' => 'NIT', 'texto' => $this->trabajador->getNit(), 'x' => 175, 'y' => $y + 20),
         );
 
         $this->addBloq($datos);
     }
 
-    function dataConyuge()
+    function dataConyuge($y)
     {
         $mciudad = ParamsConyuge::getCiudades();
         $ciudad = ($this->conyuge->getCodzon()) ? $mciudad[$this->conyuge->getCodzon()] : ' FLORENCIA';
@@ -123,34 +124,34 @@ class FormularioConyuge extends Documento
 
         $this->pdf->SetFont('helvetica', '', 8.5);
         $datos = array(
-            array('lb' => 'Cedula', 'texto' => $this->conyuge->getCedcon(), 'x' => 11, 'y' => 90),
-            array('lb' => 'Tipo documento', 'texto' => $detdoc, 'x' => 35, 'y' => 90),
-            array('lb' => 'Celular', 'texto' => $this->conyuge->getTelefono(), 'x' => 94, 'y' => 90),
-            array('lb' => 'Email', 'texto' => $this->conyuge->getEmail(), 'x' => 125, 'y' => 90),
-            array('lb' => 'Primer apellido', 'texto' => $this->conyuge->getPriape(), 'x' => 10, 'y' => 100),
-            array('lb' => 'Segundo apellido', 'texto' => $this->conyuge->getSegape(), 'x' => 60, 'y' => 100),
-            array('lb' => 'Primer nombre', 'texto' => $this->conyuge->getPrinom(), 'x' => 110, 'y' => 100),
-            array('lb' => 'Segundo nombre', 'texto' => $this->conyuge->getSegnom(), 'x' => 154, 'y' => 100),
-            array('lb' => 'Dirección recidencia', 'texto' => $this->conyuge->getDireccion(), 'x' => 10, 'y' => 110),
-            array('lb' => 'Ciudad', 'texto' => $ciudad, 'x' => 119, 'y' => 110),
-            array('lb' => 'Zona urbana', 'texto' => 'X', 'x' => 194.5, 'y' => 105),
-            array('lb' => 'Pertenencia etnica', 'texto' => $etnica, 'x' => 10, 'y' => 122),
-            array('lb' => 'Resguardo', 'texto' => $resguardo, 'x' => 78, 'y' => 122),
-            array('lb' => 'Pueblo indigena', 'texto' => $pueblo, 'x' => 125, 'y' => 122),
-            $this->posTieneDiscapacidad(),
-            array('lb' => 'Discapacidad', 'texto' => $discapacidad, 'x' => 40, 'y' => 134),
-            $this->posSexo(),
-            array('lb' => 'Fecha nacimiento año', 'texto' => $this->conyuge->getFecnac(), 'x' => 172, 'y' => 134),
-            array('lb' => 'Empresa labora', 'texto' => $empresalab, 'x' => 10, 'y' => 145),
-            array('lb' => 'Ingresos', 'texto' => $salario, 'x' => 132, 'y' => 145),
-            array('lb' => 'Recibe subsidio', 'texto' => 'X', 'x' => 192, 'y' => 145),
-            array('lb' => 'Ocupación', 'texto' =>  $ocupation, 'x' => 11, 'y' => 156),
+            array('lb' => 'Cedula', 'texto' => $this->conyuge->getCedcon(), 'x' => 11, 'y' => $y),
+            array('lb' => 'Tipo documento', 'texto' => $detdoc, 'x' => 35, 'y' => $y),
+            array('lb' => 'Celular', 'texto' => $this->conyuge->getTelefono(), 'x' => 94, 'y' => $y),
+            array('lb' => 'Email', 'texto' => $this->conyuge->getEmail(), 'x' => 125, 'y' => $y),
+            array('lb' => 'Primer apellido', 'texto' => $this->conyuge->getPriape(), 'x' => 10, 'y' => $y + 9),
+            array('lb' => 'Segundo apellido', 'texto' => $this->conyuge->getSegape(), 'x' => 60, 'y' => $y + 9),
+            array('lb' => 'Primer nombre', 'texto' => $this->conyuge->getPrinom(), 'x' => 110, 'y' => $y + 9),
+            array('lb' => 'Segundo nombre', 'texto' => $this->conyuge->getSegnom(), 'x' => 154, 'y' => $y + 9),
+            array('lb' => 'Dirección recidencia', 'texto' => $this->conyuge->getDireccion(), 'x' => 10, 'y' => $y + 18),
+            array('lb' => 'Ciudad', 'texto' => $ciudad, 'x' => 119, 'y' => $y + 18),
+            array('lb' => 'Zona urbana', 'texto' => 'X', 'x' => 194.5, 'y' => $y + 14),
+            array('lb' => 'Pertenencia etnica', 'texto' => $etnica, 'x' => 10, 'y' => $y + 30),
+            array('lb' => 'Resguardo', 'texto' => $resguardo, 'x' => 78, 'y' => $y + 30),
+            array('lb' => 'Pueblo indigena', 'texto' => $pueblo, 'x' => 125, 'y' => $y + 30),
+            $this->posTieneDiscapacidad($y + 40),
+            array('lb' => 'Discapacidad', 'texto' => $discapacidad, 'x' => 40, 'y' => $y + 40),
+            $this->posSexo($y + 40),
+            array('lb' => 'Fecha nacimiento año', 'texto' => $this->conyuge->getFecnac(), 'x' => 170, 'y' => $y + 40),
+            array('lb' => 'Empresa labora', 'texto' => $empresalab, 'x' => 10, 'y' => $y + 51),
+            array('lb' => 'Ingresos', 'texto' => $salario, 'x' => 132, 'y' => $y + 51),
+            array('lb' => 'Recibe subsidio', 'texto' => 'X', 'x' => 192, 'y' => $y + 51),
+            array('lb' => 'Ocupación', 'texto' =>  $ocupation, 'x' => 11, 'y' => $y + 61),
         );
 
         $this->addBloq($datos);
     }
 
-    function dataMedioPago()
+    function dataMedioPago($y)
     {
         $this->pdf->SetFont('helvetica', '', 9);
         $this->pdf->SetTextColor('65', '65', '65');
@@ -183,12 +184,11 @@ class FormularioConyuge extends Documento
         $mtippga = ParamsConyuge::getTipoPago();
         $tippag = ($this->conyuge->getTippag()) ? $mtippga[$this->conyuge->getTippag()] : '__________________';
 
-        $html = "El cónyuge " . $nombre . ", con " . $detdoc . " y número " . $numerocedula .
-            ', solicita que el pago del subsidio cuota monetaria se realice a la cuenta ' . $numcue . ' del ' . $banco . ', ' .
-            'que corresponde al medio de pago ' . $tippag . '.';
-        $html_decode = mb_convert_encoding($html, "ISO-8859-1", "UTF-8");
-        $this->pdf->SetXY(10, 168);
-        $this->pdf->MultiCell(190, 5, $html_decode, 0, 'L', 0);
+        $html = "El cónyuge " . $nombre . ", con " . $detdoc . " y número <b>" . $numerocedula .
+            '</b>, solicita que el pago del subsidio cuota monetaria se realice a la cuenta <b>' . $numcue . '</b> del ' . $banco . ', ' .
+            'que corresponde al medio de pago <b>' . $tippag . '</b>.';
+
+        $this->pdf->MultiCell(190, 5, $html, 0, 'L', 0, 1, 10, $y, null, null, true);
     }
 
     function posTipoAfiliado()
@@ -206,7 +206,7 @@ class FormularioConyuge extends Documento
         return array('lb' => 'Tipo afiliado', 'texto' => 'X', 'x' => $x, 'y' => 42);
     }
 
-    function posSexo()
+    function posSexo($y)
     {
         switch ($this->conyuge->getSexo()) {
             case 'M':
@@ -219,7 +219,7 @@ class FormularioConyuge extends Documento
                 $x = 164;
                 break;
         }
-        return array('lb' => 'Sexo', 'texto' => 'X', 'x' => $x, 'y' => 134);
+        return array('lb' => 'Sexo', 'texto' => 'X', 'x' => $x, 'y' => $y);
     }
 
     function posEstadoCivil()
@@ -490,17 +490,17 @@ class FormularioConyuge extends Documento
         return array('lb' => 'Tipo vivienda', 'texto' => 'X', 'x' => $x, 'y' => $y);
     }
 
-    function posTieneDiscapacidad()
+    function posTieneDiscapacidad($y)
     {
         if ($this->conyuge->getTipdis() == null || $this->conyuge->getTipdis() == '00') {
             $x = 30;
         } else {
             $x = 15;
         }
-        return array('lb' => 'Discapacidad', 'texto' => 'X', 'x' => $x, 'y' => 133.5);
+        return array('lb' => 'Discapacidad', 'texto' => 'X', 'x' => $x, 'y' => $y);
     }
 
-    function posTipoPago()
+    function posTipoPago($y)
     {
         switch ($this->conyuge->getTippag()) {
             case 'D':
@@ -513,6 +513,6 @@ class FormularioConyuge extends Documento
                 $x = null;
                 break;
         }
-        return array('lb' => 'Tipo medio pago', 'texto' => ($x) ? 'X' : '', 'x' => $x, 'y' => 190);
+        return array('lb' => 'Tipo medio pago', 'texto' => ($x) ? 'X' : '', 'x' => $x, 'y' => $y);
     }
 }
