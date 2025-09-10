@@ -401,10 +401,6 @@ class AprobaindepenController extends ApplicationController
             $email = $mercurio07->getEmail();
             $nombre = $mercurio07->getNombre();
 
-            //Prueba
-            // $email = "maxedwwin@gmail.com";
-            // $nombre = "edwin andres legro";
-
             $recip->addTo($email, $nombre);
             $swift->send($smsj, $recip, new Swift_Address($_email));
             SESSION::setData("flash_mensaje", "El envío se ha completado a la dirección de email: " . $mercurio07->getEmail() . " nombre: " . $mercurio07->getNombre());

@@ -281,7 +281,7 @@ class LoginController extends ApplicationController
             Swift_Connection_SMTP::ENC_TLS
         );
         $smtp->setUsername('soporte_sistemas@comfaca.com');
-        $smtp->setPassword('8912Elegro.');
+        $smtp->setPassword(env('MAIL_PASSWORD'));
         $smsj = new Swift_Message();
         $smsj->setSubject($asunto);
         $smsj->setContentType("text/html");
@@ -379,7 +379,7 @@ class LoginController extends ApplicationController
             "SSL" //Swift_Connection_SMTP::ENC_TLS
         );
         $smtp->setUsername("soportesistemas@comfaca.info");
-        $smtp->setPassword("Comfaca2020");
+        $smtp->setPassword(env('MAIL_PASSWORD'));
         $smsj = new Swift_Message();
         $smsj->setSubject($asunto);
         $smsj->setContentType("text/html");
