@@ -24,13 +24,16 @@ use Carbon\Carbon;
 class ActualizardatosController extends ApplicationController
 {
 
-
     protected $tipopc = 5;
     protected $db;
+    protected $user;
+    protected $tipo;
 
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
     public function aplicarFiltroAction(\Illuminate\Http\Request $request, string $estado = 'P')
@@ -175,52 +178,51 @@ class ActualizardatosController extends ApplicationController
     {
         $this->setResponse("ajax");
         $modelos = array("mercurio10", "mercurio47");
-        
+
         $this->db->begin();
         try {
-                $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
-                $codest = $request->input('codest', "addslaches", "alpha", "extraspaces", "striptags");
-                $nota = $request->input('nota');
-                $array_corregir = $request->input('campos_corregir');
-                $campos_corregir = implode(";", $array_corregir);
+            $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
+            $codest = $request->input('codest', "addslaches", "alpha", "extraspaces", "striptags");
+            $nota = $request->input('nota');
+            $array_corregir = $request->input('campos_corregir');
+            $campos_corregir = implode(";", $array_corregir);
 
-                $today = Carbon::now();
-                $mercurio47 = $this->Mercurio47->findFirst("id='{$id}'");
-                if ($mercurio47->getEstado() == 'D') {
-                    throw new DebugException("El registro ya se encuentra devuelto, no se requiere de repetir la acción.", 201);
-                }
+            $today = Carbon::now();
+            $mercurio47 = $this->Mercurio47->findFirst("id='{$id}'");
+            if ($mercurio47->getEstado() == 'D') {
+                throw new DebugException("El registro ya se encuentra devuelto, no se requiere de repetir la acción.", 201);
+            }
 
-                Mercurio47::where('id', $id)->update([
-                    'estado' => 'D',
-                    'fecha_estado' => $today->format('Y-m-d H:i:s')
-                ]);
+            Mercurio47::where('id', $id)->update([
+                'estado' => 'D',
+                'fecha_estado' => $today->format('Y-m-d H:i:s')
+            ]);
 
 
-                $item = $this->Mercurio10->maximum("item", "conditions: tipopc='$this->tipopc' and numero='$id'") + 1;
+            $item = $this->Mercurio10->maximum("item", "conditions: tipopc='$this->tipopc' and numero='$id'") + 1;
 
-                $mercurio10 = new Mercurio10;
-                
-                $mercurio10->setTipopc($this->tipopc);
-                $mercurio10->setNumero($id);
-                $mercurio10->setItem($item);
-                $mercurio10->setEstado("D");
-                $mercurio10->setNota($nota);
-                $mercurio10->setCodest($codest);
-                $mercurio10->setFecsis($today->format('Y-m-d H:i:s'));
-                if (!$mercurio10->save()) {
-                    $msj = "";
-                    foreach ($mercurio10->getMessages() as $key => $message) $msj .= $message . "<br/>";
-                    throw new DebugException("Error " . $msj, 501);
-                }
-                $this->Mercurio10->updateAll("campos_corregir='{$campos_corregir}'", "conditions: item='{$item}' AND numero='{$id}' AND tipopc='{$this->tipopc}'");
+            $mercurio10 = new Mercurio10;
 
-                $this->db->commit();
+            $mercurio10->setTipopc($this->tipopc);
+            $mercurio10->setNumero($id);
+            $mercurio10->setItem($item);
+            $mercurio10->setEstado("D");
+            $mercurio10->setNota($nota);
+            $mercurio10->setCodest($codest);
+            $mercurio10->setFecsis($today->format('Y-m-d H:i:s'));
+            if (!$mercurio10->save()) {
+                $msj = "";
+                foreach ($mercurio10->getMessages() as $key => $message) $msj .= $message . "<br/>";
+                throw new DebugException("Error " . $msj, 501);
+            }
+            $this->Mercurio10->updateAll("campos_corregir='{$campos_corregir}'", "conditions: item='{$item}' AND numero='{$id}' AND tipopc='{$this->tipopc}'");
 
-                $salida = array(
-                    "success" => true,
-                    "msj" => "El proceso se ha completado con éxito"
-                );
-          
+            $this->db->commit();
+
+            $salida = array(
+                "success" => true,
+                "msj" => "El proceso se ha completado con éxito"
+            );
         } catch (DebugException $e) {
             $salida = array(
                 "success" => false,
@@ -239,10 +241,10 @@ class ActualizardatosController extends ApplicationController
     {
         $this->setResponse("ajax");
         $modelos = array("mercurio10", "mercurio47");
-        
+
         $this->db->begin();
         try {
-            
+
             $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
             $nota = $request->input('nota');
             $codest = $request->input('codest', "addslaches", "alpha", "extraspaces", "striptags");
@@ -252,11 +254,11 @@ class ActualizardatosController extends ApplicationController
             if ($mercurio47->getEstado() == 'X') {
                 throw new DebugException("El registro ya se encuentra rechazado, no se requiere de repetir la acción.", 201);
             }
-            $this->db->inQueryAssoc("UPDATE mercurio47 SET estado='X', fecha_estado='".$today->format('Y-m-d H:i:s')."' WHERE id='{$id}'");
+            $this->db->inQueryAssoc("UPDATE mercurio47 SET estado='X', fecha_estado='" . $today->format('Y-m-d H:i:s') . "' WHERE id='{$id}'");
             $item = $this->Mercurio10->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
 
             $mercurio10 = new Mercurio10();
-            
+
             $mercurio10->setTipopc($this->tipopc);
             $mercurio10->setNumero($id);
             $mercurio10->setItem($item);
@@ -276,7 +278,6 @@ class ActualizardatosController extends ApplicationController
                 "success" => true,
                 "msj" => "El proceso se ha completado con éxito"
             );
-        
         } catch (DebugException $e) {
             $salida = array(
                 "success" => false,

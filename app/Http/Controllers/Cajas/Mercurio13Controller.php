@@ -2,13 +2,24 @@
 
 namespace App\Http\Controllers\Cajas;
 
+use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio09;
+use App\Models\Mercurio12;
+use App\Models\Mercurio13;
+use App\Services\CajaServices\Mercurio13Services;
+use App\Services\Utils\GeneralService;
+use App\Services\Utils\Pagination;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class Mercurio13Controller extends ApplicationController
 {
+
+    protected $db;
+    protected $user;
+    protected $tipo;
     /**
      * pagination variable
      * @var Pagination
@@ -23,38 +34,12 @@ class Mercurio13Controller extends ApplicationController
 
     public function __construct()
     {
-        
-        
-       
-        
-        
-        
         $this->pagination = new Pagination();
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    /**
-     * beforeFilter function
-     * @changed [2023-12-00]
-     *
-     * @author elegroag <elegroag@ibero.edu.co>
-     * @param array $permisos
-     * @return void
-     */
-    public function beforeFilter($permisos = array())
-    {
-        $permisos = array("aplicarFiltro" => "71", "info" => "72", "buscar" => "73", "aprobar" => "74", "devolver" => "75", "rechazar" => "76");
-        $flag = parent::beforeFilter($permisos);
-        if (!$flag) {
-            $response = parent::errorFunc("No cuenta con los permisos para este proceso");
-            if (is_ajax()) {
-                $this->setResponse("ajax");
-                $this->renderObject($response, false);
-            } else {
-                Router::redirectToApplication('Cajas/principal/index');
-            }
-            return false;
-        }
-    }
 
     public function indexAction()
     {
@@ -66,12 +51,12 @@ class Mercurio13Controller extends ApplicationController
             )
         );
         $tipopc = array("" => "Selecciona aquí...");
-        foreach ((new Mercurio09)->find() as $mer09) {
+        foreach ((new Mercurio09())->find() as $mer09) {
             $tipopc[$mer09->getTipopc()] = $mer09->getDetalle();
         }
 
         $coddoc = array("" => "Selecciona aquí...");
-        foreach ((new Mercurio12)->find() as $mer12) {
+        foreach ((new Mercurio12())->find() as $mer12) {
             $coddoc[$mer12->getCoddoc()] = $mer12->getDetalle();
         }
 
@@ -84,15 +69,15 @@ class Mercurio13Controller extends ApplicationController
 
     public function aplicarFiltroAction()
     {
-        return $this->buscarAction();
+        #return $this->buscarAction();
     }
 
     public function changeCantidadPaginaAction()
     {
-        return $this->buscarAction();
+        # return $this->buscarAction();
     }
 
-    public function buscarAction()
+    public function buscarAction(Request $request)
     {
         $this->setResponse("ajax");
 
@@ -119,13 +104,13 @@ class Mercurio13Controller extends ApplicationController
      * Consulta y retorna los datos del registro de mercurio13 para poder ser editado
      * @return void
      */
-    public function inforAction()
+    public function inforAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
             $tipopc = $request->input('tipopc');
             $coddoc = $request->input('coddoc');
-            $num13 = (new Mercurio13)->count("*", "conditions: tipopc='{$tipopc}' AND coddoc='{$coddoc}'");
+            $num13 = (new Mercurio13())->count("*", "conditions: tipopc='{$tipopc}' AND coddoc='{$coddoc}'");
             if ($num13 > 0) {
                 $mer13 = (new Mercurio13)->findFirst(" tipopc='{$tipopc}' AND coddoc='{$coddoc}'");
                 $tipopc_detalle = $mer13->getMercurio09()->getDetalle();
@@ -139,7 +124,7 @@ class Mercurio13Controller extends ApplicationController
                     'data' => $data,
                 );
             }
-        } catch (DbException $e) {
+        } catch (DebugException $e) {
             $response = array(
                 'success' => false,
                 'data' => null,
@@ -154,7 +139,7 @@ class Mercurio13Controller extends ApplicationController
      *
      * @return void
      */
-    public function guardarAction()
+    public function guardarAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
@@ -191,7 +176,7 @@ class Mercurio13Controller extends ApplicationController
                 'msj' => 'El registro se completo con éxito.',
                 'data' => $data->getArray()
             );
-        } catch (DbException $e) {
+        } catch (DebugException $e) {
             $response = array(
                 'success' => false,
                 'msj' => $e->getMessage()
@@ -208,7 +193,7 @@ class Mercurio13Controller extends ApplicationController
      * @author edwin <soportesistemas.comfaca@gmail.com>
      * @return void
      */
-    public function borrarAction()
+    public function borrarAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
@@ -229,7 +214,7 @@ class Mercurio13Controller extends ApplicationController
                 'msj' => 'El registro se borro con éxito.',
                 'result' => ($res) ? true : false
             );
-        } catch (Exception $e) {
+        } catch (DebugException $e) {
             $response = array(
                 'success' => false,
                 'msj' => $e->getMessage()

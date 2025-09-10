@@ -27,10 +27,14 @@ class AuthController extends ApplicationController
 {
 
     protected $db;
+    protected $user;
+    protected $tipo;
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();   
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
     public function indexAction()
@@ -41,7 +45,7 @@ class AuthController extends ApplicationController
 
     public function autenticarAction(Request $request, $comfirmar = 0)
     {
-        
+
         $this->setResponse("ajax");
         $user = $request->input("user");
         $clave = $request->input("password");
@@ -117,33 +121,33 @@ class AuthController extends ApplicationController
         $request = request();
         try {
             $db = DbBase::rawConnect();
-            
+
             $fecha = now()->format('Y-m-d H:i:s');
             $cedula = $request->input("recovery_cedula");
             $captcha = $request->input("captcha");
             $_usuario = $request->input("recovery_usuario");
-            
-                       
+
+
             $gener02 = $db->fetchOne("SELECT * FROM gener02 WHERE cedtra='{$cedula}' AND usuario='{$_usuario}' AND estado IN('A','B') LIMIT 1");
-            
+
             if (!$gener02) {
                 throw new AuthException("El usuario no se encuentra registrado en el sistema. No se puede continuar el proceso de recuperación de la cuenta.", 1);
             } else {
                 $email = $gener02['estacion'];
                 $nombre = $gener02['nombre'];
                 $usuario = $gener02['usuario'];
-                
+
                 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     throw new AuthException("La dirección email del usuario no es valido para continuar con el proceso recuperación de cuenta.", 6);
                 }
-                
+
                 $nueva_clave = $this->clave_aleatoria(8);
                 // Migrado a Hash de Laravel
                 $hash = Hash::make($nueva_clave);
-                
+
                 // TODO: Migrar a Eloquent
                 $this->Gener02->updateAll("clave='{$hash}', update_at='{$fecha}', estado='A', intentos='0'", "conditions: cedtra='{$cedula}' and usuario='{$_usuario}'");
-                
+
                 // TODO: Migrar a Mail de Laravel
                 $mensaje = view('login.tmp.mail_recovery', [
                     'assets' => asset('/'),
@@ -151,11 +155,11 @@ class AuthController extends ApplicationController
                     'user' => $usuario,
                     'clave' => $nueva_clave
                 ])->render();
-                
+
                 // TODO: Implementar Mail de Laravel
                 $senderEmail = new SenderEmail();
                 $senderEmail->send("Recuperar cuenta de acceso al sistema SISUWEB.", $mensaje, array(array("nombre" => $nombre, "email" => $email)));
-                
+
                 $_email = mask_email($email);
                 session()->flash("success", array(
                     "msj" => "Se ha emitido un mensaje a la dirección email {$_email}. Con los parametros de acceso. Para el ingreso al aplicativo SISUWEB 2021. \nPor favor probar con las nuevas credenciales de acceso. \nGracias."
@@ -184,7 +188,7 @@ class AuthController extends ApplicationController
             $clave_nueva = $request->input("change_nuevo_password");
             $captcha = $request->input("captcha");
 
-         
+
             if (!$user) {
                 throw new AuthException("El usuario es requerido para la autenticación.", 2);
             }
@@ -268,9 +272,9 @@ class AuthController extends ApplicationController
         $request = request();
         $this->setResponse("ajax");
         try {
-            
+
             $db = DbBase::rawConnect();
-            
+
             $usuario = htmlentities(trim($request->input("usuario")));
             $clave = htmlentities(trim($request->input("password")));
             $client_id = htmlentities(trim($request->input("client_id")));

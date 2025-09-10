@@ -10,25 +10,30 @@ use Illuminate\Http\Response;
 class ReportesController extends ApplicationController
 {
 
+    protected $db;
+    protected $user;
+    protected $tipo;
+
     public function __construct()
     {
-       
-        $this->setTemplateAfter("main");
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
     public function indexAction() {}
 
     public function novedades_Subsidio_viewAction() {}
 
-    public function novedades_SubsidioAction()
+    public function novedades_SubsidioAction(Request $request)
     {
         $this->setParamToView("titulo", "Reporte de Novedades de Subsidio");
         $mfecini = $request->input("fecini");
         $mfecfin = $request->input("fecfin");
         $mtipnov = $request->input("tipnov");
         $mdocumento = $request->input("documento");
-        $fecini = new Date($mfecini);
-        $fecfin = new Date($mfecfin);
+        $fecini = new \DateTime($mfecini);
+        $fecfin = new \DateTime($mfecfin);
         $mwhere_tipnov = "";
         $mwhere_documento = "";
         if (!empty($mtipnov)) {
@@ -46,7 +51,7 @@ class ReportesController extends ApplicationController
                 }
                 $title2 = array(
                     "REPORTE NOVEDADES " . $detalle,
-                    "RANGO DE FECHAS: " . $fecini->getUsingFormatDefault() . " AL " . $fecfin->getUsingFormatDefault(),
+                    "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
                 );
             }
             if ($mtipnov == "5") {
@@ -56,7 +61,7 @@ class ReportesController extends ApplicationController
                 }
                 $title3 = array(
                     "REPORTE NOVEDADES " . $detalle,
-                    "RANGO DE FECHAS: " . $fecini->getUsingFormatDefault() . " AL " . $fecfin->getUsingFormatDefault(),
+                    "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
                 );
             }
             if ($mtipnov == "7") {
@@ -66,7 +71,7 @@ class ReportesController extends ApplicationController
                 }
                 $title4 = array(
                     "REPORTE NOVEDADES " . $detalle,
-                    "RANGO DE FECHAS: " . $fecini->getUsingFormatDefault() . " AL " . $fecfin->getUsingFormatDefault(),
+                    "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
                 );
             }
             if ($mtipnov == "8") {
@@ -78,7 +83,7 @@ class ReportesController extends ApplicationController
                 $mtit = '5';
                 $title5 = array(
                     "REPORTE NOVEDADES " . $detalle,
-                    "RANGO DE FECHAS: " . $fecini->getUsingFormatDefault() . " AL " . $fecfin->getUsingFormatDefault(),
+                    "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
                 );
             }
             if ($mtipnov == "9") {
@@ -88,7 +93,7 @@ class ReportesController extends ApplicationController
                 }
                 $title6 = array(
                     "REPORTE NOVEDADES " . $detalle,
-                    "RANGO DE FECHAS: " . $fecini->getUsingFormatDefault() . " AL " . $fecfin->getUsingFormatDefault(),
+                    "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
                 );
             }
             if ($mtipnov == "10") {
@@ -98,7 +103,7 @@ class ReportesController extends ApplicationController
                 }
                 $title7 = array(
                     "REPORTE NOVEDADES " . $detalle,
-                    "RANGO DE FECHAS: " . $fecini->getUsingFormatDefault() . " AL " . $fecfin->getUsingFormatDefault(),
+                    "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
                 );
             }
             if ($mtipnov == "11") {
@@ -110,7 +115,7 @@ class ReportesController extends ApplicationController
                 $mtit = '8';
                 $title8 = array(
                     "REPORTE NOVEDADES " . $detalle,
-                    "RANGO DE FECHAS: " . $fecini->getUsingFormatDefault() . " AL " . $fecfin->getUsingFormatDefault(),
+                    "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
                 );
             }
             if ($mtipnov == "12") {
@@ -122,7 +127,7 @@ class ReportesController extends ApplicationController
                 $mtit = '9';
                 $title9 = array(
                     "REPORTE NOVEDADES " . $detalle,
-                    "RANGO DE FECHAS: " . $fecini->getUsingFormatDefault() . " AL " . $fecfin->getUsingFormatDefault(),
+                    "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
                 );
             }
             if ($mtipnov == "13") {
@@ -134,50 +139,50 @@ class ReportesController extends ApplicationController
                 $mtit = '10';
                 $title10 = array(
                     "REPORTE NOVEDADES " . $detalle,
-                    "RANGO DE FECHAS: " . $fecini->getUsingFormatDefault() . " AL " . $fecfin->getUsingFormatDefault(),
+                    "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
                 );
             }
             $title = 'title';
             $title1 = array(
                 "REPORTE NOVEDADES 3.2.1  AFILIACIONES EMPLEADORES PRIMERA VEZ",
-                "RANGO DE FECHAS: " . $fecini->getUsingFormatDefault() . " AL " . $fecfin->getUsingFormatDefault(),
+                "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
             );
         } else {
             $title1 = array(
                 "REPORTE NOVEDADES 3.2.1  AFILIACIONES EMPLEADORES PRIMERA VEZ",
-                "RANGO DE FECHAS: " . $fecini->getUsingFormatDefault() . " AL " . $fecfin->getUsingFormatDefault(),
+                "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
             );
             $title2 = array(
                 "REPORTE NOVEDADES 3.2.2  AFILIACIONES EMPLEADORES SEGUNDA VEZ",
-                "RANGO DE FECHAS: " . $fecini->getUsingFormatDefault() . " AL " . $fecfin->getUsingFormatDefault(),
+                "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
             );
             $title3 = array(
                 "REPORTE NOVEDADES 3.2.5  DESAFILIACIONES EMPLEADORES",
-                "RANGO DE FECHAS: " . $fecini->getUsingFormatDefault() . " AL " . $fecfin->getUsingFormatDefault(),
+                "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
             );
             $title4 = array(
                 "REPORTE NOVEDADES 3.2.7  PERDIDA DE AFILIACION EMPLEADORES POR CAUSA GRAVE",
-                "RANGO DE FECHAS: " . $fecini->getUsingFormatDefault() . " AL " . $fecfin->getUsingFormatDefault(),
+                "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
             );
             $title5 = array(
                 "REPORTE NOVEDADES 3.2.8 INICIO LABORAL TRABAJADORES ",
-                "RANGO DE FECHAS: " . $fecini->getUsingFormatDefault() . " AL " . $fecfin->getUsingFormatDefault(),
+                "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
             );
             $title6 = array(
                 "REPORTE NOVEDADES 3.2.9 TERMINACION LABORAL TRABAJADORES  ",
-                "RANGO DE FECHAS: " . $fecini->getUsingFormatDefault() . " AL " . $fecfin->getUsingFormatDefault(),
+                "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
             );
             $title7 = array(
                 "REPORTE NOVEDADES 3.2.10 SUSPENCION TEMPORAL DEL CONTRATO DE TRABAJO",
-                "RANGO DE FECHAS: " . $fecini->getUsingFormatDefault() . " AL " . $fecfin->getUsingFormatDefault(),
+                "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
             );
             $title8 = array(
                 "REPORTE NOVEDADES 3.2.11 LICENCIAS REMUNERADAS Y NO REMUNERADAS",
-                "RANGO DE FECHAS: " . $fecini->getUsingFormatDefault() . " AL " . $fecfin->getUsingFormatDefault(),
+                "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
             );
             $title9 = array(
                 "REPORTE NOVEDADES 3.2.12 MODIFICACION DEL SALARIO",
-                "RANGO DE FECHAS: " . $fecini->getUsingFormatDefault() . " AL " . $fecfin->getUsingFormatDefault(),
+                "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
             );
         }
         $_fields['fecha'] = array('header' => 'FECHA', 'size' => 15, 'align' => 'C');
@@ -415,7 +420,7 @@ class ReportesController extends ApplicationController
         }
         $report = new UserReportExcel($title1, $_fields);
         $report->startReport("EMPLEADOR PRIMERA VEZ");
-        $conditions = "fecha >= '" . $fecini->getUsingFormatDefault() . "' AND fecha <= '" . $fecfin->getUsingFormatDefault() . "'";
+        $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
         $msat02 = $this->Sat02->find("numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '1'  )", "order: numtraccf  ASC ");
         foreach ($msat02 as $sat02) {
             $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat02->getNumtraccf()}'   ");
@@ -458,7 +463,7 @@ class ReportesController extends ApplicationController
         }
         if ($mtipnov == '2' || $mtipnov == '') {
             $report->startReport("EMPLEADOR SEGUNDA VEZ", $title2, $_fields2);
-            $conditions = "fecha >= '" . $fecini->getUsingFormatDefault() . "' AND fecha <= '" . $fecfin->getUsingFormatDefault() . "'";
+            $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
             $msat03 = $this->Sat03->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '2'  )", "order: numtraccf  ASC ");
             foreach ($msat03 as $sat03) {
                 $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat03->getNumtraccf()}' ");
@@ -504,7 +509,7 @@ class ReportesController extends ApplicationController
         }
         if ($mtipnov == '5' || $mtipnov == '') {
             $report->startReport("DESAFILIACION EMPLEADOR", $title3, $_fields3);
-            $conditions = "fecha >= '" . $fecini->getUsingFormatDefault() . "' AND fecha <= '" . $fecfin->getUsingFormatDefault() . "'";
+            $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
             $msat06 = $this->Sat06->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '3'  )", "order: numtraccf  ASC  ");
             foreach ($msat06 as $sat06) {
                 $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat06->getNumtraccf()}' ");
@@ -531,7 +536,7 @@ class ReportesController extends ApplicationController
         }
         if ($mtipnov == '7' || $mtipnov == '') {
             $report->startReport("CAUSA GRAVE", $title4, $_fields4);
-            $conditions = "fecha >= '" . $fecini->getUsingFormatDefault() . "' AND fecha <= '" . $fecfin->getUsingFormatDefault() . "'";
+            $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
             $msat08 = $this->Sat08->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '4'  )", "order: numtraccf  ASC  ");
             foreach ($msat08 as $sat08) {
                 $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat08->getNumtraccf()}' ");
@@ -556,7 +561,7 @@ class ReportesController extends ApplicationController
         }
         if ($mtipnov == '8' || $mtipnov == '') {
             $report->startReport("INICIO LABORAL", $title5, $_fields5);
-            $conditions = "fecha >= '" . $fecini->getUsingFormatDefault() . "' AND fecha <= '" . $fecfin->getUsingFormatDefault() . "'";
+            $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
             $msat09 = $this->Sat09->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '5'  )", "order: numtraccf  ASC ");
             foreach ($msat09 as $sat09) {
                 $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat09->getNumtraccf()}' ");
@@ -597,7 +602,7 @@ class ReportesController extends ApplicationController
         }
         if ($mtipnov == '9' || $mtipnov == '') {
             $report->startReport("TERMINACION LABORAL", $title6, $_fields6);
-            $conditions = "fecha >= '" . $fecini->getUsingFormatDefault() . "' AND fecha <= '" . $fecfin->getUsingFormatDefault() . "'";
+            $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
             $msat10 = $this->Sat10->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '6'  )", "order: numtraccf  ASC ");
             foreach ($msat10 as $sat10) {
                 $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat10->getNumtraccf()}' ");
@@ -626,7 +631,7 @@ class ReportesController extends ApplicationController
         }
         if ($mtipnov == '10' || $mtipnov == '') {
             $report->startReport("SUSPENCION TEMPORAL CT", $title7, $_fields7);
-            $conditions = "fecha >= '" . $fecini->getUsingFormatDefault() . "' AND fecha <= '" . $fecfin->getUsingFormatDefault() . "'";
+            $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
             $msat11 = $this->Sat11->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '7'  )", "order: numtraccf  ASC ");
             foreach ($msat11 as $sat11) {
                 $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat11->getNumtraccf()}' ");
@@ -656,7 +661,7 @@ class ReportesController extends ApplicationController
         }
         if ($mtipnov == '11' || $mtipnov == '') {
             $report->startReport("LICENCIAS", $title8, $_fields8);
-            $conditions = "fecha >= '" . $fecini->getUsingFormatDefault() . "' AND fecha <= '" . $fecfin->getUsingFormatDefault() . "'";
+            $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
             $msat12 = $this->Sat12->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '8'  )", "order: numtraccf  ASC ");
             foreach ($msat12 as $sat12) {
                 $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat12->getNumtraccf()}' ");
@@ -687,7 +692,7 @@ class ReportesController extends ApplicationController
         }
         if ($mtipnov == '12' || $mtipnov == '') {
             $report->startReport("MODIFICACION SALARIO", $title9, $_fields9);
-            $conditions = "fecha >= '" . $fecini->getUsingFormatDefault() . "' AND fecha <= '" . $fecfin->getUsingFormatDefault() . "'";
+            $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
             $msat13 = $this->Sat13->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '9'  )", "order: numtraccf  ASC ");
             foreach ($msat13 as $sat13) {
                 $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat13->getNumtraccf()}' ");
@@ -717,6 +722,6 @@ class ReportesController extends ApplicationController
         }
 
         ob_end_clean();
-        $report->finishReport("novedades_SAT_{$fecfin->getUsingFormatDefault()}", "D");
+        $report->finishReport("novedades_SAT_{$fecfin->format('Y-m-d')}", "D");
     }
 }

@@ -2,40 +2,30 @@
 
 namespace App\Http\Controllers\Cajas;
 
+use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio01;
+use App\Services\Tag;
+use App\Services\Utils\GeneralService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class Mercurio01Controller extends ApplicationController
 {
 
-    private $query = "1=1";
-    private $cantidad_pagina = 0;
+    protected $query = "1=1";
+    protected $cantidad_pagina = 0;
+    protected $db;
+    protected $user;
+    protected $tipo;
 
     public function __construct()
     {
-       
-        
-        
         $this->cantidad_pagina = $this->numpaginate;
-        
-    }
-
-    public function beforeFilter($permisos = array())
-    {
-        $permisos = array("aplicarFiltro" => "1", "editar" => "2", "guardar" => "3", "buscar" => "4");
-        $flag = parent::beforeFilter($permisos);
-        if (!$flag) {
-            $response = parent::errorFunc("No cuenta con los permisos para este proceso");
-            if (is_ajax()) {
-                $this->setResponse("ajax");
-                $this->renderObject($response, false);
-            } else {
-                $this->redirect("principal/index/0");
-            }
-            return false;
-        }
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
     public function showTabla($paginate)
@@ -74,14 +64,14 @@ class Mercurio01Controller extends ApplicationController
         $this->setResponse("ajax");
         $consultasOldServices = new GeneralService();
         $this->query = $consultasOldServices->converQuery();
-        self::buscarAction();
+        #self::buscarAction();
     }
 
-    public function changeCantidadPaginaAction()
+    public function changeCantidadPaginaAction(Request $request)
     {
         $this->setResponse("ajax");
         $this->cantidad_pagina = $request->input("numero");
-        self::buscarAction();
+        #self::buscarAction();
     }
 
     public function indexAction()
@@ -90,11 +80,11 @@ class Mercurio01Controller extends ApplicationController
         $this->setParamToView("help", $help);
         $this->setParamToView("title", "Basica");
         if ($this->Mercurio01->count() == 0) $this->setParamToView("buttons", array("N"));
-        Tag::setDocumentTitle('Basica');
+        #Tag::setDocumentTitle('Basica');
     }
 
 
-    public function buscarAction()
+    public function buscarAction(Request $request)
     {
         $this->setResponse("ajax");
         $pagina = $request->input('pagina');
@@ -117,49 +107,44 @@ class Mercurio01Controller extends ApplicationController
             if ($mercurio01 == false) $mercurio01 = new Mercurio01();
 
             return $this->renderObject($mercurio01->getArray(), false);
-        } catch (DbException $e) {
+        } catch (DebugException $e) {
             parent::setLogger($e->getMessage());
             $this->db->rollback();
         }
     }
 
-    public function guardarAction()
+    public function guardarAction(Request $request)
     {
         try {
-            try {
-                $this->setResponse("ajax");
-                $codapl = $request->input('codapl', "addslaches", "extraspaces", "striptags");
-                $email = $request->input('email', "addslaches", "extraspaces", "striptags");
-                $clave = $request->input('clave', "addslaches", "alpha", "extraspaces", "striptags");
-                $path = $request->input('path', "addslaches", "extraspaces", "striptags");
-                $ftpserver = $request->input('ftpserver', "addslaches", "extraspaces", "striptags");
-                $pathserver = $request->input('pathserver', "addslaches", "extraspaces", "striptags");
-                $userserver = $request->input('userserver', "addslaches", "extraspaces", "striptags");
-                $passserver = $request->input('passserver', "addslaches", "extraspaces", "striptags");
-                $modelos = array("Mercurio01");
-                
-                $response = $this->db->begin();
-                $mercurio01 = new Mercurio01();
-                $mercurio01->setTransaction($Transaccion);
-                $mercurio01->setCodapl($codapl);
-                $mercurio01->setEmail($email);
-                $mercurio01->setClave($clave);
-                $mercurio01->setPath($path);
-                $mercurio01->setFtpserver($ftpserver);
-                $mercurio01->setPathserver($pathserver);
-                $mercurio01->setUserserver($userserver);
-                $mercurio01->setPassserver($passserver);
-                if (!$mercurio01->save()) {
-                    parent::setLogger($mercurio01->getMessages());
-                    $this->db->rollback();
-                }
-                $this->db->commit();
-                $response = parent::successFunc("Creacion Con Exito");
-                return $this->renderObject($response, false);
-            } catch (DbException $e) {
-                parent::setLogger($e->getMessage());
+            $this->setResponse("ajax");
+            $codapl = $request->input('codapl');
+            $email = $request->input('email');
+            $clave = $request->input('clave');
+            $path = $request->input('path');
+            $ftpserver = $request->input('ftpserver');
+            $pathserver = $request->input('pathserver');
+            $userserver = $request->input('userserver');
+            $passserver = $request->input('passserver');
+
+
+            $response = $this->db->begin();
+            $mercurio01 = new Mercurio01();
+
+            $mercurio01->setCodapl($codapl);
+            $mercurio01->setEmail($email);
+            $mercurio01->setClave($clave);
+            $mercurio01->setPath($path);
+            $mercurio01->setFtpserver($ftpserver);
+            $mercurio01->setPathserver($pathserver);
+            $mercurio01->setUserserver($userserver);
+            $mercurio01->setPassserver($passserver);
+            if (!$mercurio01->save()) {
+                parent::setLogger($mercurio01->getMessages());
                 $this->db->rollback();
             }
+            $this->db->commit();
+            $response = parent::successFunc("Creacion Con Exito");
+            return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede guardar/editar el Registro");
             return $this->renderObject($response, false);

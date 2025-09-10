@@ -2,40 +2,31 @@
 
 namespace App\Http\Controllers\Cajas;
 
+use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Models\Mercurio06;
+use App\Models\Mercurio28;
+use App\Services\Tag;
+use App\Services\Utils\GeneralService;
 
 class Mercurio06Controller extends ApplicationController
 {
 
-    private $query = "1=1";
-    private $cantidad_pagina = 10;
+    protected $query = "1=1";
+    protected $cantidad_pagina = 10;
+    protected $db;
+    protected $user;
+    protected $tipo;
 
     public function __construct()
     {
-       
-        
-        
         $this->cantidad_pagina = $this->numpaginate;
-        
-    }
-
-    public function beforeFilter($permisos = array())
-    {
-        $permisos = array("aplicarFiltro" => "14", "editar" => "15", "guardar" => "16", "buscar" => "17", "borrar" => "18", "campo_view" => "19", "editarCampo" => "20", "borrarCampo" => "21");
-        $flag = parent::beforeFilter($permisos);
-        if (!$flag) {
-            $response = parent::errorFunc("No cuenta con los permisos para este proceso");
-            if (is_ajax()) {
-                $this->setResponse("ajax");
-                $this->renderObject($response, false);
-            } else {
-                $this->redirect("principal/index/0");
-            }
-            return false;
-        }
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
 
@@ -74,12 +65,12 @@ class Mercurio06Controller extends ApplicationController
 
     public function aplicarFiltroAction()
     {
-        $this->buscarAction();
+        #$this->buscarAction();
     }
 
     public function changeCantidadPaginaAction()
     {
-        $this->buscarAction();
+        #$this->buscarAction();
     }
 
     public function indexAction()
@@ -93,11 +84,11 @@ class Mercurio06Controller extends ApplicationController
         $this->setParamToView("help", $help);
         $this->setParamToView("title", "Tipos Acceso");
         $this->setParamToView("buttons", array("N", "F", "R"));
-        Tag::setDocumentTitle('Motivos Tipos Acceso');
+        #Tag::setDocumentTitle('Motivos Tipos Acceso');
     }
 
 
-    public function buscarAction()
+    public function buscarAction(Request $request)
     {
         $this->setResponse("ajax");
         $consultasOldServices = new GeneralService();
@@ -117,7 +108,7 @@ class Mercurio06Controller extends ApplicationController
         $this->renderObject($response, false);
     }
 
-    public function editarAction()
+    public function editarAction(Request $request)
     {
         try {
             $this->setResponse("ajax");
@@ -126,67 +117,59 @@ class Mercurio06Controller extends ApplicationController
             if ($mercurio06 == false) $mercurio06 = new Mercurio06();
 
             return $this->renderObject($mercurio06->getArray(), false);
-        } catch (DbException $e) {
+        } catch (DebugException $e) {
             parent::setLogger($e->getMessage());
             $this->db->rollback();
         }
     }
 
-    public function borrarAction()
+    public function borrarAction(Request $request)
     {
         try {
-            try {
-                $this->setResponse("ajax");
-                $tipo = $request->input('tipo');
-                $modelos = array("Mercurio06");
-                
-                $response = $this->db->begin();
-                $this->Mercurio06->deleteAll("tipo = '$tipo'");
-                $this->db->commit();
-                $response = parent::successFunc("Borrado Con Exito");
-                return $this->renderObject($response, false);
-            } catch (DbException $e) {
-                parent::setLogger($e->getMessage());
-                $this->db->rollback();
-            }
+
+            $this->setResponse("ajax");
+            $tipo = $request->input('tipo');
+            $modelos = array("Mercurio06");
+
+            $response = $this->db->begin();
+            $this->Mercurio06->deleteAll("tipo = '$tipo'");
+            $this->db->commit();
+            $response = parent::successFunc("Borrado Con Exito");
+            return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede Borrar el Registro");
             return $this->renderObject($response, false);
         }
     }
 
-    public function guardarAction()
+    public function guardarAction(Request $request)
     {
         try {
-            try {
-                $this->setResponse("ajax");
-                $tipo = $request->input('tipo', "addslaches", "alpha", "extraspaces", "striptags");
-                $detalle = $request->input('detalle', "addslaches", "alpha", "extraspaces", "striptags");
-                $modelos = array("Mercurio06");
-                
-                $response = $this->db->begin();
-                $mercurio06 = new Mercurio06();
-                $mercurio06->setTransaction($Transaccion);
-                $mercurio06->setTipo($tipo);
-                $mercurio06->setDetalle($detalle);
-                if (!$mercurio06->save()) {
-                    parent::setLogger($mercurio06->getMessages());
-                    $this->db->rollback();
-                }
-                $this->db->commit();
-                $response = parent::successFunc("Creacion Con Exito");
-                return $this->renderObject($response, false);
-            } catch (DbException $e) {
-                parent::setLogger($e->getMessage());
+
+            $this->setResponse("ajax");
+            $tipo = $request->input('tipo', "addslaches", "alpha", "extraspaces", "striptags");
+            $detalle = $request->input('detalle', "addslaches", "alpha", "extraspaces", "striptags");
+            $modelos = array("Mercurio06");
+
+            $response = $this->db->begin();
+            $mercurio06 = new Mercurio06();
+
+            $mercurio06->setTipo($tipo);
+            $mercurio06->setDetalle($detalle);
+            if (!$mercurio06->save()) {
+                parent::setLogger($mercurio06->getMessages());
                 $this->db->rollback();
             }
+            $this->db->commit();
+            $response = parent::successFunc("Creacion Con Exito");
+            return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede guardar/editar el Registro");
             return $this->renderObject($response, false);
         }
     }
 
-    public function validePkAction()
+    public function validePkAction(Request $request)
     {
         try {
             $this->setResponse("ajax");
@@ -197,14 +180,13 @@ class Mercurio06Controller extends ApplicationController
                 $response = parent::errorFunc("El Registro ya se encuentra Digitado");
             }
             return $this->renderObject($response, false);
-        } catch (DbException $e) {
-            parent::setLogger($e->getMessage());
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se pudo validar la informacion");
             return $this->renderObject($response, false);
         }
     }
 
-    public function validePkCampoAction()
+    public function validePkCampoAction(Request $request)
     {
         try {
             $this->setResponse("ajax");
@@ -216,14 +198,13 @@ class Mercurio06Controller extends ApplicationController
                 $response = parent::errorFunc("El Registro ya se encuentra Digitado");
             }
             return $this->renderObject($response, false);
-        } catch (DbException $e) {
-            parent::setLogger($e->getMessage());
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se pudo validar la informacion");
             return $this->renderObject($response, false);
         }
     }
 
-    public function campo_viewAction()
+    public function campo_viewAction(Request $request)
     {
         try {
             $this->setResponse("ajax");
@@ -247,89 +228,76 @@ class Mercurio06Controller extends ApplicationController
                 $response .= "</tr>";
             }
             return $this->renderObject($response, false);
-        } catch (DbException $e) {
-            parent::setLogger($e->getMessage());
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se pudo validar la informacion");
             return $this->renderObject($response, false);
         }
     }
 
-    public function guardarCampoAction()
+    public function guardarCampoAction(Request $request)
     {
         try {
-            try {
-                $this->setResponse("ajax");
-                $tipo = $request->input('tipo', "addslaches", "alpha", "extraspaces", "striptags");
-                $campo = $request->input('campo', "addslaches", "alpha", "extraspaces", "striptags");
-                $detalle = $request->input('detalle', "addslaches", "alpha", "extraspaces", "striptags");
-                $orden = $request->input('orden', "addslaches", "extraspaces", "striptags");
-                $modelos = array("mercurio28");
-                
-                $response = $this->db->begin();
-                $mercurio28 = new Mercurio28();
-                $mercurio28->setTransaction($Transaccion);
-                $mercurio28->setTipo($tipo);
-                $mercurio28->setCampo($campo);
-                $mercurio28->setDetalle($detalle);
-                $mercurio28->setOrden($orden);
-                if (!$mercurio28->save()) {
-                    parent::setLogger($mercurio28->getMessages());
-                    $this->db->rollback();
-                }
-                $this->db->commit();
-                $response = parent::successFunc("Movimiento Realizado Con Exito");
-                return $this->renderObject($response, false);
-            } catch (DbException $e) {
-                parent::setLogger($e->getMessage());
+
+            $this->setResponse("ajax");
+            $tipo = $request->input('tipo', "addslaches", "alpha", "extraspaces", "striptags");
+            $campo = $request->input('campo', "addslaches", "alpha", "extraspaces", "striptags");
+            $detalle = $request->input('detalle', "addslaches", "alpha", "extraspaces", "striptags");
+            $orden = $request->input('orden', "addslaches", "extraspaces", "striptags");
+            $modelos = array("mercurio28");
+
+            $response = $this->db->begin();
+            $mercurio28 = new Mercurio28();
+
+            $mercurio28->setTipo($tipo);
+            $mercurio28->setCampo($campo);
+            $mercurio28->setDetalle($detalle);
+            $mercurio28->setOrden($orden);
+            if (!$mercurio28->save()) {
+                parent::setLogger($mercurio28->getMessages());
                 $this->db->rollback();
             }
+            $this->db->commit();
+            $response = parent::successFunc("Movimiento Realizado Con Exito");
+            return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $response = parent::errorFunc("No se pudo realizar el movimiento");
             return $this->renderObject($response, false);
         }
     }
 
-    public function editarCampoAction()
+    public function editarCampoAction(Request $request)
     {
         try {
-            try {
-                $this->setResponse("ajax");
-                $tipo = $request->input('tipo', "addslaches", "alpha", "extraspaces", "striptags");
-                $campo = $request->input('campo', "addslaches", "alpha", "extraspaces", "striptags");
-                $modelos = array("mercurio28");
-                
-                $response = $this->db->begin();
-                $mercurio28 = $this->Mercurio28->findFirst("tipo='$tipo' and campo = '$campo'");
-                if ($mercurio28 == false) $mercurio28 = new Mercurio28();
-                return $this->renderObject($mercurio28->getArray(), false);
-            } catch (DbException $e) {
-                parent::setLogger($e->getMessage());
-                $this->db->rollback();
-            }
+
+            $this->setResponse("ajax");
+            $tipo = $request->input('tipo', "addslaches", "alpha", "extraspaces", "striptags");
+            $campo = $request->input('campo', "addslaches", "alpha", "extraspaces", "striptags");
+            $modelos = array("mercurio28");
+
+            $response = $this->db->begin();
+            $mercurio28 = $this->Mercurio28->findFirst("tipo='$tipo' and campo = '$campo'");
+            if ($mercurio28 == false) $mercurio28 = new Mercurio28();
+            return $this->renderObject($mercurio28->getArray(), false);
         } catch (DebugException $e) {
             $response = parent::errorFunc("No se pudo realizar el movimiento");
             return $this->renderObject($response, false);
         }
     }
 
-    public function borrarCampoAction()
+    public function borrarCampoAction(Request $request)
     {
         try {
-            try {
-                $this->setResponse("ajax");
-                $tipo = $request->input('tipo', "addslaches", "alpha", "extraspaces", "striptags");
-                $campo = $request->input('campo', "addslaches", "alpha", "extraspaces", "striptags");
-                $modelos = array("mercurio28");
-                
-                $response = $this->db->begin();
-                $this->Mercurio28->deleteAll("tipo='$tipo' and campo='$campo'");
-                $this->db->commit();
-                $response = parent::successFunc("Movimiento Realizado Con Exito");
-                return $this->renderObject($response, false);
-            } catch (DbException $e) {
-                parent::setLogger($e->getMessage());
-                $this->db->rollback();
-            }
+
+            $this->setResponse("ajax");
+            $tipo = $request->input('tipo', "addslaches", "alpha", "extraspaces", "striptags");
+            $campo = $request->input('campo', "addslaches", "alpha", "extraspaces", "striptags");
+            $modelos = array("mercurio28");
+
+            $response = $this->db->begin();
+            $this->Mercurio28->deleteAll("tipo='$tipo' and campo='$campo'");
+            $this->db->commit();
+            $response = parent::successFunc("Movimiento Realizado Con Exito");
+            return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $response = parent::errorFunc("No se pudo realizar el movimiento");
             return $this->renderObject($response, false);

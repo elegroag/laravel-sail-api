@@ -29,6 +29,9 @@ use App\Services\Tag;
 class AprobaciontraController extends ApplicationController
 {
     protected $tipopc = 1;
+    protected $db;
+    protected $user;
+    protected $tipo;
 
     /**
      * services variable
@@ -44,7 +47,9 @@ class AprobaciontraController extends ApplicationController
 
     public function __construct()
     {
-        
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
     /**
@@ -88,7 +93,7 @@ class AprobaciontraController extends ApplicationController
 
     public function changeCantidadPaginaAction($estado = 'P')
     {
-       # $this->buscarAction($estado);
+        # $this->buscarAction($estado);
     }
 
     /**
@@ -350,7 +355,7 @@ class AprobaciontraController extends ApplicationController
                     'msj' => 'El registro se completo con éxito'
                 );
             } catch (DebugException $err) {
-                
+
                 $this->db->rollback();
                 $salida = array(
                     "success" => false,
@@ -516,7 +521,7 @@ class AprobaciontraController extends ApplicationController
         echo View::renderView("aprobaciontra/mail/aprobar");
         $mensaje = ob_get_contents();
         ob_end_clean();
-/* 
+        /* 
         Core::importFromLibrary("Swift", "Swift.php");
         Core::importFromLibrary("Swift", "Swift/Connection/SMTP.php");
         $smtp = new Swift_Connection_SMTP(
@@ -596,7 +601,7 @@ class AprobaciontraController extends ApplicationController
     public function editarViewAction($id = 0)
     {
         $this->setParamToView("hide_header", true);
-        
+
         if (!$id) {
             return redirect("aprobaciontra/index");
             exit;
@@ -687,7 +692,7 @@ class AprobaciontraController extends ApplicationController
                 $this->Mercurio31->updateAll($setters, "conditions: id='{$id}' AND cedtra='{$cedtra}'");
 
                 $db = DbBase::rawConnect();
-                
+
 
                 $data = $db->fetchOne("SELECT max(id), mercurio31.* FROM mercurio31 WHERE cedtra='{$cedtra}'");
                 $salida = array(

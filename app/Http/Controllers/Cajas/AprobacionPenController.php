@@ -28,6 +28,9 @@ class AprobacionpenController extends ApplicationController
 {
 
     protected $tipopc = 9;
+    protected $db;
+    protected $user;
+    protected $tipo;
     /**
      * services variable
      * @var Services
@@ -49,7 +52,9 @@ class AprobacionpenController extends ApplicationController
 
     public function __construct()
     {
-    
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
 
@@ -291,7 +296,7 @@ class AprobacionpenController extends ApplicationController
 
                 $this->db->commit();
                 $solicitud->enviarMail($request->input('actapr'), $request->input('fecapr'));
-                
+
                 return $this->renderObject([
                     'success' => true,
                     'msj' => 'El registro se completo con éxito'
@@ -346,7 +351,7 @@ class AprobacionpenController extends ApplicationController
                 "msj" => $err->getMessage(),
                 "code" => $err->getCode()
             );
-        } 
+        }
         return $this->renderObject($salida, false);
     }
 

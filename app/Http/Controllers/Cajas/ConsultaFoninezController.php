@@ -4,11 +4,18 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Models\Gener02;
+use App\Models\Mercurio20;
+use App\Models\Mercurio31;
+use App\Services\Utils\GeneralService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class ConsultafoninezController extends ApplicationController
 {
+    protected $db;
+    protected $user;
+    protected $tipo;
     /**
      * $generalService variable
      * @var GeneralService
@@ -17,10 +24,10 @@ class ConsultafoninezController extends ApplicationController
 
     public function __construct()
     {
-       
-        
-        
         $this->generalService = new GeneralService();
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
     public function indexAction()
@@ -28,11 +35,11 @@ class ConsultafoninezController extends ApplicationController
         $help = "Esta opcion permite manejar los ";
         $this->setParamToView("help", $help);
         $this->setParamToView("title", "Consulta Beneficiarios");
-        Tag::setDocumentTitle('Consulta Beneficiarios');
+        #Tag::setDocumentTitle('Consulta Beneficiarios');
         $datos_captura = $this->generalService->webService("datosconsultafoninez", array("sql" => "select mercurio81.codinf, xml4d088.nomcom, gener08.detciu from mercurio81,xml4d088,gener08 where mercurio81.codinf=xml4d088.codinf and xml4d088.divpol=gener08.codciu;"));
-        //$datos_captura = $this->generalService->webService("datosconsultafoninez",array("sql"=>"select * from mercurio81,xml4d088,gener08 where mercurio81.codinf=xml4d088.codinf and xml4d088.divpol=gener08.codciu;"));
+
         $datos_captura = $datos_captura['data'];
-        Debug::addVariable("a", $datos_captura);
+
         //throw new DebugException(0);
         $_ciudades = array();
         if (!empty($datos_captura)) {
@@ -46,10 +53,10 @@ class ConsultafoninezController extends ApplicationController
         $help = "Esta opcion permite manejar los ";
         $this->setParamToView("help", $help);
         $this->setParamToView("title", "Consulta Historica");
-        Tag::setDocumentTitle('Consulta Historica');
+        #Tag::setDocumentTitle('Consulta Historica');
     }
 
-    public function consulta_auditoriaAction()
+    public function consulta_auditoriaAction(Request $request)
     {
         $this->setResponse("ajax");
         $tipopc = $request->input("tipopc");
@@ -69,7 +76,7 @@ class ConsultafoninezController extends ApplicationController
         $html .= "</tr>";
         $condi = " estado<>'T' and mercurio20.fecha>='$fecini' and mercurio20.fecha<='$fecfin' ";
         $mercurio = $this->generalService->consultaTipopc($tipopc, "all", "", "", $condi);
-        Debug::addVariable("mercurio", $mercurio);
+
         // throw new DebugException("Error Processing Request");
 
         foreach ($mercurio['datos'] as $mmercurio) {
@@ -114,6 +121,7 @@ class ConsultafoninezController extends ApplicationController
             $mercurio20 = $this->Mercurio20->findFirst("log = '{$mmercurio->getLog()}'");
             if ($mercurio20 == false) $mercurio20 = new Mercurio20();
             $dias_vencidos = $this->generalService->getDiasHabiles($tipopc, $mmercurio->getId());
+
             // $dias_vencidos = parent::calculaDias($tipopc,$mmercurio->getId());
             $html .= "<tr>";
             $html .= "<tr>";
@@ -135,14 +143,14 @@ class ConsultafoninezController extends ApplicationController
         return $this->renderText(json_encode($html));
     }
 
-    public function reporte_auditoriaAction()
+    public function reporte_auditoriaAction(Request $request)
     {
         $this->setResponse('view');
         $ciudad = $request->input("ciudad");
         $fecini = $request->input("fecini");
         $fecfin = $request->input("fecfin");
-        $fecha = new Date();
-        $file = "public/temp/" . "reporte_beneficiariofoninez_" . $fecha->getUsingFormatDefault() . ".xls";
+        $fecha = new \DateTime();
+        $file = "public/temp/" . "reporte_beneficiariofoninez_" . $fecha->format('Y-m-d') . ".xls";
         require_once "Library/Excel/Main.php";
         $excels = new Spreadsheet_Excel_Writer($file);
         $excel = $excels->addWorksheet();
@@ -213,20 +221,20 @@ class ConsultafoninezController extends ApplicationController
 
                         foreach ($datos_capturaevent['result'] as $mmercurio) {
                             $datos_capturaben = $this->generalService->webService("datosconsultafoninez", array("sql" => "select numideben,prinomben,segnomben,priapeben,segapeben,fecina,xml4b062.nombre as ciuresben,evento,profesor,modain,modjec,motivo,fecha from mercurio80,mercurio83,mercurio84,xml4b062 where mercurio83.id='{$mmercurio['beneficiario']}' and xml4b062.divpol=mercurio83.ciuresben and mercurio84.beneficiario='{$mmercurio['beneficiario']}' and mercurio80.id='{$mmercurio['evento']}'"));
-                            Debug::addVariable("ddd2", $datos_capturaben);
+
                             //throw new DebugException(0);
                             if (!empty($datos_capturaben)) {
                                 foreach ($datos_capturaben['data']['result'] as $mercurio) {
                                     $i = 0;
                                     $datos_pro = $this->generalService->webService("datosconsultafoninez", array("sql" => "select nombre from mercurio82 where id='{$mercurio['profesor']}'"));
-                                    Debug::addVariable("prof", $datos_pro);
+
                                     //throw new DebugException(0);
                                     $datos_modalidad = $this->generalService->webService("datosconsultafoninez", array("sql" => "select nombre from xml4b042 where modain='{$mercurio['modain']}'"));
                                     $datos_modalidad2 = $this->generalService->webService("datosconsultafoninez", array("sql" => "select nombre from xml4b050 where modjec='{$mercurio['modjec']}'"));
 
-                                    Debug::addVariable("prof", $datos_pro);
+
                                     //throw new DebugException(0);
-                                    $excel->write($j, $i++, utf8_decode($datac["coddan"]), $column_style);
+                                    $excel->write($j, $i++, ($datac["coddan"]), $column_style);
                                     $excel->write($j, $i++, $datos_pro['data']['result'][0][0], $column_style);
                                     if (isset($datos_modalidad['data']['result'][0][0])) {
                                         $excel->write($j, $i++, $datos_modalidad['data']['result'][0][0], $column_style);
@@ -262,16 +270,16 @@ class ConsultafoninezController extends ApplicationController
         $help = "Esta opcion permite manejar los ";
         $this->setParamToView("help", $help);
         $this->setParamToView("title", "Consulta Beneficiarios JEC");
-        Tag::setDocumentTitle('Consulta Beneficiarios JEC');
+        # Tag::setDocumentTitle('Consulta Beneficiarios JEC');
     }
 
-    public function reporte_jecAction()
+    public function reporte_jecAction(Request $request)
     {
         $this->setResponse('view');
         $fecini = $request->input("fecini");
         $fecfin = $request->input("fecfin");
-        $fecha = new Date();
-        $file = "public/temp/" . "reporte_beneficiariosjec_" . $fecha->getUsingFormatDefault() . ".xls";
+        $fecha = new \DateTime();
+        $file = "public/temp/" . "reporte_beneficiariosjec_" . $fecha->format('Y-m-d') . ".xls";
         require_once "Library/Excel/Main.php";
         $excels = new Spreadsheet_Excel_Writer($file);
         $excel = $excels->addWorksheet();
@@ -322,40 +330,35 @@ class ConsultafoninezController extends ApplicationController
         $datos_captura = $this->generalService->webService("datosconsultafoninez", array("sql" => "select * from mercurio81,mercurio82,mercurio83,mercurio80,mercurio84 where mercurio84.beneficiario=mercurio83.id and mercurio84.evento=mercurio80.id and mercurio80.profesor=mercurio82.id and mercurio80.colegio=mercurio81.id and mercurio80.modjec is not null  and mercurio80.modjec!='' and mercurio80.fecha>='$fecini' and mercurio80.fecha<='$fecfin';"));
         $datos_capturac = $datos_captura['data'];
         if (!empty($datos_capturac)) {
-            Debug::addVariable("datos", $datos_capturac);
-            //throw new DebugException(0);
+
             foreach ($datos_capturac['result'] as $mmercurio) {
                 $ciudad = $this->generalService->webService("datosconsultafoninez", array("sql" => "select xml4b062.nombre as ciuresben from mercurio83,xml4b062 where mercurio83.id='{$mmercurio['beneficiario']}' and xml4b062.divpol=mercurio83.ciuresben"));
-                Debug::addVariable("ciudad", $ciudad);
-                //throw new DebugException(0);
+
                 $modalidad = $this->generalService->webService("datosconsultafoninez", array("sql" => "select nombre from xml4b050 where modjec='{$mmercurio['modjec']}'"));
-                Debug::addVariable("modalidad", $modalidad);
-                //throw new DebugException(0);
+
                 $infra = $this->generalService->webService("datosconsultafoninez", array("sql" => "select codinf,nomcom from xml4d088 where codinf='{$mmercurio['codinf']}'"));
-                Debug::addVariable("infra", $infra);
-                //throw new DebugException(0);
+
                 $colegio = $this->generalService->webService("datosconsultafoninez", array("sql" => "select codins,detins from xml4b085 where codins='{$mmercurio['coddan']}'"));
-                Debug::addVariable("colegio", $colegio);
-                //throw new DebugException(0);
+
                 $i = 0;
                 $excel->write($j, $i++, $mmercurio["numideben"], $column_style);
-                $excel->write($j, $i++, utf8_decode($mmercurio["prinomben"]) . " " . utf8_decode($mmercurio["segnomben"]) . " " . utf8_decode($mmercurio["priapeben"]) . " " . utf8_decode($mmercurio["segapeben"]), $column_style);
+                $excel->write($j, $i++, $mmercurio["prinomben"] . " " . $mmercurio["segnomben"] . " " . $mmercurio["priapeben"] . " " . $mmercurio["segapeben"], $column_style);
                 $excel->write($j, $i++, $mmercurio["fecnacben"], $column_style);
                 $excel->write($j, $i++, $modalidad['data']['result'][0][0], $column_style);
                 if (isset($ciudad['data']['result'][0][0])) {
-                    $excel->write($j, $i++, utf8_decode($ciudad['data']['result'][0][0]), $column_style);
+                    $excel->write($j, $i++, $ciudad['data']['result'][0][0], $column_style);
                 } else {
                     $excel->write($j, $i++, "No tiene ciudad relacionada", $column_style);
                 }
-                $excel->write($j, $i++, utf8_decode($infra['data']['result'][0][0]) . "-" . utf8_decode($infra['data']['result'][0][1]), $column_style);
-                $excel->write($j, $i++, utf8_decode($colegio['data']['result'][0][0]) . "-" . utf8_decode($colegio['data']['result'][0][1]), $column_style);
+                $excel->write($j, $i++, $infra['data']['result'][0][0] . "-" . $infra['data']['result'][0][1], $column_style);
+                $excel->write($j, $i++, $colegio['data']['result'][0][0] . "-" . $colegio['data']['result'][0][1], $column_style);
                 if ($mmercurio["codareresben"] == "2") {
                     $excel->write($j, $i++, "RURAL", $column_style);
                 } else {
                     $excel->write($j, $i++, "URBANA", $column_style);
                 }
                 $excel->write($j, $i++, $mmercurio["numdoc"], $column_style);
-                $excel->write($j, $i++, utf8_decode($mmercurio["nombre"]), $column_style);
+                $excel->write($j, $i++, $mmercurio["nombre"], $column_style);
                 $excel->write($j, $i++, $mmercurio["fecha"], $column_style);
                 $j++;
             }
@@ -370,16 +373,16 @@ class ConsultafoninezController extends ApplicationController
         $help = "Esta opcion permite manejar los ";
         $this->setParamToView("help", $help);
         $this->setParamToView("title", "Consulta Beneficiarios AIPI");
-        Tag::setDocumentTitle('Consulta Beneficiarios AIPI');
+        # Tag::setDocumentTitle('Consulta Beneficiarios AIPI');
     }
 
-    public function reporte_aipiAction()
+    public function reporte_aipiAction(Request $request)
     {
         $this->setResponse('view');
         $fecini = $request->input("fecini");
         $fecfin = $request->input("fecfin");
-        $fecha = new Date();
-        $file = "public/temp/" . "reporte_beneficiariosaipi_" . $fecha->getUsingFormatDefault() . ".xls";
+        $fecha = new \DateTime();
+        $file = "public/temp/" . "reporte_beneficiariosaipi_" . $fecha->format('Y-m-d') . ".xls";
         require_once "Library/Excel/Main.php";
         $excels = new Spreadsheet_Excel_Writer($file);
         $excel = $excels->addWorksheet();
@@ -429,18 +432,17 @@ class ConsultafoninezController extends ApplicationController
         $datos_captura = $this->generalService->webService("datosconsultafoninez", array("sql" => "select * from mercurio81,mercurio82,mercurio83,mercurio80,mercurio84 where mercurio84.beneficiario=mercurio83.id and mercurio84.evento=mercurio80.id and mercurio80.profesor=mercurio82.id and mercurio80.colegio=mercurio81.id and mercurio80.modain is not null and mercurio80.modain!='' and mercurio80.fecha>='$fecini' and mercurio80.fecha<='$fecfin';"));
         $datos_capturac = $datos_captura['data'];
         if (!empty($datos_capturac)) {
-            Debug::addVariable("datos", $datos_capturac);
-            //throw new DebugException(0);
+
             foreach ($datos_capturac['result'] as $mmercurio) {
                 $ciudad = $this->generalService->webService("datosconsultafoninez", array("sql" => "select xml4b062.nombre as ciuresben from mercurio83,xml4b062 where mercurio83.id='{$mmercurio['beneficiario']}' and xml4b062.divpol=mercurio83.ciuresben"));
-                Debug::addVariable("ciudad", $ciudad);
+
                 //throw new DebugException(0);
                 $colegio = $this->generalService->webService("datosconsultafoninez", array("sql" => "select codins,detins from xml4b085 where codins='{$mmercurio['coddan']}'"));
-                Debug::addVariable("colegio", $colegio);
+
                 //throw new DebugException(0);
                 $i = 0;
                 $excel->write($j, $i++, $mmercurio["numideben"], $column_style);
-                $excel->write($j, $i++, utf8_decode($mmercurio["prinomben"]) . " " . utf8_decode($mmercurio["segnomben"]) . " " . utf8_decode($mmercurio["priapeben"]) . " " . utf8_decode($mmercurio["segapeben"]), $column_style);
+                $excel->write($j, $i++, $mmercurio["prinomben"] . " " . $mmercurio["segnomben"] . " " . $mmercurio["priapeben"] . " " . $mmercurio["segapeben"], $column_style);
                 if ($mmercurio["numideben"] == '1') {
                     $excel->write($j, $i++, "MASCULINO", $column_style);
                 } else {
@@ -448,7 +450,7 @@ class ConsultafoninezController extends ApplicationController
                 }
                 $excel->write($j, $i++, $mmercurio["fecnacben"], $column_style);
                 if (isset($ciudad['data']['result'][0][0])) {
-                    $excel->write($j, $i++, utf8_decode($ciudad['data']['result'][0][0]), $column_style);
+                    $excel->write($j, $i++, $ciudad['data']['result'][0][0], $column_style);
                 } else {
                     $excel->write($j, $i++, "No tiene ciudad relacionada", $column_style);
                 }
@@ -469,16 +471,16 @@ class ConsultafoninezController extends ApplicationController
         $help = "Esta opcion permite manejar los ";
         $this->setParamToView("help", $help);
         $this->setParamToView("title", "Consulta Beneficiarios General");
-        Tag::setDocumentTitle('Consulta Beneficiarios General');
+        #Tag::setDocumentTitle('Consulta Beneficiarios General');
     }
 
-    public function reporte_generalAction()
+    public function reporte_generalAction(Request $request)
     {
         $this->setResponse('view');
         $fecini = $request->input("fecini");
         $fecfin = $request->input("fecfin");
-        $fecha = new Date();
-        $file = "public/temp/" . "reporte_beneficiarios_" . $fecha->getUsingFormatDefault() . ".xls";
+        $fecha = new \DateTime();
+        $file = "public/temp/" . "reporte_beneficiarios_" . $fecha->format('Y-m-d') . ".xls";
         require_once "Library/Excel/Main.php";
         $excels = new Spreadsheet_Excel_Writer($file);
         $excel = $excels->addWorksheet();
@@ -563,23 +565,22 @@ class ConsultafoninezController extends ApplicationController
         $datos_capturac = $datos_captura['data'];
 
         if (!empty($datos_capturac)) {
-            Debug::addVariable("datos", $datos_capturac);
 
             foreach ($datos_capturac['result'] as $mmercurio) {
 
                 $ciudad = $this->generalService->webService("datosconsultafoninez", array("sql" => "select xml4b062.nombre as ciuresben from mercurio83,xml4b062 where mercurio83.id='{$mmercurio['beneficiario']}' and xml4b062.divpol=mercurio83.ciuresben"));
-                Debug::addVariable("ciudad", $ciudad);
+
 
                 $modalidad = $this->generalService->webService("datosconsultafoninez", array("sql" => "select nombre from xml4b050 where modjec='{$mmercurio['modjec']}'"));
-                Debug::addVariable("modalidad", $modalidad);
+
 
 
                 $colegio = $this->generalService->webService("datosconsultafoninez", array("sql" => "select codins,detins from xml4b085 where codins='{$mmercurio['coddan']}'"));
 
                 $i = 0;
                 $excel->write($j, $i++, $mmercurio["numdoc"], $column_style);
-                $excel->write($j, $i++, utf8_decode($mmercurio["nombre"]), $column_style);
-                $excel->write($j, $i++, utf8_decode($colegio['data']['result'][0][0]) . "-" . utf8_decode($colegio['data']['result'][0][1]), $column_style);
+                $excel->write($j, $i++, $mmercurio["nombre"], $column_style);
+                $excel->write($j, $i++, $colegio['data']['result'][0][0] . "-" . $colegio['data']['result'][0][1], $column_style);
                 if (isset($modalidad['data']['result'])) {
                     $excel->write($j, $i++, $modalidad['data']['result'][0][0], $column_style);
                 } else {
@@ -587,7 +588,7 @@ class ConsultafoninezController extends ApplicationController
                 }
 
                 $excel->write($j, $i++, $mmercurio["numideben"], $column_style);
-                $excel->write($j, $i++, utf8_decode($mmercurio["prinomben"]) . " " . utf8_decode($mmercurio["segnomben"]) . " " . utf8_decode($mmercurio["priapeben"]) . " " . utf8_decode($mmercurio["segapeben"]), $column_style);
+                $excel->write($j, $i++, $mmercurio["prinomben"] . " " . $mmercurio["segnomben"] . " " . $mmercurio["priapeben"] . " " . $mmercurio["segapeben"], $column_style);
                 if ($mmercurio["fecina"] == "") {
                     $excel->write($j, $i++, 'ACTIVO', $column_style);
                 } else {
@@ -597,14 +598,14 @@ class ConsultafoninezController extends ApplicationController
                 $excel->write($j, $i++, $mmercurio["motivo"], $column_style);
                 $excel->write($j, $i++, $mmercurio["fecha"], $column_style);
                 if (isset($ciudad['data']['result'][0][0])) {
-                    $excel->write($j, $i++, utf8_decode($ciudad['data']['result'][0][0]), $column_style);
+                    $excel->write($j, $i++, $ciudad['data']['result'][0][0], $column_style);
                 } else {
                     $excel->write($j, $i++, "No tiene ciudad relacionada", $column_style);
                 }
 
                 $excel->write($j, $i++, $mmercurio["fecha"], $column_style);
                 $excel->write($j, $i++, $mmercurio["numideacu"], $column_style);
-                $excel->write($j, $i++, utf8_decode($mmercurio["prinomacu"] . ' ' . $mmercurio["segnomacu"] . ' ' . $mmercurio["priapeacu"] . ' ' . $mmercurio["segapeacu"]), $column_style);
+                $excel->write($j, $i++, $mmercurio["prinomacu"] . ' ' . $mmercurio["segnomacu"] . ' ' . $mmercurio["priapeacu"] . ' ' . $mmercurio["segapeacu"], $column_style);
                 $excel->write($j, $i++, $mmercurio["telacu"], $column_style);
                 $j++;
             }
@@ -613,7 +614,7 @@ class ConsultafoninezController extends ApplicationController
         $excels->close();
         header("location: " . env('APP_URL') . "/{$file}");
     }
-    public function infoAction()
+    public function infoAction(Request $request)
     {
         $this->setResponse("ajax");
         $tipopc = $request->input('tipopc');
@@ -630,7 +631,6 @@ class ConsultafoninezController extends ApplicationController
         $help = "Esta opcion permite manejar los ";
         $this->setParamToView("help", $help);
         $this->setParamToView("title", "Carga Laboral");
-        Tag::setDocumentTitle('Carga Laboral');
         $this->setParamToView("buttons", array("P" => array("btyp" => "btn-neutral", "func" => "reporte_excel_carga_laboral()", "glyp" => "fas fa-file-contract", "valr" => "Reporte")));
         $gener02 = $this->Gener02->findAllBySql("select distinct gener02.usuario,gener02.nombre,gener02.login from gener02,mercurio08 where gener02.usuario=mercurio08.usuario");
         $mercurio09 = $this->Mercurio09->find();
@@ -679,7 +679,7 @@ class ConsultafoninezController extends ApplicationController
         $help = "Esta opcion permite manejar los ";
         $this->setParamToView("help", $help);
         $this->setParamToView("title", "Carga Laboral");
-        Tag::setDocumentTitle('Carga Laboral');
+        #Tag::setDocumentTitle('Carga Laboral');
         $this->setParamToView("buttons", array("P" => array("btyp" => "btn-neutral", "func" => "reporte_excel_carga_laboral()", "glyp" => "fas fa-file-contract", "valr" => "Reporte")));
 
         $html = "<div class='table-responsive'> ";
@@ -711,8 +711,8 @@ class ConsultafoninezController extends ApplicationController
     public function reporte_excel_carga_laboralAction()
     {
         $this->setResponse('view');
-        $fecha = new Date();
-        $file = "public/temp/" . "reporte_carga_laboral" . $fecha->getUsingFormatDefault() . ".xls";
+        $fecha = new \DateTime();
+        $file = "public/temp/" . "reporte_carga_laboral" . $fecha->format('Y-m-d') . ".xls";
         require_once "Library/Excel/Main.php";
         $excels = new Spreadsheet_Excel_Writer($file);
         $excel = $excels->addWorksheet();
@@ -767,8 +767,8 @@ class ConsultafoninezController extends ApplicationController
     public function reporte_excel_indicadoresAction($fecini, $fecfin)
     {
         $this->setResponse('view');
-        $fecha = new Date();
-        $file = "public/temp/" . "reporte_indicadores" . $fecha->getUsingFormatDefault() . ".xls";
+        $fecha = new \DateTime();
+        $file = "public/temp/" . "reporte_indicadores" . $fecha->format('Y-m-d') . ".xls";
         require_once "Library/Excel/Main.php";
         $excels = new Spreadsheet_Excel_Writer($file);
         $excel = $excels->addWorksheet();
@@ -866,11 +866,10 @@ class ConsultafoninezController extends ApplicationController
         $help = "Esta opcion permite manejar los ";
         $this->setParamToView("help", $help);
         $this->setParamToView("title", "Carga Laboral");
-        Tag::setDocumentTitle('Carga Laboral');
         $this->setParamToView("buttons", array("P" => array("btyp" => "btn-neutral", "func" => "reporte_excel_indicadores()", "glyp" => "fas fa-file-contract", "valr" => "Reporte")));
     }
 
-    public function consulta_indicadoresAction()
+    public function consulta_indicadoresAction(Request $request)
     {
         $this->setResponse("ajax");
         $fecini = $request->input("fecini");

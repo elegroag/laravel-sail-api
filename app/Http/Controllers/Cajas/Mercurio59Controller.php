@@ -2,24 +2,32 @@
 
 namespace App\Http\Controllers\Cajas;
 
+use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio59;
+use App\Services\Request as ServicesRequest;
+use App\Services\Tag;
+use App\Services\Utils\GeneralService;
+use App\Services\Utils\UploadFile;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class Mercurio59Controller extends ApplicationController
 {
 
-    private $query = "1=1";
-    private $cantidad_pagina = 0;
+    protected $query = "1=1";
+    protected $cantidad_pagina = 0;
+    protected $db;
+    protected $user;
+    protected $tipo;
 
     public function __construct()
     {
-       
-        
-        
         $this->cantidad_pagina = $this->numpaginate;
-        
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
     public function showTabla($paginate)
@@ -69,14 +77,14 @@ class Mercurio59Controller extends ApplicationController
         $this->setResponse("ajax");
         $consultasOldServices = new GeneralService();
         $this->query = $consultasOldServices->converQuery();
-        self::buscarAction();
+        #self::buscarAction();
     }
 
-    public function changeCantidadPaginaAction()
+    public function changeCantidadPaginaAction(Request $request)
     {
         $this->setResponse("ajax");
         $this->cantidad_pagina = $request->input("numero");
-        self::buscarAction();
+        #self::buscarAction();
     }
 
     public function indexAction($codinf = "")
@@ -93,7 +101,7 @@ class Mercurio59Controller extends ApplicationController
         $this->setParamToView("title", "Servicios");
         $this->setParamToView("codinf", $_GET["codinf"]);
         $this->setParamToView("buttons", array("N", "F", "R"));
-        Tag::setDocumentTitle('Servicios');
+        #Tag::setDocumentTitle('Servicios');
         $consultasOldServices = new GeneralService();
         $codser = $consultasOldServices->webService("servicios", array());
         $_codser = array();
@@ -101,7 +109,7 @@ class Mercurio59Controller extends ApplicationController
         $this->setParamToView("_codser", $_codser);
     }
 
-    public function traerAperturaAction()
+    public function traerAperturaAction(Request $request)
     {
         $this->setResponse("ajax");
         $codser = $request->input("codser");
@@ -109,12 +117,16 @@ class Mercurio59Controller extends ApplicationController
         $servi29 = $consultasOldServices->webService("aperturas_servicios", array("codser" => $codser));
         $_servi29 = array();
         foreach ($servi29['data'] as $data) $_servi29[$data['numero']] = $data['detalle'];
-        $response = Tag::selectStatic("numero", $_servi29, "use_dummy: true", "dummyValue:", "class: form-control");
+        $response = Tag::selectStatic(new ServicesRequest([
+            "numero" => $_servi29,
+            "use_dummy" => true,
+            "dummyValue" => "",
+            "class" => "form-control"
+        ]));
         $this->renderObject($response, false);
     }
 
-
-    public function buscarAction()
+    public function buscarAction(Request $request)
     {
         $this->setResponse("ajax");
         $pagina = $request->input('pagina');
@@ -128,7 +140,7 @@ class Mercurio59Controller extends ApplicationController
         $this->renderObject($response, false);
     }
 
-    public function editarAction()
+    public function editarAction(Request $request)
     {
         try {
             $this->setResponse("ajax");
@@ -138,13 +150,13 @@ class Mercurio59Controller extends ApplicationController
             $mercurio59 = $this->Mercurio59->findFirst("codinf = '$codinf' and codser='$codser' and numero='$numero'");
             if ($mercurio59 == false) $mercurio59 = new Mercurio59();
             $this->renderObject($mercurio59->getArray(), false);
-        } catch (DbException $e) {
+        } catch (DebugException $e) {
             parent::setLogger($e->getMessage());
             $this->db->rollback();
         }
     }
 
-    public function borrarAction()
+    public function borrarAction(Request $request)
     {
         try {
             try {
@@ -153,13 +165,13 @@ class Mercurio59Controller extends ApplicationController
                 $codser = $request->input('codser');
                 $numero = $request->input('numero');
                 $modelos = array("Mercurio59");
-                
+
                 $response = $this->db->begin();
                 $this->Mercurio59->deleteAll("codinf = '$codinf' and codser='$codser' and numero='$numero'");
                 $this->db->commit();
                 $response = parent::successFunc("Borrado Con Exito");
                 return $this->renderObject($response, false);
-            } catch (DbException $e) {
+            } catch (DebugException $e) {
                 parent::setLogger($e->getMessage());
                 $this->db->rollback();
             }
@@ -169,80 +181,78 @@ class Mercurio59Controller extends ApplicationController
         }
     }
 
-    public function guardarAction()
+    public function guardarAction(Request $request)
     {
         try {
-            try {
-                $this->setResponse("ajax");
-                $codinf = $request->input('codinf', "addslaches", "extraspaces", "striptags");
-                $codser = $request->input('codser', "addslaches", "alpha", "extraspaces", "striptags");
-                $numero = $request->input('numero', "addslaches", "alpha", "extraspaces", "striptags");
-                $nota = $request->input('nota', "addslaches", "extraspaces", "striptags");
-                $email = $request->input('email', "addslaches", "extraspaces", "striptags");
-                $precan = $request->input('precan', "addslaches", "alpha", "extraspaces", "striptags");
-                $autser = $request->input('autser', "addslaches", "alpha", "extraspaces", "striptags");
-                $consumo = $request->input('consumo', "addslaches", "alpha", "extraspaces", "striptags");
-                $estado = $request->input('estado', "addslaches", "alpha", "extraspaces", "striptags");
-                $modelos = array("Mercurio59");
-                
-                $response = $this->db->begin();
-                $mercurio59 = new Mercurio59();
-                $mercurio59->setTransaction($Transaccion);
-                $mercurio59->setCodinf($codinf);
-                $mercurio59->setCodser($codser);
-                $mercurio59->setNumero($numero);
-                $mercurio59->setNota($nota);
-                $mercurio59->setEmail($email);
-                $mercurio59->setPrecan($precan);
-                $mercurio59->setAutser($autser);
-                $mercurio59->setConsumo($consumo);
-                $mercurio59->setEstado($estado);
-                $mercurio01 = $this->Mercurio01->findFirst();
-                if (isset($_FILES['archivo']['name']) && $_FILES['archivo']['name'] != "") {
-                    $extension = explode(".", $_FILES['archivo']['name']);
-                    $name = $codinf . $codser . "_infraservi." . end($extension);
-                    $_FILES['archivo']['name'] = $name;
-                    $estado = $this->uploadFile("archivo", $mercurio01->getPath() . "/galeria");
-                    if ($estado != false) {
-                        $mercurio59->setArchivo($name);
-                        if (!$mercurio59->save()) {
-                            parent::setLogger($mercurio59->getMessages());
-                            $this->db->rollback();
-                        }
-                        $response = parent::successFunc("Se adjunto con exito el archivo");
-                    } else {
-                        $response = parent::errorFunc("No se cargo: Tamano del archivo muy grande o No es Valido");
+
+            $this->setResponse("ajax");
+            $codinf = $request->input('codinf');
+            $codser = $request->input('codser');
+            $numero = $request->input('numero');
+            $nota = $request->input('nota');
+            $email = $request->input('email');
+            $precan = $request->input('precan');
+            $autser = $request->input('autser');
+            $consumo = $request->input('consumo');
+            $estado = $request->input('estado');
+            $modelos = array("Mercurio59");
+
+            $response = $this->db->begin();
+            $mercurio59 = new Mercurio59();
+
+            $mercurio59->setCodinf($codinf);
+            $mercurio59->setCodser($codser);
+            $mercurio59->setNumero($numero);
+            $mercurio59->setNota($nota);
+            $mercurio59->setEmail($email);
+            $mercurio59->setPrecan($precan);
+            $mercurio59->setAutser($autser);
+            $mercurio59->setConsumo($consumo);
+            $mercurio59->setEstado($estado);
+            $mercurio01 = $this->Mercurio01->findFirst();
+            if (isset($_FILES['archivo']['name']) && $_FILES['archivo']['name'] != "") {
+                $extension = explode(".", $_FILES['archivo']['name']);
+                $name = $codinf . $codser . "_infraservi." . end($extension);
+                $_FILES['archivo']['name'] = $name;
+
+                $uploadFile = new UploadFile();
+                $uploadFile->upload("archivo", $mercurio01->getPath() . "/galeria");
+                if ($estado != false) {
+                    $mercurio59->setArchivo($name);
+                    if (!$mercurio59->save()) {
+                        parent::setLogger($mercurio59->getMessages());
+                        $this->db->rollback();
                     }
+                    $response = parent::successFunc("Se adjunto con exito el archivo");
                 } else {
-                    $response = parent::errorFunc("No se cargo el archivo");
+                    $response = parent::errorFunc("No se cargo: Tamano del archivo muy grande o No es Valido");
                 }
-                $this->db->commit();
-                $response = parent::successFunc("Creacion Con Exito");
-                return $this->renderObject($response, false);
-            } catch (DbException $e) {
-                parent::setLogger($e->getMessage());
-                $this->db->rollback();
+            } else {
+                $response = parent::errorFunc("No se cargo el archivo");
             }
+            $this->db->commit();
+            $response = parent::successFunc("Creacion Con Exito");
+            return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede guardar/editar el Registro");
             return $this->renderObject($response, false);
         }
     }
 
-    public function validePkAction()
+    public function validePkAction(Request $request)
     {
         try {
             $this->setResponse("ajax");
-            $codinf = $request->input('codinf', "addslaches", "alpha", "extraspaces", "striptags");
-            $codser = $request->input('codser', "addslaches", "alpha", "extraspaces", "striptags");
-            $numero = $request->input('numero', "addslaches", "alpha", "extraspaces", "striptags");
+            $codinf = $request->input('codinf');
+            $codser = $request->input('codser');
+            $numero = $request->input('numero');
             $response = parent::successFunc("");
             $l = $this->Mercurio59->count("*", "conditions: codinf = '$codinf' and codser='$codser' and numero='$numero' ");
             if ($l > 0) {
                 $response = parent::errorFunc("El Registro ya se encuentra Digitado");
             }
             return $this->renderObject($response, false);
-        } catch (DbException $e) {
+        } catch (DebugException $e) {
             parent::setLogger($e->getMessage());
             $response = parent::errorFunc("No se pudo validar la informacion");
             return $this->renderObject($response, false);

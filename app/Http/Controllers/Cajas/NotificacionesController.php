@@ -2,36 +2,26 @@
 
 namespace App\Http\Controllers\Cajas;
 
+use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Models\Notificaciones;
+use App\Services\CajaServices\NotificacionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class NotificacionesController extends ApplicationController
 {
+    protected $db;
+    protected $user;
+    protected $tipo;
+
     public function __construct()
     {
-       
-        
         $this->setParamToView("instancePath", env('APP_URL') . 'Cajas/');
-        
-    }
-
-    public function beforeFilter($permisos = array())
-    {
-        parent::beforeFilter($permisos);
-        if (!Auth::getActiveIdentity()) {
-            set_flashdata("error", array(
-                "message" => "No dispone de acceso a la ruta indicada principal.",
-                "code" => 404
-            ));
-            if (is_ajax()) {
-                return redirect('login/error_access_rest');
-            } else {
-                return redirect('login/error_access');
-            }
-            exit;
-        }
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
     public function refreshAction()
@@ -57,7 +47,7 @@ class NotificacionesController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function refresh_paginationAction()
+    public function refresh_paginationAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
@@ -98,7 +88,7 @@ class NotificacionesController extends ApplicationController
             exit;
         }
         $this->setParamToView("title", "Detalle Notificación");
-        Tag::setDocumentTitle('Detalle Notificación');
+        #Tag::setDocumentTitle('Detalle Notificación');
     }
 
     public function createAction()
@@ -131,11 +121,11 @@ class NotificacionesController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function change_stateAction()
+    public function change_stateAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
-            $notificacion = (new Notificaciones)->findFirst(" id={$request->input('id')}");
+            $notificacion = (new Notificaciones())->findFirst(" id={$request->input('id')}");
             $notificacion->setEstado($request->input('estado'));
             $notificacion->save();
             $salida = array(

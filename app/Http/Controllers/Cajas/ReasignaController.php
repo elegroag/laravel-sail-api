@@ -2,48 +2,44 @@
 
 namespace App\Http\Controllers\Cajas;
 
+use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio30;
+use App\Models\Mercurio31;
+use App\Models\Mercurio32;
+use App\Models\Mercurio34;
+use App\Models\Mercurio35;
+use App\Services\Request as ServicesRequest;
+use App\Services\Tag;
+use App\Services\Utils\GeneralService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class ReasignaController extends ApplicationController
 {
 
+    protected $db;
+    protected $user;
+    protected $tipo;
 
     public function __construct()
     {
-       
-        
-        
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
-
-    public function beforeFilter($permisos = array())
-    {
-        $permisos = array("index" => 140);
-        $flag = parent::beforeFilter($permisos);
-        if (!$flag) {
-            $response = parent::errorFunc("No cuenta con los permisos para este proceso");
-            if (is_ajax()) {
-                $this->setResponse("ajax");
-                $this->renderObject($response, false);
-            } else {
-                $this->redirect("principal/index/0");
-            }
-            return false;
-        }
-    }
-
 
     public function indexAction()
     {
         $help = "Esta opcion permite manejar los ";
         $this->setParamToView("help", $help);
         $this->setParamToView("title", "Reasigna");
-        Tag::setDocumentTitle('Reasigna');
+        #Tag::setDocumentTitle('Reasigna');
     }
 
-    public function proceso_reasignar_masivoAction()
+    public function proceso_reasignar_masivoAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
@@ -95,7 +91,7 @@ class ReasignaController extends ApplicationController
         }
     }
 
-    public function traerDatosAction()
+    public function traerDatosAction(Request $request)
     {
         $this->setResponse("ajax");
         $tipopc = $request->input("tipopc");
@@ -163,7 +159,7 @@ class ReasignaController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function inforAction()
+    public function inforAction(Request $request)
     {
         $this->setResponse("ajax");
         $tipopc = $request->input('tipopc');
@@ -179,7 +175,14 @@ class ReasignaController extends ApplicationController
         $response .= "<hr class='my-4'>";
         $response .= "<p class='lead'>";
         $response .= "<div class='form-group'>";
-        $response .= Tag::select("usuario_rea", $this->Gener02->find("usuario in (select usuario from mercurio08 where tipopc='$tipopc')"), "using: usuario,nombre", "use_dummy: true", "dummyValue: ", "class: form-control");
+        $response .= Tag::selectStatic(new ServicesRequest([
+            "name" => "usuario_rea",
+            "options" => $this->Gener02->find("usuario in (select usuario from mercurio08 where tipopc='$tipopc')"),
+            "using" => "usuario,nombre",
+            "use_dummy" => true,
+            "dummyValue" => "",
+            "class" => "form-control"
+        ]));
         $response .= "</div>";
         $response .= "<button type='button' class='btn btn-warning btn-lg btn-block' onclick='cambiar_usuario($tipopc,$id)'>Cambiar Usuario Responsable</button>";
         $response .= "</p>";
@@ -187,33 +190,29 @@ class ReasignaController extends ApplicationController
         return $this->renderText($response);
     }
 
-    public function cambiar_usuarioAction()
+    public function cambiar_usuarioAction(Request $request)
     {
         try {
-            try {
-                $this->setResponse("ajax");
-                $tipopc = $request->input('tipopc');
-                $id = $request->input('id');
-                $usuario = $request->input('usuario');
-                $modelos = array("mercurio33", "Mercurio35");
-                
-                $response = $this->db->begin();
-                $consultasOldServices = new  GeneralService();
-                $result = $consultasOldServices->consultaTipopc($tipopc, "one", $id);
 
-                $mercurio = $result['datos'];
-                $mercurio->setUsuario($usuario);
-                if (!$mercurio->save()) {
-                    parent::setLogger($mercurio->getMessages());
-                    $this->db->rollback();
-                }
-                $this->db->commit();
-                $response = parent::successFunc("Cambio de Usuario con Exito");
-                return $this->renderObject($response, false);
-            } catch (DbException $e) {
-                parent::setLogger($e->getMessage());
+            $this->setResponse("ajax");
+            $tipopc = $request->input('tipopc');
+            $id = $request->input('id');
+            $usuario = $request->input('usuario');
+            $modelos = array("mercurio33", "Mercurio35");
+
+            $response = $this->db->begin();
+            $consultasOldServices = new  GeneralService();
+            $result = $consultasOldServices->consultaTipopc($tipopc, "one", $id);
+
+            $mercurio = $result['datos'];
+            $mercurio->setUsuario($usuario);
+            if (!$mercurio->save()) {
+                parent::setLogger($mercurio->getMessages());
                 $this->db->rollback();
             }
+            $this->db->commit();
+            $response = parent::successFunc("Cambio de Usuario con Exito");
+            return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $response = parent::errorFunc("No se pudo realizar la opcion");
             return $this->renderObject($response, false);

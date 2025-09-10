@@ -29,8 +29,10 @@ use App\Services\Utils\Comman;
 class AprobaciondatosController extends ApplicationController
 {
 
-    private $tipopc = "14";
+    protected $tipopc = "14";
     protected $db;
+    protected $user;
+    protected $tipo;
 
     /**
      * services variable
@@ -41,6 +43,8 @@ class AprobaciondatosController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
     public function aplicarFiltroAction(Request $request, string $estado = 'P')
@@ -305,7 +309,7 @@ class AprobaciondatosController extends ApplicationController
                     'msj' => 'El registro se completo con éxito'
                 );
             } catch (DebugException $err) {
-                
+
                 $this->db->rollback();
                 $salida = array(
                     "success" => false,
@@ -331,12 +335,12 @@ class AprobaciondatosController extends ApplicationController
             $nota = $request->input('nota', "addslaches", "alpha", "extraspaces", "striptags");
             $codest = $request->input('codest', "addslaches", "alpha", "extraspaces", "striptags");
             $modelos = array("mercurio10", "mercurio33");
-            
+
             $response = $this->db->begin();
             $today = Carbon::now();
             $mercurio33 = $this->Mercurio33->findFirst("id='$id'");
-            $this->Mercurio33->updateAll("estado='X',motivo='$nota',codest='$codest',fecest='".$today->format('Y-m-d H:i:s')."'", "conditions: id='$id' ");
-            
+            $this->Mercurio33->updateAll("estado='X',motivo='$nota',codest='$codest',fecest='" . $today->format('Y-m-d H:i:s') . "'", "conditions: id='$id' ");
+
             $mercurio07 = $this->Mercurio07->findFirst("tipo='{$mercurio33->getTipo()}' and documento = '{$mercurio33->getDocumento()}'");
             $asunto = "Actualizacion de datos";
             $msj  = "Se rechazo la actualizacion de datos";
@@ -346,11 +350,10 @@ class AprobaciondatosController extends ApplicationController
                 "asunto" => $asunto,
             ]));
             $senderEmail->send($mercurio07->getEmail(), $msj);
-            
+
             $this->db->commit();
             $response = parent::successFunc("Movimiento Realizado Con Exito");
             return $this->renderObject($response, false);
-            
         } catch (DebugException $e) {
             $this->db->rollback();
             $response = parent::errorFunc("No se pudo realizar el movimiento");

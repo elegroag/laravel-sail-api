@@ -30,6 +30,9 @@ class AprobacionfacController extends ApplicationController
 {
 
     protected $tipopc = 10;
+    protected $db;
+    protected $user;
+    protected $tipo;
 
     /**
      * services variable
@@ -51,6 +54,9 @@ class AprobacionfacController extends ApplicationController
 
     public function __construct()
     {
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
     /**
@@ -272,7 +278,7 @@ class AprobacionfacController extends ApplicationController
                     'msj' => 'El registro se completo con éxito'
                 );
             } catch (DebugException $err) {
-                
+
                 $this->db->rollback();
                 $salida = array(
                     "success" => false,

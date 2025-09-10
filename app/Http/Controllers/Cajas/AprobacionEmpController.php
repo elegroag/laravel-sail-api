@@ -33,6 +33,9 @@ class AprobacionempController extends ApplicationController
 {
     protected $tipopc = 2;
     protected $services;
+    protected $db;
+    protected $user;
+    protected $tipo;
     /**
      * independienteServices variable
      * @var EmpresaServices
@@ -40,8 +43,10 @@ class AprobacionempController extends ApplicationController
     protected $empresaServices;
 
     public function __construct()
-    {       
-        
+    {
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
     /**
@@ -58,13 +63,13 @@ class AprobacionempController extends ApplicationController
         $cantidad_pagina = $request->input("numero", 10);
         $usuario = session()->get('user');
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
-        
+
         $pagination = new Pagination(new Request([
             'query' => $query_str,
             'estado' => $estado,
             'cantidadPaginas' => $cantidad_pagina
         ]));
-        
+
         $query = $pagination->filter(
             $request->input('campo'),
             $request->input('condi'),
@@ -329,7 +334,7 @@ class AprobacionempController extends ApplicationController
      */
     public function pendiente_emailAction()
     {
-       /*  $flash_mensaje = SESSION::getData("flash_mensaje");
+        /*  $flash_mensaje = SESSION::getData("flash_mensaje");
         SESSION::setData("flash_mensaje", null); */
         /* $this->setParamToView("flash_mensaje", $flash_mensaje); */
         $this->setParamToView("title", "Procesar Notificación Pendiente");
@@ -865,7 +870,7 @@ class AprobacionempController extends ApplicationController
                     'msj' => 'El registro se completo con éxito'
                 );
             } catch (DebugException $err) {
-                
+
                 $this->db->rollback();
                 $salida = array(
                     "success" => false,

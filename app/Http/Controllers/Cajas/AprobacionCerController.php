@@ -22,10 +22,14 @@ class AprobacioncerController extends ApplicationController
 {
     protected $tipopc = 8;
     protected $db;
+    protected $user;
+    protected $tipo;
 
     public function __construct()
-    {        
+    {
         $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
     /**
@@ -161,7 +165,7 @@ class AprobacioncerController extends ApplicationController
     public function apruebaAction(Request $request)
     {
         $this->setResponse("ajax");
-        
+
         $user = session()->get('user');
         $debuginfo = array();
         try {
@@ -188,7 +192,7 @@ class AprobacioncerController extends ApplicationController
                     'msj' => 'El registro se completo con éxito'
                 );
             } catch (DebugException $err) {
-                
+
                 $this->db->rollback();
                 $salida = array(
                     "success" => false,
@@ -213,14 +217,14 @@ class AprobacioncerController extends ApplicationController
             $nota = $request->input('nota', "addslaches", "alpha", "extraspaces", "striptags");
             $codest = $request->input('codest', "addslaches", "alpha", "extraspaces", "striptags");
             $modelos = array("mercurio10", "mercurio45");
-            
+
             $response = $this->db->begin();
             $today = Carbon::now();
             $mercurio45 = $this->Mercurio45->findFirst("id='$id'");
-            $this->Mercurio45->updateAll("estado='X',motivo='$nota',codest='$codest',fecest='".$today->format('Y-m-d H:i:s')."'", "conditions: id='$id' ");
+            $this->Mercurio45->updateAll("estado='X',motivo='$nota',codest='$codest',fecest='" . $today->format('Y-m-d H:i:s') . "'", "conditions: id='$id' ");
             $item = $this->Mercurio10->maximum("item", "conditions: tipopc='$this->tipopc' and numero='$id'") + 1;
             $mercurio10 = new Mercurio10();
-            
+
             $mercurio10->setTipopc($this->tipopc);
             $mercurio10->setNumero($id);
             $mercurio10->setItem($item);
@@ -229,7 +233,7 @@ class AprobacioncerController extends ApplicationController
             $mercurio10->setCodest($codest);
             $mercurio10->setFecsis($today->format('Y-m-d H:i:s'));
             if (!$mercurio10->save()) {
-                
+
                 $this->db->rollback();
             }
             $mercurio07 = $this->Mercurio07->findFirst("tipo='{$mercurio45->getTipo()}' and coddoc='{$mercurio45->getCoddoc()}' and documento = '{$mercurio45->getDocumento()}'");
@@ -240,12 +244,11 @@ class AprobacioncerController extends ApplicationController
                 "email_clave" => $mercurio07->getClave(),
                 "asunto" => $asunto,
             ]));
-            
+
             $senderEmail->send($mercurio07->getEmail(), $asunto);
             $this->db->commit();
             $response = parent::successFunc("Movimiento Realizado Con Exito");
             return $this->renderObject($response, false);
-        
         } catch (DebugException $e) {
             $this->db->rollback();
             $response = parent::errorFunc("No se pudo realizar el movimiento");

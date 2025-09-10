@@ -4,6 +4,11 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Models\Gener02;
+use App\Models\Mercurio09;
+use App\Models\Mercurio20;
+use App\Models\Mercurio31;
+use App\Services\Utils\CalculatorDias;
 use App\Services\Utils\GeneralService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -11,9 +16,15 @@ use Illuminate\Http\Response;
 class ConsultaController extends ApplicationController
 {
 
+    protected $db;
+    protected $user;
+    protected $tipo;
 
     public function __construct()
     {
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
     public function indexAction()
@@ -21,7 +32,7 @@ class ConsultaController extends ApplicationController
         $help = "Esta opcion permite manejar los ";
         $this->setParamToView("help", $help);
         $this->setParamToView("title", "Consulta");
-       // Tag::setDocumentTitle('Consulta');
+        // Tag::setDocumentTitle('Consulta');
     }
 
 
@@ -30,7 +41,7 @@ class ConsultaController extends ApplicationController
         $help = "Esta opcion permite manejar los ";
         $this->setParamToView("help", $help);
         $this->setParamToView("title", "Consulta Historica");
-        Tag::setDocumentTitle('Consulta Historica');
+        //Tag::setDocumentTitle('Consulta Historica');
     }
 
     public function consulta_auditoriaAction(Request $request)
@@ -121,15 +132,16 @@ class ConsultaController extends ApplicationController
         return $this->renderText($html, false);
     }
 
-    public function reporte_auditoriaAction()
+    public function reporte_auditoriaAction(Request $request)
     {
         $this->setResponse('view');
         $tipopc = $request->input("tipopc");
         $fecini = $request->input("fecini");
         $fecfin = $request->input("fecfin");
-        $fecha = new Date();
-        $file = "public/temp/" . "reporte_auditoria_" . $fecha->getUsingFormatDefault() . ".xls";
-        require_once "Library/Excel/Main.php";
+        $fecha = new \DateTime();
+        $file = "public/temp/" . "reporte_auditoria_" . $fecha->format('Ymd') . ".xls";
+
+
         $excels = new Spreadsheet_Excel_Writer($file);
         $excel = $excels->addWorksheet();
         $column_title = $excels->addFormat(array(
@@ -230,7 +242,7 @@ class ConsultaController extends ApplicationController
     }
 
 
-    public function inforAction()
+    public function inforAction(Request $request, $id)
     {
         $this->setResponse("ajax");
         $tipopc = $request->input('tipopc');
@@ -248,7 +260,7 @@ class ConsultaController extends ApplicationController
         $help = "Esta opcion permite manejar los ";
         $this->setParamToView("help", $help);
         $this->setParamToView("title", "Carga Laboral");
-        Tag::setDocumentTitle('Carga Laboral');
+        //Tag::setDocumentTitle('Carga Laboral');
         $this->setParamToView("buttons", array("P" => array("btyp" => "btn-neutral", "func" => "reporte_excel_carga_laboral()", "glyp" => "fas fa-file-contract", "valr" => "Reporte")));
         $gener02 = $this->Gener02->findAllBySql("select distinct gener02.usuario,gener02.nombre,gener02.login from gener02,mercurio08 where gener02.usuario=mercurio08.usuario");
         $mercurio09 = $this->Mercurio09->find();
@@ -293,7 +305,7 @@ class ConsultaController extends ApplicationController
         $help = "Esta opcion permite manejar los ";
         $this->setParamToView("help", $help);
         $this->setParamToView("title", "Carga Laboral");
-        Tag::setDocumentTitle('Carga Laboral');
+        #Tag::setDocumentTitle('Carga Laboral');
         $this->setParamToView("buttons", array("P" => array("btyp" => "btn-neutral", "func" => "reporte_excel_carga_laboral()", "glyp" => "fas fa-file-contract", "valr" => "Reporte")));
 
         $html = "<div class='table-responsive'> ";
@@ -328,9 +340,10 @@ class ConsultaController extends ApplicationController
     public function reporte_excel_carga_laboralAction()
     {
         $this->setResponse('view');
-        $fecha = new Date();
-        $file = "public/temp/" . "reporte_carga_laboral" . $fecha->getUsingFormatDefault() . ".xls";
-        require_once "Library/Excel/Main.php";
+        $fecha = new \DateTime();
+        $file = "public/temp/" . "reporte_carga_laboral" . $fecha->format('Ymd') . ".xls";
+
+
         $excels = new Spreadsheet_Excel_Writer($file);
         $excel = $excels->addWorksheet();
         $column_title = $excels->addFormat(array(
@@ -387,9 +400,10 @@ class ConsultaController extends ApplicationController
     public function reporte_excel_indicadoresAction($fecini, $fecfin)
     {
         $this->setResponse('view');
-        $fecha = new Date();
-        $file = "public/temp/" . "reporte_indicadores" . $fecha->getUsingFormatDefault() . ".xls";
-        require_once "Library/Excel/Main.php";
+        $fecha = new \DateTime();
+        $file = "public/temp/" . "reporte_indicadores" . $fecha->format('Ymd') . ".xls";
+
+
         $excels = new Spreadsheet_Excel_Writer($file);
         $excel = $excels->addWorksheet();
         $column_title = $excels->addFormat(array(
@@ -496,16 +510,16 @@ class ConsultaController extends ApplicationController
         $help = "Esta opcion permite manejar los ";
         $this->setParamToView("help", $help);
         $this->setParamToView("title", "Indicadores");
-        Tag::setDocumentTitle('Carga Laboral');
+        //Tag::setDocumentTitle('Carga Laboral');
         $this->setParamToView("buttons", array("P" => array("btyp" => "btn-neutral", "func" => "reporte_excel_indicadores()", "glyp" => "fas fa-file-contract", "valr" => "Reporte")));
     }
 
-    public function consulta_indicadoresAction()
+    public function consulta_indicadoresAction(Request $request)
     {
         $this->setResponse("ajax");
         $fecini = $request->input("fecini");
         $fecfin = $request->input("fecfin");
-        $mercurio09 = (new Mercurio09)->find("conditions: tipopc IN(1,2,3,4,8,9,13)");
+        $mercurio09 = (new Mercurio09())->find("conditions: tipopc IN(1,2,3,4,8,9,13)");
 
         $html = "<div class='table-responsive'>";
         $html .= "<table class='table table-bordered table-hover table-sm'>";
@@ -591,10 +605,10 @@ class ConsultaController extends ApplicationController
         $help = "Esta opcion permite manejar los ";
         $this->setParamToView("help", $help);
         $this->setParamToView("title", "Consulta Activacion Masiva");
-        Tag::setDocumentTitle('Consulta Activacion Masiva');
+        //Tag::setDocumentTitle('Consulta Activacion Masiva');
     }
 
-    public function consulta_activacion_masivaAction()
+    public function consulta_activacion_masivaAction(Request $request)
     {
         $this->setResponse("ajax");
         // $nit = $request->input("nit");

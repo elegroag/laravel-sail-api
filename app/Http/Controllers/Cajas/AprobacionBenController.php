@@ -28,6 +28,9 @@ use App\Services\Utils\AsignarFuncionario;
 class AprobacionbenController extends ApplicationController
 {
     protected $tipopc = 4;
+    protected $db;
+    protected $user;
+    protected $tipo;
 
     /**
      * services variable
@@ -42,7 +45,10 @@ class AprobacionbenController extends ApplicationController
     protected $beneficiarioServices;
 
     public function __construct()
-    { 
+    {
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
 
@@ -189,7 +195,7 @@ class AprobacionbenController extends ApplicationController
                     'msj' => 'El registro se completo con éxito'
                 );
             } catch (DebugException $err) {
-                
+
                 $this->db->rollback();
                 $salida = array(
                     "success" => false,
@@ -242,7 +248,7 @@ class AprobacionbenController extends ApplicationController
         $today = Carbon::now();
         $id = $mercurio34->getId();
         $mercurio34 = new Mercurio34();
-        $mercurio34->updateAll(" estado='D', motivo='{$nota}', codest='{$codest}', fecest='".$today->format('Y-m-d H:i:s')."'", "conditions: id='{$id}'");
+        $mercurio34->updateAll(" estado='D', motivo='{$nota}', codest='{$codest}', fecest='" . $today->format('Y-m-d H:i:s') . "'", "conditions: id='{$id}'");
 
         $item = $this->Mercurio10->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$id}'");
         $mercurio10 = new Mercurio10();
@@ -297,7 +303,7 @@ class AprobacionbenController extends ApplicationController
     {
         $today = Carbon::now();
         $id = $mercurio34->getId();
-        $this->Mercurio34->updateAll("estado='X', motivo='{$nota}', codest='{$codest}', fecest='".$today->format('Y-m-d H:i:s')."'", "conditions: id='{$id}' ");
+        $this->Mercurio34->updateAll("estado='X', motivo='{$nota}', codest='{$codest}', fecest='" . $today->format('Y-m-d H:i:s') . "'", "conditions: id='{$id}' ");
 
         $item = $this->Mercurio10->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$id}'");
         $mercurio10 = new Mercurio10();
@@ -530,7 +536,7 @@ class AprobacionbenController extends ApplicationController
                 $this->Mercurio34->updateAll($setters, "conditions: id='{$id}' AND numdoc='{$numdoc}'");
 
                 $db = DbBase::rawConnect();
-                
+
 
                 $data = $db->fetchOne("SELECT max(id), mercurio34.* FROM mercurio34 WHERE numdoc='{$numdoc}'");
                 $salida = array(
@@ -633,14 +639,14 @@ class AprobacionbenController extends ApplicationController
         try {
             try {
                 $modelos = array("mercurio10", "mercurio34");
-                
+
                 $this->db->begin();
 
-                $this->Mercurio34->updateAll("estado='A',fecest='".$today->format('Y-m-d H:i:s')."'", "conditions: id='{$id}' ");
+                $this->Mercurio34->updateAll("estado='A',fecest='" . $today->format('Y-m-d H:i:s') . "'", "conditions: id='{$id}' ");
                 $item = $this->Mercurio10->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
 
                 $mercurio10 = new Mercurio10();
-                
+
                 $mercurio10->setTipopc($this->tipopc);
                 $mercurio10->setNumero($id);
                 $mercurio10->setItem($item);

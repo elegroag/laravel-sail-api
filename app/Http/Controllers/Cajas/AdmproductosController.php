@@ -15,13 +15,15 @@ use App\Services\Utils\Comman;
 class AdmproductosController extends ApplicationController
 {
     protected $db;
+    protected $user;
+    protected $tipo;
 
     public function __construct()
     {
         $this->setParamToView("instancePath", env('APP_URL') . 'Cajas/');
-        if (!$this->db) {
-            $this->db = DbBase::rawConnect();
-        }
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
     public function listaAction()

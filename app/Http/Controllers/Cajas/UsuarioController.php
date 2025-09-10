@@ -2,13 +2,33 @@
 
 namespace App\Http\Controllers\Cajas;
 
+use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Models\Gener09;
+use App\Models\Gener18;
+use App\Models\Mercurio01;
+use App\Models\Mercurio07;
+use App\Models\Mercurio19;
+use App\Models\Mercurio20;
+use App\Models\Mercurio30;
+use App\Models\Mercurio31;
+use App\Models\Mercurio32;
+use App\Models\Mercurio34;
+use App\Models\Mercurio36;
+use App\Services\CajaServices\UsuarioServices;
+use App\Services\Utils\Generales;
+use App\Services\Utils\Pagination;
+use App\Services\Utils\SenderEmail;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class UsuarioController extends ApplicationController
 {
+
+    protected $db;
+    protected $user;
+    protected $tipo;
 
     /**
      * services variable
@@ -24,24 +44,12 @@ class UsuarioController extends ApplicationController
 
     public function __construct()
     {
-        
-        
-        
         $this->pagination = new Pagination();
-        
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    /**
-     * @name function NO
-     * @date update 2025/04/01
-     * @author edwin <soportesistemas.comfaca@gmail.com>
-     * @return void
-     */
-    public function beforeFilter($permisos = null)
-    {
-        parent::beforeFilter();
-        
-    }
 
     public function indexAction()
     {
@@ -61,13 +69,13 @@ class UsuarioController extends ApplicationController
         $this->setResponse("ajax");
         try {
             $coddoc = array();
-            foreach ((new Gener18)->find() as $entity) {
+            foreach ((new Gener18())->find() as $entity) {
                 $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
             }
-            $tipo = (new Mercurio07)->getArrayTipos();
+            $tipo = (new Mercurio07())->getArrayTipos();
 
             $codciu = array();
-            foreach ((new Gener09)->find("*", "conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
+            foreach ((new Gener09())->find("*", "conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
                 $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
             }
 
@@ -81,7 +89,7 @@ class UsuarioController extends ApplicationController
                 ),
                 "msj" => 'OK'
             );
-        } catch (Exception $err) {
+        } catch (DebugException $err) {
             $salida = array(
                 "success" => false,
                 "msj" => $err->getMessage()
@@ -90,19 +98,19 @@ class UsuarioController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function guardarAction()
+    public function guardarAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
-            $tipo = $request->input('tipo', "addslaches", "alpha", "extraspaces", "striptags");
-            $coddoc = $request->input('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
-            $nombre = $request->input('nombre', "addslaches", "alpha", "extraspaces", "striptags");
-            $codciu = $request->input('codciu', "addslaches", "alpha", "extraspaces", "striptags");
+            $tipo = $request->input('tipo');
+            $coddoc = $request->input('coddoc');
+            $nombre = $request->input('nombre');
+            $codciu = $request->input('codciu');
             $newclave = $request->input('newclave');
-            $email = $request->input('email', "addslaches", "extraspaces", "striptags");
-            $documento = $request->input('documento', "addslaches", "extraspaces", "striptags");
-            $old_coddoc = $request->input('old_coddoc', "addslaches", "extraspaces", "striptags");
-            $estado = $request->input('estado', "addslaches", "alpha", "extraspaces", "striptags");
+            $email = $request->input('email');
+            $documento = $request->input('documento');
+            $old_coddoc = $request->input('old_coddoc');
+            $estado = $request->input('estado');
 
             $hasUsuario = (new Mercurio07)->count(
                 "*",
@@ -162,7 +170,7 @@ class UsuarioController extends ApplicationController
                 "success" => true,
                 "data" => $entity->getArray()
             );
-        } catch (Exception $err) {
+        } catch (DebugException $err) {
             $response = array(
                 'success' => false,
                 'msj' => $err->getMessage()
@@ -181,7 +189,7 @@ class UsuarioController extends ApplicationController
             <b>USUARIO {$usuario_externo->getDocumento()}</b><br/>
             <b>CLAVE {$clave}</b><br/>";
 
-        $html = View::render(
+        $html = view(
             "templates/cambio_clave",
             array(
                 "titulo" => "Cordial saludo, señor@ {$nombre}",
@@ -193,9 +201,9 @@ class UsuarioController extends ApplicationController
                 "tipo" => "",
                 "asunto" => $asunto
             )
-        );
+        )->render();
 
-        $emailCaja = (new Mercurio01)->findFirst();
+        $emailCaja = (new Mercurio01())->findFirst();
         $senderEmail = new SenderEmail();
         $senderEmail->setters(
             "emisor_email: {$emailCaja->getEmail()}",
@@ -223,17 +231,18 @@ class UsuarioController extends ApplicationController
      * @param string $estado
      * @return void
      */
-    public function aplicarFiltroAction($tipo = '', $estado = '')
+    public function aplicarFiltroAction(Request $request)
     {
         $this->setResponse("ajax");
         $cantidad_pagina = ($request->input("numero")) ? $request->input("numero") : 10;
 
-        $ftipo = ($tipo == '') ? " 1=1 " : " tipo='{$tipo}'";
+        $ftipo = ($request->input("tipo") == '') ? " 1=1 " : " tipo='{$request->input("tipo")}'";
+        $festado = ($request->input("estado") == '') ? " 1=1 " : " estado='{$request->input("estado")}'";
 
         $this->pagination->setters(
             "cantidadPaginas: {$cantidad_pagina}",
             "query: {$ftipo}",
-            "estado: {$estado}"
+            "estado: {$festado}"
         );
 
         $query = $this->pagination->filter(
@@ -249,9 +258,9 @@ class UsuarioController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function changeCantidadPaginaAction($tipo = '')
+    public function changeCantidadPaginaAction(Request $request)
     {
-        $this->buscarAction($tipo);
+        $this->buscarAction($request->input("tipo"), $request->input("estado"));
     }
 
     /**
@@ -264,19 +273,20 @@ class UsuarioController extends ApplicationController
      * @param string $estado
      * @return void
      */
-    public function buscarAction($tipo = '', $estado = '')
+    public function buscarAction(Request $request)
     {
         $this->setResponse("ajax");
 
         $pagina = ($request->input('pagina')) ? $request->input('pagina') : 1;
         $cantidad_pagina = ($request->input("numero")) ? $request->input("numero") : 10;
-        $query = ($tipo == '') ? " 1=1 " : " tipo='{$tipo}'";
+        $ftipo = ($request->input("tipo") == '') ? " 1=1 " : " tipo='{$request->input("tipo")}'";
+        $festado = ($request->input("estado") == '') ? " 1=1 " : " estado='{$request->input("estado")}'";
 
         $this->pagination->setters(
             "cantidadPaginas: $cantidad_pagina",
             "pagina: {$pagina}",
-            "query: {$query}",
-            "estado: {$estado}"
+            "query: {$ftipo}",
+            "estado: {$festado}"
         );
         if (
             get_flashdata_item("filter_usuarios") != false
@@ -311,12 +321,12 @@ class UsuarioController extends ApplicationController
      * @author edwin <soportesistemas.comfaca@gmail.com>
      * @return void
      */
-    public function show_userAction()
+    public function show_userAction(Request $request)
     {
         $this->setResponse("ajax");
-        $documento = $request->input('documento', "addslaches", "alpha", "extraspaces", "striptags");
-        $tipo = $request->input('tipo', "addslaches", "alpha", "extraspaces", "striptags");
-        $coddoc = $request->input('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
+        $documento = $request->input('documento');
+        $tipo = $request->input('tipo');
+        $coddoc = $request->input('coddoc');
 
         $user = (new Mercurio07)->findFirst(" documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'");
         $data = $user->getArray();
@@ -339,20 +349,20 @@ class UsuarioController extends ApplicationController
      * @author edwin <soportesistemas.comfaca@gmail.com>
      * @return void
      */
-    public function borrarUsuarioAction()
+    public function borrarUsuarioAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
-            $documento = $request->input('documento', "addslaches", "alpha", "extraspaces", "striptags");
-            $tipo = $request->input('tipo', "addslaches", "alpha", "extraspaces", "striptags");
-            $coddoc = $request->input('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
+            $documento = $request->input('documento');
+            $tipo = $request->input('tipo');
+            $coddoc = $request->input('coddoc');
 
             $hasUser = (new Mercurio07)->count(
                 "*",
                 "conditions: documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'"
             );
             if ($hasUser > 0) {
-                $hasRequests = (new Mercurio30)->count(
+                $hasRequests = (new Mercurio30())->count(
                     "*",
                     "conditions: documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'"
                 );
@@ -360,7 +370,7 @@ class UsuarioController extends ApplicationController
                     (new Mercurio30)->deleteAll(" documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'");
                 }
 
-                $hasRequests = (new Mercurio31)->count(
+                $hasRequests = (new Mercurio31())->count(
                     "*",
                     "conditions: documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'"
                 );
@@ -368,7 +378,7 @@ class UsuarioController extends ApplicationController
                     (new Mercurio31)->deleteAll(" documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'");
                 }
 
-                $hasRequests = (new Mercurio32)->count(
+                $hasRequests = (new Mercurio32())->count(
                     "*",
                     "conditions: documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'"
                 );
@@ -376,7 +386,7 @@ class UsuarioController extends ApplicationController
                     (new Mercurio32)->deleteAll(" documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'");
                 }
 
-                $hasRequests = (new Mercurio36)->count(
+                $hasRequests = (new Mercurio36())->count(
                     "*",
                     "conditions: documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'"
                 );
@@ -384,7 +394,7 @@ class UsuarioController extends ApplicationController
                     (new Mercurio36)->deleteAll(" documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'");
                 }
 
-                $hasRequests = (new Mercurio19)->count(
+                $hasRequests = (new Mercurio19())->count(
                     "*",
                     "conditions: documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'"
                 );
@@ -392,7 +402,7 @@ class UsuarioController extends ApplicationController
                     (new Mercurio19)->deleteAll(" documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'");
                 }
 
-                $hasRequests = (new Mercurio20)->count(
+                $hasRequests = (new Mercurio20())->count(
                     "*",
                     "conditions: documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'"
                 );
@@ -400,7 +410,7 @@ class UsuarioController extends ApplicationController
                     (new Mercurio20)->deleteAll(" documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'");
                 }
 
-                $hasRequests = (new Mercurio34)->count(
+                $hasRequests = (new Mercurio34())->count(
                     "*",
                     "conditions: documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'"
                 );
@@ -417,7 +427,7 @@ class UsuarioController extends ApplicationController
                 "success" => true,
                 "msj" => "El usuario se ha eliminado exitosamente."
             );
-        } catch (Exception $err) {
+        } catch (DebugException $err) {
             $response = array(
                 'success' => false,
                 'msj' => $err->getMessage()

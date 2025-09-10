@@ -8,6 +8,7 @@ use App\Models\Mercurio02;
 use App\Models\Mercurio04;
 use App\Models\Mercurio05;
 use App\Models\Mercurio08;
+use App\Models\Mercurio10;
 use App\Models\Mercurio20;
 use App\Services\Api\PortalMercurio;
 use Carbon\Carbon;
@@ -73,6 +74,67 @@ class GeneralService
         }
         $query = count($query) != 0 ? join(" AND ", $query) : " 1=1 ";
         return $query;
+    }
+
+    public function getDiasHabiles($fechainicio, $fechafin, $diasferiados = array())
+    {
+        $fechainicio = strtotime($fechainicio);
+        $fechafin = strtotime($fechafin);
+        $diainc = 86400;
+        $diashabiles = array();
+        $midia = $fechainicio;
+        for ($midia; $midia <= $fechafin; $midia += $diainc) {
+            if (!in_array(date('N', $midia), array(6, 7))) {
+                if (!in_array(date('Y-m-d', $midia), $diasferiados)) {
+                    array_push($diashabiles, date('Y-m-d', $midia));
+                }
+            }
+        }
+        return $diashabiles;
+    }
+
+    public function calculaDias($tipopc, $numero, $fecsol = '')
+    {
+        $mercurio10 = new Mercurio10();
+        $fecsis = $mercurio10->maximum(
+            "fecsis",
+            "conditions: tipopc='{$tipopc}' and numero='{$numero}'"
+        );
+        $mercurio10 = new Mercurio10();
+        $fecha_ultimo_evento =  $mercurio10->findFirst(" tipopc='{$tipopc}' and numero='{$numero}' and fecsis='{$fecsis}'");
+
+        if ($fecsol != '') {
+            if ($fecha_ultimo_evento->getEstado() == "A" || $fecha_ultimo_evento->getEstado() == "X") {
+                $fecha_envio = Carbon::now();
+                $fecha_cerrado = $fecha_envio;
+            } elseif ($fecha_ultimo_evento->getEstado() == "P") {
+                $fecha_envio = Carbon::parse($fecsol);
+                $fecha_cerrado = Carbon::now();
+            } else {
+                $fecha_envio = Carbon::parse($fecsol);
+                $fecha_cerrado = Carbon::now();
+            }
+        } else {
+
+            if ($fecha_ultimo_evento) {
+                if ($fecha_ultimo_evento->getEstado() == "A" || $fecha_ultimo_evento->getEstado() == "X") {
+                    $fecha_envio = Carbon::now();
+                    $fecha_cerrado = $fecha_envio;
+                } elseif ($fecha_ultimo_evento->getEstado() == "P") {
+                    $fecha_envio = Carbon::parse($fecha_ultimo_evento->getFecsis());
+                    $fecha_cerrado = Carbon::now();
+                } else {
+                    $fecha_envio = Carbon::parse($fecha_ultimo_evento->getFecsis());
+                    $fecha_cerrado = Carbon::now();
+                }
+            } else {
+                $fecha_envio = Carbon::now();
+                $fecha_cerrado = Carbon::now();
+            }
+        }
+        $dias = $fecha_cerrado->diffInDays($fecha_envio);
+        $dias = count($this->getDiasHabiles($fecha_envio, $fecha_cerrado->format('Y-m-d'))) - 1;
+        return $dias;
     }
 
     public function showPaginate($paginate)
@@ -1919,4 +1981,6 @@ class GeneralService
     public function errorTrans($message = '',  $linea = '') {}
 
     public function finishTrans() {}
+
+    public function consultaTipopc($tipopc, $estado, $documento, $nombre = null, $condi = null) {}
 }

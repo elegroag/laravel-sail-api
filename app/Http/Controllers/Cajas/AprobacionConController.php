@@ -24,8 +24,10 @@ use App\Services\Utils\Comman;
 
 class AprobacionconController extends ApplicationController
 {
-    private $tipopc = 3;
-
+    protected $tipopc = 3;
+    protected $db;
+    protected $user;
+    protected $tipo;
     /**
      * services variable
      * @var Services
@@ -48,6 +50,9 @@ class AprobacionconController extends ApplicationController
      */
     public function __construct()
     {
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
     /**
@@ -589,7 +594,7 @@ class AprobacionconController extends ApplicationController
                 $this->Mercurio32->updateAll($setters, "conditions: id='{$id}' AND cedcon='{$cedcon}'");
 
                 $db = DbBase::rawConnect();
-                
+
 
                 $data = $db->fetchOne("SELECT max(id), mercurio32.* FROM mercurio32 WHERE cedcon='{$cedcon}'");
                 $salida = array(
@@ -656,13 +661,13 @@ class AprobacionconController extends ApplicationController
         $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
         $nota = sanetizar($request->input('nota'));
         $today = Carbon::now();
-        
+
         try {
-            $this->Mercurio32->updateAll("estado='A',fecest='".$today->format('Y-m-d H:i:s')."'", "conditions: id='{$id}' ");
-            
+            $this->Mercurio32->updateAll("estado='A',fecest='" . $today->format('Y-m-d H:i:s') . "'", "conditions: id='{$id}' ");
+
             $item = $this->Mercurio10->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
             $mercurio10 = new Mercurio10();
-            
+
             $mercurio10->setTipopc($this->tipopc);
             $mercurio10->setNumero($id);
             $mercurio10->setItem($item);

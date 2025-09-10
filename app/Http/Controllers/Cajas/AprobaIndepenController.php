@@ -22,6 +22,9 @@ class AprobaindepenController extends ApplicationController
 {
 
     protected $tipopc = 13;
+    protected $db;
+    protected $user;
+    protected $tipo;
 
     /**
      * services variable
@@ -43,7 +46,10 @@ class AprobaindepenController extends ApplicationController
     protected $apruebaSolicitud;
 
     public function __construct()
-    {            
+    {
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
     public function aplicarFiltroAction($estado = 'P')
@@ -563,7 +569,7 @@ class AprobaindepenController extends ApplicationController
         $this->setParamToView("_codciu", ParamsIndependiente::getCiudades());
         $this->setParamToView("_codact", ParamsIndependiente::getActividades());
         $this->setParamToView("_coddoc", ParamsIndependiente::getTipoDocumentos());
-      /*   $this->setParamToView("_tippag", ParamsIndependiente::getTipoPago());
+        /*   $this->setParamToView("_tippag", ParamsIndependiente::getTipoPago());
         $this->setParamToView("_bancos", ParamsIndependiente::getBancos());
         $this->setParamToView("_tipcue", ParamsIndependiente::getTipoCuenta());
         $this->setParamToView("_giro", ParamsIndependiente::getGiro());
@@ -734,7 +740,7 @@ class AprobaindepenController extends ApplicationController
      */
     public function excel_reporteAction($estado = 'P')
     {
-       /*  $this->setResponse('view');
+        /*  $this->setResponse('view');
         $fecha = new Date();
         $file = "public/temp/" . "reporte_solicitudes_" . $fecha->getUsingFormatDefault() . ".xls";
         require_once "Library/Excel/Main.php";
@@ -842,7 +848,7 @@ class AprobaindepenController extends ApplicationController
                     'msj' => 'El registro se completo con éxito'
                 );
             } catch (DebugException $err) {
-                
+
                 $this->db->rollback();
                 $salida = array(
                     "success" => false,

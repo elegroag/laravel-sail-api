@@ -2,42 +2,32 @@
 
 namespace App\Http\Controllers\Cajas;
 
+use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio02;
+use App\Services\Tag;
+use App\Services\Utils\Comman;
+use App\Services\Utils\GeneralService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class Mercurio02Controller extends ApplicationController
 {
 
-    private $query = "1=1";
-    private $cantidad_pagina = 0;
+    protected $query = "1=1";
+    protected $cantidad_pagina = 0;
+    protected $db;
+    protected $user;
+    protected $tipo;
 
     public function __construct()
     {
-       
-        
-        
         $this->cantidad_pagina = $this->numpaginate;
-        
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
-
-    public function beforeFilter($permisos = array())
-    {
-        $permisos = array("aplicarFiltro" => "5", "editar" => "6", "guardar" => "7", "buscar" => "8");
-        $flag = parent::beforeFilter($permisos);
-        if (!$flag) {
-            $response = parent::errorFunc("No cuenta con los permisos para este proceso");
-            if (is_ajax()) {
-                $this->setResponse("ajax");
-                $this->renderObject($response, false);
-            } else {
-                Router::redirectToApplication('Cajas/entrada/index');
-            }
-            return false; //habilitados los permisos
-        }
-    }
-
 
     public function showTabla($paginate)
     {
@@ -73,14 +63,14 @@ class Mercurio02Controller extends ApplicationController
         $this->setResponse("ajax");
         $consultasOldServices = new GeneralService();
         $this->query = $consultasOldServices->converQuery();
-        self::buscarAction();
+        #self::buscarAction();
     }
 
-    public function changeCantidadPaginaAction()
+    public function changeCantidadPaginaAction(Request $request)
     {
         $this->setResponse("ajax");
         $this->cantidad_pagina = $request->input("numero");
-        self::buscarAction();
+        #self::buscarAction();
     }
 
     public function indexAction()
@@ -88,8 +78,8 @@ class Mercurio02Controller extends ApplicationController
         $help = "Esta opcion permite manejar los ";
         $this->setParamToView("help", $help);
         $this->setParamToView("title", "Datos Caja");
-        Tag::setDocumentTitle('Datos Caja');
-        if ((new Mercurio02)->count() == 0) $this->setParamToView("buttons", array("N"));
+        #Tag::setDocumentTitle('Datos Caja');
+        if ((new Mercurio02())->count() == 0) $this->setParamToView("buttons", array("N"));
 
         $apiRest = Comman::Api();
         $apiRest->runCli(
@@ -106,7 +96,7 @@ class Mercurio02Controller extends ApplicationController
         $this->setParamToView("ciudades", $_codciu);
     }
 
-    public function buscarAction()
+    public function buscarAction(Request $request)
     {
         $this->setResponse("ajax");
         $pagina = $request->input('pagina');
@@ -129,58 +119,53 @@ class Mercurio02Controller extends ApplicationController
             if ($mercurio02 == false) $mercurio02 = new Mercurio02();
 
             return $this->renderObject($mercurio02->getArray(), false);
-        } catch (DbException $e) {
+        } catch (DebugException $e) {
             parent::setLogger($e->getMessage());
             $this->db->rollback();
         }
     }
 
-    public function guardarAction()
+    public function guardarAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
-            try {
-                $codcaj = $request->input('codcaj', "addslaches", "extraspaces", "striptags");
-                $nit = $request->input('nit', "addslaches", "extraspaces", "striptags");
-                $razsoc = $request->input('razsoc', "addslaches", "alpha", "extraspaces", "striptags");
-                $sigla = $request->input('sigla', "addslaches", "extraspaces", "striptags");
-                $email = $request->input('email', "addslaches", "extraspaces", "striptags");
-                $direccion = $request->input('direccion', "addslaches", "extraspaces", "striptags");
-                $telefono = $request->input('telefono', "addslaches", "alpha", "extraspaces", "striptags");
-                $codciu = $request->input('codciu', "addslaches", "extraspaces", "striptags");
-                $pagweb = $request->input('pagweb', "addslaches", "extraspaces", "striptags");
-                $pagfac = $request->input('pagfac', "addslaches", "extraspaces", "striptags");
-                $pagtwi = $request->input('pagtwi', "addslaches", "extraspaces", "striptags");
-                $pagyou = $request->input('pagyou', "addslaches", "extraspaces", "striptags");
-                $modelos = array("Mercurio02");
-                
-                $response = $this->db->begin();
-                $mercurio02 = new Mercurio02();
-                $mercurio02->setTransaction($Transaccion);
-                $mercurio02->setCodcaj($codcaj);
-                $mercurio02->setNit($nit);
-                $mercurio02->setRazsoc($razsoc);
-                $mercurio02->setSigla($sigla);
-                $mercurio02->setEmail($email);
-                $mercurio02->setDireccion($direccion);
-                $mercurio02->setTelefono($telefono);
-                $mercurio02->setCodciu($codciu);
-                $mercurio02->setPagweb($pagweb);
-                $mercurio02->setPagfac($pagfac);
-                $mercurio02->setPagtwi($pagtwi);
-                $mercurio02->setPagyou($pagyou);
-                if (!$mercurio02->save()) {
-                    throw new DebugException("Error " . $mercurio02->getMessages(), 501);
-                }
 
-                $this->db->commit();
-                $response = parent::successFunc("Creacion Con Exito");
-                return $this->renderObject($response, false);
-            } catch (DbException $e) {
-                parent::ErrorTrans($e->getMessage());
-            } catch (Exception $err) {
-                parent::ErrorTrans($err->getMessage());
+            $codcaj = $request->input('codcaj', "addslaches", "extraspaces", "striptags");
+            $nit = $request->input('nit', "addslaches", "extraspaces", "striptags");
+            $razsoc = $request->input('razsoc', "addslaches", "alpha", "extraspaces", "striptags");
+            $sigla = $request->input('sigla', "addslaches", "extraspaces", "striptags");
+            $email = $request->input('email', "addslaches", "extraspaces", "striptags");
+            $direccion = $request->input('direccion', "addslaches", "extraspaces", "striptags");
+            $telefono = $request->input('telefono', "addslaches", "alpha", "extraspaces", "striptags");
+            $codciu = $request->input('codciu', "addslaches", "extraspaces", "striptags");
+            $pagweb = $request->input('pagweb', "addslaches", "extraspaces", "striptags");
+            $pagfac = $request->input('pagfac', "addslaches", "extraspaces", "striptags");
+            $pagtwi = $request->input('pagtwi', "addslaches", "extraspaces", "striptags");
+            $pagyou = $request->input('pagyou', "addslaches", "extraspaces", "striptags");
+            $modelos = array("Mercurio02");
+
+            $response = $this->db->begin();
+            $mercurio02 = new Mercurio02();
+
+            $mercurio02->setCodcaj($codcaj);
+            $mercurio02->setNit($nit);
+            $mercurio02->setRazsoc($razsoc);
+            $mercurio02->setSigla($sigla);
+            $mercurio02->setEmail($email);
+            $mercurio02->setDireccion($direccion);
+            $mercurio02->setTelefono($telefono);
+            $mercurio02->setCodciu($codciu);
+            $mercurio02->setPagweb($pagweb);
+            $mercurio02->setPagfac($pagfac);
+            $mercurio02->setPagtwi($pagtwi);
+            $mercurio02->setPagyou($pagyou);
+            if (!$mercurio02->save()) {
+                throw new DebugException("Error " . $mercurio02->getMessages(), 501);
             }
+
+            $this->db->commit();
+            $response = parent::successFunc("Creacion Con Exito");
+            return $this->renderObject($response, false);
         } catch (DebugException $error) {
             $response = parent::errorFunc("No se puede guardar/editar el registro " . $error->getMessage());
         }

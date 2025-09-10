@@ -2,24 +2,30 @@
 
 namespace App\Http\Controllers\Cajas;
 
+use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio67;
+use App\Services\Tag;
+use App\Services\Utils\GeneralService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class Mercurio67Controller extends ApplicationController
 {
 
-    private $query = "1=1";
-    private $cantidad_pagina = 0;
+    protected $query = "1=1";
+    protected $cantidad_pagina = 0;
+    protected $db;
+    protected $user;
+    protected $tipo;
 
     public function __construct()
     {
-       
-        
-        
         $this->cantidad_pagina = $this->numpaginate;
-        
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
     public function showTabla($paginate)
@@ -57,14 +63,14 @@ class Mercurio67Controller extends ApplicationController
         $this->setResponse("ajax");
         $consultasOldServices = new GeneralService();
         $this->query = $consultasOldServices->converQuery();
-        self::buscarAction();
+        #self::buscarAction();
     }
 
-    public function changeCantidadPaginaAction()
+    public function changeCantidadPaginaAction(Request $request)
     {
         $this->setResponse("ajax");
         $this->cantidad_pagina = $request->input("numero");
-        self::buscarAction();
+        #self::buscarAction();
     }
 
     public function indexAction()
@@ -78,7 +84,7 @@ class Mercurio67Controller extends ApplicationController
         $this->setParamToView("help", $help);
         $this->setParamToView("title", "Clasificaciones");
         $this->setParamToView("buttons", array("N", "F", "R"));
-        Tag::setDocumentTitle('Clasificaciones');
+        # Tag::setDocumentTitle('Clasificaciones');
     }
 
     public function nuevoAction()
@@ -90,7 +96,7 @@ class Mercurio67Controller extends ApplicationController
     }
 
 
-    public function buscarAction()
+    public function buscarAction(Request $request)
     {
         $this->setResponse("ajax");
         $pagina = $request->input('pagina');
@@ -104,7 +110,7 @@ class Mercurio67Controller extends ApplicationController
         $this->renderObject($response, false);
     }
 
-    public function editarAction()
+    public function editarAction(Request $request)
     {
         try {
             $this->setResponse("ajax");
@@ -112,78 +118,66 @@ class Mercurio67Controller extends ApplicationController
             $mercurio67 = $this->Mercurio67->findFirst("codcla = '$codcla'");
             if ($mercurio67 == false) $mercurio67 = new Mercurio67();
             $this->renderObject($mercurio67->getArray(), false);
-        } catch (DbException $e) {
+        } catch (DebugException $e) {
             parent::setLogger($e->getMessage());
             $this->db->rollback();
         }
     }
 
-    public function borrarAction()
+    public function borrarAction(Request $request)
     {
         try {
-            try {
-                $this->setResponse("ajax");
-                $codcla = $request->input('codcla');
-                $modelos = array("Mercurio67");
-                
-                $response = $this->db->begin();
-                $this->Mercurio67->deleteAll("codcla = '$codcla'");
-                $this->db->commit();
-                $response = parent::successFunc("Borrado Con Exito");
-                return $this->renderObject($response, false);
-            } catch (DbException $e) {
-                parent::setLogger($e->getMessage());
-                $this->db->rollback();
-            }
+            $this->setResponse("ajax");
+            $codcla = $request->input('codcla');
+
+            $response = $this->db->begin();
+            $this->Mercurio67->deleteAll("codcla = '$codcla'");
+            $this->db->commit();
+            $response = parent::successFunc("Borrado Con Exito");
+            return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede Borrar el Registro");
             return $this->renderObject($response, false);
         }
     }
 
-    public function guardarAction()
+    public function guardarAction(Request $request)
     {
         try {
-            try {
-                $this->setResponse("ajax");
-                $codcla = $request->input('codcla', "addslaches", "alpha", "extraspaces", "striptags");
-                $detalle = $request->input('detalle', "addslaches", "alpha", "extraspaces", "striptags");
-                $modelos = array("Mercurio67");
-                
-                $response = $this->db->begin();
-                $mercurio67 = new Mercurio67();
-                $mercurio67->setTransaction($Transaccion);
-                $mercurio67->setCodcla($codcla);
-                $mercurio67->setDetalle($detalle);
-                if (!$mercurio67->save()) {
-                    parent::setLogger($mercurio67->getMessages());
-                    $this->db->rollback();
-                }
-                $this->db->commit();
-                $response = parent::successFunc("Creacion Con Exito");
-                return $this->renderObject($response, false);
-            } catch (DbException $e) {
-                parent::setLogger($e->getMessage());
+            $this->setResponse("ajax");
+            $codcla = $request->input('codcla');
+            $detalle = $request->input('detalle');
+
+            $response = $this->db->begin();
+            $mercurio67 = new Mercurio67();
+
+            $mercurio67->setCodcla($codcla);
+            $mercurio67->setDetalle($detalle);
+            if (!$mercurio67->save()) {
+                parent::setLogger($mercurio67->getMessages());
                 $this->db->rollback();
             }
+            $this->db->commit();
+            $response = parent::successFunc("Creacion Con Exito");
+            return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede guardar/editar el Registro");
             return $this->renderObject($response, false);
         }
     }
 
-    public function validePkAction()
+    public function validePkAction(Request $request)
     {
         try {
             $this->setResponse("ajax");
-            $codcla = $request->input('codcla', "addslaches", "alpha", "extraspaces", "striptags");
+            $codcla = $request->input('codcla');
             $response = parent::successFunc("");
             $l = $this->Mercurio67->count("*", "conditions: codcla = '$codcla'");
             if ($l > 0) {
                 $response = parent::errorFunc("El Registro ya se encuentra Digitado");
             }
             return $this->renderObject($response, false);
-        } catch (DbException $e) {
+        } catch (DebugException $e) {
             parent::setLogger($e->getMessage());
             $response = parent::errorFunc("No se pudo validar la informacion");
             return $this->renderObject($response, false);

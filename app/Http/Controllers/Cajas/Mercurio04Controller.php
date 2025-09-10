@@ -2,42 +2,34 @@
 
 namespace App\Http\Controllers\Cajas;
 
+use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio04;
+use App\Models\Mercurio05;
+use App\Models\Mercurio08;
+use App\Services\Tag;
+use App\Services\Utils\Comman;
+use App\Services\Utils\GeneralService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class Mercurio04Controller extends ApplicationController
 {
 
-    private $query = "1=1";
-    private $cantidad_pagina = 0;
+    protected $query = "1=1";
+    protected $cantidad_pagina = 0;
+    protected $db;
+    protected $user;
+    protected $tipo;
 
     public function __construct()
     {
-       
-        
-        
         $this->cantidad_pagina = $this->numpaginate;
-        
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
-
-    public function beforeFilter($permisos = array())
-    {
-        $permisos = array("aplicarFiltro" => "49", "editar" => "50", "guardar" => "51", "buscar" => "52", "borrar" => "53");
-        $flag = parent::beforeFilter($permisos);
-        if (!$flag) {
-            $response = parent::errorFunc("No cuenta con los permisos para este proceso");
-            if (is_ajax()) {
-                $this->setResponse("ajax");
-                $this->renderObject($response, false);
-            } else {
-                $this->redirect("principal/index/0");
-            }
-            return false;
-        }
-    }
-
 
     public function showTabla($paginate)
     {
@@ -84,14 +76,14 @@ class Mercurio04Controller extends ApplicationController
         $this->setResponse("ajax");
         $consultasOldServices = new GeneralService();
         $this->query = $consultasOldServices->converQuery();
-        self::buscarAction();
+        #self::buscarAction();
     }
 
-    public function changeCantidadPaginaAction()
+    public function changeCantidadPaginaAction(Request $request)
     {
         $this->setResponse("ajax");
         $this->cantidad_pagina = $request->input("numero");
-        self::buscarAction();
+        #self::buscarAction();
     }
 
     public function indexAction()
@@ -105,7 +97,7 @@ class Mercurio04Controller extends ApplicationController
         $this->setParamToView("help", $help);
         $this->setParamToView("title", "Oficinas");
         $this->setParamToView("buttons", array("N", "F", "R"));
-        Tag::setDocumentTitle('Motivos Oficinas');
+        #Tag::setDocumentTitle('Motivos Oficinas');
 
         $ps = Comman::Api();
         $ps->runCli(
@@ -124,7 +116,7 @@ class Mercurio04Controller extends ApplicationController
     }
 
 
-    public function buscarAction()
+    public function buscarAction(Request $request)
     {
         $this->setResponse("ajax");
         $pagina = $request->input('pagina');
@@ -139,7 +131,7 @@ class Mercurio04Controller extends ApplicationController
         $this->renderObject($response, false);
     }
 
-    public function editarAction()
+    public function editarAction(Request $request)
     {
         try {
             $this->setResponse("ajax");
@@ -148,26 +140,26 @@ class Mercurio04Controller extends ApplicationController
             if ($mercurio04 == false) $mercurio04 = new Mercurio04();
 
             return  $this->renderObject($mercurio04->getArray(), false);
-        } catch (DbException $e) {
+        } catch (DebugException $e) {
             parent::setLogger($e->getMessage());
             $this->db->rollback();
         }
     }
 
-    public function borrarAction()
+    public function borrarAction(Request $request)
     {
         try {
             try {
                 $this->setResponse("ajax");
                 $codofi = $request->input('codofi');
                 $modelos = array("Mercurio04");
-                
+
                 $response = $this->db->begin();
                 $this->Mercurio04->deleteAll("codofi = '$codofi'");
                 $this->db->commit();
                 $response = parent::successFunc("Borrado Con Exito");
                 return $this->renderObject($response, false);
-            } catch (DbException $e) {
+            } catch (DebugException $e) {
                 parent::setLogger($e->getMessage());
                 $this->db->rollback();
             }
@@ -177,7 +169,7 @@ class Mercurio04Controller extends ApplicationController
         }
     }
 
-    public function guardarAction()
+    public function guardarAction(Request $request)
     {
         try {
             try {
@@ -187,10 +179,10 @@ class Mercurio04Controller extends ApplicationController
                 $principal = $request->input('principal', "addslaches", "alpha", "extraspaces", "striptags");
                 $estado = $request->input('estado', "addslaches", "alpha", "extraspaces", "striptags");
                 $modelos = array("Mercurio04");
-                
+
                 $response = $this->db->begin();
                 $mercurio04 = new Mercurio04();
-                $mercurio04->setTransaction($Transaccion);
+
                 $mercurio04->setCodofi($codofi);
                 $mercurio04->setDetalle($detalle);
                 $mercurio04->setPrincipal($principal);
@@ -202,7 +194,7 @@ class Mercurio04Controller extends ApplicationController
                 $this->db->commit();
                 $response = parent::successFunc("Creacion Con Exito");
                 return $this->renderObject($response, false);
-            } catch (DbException $e) {
+            } catch (DebugException $e) {
                 parent::setLogger($e->getMessage());
                 $this->db->rollback();
             }
@@ -212,7 +204,7 @@ class Mercurio04Controller extends ApplicationController
         }
     }
 
-    public function validePkAction()
+    public function validePkAction(Request $request)
     {
         try {
             $this->setResponse("ajax");
@@ -223,14 +215,14 @@ class Mercurio04Controller extends ApplicationController
                 $response = parent::errorFunc("El Registro ya se encuentra Digitado");
             }
             return $this->renderObject($response, false);
-        } catch (DbException $e) {
+        } catch (DebugException $e) {
             parent::setLogger($e->getMessage());
             $response = parent::errorFunc("No se pudo validar la informacion");
             return $this->renderObject($response, false);
         }
     }
 
-    public function reporteAction($format = 'P')
+    public function reporteAction(Request $request, $format = 'P')
     {
         $this->setResponse("ajax");
         $_fields = array();
@@ -243,7 +235,7 @@ class Mercurio04Controller extends ApplicationController
         return $this->renderObject($file, false);
     }
 
-    public function validePkCiudadAction()
+    public function validePkCiudadAction(Request $request)
     {
         try {
             $this->setResponse("ajax");
@@ -255,14 +247,14 @@ class Mercurio04Controller extends ApplicationController
                 $response = parent::errorFunc("El Registro ya se encuentra Digitado");
             }
             return $this->renderObject($response, false);
-        } catch (DbException $e) {
+        } catch (DebugException $e) {
             parent::setLogger($e->getMessage());
             $response = parent::errorFunc("No se pudo validar la informacion");
             return $this->renderObject($response, false);
         }
     }
 
-    public function ciudad_viewAction()
+    public function ciudad_viewAction(Request $request)
     {
         try {
             $this->setResponse("ajax");
@@ -281,45 +273,40 @@ class Mercurio04Controller extends ApplicationController
                 $response .= "</tr>";
             }
             return $this->renderObject($response, false);
-        } catch (DbException $e) {
+        } catch (DebugException $e) {
             parent::setLogger($e->getMessage());
             $response = parent::errorFunc("No se pudo validar la informacion");
             return $this->renderObject($response, false);
         }
     }
 
-    public function guardarCiudadAction()
+    public function guardarCiudadAction(Request $request)
     {
         try {
-            try {
-                $this->setResponse("ajax");
-                $codofi = $request->input('codofi', "addslaches", "alpha", "extraspaces", "striptags");
-                $codciu = $request->input('codciu', "addslaches", "alpha", "extraspaces", "striptags");
-                $modelos = array("mercurio05");
-                
-                $response = $this->db->begin();
-                $mercurio05 = new Mercurio05();
-                $mercurio05->setTransaction($Transaccion);
-                $mercurio05->setCodofi($codofi);
-                $mercurio05->setCodciu($codciu);
-                if (!$mercurio05->save()) {
-                    parent::setLogger($mercurio05->getMessages());
-                    $this->db->rollback();
-                }
-                $this->db->commit();
-                $response = parent::successFunc("Movimiento Realizado Con Exito");
-                return $this->renderObject($response, false);
-            } catch (DbException $e) {
-                parent::setLogger($e->getMessage());
+
+            $this->setResponse("ajax");
+            $codofi = $request->input('codofi', "addslaches", "alpha", "extraspaces", "striptags");
+            $codciu = $request->input('codciu', "addslaches", "alpha", "extraspaces", "striptags");
+
+            $response = $this->db->begin();
+            $mercurio05 = new Mercurio05();
+
+            $mercurio05->setCodofi($codofi);
+            $mercurio05->setCodciu($codciu);
+            if (!$mercurio05->save()) {
+                parent::setLogger($mercurio05->getMessages());
                 $this->db->rollback();
             }
+            $this->db->commit();
+            $response = parent::successFunc("Movimiento Realizado Con Exito");
+            return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $response = parent::errorFunc("No se pudo realizar el movimiento");
             return $this->renderObject($response, false);
         }
     }
 
-    public function editarCiudadAction()
+    public function editarCiudadAction(Request $request)
     {
         try {
             try {
@@ -327,13 +314,13 @@ class Mercurio04Controller extends ApplicationController
                 $codofi = $request->input('codofi', "addslaches", "alpha", "extraspaces", "striptags");
                 $codciu = $request->input('codciu', "addslaches", "alpha", "extraspaces", "striptags");
                 $modelos = array("mercurio28");
-                
+
                 $response = $this->db->begin();
                 $mercurio05 = $this->Mercurio05->findFirst("codofi='$codofi' and codciu = '$codciu'");
                 if ($mercurio05 == false) $mercurio05 = new Mercurio05();
 
                 return $this->renderObject($mercurio05->getArray(), false);
-            } catch (DbException $e) {
+            } catch (DebugException $e) {
                 parent::setLogger($e->getMessage());
                 $this->db->rollback();
             }
@@ -343,7 +330,7 @@ class Mercurio04Controller extends ApplicationController
         }
     }
 
-    public function borrarCiudadAction()
+    public function borrarCiudadAction(Request $request)
     {
         try {
             try {
@@ -351,13 +338,13 @@ class Mercurio04Controller extends ApplicationController
                 $codofi = $request->input('codofi', "addslaches", "alpha", "extraspaces", "striptags");
                 $codciu = $request->input('codciu', "addslaches", "alpha", "extraspaces", "striptags");
                 $modelos = array("mercurio28");
-                
+
                 $response = $this->db->begin();
                 $this->Mercurio05->deleteAll("codofi='$codofi' and codciu='$codciu'");
                 $this->db->commit();
                 $response = parent::successFunc("Movimiento Realizado Con Exito");
                 return $this->renderObject($response, false);
-            } catch (DbException $e) {
+            } catch (DebugException $e) {
                 parent::setLogger($e->getMessage());
                 $this->db->rollback();
             }
@@ -369,7 +356,7 @@ class Mercurio04Controller extends ApplicationController
 
 
 
-    public function validePkOpcionAction()
+    public function validePkOpcionAction(Request $request)
     {
         try {
             $this->setResponse("ajax");
@@ -377,7 +364,7 @@ class Mercurio04Controller extends ApplicationController
             $tipopc = $request->input('tipopc', "addslaches", "alpha", "extraspaces", "striptags");
             $usuario = $request->input('usuario', "addslaches", "alpha", "extraspaces", "striptags");
 
-            $l = (new Mercurio08)->count(
+            $l = (new Mercurio08())->count(
                 "*",
                 "conditions: codofi='{$codofi}' AND tipopc='{$tipopc}' AND usuario='{$usuario}'"
             );
@@ -389,7 +376,7 @@ class Mercurio04Controller extends ApplicationController
                 'msg' => "Ok",
                 'success' => true
             );
-        } catch (Exception $e) {
+        } catch (DebugException $e) {
             $response = array(
                 'flag' => false,
                 'msg' => $e->getMessage(),
@@ -400,7 +387,7 @@ class Mercurio04Controller extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function opcion_viewAction()
+    public function opcion_viewAction(Request $request)
     {
         try {
             $this->setResponse("ajax");
@@ -421,14 +408,14 @@ class Mercurio04Controller extends ApplicationController
                 $response .= "</tr>";
             }
             return $this->renderObject($response, false);
-        } catch (DbException $e) {
+        } catch (DebugException $e) {
             parent::setLogger($e->getMessage());
             $response = parent::errorFunc("No se pudo validar la informacion");
             return $this->renderObject($response, false);
         }
     }
 
-    public function guardarOpcionAction()
+    public function guardarOpcionAction(Request $request)
     {
         try {
             try {
@@ -437,7 +424,7 @@ class Mercurio04Controller extends ApplicationController
                 $tipopc = $request->input('tipopc', "addslaches", "alpha", "extraspaces", "striptags");
                 $usuario = $request->input('usuario', "addslaches", "alpha", "extraspaces", "striptags");
                 $modelos = array("mercurio08");
-                
+
                 $response = $this->db->begin();
                 $mercurio08 = $this->Mercurio08->findFirst("codofi='$codofi' and tipopc='$tipopc' and usuario='$usuario'");
                 if ($mercurio08 == false) {
@@ -445,7 +432,7 @@ class Mercurio04Controller extends ApplicationController
                     $orden = $this->Mercurio08->maximum("orden", "conditions: codofi='$codofi' and tipopc='$tipopc'") + 1;
                     $mercurio08->setOrden($orden);
                 }
-                $mercurio08->setTransaction($Transaccion);
+
                 $mercurio08->setCodofi($codofi);
                 $mercurio08->setTipopc($tipopc);
                 $mercurio08->setUsuario($usuario);
@@ -456,7 +443,7 @@ class Mercurio04Controller extends ApplicationController
                 $this->db->commit();
                 $response = parent::successFunc("Movimiento Realizado Con Exito");
                 return $this->renderObject($response, false);
-            } catch (DbException $e) {
+            } catch (DebugException $e) {
                 parent::setLogger($e->getMessage());
                 $this->db->rollback();
             }
@@ -466,7 +453,7 @@ class Mercurio04Controller extends ApplicationController
         }
     }
 
-    public function borrarOpcionAction()
+    public function borrarOpcionAction(Request $request)
     {
         try {
             try {
@@ -475,13 +462,13 @@ class Mercurio04Controller extends ApplicationController
                 $tipopc = $request->input('tipopc', "addslaches", "alpha", "extraspaces", "striptags");
                 $usuario = $request->input('usuario', "addslaches", "alpha", "extraspaces", "striptags");
                 $modelos = array("mercurio08");
-                
+
                 $response = $this->db->begin();
                 $this->Mercurio08->deleteAll("codofi='$codofi' and tipopc='$tipopc' and usuario='$usuario'");
                 $this->db->commit();
                 $response = parent::successFunc("Movimiento Realizado Con Exito");
                 return $this->renderObject($response, false);
-            } catch (DbException $e) {
+            } catch (DebugException $e) {
                 parent::setLogger($e->getMessage());
                 $this->db->rollback();
             }

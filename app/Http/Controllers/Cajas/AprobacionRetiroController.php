@@ -20,12 +20,18 @@ use App\Services\Tag;
 class AprobacionretiroController extends ApplicationController
 {
 
-    private $tipopc = 7;
+    protected $tipopc = 7;
     protected $cantidad_pagina = 10;
     protected $query = "";
+    protected $db;
+    protected $user;
+    protected $tipo;
 
     public function __construct()
-    {        
+    {
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
     public function showTabla($paginate)
@@ -92,7 +98,7 @@ class AprobacionretiroController extends ApplicationController
         $this->setParamToView("help", $help);
         $this->setParamToView("title", "Aprobacion Retiro Trabajadores");
         $this->setParamToView("buttons", array("F"));
-       // Tag::setDocumentTitle('Aprobacion Retiro Trabajadores');
+        // Tag::setDocumentTitle('Aprobacion Retiro Trabajadores');
     }
 
     public function buscarAction(Request $request)
@@ -100,11 +106,11 @@ class AprobacionretiroController extends ApplicationController
         $this->setResponse("ajax");
         $pagina = $request->input('pagina', 1);
         $paginate = $this->Mercurio35->find("$this->query and estado='P' AND usuario = " . parent::getActUser())->paginate($this->cantidad_pagina, ['*'], 'page', $pagina);
-        
+
         $html = $this->showTabla($paginate);
         $consultasOldServices = new GeneralService();
         $html_paginate = $consultasOldServices->showPaginate($paginate);
-        
+
         return $this->renderObject([
             'consulta' => $html,
             'paginate' => $html_paginate
@@ -194,58 +200,57 @@ class AprobacionretiroController extends ApplicationController
     public function aprobarAction(Request $request)
     {
         try {
-            
-                $this->setResponse("ajax");
-                $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
-                $nota = $request->input('nota', "addslaches", "alpha", "extraspaces", "striptags");
-                $fecest = $request->input('fecest', "addslaches", "alpha", "extraspaces", "striptags");
 
-                $modelos = array("mercurio10", "mercurio35");
-                
-                $response = $this->db->begin();
-                $today = new \DateTime();
-                $mercurio35 = $this->Mercurio35->findFirst("id='$id'");
-                if (!$fecest) {
-                    $fecest = $today->format('Y-m-d');
-                }
-                $this->Mercurio35->updateAll("estado='A',fecest='{$fecest}'", "conditions: id='$id' ");
-                $item = $this->Mercurio10->maximum("item", "conditions: tipopc='$this->tipopc' and numero='$id'") + 1;
-                $mercurio10 = new Mercurio10();
-                
-                $mercurio10->setTipopc($this->tipopc);
-                $mercurio10->setNumero($id);
-                $mercurio10->setItem($item);
-                $mercurio10->setEstado("A");
-                $mercurio10->setNota($nota);
-                $mercurio10->setFecsis($today->format('Y-m-d'));
-                if (!$mercurio10->save()) {
-                    
-                    $this->db->rollback();
-                }
-                $params['nit'] = $mercurio35->getNit();
-                $params['cedtra'] = $mercurio35->getCedtra();
-                $params['codest'] = $mercurio35->getCodest();
-                $params['fecest'] = $mercurio35->getFecest();
+            $this->setResponse("ajax");
+            $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
+            $nota = $request->input('nota', "addslaches", "alpha", "extraspaces", "striptags");
+            $fecest = $request->input('fecest', "addslaches", "alpha", "extraspaces", "striptags");
 
-                $consultasOldServices = new GeneralService();
-                $result = $consultasOldServices->webService("retiroTrabajador", $params);
-                if ($result['flag'] == false) {
-                    $response = parent::errorFunc($result['msg']);
-                    return $this->renderObject($response, false);
-                }
-                if ($result['data']['flag'] == false) {
-                    $response = parent::errorFunc($result['data']['msg']);
-                    return $this->renderObject($response, false);
-                }
-                $mercurio07 = $this->Mercurio07->findFirst("tipo='{$mercurio35->getTipo()}' and coddoc='{$mercurio35->getCoddoc()}' and documento = '{$mercurio35->getDocumento()}'");
-                $asunto = "Retiro Trabajador";
-                $msj  = "se informa que el trabajador {$mercurio35->getCedtra()} fue retirado exitsomante";
-                $senderEmail = new SenderEmail();
-                $senderEmail->send($mercurio07->getEmail(), $msj);
-                $this->db->commit();
-                $response = parent::successFunc("Movimiento Realizado Con Exito");
+            $modelos = array("mercurio10", "mercurio35");
+
+            $response = $this->db->begin();
+            $today = new \DateTime();
+            $mercurio35 = $this->Mercurio35->findFirst("id='$id'");
+            if (!$fecest) {
+                $fecest = $today->format('Y-m-d');
+            }
+            $this->Mercurio35->updateAll("estado='A',fecest='{$fecest}'", "conditions: id='$id' ");
+            $item = $this->Mercurio10->maximum("item", "conditions: tipopc='$this->tipopc' and numero='$id'") + 1;
+            $mercurio10 = new Mercurio10();
+
+            $mercurio10->setTipopc($this->tipopc);
+            $mercurio10->setNumero($id);
+            $mercurio10->setItem($item);
+            $mercurio10->setEstado("A");
+            $mercurio10->setNota($nota);
+            $mercurio10->setFecsis($today->format('Y-m-d'));
+            if (!$mercurio10->save()) {
+
+                $this->db->rollback();
+            }
+            $params['nit'] = $mercurio35->getNit();
+            $params['cedtra'] = $mercurio35->getCedtra();
+            $params['codest'] = $mercurio35->getCodest();
+            $params['fecest'] = $mercurio35->getFecest();
+
+            $consultasOldServices = new GeneralService();
+            $result = $consultasOldServices->webService("retiroTrabajador", $params);
+            if ($result['flag'] == false) {
+                $response = parent::errorFunc($result['msg']);
                 return $this->renderObject($response, false);
-           
+            }
+            if ($result['data']['flag'] == false) {
+                $response = parent::errorFunc($result['data']['msg']);
+                return $this->renderObject($response, false);
+            }
+            $mercurio07 = $this->Mercurio07->findFirst("tipo='{$mercurio35->getTipo()}' and coddoc='{$mercurio35->getCoddoc()}' and documento = '{$mercurio35->getDocumento()}'");
+            $asunto = "Retiro Trabajador";
+            $msj  = "se informa que el trabajador {$mercurio35->getCedtra()} fue retirado exitsomante";
+            $senderEmail = new SenderEmail();
+            $senderEmail->send($mercurio07->getEmail(), $msj);
+            $this->db->commit();
+            $response = parent::successFunc("Movimiento Realizado Con Exito");
+            return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $response = parent::errorFunc("No se pudo realizar el movimiento");
             return $this->renderObject($response, false);
@@ -255,21 +260,23 @@ class AprobacionretiroController extends ApplicationController
     public function rechazarAction(Request $request)
     {
         try {
-            
+
             $this->setResponse("ajax");
             $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
             $nota = $request->input('nota', "addslaches", "alpha", "extraspaces", "striptags");
             $codest = $request->input('codest', "addslaches", "alpha", "extraspaces", "striptags");
             $modelos = array("mercurio10", "mercurio35");
-            
+
             $response = $this->db->begin();
             $today = new \DateTime();
             $mercurio35 = $this->Mercurio35->findFirst("id='$id'");
             $this->Mercurio35->updateAll(
-                "estado='X',motivo='$nota',motrec='$codest',fecest='{$today->format('Y-m-d')}'", "conditions: id='$id' ");
+                "estado='X',motivo='$nota',motrec='$codest',fecest='{$today->format('Y-m-d')}'",
+                "conditions: id='$id' "
+            );
             $item = $this->Mercurio10->maximum("item", "conditions: tipopc='$this->tipopc' and numero='$id'") + 1;
             $mercurio10 = new Mercurio10();
-            
+
             $mercurio10->setTipopc($this->tipopc);
             $mercurio10->setNumero($id);
             $mercurio10->setItem($item);
@@ -278,7 +285,7 @@ class AprobacionretiroController extends ApplicationController
             $mercurio10->setCodest($codest);
             $mercurio10->setFecsis($today->format('Y-m-d'));
             if (!$mercurio10->save()) {
-                
+
                 $this->db->rollback();
             }
             $mercurio07 = $this->Mercurio07->findFirst("tipo='{$mercurio35->getTipo()}' and coddoc='{$mercurio35->getCoddoc()}' and documento = '{$mercurio35->getDocumento()}'");
@@ -289,7 +296,6 @@ class AprobacionretiroController extends ApplicationController
             $this->db->commit();
             $response = parent::successFunc("Movimiento Realizado Con Exito");
             return $this->renderObject($response, false);
-            
         } catch (DebugException $e) {
             $response = parent::errorFunc("No se pudo realizar el movimiento");
             return $this->renderObject($response, false);

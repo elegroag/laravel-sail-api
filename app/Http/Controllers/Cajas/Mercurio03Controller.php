@@ -2,46 +2,36 @@
 
 namespace App\Http\Controllers\Cajas;
 
+use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio03;
+use App\Services\Tag;
+use App\Services\Utils\GeneralService;
+use App\Services\Utils\Table;
+use App\Services\Utils\UploadFile;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class Mercurio03Controller extends ApplicationController
 {
 
-    private $query = "1=1";
-    private $cantidad_pagina = 0;
+    protected $query = "1=1";
+    protected $cantidad_pagina = 0;
+    protected $db;
+    protected $user;
+    protected $tipo;
 
     public function __construct()
     {
-       
-        
-        
         $this->cantidad_pagina = $this->numpaginate;
-        
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
-
-    public function beforeFilter($permisos = array())
-    {
-        $permisos = array("aplicarFiltro" => "9", "editar" => "10", "guardar" => "11", "buscar" => "12", "borrar" => "13");
-        $flag = parent::beforeFilter($permisos);
-        if (!$flag) {
-            $response = parent::errorFunc("No cuenta con los permisos para este proceso");
-            if (is_ajax()) {
-                $this->setResponse("ajax");
-                $this->renderObject($response, false);
-            } else {
-                $this->redirect("principal/index/0");
-            }
-            return false;
-        }
-    }
-
 
     public function showTabla($paginate)
     {
-        Core::importLibrary("Table", "Pagination");
         $table = new Table();
         $table->set_template(Table::TmpGeneral());
         $table->set_heading(
@@ -81,14 +71,14 @@ class Mercurio03Controller extends ApplicationController
         $this->setResponse("ajax");
         $consultasOldServices = new GeneralService();
         $this->query = $consultasOldServices->converQuery();
-        self::buscarAction();
+        # self::buscarAction();
     }
 
-    public function changeCantidadPaginaAction()
+    public function changeCantidadPaginaAction(Request $request)
     {
         $this->setResponse("ajax");
         $this->cantidad_pagina = $request->input("numero");
-        self::buscarAction();
+        #self::buscarAction();
     }
 
     public function indexAction()
@@ -102,11 +92,11 @@ class Mercurio03Controller extends ApplicationController
         $this->setParamToView("help", $help);
         $this->setParamToView("title", "Firmas");
         $this->setParamToView("buttons", array("N", "F", "R"));
-        Tag::setDocumentTitle('Motivos Firmas');
+        #Tag::setDocumentTitle('Motivos Firmas');
     }
 
 
-    public function buscarAction()
+    public function buscarAction(Request $request)
     {
         $this->setResponse("ajax");
         $pagina = $request->input('pagina');
@@ -120,7 +110,7 @@ class Mercurio03Controller extends ApplicationController
         $this->renderObject($response, false);
     }
 
-    public function editarAction()
+    public function editarAction(Request $request)
     {
         try {
             $this->setResponse("ajax");
@@ -128,87 +118,82 @@ class Mercurio03Controller extends ApplicationController
             $mercurio03 = $this->Mercurio03->findFirst("codfir = '$codfir'");
             if ($mercurio03 == false) $mercurio03 = new Mercurio03();
             return $this->renderObject($mercurio03->getArray(), false);
-        } catch (DbException $e) {
+        } catch (DebugException $e) {
             parent::setLogger($e->getMessage());
             $this->db->rollback();
         }
     }
 
-    public function borrarAction()
+    public function borrarAction(Request $request)
     {
         try {
-            try {
-                $this->setResponse("ajax");
-                $codfir = $request->input('codfir');
-                $modelos = array("Mercurio03");
-                
-                $response = $this->db->begin();
-                $this->Mercurio03->deleteAll("codfir = '$codfir'");
-                $this->db->commit();
-                $response = parent::successFunc("Borrado Con Exito");
-                return $this->renderObject($response, false);
-            } catch (DbException $e) {
-                parent::setLogger($e->getMessage());
-                $this->db->rollback();
-            }
+
+            $this->setResponse("ajax");
+            $codfir = $request->input('codfir');
+            $modelos = array("Mercurio03");
+
+            $response = $this->db->begin();
+            $this->Mercurio03->deleteAll("codfir = '$codfir'");
+            $this->db->commit();
+            $response = parent::successFunc("Borrado Con Exito");
+            return $this->renderObject($response, false);
         } catch (DebugException $e) {
+
             $response = parent::errorFunc("No se puede Borrar el Registro");
             return $this->renderObject($response, false);
         }
     }
 
-    public function guardarAction()
+    public function guardarAction(Request $request)
     {
         try {
-            try {
-                $this->setResponse("ajax");
-                $codfir = $request->input('codfir', "addslaches", "alpha", "extraspaces", "striptags");
-                $nombre = $request->input('nombre', "addslaches", "alpha", "extraspaces", "striptags");
-                $cargo = $request->input('cargo', "addslaches", "alpha", "extraspaces", "striptags");
-                $archivo = $request->input('archivo', "addslaches", "extraspaces", "striptags");
-                $email = $request->input('email', "addslaches", "extraspaces", "striptags");
-                $modelos = array("Mercurio03");
-                
-                $response = $this->db->begin();
-                $mercurio03 = new Mercurio03();
-                $mercurio03->setTransaction($Transaccion);
-                $mercurio03->setCodfir($codfir);
-                $mercurio03->setNombre($nombre);
-                $mercurio03->setCargo($cargo);
-                $mercurio03->setEmail($email);
-                $mercurio01 = $this->Mercurio01->findFirst();
-                if (isset($_FILES['archivo']['name']) && $_FILES['archivo']['name'] != "") {
-                    $extension = explode(".", $_FILES['archivo']['name']);
-                    $name = $codfir . "_firma." . end($extension);
-                    $_FILES['archivo']['name'] = $name;
-                    $estado = $this->uploadFile("archivo", $mercurio01->getPath());
-                    if ($estado != false) {
-                        $mercurio03->setArchivo($name);
-                        if (!$mercurio03->save()) {
-                            parent::setLogger($mercurio03->getMessages());
-                            $this->db->rollback();
-                        }
-                        $response = parent::successFunc("Se adjunto con exito el archivo");
-                    } else {
-                        $response = parent::errorFunc("No se cargo: Tamano del archivo muy grande o No es Valido");
+
+            $this->setResponse("ajax");
+            $codfir = $request->input('codfir', "addslaches", "alpha", "extraspaces", "striptags");
+            $nombre = $request->input('nombre', "addslaches", "alpha", "extraspaces", "striptags");
+            $cargo = $request->input('cargo', "addslaches", "alpha", "extraspaces", "striptags");
+            $archivo = $request->input('archivo', "addslaches", "extraspaces", "striptags");
+            $email = $request->input('email', "addslaches", "extraspaces", "striptags");
+            $modelos = array("Mercurio03");
+
+            $response = $this->db->begin();
+            $mercurio03 = new Mercurio03();
+
+            $mercurio03->setCodfir($codfir);
+            $mercurio03->setNombre($nombre);
+            $mercurio03->setCargo($cargo);
+            $mercurio03->setEmail($email);
+            $mercurio01 = $this->Mercurio01->findFirst();
+            if (isset($_FILES['archivo']['name']) && $_FILES['archivo']['name'] != "") {
+                $extension = explode(".", $_FILES['archivo']['name']);
+                $name = $codfir . "_firma." . end($extension);
+                $_FILES['archivo']['name'] = $name;
+
+                $uploadFile = new UploadFile();
+                $estado = $uploadFile->upload("archivo", $mercurio01->getPath());
+                if ($estado != false) {
+                    $mercurio03->setArchivo($name);
+                    if (!$mercurio03->save()) {
+                        parent::setLogger($mercurio03->getMessages());
+                        $this->db->rollback();
                     }
+                    $response = parent::successFunc("Se adjunto con exito el archivo");
                 } else {
-                    $response = parent::errorFunc("No se cargo el archivo");
+                    $response = parent::errorFunc("No se cargo: Tamano del archivo muy grande o No es Valido");
                 }
-                $this->db->commit();
-                $response = parent::successFunc("Creacion Con Exito");
-                return $this->renderObject($response, false);
-            } catch (DbException $e) {
-                parent::setLogger($e->getMessage());
-                $this->db->rollback();
+            } else {
+                $response = parent::errorFunc("No se cargo el archivo");
             }
+            $this->db->commit();
+            $response = parent::successFunc("Creacion Con Exito");
+            return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede guardar/editar el Registro");
             return $this->renderObject($response, false);
         }
     }
 
-    public function validePkAction()
+    public function validePkAction(Request $request)
     {
         try {
             $this->setResponse("ajax");
@@ -219,7 +204,7 @@ class Mercurio03Controller extends ApplicationController
                 $response = parent::errorFunc("El Registro ya se encuentra Digitado");
             }
             return $this->renderObject($response, false);
-        } catch (DbException $e) {
+        } catch (DebugException $e) {
             parent::setLogger($e->getMessage());
             $response = parent::errorFunc("No se pudo validar la informacion");
             return $this->renderObject($response, false);

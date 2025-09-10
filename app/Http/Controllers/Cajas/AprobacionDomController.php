@@ -27,6 +27,9 @@ class AprobaciondomController extends ApplicationController
 {
 
     protected $tipopc = 12;
+    protected $db;
+    protected $user;
+    protected $tipo;
 
     /**
      * services variable
@@ -55,8 +58,11 @@ class AprobaciondomController extends ApplicationController
 
 
     public function __construct()
-    {    
+    {
         $this->pagination = new Pagination();
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
     /**
@@ -306,7 +312,7 @@ class AprobaciondomController extends ApplicationController
             $postData = $request->all();
             $idSolicitud = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
             $calemp = 'E';
-            
+
             $solicitud = $this->apruebaSolicitud->main(
                 $calemp,
                 $idSolicitud,
@@ -315,7 +321,7 @@ class AprobaciondomController extends ApplicationController
 
             $this->apruebaSolicitud->endTransa();
             $solicitud->enviarMail($request->input('actapr'), $request->input('feccap'));
-            
+
             return $this->renderObject([
                 'success' => true,
                 'msj' => 'El registro se completo con éxito'

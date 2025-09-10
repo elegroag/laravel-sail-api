@@ -2,24 +2,30 @@
 
 namespace App\Http\Controllers\Cajas;
 
+use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio50;
+use App\Services\Tag;
+use App\Services\Utils\GeneralService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class Mercurio50Controller extends ApplicationController
 {
 
-    private $query = "1=1";
-    private $cantidad_pagina = 0;
+    protected $query = "1=1";
+    protected $cantidad_pagina = 0;
+    protected $db;
+    protected $user;
+    protected $tipo;
 
     public function __construct()
     {
-       
-        
-        
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
         $this->cantidad_pagina = $this->numpaginate;
-        
     }
 
     public function showTabla($paginate)
@@ -60,14 +66,14 @@ class Mercurio50Controller extends ApplicationController
         $this->setResponse("ajax");
         $consultasOldServices = new GeneralService();
         $this->query = $consultasOldServices->converQuery();
-        self::buscarAction();
+        #self::buscarAction();
     }
 
-    public function changeCantidadPaginaAction()
+    public function changeCantidadPaginaAction(Request $request)
     {
         $this->setResponse("ajax");
         $this->cantidad_pagina = $request->input("numero");
-        self::buscarAction();
+        #self::buscarAction();
     }
 
     public function indexAction()
@@ -76,11 +82,11 @@ class Mercurio50Controller extends ApplicationController
         $this->setParamToView("help", $help);
         $this->setParamToView("title", "Basica");
         if ($this->Mercurio50->count() == 0) $this->setParamToView("buttons", array("N"));
-        Tag::setDocumentTitle('Basica');
+        #Tag::setDocumentTitle('Basica');
     }
 
 
-    public function buscarAction()
+    public function buscarAction(Request $request)
     {
         $this->setResponse("ajax");
         $pagina = $request->input('pagina');
@@ -94,34 +100,34 @@ class Mercurio50Controller extends ApplicationController
         $this->renderObject($response, false);
     }
 
-    public function editarAction()
+    public function editarAction(Request $request)
     {
         try {
             $this->setResponse("ajax");
             $mercurio50 = $this->Mercurio50->findFirst();
             if ($mercurio50 == false) $mercurio50 = new Mercurio50();
             $this->renderObject($mercurio50->getArray(), false);
-        } catch (DbException $e) {
+        } catch (DebugException $e) {
             parent::setLogger($e->getMessage());
             $this->db->rollback();
         }
     }
 
-    public function guardarAction()
+    public function guardarAction(Request $request)
     {
         try {
             try {
                 $this->setResponse("ajax");
-                $codapl = $request->input('codapl', "addslaches", "extraspaces", "striptags");
-                $webser = $request->input('webser', "addslaches", "extraspaces", "striptags");
-                $path = $request->input('path', "addslaches", "alpha", "extraspaces", "striptags");
-                $urlonl = $request->input('urlonl', "addslaches", "extraspaces", "striptags");
-                $puncom = $request->input('puncom', "addslaches", "extraspaces", "striptags");
+                $codapl = $request->input('codapl');
+                $webser = $request->input('webser');
+                $path = $request->input('path');
+                $urlonl = $request->input('urlonl');
+                $puncom = $request->input('puncom');
                 $modelos = array("Mercurio50");
-                
+
                 $response = $this->db->begin();
                 $mercurio50 = new Mercurio50();
-                $mercurio50->setTransaction($Transaccion);
+
                 $mercurio50->setCodapl($codapl);
                 $mercurio50->setWebser($webser);
                 $mercurio50->setPath($path);
@@ -134,7 +140,7 @@ class Mercurio50Controller extends ApplicationController
                 $this->db->commit();
                 $response = parent::successFunc("Creacion Con Exito");
                 return $this->renderObject($response, false);
-            } catch (DbException $e) {
+            } catch (DebugException $e) {
                 parent::setLogger($e->getMessage());
                 $this->db->rollback();
             }

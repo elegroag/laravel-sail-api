@@ -2,36 +2,30 @@
 
 namespace App\Http\Controllers\Cajas;
 
+use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio51;
+use App\Services\Tag;
+use App\Services\Utils\GeneralService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class Mercurio51Controller extends ApplicationController
 {
 
-    private $query = "1=1";
-    private $cantidad_pagina = 0;
+    protected $query = "1=1";
+    protected $cantidad_pagina = 0;
+    protected $db;
+    protected $user;
+    protected $tipo;
 
     public function __construct()
     {
-       
-        
-        
         $this->cantidad_pagina = $this->numpaginate;
-        
-    }
-
-    public function beforeFilter($permisos = array())
-    {
-        $permisos = array("aplicarFiltro" => "44", "editar" => "45", "guardar" => "46", "buscar" => "47", "borrar" => "48");
-        $flag = parent::beforeFilter($permisos);
-        if (!$flag) {
-            $this->setResponse("ajax");
-            $response = parent::errorFunc("No cuenta con los permisos para este proceso");
-            $this->redirect("principal/index/0");
-            return false;
-        }
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
     public function showTabla($paginate)
@@ -75,14 +69,14 @@ class Mercurio51Controller extends ApplicationController
         $this->setResponse("ajax");
         $consultasOldServices = new GeneralService();
         $this->query = $consultasOldServices->converQuery();
-        self::buscarAction();
+        #self::buscarAction();
     }
 
-    public function changeCantidadPaginaAction()
+    public function changeCantidadPaginaAction(Request $request)
     {
         $this->setResponse("ajax");
         $this->cantidad_pagina = $request->input("numero");
-        self::buscarAction();
+        #self::buscarAction();
     }
 
     public function indexAction()
@@ -96,7 +90,7 @@ class Mercurio51Controller extends ApplicationController
         $this->setParamToView("help", $help);
         $this->setParamToView("title", "Categorias");
         $this->setParamToView("buttons", array("N", "F", "R"));
-        Tag::setDocumentTitle('Categorias');
+        #Tag::setDocumentTitle('Categorias');
     }
 
     public function nuevoAction()
@@ -108,7 +102,7 @@ class Mercurio51Controller extends ApplicationController
     }
 
 
-    public function buscarAction()
+    public function buscarAction(Request $request)
     {
         $this->setResponse("ajax");
         $pagina = $request->input('pagina');
@@ -122,7 +116,7 @@ class Mercurio51Controller extends ApplicationController
         $this->renderObject($response, false);
     }
 
-    public function editarAction()
+    public function editarAction(Request $request)
     {
         try {
             $this->setResponse("ajax");
@@ -130,82 +124,73 @@ class Mercurio51Controller extends ApplicationController
             $mercurio51 = $this->Mercurio51->findFirst("codcat = '$codcat'");
             if ($mercurio51 == false) $mercurio51 = new Mercurio51();
             $this->renderObject($mercurio51->getArray(), false);
-        } catch (DbException $e) {
+        } catch (DebugException $e) {
             parent::setLogger($e->getMessage());
             $this->db->rollback();
         }
     }
 
-    public function borrarAction()
+    public function borrarAction(Request $request)
     {
         try {
-            try {
-                $this->setResponse("ajax");
-                $codcat = $request->input('codcat');
-                $modelos = array("Mercurio51");
-                
-                $response = $this->db->begin();
-                $this->Mercurio51->deleteAll("codcat = '$codcat'");
-                $this->db->commit();
-                $response = parent::successFunc("Borrado Con Exito");
-                return $this->renderObject($response, false);
-            } catch (DbException $e) {
-                parent::setLogger($e->getMessage());
-                $this->db->rollback();
-            }
+
+            $this->setResponse("ajax");
+            $codcat = $request->input('codcat');
+            $modelos = array("Mercurio51");
+
+            $response = $this->db->begin();
+            $this->Mercurio51->deleteAll("codcat = '$codcat'");
+            $this->db->commit();
+            $response = parent::successFunc("Borrado Con Exito");
+            return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede Borrar el Registro");
             return $this->renderObject($response, false);
         }
     }
 
-    public function guardarAction()
+    public function guardarAction(Request $request)
     {
         try {
-            try {
-                $this->setResponse("ajax");
-                $codcat = $request->input('codcat', "addslaches", "alpha", "extraspaces", "striptags");
-                $detalle = $request->input('detalle', "addslaches", "alpha", "extraspaces", "striptags");
-                $tipo = $request->input('tipo', "addslaches", "alpha", "extraspaces", "striptags");
-                $estado = $request->input('estado', "addslaches", "alpha", "extraspaces", "striptags");
-                $modelos = array("Mercurio51");
-                
-                $response = $this->db->begin();
-                $mercurio51 = new Mercurio51();
-                $mercurio51->setTransaction($Transaccion);
-                $mercurio51->setCodcat($codcat);
-                $mercurio51->setDetalle($detalle);
-                $mercurio51->setTipo($tipo);
-                $mercurio51->setEstado($estado);
-                if (!$mercurio51->save()) {
-                    parent::setLogger($mercurio51->getMessages());
-                    $this->db->rollback();
-                }
-                $this->db->commit();
-                $response = parent::successFunc("Creacion Con Exito");
-                return $this->renderObject($response, false);
-            } catch (DbException $e) {
-                parent::setLogger($e->getMessage());
+            $this->setResponse("ajax");
+            $codcat = $request->input('codcat');
+            $detalle = $request->input('detalle');
+            $tipo = $request->input('tipo');
+            $estado = $request->input('estado');
+
+
+            $response = $this->db->begin();
+            $mercurio51 = new Mercurio51();
+
+            $mercurio51->setCodcat($codcat);
+            $mercurio51->setDetalle($detalle);
+            $mercurio51->setTipo($tipo);
+            $mercurio51->setEstado($estado);
+            if (!$mercurio51->save()) {
+                parent::setLogger($mercurio51->getMessages());
                 $this->db->rollback();
             }
+            $this->db->commit();
+            $response = parent::successFunc("Creacion Con Exito");
+            return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede guardar/editar el Registro");
             return $this->renderObject($response, false);
         }
     }
 
-    public function validePkAction()
+    public function validePkAction(Request $request)
     {
         try {
             $this->setResponse("ajax");
-            $codcat = $request->input('codcat', "addslaches", "alpha", "extraspaces", "striptags");
+            $codcat = $request->input('codcat');
             $response = parent::successFunc("");
             $l = $this->Mercurio51->count("*", "conditions: codcat = '$codcat'");
             if ($l > 0) {
                 $response = parent::errorFunc("El Registro ya se encuentra Digitado");
             }
             return $this->renderObject($response, false);
-        } catch (DbException $e) {
+        } catch (DebugException $e) {
             parent::setLogger($e->getMessage());
             $response = parent::errorFunc("No se pudo validar la informacion");
             return $this->renderObject($response, false);

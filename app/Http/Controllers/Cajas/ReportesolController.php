@@ -4,6 +4,10 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio09;
+use App\Services\Reportes\ReporteSolicitudes;
+use App\Services\Request as ServicesRequest;
+use App\Services\Utils\Pagination;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -16,20 +20,21 @@ class ReportesolController extends ApplicationController
      */
     protected $pagination;
 
+    protected $db;
+    protected $user;
+    protected $tipo;
+
     public function __construct()
     {
-        
-        
-       
-        
-        
-        
         $this->pagination = new Pagination();
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
     public function indexAction()
     {
-        $m09 = (new Mercurio09)->find();
+        $m09 = (new Mercurio09())->find();
         $tipo_solicitudes = array();
         foreach ($m09 as $model09) {
             $tipo_solicitudes[$model09->getTipopc()] = $model09->getDetalle();
@@ -38,7 +43,7 @@ class ReportesolController extends ApplicationController
         $this->setParamToView("title", "Reportes de Solicitudes");
     }
 
-    public function procesarAction()
+    public function procesarAction(Request $request)
     {
         $this->setResponse('ajax');
         $tipo = $request->input("tipo");
@@ -49,7 +54,7 @@ class ReportesolController extends ApplicationController
         $reporte = new ReporteSolicitudes();
 
         $file = $reporte->main(
-            new Request(
+            new ServicesRequest(
                 array(
                     'estado' => $estado,
                     'fecha_solicitud' => $fecha_solicitud,

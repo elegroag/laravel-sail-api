@@ -2,37 +2,36 @@
 
 namespace App\Http\Controllers\Cajas;
 
+use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio30;
+use App\Models\Mercurio31;
+use App\Models\Mercurio32;
+use App\Models\Mercurio33;
+use App\Models\Mercurio34;
+use App\Models\Mercurio38;
+use App\Models\Mercurio41;
+use App\Models\Mercurio47;
+use App\Services\SatApi\SatConsultaServices;
+use App\Services\Utils\Comman;
+use App\Services\Utils\GeneralService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class PrincipalController extends ApplicationController
 {
 
+    protected $db;
+    protected $user;
+    protected $tipo;
+
     public function __construct()
     {
-       
-        
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
         $this->setParamToView("instancePath", env('APP_URL') . 'Cajas/');
-        
-    }
-
-    public function beforeFilter($permisos = array())
-    {
-        parent::beforeFilter($permisos);
-        if (!Auth::getActiveIdentity()) {
-            set_flashdata("error", array(
-                "message" => "No dispone de acceso a la ruta indicada principal.",
-                "code" => 404
-            ));
-            if (is_ajax()) {
-                return redirect('login/error_access_rest');
-            } else {
-                return redirect('login/error_access');
-            }
-            exit;
-        }
     }
 
     public function indexAction($permiso_menu = 1)
@@ -45,7 +44,7 @@ class PrincipalController extends ApplicationController
                 array(
                     'name' => 'Afiliación Empresas',
                     'cantidad' => array(
-                        'pendientes' => (new Mercurio30)->count("*", "conditions: estado='P' and usuario = '" . $user . "'"),
+                        'pendientes' => (new Mercurio30())->count("*", "conditions: estado='P' and usuario = '" . $user . "'"),
                         'aprobados' => (new Mercurio30)->count("*", "conditions: estado='A' and usuario = '" . $user . "'"),
                         'rechazados' => (new Mercurio30)->count("*", "conditions: estado='R' and usuario = '" . $user . "'"),
                         'devueltos' => (new Mercurio30)->count("*", "conditions: estado='D' and usuario = '" . $user . "'"),
@@ -58,7 +57,7 @@ class PrincipalController extends ApplicationController
                 array(
                     'name' => 'Afiliación Independientes',
                     'cantidad' => array(
-                        'pendientes' => (new Mercurio41)->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
+                        'pendientes' => (new Mercurio41())->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
                         'aprobados' => (new Mercurio41)->count("id.*", "conditions: estado='A' and usuario = '" . $user . "'"),
                         'rechazados' => (new Mercurio41)->count("id.*", "conditions: estado='R' and usuario = '" . $user . "'"),
                         'devueltos' => (new Mercurio41)->count("id.*", "conditions: estado='D' and usuario = '" . $user . "'"),
@@ -71,7 +70,7 @@ class PrincipalController extends ApplicationController
                 array(
                     'name' => 'Afiliación Pensionados',
                     'cantidad' => array(
-                        'pendientes' => (new Mercurio38)->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
+                        'pendientes' => (new Mercurio38())->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
                         'aprobados' => (new Mercurio38)->count("id.*", "conditions: estado='A' and usuario = '" . $user . "'"),
                         'rechazados' => (new Mercurio38)->count("id.*", "conditions: estado='R' and usuario = '" . $user . "'"),
                         'devueltos' => (new Mercurio38)->count("id.*", "conditions: estado='D' and usuario = '" . $user . "'"),
@@ -84,7 +83,7 @@ class PrincipalController extends ApplicationController
                 array(
                     'name' => 'Afiliación Trabajadores',
                     'cantidad' => array(
-                        'pendientes' => (new Mercurio31)->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
+                        'pendientes' => (new Mercurio31())->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
                         'aprobados' => (new Mercurio31)->count("id.*", "conditions: estado='A' and usuario = '" . $user . "'"),
                         'rechazados' => (new Mercurio31)->count("id.*", "conditions: estado='R' and usuario = '" . $user . "'"),
                         'devueltos' => (new Mercurio31)->count("id.*", "conditions: estado='D' and usuario = '" . $user . "'"),
@@ -97,7 +96,7 @@ class PrincipalController extends ApplicationController
                 array(
                     'name' => 'Afiliación Conyuges',
                     'cantidad' => array(
-                        'pendientes' => (new Mercurio32)->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
+                        'pendientes' => (new Mercurio32())->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
                         'aprobados' => (new Mercurio32)->count("id.*", "conditions: estado='A' and usuario = '" . $user . "'"),
                         'rechazados' => (new Mercurio32)->count("id.*", "conditions: estado='R' and usuario = '" . $user . "'"),
                         'devueltos' => (new Mercurio32)->count("id.*", "conditions: estado='D' and usuario = '" . $user . "'"),
@@ -110,7 +109,7 @@ class PrincipalController extends ApplicationController
                 array(
                     'name' => 'Afiliación Beneficiarios',
                     'cantidad' => array(
-                        'pendientes' => (new Mercurio34)->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
+                        'pendientes' => (new Mercurio34())->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
                         'aprobados' => (new Mercurio34)->count("id.*", "conditions: estado='A' and usuario = '" . $user . "'"),
                         'rechazados' => (new Mercurio34)->count("id.*", "conditions: estado='R' and usuario = '" . $user . "'"),
                         'devueltos' => (new Mercurio34)->count("id.*", "conditions: estado='D' and usuario = '" . $user . "'"),
@@ -123,7 +122,7 @@ class PrincipalController extends ApplicationController
                 array(
                     'name' => 'Actualización datos Empresas',
                     'cantidad' => array(
-                        'pendientes' => (new Mercurio33)->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
+                        'pendientes' => (new Mercurio33())->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
                         'aprobados' => (new Mercurio33)->count("id.*", "conditions: estado='A' and usuario = '" . $user . "'"),
                         'rechazados' => (new Mercurio33)->count("id.*", "conditions: estado='R' and usuario = '" . $user . "'"),
                         'devueltos' => (new Mercurio33)->count("id.*", "conditions: estado='D' and usuario = '" . $user . "'"),
@@ -136,7 +135,7 @@ class PrincipalController extends ApplicationController
                 array(
                     'name' => 'Actualización datos Trabajador',
                     'cantidad' => array(
-                        'pendientes' => (new Mercurio47)->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
+                        'pendientes' => (new Mercurio47())->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
                         'aprobados' => (new Mercurio47)->count("id.*", "conditions: estado='A' and usuario = '" . $user . "'"),
                         'rechazados' => (new Mercurio47)->count("id.*", "conditions: estado='R' and usuario = '" . $user . "'"),
                         'devueltos' => (new Mercurio47)->count("id.*", "conditions: estado='D' and usuario = '" . $user . "'"),
@@ -166,7 +165,7 @@ class PrincipalController extends ApplicationController
         );
 
         $this->setParamToView("servicios", $servicios);
-        Tag::displayTo("permiso_menu", $permiso_menu);
+        #Tag::displayTo("permiso_menu", $permiso_menu);
     }
 
     public function dashboardAction()
@@ -256,7 +255,7 @@ class PrincipalController extends ApplicationController
                 'labels' => $labels,
                 'success' => true
             );
-        } catch (Exception $err) {
+        } catch (DebugException $err) {
             $response = array(
                 'success' => false,
                 'msj' => $err->getMessage()
@@ -265,21 +264,6 @@ class PrincipalController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function prueba_tokenAction($tabla)
-    {
-        $sat01 = $this->Sat01->findFirst();
-        $sat29 = $this->Sat29->findfirst("referencia = '$tabla'");
-        $nit = trim($sat01->getNit());
-        $pass = trim($sat01->getPassword());
-        $grant_type = trim($sat01->getGrantType());
-        $client_id = trim($sat29->getClientId());
-        $path = trim($sat01->getPath());
-
-        $satConsultaServices  = new SatConsultaServices();
-        $token = $satConsultaServices->tokenSat($path, $nit, $pass, $grant_type, $client_id);
-        Debug::addVariable("a", $token);
-        throw new DebugException(0);
-    }
 
     public function prueba_sat02Action()
     {
@@ -354,7 +338,7 @@ class PrincipalController extends ApplicationController
         }
     }
 
-    public function file_existe_globalAction()
+    public function file_existe_globalAction(Request $request)
     {
         $this->setResponse("ajax");
         $filepath = $request->input('filepath');

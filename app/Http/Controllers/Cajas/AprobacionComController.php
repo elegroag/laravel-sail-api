@@ -26,6 +26,9 @@ use App\Services\Utils\Comman;
 class AprobacioncomController extends ApplicationController
 {
     protected $tipopc = 11;
+    protected $db;
+    protected $user;
+    protected $tipo;
     /**
      * services variable
      *
@@ -53,8 +56,11 @@ class AprobacioncomController extends ApplicationController
 
 
     public function __construct()
-    {    
+    {
         $this->pagination = new Pagination();
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
     public function aplicarFiltroAction(Request $request, string $estado = 'P')
@@ -304,7 +310,7 @@ class AprobacioncomController extends ApplicationController
                 'success' => true,
                 'msj' => 'El registro se completo con éxito'
             );
-            
+
             $this->db->commit();
         } catch (DebugException $e) {
             $this->db->rollBack();
@@ -339,7 +345,7 @@ class AprobacioncomController extends ApplicationController
             }
 
             $today = Carbon::now();
-            $this->Mercurio39->updateAll("estado='D', motivo='{$nota}', codest='{$codest}', fecest='".$today->format('Y-m-d H:i:s')."'", "conditions: id='{$id}'");
+            $this->Mercurio39->updateAll("estado='D', motivo='{$nota}', codest='{$codest}', fecest='" . $today->format('Y-m-d H:i:s') . "'", "conditions: id='{$id}'");
 
             $item = $this->Mercurio10->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$id}'");
             $mercurio10 = new Mercurio10();

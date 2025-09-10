@@ -2,24 +2,31 @@
 
 namespace App\Http\Controllers\Cajas;
 
+use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio65;
+use App\Services\Tag;
+use App\Services\Utils\GeneralService;
+use App\Services\Utils\UploadFile;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class Mercurio65Controller extends ApplicationController
 {
 
-    private $query = "1=1";
-    private $cantidad_pagina = 0;
+    protected $query = "1=1";
+    protected $cantidad_pagina = 0;
+    protected $db;
+    protected $user;
+    protected $tipo;
 
     public function __construct()
     {
-       
-        
-        
         $this->cantidad_pagina = $this->numpaginate;
-        
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
     public function showTabla($paginate)
@@ -65,14 +72,14 @@ class Mercurio65Controller extends ApplicationController
         $this->setResponse("ajax");
         $consultasOldServices = new GeneralService();
         $this->query = $consultasOldServices->converQuery();
-        self::buscarAction();
+        #self::buscarAction();
     }
 
-    public function changeCantidadPaginaAction()
+    public function changeCantidadPaginaAction(Request $request)
     {
         $this->setResponse("ajax");
         $this->cantidad_pagina = $request->input("numero");
-        self::buscarAction();
+        #self::buscarAction();
     }
 
     public function indexAction()
@@ -87,11 +94,11 @@ class Mercurio65Controller extends ApplicationController
         $this->setParamToView("help", $help);
         $this->setParamToView("buttons", array("N", "F", "R"));
         $this->setParamToView("title", "Comercios");
-        Tag::setDocumentTitle('Comercios');
+        #Tag::setDocumentTitle('Comercios');
     }
 
 
-    public function buscarAction()
+    public function buscarAction(Request $request)
     {
         $this->setResponse("ajax");
         $pagina = $request->input('pagina');
@@ -105,7 +112,7 @@ class Mercurio65Controller extends ApplicationController
         $this->renderObject($response, false);
     }
 
-    public function editarAction()
+    public function editarAction(Request $request)
     {
         try {
             $this->setResponse("ajax");
@@ -113,100 +120,94 @@ class Mercurio65Controller extends ApplicationController
             $mercurio65 = $this->Mercurio65->findFirst("codsed = '$codsed'");
             if ($mercurio65 == false) $mercurio65 = new Mercurio65();
             $this->renderObject($mercurio65->getArray(), false);
-        } catch (DbException $e) {
+        } catch (DebugException $e) {
             parent::setLogger($e->getMessage());
             $this->db->rollback();
         }
     }
 
-    public function borrarAction()
+    public function borrarAction(Request $request)
     {
         try {
-            try {
-                $this->setResponse("ajax");
-                $codsed = $request->input('codsed');
-                $modelos = array("Mercurio65");
-                
-                $response = $this->db->begin();
-                $this->Mercurio65->deleteAll("codsed = '$codsed'");
-                $this->db->commit();
-                $response = parent::successFunc("Borrado Con Exito");
-                return $this->renderObject($response, false);
-            } catch (DbException $e) {
-                parent::setLogger($e->getMessage());
-                $this->db->rollback();
-            }
+
+            $this->setResponse("ajax");
+            $codsed = $request->input('codsed');
+            $modelos = array("Mercurio65");
+
+            $response = $this->db->begin();
+            $this->Mercurio65->deleteAll("codsed = '$codsed'");
+            $this->db->commit();
+            $response = parent::successFunc("Borrado Con Exito");
+            return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede Borrar el Registro");
             return $this->renderObject($response, false);
         }
     }
 
-    public function guardarAction()
+    public function guardarAction(Request $request)
     {
         try {
-            try {
-                $this->setResponse("ajax");
-                $codsed = $request->input('codsed', "addslaches", "extraspaces", "striptags");
-                $nit = $request->input('nit', "addslaches", "extraspaces", "striptags");
-                $razsoc = $request->input('razsoc', "addslaches", "extraspaces", "striptags");
-                $direccion = $request->input('direccion', "addslaches", "extraspaces", "striptags");
-                $email = $request->input('email', "addslaches", "extraspaces", "striptags");
-                $celular = $request->input('celular', "addslaches", "extraspaces", "striptags");
-                $codcla = $request->input('codcla', "addslaches", "alpha", "extraspaces", "striptags");
-                $detalle = $request->input('detalle', "addslaches", "alpha", "extraspaces", "striptags");
-                $estado = $request->input('estado', "addslaches", "alpha", "extraspaces", "striptags");
-                $lat = $request->input('lat');
-                $log = $request->input('log');
-                $modelos = array("Mercurio65");
-                
-                $response = $this->db->begin();
-                $mercurio65 = new Mercurio65();
-                $mercurio65->setTransaction($Transaccion);
-                $mercurio65->setCodsed($codsed);
-                $mercurio65->setNit($nit);
-                $mercurio65->setRazsoc($razsoc);
-                $mercurio65->setDireccion($direccion);
-                $mercurio65->setEmail($email);
-                $mercurio65->setCelular($celular);
-                $mercurio65->setCodcla($codcla);
-                $mercurio65->setDetalle($detalle);
-                $mercurio65->setLat($lat);
-                $mercurio65->setLog($log);
-                $mercurio65->setEstado($estado);
-                $mercurio01 = $this->Mercurio01->findFirst();
-                if (isset($_FILES['archivo']['name']) && $_FILES['archivo']['name'] != "") {
-                    $extension = explode(".", $_FILES['archivo']['name']);
-                    $name = $codsed . "_comercios." . end($extension);
-                    $_FILES['archivo']['name'] = $name;
-                    $estado = $this->uploadFile("archivo", $mercurio01->getPath());
-                    if ($estado != false) {
-                        $mercurio65->setArchivo($name);
-                        if (!$mercurio65->save()) {
-                            parent::setLogger($mercurio65->getMessages());
-                            $this->db->rollback();
-                        }
-                        $response = parent::successFunc("Se adjunto con exito el archivo");
-                    } else {
-                        $response = parent::errorFunc("No se cargo: Tamano del archivo muy grande o No es Valido");
+
+            $this->setResponse("ajax");
+            $codsed = $request->input('codsed');
+            $nit = $request->input('nit');
+            $razsoc = $request->input('razsoc');
+            $direccion = $request->input('direccion');
+            $email = $request->input('email');
+            $celular = $request->input('celular');
+            $codcla = $request->input('codcla');
+            $detalle = $request->input('detalle');
+            $estado = $request->input('estado');
+            $lat = $request->input('lat');
+            $log = $request->input('log');
+
+
+            $response = $this->db->begin();
+            $mercurio65 = new Mercurio65();
+
+            $mercurio65->setCodsed($codsed);
+            $mercurio65->setNit($nit);
+            $mercurio65->setRazsoc($razsoc);
+            $mercurio65->setDireccion($direccion);
+            $mercurio65->setEmail($email);
+            $mercurio65->setCelular($celular);
+            $mercurio65->setCodcla($codcla);
+            $mercurio65->setDetalle($detalle);
+            $mercurio65->setLat($lat);
+            $mercurio65->setLog($log);
+            $mercurio65->setEstado($estado);
+            $mercurio01 = $this->Mercurio01->findFirst();
+            if (isset($_FILES['archivo']['name']) && $_FILES['archivo']['name'] != "") {
+                $extension = explode(".", $_FILES['archivo']['name']);
+                $name = $codsed . "_comercios." . end($extension);
+                $_FILES['archivo']['name'] = $name;
+
+                $uploadFile = new UploadFile();
+                $estado = $uploadFile->upload("archivo", $mercurio01->getPath());
+                if ($estado != false) {
+                    $mercurio65->setArchivo($name);
+                    if (!$mercurio65->save()) {
+                        parent::setLogger($mercurio65->getMessages());
+                        $this->db->rollback();
                     }
+                    $response = parent::successFunc("Se adjunto con exito el archivo");
                 } else {
-                    $response = parent::errorFunc("No se cargo el archivo");
+                    $response = parent::errorFunc("No se cargo: Tamano del archivo muy grande o No es Valido");
                 }
-                $this->db->commit();
-                $response = parent::successFunc("Creacion Con Exito");
-                return $this->renderObject($response, false);
-            } catch (DbException $e) {
-                parent::setLogger($e->getMessage());
-                $this->db->rollback();
+            } else {
+                $response = parent::errorFunc("No se cargo el archivo");
             }
+            $this->db->commit();
+            $response = parent::successFunc("Creacion Con Exito");
+            return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede guardar/editar el Registro");
             return $this->renderObject($response, false);
         }
     }
 
-    public function validePkAction()
+    public function validePkAction(Request $request)
     {
         try {
             $this->setResponse("ajax");
@@ -217,7 +218,7 @@ class Mercurio65Controller extends ApplicationController
                 $response = parent::errorFunc("El Registro ya se encuentra Digitado");
             }
             return $this->renderObject($response, false);
-        } catch (DbException $e) {
+        } catch (DebugException $e) {
             parent::setLogger($e->getMessage());
             $response = parent::errorFunc("No se pudo validar la informacion");
             return $this->renderObject($response, false);

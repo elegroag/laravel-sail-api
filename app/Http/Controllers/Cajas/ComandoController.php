@@ -11,12 +11,14 @@ class ComandoController extends ApplicationController
 {
 
     protected $db;
-    protected $usuario;
+    protected $user;
+    protected $tipo;
 
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->usuario = session()->get('user');
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
     /**
