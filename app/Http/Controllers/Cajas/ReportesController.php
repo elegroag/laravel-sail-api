@@ -10,9 +10,9 @@ use Illuminate\Http\Response;
 class ReportesController extends ApplicationController
 {
 
-    public function initialize()
+    public function __construct()
     {
-        Core::importLibrary("Services", "Services");
+       
         $this->setTemplateAfter("main");
     }
 
@@ -23,10 +23,10 @@ class ReportesController extends ApplicationController
     public function novedades_SubsidioAction()
     {
         $this->setParamToView("titulo", "Reporte de Novedades de Subsidio");
-        $mfecini = $this->getPostParam("fecini");
-        $mfecfin = $this->getPostParam("fecfin");
-        $mtipnov = $this->getPostParam("tipnov");
-        $mdocumento = $this->getPostParam("documento");
+        $mfecini = $request->input("fecini");
+        $mfecfin = $request->input("fecfin");
+        $mtipnov = $request->input("tipnov");
+        $mdocumento = $request->input("documento");
         $fecini = new Date($mfecini);
         $fecfin = new Date($mfecfin);
         $mwhere_tipnov = "";

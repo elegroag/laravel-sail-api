@@ -2,10 +2,21 @@
 
 namespace App\Http\Controllers\Cajas;
 
+use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Services\CajaServices\IndependienteServices;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Services\Utils\Pagination;
+use App\Services\Utils\NotifyEmailServices;
+use App\Library\Collections\ParamsIndependiente;
+use App\Models\Gener42;
+use App\Models\Mercurio41;
+use App\Services\Aprueba\ApruebaSolicitud;
+use App\Services\Utils\CalculatorDias;
+use App\Services\Utils\Comman;
+use App\Services\Utils\GeneralService;
 
 class AprobaindepenController extends ApplicationController
 {
@@ -31,40 +42,15 @@ class AprobaindepenController extends ApplicationController
      */
     protected $apruebaSolicitud;
 
-    public function initialize()
-    {
-        Core::importHelper('format');
-        Core::importLibrary("Services", "Services");
-        Core::importLibrary("Pagination", "Pagination");
-        Core::importLibrary("ParamsIndependiente", "Collections");
-        $this->setTemplateAfter('bone');
-        $this->services = Services::Init();
-    }
-
-    public function beforeFilter($permisos = array())
-    {
-        $permisos = array(
-            "aplicarFiltro" => "59",
-            "info" => "60",
-            "buscar" => "61"
-        );
-        $flag = parent::beforeFilter($permisos);
-        if (!$flag) {
-            if (is_ajax()) {
-                $this->setResponse("ajax");
-                $response = parent::errorFunc("No cuenta con los permisos para este proceso");
-                $this->renderObject($response, false);
-            } else {
-                $this->redirect("principal/index/0");
-            }
-            return false;
-        }
+    public function __construct()
+    {            
     }
 
     public function aplicarFiltroAction($estado = 'P')
     {
         $this->setResponse("ajax");
-        $cantidad_pagina = ($this->getPostParam("numero")) ? $this->getPostParam("numero") : 10;
+        $request = request();
+        $cantidad_pagina = ($request->input("numero")) ? $request->input("numero") : 10;
         $usuario = parent::getActUser();
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
@@ -79,13 +65,13 @@ class AprobaindepenController extends ApplicationController
         );
 
         $query = $pagination->filter(
-            $this->getPostParam('campo'),
-            $this->getPostParam('condi'),
-            $this->getPostParam('value')
+            $request->input('campo'),
+            $request->input('condi'),
+            $request->input('value')
         );
 
-        Flash::set_flashdata("filter_independiente", $query, true);
-        Flash::set_flashdata("filter_params", $pagination->filters, true);
+        set_flashdata("filter_independiente", $query, true);
+        set_flashdata("filter_params", $pagination->filters, true);
 
         $response = $pagination->render(new IndependienteServices());
         return $this->renderObject($response, false);
@@ -108,7 +94,7 @@ class AprobaindepenController extends ApplicationController
         );
 
         $this->setParamToView("campo_filtro", $campo_field);
-        $this->setParamToView("filters", Flash::get_flashdata_item("filter_params"));
+        $this->setParamToView("filters", get_flashdata_item("filter_params"));
         $this->setParamToView("mercurio11", $this->Mercurio11->find());
         $this->setParamToView("title", "Aprueba Independientes");
         $this->setParamToView("buttons", array("F"));
@@ -140,9 +126,9 @@ class AprobaindepenController extends ApplicationController
             }
 
             if ($mercurio->getEstado() == 'A') {
-                $url = Core::getInstancePath() . "Cajas/aprobaindepen/infoAprobadoView/" . $mercurio->getId();
+                $url = env('APP_URL') . "Cajas/aprobaindepen/infoAprobadoView/" . $mercurio->getId();
             } else {
-                $url = Core::getInstancePath() . "Cajas/aprobaindepen/info_empresa/" . $mercurio->getId();
+                $url = env('APP_URL') . "Cajas/aprobaindepen/info_empresa/" . $mercurio->getId();
             }
 
             $sat = "NORMAL";
@@ -167,8 +153,9 @@ class AprobaindepenController extends ApplicationController
     public function buscarAction($estado = 'P')
     {
         $this->setResponse("ajax");
-        $pagina = ($this->getPostParam('pagina')) ? $this->getPostParam('pagina') : 1;
-        $cantidad_pagina = ($this->getPostParam("numero")) ? $this->getPostParam("numero") : 10;
+        $request = request();
+        $pagina = ($request->input('pagina')) ? $request->input('pagina') : 1;
+        $cantidad_pagina = ($request->input("numero")) ? $request->input("numero") : 10;
         $usuario = parent::getActUser();
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
@@ -184,19 +171,19 @@ class AprobaindepenController extends ApplicationController
         );
 
         if (
-            Flash::get_flashdata_item("filter_independiente") != false
+            get_flashdata_item("filter_independiente") != false
         ) {
-            $query = $pagination->persistencia(Flash::get_flashdata_item("filter_params"));
+            $query = $pagination->persistencia(get_flashdata_item("filter_params"));
         } else {
             $query = $pagination->filter(
-                $this->getPostParam('campo'),
-                $this->getPostParam('condi'),
-                $this->getPostParam('value')
+                $request->input('campo'),
+                $request->input('condi'),
+                $request->input('value')
             );
         }
 
-        Flash::set_flashdata("filter_independiente", $query, true);
-        Flash::set_flashdata("filter_params", $pagination->filters, true);
+        set_flashdata("filter_independiente", $query, true);
+        set_flashdata("filter_params", $pagination->filters, true);
 
         $response = $pagination->render(
             new IndependienteServices()
@@ -212,18 +199,19 @@ class AprobaindepenController extends ApplicationController
     public function devolverAction()
     {
         $this->setResponse("ajax");
+        $request = request();
         $independienteServices = new IndependienteServices();
         $notifyEmailServices = new NotifyEmailServices();
         try {
-            $id = $this->getPostParam('id', "addslaches", "alpha", "extraspaces", "striptags");
-            $codest = $this->getPostParam('codest', "addslaches", "alpha", "extraspaces", "striptags");
-            $nota = $this->getPostParam('nota');
-            $array_corregir = $this->getPostParam('campos_corregir');
+            $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
+            $codest = $request->input('codest', "addslaches", "alpha", "extraspaces", "striptags");
+            $nota = $request->input('nota');
+            $array_corregir = $request->input('campos_corregir');
             $campos_corregir = implode(";", $array_corregir);
 
-            $mercurio41 = (new Mercurio41)->findFirst("id='{$id}'");
+            $mercurio41 = (new Mercurio41())->findFirst("id='{$id}'");
             if ($mercurio41->getEstado() == 'D') {
-                throw new Exception("El registro ya se encuentra devuelto, no se requiere de repetir la acción.", 201);
+                throw new DebugException("El registro ya se encuentra devuelto, no se requiere de repetir la acción.", 201);
             }
 
             $independienteServices->devolver($mercurio41, $nota, $codest, $campos_corregir);
@@ -243,18 +231,6 @@ class AprobaindepenController extends ApplicationController
                 "msj" => $err->getMessage(),
                 "code" => $err->getCode()
             );
-        } catch (DbException $e) {
-            $salida = array(
-                "success" => false,
-                "msj" => $e->getMessage(),
-                "code" => 500
-            );
-        } catch (Exception $ei) {
-            $salida = array(
-                "success" => false,
-                "msj" => $ei->getMessage() . ' ' . $ei->getLine(),
-                "code" => 500
-            );
         }
         return $this->renderObject($salida, false);
     }
@@ -266,12 +242,13 @@ class AprobaindepenController extends ApplicationController
     public function rechazarAction()
     {
         $this->setResponse("ajax");
+        $request = request();
         $notifyEmailServices = new NotifyEmailServices();
         $indeServices =  new IndependienteServices();
         try {
-            $id = $this->getPostParam('id', "addslaches", "alpha", "extraspaces", "striptags");
-            $nota = $this->getPostParam('nota');
-            $codest = $this->getPostParam('codest', "addslaches", "alpha", "extraspaces", "striptags");
+            $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
+            $nota = $request->input('nota');
+            $codest = $request->input('codest', "addslaches", "alpha", "extraspaces", "striptags");
 
             $mercurio41 = (new Mercurio41)->findFirst(" id='{$id}'");
 
@@ -293,12 +270,6 @@ class AprobaindepenController extends ApplicationController
                 "msj" => $err->getMessage(),
                 "code" => $err->getCode()
             );
-        } catch (DbException $e) {
-            $salida = array(
-                "success" => false,
-                "msj" => $e->getMessage(),
-                "code" => 500
-            );
         }
         return  $this->renderObject($salida, false);
     }
@@ -312,10 +283,10 @@ class AprobaindepenController extends ApplicationController
      */
     public function pendiente_emailAction()
     {
-        $flash_mensaje = SESSION::getData("flash_mensaje");
+        /* $flash_mensaje = SESSION::getData("flash_mensaje");
         SESSION::setData("flash_mensaje", null);
         $this->setParamToView("flash_mensaje", $flash_mensaje);
-        $this->setParamToView("title", "Procesar Notificación Pendiente");
+        $this->setParamToView("title", "Procesar Notificación Pendiente"); */
     }
 
     /**
@@ -328,31 +299,32 @@ class AprobaindepenController extends ApplicationController
     public function rezagoCorreoAction()
     {
         $this->setResponse("view");
+        $request = request();
         $meses = array("Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre");
-        $nit = $this->getPostParam('nit');
-        $anexo_final = $this->getPostParam('anexo_final');
-        $anexo_inicial = $this->getPostParam('anexo_inicial');
-        $feccap = $this->getPostParam('feccap');
-        $feccap = new DateTime($feccap);
+        $nit = $request->input('nit');
+        $anexo_final = $request->input('anexo_final');
+        $anexo_inicial = $request->input('anexo_inicial');
+        $feccap = $request->input('feccap');
+        $feccap = new \DateTime($feccap);
 
         try {
             $mercurio41 = $this->Mercurio41->findFirst("nit='{$nit}' AND estado='A'");
             if (!$mercurio41) {
-                throw new Exception("Error la empresa no es valida para envio de correo.", 501);
+                throw new DebugException("Error la empresa no es valida para envio de correo.", 501);
             }
             $consultasOldServices = new GeneralService();
             $servicio = $consultasOldServices->webService("datosEmpresa", $_POST);
             if ($servicio['flag'] == false) {
-                throw new Exception("Error al buscar la empresa en SISUWEB.", 502);
+                throw new DebugException("Error al buscar la empresa en SISUWEB.", 502);
             }
             if (!$servicio['data']) {
-                throw new Exception("Los datos de la empresa no está disponible en SISUWEB.", 503);
+                throw new DebugException("Los datos de la empresa no está disponible en SISUWEB.", 503);
             }
 
             $asunto = "Afiliacion de la empresa realizada con Exito. Nit: " . $mercurio41->getCedtra();
             $mercurio07 = $this->Mercurio07->findFirst("tipo='{$mercurio41->getTipo()}' and coddoc='{$mercurio41->getCoddoc()}' and documento='{$mercurio41->getDocumento()}'");
             if (!$mercurio07) {
-                throw new Exception("Error no hay usuario empresa para el servicio de autogestión de comfaca en línea.", 504);
+                throw new DebugException("Error no hay usuario empresa para el servicio de autogestión de comfaca en línea.", 504);
             }
             $mercurio07->setTipo('E');
             $mercurio07->save();
@@ -369,7 +341,7 @@ class AprobaindepenController extends ApplicationController
             ob_start();
             $this->setParamToView("rutaImg", "https://comfacaenlinea.com.co/Mercurio/public/img/Mercurio/logob.png");
             $this->setParamToView("mercurio41", $mercurio41);
-            $this->setParamToView("actapr", $this->getPostParam('actapr'));
+            $this->setParamToView("actapr", $request->input('actapr'));
             $this->setParamToView("dia", $feccap->format("d"));
             $this->setParamToView("mes", $meses[intval($feccap->format("m") - 1)]);
             $this->setParamToView("anno", $feccap->format("Y"));
@@ -377,7 +349,7 @@ class AprobaindepenController extends ApplicationController
             $this->setParamToView("mercurio02", $mercurio02);
             $this->setParamToView("anexo_final", $anexo_final);
             $this->setParamToView("anexo_inicial", $anexo_inicial);
-            echo View::renderView("aprobaindepen/mail/aprobar");
+            /* echo View::renderView("aprobaindepen/mail/aprobar");
             $mensaje = ob_get_contents();
             ob_end_clean();
 
@@ -404,10 +376,11 @@ class AprobaindepenController extends ApplicationController
             $recip->addTo($email, $nombre);
             $swift->send($smsj, $recip, new Swift_Address($_email));
             SESSION::setData("flash_mensaje", "El envío se ha completado a la dirección de email: " . $mercurio07->getEmail() . " nombre: " . $mercurio07->getNombre());
+       
+        Router::redirectToApplication('Cajas/aprobaindepen/pendiente_email'); */
         } catch (\Exception $err) {
-            SESSION::setData("flash_mensaje", $err->getMessage());
+            #SESSION::setData("flash_mensaje", $err->getMessage());
         }
-        Router::redirectToApplication('Cajas/aprobaindepen/pendiente_email');
     }
 
     /**
@@ -420,20 +393,21 @@ class AprobaindepenController extends ApplicationController
     public function empresa_searchAction()
     {
         $this->setResponse("ajax");
-        $nit = $this->getPostParam('nit');
+        $request = request();
+        $nit = $request->input('nit');
         try {
             $mercurio41 = $this->Mercurio41->findFirst("nit='{$nit}' AND estado='A'");
             if (!$mercurio41) {
-                throw new Exception("La empresa no está disponible para notificar por email", 501);
+                throw new DebugException("La empresa no está disponible para notificar por email", 501);
             } else {
                 $data07 = $this->Mercurio07->find("conditions: documento='{$mercurio41->getDocumento()}'");
                 $consultasOldServices = new GeneralService();
                 $servicio = $consultasOldServices->webService("datosEmpresa", $_POST);
                 if ($servicio['flag'] == false) {
-                    throw new Exception("Error al buscar la empresa en SISUWEB.", 502);
+                    throw new DebugException("Error al buscar la empresa en SISUWEB.", 502);
                 }
                 if (!$servicio['data']) {
-                    throw new Exception("Los datos de la empresa no está disponible en SISUWEB.", 503);
+                    throw new DebugException("Los datos de la empresa no está disponible en SISUWEB.", 503);
                 }
 
                 $mercurio07 = array();
@@ -480,11 +454,12 @@ class AprobaindepenController extends ApplicationController
     public function inforAction()
     {
         $this->setResponse("ajax");
+        $request = request();
         try {
             $independienteServices = new IndependienteServices();
-            $id = $this->getPostParam('id');
+            $id = $request->input('id');
             if (!$id) {
-                throw new Exception("Error se requiere del id independiente", 501);
+                throw new DebugException("Error se requiere del id independiente", 501);
             }
 
             $mercurio41 = $this->Mercurio41->findFirst("id='{$id}'");
@@ -500,7 +475,7 @@ class AprobaindepenController extends ApplicationController
             $paramsIndependiente = new ParamsIndependiente();
             $paramsIndependiente->setDatosCaptura($datos_captura);
 
-            $htmlEmpresa = View::render('aprobaindepen/tmp/consulta', array(
+            $htmlEmpresa = view('aprobaindepen/tmp/consulta', array(
                 'mercurio41' => $mercurio41,
                 'mercurio01' => $this->Mercurio01->findFirst(),
                 'det_tipo' => $this->Mercurio06->findFirst("tipo = '{$mercurio41->getTipo()}'")->getDetalle(),
@@ -517,7 +492,7 @@ class AprobaindepenController extends ApplicationController
                 '_tipdis' => ParamsIndependiente::getTipoDiscapacidad(),
                 '_nivedu' => ParamsIndependiente::getNivelEducativo(),
                 '_tipafi' => ParamsIndependiente::getTipoAfiliado(),
-            ));
+            ))->render();
 
             $procesadorComando = Comman::Api();
             $procesadorComando->runCli(
@@ -543,7 +518,7 @@ class AprobaindepenController extends ApplicationController
                 'seguimiento' => $independienteServices->seguimiento($mercurio41),
                 'campos_disponibles' => $mercurio41->CamposDisponibles()
             );
-        } catch (Exception $err) {
+        } catch (DebugException $err) {
             $response = array(
                 'success' => false,
                 'msj' => $err->getMessage()
@@ -588,11 +563,11 @@ class AprobaindepenController extends ApplicationController
         $this->setParamToView("_codciu", ParamsIndependiente::getCiudades());
         $this->setParamToView("_codact", ParamsIndependiente::getActividades());
         $this->setParamToView("_coddoc", ParamsIndependiente::getTipoDocumentos());
-        $this->setParamToView("_tippag", ParamsIndependiente::getTipoPago());
+      /*   $this->setParamToView("_tippag", ParamsIndependiente::getTipoPago());
         $this->setParamToView("_bancos", ParamsIndependiente::getBancos());
         $this->setParamToView("_tipcue", ParamsIndependiente::getTipoCuenta());
         $this->setParamToView("_giro", ParamsIndependiente::getGiro());
-        $this->setParamToView("_codgir", ParamsIndependiente::getCodigoGiro());
+        $this->setParamToView("_codgir", ParamsIndependiente::getCodigoGiro()); */
         $this->setParamToView("_coddocrepleg", $_coddocrepleg);
     }
 
@@ -604,7 +579,7 @@ class AprobaindepenController extends ApplicationController
     public function editarViewAction($id)
     {
         if (!$id) {
-            Router::rTa("aprobaindepen/index");
+            return redirect("aprobaindepen/index");
             exit;
         }
         $this->independienteServices = new IndependienteServices();
@@ -639,52 +614,53 @@ class AprobaindepenController extends ApplicationController
     public function edita_empresaAction()
     {
         $this->setResponse("ajax");
-        $nit = $this->getPostParam('nit');
-        $id = $this->getPostParam('id');
+        $request = request();
+        $nit = $request->input('nit');
+        $id = $request->input('id');
         try {
             $mercurio41 = $this->Mercurio41->findFirst("nit='{$nit}' AND id='{$id}'");
             if (!$mercurio41) {
-                throw new Exception("La empresa no está disponible para notificar por email", 501);
+                throw new DebugException("La empresa no está disponible para notificar por email", 501);
             } else {
-                $tipsoc = $this->getPostParam('tipsoc');
+                $tipsoc = $request->input('tipsoc');
                 if (strlen($tipsoc) == 1) {
                     $tipsoc = str_pad($tipsoc, 2, '0', STR_PAD_LEFT);
                 }
                 $data = array(
-                    "razsoc" => $this->getPostParam('razsoc'),
-                    "codact" => $this->getPostParam('codact'),
-                    "digver" => $this->getPostParam('digver'),
-                    "calemp" => $this->getPostParam('calemp'),
-                    "cedrep" => $this->getPostParam('cedrep'),
-                    "repleg" => $this->getPostParam('repleg'),
-                    "direccion" => $this->getPostParam('direccion'),
-                    "codciu" => $this->getPostParam('codciu'),
-                    "codzon" => $this->getPostParam('codzon'),
-                    "telefono" => $this->getPostParam('telefono'),
-                    "celular" => $this->getPostParam('celular'),
-                    "email" => $this->getPostParam('email'),
-                    "sigla" => $this->getPostParam('sigla'),
-                    "fecini" => $this->getPostParam('fecini'),
-                    "tottra" => $this->getPostParam('tottra'),
-                    "valnom" => $this->getPostParam('valnom'),
+                    "razsoc" => $request->input('razsoc'),
+                    "codact" => $request->input('codact'),
+                    "digver" => $request->input('digver'),
+                    "calemp" => $request->input('calemp'),
+                    "cedrep" => $request->input('cedrep'),
+                    "repleg" => $request->input('repleg'),
+                    "direccion" => $request->input('direccion'),
+                    "codciu" => $request->input('codciu'),
+                    "codzon" => $request->input('codzon'),
+                    "telefono" => $request->input('telefono'),
+                    "celular" => $request->input('celular'),
+                    "email" => $request->input('email'),
+                    "sigla" => $request->input('sigla'),
+                    "fecini" => $request->input('fecini'),
+                    "tottra" => $request->input('tottra'),
+                    "valnom" => $request->input('valnom'),
                     "tipsoc" => $tipsoc,
-                    "dirpri" => $this->getPostParam('dirpri'),
-                    "ciupri" => $this->getPostParam('ciupri'),
-                    "celpri" => $this->getPostParam('celpri'),
-                    'tipemp' => $this->getPostParam('tipemp'),
-                    "emailpri" => $this->getPostParam('emailpri'),
-                    "tipper" => $this->getPostParam('tipper'),
-                    "matmer" => $this->getPostParam('matmer'),
-                    "coddocrepleg" => (!$this->getPostParam('coddocrepleg')) ? '1' : $this->getPostParam('coddocrepleg'),
-                    "prinom" => ($this->getPostParam('tipper') == 'N') ? $this->getPostParam('prinom') : $this->getPostParam('prinomrepleg'),
-                    "priape" => ($this->getPostParam('tipper') == 'N') ? $this->getPostParam('priape') : $this->getPostParam('priaperepleg'),
-                    "segnom" => ($this->getPostParam('tipper') == 'N') ? $this->getPostParam('segnom') : $this->getPostParam('segnomrepleg'),
-                    "segape" => ($this->getPostParam('tipper') == 'N') ? $this->getPostParam('segape') : $this->getPostParam('segaperepleg'),
-                    "prinomrepleg" => ($this->getPostParam('tipper') == 'J') ? $this->getPostParam('prinomrepleg') : '',
-                    "priaperepleg" => ($this->getPostParam('tipper') == 'J') ? $this->getPostParam('priaperepleg') : '',
-                    "segnomrepleg" => ($this->getPostParam('tipper') == 'J') ? $this->getPostParam('segnomrepleg') : '',
-                    "segaperepleg" => ($this->getPostParam('tipper') == 'J') ? $this->getPostParam('segaperepleg') : '',
-                    "telpri" => $this->getPostParam('telpri')
+                    "dirpri" => $request->input('dirpri'),
+                    "ciupri" => $request->input('ciupri'),
+                    "celpri" => $request->input('celpri'),
+                    'tipemp' => $request->input('tipemp'),
+                    "emailpri" => $request->input('emailpri'),
+                    "tipper" => $request->input('tipper'),
+                    "matmer" => $request->input('matmer'),
+                    "coddocrepleg" => (!$request->input('coddocrepleg')) ? '1' : $request->input('coddocrepleg'),
+                    "prinom" => ($request->input('tipper') == 'N') ? $request->input('prinom') : $request->input('prinomrepleg'),
+                    "priape" => ($request->input('tipper') == 'N') ? $request->input('priape') : $request->input('priaperepleg'),
+                    "segnom" => ($request->input('tipper') == 'N') ? $request->input('segnom') : $request->input('segnomrepleg'),
+                    "segape" => ($request->input('tipper') == 'N') ? $request->input('segape') : $request->input('segaperepleg'),
+                    "prinomrepleg" => ($request->input('tipper') == 'J') ? $request->input('prinomrepleg') : '',
+                    "priaperepleg" => ($request->input('tipper') == 'J') ? $request->input('priaperepleg') : '',
+                    "segnomrepleg" => ($request->input('tipper') == 'J') ? $request->input('segnomrepleg') : '',
+                    "segaperepleg" => ($request->input('tipper') == 'J') ? $request->input('segaperepleg') : '',
+                    "telpri" => $request->input('telpri')
                 );
                 $setters = "";
                 foreach ($data as $ai => $row) $setters .= " $ai='{$row}',";
@@ -695,7 +671,7 @@ class AprobaindepenController extends ApplicationController
                     "success" => true
                 );
             }
-        } catch (Exception $err) {
+        } catch (DebugException $err) {
             $salida = array(
                 "success" => false,
                 "msj" => $err->getMessage()
@@ -715,11 +691,11 @@ class AprobaindepenController extends ApplicationController
 
         $mercurio41 = $this->Mercurio41->findFirst("id='{$id}'");
         if (!$mercurio41) {
-            Flash::set_flashdata("error", array(
+            set_flashdata("error", array(
                 "msj" => "La empresa no se encuentra registrada.",
                 "code" => 201
             ));
-            Router::rTa("aprobaindepen/index");
+            return redirect("aprobaindepen/index");
             exit();
         }
 
@@ -735,11 +711,11 @@ class AprobaindepenController extends ApplicationController
         );
         $response =  $procesadorComando->toArray();
         if (!$response['success']) {
-            Flash::set_flashdata("error", array(
+            set_flashdata("error", array(
                 "msj" => "La empresa no se encuentra registrada.",
                 "code" => 201
             ));
-            Router::rTa("aprobaindepen/index");
+            return redirect("aprobaindepen/index");
             exit();
         }
 
@@ -758,7 +734,7 @@ class AprobaindepenController extends ApplicationController
      */
     public function excel_reporteAction($estado = 'P')
     {
-        $this->setResponse('view');
+       /*  $this->setResponse('view');
         $fecha = new Date();
         $file = "public/temp/" . "reporte_solicitudes_" . $fecha->getUsingFormatDefault() . ".xls";
         require_once "Library/Excel/Main.php";
@@ -827,7 +803,7 @@ class AprobaindepenController extends ApplicationController
             $j++;
         }
         $excels->close();
-        header("location: " . Core::getInstancePath() . "/{$file}");
+        header("location: " . env('APP_URL') . "/{$file}"); */
     }
 
     /**
@@ -838,19 +814,20 @@ class AprobaindepenController extends ApplicationController
     public function apruebaAction()
     {
         $this->setResponse("ajax");
+        $request = request();
         $debuginfo = array();
         try {
             try {
-                $user = Auth::getActiveIdentity();
-                $acceso = (new Gener42)->count("*", "conditions: permiso='62' AND usuario='{$user['usuario']}'");
+                $user = session()->get('user');
+                $acceso = (new Gener42())->count("*", "conditions: permiso='62' AND usuario='{$user['usuario']}'");
                 if ($acceso == 0) {
                     return $this->renderObject(array("success" => false, "msj" => "El usuario no dispone de permisos de aprobación"), false);
                 }
 
                 $apruebaSolicitud = new ApruebaSolicitud();
-                $apruebaSolicitud->setTransa();
+                $this->db->begin();
 
-                $idSolicitud = $this->getPostParam('id', "addslaches", "alpha", "extraspaces", "striptags");
+                $idSolicitud = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
                 $calemp = 'I';
                 $solicitud = $apruebaSolicitud->main(
                     $calemp,
@@ -858,21 +835,21 @@ class AprobaindepenController extends ApplicationController
                     $_POST
                 );
 
-                $apruebaSolicitud->endTransa();
-                $solicitud->enviarMail($this->getPostParam('actapr'), $this->getPostParam('fecapr'));
+                $this->db->commit();
+                $solicitud->enviarMail($request->input('actapr'), $request->input('fecapr'));
                 $salida = array(
                     'success' => true,
                     'msj' => 'El registro se completo con éxito'
                 );
             } catch (DebugException $err) {
-                $debuginfo = $err->getDebugInfo();
-                $apruebaSolicitud->closeTransa($err->getMessage());
+                
+                $this->db->rollback();
                 $salida = array(
                     "success" => false,
                     "msj" => $err->getMessage(),
                 );
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $salida = array(
                 "success" => false,
                 "msj" => $e->getMessage(),
@@ -885,12 +862,13 @@ class AprobaindepenController extends ApplicationController
     public function borrarFiltroAction()
     {
         $this->setResponse("ajax");
-        Flash::set_flashdata("filter_independiente", false, true);
-        Flash::set_flashdata("filter_params", false, true);
+        $request = request();
+        set_flashdata("filter_independiente", false, true);
+        set_flashdata("filter_params", false, true);
         return $this->renderObject(array(
             'success' => true,
-            'query' => Flash::get_flashdata_item("filter_independiente"),
-            'filter' => Flash::get_flashdata_item("filter_params"),
+            'query' => get_flashdata_item("filter_independiente"),
+            'filter' => get_flashdata_item("filter_params"),
         ));
     }
 
@@ -904,11 +882,11 @@ class AprobaindepenController extends ApplicationController
     {
         $mercurio41 = $this->Mercurio41->findFirst(" id='{$id}'");
         if (!$mercurio41) {
-            Flash::set_flashdata("error", array(
+            set_flashdata("error", array(
                 "msj" => "La empresa no se encuentra registrada.",
                 "code" => 201
             ));
-            Router::rTa("aprobaindepen/info/" . $id);
+            return redirect("aprobaindepen/info/" . $id);
             exit();
         }
 
@@ -926,11 +904,12 @@ class AprobaindepenController extends ApplicationController
     public function aportesAction($id)
     {
         $this->setResponse("ajax");
+        $request = request();
         try {
             try {
                 $mercurio41 = (new Mercurio41)->findFirst(" id='{$id}'");
                 if (!$mercurio41) {
-                    throw new Exception("La empresa no se encuentra registrada.", 201);
+                    throw new DebugException("La empresa no se encuentra registrada.", 201);
                 }
 
                 $procesadorComando = Comman::Api();
@@ -943,15 +922,15 @@ class AprobaindepenController extends ApplicationController
                 );
 
                 if ($procesadorComando->isJson() == False) {
-                    throw new Exception("Error procesando la consulta de aportes", 501);
+                    throw new DebugException("Error procesando la consulta de aportes", 501);
                 }
 
                 $salida = $procesadorComando->toArray();
                 $salida['solicitud'] = $mercurio41->getArray();
-            } catch (TransactionFailed $e) {
-                throw new Exception($e->getMessage(), 501);
+            } catch (DebugException $e) {
+                throw new DebugException($e->getMessage(), 501);
             }
-        } catch (Exception $err) {
+        } catch (DebugException $err) {
             $salida = array(
                 "success" => false,
                 "msj" => "No se pudo realizar el movimiento " . "\n" . $err->getMessage() . "\n " . $err->getLine(),
@@ -1009,7 +988,7 @@ class AprobaindepenController extends ApplicationController
             $mercurio41 = new Mercurio41();
             $mercurio41->createAttributes($empresa);
 
-            $htmlEmpresa = View::render('aprobaindepen/tmp/consulta', array(
+            $htmlEmpresa = view('aprobaindepen/tmp/consulta', array(
                 'mercurio41' => $mercurio41,
                 'mercurio01' => $mercurio01,
                 'det_tipo' => $det_tipo,
@@ -1019,7 +998,7 @@ class AprobaindepenController extends ApplicationController
                 '_codzon' => ParamsIndependiente::getZonas(),
                 '_codact' => ParamsIndependiente::getActividades(),
                 '_tipsoc' => ParamsIndependiente::getTipoSociedades()
-            ));
+            ))->render();
 
             $code_estados = array();
             $query = $this->Mercurio11->find();
@@ -1033,11 +1012,11 @@ class AprobaindepenController extends ApplicationController
             $this->setParamToView("nit", $mercurio41->getCedtra());
             $this->setParamToView("title", "Empresa Aprobada " . $mercurio41->getCedtra());
         } catch (DebugException $err) {
-            Flash::set_flashdata("error", array(
+            set_flashdata("error", array(
                 "msj" => $err->getMessage(),
                 "code" => 201
             ));
-            Router::rTa("aprobaindepen/index/A");
+            return redirect("aprobaindepen/index/A");
             exit;
         }
     }
@@ -1045,19 +1024,20 @@ class AprobaindepenController extends ApplicationController
     public function deshacerAction()
     {
         $this->setResponse("ajax");
+        $request = request();
         $indepeServices = new IndependienteServices();
         $notifyEmailServices = new NotifyEmailServices();
-        $action = $this->getPostParam('action');
-        $codest = $this->getPostParam('codest');
-        $sendEmail = $this->getPostParam('send_email');
-        $nota = $this->getPostParam('nota');
+        $action = $request->input('action');
+        $codest = $request->input('codest');
+        $sendEmail = $request->input('send_email');
+        $nota = $request->input('nota');
 
         try {
-            $id = $this->getPostParam('id');
+            $id = $request->input('id');
 
             $mercurio41 = (new Mercurio41)->findFirst("id='{$id}'");
             if (!$mercurio41) {
-                throw new Exception("Los datos de la empresa no son validos para procesar.", 501);
+                throw new DebugException("Los datos de la empresa no son validos para procesar.", 501);
             }
 
             $ps = Comman::Api();
@@ -1072,7 +1052,7 @@ class AprobaindepenController extends ApplicationController
                 )
             );
 
-            if ($ps->isJson() == False) throw new Exception("Error al buscar la empresa en Sisuweb", 501);
+            if ($ps->isJson() == False) throw new DebugException("Error al buscar la empresa en Sisuweb", 501);
 
             $out = $ps->toArray();
             $empresaSisu = $out['data'];
@@ -1092,11 +1072,11 @@ class AprobaindepenController extends ApplicationController
             );
 
             if ($ps->isJson() == False) {
-                throw new Exception("Error al procesar el deshacer la aprobación en SisuWeb.", 501);
+                throw new DebugException("Error al procesar el deshacer la aprobación en SisuWeb.", 501);
             }
 
             $resdev = $ps->toArray();
-            if ($resdev['success'] !== true) throw new Exception($resdev['message'], 501);
+            if ($resdev['success'] !== true) throw new DebugException($resdev['message'], 501);
 
             $datos = $resdev['data'];
             if ($datos['noAction']) {
@@ -1133,7 +1113,7 @@ class AprobaindepenController extends ApplicationController
                     'isDelete' => $datos['isDelete'],
                 );
             }
-        } catch (Exception $err) {
+        } catch (DebugException $err) {
             $salida = array(
                 "success" => false,
                 "msj" => "Error no se pudo realizar el movimiento, " . $err->getMessage(),

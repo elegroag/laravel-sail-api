@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Services\Utils\GeneralService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -11,12 +12,8 @@ class ConsultaController extends ApplicationController
 {
 
 
-    public function initialize()
+    public function __construct()
     {
-        Core::importLibrary("Services", "Services");
-        Core::importLibrary("CalculatorDias", "Pagination");
-        $this->setTemplateAfter('main');
-        Services::Init();
     }
 
     public function indexAction()
@@ -24,23 +21,7 @@ class ConsultaController extends ApplicationController
         $help = "Esta opcion permite manejar los ";
         $this->setParamToView("help", $help);
         $this->setParamToView("title", "Consulta");
-        Tag::setDocumentTitle('Consulta');
-    }
-
-    public function beforeFilter($permisos = array())
-    {
-        $permisos = array("consulta_auditoria_view" => "137", "carga_laboral" => "138", "indicadores" => "139");
-        $flag = parent::beforeFilter($permisos);
-        if (!$flag) {
-            $response = parent::errorFunc("No cuenta con los permisos para este proceso");
-            if (is_ajax()) {
-                $this->setResponse("ajax");
-                $this->renderObject($response, false);
-            } else {
-                Router::redirectToApplication('Cajas/principal/index');
-            }
-            return false;
-        }
+       // Tag::setDocumentTitle('Consulta');
     }
 
 
@@ -52,12 +33,12 @@ class ConsultaController extends ApplicationController
         Tag::setDocumentTitle('Consulta Historica');
     }
 
-    public function consulta_auditoriaAction()
+    public function consulta_auditoriaAction(Request $request)
     {
         $this->setResponse("ajax");
-        $tipopc = $this->getPostParam("tipopc");
-        $fecini = $this->getPostParam("fecini");
-        $fecfin = $this->getPostParam("fecfin");
+        $tipopc = $request->input("tipopc");
+        $fecini = $request->input("fecini");
+        $fecfin = $request->input("fecfin");
         $html = "";
         $html = "<div class='table-responsive'> ";
         $html .= "<table class='table'>";
@@ -143,9 +124,9 @@ class ConsultaController extends ApplicationController
     public function reporte_auditoriaAction()
     {
         $this->setResponse('view');
-        $tipopc = $this->getPostParam("tipopc");
-        $fecini = $this->getPostParam("fecini");
-        $fecfin = $this->getPostParam("fecfin");
+        $tipopc = $request->input("tipopc");
+        $fecini = $request->input("fecini");
+        $fecfin = $request->input("fecfin");
         $fecha = new Date();
         $file = "public/temp/" . "reporte_auditoria_" . $fecha->getUsingFormatDefault() . ".xls";
         require_once "Library/Excel/Main.php";
@@ -245,15 +226,15 @@ class ConsultaController extends ApplicationController
             $j++;
         }
         $excels->close();
-        header("location: " . Core::getInstancePath() . "/{$file}");
+        header("location: " . env('APP_URL') . "/{$file}");
     }
 
 
     public function inforAction()
     {
         $this->setResponse("ajax");
-        $tipopc = $this->getPostParam('tipopc');
-        $id = $this->getPostParam('id');
+        $tipopc = $request->input('tipopc');
+        $id = $request->input('id');
         $response = "";
         $consultasOldServices = new GeneralService();
         $result = $consultasOldServices->consultaTipopc($tipopc, "info", $id);
@@ -400,7 +381,7 @@ class ConsultaController extends ApplicationController
             $j++;
         }
         $excels->close();
-        header("location: " . Core::getInstancePath() . "/{$file}");
+        header("location: " . env('APP_URL') . "/{$file}");
     }
 
     public function reporte_excel_indicadoresAction($fecini, $fecfin)
@@ -507,7 +488,7 @@ class ConsultaController extends ApplicationController
             $j++;
         }
         $excels->close();
-        header("location: " . Core::getInstancePath() . "/{$file}");
+        header("location: " . env('APP_URL') . "/{$file}");
     }
 
     public function indicadoresAction()
@@ -522,8 +503,8 @@ class ConsultaController extends ApplicationController
     public function consulta_indicadoresAction()
     {
         $this->setResponse("ajax");
-        $fecini = $this->getPostParam("fecini");
-        $fecfin = $this->getPostParam("fecfin");
+        $fecini = $request->input("fecini");
+        $fecfin = $request->input("fecfin");
         $mercurio09 = (new Mercurio09)->find("conditions: tipopc IN(1,2,3,4,8,9,13)");
 
         $html = "<div class='table-responsive'>";
@@ -616,9 +597,9 @@ class ConsultaController extends ApplicationController
     public function consulta_activacion_masivaAction()
     {
         $this->setResponse("ajax");
-        // $nit = $this->getPostParam("nit");
-        $fecini = $this->getPostParam("fecini");
-        $fecfin = $this->getPostParam("fecfin");
+        // $nit = $request->input("nit");
+        $fecini = $request->input("fecini");
+        $fecfin = $request->input("fecfin");
         $html = "";
         $html = "<div class='table-responsive'> ";
         $html .= "<table class='table'>";

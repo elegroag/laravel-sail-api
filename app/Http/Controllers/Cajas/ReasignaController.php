@@ -11,11 +11,11 @@ class ReasignaController extends ApplicationController
 {
 
 
-    public function initialize()
+    public function __construct()
     {
-        Core::importLibrary("Services", "Services");
-        $this->setTemplateAfter('main');
-        Services::Init();
+       
+        
+        
     }
 
     public function beforeFilter($permisos = array())
@@ -47,11 +47,11 @@ class ReasignaController extends ApplicationController
     {
         $this->setResponse("ajax");
         try {
-            $tipopc = $this->getPostParam("tipopc_proceso");
-            $usuori = $this->getPostParam("usuori");
-            $usudes = $this->getPostParam("usudes");
-            $fecini = $this->getPostParam("fecini");
-            $fecfin = $this->getPostParam("fecfin");
+            $tipopc = $request->input("tipopc_proceso");
+            $usuori = $request->input("usuori");
+            $usudes = $request->input("usudes");
+            $fecini = $request->input("fecini");
+            $fecfin = $request->input("fecfin");
             $model = '';
             if ($tipopc == 1) {
                 $model = new Mercurio31();
@@ -98,8 +98,8 @@ class ReasignaController extends ApplicationController
     public function traerDatosAction()
     {
         $this->setResponse("ajax");
-        $tipopc = $this->getPostParam("tipopc");
-        $usuario = $this->getPostParam("usuario");
+        $tipopc = $request->input("tipopc");
+        $usuario = $request->input("usuario");
         $response  = "<table class='table table-hover align-items-center table-bordered'>";
         $response .= "<thead class='thead-dark'>";
         $response .= "<tr>";
@@ -166,8 +166,8 @@ class ReasignaController extends ApplicationController
     public function inforAction()
     {
         $this->setResponse("ajax");
-        $tipopc = $this->getPostParam('tipopc');
-        $id = $this->getPostParam('id');
+        $tipopc = $request->input('tipopc');
+        $id = $request->input('id');
         $response = "";
         $consultasOldServices = new  GeneralService();
         $result = $consultasOldServices->consultaTipopc($tipopc, "info", $id);
@@ -192,12 +192,12 @@ class ReasignaController extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $tipopc = $this->getPostParam('tipopc');
-                $id = $this->getPostParam('id');
-                $usuario = $this->getPostParam('usuario');
+                $tipopc = $request->input('tipopc');
+                $id = $request->input('id');
+                $usuario = $request->input('usuario');
                 $modelos = array("mercurio33", "Mercurio35");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 $consultasOldServices = new  GeneralService();
                 $result = $consultasOldServices->consultaTipopc($tipopc, "one", $id);
 
@@ -205,16 +205,16 @@ class ReasignaController extends ApplicationController
                 $mercurio->setUsuario($usuario);
                 if (!$mercurio->save()) {
                     parent::setLogger($mercurio->getMessages());
-                    parent::ErrorTrans();
+                    $this->db->rollback();
                 }
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Cambio de Usuario con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se pudo realizar la opcion");
             return $this->renderObject($response, false);
         }

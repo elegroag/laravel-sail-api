@@ -16,14 +16,14 @@ class ReportesolController extends ApplicationController
      */
     protected $pagination;
 
-    public function initialize()
+    public function __construct()
     {
-        $this->setPersistance(false);
-        Core::importHelper('format');
-        Core::importLibrary("Services", "Services");
-        Core::importLibrary("Pagination", "Pagination");
-        $this->setTemplateAfter('main');
-        Services::Init();
+        
+        
+       
+        
+        
+        
         $this->pagination = new Pagination();
     }
 
@@ -41,10 +41,10 @@ class ReportesolController extends ApplicationController
     public function procesarAction()
     {
         $this->setResponse('ajax');
-        $tipo = $this->getPostParam("tipo");
-        $estado = $this->getPostParam("estado");
-        $fecha_solicitud = $this->getPostParam("fecha_solicitud");
-        $fecha_aprueba = $this->getPostParam("fecha_aprueba");
+        $tipo = $request->input("tipo");
+        $estado = $request->input("estado");
+        $fecha_solicitud = $request->input("fecha_solicitud");
+        $fecha_aprueba = $request->input("fecha_aprueba");
 
         $reporte = new ReporteSolicitudes();
 

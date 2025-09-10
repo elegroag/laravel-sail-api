@@ -6,6 +6,24 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Carbon\Carbon;
+use App\Exceptions\DebugException;
+use App\Library\Collections\ParamsBeneficiario;
+use App\Services\Utils\Comman;
+use App\Models\Mercurio10;
+use App\Models\Mercurio34;
+use App\Services\CajaServices\BeneficiarioServices;
+use App\Services\Utils\Pagination;
+use App\Library\Auth;
+use App\Models\Gener42;
+use App\Services\Aprueba\ApruebaBeneficiario;
+use App\Services\Utils\NotifyEmailServices;
+use App\Library\DbException;
+use App\Models\Mercurio07;
+use App\Library\View;
+use App\Library\Exception;
+use App\Services\Request as RequestParam;
+use App\Services\Utils\AsignarFuncionario;
 
 class AprobacionbenController extends ApplicationController
 {
@@ -23,38 +41,11 @@ class AprobacionbenController extends ApplicationController
      */
     protected $beneficiarioServices;
 
-    public function initialize()
-    {
-        Core::importHelper('format');
-        Core::importLibrary("Services", "Services");
-        Core::importLibrary("Pagination", "Pagination");
-        Core::importLibrary("ParamsBeneficiario", "Collections");
-        $this->setTemplateAfter('bone');
-        $this->services = Services::Init();
+    public function __construct()
+    { 
     }
 
-    public function beforeFilter($permisos = array())
-    {
-        $permisos = array(
-            "aplicarFiltro" => "107",
-            "info" => "108",
-            "buscar" => "109",
-            "aprobar" => "110",
-            "devolver" => "111",
-            "rechazar" => "112"
-        );
-        $flag = parent::beforeFilter($permisos);
-        if (!$flag) {
-            $response = parent::errorFunc("No cuenta con los permisos para este proceso");
-            if (is_ajax()) {
-                $this->setResponse("ajax");
-                $this->renderObject($response, false);
-            } else {
-                Router::redirectToApplication('Cajas/principal/index');
-            }
-            return false;
-        }
-    }
+
 
     /**
      * aplicarFiltroAction function
@@ -63,30 +54,28 @@ class AprobacionbenController extends ApplicationController
      * @param string $estado
      * @return void
      */
-    public function aplicarFiltroAction($estado = 'P')
+    public function aplicarFiltroAction(Request $request, string $estado = 'P')
     {
         $this->setResponse("ajax");
-        $cantidad_pagina = ($this->getPostParam("numero")) ? $this->getPostParam("numero") : 10;
+        $cantidad_pagina = $request->input("numero", 10);
         $usuario = parent::getActUser();
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
-            new Request(
-                array(
-                    "cantidadPaginas" => $cantidad_pagina,
-                    "query" => $query_str,
-                    "estado" => $estado
-                )
-            )
+            new RequestParam([
+                "cantidadPaginas" => $cantidad_pagina,
+                "query" => $query_str,
+                "estado" => $estado
+            ])
         );
         $query = $pagination->filter(
-            $this->getPostParam('campo'),
-            $this->getPostParam('condi'),
-            $this->getPostParam('value')
+            $request->input('campo'),
+            $request->input('condi'),
+            $request->input('value')
         );
 
-        Flash::set_flashdata("filter_beneficiario", $query, true);
-        Flash::set_flashdata("filter_params", $pagination->filters, true);
+        set_flashdata("filter_beneficiario", $query, true);
+        set_flashdata("filter_params", $pagination->filters, true);
 
         $response = $pagination->render(new BeneficiarioServices());
         return $this->renderObject($response, false);
@@ -94,7 +83,7 @@ class AprobacionbenController extends ApplicationController
 
     public function changeCantidadPaginaAction($estado = 'P')
     {
-        $this->buscarAction($estado);
+        //$this->buscarAction($estado);
     }
 
     /**
@@ -118,7 +107,7 @@ class AprobacionbenController extends ApplicationController
             "fecsol" => "Fecha solicitud",
         );
         $this->setParamToView("campo_filtro", $campo_field);
-        $this->setParamToView("filters", Flash::get_flashdata_item("filter_params"));
+        $this->setParamToView("filters", get_flashdata_item("filter_params"));
         $this->setParamToView("title", "Aprueba Beneficiario");
         $this->setParamToView("buttons", array("F"));
         $this->setParamToView("mercurio11", $this->Mercurio11->find());
@@ -133,35 +122,33 @@ class AprobacionbenController extends ApplicationController
      * @param string $estado
      * @return void
      */
-    public function buscarAction($estado = 'P')
+    public function buscarAction(Request $request, $estado = 'P')
     {
         $this->setResponse("ajax");
-        $pagina = ($this->getPostParam('pagina')) ? $this->getPostParam('pagina') : 1;
-        $cantidad_pagina = ($this->getPostParam("numero")) ? $this->getPostParam("numero") : 10;
+        $pagina = ($request->input('pagina')) ? $request->input('pagina') : 1;
+        $cantidad_pagina = ($request->input("numero")) ? $request->input("numero") : 10;
         $usuario = parent::getActUser();
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
-            new Request(
-                array(
-                    "cantidadPaginas" => $cantidad_pagina,
-                    "query" => $query_str,
-                    "estado" => $estado,
-                    "pagina" => $pagina
-                )
-            )
+            new Request([
+                "cantidadPaginas" => $cantidad_pagina,
+                "query" => $query_str,
+                "estado" => $estado,
+                "pagina" => $pagina
+            ])
         );
-        if (Flash::get_flashdata_item("filter_beneficiario") != false) {
-            $query = $pagination->persistencia(Flash::get_flashdata_item("filter_params"));
+        if (get_flashdata_item("filter_beneficiario") != false) {
+            $query = $pagination->persistencia(get_flashdata_item("filter_params"));
         } else {
             $query = $pagination->filter(
-                $this->getPostParam('campo'),
-                $this->getPostParam('condi'),
-                $this->getPostParam('value')
+                $request->input('campo'),
+                $request->input('condi'),
+                $request->input('value')
             );
         }
-        Flash::set_flashdata("filter_beneficiario", $query, true);
-        Flash::set_flashdata("filter_params", $pagination->filters, true);
+        set_flashdata("filter_beneficiario", $query, true);
+        set_flashdata("filter_params", $pagination->filters, true);
 
         $response = $pagination->render(new BeneficiarioServices());
         return $this->renderObject($response, false);
@@ -173,11 +160,10 @@ class AprobacionbenController extends ApplicationController
      * @author elegroag <elegroag@ibero.edu.co>
      * @return void
      */
-    public function apruebaAction()
+    public function apruebaAction(Request $request)
     {
         $this->setResponse("ajax");
-        Services::Init();
-        $user = Auth::getActiveIdentity();
+        $user = session()->get('user');
         $debuginfo = array();
         try {
             try {
@@ -190,27 +176,27 @@ class AprobacionbenController extends ApplicationController
                 }
 
                 $aprueba = new ApruebaBeneficiario();
-                $aprueba->setTransa();
+                $this->db->begin();
                 $postData = $_POST;
-                $idSolicitud = $this->getPostParam('id', "addslaches", "alpha", "extraspaces", "striptags");
+                $idSolicitud = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
                 $aprueba->findSolicitud($idSolicitud);
                 $aprueba->findSolicitante();
                 $aprueba->procesar($postData);
-                $aprueba->endTransa();
-                $aprueba->enviarMail($this->getPostParam('actapr'), $this->getPostParam('feccap'));
+                $this->db->commit();
+                $aprueba->enviarMail($request->input('actapr'), $request->input('feccap'));
                 $salida = array(
                     'success' => true,
                     'msj' => 'El registro se completo con éxito'
                 );
             } catch (DebugException $err) {
-                $debuginfo = $err->getDebugInfo();
-                $aprueba->closeTransa($err->getMessage());
+                
+                $this->db->rollback();
                 $salida = array(
                     "success" => false,
                     "msj" => $err->getMessage(),
                 );
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $salida = array(
                 "success" => false,
                 "msj" => $e->getMessage(),
@@ -220,16 +206,16 @@ class AprobacionbenController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function devolverAction()
+    public function devolverAction(Request $request)
     {
         $this->beneficiarioServices =  new BeneficiarioServices();
         $notifyEmailServices = new NotifyEmailServices();
 
         $this->setResponse("ajax");
-        $id = $this->getPostParam('id', "addslaches", "alpha", "extraspaces", "striptags");
-        $nota = sanetizar($this->getPostParam('nota'));
-        $codest = $this->getPostParam('codest', "addslaches", "alpha", "extraspaces", "striptags");
-        $array_corregir = $this->getPostParam('campos_corregir');
+        $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
+        $nota = sanetizar($request->input('nota'));
+        $codest = $request->input('codest', "addslaches", "alpha", "extraspaces", "striptags");
+        $array_corregir = $request->input('campos_corregir');
 
         try {
             $campos_corregir = implode(";", $array_corregir);
@@ -245,7 +231,7 @@ class AprobacionbenController extends ApplicationController
                 "success" => true,
                 "msj" => "Movimiento realizado con exito"
             );
-        } catch (DbException $err) {
+        } catch (DebugException $err) {
             $response = $err->getMessage();
         }
         $this->renderObject($response);
@@ -253,10 +239,10 @@ class AprobacionbenController extends ApplicationController
 
     public function devolver($mercurio34, $nota, $codest, $campos_corregir)
     {
-        $today = new Date();
+        $today = Carbon::now();
         $id = $mercurio34->getId();
         $mercurio34 = new Mercurio34();
-        $mercurio34->updateAll(" estado='D', motivo='{$nota}', codest='{$codest}', fecest='{$today->getUsingFormatDefault()}'", "conditions: id='{$id}'");
+        $mercurio34->updateAll(" estado='D', motivo='{$nota}', codest='{$codest}', fecest='".$today->format('Y-m-d H:i:s')."'", "conditions: id='{$id}'");
 
         $item = $this->Mercurio10->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$id}'");
         $mercurio10 = new Mercurio10();
@@ -266,25 +252,25 @@ class AprobacionbenController extends ApplicationController
         $mercurio10->setEstado("D");
         $mercurio10->setNota($nota);
         $mercurio10->setCodest($codest);
-        $mercurio10->setFecsis($today->getUsingFormatDefault());
+        $mercurio10->setFecsis($today->format('Y-m-d H:i:s'));
 
         if (!$mercurio10->save()) {
             $msj = "";
             foreach ($mercurio10->getMessages() as $key => $message) $msj .= $message . "<br/>";
-            throw new DbException("Error " . $msj, 501);
+            throw new DebugException("Error " . $msj, 501);
         }
 
         $this->Mercurio10->updateAll("campos_corregir='{$campos_corregir}'", "conditions: item='{$item}' AND numero='{$id}' AND tipopc='{$this->tipopc}'");
     }
 
-    public function rechazarAction()
+    public function rechazarAction(Request $request)
     {
         $notifyEmailServices = new NotifyEmailServices();
         $this->beneficiarioServices =  new BeneficiarioServices();
         $this->setResponse("ajax");
-        $id = $this->getPostParam('id', "addslaches", "alpha", "extraspaces", "striptags");
-        $nota = sanetizar($this->getPostParam('nota'));
-        $codest = $this->getPostParam('codest', "addslaches", "alpha", "extraspaces", "striptags");
+        $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
+        $nota = sanetizar($request->input('nota'));
+        $codest = $request->input('codest', "addslaches", "alpha", "extraspaces", "striptags");
         try {
             $mercurio34 = $this->Mercurio34->findFirst("id='{$id}'");
             $this->beneficiarioServices->rechazar($mercurio34, $nota, $codest);
@@ -292,6 +278,7 @@ class AprobacionbenController extends ApplicationController
                 $mercurio34,
                 $this->beneficiarioServices->msjRechazar($mercurio34, $nota)
             );
+
             $response = array(
                 "success" => true,
                 "msj" => "Movimiento Realizado Con Exito"
@@ -308,9 +295,9 @@ class AprobacionbenController extends ApplicationController
 
     function rechazar($mercurio34, $nota, $codest)
     {
-        $today = new Date();
+        $today = Carbon::now();
         $id = $mercurio34->getId();
-        $this->Mercurio34->updateAll("estado='X', motivo='{$nota}', codest='{$codest}', fecest='{$today->getUsingFormatDefault()}'", "conditions: id='{$id}' ");
+        $this->Mercurio34->updateAll("estado='X', motivo='{$nota}', codest='{$codest}', fecest='".$today->format('Y-m-d H:i:s')."'", "conditions: id='{$id}' ");
 
         $item = $this->Mercurio10->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$id}'");
         $mercurio10 = new Mercurio10();
@@ -320,7 +307,7 @@ class AprobacionbenController extends ApplicationController
         $mercurio10->setEstado("X");
         $mercurio10->setNota($nota);
         $mercurio10->setCodest($codest);
-        $mercurio10->setFecsis($today->getUsingFormatDefault());
+        $mercurio10->setFecsis($today->format('Y-m-d H:i:s'));
         $mercurio10->save();
         return true;
     }
@@ -333,21 +320,21 @@ class AprobacionbenController extends ApplicationController
      * @author elegroag <elegroag@ibero.edu.co>
      * @return void
      */
-    public function inforAction()
+    public function inforAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
-            $id = $this->getPostParam('id');
+            $id = $request->input('id');
 
             if (!$id) {
-                throw new Exception("Error la solicitud es requerida para continuar", 501);
+                throw new DebugException("Error la solicitud es requerida para continuar", 501);
             }
 
             $beneficiarioServices = new BeneficiarioServices();
             $this->setParamToView("hide_header", true);
             $solicitud = $this->Mercurio34->findFirst("id='{$id}'");
             if ($solicitud == false) {
-                throw new Exception("La solicitud de afiliación de beneficiario no es valida.", 501);
+                throw new DebugException("La solicitud de afiliación de beneficiario no es valida.", 501);
             }
 
             $trabajador_sisu = false;
@@ -365,7 +352,7 @@ class AprobacionbenController extends ApplicationController
                 $trabajador_sisu = ($rqs['success']) ? $rqs['data'] : false;
             }
 
-            $trabajador = new stdClass();
+            $trabajador = new \stdClass();
             if (!$trabajador_sisu) {
                 $tr = $this->Mercurio31->findFirst("cedtra='{$solicitud->getCedtra()}' and estado='A'");
                 $trabajador->estado = ($tr) ? $tr->getEstado() : 'I';
@@ -417,8 +404,8 @@ class AprobacionbenController extends ApplicationController
             $paramsBeneficiario = new ParamsBeneficiario();
             $paramsBeneficiario->setDatosCaptura($datos_captura);
 
-            $html = View::render(
-                'aprobacionben/tmp/consulta',
+            $html = view(
+                'cajas/aprobacionben/tmp/consulta',
                 array(
                     'beneficiario' => $solicitud,
                     'detTipo' => $this->Mercurio06->findFirst("tipo='{$solicitud->getTipo()}'")->getDetalle(),
@@ -440,7 +427,7 @@ class AprobacionbenController extends ApplicationController
                     '_codgir',
                     ParamsBeneficiario::getCodigoGiro()
                 )
-            );
+            )->render();
 
             $response = array(
                 'success' => true,
@@ -453,7 +440,7 @@ class AprobacionbenController extends ApplicationController
                 "relacion_multiple" => $relacion_multiple,
                 "trabajador" => $trabajador
             );
-        } catch (Exception $err) {
+        } catch (DebugException $err) {
             $response = array(
                 'success' => false,
                 'msj' => $err->getMessage()
@@ -493,50 +480,45 @@ class AprobacionbenController extends ApplicationController
         $this->setParamToView("tipo", parent::getActUser("tipo"));
     }
 
-    function clp($name)
-    {
-        return $this->getPostParam($name, "addslaches", "extraspaces", "striptags");
-    }
-
-    public function editar_solicitudAction()
+    public function editar_solicitudAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
-            $id = $this->getPostParam('id', "addslaches", "alpha", "extraspaces", "striptags");
-            $numdoc = $this->getPostParam('numdoc', "addslaches", "alpha", "extraspaces", "striptags");
+            $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
+            $numdoc = $request->input('numdoc', "addslaches", "alpha", "extraspaces", "striptags");
 
             $mercurio34 = (new Mercurio34)->findFirst("id='{$id}' and numdoc='{$numdoc}'");
             if (!$mercurio34) {
-                throw new Exception("El beneficiario no está disponible para notificar por email", 501);
+                throw new DebugException("El beneficiario no está disponible para notificar por email", 501);
             } else {
                 $mercurio07 = (new Mercurio07)->findFirst("documento='{$mercurio34->getDocumento()}' and coddoc='{$mercurio34->getCoddoc()}'");
                 if (!$mercurio07) {
-                    throw new Exception("El usuario no está disponible para notificar por email", 501);
+                    throw new DebugException("El usuario no está disponible para notificar por email", 501);
                 }
                 $asignarFuncionario = new AsignarFuncionario();
                 $usuario = $asignarFuncionario->asignar($this->tipopc, $mercurio07->getCodciu());
 
                 if (empty($usuario)) {
-                    throw new Exception("No se puede realizar el registro, no hay usuario disponible para la atención de la solicitud, Comuniquese con la Atencion al cliente", 505);
+                    throw new DebugException("No se puede realizar el registro, no hay usuario disponible para la atención de la solicitud, Comuniquese con la Atencion al cliente", 505);
                 }
                 $data = array(
-                    "tipdoc" => $this->clp('tipdoc'),
-                    "numdoc" => $this->clp('numdoc'),
-                    "priape" => $this->clp('priape'),
-                    "segape" => $this->clp('segape'),
-                    "prinom" => $this->clp('prinom'),
-                    "segnom" => $this->clp('segnom'),
-                    "fecnac" => $this->clp('fecnac'),
-                    "ciunac" => $this->clp('ciunac'),
-                    "sexo"   => $this->clp('sexo'),
-                    "parent" => $this->clp('parent'),
-                    "huerfano" => $this->clp('huerfano'),
-                    "tiphij" => $this->clp('tiphij'),
-                    "nivedu" => $this->clp('nivedu'),
-                    "captra" => $this->clp('captra'),
-                    "tipdis" => $this->clp('tipdis'),
-                    "calendario" => $this->clp('calendario'),
-                    "cedacu" => $this->clp('cedacu')
+                    "tipdoc" => $this->clp($request, 'tipdoc'),
+                    "numdoc" => $this->clp($request, 'numdoc'),
+                    "priape" => $this->clp($request, 'priape'),
+                    "segape" => $this->clp($request, 'segape'),
+                    "prinom" => $this->clp($request, 'prinom'),
+                    "segnom" => $this->clp($request, 'segnom'),
+                    "fecnac" => $this->clp($request, 'fecnac'),
+                    "ciunac" => $this->clp($request, 'ciunac'),
+                    "sexo"   => $this->clp($request, 'sexo'),
+                    "parent" => $this->clp($request, 'parent'),
+                    "huerfano" => $this->clp($request, 'huerfano'),
+                    "tiphij" => $this->clp($request, 'tiphij'),
+                    "nivedu" => $this->clp($request, 'nivedu'),
+                    "captra" => $this->clp($request, 'captra'),
+                    "tipdis" => $this->clp($request, 'tipdis'),
+                    "calendario" => $this->clp($request, 'calendario'),
+                    "cedacu" => $this->clp($request, 'cedacu')
                 );
                 $setters = "";
                 foreach ($data as $ai => $row) {
@@ -547,8 +529,8 @@ class AprobacionbenController extends ApplicationController
                 $setters  = trim($setters, ',');
                 $this->Mercurio34->updateAll($setters, "conditions: id='{$id}' AND numdoc='{$numdoc}'");
 
-                $db = (object) DbBase::rawConnect();
-                $db->setFetchMode(DbBase::DB_ASSOC);
+                $db = DbBase::rawConnect();
+                
 
                 $data = $db->fetchOne("SELECT max(id), mercurio34.* FROM mercurio34 WHERE numdoc='{$numdoc}'");
                 $salida = array(
@@ -557,7 +539,7 @@ class AprobacionbenController extends ApplicationController
                     "data" => $data
                 );
             }
-        } catch (Exception $err) {
+        } catch (DebugException $err) {
             $salida = array(
                 "success" => false,
                 "msj" => $err->getMessage()
@@ -576,18 +558,18 @@ class AprobacionbenController extends ApplicationController
     {
 
         if (!$id) {
-            Router::rTa("aprobacionben/index");
+            return redirect("aprobacionben/index");
             exit;
         }
 
         $mercurio34 = $this->Mercurio34->findFirst("id='{$id}'");
 
         if (!$mercurio34) {
-            Flash::set_flashdata("error", array(
+            set_flashdata("error", array(
                 "msj" => "El beneficiario no se encuentra registrado.",
                 "code" => 201
             ));
-            Router::rTa('aprobacionben/index');
+            return redirect('aprobacionben/index');
             exit;
         }
         $numdoc = $mercurio34->getNumdoc();
@@ -603,11 +585,11 @@ class AprobacionbenController extends ApplicationController
         $rqs =  $procesadorComando->toArray();
 
         if (!$rqs['success']) {
-            Flash::set_flashdata("error", array(
+            set_flashdata("error", array(
                 "msj" => "El beneficiario no se encuentra registrado.",
                 "code" => 201
             ));
-            Router::rTa("aprobacionben/index");
+            return redirect("aprobacionben/index");
             exit();
         }
 
@@ -638,33 +620,33 @@ class AprobacionbenController extends ApplicationController
         $this->setParamToView("pagina_con_estado", $estado);
     }
 
-    public function reaprobarAction()
+    public function reaprobarAction(Request $request)
     {
 
         $this->setResponse("ajax");
-        $id = $this->getPostParam('id', "addslaches", "alpha", "extraspaces", "striptags");
-        $giro =  $this->getPostParam('giro', "addslaches", "alpha", "extraspaces", "striptags");
-        $codgir =  $this->getPostParam('codgir', "addslaches", "alpha", "extraspaces", "striptags");
-        $nota = sanetizar($this->getPostParam('nota'));
-        $today = new Date();
+        $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
+        $giro =  $request->input('giro', "addslaches", "alpha", "extraspaces", "striptags");
+        $codgir =  $request->input('codgir', "addslaches", "alpha", "extraspaces", "striptags");
+        $nota = sanetizar($request->input('nota'));
+        $today = Carbon::now();
         $comando = '';
         try {
             try {
                 $modelos = array("mercurio10", "mercurio34");
-                $Transaccion = parent::startTrans($modelos);
-                parent::startFunc();
+                
+                $this->db->begin();
 
-                $this->Mercurio34->updateAll("estado='A',fecest='{$today->getUsingFormatDefault()}'", "conditions: id='{$id}' ");
+                $this->Mercurio34->updateAll("estado='A',fecest='".$today->format('Y-m-d H:i:s')."'", "conditions: id='{$id}' ");
                 $item = $this->Mercurio10->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
 
                 $mercurio10 = new Mercurio10();
-                $mercurio10->setTransaction($Transaccion);
+                
                 $mercurio10->setTipopc($this->tipopc);
                 $mercurio10->setNumero($id);
                 $mercurio10->setItem($item);
                 $mercurio10->setEstado("A");
                 $mercurio10->setNota($nota);
-                $mercurio10->setFecsis($today->getUsingFormatDefault());
+                $mercurio10->setFecsis($today->format('Y-m-d H:i:s'));
                 $mercurio10->save();
 
                 $beneficiario = $this->Mercurio34->findFirst(" id='{$id}'");
@@ -691,20 +673,20 @@ class AprobacionbenController extends ApplicationController
 
                 $result =  $procesadorComando->toArray();
                 if (!$result) {
-                    throw new Exception("Error, no hay respuesta del servidor para validación del resultado.", 1);
+                    throw new DebugException("Error, no hay respuesta del servidor para validación del resultado.", 1);
                 } else {
 
-                    parent::finishTrans();
+                    $this->db->commit();
                     $response = array(
                         "success" => true,
                         "msj" => "Movimiento realizado con éxito",
                         "result" => $result
                     );
                 }
-            } catch (TransactionFailed $err) {
-                throw new Exception($err->getMessage(), 505);
+            } catch (DebugException $err) {
+                throw new DebugException($err->getMessage(), 505);
             }
-        } catch (Exception $e) {
+        } catch (DebugException $e) {
             $response = array(
                 "success" => false,
                 "msj" => "No se pudo realizar el movimiento " . "\n" . $e->getMessage() . "\n " . $e->getLine(),
@@ -714,15 +696,15 @@ class AprobacionbenController extends ApplicationController
         $this->renderObject($response);
     }
 
-    public function borrarFiltroAction()
+    public function borrarFiltroAction(Request $request)
     {
         $this->setResponse("ajax");
-        Flash::set_flashdata("filter_beneficiario", false, true);
-        Flash::set_flashdata("filter_params", false, true);
+        set_flashdata("filter_beneficiario", false, true);
+        set_flashdata("filter_params", false, true);
         return $this->renderObject(array(
             'success' => true,
-            'query' => Flash::get_flashdata_item("filter_trabajador"),
-            'filter' => Flash::get_flashdata_item("filter_params"),
+            'query' => get_flashdata_item("filter_trabajador"),
+            'filter' => get_flashdata_item("filter_params"),
         ));
     }
 
@@ -774,8 +756,8 @@ class AprobacionbenController extends ApplicationController
             $beneficiario->createAttributes($beneSisu);
             $beneficiario->setTipo('E');
             $beneficiario->setNumdoc($beneSisu['documento']);
-            $html = View::render(
-                'aprobacionben/tmp/consulta',
+            $html = view(
+                'cajas/aprobacionben/tmp/consulta',
                 array(
                     'beneficiario' => $beneficiario,
                     'detTipo' => $this->Mercurio06->findFirst("tipo='{$beneficiario->getTipo()}'")->getDetalle(),
@@ -796,7 +778,7 @@ class AprobacionbenController extends ApplicationController
                     '_codgir',
                     ParamsBeneficiario::getCodigoGiro()
                 )
-            );
+            )->render();
 
             $code_estados = array();
             $query = $this->Mercurio11->find();
@@ -810,11 +792,11 @@ class AprobacionbenController extends ApplicationController
             $this->setParamToView("cedtra", $cedtra);
             $this->setParamToView("title", "Beneficiario Aprobado {$beneficiario->getNumdoc()}");
         } catch (DebugException $err) {
-            Flash::set_flashdata("error", array(
+            set_flashdata("error", array(
                 "msj" => $err->getMessage(),
                 "code" => 201
             ));
-            Router::rTa("aprobacionben/index");
+            return redirect("aprobacionben/index");
             exit;
         }
     }
@@ -825,24 +807,24 @@ class AprobacionbenController extends ApplicationController
      * @param [type] $id
      * @return void
      */
-    public function deshacerAction()
+    public function deshacerAction(Request $request)
     {
         $this->beneficiarioServices = $this->services->get('BeneficiarioServices');
         $notifyEmailServices = new NotifyEmailServices();
         $this->setResponse("ajax");
-        $action = $this->getPostParam('action');
-        $codest = $this->getPostParam('codest');
-        $sendEmail = $this->getPostParam('send_email');
-        $nota = sanetizar($this->getPostParam('nota'));
+        $action = $request->input('action');
+        $codest = $request->input('codest');
+        $sendEmail = $request->input('send_email');
+        $nota = sanetizar($request->input('nota'));
         $comando = '';
 
         try {
 
-            $id = $this->getPostParam('id');
+            $id = $request->input('id');
 
             $mercurio34 = (new Mercurio34)->findFirst(" id='{$id}' and estado='A' ");
             if (!$mercurio34) {
-                throw new Exception("Los datos del beneficiario no son validos para procesar.", 501);
+                throw new DebugException("Los datos del beneficiario no son validos para procesar.", 501);
             }
 
             $procesadorComando = Comman::Api();
@@ -855,7 +837,7 @@ class AprobacionbenController extends ApplicationController
             );
 
             if ($procesadorComando->isJson() == False) {
-                throw new Exception("Error al buscar al beneficiario en Sisuweb", 501);
+                throw new DebugException("Error al buscar al beneficiario en Sisuweb", 501);
             }
 
             $out = $procesadorComando->toArray();
@@ -876,11 +858,11 @@ class AprobacionbenController extends ApplicationController
 
             $comando = $procesadorComando->getLineaComando();
             if ($procesadorComando->isJson() == False) {
-                throw new Exception("Error al procesar el deshacer la aprobación en SisuWeb.", 501);
+                throw new DebugException("Error al procesar el deshacer la aprobación en SisuWeb.", 501);
             }
 
             $resdev = $procesadorComando->toArray();
-            if ($resdev['success'] !== true) throw new Exception($resdev['message'], 501);
+            if ($resdev['success'] !== true) throw new DebugException($resdev['message'], 501);
 
             $datos = $resdev['data'];
             if ($datos['noAction']) {
@@ -904,7 +886,7 @@ class AprobacionbenController extends ApplicationController
 
                 if ($action == 'I') {
                     $mercurio34->setEstado('I');
-                    $mercurio34->setFecest(date('Y-m-d'));
+                    $mercurio34->setFecest(Carbon::now()->format('Y-m-d'));
                     $mercurio34->save();
                 }
 
@@ -917,7 +899,7 @@ class AprobacionbenController extends ApplicationController
                     'isDelete' => $datos['isDelete'],
                 );
             }
-        } catch (Exception $err) {
+        } catch (DebugException $err) {
             $salida = array(
                 "success" => false,
                 "msj" => "Error no se pudo realizar el movimiento, " . $err->getMessage(),

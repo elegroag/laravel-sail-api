@@ -13,13 +13,13 @@ class Mercurio51Controller extends ApplicationController
     private $query = "1=1";
     private $cantidad_pagina = 0;
 
-    public function initialize()
+    public function __construct()
     {
-        Core::importLibrary("Services", "Services");
-        $this->setTemplateAfter('main');
-        $this->setPersistance(true);
+       
+        
+        
         $this->cantidad_pagina = $this->numpaginate;
-        Services::Init();
+        
     }
 
     public function beforeFilter($permisos = array())
@@ -81,7 +81,7 @@ class Mercurio51Controller extends ApplicationController
     public function changeCantidadPaginaAction()
     {
         $this->setResponse("ajax");
-        $this->cantidad_pagina = $this->getPostParam("numero");
+        $this->cantidad_pagina = $request->input("numero");
         self::buscarAction();
     }
 
@@ -111,7 +111,7 @@ class Mercurio51Controller extends ApplicationController
     public function buscarAction()
     {
         $this->setResponse("ajax");
-        $pagina = $this->getPostParam('pagina');
+        $pagina = $request->input('pagina');
         if ($pagina == "") $pagina = 1;
         $paginate = Tag::paginate($this->Mercurio51->find("$this->query"), $pagina, $this->cantidad_pagina);
         $html = self::showTabla($paginate);
@@ -126,13 +126,13 @@ class Mercurio51Controller extends ApplicationController
     {
         try {
             $this->setResponse("ajax");
-            $codcat = $this->getPostParam('codcat');
+            $codcat = $request->input('codcat');
             $mercurio51 = $this->Mercurio51->findFirst("codcat = '$codcat'");
             if ($mercurio51 == false) $mercurio51 = new Mercurio51();
             $this->renderObject($mercurio51->getArray(), false);
         } catch (DbException $e) {
             parent::setLogger($e->getMessage());
-            parent::ErrorTrans();
+            $this->db->rollback();
         }
     }
 
@@ -141,19 +141,19 @@ class Mercurio51Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $codcat = $this->getPostParam('codcat');
+                $codcat = $request->input('codcat');
                 $modelos = array("Mercurio51");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 $this->Mercurio51->deleteAll("codcat = '$codcat'");
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Borrado Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede Borrar el Registro");
             return $this->renderObject($response, false);
         }
@@ -164,13 +164,13 @@ class Mercurio51Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $codcat = $this->getPostParam('codcat', "addslaches", "alpha", "extraspaces", "striptags");
-                $detalle = $this->getPostParam('detalle', "addslaches", "alpha", "extraspaces", "striptags");
-                $tipo = $this->getPostParam('tipo', "addslaches", "alpha", "extraspaces", "striptags");
-                $estado = $this->getPostParam('estado', "addslaches", "alpha", "extraspaces", "striptags");
+                $codcat = $request->input('codcat', "addslaches", "alpha", "extraspaces", "striptags");
+                $detalle = $request->input('detalle', "addslaches", "alpha", "extraspaces", "striptags");
+                $tipo = $request->input('tipo', "addslaches", "alpha", "extraspaces", "striptags");
+                $estado = $request->input('estado', "addslaches", "alpha", "extraspaces", "striptags");
                 $modelos = array("Mercurio51");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 $mercurio51 = new Mercurio51();
                 $mercurio51->setTransaction($Transaccion);
                 $mercurio51->setCodcat($codcat);
@@ -179,16 +179,16 @@ class Mercurio51Controller extends ApplicationController
                 $mercurio51->setEstado($estado);
                 if (!$mercurio51->save()) {
                     parent::setLogger($mercurio51->getMessages());
-                    parent::ErrorTrans();
+                    $this->db->rollback();
                 }
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Creacion Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede guardar/editar el Registro");
             return $this->renderObject($response, false);
         }
@@ -198,7 +198,7 @@ class Mercurio51Controller extends ApplicationController
     {
         try {
             $this->setResponse("ajax");
-            $codcat = $this->getPostParam('codcat', "addslaches", "alpha", "extraspaces", "striptags");
+            $codcat = $request->input('codcat', "addslaches", "alpha", "extraspaces", "striptags");
             $response = parent::successFunc("");
             $l = $this->Mercurio51->count("*", "conditions: codcat = '$codcat'");
             if ($l > 0) {

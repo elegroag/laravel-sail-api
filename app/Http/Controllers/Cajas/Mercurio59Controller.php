@@ -13,13 +13,13 @@ class Mercurio59Controller extends ApplicationController
     private $query = "1=1";
     private $cantidad_pagina = 0;
 
-    public function initialize()
+    public function __construct()
     {
-        Core::importLibrary("Services", "Services");
-        $this->setTemplateAfter('main');
-        $this->setPersistance(true);
+       
+        
+        
         $this->cantidad_pagina = $this->numpaginate;
-        Services::Init();
+        
     }
 
     public function showTabla($paginate)
@@ -75,7 +75,7 @@ class Mercurio59Controller extends ApplicationController
     public function changeCantidadPaginaAction()
     {
         $this->setResponse("ajax");
-        $this->cantidad_pagina = $this->getPostParam("numero");
+        $this->cantidad_pagina = $request->input("numero");
         self::buscarAction();
     }
 
@@ -104,7 +104,7 @@ class Mercurio59Controller extends ApplicationController
     public function traerAperturaAction()
     {
         $this->setResponse("ajax");
-        $codser = $this->getPostParam("codser");
+        $codser = $request->input("codser");
         $consultasOldServices = new GeneralService();
         $servi29 = $consultasOldServices->webService("aperturas_servicios", array("codser" => $codser));
         $_servi29 = array();
@@ -117,7 +117,7 @@ class Mercurio59Controller extends ApplicationController
     public function buscarAction()
     {
         $this->setResponse("ajax");
-        $pagina = $this->getPostParam('pagina');
+        $pagina = $request->input('pagina');
         if ($pagina == "") $pagina = 1;
         $paginate = Tag::paginate($this->Mercurio59->find("$this->query"), $pagina, $this->cantidad_pagina);
         $html = self::showTabla($paginate);
@@ -132,15 +132,15 @@ class Mercurio59Controller extends ApplicationController
     {
         try {
             $this->setResponse("ajax");
-            $codinf = $this->getPostParam('codinf');
-            $codser = $this->getPostParam('codser');
-            $numero = $this->getPostParam('numero');
+            $codinf = $request->input('codinf');
+            $codser = $request->input('codser');
+            $numero = $request->input('numero');
             $mercurio59 = $this->Mercurio59->findFirst("codinf = '$codinf' and codser='$codser' and numero='$numero'");
             if ($mercurio59 == false) $mercurio59 = new Mercurio59();
             $this->renderObject($mercurio59->getArray(), false);
         } catch (DbException $e) {
             parent::setLogger($e->getMessage());
-            parent::ErrorTrans();
+            $this->db->rollback();
         }
     }
 
@@ -149,21 +149,21 @@ class Mercurio59Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $codinf = $this->getPostParam('codinf');
-                $codser = $this->getPostParam('codser');
-                $numero = $this->getPostParam('numero');
+                $codinf = $request->input('codinf');
+                $codser = $request->input('codser');
+                $numero = $request->input('numero');
                 $modelos = array("Mercurio59");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 $this->Mercurio59->deleteAll("codinf = '$codinf' and codser='$codser' and numero='$numero'");
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Borrado Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede Borrar el Registro");
             return $this->renderObject($response, false);
         }
@@ -174,18 +174,18 @@ class Mercurio59Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $codinf = $this->getPostParam('codinf', "addslaches", "extraspaces", "striptags");
-                $codser = $this->getPostParam('codser', "addslaches", "alpha", "extraspaces", "striptags");
-                $numero = $this->getPostParam('numero', "addslaches", "alpha", "extraspaces", "striptags");
-                $nota = $this->getPostParam('nota', "addslaches", "extraspaces", "striptags");
-                $email = $this->getPostParam('email', "addslaches", "extraspaces", "striptags");
-                $precan = $this->getPostParam('precan', "addslaches", "alpha", "extraspaces", "striptags");
-                $autser = $this->getPostParam('autser', "addslaches", "alpha", "extraspaces", "striptags");
-                $consumo = $this->getPostParam('consumo', "addslaches", "alpha", "extraspaces", "striptags");
-                $estado = $this->getPostParam('estado', "addslaches", "alpha", "extraspaces", "striptags");
+                $codinf = $request->input('codinf', "addslaches", "extraspaces", "striptags");
+                $codser = $request->input('codser', "addslaches", "alpha", "extraspaces", "striptags");
+                $numero = $request->input('numero', "addslaches", "alpha", "extraspaces", "striptags");
+                $nota = $request->input('nota', "addslaches", "extraspaces", "striptags");
+                $email = $request->input('email', "addslaches", "extraspaces", "striptags");
+                $precan = $request->input('precan', "addslaches", "alpha", "extraspaces", "striptags");
+                $autser = $request->input('autser', "addslaches", "alpha", "extraspaces", "striptags");
+                $consumo = $request->input('consumo', "addslaches", "alpha", "extraspaces", "striptags");
+                $estado = $request->input('estado', "addslaches", "alpha", "extraspaces", "striptags");
                 $modelos = array("Mercurio59");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 $mercurio59 = new Mercurio59();
                 $mercurio59->setTransaction($Transaccion);
                 $mercurio59->setCodinf($codinf);
@@ -207,7 +207,7 @@ class Mercurio59Controller extends ApplicationController
                         $mercurio59->setArchivo($name);
                         if (!$mercurio59->save()) {
                             parent::setLogger($mercurio59->getMessages());
-                            parent::ErrorTrans();
+                            $this->db->rollback();
                         }
                         $response = parent::successFunc("Se adjunto con exito el archivo");
                     } else {
@@ -216,14 +216,14 @@ class Mercurio59Controller extends ApplicationController
                 } else {
                     $response = parent::errorFunc("No se cargo el archivo");
                 }
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Creacion Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede guardar/editar el Registro");
             return $this->renderObject($response, false);
         }
@@ -233,9 +233,9 @@ class Mercurio59Controller extends ApplicationController
     {
         try {
             $this->setResponse("ajax");
-            $codinf = $this->getPostParam('codinf', "addslaches", "alpha", "extraspaces", "striptags");
-            $codser = $this->getPostParam('codser', "addslaches", "alpha", "extraspaces", "striptags");
-            $numero = $this->getPostParam('numero', "addslaches", "alpha", "extraspaces", "striptags");
+            $codinf = $request->input('codinf', "addslaches", "alpha", "extraspaces", "striptags");
+            $codser = $request->input('codser', "addslaches", "alpha", "extraspaces", "striptags");
+            $numero = $request->input('numero', "addslaches", "alpha", "extraspaces", "striptags");
             $response = parent::successFunc("");
             $l = $this->Mercurio59->count("*", "conditions: codinf = '$codinf' and codser='$codser' and numero='$numero' ");
             if ($l > 0) {

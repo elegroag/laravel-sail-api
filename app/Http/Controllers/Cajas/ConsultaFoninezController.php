@@ -15,11 +15,11 @@ class ConsultafoninezController extends ApplicationController
      */
     private $generalService;
 
-    public function initialize()
+    public function __construct()
     {
-        Core::importLibrary("Services", "Services");
-        $this->setTemplateAfter('main');
-        Services::Init();
+       
+        
+        
         $this->generalService = new GeneralService();
     }
 
@@ -52,9 +52,9 @@ class ConsultafoninezController extends ApplicationController
     public function consulta_auditoriaAction()
     {
         $this->setResponse("ajax");
-        $tipopc = $this->getPostParam("tipopc");
-        $fecini = $this->getPostParam("fecini");
-        $fecfin = $this->getPostParam("fecfin");
+        $tipopc = $request->input("tipopc");
+        $fecini = $request->input("fecini");
+        $fecfin = $request->input("fecfin");
         $html = "";
         $html = "<div class='table-responsive'> ";
         $html .= "<table class='table'>";
@@ -138,9 +138,9 @@ class ConsultafoninezController extends ApplicationController
     public function reporte_auditoriaAction()
     {
         $this->setResponse('view');
-        $ciudad = $this->getPostParam("ciudad");
-        $fecini = $this->getPostParam("fecini");
-        $fecfin = $this->getPostParam("fecfin");
+        $ciudad = $request->input("ciudad");
+        $fecini = $request->input("fecini");
+        $fecfin = $request->input("fecfin");
         $fecha = new Date();
         $file = "public/temp/" . "reporte_beneficiariofoninez_" . $fecha->getUsingFormatDefault() . ".xls";
         require_once "Library/Excel/Main.php";
@@ -253,7 +253,7 @@ class ConsultafoninezController extends ApplicationController
             }
         }
         $excels->close();
-        header("location: " . Core::getInstancePath() . "/{$file}");
+        header("location: " . env('APP_URL') . "/{$file}");
     }
 
 
@@ -268,8 +268,8 @@ class ConsultafoninezController extends ApplicationController
     public function reporte_jecAction()
     {
         $this->setResponse('view');
-        $fecini = $this->getPostParam("fecini");
-        $fecfin = $this->getPostParam("fecfin");
+        $fecini = $request->input("fecini");
+        $fecfin = $request->input("fecfin");
         $fecha = new Date();
         $file = "public/temp/" . "reporte_beneficiariosjec_" . $fecha->getUsingFormatDefault() . ".xls";
         require_once "Library/Excel/Main.php";
@@ -362,7 +362,7 @@ class ConsultafoninezController extends ApplicationController
         }
 
         $excels->close();
-        header("location: " . Core::getInstancePath() . "/{$file}");
+        header("location: " . env('APP_URL') . "/{$file}");
     }
 
     public function consulta_aipi_viewAction()
@@ -376,8 +376,8 @@ class ConsultafoninezController extends ApplicationController
     public function reporte_aipiAction()
     {
         $this->setResponse('view');
-        $fecini = $this->getPostParam("fecini");
-        $fecfin = $this->getPostParam("fecfin");
+        $fecini = $request->input("fecini");
+        $fecfin = $request->input("fecfin");
         $fecha = new Date();
         $file = "public/temp/" . "reporte_beneficiariosaipi_" . $fecha->getUsingFormatDefault() . ".xls";
         require_once "Library/Excel/Main.php";
@@ -461,7 +461,7 @@ class ConsultafoninezController extends ApplicationController
         }
 
         $excels->close();
-        header("location: " . Core::getInstancePath() . "/{$file}");
+        header("location: " . env('APP_URL') . "/{$file}");
     }
 
     public function consulta_general_viewAction()
@@ -475,8 +475,8 @@ class ConsultafoninezController extends ApplicationController
     public function reporte_generalAction()
     {
         $this->setResponse('view');
-        $fecini = $this->getPostParam("fecini");
-        $fecfin = $this->getPostParam("fecfin");
+        $fecini = $request->input("fecini");
+        $fecfin = $request->input("fecfin");
         $fecha = new Date();
         $file = "public/temp/" . "reporte_beneficiarios_" . $fecha->getUsingFormatDefault() . ".xls";
         require_once "Library/Excel/Main.php";
@@ -611,13 +611,13 @@ class ConsultafoninezController extends ApplicationController
         }
 
         $excels->close();
-        header("location: " . Core::getInstancePath() . "/{$file}");
+        header("location: " . env('APP_URL') . "/{$file}");
     }
     public function infoAction()
     {
         $this->setResponse("ajax");
-        $tipopc = $this->getPostParam('tipopc');
-        $id = $this->getPostParam('id');
+        $tipopc = $request->input('tipopc');
+        $id = $request->input('id');
         $response = "";
         $result = $this->generalService->consultaTipopc($tipopc, "info", $id);
         $response = $result['consulta'];
@@ -761,7 +761,7 @@ class ConsultafoninezController extends ApplicationController
             $j++;
         }
         $excels->close();
-        header("location: " . Core::getInstancePath() . "/{$file}");
+        header("location: " . env('APP_URL') . "/{$file}");
     }
 
     public function reporte_excel_indicadoresAction($fecini, $fecfin)
@@ -858,7 +858,7 @@ class ConsultafoninezController extends ApplicationController
             $j++;
         }
         $excels->close();
-        header("location: " . Core::getInstancePath() . "/{$file}");
+        header("location: " . env('APP_URL') . "/{$file}");
     }
 
     public function indicadoresAction()
@@ -873,8 +873,8 @@ class ConsultafoninezController extends ApplicationController
     public function consulta_indicadoresAction()
     {
         $this->setResponse("ajax");
-        $fecini = $this->getPostParam("fecini");
-        $fecfin = $this->getPostParam("fecfin");
+        $fecini = $request->input("fecini");
+        $fecfin = $request->input("fecfin");
         $mercurio09 = $this->Mercurio09->find();
 
         $html = "<div class='table-responsive'>";

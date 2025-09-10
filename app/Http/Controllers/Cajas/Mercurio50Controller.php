@@ -13,13 +13,13 @@ class Mercurio50Controller extends ApplicationController
     private $query = "1=1";
     private $cantidad_pagina = 0;
 
-    public function initialize()
+    public function __construct()
     {
-        Core::importLibrary("Services", "Services");
-        $this->setTemplateAfter('main');
-        $this->setPersistance(true);
+       
+        
+        
         $this->cantidad_pagina = $this->numpaginate;
-        Services::Init();
+        
     }
 
     public function showTabla($paginate)
@@ -66,7 +66,7 @@ class Mercurio50Controller extends ApplicationController
     public function changeCantidadPaginaAction()
     {
         $this->setResponse("ajax");
-        $this->cantidad_pagina = $this->getPostParam("numero");
+        $this->cantidad_pagina = $request->input("numero");
         self::buscarAction();
     }
 
@@ -83,7 +83,7 @@ class Mercurio50Controller extends ApplicationController
     public function buscarAction()
     {
         $this->setResponse("ajax");
-        $pagina = $this->getPostParam('pagina');
+        $pagina = $request->input('pagina');
         if ($pagina == "") $pagina = 1;
         $paginate = Tag::paginate($this->Mercurio50->find("$this->query"), $pagina, $this->cantidad_pagina);
         $html = $this->showTabla($paginate);
@@ -103,7 +103,7 @@ class Mercurio50Controller extends ApplicationController
             $this->renderObject($mercurio50->getArray(), false);
         } catch (DbException $e) {
             parent::setLogger($e->getMessage());
-            parent::ErrorTrans();
+            $this->db->rollback();
         }
     }
 
@@ -112,14 +112,14 @@ class Mercurio50Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $codapl = $this->getPostParam('codapl', "addslaches", "extraspaces", "striptags");
-                $webser = $this->getPostParam('webser', "addslaches", "extraspaces", "striptags");
-                $path = $this->getPostParam('path', "addslaches", "alpha", "extraspaces", "striptags");
-                $urlonl = $this->getPostParam('urlonl', "addslaches", "extraspaces", "striptags");
-                $puncom = $this->getPostParam('puncom', "addslaches", "extraspaces", "striptags");
+                $codapl = $request->input('codapl', "addslaches", "extraspaces", "striptags");
+                $webser = $request->input('webser', "addslaches", "extraspaces", "striptags");
+                $path = $request->input('path', "addslaches", "alpha", "extraspaces", "striptags");
+                $urlonl = $request->input('urlonl', "addslaches", "extraspaces", "striptags");
+                $puncom = $request->input('puncom', "addslaches", "extraspaces", "striptags");
                 $modelos = array("Mercurio50");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 $mercurio50 = new Mercurio50();
                 $mercurio50->setTransaction($Transaccion);
                 $mercurio50->setCodapl($codapl);
@@ -129,16 +129,16 @@ class Mercurio50Controller extends ApplicationController
                 $mercurio50->setPuncom($puncom);
                 if (!$mercurio50->save()) {
                     parent::setLogger($mercurio50->getMessages());
-                    parent::ErrorTrans();
+                    $this->db->rollback();
                 }
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Creacion Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede guardar/editar el Registro");
             return $this->renderObject($response, false);
         }

@@ -13,13 +13,13 @@ class Mercurio52Controller extends ApplicationController
     private $query = "1=1";
     private $cantidad_pagina = 0;
 
-    public function initialize()
+    public function __construct()
     {
-        Core::importLibrary("Services", "Services");
-        $this->setTemplateAfter('main');
-        $this->setPersistance(true);
+       
+        
+        
         $this->cantidad_pagina = $this->numpaginate;
-        Services::Init();
+        
     }
 
     public function showTabla($paginate)
@@ -71,7 +71,7 @@ class Mercurio52Controller extends ApplicationController
     public function changeCantidadPaginaAction()
     {
         $this->setResponse("ajax");
-        $this->cantidad_pagina = $this->getPostParam("numero");
+        $this->cantidad_pagina = $request->input("numero");
         self::buscarAction();
     }
 
@@ -101,7 +101,7 @@ class Mercurio52Controller extends ApplicationController
     public function buscarAction()
     {
         $this->setResponse("ajax");
-        $pagina = $this->getPostParam('pagina');
+        $pagina = $request->input('pagina');
         if ($pagina == "") $pagina = 1;
         $paginate = Tag::paginate($this->Mercurio52->find("$this->query"), $pagina, $this->cantidad_pagina);
         $html = self::showTabla($paginate);
@@ -116,13 +116,13 @@ class Mercurio52Controller extends ApplicationController
     {
         try {
             $this->setResponse("ajax");
-            $codmen = $this->getPostParam('codmen');
+            $codmen = $request->input('codmen');
             $mercurio52 = $this->Mercurio52->findFirst("codmen = '$codmen'");
             if ($mercurio52 == false) $mercurio52 = new Mercurio52();
             $this->renderObject($mercurio52->getArray(), false);
         } catch (DbException $e) {
             parent::setLogger($e->getMessage());
-            parent::ErrorTrans();
+            $this->db->rollback();
         }
     }
 
@@ -131,19 +131,19 @@ class Mercurio52Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $codmen = $this->getPostParam('codmen');
+                $codmen = $request->input('codmen');
                 $modelos = array("Mercurio52");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 $this->Mercurio52->deleteAll("codmen = '$codmen'");
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Borrado Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede Borrar el Registro");
             return $this->renderObject($response, false);
         }
@@ -154,15 +154,15 @@ class Mercurio52Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $codmen = $this->getPostParam('codmen', "addslaches", "alpha", "extraspaces", "striptags");
-                $detalle = $this->getPostParam('detalle', "addslaches", "alpha", "extraspaces", "striptags");
-                $codare = $this->getPostParam('codare', "addslaches", "alpha", "extraspaces", "striptags");
-                $url = $this->getPostParam('url', "addslaches", "alpha", "extraspaces", "striptags");
-                $tipo = $this->getPostParam('tipo', "addslaches", "alpha", "extraspaces", "striptags");
-                $estado = $this->getPostParam('estado', "addslaches", "alpha", "extraspaces", "striptags");
+                $codmen = $request->input('codmen', "addslaches", "alpha", "extraspaces", "striptags");
+                $detalle = $request->input('detalle', "addslaches", "alpha", "extraspaces", "striptags");
+                $codare = $request->input('codare', "addslaches", "alpha", "extraspaces", "striptags");
+                $url = $request->input('url', "addslaches", "alpha", "extraspaces", "striptags");
+                $tipo = $request->input('tipo', "addslaches", "alpha", "extraspaces", "striptags");
+                $estado = $request->input('estado', "addslaches", "alpha", "extraspaces", "striptags");
                 $modelos = array("Mercurio52");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 $mercurio52 = new Mercurio52();
                 $mercurio52->setTransaction($Transaccion);
                 $mercurio52->setCodmen($codmen);
@@ -173,16 +173,16 @@ class Mercurio52Controller extends ApplicationController
                 $mercurio52->setEstado($estado);
                 if (!$mercurio52->save()) {
                     parent::setLogger($mercurio52->getMessages());
-                    parent::ErrorTrans();
+                    $this->db->rollback();
                 }
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Creacion Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede guardar/editar el Registro");
             return $this->renderObject($response, false);
         }
@@ -192,7 +192,7 @@ class Mercurio52Controller extends ApplicationController
     {
         try {
             $this->setResponse("ajax");
-            $codmen = $this->getPostParam('codmen', "addslaches", "alpha", "extraspaces", "striptags");
+            $codmen = $request->input('codmen', "addslaches", "alpha", "extraspaces", "striptags");
             $response = parent::successFunc("");
             $l = $this->Mercurio52->count("*", "conditions: codmen = '$codmen'");
             if ($l > 0) {

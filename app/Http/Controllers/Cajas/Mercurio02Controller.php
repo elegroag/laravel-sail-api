@@ -13,13 +13,13 @@ class Mercurio02Controller extends ApplicationController
     private $query = "1=1";
     private $cantidad_pagina = 0;
 
-    public function initialize()
+    public function __construct()
     {
-        Core::importLibrary("Services", "Services");
-        $this->setTemplateAfter('main');
-        $this->setPersistance(true);
+       
+        
+        
         $this->cantidad_pagina = $this->numpaginate;
-        Services::Init();
+        
     }
 
     public function beforeFilter($permisos = array())
@@ -79,7 +79,7 @@ class Mercurio02Controller extends ApplicationController
     public function changeCantidadPaginaAction()
     {
         $this->setResponse("ajax");
-        $this->cantidad_pagina = $this->getPostParam("numero");
+        $this->cantidad_pagina = $request->input("numero");
         self::buscarAction();
     }
 
@@ -109,7 +109,7 @@ class Mercurio02Controller extends ApplicationController
     public function buscarAction()
     {
         $this->setResponse("ajax");
-        $pagina = $this->getPostParam('pagina');
+        $pagina = $request->input('pagina');
         if ($pagina == "") $pagina = 1;
         $paginate = Tag::paginate($this->Mercurio02->find("$this->query"), $pagina, $this->cantidad_pagina);
         $html = self::showTabla($paginate);
@@ -131,7 +131,7 @@ class Mercurio02Controller extends ApplicationController
             return $this->renderObject($mercurio02->getArray(), false);
         } catch (DbException $e) {
             parent::setLogger($e->getMessage());
-            parent::ErrorTrans();
+            $this->db->rollback();
         }
     }
 
@@ -140,21 +140,21 @@ class Mercurio02Controller extends ApplicationController
         $this->setResponse("ajax");
         try {
             try {
-                $codcaj = $this->getPostParam('codcaj', "addslaches", "extraspaces", "striptags");
-                $nit = $this->getPostParam('nit', "addslaches", "extraspaces", "striptags");
-                $razsoc = $this->getPostParam('razsoc', "addslaches", "alpha", "extraspaces", "striptags");
-                $sigla = $this->getPostParam('sigla', "addslaches", "extraspaces", "striptags");
-                $email = $this->getPostParam('email', "addslaches", "extraspaces", "striptags");
-                $direccion = $this->getPostParam('direccion', "addslaches", "extraspaces", "striptags");
-                $telefono = $this->getPostParam('telefono', "addslaches", "alpha", "extraspaces", "striptags");
-                $codciu = $this->getPostParam('codciu', "addslaches", "extraspaces", "striptags");
-                $pagweb = $this->getPostParam('pagweb', "addslaches", "extraspaces", "striptags");
-                $pagfac = $this->getPostParam('pagfac', "addslaches", "extraspaces", "striptags");
-                $pagtwi = $this->getPostParam('pagtwi', "addslaches", "extraspaces", "striptags");
-                $pagyou = $this->getPostParam('pagyou', "addslaches", "extraspaces", "striptags");
+                $codcaj = $request->input('codcaj', "addslaches", "extraspaces", "striptags");
+                $nit = $request->input('nit', "addslaches", "extraspaces", "striptags");
+                $razsoc = $request->input('razsoc', "addslaches", "alpha", "extraspaces", "striptags");
+                $sigla = $request->input('sigla', "addslaches", "extraspaces", "striptags");
+                $email = $request->input('email', "addslaches", "extraspaces", "striptags");
+                $direccion = $request->input('direccion', "addslaches", "extraspaces", "striptags");
+                $telefono = $request->input('telefono', "addslaches", "alpha", "extraspaces", "striptags");
+                $codciu = $request->input('codciu', "addslaches", "extraspaces", "striptags");
+                $pagweb = $request->input('pagweb', "addslaches", "extraspaces", "striptags");
+                $pagfac = $request->input('pagfac', "addslaches", "extraspaces", "striptags");
+                $pagtwi = $request->input('pagtwi', "addslaches", "extraspaces", "striptags");
+                $pagyou = $request->input('pagyou', "addslaches", "extraspaces", "striptags");
                 $modelos = array("Mercurio02");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 $mercurio02 = new Mercurio02();
                 $mercurio02->setTransaction($Transaccion);
                 $mercurio02->setCodcaj($codcaj);
@@ -170,10 +170,10 @@ class Mercurio02Controller extends ApplicationController
                 $mercurio02->setPagtwi($pagtwi);
                 $mercurio02->setPagyou($pagyou);
                 if (!$mercurio02->save()) {
-                    throw new Exception("Error " . $mercurio02->getMessages(), 501);
+                    throw new DebugException("Error " . $mercurio02->getMessages(), 501);
                 }
 
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Creacion Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
@@ -181,7 +181,7 @@ class Mercurio02Controller extends ApplicationController
             } catch (Exception $err) {
                 parent::ErrorTrans($err->getMessage());
             }
-        } catch (TransactionFailed $error) {
+        } catch (DebugException $error) {
             $response = parent::errorFunc("No se puede guardar/editar el registro " . $error->getMessage());
         }
         return $this->renderObject($response, false);

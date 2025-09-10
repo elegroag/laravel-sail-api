@@ -1,6 +1,17 @@
 <?php
 namespace App\Library\Auth;
 
+use App\Helpers\Core;
+use App\Helpers\Router;
+use App\Helpers\Flash;
+use App\Helpers\Session as SESSION;
+use Securimage;
+use Securimage_Color;
+use Swift_Connection_SMTP;
+use Swift_Message;
+use Swift;
+use Swift_RecipientList;
+use Swift_Address;
 use App\Exceptions\AuthException;
 
 class AuthHtml
@@ -140,4 +151,11 @@ class AuthHtml
 		$this->Gener02 = $gener02;
 	}
 
+    /**
+     * Obtener el usuario actual después de la autenticación
+     */
+    public function getUsuario()
+    {
+        return $this->usuario;
+    }
 }

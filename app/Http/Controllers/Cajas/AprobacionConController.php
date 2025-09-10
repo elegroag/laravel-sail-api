@@ -6,6 +6,21 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Carbon\Carbon;
+use App\Exceptions\DebugException;
+use App\Services\Utils\Pagination;
+use App\Services\CajaServices\ConyugeServices;
+use App\Models\Mercurio32;
+use App\Models\Mercurio10;
+use App\Models\Mercurio31;
+use App\Library\Auth;
+use App\Models\Gener42;
+use App\Services\Aprueba\ApruebaConyuge;
+use App\Library\DbException;
+use Illuminate\Support\Facades\View;
+use App\Services\Utils\NotifyEmailServices;
+use App\Library\Collections\ParamsConyuge;
+use App\Services\Utils\Comman;
 
 class AprobacionconController extends ApplicationController
 {
@@ -31,45 +46,8 @@ class AprobacionconController extends ApplicationController
      * @author elegroag <elegroag@ibero.edu.co>
      * @return void
      */
-    public function initialize()
+    public function __construct()
     {
-        Core::importHelper('format');
-        Core::importLibrary("Services", "Services");
-        Core::importLibrary("Pagination", "Pagination");
-        Core::importLibrary("ProcesadorComandos", "ProcesadorComandos");
-        Core::importLibrary("ParamsConyuge", "Collections");
-        $this->setTemplateAfter('bone');
-        $this->services = Services::Init();
-    }
-
-    /**
-     * beforeFilter function
-     * @changed [2023-12-20]
-     * @author elegroag <elegroag@ibero.edu.co>
-     * @param array $permisos
-     * @return void
-     */
-    public function beforeFilter($permisos = array())
-    {
-        $permisos = array(
-            "aplicarFiltro" => "101",
-            "info" => "102",
-            "buscar" => "103",
-            "aprobar" => "104",
-            "devolver" => "105",
-            "rechazar" => "106"
-        );
-        $flag = parent::beforeFilter($permisos);
-        if (!$flag) {
-            $response = parent::errorFunc("No cuenta con los permisos para este proceso");
-            if (is_ajax()) {
-                $this->setResponse("ajax");
-                $this->renderObject($response, false);
-            } else {
-                Router::redirectToApplication('Cajas/principal/index');
-            }
-            return false;
-        }
     }
 
     /**
@@ -77,35 +55,34 @@ class AprobacionconController extends ApplicationController
      * @changed [2023-12-20]
      *
      * @author elegroag <elegroag@ibero.edu.co>
+     * @param Request $request
      * @param string $estado
      * @return void
      */
-    public function aplicarFiltroAction($estado = 'P')
+    public function aplicarFiltroAction(Request $request, string $estado = 'P')
     {
         $this->setResponse("ajax");
-        $cantidad_pagina = ($this->getPostParam("numero")) ? $this->getPostParam("numero") : 10;
+        $cantidad_pagina = $request->input("numero", 10);
         $usuario = parent::getActUser();
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
-            new Request(
-                array(
-                    "cantidadPaginas" => $cantidad_pagina,
-                    "query" => $query_str,
-                    "estado" => $estado
-                )
-            )
+            new Request([
+                "cantidadPaginas" => $cantidad_pagina,
+                "query" => $query_str,
+                "estado" => $estado
+            ])
         );
 
         $query = $pagination->filter(
-            $this->getPostParam('campo'),
-            $this->getPostParam('condi'),
-            $this->getPostParam('value')
+            $request->input('campo'),
+            $request->input('condi'),
+            $request->input('value')
         );
 
-        Flash::set_flashdata("filter_conyuge", $query, true);
+        set_flashdata("filter_conyuge", $query, true);
 
-        Flash::set_flashdata("filter_params", $pagination->filters, true);
+        set_flashdata("filter_params", $pagination->filters, true);
 
         $response = $pagination->render(new ConyugeServices());
         return $this->renderObject($response, false);
@@ -121,7 +98,7 @@ class AprobacionconController extends ApplicationController
      */
     public function changeCantidadPaginaAction($estado = 'P')
     {
-        $this->buscarAction($estado);
+        //$this->buscarAction($estado);
     }
 
     /**
@@ -146,7 +123,7 @@ class AprobacionconController extends ApplicationController
         );
 
         $this->setParamToView("campo_filtro", $campo_field);
-        $this->setParamToView("filters", Flash::get_flashdata_item("filter_params"));
+        $this->setParamToView("filters", get_flashdata_item("filter_params"));
         $this->setParamToView("title", "Aprueba Conyuge");
         $this->setParamToView("buttons", array("F"));
         $this->setParamToView("mercurio11", $this->Mercurio11->find());
@@ -158,42 +135,41 @@ class AprobacionconController extends ApplicationController
      * @changed [2023-12-00]
      *
      * @author elegroag <elegroag@ibero.edu.co>
+     * @param Request $request
      * @param string $estado
      * @return void
      */
-    public function buscarAction($estado = 'P')
+    public function buscarAction(Request $request, $estado = 'P')
     {
         $this->setResponse("ajax");
-        $pagina = ($this->getPostParam('pagina')) ? $this->getPostParam('pagina') : 1;
-        $cantidad_pagina = ($this->getPostParam("numero")) ? $this->getPostParam("numero") : 10;
+        $pagina = $request->input('pagina', 1);
+        $cantidad_pagina = $request->input("numero", 10);
         $usuario = parent::getActUser();
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
-            new Request(
-                array(
-                    "cantidadPaginas" => $cantidad_pagina,
-                    "query" => $query_str,
-                    "estado" => $estado,
-                    'pagina' => $pagina
-                )
-            )
+            new Request([
+                "cantidadPaginas" => $cantidad_pagina,
+                "query" => $query_str,
+                "estado" => $estado,
+                'pagina' => $pagina
+            ])
         );
 
         if (
-            Flash::get_flashdata_item("filter_conyuge") != false
+            get_flashdata_item("filter_conyuge") != false
         ) {
-            $query = $pagination->persistencia(Flash::get_flashdata_item("filter_params"));
+            $query = $pagination->persistencia(get_flashdata_item("filter_params"));
         } else {
             $query = $pagination->filter(
-                $this->getPostParam('campo'),
-                $this->getPostParam('condi'),
-                $this->getPostParam('value')
+                $request->input('campo'),
+                $request->input('condi'),
+                $request->input('value')
             );
         }
 
-        Flash::set_flashdata("filter_conyuge", $query, true);
-        Flash::set_flashdata("filter_params", $pagination->filters, true);
+        set_flashdata("filter_conyuge", $query, true);
+        set_flashdata("filter_params", $pagination->filters, true);
 
         $response = $pagination->render(new ConyugeServices());
         return $this->renderObject($response, false);
@@ -206,40 +182,39 @@ class AprobacionconController extends ApplicationController
      * @author elegroag <elegroag@ibero.edu.co>
      * @return void
      */
-    public function apruebaAction()
+    public function apruebaAction(Request $request)
     {
         $this->setResponse("ajax");
         $debuginfo = array();
         try {
             try {
-                $user = Auth::getActiveIdentity();
+                $user = session()->get('user');
                 $acceso = $this->Gener42->count("permiso='92' AND usuario='{$user['usuario']}'");
                 if ($acceso == 0) {
                     return $this->renderObject(array("success" => false, "msj" => "El usuario no dispone de permisos de aprobación"), false);
                 }
                 $apruebaSolicitud = new ApruebaConyuge();
-                $apruebaSolicitud->setTransa();
+                $this->db->begin();
 
-                $idSolicitud = $this->getPostParam('id', "addslaches", "alpha", "extraspaces", "striptags");
+                $idSolicitud = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
                 $solicitud = $apruebaSolicitud->findSolicitud($idSolicitud);
                 $apruebaSolicitud->findSolicitante($solicitud);
                 $apruebaSolicitud->procesar($_POST);
-                $apruebaSolicitud->endTransa();
-                $apruebaSolicitud->enviarMail($this->getPostParam('actapr'), $this->getPostParam('fecapr'));
+                $this->db->commit();
+                $apruebaSolicitud->enviarMail($request->input('actapr'), $request->input('fecapr'));
 
                 $salida = array(
                     'success' => true,
                     'msj' => 'El registro se completo con éxito'
                 );
             } catch (DebugException $err) {
-                $debuginfo = $err->getDebugInfo();
-                $apruebaSolicitud->closeTransa($err->getMessage());
+                $this->db->rollback();
                 $salida = array(
                     "success" => false,
                     "msj" => $err->getMessage()
                 );
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $salida = array(
                 "success" => false,
                 "msj" => $e->getMessage(),
@@ -257,17 +232,17 @@ class AprobacionconController extends ApplicationController
      * @author elegroag <elegroag@ibero.edu.co>
      * @return void
      */
-    public function devolverAction()
+    public function devolverAction(Request $request)
     {
         $this->conyugeServices =  $this->services->get('ConyugeServices');
         $notifyEmailServices = new NotifyEmailServices();
 
         $this->setResponse("ajax");
-        $id = $this->getPostParam('id', "addslaches", "alpha", "extraspaces", "striptags");
-        $codest = $this->getPostParam('codest', "addslaches", "alpha", "extraspaces", "striptags");
-        $nota = sanetizar($this->getPostParam('nota'));
+        $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
+        $codest = $request->input('codest', "addslaches", "alpha", "extraspaces", "striptags");
+        $nota = sanetizar($request->input('nota'));
 
-        $array_corregir = $this->getPostParam('campos_corregir');
+        $array_corregir = $request->input('campos_corregir');
         try {
             $campos_corregir = implode(";", $array_corregir);
 
@@ -290,14 +265,14 @@ class AprobacionconController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function rechazarAction()
+    public function rechazarAction(Request $request)
     {
         $notifyEmailServices = new NotifyEmailServices();
         $this->conyugeServices =  new ConyugeServices;
         $this->setResponse("ajax");
-        $id = $this->getPostParam('id', "addslaches", "alpha", "extraspaces", "striptags");
-        $nota = sanetizar($this->getPostParam('nota'));
-        $codest = $this->getPostParam('codest', "addslaches", "alpha", "extraspaces", "striptags");
+        $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
+        $nota = sanetizar($request->input('nota'));
+        $codest = $request->input('codest', "addslaches", "alpha", "extraspaces", "striptags");
         try {
             $mercurio32 = $this->Mercurio32->findFirst("id='{$id}'");
             $this->conyugeServices->rechazar($mercurio32, $nota, $codest);
@@ -319,24 +294,24 @@ class AprobacionconController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function inforAction()
+    public function inforAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
-            $id = $this->getPostParam('id');
+            $id = $request->input('id');
             if (!$id) {
-                Router::rTa("aprobacioncon/index");
+                return redirect("aprobacioncon/index");
                 exit;
             }
             $this->conyugeServices =  new ConyugeServices();
 
             $solicitud = $this->Mercurio32->findFirst("id='{$id}'");
             if ($solicitud == false) {
-                Flash::set_flashdata("error", array(
+                set_flashdata("error", array(
                     "msj" => "La solicitud de afiliación de conyugue no es valida.",
                     "code" => 500
                 ));
-                Router::rTa("aprobacioncon/index");
+                return redirect("aprobacioncon/index");
                 exit;
             }
 
@@ -349,7 +324,7 @@ class AprobacionconController extends ApplicationController
                     "params" => array("cedtra" => $solicitud->getCedtra(), "estado" => 'A')
                 )
             );
-            $trabajador = new stdClass;
+            $trabajador = new \stdClass;
 
             if ($procesadorComando->isJson()) {
                 $rqs =  $procesadorComando->toArray();
@@ -453,7 +428,7 @@ class AprobacionconController extends ApplicationController
                 'seguimiento' => $seguimiento,
                 'campos_disponibles' => $campos_disponibles
             );
-        } catch (Exception $err) {
+        } catch (DebugException $err) {
             $response = array(
                 'success' => false,
                 'msj' => $err->getMessage()
@@ -522,11 +497,11 @@ class AprobacionconController extends ApplicationController
     {
         $mercurio32 = $this->Mercurio32->findFirst("id='{$id}'");
         if (!$mercurio32) {
-            Flash::set_flashdata("error", array(
+            set_flashdata("error", array(
                 "msj" => "El conyuge no se encuentra registrado.",
                 "code" => 201
             ));
-            Router::rTa('aprobacioncon/index');
+            return redirect('aprobacioncon/index');
             exit;
         }
 
@@ -543,11 +518,11 @@ class AprobacionconController extends ApplicationController
 
         $rqs =  $procesadorComando->toArray();
         if (!$rqs['success']) {
-            Flash::set_flashdata("error", array(
+            set_flashdata("error", array(
                 "msj" => "El conyuge no se encuentra registrado.",
                 "code" => 201
             ));
-            Router::rTa("aprobacioncon/index");
+            return redirect("aprobacioncon/index");
             exit();
         }
         $relaciones = array();
@@ -564,45 +539,45 @@ class AprobacionconController extends ApplicationController
         $this->setParamToView("title", "Conyuge SisuWeb - {$mercurio32->getCedcon()}");
     }
 
-    public function editar_solicitudAction()
+    public function editar_solicitudAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
-            $id = $this->getPostParam('id', "addslaches", "alpha", "extraspaces", "striptags");
-            $cedcon = $this->getPostParam('cedcon', "addslaches", "alpha", "extraspaces", "striptags");
+            $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
+            $cedcon = $request->input('cedcon', "addslaches", "alpha", "extraspaces", "striptags");
 
             $mercurio32 = $this->Mercurio32->findFirst(" id='{$id}' and cedcon='{$cedcon}'");
             if (!$mercurio32) {
-                throw new Exception("La cónyuge no está disponible para editar", 501);
+                throw new DebugException("La cónyuge no está disponible para editar", 501);
             } else {
                 $data = array(
-                    "cedtra" => $this->clp('cedtra'),
-                    "cedcon" => $this->clp('cedcon'),
-                    "tipdoc" => $this->clp('tipdoc'),
-                    "priape" => $this->clp('priape'),
-                    "segape" => $this->clp('segape'),
-                    "prinom" => $this->clp('prinom'),
-                    "segnom" => $this->clp('segnom'),
-                    "fecnac" => $this->clp('fecnac'),
-                    "ciunac" => $this->clp('ciunac'),
-                    "sexo" => $this->clp('sexo'),
-                    "estciv" => $this->clp('estciv'),
-                    "comper" => $this->clp('comper'),
-                    "tiecon" => $this->clp('tiecon'),
-                    "ciures" => $this->clp('ciures'),
-                    "codzon" => $this->clp('codzon'),
-                    "tipviv" => $this->clp('tipviv'),
-                    "direccion" => $this->clp('direccion'),
-                    "barrio" => $this->clp('barrio'),
-                    "telefono" => $this->clp('telefono'),
-                    "celular" => $this->clp('celular'),
-                    "email" => $this->clp('email'),
-                    "nivedu" => $this->clp('nivedu'),
-                    "fecing" => $this->clp('fecing'),
-                    "codocu" => $this->clp('codocu'),
-                    "salario" => $this->clp('salario'),
-                    "captra" => $this->clp('captra'),
-                    "tipsal" => $this->clp('tipsal')
+                    "cedtra" => $request->input('cedtra'),
+                    "cedcon" => $request->input('cedcon'),
+                    "tipdoc" => $request->input('tipdoc'),
+                    "priape" => $request->input('priape'),
+                    "segape" => $request->input('segape'),
+                    "prinom" => $request->input('prinom'),
+                    "segnom" => $request->input('segnom'),
+                    "fecnac" => $request->input('fecnac'),
+                    "ciunac" => $request->input('ciunac'),
+                    "sexo" => $request->input('sexo'),
+                    "estciv" => $request->input('estciv'),
+                    "comper" => $request->input('comper'),
+                    "tiecon" => $request->input('tiecon'),
+                    "ciures" => $request->input('ciures'),
+                    "codzon" => $request->input('codzon'),
+                    "tipviv" => $request->input('tipviv'),
+                    "direccion" => $request->input('direccion'),
+                    "barrio" => $request->input('barrio'),
+                    "telefono" => $request->input('telefono'),
+                    "celular" => $request->input('celular'),
+                    "email" => $request->input('email'),
+                    "nivedu" => $request->input('nivedu'),
+                    "fecing" => $request->input('fecing'),
+                    "codocu" => $request->input('codocu'),
+                    "salario" => $request->input('salario'),
+                    "captra" => $request->input('captra'),
+                    "tipsal" => $request->input('tipsal')
                 );
                 $setters = "";
                 foreach ($data as $ai => $row) {
@@ -613,8 +588,8 @@ class AprobacionconController extends ApplicationController
                 $setters  = trim($setters, ',');
                 $this->Mercurio32->updateAll($setters, "conditions: id='{$id}' AND cedcon='{$cedcon}'");
 
-                $db = (object) DbBase::rawConnect();
-                $db->setFetchMode(DbBase::DB_ASSOC);
+                $db = DbBase::rawConnect();
+                
 
                 $data = $db->fetchOne("SELECT max(id), mercurio32.* FROM mercurio32 WHERE cedcon='{$cedcon}'");
                 $salida = array(
@@ -623,7 +598,7 @@ class AprobacionconController extends ApplicationController
                     "data" => $data
                 );
             }
-        } catch (Exception $err) {
+        } catch (DebugException $err) {
             $salida = array(
                 "success" => false,
                 "msj" => $err->getMessage()
@@ -632,17 +607,12 @@ class AprobacionconController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    function clp($name)
-    {
-        return $this->getPostParam($name, "addslaches", "extraspaces", "striptags");
-    }
-
     public function editarViewAction($id = '')
     {
         $this->setParamToView("hide_header", true);
 
         if (empty($id)) {
-            Router::rTa("aprobacioncon/index");
+            return redirect("aprobacioncon/index");
             exit;
         }
         $conyuge = $this->Mercurio32->findFirst("id='{$id}'");
@@ -680,22 +650,25 @@ class AprobacionconController extends ApplicationController
         $this->setParamToView("pagina_con_estado", $estado);
     }
 
-    public function reaprobarAction()
+    public function reaprobarAction(Request $request)
     {
         $this->setResponse("ajax");
-        $id = $this->getPostParam('id', "addslaches", "alpha", "extraspaces", "striptags");
-        $nota = sanetizar($this->getPostParam('nota'));
-        $today = new Date();
+        $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
+        $nota = sanetizar($request->input('nota'));
+        $today = Carbon::now();
+        
         try {
-            $this->Mercurio32->updateAll("estado='A',fecest='{$today->getUsingFormatDefault()}'", "conditions: id='{$id}' ");
+            $this->Mercurio32->updateAll("estado='A',fecest='".$today->format('Y-m-d H:i:s')."'", "conditions: id='{$id}' ");
+            
             $item = $this->Mercurio10->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
             $mercurio10 = new Mercurio10();
+            
             $mercurio10->setTipopc($this->tipopc);
             $mercurio10->setNumero($id);
             $mercurio10->setItem($item);
             $mercurio10->setEstado("A");
             $mercurio10->setNota($nota);
-            $mercurio10->setFecsis($today->getUsingFormatDefault());
+            $mercurio10->setFecsis($today->format('Y-m-d H:i:s'));
             $mercurio10->save();
             $mercurio32 = $this->Mercurio32->findFirst("id='{$id}'");
 
@@ -736,7 +709,7 @@ class AprobacionconController extends ApplicationController
                 'result' => $result,
                 'out' => $out
             );
-        } catch (Exception $e) {
+        } catch (DebugException $e) {
             $response = array(
                 "success" => false,
                 "msj" => "No se pudo realizar el movimiento " . "\n" . $e->getMessage() . "\n " . $e->getLine(),
@@ -748,12 +721,12 @@ class AprobacionconController extends ApplicationController
     public function borrarFiltroAction()
     {
         $this->setResponse("ajax");
-        Flash::set_flashdata("filter_conyuge", false, true);
-        Flash::set_flashdata("filter_params", false, true);
+        set_flashdata("filter_conyuge", false, true);
+        set_flashdata("filter_params", false, true);
         return $this->renderObject(array(
             'success' => true,
-            'query' => Flash::get_flashdata_item("filter_conyuge"),
-            'filter' => Flash::get_flashdata_item("filter_params"),
+            'query' => get_flashdata_item("filter_conyuge"),
+            'filter' => get_flashdata_item("filter_params"),
         ));
     }
 
@@ -844,11 +817,11 @@ class AprobacionconController extends ApplicationController
             $this->setParamToView("cedtra", $cedtra);
             $this->setParamToView("title", "Conyuge Aprobado {$conyuge->getCedcon()}");
         } catch (DebugException $err) {
-            Flash::set_flashdata("error", array(
+            set_flashdata("error", array(
                 "msj" => $err->getMessage(),
                 "code" => 201
             ));
-            Router::rTa("aprobacionben/index");
+            return redirect("aprobacionben/index");
             exit;
         }
     }
@@ -859,23 +832,23 @@ class AprobacionconController extends ApplicationController
      * @param [type] $id
      * @return void
      */
-    public function deshacerAction()
+    public function deshacerAction(Request $request)
     {
         $this->setResponse("ajax");
-        $action = $this->getPostParam('action');
-        $codest = $this->getPostParam('codest');
-        $sendEmail = $this->getPostParam('send_email');
-        $nota = $this->getPostParam('nota');
+        $action = $request->input('action');
+        $codest = $request->input('codest');
+        $sendEmail = $request->input('send_email');
+        $nota = $request->input('nota');
         $this->conyugeServices = new ConyugeServices();
         $notifyEmailServices = new NotifyEmailServices();
         $comando = '';
 
         try {
-            $id = $this->getPostParam('id');
+            $id = $request->input('id');
 
             $mercurio32 = (new Mercurio32)->findFirst(" id='{$id}' and estado='A' ");
             if (!$mercurio32) {
-                throw new Exception("Los datos del cónyuge no son validos para procesar.", 501);
+                throw new DebugException("Los datos del cónyuge no son validos para procesar.", 501);
             }
 
             $procesadorComando = Comman::Api();
@@ -890,7 +863,7 @@ class AprobacionconController extends ApplicationController
             );
 
             if ($procesadorComando->isJson() == False) {
-                throw new Exception("Error al buscar al cónyuge en Sisuweb", 501);
+                throw new DebugException("Error al buscar al cónyuge en Sisuweb", 501);
             }
 
             $out = $procesadorComando->toArray();
@@ -910,11 +883,11 @@ class AprobacionconController extends ApplicationController
             );
 
             if ($procesadorComando->isJson() == False) {
-                throw new Exception("Error al procesar el deshacer la aprobación en SisuWeb.", 501);
+                throw new DebugException("Error al procesar el deshacer la aprobación en SisuWeb.", 501);
             }
 
             $resdev = $procesadorComando->toArray();
-            if ($resdev['success'] !== true) throw new Exception($resdev['message'], 501);
+            if ($resdev['success'] !== true) throw new DebugException($resdev['message'], 501);
 
             $datos = $resdev['data'];
             if ($datos['noAction']) {
@@ -951,7 +924,7 @@ class AprobacionconController extends ApplicationController
                     'isDelete' => $datos['isDelete'],
                 );
             }
-        } catch (Exception $err) {
+        } catch (DebugException $err) {
             $salida = array(
                 "success" => false,
                 "msj" => "Error no se pudo realizar el movimiento, " . $err->getMessage(),
@@ -967,13 +940,13 @@ class AprobacionconController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function valida_conyugeAction()
+    public function valida_conyugeAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
-            $id = $this->getPostParam('id', "addslaches", "alpha", "extraspaces", "striptags");
-            $cedtra = $this->getPostParam('cedtra', "addslaches", "alpha", "extraspaces", "striptags");
-            $coddoc = $this->getPostParam('tipdoc', "addslaches", "alpha", "extraspaces", "striptags");
+            $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
+            $cedtra = $request->input('cedtra', "addslaches", "alpha", "extraspaces", "striptags");
+            $coddoc = $request->input('tipdoc', "addslaches", "alpha", "extraspaces", "striptags");
 
             $ps = Comman::Api();
             $ps->runCli(
@@ -989,7 +962,7 @@ class AprobacionconController extends ApplicationController
             );
 
             if ($ps->isJson() == False) {
-                throw new Exception("Error al buscar al cónyuge en Sisuweb", 501);
+                throw new DebugException("Error al buscar al cónyuge en Sisuweb", 501);
             }
             $trabajador_sisu = false;
 
@@ -1011,6 +984,6 @@ class AprobacionconController extends ApplicationController
                 "msj" => $err->getMessage()
             );
         }
-        return $this->renderObject($salida);
+        return $this->renderObject($salida, false);
     }
 }

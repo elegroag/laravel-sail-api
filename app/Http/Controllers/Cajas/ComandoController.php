@@ -13,30 +13,25 @@ class ComandoController extends ApplicationController
     protected $db;
     protected $usuario;
 
-    public function initialize()
+    public function __construct()
     {
-        Core::importHelper('hash');
-        Core::importLibrary("Services", "Services");
-        Core::importHelper('format');
-        $this->setTemplateAfter("template");
-        $this->db = (object) DbBase::rawConnect();
-        $this->db->setFetchMode(DbBase::DB_ASSOC);
-        $this->usuario = parent::getActUser('usuario');
+        $this->db = DbBase::rawConnect();
+        $this->usuario = session()->get('user');
     }
 
     /**
      * statusComando function
      * @return void
      */
-    public function statusComandoAction()
+    public function statusComandoAction(Request $request)
     {
         $this->setResponse("ajax");
-        $id = $this->getPostParam('id');
+        $id = $request->input('id');
         if ($id) {
             $comando = $this->Comandos->findFirst("id='{$id}'");
         } else {
-            $proceso = $this->getPostParam('proceso');
-            $servicio = $this->getPostParam('servicio');
+            $proceso = $request->input('proceso');
+            $servicio = $request->input('servicio');
             $comando = $this->Comandos->findFirst(" usuario='{$$this->usuario}' and (linea_comando like '%{$servicio}%' OR proceso='{$proceso}')");
         }
         if ($comando) {
@@ -58,14 +53,14 @@ class ComandoController extends ApplicationController
      * listarComandos function
      * @return void
      */
-    public function listarComandosAction()
+    public function listarComandosAction(Request $request)
     {
         $this->setResponse("ajax");
-        $servicio = $this->getPostParam('servicio');
-        $fechaini = ($this->getPostParam('fechaini') == '') ? date('Y-m-d') : $this->getPostParam('fechaini');
-        $fechafin = ($this->getPostParam('fechafin') == '') ? date('Y-m-d') : $this->getPostParam('fechafin');
+        $servicio = $request->input('servicio');
+        $fechaini = ($request->input('fechaini') == '') ? date('Y-m-d') : $request->input('fechaini');
+        $fechafin = ($request->input('fechafin') == '') ? date('Y-m-d') : $request->input('fechafin');
         $sql = "SELECT * FROM comandos WHERE usuario='{$this->usuario}' and (linea_comando like '%{$servicio}%') and (fecha_runner >='{$fechaini}' and fecha_runner <='{$fechafin}')";
-        $comandos = $this->db->fetchAll($sql);
+        $comandos = $this->db->inQueryAssoc($sql);
         if ($comandos) {
             $salida = array(
                 "success" => true,
@@ -81,10 +76,10 @@ class ComandoController extends ApplicationController
      * resultadoComando
      * @return void
      */
-    public function resultadoComandoAction()
+    public function resultadoComandoAction(Request $request)
     {
         $this->setResponse("ajax");
-        $id = $this->getPostParam('id');
+        $id = $request->input('id');
 
         $comando = $this->Comandos->findFirst("id='{$id}' and usuario='{$this->usuario}'");
         if ($comando) {

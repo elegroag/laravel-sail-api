@@ -6,24 +6,22 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Models\ServiciosCupos;
+use App\Models\PinesAfiliado;
+use App\Exceptions\DebugException;
+use App\Library\Collections\ParamsTrabajador;
+use App\Services\Utils\Comman;
 
 class AdmproductosController extends ApplicationController
 {
     protected $db;
 
-    public function initialize()
+    public function __construct()
     {
-        Core::importHelper('format');
-        Core::importLibrary("Services", "Services");
-        Core::importLibrary("ParamsTrabajador", "Collections");
-        $this->setTemplateAfter('main');
-        $this->setPersistance(false);
-        $this->setParamToView("instancePath", Core::getInstancePath() . 'Cajas/');
+        $this->setParamToView("instancePath", env('APP_URL') . 'Cajas/');
         if (!$this->db) {
-            $this->db = (object) DbBase::rawConnect();
-            $this->db->setFetchMode(DbBase::DB_ASSOC);
+            $this->db = DbBase::rawConnect();
         }
-        Services::Init();
     }
 
     public function listaAction()
@@ -64,14 +62,14 @@ class AdmproductosController extends ApplicationController
         $this->setParamToView("title", "Productos y Servicios");
     }
 
-    public function guardarAction($id = '')
+    public function guardarAction(Request $request, $id = '')
     {
         try {
             $this->setResponse('ajax');
-            $codser = $this->getPostParam('codser', "addslaches", "alpha", "extraspaces", "striptags");
-            $cupos = $this->getPostParam('cupos', "addslaches", "alpha", "extraspaces", "striptags");
-            $servicio = $this->getPostParam('servicio');
-            $estado = $this->getPostParam('estado');
+            $codser = $request->input('codser');
+            $cupos = $request->input('cupos');
+            $servicio = $request->input('servicio');
+            $estado = $request->input('estado');
 
             if ($id == '') {
                 $serviciosCupos = new ServiciosCupos();
@@ -116,22 +114,22 @@ class AdmproductosController extends ApplicationController
     public function editarAction($id = '')
     {
         if ($id == '') {
-            Flash::set_flashdata("error", array(
+            set_flashdata("error", array(
                 "msj" => "El servicio no está disponible para editar.",
                 "code" => '505'
             ));
-            Router::rTa("admproductos/lista");
+            return redirect("admproductos/lista");
             exit;
         }
 
         $model = new ServiciosCupos();
         $servicioCupo = $model->findFirst("id='{$id}'");
         if ($servicioCupo == false) {
-            Flash::set_flashdata("error", array(
+            set_flashdata("error", array(
                 "msj" => "El servicio no está disponible para editar.",
                 "code" => '505'
             ));
-            Router::rTa("admproductos/lista");
+            return redirect("admproductos/lista");
             exit;
         }
         $this->setParamToView("servicio", $servicioCupo);
@@ -139,12 +137,12 @@ class AdmproductosController extends ApplicationController
         $this->setParamToView("title", "Productos y Servicios");
     }
 
-    public function changeEstadoAction()
+    public function changeEstadoAction(Request $request)
     {
         try {
             $this->setResponse('ajax');
-            $id = $this->getPostParam('id', "addslaches", "alpha", "extraspaces", "striptags");
-            $estado = $this->getPostParam('estado', "addslaches", "alpha", "extraspaces", "striptags");
+            $id = $request->input('id');
+            $estado = $request->input('estado');
 
             $model = new ServiciosCupos();
             $serviciosCupo = $model->findFirst(" id='{$id}'");
@@ -173,11 +171,11 @@ class AdmproductosController extends ApplicationController
     public function aplicadosAction($codser = '')
     {
         if ($codser == '') {
-            Flash::set_flashdata("error", array(
+            set_flashdata("error", array(
                 "msj" => "El servicio no está disponible.",
                 "code" => '505'
             ));
-            Router::rTa("admproductos/lista");
+            return redirect("admproductos/lista");
             exit;
         }
         $servicioCupo = $this->ServiciosCupos->findFirst(" codser='{$codser}'");
@@ -191,7 +189,7 @@ class AdmproductosController extends ApplicationController
         $this->setParamToView("title", "Productos y Servicios");
     }
 
-    public function buscarAfiliadosAplicadosAction($codser = '')
+    public function buscarAfiliadosAplicadosAction(Request $request, $codser = '')
     {
         $this->setResponse('ajax');
 
@@ -228,11 +226,11 @@ class AdmproductosController extends ApplicationController
     public function cargue_pagosAction($codser = '')
     {
         if ($codser == '') {
-            Flash::set_flashdata("error", array(
+            set_flashdata("error", array(
                 "msj" => "El servicio no está disponible.",
                 "code" => '505'
             ));
-            Router::rTa("admproductos/lista");
+            return redirect("admproductos/lista");
             exit;
         }
         $servicioCupo = $this->ServiciosCupos->findFirst(" codser='{$codser}'");
@@ -246,7 +244,7 @@ class AdmproductosController extends ApplicationController
         $this->setParamToView("title", "Productos y Servicios");
     }
 
-    public function detalleAplicadoAction($id)
+    public function detalleAplicadoAction(Request $request, $id)
     {
         $this->setResponse('ajax');
         try {
@@ -326,7 +324,7 @@ class AdmproductosController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function rechazarAction($id = '')
+    public function rechazarAction(Request $request, $id = '')
     {
         $this->setResponse('ajax');
         try {

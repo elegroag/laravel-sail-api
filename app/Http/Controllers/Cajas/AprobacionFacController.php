@@ -4,8 +4,27 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Services\CajaServices\FacultativoServices;
+use App\Services\Utils\Pagination;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Carbon\Carbon;
+use App\Exceptions\DebugException;
+use App\Library\Collections\ParamsFacultativo;
+use App\Library\Auth;
+use App\Library\Collections\ParamsPensionado;
+use App\Models\Mercurio36;
+use App\Models\Mercurio01;
+use App\Models\Mercurio06;
+use App\Models\Mercurio11;
+use App\Models\Mercurio37;
+use App\Models\Gener42;
+use App\Services\Utils\NotifyEmailServices;
+use App\Library\DbException;
+use App\Services\Aprueba\ApruebaSolicitud;
+use Illuminate\Support\Facades\View;
+use App\Services\Utils\Comman;
+use Exception;
 
 class AprobacionfacController extends ApplicationController
 {
@@ -30,40 +49,8 @@ class AprobacionfacController extends ApplicationController
      */
     protected $apruebaSolicitud;
 
-    public function initialize()
+    public function __construct()
     {
-        $this->setPersistance(false);
-        Core::importHelper('format');
-        Core::importLibrary("Services", "Services");
-        Core::importLibrary("Pagination", "Pagination");
-        Core::importLibrary("ParamsFacultativo", "Collections");
-        $this->setTemplateAfter('bone');
-        $this->services = Services::Init();
-    }
-
-
-    /**
-     * beforeFilter function
-     * @changed [2023-12-21]
-     *
-     * @author elegroag <elegroag@ibero.edu.co>
-     * @param array $permisos
-     * @return void
-     */
-    public function beforeFilter($permisos = array())
-    {
-        $permisos = array("aplicarFiltro" => "65", "info" => "66", "buscar" => "67", "aprobar" => "68", "devolver" => "69", "rechazar" => "70");
-        $flag = parent::beforeFilter($permisos);
-        if (!$flag) {
-            if (is_ajax()) {
-                $this->setResponse("ajax");
-                $response = parent::errorFunc("No cuenta con los permisos para este proceso");
-                $this->renderObject($response, false);
-            } else {
-                $this->redirect("principal/index/0");
-            }
-            return false;
-        }
     }
 
     /**
@@ -73,10 +60,10 @@ class AprobacionfacController extends ApplicationController
      * @author elegroag <elegroag@ibero.edu.co>
      * @return void
      */
-    public function aplicarFiltroAction($estado = 'P')
+    public function aplicarFiltroAction(Request $request, $estado = 'P')
     {
         $this->setResponse("ajax");
-        $cantidad_pagina = ($this->getPostParam("numero")) ? $this->getPostParam("numero") : 10;
+        $cantidad_pagina = ($request->input("numero")) ? $request->input("numero") : 10;
         $usuario = parent::getActUser();
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
         $pagination = new Pagination(
@@ -90,14 +77,14 @@ class AprobacionfacController extends ApplicationController
         );
 
         $query = $pagination->filter(
-            $this->getPostParam('campo'),
-            $this->getPostParam('condi'),
-            $this->getPostParam('value')
+            $request->input('campo'),
+            $request->input('condi'),
+            $request->input('value')
         );
 
-        Flash::set_flashdata("filter_facultativo", $query, true);
+        set_flashdata("filter_facultativo", $query, true);
 
-        Flash::set_flashdata("filter_params", $pagination->filters, true);
+        set_flashdata("filter_params", $pagination->filters, true);
 
         $response = $pagination->render(
             new FacultativoServices()
@@ -108,7 +95,7 @@ class AprobacionfacController extends ApplicationController
 
     public function changeCantidadPaginaAction($estado = 'P')
     {
-        $this->buscarAction($estado);
+        //$this->buscarAction($estado);
     }
 
     public function indexAction()
@@ -123,47 +110,44 @@ class AprobacionfacController extends ApplicationController
         );
 
         $this->setParamToView("campo_filtro", $campo_field);
-        $this->setParamToView("filters", Flash::get_flashdata_item("filter_params"));
+        $this->setParamToView("filters", get_flashdata_item("filter_params"));
         $this->setParamToView("title", "Aprueba Facultativo");
         $this->setParamToView("buttons", array("F"));
         $this->loadParametrosView();
         $this->setParamToView("mercurio11", $this->Mercurio11->find());
     }
 
-
-    public function buscarAction($estado = 'P')
+    public function buscarAction(Request $request, string $estado = 'P')
     {
         $this->setResponse("ajax");
-        $pagina = ($this->getPostParam('pagina')) ? $this->getPostParam('pagina') : 1;
-        $cantidad_pagina = ($this->getPostParam("numero")) ? $this->getPostParam("numero") : 10;
-        $usuario = parent::getActUser();
+        $pagina = $request->input('pagina', 1);
+        $cantidad_pagina = $request->input("numero", 10);
+        $usuario = session()->get('user');
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
-            new Request(
-                array(
-                    "cantidadPaginas" => $cantidad_pagina,
-                    "pagina" => $pagina,
-                    "query" => $query_str,
-                    "estado" => $estado
-                )
-            )
+            new Request([
+                "cantidadPaginas" => $cantidad_pagina,
+                "pagina" => $pagina,
+                "query" => $query_str,
+                "estado" => $estado
+            ])
         );
 
         if (
-            Flash::get_flashdata_item("filter_facultativo") != false
+            get_flashdata_item("filter_facultativo") != false
         ) {
-            $query = $this->pagination->persistencia(Flash::get_flashdata_item("filter_params"));
+            $query = $this->pagination->persistencia(get_flashdata_item("filter_params"));
         } else {
             $query = $pagination->filter(
-                $this->getPostParam('campo'),
-                $this->getPostParam('condi'),
-                $this->getPostParam('value')
+                $request->input('campo'),
+                $request->input('condi'),
+                $request->input('value')
             );
         }
 
-        Flash::set_flashdata("filter_facultativo", $query, true);
-        Flash::set_flashdata("filter_params", $pagination->filters, true);
+        set_flashdata("filter_facultativo", $query, true);
+        set_flashdata("filter_params", $pagination->filters, true);
 
         $response = $pagination->render(
             new FacultativoServices()
@@ -176,13 +160,13 @@ class AprobacionfacController extends ApplicationController
      * infor function
      * @return void
      */
-    public function inforAction()
+    public function inforAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
-            $id = $this->getPostParam('id');
+            $id = $request->input('id');
             if (!$id) {
-                throw new Exception("Error se requiere del id independiente", 501);
+                throw new DebugException("Error se requiere del id independiente", 501);
             }
             $facultativoServices = new FacultativoServices();
             $mercurio36 = (new Mercurio36)->findFirst("id='{$id}'");
@@ -258,10 +242,10 @@ class AprobacionfacController extends ApplicationController
      * @author elegroag <elegroag@ibero.edu.co>
      * @return void
      */
-    public function apruebaAction()
+    public function apruebaAction(Request $request)
     {
         $this->setResponse("ajax");
-        $user = Auth::getActiveIdentity();
+        $user = session()->get('user');
         $debuginfo = array();
 
         $acceso = (new Gener42)->count("permiso='62' AND usuario='{$user['usuario']}'");
@@ -269,11 +253,11 @@ class AprobacionfacController extends ApplicationController
             return $this->renderObject(array("success" => false, "msj" => "El usuario no dispone de permisos de aprobación"), false);
         }
         $apruebaSolicitud = new ApruebaSolicitud();
-        $apruebaSolicitud->setTransa();
+        $this->db->begin();
         try {
             try {
                 $postData = $_POST;
-                $idSolicitud = $this->getPostParam('id', "addslaches", "alpha", "extraspaces", "striptags");
+                $idSolicitud = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
                 $calemp = 'F';
                 $solicitud = $apruebaSolicitud->main(
                     $calemp,
@@ -281,21 +265,21 @@ class AprobacionfacController extends ApplicationController
                     $postData
                 );
 
-                $apruebaSolicitud->endTransa();
-                $solicitud->enviarMail($this->getPostParam('actapr'), $this->getPostParam('feccap'));
+                $this->db->commit();
+                $solicitud->enviarMail($request->input('actapr'), $request->input('feccap'));
                 $salida = array(
                     'success' => true,
                     'msj' => 'El registro se completo con éxito'
                 );
             } catch (DebugException $err) {
-                $debuginfo = $err->getDebugInfo();
-                $apruebaSolicitud->closeTransa($err->getMessage());
+                
+                $this->db->rollback();
                 $salida = array(
                     "success" => false,
                     "msj" => $err->getMessage(),
                 );
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $salida = array(
                 "success" => false,
                 "msj" => $e->getMessage(),
@@ -305,22 +289,22 @@ class AprobacionfacController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function borrarFiltroAction()
+    public function borrarFiltroAction(Request $request)
     {
         $this->setResponse("ajax");
-        Flash::set_flashdata("filter_facultativo", false, true);
-        Flash::set_flashdata("filter_params", false, true);
+        set_flashdata("filter_facultativo", false, true);
+        set_flashdata("filter_params", false, true);
         return $this->renderObject(array(
             'success' => true,
-            'query' => Flash::get_flashdata_item("filter_facultativo"),
-            'filter' => Flash::get_flashdata_item("filter_params"),
+            'query' => get_flashdata_item("filter_facultativo"),
+            'filter' => get_flashdata_item("filter_params"),
         ));
     }
 
     public function editarViewAction($id)
     {
         if (!$id) {
-            Router::rTa("aprobacionfac/index");
+            return redirect("aprobacionfac/index");
             exit;
         }
         $facultativoServices = new FacultativoServices();
@@ -354,56 +338,56 @@ class AprobacionfacController extends ApplicationController
         $this->setParamToView("title", "Editar Ficha Pensionado " . $mercurio36->getCedtra());
     }
 
-    public function edita_empresaAction()
+    public function edita_empresaAction(Request $request)
     {
         $this->setResponse("ajax");
-        $nit = $this->getPostParam('nit');
-        $id = $this->getPostParam('id');
+        $nit = $request->input('nit');
+        $id = $request->input('id');
         try {
             $mercurio36 = $this->Mercurio36->findFirst("nit='{$nit}' AND id='{$id}'");
             if (!$mercurio36) {
-                throw new Exception("La empresa no está disponible para notificar por email", 501);
+                throw new DebugException("La empresa no está disponible para notificar por email", 501);
             } else {
-                $tipsoc = $this->getPostParam('tipsoc');
+                $tipsoc = $request->input('tipsoc');
                 if (strlen($tipsoc) == 1) {
                     $tipsoc = str_pad($tipsoc, 2, '0', STR_PAD_LEFT);
                 }
                 $data = array(
-                    "razsoc" => $this->getPostParam('razsoc'),
-                    "codact" => $this->getPostParam('codact'),
-                    "digver" => $this->getPostParam('digver'),
-                    "calemp" => $this->getPostParam('calemp'),
-                    "cedrep" => $this->getPostParam('cedrep'),
-                    "repleg" => $this->getPostParam('repleg'),
-                    "direccion" => $this->getPostParam('direccion'),
-                    "codciu" => $this->getPostParam('codciu'),
-                    "codzon" => $this->getPostParam('codzon'),
-                    "telefono" => $this->getPostParam('telefono'),
-                    "celular" => $this->getPostParam('celular'),
-                    "fax" => $this->getPostParam('fax'),
-                    "email" => $this->getPostParam('email'),
-                    "sigla" => $this->getPostParam('sigla'),
-                    "fecini" => $this->getPostParam('fecini'),
-                    "tottra" => $this->getPostParam('tottra'),
-                    "valnom" => $this->getPostParam('valnom'),
+                    "razsoc" => $request->input('razsoc'),
+                    "codact" => $request->input('codact'),
+                    "digver" => $request->input('digver'),
+                    "calemp" => $request->input('calemp'),
+                    "cedrep" => $request->input('cedrep'),
+                    "repleg" => $request->input('repleg'),
+                    "direccion" => $request->input('direccion'),
+                    "codciu" => $request->input('codciu'),
+                    "codzon" => $request->input('codzon'),
+                    "telefono" => $request->input('telefono'),
+                    "celular" => $request->input('celular'),
+                    "fax" => $request->input('fax'),
+                    "email" => $request->input('email'),
+                    "sigla" => $request->input('sigla'),
+                    "fecini" => $request->input('fecini'),
+                    "tottra" => $request->input('tottra'),
+                    "valnom" => $request->input('valnom'),
                     "tipsoc" => $tipsoc,
-                    "dirpri" => $this->getPostParam('dirpri'),
-                    "ciupri" => $this->getPostParam('ciupri'),
-                    "celpri" => $this->getPostParam('celpri'),
-                    'tipemp' => $this->getPostParam('tipemp'),
-                    "emailpri" => $this->getPostParam('emailpri'),
-                    "tipper" => $this->getPostParam('tipper'),
-                    "matmer" => $this->getPostParam('matmer'),
-                    "coddocrepleg" => (!$this->getPostParam('coddocrepleg')) ? '1' : $this->getPostParam('coddocrepleg'),
-                    "prinom" => ($this->getPostParam('tipper') == 'N') ? $this->getPostParam('prinom') : $this->getPostParam('prinomrepleg'),
-                    "priape" => ($this->getPostParam('tipper') == 'N') ? $this->getPostParam('priape') : $this->getPostParam('priaperepleg'),
-                    "segnom" => ($this->getPostParam('tipper') == 'N') ? $this->getPostParam('segnom') : $this->getPostParam('segnomrepleg'),
-                    "segape" => ($this->getPostParam('tipper') == 'N') ? $this->getPostParam('segape') : $this->getPostParam('segaperepleg'),
-                    "prinomrepleg" => ($this->getPostParam('tipper') == 'J') ? $this->getPostParam('prinomrepleg') : '',
-                    "priaperepleg" => ($this->getPostParam('tipper') == 'J') ? $this->getPostParam('priaperepleg') : '',
-                    "segnomrepleg" => ($this->getPostParam('tipper') == 'J') ? $this->getPostParam('segnomrepleg') : '',
-                    "segaperepleg" => ($this->getPostParam('tipper') == 'J') ? $this->getPostParam('segaperepleg') : '',
-                    "telpri" => $this->getPostParam('telpri')
+                    "dirpri" => $request->input('dirpri'),
+                    "ciupri" => $request->input('ciupri'),
+                    "celpri" => $request->input('celpri'),
+                    'tipemp' => $request->input('tipemp'),
+                    "emailpri" => $request->input('emailpri'),
+                    "tipper" => $request->input('tipper'),
+                    "matmer" => $request->input('matmer'),
+                    "coddocrepleg" => (!$request->input('coddocrepleg')) ? '1' : $request->input('coddocrepleg'),
+                    "prinom" => ($request->input('tipper') == 'N') ? $request->input('prinom') : $request->input('prinomrepleg'),
+                    "priape" => ($request->input('tipper') == 'N') ? $request->input('priape') : $request->input('priaperepleg'),
+                    "segnom" => ($request->input('tipper') == 'N') ? $request->input('segnom') : $request->input('segnomrepleg'),
+                    "segape" => ($request->input('tipper') == 'N') ? $request->input('segape') : $request->input('segaperepleg'),
+                    "prinomrepleg" => ($request->input('tipper') == 'J') ? $request->input('prinomrepleg') : '',
+                    "priaperepleg" => ($request->input('tipper') == 'J') ? $request->input('priaperepleg') : '',
+                    "segnomrepleg" => ($request->input('tipper') == 'J') ? $request->input('segnomrepleg') : '',
+                    "segaperepleg" => ($request->input('tipper') == 'J') ? $request->input('segaperepleg') : '',
+                    "telpri" => $request->input('telpri')
                 );
                 $setters = "";
                 foreach ($data as $ai => $row) $setters .= " $ai='{$row}',";
@@ -466,15 +450,15 @@ class AprobacionfacController extends ApplicationController
         $this->setParamToView("_coddocrepleg", $_coddocrepleg);
     }
 
-    public function rechazarAction()
+    public function rechazarAction(Request $request)
     {
         $this->setResponse("ajax");
         $notifyEmailServices = new NotifyEmailServices();
-        $this->independienteServices =  $this->services->get('IndependienteServices');
+        $this->facultativoServices =  new FacultativoServices();
         try {
-            $id = $this->getPostParam('id', "addslaches", "alpha", "extraspaces", "striptags");
-            $nota = sanetizar($this->getPostParam('nota'));
-            $codest = $this->getPostParam('codest', "addslaches", "alpha", "extraspaces", "striptags");
+            $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
+            $nota = sanetizar($request->input('nota'));
+            $codest = $request->input('codest', "addslaches", "alpha", "extraspaces", "striptags");
 
             $mercurio41 = $this->Mercurio41->findFirst(" id='{$id}'");
 
@@ -482,9 +466,9 @@ class AprobacionfacController extends ApplicationController
                 throw new DebugException("El registro ya se encuentra rechazado, no se requiere de repetir la acción.", 201);
             }
 
-            $this->independienteServices->rechazar($mercurio41, $nota, $codest);
+            $this->facultativoServices->rechazar($mercurio41, $nota, $codest);
 
-            $notifyEmailServices->emailRechazar($mercurio41, $this->independienteServices->msjRechazar($mercurio41, $nota));
+            $notifyEmailServices->emailRechazar($mercurio41, $this->facultativoServices->msjRechazar($mercurio41, $nota));
 
             $salida = array(
                 "success" => true,
@@ -495,39 +479,33 @@ class AprobacionfacController extends ApplicationController
                 "success" => false,
                 "msj" => $err->getMessage(),
                 "code" => $err->getCode()
-            );
-        } catch (DbException $e) {
-            $salida = array(
-                "success" => false,
-                "msj" => $e->getMessage(),
-                "code" => 500
             );
         }
         return  $this->renderObject($salida, false);
     }
 
-    public function devolverAction()
+    public function devolverAction(Request $request)
     {
         $this->setResponse("ajax");
-        $this->independienteServices =  $this->services->get('IndependienteServices');
+        $this->facultativoServices =  $this->services->get('facultativoServices');
         $notifyEmailServices = new NotifyEmailServices();
         try {
-            $id = $this->getPostParam('id', "addslaches", "alpha", "extraspaces", "striptags");
-            $codest = $this->getPostParam('codest', "addslaches", "alpha", "extraspaces", "striptags");
-            $nota = sanetizar($this->getPostParam('nota'));
-            $array_corregir = $this->getPostParam('campos_corregir');
+            $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
+            $codest = $request->input('codest', "addslaches", "alpha", "extraspaces", "striptags");
+            $nota = sanetizar($request->input('nota'));
+            $array_corregir = $request->input('campos_corregir');
             $campos_corregir = implode(";", $array_corregir);
 
             $mercurio41 = $this->Mercurio41->findFirst("id='{$id}'");
             if ($mercurio41->getEstado() == 'D') {
-                throw new Exception("El registro ya se encuentra devuelto, no se requiere de repetir la acción.", 201);
+                throw new DebugException("El registro ya se encuentra devuelto, no se requiere de repetir la acción.", 201);
             }
 
-            $this->independienteServices->devolver($mercurio41, $nota, $codest, $campos_corregir);
+            $this->facultativoServices->devolver($mercurio41, $nota, $codest, $campos_corregir);
 
             $notifyEmailServices->emailDevolver(
                 $mercurio41,
-                $this->independienteServices->msjDevolver($mercurio41, $nota)
+                $this->facultativoServices->msjDevolver($mercurio41, $nota)
             );
 
             $salida = array(
@@ -539,18 +517,6 @@ class AprobacionfacController extends ApplicationController
                 "success" => false,
                 "msj" => $err->getMessage(),
                 "code" => $err->getCode()
-            );
-        } catch (DbException $e) {
-            $salida = array(
-                "success" => false,
-                "msj" => $e->getMessage(),
-                "code" => 500
-            );
-        } catch (Exception $ei) {
-            $salida = array(
-                "success" => false,
-                "msj" => $ei->getMessage() . ' ' . $ei->getLine(),
-                "code" => 500
             );
         }
         return $this->renderObject($salida, false);

@@ -25,13 +25,13 @@ class MotivosrechazoController extends ApplicationController
         }
     }
 
-    public function initialize()
+    public function __construct()
     {
-        Core::importLibrary("Services", "Services");
-        $this->setTemplateAfter('main');
-        $this->setPersistance(true);
+       
+        
+        
         $this->cantidad_pagina = $this->numpaginate;
-        Services::Init();
+        
     }
 
     public function showTabla($paginate)
@@ -76,7 +76,7 @@ class MotivosrechazoController extends ApplicationController
     public function changeCantidadPaginaAction()
     {
         $this->setResponse("ajax");
-        $this->cantidad_pagina = $this->getPostParam("numero");
+        $this->cantidad_pagina = $request->input("numero");
         self::buscarAction();
     }
     public function indexAction()
@@ -97,7 +97,7 @@ class MotivosrechazoController extends ApplicationController
     public function buscarAction()
     {
         $this->setResponse("ajax");
-        $pagina = $this->getPostParam('pagina');
+        $pagina = $request->input('pagina');
         $params = $_POST;
         if ($this->query != "1=1") {
             $query = array("query" => $this->query);
@@ -126,13 +126,13 @@ class MotivosrechazoController extends ApplicationController
     {
         try {
             $this->setResponse("ajax");
-            $codest = $this->getPostParam('codest');
+            $codest = $request->input('codest');
             $sat28 = $this->Sat28->findFirst("codest = '$codest'");
             if ($sat28 == false) $sat28 = new Sat28();
             return $this->renderObject($sat28->getArray(), false);
         } catch (DbException $e) {
             parent::setLogger($e->getMessage());
-            parent::ErrorTrans();
+            $this->db->rollback();
         }
     }
 
@@ -141,19 +141,19 @@ class MotivosrechazoController extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $codest = $this->getPostParam('codest');
+                $codest = $request->input('codest');
                 $modelos = array("Sat28");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 $this->Sat28->deleteAll("codest = '$codest'");
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Borrado Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede Borrar el Registro");
             return $this->renderObject($response, false);
         }
@@ -164,27 +164,27 @@ class MotivosrechazoController extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $codest = $this->getPostParam('codest', "addslaches", "alpha", "extraspaces", "striptags");
-                $detalle = $this->getPostParam('detalle', "addslaches", "alpha", "extraspaces", "striptags");
+                $codest = $request->input('codest', "addslaches", "alpha", "extraspaces", "striptags");
+                $detalle = $request->input('detalle', "addslaches", "alpha", "extraspaces", "striptags");
                 $modelos = array("Sat28");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 $sat28 = new Sat28();
                 $sat28->setTransaction($Transaccion);
                 $sat28->setCodest($codest);
                 $sat28->setDetalle($detalle);
                 if (!$sat28->save()) {
                     parent::setLogger($sat28->getMessages());
-                    parent::ErrorTrans();
+                    $this->db->rollback();
                 }
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Creacion Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede guardar/editar el Registro");
             return $this->renderObject($response, false);
         }
@@ -194,7 +194,7 @@ class MotivosrechazoController extends ApplicationController
     {
         try {
             $this->setResponse("ajax");
-            $codest = $this->getPostParam('codest', "addslaches", "alpha", "extraspaces", "striptags");
+            $codest = $request->input('codest', "addslaches", "alpha", "extraspaces", "striptags");
             $response = parent::successFunc("");
             $l = $this->Sat28->count("*", "conditions: codest = '$codest'");
             if ($l > 0) {

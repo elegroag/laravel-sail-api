@@ -29,11 +29,11 @@ class Gener42Controller extends ApplicationController
         }
     }
 
-    public function initialize()
+    public function __construct()
     {
-        Core::importLibrary("Services", "Services");
-        $this->setTemplateAfter('main');
-        $this->setPersistance(true);
+       
+        
+        
         $this->cantidad_pagina = $this->numpaginate;
     }
 
@@ -49,9 +49,9 @@ class Gener42Controller extends ApplicationController
     public function buscarAction()
     {
         $this->setResponse("ajax");
-        $usuario = $this->getPostParam("usuario");
-        $buscar = $this->getPostParam("buscar");
-        $tipo = $this->getPostParam("tipo");
+        $usuario = $request->input("usuario");
+        $buscar = $request->input("buscar");
+        $tipo = $request->input("tipo");
         $response['flag'] = true;
 
         $likes = "";
@@ -92,13 +92,13 @@ class Gener42Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $tipo = $this->getPostParam('tipo', "addslaches", "extraspaces", "striptags");
-                $usuario = $this->getPostParam('usuario', "addslaches", "extraspaces", "striptags");
-                $permisos = $this->getPostParam('permisos', "addslaches", "extraspaces", "striptags");
+                $tipo = $request->input('tipo', "addslaches", "extraspaces", "striptags");
+                $usuario = $request->input('usuario', "addslaches", "extraspaces", "striptags");
+                $permisos = $request->input('permisos', "addslaches", "extraspaces", "striptags");
                 $permisos = explode(";", $permisos);
                 $modelos = array("gener42");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 if ($tipo == "A") {
                     foreach ($permisos as $permiso) {
                         if (empty($permiso)) continue;
@@ -108,7 +108,7 @@ class Gener42Controller extends ApplicationController
                         $table->setPermiso($permiso);
                         if (!$table->save()) {
                             parent::setLogger($table->getMessages());
-                            parent::ErrorTrans();
+                            $this->db->rollback();
                         }
                     }
                 }
@@ -118,14 +118,14 @@ class Gener42Controller extends ApplicationController
                         $this->Gener42->deleteAll("usuario='$usuario' and permiso='$permiso'");
                     }
                 }
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Creacion Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede guardar/editar el Registro");
             return $this->renderObject($response, false);
         }

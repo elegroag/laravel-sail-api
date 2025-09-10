@@ -13,13 +13,13 @@ class Mercurio12Controller extends ApplicationController
     private $query = "1=1";
     private $cantidad_pagina = 10;
 
-    public function initialize()
+    public function __construct()
     {
-        Core::importLibrary("Services", "Services");
-        $this->setTemplateAfter('main');
-        $this->setPersistance(true);
+       
+        
+        
         $this->cantidad_pagina = $this->numpaginate;
-        Services::Init();
+        
     }
 
     public function beforeFilter($permisos = array())
@@ -100,8 +100,8 @@ class Mercurio12Controller extends ApplicationController
         $consultasOldServices = new GeneralService();
         $this->query = $consultasOldServices->converQuery();
 
-        $pagina = ($this->getPostParam('pagina')) ? $this->getPostParam('pagina') : 1;
-        $this->cantidad_pagina = ($this->getPostParam("numero")) ? $this->getPostParam("numero") : 10;
+        $pagina = ($request->input('pagina')) ? $request->input('pagina') : 1;
+        $this->cantidad_pagina = ($request->input("numero")) ? $request->input("numero") : 10;
 
         if ($pagina == "") $pagina = 1;
 
@@ -120,14 +120,14 @@ class Mercurio12Controller extends ApplicationController
     {
         try {
             $this->setResponse("ajax");
-            $coddoc = $this->getPostParam('coddoc');
+            $coddoc = $request->input('coddoc');
             $mercurio12 = $this->Mercurio12->findFirst("coddoc = '$coddoc'");
             if ($mercurio12 == false) $mercurio12 = new Mercurio12();
 
             return $this->renderObject($mercurio12->getArray(), false);
         } catch (DbException $e) {
             parent::setLogger($e->getMessage());
-            parent::ErrorTrans();
+            $this->db->rollback();
         }
     }
 
@@ -136,19 +136,19 @@ class Mercurio12Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $coddoc = $this->getPostParam('coddoc');
+                $coddoc = $request->input('coddoc');
                 $modelos = array("Mercurio12");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 $this->Mercurio12->deleteAll("coddoc = '$coddoc'");
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Borrado Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede Borrar el Registro");
             return $this->renderObject($response, false);
         }
@@ -159,27 +159,27 @@ class Mercurio12Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $coddoc = $this->getPostParam('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
-                $detalle = $this->getPostParam('detalle', "addslaches", "alpha", "extraspaces", "striptags");
+                $coddoc = $request->input('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
+                $detalle = $request->input('detalle', "addslaches", "alpha", "extraspaces", "striptags");
                 $modelos = array("Mercurio12");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 $mercurio12 = new Mercurio12();
                 $mercurio12->setTransaction($Transaccion);
                 $mercurio12->setCoddoc($coddoc);
                 $mercurio12->setDetalle($detalle);
                 if (!$mercurio12->save()) {
                     parent::setLogger($mercurio12->getMessages());
-                    parent::ErrorTrans();
+                    $this->db->rollback();
                 }
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Creacion Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede guardar/editar el Registro");
             return $this->renderObject($response, false);
         }
@@ -189,7 +189,7 @@ class Mercurio12Controller extends ApplicationController
     {
         try {
             $this->setResponse("ajax");
-            $coddoc = $this->getPostParam('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
+            $coddoc = $request->input('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
             $response = parent::successFunc("");
             $l = $this->Mercurio12->count("*", "conditions: coddoc = '$coddoc'");
             if ($l > 0) {

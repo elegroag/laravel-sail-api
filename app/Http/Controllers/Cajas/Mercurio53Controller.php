@@ -11,10 +11,10 @@ class Mercurio53Controller extends ApplicationController
 {
 
 
-    public function initialize()
+    public function __construct()
     {
-        Core::importLibrary("Services", "Services");
-        $this->setTemplateAfter('main');
+       
+        
     }
 
     public function indexAction()
@@ -29,14 +29,14 @@ class Mercurio53Controller extends ApplicationController
     {
         try {
             $this->setResponse("ajax");
-            $instancePath = Core::getInstancePath();
+            $instancePath = env('APP_URL');
             $mercurio01 = $this->Mercurio01->findFirst();
             $con = DbBase::rawConnect();
             $response = $con->inQueryAssoc("SELECT numero,concat('$instancePath{$mercurio01->getPath()}galeria/',archivo) as archivo FROM mercurio53 ORDER BY orden ASC");
             $this->renderObject($response, false);
         } catch (DbException $e) {
             parent::setLogger($e->getMessage());
-            parent::ErrorTrans();
+            $this->db->rollback();
         }
     }
 
@@ -48,8 +48,8 @@ class Mercurio53Controller extends ApplicationController
                 $numero = $this->Mercurio53->maximum("numero") + 1;
                 $orden =  $this->Mercurio53->maximum("orden") + 1;
                 $modelos = array("mercurio53");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 $mercurio53 = new Mercurio53();
 
                 $mercurio53->setTransaction($Transaccion);
@@ -67,17 +67,17 @@ class Mercurio53Controller extends ApplicationController
 
                 if (!$mercurio53->save()) {
                     parent::setLogger($mercurio53->getMessages());
-                    parent::ErrorTrans();
+                    $this->db->rollback();
                 }
 
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Creacion terminada Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede guardar el Registro" . $e->getMessage());
             return $this->renderObject($response, false);
         }
@@ -88,7 +88,7 @@ class Mercurio53Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $numero = $this->getPostParam('numero');
+                $numero = $request->input('numero');
                 $objetivo = $this->Mercurio53->findFirst("numero = $numero");
                 $orden_obj = $objetivo->getOrden();
                 $minimo =  $this->Mercurio53->minimum("orden");
@@ -107,9 +107,9 @@ class Mercurio53Controller extends ApplicationController
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede Ordenar el Registro");
             return $this->renderObject($response, false);
         }
@@ -120,7 +120,7 @@ class Mercurio53Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $numero = $this->getPostParam('numero');
+                $numero = $request->input('numero');
                 $objetivo = $this->Mercurio53->findFirst("numero = $numero");
                 $orden_obj = $objetivo->getOrden();
                 $maximo =  $this->Mercurio53->maximum("orden");
@@ -142,9 +142,9 @@ class Mercurio53Controller extends ApplicationController
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede Ordenar el Registro");
             return $this->renderObject($response, false);
         }
@@ -155,24 +155,24 @@ class Mercurio53Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $numero = $this->getPostParam('numero');
+                $numero = $request->input('numero');
                 $archivo = $this->Mercurio53->findFirst("numero = '$numero'")->getArchivo();
                 $mercurio01 = $this->Mercurio01->findFirst();
                 if (!empty($archivo) && file_exists("{$mercurio01->getPath()}galeria/" . $archivo)) {
                     unlink("{$mercurio01->getPath()}galeria/" . $archivo);
                 }
                 $modelos = array("mercurio53");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 $this->Mercurio53->deleteAll("numero = $numero");
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Borrado Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede Borrar el Registro");
             return $this->renderObject($response, false);
         }

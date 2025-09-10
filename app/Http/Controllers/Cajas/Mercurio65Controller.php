@@ -13,13 +13,13 @@ class Mercurio65Controller extends ApplicationController
     private $query = "1=1";
     private $cantidad_pagina = 0;
 
-    public function initialize()
+    public function __construct()
     {
-        Core::importLibrary("Services", "Services");
-        $this->setTemplateAfter('main');
-        $this->setPersistance(true);
+       
+        
+        
         $this->cantidad_pagina = $this->numpaginate;
-        Services::Init();
+        
     }
 
     public function showTabla($paginate)
@@ -71,7 +71,7 @@ class Mercurio65Controller extends ApplicationController
     public function changeCantidadPaginaAction()
     {
         $this->setResponse("ajax");
-        $this->cantidad_pagina = $this->getPostParam("numero");
+        $this->cantidad_pagina = $request->input("numero");
         self::buscarAction();
     }
 
@@ -94,7 +94,7 @@ class Mercurio65Controller extends ApplicationController
     public function buscarAction()
     {
         $this->setResponse("ajax");
-        $pagina = $this->getPostParam('pagina');
+        $pagina = $request->input('pagina');
         if ($pagina == "") $pagina = 1;
         $paginate = Tag::paginate($this->Mercurio65->find("$this->query"), $pagina, $this->cantidad_pagina);
         $html = self::showTabla($paginate);
@@ -109,13 +109,13 @@ class Mercurio65Controller extends ApplicationController
     {
         try {
             $this->setResponse("ajax");
-            $codsed = $this->getPostParam('codsed');
+            $codsed = $request->input('codsed');
             $mercurio65 = $this->Mercurio65->findFirst("codsed = '$codsed'");
             if ($mercurio65 == false) $mercurio65 = new Mercurio65();
             $this->renderObject($mercurio65->getArray(), false);
         } catch (DbException $e) {
             parent::setLogger($e->getMessage());
-            parent::ErrorTrans();
+            $this->db->rollback();
         }
     }
 
@@ -124,19 +124,19 @@ class Mercurio65Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $codsed = $this->getPostParam('codsed');
+                $codsed = $request->input('codsed');
                 $modelos = array("Mercurio65");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 $this->Mercurio65->deleteAll("codsed = '$codsed'");
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Borrado Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede Borrar el Registro");
             return $this->renderObject($response, false);
         }
@@ -147,20 +147,20 @@ class Mercurio65Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $codsed = $this->getPostParam('codsed', "addslaches", "extraspaces", "striptags");
-                $nit = $this->getPostParam('nit', "addslaches", "extraspaces", "striptags");
-                $razsoc = $this->getPostParam('razsoc', "addslaches", "extraspaces", "striptags");
-                $direccion = $this->getPostParam('direccion', "addslaches", "extraspaces", "striptags");
-                $email = $this->getPostParam('email', "addslaches", "extraspaces", "striptags");
-                $celular = $this->getPostParam('celular', "addslaches", "extraspaces", "striptags");
-                $codcla = $this->getPostParam('codcla', "addslaches", "alpha", "extraspaces", "striptags");
-                $detalle = $this->getPostParam('detalle', "addslaches", "alpha", "extraspaces", "striptags");
-                $estado = $this->getPostParam('estado', "addslaches", "alpha", "extraspaces", "striptags");
-                $lat = $this->getPostParam('lat');
-                $log = $this->getPostParam('log');
+                $codsed = $request->input('codsed', "addslaches", "extraspaces", "striptags");
+                $nit = $request->input('nit', "addslaches", "extraspaces", "striptags");
+                $razsoc = $request->input('razsoc', "addslaches", "extraspaces", "striptags");
+                $direccion = $request->input('direccion', "addslaches", "extraspaces", "striptags");
+                $email = $request->input('email', "addslaches", "extraspaces", "striptags");
+                $celular = $request->input('celular', "addslaches", "extraspaces", "striptags");
+                $codcla = $request->input('codcla', "addslaches", "alpha", "extraspaces", "striptags");
+                $detalle = $request->input('detalle', "addslaches", "alpha", "extraspaces", "striptags");
+                $estado = $request->input('estado', "addslaches", "alpha", "extraspaces", "striptags");
+                $lat = $request->input('lat');
+                $log = $request->input('log');
                 $modelos = array("Mercurio65");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 $mercurio65 = new Mercurio65();
                 $mercurio65->setTransaction($Transaccion);
                 $mercurio65->setCodsed($codsed);
@@ -184,7 +184,7 @@ class Mercurio65Controller extends ApplicationController
                         $mercurio65->setArchivo($name);
                         if (!$mercurio65->save()) {
                             parent::setLogger($mercurio65->getMessages());
-                            parent::ErrorTrans();
+                            $this->db->rollback();
                         }
                         $response = parent::successFunc("Se adjunto con exito el archivo");
                     } else {
@@ -193,14 +193,14 @@ class Mercurio65Controller extends ApplicationController
                 } else {
                     $response = parent::errorFunc("No se cargo el archivo");
                 }
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Creacion Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede guardar/editar el Registro");
             return $this->renderObject($response, false);
         }
@@ -210,7 +210,7 @@ class Mercurio65Controller extends ApplicationController
     {
         try {
             $this->setResponse("ajax");
-            $nit = $this->getPostParam('nit', "addslaches", "extraspaces", "striptags");
+            $nit = $request->input('nit', "addslaches", "extraspaces", "striptags");
             $response = parent::successFunc("");
             $l = $this->Mercurio65->count("*", "conditions: nit = '$nit'");
             if ($l > 0) {

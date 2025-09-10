@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Adapter;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ApplicationController extends Controller
 {
@@ -147,4 +148,30 @@ class ApplicationController extends Controller
         return $this->cleanInput($request->input($name, $default));
     }
 
+    public function setParamToView($name, $value)
+    {   
+    }
+
+    public function errorFunc($msg, int|null $code = null)
+    {
+        set_flashdata("error", array(
+            "msj" => $msg,
+            "code" => $code
+        ));
+        return array("flag" => false, "msg" => $msg);
+    }
+
+    public function successFunc($msg, string|null $template = null)
+    {
+        set_flashdata("success", array(
+            "msj" => $msg,
+            "template" => $template
+        ));
+        return array("flag" => true, "msg" => $msg);
+    }
+
+    public function setLogger($msg)
+    {
+        Log::stack(['single', 'slack'])->debug($msg);
+    }
 }

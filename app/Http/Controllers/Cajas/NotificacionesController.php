@@ -9,26 +9,26 @@ use Illuminate\Http\Response;
 
 class NotificacionesController extends ApplicationController
 {
-    public function initialize()
+    public function __construct()
     {
-        Core::importLibrary("Services", "Services");
-        $this->setTemplateAfter('bone');
-        $this->setParamToView("instancePath", Core::getInstancePath() . 'Cajas/');
-        Services::Init();
+       
+        
+        $this->setParamToView("instancePath", env('APP_URL') . 'Cajas/');
+        
     }
 
     public function beforeFilter($permisos = array())
     {
         parent::beforeFilter($permisos);
         if (!Auth::getActiveIdentity()) {
-            Flash::set_flashdata("error", array(
+            set_flashdata("error", array(
                 "message" => "No dispone de acceso a la ruta indicada principal.",
                 "code" => 404
             ));
             if (is_ajax()) {
-                Router::rTa('login/error_access_rest');
+                return redirect('login/error_access_rest');
             } else {
-                Router::rTa('login/error_access');
+                return redirect('login/error_access');
             }
             exit;
         }
@@ -61,8 +61,8 @@ class NotificacionesController extends ApplicationController
     {
         $this->setResponse("ajax");
         try {
-            $pagina = ($this->getPostParam('pagina')) ? $this->getPostParam('pagina') : 1;
-            $porPagina = ($this->getPostParam('porPagina')) ? $this->getPostParam('porPagina') : 10;
+            $pagina = ($request->input('pagina')) ? $request->input('pagina') : 1;
+            $porPagina = ($request->input('porPagina')) ? $request->input('porPagina') : 10;
 
             $notificacionService = new NotificacionService();
             $usuario = parent::getActUser();
@@ -86,14 +86,14 @@ class NotificacionesController extends ApplicationController
     public function detalleAction($id = '')
     {
         if ($id == '') {
-            Flash::set_flashdata("error", array(
+            set_flashdata("error", array(
                 "message" => "No se ha seleccionado una notificación.",
                 "code" => 404
             ));
             if (is_ajax()) {
-                Router::rTa('login/error_access_rest');
+                return redirect('login/error_access_rest');
             } else {
-                Router::rTa('login/error_access');
+                return redirect('login/error_access');
             }
             exit;
         }
@@ -135,8 +135,8 @@ class NotificacionesController extends ApplicationController
     {
         $this->setResponse("ajax");
         try {
-            $notificacion = (new Notificaciones)->findFirst(" id={$this->getPostParam('id')}");
-            $notificacion->setEstado($this->getPostParam('estado'));
+            $notificacion = (new Notificaciones)->findFirst(" id={$request->input('id')}");
+            $notificacion->setEstado($request->input('estado'));
             $notificacion->save();
             $salida = array(
                 'success' => true,

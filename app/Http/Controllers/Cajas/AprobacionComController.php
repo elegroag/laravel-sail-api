@@ -6,6 +6,22 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Carbon\Carbon;
+use App\Exceptions\DebugException;
+use App\Services\Utils\Pagination;
+use App\Services\CajaServices\MadreComuniServices;
+use App\Services\Aprueba\ApruebaSolicitud;
+use App\Models\Mercurio39;
+use App\Models\Mercurio10;
+use App\Library\Auth;
+use App\Library\Collections\ParamsEmpresa;
+use App\Library\Collections\ParamsTrabajador;
+use App\Models\Gener42;
+use App\Services\Utils\NotifyEmailServices;
+use App\Library\DbException;
+use App\Library\View;
+use App\Services\Utils\Comman;
+
 
 class AprobacioncomController extends ApplicationController
 {
@@ -36,39 +52,15 @@ class AprobacioncomController extends ApplicationController
     protected $apruebaSolicitud;
 
 
-    public function initialize()
-    {
-        $this->setPersistance(false);
-        Core::importHelper('format');
-        Core::importLibrary("Services", "Services");
-        Core::importLibrary("Pagination", "Pagination");
-        Core::importLibrary("ParamsTrabajador", "Collections");
-        $this->setTemplateAfter('bone');
-        $this->services = Services::Init();
+    public function __construct()
+    {    
         $this->pagination = new Pagination();
     }
 
-    public function beforeFilter($permisos = array())
-    {
-        $permisos = array("aplicarFiltro" => "77", "info" => "78", "buscar" => "79", "aprobar" => "80", "devolver" => "81", "rechazar" => "82");
-        $flag = parent::beforeFilter($permisos);
-        if (!$flag) {
-            $response = parent::errorFunc("No cuenta con los permisos para este proceso");
-            if (is_ajax()) {
-                $this->setResponse("ajax");
-                $this->renderObject($response, false);
-            } else {
-                Router::redirectToApplication('Cajas/principal/index');
-            }
-            return false;
-        }
-    }
-
-
-    public function aplicarFiltroAction($estado = 'P')
+    public function aplicarFiltroAction(Request $request, string $estado = 'P')
     {
         $this->setResponse("ajax");
-        $cantidad_pagina = ($this->getPostParam("numero")) ? $this->getPostParam("numero") : 10;
+        $cantidad_pagina = $request->input("numero", 10);
         $usuario = parent::getActUser();
 
         $this->pagination->setters(
@@ -78,14 +70,14 @@ class AprobacioncomController extends ApplicationController
         );
 
         $query = $this->pagination->filter(
-            $this->getPostParam('campo'),
-            $this->getPostParam('condi'),
-            $this->getPostParam('value')
+            $request->input('campo'),
+            $request->input('condi'),
+            $request->input('value')
         );
 
-        Flash::set_flashdata("filter_madres", $query, true);
+        set_flashdata("filter_madres", $query, true);
 
-        Flash::set_flashdata("filter_params", $this->pagination->filters, true);
+        set_flashdata("filter_params", $this->pagination->filters, true);
 
         $response = $this->pagination->render(
             new MadreComuniServices()
@@ -95,7 +87,7 @@ class AprobacioncomController extends ApplicationController
 
     public function changeCantidadPaginaAction($estado = 'P')
     {
-        $this->buscarAction($estado);
+        //$this->buscarAction($estado);
     }
 
 
@@ -111,7 +103,7 @@ class AprobacioncomController extends ApplicationController
         );
 
         $this->setParamToView("campo_filtro", $campo_field);
-        $this->setParamToView("filters", Flash::get_flashdata_item("filter_params"));
+        $this->setParamToView("filters", get_flashdata_item("filter_params"));
         $this->setParamToView("title", "Aprueba Madres Comunitarias");
         $this->setParamToView("buttons", array("F"));
         $this->loadParametrosView();
@@ -119,11 +111,11 @@ class AprobacioncomController extends ApplicationController
     }
 
 
-    public function buscarAction($estado = 'P')
+    public function buscarAction(Request $request, $estado = 'P')
     {
         $this->setResponse("ajax");
-        $pagina = ($this->getPostParam('pagina')) ? $this->getPostParam('pagina') : 1;
-        $cantidad_pagina = ($this->getPostParam("numero")) ? $this->getPostParam("numero") : 10;
+        $pagina = $request->input('pagina', 1);
+        $cantidad_pagina = $request->input("numero", 10);
         $usuario = parent::getActUser();
         $query = "usuario='{$usuario}' and estado='{$estado}'";
 
@@ -135,13 +127,13 @@ class AprobacioncomController extends ApplicationController
         );
 
         if (
-            Flash::get_flashdata_item("filter_madres") != false
+            get_flashdata_item("filter_madres") != false
         ) {
-            $query = $this->pagination->persistencia(Flash::get_flashdata_item("filter_params"));
+            $query = $this->pagination->persistencia(get_flashdata_item("filter_params"));
         }
 
-        Flash::set_flashdata("filter_madres", $query, true);
-        Flash::set_flashdata("filter_params", $this->pagination->filters, true);
+        set_flashdata("filter_madres", $query, true);
+        set_flashdata("filter_params", $this->pagination->filters, true);
 
         $response = $this->pagination->render(
             new MadreComuniServices()
@@ -159,18 +151,18 @@ class AprobacioncomController extends ApplicationController
     {
         $madreComuniServices = new MadreComuniServices();
         if (!$id) {
-            Router::rTa("aprobacioncom/index");
+            return redirect("aprobacioncom/index");
             exit;
         }
         $this->setParamToView("hide_header", true);
 
         $mercurio39 = $this->Mercurio39->findFirst("id='{$id}'");
         if ($mercurio39->getEstado() == "A") {
-            Flash::set_flashdata("success", array(
+            set_flashdata("success", array(
                 "msj" => "La empresa {$mercurio39->getNit()}, ya se encuentra aprobada su afiliación. Y no requiere de más acciones.",
                 "code" => 200
             ));
-            Router::rTa("aprobacioncom/index");
+            return redirect("aprobacioncom/index");
             exit;
         }
         $this->setParamToView("mercurio39", $mercurio39);
@@ -193,7 +185,7 @@ class AprobacioncomController extends ApplicationController
         $this->setParamToView("adjuntos", $madreComuniServices->adjuntos($mercurio39));
         $this->setParamToView("seguimiento", $madreComuniServices->seguimiento($mercurio39));
 
-        $htmlEmpresa = View::render('aprobacioncom/tmp/consulta', array(
+        $htmlEmpresa = view('cajas/aprobacioncom/tmp/consulta', array(
             'mercurio39' => $mercurio39,
             'mercurio01' => $mercurio01,
             'det_tipo' => $det_tipo,
@@ -203,7 +195,7 @@ class AprobacioncomController extends ApplicationController
             '_codzon' => ParamsEmpresa::getZonas(),
             '_codact' => ParamsEmpresa::getActividades(),
             '_tipsoc' => ParamsEmpresa::getTipoSociedades()
-        ));
+        ))->render();
 
         $this->setParamToView("consulta_empresa", $htmlEmpresa);
         $this->setParamToView("mercurio11", $this->Mercurio11->find());
@@ -286,10 +278,10 @@ class AprobacioncomController extends ApplicationController
      * Aprobación de empresa
      * @return void
      */
-    public function apruebaAction()
+    public function apruebaAction(Request $request)
     {
         $this->setResponse("ajax");
-        $user = Auth::getActiveIdentity();
+        $user = session()->get('user');
         $acceso = $this->Gener42->count("permiso='62' AND usuario='{$user['usuario']}'");
         if ($acceso == 0) {
             return $this->renderObject(array("success" => false, "msj" => "El usuario no dispone de permisos de aprobación"), false);
@@ -297,30 +289,25 @@ class AprobacioncomController extends ApplicationController
 
         $this->apruebaSolicitud = $this->services->get('ApruebaSolicitud', true);
         try {
-            try {
-                $postData = $_POST;
-                $idSolicitud = $this->getPostParam('id', "addslaches", "alpha", "extraspaces", "striptags");
-                $calemp = 'M';
-                $solicitud = $this->apruebaSolicitud->main(
-                    $calemp,
-                    $idSolicitud,
-                    $postData
-                );
+            $postData = $request->all();
+            $idSolicitud = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
+            $calemp = 'M';
+            $solicitud = $this->apruebaSolicitud->main(
+                $calemp,
+                $idSolicitud,
+                $postData
+            );
 
-                $this->apruebaSolicitud->endTransa();
-                $solicitud->enviarMail($this->getPostParam('actapr'), $this->getPostParam('feccap'));
-                $salida = array(
-                    'success' => true,
-                    'msj' => 'El registro se completo con éxito'
-                );
-            } catch (Exception $err) {
-                $this->apruebaSolicitud->closeTransa($err->getMessage());
-                $salida = array(
-                    "success" => false,
-                    "msj" => $err->getMessage(),
-                );
-            }
-        } catch (TransactionFailed $e) {
+            $this->db->begin();
+            $solicitud->enviarMail($request->input('actapr'), $request->input('feccap'));
+            $salida = array(
+                'success' => true,
+                'msj' => 'El registro se completo con éxito'
+            );
+            
+            $this->db->commit();
+        } catch (DebugException $e) {
+            $this->db->rollBack();
             $salida = array(
                 "success" => false,
                 "msj" => $e->getMessage(),
@@ -334,24 +321,28 @@ class AprobacioncomController extends ApplicationController
      * devolverAction function
      * @return void
      */
-    public function devolverAction()
+    public function devolverAction(Request $request)
     {
         $this->setResponse("ajax");
         $this->madreComuniServices = new MadreComuniServices();
         $notifyEmailServices = new NotifyEmailServices();
         try {
-            $id = $this->getPostParam('id', "addslaches", "alpha", "extraspaces", "striptags");
-            $codest = $this->getPostParam('codest', "addslaches", "alpha", "extraspaces", "striptags");
-            $nota = sanetizar($this->getPostParam('nota'));
-            $array_corregir = $this->getPostParam('campos_corregir');
+            $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
+            $codest = $request->input('codest', "addslaches", "alpha", "extraspaces", "striptags");
+            $nota = sanetizar($request->input('nota'));
+            $array_corregir = $request->input('campos_corregir');
             $campos_corregir = implode(";", $array_corregir);
 
             $mercurio39 = $this->Mercurio39->findFirst("id='{$id}'");
             if ($mercurio39->getEstado() == 'D') {
-                throw new Exception("El registro ya se encuentra devuelto, no se requiere de repetir la acción.", 201);
+                throw new DebugException("El registro ya se encuentra devuelto, no se requiere de repetir la acción.", 201);
             }
 
-            $this->madreComuniServices->devolver($mercurio39, $nota, $codest, $campos_corregir);
+            $today = Carbon::now();
+            $this->Mercurio39->updateAll("estado='D', motivo='{$nota}', codest='{$codest}', fecest='".$today->format('Y-m-d H:i:s')."'", "conditions: id='{$id}'");
+
+            $item = $this->Mercurio10->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$id}'");
+            $mercurio10 = new Mercurio10();
 
             $notifyEmailServices->emailDevolver(
                 $mercurio39,
@@ -368,18 +359,6 @@ class AprobacioncomController extends ApplicationController
                 "msj" => $err->getMessage(),
                 "code" => $err->getCode()
             );
-        } catch (DbException $e) {
-            $salida = array(
-                "success" => false,
-                "msj" => $e->getMessage(),
-                "code" => 500
-            );
-        } catch (Exception $ei) {
-            $salida = array(
-                "success" => false,
-                "msj" => $ei->getMessage() . ' ' . $ei->getLine(),
-                "code" => 500
-            );
         }
         return $this->renderObject($salida, false);
     }
@@ -388,15 +367,15 @@ class AprobacioncomController extends ApplicationController
      * rechazarAction function
      * @return void
      */
-    public function rechazarAction()
+    public function rechazarAction(Request $request)
     {
         $this->setResponse("ajax");
         $notifyEmailServices = new NotifyEmailServices();
         $this->madreComuniServices =  new MadreComuniServices();
         try {
-            $id = $this->getPostParam('id', "addslaches", "alpha", "extraspaces", "striptags");
-            $nota = sanetizar($this->getPostParam('nota'));
-            $codest = $this->getPostParam('codest', "addslaches", "alpha", "extraspaces", "striptags");
+            $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
+            $nota = sanetizar($request->input('nota'));
+            $codest = $request->input('codest', "addslaches", "alpha", "extraspaces", "striptags");
 
             $mercurio39 = $this->Mercurio39->findFirst(" id='{$id}'");
 
@@ -418,12 +397,6 @@ class AprobacioncomController extends ApplicationController
                 "msj" => $err->getMessage(),
                 "code" => $err->getCode()
             );
-        } catch (DbException $e) {
-            $salida = array(
-                "success" => false,
-                "msj" => $e->getMessage(),
-                "code" => 500
-            );
         }
         return  $this->renderObject($salida, false);
     }
@@ -431,12 +404,12 @@ class AprobacioncomController extends ApplicationController
     public function borrarFiltroAction()
     {
         $this->setResponse("ajax");
-        Flash::set_flashdata("filter_madres", false, true);
-        Flash::set_flashdata("filter_params", false, true);
+        set_flashdata("filter_madres", false, true);
+        set_flashdata("filter_params", false, true);
         return $this->renderObject(array(
             'success' => true,
-            'query' => Flash::get_flashdata_item("filter_madres"),
-            'filter' => Flash::get_flashdata_item("filter_params"),
+            'query' => get_flashdata_item("filter_madres"),
+            'filter' => get_flashdata_item("filter_params"),
         ));
     }
 }

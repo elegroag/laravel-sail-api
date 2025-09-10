@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Cajas;
 
+use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use App\Services\Utils\Pagination;
@@ -18,6 +19,7 @@ use App\Models\Gener42;
 use App\Services\Aprueba\ApruebaSolicitud;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Carbon\Carbon;
 
 class ActualizardatosController extends ApplicationController
 {
@@ -31,21 +33,19 @@ class ActualizardatosController extends ApplicationController
         $this->db = DbBase::rawConnect();
     }
 
-    public function aplicarFiltroAction(Request $request, Response $response, string $estado = 'P')
+    public function aplicarFiltroAction(\Illuminate\Http\Request $request, string $estado = 'P')
     {
         $this->setResponse("ajax");
-        $cantidad_pagina = ($request->input("numero")) ? $request->input("numero") : 10;
+        $cantidad_pagina = $request->input("numero", 10);
         $usuario = parent::getActUser();
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
-            new Request(
-                array(
-                    "cantidadPaginas" => $cantidad_pagina,
-                    "query" => $query_str,
-                    "estado" => $estado
-                )
-            )
+            new \Illuminate\Http\Request([
+                "cantidadPaginas" => $cantidad_pagina,
+                "query" => $query_str,
+                "estado" => $estado
+            ])
         );
 
         $query = $pagination->filter(
@@ -63,7 +63,7 @@ class ActualizardatosController extends ApplicationController
 
     public function changeCantidadPaginaAction($estado = 'P')
     {
-        $this->buscarAction($estado);
+        //$this->buscarAction($estado);
     }
 
     public function indexAction()
@@ -79,7 +79,7 @@ class ActualizardatosController extends ApplicationController
             "fecsol" => "Fecha solicitud",
         );
         $this->setParamToView("campo_filtro", $campo_field);
-        $this->setParamToView("filters", Flash::get_flashdata_item("filter_params"));
+        $this->setParamToView("filters", get_flashdata_item("filter_params"));
         $this->setParamToView("title", "Aprueba Actualización Datos Empleador");
         $this->setParamToView("buttons", array("F"));
         $this->loadParametrosView();
@@ -108,7 +108,7 @@ class ActualizardatosController extends ApplicationController
                     $background = '#f5b2b2';
                 }
             }
-            $url = Core::getInstancePath() . "Cajas/aprobacionemp/info_empresa/" . $mercurio->getId();
+            $url = env('APP_URL') . "Cajas/aprobacionemp/info_empresa/" . $mercurio->getId();
             $sat = "NORMAL";
             if ($mercurio->getDocumentoRepresentanteSat() > 0) {
                 $sat = "SAT";
@@ -131,39 +131,37 @@ class ActualizardatosController extends ApplicationController
         $this->setParamToView("pagina_con_estado", $estado);
     }
 
-    public function buscarAction($estado = 'P')
+    public function buscarAction(Request $request, $estado = 'P')
     {
         $this->setResponse("ajax");
-        $pagina = ($this->getPostParam('pagina')) ? $this->getPostParam('pagina') : 1;
-        $cantidad_pagina = ($this->getPostParam("numero")) ? $this->getPostParam("numero") : 10;
+        $pagina = $request->input('pagina', 1);
+        $cantidad_pagina = $request->input("numero", 10);
         $usuario = parent::getActUser();
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
-            new Request(
-                array(
-                    "cantidadPaginas" => $cantidad_pagina,
-                    "pagina" => $pagina,
-                    "query" => $query_str,
-                    "estado" => $estado
-                )
-            )
+            new Request([
+                "cantidadPaginas" => $cantidad_pagina,
+                "pagina" => $pagina,
+                "query" => $query_str,
+                "estado" => $estado
+            ])
         );
 
         if (
-            Flash::get_flashdata_item("filter_empresa") != false
+            get_flashdata_item("filter_empresa") != false
         ) {
-            $query = $pagination->persistencia(Flash::get_flashdata_item("filter_params"));
+            $query = $pagination->persistencia(get_flashdata_item("filter_params"));
         } else {
             $query = $pagination->filter(
-                $this->getPostParam('campo'),
-                $this->getPostParam('condi'),
-                $this->getPostParam('value')
+                $request->input('campo'),
+                $request->input('condi'),
+                $request->input('value')
             );
         }
 
-        Flash::set_flashdata("filter_empresa", $query, true);
-        Flash::set_flashdata("filter_params", $pagination->filters, true);
+        set_flashdata("filter_empresa", $query, true);
+        set_flashdata("filter_params", $pagination->filters, true);
 
         $response = $pagination->render(new UpDatosEmpresaServices());
         return $this->renderObject($response, false);
@@ -173,73 +171,57 @@ class ActualizardatosController extends ApplicationController
      * devolverAction function
      * @return void
      */
-    public function devolverAction()
+    public function devolverAction(Request $request)
     {
         $this->setResponse("ajax");
         $modelos = array("mercurio10", "mercurio47");
-        $Transaccion = parent::startTrans($modelos);
-        parent::startFunc();
+        
+        $this->db->begin();
         try {
-            try {
-                $id = $this->getPostParam('id', "addslaches", "alpha", "extraspaces", "striptags");
-                $codest = $this->getPostParam('codest', "addslaches", "alpha", "extraspaces", "striptags");
-                $nota = $this->getPostParam('nota');
-                $array_corregir = $this->getPostParam('campos_corregir');
+                $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
+                $codest = $request->input('codest', "addslaches", "alpha", "extraspaces", "striptags");
+                $nota = $request->input('nota');
+                $array_corregir = $request->input('campos_corregir');
                 $campos_corregir = implode(";", $array_corregir);
 
-                $today = new Date();
+                $today = Carbon::now();
                 $mercurio47 = $this->Mercurio47->findFirst("id='{$id}'");
                 if ($mercurio47->getEstado() == 'D') {
-                    throw new Exception("El registro ya se encuentra devuelto, no se requiere de repetir la acción.", 201);
+                    throw new DebugException("El registro ya se encuentra devuelto, no se requiere de repetir la acción.", 201);
                 }
 
-                $db = DbBase::rawConnect();
-                $db->query("UPDATE mercurio47 SET estado='D', fecha_estado='{$today->getUsingFormatDefault()}' WHERE id='{$id}'");
+                Mercurio47::where('id', $id)->update([
+                    'estado' => 'D',
+                    'fecha_estado' => $today->format('Y-m-d H:i:s')
+                ]);
+
 
                 $item = $this->Mercurio10->maximum("item", "conditions: tipopc='$this->tipopc' and numero='$id'") + 1;
 
                 $mercurio10 = new Mercurio10;
-                $mercurio10->setTransaction($Transaccion);
+                
                 $mercurio10->setTipopc($this->tipopc);
                 $mercurio10->setNumero($id);
                 $mercurio10->setItem($item);
                 $mercurio10->setEstado("D");
                 $mercurio10->setNota($nota);
                 $mercurio10->setCodest($codest);
-                $mercurio10->setFecsis($today->getUsingFormatDefault());
+                $mercurio10->setFecsis($today->format('Y-m-d H:i:s'));
                 if (!$mercurio10->save()) {
                     $msj = "";
                     foreach ($mercurio10->getMessages() as $key => $message) $msj .= $message . "<br/>";
-                    throw new Exception("Error " . $msj, 501);
+                    throw new DebugException("Error " . $msj, 501);
                 }
                 $this->Mercurio10->updateAll("campos_corregir='{$campos_corregir}'", "conditions: item='{$item}' AND numero='{$id}' AND tipopc='{$this->tipopc}'");
 
-                parent::finishTrans();
+                $this->db->commit();
 
                 $salida = array(
                     "success" => true,
                     "msj" => "El proceso se ha completado con éxito"
                 );
-            } catch (DebugException $err) {
-                $salida = array(
-                    "success" => false,
-                    "msj" => $err->getMessage(),
-                    "code" => $err->getCode()
-                );
-            } catch (DbException $e) {
-                $salida = array(
-                    "success" => false,
-                    "msj" => $e->getMessage(),
-                    "code" => 500
-                );
-            } catch (Exception $ei) {
-                $salida = array(
-                    "success" => false,
-                    "msj" => $ei->getMessage() . ' ' . $ei->getLine(),
-                    "code" => 500
-                );
-            }
-        } catch (TransactionFailed $e) {
+          
+        } catch (DebugException $e) {
             $salida = array(
                 "success" => false,
                 "msj" => $e->getMessage(),
@@ -253,61 +235,49 @@ class ActualizardatosController extends ApplicationController
      * rechazarAction function
      * @return void
      */
-    public function rechazarAction()
+    public function rechazarAction(Request $request)
     {
         $this->setResponse("ajax");
         $modelos = array("mercurio10", "mercurio47");
-        $Transaccion = parent::startTrans($modelos);
-        parent::startFunc();
+        
+        $this->db->begin();
         try {
-            try {
-                $id = $this->getPostParam('id', "addslaches", "alpha", "extraspaces", "striptags");
-                $nota = $this->getPostParam('nota');
-                $codest = $this->getPostParam('codest', "addslaches", "alpha", "extraspaces", "striptags");
+            
+            $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
+            $nota = $request->input('nota');
+            $codest = $request->input('codest', "addslaches", "alpha", "extraspaces", "striptags");
 
-                $today = new Date();
-                $mercurio47 = $this->Mercurio47->findFirst("id='$id'");
-                if ($mercurio47->getEstado() == 'X') {
-                    throw new DebugException("El registro ya se encuentra rechazado, no se requiere de repetir la acción.", 201);
-                }
-                $this->db->query("UPDATE mercurio47 SET estado='X', fecha_estado='{$today->getUsingFormatDefault()}' WHERE id='{$id}'");
-                $item = $this->Mercurio10->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
-
-                $mercurio10 = new Mercurio10();
-                $mercurio10->setTransaction($Transaccion);
-                $mercurio10->setTipopc($this->tipopc);
-                $mercurio10->setNumero($id);
-                $mercurio10->setItem($item);
-                $mercurio10->setEstado("X");
-                $mercurio10->setNota($nota);
-                $mercurio10->setCodest($codest);
-                $mercurio10->setFecsis($today->getUsingFormatDefault());
-
-                if (!$mercurio10->save()) {
-                    $msj = "";
-                    foreach ($mercurio10->getMessages() as $key => $mess) $msj .= $mess->getMessage() . "<br/>";
-                    throw new DebugException("Error " . $msj, 501);
-                }
-
-                parent::finishTrans();
-                $salida = array(
-                    "success" => true,
-                    "msj" => "El proceso se ha completado con éxito"
-                );
-            } catch (DebugException $err) {
-                $salida = array(
-                    "success" => false,
-                    "msj" => $err->getMessage(),
-                    "code" => $err->getCode()
-                );
-            } catch (DbException $e) {
-                $salida = array(
-                    "success" => false,
-                    "msj" => $e->getMessage(),
-                    "code" => 500
-                );
+            $today = Carbon::now();
+            $mercurio47 = $this->Mercurio47->findFirst("id='$id'");
+            if ($mercurio47->getEstado() == 'X') {
+                throw new DebugException("El registro ya se encuentra rechazado, no se requiere de repetir la acción.", 201);
             }
-        } catch (TransactionFailed $e) {
+            $this->db->inQueryAssoc("UPDATE mercurio47 SET estado='X', fecha_estado='".$today->format('Y-m-d H:i:s')."' WHERE id='{$id}'");
+            $item = $this->Mercurio10->maximum("item", "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
+
+            $mercurio10 = new Mercurio10();
+            
+            $mercurio10->setTipopc($this->tipopc);
+            $mercurio10->setNumero($id);
+            $mercurio10->setItem($item);
+            $mercurio10->setEstado("X");
+            $mercurio10->setNota($nota);
+            $mercurio10->setCodest($codest);
+            $mercurio10->setFecsis($today->format('Y-m-d H:i:s'));
+
+            if (!$mercurio10->save()) {
+                $msj = "";
+                foreach ($mercurio10->getMessages() as $key => $mess) $msj .= $mess->getMessage() . "<br/>";
+                throw new DebugException("Error " . $msj, 501);
+            }
+
+            $this->db->commit();
+            $salida = array(
+                "success" => true,
+                "msj" => "El proceso se ha completado con éxito"
+            );
+        
+        } catch (DebugException $e) {
             $salida = array(
                 "success" => false,
                 "msj" => $e->getMessage(),
@@ -325,21 +295,21 @@ class ActualizardatosController extends ApplicationController
     public function info_actualizaAction($id = 0)
     {
         if (!$id) {
-            Router::rTa("actualizardatos/index");
+            return redirect("actualizardatos/index");
             exit;
         }
         $this->setParamToView("hide_header", true);
         $mercurio47 = $this->Mercurio47->findFirst("id='{$id}'");
         if ($mercurio47->getEstado() == "A") {
-            Flash::set_flashdata("success", array(
+            set_flashdata("success", array(
                 "msj" => "La empresa {$mercurio47->getDocumento()}, ya se encuentra aprobada su afiliación. Y no requiere de más acciones.",
                 "code" => 200
             ));
         }
-        $mercurio28 = $this->db->fetchAll("SELECT * FROM mercurio28 WHERE tipo='E'");
-        $mercurio33 = $this->db->fetchAll("SELECT * FROM mercurio33 WHERE actualizacion='{$id}'");
-        $mercurio37 = $this->db->fetchAll("SELECT * FROM  mercurio37 WHERE tipopc='{$this->tipopc}' and numero='{$mercurio47->getId()}'");
-        $mercurio12 = $this->db->fetchAll("SELECT * FROM mercurio12");
+        $mercurio28 = $this->db->inQueryAssoc("SELECT * FROM mercurio28 WHERE tipo='E'");
+        $mercurio33 = $this->db->inQueryAssoc("SELECT * FROM mercurio33 WHERE actualizacion='{$id}'");
+        $mercurio37 = $this->db->inQueryAssoc("SELECT * FROM  mercurio37 WHERE tipopc='{$this->tipopc}' and numero='{$mercurio47->getId()}'");
+        $mercurio12 = $this->db->inQueryAssoc("SELECT * FROM mercurio12");
         $_mercurio12 = array();
         foreach ($mercurio12  as $ai => $m12) $_mercurio12["{$m12['coddoc']}"] = $m12['detalle'];
 
@@ -439,7 +409,7 @@ class ActualizardatosController extends ApplicationController
 
     function send_email($emisor, $asunto, $mensaje, $destinatarios)
     {
-        Core::importFromLibrary("Swift", "Swift.php");
+        /* Core::importFromLibrary("Swift", "Swift.php");
         Core::importFromLibrary("Swift", "Swift/Connection/SMTP.php");
         $smtp = new Swift_Connection_SMTP(
             "smtp.gmail.com",
@@ -460,29 +430,29 @@ class ActualizardatosController extends ApplicationController
             }
             $email->addTo($destinatario['email'], $destinatario['nombre']);
         }
-        $swift->send($smsj, $email, new Swift_Address($emisor['email']));
+        $swift->send($smsj, $email, new Swift_Address($emisor['email'])); */
     }
 
     /**
      * apruebaAction function
      * @return void
      */
-    public function apruebaAction()
+    public function apruebaAction(Request $request)
     {
         $this->setResponse("ajax");
         $debuginfo = array();
         try {
             try {
-                $user = Auth::getActiveIdentity();
+                $user = session()->get('user');
                 $acceso = (new Gener42)->count("*", "conditions: permiso='62' AND usuario='{$user['usuario']}'");
                 if ($acceso == 0) {
                     return $this->renderObject(array("success" => false, "msj" => "El usuario no dispone de permisos de aprobación"), false);
                 }
                 $apruebaSolicitud = new ApruebaSolicitud();
-                $apruebaSolicitud->setTransa();
+                $this->db->begin();
 
                 $postData = $_POST;
-                $idSolicitud = $this->getPostParam('id', "addslaches", "alpha", "extraspaces", "striptags");
+                $idSolicitud = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
                 $calemp = 'UE';
                 $solicitud = $apruebaSolicitud->main(
                     $calemp,
@@ -490,21 +460,20 @@ class ActualizardatosController extends ApplicationController
                     $postData
                 );
 
-                $apruebaSolicitud->endTransa();
-                $solicitud->enviarMail($this->getPostParam('actapr'), $this->getPostParam('fecapr'));
+                $this->db->commit();
+                $solicitud->enviarMail($request->input('actapr'), $request->input('fecapr'));
                 $salida = array(
                     'success' => true,
                     'msj' => 'El registro se completo con éxito'
                 );
             } catch (DebugException $err) {
-                $debuginfo = $err->getDebugInfo();
-                $apruebaSolicitud->closeTransa($err->getMessage());
+                $this->db->rollback();
                 $salida = array(
                     "success" => false,
                     "msj" => $err->getMessage()
                 );
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $salida = array(
                 "success" => false,
                 "msj" => $e->getMessage(),
@@ -518,8 +487,8 @@ class ActualizardatosController extends ApplicationController
     public function borrarFiltroAction()
     {
         $this->setResponse("ajax");
-        if (Flash::get_flashdata_item("filter_actualizacion")) {
-            Flash::set_flashdata("filter_actualizacion", "1=1", true);
+        if (get_flashdata_item("filter_actualizacion")) {
+            set_flashdata("filter_actualizacion", "1=1", true);
         }
         echo "{\"success\":true}";
     }
@@ -529,14 +498,14 @@ class ActualizardatosController extends ApplicationController
      * mostrar la ficha de afiliación de la empresa
      * @return void
      */
-    public function inforAction()
+    public function inforAction(Request $request)
     {
         $this->setResponse("ajax");
         try {
             $upServices = new UpDatosEmpresaServices();
-            $id = $this->getPostParam('id');
+            $id = $request->input('id');
             if (!$id) {
-                throw new Exception("Error se requiere del id independiente", 501);
+                throw new DebugException("Error se requiere del id independiente", 501);
             }
 
             $mercurio47 = (new Mercurio47)->findFirst("id='{$id}'");
@@ -598,7 +567,7 @@ class ActualizardatosController extends ApplicationController
                 'seguimiento' => $upServices->seguimiento($mercurio47),
                 'campos_disponibles' => $mercurio47->CamposDisponibles()
             );
-        } catch (Exception $err) {
+        } catch (DebugException $err) {
             $response = array(
                 'success' => false,
                 'msj' => $err->getMessage()

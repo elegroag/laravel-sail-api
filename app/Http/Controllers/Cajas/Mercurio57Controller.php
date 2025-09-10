@@ -11,10 +11,10 @@ class Mercurio57Controller extends ApplicationController
 {
 
 
-    public function initialize()
+    public function __construct()
     {
-        Core::importLibrary("Services", "Services");
-        $this->setTemplateAfter('main');
+       
+        
     }
 
     public function indexAction()
@@ -29,14 +29,14 @@ class Mercurio57Controller extends ApplicationController
     {
         try {
             $this->setResponse("ajax");
-            $instancePath = Core::getInstancePath();
+            $instancePath = env('APP_URL');
             $mercurio01 = $this->Mercurio01->findFirst();
             $con = DbBase::rawConnect();
             $response = $con->inQueryAssoc("SELECT numpro,concat('$instancePath{$mercurio01->getPath()}galeria/',archivo) as archivo FROM mercurio57 ORDER BY orden ASC");
             $this->renderObject($response, false);
         } catch (DbException $e) {
             parent::setLogger($e->getMessage());
-            parent::ErrorTrans();
+            $this->db->rollback();
         }
     }
 
@@ -47,10 +47,10 @@ class Mercurio57Controller extends ApplicationController
                 $this->setResponse("ajax");
                 $numpro = $this->Mercurio57->maximum("numpro") + 1;
                 $orden =  $this->Mercurio57->maximum("orden") + 1;
-                $url = $this->getPostParam("url");
+                $url = $request->input("url");
                 $modelos = array("mercurio57");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 $mercurio57 = new Mercurio57();
 
                 $mercurio57->setTransaction($Transaccion);
@@ -70,17 +70,17 @@ class Mercurio57Controller extends ApplicationController
 
                 if (!$mercurio57->save()) {
                     parent::setLogger($mercurio57->getMessages());
-                    parent::ErrorTrans();
+                    $this->db->rollback();
                 }
 
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Creacion terminada Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede guardar el Registro" . $e->getMessage());
             return $this->renderObject($response, false);
         }
@@ -91,7 +91,7 @@ class Mercurio57Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $numpro = $this->getPostParam('numpro');
+                $numpro = $request->input('numpro');
                 $objetivo = $this->Mercurio57->findFirst("numpro = $numpro");
                 $orden_obj = $objetivo->getOrden();
                 $minimo =  $this->Mercurio57->minimum("orden");
@@ -111,9 +111,9 @@ class Mercurio57Controller extends ApplicationController
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede Ordenar el Registro");
             return $this->renderObject($response, false);
         }
@@ -124,7 +124,7 @@ class Mercurio57Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $numpro = $this->getPostParam('numpro');
+                $numpro = $request->input('numpro');
                 $objetivo = $this->Mercurio57->findFirst("numpro = $numpro");
                 $orden_obj = $objetivo->getOrden();
                 $maximo =  $this->Mercurio57->maximum("orden");
@@ -146,9 +146,9 @@ class Mercurio57Controller extends ApplicationController
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede Ordenar el Registro");
             return $this->renderObject($response, false);
         }
@@ -159,24 +159,24 @@ class Mercurio57Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $numpro = $this->getPostParam('numpro');
+                $numpro = $request->input('numpro');
                 $archivo = $this->Mercurio57->findFirst("numpro = '$numpro'")->getArchivo();
                 $mercurio01 = $this->Mercurio01->findFirst();
                 if (!empty($archivo) && file_exists("{$mercurio01->getPath()}galeria/" . $archivo)) {
                     unlink("{$mercurio01->getPath()}galeria/" . $archivo);
                 }
                 $modelos = array("mercurio57");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 $this->Mercurio57->deleteAll("numpro = $numpro");
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Inactivado Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede Borrar el Registro");
             return $this->renderObject($response, false);
         }

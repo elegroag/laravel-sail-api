@@ -1,54 +1,53 @@
-
 <script id='tmp_filtro' type="text/template">
-    <?= TagUser::filtro($campo_filtro, 'aplicar_filtro') ?>
+    @php echo TagUser::filtro($campo_filtro, 'aplicar_filtro') @endphp
 </script>
 
 <script id='tmp_list_header' type="text/template">
-    <?= View::renderView("templates/tmp_list_header"); ?>
+    @include('templates.tmp_list_header')
 </script>
 
 <script type="text/template" id='tmp_layout'>
-    <?= View::renderView("templates/tmp_layout"); ?>
+    @include('templates.tmp_layout')
 </script>
 
 <script type="text/template" id='tmp_header'>
-    <?= View::renderView("templates/tmp_header"); ?>
+    @include('templates.tmp_header')
 </script>
 
 <script type="text/template" id='tmp_rechazar'>
-    <?= View::renderView("templates/tmp_rechazar"); ?>
+    @include('templates.tmp_rechazar')
 </script>
 
 <script type="text/template" id='tmp_devolver'>
-    <?= View::renderView("templates/tmp_devolver"); ?>
+    @include('templates.tmp_devolver')
 </script>
 
 <script type="text/template" id='tmp_info'>
-    <?= View::renderView("templates/tmp_information"); ?>
+    @include('templates.tmp_information')
 </script>
 
 <script type="text/template" id='tmp_aprobar'>
-    <?= View::renderView("actualizardatos/tmp/tmp_aprobar"); ?>
+    @include('actualizardatos.tmp.tmp_aprobar')
 </script>
 
 <script id='tmp_aportes' type='text/template'>
-    <?= View::renderView("templates/tmp_aportes"); ?>
+    @include('templates.tmp_aportes')
 </script>
 
 <script type="text/template" id="tmp_reaprobar">
-    <?= View::renderView("templates/tmp_reaprobar"); ?>
+    @include('templates.tmp_reaprobar')
 </script>
 
 <script id='tmp_info_header' type="text/template">
-	<?= View::renderView("templates/tmp_info_header"); ?>
+    @include('templates.tmp_info_header')
 </script>
 
 <script type="text/template" id='tmp_deshacer'>
-    <?= View::renderView("templates/tmp_deshacer"); ?>
+    @include('templates.tmp_deshacer')
 </script>
 
 <script id='tmp_info_header' type="text/template">
-    <?= View::renderView("templates/tmp_info_header"); ?>
+    @include('templates.tmp_info_header')
 </script>
 
 <script id='tmp_table' type="text/template">
@@ -63,4 +62,5 @@
 </script>
 
 <div id='boneLayout'></div>
-<?= Tag::javascriptInclude('Cajas/datosempresa/build.datosempresa'); ?>
+
+<script src="{{ asset('js/cajas/actualizardatos.js') }}"></script>

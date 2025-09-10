@@ -10,26 +10,26 @@ use Illuminate\Http\Response;
 class PrincipalController extends ApplicationController
 {
 
-    public function initialize()
+    public function __construct()
     {
-        Core::importLibrary("Services", "Services");
-        $this->setTemplateAfter('main');
-        $this->setParamToView("instancePath", Core::getInstancePath() . 'Cajas/');
-        Services::Init();
+       
+        
+        $this->setParamToView("instancePath", env('APP_URL') . 'Cajas/');
+        
     }
 
     public function beforeFilter($permisos = array())
     {
         parent::beforeFilter($permisos);
         if (!Auth::getActiveIdentity()) {
-            Flash::set_flashdata("error", array(
+            set_flashdata("error", array(
                 "message" => "No dispone de acceso a la ruta indicada principal.",
                 "code" => 404
             ));
             if (is_ajax()) {
-                Router::rTa('login/error_access_rest');
+                return redirect('login/error_access_rest');
             } else {
-                Router::rTa('login/error_access');
+                return redirect('login/error_access');
             }
             exit;
         }
@@ -53,7 +53,7 @@ class PrincipalController extends ApplicationController
                     ),
                     'icon' => 'E',
                     'url' => 'aprobacionemp/index',
-                    'imagen' => Core::getInstancePath() . 'img/Mercurio/empresas.jpg',
+                    'imagen' => env('APP_URL') . 'img/Mercurio/empresas.jpg',
                 ),
                 array(
                     'name' => 'Afiliación Independientes',
@@ -66,7 +66,7 @@ class PrincipalController extends ApplicationController
                     ),
                     'icon' => 'I',
                     'url' => 'aprobaindepen/index',
-                    'imagen' => Core::getInstancePath() . 'img/Mercurio/independiente.jpg',
+                    'imagen' => env('APP_URL') . 'img/Mercurio/independiente.jpg',
                 ),
                 array(
                     'name' => 'Afiliación Pensionados',
@@ -79,7 +79,7 @@ class PrincipalController extends ApplicationController
                     ),
                     'icon' => 'P',
                     'url' => 'aprobacionpen/index',
-                    'imagen' => Core::getInstancePath() . 'img/Mercurio/pensionado.jpg',
+                    'imagen' => env('APP_URL') . 'img/Mercurio/pensionado.jpg',
                 ),
                 array(
                     'name' => 'Afiliación Trabajadores',
@@ -92,7 +92,7 @@ class PrincipalController extends ApplicationController
                     ),
                     'icon' => 'T',
                     'url' => 'aprobaciontra/index',
-                    'imagen' => Core::getInstancePath() . 'img/Mercurio/trabajadores.jpg',
+                    'imagen' => env('APP_URL') . 'img/Mercurio/trabajadores.jpg',
                 ),
                 array(
                     'name' => 'Afiliación Conyuges',
@@ -105,7 +105,7 @@ class PrincipalController extends ApplicationController
                     ),
                     'icon' => 'C',
                     'url' => 'aprobacioncon/index',
-                    'imagen' => Core::getInstancePath() . 'img/Mercurio/conyuges.jpg',
+                    'imagen' => env('APP_URL') . 'img/Mercurio/conyuges.jpg',
                 ),
                 array(
                     'name' => 'Afiliación Beneficiarios',
@@ -118,7 +118,7 @@ class PrincipalController extends ApplicationController
                     ),
                     'icon' => 'B',
                     'url' => 'aprobacionben/index',
-                    'imagen' => Core::getInstancePath() . 'img/Mercurio/beneficiarios.jpg',
+                    'imagen' => env('APP_URL') . 'img/Mercurio/beneficiarios.jpg',
                 ),
                 array(
                     'name' => 'Actualización datos Empresas',
@@ -131,7 +131,7 @@ class PrincipalController extends ApplicationController
                     ),
                     'icon' => 'AE',
                     'url' => 'actualizardatos/index',
-                    'imagen' => Core::getInstancePath() . 'img/Mercurio/empresas.jpg',
+                    'imagen' => env('APP_URL') . 'img/Mercurio/empresas.jpg',
                 ),
                 array(
                     'name' => 'Actualización datos Trabajador',
@@ -144,7 +144,7 @@ class PrincipalController extends ApplicationController
                     ),
                     'icon' => 'AT',
                     'url' => 'aprobaciondatos/index',
-                    'imagen' => Core::getInstancePath() . 'img/Mercurio/datos_basicos.jpg',
+                    'imagen' => env('APP_URL') . 'img/Mercurio/datos_basicos.jpg',
                 )
             ),
             'productos' => array(
@@ -153,14 +153,14 @@ class PrincipalController extends ApplicationController
                     'cantidad' => 0,
                     'icon' => 'L',
                     'url' => 'admproductos/lista',
-                    'imagen' => Core::getInstancePath() . 'img/Mercurio/registro_empresa.jpg',
+                    'imagen' => env('APP_URL') . 'img/Mercurio/registro_empresa.jpg',
                 ),
                 array(
                     'name' => 'Complemento nutricional',
                     'cantidad' => 0,
                     'icon' => 'N',
                     'url' => 'admproductos/aplicados/27',
-                    'imagen' => Core::getInstancePath() . 'img/Mercurio/complemento.jpg',
+                    'imagen' => env('APP_URL') . 'img/Mercurio/complemento.jpg',
                 )
             )
         );
@@ -357,7 +357,7 @@ class PrincipalController extends ApplicationController
     public function file_existe_globalAction()
     {
         $this->setResponse("ajax");
-        $filepath = $this->getPostParam('filepath');
+        $filepath = $request->input('filepath');
         $archivo = base64_decode($filepath);
         if (preg_match('/(public)(\/)(temp)/i', $archivo) == false) {
             $fichero = "public/temp/{$archivo}";

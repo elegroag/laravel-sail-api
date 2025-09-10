@@ -21,14 +21,14 @@ class Mercurio13Controller extends ApplicationController
      */
     protected $query;
 
-    public function initialize()
+    public function __construct()
     {
-        $this->setPersistance(false);
-        Core::importHelper('format');
-        Core::importLibrary("Services", "Services");
-        Core::importLibrary("Pagination", "Pagination");
-        $this->setTemplateAfter('main');
-        Services::Init();
+        
+        
+       
+        
+        
+        
         $this->pagination = new Pagination();
     }
 
@@ -77,7 +77,7 @@ class Mercurio13Controller extends ApplicationController
 
         $this->setParamToView("tipopc", $tipopc);
         $this->setParamToView("coddoc", $coddoc);
-        $this->setParamToView("filters", Flash::get_flashdata_item("filter_params"));
+        $this->setParamToView("filters", get_flashdata_item("filter_params"));
         $this->setParamToView("title", "Documentos requeridos trabajadores");
         $this->setParamToView("buttons", array("N", "F"));
     }
@@ -99,8 +99,8 @@ class Mercurio13Controller extends ApplicationController
         $consultasOldServices = new GeneralService();
         $this->query = $consultasOldServices->converQuery();
 
-        $pagina = ($this->getPostParam('pagina')) ? $this->getPostParam('pagina') : 1;
-        $cantidad_pagina = ($this->getPostParam("numero")) ? $this->getPostParam("numero") : 10;
+        $pagina = ($request->input('pagina')) ? $request->input('pagina') : 1;
+        $cantidad_pagina = ($request->input("numero")) ? $request->input("numero") : 10;
         if ($pagina == "") $pagina = 1;
 
         if (!$this->query) $this->query = "1=1";
@@ -123,8 +123,8 @@ class Mercurio13Controller extends ApplicationController
     {
         $this->setResponse("ajax");
         try {
-            $tipopc = $this->getPostParam('tipopc');
-            $coddoc = $this->getPostParam('coddoc');
+            $tipopc = $request->input('tipopc');
+            $coddoc = $request->input('coddoc');
             $num13 = (new Mercurio13)->count("*", "conditions: tipopc='{$tipopc}' AND coddoc='{$coddoc}'");
             if ($num13 > 0) {
                 $mer13 = (new Mercurio13)->findFirst(" tipopc='{$tipopc}' AND coddoc='{$coddoc}'");
@@ -158,11 +158,11 @@ class Mercurio13Controller extends ApplicationController
     {
         $this->setResponse("ajax");
         try {
-            $tipopc = $this->getPostParam('tipopc');
-            $coddoc = $this->getPostParam('coddoc');
-            $obliga = $this->getPostParam('obliga');
-            $auto_generado = $this->getPostParam('auto_generado');
-            $nota = $this->getPostParam('nota');
+            $tipopc = $request->input('tipopc');
+            $coddoc = $request->input('coddoc');
+            $obliga = $request->input('obliga');
+            $auto_generado = $request->input('auto_generado');
+            $nota = $request->input('nota');
 
             $num = (new Mercurio13)->count(
                 "*",
@@ -176,7 +176,7 @@ class Mercurio13Controller extends ApplicationController
                 $mercurio13->setAuto_generado($auto_generado);
                 $mercurio13->setNota($nota);
                 if (!$mercurio13->save()) {
-                    throw new Exception("Error no se puede guardar el registro", 501);
+                    throw new DebugException("Error no se puede guardar el registro", 501);
                 }
             } else {
                 (new Mercurio13)->updateAll(
@@ -212,8 +212,8 @@ class Mercurio13Controller extends ApplicationController
     {
         $this->setResponse("ajax");
         try {
-            $tipopc = $this->getPostParam('tipopc');
-            $coddoc = $this->getPostParam('coddoc');
+            $tipopc = $request->input('tipopc');
+            $coddoc = $request->input('coddoc');
             $num = (new Mercurio13)->count(
                 "*",
                 "conditions: coddoc='{$coddoc}' AND tipopc='{$tipopc}'"
@@ -222,7 +222,7 @@ class Mercurio13Controller extends ApplicationController
             if ($num > 0) {
                 $res = (new Mercurio13)->deleteAll(" tipopc='{$tipopc}' AND coddoc='{$coddoc}'", "limit: 1");
             } else {
-                throw new Exception("Error no se puede borrar el registro, no está disponible.", 501);
+                throw new DebugException("Error no se puede borrar el registro, no está disponible.", 501);
             }
             $response = array(
                 'success' => true,

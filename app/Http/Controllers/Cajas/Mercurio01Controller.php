@@ -13,13 +13,13 @@ class Mercurio01Controller extends ApplicationController
     private $query = "1=1";
     private $cantidad_pagina = 0;
 
-    public function initialize()
+    public function __construct()
     {
-        Core::importLibrary("Services", "Services");
-        $this->setTemplateAfter('main');
-        $this->setPersistance(true);
+       
+        
+        
         $this->cantidad_pagina = $this->numpaginate;
-        Services::Init();
+        
     }
 
     public function beforeFilter($permisos = array())
@@ -80,7 +80,7 @@ class Mercurio01Controller extends ApplicationController
     public function changeCantidadPaginaAction()
     {
         $this->setResponse("ajax");
-        $this->cantidad_pagina = $this->getPostParam("numero");
+        $this->cantidad_pagina = $request->input("numero");
         self::buscarAction();
     }
 
@@ -97,7 +97,7 @@ class Mercurio01Controller extends ApplicationController
     public function buscarAction()
     {
         $this->setResponse("ajax");
-        $pagina = $this->getPostParam('pagina');
+        $pagina = $request->input('pagina');
         if ($pagina == "") $pagina = 1;
         $paginate = Tag::paginate($this->Mercurio01->find("$this->query"), $pagina, $this->cantidad_pagina);
         $html = self::showTabla($paginate);
@@ -119,7 +119,7 @@ class Mercurio01Controller extends ApplicationController
             return $this->renderObject($mercurio01->getArray(), false);
         } catch (DbException $e) {
             parent::setLogger($e->getMessage());
-            parent::ErrorTrans();
+            $this->db->rollback();
         }
     }
 
@@ -128,17 +128,17 @@ class Mercurio01Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $codapl = $this->getPostParam('codapl', "addslaches", "extraspaces", "striptags");
-                $email = $this->getPostParam('email', "addslaches", "extraspaces", "striptags");
-                $clave = $this->getPostParam('clave', "addslaches", "alpha", "extraspaces", "striptags");
-                $path = $this->getPostParam('path', "addslaches", "extraspaces", "striptags");
-                $ftpserver = $this->getPostParam('ftpserver', "addslaches", "extraspaces", "striptags");
-                $pathserver = $this->getPostParam('pathserver', "addslaches", "extraspaces", "striptags");
-                $userserver = $this->getPostParam('userserver', "addslaches", "extraspaces", "striptags");
-                $passserver = $this->getPostParam('passserver', "addslaches", "extraspaces", "striptags");
+                $codapl = $request->input('codapl', "addslaches", "extraspaces", "striptags");
+                $email = $request->input('email', "addslaches", "extraspaces", "striptags");
+                $clave = $request->input('clave', "addslaches", "alpha", "extraspaces", "striptags");
+                $path = $request->input('path', "addslaches", "extraspaces", "striptags");
+                $ftpserver = $request->input('ftpserver', "addslaches", "extraspaces", "striptags");
+                $pathserver = $request->input('pathserver', "addslaches", "extraspaces", "striptags");
+                $userserver = $request->input('userserver', "addslaches", "extraspaces", "striptags");
+                $passserver = $request->input('passserver', "addslaches", "extraspaces", "striptags");
                 $modelos = array("Mercurio01");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 $mercurio01 = new Mercurio01();
                 $mercurio01->setTransaction($Transaccion);
                 $mercurio01->setCodapl($codapl);
@@ -151,16 +151,16 @@ class Mercurio01Controller extends ApplicationController
                 $mercurio01->setPassserver($passserver);
                 if (!$mercurio01->save()) {
                     parent::setLogger($mercurio01->getMessages());
-                    parent::ErrorTrans();
+                    $this->db->rollback();
                 }
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Creacion Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede guardar/editar el Registro");
             return $this->renderObject($response, false);
         }

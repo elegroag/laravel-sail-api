@@ -22,13 +22,13 @@ class UsuarioController extends ApplicationController
      */
     protected $pagination;
 
-    public function initialize()
+    public function __construct()
     {
-        Core::importHelper('format');
-        Core::importHelper('hash');
-        $this->setTemplateAfter('bone');
+        
+        
+        
         $this->pagination = new Pagination();
-        $this->services = Services::Init();
+        
     }
 
     /**
@@ -40,7 +40,7 @@ class UsuarioController extends ApplicationController
     public function beforeFilter($permisos = null)
     {
         parent::beforeFilter();
-        Services::Init();
+        
     }
 
     public function indexAction()
@@ -52,7 +52,7 @@ class UsuarioController extends ApplicationController
             "email" => "Email",
         );
         $this->setParamToView("campo_filtro", $campo_field);
-        $this->setParamToView("filters", Flash::get_flashdata_item("filter_params"));
+        $this->setParamToView("filters", get_flashdata_item("filter_params"));
         $this->setParamToView("title", "Perfil usuario");
     }
 
@@ -94,15 +94,15 @@ class UsuarioController extends ApplicationController
     {
         $this->setResponse("ajax");
         try {
-            $tipo = $this->getPostParam('tipo', "addslaches", "alpha", "extraspaces", "striptags");
-            $coddoc = $this->getPostParam('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
-            $nombre = $this->getPostParam('nombre', "addslaches", "alpha", "extraspaces", "striptags");
-            $codciu = $this->getPostParam('codciu', "addslaches", "alpha", "extraspaces", "striptags");
-            $newclave = $this->getPostParam('newclave');
-            $email = $this->getPostParam('email', "addslaches", "extraspaces", "striptags");
-            $documento = $this->getPostParam('documento', "addslaches", "extraspaces", "striptags");
-            $old_coddoc = $this->getPostParam('old_coddoc', "addslaches", "extraspaces", "striptags");
-            $estado = $this->getPostParam('estado', "addslaches", "alpha", "extraspaces", "striptags");
+            $tipo = $request->input('tipo', "addslaches", "alpha", "extraspaces", "striptags");
+            $coddoc = $request->input('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
+            $nombre = $request->input('nombre', "addslaches", "alpha", "extraspaces", "striptags");
+            $codciu = $request->input('codciu', "addslaches", "alpha", "extraspaces", "striptags");
+            $newclave = $request->input('newclave');
+            $email = $request->input('email', "addslaches", "extraspaces", "striptags");
+            $documento = $request->input('documento', "addslaches", "extraspaces", "striptags");
+            $old_coddoc = $request->input('old_coddoc', "addslaches", "extraspaces", "striptags");
+            $estado = $request->input('estado', "addslaches", "alpha", "extraspaces", "striptags");
 
             $hasUsuario = (new Mercurio07)->count(
                 "*",
@@ -226,7 +226,7 @@ class UsuarioController extends ApplicationController
     public function aplicarFiltroAction($tipo = '', $estado = '')
     {
         $this->setResponse("ajax");
-        $cantidad_pagina = ($this->getPostParam("numero")) ? $this->getPostParam("numero") : 10;
+        $cantidad_pagina = ($request->input("numero")) ? $request->input("numero") : 10;
 
         $ftipo = ($tipo == '') ? " 1=1 " : " tipo='{$tipo}'";
 
@@ -237,13 +237,13 @@ class UsuarioController extends ApplicationController
         );
 
         $query = $this->pagination->filter(
-            $this->getPostParam('campo'),
-            $this->getPostParam('condi'),
-            $this->getPostParam('value')
+            $request->input('campo'),
+            $request->input('condi'),
+            $request->input('value')
         );
 
-        Flash::set_flashdata("filter_usuarios", $query, true);
-        Flash::set_flashdata("filter_params", $this->pagination->filters, true);
+        set_flashdata("filter_usuarios", $query, true);
+        set_flashdata("filter_params", $this->pagination->filters, true);
 
         $response = $this->pagination->render(new UsuarioServices());
         return $this->renderObject($response, false);
@@ -268,8 +268,8 @@ class UsuarioController extends ApplicationController
     {
         $this->setResponse("ajax");
 
-        $pagina = ($this->getPostParam('pagina')) ? $this->getPostParam('pagina') : 1;
-        $cantidad_pagina = ($this->getPostParam("numero")) ? $this->getPostParam("numero") : 10;
+        $pagina = ($request->input('pagina')) ? $request->input('pagina') : 1;
+        $cantidad_pagina = ($request->input("numero")) ? $request->input("numero") : 10;
         $query = ($tipo == '') ? " 1=1 " : " tipo='{$tipo}'";
 
         $this->pagination->setters(
@@ -279,12 +279,12 @@ class UsuarioController extends ApplicationController
             "estado: {$estado}"
         );
         if (
-            Flash::get_flashdata_item("filter_usuarios") != false
+            get_flashdata_item("filter_usuarios") != false
         ) {
-            $query = $this->pagination->persistencia(Flash::get_flashdata_item("filter_params"));
+            $query = $this->pagination->persistencia(get_flashdata_item("filter_params"));
         }
-        Flash::set_flashdata("filter_usuarios", $query, true);
-        Flash::set_flashdata("filter_params", $this->pagination->filters, true);
+        set_flashdata("filter_usuarios", $query, true);
+        set_flashdata("filter_params", $this->pagination->filters, true);
 
         $response = $this->pagination->render(new UsuarioServices());
         return $this->renderObject($response, false);
@@ -293,13 +293,13 @@ class UsuarioController extends ApplicationController
     public function borrarFiltroAction()
     {
         $this->setResponse("ajax");
-        Flash::set_flashdata("filter_usuarios", false, true);
-        Flash::set_flashdata("filter_params", false, true);
+        set_flashdata("filter_usuarios", false, true);
+        set_flashdata("filter_params", false, true);
 
         return $this->renderObject(array(
             'success' => true,
-            'query' => Flash::get_flashdata_item("filter_usuarios"),
-            'filter' => Flash::get_flashdata_item("filter_params"),
+            'query' => get_flashdata_item("filter_usuarios"),
+            'filter' => get_flashdata_item("filter_params"),
         ));
     }
 
@@ -314,9 +314,9 @@ class UsuarioController extends ApplicationController
     public function show_userAction()
     {
         $this->setResponse("ajax");
-        $documento = $this->getPostParam('documento', "addslaches", "alpha", "extraspaces", "striptags");
-        $tipo = $this->getPostParam('tipo', "addslaches", "alpha", "extraspaces", "striptags");
-        $coddoc = $this->getPostParam('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
+        $documento = $request->input('documento', "addslaches", "alpha", "extraspaces", "striptags");
+        $tipo = $request->input('tipo', "addslaches", "alpha", "extraspaces", "striptags");
+        $coddoc = $request->input('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
 
         $user = (new Mercurio07)->findFirst(" documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'");
         $data = $user->getArray();
@@ -343,9 +343,9 @@ class UsuarioController extends ApplicationController
     {
         $this->setResponse("ajax");
         try {
-            $documento = $this->getPostParam('documento', "addslaches", "alpha", "extraspaces", "striptags");
-            $tipo = $this->getPostParam('tipo', "addslaches", "alpha", "extraspaces", "striptags");
-            $coddoc = $this->getPostParam('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
+            $documento = $request->input('documento', "addslaches", "alpha", "extraspaces", "striptags");
+            $tipo = $request->input('tipo', "addslaches", "alpha", "extraspaces", "striptags");
+            $coddoc = $request->input('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
 
             $hasUser = (new Mercurio07)->count(
                 "*",

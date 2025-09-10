@@ -13,13 +13,13 @@ class Mercurio03Controller extends ApplicationController
     private $query = "1=1";
     private $cantidad_pagina = 0;
 
-    public function initialize()
+    public function __construct()
     {
-        Core::importLibrary("Services", "Services");
-        $this->setTemplateAfter('main');
-        $this->setPersistance(true);
+       
+        
+        
         $this->cantidad_pagina = $this->numpaginate;
-        Services::Init();
+        
     }
 
     public function beforeFilter($permisos = array())
@@ -87,7 +87,7 @@ class Mercurio03Controller extends ApplicationController
     public function changeCantidadPaginaAction()
     {
         $this->setResponse("ajax");
-        $this->cantidad_pagina = $this->getPostParam("numero");
+        $this->cantidad_pagina = $request->input("numero");
         self::buscarAction();
     }
 
@@ -109,7 +109,7 @@ class Mercurio03Controller extends ApplicationController
     public function buscarAction()
     {
         $this->setResponse("ajax");
-        $pagina = $this->getPostParam('pagina');
+        $pagina = $request->input('pagina');
         if ($pagina == "") $pagina = 1;
         $paginate = Tag::paginate($this->Mercurio03->find("$this->query"), $pagina, $this->cantidad_pagina);
         $html = self::showTabla($paginate);
@@ -124,13 +124,13 @@ class Mercurio03Controller extends ApplicationController
     {
         try {
             $this->setResponse("ajax");
-            $codfir = $this->getPostParam('codfir');
+            $codfir = $request->input('codfir');
             $mercurio03 = $this->Mercurio03->findFirst("codfir = '$codfir'");
             if ($mercurio03 == false) $mercurio03 = new Mercurio03();
             return $this->renderObject($mercurio03->getArray(), false);
         } catch (DbException $e) {
             parent::setLogger($e->getMessage());
-            parent::ErrorTrans();
+            $this->db->rollback();
         }
     }
 
@@ -139,19 +139,19 @@ class Mercurio03Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $codfir = $this->getPostParam('codfir');
+                $codfir = $request->input('codfir');
                 $modelos = array("Mercurio03");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 $this->Mercurio03->deleteAll("codfir = '$codfir'");
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Borrado Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede Borrar el Registro");
             return $this->renderObject($response, false);
         }
@@ -162,14 +162,14 @@ class Mercurio03Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $codfir = $this->getPostParam('codfir', "addslaches", "alpha", "extraspaces", "striptags");
-                $nombre = $this->getPostParam('nombre', "addslaches", "alpha", "extraspaces", "striptags");
-                $cargo = $this->getPostParam('cargo', "addslaches", "alpha", "extraspaces", "striptags");
-                $archivo = $this->getPostParam('archivo', "addslaches", "extraspaces", "striptags");
-                $email = $this->getPostParam('email', "addslaches", "extraspaces", "striptags");
+                $codfir = $request->input('codfir', "addslaches", "alpha", "extraspaces", "striptags");
+                $nombre = $request->input('nombre', "addslaches", "alpha", "extraspaces", "striptags");
+                $cargo = $request->input('cargo', "addslaches", "alpha", "extraspaces", "striptags");
+                $archivo = $request->input('archivo', "addslaches", "extraspaces", "striptags");
+                $email = $request->input('email', "addslaches", "extraspaces", "striptags");
                 $modelos = array("Mercurio03");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 $mercurio03 = new Mercurio03();
                 $mercurio03->setTransaction($Transaccion);
                 $mercurio03->setCodfir($codfir);
@@ -186,7 +186,7 @@ class Mercurio03Controller extends ApplicationController
                         $mercurio03->setArchivo($name);
                         if (!$mercurio03->save()) {
                             parent::setLogger($mercurio03->getMessages());
-                            parent::ErrorTrans();
+                            $this->db->rollback();
                         }
                         $response = parent::successFunc("Se adjunto con exito el archivo");
                     } else {
@@ -195,14 +195,14 @@ class Mercurio03Controller extends ApplicationController
                 } else {
                     $response = parent::errorFunc("No se cargo el archivo");
                 }
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Creacion Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede guardar/editar el Registro");
             return $this->renderObject($response, false);
         }
@@ -212,7 +212,7 @@ class Mercurio03Controller extends ApplicationController
     {
         try {
             $this->setResponse("ajax");
-            $codfir = $this->getPostParam('codfir', "addslaches", "alpha", "extraspaces", "striptags");
+            $codfir = $request->input('codfir', "addslaches", "alpha", "extraspaces", "striptags");
             $response = parent::successFunc("");
             $l = $this->Mercurio03->count("*", "conditions: codfir = '$codfir'");
             if ($l > 0) {

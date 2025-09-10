@@ -13,13 +13,13 @@ class Mercurio09Controller extends ApplicationController
     private $query = "1=1";
     private $cantidad_pagina = 0;
 
-    public function initialize()
+    public function __construct()
     {
-        Core::importLibrary("Services", "Services");
-        $this->setTemplateAfter('main');
-        $this->setPersistance(true);
+       
+        
+        
         $this->cantidad_pagina = $this->numpaginate;
-        Services::Init();
+        
     }
 
     public function beforeFilter($permisos = array())
@@ -86,7 +86,7 @@ class Mercurio09Controller extends ApplicationController
     public function changeCantidadPaginaAction()
     {
         $this->setResponse("ajax");
-        $this->cantidad_pagina = $this->getPostParam("numero");
+        $this->cantidad_pagina = $request->input("numero");
         self::buscarAction();
     }
 
@@ -119,7 +119,7 @@ class Mercurio09Controller extends ApplicationController
     public function buscarAction()
     {
         $this->setResponse("ajax");
-        $pagina = $this->getPostParam('pagina');
+        $pagina = $request->input('pagina');
         if ($pagina == "") $pagina = 1;
         $paginate = Tag::paginate($this->Mercurio09->find("$this->query"), $pagina, $this->cantidad_pagina);
         $html = self::showTabla($paginate);
@@ -134,13 +134,13 @@ class Mercurio09Controller extends ApplicationController
     {
         try {
             $this->setResponse("ajax");
-            $tipopc = $this->getPostParam('tipopc');
+            $tipopc = $request->input('tipopc');
             $mercurio09 = $this->Mercurio09->findFirst("tipopc = '$tipopc'");
             if ($mercurio09 == false) $mercurio09 = new Mercurio09();
             $this->renderObject($mercurio09->getArray(), false);
         } catch (DbException $e) {
             parent::setLogger($e->getMessage());
-            parent::ErrorTrans();
+            $this->db->rollback();
         }
     }
 
@@ -149,19 +149,19 @@ class Mercurio09Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $tipopc = $this->getPostParam('tipopc');
+                $tipopc = $request->input('tipopc');
                 $modelos = array("Mercurio09");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 $this->Mercurio09->deleteAll("tipopc = '$tipopc'");
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Borrado Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede Borrar el Registro");
             return $this->renderObject($response, false);
         }
@@ -172,12 +172,12 @@ class Mercurio09Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $tipopc = $this->getPostParam('tipopc', "addslaches", "alpha", "extraspaces", "striptags");
-                $detalle = $this->getPostParam('detalle', "addslaches", "alpha", "extraspaces", "striptags");
-                $dias = $this->getPostParam('dias', "addslaches", "alpha", "extraspaces", "striptags");
+                $tipopc = $request->input('tipopc', "addslaches", "alpha", "extraspaces", "striptags");
+                $detalle = $request->input('detalle', "addslaches", "alpha", "extraspaces", "striptags");
+                $dias = $request->input('dias', "addslaches", "alpha", "extraspaces", "striptags");
                 $modelos = array("Mercurio09");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 $mercurio09 = new Mercurio09();
                 $mercurio09->setTransaction($Transaccion);
                 $mercurio09->setTipopc($tipopc);
@@ -185,16 +185,16 @@ class Mercurio09Controller extends ApplicationController
                 $mercurio09->setDias($dias);
                 if (!$mercurio09->save()) {
                     parent::setLogger($mercurio09->getMessages());
-                    parent::ErrorTrans();
+                    $this->db->rollback();
                 }
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Creacion Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se puede guardar/editar el Registro");
             return $this->renderObject($response, false);
         }
@@ -204,7 +204,7 @@ class Mercurio09Controller extends ApplicationController
     {
         try {
             $this->setResponse("ajax");
-            $tipopc = $this->getPostParam('tipopc', "addslaches", "alpha", "extraspaces", "striptags");
+            $tipopc = $request->input('tipopc', "addslaches", "alpha", "extraspaces", "striptags");
             $response = parent::successFunc("");
             $l = $this->Mercurio09->count("*", "conditions: tipopc = '$tipopc'");
             if ($l > 0) {
@@ -222,7 +222,7 @@ class Mercurio09Controller extends ApplicationController
     {
         try {
             $this->setResponse("view");
-            $tipopc = $this->getPostParam('tipopc', "addslaches", "alpha", "extraspaces", "striptags");
+            $tipopc = $request->input('tipopc', "addslaches", "alpha", "extraspaces", "striptags");
             $response = "";
             $mercurio12 = $this->Mercurio12->find();
             View::renderView('mercurio09/tmp/archivos_view', array(
@@ -242,13 +242,13 @@ class Mercurio09Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $tipopc = $this->getPostParam('tipopc', "addslaches", "alpha", "extraspaces", "striptags");
-                $coddoc = $this->getPostParam('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
-                $acc = $this->getPostParam('acc', "addslaches", "extraspaces", "striptags");
+                $tipopc = $request->input('tipopc', "addslaches", "alpha", "extraspaces", "striptags");
+                $coddoc = $request->input('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
+                $acc = $request->input('acc', "addslaches", "extraspaces", "striptags");
                 $item = 1;
                 $modelos = array("mercurio13");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 if ($acc == "1") {
                     $mercurio13 = new Mercurio13();
                     $mercurio13->setTransaction($Transaccion);
@@ -257,19 +257,19 @@ class Mercurio09Controller extends ApplicationController
                     $mercurio13->setObliga("N");
                     if (!$mercurio13->save()) {
                         parent::setLogger($mercurio13->getMessages());
-                        parent::ErrorTrans();
+                        $this->db->rollback();
                     }
                 } else {
                     $this->Mercurio13->deleteAll("tipopc='$tipopc' and coddoc='$coddoc' ");
                 }
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Movimiento Realizado Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se pudo realizar el movimiento");
             return $this->renderObject($response, false);
         }
@@ -280,21 +280,21 @@ class Mercurio09Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $tipopc = $this->getPostParam('tipopc', "addslaches", "alpha", "extraspaces", "striptags");
-                $coddoc = $this->getPostParam('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
-                $obliga = $this->getPostParam('obliga', "addslaches", "alpha", "extraspaces", "striptags");
+                $tipopc = $request->input('tipopc', "addslaches", "alpha", "extraspaces", "striptags");
+                $coddoc = $request->input('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
+                $obliga = $request->input('obliga', "addslaches", "alpha", "extraspaces", "striptags");
                 $modelos = array("mercurio13");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 $this->Mercurio13->updateAll("obliga='$obliga'", "conditions: tipopc='$tipopc' and coddoc='$coddoc' ");
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Movimiento Realizado Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se pudo realizar el movimiento");
             return $this->renderObject($response, false);
         }
@@ -304,8 +304,8 @@ class Mercurio09Controller extends ApplicationController
     {
         $this->setResponse("view");
         try {
-            $tipopc = $this->getPostParam('tipopc', "addslaches", "alpha", "extraspaces", "striptags");
-            $tipsoc = $this->getPostParam('tipsoc', "addslaches", "alpha", "extraspaces", "striptags");
+            $tipopc = $request->input('tipopc', "addslaches", "alpha", "extraspaces", "striptags");
+            $tipsoc = $request->input('tipsoc', "addslaches", "alpha", "extraspaces", "striptags");
             $response = "";
             $mercurio12 = $this->Mercurio12->find();
             View::renderView('mercurio09/tmp/archivos_empresas', array(
@@ -326,14 +326,14 @@ class Mercurio09Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $tipopc = $this->getPostParam('tipopc', "addslaches", "alpha", "extraspaces", "striptags");
-                $tipsoc = $this->getPostParam('tipsoc', "addslaches", "alpha", "extraspaces", "striptags");
-                $coddoc = $this->getPostParam('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
-                $acc = $this->getPostParam('acc', "addslaches", "extraspaces", "striptags");
+                $tipopc = $request->input('tipopc', "addslaches", "alpha", "extraspaces", "striptags");
+                $tipsoc = $request->input('tipsoc', "addslaches", "alpha", "extraspaces", "striptags");
+                $coddoc = $request->input('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
+                $acc = $request->input('acc', "addslaches", "extraspaces", "striptags");
                 $item = 1;
                 $modelos = array("mercurio14");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 if ($acc == "1") {
                     $mercurio14 = new Mercurio14();
                     $mercurio14->setTransaction($Transaccion);
@@ -343,19 +343,19 @@ class Mercurio09Controller extends ApplicationController
                     $mercurio14->setObliga("N");
                     if (!$mercurio14->save()) {
                         parent::setLogger($mercurio14->getMessages());
-                        parent::ErrorTrans();
+                        $this->db->rollback();
                     }
                 } else {
                     $this->Mercurio14->deleteAll("tipopc='$tipopc' and tipsoc='$tipsoc' and coddoc='$coddoc' ");
                 }
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Movimiento Realizado Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se pudo realizar el movimiento");
             return $this->renderObject($response, false);
         }
@@ -366,22 +366,22 @@ class Mercurio09Controller extends ApplicationController
         try {
             try {
                 $this->setResponse("ajax");
-                $tipopc = $this->getPostParam('tipopc', "addslaches", "alpha", "extraspaces", "striptags");
-                $tipsoc = $this->getPostParam('tipsoc', "addslaches", "alpha", "extraspaces", "striptags");
-                $coddoc = $this->getPostParam('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
-                $obliga = $this->getPostParam('obliga', "addslaches", "alpha", "extraspaces", "striptags");
+                $tipopc = $request->input('tipopc', "addslaches", "alpha", "extraspaces", "striptags");
+                $tipsoc = $request->input('tipsoc', "addslaches", "alpha", "extraspaces", "striptags");
+                $coddoc = $request->input('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
+                $obliga = $request->input('obliga', "addslaches", "alpha", "extraspaces", "striptags");
                 $modelos = array("mercurio13");
-                $Transaccion = parent::startTrans($modelos);
-                $response = parent::startFunc();
+                
+                $response = $this->db->begin();
                 $this->Mercurio14->updateAll("obliga='$obliga'", "conditions: tipopc='$tipopc' and tipsoc='$tipsoc' and coddoc='$coddoc' ");
-                parent::finishTrans();
+                $this->db->commit();
                 $response = parent::successFunc("Movimiento Realizado Con Exito");
                 return $this->renderObject($response, false);
             } catch (DbException $e) {
                 parent::setLogger($e->getMessage());
-                parent::ErrorTrans();
+                $this->db->rollback();
             }
-        } catch (TransactionFailed $e) {
+        } catch (DebugException $e) {
             $response = parent::errorFunc("No se pudo realizar el movimiento");
             return $this->renderObject($response, false);
         }
