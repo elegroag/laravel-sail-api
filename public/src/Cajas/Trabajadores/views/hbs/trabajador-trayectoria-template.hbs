@@ -1,0 +1,33 @@
+<div class="trabajador-trayectoria-container">
+    <h2>Trayectoria Laboral de <%= trabajador.nombre %> <%= trabajador.apellido %></h2>
+    
+    <div class="historial-laboral">
+        <h3>Historial Laboral</h3>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Empresa</th>
+                    <th>Cargo</th>
+                    <th>Fecha Inicio</th>
+                    <th>Fecha Fin</th>
+                    <th>Duración</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% _.each(historial_laboral, function(trabajo) { %>
+                    <tr>
+                        <td><%= trabajo.empresa %></td>
+                        <td><%= trabajo.cargo %></td>
+                        <td><%= trabajo.fecha_inicio %></td>
+                        <td><%= trabajo.fecha_fin || 'Actual' %></td>
+                        <td><%= trabajo.duracion %></td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="actions">
+        <button class="btn btn-secondary js-volver">Volver</button>
+    </div>
+</div>

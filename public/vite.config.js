@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const _name = process.env.MODULE;
+const _app = process.env.APP;
 
 const camelCase = (str) => {
     return str.replace(/\b\w/g, (l) => l.toUpperCase());
@@ -17,10 +18,10 @@ export default defineConfig({
         chunkSizeWarningLimit: 300,
         sourcemap: true,
         emptyOutDir: false,
-        outDir: resolve(__dirname, `mercurio/build/`),
+        outDir: resolve(__dirname, `${_app}/build/`),
         rollupOptions: {
             input: {
-                main: resolve(__dirname, `src/Mercurio/${_name}/main.js`),
+                main: resolve(__dirname, `src/${camelCase(_app)}/${_name}/main.js`),
             },
             output: {
                 entryFileNames: `${camelCase(_name)}.js`,

@@ -1,0 +1,48 @@
+<div class="row justify-content-center">
+    <div class="col-md-4 col-lg-3">
+         <div class="form-group pt-3">
+            <label for="fecha_desde">Fecha desde:</label>
+            <input type="date" class="form-control" id="fecha_desde" name="fecha_desde">
+        </div>
+        <div class="form-group pt-3">
+            <label for="reporte">Reporte:</label>
+            <select class="form-control" id="reporte" name="reporte">
+                <option value="">Seleccione un reporte</option>
+                <option value="pdf">PDF</option>
+                <option value="excel">EXCEL</option>
+                <option value="csv">CSV</option>
+            </select>
+        </div>
+        <div class="form-group pt-3">
+            <label for="funcionario">Funcionario asignado:</label>
+            <select class="form-control" id="funcionario" name="funcionario">
+                <option value="">Seleccione un funcionario</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-3">
+        <div class="form-group pt-3">
+            <label for="fecha_hasta">Fecha hasta:</label>
+            <input type="date" class="form-control" id="fecha_hasta" name="fecha_hasta">
+        </div>
+        <div class="form-group pt-3">
+            <label for="estados">Estados:</label>
+            <select class="form-control" id="estados" name="estados">
+                <option value="">Seleccione un estado</option>
+                <option value="T">Todos</option>
+                <option value="A">Activo</option>
+                <option value="P">Pendiente</option>
+                <option value="D">Devuelto</option>
+                <option value="R">Rechazado</option>
+                <option value="T">Temporales</option>
+            </select>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="text-center pt-3 ">
+        <label class="text-center">Generar el reporte de <span class="text-lowercase"><%=request%></span></label><br/>
+        <button class="btn btn-primary mt-2" id="btn_generar_reporte"><i class="fa fa-check"></i> Procesar</button>
+        <button class="btn btn-default mt-2" id="btn_salir"><i class="fa fa-times"></i> Salir</button>
+    </div>
+</div>

@@ -1,0 +1,363 @@
+#contentView {
+    padding-bottom: 3rem;
+}
+
+#circle-logo {
+    z-index: 9;
+}
+
+.sidenav {
+	box-shadow: none;
+}
+
+.form-control-label {
+    font-size: .82rem;
+    margin-bottom: 1px;
+}
+
+.btn.btn-primary.active {
+    background-color: rgba(56, 199, 210, .7) !important;
+    border-color: rgba(56, 199, 210, 1) !important;
+}
+
+.list-group-item {
+    padding: 0.2rem 1rem;
+    padding-top: 10px;
+}
+
+.text-muted .list-group-item {
+    padding: 0.2rem 1rem;
+}
+
+.list-group-item.active {
+    border-color: #adadad;
+    background-color: #fff;
+}
+
+.list-group-item.inactive {
+    border-color: #adadad;
+    background-color: #e7e7e7;
+}
+
+.btn-link-file {
+    border-radius: 1px;
+    margin-top: 5px;
+    padding: 8px 5px !important;
+    border: 0px;
+    cursor: pointer;
+    background-color: rgba(56, 199, 210, 1) !important;
+    color: #fff !important;
+    border-radius: 5px;
+    font-size: 13px;
+}
+
+a.btn-link-file:hover,
+a.btn-link-file:focus,
+a.btn-link-file:active,
+button.btn-link-file:hover,
+button.btn-link-file:focus,
+button.btn-link-file:active {
+    border: 1px solid #ddd;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.list-group-item.border-0 {
+    padding: 2px;
+}
+
+.btn-outline-primary {
+    margin-bottom: 2px;
+}
+
+.note-editable {
+    background-color: #FFFFFF;
+}
+
+.note-editable p,
+.note-editable h3,
+.note-editable label,
+.note-editable span {
+    line-height: 1.8pt;
+}
+
+.navbar-nav li.nav-item a.nav-link.active {
+    margin-right: 0.5rem;
+    margin-left: 0.5rem;
+    border-radius: 0px;
+    background: #b2ddb8b8;
+    border-color: #b2ddb8b8;
+    color: #222;
+}
+
+.btn-link-file {
+    border-radius: 1px;
+    margin-top: 5px;
+    padding: 8px 5px !important;
+    border: 0px;
+    cursor: pointer;
+    background-color: rgba(56, 199, 210, 1) !important;
+    color: #fff !important;
+    border-radius: 5px;
+    font-size: 13px;
+}
+
+.btn-link-file:hover,
+.btn-link-file:focus,
+.btn-link-file:active {
+    border: 0px;
+    cursor: pointer;
+}
+
+.list-group-item {
+    padding: 0.2rem 1rem;
+    padding-top: 10px;
+}
+
+.text-muted .list-group-item {
+    padding: 0.2rem 1rem;
+}
+
+label {
+	font-size: .91rem;
+}
+
+.form-control-label {
+    font-size: .81rem;
+    margin-bottom: 3px;
+}
+
+label.error,
+label.is-invalid {
+    font-size: 0.70rem;
+    color: #ed4629eb;
+    display: none;
+    line-height: 1rem;
+    padding: 0px;
+    margin: 0px;
+}
+
+.d-flex label.error{
+	position: absolute;
+	bottom: -15px;
+	right: 20px;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    font-size: .875rem;
+    line-height: 1.8rem;
+    display: inline-flex;
+    margin: 0 0 0.25rem 0.25rem;
+    padding: 0 0.5rem;
+    color: #777;
+    border: none;
+    border-radius: 0.25rem;
+    background-color: #ffffee;
+}
+
+.select2-results__option,
+.select2-results__option:hover .select2-results__option:focus {
+    border-bottom: 1px solid #ededed;
+    padding-top: 1px;
+}
+
+.select2-container .select2-selection--single,
+.select2-container--default.select2-container--focus .select2-selection--multiple,
+.select2-container--default .select2-selection--multiple,
+.select2-container--default .select2-search--dropdown .select2-search__field {
+    padding: 0.2rem 0.3rem;
+    font-size: 13px;
+    height: initial;
+    min-height: calc(2.3rem + 2px);
+    line-height: 1.2rem;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    margin-top: 5px;
+}
+
+.list-group-item.active {
+    border-color: #adadad;
+    background-color: #fff;
+}
+
+.list-group-item.inactive {
+    border-color: #adadad;
+    background-color: #e7e7e7;
+}
+
+h4.active {
+    color: #388e3c;
+    font-size: 1rem;
+}
+
+h4.inactive {
+    color: #4caf50;
+    font-size: 1rem;
+}
+
+p {
+    font-size: 0.85em;
+}
+
+.select2-results__option {
+    font-size: .8rem;
+    padding: .3rem .5rem;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+div.form-item {
+    position: relative;
+    height: 4.5rem;
+}
+
+label.control-label {
+    display: block;
+    position: absolute;
+    font-size: 0.8rem;
+    line-height: 1.1rem;
+    color: #777;
+    top: 15%;
+    left: 0px;
+    cursor: text;
+    transition: 0.3s;
+    padding: 0 3px;
+}
+
+label.control-label.top {
+    cursor: default;
+    background-color: #fff;
+    margin-top: 0;
+    top: -18px;
+    transition: 0.3s;
+    font-size: 0.80rem;
+}
+
+select.form-control,
+input.form-control,
+textarea.form-control {
+    line-height: 1.2rem;
+    margin: 1px 0px;
+    padding: 5px 7px;
+    height: calc(2.3rem + 2px);
+    background-color: #fefefe;
+    border-color: #ededed;
+}
+
+.form-control.is-invalid {
+    background-color: #ffffee;
+}
+
+fieldset {
+    border: 1px solid #0103;
+    padding: 15px 10px;
+}
+
+legend {
+    text-align: left;
+    padding: 0 calc(1px * 15);
+    font-size: 1.3rem;
+    letter-spacing: .04em;
+    color: #000103;
+}
+
+.calendar {
+    width: 100%;
+    border: 1px solid #ddd;
+    text-align: left;
+    margin-top: 3px;
+    height: calc(2.1rem + 2px);
+}
+
+.navbar.bg-gradient-primary .nav-link {
+    color: #e7e7e7;
+}
+
+.navbar-dark {
+    top: -1px;
+}
+
+.shw-adjuntos button.btn-block {
+    cursor: pointer;
+    border-radius: 5px;
+    min-height: 35px;
+    font-size: 0.82rem;
+    text-decoration: none;
+    cursor: pointer;
+    border-style: groove;
+}
+
+.card .table th {
+    font-size: .89rem !important;
+}
+
+.card .table td {
+    font-size: .84rem !important;
+}
+
+.bg-green-blue {
+    background-color: #84e1be;
+}
+
+.page-item .page-link,
+.page-item span {
+    height: initial;
+    width: initial;
+    min-width: 38px;
+    min-height: 38px;
+    padding: 2px;
+}
+
+.note-editing-area,
+.note-editing-area p {
+	font-family: initial !important;
+	font-size: 1rem !important;
+	color: #333 !important;
+}
+
+.note-editing-area {
+	padding: 10px !important;
+}
+
+.navbar-brand:hover{
+	border: 0px;
+	box-shadow: none;
+}
+
+.badge {
+	font-size: 0.6rem;
+	padding: 0.25em 0.4em;
+}
+
+/* Notification dropdown scrollbar */
+.notification-list::-webkit-scrollbar {
+	width: 6px;
+}
+
+.notification-list::-webkit-scrollbar-track {
+	background: #f1f1f1;
+	border-radius: 3px;
+}
+
+.notification-list::-webkit-scrollbar-thumb {
+	background: #888;
+	border-radius: 3px;
+}
+
+.notification-list::-webkit-scrollbar-thumb:hover {
+	background: #555;
+}
+
+/* Dropdown arrow positioning */
+.dropdown-menu-arrow.dropdown-menu-end:before {
+	left: auto !important;
+	right: 20px !important;
+}
+
+.dropdown-menu-arrow:before {
+	top: -12px;
+	left: 20px;
+}
