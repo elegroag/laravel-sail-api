@@ -264,55 +264,7 @@ class PrincipalController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-
-    public function prueba_sat02Action()
-    {
-        $data = array(
-            "NumeroRadicadoSolicitud" => "CCFN012345678",
-            "NumeroTransaccion" => "0",
-            "TipoPersona" => "J",
-            "NaturalezaJuridicaEmpleador" => "",
-            "TipoDocumentoEmpleador" => "NI",
-            "NumeroDocumentoEmpleador" => "800000370",
-            "SerialSAT" => "0",
-            "PrimerNombreEmpleador" => "",
-            "SegundoNombreEmpleador" => "",
-            "PrimerApellidoEmpleador" => "",
-            "SegundoApellidoEmpleador" => "",
-            "FechaSolicitud" => "2021-07-15",
-            "PerdidaAfiliacionCausaGrave" => "",
-            "FechaEfectivaAfiliacion" => "2021-07-15",
-            "RazonSocial" => "ESCANOGRAFIA S.A.",
-            "NumeroMatriculaMercantil" => "",
-            "Departamento" => "52",
-            "Municipio" => "001",
-            "DireccionContacto" => "KR 30A 15 53 PS 2",
-            "NumeroTelefono" => "3002820525",
-            "CorreoElectronico" => "andresferla27@gmail.com",
-            "TipoDocumentoRepresentante" => "CC",
-            "NumeroDocumentoRepresentante" => "76228782",
-            "PrimerNombreRepresentante" => "ABDU",
-            "SegundoNombreRepresentante" => "",
-            "PrimerApellidoRepresentante" => "ABURTO",
-            "SegundoApellidoRepresentante" => "",
-            "AutorizacionManejoDatos" => "SI",
-            "AutorizacionNotificaciones" => "SI",
-            "Manifestacion" => "SI"
-        );
-        $satConsultaServices = new SatConsultaServices();
-        $respuesta = $satConsultaServices->sendWebServiceSat("sat02", $data);
-        return $respuesta;
-    }
-
-    public function pruebaWsSatAction($tabla, $radicado)
-    {
-        // $wscajas = new WebcajasController();
-        // $response = $wscajas->envioWSSatAction($tabla, $radicado, 'S');
-        // Debug::AddVariable("response", $response);
-        // throw new DebugException("Error Processing Request");
-    }
-
-    public function download_globalAction($filepath = "")
+    public function downloadGlobalAction($filepath = "")
     {
         $archivo = base64_decode($filepath);
         if (preg_match('/(public)(\/)(temp)/i', $archivo) == false) {
@@ -338,7 +290,7 @@ class PrincipalController extends ApplicationController
         }
     }
 
-    public function file_existe_globalAction(Request $request)
+    public function fileExisteGlobalAction(Request $request)
     {
         $this->setResponse("ajax");
         $filepath = $request->input('filepath');
@@ -355,19 +307,5 @@ class PrincipalController extends ApplicationController
         } else {
             echo "{\"success\":false}";
         }
-    }
-
-    public function pruebaAction()
-    {
-        $this->setResponse("view");
-        $id = 1;
-        $params = array(
-            'servicio' => 'SaldoTarjeta',
-            'metodo' => 'numtarSaldos',
-            'params' => $id
-        );
-        $procesadorComandos = Comman::Api();
-        $procesadorComandos->runCli($params);
-        $this->renderObject($procesadorComandos->toArray());
     }
 }
