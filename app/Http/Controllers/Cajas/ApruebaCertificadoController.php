@@ -18,7 +18,7 @@ use App\Services\Request as ServicesRequest;
 use Illuminate\Support\Facades\View;
 use App\Services\Utils\SenderEmail;
 
-class AprobacioncerController extends ApplicationController
+class ApruebaCertificadoController extends ApplicationController
 {
     protected $tipopc = 8;
     protected $db;

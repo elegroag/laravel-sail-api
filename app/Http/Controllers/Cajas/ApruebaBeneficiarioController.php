@@ -25,7 +25,7 @@ use App\Library\Exception;
 use App\Services\Request as RequestParam;
 use App\Services\Utils\AsignarFuncionario;
 
-class AprobacionbenController extends ApplicationController
+class ApruebaBeneficiarioController extends ApplicationController
 {
     protected $tipopc = 4;
     protected $db;

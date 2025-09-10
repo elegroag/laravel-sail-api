@@ -21,7 +21,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Carbon\Carbon;
 
-class ActualizardatosController extends ApplicationController
+class ApruebaUpEmpresaController extends ApplicationController
 {
 
     protected $tipopc = 5;

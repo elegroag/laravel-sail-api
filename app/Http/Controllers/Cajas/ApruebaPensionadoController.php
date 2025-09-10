@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\View;
 use App\Services\Utils\Comman;
 use App\Services\Aprueba\ApruebaSolicitud;
 
-class AprobacionpenController extends ApplicationController
+class ApruebaPensionadoController extends ApplicationController
 {
 
     protected $tipopc = 9;

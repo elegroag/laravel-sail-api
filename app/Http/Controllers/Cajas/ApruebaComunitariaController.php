@@ -23,7 +23,7 @@ use App\Library\View;
 use App\Services\Utils\Comman;
 
 
-class AprobacioncomController extends ApplicationController
+class ApruebaComunitariaController extends ApplicationController
 {
     protected $tipopc = 11;
     protected $db;

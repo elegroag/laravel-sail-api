@@ -17,7 +17,7 @@ use App\Exceptions\DebugException;
 use App\Library\DbException;
 use App\Services\Tag;
 
-class AprobacionretiroController extends ApplicationController
+class ApruebaRetiroController extends ApplicationController
 {
 
     protected $tipopc = 7;

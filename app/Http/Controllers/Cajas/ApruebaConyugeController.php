@@ -22,7 +22,7 @@ use App\Services\Utils\NotifyEmailServices;
 use App\Library\Collections\ParamsConyuge;
 use App\Services\Utils\Comman;
 
-class AprobacionconController extends ApplicationController
+class ApruebaConyugeController extends ApplicationController
 {
     protected $tipopc = 3;
     protected $db;

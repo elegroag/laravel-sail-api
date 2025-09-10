@@ -26,7 +26,7 @@ use App\Library\Collections\ParamsTrabajador;
 use App\Services\Request as ServicesRequest;
 use App\Services\Utils\Comman;
 
-class AprobaciondatosController extends ApplicationController
+class ApruebaUpTrabajadorController extends ApplicationController
 {
 
     protected $tipopc = "14";

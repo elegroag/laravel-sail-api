@@ -26,7 +26,7 @@ use App\Services\Aprueba\ApruebaTrabajador;
 use App\Services\Request as ServicesRequest;
 use App\Services\Tag;
 
-class AprobaciontraController extends ApplicationController
+class ApruebaTrabajadorController extends ApplicationController
 {
     protected $tipopc = 1;
     protected $db;

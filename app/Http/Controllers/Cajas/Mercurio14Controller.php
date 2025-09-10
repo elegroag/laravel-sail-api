@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio09;
 use App\Models\Mercurio12;
 use App\Models\Mercurio14;
@@ -13,15 +12,9 @@ use App\Services\CajaServices\Mercurio14Services;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Pagination;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class Mercurio14Controller extends ApplicationController
 {
-
-    protected $db;
-    protected $user;
-    protected $tipo;
-
     /**
      * pagination variable
      * @var Pagination
@@ -34,12 +27,9 @@ class Mercurio14Controller extends ApplicationController
      */
     protected $query;
 
-    public function __construct()
+    public function initialize()
     {
         $this->pagination = new Pagination();
-        $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
     public function indexAction()
@@ -76,14 +66,14 @@ class Mercurio14Controller extends ApplicationController
         $this->setParamToView("buttons", array("N", "F"));
     }
 
-    public function aplicarFiltroAction()
+    public function aplicarFiltroAction(Request $request)
     {
-        #return $this->buscarAction();
+        return $this->buscarAction($request);
     }
 
-    public function changeCantidadPaginaAction()
+    public function changeCantidadPaginaAction(Request $request)
     {
-        #return $this->buscarAction();
+        return $this->buscarAction($request);
     }
 
     public function buscarAction(Request $request)
@@ -110,7 +100,7 @@ class Mercurio14Controller extends ApplicationController
 
     /**
      * infor function
-     * Consulta y retorna los datos del registro de mercurio14 para poder ser editado
+     * Consulta y retorna los datos del registro de mercurio14 para poder ser editado 
      * @return void
      */
     public function inforAction(Request $request)
@@ -122,7 +112,7 @@ class Mercurio14Controller extends ApplicationController
             $tipsoc = $request->input('tipsoc');
             $num14 = (new Mercurio14())->count("*", "conditions: tipopc='{$tipopc}' AND coddoc='{$coddoc}' AND tipsoc='{$tipsoc}'");
             if ($num14 > 0) {
-                $mer14 = (new Mercurio14)->findFirst(" tipopc='{$tipopc}' AND coddoc='{$coddoc}' AND tipsoc='{$tipsoc}'");
+                $mer14 = (new Mercurio14())->findFirst(" tipopc='{$tipopc}' AND coddoc='{$coddoc}' AND tipsoc='{$tipsoc}'");
                 $tipopc_detalle = $mer14->getMercurio09()->getDetalle();
                 $coddoc_detalle = $mer14->getMercurio12()->getDetalle();
                 $data = $mer14->getArray();

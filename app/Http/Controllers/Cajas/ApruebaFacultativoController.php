@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\View;
 use App\Services\Utils\Comman;
 use Exception;
 
-class AprobacionfacController extends ApplicationController
+class ApruebaFacultativoController extends ApplicationController
 {
 
     protected $tipopc = 10;
