@@ -1,0 +1,227 @@
+<?php
+
+namespace App\Http\Controllers\Cajas;
+
+use App\Http\Controllers\Adapter\ApplicationController;
+use App\Models\Adapter\DbBase;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+
+class Mercurio51Controller extends ApplicationController
+{
+
+    private $query = "1=1";
+    private $cantidad_pagina = 0;
+
+    public function initialize()
+    {
+        Core::importLibrary("Services", "Services");
+        $this->setTemplateAfter('main');
+        $this->setPersistance(true);
+        $this->cantidad_pagina = $this->numpaginate;
+        Services::Init();
+    }
+
+    public function beforeFilter($permisos = array())
+    {
+        $permisos = array("aplicarFiltro" => "44", "editar" => "45", "guardar" => "46", "buscar" => "47", "borrar" => "48");
+        $flag = parent::beforeFilter($permisos);
+        if (!$flag) {
+            $this->setResponse("ajax");
+            $response = parent::errorFunc("No cuenta con los permisos para este proceso");
+            $this->redirect("principal/index/0");
+            return false;
+        }
+    }
+
+    public function showTabla($paginate)
+    {
+        $html  = '<table border="0" cellpadding="0" cellspacing="0" class="table table-bordered">';
+        $html .= "<thead class='thead-light'>";
+        $html .= "<tr>";
+        $html .= "<th scope='col'>Codigo</th>";
+        $html .= "<th scope='col'>Detalle</th>";
+        $html .= "<th scope='col'>Categoria</th>";
+        $html .= "<th scope='col'>Tipo</th>";
+        $html .= "<th scope='col'>Estado</th>";
+        $html .= "<th scope='col'></th>";
+        $html .= "</tr>";
+        $html .= "</thead>";
+        $html .= "<tbody class='list'>";
+        foreach ($paginate->items as $mtable) {
+            $html .= "<tr>";
+            $html .= "<td>{$mtable->getCodcat()}</td>";
+            $html .= "<td>{$mtable->getDetalle()}</td>";
+            $html .= "<td>{$mtable->getCodcatDetalle()}</td>";
+            $html .= "<td>{$mtable->getTipoDetalle()}</td>";
+            $html .= "<td>{$mtable->getEstadoDetalle()}</td>";
+            $html .= "<td class='table-actions'>";
+            $html .= "<a href='#!' class='table-action btn btn-xs btn-primary' title='Editar' onclick='editar(\"{$mtable->getCodcat()}\")'>";
+            $html .= "<i class='fas fa-user-edit text-white'></i>";
+            $html .= "</a>";
+            $html .= "<a href='#!' class='table-action table-action-delete btn btn-xs btn-danger' title='Borrar' onclick='borrar(\"{$mtable->getCodcat()}\")'>";
+            $html .= "<i class='fas fa-trash text-white'></i>";
+            $html .= "</a>";
+            $html .= "</td>";
+            $html .= "</tr>";
+        }
+        $html .= "</tbody>";
+        $html .= "</table>";
+        return $html;
+    }
+
+    public function aplicarFiltroAction()
+    {
+        $this->setResponse("ajax");
+        $consultasOldServices = new GeneralService();
+        $this->query = $consultasOldServices->converQuery();
+        self::buscarAction();
+    }
+
+    public function changeCantidadPaginaAction()
+    {
+        $this->setResponse("ajax");
+        $this->cantidad_pagina = $this->getPostParam("numero");
+        self::buscarAction();
+    }
+
+    public function indexAction()
+    {
+        $campo_field = array(
+            "codcat" => "Codigo",
+            "detalle" => "Detalle",
+        );
+        $this->setParamToView("campo_filtro", $campo_field);
+        $help = "Esta opcion permite manejar los ";
+        $this->setParamToView("help", $help);
+        $this->setParamToView("title", "Categorias");
+        $this->setParamToView("buttons", array("N", "F", "R"));
+        Tag::setDocumentTitle('Categorias');
+    }
+
+    public function nuevoAction()
+    {
+        $this->setResponse("ajax");
+        $numero = $this->Mercurio51->maximum("codcat") + 1;
+        $response = parent::successFunc("ok", $numero);
+        $this->renderObject($response, false);
+    }
+
+
+    public function buscarAction()
+    {
+        $this->setResponse("ajax");
+        $pagina = $this->getPostParam('pagina');
+        if ($pagina == "") $pagina = 1;
+        $paginate = Tag::paginate($this->Mercurio51->find("$this->query"), $pagina, $this->cantidad_pagina);
+        $html = self::showTabla($paginate);
+        $consultasOldServices = new GeneralService();
+        $html_paginate = $consultasOldServices->showPaginate($paginate);
+        $response['consulta'] = $html;
+        $response['paginate'] = $html_paginate;
+        $this->renderObject($response, false);
+    }
+
+    public function editarAction()
+    {
+        try {
+            $this->setResponse("ajax");
+            $codcat = $this->getPostParam('codcat');
+            $mercurio51 = $this->Mercurio51->findFirst("codcat = '$codcat'");
+            if ($mercurio51 == false) $mercurio51 = new Mercurio51();
+            $this->renderObject($mercurio51->getArray(), false);
+        } catch (DbException $e) {
+            parent::setLogger($e->getMessage());
+            parent::ErrorTrans();
+        }
+    }
+
+    public function borrarAction()
+    {
+        try {
+            try {
+                $this->setResponse("ajax");
+                $codcat = $this->getPostParam('codcat');
+                $modelos = array("Mercurio51");
+                $Transaccion = parent::startTrans($modelos);
+                $response = parent::startFunc();
+                $this->Mercurio51->deleteAll("codcat = '$codcat'");
+                parent::finishTrans();
+                $response = parent::successFunc("Borrado Con Exito");
+                return $this->renderObject($response, false);
+            } catch (DbException $e) {
+                parent::setLogger($e->getMessage());
+                parent::ErrorTrans();
+            }
+        } catch (TransactionFailed $e) {
+            $response = parent::errorFunc("No se puede Borrar el Registro");
+            return $this->renderObject($response, false);
+        }
+    }
+
+    public function guardarAction()
+    {
+        try {
+            try {
+                $this->setResponse("ajax");
+                $codcat = $this->getPostParam('codcat', "addslaches", "alpha", "extraspaces", "striptags");
+                $detalle = $this->getPostParam('detalle', "addslaches", "alpha", "extraspaces", "striptags");
+                $tipo = $this->getPostParam('tipo', "addslaches", "alpha", "extraspaces", "striptags");
+                $estado = $this->getPostParam('estado', "addslaches", "alpha", "extraspaces", "striptags");
+                $modelos = array("Mercurio51");
+                $Transaccion = parent::startTrans($modelos);
+                $response = parent::startFunc();
+                $mercurio51 = new Mercurio51();
+                $mercurio51->setTransaction($Transaccion);
+                $mercurio51->setCodcat($codcat);
+                $mercurio51->setDetalle($detalle);
+                $mercurio51->setTipo($tipo);
+                $mercurio51->setEstado($estado);
+                if (!$mercurio51->save()) {
+                    parent::setLogger($mercurio51->getMessages());
+                    parent::ErrorTrans();
+                }
+                parent::finishTrans();
+                $response = parent::successFunc("Creacion Con Exito");
+                return $this->renderObject($response, false);
+            } catch (DbException $e) {
+                parent::setLogger($e->getMessage());
+                parent::ErrorTrans();
+            }
+        } catch (TransactionFailed $e) {
+            $response = parent::errorFunc("No se puede guardar/editar el Registro");
+            return $this->renderObject($response, false);
+        }
+    }
+
+    public function validePkAction()
+    {
+        try {
+            $this->setResponse("ajax");
+            $codcat = $this->getPostParam('codcat', "addslaches", "alpha", "extraspaces", "striptags");
+            $response = parent::successFunc("");
+            $l = $this->Mercurio51->count("*", "conditions: codcat = '$codcat'");
+            if ($l > 0) {
+                $response = parent::errorFunc("El Registro ya se encuentra Digitado");
+            }
+            return $this->renderObject($response, false);
+        } catch (DbException $e) {
+            parent::setLogger($e->getMessage());
+            $response = parent::errorFunc("No se pudo validar la informacion");
+            return $this->renderObject($response, false);
+        }
+    }
+
+    public function reporteAction($format = 'P')
+    {
+        $this->setResponse("ajax");
+        $_fields = array();
+        $_fields["codcat"] = array('header' => "Codigo", 'size' => "15", 'align' => "C");
+        $_fields["detalle"] = array('header' => "Detalle", 'size' => "31", 'align' => "C");
+        $_fields["tipo"] = array('header' => "Tipo", 'size' => "31", 'align' => "C");
+        $_fields["estado"] = array('header' => "Estado", 'size' => "31", 'align' => "C");
+        $consultasOldServices = new GeneralService();
+        $file = $consultasOldServices->createReport("mercurio51", $_fields, $this->query, "Categorias", $format);
+        return $this->renderObject($file, false);
+    }
+}

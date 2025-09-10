@@ -16,6 +16,10 @@ class Mercurio01 extends ModelBase
         'email',
         'clave',
         'path',
+        'ftpserver',
+        'pathserver',
+        'userserver',
+        'passserver',
     ];
 
     /**
@@ -54,6 +58,42 @@ class Mercurio01 extends ModelBase
         $this->path = $path;
     }
 
+    /**
+     * Metodo para establecer el valor del campo ftpserver
+     * @param string $ftpserver
+     */
+    public function setFtpserver($ftpserver)
+    {
+        $this->ftpserver = $ftpserver;
+    }
+
+    /**
+     * Metodo para establecer el valor del campo pathserver
+     * @param string $pathserver
+     */
+    public function setPathserver($pathserver)
+    {
+        $this->pathserver = $pathserver;
+    }
+
+    /**
+     * Metodo para establecer el valor del campo userserver
+     * @param string $userserver
+     */
+    public function setUserserver($userserver)
+    {
+        $this->userserver = $userserver;
+    }
+
+    /**
+     * Metodo para establecer el valor del campo passserver
+     * @param string $passserver
+     */
+    public function setPassserver($passserver)
+    {
+        $this->passserver = $passserver;
+    }
+
 
     /**
      * Devuelve el valor del campo codapl
@@ -89,5 +129,41 @@ class Mercurio01 extends ModelBase
     public function getPath()
     {
         return $this->path;
+    }
+
+    /**
+     * Devuelve el valor del campo ftpserver
+     * @return string
+     */
+    public function getFtpserver()
+    {
+        return $this->ftpserver;
+    }
+
+    /**
+     * Devuelve el valor del campo pathserver
+     * @return string
+     */
+    public function getPathserver()
+    {
+        return $this->pathserver;
+    }
+
+    /**
+     * Devuelve el valor del campo userserver
+     * @return string
+     */
+    public function getUserserver()
+    {
+        return $this->userserver;
+    }
+
+    /**
+     * Devuelve el valor del campo passserver
+     * @return string
+     */
+    public function getPassserver()
+    {
+        return $this->passserver;
     }
 }

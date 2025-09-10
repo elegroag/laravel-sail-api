@@ -521,3 +521,30 @@ if (!function_exists('public_url')) {
         }
     }
 }
+
+if (!function_exists('get_mes_name')) {
+    /**
+     * Retorna el nombre del mes en español a partir de un número de mes (1-12 o cadena "01"-"12").
+     * @param int|string $month
+     * @return string
+     */
+    function get_mes_name($month)
+    {
+        $meses = array(
+            1 => 'Enero',
+            2 => 'Febrero',
+            3 => 'Marzo',
+            4 => 'Abril',
+            5 => 'Mayo',
+            6 => 'Junio',
+            7 => 'Julio',
+            8 => 'Agosto',
+            9 => 'Septiembre',
+            10 => 'Octubre',
+            11 => 'Noviembre',
+            12 => 'Diciembre'
+        );
+        $idx = intval($month);
+        return isset($meses[$idx]) ? $meses[$idx] : '';
+    }
+}

@@ -16,6 +16,8 @@ class Mercurio26 extends ModelBase
         'archivo',
         'nota',
         'estado',
+        'tipo',
+        'orden',
     ];
 
     /**
@@ -54,6 +56,23 @@ class Mercurio26 extends ModelBase
         $this->estado = $estado;
     }
 
+    /**
+     * Metodo para establecer el valor del campo tipo
+     * @param string $tipo
+     */
+    public function setTipo($tipo)
+    {
+        $this->tipo = $tipo;
+    }
+
+    /**
+     * Metodo para establecer el valor del campo orden
+     * @param string $orden
+     */
+    public function setOrden($orden)
+    {
+        $this->orden = $orden;
+    }
 
     /**
      * Devuelve el valor del campo numero
@@ -89,5 +108,23 @@ class Mercurio26 extends ModelBase
     public function getEstado()
     {
         return $this->estado;
+    }
+
+    /**
+     * Devuelve el valor del campo tipo
+     * @return string
+     */
+    public function getTipo()
+    {
+        return $this->tipo;
+    }
+
+    /**
+     * Devuelve el valor del campo orden
+     * @return string
+     */
+    public function getOrden()
+    {
+        return $this->orden;
     }
 }

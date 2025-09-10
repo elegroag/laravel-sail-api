@@ -83,4 +83,9 @@ class Generales
             14 => "PERMISO PROTECCION TEMPORAL"
         );
     }
+
+    public static function GeneraHashByClave($mclave)
+    {
+        return md5(password_hash_old(strval($mclave)));
+    }
 }

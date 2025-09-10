@@ -3,12 +3,20 @@
 namespace App\Exceptions;
 
 use Exception;
+use Throwable;
 use Illuminate\Http\Request;
 
 class DebugException extends Exception
 {
     static $errors = array();
+    protected $extra = null;
     protected $orderId;
+
+    public function __construct(string $message = "", int $code = 0, $extra = null, ?Throwable $previous = null)
+    {
+        parent::__construct($message, $code, $previous);
+        $this->extra = $extra;
+    }
 
     public function context()
     {
@@ -32,6 +40,7 @@ class DebugException extends Exception
                 "message" => $this->getMessage(),
                 "msj" => $this->getMessage(),
                 'request' => $request,
+                'extra' => $this->extra,
                 'out' => [
                     'code' => $this->getCode(),
                     'file' => basename($this->getFile()),

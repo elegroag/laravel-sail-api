@@ -1,5 +1,8 @@
 <?php
+
 namespace App\Services\Utils;
+
+use App\Services\Tag;
 
 class Pagination
 {
@@ -9,9 +12,7 @@ class Pagination
     public $estado = 'P';
     public $filters = false;
 
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     /**
      * filter function
@@ -124,12 +125,12 @@ class Pagination
         $paginate = Tag::paginate($modelEntity, $this->pagina, $this->cantidadPaginas);
 
         $html = $service->showTabla($paginate);
-        $html_paginate = View::render('layouts/paginate', array(
+        $html_paginate = view('layouts/paginate', array(
             'paginate' => $paginate,
             'estado'   => $this->estado,
             'event'    => "buscar_pagina(this, '{$this->estado}')",
             'event_pagina' => "cambiar_pagina(this, '{$this->estado}')",
-        ));
+        ))->render();
 
         return array(
             'consulta' => $html,

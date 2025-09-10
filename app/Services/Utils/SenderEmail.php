@@ -1,11 +1,13 @@
 <?php
+
 namespace App\Services\Utils;
 
 use App\Exceptions\DebugException;
+use App\Services\Request;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception as PHPMailerException;
 
-class SenderEmail 
+class SenderEmail
 {
     protected $email_pruebas = "soportesistemas.comfaca@gmail.com";
     protected $emisor_email;
@@ -39,10 +41,15 @@ class SenderEmail
         $this->mail->CharSet = 'UTF-8';
     }
 
-    public function __construct()
+    public function __construct(Request|null $params = null)
     {
         $this->mail = new PHPMailer(true);
         $this->configureSMTP();
+        if ($params instanceof Request) {
+            $this->emisor_email = $params->getParam('emisor_email');
+            $this->emisor_clave = $params->getParam('emisor_clave');
+            $this->asunto = $params->getParam('asunto');
+        }
     }
 
     public function setters(...$params)
@@ -59,14 +66,13 @@ class SenderEmail
         string $altBody = '',
         array|null $cc = null,
         array|null $bcc = null
-    )
-    {
+    ) {
         try {
             // Remitente
             $this->mail->setFrom($this->emisor_email, $this->emisor_nombre);
 
             // Destinatarios
-            if(env('APP_ENV') == 'local'){
+            if (env('APP_ENV') == 'local') {
                 $to = $this->email_pruebas;
             }
             if (is_array($to)) {

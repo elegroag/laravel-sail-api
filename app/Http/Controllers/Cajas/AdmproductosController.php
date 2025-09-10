@@ -1,0 +1,361 @@
+<?php
+
+namespace App\Http\Controllers\Cajas;
+
+use App\Http\Controllers\Adapter\ApplicationController;
+use App\Models\Adapter\DbBase;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+
+class AdmproductosController extends ApplicationController
+{
+    protected $db;
+
+    public function initialize()
+    {
+        Core::importHelper('format');
+        Core::importLibrary("Services", "Services");
+        Core::importLibrary("ParamsTrabajador", "Collections");
+        $this->setTemplateAfter('main');
+        $this->setPersistance(false);
+        $this->setParamToView("instancePath", Core::getInstancePath() . 'Cajas/');
+        if (!$this->db) {
+            $this->db = (object) DbBase::rawConnect();
+            $this->db->setFetchMode(DbBase::DB_ASSOC);
+        }
+        Services::Init();
+    }
+
+    public function listaAction()
+    {
+        $this->setParamToView("hide_header", true);
+        $this->setParamToView("title", "Productos y Servicios");
+    }
+
+    public function buscarListaAction()
+    {
+        $this->setResponse('ajax');
+        $serviciosCupos = new ServiciosCupos();
+        $todosServicios = array();
+        $collect = $serviciosCupos->find();
+        $ai = 0;
+        foreach ($collect as $servicioCupo) {
+            $todosServicios[$ai] = $servicioCupo->getArray();
+            $model = $this->db->fetchOne("SELECT count(DISTINCT cedtra) as numtra, count(DISTINCT docben) as numben
+            FROM pines_afiliado
+            WHERE codser='{$servicioCupo->getCodser()}'");
+
+            $todosServicios[$ai]['cantidad_trabajadores'] = $model['numtra'];
+            $todosServicios[$ai]['cantidad_beneficiarios'] = $model['numben'];
+            $ai++;
+        }
+
+        return $this->renderObject(
+            array(
+                "success" => true,
+                "data" => $todosServicios
+            )
+        );
+    }
+
+    public function nuevoAction()
+    {
+        $this->setParamToView("hide_header", true);
+        $this->setParamToView("title", "Productos y Servicios");
+    }
+
+    public function guardarAction($id = '')
+    {
+        try {
+            $this->setResponse('ajax');
+            $codser = $this->getPostParam('codser', "addslaches", "alpha", "extraspaces", "striptags");
+            $cupos = $this->getPostParam('cupos', "addslaches", "alpha", "extraspaces", "striptags");
+            $servicio = $this->getPostParam('servicio');
+            $estado = $this->getPostParam('estado');
+
+            if ($id == '') {
+                $serviciosCupos = new ServiciosCupos();
+                $serviciosCupos->setId(null);
+                $serviciosCupos->setCodser($codser);
+                $serviciosCupos->setCupos($cupos);
+                $serviciosCupos->setServicio($servicio);
+                $serviciosCupos->setEstado($estado);
+            } else {
+                $model = new ServiciosCupos();
+                $serviciosCupos = $model->findFirst(" id='{$id}'");
+                if ($serviciosCupos == false) {
+                    throw new DebugException("Error el servicio no es valido para continuar.", 501);
+                }
+                $serviciosCupos->setCodser($codser);
+                $serviciosCupos->setCupos($cupos);
+                $serviciosCupos->setServicio($servicio);
+                $serviciosCupos->setEstado($estado);
+            }
+
+            if (!$serviciosCupos->save()) {
+                $msj = '';
+                foreach ($serviciosCupos->getMessages() as $message)  $msj .= $message->getMessage() . "\n";
+                throw new DebugException("Error al guardar el servicio." . $msj, 501);
+            }
+
+            $salida =  array(
+                "success" => true,
+                'msj' => 'El proceso de guardado se completo con éxito.',
+                "data" => $serviciosCupos->getArray()
+            );
+        } catch (DebugException $err) {
+            $salida = array(
+                "success" => false,
+                "msj" => $err->getMessage()
+            );
+        }
+
+        return $this->renderObject($salida);
+    }
+
+    public function editarAction($id = '')
+    {
+        if ($id == '') {
+            Flash::set_flashdata("error", array(
+                "msj" => "El servicio no está disponible para editar.",
+                "code" => '505'
+            ));
+            Router::rTa("admproductos/lista");
+            exit;
+        }
+
+        $model = new ServiciosCupos();
+        $servicioCupo = $model->findFirst("id='{$id}'");
+        if ($servicioCupo == false) {
+            Flash::set_flashdata("error", array(
+                "msj" => "El servicio no está disponible para editar.",
+                "code" => '505'
+            ));
+            Router::rTa("admproductos/lista");
+            exit;
+        }
+        $this->setParamToView("servicio", $servicioCupo);
+        $this->setParamToView("hide_header", true);
+        $this->setParamToView("title", "Productos y Servicios");
+    }
+
+    public function changeEstadoAction()
+    {
+        try {
+            $this->setResponse('ajax');
+            $id = $this->getPostParam('id', "addslaches", "alpha", "extraspaces", "striptags");
+            $estado = $this->getPostParam('estado', "addslaches", "alpha", "extraspaces", "striptags");
+
+            $model = new ServiciosCupos();
+            $serviciosCupo = $model->findFirst(" id='{$id}'");
+            $serviciosCupo->setEstado($estado);
+
+            if (!$serviciosCupo->save()) {
+                $msj = '';
+                foreach ($serviciosCupo->getMessages() as $message)  $msj .= $message->getMessage() . "\n";
+                throw new DebugException("Error al guardar el servicio." . $msj, 501);
+            }
+
+            $salida =  array(
+                "success" => true,
+                'msj' => 'El registro se actualizo con éxito.',
+                "data" => $serviciosCupo->getArray()
+            );
+        } catch (DebugException $err) {
+            $salida = array(
+                "success" => false,
+                "msj" => $err->getMessage()
+            );
+        }
+        return $this->renderObject($salida);
+    }
+
+    public function aplicadosAction($codser = '')
+    {
+        if ($codser == '') {
+            Flash::set_flashdata("error", array(
+                "msj" => "El servicio no está disponible.",
+                "code" => '505'
+            ));
+            Router::rTa("admproductos/lista");
+            exit;
+        }
+        $servicioCupo = $this->ServiciosCupos->findFirst(" codser='{$codser}'");
+        $pinesAfiliado = new PinesAfiliado();
+        $collect = $pinesAfiliado->find(" codser='{$servicioCupo->getCodser()}'");
+
+        $this->setParamToView("hide_header", true);
+        $this->setParamToView("servicio", $servicioCupo);
+        $this->setParamToView("codser", $codser);
+        $this->setParamToView("aplicados", $collect);
+        $this->setParamToView("title", "Productos y Servicios");
+    }
+
+    public function buscarAfiliadosAplicadosAction($codser = '')
+    {
+        $this->setResponse('ajax');
+
+        try {
+            if ($codser == '') {
+                throw new DebugException("Error el servicio no es valido para continuar.", 501);
+            }
+
+            $pinesAfiliado = new PinesAfiliado();
+            $servicioCupo = $this->ServiciosCupos->findFirst(" codser='{$codser}'");
+
+            $collect = $pinesAfiliado->find(" codser='{$servicioCupo->getCodser()}'");
+            $ai = 0;
+            $todosAplicados = array();
+            foreach ($collect as $pinAfiliado) {
+                $todosAplicados[$ai] = $pinAfiliado->getArray();
+                $ai++;
+            }
+
+            $salida = array(
+                "success" => true,
+                "data" => $todosAplicados
+            );
+        } catch (DebugException $err) {
+            $salida = array(
+                "msj" => $err->getMessage(),
+                "success" => false,
+                "data" => false,
+            );
+        }
+        return $this->renderObject($salida);
+    }
+
+    public function cargue_pagosAction($codser = '')
+    {
+        if ($codser == '') {
+            Flash::set_flashdata("error", array(
+                "msj" => "El servicio no está disponible.",
+                "code" => '505'
+            ));
+            Router::rTa("admproductos/lista");
+            exit;
+        }
+        $servicioCupo = $this->ServiciosCupos->findFirst(" codser='{$codser}'");
+        $pinesAfiliado = new PinesAfiliado();
+        $collect = $pinesAfiliado->find(" codser='{$servicioCupo->getCodser()}'");
+
+        $this->setParamToView("hide_header", true);
+        $this->setParamToView("servicio", $servicioCupo);
+        $this->setParamToView("codser", $codser);
+        $this->setParamToView("aplicados", $collect);
+        $this->setParamToView("title", "Productos y Servicios");
+    }
+
+    public function detalleAplicadoAction($id)
+    {
+        $this->setResponse('ajax');
+        try {
+            if ($id == '') {
+                throw new DebugException("Error el servicio no es valido para continuar.", 501);
+            }
+
+            $model = new PinesAfiliado();
+            $pineAfiliado = $model->findfirst(" id='{$id}'");
+            $pinAfiliado = $pineAfiliado->getArray();
+            $pinAfiliado['beneficiario'] = false;
+            $pinAfiliado['trabajador'] = false;
+            $pinAfiliado['estado_detalle'] = $model->getEstadoDetalle();
+
+            $procesadorComando = Comman::Api();
+            $procesadorComando->runCli(
+                array(
+                    "servicio" => "ComfacaAfilia",
+                    "metodo"  => "parametros_trabajadores",
+                    "params"  => true
+                )
+            );
+
+            if ($procesadorComando->isJson()) {
+                $datos_captura = $procesadorComando->toArray();
+                $paramsTrabajador = new ParamsTrabajador();
+                $paramsTrabajador->setDatosCaptura($datos_captura);
+            }
+
+            $procesadorComando = Comman::Api();
+            $procesadorComando->runCli(
+                array(
+                    "servicio" => "ComfacaAfilia",
+                    "metodo" => "trabajador",
+                    "params" => array(
+                        "cedtra" => $pineAfiliado->getCedtra()
+                    )
+                )
+            );
+
+            if ($procesadorComando->isJson()) {
+                $out = $procesadorComando->toArray();
+                if ($out['success']) {
+                    $pinAfiliado['trabajador'] = $out['data'];
+                    $zonas = ParamsTrabajador::getZonas();
+                    $pinAfiliado['trabajador']['zona_detalle'] =  $zonas[$pinAfiliado['trabajador']['codzon']];
+                }
+            }
+
+            $procesadorComando = Comman::Api();
+            $procesadorComando->runCli(
+                array(
+                    "servicio" => "ComfacaEmpresas",
+                    "metodo" => "informacion_beneficiario",
+                    "params" =>  $pineAfiliado->getDocben()
+                )
+            );
+
+            if ($procesadorComando->isJson()) {
+                $out = $procesadorComando->toArray();
+                if ($out['success']) {
+                    $pinAfiliado['beneficiario'] = $out['data'];
+                }
+            }
+
+            $salida = array(
+                "success" => true,
+                "data" => $pinAfiliado
+            );
+        } catch (DebugException $err) {
+            $salida = array(
+                "msj" => $err->getMessage(),
+                "success" => false,
+                "data" => false,
+            );
+        }
+        return $this->renderObject($salida);
+    }
+
+    public function rechazarAction($id = '')
+    {
+        $this->setResponse('ajax');
+        try {
+            if ($id == '') {
+                throw new DebugException("Error el servicio no es valido para continuar.", 501);
+            }
+
+            $model = new PinesAfiliado();
+            $pineAfiliado = $model->findfirst(" id='{$id}'");
+            $pineAfiliado->setEstado('R');
+            $pineAfiliado->save();
+
+            $servicioCupo = new ServiciosCupos();
+            $servicioCupo->findFirst("codser='{$pineAfiliado->getCodser()}'");
+            $servicioCupo->setCupos($servicioCupo->getCupos() + 1);
+            $servicioCupo->save();
+
+            $salida = array(
+                "success" => true,
+                "msj" => 'El registro se rechazo con éxito',
+                "data" => $pineAfiliado->getArray()
+            );
+        } catch (DebugException $err) {
+            $salida = array(
+                "msj" => $err->getMessage(),
+                "success" => false,
+                "data" => false,
+            );
+        }
+        return $this->renderObject($salida);
+    }
+}

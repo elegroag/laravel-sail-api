@@ -1,0 +1,389 @@
+<?php
+
+namespace App\Http\Controllers\Cajas;
+
+use App\Http\Controllers\Adapter\ApplicationController;
+use App\Models\Adapter\DbBase;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+
+class PrincipalController extends ApplicationController
+{
+
+    public function initialize()
+    {
+        Core::importLibrary("Services", "Services");
+        $this->setTemplateAfter('main');
+        $this->setParamToView("instancePath", Core::getInstancePath() . 'Cajas/');
+        Services::Init();
+    }
+
+    public function beforeFilter($permisos = array())
+    {
+        parent::beforeFilter($permisos);
+        if (!Auth::getActiveIdentity()) {
+            Flash::set_flashdata("error", array(
+                "message" => "No dispone de acceso a la ruta indicada principal.",
+                "code" => 404
+            ));
+            if (is_ajax()) {
+                Router::rTa('login/error_access_rest');
+            } else {
+                Router::rTa('login/error_access');
+            }
+            exit;
+        }
+    }
+
+    public function indexAction($permiso_menu = 1)
+    {
+        $this->setParamToView("hide_header", true);
+        $this->setParamToView("title", "Inicio");
+        $user = parent::getActUser("usuario");
+        $servicios = array(
+            'afiliacion' => array(
+                array(
+                    'name' => 'Afiliación Empresas',
+                    'cantidad' => array(
+                        'pendientes' => (new Mercurio30)->count("*", "conditions: estado='P' and usuario = '" . $user . "'"),
+                        'aprobados' => (new Mercurio30)->count("*", "conditions: estado='A' and usuario = '" . $user . "'"),
+                        'rechazados' => (new Mercurio30)->count("*", "conditions: estado='R' and usuario = '" . $user . "'"),
+                        'devueltos' => (new Mercurio30)->count("*", "conditions: estado='D' and usuario = '" . $user . "'"),
+                        'temporales' => (new Mercurio30)->count("*", "conditions: estado='T'")
+                    ),
+                    'icon' => 'E',
+                    'url' => 'aprobacionemp/index',
+                    'imagen' => Core::getInstancePath() . 'img/Mercurio/empresas.jpg',
+                ),
+                array(
+                    'name' => 'Afiliación Independientes',
+                    'cantidad' => array(
+                        'pendientes' => (new Mercurio41)->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
+                        'aprobados' => (new Mercurio41)->count("id.*", "conditions: estado='A' and usuario = '" . $user . "'"),
+                        'rechazados' => (new Mercurio41)->count("id.*", "conditions: estado='R' and usuario = '" . $user . "'"),
+                        'devueltos' => (new Mercurio41)->count("id.*", "conditions: estado='D' and usuario = '" . $user . "'"),
+                        'temporales' => (new Mercurio41)->count("id.*", "conditions: estado='T'"),
+                    ),
+                    'icon' => 'I',
+                    'url' => 'aprobaindepen/index',
+                    'imagen' => Core::getInstancePath() . 'img/Mercurio/independiente.jpg',
+                ),
+                array(
+                    'name' => 'Afiliación Pensionados',
+                    'cantidad' => array(
+                        'pendientes' => (new Mercurio38)->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
+                        'aprobados' => (new Mercurio38)->count("id.*", "conditions: estado='A' and usuario = '" . $user . "'"),
+                        'rechazados' => (new Mercurio38)->count("id.*", "conditions: estado='R' and usuario = '" . $user . "'"),
+                        'devueltos' => (new Mercurio38)->count("id.*", "conditions: estado='D' and usuario = '" . $user . "'"),
+                        'temporales' => (new Mercurio38)->count("id.*", "conditions: estado='T'"),
+                    ),
+                    'icon' => 'P',
+                    'url' => 'aprobacionpen/index',
+                    'imagen' => Core::getInstancePath() . 'img/Mercurio/pensionado.jpg',
+                ),
+                array(
+                    'name' => 'Afiliación Trabajadores',
+                    'cantidad' => array(
+                        'pendientes' => (new Mercurio31)->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
+                        'aprobados' => (new Mercurio31)->count("id.*", "conditions: estado='A' and usuario = '" . $user . "'"),
+                        'rechazados' => (new Mercurio31)->count("id.*", "conditions: estado='R' and usuario = '" . $user . "'"),
+                        'devueltos' => (new Mercurio31)->count("id.*", "conditions: estado='D' and usuario = '" . $user . "'"),
+                        'temporales' => (new Mercurio31)->count("id.*", "conditions: estado='T'"),
+                    ),
+                    'icon' => 'T',
+                    'url' => 'aprobaciontra/index',
+                    'imagen' => Core::getInstancePath() . 'img/Mercurio/trabajadores.jpg',
+                ),
+                array(
+                    'name' => 'Afiliación Conyuges',
+                    'cantidad' => array(
+                        'pendientes' => (new Mercurio32)->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
+                        'aprobados' => (new Mercurio32)->count("id.*", "conditions: estado='A' and usuario = '" . $user . "'"),
+                        'rechazados' => (new Mercurio32)->count("id.*", "conditions: estado='R' and usuario = '" . $user . "'"),
+                        'devueltos' => (new Mercurio32)->count("id.*", "conditions: estado='D' and usuario = '" . $user . "'"),
+                        'temporales' => (new Mercurio32)->count("id.*", "conditions: estado='T'"),
+                    ),
+                    'icon' => 'C',
+                    'url' => 'aprobacioncon/index',
+                    'imagen' => Core::getInstancePath() . 'img/Mercurio/conyuges.jpg',
+                ),
+                array(
+                    'name' => 'Afiliación Beneficiarios',
+                    'cantidad' => array(
+                        'pendientes' => (new Mercurio34)->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
+                        'aprobados' => (new Mercurio34)->count("id.*", "conditions: estado='A' and usuario = '" . $user . "'"),
+                        'rechazados' => (new Mercurio34)->count("id.*", "conditions: estado='R' and usuario = '" . $user . "'"),
+                        'devueltos' => (new Mercurio34)->count("id.*", "conditions: estado='D' and usuario = '" . $user . "'"),
+                        'temporales' => (new Mercurio34)->count("id.*", "conditions: estado='T'"),
+                    ),
+                    'icon' => 'B',
+                    'url' => 'aprobacionben/index',
+                    'imagen' => Core::getInstancePath() . 'img/Mercurio/beneficiarios.jpg',
+                ),
+                array(
+                    'name' => 'Actualización datos Empresas',
+                    'cantidad' => array(
+                        'pendientes' => (new Mercurio33)->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
+                        'aprobados' => (new Mercurio33)->count("id.*", "conditions: estado='A' and usuario = '" . $user . "'"),
+                        'rechazados' => (new Mercurio33)->count("id.*", "conditions: estado='R' and usuario = '" . $user . "'"),
+                        'devueltos' => (new Mercurio33)->count("id.*", "conditions: estado='D' and usuario = '" . $user . "'"),
+                        'temporales' => (new Mercurio33)->count("id.*", "conditions: estado='T'"),
+                    ),
+                    'icon' => 'AE',
+                    'url' => 'actualizardatos/index',
+                    'imagen' => Core::getInstancePath() . 'img/Mercurio/empresas.jpg',
+                ),
+                array(
+                    'name' => 'Actualización datos Trabajador',
+                    'cantidad' => array(
+                        'pendientes' => (new Mercurio47)->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
+                        'aprobados' => (new Mercurio47)->count("id.*", "conditions: estado='A' and usuario = '" . $user . "'"),
+                        'rechazados' => (new Mercurio47)->count("id.*", "conditions: estado='R' and usuario = '" . $user . "'"),
+                        'devueltos' => (new Mercurio47)->count("id.*", "conditions: estado='D' and usuario = '" . $user . "'"),
+                        'temporales' => (new Mercurio47)->count("id.*", "conditions: estado='T'"),
+                    ),
+                    'icon' => 'AT',
+                    'url' => 'aprobaciondatos/index',
+                    'imagen' => Core::getInstancePath() . 'img/Mercurio/datos_basicos.jpg',
+                )
+            ),
+            'productos' => array(
+                array(
+                    'name' => 'Lista Productos',
+                    'cantidad' => 0,
+                    'icon' => 'L',
+                    'url' => 'admproductos/lista',
+                    'imagen' => Core::getInstancePath() . 'img/Mercurio/registro_empresa.jpg',
+                ),
+                array(
+                    'name' => 'Complemento nutricional',
+                    'cantidad' => 0,
+                    'icon' => 'N',
+                    'url' => 'admproductos/aplicados/27',
+                    'imagen' => Core::getInstancePath() . 'img/Mercurio/complemento.jpg',
+                )
+            )
+        );
+
+        $this->setParamToView("servicios", $servicios);
+        Tag::displayTo("permiso_menu", $permiso_menu);
+    }
+
+    public function dashboardAction()
+    {
+        $this->setParamToView("hide_header", true);
+        $this->setParamToView("title", "Estadística");
+    }
+
+    public function traerUsuariosRegistradosAction()
+    {
+        $this->setResponse("ajax");
+        $data = array();
+        $labels = array();
+        $params['nit'] = parent::getActUser("documento");
+        $mercurio07 = $this->Mercurio07->findAllBySql("select tipo,count(*) as documento from mercurio07 group by 1");
+        foreach ($mercurio07 as $mmercurio07) {
+            $mercurio06 = $this->Mercurio06->findFirst("tipo='{$mmercurio07->getTipo()}'");
+            $data[] = $mmercurio07->getDocumento();
+            $labels[] = $mercurio06->getDetalle();
+        }
+        $response['data'] = $data;
+        $response['labels'] = $labels;
+
+        return $this->renderObject($response, false);
+    }
+
+    public function traerOpcionMasUsuadaAction()
+    {
+        $this->setResponse("ajax");
+        $data = array();
+        $params['nit'] = parent::getActUser("documento");
+        $mercurio20 = $this->Mercurio20->findAllBySql("select accion,count(*) as log from mercurio20 group by 1");
+        foreach ($mercurio20 as $mmercurio20) {
+            $data[] = $mmercurio20->getLog();
+            $labels[] = $mmercurio20->getAccion();
+        }
+        $response['data'] = $data;
+        $response['labels'] = $labels;
+        return $this->renderObject($response, false);
+    }
+
+    public function traerMotivoMasUsuadaAction()
+    {
+        $this->setResponse("ajax");
+        $labels = array();
+        $data = array();
+        $params['nit'] = parent::getActUser("documento");
+        $mercurio10 = $this->Mercurio10->findAllBySql("select codest,count(*) as numero from mercurio10 WHERE codest is not null group by 1");
+        foreach ($mercurio10 as $mmercurio10) {
+            $mercurio11 = $this->Mercurio11->findFirst("codest='{$mmercurio10->getCodest()}'");
+            $data[] = $mmercurio10->getNumero();
+            $labels[] = $mercurio11->getDetalle();
+        }
+        $response['data'] = $data;
+        $response['labels'] = $labels;
+        return $this->renderObject($response, false);
+    }
+
+    public function traerCargaLaboralAction()
+    {
+        $this->setResponse("ajax");
+        try {
+            $data = array();
+            $params['nit'] = parent::getActUser("documento");
+            $gener02 = $this->Gener02->findAllBySql(
+                "SELECT distinct gener02.usuario, gener02.nombre, gener02.login
+            FROM gener02,mercurio08
+            WHERE gener02.usuario = mercurio08.usuario"
+            );
+
+            foreach ($gener02 as $mgener02) {
+                $count = 0;
+                $mercurio09 = $this->Mercurio09->find();
+                foreach ($mercurio09 as $mmercurio09) {
+                    $condi = "estado='P'";
+
+                    $generalService = new GeneralService();
+                    $result = $generalService->consultaTipopc($mmercurio09->getTipopc(), 'count', "", $mgener02->getUsuario(), $condi);
+                    $count += $result['count'];
+                }
+                $data[] = $count;
+                $labels[] = $mgener02->getNombre();
+            }
+
+            $response = array(
+                'data' => $data,
+                'labels' => $labels,
+                'success' => true
+            );
+        } catch (Exception $err) {
+            $response = array(
+                'success' => false,
+                'msj' => $err->getMessage()
+            );
+        }
+        return $this->renderObject($response, false);
+    }
+
+    public function prueba_tokenAction($tabla)
+    {
+        $sat01 = $this->Sat01->findFirst();
+        $sat29 = $this->Sat29->findfirst("referencia = '$tabla'");
+        $nit = trim($sat01->getNit());
+        $pass = trim($sat01->getPassword());
+        $grant_type = trim($sat01->getGrantType());
+        $client_id = trim($sat29->getClientId());
+        $path = trim($sat01->getPath());
+
+        $satConsultaServices  = new SatConsultaServices();
+        $token = $satConsultaServices->tokenSat($path, $nit, $pass, $grant_type, $client_id);
+        Debug::addVariable("a", $token);
+        throw new DebugException(0);
+    }
+
+    public function prueba_sat02Action()
+    {
+        $data = array(
+            "NumeroRadicadoSolicitud" => "CCFN012345678",
+            "NumeroTransaccion" => "0",
+            "TipoPersona" => "J",
+            "NaturalezaJuridicaEmpleador" => "",
+            "TipoDocumentoEmpleador" => "NI",
+            "NumeroDocumentoEmpleador" => "800000370",
+            "SerialSAT" => "0",
+            "PrimerNombreEmpleador" => "",
+            "SegundoNombreEmpleador" => "",
+            "PrimerApellidoEmpleador" => "",
+            "SegundoApellidoEmpleador" => "",
+            "FechaSolicitud" => "2021-07-15",
+            "PerdidaAfiliacionCausaGrave" => "",
+            "FechaEfectivaAfiliacion" => "2021-07-15",
+            "RazonSocial" => "ESCANOGRAFIA S.A.",
+            "NumeroMatriculaMercantil" => "",
+            "Departamento" => "52",
+            "Municipio" => "001",
+            "DireccionContacto" => "KR 30A 15 53 PS 2",
+            "NumeroTelefono" => "3002820525",
+            "CorreoElectronico" => "andresferla27@gmail.com",
+            "TipoDocumentoRepresentante" => "CC",
+            "NumeroDocumentoRepresentante" => "76228782",
+            "PrimerNombreRepresentante" => "ABDU",
+            "SegundoNombreRepresentante" => "",
+            "PrimerApellidoRepresentante" => "ABURTO",
+            "SegundoApellidoRepresentante" => "",
+            "AutorizacionManejoDatos" => "SI",
+            "AutorizacionNotificaciones" => "SI",
+            "Manifestacion" => "SI"
+        );
+        $satConsultaServices = new SatConsultaServices();
+        $respuesta = $satConsultaServices->sendWebServiceSat("sat02", $data);
+        return $respuesta;
+    }
+
+    public function pruebaWsSatAction($tabla, $radicado)
+    {
+        // $wscajas = new WebcajasController();
+        // $response = $wscajas->envioWSSatAction($tabla, $radicado, 'S');
+        // Debug::AddVariable("response", $response);
+        // throw new DebugException("Error Processing Request");
+    }
+
+    public function download_globalAction($filepath = "")
+    {
+        $archivo = base64_decode($filepath);
+        if (preg_match('/(public)(\/)(temp)/i', $archivo) == false) {
+            $fichero = "public/temp/{$archivo}";
+        } else {
+            $fichero = $archivo;
+            $archivo = basename($archivo);
+        }
+        $ext = substr(strrchr($archivo, "."), 1);
+        if (file_exists($fichero)) {
+            header('Content-Description: File Transfer');
+            header("Content-Type: application/{$ext}");
+            header("Content-Disposition: attachment; filename={$archivo}");
+            header('Cache-Control: must-revalidate');
+            header('Expires: 0');
+            header('Pragma: public');
+            header('Content-Length: ' . filesize($fichero));
+            ob_clean();
+            readfile($fichero);
+            exit();
+        } else {
+            exit();
+        }
+    }
+
+    public function file_existe_globalAction()
+    {
+        $this->setResponse("ajax");
+        $filepath = $this->getPostParam('filepath');
+        $archivo = base64_decode($filepath);
+        if (preg_match('/(public)(\/)(temp)/i', $archivo) == false) {
+            $fichero = "public/temp/{$archivo}";
+        } else {
+            $fichero = $archivo;
+            $archivo = basename($archivo);
+        }
+        $ext = substr(strrchr($archivo, "."), 1);
+        if (file_exists($fichero)) {
+            echo "{\"success\":true}";
+        } else {
+            echo "{\"success\":false}";
+        }
+    }
+
+    public function pruebaAction()
+    {
+        $this->setResponse("view");
+        $id = 1;
+        $params = array(
+            'servicio' => 'SaldoTarjeta',
+            'metodo' => 'numtarSaldos',
+            'params' => $id
+        );
+        $procesadorComandos = Comman::Api();
+        $procesadorComandos->runCli($params);
+        $this->renderObject($procesadorComandos->toArray());
+    }
+}

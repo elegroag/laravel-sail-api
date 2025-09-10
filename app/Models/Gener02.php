@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
+use Illuminate\Support\Facades\DB;
 
 class Gener02 extends ModelBase
 {
@@ -107,5 +108,32 @@ class Gener02 extends ModelBase
     public function getLogin()
     {
         return $this->login;
+    }
+
+    public function getTipfunLista()
+    {
+        // Obtiene lista de tipos de funcionario desde tabla gener21
+        $rows = DB::table('gener21')->select('tipfun', 'detalle')->get();
+        $data = [];
+        foreach ($rows as $row) {
+            $data[$row->tipfun] = $row->detalle;
+        }
+        return $data;
+    }
+
+    public function getTipfunDetalle($tipfun = '')
+    {
+        if ($tipfun !== '') {
+            $this->tipfun = $tipfun;
+        }
+        $row = DB::table('gener21')
+            ->select('detalle')
+            ->where('tipfun', $this->tipfun)
+            ->first();
+
+        if (!$row) {
+            return false;
+        }
+        return $row->detalle;
     }
 }
