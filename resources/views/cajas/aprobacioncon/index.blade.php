@@ -1,46 +1,57 @@
+@php
+    use App\Http\Helpers\Tag;
+@endphp
 
+@extends('layouts.cajas')
+
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.css') }}" />
+@endpush
+
+@push('scripts')
 <script id='tmp_filtro' type="text/template">
-	<?= TagUser::filtro($campo_filtro, 'aplicar_filtro') ?>
+    @php echo Tag::filtro($campo_filtro, 'aplicar_filtro') @endphp
 </script>
 
 <script id='tmp_list_header' type="text/template">
-	<?= View::renderView("templates/tmp_list_header"); ?>
+    @include('cajas/templates/tmp_list_header')
 </script>
 
 <script type="text/template" id='tmp_layout'>
-	<?= View::renderView("templates/tmp_layout"); ?>
+    @include('cajas/templates/tmp_layout')
 </script>
 
 <script type="text/template" id='tmp_header'>
-	<?= View::renderView("templates/tmp_header"); ?>
+    @include('cajas/templates/tmp_header')
 </script>
 
 <script type="text/template" id='tmp_rechazar'>
-	<?= View::renderView("templates/tmp_rechazar"); ?>
+    @include('cajas/templates/tmp_rechazar')
 </script>
 
 <script type="text/template" id='tmp_devolver'>
-	<?= View::renderView("templates/tmp_devolver"); ?>
+    @include('cajas/templates/tmp_devolver')
 </script>
 
 <script type="text/template" id='tmp_deshacer'>
-	<?= View::renderView("templates/tmp_deshacer"); ?>
+    @include('cajas/templates/tmp_deshacer')
 </script>
 
 <script type="text/template" id="tmp_reaprobar">
-	<?= View::renderView("templates/tmp_reaprobar"); ?>
+    @include('cajas/templates/tmp_reaprobar')
 </script>
 
 <script type="text/template" id='tmp_info'>
-	<?= View::renderView("templates/tmp_information"); ?>
+    @include('cajas/templates/tmp_information')
 </script>
 
 <script type="text/template" id='tmp_aprobar'>
-	<?= View::renderView("aprobacioncon/tmp/tmp_aprobar"); ?>
+    @include('cajas/aprobacioncon/tmp/tmp_aprobar')
 </script>
 
 <script id='tmp_info_header' type="text/template">
-	<?= View::renderView("templates/tmp_info_header"); ?>
+    @include('cajas/templates/tmp_info_header')
 </script>
 
 <script id='tmp_conyuge' type='text/template'>
@@ -57,5 +68,9 @@
 	<div id='filtro'></div>
 </script>
 
+<script src="{{ asset('Cajas/build/Conyuges.js') }}"></script>
+@endpush
+
+@section('content')
 <div id='boneLayout'></div>
-<?= Tag::javascriptInclude('Cajas/conyuges/build.conyuges'); ?>
+@endsection

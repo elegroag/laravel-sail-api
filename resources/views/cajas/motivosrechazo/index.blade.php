@@ -2,8 +2,8 @@
 echo View::getContent();
 echo Tag::addJavascript('Cajas/global');
 echo Tag::addJavascript('Cajas/motivorechazo');
-echo TagUser::help($title, $help);
-echo TagUser::filtro($campo_filtro);
+echo Tag::help($title, $help);
+echo Tag::filtro($campo_filtro);
 ?>
 
 <div id='consulta' class='table-responsive'></div>

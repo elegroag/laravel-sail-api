@@ -1,4 +1,6 @@
-<?php $id = $mercurio30->getId(); ?>
+@php
+$id = $mercurio30->getId();
+@endphp
 
 <script id='tmp_card_header' type="text/template">
     <div id="botones" class='row justify-content-end'>
@@ -6,14 +8,14 @@
             <a href="<%=url%>" class='btn btn-sm btn-success'><i class=''></i> Empresa Sisuweb</a>&nbsp;
         <% } %>
         <a href="#" data-href="aprobacionemp/editar_ficha/<?= $id ?>" class='btn btn-sm btn-warning' id='editar_ficha'><i class=''></i> Editar Ficha Empleador</a>&nbsp;
-        <a href="#" data-href="aprobacionemp/index" class='btn btn-sm btn-primary' id='cancelar_volver'><i class='fas fa-hand-point-up text-white'></i> Salir</a>&nbsp;   
+        <a href="#" data-href="aprobacionemp/index" class='btn btn-sm btn-primary' id='cancelar_volver'><i class='fas fa-hand-point-up text-white'></i> Salir</a>&nbsp;
     </div>
 </script>
 
 <div class='card-header pt-2 pb-2' id='afiliacion_header'></div>
 
 <div class='card-body'>
-    <?= $consulta_empresa; ?>
+    @php echo $consulta_empresa; @endphp
     <hr class='my-3'>
     <h6 class='heading-small text-muted mb-2'>Acciones </h6>
     <div class='row'>
@@ -46,25 +48,25 @@
                                         <div class='col-md-2'>
                                             <div class='form-group'>
                                                 <label for='tipdur' class='form-control-label'>Duración</label>
-                                                <?= Tag::selectStatic("tipdur", $_tipdur, "use_dummy: true", "dummyValue: ", "class: form-control"); ?>
+                                                @php echo Tag::selectStatic("tipdur", $_tipdur, "use_dummy: true", "dummyValue: ", "class: form-control"); @endphp
                                             </div>
                                         </div>
                                         <div class='col-md-4'>
                                             <div class='form-group'>
                                                 <label for='codind' class='form-control-label'>Indice</label>
-                                                <?= Tag::selectStatic("codind", $_codind, "use_dummy: true", "dummyValue: ", "class: form-control"); ?>
+                                                @php echo Tag::selectStatic("codind", $_codind, "use_dummy: true", "dummyValue: ", "class: form-control"); @endphp
                                             </div>
                                         </div>
                                         <div class='col-md-2'>
                                             <div class='form-group'>
                                                 <label for='todmes' class='form-control-label'>Paga mes</label>
-                                                <?= Tag::selectStatic("todmes", $_todmes, "use_dummy: true", "dummyValue: ", "class: form-control"); ?>
+                                                @php echo Tag::selectStatic("todmes", $_todmes, "use_dummy: true", "dummyValue: ", "class: form-control"); @endphp
                                             </div>
                                         </div>
                                         <div class='col-md-4'>
                                             <div class='form-group'>
                                                 <label for='forpre' class='form-control-label'>Forma presentación</label>
-                                                <?= Tag::selectStatic("forpre", $_forpre, "use_dummy: true", "dummyValue: ", "class: form-control"); ?>
+                                                @php echo Tag::selectStatic("forpre", $_forpre, "use_dummy: true", "dummyValue: ", "class: form-control"); @endphp
                                             </div>
                                         </div>
                                     </div>
@@ -72,25 +74,25 @@
                                         <div class='col-md-2'>
                                             <div class='form-group'>
                                                 <label for='pymes' class='form-control-label'>Pyme</label>
-                                                <?= Tag::selectStatic("pymes", $_pymes, "use_dummy: true", "dummyValue: ", "class: form-control"); ?>
+                                                @php echo Tag::selectStatic("pymes", $_pymes, "use_dummy: true", "dummyValue: ", "class: form-control"); @endphp
                                             </div>
                                         </div>
                                         <div class='col-md-3'>
                                             <div class='form-group'>
                                                 <label for='contratista' class='form-control-label'>Contratista</label>
-                                                <?= Tag::selectStatic("contratista", $_contratista, "use_dummy: true", "dummyValue: ", "class: form-control"); ?>
+                                                @php echo Tag::selectStatic("contratista", $_contratista, "use_dummy: true", "dummyValue: ", "class: form-control"); @endphp
                                             </div>
                                         </div>
                                         <div class='col-md-3'>
                                             <div class='form-group'>
                                                 <label for='tipemp' class='form-control-label'>Tipo Empresa</label>
-                                                <?= Tag::selectStatic("tipemp", $_tipemp, "use_dummy: true", "dummyValue: ", "class: form-control"); ?>
+                                                @php echo Tag::selectStatic("tipemp", $_tipemp, "use_dummy: true", "dummyValue: ", "class: form-control"); @endphp
                                             </div>
                                         </div>
                                         <div class='col-md-4'>
                                             <div class='form-group'>
                                                 <label for='tipapo' class='form-control-label'>Tipo Aportante </label>
-                                                <?= Tag::selectStatic("tipapo", $_tipapo, "use_dummy: true", "dummyValue: ", "class: form-control"); ?>
+                                                @php echo Tag::selectStatic("tipapo", $_tipapo, "use_dummy: true", "dummyValue: ", "class: form-control"); @endphp
                                             </div>
                                         </div>
                                     </div>
@@ -98,25 +100,25 @@
                                         <div class='col-md-3'>
                                             <div class='form-group'>
                                                 <label for='tipsoc' class='form-control-label'>Tipo Sociedad</label>
-                                                <?= Tag::selectStatic("tipsoc", $_tipsoc, "use_dummy: true", "dummyValue: ", "class: form-control"); ?>
+                                                @php echo Tag::selectStatic("tipsoc", $_tipsoc, "use_dummy: true", "dummyValue: ", "class: form-control"); @endphp
                                             </div>
                                         </div>
                                         <div class='col-md-4'>
                                             <div class='form-group'>
                                                 <label for='ofiafi' class='form-control-label'>Oficina</label>
-                                                <?= Tag::selectStatic("ofiafi", $_ofiafi, "use_dummy: true", "dummyValue: ", "class: form-control"); ?>
+                                                @php echo Tag::selectStatic("ofiafi", $_ofiafi, "use_dummy: true", "dummyValue: ", "class: form-control"); @endphp
                                             </div>
                                         </div>
                                         <div class='col-md-2'>
                                             <div class='form-group'>
                                                 <label for='colegio' class='form-control-label'>Colegio</label>
-                                                <?= Tag::selectStatic("colegio", $_colegio, "use_dummy: true", "dummyValue: ", "class: form-control"); ?>
+                                                @php echo Tag::selectStatic("colegio", $_colegio, "use_dummy: true", "dummyValue: ", "class: form-control"); @endphp
                                             </div>
                                         </div>
                                         <div class='col-md-3'>
                                             <div class='form-group'>
                                                 <label for='tipdoc' class='form-control-label'>Fecha Afiliación</label>
-                                                <?= TagUser::calendar("fecafi", "class: form-control"); ?>
+                                                @php echo Tag::calendar("fecafi", "class: form-control"); @endphp
                                             </div>
                                         </div>
                                     </div>
@@ -124,25 +126,25 @@
                                         <div class='col-md-3'>
                                             <div class='form-group'>
                                                 <label for='subpla' class='form-control-label'>Sucursal planilla</label>
-                                                <?= Tag::textField("subpla", "class: form-control"); ?>
+                                                @php echo Tag::textField("subpla", "class: form-control"); @endphp
                                             </div>
                                         </div>
                                         <div class='col-md-3'>
                                             <div class='form-group'>
                                                 <label for='actapr' class='form-control-label'>Acta Aprobación</label>
-                                                <?= Tag::textField("actapr", "class: form-control"); ?>
+                                                @php echo Tag::textField("actapr", "class: form-control"); @endphp
                                             </div>
                                         </div>
                                         <div class='col-md-3'>
                                             <div class='form-group'>
                                                 <label for='diahab' class='form-control-label'>Día habil de Pago </label>
-                                                <?= Tag::textField("diahab", "class: form-control"); ?>
+                                                @php echo Tag::textField("diahab", "class: form-control"); @endphp
                                             </div>
                                         </div>
                                         <div class='col-md-3'>
                                             <div class='form-group'>
                                                 <label for='feccap' class='form-control-label'>Fecha Resolución</label>
-                                                <?= TagUser::calendar("feccap", "class: form-control"); ?>
+                                                @php echo Tag::calendar("feccap", "class: form-control"); @endphp
                                             </div>
                                         </div>
                                     </div>
@@ -173,14 +175,17 @@
                                 <div class="col-md-12">
                                     <div class='form-group'>
                                         <label class='label'> Motivo:</label>
-                                        <?= Tag::select("codest_devolver", $mercurio11, "using: codest,detalle", "use_dummy: true", "dummyValue: ", "class: form-control"); ?>
+                                        @php echo Tag::selectStatic("codest_devolver", $mercurio11, "use_dummy: true", "dummyValue: ", "class: form-control"); @endphp
                                     </div>
                                     <div class='form-group'>
                                         <label class='label'> Campos para corregir:</label>
                                         <select class="js-basic-multiple" name="campos_corregir[]" id='campos_corregir' multiple="multiple">
-                                            <? foreach ($mercurio30->CamposDisponibles() as $kei => $campos) { ?>
-                                                <option value="<?= $kei ?>"><?= $campos ?></option>
-                                            <? } ?>
+                                            @foreach ($mercurio30->CamposDisponibles() as $kei => $campos) {
+                                                @php
+                                                echo Tag::selectStatic("campos_corregir", $campos, "use_dummy: true", "dummyValue: ", "class: form-control");
+                                                @endphp
+                                            }
+                                            @endforeach
                                         </select>
                                     </div>
                                 </div>

@@ -1,13 +1,17 @@
-<?php echo Tag::form("", "id: form_opcion", "class: validation_form", "autocomplete: off", "novalidate"); ?>
+@php
+use App\Services\Tag;
+@endphp
+
+@php echo Tag::form("", "id: form_opcion", "class: validation_form", "autocomplete: off", "novalidate"); @endphp
 <div class="d-flex p-2">
     <div class="col-sm-6 col-md-3">
         <div class="form-group">
-            <?php echo Tag::select("tipopc_08", $mercurio09, "using: tipopc,detalle", "use_dummy: true", "dummyValue: ", "class: form-control"); ?>
+            @php echo Tag::select("tipopc_08", $mercurio09, "using: tipopc,detalle", "use_dummy: true", "dummyValue: ", "class: form-control"); @endphp
         </div>
     </div>
     <div class="col-sm-6 col-md-3">
         <div class="form-group">
-            <?php echo Tag::select("usuario_08", $gener02, "using: usuario,nombre", "use_dummy: true", "dummyValue: ", "class: form-control"); ?>
+            @php echo Tag::select("usuario_08", $gener02, "using: usuario,nombre", "use_dummy: true", "dummyValue: ", "class: form-control"); @endphp
         </div>
     </div>
     <div class="form-group">
@@ -26,4 +30,4 @@
         <tbody id="result_opcion"></tbody>
     </table>
 </div>
-<?php echo Tag::endform(); ?>
+@php echo Tag::endform(); @endphp

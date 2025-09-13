@@ -1,58 +1,65 @@
+@extends('layouts.cajas')
 
-<script id='tmp_filtro' type="text/template">
-    <?= TagUser::filtro($campo_filtro, 'aplicar_filtro') ?>
-</script>
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.css') }}" />
+@endpush
 
+@push('scripts')
 <script id='tmp_list_header' type="text/template">
-    <?= View::renderView("templates/tmp_list_header"); ?>
+    @include('cajas/templates/tmp_list_header')
 </script>
 
 <script type="text/template" id='tmp_layout'>
-    <?= View::renderView("templates/tmp_layout"); ?>
+    @include('cajas/templates/tmp_layout')
 </script>
 
 <script type="text/template" id='tmp_header'>
-    <?= View::renderView("templates/tmp_header"); ?>
+    @include('cajas/templates/tmp_header')
 </script>
 
 <script type="text/template" id='tmp_rechazar'>
-    <?= View::renderView("templates/tmp_rechazar"); ?>
+    @include('cajas/templates/tmp_rechazar')
 </script>
 
 <script type="text/template" id='tmp_devolver'>
-    <?= View::renderView("templates/tmp_devolver"); ?>
+    @include('cajas/templates/tmp_devolver')
 </script>
 
 <script type="text/template" id='tmp_info'>
-    <?= View::renderView("templates/tmp_information"); ?>
-</script>
-
-<script type="text/template" id='tmp_aprobar'>
-    <?= View::renderView("aprobacionemp/tmp/tmp_aprobar"); ?>
-</script>
-
-<script id='tmp_aportes' type='text/template'>
-    <?= View::renderView("templates/tmp_aportes"); ?>
-</script>
-
-<script type="text/template" id="tmp_reaprobar">
-    <?= View::renderView("templates/tmp_reaprobar"); ?>
-</script>
-
-<script id='tmp_info_header' type="text/template">
-	<?= View::renderView("templates/tmp_info_header"); ?>
-</script>
-
-<script id='tmp_sisu' type='text/template'>
-    <?= View::renderView("aprobacionemp/tmp/tmp_sisu"); ?>
-</script>
-
-<script id='tmp_editar' type='text/template'>
-    <?= View::renderView("aprobacionemp/tmp/tmp_editar"); ?>
+    @include('cajas/templates/tmp_information')
 </script>
 
 <script type="text/template" id='tmp_deshacer'>
-    <?= View::renderView("templates/tmp_deshacer"); ?>
+    @include('cajas/templates/tmp_deshacer')
+</script>
+
+<script id='tmp_aportes' type='text/template'>
+    @include('cajas/templates/tmp_aportes')
+</script>
+
+<script type="text/template" id="tmp_reaprobar">
+    @include('cajas/templates/tmp_reaprobar')
+</script>
+
+<script id='tmp_info_header' type="text/template">
+    @include('cajas/templates/tmp_info_header')
+</script>
+
+<script id='tmp_sisu' type='text/template'>
+    @include('cajas/aprobacionemp/tmp/tmp_sisu')
+</script>
+
+<script id='tmp_editar' type='text/template'>
+    @include('cajas/aprobacionemp/tmp/tmp_editar')
+</script>
+
+<script type="text/template" id='tmp_aprobar'>
+    @include('cajas/aprobacionemp/tmp/tmp_aprobar')
+</script>
+
+<script id='tmp_filtro' type="text/template">
+    @include('cajas/aprobacionemp/tmp/tmp_filtro')
 </script>
 
 <script id='tmp_trayectoria' type='text/template'>
@@ -166,5 +173,10 @@
 	<div id='filtro'></div>
 </script>
 
+<script src="{{ asset('Cajas/build/Empresas.js') }}"></script>
+@endpush
+
+@section('content')
 <div id='boneLayout'></div>
-<?= Tag::javascriptInclude('Cajas/empresas/build.empresas'); ?>
+@endsection
+

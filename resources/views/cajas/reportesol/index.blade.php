@@ -24,12 +24,12 @@
 
                     <div class='form-group'>
                         <label for="fecha_solicitud">Fecha de envío</label>
-                        <?= TagUser::calendar('fecha_solicitud', 'class: form-control', 'type: date') ?>
+                        <?= Tag::calendar('fecha_solicitud', 'class: form-control', 'type: date') ?>
                     </div>
 
                     <div class='form-group'>
                         <label for="fecha_solicitud">Fecha de aprobación</label>
-                        <?= TagUser::calendar('fecha_aprueba', 'class: form-control', 'type: date') ?>
+                        <?= Tag::calendar('fecha_aprueba', 'class: form-control', 'type: date') ?>
                     </div>
 
                     <div class='form-group text-center mt-2'>

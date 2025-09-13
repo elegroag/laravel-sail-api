@@ -1,13 +1,24 @@
+@php
+use App\Services\Tag;
+@endphp
+
+@extends('layouts.cajas')
+
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
+@endpush
+
+@section('content')
 <div class="col-md-8 mb-4 mt-2">
 
     <div class="card-header text-sm-left text-center pb-3 px-4 pt-2">
         <div id="botones" class='row justify-content-end mt-0'>
-            <a href="<?= $instancePath ?>admproductos/lista" class='btn btn-light'>&nbsp;Salir</a>&nbsp;
+            <a href="{{ Utils.getKumbiaURL($instancePath) }}admproductos/lista" class='btn btn-light'>&nbsp;Salir</a>&nbsp;
         </div>
         <h3 class="mb-1">Registrar nuevo producto o servicio</h3>
     </div>
     <div class="card-body border-0">
-        <?= Tag::form("id: formulario", "autocomplete: off", "role: form"); ?>
+        @php echo Tag::form("id: formulario", "autocomplete: off", "role: form"); @endphp
         <div class="row">
             <div class="col-md-6">
                 <div class="form-group">
@@ -43,11 +54,13 @@
                 <button type="button" id="guardaRegistro" class='btn btn-primary'>&nbsp;Guardar</button>
             </div>
         </div>
-        <?= Tag::endform(); ?>
+        @php echo Tag::endform(); @endphp
     </div>
 
 </div>
+@endsection
 
+@push('scripts')
 <script type="text/javascript">
     const formData = function(formById) {
         let _arreglo = $('#' + formById).serializeArray();
@@ -118,3 +131,4 @@
         });
     });
 </script>
+@endpush

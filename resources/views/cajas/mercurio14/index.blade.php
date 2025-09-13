@@ -1,6 +1,6 @@
 <?php
 echo View::getContent();
-echo TagUser::filtro($campo_filtro);
+echo Tag::filtro($campo_filtro);
 ?>
 
 <div id='boneLayout'></div>
@@ -10,7 +10,7 @@ echo TagUser::filtro($campo_filtro);
     <div id='paginate' class='card-footer py-4'></div>
 </script>
 
-<?= TagUser::ModalGeneric(
+<?= Tag::ModalGeneric(
     $title,
     View::render(
         "mercurio14/tmp/form",

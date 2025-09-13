@@ -10,13 +10,13 @@ Tag::addJavascript('core/global');
             <div class="col-md-4 ml-auto">
                 <div class="form-group">
                     <label for="fecini" class="form-control-label">Fecha Inicial</label>
-                    <?php echo TagUser::calendar("fecini", "placeholder: Fecha Inicial", "class: form-control"); ?>
+                    <?php echo Tag::calendar("fecini", "placeholder: Fecha Inicial", "class: form-control"); ?>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="form-group">
                     <label for="fecfin" class="form-control-label">Fecha Final</label>
-                    <?php echo TagUser::calendar("fecfin", "placeholder: Fecha Final", "class: form-control"); ?>
+                    <?php echo Tag::calendar("fecfin", "placeholder: Fecha Final", "class: form-control"); ?>
                 </div>
             </div>
             <div class="col-md-2 d-flex ml-auto">

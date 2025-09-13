@@ -1,6 +1,6 @@
 <div class='col-xs-12'>
     <p>Complete el campo requerido para emitir el correo de aprobación al trabajador que ha quedado pendiente.</p>
-    <?= Tag::form("aprobaciontra/rezagoCorreo", "id: form_pendiente"); ?>
+    <form id="form_pendiente" action="aprobaciontra/rezagoCorreo" method="POST">
     <div class='form-horizontal'>
         <div class="form-group">
             <label class='col-md-4 control-label'>Cedula del trabajador:</label>
@@ -27,6 +27,6 @@
     <div class="form-group">
         <button type='button' class='btn btn-md btn-primary' id='btenviar'>Enviar email</button>
     </div>
-    <?= Tag::endForm(); ?>
-    <p class='help'><?= $flash_mensaje ?></p>
+    </form>
+    <p class='help'>{{ $flash_mensaje }}</p>
 </div>

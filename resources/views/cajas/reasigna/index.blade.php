@@ -2,7 +2,7 @@
 echo View::getContent();
 Tag::addJavascript('core/global');
 
-echo TagUser::help($title, $help);
+echo Tag::help($title, $help);
 $accion = array('C' => 'CONSULTA', 'P' => 'PROCESO');
 ?>
 
@@ -52,13 +52,13 @@ $accion = array('C' => 'CONSULTA', 'P' => 'PROCESO');
 				<div class="col-md-2">
 					<div class="form-group">
 						<label for="fecini" class="form-control-label">Fecha Inicio</label>
-						<?php echo TagUser::calendar("fecini", "placeholder: Fecha Inicio", "class: form-control"); ?>
+						<?php echo Tag::calendar("fecini", "placeholder: Fecha Inicio", "class: form-control"); ?>
 					</div>
 				</div>
 				<div class="col-md-2">
 					<div class="form-group">
 						<label for="fecfin" class="form-control-label">Fecha Final</label>
-						<?php echo TagUser::calendar("fecfin", "placeholder: Fecha Final", "class: form-control"); ?>
+						<?php echo Tag::calendar("fecfin", "placeholder: Fecha Final", "class: form-control"); ?>
 					</div>
 				</div>
 			</div>

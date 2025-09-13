@@ -3,7 +3,7 @@ echo View::getContent();
 Tag::addJavascript('core/global');
 Tag::addJavascript('Cajas/movile/mercurio50');
 
-echo TagUser::help($title, $help);
+echo Tag::help($title, $help);
 ?>
 
 <div id='consulta' class='table-responsive'></div>

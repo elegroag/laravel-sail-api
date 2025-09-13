@@ -1,18 +1,18 @@
-<?php
-echo View::getContent();
-echo TagUser::filtro($campo_filtro);
-?>
+@php
+use App\Services\Tag;
+@endphp
+@php echo Tag::filtro($campo_filtro); @endphp
 
 <!-- Modal Captura -->
-<?= TagUser::ModalGeneric(
+@php echo Tag::ModalGeneric(
     $title,
     View::render(
         "mercurio04/tmp/form",
         array('principal' => $Mercurio04->getPrincipalArray(), 'estados' => $Mercurio04->getEstadoArray())
     )
-) ?>
+); @endphp
 
-<?= TagUser::ModalCapture(
+@php echo Tag::ModalCapture(
     array(
         'name' => 'ModalCapturarOpciones',
         'titulo' => 'Capturar opciones',
@@ -24,9 +24,9 @@ echo TagUser::filtro($campo_filtro);
             )
         )
     )
-) ?>
+); @endphp
 
-<?= TagUser::ModalCapture(
+@php echo Tag::ModalCapture(
     array(
         'name' => 'ModalCapturarCiudades',
         'titulo' => 'Capturar ciudades',
@@ -35,11 +35,11 @@ echo TagUser::filtro($campo_filtro);
             array('ciudades' => $ciudades)
         )
     )
-) ?>
+); @endphp
 
 
 <div id='consulta' class='table-responsive'></div>
 <div id='paginate' class='card-footer py-4'></div>
 
 
-<?= Tag::javascriptInclude('Cajas/oficinas/build.oficinas'); ?>
+@php echo Tag::javascriptInclude('Cajas/oficinas/build.oficinas'); @endphp

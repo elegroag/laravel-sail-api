@@ -1,7 +1,7 @@
-<?php 
+<?php
 echo View::getContent();
 echo Tag::addJavascript('Cajas/reportes');
-//echo TagUser::help($title,$help);
+//echo Tag::help($title,$help);
 ?>
 <div class="card mb-0">
 	<div class="card-body">
@@ -10,13 +10,13 @@ echo Tag::addJavascript('Cajas/reportes');
 		<div class="col-md-2 ml-auto">
 			<div class="form-group">
 				<label for="fecini" class="form-control-label">Fecha Inicial</label>
-				<?php echo TagUser::calendar("fecini","placeholder: Fecha Inicial","class: form-control"); ?>
+				<?php echo Tag::calendar("fecini","placeholder: Fecha Inicial","class: form-control"); ?>
 			</div>
 		</div>
 		<div class="col-md-2">
 			<div class="form-group">
 				<label for="fecfin" class="form-control-label">Fecha Final</label>
-				<?php echo TagUser::calendar("fecfin","placeholder: Fecha Final","class: form-control"); ?>
+				<?php echo Tag::calendar("fecfin","placeholder: Fecha Final","class: form-control"); ?>
 			</div>
 		</div>
 		<div class="col-md-2">

@@ -1,58 +1,65 @@
+@extends('layouts.cajas')
 
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.css') }}" />
+@endpush
+
+@push('scripts')
 <script id='tmp_filtro' type="text/template">
-	<?= TagUser::filtro($campo_filtro, 'aplicar_filtro') ?>
+	@php echo Tag::filtro($campo_filtro, 'aplicar_filtro') @endphp
 </script>
 
 <script id='tmp_list_header' type="text/template">
-	<?= View::renderView("templates/tmp_list_header"); ?>
+    @include('cajas/templates/tmp_list_header')
 </script>
 
 <script type="text/template" id='tmp_layout'>
-	<?= View::renderView("templates/tmp_layout"); ?>
+    @include('cajas/templates/tmp_layout')
 </script>
 
 <script type="text/template" id='tmp_header'>
-	<?= View::renderView("templates/tmp_header"); ?>
+    @include('cajas/templates/tmp_header')
 </script>
 
 <script type="text/template" id='tmp_rechazar'>
-	<?= View::renderView("templates/tmp_rechazar"); ?>
+    @include('cajas/templates/tmp_rechazar')
 </script>
 
 <script type="text/template" id='tmp_devolver'>
-	<?= View::renderView("templates/tmp_devolver"); ?>
+    @include('cajas/templates/tmp_devolver')
 </script>
 
 <script type="text/template" id="tmp_reaprobar">
-	<?= View::renderView("templates/tmp_reaprobar"); ?>
+    @include('cajas/templates/tmp_reaprobar')
 </script>
 
 <script type="text/template" id='tmp_info'>
-	<?= View::renderView("templates/tmp_information"); ?>
+    @include('cajas/templates/tmp_information')
 </script>
 
 <script type="text/template" id='tmp_aprobar'>
-	<?= View::renderView("aprobaciontra/tmp/tmp_aprobar"); ?>
+    @include('cajas/aprobaciontra/tmp/tmp_aprobar')
 </script>
 
 <script type='text/template' id='tmp_aportes'>
-	<?= View::renderView("templates/tmp_aportes"); ?>
+    @include('cajas/templates/tmp_aportes')
 </script>
 
 <script type="text/template" id='tmp_deshacer'>
-	<?= View::renderView("templates/tmp_deshacer"); ?>
+    @include('cajas/templates/tmp_deshacer')
 </script>
 
 <script type="text/template" id='tmp_info_header'>
-	<?= View::renderView("templates/tmp_info_header"); ?>
+    @include('cajas/templates/tmp_info_header')
 </script>
 
 <script type='text/template' id='tmp_layout_trabajador'>
-	<div class="row justify-content-between">
-		<div class="col-md-12" id='show_trabajador'></div>
-		<div class="col-md-6" id='show_trayectoria'></div>
-		<div class="col-md-6" id='show_salario'></div>
-	</div>
+    <div class="row justify-content-between">
+        <div class="col-md-12" id='show_trabajador'></div>
+        <div class="col-md-6" id='show_trayectoria'></div>
+        <div class="col-md-6" id='show_salario'></div>
+    </div>
 </script>
 
 <script type='text/template' id='tmp_trabajador'>
@@ -122,37 +129,33 @@
 </script>
 
 <script type='text/template' id='tmp_trayectoria'>
-	<h5>Trayectoria</h5>
-    <div class='row pl-lg-4 pb-3'>
+    <h5 class="mb-3">Trayectoria</h5>
+    <div class='table-responsive'>
         <% if(_.size(trayectorias) == 0){ %>
-            <table class='table table-bordered table-hover'>
-                <tbody>
-                    <tr>
-                        <td>Ninguna dato de trayectoria disponible...</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="alert alert-info">
+                Ningún dato de trayectoria disponible...
+            </div>
         <% }else{
         _ai=1
         _.each(trayectorias, function(row, ai){ %>
             <table class='table table-bordered table-hover'>
-            <tbody>
-            <tr>
-                <td rowspan='4' width='10pt' style="padding:2px"><%=_ai%></td>
-                <td>Fecha inicia: <%=row.fecafi%></td>
-            </tr>
-            <tr>
-                <td>Nit: <%=row.nit%></td>
-            </tr>
-            <tr>
-                <td>sucursal: <%=row.codsuc%></td>
-            </tr>
-            <tr>
-                <td>Fecha retiro: <%=(!!row.fecret)? row.fecret : 'X'%></td>
-            </tr>
-            </tbody>
-        </table>
-        <br/>
+                <tbody>
+                    <tr>
+                        <td rowspan='4' width='10pt' style="padding:2px"><%=_ai%></td>
+                        <td>Fecha inicia: <%=row.fecafi%></td>
+                    </tr>
+                    <tr>
+                        <td>Nit: <%=row.nit%></td>
+                    </tr>
+                    <tr>
+                        <td>Sucursal: <%=row.codsuc%></td>
+                    </tr>
+                    <tr>
+                        <td>Fecha retiro: <%=(!!row.fecret)? row.fecret : 'X'%></td>
+                    </tr>
+                </tbody>
+            </table>
+            <br/>
         <% _ai++ })} %>
     </div>
 </script>
@@ -191,6 +194,9 @@
 	<div id='filtro'></div>
 </script>
 
-<div id='boneLayout'></div>
+<script src="{{ asset('Cajas/build/Trabajadores.js') }}"></script>
+@endpush
 
-<?= Tag::javascriptInclude('Cajas/trabajadores/build.trabajadores'); ?>
+@section('content')
+<div id='boneLayout'></div>
+@endsection

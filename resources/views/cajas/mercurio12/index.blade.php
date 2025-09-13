@@ -1,6 +1,6 @@
 <?php
 echo View::getContent();
-echo TagUser::filtro($campo_filtro);
+echo Tag::filtro($campo_filtro);
 ?>
 
 <div id='consulta' class='table-responsive'></div>
@@ -8,7 +8,7 @@ echo TagUser::filtro($campo_filtro);
 
 
 <!-- Modal Captura -->
-<?= TagUser::ModalGeneric(
+<?= Tag::ModalGeneric(
     $title,
     View::render(
         "mercurio12/tmp/form"

@@ -1,15 +1,20 @@
-<?
-echo View::getContent();
-echo Tag::Assets('datatables.net.bs5/css/dataTables.bootstrap5.min', 'css');
-echo Tag::Assets('datatables.net/js/dataTables.min', 'js');
-echo Tag::Assets('datatables.net.bs5/js/dataTables.bootstrap5.min', 'js');
-?>
+@extends('layouts.cajas')
+
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.css') }}" />
+@endpush
+
+@push('scripts')
+<script src="{{ asset('assets/datatables.net/js/dataTables.min.js') }}"></script>
+<script src="{{ asset('assets/datatables.net.bs5/js/dataTables.bootstrap5.min.js') }}"></script>
+@endpush
 
 <div class='card-header pt-2 pb-2' id='afiliacion_header'>
     <div class='row'>
         <div class='col'>
             <div id="botones" class='d-flex justify-content-end'>
-                <a href="<?= $instancePath ?>admproductos/nuevo" class='btn btn-info'><i class="fas fa-plus"></i>&nbsp;&nbsp;Nuevo</a>&nbsp;
+                <a href="{{ Utils.getKumbiaURL($instancePath) }}admproductos/nuevo" class='btn btn-info'><i class="fas fa-plus"></i>&nbsp;&nbsp;Nuevo</a>&nbsp;
             </div>
         </div>
     </div>

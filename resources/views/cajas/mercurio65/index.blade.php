@@ -4,8 +4,8 @@ Tag::addJavascript('core/global');
 Tag::addJavascript('Cajas/movile/mercurio65');
 Tag::addJavascript('Cajas/movile/upload');
 
-echo TagUser::help($title, $help);
-echo TagUser::filtro($campo_filtro);
+echo Tag::help($title, $help);
+echo Tag::filtro($campo_filtro);
 ?>
 
 <div id='consulta' class='table-responsive'></div>

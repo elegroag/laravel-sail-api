@@ -1,6 +1,6 @@
 <form method='POST' action="#" id='formulario_trabajador'>
-    <?= Tag::numericField("id", "class: d-none", "value: $id"); ?>
-    <?= Tag::textUpperField("fax", "class: d-none", "value: ") ?>
+    <input type="hidden" name="id" value="{{ $id }}">
+    <input type="hidden" name="fax" value="">
     <div class="row">
         <div class='col-md-4'>
             <div class='form-group'>

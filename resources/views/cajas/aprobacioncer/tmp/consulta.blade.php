@@ -7,19 +7,19 @@
 			<div class="col-md-6 col-lg-4">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Cedula de trabajador</label>
-					<div class="form-control bg-light"><?= htmlspecialchars($mercurio45->getCedtra()) ?></div>
+					<div class="form-control bg-light">{{$mercurio45->getCedtra()}}</div>
 				</div>
 			</div>
 			<div class="col-md-6 col-lg-4">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Nombres Completos</label>
-					<div class="form-control bg-light"><?= htmlspecialchars($mercurio45->getNombre()) ?></div>
+					<div class="form-control bg-light">{{$mercurio45->getNombre()}}</div>
 				</div>
 			</div>
 			<div class="col-md-6 col-lg-4">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Nombre del certificado</label>
-					<div class="form-control bg-light"><?= htmlspecialchars($mercurio45->getNomcer()) ?></div>
+					<div class="form-control bg-light">{{$mercurio45->getNomcer()}}</div>
 				</div>
 			</div>
 		</div>

@@ -1,13 +1,13 @@
     <div class="card-header text-sm-left text-center pb-3 px-4 pt-2">
         <div id="botones" class='row justify-content-end mt-0'>
-            <a href="<?= $instancePath ?>admproductos/lista" class='btn btn-light'>&nbsp;Salir</a>&nbsp;
+            <a href="{{ Utils.getKumbiaURL($instancePath) }}admproductos/lista" class='btn btn-light'>&nbsp;Salir</a>&nbsp;
         </div>
         <h4>Editar producto o servicio</h4>
     </div>
 
     <div class="col-md-8 mb-4 mt-2">
         <div class="card-body border-0">
-            <?= Tag::form("id: formulario", "autocomplete: off", "role: form"); ?>
+            <form id="formulario" autocomplete="off" role="form">
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
@@ -31,19 +31,19 @@
                     <div class="form-group">
                         <label for="example-text-input" class="form-control-label">Estado:</label>
                         <select class="form-control form-control-sm" name="estado" id="estado">
-                            <option <?= ($servicio->getEstado() == 'A') ? 'selected' : '' ?> value="A">Activo</option>
-                            <option <?= ($servicio->getEstado() == 'P') ? 'selected' : '' ?> value="P">Pendiente</option>
-                            <option <?= ($servicio->getEstado() == 'F') ? 'selected' : '' ?> value="F">Finalizado</option>
+                            <option {{ ($servicio->getEstado() == 'A') ? 'selected' : '' }} value="A">Activo</option>
+                            <option {{ ($servicio->getEstado() == 'P') ? 'selected' : '' }} value="P">Pendiente</option>
+                            <option {{ ($servicio->getEstado() == 'F') ? 'selected' : '' }} value="F">Finalizado</option>
                         </select>
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col">
-                    <button type="button" id="guardaRegistro" data-cid='<?= $servicio->getId() ?>' class='btn btn-primary'>&nbsp;Guardar</button>
+                    <button type="button" id="guardaRegistro" data-cid='{{ $servicio->getId() }}' class='btn btn-primary'>&nbsp;Guardar</button>
                 </div>
             </div>
-            <?= Tag::endform(); ?>
+            </form>
         </div>
 
     </div>

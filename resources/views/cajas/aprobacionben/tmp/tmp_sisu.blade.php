@@ -1,6 +1,6 @@
 <script id='tmp_beneficiario' type='text/template'>
-    <div class='col-md-12'> 
-        <h4>Beneficiario</h4>        
+    <div class='col-md-12'>
+        <h4>Beneficiario</h4>
     </div>
 
     <div class='row pl-lg-4 pb-3'>
@@ -47,7 +47,7 @@
         <div class='col-md-4 border-bottom border-right'>
             <label class='form-control-label'>Huerfano:</label>
             <p class='descripcion'><%=huerfano%></p>
-        </div>        
+        </div>
         <div class='col-md-4 border-bottom border-right'>
             <label class='form-control-label'>Parentesco:</label>
             <p class='descripcion'><%=parent%></p>
@@ -68,8 +68,8 @@
 </script>
 
 <script id='tmp_relaciones' type='text/template'>
-    <h4>Relaciones</h4>        
-    <div class='row pl-lg-4 pb-3'>        
+    <h4>Relaciones</h4>
+    <div class='row pl-lg-4 pb-3'>
         <% if(_.size(relaciones) == 0){ %>
         <table class='table table-bordered table-hover'>
             <tbody>
@@ -90,7 +90,7 @@
                         <th>Pago</th>
                         <th>Ruaf</th>
                     </tr>
-                </thead>    
+                </thead>
                 <tbody>
                     <% _.each(relaciones, function(row){ %>
                         <tr>
@@ -106,20 +106,20 @@
                 </tbody>
             </table>
         <% } %>
-    </div>    
+    </div>
 </script>
 
 <script id='tmp_card_header' type="text/template">
     <div class='row'>
         <div class='col-md-4'>
-            <div class='row justify-content-first' style='padding-top:10px'>    
+            <div class='row justify-content-first' style='padding-top:10px'>
                 <h3>&nbsp;Opción Informativa</h3>
             </div>
         </div>
         <div class='col-md-8'>
             <div id="botones" class='row justify-content-end'>
                 <a href="#" data-href="info_beneficiario/<%=cedtra+'/'+documento+'/'+id%>" class='btn btn-sm btn-primary' id='cancelar_volver'>
-                <i class='fas fa-hand-point-up text-white'></i> Salir</a>&nbsp;   
+                <i class='fas fa-hand-point-up text-white'></i> Salir</a>&nbsp;
             </div>
         </div>
     </div>
@@ -133,9 +133,9 @@
 </div>
 
 <script type="text/javascript">
-    var _SOLICITUD = <?= json_encode($mercurio34) ?>;
-    var _BENEFICIARIO_SISU = <?= json_encode($beneficiario) ?>;
-    var _RELACIONES = <?= json_encode($relaciones) ?>;
+    var _SOLICITUD = @json($mercurio34);
+    var _BENEFICIARIO_SISU = @json($beneficiario);
+    var _RELACIONES = @json($relaciones);
 </script>
 
 <?= Tag::addJavascript('Cajas/src/Beneficiarios/buscar_sisu_view', true); ?>

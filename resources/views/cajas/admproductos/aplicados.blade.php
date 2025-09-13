@@ -1,10 +1,16 @@
-<?
-echo View::getContent();
-echo Tag::Assets('datatables.net.bs5/css/dataTables.bootstrap5.min', 'css');
-echo Tag::Assets('datatables.net/js/dataTables.min', 'js');
-echo Tag::Assets('datatables.net.bs5/js/dataTables.bootstrap5.min', 'js');
-?>
-<input style="display:none" id="codser" value="<?= $codser ?>" />
+@extends('layouts.cajas')
+
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.css') }}" />
+@endpush
+
+@push('scripts')
+<script src="{{ asset('assets/datatables.net/js/dataTables.min.js') }}"></script>
+<script src="{{ asset('assets/datatables.net.bs5/js/dataTables.bootstrap5.min.js') }}"></script>
+@endpush
+
+<input style="display:none" id="codser" value="{{ $codser }}" />
 
 <script type="text/template" id="tmp_detalle_aplicado">
     <div class="card-header mb-1 pt-3">
@@ -53,10 +59,10 @@ echo Tag::Assets('datatables.net.bs5/js/dataTables.bootstrap5.min', 'js');
 
 <div class='card-header pt-2 pb-2' id='afiliacion_header'>
     <div id="botones" class='d-flex justify-content-end'>
-        <a href="<?= $instancePath ?>admproductos/cargue_pagos/<?= $codser ?>" class='btn btn-md btn-warning'><i class="fas fa-plus"></i> Pagos</a>&nbsp;
-        <a href="<?= $instancePath ?>admproductos/lista" class='btn btn-md btn-primary'><i class="fas fa-home"></i> Salir</a>&nbsp;
+        <a href="{{ Utils.getKumbiaURL($instancePath) }}admproductos/cargue_pagos/{{ $codser }}" class='btn btn-md btn-warning'><i class="fas fa-plus"></i> Pagos</a>&nbsp;
+        <a href="{{ Utils.getKumbiaURL($instancePath) }}admproductos/lista" class='btn btn-md btn-primary'><i class="fas fa-home"></i> Salir</a>&nbsp;
     </div>
-    <h3 class="p-1"><?= Tag::capitalize($servicio->getServicio()) ?></h3>
+    <h3 class="p-1">{{ capitalize($servicio->getServicio()) }}</h3>
     <p>Lista de afiliados que han aplicado al servicio o producto</p>
 </div>
 
@@ -68,7 +74,9 @@ echo Tag::Assets('datatables.net.bs5/js/dataTables.bootstrap5.min', 'js');
         <div class="col-md-4">
             <div class="col-auto" id="showDetalleAplicado">
                 <div class="card-body">
-                    <p class="text-center"><?php echo Tag::image("Mercurio/consulta_aportes.jpg", "style: width:180px", "class: img-responsive"); ?></p>
+                    <p class="text-center">
+                        <img src="{{ asset('img/Mercurio/consulta_aportes.jpg') }}" style="width:180px" class="img-responsive">
+                    </p>
                 </div>
             </div>
         </div>

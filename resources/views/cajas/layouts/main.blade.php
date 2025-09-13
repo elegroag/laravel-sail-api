@@ -24,7 +24,7 @@ $user = Tag::capitalize($muser['nombre']);
                         </nav>
                     </div>
                     <div class="col-lg-5 col-auto text-right">
-                        <?php echo TagUser::group_buttons(isset($buttons) ? $buttons : ""); ?>
+                        <?php echo Tag::group_buttons(isset($buttons) ? $buttons : ""); ?>
                     </div>
                 </div>
             </div>

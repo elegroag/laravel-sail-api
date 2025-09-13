@@ -2,7 +2,7 @@
 echo View::getContent();
 Tag::addJavascript('core/global');
 Tag::addJavascript('Cajas/movile/mercurio74');
-echo TagUser::help($title, $help);
+echo Tag::help($title, $help);
 ?>
 
 
