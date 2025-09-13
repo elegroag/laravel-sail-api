@@ -5,7 +5,7 @@
 		margin: 0 auto;
 		background-size: contain;
 		background-repeat: no-repeat;
-		background-image: url(<?= $membrete ?>);
+		background-image: url({{ $membrete }});
 		padding: 118px 8px 0;
 		box-sizing: border-box;
 	">
@@ -22,7 +22,7 @@
 				color: #000;
 				line-height: 20px;
 			">
-				Fecha <?= date('Y/m/d') ?><br />
+				Fecha {{ date('Y/m/d') }}<br />
 				Florencia
 			</div>
 
@@ -34,7 +34,7 @@
 				margin-bottom: 15px;
 			">
 				Señor(a) <br />
-				<?= $razsoc ?><br />
+				{{ $razsoc }}<br />
 				Florencia, Caquetá
 			</div>
 
@@ -46,7 +46,7 @@
 				font-weight: bold;
 				margin: 0 0 15px 0;
 			">
-				<?= (isset($titulo) && !empty($titulo)) ? $titulo : 'Proceso de afiliación, Caja De Compensación Familiar del Caquetá COMFACA' ?>
+				{{ (isset($titulo) && !empty($titulo)) ? $titulo : 'Proceso de afiliación, Caja De Compensación Familiar del Caquetá COMFACA' }}
 			</p>
 
 			<div style="
@@ -58,7 +58,7 @@
 				line-height: 1.5;
 			">
 				Reciba un cordial saludo deseando éxitos en sus diferentes labores.<br>
-				<?= $msj ?>
+				{{ $msj }}
 			</div>
 
 			<div style="

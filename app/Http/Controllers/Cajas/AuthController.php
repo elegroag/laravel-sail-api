@@ -7,7 +7,6 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use App\Library\Auth\AuthHtml;
 use App\Services\CajaServices\UsuarioServices;
 use App\Exceptions\AuthException;
 use App\Exceptions\DebugException;
@@ -18,6 +17,7 @@ use App\Helpers\Core;
 use App\Models\Gener02;
 use App\Library\Router;
 use App\Helpers\Flash;
+use App\Library\Auth\AuthCajas;
 use App\Services\Utils\SenderEmail;
 use App\Services\View as ServicesView;
 use Exception;
@@ -39,29 +39,31 @@ class AuthController extends ApplicationController
 
     public function indexAction()
     {
-        $this->setResponse("view");
-        $this->setParamToView("titulo", "Login");
+        return view('cajas.auth.login', [
+            'titulo' => 'Login'
+        ]);
     }
 
-    public function autenticarAction(Request $request, $comfirmar = 0)
+    public function authenticateAction(Request $request, Response $response)
     {
 
         $this->setResponse("ajax");
         $user = $request->input("user");
         $clave = $request->input("password");
-        $auth = new AuthHtml();
+        $politica = $request->input("politica");
         try {
             try {
+                $auth = new AuthCajas();
                 $usuarioServices = new UsuarioServices();
-                $auth->buscar_usuario($usuarioServices, $user);
-                $auth->principal($clave, $comfirmar);
+                $auth->buscarUsuario($usuarioServices, $user);
+                $auth->principal($clave, $politica);
                 $msj = $auth->getResultado();
                 $usuarioServices->actualizaUsuario($auth->getUsuario());
 
-                set_flashdata("success", array(
+                set_flashdata("success", [
                     "msj" => $msj,
                     "template" => "tmp_bienvenida"
-                ));
+                ]);
             } catch (AuthException $auth_err) {
 
                 $code = $auth_err->getCode();
@@ -69,15 +71,14 @@ class AuthController extends ApplicationController
 
                 //si es diferente a error de captcha
                 if ($code != 1) {
-                    $auth->cargar_intentos($user);
+                    $auth->cargarIntentos($user);
                     $msj = $auth->getResultado();
                 }
                 set_flashdata("error", array(
                     "msj" => $msj,
                     "code" => $code
                 ));
-                return redirect('login/index');
-                exit;
+                return redirect('cajas/login');
             }
         } catch (Exception $err) {
 
@@ -85,16 +86,15 @@ class AuthController extends ApplicationController
                 "msj" => $err->getMessage() . " " . $err->getFile() . " " . $err->getLine(),
                 "code" => $err->getCode()
             ));
-            return redirect('login/index');
-            exit;
+            return redirect('cajas/login');
         }
-        return redirect('principal/index');
+        return redirect('cajas/principal');
     }
 
     public function salirAction()
     {
         session()->forget('user');
-        return redirect('login/index');
+        return redirect('cajas/login');
     }
 
     public function error_accessAction()
@@ -103,7 +103,10 @@ class AuthController extends ApplicationController
         if (!isset($flash['error'])) {
             $flash = array('error' => array("message" => "", "code" => 404));
         }
-        $this->setParamToView("flash", $flash['error']);
+
+        return view('cajas/auth/error_access', [
+            'flash' => $flash['error']
+        ]);
     }
 
     public function error_access_restAction()

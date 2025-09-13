@@ -137,7 +137,7 @@
     <div class="card-footer">
         <div class="text-center">
             <a href="#" data-toggle='tofile' data-file='Guia_afiliaciones_por_comfaca_en_linea.pdf'>
-                <?= App\Services\Tag::image("guia.png", "class: img-responsive", "width:200px");?>
+                <img src="{{ asset('images/Mercurio/guia.png') }}" class="img-responsive" width="200px" />
                 <br />Descarga la guía de afiliación aquí
             </a>
         </div>

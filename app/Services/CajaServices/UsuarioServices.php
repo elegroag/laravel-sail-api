@@ -3,6 +3,8 @@
 namespace App\Services\CajaServices;
 
 use App\Exceptions\AuthException;
+use App\Models\Gener02;
+use App\Models\Gener21;
 use App\Models\Mercurio07;
 use App\Services\Utils\Comman;
 use App\Services\Utils\Table;
@@ -50,8 +52,7 @@ class UsuarioServices
                 "servicio" => "Usuarios",
                 "metodo" => "trae_usuario",
                 "params" => $user
-            ),
-            false
+            )
         );
 
         $salida = $this->procesadorComando->toArray();

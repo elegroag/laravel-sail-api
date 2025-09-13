@@ -53,12 +53,12 @@ class LoginController extends ApplicationController
 
     public function indexAction()
     {
-        return view('auth.login');
+        return view('mercurio.auth.login');
     }
 
     public function showRegisterAction()
     {
-        return view('auth.register');
+        return view('mercurio.auth.register');
     }
 
     public function authenticateAction(Request $request, Response $response)

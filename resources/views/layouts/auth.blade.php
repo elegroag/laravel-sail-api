@@ -5,13 +5,12 @@
     <meta charset="UTF-8">
     @php
         $path = env('APP_URL').':'.env('APP_PORT');
-        $app = 'mercurio';
     @endphp
     <meta
         name="csrf-token"
         content="{{ csrf_token() }}"
         path="{{ $path }}"
-        app="{{ $app }}" />
+        app="@yield('application')" />
 
     <title>@yield('title')</title>
     <link rel="stylesheet" href="{{ asset('assets/bootstrap/css/bootstrap.min.css') }}" />
@@ -34,10 +33,10 @@
     <script type="text/javascript" src="{{ asset('assets/bootstrap/js/popper.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/noty/noty.js') }}"></script>
-
+    @stack('styles')
 </head>
 
-<body class="bg-gray-100 flex items-center justify-center h-screen">
+<body class="bg-gray-100 flex items-center justify-center h-screen bg-gradient-primary">
     @include('templates.loading')
     @yield('content')
 
@@ -51,7 +50,7 @@
 
     <script src="{{ asset('assets/argon/headroom.js') }}"></script>
     <script src="{{ asset('assets/argon/argon.js') }}"></script>
-
+    @stack('scripts')
 </body>
 
 </html>

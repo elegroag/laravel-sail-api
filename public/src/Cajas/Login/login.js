@@ -3,10 +3,10 @@ import { Utils } from '@/Utils';
 
 const AutenticarCajas = (event) => {
     loading.show();
-    var nerr = 0;
-    var _password = $('#password').val();
-    var _user = $('#user').val();
-    var _comfirmar_politica = document.getElementById('comfirmar_politica').checked ? '1' : '0';
+    const nerr = 0;
+    const _password = $('#password').val();
+    const _user = $('#user').val();
+    const _comfirmar_politica = document.getElementById('comfirmar_politica').checked ? 'S' : 'N';
 
     if (_user == '') {
         document.querySelector('.error_user').innerHTML = '<span>El campo usuario es un valor requerido.</span>';
@@ -24,8 +24,9 @@ const AutenticarCajas = (event) => {
     }
     if (nerr == 0) {
         $('#password').val(_password.trim());
-        let url = Utils.getKumbiaURL('login/autenticar/' + _comfirmar_politica);
+        const url = Utils.getKumbiaURL('autenticar');
         document.getElementById('form_autenticar').setAttribute('action', url);
+        document.getElementById('politica').value = _comfirmar_politica;
         $('#form_autenticar').submit();
     } else {
         loading.hide();

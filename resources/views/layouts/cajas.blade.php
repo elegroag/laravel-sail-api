@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('application', 'mercurio')
+@section('application', 'cajas')
 
 @section('content-main')
 @php
@@ -12,8 +12,8 @@ list($menu, $migas) = Menu::showMenu();
 @endphp
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('theme/argon-mercurio.css') }}" />
-    <link rel="stylesheet" href="{{ asset('mercurio/css/mercurio.css') }}" />
+    <link rel="stylesheet" href="{{ asset('theme/argon-cajas.css') }}" />
+    <link rel="stylesheet" href="{{ asset('cajas/css/cajas.css') }}" />
 @endpush
 
 @include('partials.flash')

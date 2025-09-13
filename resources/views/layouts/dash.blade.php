@@ -1,5 +1,7 @@
 @extends('layouts.main')
 
+@section('application', 'mercurio')
+
 @section('content-main')
 @php
 use App\Services\Menu\Menu;

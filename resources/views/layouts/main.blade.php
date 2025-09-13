@@ -5,13 +5,12 @@
     <meta charset="UTF-8">
     @php
         $path = env('APP_URL').':'.env('APP_PORT');
-        $app = 'mercurio';
     @endphp
     <meta
         name="csrf-token"
         content="{{ csrf_token() }}"
         path="{{ $path }}"
-        app="{{ $app }}" />
+        app="@yield('application')" />
 
     <title>@yield('title')</title>
     <link rel="stylesheet" href="{{ asset('assets/bootstrap/css/bootstrap.min.css') }}" />
