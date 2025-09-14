@@ -1,7 +1,6 @@
-<?php
-echo View::getContent();
+@php
 echo Tag::filtro($campo_filtro);
-?>
+@endphp
 
 <div id='boneLayout'></div>
 
@@ -10,7 +9,7 @@ echo Tag::filtro($campo_filtro);
     <div id='paginate' class='card-footer py-4'></div>
 </script>
 
-<?= Tag::ModalGeneric(
+@php echo Tag::ModalGeneric(
     $title,
     View::render(
         "mercurio13/tmp/form",
@@ -22,6 +21,6 @@ echo Tag::filtro($campo_filtro);
     'data-toggle="guardar"',
     'btnModalCapturarCampo',
     'modal_capturar_campo'
-) ?>
+) @endphp
 
-<?= Tag::javascriptInclude('Cajas/docureqtrabajadores/build.docureqtrabajadores'); ?>
+<script src="{{ asset('Cajas/build/Docureqtrabajadores.js') }}"></script>

@@ -1,18 +1,15 @@
-<?php
-echo View::getContent();
+@php
 echo Tag::filtro($campo_filtro);
-?>
+@endphp
 
 <div id='consulta' class='table-responsive'></div>
 <div id='paginate' class='card-footer py-4'></div>
 
-
-<!-- Modal Captura -->
-<?= Tag::ModalGeneric(
+@php echo Tag::ModalGeneric(
     $title,
     View::render(
         "mercurio12/tmp/form"
     )
-) ?>
+) @endphp
 
-<?= Tag::javascriptInclude('Cajas/documentos/build.documentos'); ?>
+<script src="{{ asset('Cajas/build/Documentos.js') }}"></script>

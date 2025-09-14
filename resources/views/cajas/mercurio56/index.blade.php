@@ -1,12 +1,6 @@
-<?php
-echo View::getContent();
-Tag::addJavascript('core/global');
-Tag::addJavascript('Cajas/movile/mercurio56');
-Tag::addJavascript('Cajas/movile/upload');
-
-echo Tag::help($title, $help);
+@php
 echo Tag::filtro($campo_filtro);
-?>
+@endphp
 
 <div id='consulta' class='table-responsive'></div>
 <div id='paginate' class='card-footer py-4'></div>
@@ -20,7 +14,7 @@ echo Tag::filtro($campo_filtro);
                     <div class="card-header bg-secondary">
                         <div class="row align-items-center">
                             <div class="col-10">
-                                <h3 class="mb-0"><?php echo $title; ?></h3>
+                                <h3 class="mb-0">@php echo $title; @endphp</h3>
                             </div>
                             <div class="col-2 text-right">
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -30,22 +24,22 @@ echo Tag::filtro($campo_filtro);
                         </div>
                     </div>
                     <div class="card-body">
-                        <?php echo Tag::form("", "id: form", "class: validation_form", "autocomplete: off", "novalidate"); ?>
+                        @php echo Tag::form("", "id: form", "class: validation_form", "autocomplete: off", "novalidate"); @endphp
                         <div class="form-group">
                             <label for="codinf" class="form-control-label">Codigo</label>
-                            <?php echo Tag::selectStatic("codinf", $_infraestructura, "use_dummy: true", "select2: true", "dummyValue: ", "class: form-control"); ?>
+                            @php echo Tag::selectStatic("codinf", $_infraestructura, "use_dummy: true", "select2: true", "dummyValue: ", "class: form-control"); @endphp
                         </div>
                         <div class="form-group">
                             <label for="email" class="form-control-label">Email</label>
-                            <?php echo Tag::textUpperField("email", "class: form-control", "placeholder: Email"); ?>
+                            @php echo Tag::textUpperField("email", "class: form-control", "placeholder: Email"); @endphp
                         </div>
                         <div class="form-group">
                             <label for="telefono" class="form-control-label">Telefono</label>
-                            <?php echo Tag::numericField("telefono", "class: form-control", "placeholder: Telefono"); ?>
+                            @php echo Tag::numericField("telefono", "class: form-control", "placeholder: Telefono"); @endphp
                         </div>
                         <div class="form-group">
                             <label for="nota" class="form-control-label">Nota</label>
-                            <?php echo Tag::textUpperField("nota", "class: form-control", "placeholder: Nota"); ?>
+                            @php echo Tag::textUpperField("nota", "class: form-control", "placeholder: Nota"); @endphp
                         </div>
                         <div class="form-group">
                             <label for="archivo" class="form-control-label">Archivo</label>
@@ -56,9 +50,9 @@ echo Tag::filtro($campo_filtro);
                         </div>
                         <div class="form-group">
                             <label for="estado" class="form-control-label">Estado</label>
-                            <?php echo Tag::selectStatic("estado", $Mercurio56->getEstadoArray(), "use_dummy: true", "dummyValue: ", "class: form-control"); ?>
+                            @php echo Tag::selectStatic("estado", $Mercurio56->getEstadoArray(), "use_dummy: true", "dummyValue: ", "class: form-control"); @endphp
                         </div>
-                        <?php echo Tag::endform(); ?>
+                        @php echo Tag::endform(); @endphp
                     </div>
                     <div class="card-footer text-right">
                         <button type="button" class="btn btn-primary" onclick="guardar();">Guardar</button>
@@ -69,3 +63,7 @@ echo Tag::filtro($campo_filtro);
         </div>
     </div>
 </div>
+
+<script src="{{ asset('core/global.js') }}"></script>
+<script src="{{ asset('Cajas/movile/mercurio56.js') }}"></script>
+<script src="{{ asset('Cajas/movile/upload.js') }}"></script>

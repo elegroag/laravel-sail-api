@@ -26,17 +26,17 @@
 
                                 <div style="height:30mm;width:100%"></div>
 
-                                <p style="text-align:justify;font-size:15px;color:#333 !important">Fecha Radicado <?= $fecha ?></p>
+                                <p style="text-align:justify;font-size:15px;color:#333 !important">Fecha Radicado {{ $fecha }}</p>
                                 <p style="text-align:left;font-size: 15px;color:#333">
                                     Florencia,<br><br>
-                                    Cordial saludo, Señor(a) <?= $nombre ?><br>
-                                    <?= $razon ?><br>
+                                    Cordial saludo, Señor(a) {{ $nombre }}<br>
+                                    {{ $razon }}<br>
                                 </p>
-                                <p style="color:#333 !important; text-align: left; font-size: 18px; padding-top:20px;"><?= $asunto ?></p>
+                                <p style="color:#333 !important; text-align: left; font-size: 18px; padding-top:20px;">{{ $asunto }}</p>
                                 <p style="color:#333 !important; text-align: left; font-size: 15px;"><br>Cordial Saludo, Señor(a)<br> </p>
                                 <p style="color:#333 !important; text-align:justify; font-size: 14px;">
                                     La Caja De Compensación Familiar del Caquetá COMFACA, se permite informar:<br>
-                                    <?= $msj ?>
+                                    {{ $msj }}
                                 </p>
                                 <p><br></p>
                                 <p style="text-align:left;font-size:15px;color:#333 !important">Atentamente,<br></p>

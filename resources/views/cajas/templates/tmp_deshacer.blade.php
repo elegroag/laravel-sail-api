@@ -8,17 +8,17 @@
 					<div class="col-6">
 						<div class="form-group mb-3">
 							<label class="form-label">Acción Comfaca En Línea:</label>
-							<?= Tag::selectStatic("action", array(
+							@php echo Tag::selectStatic("action", array(
 								'D' => 'Devolver',
 								'R' => 'Rechazar',
 								'I' => 'Inactivo',
-							), "use_dummy: true", "dummyValue: ", "class: form-select", "value: R"); ?>
+							), "use_dummy: true", "dummyValue: ", "class: form-select", "value: R"); @endphp
 						</div>
 					</div>
 					<div class="col-6">
 						<div class="form-group mb-3">
 							<label class="form-label"> Motivo de la acción:</label>
-							<?= Tag::select("codest", $mercurio11, "using: codest,detalle", "use_dummy: true", "dummyValue: ", "class: form-control"); ?>
+							@php echo Tag::select("codest", $mercurio11, "using: codest,detalle", "use_dummy: true", "dummyValue: ", "class: form-control"); @endphp
 						</div>
 					</div>
 				</div>

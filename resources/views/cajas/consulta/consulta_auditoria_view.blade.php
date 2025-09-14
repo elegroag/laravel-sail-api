@@ -1,5 +1,5 @@
 <?php
-echo View::getContent();
+
 Tag::addJavascript('core/global');
 ?>
 <div class="card mb-0">

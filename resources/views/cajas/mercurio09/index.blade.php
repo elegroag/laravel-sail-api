@@ -1,17 +1,17 @@
-<?php
-echo View::getContent();
+@php
+
 echo Tag::filtro($campo_filtro);
-?>
+@endphp
 
 <div id='consulta' class='table-responsive'></div>
 <div id='paginate' class='card-footer py-4'></div>
 
-<?= Tag::ModalGeneric(
+@php echo Tag::ModalGeneric(
     $title,
     View::render("mercurio09/tmp/form")
-) ?>
+) @endphp
 
-<?= Tag::ModalCapture(
+@php echo Tag::ModalCapture(
     array(
         'name' => 'ModalCapturaArchivos',
         'titulo' => 'Requeridos por afiliados',
@@ -19,9 +19,9 @@ echo Tag::filtro($campo_filtro);
             "mercurio09/tmp/capture_archivos"
         )
     )
-) ?>
+) @endphp
 
-<?= Tag::ModalCapture(
+@php echo Tag::ModalCapture(
     array(
         'name' => 'ModalCapturaEmpresa',
         'titulo' => 'Requeridos por empresa',
@@ -30,6 +30,6 @@ echo Tag::filtro($campo_filtro);
             array('_tipsoc' => $_tipsoc)
         )
     )
-) ?>
+) @endphp
 
-<?= Tag::javascriptInclude('Cajas/tipoopciones/build.tipoopciones'); ?>
+@php echo Tag::javascriptInclude('Cajas/tipoopciones/build.tipoopciones'); @endphp

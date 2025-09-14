@@ -1,18 +1,16 @@
-<?php
-echo View::getContent();
-Tag::addJavascript('core/global');
-Tag::addJavascript('Cajas/movile/mercurio58');
-echo Tag::help($title, $help);
-?>
+@php
+use App\Services\Tag;
 
+echo Tag::help($title, $help);
+@endphp
 
 <div class="card-body border-top">
-    <?php echo Tag::form("id: form", "class: validation_form", "autocomplete: off", "novalidate"); ?>
+    @php echo Tag::form("id: form", "class: validation_form", "autocomplete: off", "novalidate"); @endphp
     <div class="row">
         <div class="col-md-6 ml-auto">
             <div class="form-group">
                 <div class="custom-file">
-                    <input type="hidden" class="custom-file-input" id="codare" name="codare" value="<?php echo $codare ?>" lang="es">
+                    <input type="hidden" class="custom-file-input" id="codare" name="codare" value="{{ $codare }}" lang="es">
                     <input type="file" class="custom-file-input" id="archivo" name="archivo" lang="es">
                     <label class="custom-file-label" for="customFileLang">Seleccione un archivo</label>
                 </div>
@@ -22,7 +20,7 @@ echo Tag::help($title, $help);
             <button type="button" class="btn btn-primary " onclick="guardar();">Agregar</button>
         </div>
     </div>
-    <?php echo Tag::endform(); ?>
+    @php echo Tag::endform(); @endphp
 
     <div class="row border-top d-flex flex-wrap mt-2 pt-3" id="galeria">
     </div>
@@ -40,3 +38,6 @@ echo Tag::help($title, $help);
         </div>
     </div>
 </div>
+
+<script src="{{ asset('core/global.js') }}"></script>
+<script src="{{ asset('Cajas/movile/mercurio58.js') }}"></script>

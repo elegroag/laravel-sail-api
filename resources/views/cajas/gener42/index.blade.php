@@ -1,5 +1,5 @@
 <?php
-echo View::getContent();
+
 ?>
 
 <div class="row">

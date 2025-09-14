@@ -7,7 +7,7 @@
                 <div class="col-lg-4 col-md-6 col-12">
                     <div class="form-group">
                         <label for="tipo_solicitud">Tipo de Solicitud</label>
-                        <?= Tag::selectStatic('tipo_solicitud', $tipo_solicitudes, 'class: form-control') ?>
+                        @php echo Tag::selectStatic('tipo_solicitud', $tipo_solicitudes, 'class: form-control'); @endphp
                     </div>
 
                     <div class='form-group'>
@@ -24,12 +24,12 @@
 
                     <div class='form-group'>
                         <label for="fecha_solicitud">Fecha de envío</label>
-                        <?= Tag::calendar('fecha_solicitud', 'class: form-control', 'type: date') ?>
+                        @php echo Tag::calendar('fecha_solicitud', 'class: form-control', 'type: date'); @endphp
                     </div>
 
                     <div class='form-group'>
                         <label for="fecha_solicitud">Fecha de aprobación</label>
-                        <?= Tag::calendar('fecha_aprueba', 'class: form-control', 'type: date') ?>
+                        @php echo Tag::calendar('fecha_aprueba', 'class: form-control', 'type: date'); @endphp
                     </div>
 
                     <div class='form-group text-center mt-2'>

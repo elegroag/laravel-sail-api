@@ -1,7 +1,3 @@
-<?php
-echo View::getContent();
-?>
-
 <script type="text/template" id='tmp_galeria'>
     <div class="col-lg-3 col-md-4 col-xs-6 mb-3">
         <button
@@ -42,7 +38,7 @@ echo View::getContent();
 </script>
 
 <div class="card-body border-top">
-    <?php echo Tag::form("id: form", "class: validation_form", "autocomplete: off", "novalidate"); ?>
+    @php echo Tag::form("id: form", "class: validation_form", "autocomplete: off", "novalidate"); @endphp
     <div class="row">
         <div class="col-md-6 ml-auto">
             <div class="form-group">
@@ -56,20 +52,20 @@ echo View::getContent();
         <div class="col-md-4">
             <div class="form-group">
                 <label for="tipo" class="form-control-label">Tipo</label>
-                <?php echo Tag::selectStatic("tipo", array("F" => "FOTO", "V" => "VIDEO"), "use_dummy: true", "dummyValue: ", "class: form-control"); ?>
+                @php echo Tag::selectStatic("tipo", array("F" => "FOTO", "V" => "VIDEO"), "use_dummy: true", "dummyValue: ", "class: form-control"); @endphp
             </div>
         </div>
         <div class="col-md-2 mr-auto">
             <button type="button" class="btn btn-primary" style="margin-top: 17%" data-toggle="guardar">Agregar</button>
         </div>
     </div>
-    <?php echo Tag::endform(); ?>
+    @php echo Tag::endform(); @endphp
     <div class="row border-top d-flex flex-wrap mt-2 pt-3" id="galeria"> </div>
 </div>
 
-<?= Tag::ModalGeneric(
+@php echo Tag::ModalGeneric(
     'Imagen Zoom',
     '<img id="img_zoom" class="img-fluid" src="" />'
-) ?>
+) @endphp
 
-<?= Tag::javascriptInclude('Cajas/galeria/build.galeria'); ?>
+<script src="{{ asset('Cajas/galeria/build.galeria.js') }}"></script>

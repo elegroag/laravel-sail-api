@@ -1,24 +1,28 @@
+@php
+use App\Services\Tag;
+@endphp
+
 <form id="form" method='POST'>
     <div class="row justify-content-start">
         <div class="form-group mb-2" style="width: 50%;">
             <label for="tipopc" class="form-control-label">Tipo afiliación</label>
-            <?= Tag::selectStatic("tipopc", $tipopc, "class: form-control", "placeholder: Tipo PC"); ?>
+            @php echo Tag::selectStatic("tipopc", $tipopc, "class: form-control", "placeholder: Tipo PC"); @endphp
         </div>
         <div class="form-group mb-2" style="width: 50%;">
             <label for="coddoc" class="form-control-label">Documento</label>
-            <?= Tag::selectStatic("coddoc", $coddoc, "class: form-control", "placeholder: Documento"); ?>
+            @php echo Tag::selectStatic("coddoc", $coddoc, "class: form-control", "placeholder: Documento"); @endphp
         </div>
         <div class="form-group mb-2" style="width: 50%;">
             <label for="tipsoc" class="form-control-label">Tipo sociedad</label>
-            <?= Tag::selectStatic("tipsoc", $tipsoc, "class: form-control", "placeholder: Código Doc"); ?>
+            @php echo Tag::selectStatic("tipsoc", $tipsoc, "class: form-control", "placeholder: Código Doc"); @endphp
         </div>
         <div class="form-group mb-2" style="width: 140px;">
             <label for="obliga" class="form-control-label">Obligatorio</label>
-            <?= Tag::selectStatic("obliga", array('N' => 'NO', 'S' => 'SI'), "class: form-control", "placeholder: obligatorio"); ?>
+            @php echo Tag::selectStatic("obliga", array('N' => 'NO', 'S' => 'SI'), "class: form-control", "placeholder: obligatorio"); @endphp
         </div>
         <div class="form-group mb-2" style="width: 140px;">
             <label for="auto_generado" class="form-control-label">Auto generado</label>
-            <?= Tag::selectStatic("auto_generado", array('0' => 'NO', '1' => 'SI'), "class: form-control", "placeholder: Auto Generado"); ?>
+            @php echo Tag::selectStatic("auto_generado", array('0' => 'NO', '1' => 'SI'), "class: form-control", "placeholder: Auto Generado"); @endphp
         </div>
         <div class="form-group mb-2" style="width: 100%;">
             <label for="nota" class="form-control-label">Nota observaciones:</label>

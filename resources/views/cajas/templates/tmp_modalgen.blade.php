@@ -1,8 +1,8 @@
 <div
     class="modal fade"
-    id="<?php echo $__idModal ?>"
+    id="{{ $__idModal }}"
     aria-hidden="true"
-    aria-labelledby="<?php echo $__btnShowModal ?>"
+    aria-labelledby="{{ $__btnShowModal }}"
     tabindex="-1">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -11,23 +11,23 @@
                     <div class="card-header bg-primary">
                         <div class="row align-items-center">
                             <div class="col-10">
-                                <h5 class="mb-0 text-white"><?php echo $titulo; ?></h5>
+                                <h5 class="mb-0 text-white">{{ $titulo }}</h5>
                             </div>
                             <div class="col-2 text-right">
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" data-bs-target="#<?php echo $__idModal ?>"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" data-bs-target="#{{ $__idModal }}"></button>
                             </div>
                         </div>
                     </div>
                     <div class="card-body">
-                        <?php echo $contenido ?>
+                        {{ $contenido }}
                     </div>
                     <div class="card-footer text-right">
-                        <button type="button" class="btn btn-primary" <?php echo $evento ?>>Guardar</button>
-                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" data-bs-target="#<?php echo $__idModal ?>" aria-label="Close">Cerrar</button>
+                        <button type="button" class="btn btn-primary" {!! $evento !!}>Guardar</button>
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" data-bs-target="#{{ $__idModal }}" aria-label="Close">Cerrar</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<a class="d-none" data-bs-toggle="modal" id='<?php echo $__btnShowModal ?>' href="#<?php echo $__idModal ?>" role="button">Crear</a>
+<a class="d-none" data-bs-toggle="modal" id='{{ $__btnShowModal }}' href="#{{ $__idModal }}" role="button">Crear</a>

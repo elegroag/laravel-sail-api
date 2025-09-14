@@ -43,15 +43,15 @@
 					<a class="nav-link pr-0" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 						<div class="media align-items-center">
 							<span class="avatar avatar-sm rounded-circle">
-								<?php echo Tag::image("Mercurio/profile-a.png", "alt: Image placeholder") ?>
+								@php echo Tag::image("Mercurio/profile-a.png", "alt: Image placeholder"); @endphp
 							</span>
 							<div class="media-body ml-2 d-none d-lg-block">
-								<span class="mb-0 text-sm font-weight-normal"><?php echo $user ?></span>
+								<span class="mb-0 text-sm font-weight-normal">{{ $user }}</span>
 							</div>
 						</div>
 					</a>
 					<div class="dropdown-menu dropdown-menu-right">
-						<a href="<?php echo Utils::getKumbiaUrl('login/salir'); ?>" class="dropdown-item">
+						<a href="{{ Utils::getKumbiaUrl('login/salir') }}" class="dropdown-item">
 							<i class="ni ni-user-run"></i>
 							<span>Cerrar sesión</span>
 						</a>
@@ -90,12 +90,12 @@
 
 <script type="text/javascript">
 	$('#btnVerNotificaciones').click(function() {
-		window.location.href = "<?php echo Utils::getKumbiaUrl('notificaciones'); ?>";
+		window.location.href = "{{ Utils::getKumbiaUrl('notificaciones') }}";
 	});
 
 	function refreshNotificaciones() {
 		$.ajax({
-			url: "<?php echo Utils::getKumbiaUrl('notificaciones/refresh'); ?>",
+			url: "{{ Utils::getKumbiaUrl('notificaciones/refresh') }}",
 			type: "POST",
 			dataType: "json",
 			data: {}

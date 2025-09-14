@@ -9,12 +9,12 @@
                 <div class="d-flex p-2">
                     <div class="col-sm-6 col-md-3" style="padding:5px;">
                         <div class="form-group">
-                            <?= Tag::selectStatic("campo-filtro", $campo_filtro, "class: form-control", "style: padding:8px;height:35px"); ?>
+                            @php echo Tag::selectStatic("campo-filtro", $campo_filtro, "class: form-control", "style: padding:8px;height:35px"); @endphp
                         </div>
                     </div>
                     <div class="col-sm-6 col-md-3" style="padding:5px;">
                         <div class="form-group">
-                            <?= Tag::selectStatic(
+                            @php echo Tag::selectStatic(
                                 "condi-filtro",
                                 array(
                                     "como" => "Coincidencia",
@@ -27,13 +27,12 @@
                                 ),
                                 "class: form-control",
                                 "style: padding:8px;height:35px"
-                            );
-                            ?>
+                            ); @endphp
                         </div>
                     </div>
                     <div class="col-sm-6 col-md-3" style="padding:5px;">
                         <div class="form-group">
-                            <?= Tag::textUpperField("value-filtro", "class: form-control", "placeholder: Valor filtro", "style: padding:8px;height:35px"); ?>
+                            @php echo Tag::textUpperField("value-filtro", "class: form-control", "placeholder: Valor filtro", "style: padding:8px;height:35px"); @endphp
                         </div>
                     </div>
                     <div class="form-group" style="padding:5px;">
@@ -57,31 +56,29 @@
                             </tr>
                         </thead>
                         <tbody id='tbody_filter'>
-                            <?
-                            if (isset($filters) && $filters != false) {
-                                foreach ($filters['campo'] as $xk => $value) { ?>
+                            @if (isset($filters) && $filters != false)
+                                @foreach ($filters['campo'] as $xk => $value)
                                     <tr>
                                         <td>
-                                            <?= $filters['campo'][$xk]['mcampo'] ?>
-                                            <input id='mcampo-filtro[]' name='mcampo-filtro[]' type='hidden' value='<?= $filters['campo'][$xk]['mcampo'] ?>' />
+                                            {{ $filters['campo'][$xk]['mcampo'] }}
+                                            <input id='mcampo-filtro[]' name='mcampo-filtro[]' type='hidden' value='{{ $filters['campo'][$xk]['mcampo'] }}' />
                                         </td>
                                         <td>
-                                            <?= $filters['condi'][$xk]['mcondi'] ?>
-                                            <input id='mcondi-filtro[]' name='mcondi-filtro[]' type='hidden' value='<?= $filters['condi'][$xk]['mcondi'] ?>' />
+                                            {{ $filters['condi'][$xk]['mcondi'] }}
+                                            <input id='mcondi-filtro[]' name='mcondi-filtro[]' type='hidden' value='{{ $filters['condi'][$xk]['mcondi'] }}' />
                                         </td>
                                         <td>
-                                            <?= $filters['value'][$xk]['mvalue'] ?>
-                                            <input id='mvalue-filtro[]' name='mvalue-filtro[]' type='hidden' value='<?= $filters['value'][$xk]['mvalue'] ?>' />
+                                            {{ $filters['value'][$xk]['mvalue'] }}
+                                            <input id='mvalue-filtro[]' name='mvalue-filtro[]' type='hidden' value='{{ $filters['value'][$xk]['mvalue'] }}' />
                                         </td>
                                         <td>
-                                            <button class='btn btn-outline-danger btn-sm' toggle-event='remove' data-key='<?= $xk ?>'>
+                                            <button class='btn btn-outline-danger btn-sm' toggle-event='remove' data-key='{{ $xk }}'>
                                                 <span class='btn-inner--icon'><i class='fas fa-trash'></i></span>
                                             </button>
                                         </td>
                                     </tr>
-                                <? }
-                            } else { ?>
-                            <? } ?>
+                                @endforeach
+                            @endif
                         </tbody>
                     </table>
                 </div>

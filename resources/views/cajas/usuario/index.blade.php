@@ -7,15 +7,15 @@
 
 @push('scripts')
     <script id='tmp_filtro' type="text/template">
-        <?= Tag::filtro($campo_filtro, 'aplicar_filtro') ?>
+        @php echo Tag::filtro($campo_filtro, 'aplicar_filtro'); @endphp
     </script>
 
     <script type="text/template" id='tmp_layout'>
-        <?= View::renderView("usuario/tmp/tmp_layout"); ?>
+        @php echo View::renderView("usuario/tmp/tmp_layout"); @endphp
     </script>
 
     <script type="text/template" id='tmp_header'>
-        <?= View::renderView("templates/tmp_header"); ?>
+        @php echo View::renderView("templates/tmp_header"); @endphp
     </script>
 
     <script type="text/template" id='tmp_tabla_usuarios'>
@@ -26,7 +26,7 @@
     </script>
 
     <script type="text/template" id='tmp_detalle'>
-        <?= View::renderView("usuario/tmp/tmp_detalle"); ?>
+        @php echo View::renderView("usuario/tmp/tmp_detalle"); @endphp
     </script>
 
     <script id='tmp_list_header' type="text/template">

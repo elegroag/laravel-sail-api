@@ -78,7 +78,7 @@
                       <div class="content-main">
                           <div class="container-fluid">
                               <div class="section">
-                                  <?php echo View::getContent(); ?>
+                                  <?php  ?>
                               </div>
                           </div>
                       </div>

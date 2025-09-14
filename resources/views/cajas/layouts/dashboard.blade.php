@@ -256,7 +256,7 @@ $user = ucfirst(strtolower($user));
     </div>
     <!-- Page content -->
     <div class="container-fluid mt--6">
-        <?php echo View::getContent(); ?>
+        <?php  ?>
 
         <!-- Footer -->
         <footer class="footer pt-0">

@@ -1,9 +1,3 @@
-<?php
-echo View::getContent();
-echo Tag::Assets("chart/Chart.min", 'js');
-echo Tag::Assets("chart/Chart.extension", 'js');
-?>
-
 <div class="card-body">
     <div class="row">
         <div class="col-xl-6">
@@ -87,4 +81,6 @@ echo Tag::Assets("chart/Chart.extension", 'js');
     </div>
 </div>
 
-<?= Tag::javascriptInclude('Cajas/dashboard/build.dashboard'); ?>
+<script src="{{ asset('Cajas/dashboard/build.dashboard.js') }}"></script>
+<script src="{{ asset('chart/Chart.min.js') }}"></script>
+<script src="{{ asset('chart/Chart.extension.js') }}"></script>

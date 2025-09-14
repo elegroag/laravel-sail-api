@@ -99,8 +99,7 @@
 	</div>
 </script>
 
-<?= Tag::javascriptInclude('Cajas/notificaciones/build.notificaciones'); ?>
-
+<script src="{{ asset('Cajas/notificaciones/build.notificaciones.js') }}"></script>
 
 <style>
 	.modal-text-notify {

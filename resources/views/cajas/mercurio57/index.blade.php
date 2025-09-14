@@ -1,13 +1,11 @@
-<?php
-echo View::getContent();
-Tag::addJavascript('core/global');
-Tag::addJavascript('Cajas/movile/mercurio57');
-echo Tag::help($title, $help);
-?>
 
+@php
+use App\Services\Tag;
+echo Tag::help($title, $help);
+@endphp
 
 <div class="card-body border-top">
-    <?php echo Tag::form("id: form", "class: validation_form", "autocomplete: off", "novalidate"); ?>
+    @php echo Tag::form("id: form", "class: validation_form", "autocomplete: off", "novalidate"); @endphp
     <div class="row">
         <div class="col-md-4 ml-auto">
             <div class="form-group">
@@ -19,14 +17,14 @@ echo Tag::help($title, $help);
         </div>
         <div class="col-md-4 ml-auto">
             <div class="form-group">
-                <?php echo Tag::textField("url", "class: form-control", "placeholder: Url"); ?>
+                @php echo Tag::textField("url", "class: form-control", "placeholder: Url"); @endphp
             </div>
         </div>
         <div class="col-md-auto mr-auto">
             <button type="button" class="btn btn-primary " onclick="guardar();">Agregar</button>
         </div>
     </div>
-    <?php echo Tag::endform(); ?>
+    @php echo Tag::endform(); @endphp
 
     <div class="row border-top d-flex flex-wrap mt-2 pt-3" id="galeria">
     </div>
@@ -44,3 +42,6 @@ echo Tag::help($title, $help);
         </div>
     </div>
 </div>
+
+<script src="{{ asset('core/global.js') }}"></script>
+<script src="{{ asset('Cajas/movile/mercurio57.js') }}"></script>
