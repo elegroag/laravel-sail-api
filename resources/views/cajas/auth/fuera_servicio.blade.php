@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<?php echo Tag::getDocumentTitle();	?>
+	<title>{{ $title }}</title>
 	<link href="/img/Cajas/favicon.png" rel="icon" type="image/png">
 	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
 
@@ -15,10 +15,12 @@
 	Tag::stylesheetLink('Cajas/all');
 	Tag::stylesheetLink('Cajas/nucleo');
 	Tag::stylesheetLink('Cajas/sweetalert2.min');
-	echo Tag::stylesheetLinkTags();
+	?>
+    <?php
+    echo Tag::stylesheetLinkTags();
 	echo Tag::javascriptLibrary('Cajas/core/jquery.min', true);
 	echo Tag::stylesheetLink('style', false);
-	?>
+    ?>
 </head>
 <body>
 	<main style='position:relative;top:120px'>
@@ -31,20 +33,20 @@
 			<div class="row mb-3" >
 				<div class="col-md-12">
 					<p class="text-center">
-						<?=$nota?>
+						{{ $nota }}
 						<br/>
-							Esta ventana de mantenimiento se prolonga por 4 horas, inicia desde las <?=$hora_inicia?> hasta <?=$hora_finaliza?> de la mañana.<br/>
+							Esta ventana de mantenimiento se prolonga por 4 horas, inicia desde las {{ $hora_inicia }} hasta {{ $hora_finaliza }} de la mañana.<br/>
 							En caso de ser necesario se puede prolongar otras 4 horas.
 						<br/>
-						Gracias por su comprensión 
+						Gracias por su comprensión
 						<br/>
 						<br/>
-						<?= Tag::linkTo("login/index", "Volver Inicio", "class: btn bg-green text-white") ?>
+						<a href="{{ route('login.index') }}" class="btn btn-primary">Volver Inicio</a>
 					</p>
 				</div>
 			</div>
 		</div>
 	</main>
-	<?=Tag::addJavascript('core/fuera_servicio'); ?>
+    <script src="{{ asset('assets/js/core/fuera_servicio.js') }}"></script>
 </body>
 </html>
