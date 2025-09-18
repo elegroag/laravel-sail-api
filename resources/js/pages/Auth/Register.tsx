@@ -1,11 +1,15 @@
 import type React from "react"
-import { useReducer, useRef, useEffect } from "react"
+import { useReducer, useRef, useEffect, useState } from "react"
 import { Building2, GraduationCap, Briefcase, Users, Home, HardHat } from "lucide-react"
 import AuthLayout from "@/layouts/auth-layout";
 import AuthWelcome from "@/components/auth-welcome";
 import AuthUserTypeSelector from "@/components/auth-user-type-selector";
 import RegisterForm from "@/components/register-form";
 import imageLogo from "../../assets/comfaca-logo.png";
+
+// ...tipos y constantes como antes...
+
+// (copio aquí los tipos y constantes del archivo original para mantener la integridad)
 
 type UserType = "empresa" | "independiente" | "facultativo" | "particular" | "domestico" | "trabajador"
 
@@ -99,10 +103,11 @@ function formReducer(state: FormState, action: FormAction): FormState {
   }
 }
 
-
 export default function Register(){ 
   const [state, dispatch] = useReducer(formReducer, initialState)
+  const [step, setStep] = useState(1)
 
+  // ...refs igual que antes...
   const firstNameRef = useRef<HTMLInputElement>(null)
   const lastNameRef = useRef<HTMLInputElement>(null)
   const emailRef = useRef<HTMLInputElement>(null)
@@ -122,72 +127,26 @@ export default function Register(){
 
   const handleUserTypeSelect = (userType: UserType) => {
     dispatch({ type: "SET_USER_TYPE", payload: userType })
+    setStep(1)
   }
 
   const handleBack = () => {
-    dispatch({ type: "RESET_FORM" })
+    if (state.selectedUserType === "empresa" && step === 2) {
+      setStep(1)
+    } else {
+      dispatch({ type: "RESET_FORM" })
+      setStep(1)
+    }
   }
 
-  const validateForm = (): boolean => {
+  // Validación por paso
+  const validateStep = (): boolean => {
     dispatch({ type: "CLEAR_ERRORS" })
     let isValid = true
-
-    // Document type validation
-    if (!state.documentType) {
-      dispatch({ type: "SET_ERROR", field: "documentType", error: "El tipo de documento es requerido" })
-      isValid = false
-    }
-
-    // Basic field validation
-    if (!state.firstName.trim()) {
-      dispatch({ type: "SET_ERROR", field: "firstName", error: "El nombre es requerido" })
-      firstNameRef.current?.focus()
-      isValid = false
-    }
-
-    if (!state.lastName.trim()) {
-      dispatch({ type: "SET_ERROR", field: "lastName", error: "El apellido es requerido" })
-      if (isValid) lastNameRef.current?.focus()
-      isValid = false
-    }
-
-    if (!state.email.trim()) {
-      dispatch({ type: "SET_ERROR", field: "email", error: "El email es requerido" })
-      if (isValid) emailRef.current?.focus()
-      isValid = false
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.email)) {
-      dispatch({ type: "SET_ERROR", field: "email", error: "Email inválido" })
-      if (isValid) emailRef.current?.focus()
-      isValid = false
-    }
-
-    if (!state.identification.trim()) {
-      dispatch({ type: "SET_ERROR", field: "identification", error: "La identificación es requerida" })
-      if (isValid) identificationRef.current?.focus()
-      isValid = false
-    }
-
-    if (!state.password.trim()) {
-      dispatch({ type: "SET_ERROR", field: "password", error: "La contraseña es requerida" })
-      if (isValid) passwordRef.current?.focus()
-      isValid = false
-    } else if (state.password.length < 6) {
-      dispatch({ type: "SET_ERROR", field: "password", error: "La contraseña debe tener al menos 6 caracteres" })
-      if (isValid) passwordRef.current?.focus()
-      isValid = false
-    }
-
-    if (state.password !== state.confirmPassword) {
-      dispatch({ type: "SET_ERROR", field: "confirmPassword", error: "Las contraseñas no coinciden" })
-      if (isValid) confirmPasswordRef.current?.focus()
-      isValid = false
-    }
-
-    // Company-specific validation
-    if (state.selectedUserType === "empresa") {
+    if (state.selectedUserType === "empresa" && step === 1) {
       if (!state.companyName.trim()) {
         dispatch({ type: "SET_ERROR", field: "companyName", error: "El nombre de la empresa es requerido" })
-        if (isValid) companyNameRef.current?.focus()
+        companyNameRef.current?.focus()
         isValid = false
       }
       if (!state.companyNit.trim()) {
@@ -195,55 +154,80 @@ export default function Register(){
         if (isValid) companyNitRef.current?.focus()
         isValid = false
       }
+      // No validar campos de representante aquí
+    } else {
+      // Validar todos los campos (como antes)
+      // ...copiar aquí la validación global del paso 2...
+      if (!state.documentType) {
+        dispatch({ type: "SET_ERROR", field: "documentType", error: "El tipo de documento es requerido" })
+        isValid = false
+      }
+      if (!state.firstName.trim()) {
+        dispatch({ type: "SET_ERROR", field: "firstName", error: "El nombre es requerido" })
+        firstNameRef.current?.focus()
+        isValid = false
+      }
+      if (!state.lastName.trim()) {
+        dispatch({ type: "SET_ERROR", field: "lastName", error: "El apellido es requerido" })
+        if (isValid) lastNameRef.current?.focus()
+        isValid = false
+      }
+      if (!state.email.trim()) {
+        dispatch({ type: "SET_ERROR", field: "email", error: "El email es requerido" })
+        if (isValid) emailRef.current?.focus()
+        isValid = false
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.email)) {
+        dispatch({ type: "SET_ERROR", field: "email", error: "Email inválido" })
+        if (isValid) emailRef.current?.focus()
+        isValid = false
+      }
+      if (!state.identification.trim()) {
+        dispatch({ type: "SET_ERROR", field: "identification", error: "La identificación es requerida" })
+        if (isValid) identificationRef.current?.focus()
+        isValid = false
+      }
+      if (!state.password.trim()) {
+        dispatch({ type: "SET_ERROR", field: "password", error: "La contraseña es requerida" })
+        if (isValid) passwordRef.current?.focus()
+        isValid = false
+      } else if (state.password.length < 6) {
+        dispatch({ type: "SET_ERROR", field: "password", error: "La contraseña debe tener al menos 6 caracteres" })
+        if (isValid) passwordRef.current?.focus()
+        isValid = false
+      }
+      if (state.password !== state.confirmPassword) {
+        dispatch({ type: "SET_ERROR", field: "confirmPassword", error: "Las contraseñas no coinciden" })
+        if (isValid) confirmPasswordRef.current?.focus()
+        isValid = false
+      }
     }
-
     return isValid
+  }
+
+  const handleNextStep = () => {
+    if (validateStep()) {
+      setStep(2)
+    }
+  }
+
+  const handlePrevStep = () => {
+    setStep(1)
   }
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    if (!validateForm()) {
+    if (!validateStep()) {
       return
     }
-
     dispatch({ type: "SET_SUBMITTING", payload: true })
-
     try {
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 2000))
-
-      // Log registration data for development
-      console.log("[v0] Registration data:", {
-        userType: state.selectedUserType,
-        personalInfo: {
-          firstName: state.firstName,
-          lastName: state.lastName,
-          email: state.email,
-          phone: state.phone,
-        },
-        document: {
-          type: state.documentType,
-          number: state.identification,
-        },
-        ...(state.selectedUserType === "empresa" && {
-          company: {
-            name: state.companyName,
-            nit: state.companyNit,
-          },
-        }),
-        address: state.address,
-      })
-
-      // Show success message and redirect
       alert("¡Registro exitoso! Serás redirigido al login.")
-
-      // Reset form and redirect to login
       dispatch({ type: "RESET_FORM" })
+      setStep(1)
       window.location.href = "/"
     } catch (error) {
-      console.error("Registration error:", error)
-      alert("Error en el registro. Por favor intenta nuevamente.")
+      console.log("Error en el registro. Por favor intenta nuevamente.", error)
     } finally {
       dispatch({ type: "SET_SUBMITTING", payload: false })
     }
@@ -253,7 +237,6 @@ export default function Register(){
 
   return (
     <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
-      {/* Left Panel - Welcome Section */}
       <AuthWelcome
         title="REGISTRO"
         tagline="Únete a Value Aims"
@@ -261,23 +244,20 @@ export default function Register(){
         backHref={route('login')}
         backText="¿Ya tienes cuenta? Inicia sesión"
       />
-
-      {/* Right Panel - Registration Form */}
       <div className="lg:w-1/2 p-8 flex flex-col justify-center relative overflow-y-auto max-h-[700px]">
         <div className="absolute top-6 right-6 w-16 h-16 bg-gradient-to-br from-emerald-200 to-teal-300 rounded-2xl opacity-70"></div>
         <div className="absolute bottom-6 right-12 w-8 h-8 bg-gradient-to-tr from-emerald-300 to-green-400 rounded-lg opacity-50"></div>
         <div className="absolute top-1/3 left-6 w-12 h-12 bg-gradient-to-bl from-teal-200 to-emerald-200 rounded-full opacity-40"></div>
-
         <div className="max-w-md mx-auto w-full">
           {!state.selectedUserType ? (
-              <AuthUserTypeSelector
-                title="Crear cuenta"
-                subtitle="Selecciona tu tipo de usuario"
-                logoSrc={imageLogo}
-                logoAlt="Comfaca Logo"
-                userTypes={userTypes}
-                onSelect={(id) => handleUserTypeSelect(id)}
-              />
+            <AuthUserTypeSelector
+              title="Crear cuenta"
+              subtitle="Selecciona tu tipo de usuario"
+              logoSrc={imageLogo}
+              logoAlt="Comfaca Logo"
+              userTypes={userTypes}
+              onSelect={(id) => handleUserTypeSelect(id)}
+            />
           ) : (
             <RegisterForm
               userTypeLabel={userTypes.find((ut) => ut.id === state.selectedUserType)?.label || ""}
@@ -303,6 +283,9 @@ export default function Register(){
                 dispatch({ type: "SET_FIELD", field: field as keyof FormState, value })
               }
               onSubmit={handleRegister}
+              step={isCompanyType ? step : 2}
+              onNextStep={handleNextStep}
+              onPrevStep={handlePrevStep}
               firstNameRef={firstNameRef}
               lastNameRef={lastNameRef}
               emailRef={emailRef}
