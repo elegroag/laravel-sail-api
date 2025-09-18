@@ -1,6 +1,6 @@
 <?php
 
-
+use App\Http\Controllers\Mercurio\AuthController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\WebController;
 use Illuminate\Foundation\Application;
@@ -16,15 +16,15 @@ Route::get('/', function () {
     ]);
 });
 
-/* Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard'); */
-
 Route::get('/dashboard', function () {
     return Inertia::render('dashboard');
 })->name('dash');
 
 Route::resource('tasks', TaskController::class);
+
+Route::get('/web/login', [AuthController::class, 'index'])->name('login');
+Route::get('/web/register', [AuthController::class, 'register'])->name('register');
+Route::get('/web/password/request', [AuthController::class, 'passwordRequest'])->name('password.request');
 
 Route::get('/web', [WebController::class, 'dashboard'])->name('dashboard');
 Route::get('/web/empresas', [WebController::class, 'empresas'])->name('empresas.index');
