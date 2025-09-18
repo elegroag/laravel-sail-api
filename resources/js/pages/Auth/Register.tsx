@@ -1,13 +1,11 @@
 import type React from "react"
 import { useReducer, useRef, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Building2, GraduationCap, Briefcase, Users, Home, HardHat, ChevronLeft } from "lucide-react"
-import imageLogo from "../../assets/comfaca-logo.png";
+import { Building2, GraduationCap, Briefcase, Users, Home, HardHat } from "lucide-react"
 import AuthLayout from "@/layouts/auth-layout";
-import TextLink from "@/components/text-link";
+import AuthWelcome from "@/components/auth-welcome";
+import AuthUserTypeSelector from "@/components/auth-user-type-selector";
+import RegisterForm from "@/components/register-form";
+import imageLogo from "../../assets/comfaca-logo.png";
 
 type UserType = "empresa" | "independiente" | "facultativo" | "particular" | "domestico" | "trabajador"
 
@@ -101,12 +99,8 @@ function formReducer(state: FormState, action: FormAction): FormState {
   }
 }
 
-interface ReactProps {
-  status?: string;
-  canResetPassword: boolean;
-}
 
-export default function Register({ status, canResetPassword }: ReactProps){ 
+export default function Register(){ 
   const [state, dispatch] = useReducer(formReducer, initialState)
 
   const firstNameRef = useRef<HTMLInputElement>(null)
@@ -260,29 +254,13 @@ export default function Register({ status, canResetPassword }: ReactProps){
   return (
     <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
       {/* Left Panel - Welcome Section */}
-      <div className="lg:w-1/2 bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-700 text-white p-12 flex flex-col justify-center relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full -translate-y-16 translate-x-16 opacity-60"></div>
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-emerald-800 to-emerald-600 rounded-full translate-y-12 -translate-x-12 opacity-40"></div>
-        <div className="absolute top-1/2 left-0 w-16 h-16 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-full -translate-x-8 opacity-30"></div>
-
-        <div className="relative z-10">
-          <h1 className="text-4xl font-bold mb-2">REGISTRO</h1>
-          <div className="w-16 h-0.5 bg-white mb-6"></div>
-          <p className="text-emerald-100 text-lg mb-6">Únete a Value Aims</p>
-
-          <p className="text-emerald-100 text-sm leading-relaxed mb-6">
-            Crea tu cuenta para acceder a todos los servicios y beneficios que Value Aims tiene para ofrecerte. Un
-            proceso simple y seguro para comenzar tu experiencia.
-          </p>
-
-          <TextLink href={route('login')}
-            className="inline-flex items-center text-emerald-200 hover:text-white transition-colors text-sm"
-          >
-            <ChevronLeft className="w-4 h-4 mr-1" />
-            ¿Ya tienes cuenta? Inicia sesión
-          </TextLink>
-        </div>
-      </div>
+      <AuthWelcome
+        title="REGISTRO"
+        tagline="Únete a Value Aims"
+        description="Crea tu cuenta para acceder a todos los servicios y beneficios que Value Aims tiene para ofrecerte. Un proceso simple y seguro para comenzar tu experiencia."
+        backHref={route('login')}
+        backText="¿Ya tienes cuenta? Inicia sesión"
+      />
 
       {/* Right Panel - Registration Form */}
       <div className="lg:w-1/2 p-8 flex flex-col justify-center relative overflow-y-auto max-h-[700px]">
@@ -292,270 +270,50 @@ export default function Register({ status, canResetPassword }: ReactProps){
 
         <div className="max-w-md mx-auto w-full">
           {!state.selectedUserType ? (
-            <>
-            <div className="mb-6 flex justify-center">
-            <img
-              src={imageLogo}
-              alt="Comfaca Logo"
-              width={180}
-              height={60}
-              className="opacity-90"
-            />
-          </div>
-              <h2 className="text-2xl font-semibold text-gray-800 mb-2 text-center">Crear cuenta</h2>
-              <p className="text-lg text-gray-600 mb-8 text-center">Selecciona tu tipo de usuario</p>
-
-              <div className="grid grid-cols-3 gap-4 mb-8">
-                {userTypes.map((userType) => (
-                  <button
-                    key={userType.id}
-                    onClick={() => handleUserTypeSelect(userType.id)}
-                    className="flex flex-col items-center p-4 rounded-lg border-2 border-gray-200 hover:border-emerald-500 hover:bg-gradient-to-br hover:from-emerald-50 hover:to-teal-50 transition-all duration-200 group"
-                  >
-                    <div className="text-emerald-600 group-hover:text-emerald-700 mb-2">{userType.icon}</div>
-                    <span className="text-xs text-gray-600 text-center font-medium">{userType.label}</span>
-                  </button>
-                ))}
-              </div>
-            </>
+              <AuthUserTypeSelector
+                title="Crear cuenta"
+                subtitle="Selecciona tu tipo de usuario"
+                logoSrc={imageLogo}
+                logoAlt="Comfaca Logo"
+                userTypes={userTypes}
+                onSelect={(id) => handleUserTypeSelect(id)}
+              />
           ) : (
-            <>
-              <div className="flex items-center mb-6">
-                <button onClick={handleBack} className="mr-3 p-2 hover:bg-gray-100 rounded-full transition-colors">
-                  <ChevronLeft className="w-5 h-5 text-gray-600" />
-                </button>
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-800">
-                    {userTypes.find((ut) => ut.id === state.selectedUserType)?.label}
-                  </h2>
-                  <p className="text-sm text-gray-600">Completa tu información</p>
-                </div>
-              </div>
-
-              <form onSubmit={handleRegister} className="space-y-4">
-                {/* Personal Information */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="firstName" className="text-sm font-medium text-gray-700">
-                      Nombre *
-                    </Label>
-                    <Input
-                      id="firstName"
-                      ref={firstNameRef}
-                      type="text"
-                      value={state.firstName}
-                      onChange={(e) => dispatch({ type: "SET_FIELD", field: "firstName", value: e.target.value })}
-                      placeholder="Tu nombre"
-                      className={`mt-1 ${state.errors.firstName ? "border-red-500" : ""}`}
-                    />
-                    {state.errors.firstName && (
-                      <p className="text-red-500 text-xs mt-1">{state.errors.firstName}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label htmlFor="lastName" className="text-sm font-medium text-gray-700">
-                      Apellido *
-                    </Label>
-                    <Input
-                      id="lastName"
-                      ref={lastNameRef}
-                      type="text"
-                      value={state.lastName}
-                      onChange={(e) => dispatch({ type: "SET_FIELD", field: "lastName", value: e.target.value })}
-                      placeholder="Tu apellido"
-                      className={`mt-1 ${state.errors.lastName ? "border-red-500" : ""}`}
-                    />
-                    {state.errors.lastName && <p className="text-red-500 text-xs mt-1">{state.errors.lastName}</p>}
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-                    Email *
-                  </Label>
-                  <Input
-                    id="email"
-                    ref={emailRef}
-                    type="email"
-                    value={state.email}
-                    onChange={(e) => dispatch({ type: "SET_FIELD", field: "email", value: e.target.value })}
-                    placeholder="tu@email.com"
-                    className={`mt-1 ${state.errors.email ? "border-red-500" : ""}`}
-                  />
-                  {state.errors.email && <p className="text-red-500 text-xs mt-1">{state.errors.email}</p>}
-                </div>
-
-                <div>
-                  <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
-                    Teléfono
-                  </Label>
-                  <Input
-                    id="phone"
-                    ref={phoneRef}
-                    type="tel"
-                    value={state.phone}
-                    onChange={(e) => dispatch({ type: "SET_FIELD", field: "phone", value: e.target.value })}
-                    placeholder="Tu número de teléfono"
-                    className="mt-1"
-                  />
-                </div>
-
-                {/* Document Information */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="documentType" className="text-sm font-medium text-gray-700">
-                      Tipo de documento *
-                    </Label>
-                    <Select
-                      value={state.documentType}
-                      onValueChange={(value) => dispatch({ type: "SET_FIELD", field: "documentType", value })}
-                    >
-                      <SelectTrigger className={`mt-1 ${state.errors.documentType ? "border-red-500" : ""}`}>
-                        <SelectValue placeholder="Selecciona" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {documentTypes.map((doc) => (
-                          <SelectItem key={doc.value} value={doc.value}>
-                            {doc.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {state.errors.documentType && (
-                      <p className="text-red-500 text-xs mt-1">{state.errors.documentType}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label htmlFor="identification" className="text-sm font-medium text-gray-700">
-                      Número *
-                    </Label>
-                    <Input
-                      id="identification"
-                      ref={identificationRef}
-                      type="text"
-                      value={state.identification}
-                      onChange={(e) =>
-                        dispatch({ type: "SET_FIELD", field: "identification", value: e.target.value })
-                      }
-                      placeholder="Número de documento"
-                      className={`mt-1 ${state.errors.identification ? "border-red-500" : ""}`}
-                    />
-                    {state.errors.identification && (
-                      <p className="text-red-500 text-xs mt-1">{state.errors.identification}</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Company Information (only for empresa type) */}
-                {isCompanyType && (
-                  <>
-                    <div>
-                      <Label htmlFor="companyName" className="text-sm font-medium text-gray-700">
-                        Nombre de la empresa *
-                      </Label>
-                      <Input
-                        id="companyName"
-                        ref={companyNameRef}
-                        type="text"
-                        value={state.companyName}
-                        onChange={(e) =>
-                          dispatch({ type: "SET_FIELD", field: "companyName", value: e.target.value })
-                        }
-                        placeholder="Nombre de tu empresa"
-                        className={`mt-1 ${state.errors.companyName ? "border-red-500" : ""}`}
-                      />
-                      {state.errors.companyName && (
-                        <p className="text-red-500 text-xs mt-1">{state.errors.companyName}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <Label htmlFor="companyNit" className="text-sm font-medium text-gray-700">
-                        NIT de la empresa *
-                      </Label>
-                      <Input
-                        id="companyNit"
-                        ref={companyNitRef}
-                        type="text"
-                        value={state.companyNit}
-                        onChange={(e) =>
-                          dispatch({ type: "SET_FIELD", field: "companyNit", value: e.target.value })
-                        }
-                        placeholder="NIT de la empresa"
-                        className={`mt-1 ${state.errors.companyNit ? "border-red-500" : ""}`}
-                      />
-                      {state.errors.companyNit && (
-                        <p className="text-red-500 text-xs mt-1">{state.errors.companyNit}</p>
-                      )}
-                    </div>
-                  </>
-                )}
-
-                <div>
-                  <Label htmlFor="address" className="text-sm font-medium text-gray-700">
-                    Dirección
-                  </Label>
-                  <Input
-                    id="address"
-                    ref={addressRef}
-                    type="text"
-                    value={state.address}
-                    onChange={(e) => dispatch({ type: "SET_FIELD", field: "address", value: e.target.value })}
-                    placeholder="Tu dirección"
-                    className="mt-1"
-                  />
-                </div>
-
-                {/* Password Fields */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="password" className="text-sm font-medium text-gray-700">
-                      Contraseña *
-                    </Label>
-                    <Input
-                      id="password"
-                      ref={passwordRef}
-                      type="password"
-                      value={state.password}
-                      onChange={(e) => dispatch({ type: "SET_FIELD", field: "password", value: e.target.value })}
-                      placeholder="Mínimo 6 caracteres"
-                      className={`mt-1 ${state.errors.password ? "border-red-500" : ""}`}
-                    />
-                    {state.errors.password && <p className="text-red-500 text-xs mt-1">{state.errors.password}</p>}
-                  </div>
-
-                  <div>
-                    <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
-                      Confirmar *
-                    </Label>
-                    <Input
-                      id="confirmPassword"
-                      ref={confirmPasswordRef}
-                      type="password"
-                      value={state.confirmPassword}
-                      onChange={(e) =>
-                        dispatch({ type: "SET_FIELD", field: "confirmPassword", value: e.target.value })
-                      }
-                      placeholder="Repite la contraseña"
-                      className={`mt-1 ${state.errors.confirmPassword ? "border-red-500" : ""}`}
-                    />
-                    {state.errors.confirmPassword && (
-                      <p className="text-red-500 text-xs mt-1">{state.errors.confirmPassword}</p>
-                    )}
-                  </div>
-                </div>
-
-                <Button
-                  type="submit"
-                  disabled={state.isSubmitting}
-                  className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white py-3 rounded-lg font-medium shadow-lg mt-6"
-                >
-                  {state.isSubmitting ? "Registrando..." : "Crear cuenta"}
-                </Button>
-              </form>
-            </>
+            <RegisterForm
+              userTypeLabel={userTypes.find((ut) => ut.id === state.selectedUserType)?.label || ""}
+              values={{
+                documentType: state.documentType,
+                identification: state.identification,
+                firstName: state.firstName,
+                lastName: state.lastName,
+                email: state.email,
+                phone: state.phone,
+                password: state.password,
+                confirmPassword: state.confirmPassword,
+                companyName: state.companyName,
+                companyNit: state.companyNit,
+                address: state.address,
+              }}
+              errors={state.errors}
+              isSubmitting={state.isSubmitting}
+              isCompanyType={isCompanyType}
+              documentTypes={documentTypes}
+              onBack={handleBack}
+              onChange={(field, value) =>
+                dispatch({ type: "SET_FIELD", field: field as keyof FormState, value })
+              }
+              onSubmit={handleRegister}
+              firstNameRef={firstNameRef}
+              lastNameRef={lastNameRef}
+              emailRef={emailRef}
+              phoneRef={phoneRef}
+              identificationRef={identificationRef}
+              passwordRef={passwordRef}
+              confirmPasswordRef={confirmPasswordRef}
+              companyNameRef={companyNameRef}
+              companyNitRef={companyNitRef}
+              addressRef={addressRef}
+            />
           )}
         </div>
       </div>
