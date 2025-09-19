@@ -1,6 +1,6 @@
 import type React from "react"
 import { useReducer, useRef, useEffect, useState } from "react"
-import { Building2, GraduationCap, Briefcase, Users, Home, HardHat } from "lucide-react"
+import { Building2, GraduationCap, Briefcase, Users, Home, HardHat, User } from "lucide-react"
 import AuthLayout from "@/layouts/auth-layout";
 import AuthWelcome from "@/components/auth-welcome";
 import AuthUserTypeSelector from "@/components/auth-user-type-selector";
@@ -11,7 +11,7 @@ import imageLogo from "../../assets/comfaca-logo.png";
 
 // (copio aquí los tipos y constantes del archivo original para mantener la integridad)
 
-type UserType = "empresa" | "independiente" | "facultativo" | "particular" | "domestico" | "trabajador"
+type UserType = "empresa" | "independiente" | "facultativo" | "particular" | "domestico" | "trabajador" | "pensionado"
 
 interface UserTypeOption {
   id: UserType
@@ -26,6 +26,7 @@ const userTypes: UserTypeOption[] = [
   { id: "particular", label: "Particular", icon: <Users className="w-8 h-8 text-orange-500" /> },
   { id: "domestico", label: "Servicio doméstico", icon: <Home className="w-8 h-8 text-red-500" /> },
   { id: "trabajador", label: "Trabajador", icon: <HardHat className="w-8 h-8 text-yellow-500" /> },
+  { id: "pensionado", label: "Pensionado", icon: <User className="w-8 h-8 text-pink-500" /> },
 ]
 
 const documentTypes = [
@@ -103,7 +104,7 @@ function formReducer(state: FormState, action: FormAction): FormState {
   }
 }
 
-export default function Register(){ 
+export default function Register(){
   const [state, dispatch] = useReducer(formReducer, initialState)
   const [step, setStep] = useState(1)
 

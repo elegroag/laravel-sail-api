@@ -2,14 +2,14 @@ import type React from "react"
 import TextLink from "@/components/text-link"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Building2, GraduationCap, Briefcase, Users, Home, HardHat } from "lucide-react"
+import { Building2, GraduationCap, Briefcase, Users, Home, HardHat, User } from "lucide-react"
 import imageLogo from "../../assets/comfaca-logo.png";
 import AuthLayout from "@/layouts/auth-layout"
 import AuthWelcome from "@/components/auth-welcome"
 import AuthUserTypeSelector from "@/components/auth-user-type-selector"
 import LoginForm from "@/components/login-form"
 
-type UserType = "empresa" | "independiente" | "facultativo" | "particular" | "domestico" | "trabajador"
+type UserType = "empresa" | "independiente" | "facultativo" | "particular" | "domestico" | "trabajador" | "pensionado"
 
 interface UserTypeOption {
   id: UserType
@@ -24,6 +24,7 @@ const userTypes: UserTypeOption[] = [
   { id: "particular", label: "Particular", icon: <Users className="w-8 h-8 text-orange-500" /> },
   { id: "domestico", label: "Servicio doméstico", icon: <Home className="w-8 h-8 text-red-500" /> },
   { id: "trabajador", label: "Trabajador", icon: <HardHat className="w-8 h-8 text-yellow-500" /> },
+  { id: "pensionado", label: "Pensionado", icon: <User className="w-8 h-8 text-pink-500" /> },
 ]
 
 const documentTypes = [
@@ -33,7 +34,7 @@ const documentTypes = [
   { value: "pasaporte", label: "Pasaporte" },
 ]
 
-export default function Login() 
+export default function Login()
 {
   const [selectedUserType, setSelectedUserType] = useState<UserType | null>(null)
   const [documentType, setDocumentType] = useState("")
@@ -66,7 +67,7 @@ export default function Login()
   }
 
   return (
-    <AuthLayout title="Log in to your account" description="Enter your email and password below to log in"> 
+    <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
       {/* Left Panel - Welcome Section */}
       <AuthWelcome
         title="BIENVENIDO"
@@ -106,8 +107,8 @@ export default function Login()
                   <span className="mr-1">?</span>
                   Olvidé mi clave
                 </button>
-                
-                <TextLink href={route('register')} 
+
+                <TextLink href={route('register')}
                 className="text-gray-500 hover:text-emerald-600 flex items-center">
                   <span className="mr-1">🔑</span>
                   Crear cuenta

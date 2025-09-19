@@ -104,7 +104,7 @@ export default function RegisterForm({
                 value={values.companyName}
                 onChange={(e) => onChange("companyName", e.target.value)}
                 placeholder="Nombre de tu empresa"
-                className={`mt-1 ${errors.companyName ? "border-red-500" : ""}`}
+                className={`in-b-form mt-1 ${errors.companyName ? "border-red-500" : ""}`}
               />
               {errors.companyName && <p className="text-red-500 text-xs mt-1">{errors.companyName}</p>}
             </div>
@@ -119,7 +119,7 @@ export default function RegisterForm({
                 value={values.companyNit}
                 onChange={(e) => onChange("companyNit", e.target.value)}
                 placeholder="NIT de la empresa"
-                className={`mt-1 ${errors.companyNit ? "border-red-500" : ""}`}
+                className={`in-b-form mt-1 ${errors.companyNit ? "border-red-500" : ""}`}
               />
               {errors.companyNit && <p className="text-red-500 text-xs mt-1">{errors.companyNit}</p>}
             </div>
@@ -134,7 +134,7 @@ export default function RegisterForm({
                 value={values.address}
                 onChange={(e) => onChange("address", e.target.value)}
                 placeholder="Dirección empresa"
-                className="mt-1"
+                className="in-b-form mt-1"
               />
             </div>
             <Button type="button" className="w-full mt-4" onClick={onNextStep}>
@@ -158,7 +158,7 @@ export default function RegisterForm({
                   value={values.firstName}
                   onChange={(e) => onChange("firstName", e.target.value)}
                   placeholder="Nombre representante"
-                  className={`mt-1 ${errors.firstName ? "border-red-500" : ""}`}
+                  className={`in-b-form mt-1 ${errors.firstName ? "border-red-500" : ""}`}
                 />
                 {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
               </div>
@@ -173,7 +173,7 @@ export default function RegisterForm({
                   value={values.lastName}
                   onChange={(e) => onChange("lastName", e.target.value)}
                   placeholder="Apellido representante"
-                  className={`mt-1 ${errors.lastName ? "border-red-500" : ""}`}
+                  className={`in-b-form mt-1 ${errors.lastName ? "border-red-500" : ""}`}
                 />
                 {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
               </div>
@@ -189,7 +189,7 @@ export default function RegisterForm({
                 value={values.email}
                 onChange={(e) => onChange("email", e.target.value)}
                 placeholder="Correo representante"
-                className={`mt-1 ${errors.email ? "border-red-500" : ""}`}
+                className={`in-b-form mt-1 ${errors.email ? "border-red-500" : ""}`}
               />
               {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
             </div>
@@ -204,7 +204,7 @@ export default function RegisterForm({
                 value={values.phone}
                 onChange={(e) => onChange("phone", e.target.value)}
                 placeholder="Teléfono representante"
-                className="mt-1"
+                className="in-b-form mt-1"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -213,7 +213,7 @@ export default function RegisterForm({
                   Tipo de documento *
                 </Label>
                 <Select value={values.documentType} onValueChange={(v) => onChange("documentType", v)}>
-                  <SelectTrigger className={`mt-1 ${errors.documentType ? "border-red-500" : ""}`}>
+                  <SelectTrigger className={`in-b-form mt-1 ${errors.documentType ? "border-red-500" : ""}`}>
                     <SelectValue placeholder="Selecciona" />
                   </SelectTrigger>
                   <SelectContent>
@@ -237,7 +237,7 @@ export default function RegisterForm({
                   value={values.identification}
                   onChange={(e) => onChange("identification", e.target.value)}
                   placeholder="Número de documento"
-                  className={`mt-1 ${errors.identification ? "border-red-500" : ""}`}
+                  className={`in-b-form mt-1 ${errors.identification ? "border-red-500" : ""}`}
                 />
                 {errors.identification && <p className="text-red-500 text-xs mt-1">{errors.identification}</p>}
               </div>
@@ -254,7 +254,7 @@ export default function RegisterForm({
                   value={values.password}
                   onChange={(e) => onChange("password", e.target.value)}
                   placeholder="Mínimo 6 caracteres"
-                  className={`mt-1 ${errors.password ? "border-red-500" : ""}`}
+                  className={`in-b-form mt-1 ${errors.password ? "border-red-500" : ""}`}
                 />
                 {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
               </div>
@@ -269,7 +269,7 @@ export default function RegisterForm({
                   value={values.confirmPassword}
                   onChange={(e) => onChange("confirmPassword", e.target.value)}
                   placeholder="Repite la contraseña"
-                  className={`mt-1 ${errors.confirmPassword ? "border-red-500" : ""}`}
+                  className={`in-b-form mt-1 ${errors.confirmPassword ? "border-red-500" : ""}`}
                 />
                 {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
               </div>

@@ -57,7 +57,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             Tipo de documento
           </Label>
           <Select value={documentType} onValueChange={onDocumentTypeChange}>
-            <SelectTrigger className="mt-1">
+            <SelectTrigger className="in-b-form mt-1">
               <SelectValue placeholder="Selecciona el tipo de documento" />
             </SelectTrigger>
             <SelectContent>
@@ -80,7 +80,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             value={identification}
             onChange={(e) => onIdentificationChange(e.target.value)}
             placeholder="Ingresa tu número de identificación"
-            className="mt-1"
+            className="in-b-form mt-1"
             required
           />
         </div>
@@ -95,7 +95,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             value={password}
             onChange={(e) => onPasswordChange(e.target.value)}
             placeholder="Ingresa tu clave"
-            className="mt-1"
+            className="in-b-form mt-1"
             required
           />
         </div>
