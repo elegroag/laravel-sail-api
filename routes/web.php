@@ -24,7 +24,7 @@ Route::resource('tasks', TaskController::class);
 
 Route::get('/web/login', [AuthController::class, 'index'])->name('login');
 Route::get('/web/register', [AuthController::class, 'register'])->name('register');
-Route::get('/web/password/request', [AuthController::class, 'passwordRequest'])->name('password.request');
+Route::get('/web/password/request', [AuthController::class, 'resetPassword'])->name('password.request');
 
 Route::get('/web', [WebController::class, 'dashboard'])->name('dashboard');
 Route::get('/web/empresas', [WebController::class, 'empresas'])->name('empresas.index');

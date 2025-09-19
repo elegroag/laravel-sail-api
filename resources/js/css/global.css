@@ -126,7 +126,7 @@
 
 div.in-b-form,
 .in-b-form {
-    font-size: 0.9rem;
+  font-size: 0.9rem;
 	height: calc(2.5rem + 1px);
 	padding: .625rem .75rem;
 	transition: all .15s cubic-bezier(.68, -.55, .265, 1.55);

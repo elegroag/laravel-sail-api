@@ -16,21 +16,25 @@ export interface UserTypeOption {
   icon: React.ReactNode
 }
 
-export interface FormState {
+export interface FormBasic {
+  documentType: string,
+  identification: string,
+  email: string,
+  errors: Record<string, string>,
+  isSubmitting: boolean,
+  isSuccess: boolean,
+}
+
+export interface FormState extends FormBasic {
   selectedUserType: UserType | null
-  documentType: string
-  identification: string
   firstName: string
   lastName: string
-  email: string
   phone: string
   password: string
   confirmPassword: string
   companyName: string
   companyNit: string
   address: string
-  errors: Record<string, string>
-  isSubmitting: boolean
 }
 
 export type FormAction =
@@ -40,3 +44,5 @@ export type FormAction =
   | { type: "CLEAR_ERRORS" }
   | { type: "SET_SUBMITTING"; payload: boolean }
   | { type: "RESET_FORM" }
+  | { type: "SET_SUCCESS"; payload: boolean }
+  | { type: "CLEAR_ERROR"; field: string }

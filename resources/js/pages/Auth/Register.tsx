@@ -25,6 +25,7 @@ const initialState: FormState = {
   address: "",
   errors: {},
   isSubmitting: false,
+  isSuccess: false
 }
 
 function formReducer(state: FormState, action: FormAction): FormState {

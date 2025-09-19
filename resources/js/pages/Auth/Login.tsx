@@ -67,7 +67,7 @@ export default function Login()
               logoAlt="Comfaca Logo"
               userTypes={userTypes}
               onSelect={(id) => handleUserTypeSelect(id as UserType)}
-              onForgotPassword={() => alert("Recuperación de clave próximamente")}
+              onForgotPassword={route('password.request')}
               continueDisabled
               registerHref={route('register')}
             />

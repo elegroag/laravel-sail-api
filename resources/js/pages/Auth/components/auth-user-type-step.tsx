@@ -20,7 +20,7 @@ interface Props {
   logoAlt: string
   userTypes: UserTypeOption[]
   onSelect: (id: string) => void
-  onForgotPassword?: () => void
+  onForgotPassword?: string
   continueDisabled?: boolean
   registerHref: string
 }
@@ -55,14 +55,10 @@ const AuthUserTypeStep: React.FC<Props> = ({
       </Button>
 
       <div className="flex justify-center space-x-8 text-sm">
-        <button
-          className="text-gray-500 hover:text-emerald-600 flex items-center"
-          type="button"
-          onClick={onForgotPassword}
-        >
+        <TextLink href={onForgotPassword} className="text-gray-500 hover:text-emerald-600 flex items-center">
           <span className="mr-1">?</span>
           Olvidé mi clave
-        </button>
+        </TextLink>
 
         <TextLink href={registerHref} className="text-gray-500 hover:text-emerald-600 flex items-center">
           <span className="mr-1">🔑</span>

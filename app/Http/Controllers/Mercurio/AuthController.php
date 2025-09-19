@@ -19,7 +19,7 @@ class AuthController extends Controller
         return Inertia::render('Auth/Register');
     }
 
-    public function passwordRequest()
+    public function resetPassword()
     {
         return Inertia::render('Auth/ResetPassword');
     }
