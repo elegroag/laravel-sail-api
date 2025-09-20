@@ -72,23 +72,23 @@ if (!function_exists('calemp_detalle_value')) {
 }
 
 if (!function_exists('calemp_use_tipo_value')) {
-    function calemp_use_tipo_value($tipo)
+    function calemp_use_tipo_value($detalle)
     {
-        switch ($tipo) {
-            case 'E':
-                return 'EMPRESA';
+        switch (strtolower($detalle)) {
+            case 'empresa':
+                return 'E';
                 break;
-            case 'I':
-                return 'INDEPENDIENTE';
+            case 'independiente':
+                return 'I';
                 break;
-            case 'O':
-                return 'PENSIONADO';
+            case 'pensionado':
+                return 'O';
                 break;
-            case 'F':
-                return 'FACULTATIVO';
+            case 'facultativo':
+                return 'F';
                 break;
-            case 'D':
-                return 'DESEMPLEADO';
+            case 'desempleado':
+                return 'D';
                 break;
             default:
                 return null;

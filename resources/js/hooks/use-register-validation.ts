@@ -60,6 +60,10 @@ export function useRegisterValidation({ state, step, refs, dispatch }: UseRegist
         if (isValid) companyNitRef.current?.focus()
         isValid = false
       }
+      if (!state.documentType) {
+        dispatch({ type: "SET_ERROR", field: "documentType", error: "El tipo de documento de la empresa es requerido" })
+        isValid = false
+      }
       if (!state.societyType) {
         dispatch({ type: "SET_ERROR", field: "societyType", error: "El tipo de sociedad es requerido" })
         isValid = false
@@ -126,6 +130,11 @@ export function useRegisterValidation({ state, step, refs, dispatch }: UseRegist
         dispatch({ type: "SET_ERROR", field: "userRole", error: "Debes indicar si eres representante o delegado" })
         isValid = false
       }
+      // Empresa Natural no puede tener delegado
+      if (isCompany && state.companyCategory === 'N' && state.userRole === 'delegado') {
+        dispatch({ type: "SET_ERROR", field: "userRole", error: "Para persona natural no aplica la opción de delegado" })
+        isValid = false
+      }
       if (isCompany && state.userRole === 'delegado' && !state.position.trim()) {
         dispatch({ type: "SET_ERROR", field: "position", error: "El cargo u ocupación es requerido para delegados" })
         isValid = false
@@ -170,8 +179,11 @@ export function useRegisterValidation({ state, step, refs, dispatch }: UseRegist
       || (isWorker && step === 3)
       || (!isCompany && !isWorker && step === 2)
     ) {
-      if (!state.documentType) {
-        dispatch({ type: "SET_ERROR", field: "documentType", error: "El tipo de documento es requerido" })
+      // En empresa el tipo de documento de sesión es documentTypeUser; en otros flujos sigue siendo documentType
+      const docTypeField = isCompany ? 'documentTypeUser' : 'documentType'
+      const docTypeValue = (state as any)[docTypeField] as string
+      if (!docTypeValue) {
+        dispatch({ type: "SET_ERROR", field: docTypeField, error: "El tipo de documento es requerido" })
         isValid = false
       }
       if (!state.identification.trim()) {

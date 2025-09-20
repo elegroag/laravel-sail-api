@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -96,6 +96,50 @@ export default function CompanyRegisterForm({
     setShowConfirm(true)
   }
 
+  // --- Reglas de documento según categoría de empresa ---
+  // Persona Natural (N): todos menos NIT
+  // Persona Jurídica (J): solo NIT y forzar selección
+  const isNatural = values.companyCategory === 'N'
+  const isJuridica = values.companyCategory === 'J'
+  const isDelegate = values.userRole === 'delegado'
+  const isJuridicaRepresentative = isJuridica && !isDelegate
+  const isJuridicaDelegate = isJuridica && isDelegate
+
+  const isNitOption = (opt: DocumentTypeOption) =>
+    opt.label.toLowerCase().includes('nit') || opt.value.toLowerCase() === 'nit'
+
+  const filteredDocumentTypes = (documentTypes || []).filter((opt) =>
+    // Jurídica + representante: solo NIT
+    isJuridicaRepresentative ? isNitOption(opt)
+    // Jurídica + delegado o Natural: todo menos NIT
+    : !isNitOption(opt)
+  )
+
+  // Forzar selección cuando es Jurídica y limpiar cuando Natural tenga NIT
+  useEffect(() => {
+    if (isJuridicaRepresentative) {
+      // Forzar NIT
+      const nit = (documentTypes || []).find(isNitOption)
+      if (nit && values.documentType !== nit.value) {
+        onChange('documentType', nit.value)
+      }
+    } else if (isNatural || isJuridicaDelegate) {
+      // Limpiar si quedó NIT seleccionado
+      const isNitSelected = (documentTypes || []).some(
+        (o) => isNitOption(o) && o.value === values.documentType
+      )
+      if (isNitSelected) {
+        onChange('documentType', '')
+      }
+      // Si es persona natural, no puede haber delegado: forzar representante
+      if (isNatural && values.userRole !== 'representante') {
+        onChange('userRole', 'representante')
+      }
+    }
+    // Solo dependencias necesarias para evitar bucles
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values.companyCategory, values.userRole])
+
   return (
     <>
       <div className="flex items-center mb-6">
@@ -112,9 +156,45 @@ export default function CompanyRegisterForm({
         {/* Paso 1: Datos empresa */}
         {step === 1 && (
           <>
+          <div>
+              <Label htmlFor="companyCategory" className="text-sm font-medium text-gray-700">
+                Tipo persona *
+              </Label>
+              <Select value={values.companyCategory} onValueChange={(v) => onChange("companyCategory", v)}>
+                <SelectTrigger className={`in-b-form mt-1 ${errors.companyCategory ? "border-red-500" : ""}`}>
+                  <SelectValue placeholder="Selecciona la categoría" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categoryOptions.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.companyCategory && <p className="text-red-500 text-xs mt-1">{errors.companyCategory}</p>}
+            </div>
+            <div>
+                <Label htmlFor="documentType" className="text-sm font-medium text-gray-700">
+                  Tipo de documento empresa *
+                </Label>
+                <Select value={values.documentType} onValueChange={(v) => onChange("documentType", v)} disabled={isJuridicaRepresentative}>
+                  <SelectTrigger className={`in-b-form mt-1 ${errors.documentType ? "border-red-500" : ""} ${isJuridicaRepresentative ? 'bg-gray-50 text-gray-600' : ''}`}>
+                    <SelectValue placeholder="Selecciona" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {documentTypes.map((doc) => (
+                      <SelectItem key={doc.value} value={doc.value}>
+                        {doc.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.documentType && <p className="text-red-500 text-xs mt-1">{errors.documentType}</p>}
+            </div>
             <div>
               <Label htmlFor="companyName" className="text-sm font-medium text-gray-700">
-                Nombre de la empresa *
+                Razón social *
               </Label>
               <Input
                 id="companyName"
@@ -122,7 +202,7 @@ export default function CompanyRegisterForm({
                 type="text"
                 value={values.companyName}
                 onChange={(e) => onChange("companyName", e.target.value)}
-                placeholder="Nombre de tu empresa"
+                placeholder="Razón social de tu empresa"
                 className={`in-b-form mt-1 ${errors.companyName ? "border-red-500" : ""}`}
               />
               {errors.companyName && <p className="text-red-500 text-xs mt-1">{errors.companyName}</p>}
@@ -160,24 +240,7 @@ export default function CompanyRegisterForm({
               </Select>
               {errors.societyType && <p className="text-red-500 text-xs mt-1">{errors.societyType}</p>}
             </div>
-            <div>
-              <Label htmlFor="companyCategory" className="text-sm font-medium text-gray-700">
-                Tipo persona comercial *
-              </Label>
-              <Select value={values.companyCategory} onValueChange={(v) => onChange("companyCategory", v)}>
-                <SelectTrigger className={`in-b-form mt-1 ${errors.companyCategory ? "border-red-500" : ""}`}>
-                  <SelectValue placeholder="Selecciona la categoría" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categoryOptions.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.companyCategory && <p className="text-red-500 text-xs mt-1">{errors.companyCategory}</p>}
-            </div>
+
             <div>
               <Label htmlFor="address" className="text-sm font-medium text-gray-700">
                 Dirección
@@ -205,13 +268,15 @@ export default function CompanyRegisterForm({
               <Label htmlFor="userRole" className="text-sm font-medium text-gray-700">
                 ¿Eres representante o delegado? *
               </Label>
-              <Select value={values.userRole} onValueChange={(v) => onChange("userRole", v)}>
-                <SelectTrigger className={`in-b-form mt-1 ${errors.userRole ? "border-red-500" : ""}`}>
+              <Select value={values.userRole} onValueChange={(v) => onChange("userRole", v)} disabled={isNatural}>
+                <SelectTrigger className={`in-b-form mt-1 ${errors.userRole ? "border-red-500" : ""} ${isNatural ? 'bg-gray-50 text-gray-600' : ''}`}>
                   <SelectValue placeholder="Selecciona" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="representante">Representante legal</SelectItem>
-                  <SelectItem value="delegado">Delegado de la empresa</SelectItem>
+                  {isJuridica && (
+                    <SelectItem value="delegado">Delegado de la empresa</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
               {errors.userRole && <p className="text-red-500 text-xs mt-1">{errors.userRole}</p>}
@@ -235,7 +300,7 @@ export default function CompanyRegisterForm({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="firstName" className="text-sm font-medium text-gray-700">
-                  Nombre *
+                  {values.userRole === 'delegado' ? 'Nombre delegado *' : 'Nombre representante *'}
                 </Label>
                 <Input
                   id="firstName"
@@ -243,14 +308,14 @@ export default function CompanyRegisterForm({
                   type="text"
                   value={values.firstName}
                   onChange={(e) => onChange("firstName", e.target.value)}
-                  placeholder="Nombre representante"
+                  placeholder={values.userRole === 'delegado' ? 'Nombre delegado' : 'Nombre representante'}
                   className={`in-b-form mt-1 ${errors.firstName ? "border-red-500" : ""}`}
                 />
                 {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
               </div>
               <div>
                 <Label htmlFor="lastName" className="text-sm font-medium text-gray-700">
-                  Apellido *
+                  {values.userRole === 'delegado' ? 'Apellido delegado *' : 'Apellido representante *'}
                 </Label>
                 <Input
                   id="lastName"
@@ -258,7 +323,7 @@ export default function CompanyRegisterForm({
                   type="text"
                   value={values.lastName}
                   onChange={(e) => onChange("lastName", e.target.value)}
-                  placeholder="Apellido representante"
+                  placeholder={values.userRole === 'delegado' ? 'Apellido delegado' : 'Apellido representante'}
                   className={`in-b-form mt-1 ${errors.lastName ? "border-red-500" : ""}`}
                 />
                 {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
@@ -266,7 +331,7 @@ export default function CompanyRegisterForm({
             </div>
             <div>
               <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-                Email *
+                {values.userRole === 'delegado' ? 'Email delegado *' : 'Email representante *'}
               </Label>
               <Input
                 id="email"
@@ -281,7 +346,7 @@ export default function CompanyRegisterForm({
             </div>
             <div>
               <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
-                Teléfono
+                {values.userRole === 'delegado' ? 'Teléfono delegado' : 'Teléfono representante'}
               </Label>
               <Input
                 id="phone"
@@ -295,7 +360,7 @@ export default function CompanyRegisterForm({
             </div>
             <div>
               <Label htmlFor="city" className="text-sm font-medium text-gray-700">
-                Ciudad
+                Ciudad laboral
               </Label>
               <Select value={values.city} onValueChange={(v) => onChange("city", v)}>
                 <SelectTrigger className={`in-b-form mt-1 ${errors.city ? "border-red-500" : ""}`}>
@@ -388,22 +453,22 @@ export default function CompanyRegisterForm({
           <>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="documentType" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="documentTypeUser" className="text-sm font-medium text-gray-700">
                   Tipo de documento *
                 </Label>
-                <Select value={values.documentType} onValueChange={(v) => onChange("documentType", v)}>
-                  <SelectTrigger className={`in-b-form mt-1 ${errors.documentType ? "border-red-500" : ""}`}>
+                <Select value={values.documentTypeUser} onValueChange={(v) => onChange("documentTypeUser", v)}>
+                  <SelectTrigger className={`in-b-form mt-1 ${errors.documentTypeUser ? "border-red-500" : ""} ${isJuridicaRepresentative ? 'bg-gray-50 text-gray-600' : ''}`}>
                     <SelectValue placeholder="Selecciona" />
                   </SelectTrigger>
                   <SelectContent>
-                    {documentTypes.map((doc) => (
+                    {filteredDocumentTypes.map((doc) => (
                       <SelectItem key={doc.value} value={doc.value}>
                         {doc.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                {errors.documentType && <p className="text-red-500 text-xs mt-1">{errors.documentType}</p>}
+                {errors.documentTypeUser && <p className="text-red-500 text-xs mt-1">{errors.documentTypeUser}</p>}
               </div>
               <div>
                 <Label htmlFor="identification" className="text-sm font-medium text-gray-700">

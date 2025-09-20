@@ -14,6 +14,7 @@ import AuthBackgroundShapes from "@/components/ui/auth-background-shapes";
 const initialState: FormState = {
   selectedUserType: null,
   documentType: "",
+  documentTypeUser: "",
   identification: "",
   firstName: "",
   lastName: "",
@@ -181,9 +182,10 @@ export default function Register({
 
       // Mapeo de campos a las propiedades esperadas por el backend
       const payload: Record<string, any> = {
+        selected_user_type: state.selectedUserType,
         tipo: tipoValue,
         // Sesión
-        coddoc: state.documentType,
+        coddoc: state.selectedUserType === 'empresa' ? (state.documentTypeUser || state.documentType) : state.documentType,
         documento: state.identification,
         password: state.password,
         // Empresa (si aplica)
@@ -299,6 +301,7 @@ export default function Register({
                   repIdentification: state.repIdentification,
                   repEmail: state.repEmail,
                   repPhone: state.repPhone,
+                  documentTypeUser: state.documentTypeUser
                 }}
                 errors={state.errors}
                 isSubmitting={state.isSubmitting}
@@ -350,6 +353,7 @@ export default function Register({
                   repEmail: state.repEmail,
                   repPhone: state.repPhone,
                   contributionRate: state.contributionRate,
+                  documentTypeUser: state.documentTypeUser
                 }}
                 errors={state.errors}
                 isSubmitting={state.isSubmitting}

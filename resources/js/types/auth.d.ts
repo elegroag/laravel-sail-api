@@ -45,7 +45,8 @@ export interface FormState extends FormBasic {
     repName: string
     repIdentification: string
     repEmail: string
-    repPhone: string
+    repPhone: string,
+    documentTypeUser: string
 }
 
 export type FormAction =
