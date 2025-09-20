@@ -2,14 +2,22 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\DebugException;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Adapter\DbBase;
 use App\Services\Autentications\AutenticaService;
 use Illuminate\Validation\ValidationException;
 use App\Services\Request as RequestParam;
+use App\Services\Signup\SignupService;
 
 class AuthMercurioController extends Controller
 {
+    private $db;
+    public function __construct($db)
+    {
+        $this->db = DbBase::rawConnect();
+    }
 
     public function authenticateAction(Request $request)
     {
@@ -24,10 +32,10 @@ class AuthMercurioController extends Controller
             $autenticaService = new AutenticaService();
             $response = $autenticaService->execute(
                 new RequestParam([
-                    'tipo' => $request->documentType,
+                    'coddoc' => $request->documentType,
                     'documento' => $request->identification,
                     'password' => $request->password,
-                    'selectedUserType' => $request->selectedUserType
+                    'tipo' => $request->selectedUserType
                 ])
             );
 
@@ -43,6 +51,30 @@ class AuthMercurioController extends Controller
                 'errors' => $e->errors()
             ], 422);
         } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al crear empresa: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function registerAction(Request $request)
+    {
+        try {
+            $this->db->begin();
+            $signupService = new SignupService();
+            $response = $signupService->execute(
+                new RequestParam($request->all())
+            );
+
+            $this->db->commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Registro exitoso',
+                'data' => $response
+            ], 201);
+        } catch (DebugException $e) {
+            $this->db->rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Error al crear empresa: ' . $e->getMessage()

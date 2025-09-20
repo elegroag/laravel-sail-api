@@ -18,3 +18,13 @@ export const documentTypes = [
   { value: "nit", label: "NIT" },
   { value: "pasaporte", label: "Pasaporte" },
 ]
+
+export enum TipoFuncionario {
+    empresa= "E",
+    independiente= "I",
+    facultativo= "F",
+    particular= "P",
+    domestico= "D",
+    trabajador= "T",
+    pensionado= "O",
+}

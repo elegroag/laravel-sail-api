@@ -5,12 +5,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ChevronLeft } from "lucide-react"
+import { DocumentTypeOption } from "@/types/auth"
 
 // Componente reutilizable para el formulario de login según el tipo de usuario seleccionado
 // Principio SRP: Este componente solo se encarga de mostrar el formulario y manejar los callbacks recibidos por props
 interface LoginFormProps {
   userTypes: { id: string; label: string }[]
-  documentTypes: { value: string; label: string }[]
+  documentTypes: DocumentTypeOption[]
   selectedUserType: string | null
   documentType: string
   identification: string

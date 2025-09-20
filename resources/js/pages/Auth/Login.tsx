@@ -1,19 +1,22 @@
 import type React from "react"
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import imageLogo from "../../assets/comfaca-logo.png";
 import AuthLayout from "@/layouts/auth-layout"
 import AuthWelcome from "@/pages/Auth/components/auth-welcome"
 import LoginForm from "@/pages/Auth/components/login-form"
 import AuthUserTypeStep from "@/pages/Auth/components/auth-user-type-step"
-import { userTypes, documentTypes } from "@/constants/auth"
-import type { UserType } from "@/types/auth"
+import { userTypes, TipoFuncionario } from "@/constants/auth"
+import type { LoginProps, UserType } from "@/types/auth"
 import AuthBackgroundShapes from "@/components/ui/auth-background-shapes"
 import { router } from '@inertiajs/react';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 
-// Tipos y constantes centralizados importados
-
-export default function Login()
+export default function Login({
+    Coddoc,
+    Tipsoc,
+    Codciu,
+    Detadoc
+}: LoginProps)
 {
   const [selectedUserType, setSelectedUserType] = useState<UserType | null>(null)
   const [documentType, setDocumentType] = useState("")
@@ -22,6 +25,13 @@ export default function Login()
   const [processing, setProcessing] = useState(false);
   // Estado para mostrar mensajes de error en un Alert
   const [alertMessage, setAlertMessage] = useState<string | null>(null)
+
+  // Mapea Coddoc ({ [codigo]: descripcion }) a opciones { value, label } esperadas por LoginForm
+  // Uso de useMemo para cumplir con buenas prácticas de rendimiento
+  const documentTypeOptions = useMemo(
+    () => Object.entries(Coddoc || {}).map(([value, label]) => ({ value, label })),
+    [Coddoc]
+  )
 
   const handleUserTypeSelect = (userType: UserType) => {
     setSelectedUserType(userType)
@@ -42,6 +52,8 @@ export default function Login()
       // Reiniciar cualquier alerta previa antes de intentar login
       setAlertMessage(null)
       try {
+        const tipoValue = TipoFuncionario[selectedUserType as keyof typeof TipoFuncionario];
+
         const response = await fetch(route('api.authenticate'), {
             method: 'POST',
             headers: {
@@ -52,7 +64,7 @@ export default function Login()
               documentType,
               password,
               identification: identification ? parseInt(identification) : null,
-              selectedUserType
+              tipo: tipoValue,
             })
         });
 
@@ -114,7 +126,7 @@ export default function Login()
             // Componente LoginForm extraído y reutilizable
             <LoginForm
               userTypes={userTypes}
-              documentTypes={documentTypes}
+              documentTypes={documentTypeOptions}
               selectedUserType={selectedUserType}
               documentType={documentType}
               identification={identification}

@@ -55,12 +55,26 @@ export function useRegisterValidation({ state, step, refs, dispatch }: UseRegist
         if (isValid) companyNitRef.current?.focus()
         isValid = false
       }
+      if (!state.societyType) {
+        dispatch({ type: "SET_ERROR", field: "societyType", error: "El tipo de sociedad es requerido" })
+        isValid = false
+      }
+      if (!state.companyCategory) {
+        dispatch({ type: "SET_ERROR", field: "companyCategory", error: "La categoría de empresa es requerida" })
+        isValid = false
+      }
       return isValid
     }
 
     // Validación global (paso 2 u otros tipos de usuario)
     if (!state.documentType) {
       dispatch({ type: "SET_ERROR", field: "documentType", error: "El tipo de documento es requerido" })
+      isValid = false
+    }
+
+    // Validación de select: ciudad (aplica en paso 2 / usuarios no empresa)
+    if (!state.city) {
+      dispatch({ type: "SET_ERROR", field: "city", error: "La ciudad es requerida" })
       isValid = false
     }
 

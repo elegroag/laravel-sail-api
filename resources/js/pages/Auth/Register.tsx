@@ -1,13 +1,13 @@
 import type React from "react"
-import { useReducer, useRef, useEffect, useState } from "react"
+import { useReducer, useRef, useEffect, useState, useMemo } from "react"
 import AuthLayout from "@/layouts/auth-layout";
 import AuthWelcome from "@/pages/Auth/components/auth-welcome";
 import AuthUserTypeSelector from "@/pages/Auth/components/auth-user-type-selector";
 import RegisterForm from "@/pages/Auth/components/register-form";
 import imageLogo from "../../assets/comfaca-logo.png";
 import { useRegisterValidation } from "@/hooks/use-register-validation";
-import { userTypes, documentTypes } from "@/constants/auth";
-import type { UserType, FormState, FormAction } from "@/types/auth";
+import { userTypes } from "@/constants/auth";
+import type { UserType, FormState, FormAction, LoginProps } from "@/types/auth";
 import AuthBackgroundShapes from "@/components/ui/auth-background-shapes";
 
 const initialState: FormState = {
@@ -23,6 +23,9 @@ const initialState: FormState = {
   companyName: "",
   companyNit: "",
   address: "",
+  city: "",
+  societyType: "",
+  companyCategory: "",
   errors: {},
   isSubmitting: false,
   isSuccess: false
@@ -54,7 +57,12 @@ function formReducer(state: FormState, action: FormAction): FormState {
   }
 }
 
-export default function Register(){
+export default function Register({
+    Coddoc,
+    Tipsoc,
+    Codciu,
+    Detadoc
+}: LoginProps){
   const [state, dispatch] = useReducer(formReducer, initialState)
   const [step, setStep] = useState(1)
 
@@ -68,6 +76,32 @@ export default function Register(){
   const companyNameRef = useRef<HTMLInputElement>(null)
   const companyNitRef = useRef<HTMLInputElement>(null)
   const addressRef = useRef<HTMLInputElement>(null)
+
+  const documentTypeOptions = useMemo(
+    () => Object.entries(Coddoc || {}).map(([value, label]) => ({ value, label })),
+    [Coddoc]
+  )
+
+  // Opciones de ciudades mapeadas desde Codciu
+  const cityOptions = useMemo(
+    () => Object.entries(Codciu || {}).map(([value, label]) => ({ value, label })),
+    [Codciu]
+  )
+
+  // Opciones de tipos de sociedad desde Tipsoc
+  const societyOptions = useMemo(
+    () => Object.entries(Tipsoc || {}).map(([value, label]) => ({ value, label })),
+    [Tipsoc]
+  )
+
+  // Opciones de categoría de empresa (Natural/Jurídica)
+  const companyCategoryOptions = useMemo(
+    () => [
+      { value: 'N', label: 'NATURAL' },
+      { value: 'J', label: 'JURIDICA' },
+    ],
+    []
+  )
 
   useEffect(() => {
     if (state.selectedUserType && firstNameRef.current) {
@@ -175,11 +209,17 @@ export default function Register(){
                 companyName: state.companyName,
                 companyNit: state.companyNit,
                 address: state.address,
+                city: state.city,
+                societyType: state.societyType,
+                companyCategory: state.companyCategory,
               }}
               errors={state.errors}
               isSubmitting={state.isSubmitting}
               isCompanyType={isCompanyType}
-              documentTypes={documentTypes}
+              documentTypes={documentTypeOptions}
+              cityOptions={cityOptions}
+              societyOptions={societyOptions}
+              categoryOptions={companyCategoryOptions}
               onBack={handleBack}
               onChange={(field, value) =>
                 dispatch({ type: "SET_FIELD", field: field as keyof FormState, value })

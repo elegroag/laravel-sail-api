@@ -4,10 +4,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ChevronLeft } from "lucide-react"
+import { DocumentTypeOption } from "@/types/auth"
 
 // Formulario de registro reutilizable con soporte para pasos
 // Si userTypeLabel es "empresa", el registro es en 2 pasos: primero datos de empresa, luego representante
-export type DocumentTypeOption = { value: string; label: string }
 
 export type RegisterValues = {
   documentType: string
@@ -21,6 +21,9 @@ export type RegisterValues = {
   companyName: string
   companyNit: string
   address: string
+  city: string
+  societyType: string
+  companyCategory: string
 }
 
 type RegisterFormProps = {
@@ -31,6 +34,9 @@ type RegisterFormProps = {
   isSubmitting: boolean
   isCompanyType: boolean
   documentTypes: DocumentTypeOption[]
+  societyOptions: DocumentTypeOption[]
+  cityOptions: DocumentTypeOption[]
+  categoryOptions: DocumentTypeOption[]
   onBack: () => void
   onChange: (field: keyof RegisterValues, value: string) => void
   onSubmit: (e: React.FormEvent) => void
@@ -59,6 +65,9 @@ export default function RegisterForm({
   isSubmitting,
   isCompanyType,
   documentTypes,
+  societyOptions,
+  cityOptions,
+  categoryOptions,
   onBack,
   onChange,
   onSubmit,
@@ -124,6 +133,42 @@ export default function RegisterForm({
               {errors.companyNit && <p className="text-red-500 text-xs mt-1">{errors.companyNit}</p>}
             </div>
             <div>
+              <Label htmlFor="societyType" className="text-sm font-medium text-gray-700">
+                Tipo de sociedad *
+              </Label>
+              <Select value={values.societyType} onValueChange={(v) => onChange("societyType", v)}>
+                <SelectTrigger className={`in-b-form mt-1 ${errors.societyType ? "border-red-500" : ""}`}>
+                  <SelectValue placeholder="Selecciona el tipo de sociedad" />
+                </SelectTrigger>
+                <SelectContent>
+                  {societyOptions.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.societyType && <p className="text-red-500 text-xs mt-1">{errors.societyType}</p>}
+            </div>
+            <div>
+              <Label htmlFor="companyCategory" className="text-sm font-medium text-gray-700">
+                Tipo persona comercial *
+              </Label>
+              <Select value={values.companyCategory} onValueChange={(v) => onChange("companyCategory", v)}>
+                <SelectTrigger className={`in-b-form mt-1 ${errors.companyCategory ? "border-red-500" : ""}`}>
+                  <SelectValue placeholder="Selecciona la categoría" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categoryOptions.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.companyCategory && <p className="text-red-500 text-xs mt-1">{errors.companyCategory}</p>}
+            </div>
+            <div>
               <Label htmlFor="address" className="text-sm font-medium text-gray-700">
                 Dirección
               </Label>
@@ -137,6 +182,26 @@ export default function RegisterForm({
                 className="in-b-form mt-1"
               />
             </div>
+            {!isCompanyType && (
+              <div>
+                <Label htmlFor="city" className="text-sm font-medium text-gray-700">
+                  Ciudad
+                </Label>
+                <Select value={values.city} onValueChange={(v) => onChange("city", v)}>
+                  <SelectTrigger className={`in-b-form mt-1 ${errors.city ? "border-red-500" : ""}`}>
+                    <SelectValue placeholder="Selecciona la ciudad" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cityOptions.map((city) => (
+                      <SelectItem key={city.value} value={city.value}>
+                        {city.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
+              </div>
+            )}
             <Button type="button" className="w-full mt-4" onClick={onNextStep}>
               Siguiente: Datos representante
             </Button>
@@ -206,6 +271,24 @@ export default function RegisterForm({
                 placeholder="Teléfono representante"
                 className="in-b-form mt-1"
               />
+            </div>
+            <div>
+              <Label htmlFor="city" className="text-sm font-medium text-gray-700">
+                Ciudad
+              </Label>
+              <Select value={values.city} onValueChange={(v) => onChange("city", v)}>
+                <SelectTrigger className={`in-b-form mt-1 ${errors.city ? "border-red-500" : ""}`}>
+                  <SelectValue placeholder="Selecciona la ciudad" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cityOptions.map((city) => (
+                    <SelectItem key={city.value} value={city.value}>
+                      {city.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
