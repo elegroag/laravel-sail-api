@@ -14,7 +14,7 @@ use App\Services\Signup\SignupService;
 class AuthMercurioController extends Controller
 {
     private $db;
-    public function __construct($db)
+    public function __construct()
     {
         $this->db = DbBase::rawConnect();
     }

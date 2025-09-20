@@ -43,4 +43,5 @@ Route::get('empresas/{empresa}/trabajadores', [TrabajadorController::class, 'ind
 Route::get('trabajadores/{trabajador}/nucleos-familiares', [NucleoFamiliarController::class, 'index'])
     ->where('trabajador', '[0-9]+');
 
-Route::post('api/authenticate', [AuthMercurioController::class, 'authenticateAction'])->name('api.authenticate');
+Route::post('authenticate', [AuthMercurioController::class, 'authenticateAction'])->name('api.authenticate');
+Route::post('register', [AuthMercurioController::class, 'registerAction'])->name('api.register');

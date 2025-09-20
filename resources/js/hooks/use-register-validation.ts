@@ -43,8 +43,10 @@ export function useRegisterValidation({ state, step, refs, dispatch }: UseRegist
     dispatch({ type: "CLEAR_ERRORS" })
     let isValid = true
 
-    // Validación específica para empresas en paso 1
-    if (state.selectedUserType === "empresa" && step === 1) {
+    const isCompany = state.selectedUserType === "empresa"
+
+    // Paso 1 (empresa): datos de empresa
+    if (isCompany && step === 1) {
       if (!state.companyName.trim()) {
         dispatch({ type: "SET_ERROR", field: "companyName", error: "El nombre de la empresa es requerido" })
         companyNameRef.current?.focus()
@@ -66,60 +68,75 @@ export function useRegisterValidation({ state, step, refs, dispatch }: UseRegist
       return isValid
     }
 
-    // Validación global (paso 2 u otros tipos de usuario)
-    if (!state.documentType) {
-      dispatch({ type: "SET_ERROR", field: "documentType", error: "El tipo de documento es requerido" })
-      isValid = false
+    // Paso personales: empresa paso 2, otros paso 1
+    if ((isCompany && step === 2) || (!isCompany && step === 1)) {
+      if (!state.firstName.trim()) {
+        dispatch({ type: "SET_ERROR", field: "firstName", error: "El nombre es requerido" })
+        firstNameRef.current?.focus()
+        isValid = false
+      }
+      if (!state.lastName.trim()) {
+        dispatch({ type: "SET_ERROR", field: "lastName", error: "El apellido es requerido" })
+        if (isValid) lastNameRef.current?.focus()
+        isValid = false
+      }
+      if (!state.email.trim()) {
+        dispatch({ type: "SET_ERROR", field: "email", error: "El email es requerido" })
+        if (isValid) emailRef.current?.focus()
+        isValid = false
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.email)) {
+        dispatch({ type: "SET_ERROR", field: "email", error: "Email inválido" })
+        if (isValid) emailRef.current?.focus()
+        isValid = false
+      }
+      if (!state.city) {
+        dispatch({ type: "SET_ERROR", field: "city", error: "La ciudad es requerida" })
+        isValid = false
+      }
+      if (isCompany && !state.userRole) {
+        dispatch({ type: "SET_ERROR", field: "userRole", error: "Debes indicar si eres representante o delegado" })
+        isValid = false
+      }
+      if (isCompany && state.userRole === 'delegado' && !state.position.trim()) {
+        dispatch({ type: "SET_ERROR", field: "position", error: "El cargo u ocupación es requerido para delegados" })
+        isValid = false
+      }
+      return isValid
     }
 
-    // Validación de select: ciudad (aplica en paso 2 / usuarios no empresa)
-    if (!state.city) {
-      dispatch({ type: "SET_ERROR", field: "city", error: "La ciudad es requerida" })
-      isValid = false
-    }
-
-    if (!state.firstName.trim()) {
-      dispatch({ type: "SET_ERROR", field: "firstName", error: "El nombre es requerido" })
-      firstNameRef.current?.focus()
-      isValid = false
-    }
-
-    if (!state.lastName.trim()) {
-      dispatch({ type: "SET_ERROR", field: "lastName", error: "El apellido es requerido" })
-      if (isValid) lastNameRef.current?.focus()
-      isValid = false
-    }
-
-    if (!state.email.trim()) {
-      dispatch({ type: "SET_ERROR", field: "email", error: "El email es requerido" })
-      if (isValid) emailRef.current?.focus()
-      isValid = false
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.email)) {
-      dispatch({ type: "SET_ERROR", field: "email", error: "Email inválido" })
-      if (isValid) emailRef.current?.focus()
-      isValid = false
-    }
-
-    if (!state.identification.trim()) {
-      dispatch({ type: "SET_ERROR", field: "identification", error: "La identificación es requerida" })
-      if (isValid) identificationRef.current?.focus()
-      isValid = false
-    }
-
-    if (!state.password.trim()) {
-      dispatch({ type: "SET_ERROR", field: "password", error: "La contraseña es requerida" })
-      if (isValid) passwordRef.current?.focus()
-      isValid = false
-    } else if (state.password.length < 6) {
-      dispatch({ type: "SET_ERROR", field: "password", error: "La contraseña debe tener al menos 6 caracteres" })
-      if (isValid) passwordRef.current?.focus()
-      isValid = false
-    }
-
-    if (state.password !== state.confirmPassword) {
-      dispatch({ type: "SET_ERROR", field: "confirmPassword", error: "Las contraseñas no coinciden" })
-      if (isValid) confirmPasswordRef.current?.focus()
-      isValid = false
+    // Paso sesión: empresa paso 3, otros paso 2
+    if ((isCompany && step === 3) || (!isCompany && step === 2)) {
+      if (!state.documentType) {
+        dispatch({ type: "SET_ERROR", field: "documentType", error: "El tipo de documento es requerido" })
+        isValid = false
+      }
+      if (!state.identification.trim()) {
+        dispatch({ type: "SET_ERROR", field: "identification", error: "La identificación es requerida" })
+        if (isValid) identificationRef.current?.focus()
+        isValid = false
+      }
+      if (!state.password.trim()) {
+        dispatch({ type: "SET_ERROR", field: "password", error: "La contraseña es requerida" })
+        if (isValid) passwordRef.current?.focus()
+        isValid = false
+      } else {
+        const strongPwd = /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{10,}$/
+        if (!strongPwd.test(state.password)) {
+          dispatch({
+            type: "SET_ERROR",
+            field: "password",
+            error: "La contraseña debe tener mínimo 10 caracteres, incluir 1 mayúscula, 1 número y 1 símbolo"
+          })
+          if (isValid) passwordRef.current?.focus()
+          isValid = false
+        }
+      }
+      if (state.password !== state.confirmPassword) {
+        dispatch({ type: "SET_ERROR", field: "confirmPassword", error: "Las contraseñas no coinciden" })
+        if (isValid) confirmPasswordRef.current?.focus()
+        isValid = false
+      }
+      return isValid
     }
 
     return isValid

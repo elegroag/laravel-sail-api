@@ -1,4 +1,4 @@
-import type React from "react"
+import React, { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -24,6 +24,8 @@ export type RegisterValues = {
   city: string
   societyType: string
   companyCategory: string
+  userRole: string
+  position: string
 }
 
 type RegisterFormProps = {
@@ -85,6 +87,40 @@ export default function RegisterForm({
   companyNitRef,
   addressRef,
 }: RegisterFormProps) {
+  // Pista visual de contraseña: requisitos básicos
+  const pwd = values.password || ""
+  const pwdReqs = {
+    length: pwd.length >= 10,
+    upper: /[A-Z]/.test(pwd),
+    number: /\d/.test(pwd),
+    symbol: /[^A-Za-z0-9]/.test(pwd),
+  }
+
+  // Estados locales para mostrar/ocultar contraseñas
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+
+  // Generador simple de contraseña fuerte
+  const suggestStrongPassword = () => {
+    const uppers = "ABCDEFGHJKLMNPQRSTUVWXYZ"
+    const lowers = "abcdefghijkmnopqrstuvwxyz"
+    const numbers = "23456789"
+    const symbols = "!@#$%^&*()-_=+[]{};:,.?";
+    const pick = (set: string, n: number) => Array.from({ length: n }, () => set[Math.floor(Math.random() * set.length)]).join("")
+    // garantizar al menos 1 de cada
+    let base = pick(uppers, 2) + pick(numbers, 2) + pick(symbols, 2) + pick(lowers, 6)
+    // mezclar
+    const arr = base.split("")
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]]
+    }
+    const suggestion = arr.join("")
+    onChange("password", suggestion)
+    onChange("confirmPassword", suggestion)
+    setShowPassword(true)
+    setShowConfirm(true)
+  }
 
   return (
     <>
@@ -98,7 +134,7 @@ export default function RegisterForm({
         </div>
       </div>
 
-      <form onSubmit={onSubmit} className="space-y-4">
+      <form onSubmit={onSubmit} className="space-y-3">
         {/* Paso 1: Datos empresa */}
         {isCompanyType && step === 1 && (
           <>
@@ -208,8 +244,8 @@ export default function RegisterForm({
           </>
         )}
 
-        {/* Paso 2: Datos representante/persona delegada */}
-        {(!isCompanyType || step === 2) && (
+        {/* Paso 2: Datos personales (empresa: paso 2, otros: paso 1) */}
+        {((isCompanyType && step === 2) || (!isCompanyType && step === 1)) && (
           <>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -290,6 +326,56 @@ export default function RegisterForm({
               </Select>
               {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
             </div>
+            {/* Solo empresas: indicar si es representante o delegado */}
+            {isCompanyType && (
+              <div>
+                <Label htmlFor="userRole" className="text-sm font-medium text-gray-700">
+                  ¿Eres representante o delegado? *
+                </Label>
+                <Select value={values.userRole} onValueChange={(v) => onChange("userRole", v)}>
+                  <SelectTrigger className={`in-b-form mt-1 ${errors.userRole ? "border-red-500" : ""}`}>
+                    <SelectValue placeholder="Selecciona" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="representante">Representante legal</SelectItem>
+                    <SelectItem value="delegado">Delegado de la empresa</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.userRole && <p className="text-red-500 text-xs mt-1">{errors.userRole}</p>}
+              </div>
+            )}
+            {isCompanyType && values.userRole === 'delegado' && (
+              <div>
+                <Label htmlFor="position" className="text-sm font-medium text-gray-700">
+                  Cargo u ocupación dentro de la empresa *
+                </Label>
+                <Input
+                  id="position"
+                  type="text"
+                  value={values.position}
+                  onChange={(e) => onChange("position", e.target.value)}
+                  placeholder="Ej: Coordinador de Talento Humano"
+                  className={`in-b-form mt-1 ${errors.position ? "border-red-500" : ""}`}
+                />
+                {errors.position && <p className="text-red-500 text-xs mt-1">{errors.position}</p>}
+              </div>
+            )}
+            <div className="flex gap-3 mt-4">
+              {isCompanyType && (
+                <Button type="button" variant="secondary" onClick={onPrevStep}>
+                  Volver a datos de empresa
+                </Button>
+              )}
+              <Button type="button" onClick={onNextStep} className="flex-1">
+                Siguiente: Datos de sesión
+              </Button>
+            </div>
+          </>
+        )}
+
+        {/* Paso sesión: empresa paso 3, otros paso 2 */}
+        {((isCompanyType && step === 3) || (!isCompanyType && step === 2)) && (
+          <>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="documentType" className="text-sm font-medium text-gray-700">
@@ -330,45 +416,98 @@ export default function RegisterForm({
                 <Label htmlFor="password" className="text-sm font-medium text-gray-700">
                   Contraseña *
                 </Label>
-                <Input
-                  id="password"
-                  ref={passwordRef}
-                  type="password"
-                  value={values.password}
-                  onChange={(e) => onChange("password", e.target.value)}
-                  placeholder="Mínimo 6 caracteres"
-                  className={`in-b-form mt-1 ${errors.password ? "border-red-500" : ""}`}
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    ref={passwordRef}
+                    type={showPassword ? "text" : "password"}
+                    value={values.password}
+                    onChange={(e) => onChange("password", e.target.value)}
+                    placeholder="Mínimo 10 caracteres, 1 mayúscula, 1 número y 1 símbolo"
+                    className={`in-b-form mt-1 pr-20 ${errors.password ? "border-red-500" : ""}`}
+                    aria-invalid={!!errors.password}
+                    aria-describedby={errors.password ? "password-error" : undefined}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-600 hover:text-gray-800 bg-white/60 border border-gray-200 px-2 py-1 rounded"
+                    aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  >
+                    {showPassword ? "Ocultar" : "Mostrar"}
+                  </button>
+                </div>
                 {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
               </div>
               <div>
                 <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
                   Confirmar *
                 </Label>
-                <Input
-                  id="confirmPassword"
-                  ref={confirmPasswordRef}
-                  type="password"
-                  value={values.confirmPassword}
-                  onChange={(e) => onChange("confirmPassword", e.target.value)}
-                  placeholder="Repite la contraseña"
-                  className={`in-b-form mt-1 ${errors.confirmPassword ? "border-red-500" : ""}`}
-                />
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    ref={confirmPasswordRef}
+                    type={showConfirm ? "text" : "password"}
+                    value={values.confirmPassword}
+                    onChange={(e) => onChange("confirmPassword", e.target.value)}
+                    placeholder="Repite la contraseña"
+                    className={`in-b-form mt-1 pr-20 ${errors.confirmPassword ? "border-red-500" : ""}`}
+                    aria-invalid={!!errors.confirmPassword}
+                    aria-describedby={errors.confirmPassword ? "confirmPassword-error" : undefined}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm((v) => !v)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-600 hover:text-gray-800 bg-white/60 border border-gray-200 px-2 py-1 rounded"
+                    aria-label={showConfirm ? "Ocultar confirmación" : "Mostrar confirmación"}
+                  >
+                    {showConfirm ? "Ocultar" : "Mostrar"}
+                  </button>
+                </div>
                 {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
               </div>
+
+                {/* Pista visual compacta */}
+                <div className="w-full">
+                    <div className="mt-1 grid grid-cols-2 gap-x-4 gap-y-0.5 text-[10px] leading-tight">
+                        <div className={pwdReqs.length ? "text-emerald-600" : "text-gray-500"}>
+                            {pwdReqs.length ? "✔" : "•"} 10+ caracteres
+                        </div>
+                        <div className={pwdReqs.upper ? "text-emerald-600" : "text-gray-500"}>
+                            {pwdReqs.upper ? "✔" : "•"} 1 mayúscula
+                        </div>
+                        <div className={pwdReqs.number ? "text-emerald-600" : "text-gray-500"}>
+                            {pwdReqs.number ? "✔" : "•"} 1 número
+                        </div>
+                        <div className={pwdReqs.symbol ? "text-emerald-600" : "text-gray-500"}>
+                            {pwdReqs.symbol ? "✔" : "•"} 1 símbolo
+                        </div>
+                    </div>
+                    <div className="mt-1 text-[11px] text-gray-500 mt-4">
+                        <span className="truncate">Sugerencia: usa una frase con símbolos y números.</span>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={suggestStrongPassword}
+                            className="h-7 mt-2 px-2 py-0.5 text-[11px] border-gray-300 text-gray-700 hover:text-gray-900 text-white"
+                        >
+                            Sugerir
+                        </Button>
+                    </div>
+                </div>
             </div>
-            {isCompanyType && (
-              <Button type="button" className="w-full mt-4" onClick={onPrevStep}>
-                Volver a datos de empresa
+            <div className="flex gap-3 mt-4">
+              <Button type="button" variant="secondary" onClick={onPrevStep}>
+                Volver
               </Button>
-            )}
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white py-3 rounded-lg font-medium shadow-lg mt-6"
-            >
-              {isSubmitting ? "Registrando..." : "Crear cuenta"}
-            </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white py-3 rounded-lg font-medium shadow-lg"
+              >
+                {isSubmitting ? "Registrando..." : "Crear cuenta"}
+              </Button>
+            </div>
           </>
         )}
       </form>

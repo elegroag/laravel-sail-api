@@ -38,6 +38,8 @@ export interface FormState extends FormBasic {
     city: string
     societyType: string
     companyCategory: string
+    userRole: string
+    position: string
 }
 
 export type FormAction =

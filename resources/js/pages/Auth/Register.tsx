@@ -6,7 +6,7 @@ import AuthUserTypeSelector from "@/pages/Auth/components/auth-user-type-selecto
 import RegisterForm from "@/pages/Auth/components/register-form";
 import imageLogo from "../../assets/comfaca-logo.png";
 import { useRegisterValidation } from "@/hooks/use-register-validation";
-import { userTypes } from "@/constants/auth";
+import { TipoFuncionario, userTypes } from "@/constants/auth";
 import type { UserType, FormState, FormAction, LoginProps } from "@/types/auth";
 import AuthBackgroundShapes from "@/components/ui/auth-background-shapes";
 
@@ -26,6 +26,8 @@ const initialState: FormState = {
   city: "",
   societyType: "",
   companyCategory: "",
+  userRole: "",
+  position: "",
   errors: {},
   isSubmitting: false,
   isSuccess: false
@@ -65,6 +67,7 @@ export default function Register({
 }: LoginProps){
   const [state, dispatch] = useReducer(formReducer, initialState)
   const [step, setStep] = useState(1)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
   const firstNameRef = useRef<HTMLInputElement>(null)
   const lastNameRef = useRef<HTMLInputElement>(null)
@@ -140,16 +143,16 @@ export default function Register({
     }
   }
 
-  // Validación por paso delegada al hook (mantiene la API anterior)
-
+  // Navegación entre pasos usando validación
   const handleNextStep = () => {
+    const maxSteps = state.selectedUserType === "empresa" ? 3 : 2
     if (validateStep()) {
-      setStep(2)
+      setStep((prev) => Math.min(prev + 1, maxSteps))
     }
   }
 
   const handlePrevStep = () => {
-    setStep(1)
+    setStep((prev) => Math.max(prev - 1, 1))
   }
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -159,13 +162,54 @@ export default function Register({
     }
     dispatch({ type: "SET_SUBMITTING", payload: true })
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      alert("¡Registro exitoso! Serás redirigido al login.")
-      dispatch({ type: "RESET_FORM" })
-      setStep(1)
-      window.location.href = "/"
+      const tipoValue = TipoFuncionario[state.selectedUserType as keyof typeof TipoFuncionario];
+
+      // Mapeo de campos a las propiedades esperadas por el backend
+      const payload = {
+        tipo: tipoValue,
+        // Sesión
+        coddoc: state.documentType,
+        documento: state.identification,
+        password: state.password,
+        // Empresa
+        razsoc: state.companyName,
+        nit: state.companyNit,
+        tipsoc: state.societyType,
+        tipper: state.companyCategory,
+        // Personales
+        nombre: `${state.firstName} ${state.lastName}`.trim(),
+        email: state.email,
+        telefono: state.phone,
+        codciu: state.city,
+        // Delegado/Representante
+        is_delegado: state.userRole === 'delegado',
+        cargo: state.userRole === 'delegado' ? state.position : null,
+      }
+      console.debug('Payload de registro (previo a envío):', payload)
+
+      const response = await fetch(route('api.register'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        },
+        body: JSON.stringify(payload)
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data?.success) {
+        setToast({ message: '¡Registro exitoso! Serás redirigido al login.', type: 'success' })
+        dispatch({ type: 'RESET_FORM' })
+        setStep(1)
+        setTimeout(() => { window.location.href = '/' }, 1500)
+      } else {
+        console.error('Error al registrar:', data)
+        setToast({ message: typeof data?.message === 'string' ? data.message : 'No fue posible completar el registro.', type: 'error' })
+      }
     } catch (error) {
       console.log("Error en el registro. Por favor intenta nuevamente.", error)
+      setToast({ message: 'No fue posible completar el registro. Intenta nuevamente.', type: 'error' })
     } finally {
       dispatch({ type: "SET_SUBMITTING", payload: false })
     }
@@ -174,6 +218,7 @@ export default function Register({
   const isCompanyType = state.selectedUserType === "empresa"
 
   return (
+    <>
     <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
       <AuthWelcome
         title="REGISTRO"
@@ -212,6 +257,8 @@ export default function Register({
                 city: state.city,
                 societyType: state.societyType,
                 companyCategory: state.companyCategory,
+                userRole: state.userRole,
+                position: state.position,
               }}
               errors={state.errors}
               isSubmitting={state.isSubmitting}
@@ -225,7 +272,7 @@ export default function Register({
                 dispatch({ type: "SET_FIELD", field: field as keyof FormState, value })
               }
               onSubmit={handleRegister}
-              step={isCompanyType ? step : 2}
+              step={step}
               onNextStep={handleNextStep}
               onPrevStep={handlePrevStep}
               firstNameRef={firstNameRef}
@@ -243,5 +290,22 @@ export default function Register({
         </div>
       </div>
     </AuthLayout>
+
+    {/* Toast simple */}
+    {toast && (
+      <div
+        className={`fixed bottom-4 right-4 z-50 min-w-[260px] max-w-[360px] px-4 py-3 rounded shadow-lg text-sm transition-all ${toast.type === 'success' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'}`}
+      >
+        {toast.message}
+        <button
+          type="button"
+          className="ml-3 underline text-white/90 hover:text-white"
+          onClick={() => setToast(null)}
+        >
+          Cerrar
+        </button>
+      </div>
+    )}
+    </>
   )
 }
