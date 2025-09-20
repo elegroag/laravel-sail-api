@@ -4,37 +4,18 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ChevronLeft } from "lucide-react"
-import { DocumentTypeOption } from "@/types/auth"
+import type { DocumentTypeOption } from "@/types/auth"
+import type { RegisterValues } from "@/types/register"
 
-// Formulario de registro reutilizable con soporte para pasos
-// Si userTypeLabel es "empresa", el registro es en 2 pasos: primero datos de empresa, luego representante
+// Componente especializado para registro de empresas (3 pasos)
+// Paso 1: Datos empresa, Paso 2: Datos representante, Paso 3: Datos de sesión
 
-export type RegisterValues = {
-  documentType: string
-  identification: string
-  firstName: string
-  lastName: string
-  email: string
-  phone: string
-  password: string
-  confirmPassword: string
-  companyName: string
-  companyNit: string
-  address: string
-  city: string
-  societyType: string
-  companyCategory: string
-  userRole: string
-  position: string
-}
-
-type RegisterFormProps = {
+type Props = {
   subtitle?: string
   userTypeLabel: string
   values: RegisterValues
   errors: Record<string, string>
   isSubmitting: boolean
-  isCompanyType: boolean
   documentTypes: DocumentTypeOption[]
   societyOptions: DocumentTypeOption[]
   cityOptions: DocumentTypeOption[]
@@ -42,11 +23,9 @@ type RegisterFormProps = {
   onBack: () => void
   onChange: (field: keyof RegisterValues, value: string) => void
   onSubmit: (e: React.FormEvent) => void
-  // Nuevo: paso actual y handlers para navegación
   step?: number
   onNextStep?: () => void
   onPrevStep?: () => void
-  // Refs opcionales para manejo de foco desde el padre
   firstNameRef?: React.Ref<HTMLInputElement>
   lastNameRef?: React.Ref<HTMLInputElement>
   emailRef?: React.Ref<HTMLInputElement>
@@ -59,13 +38,12 @@ type RegisterFormProps = {
   addressRef?: React.Ref<HTMLInputElement>
 }
 
-export default function RegisterForm({
+export default function CompanyRegisterForm({
   subtitle,
   userTypeLabel,
   values,
   errors,
   isSubmitting,
-  isCompanyType,
   documentTypes,
   societyOptions,
   cityOptions,
@@ -86,7 +64,7 @@ export default function RegisterForm({
   companyNameRef,
   companyNitRef,
   addressRef,
-}: RegisterFormProps) {
+}: Props){
   // Pista visual de contraseña: requisitos básicos
   const pwd = values.password || ""
   const pwdReqs = {
@@ -96,20 +74,16 @@ export default function RegisterForm({
     symbol: /[^A-Za-z0-9]/.test(pwd),
   }
 
-  // Estados locales para mostrar/ocultar contraseñas
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
 
-  // Generador simple de contraseña fuerte
   const suggestStrongPassword = () => {
     const uppers = "ABCDEFGHJKLMNPQRSTUVWXYZ"
     const lowers = "abcdefghijkmnopqrstuvwxyz"
     const numbers = "23456789"
     const symbols = "!@#$%^&*()-_=+[]{};:,.?";
     const pick = (set: string, n: number) => Array.from({ length: n }, () => set[Math.floor(Math.random() * set.length)]).join("")
-    // garantizar al menos 1 de cada
     let base = pick(uppers, 2) + pick(numbers, 2) + pick(symbols, 2) + pick(lowers, 6)
-    // mezclar
     const arr = base.split("")
     for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -136,7 +110,7 @@ export default function RegisterForm({
 
       <form onSubmit={onSubmit} className="space-y-3">
         {/* Paso 1: Datos empresa */}
-        {isCompanyType && step === 1 && (
+        {step === 1 && (
           <>
             <div>
               <Label htmlFor="companyName" className="text-sm font-medium text-gray-700">
@@ -218,34 +192,14 @@ export default function RegisterForm({
                 className="in-b-form mt-1"
               />
             </div>
-            {!isCompanyType && (
-              <div>
-                <Label htmlFor="city" className="text-sm font-medium text-gray-700">
-                  Ciudad
-                </Label>
-                <Select value={values.city} onValueChange={(v) => onChange("city", v)}>
-                  <SelectTrigger className={`in-b-form mt-1 ${errors.city ? "border-red-500" : ""}`}>
-                    <SelectValue placeholder="Selecciona la ciudad" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {cityOptions.map((city) => (
-                      <SelectItem key={city.value} value={city.value}>
-                        {city.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
-              </div>
-            )}
             <Button type="button" className="w-full mt-4" onClick={onNextStep}>
               Siguiente: Datos representante
             </Button>
           </>
         )}
 
-        {/* Paso 2: Datos personales (empresa: paso 2, otros: paso 1) */}
-        {((isCompanyType && step === 2) || (!isCompanyType && step === 1)) && (
+        {/* Paso 2: Datos representante */}
+        {step === 2 && (
           <>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -326,25 +280,22 @@ export default function RegisterForm({
               </Select>
               {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
             </div>
-            {/* Solo empresas: indicar si es representante o delegado */}
-            {isCompanyType && (
-              <div>
-                <Label htmlFor="userRole" className="text-sm font-medium text-gray-700">
-                  ¿Eres representante o delegado? *
-                </Label>
-                <Select value={values.userRole} onValueChange={(v) => onChange("userRole", v)}>
-                  <SelectTrigger className={`in-b-form mt-1 ${errors.userRole ? "border-red-500" : ""}`}>
-                    <SelectValue placeholder="Selecciona" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="representante">Representante legal</SelectItem>
-                    <SelectItem value="delegado">Delegado de la empresa</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.userRole && <p className="text-red-500 text-xs mt-1">{errors.userRole}</p>}
-              </div>
-            )}
-            {isCompanyType && values.userRole === 'delegado' && (
+            <div>
+              <Label htmlFor="userRole" className="text-sm font-medium text-gray-700">
+                ¿Eres representante o delegado? *
+              </Label>
+              <Select value={values.userRole} onValueChange={(v) => onChange("userRole", v)}>
+                <SelectTrigger className={`in-b-form mt-1 ${errors.userRole ? "border-red-500" : ""}`}>
+                  <SelectValue placeholder="Selecciona" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="representante">Representante legal</SelectItem>
+                  <SelectItem value="delegado">Delegado de la empresa</SelectItem>
+                </SelectContent>
+              </Select>
+              {errors.userRole && <p className="text-red-500 text-xs mt-1">{errors.userRole}</p>}
+            </div>
+            {values.userRole === 'delegado' && (
               <div>
                 <Label htmlFor="position" className="text-sm font-medium text-gray-700">
                   Cargo u ocupación dentro de la empresa *
@@ -361,11 +312,9 @@ export default function RegisterForm({
               </div>
             )}
             <div className="flex gap-3 mt-4">
-              {isCompanyType && (
-                <Button type="button" variant="secondary" onClick={onPrevStep}>
-                  Volver a datos de empresa
-                </Button>
-              )}
+              <Button type="button" variant="secondary" onClick={onPrevStep}>
+                Volver a datos de empresa
+              </Button>
               <Button type="button" onClick={onNextStep} className="flex-1">
                 Siguiente: Datos de sesión
               </Button>
@@ -373,8 +322,8 @@ export default function RegisterForm({
           </>
         )}
 
-        {/* Paso sesión: empresa paso 3, otros paso 2 */}
-        {((isCompanyType && step === 3) || (!isCompanyType && step === 2)) && (
+        {/* Paso 3: Datos sesión */}
+        {step === 3 && (
           <>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -467,35 +416,36 @@ export default function RegisterForm({
                 {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
               </div>
 
-                {/* Pista visual compacta */}
-                <div className="w-full">
-                    <div className="mt-1 grid grid-cols-2 gap-x-4 gap-y-0.5 text-[10px] leading-tight">
-                        <div className={pwdReqs.length ? "text-emerald-600" : "text-gray-500"}>
-                            {pwdReqs.length ? "✔" : "•"} 10+ caracteres
-                        </div>
-                        <div className={pwdReqs.upper ? "text-emerald-600" : "text-gray-500"}>
-                            {pwdReqs.upper ? "✔" : "•"} 1 mayúscula
-                        </div>
-                        <div className={pwdReqs.number ? "text-emerald-600" : "text-gray-500"}>
-                            {pwdReqs.number ? "✔" : "•"} 1 número
-                        </div>
-                        <div className={pwdReqs.symbol ? "text-emerald-600" : "text-gray-500"}>
-                            {pwdReqs.symbol ? "✔" : "•"} 1 símbolo
-                        </div>
-                    </div>
-                    <div className="mt-1 text-[11px] text-gray-500 mt-4">
-                        <span className="truncate">Sugerencia: usa una frase con símbolos y números.</span>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={suggestStrongPassword}
-                            className="h-7 mt-2 px-2 py-0.5 text-[11px] border-gray-300 text-gray-700 hover:text-gray-900 text-white"
-                        >
-                            Sugerir
-                        </Button>
-                    </div>
+              {/* Pista visual compacta */}
+              <div className="w-full">
+                <div className="mt-1 grid grid-cols-2 gap-x-4 gap-y-0.5 text-[10px] leading-tight">
+                  <div className={pwdReqs.length ? "text-emerald-600" : "text-gray-500"}>
+                    {pwdReqs.length ? "✔" : "•"} 10+ caracteres
+                  </div>
+                  <div className={pwdReqs.upper ? "text-emerald-600" : "text-gray-500"}>
+                    {pwdReqs.upper ? "✔" : "•"} 1 mayúscula
+                  </div>
+                  <div className={pwdReqs.number ? "text-emerald-600" : "text-gray-500"}>
+                    {pwdReqs.number ? "✔" : "•"} 1 número
+                  </div>
+                  <div className={pwdReqs.symbol ? "text-emerald-600" : "text-gray-500"}>
+                    {pwdReqs.symbol ? "✔" : "•"} 1 símbolo
+                  </div>
                 </div>
+                <div className="mt-1 text-[11px] text-gray-500 mt-4">
+                  <span className="truncate">Sugerencia: usa una frase con símbolos y números.</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={suggestStrongPassword}
+                    className="h-7 mt-2 px-2 py-0.5 text-[11px] border-gray-300 text-gray-700 hover:text-gray-900 text-white"
+                  >
+                    Sugerir
+                  </Button>
+                </div>
+              </div>
             </div>
+
             <div className="flex gap-3 mt-4">
               <Button type="button" variant="secondary" onClick={onPrevStep}>
                 Volver

@@ -3,7 +3,8 @@ import { useReducer, useRef, useEffect, useState, useMemo } from "react"
 import AuthLayout from "@/layouts/auth-layout";
 import AuthWelcome from "@/pages/Auth/components/auth-welcome";
 import AuthUserTypeSelector from "@/pages/Auth/components/auth-user-type-selector";
-import RegisterForm from "@/pages/Auth/components/register-form";
+import CompanyRegisterForm from "@/pages/Auth/components/company-register-form";
+import PersonRegisterForm from "@/pages/Auth/components/person-register-form";
 import imageLogo from "../../assets/comfaca-logo.png";
 import { useRegisterValidation } from "@/hooks/use-register-validation";
 import { TipoFuncionario, userTypes } from "@/constants/auth";
@@ -240,52 +241,94 @@ export default function Register({
               onSelect={(id) => handleUserTypeSelect(id)}
             />
           ) : (
-            <RegisterForm
-              userTypeLabel={userTypes.find((ut) => ut.id === state.selectedUserType)?.label || ""}
-              values={{
-                documentType: state.documentType,
-                identification: state.identification,
-                firstName: state.firstName,
-                lastName: state.lastName,
-                email: state.email,
-                phone: state.phone,
-                password: state.password,
-                confirmPassword: state.confirmPassword,
-                companyName: state.companyName,
-                companyNit: state.companyNit,
-                address: state.address,
-                city: state.city,
-                societyType: state.societyType,
-                companyCategory: state.companyCategory,
-                userRole: state.userRole,
-                position: state.position,
-              }}
-              errors={state.errors}
-              isSubmitting={state.isSubmitting}
-              isCompanyType={isCompanyType}
-              documentTypes={documentTypeOptions}
-              cityOptions={cityOptions}
-              societyOptions={societyOptions}
-              categoryOptions={companyCategoryOptions}
-              onBack={handleBack}
-              onChange={(field, value) =>
-                dispatch({ type: "SET_FIELD", field: field as keyof FormState, value })
-              }
-              onSubmit={handleRegister}
-              step={step}
-              onNextStep={handleNextStep}
-              onPrevStep={handlePrevStep}
-              firstNameRef={firstNameRef}
-              lastNameRef={lastNameRef}
-              emailRef={emailRef}
-              phoneRef={phoneRef}
-              identificationRef={identificationRef}
-              passwordRef={passwordRef}
-              confirmPasswordRef={confirmPasswordRef}
-              companyNameRef={companyNameRef}
-              companyNitRef={companyNitRef}
-              addressRef={addressRef}
-            />
+            state.selectedUserType === 'empresa' ? (
+              <CompanyRegisterForm
+                userTypeLabel={userTypes.find((ut) => ut.id === state.selectedUserType)?.label || ""}
+                values={{
+                  documentType: state.documentType,
+                  identification: state.identification,
+                  firstName: state.firstName,
+                  lastName: state.lastName,
+                  email: state.email,
+                  phone: state.phone,
+                  password: state.password,
+                  confirmPassword: state.confirmPassword,
+                  companyName: state.companyName,
+                  companyNit: state.companyNit,
+                  address: state.address,
+                  city: state.city,
+                  societyType: state.societyType,
+                  companyCategory: state.companyCategory,
+                  userRole: state.userRole,
+                  position: state.position,
+                }}
+                errors={state.errors}
+                isSubmitting={state.isSubmitting}
+                documentTypes={documentTypeOptions}
+                cityOptions={cityOptions}
+                societyOptions={societyOptions}
+                categoryOptions={companyCategoryOptions}
+                onBack={handleBack}
+                onChange={(field, value) =>
+                  dispatch({ type: "SET_FIELD", field: field as keyof FormState, value })
+                }
+                onSubmit={handleRegister}
+                step={step}
+                onNextStep={handleNextStep}
+                onPrevStep={handlePrevStep}
+                firstNameRef={firstNameRef}
+                lastNameRef={lastNameRef}
+                emailRef={emailRef}
+                phoneRef={phoneRef}
+                identificationRef={identificationRef}
+                passwordRef={passwordRef}
+                confirmPasswordRef={confirmPasswordRef}
+                companyNameRef={companyNameRef}
+                companyNitRef={companyNitRef}
+                addressRef={addressRef}
+              />
+            ) : (
+              <PersonRegisterForm
+                userTypeLabel={userTypes.find((ut) => ut.id === state.selectedUserType)?.label || ""}
+                values={{
+                  documentType: state.documentType,
+                  identification: state.identification,
+                  firstName: state.firstName,
+                  lastName: state.lastName,
+                  email: state.email,
+                  phone: state.phone,
+                  password: state.password,
+                  confirmPassword: state.confirmPassword,
+                  companyName: state.companyName,
+                  companyNit: state.companyNit,
+                  address: state.address,
+                  city: state.city,
+                  societyType: state.societyType,
+                  companyCategory: state.companyCategory,
+                  userRole: state.userRole,
+                  position: state.position,
+                }}
+                errors={state.errors}
+                isSubmitting={state.isSubmitting}
+                documentTypes={documentTypeOptions}
+                cityOptions={cityOptions}
+                onBack={handleBack}
+                onChange={(field, value) =>
+                  dispatch({ type: "SET_FIELD", field: field as keyof FormState, value })
+                }
+                onSubmit={handleRegister}
+                step={step}
+                onNextStep={handleNextStep}
+                onPrevStep={handlePrevStep}
+                firstNameRef={firstNameRef}
+                lastNameRef={lastNameRef}
+                emailRef={emailRef}
+                phoneRef={phoneRef}
+                identificationRef={identificationRef}
+                passwordRef={passwordRef}
+                confirmPasswordRef={confirmPasswordRef}
+              />
+            )
           )}
         </div>
       </div>
