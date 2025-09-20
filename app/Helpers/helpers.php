@@ -64,3 +64,4 @@ require_once __DIR__ . '/format.php';
 require_once __DIR__ . '/flash.php';
 require_once __DIR__ . '/files.php';
 require_once __DIR__ . '/hashes.php';
+require_once __DIR__ . '/company.php';

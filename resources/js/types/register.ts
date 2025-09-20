@@ -18,4 +18,11 @@ export type RegisterValues = {
   companyCategory: string
   userRole: string
   position: string
+  // Datos del representante (solo cuando userRole === 'delegado')
+  repName: string
+  repIdentification: string
+  repEmail: string
+  repPhone: string
+  // Aportes (independiente/pensionado): 2%, 0.6% o 0%
+  contributionRate: string
 }

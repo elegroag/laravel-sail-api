@@ -40,6 +40,12 @@ export interface FormState extends FormBasic {
     companyCategory: string
     userRole: string
     position: string
+    contributionRate: string
+    // Datos del representante (solo aplica cuando userRole === 'delegado')
+    repName: string
+    repIdentification: string
+    repEmail: string
+    repPhone: string
 }
 
 export type FormAction =

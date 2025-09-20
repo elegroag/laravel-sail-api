@@ -201,6 +201,37 @@ export default function CompanyRegisterForm({
         {/* Paso 2: Datos representante */}
         {step === 2 && (
           <>
+          <div>
+              <Label htmlFor="userRole" className="text-sm font-medium text-gray-700">
+                ¿Eres representante o delegado? *
+              </Label>
+              <Select value={values.userRole} onValueChange={(v) => onChange("userRole", v)}>
+                <SelectTrigger className={`in-b-form mt-1 ${errors.userRole ? "border-red-500" : ""}`}>
+                  <SelectValue placeholder="Selecciona" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="representante">Representante legal</SelectItem>
+                  <SelectItem value="delegado">Delegado de la empresa</SelectItem>
+                </SelectContent>
+              </Select>
+              {errors.userRole && <p className="text-red-500 text-xs mt-1">{errors.userRole}</p>}
+            </div>
+            {values.userRole === 'delegado' && (
+              <div>
+                <Label htmlFor="position" className="text-sm font-medium text-gray-700">
+                  Cargo u ocupación dentro de la empresa *
+                </Label>
+                <Input
+                  id="position"
+                  type="text"
+                  value={values.position}
+                  onChange={(e) => onChange("position", e.target.value)}
+                  placeholder="Ej: Coordinador de Talento Humano"
+                  className={`in-b-form mt-1 ${errors.position ? "border-red-500" : ""}`}
+                />
+                {errors.position && <p className="text-red-500 text-xs mt-1">{errors.position}</p>}
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="firstName" className="text-sm font-medium text-gray-700">
@@ -280,50 +311,80 @@ export default function CompanyRegisterForm({
               </Select>
               {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
             </div>
-            <div>
-              <Label htmlFor="userRole" className="text-sm font-medium text-gray-700">
-                ¿Eres representante o delegado? *
-              </Label>
-              <Select value={values.userRole} onValueChange={(v) => onChange("userRole", v)}>
-                <SelectTrigger className={`in-b-form mt-1 ${errors.userRole ? "border-red-500" : ""}`}>
-                  <SelectValue placeholder="Selecciona" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="representante">Representante legal</SelectItem>
-                  <SelectItem value="delegado">Delegado de la empresa</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.userRole && <p className="text-red-500 text-xs mt-1">{errors.userRole}</p>}
-            </div>
-            {values.userRole === 'delegado' && (
-              <div>
-                <Label htmlFor="position" className="text-sm font-medium text-gray-700">
-                  Cargo u ocupación dentro de la empresa *
-                </Label>
-                <Input
-                  id="position"
-                  type="text"
-                  value={values.position}
-                  onChange={(e) => onChange("position", e.target.value)}
-                  placeholder="Ej: Coordinador de Talento Humano"
-                  className={`in-b-form mt-1 ${errors.position ? "border-red-500" : ""}`}
-                />
-                {errors.position && <p className="text-red-500 text-xs mt-1">{errors.position}</p>}
-              </div>
-            )}
+
             <div className="flex gap-3 mt-4">
               <Button type="button" variant="secondary" onClick={onPrevStep}>
                 Volver a datos de empresa
               </Button>
               <Button type="button" onClick={onNextStep} className="flex-1">
-                Siguiente: Datos de sesión
+                {values.userRole === 'delegado' ? 'Siguiente: Datos del representante' : 'Siguiente: Datos de sesión'}
               </Button>
             </div>
           </>
         )}
 
-        {/* Paso 3: Datos sesión */}
-        {step === 3 && (
+        {/* Paso 3 (solo delegado): Datos del representante */}
+        {step === 3 && values.userRole === 'delegado' && (
+          <>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <Label htmlFor="repName" className="text-sm font-medium text-gray-700">Nombre del representante *</Label>
+                <Input
+                  id="repName"
+                  type="text"
+                  value={values.repName}
+                  onChange={(e) => onChange("repName", e.target.value)}
+                  placeholder="Nombre y apellido del representante"
+                  className={`in-b-form mt-1 ${errors.repName ? 'border-red-500' : ''}`}
+                />
+                {errors.repName && <p className="text-red-500 text-xs mt-1">{errors.repName}</p>}
+              </div>
+              <div>
+                <Label htmlFor="repIdentification" className="text-sm font-medium text-gray-700">Identificación *</Label>
+                <Input
+                  id="repIdentification"
+                  type="text"
+                  value={values.repIdentification}
+                  onChange={(e) => onChange("repIdentification", e.target.value)}
+                  placeholder="Número de documento"
+                  className={`in-b-form mt-1 ${errors.repIdentification ? 'border-red-500' : ''}`}
+                />
+                {errors.repIdentification && <p className="text-red-500 text-xs mt-1">{errors.repIdentification}</p>}
+              </div>
+              <div>
+                <Label htmlFor="repEmail" className="text-sm font-medium text-gray-700">Email *</Label>
+                <Input
+                  id="repEmail"
+                  type="email"
+                  value={values.repEmail}
+                  onChange={(e) => onChange("repEmail", e.target.value)}
+                  placeholder="Correo del representante"
+                  className={`in-b-form mt-1 ${errors.repEmail ? 'border-red-500' : ''}`}
+                />
+                {errors.repEmail && <p className="text-red-500 text-xs mt-1">{errors.repEmail}</p>}
+              </div>
+              <div>
+                <Label htmlFor="repPhone" className="text-sm font-medium text-gray-700">Teléfono *</Label>
+                <Input
+                  id="repPhone"
+                  type="tel"
+                  value={values.repPhone}
+                  onChange={(e) => onChange("repPhone", e.target.value)}
+                  placeholder="Teléfono personal"
+                  className={`in-b-form mt-1 ${errors.repPhone ? 'border-red-500' : ''}`}
+                />
+                {errors.repPhone && <p className="text-red-500 text-xs mt-1">{errors.repPhone}</p>}
+              </div>
+            </div>
+            <div className="flex gap-3 mt-4">
+              <Button type="button" variant="secondary" onClick={onPrevStep}>Volver</Button>
+              <Button type="button" onClick={onNextStep} className="flex-1">Siguiente: Datos de sesión</Button>
+            </div>
+          </>
+        )}
+
+        {/* Paso sesión: paso 3 (no delegado) o paso 4 (delegado) */}
+        {((values.userRole !== 'delegado' && step === 3) || (values.userRole === 'delegado' && step === 4)) && (
           <>
             <div className="grid grid-cols-2 gap-4">
               <div>

@@ -63,8 +63,10 @@ class AuthMercurioController extends Controller
         try {
             $this->db->begin();
             $signupService = new SignupService();
+            $data = $request->all();
+            $data['calemp'] = calemp_use_tipo_value($request->input('tipo'));
             $response = $signupService->execute(
-                new RequestParam($request->all())
+                new RequestParam($data)
             );
 
             $this->db->commit();

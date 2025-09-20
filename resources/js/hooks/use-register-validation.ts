@@ -44,6 +44,9 @@ export function useRegisterValidation({ state, step, refs, dispatch }: UseRegist
     let isValid = true
 
     const isCompany = state.selectedUserType === "empresa"
+    const isWorker = state.selectedUserType === "trabajador"
+    const isIndependent = state.selectedUserType === "independiente"
+    const isPensioner = state.selectedUserType === "pensionado"
 
     // Paso 1 (empresa): datos de empresa
     if (isCompany && step === 1) {
@@ -68,7 +71,33 @@ export function useRegisterValidation({ state, step, refs, dispatch }: UseRegist
       return isValid
     }
 
-    // Paso personales: empresa paso 2, otros paso 1
+    // Paso 2 (Trabajador): datos de empresa (nit, razón social, cargo)
+    if (isWorker && step === 2) {
+      const reasons: string[] = []
+      if (!state.companyNit?.trim()) {
+        dispatch({ type: "SET_ERROR", field: "companyNit", error: "El NIT de la empresa es requerido" })
+        reasons.push('companyNit')
+        companyNitRef.current?.focus()
+        isValid = false
+      }
+      if (!state.companyName?.trim()) {
+        dispatch({ type: "SET_ERROR", field: "companyName", error: "La razón social es requerida" })
+        reasons.push('companyName')
+        if (isValid) companyNameRef.current?.focus()
+        isValid = false
+      }
+      if (!state.position?.trim()) {
+        dispatch({ type: "SET_ERROR", field: "position", error: "El cargo es requerido" })
+        reasons.push('position')
+        isValid = false
+      }
+      if (reasons.length) {
+        console.debug('[validación] Paso 2 (Trabajador) inválido ->', reasons)
+      }
+      return isValid
+    }
+
+    // Paso personales: empresa paso 2, otros (incluye trabajador) paso 1
     if ((isCompany && step === 2) || (!isCompany && step === 1)) {
       if (!state.firstName.trim()) {
         dispatch({ type: "SET_ERROR", field: "firstName", error: "El nombre es requerido" })
@@ -101,11 +130,46 @@ export function useRegisterValidation({ state, step, refs, dispatch }: UseRegist
         dispatch({ type: "SET_ERROR", field: "position", error: "El cargo u ocupación es requerido para delegados" })
         isValid = false
       }
+      // Independiente/Pensionado: contributionRate requerido en paso 1
+      if (!isCompany && (isIndependent || isPensioner)) {
+        if (!state.contributionRate) {
+          dispatch({ type: "SET_ERROR", field: "contributionRate", error: "Selecciona la tasa de contribución" })
+          isValid = false
+        }
+      }
       return isValid
     }
 
-    // Paso sesión: empresa paso 3, otros paso 2
-    if ((isCompany && step === 3) || (!isCompany && step === 2)) {
+    // Paso 3 adicional para empresas con delegado: datos del representante
+    if (isCompany && state.userRole === 'delegado' && step === 3) {
+      if (!state.repName?.trim()) {
+        dispatch({ type: "SET_ERROR", field: "repName", error: "El nombre del representante es requerido" })
+        isValid = false
+      }
+      if (!state.repIdentification?.trim()) {
+        dispatch({ type: "SET_ERROR", field: "repIdentification", error: "La identificación del representante es requerida" })
+        isValid = false
+      }
+      if (!state.repEmail?.trim()) {
+        dispatch({ type: "SET_ERROR", field: "repEmail", error: "El email del representante es requerido" })
+        isValid = false
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.repEmail)) {
+        dispatch({ type: "SET_ERROR", field: "repEmail", error: "Email del representante inválido" })
+        isValid = false
+      }
+      if (!state.repPhone?.trim()) {
+        dispatch({ type: "SET_ERROR", field: "repPhone", error: "El teléfono del representante es requerido" })
+        isValid = false
+      }
+      return isValid
+    }
+
+    // Paso sesión: empresa (paso 3 normal o paso 4 si es delegado), trabajador (paso 3), otros (paso 2)
+    if (
+      (isCompany && ((state.userRole === 'delegado' && step === 4) || (state.userRole !== 'delegado' && step === 3)))
+      || (isWorker && step === 3)
+      || (!isCompany && !isWorker && step === 2)
+    ) {
       if (!state.documentType) {
         dispatch({ type: "SET_ERROR", field: "documentType", error: "El tipo de documento es requerido" })
         isValid = false

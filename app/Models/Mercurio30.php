@@ -397,12 +397,7 @@ class Mercurio30 extends ModelBase
 
     public function getEstadoDetalle()
     {
-        $return = "";
-        if ($this->estado == "T") $return = "TEMPORAL";
-        if ($this->estado == "D") $return = "DEVUELTO";
-        if ($this->estado == "A") $return = "APROBADO";
-        if ($this->estado == "X") $return = "RECHAZADO";
-        return $return;
+        return estado_detalle_value($this->estado);
     }
 
     public function getCodest()
@@ -547,10 +542,7 @@ class Mercurio30 extends ModelBase
     }
     public function getTipperArray()
     {
-        return array(
-            'N' => 'NATURAL',
-            'J' => 'JURIDICA'
-        );
+        return tipper_array();
     }
     public function getCoddocrepleg()
     {
@@ -592,57 +584,17 @@ class Mercurio30 extends ModelBase
 
     public function getCalempDetalle()
     {
-        switch ($this->calemp) {
-            case 'E':
-                return 'EMPRESA';
-                break;
-            case 'I':
-                return 'INDEPENDIENTE';
-                break;
-            case 'P':
-                return 'PENSIONADO';
-                break;
-            case 'F':
-                return 'FACULTATIVO';
-                break;
-            case 'D':
-                return 'DESEMPLEADO';
-                break;
-            default:
-                return null;
-                break;
-        }
+        return calemp_detalle_value($this->calemp);
     }
 
     public function getCalempArray()
     {
-        return array(
-            'E' => 'EMPRESA',
-            'I' => 'INDEPENDIENTE',
-            'P' => 'PENSIONADO',
-            'F' => 'FACULTATIVO',
-            'D' => 'DESEMPLEADO'
-        );
+        return calemp_array();
     }
 
     public function getCoddocreplegArray()
     {
-        return array(
-            1 => 'CC',
-            10 => 'TMF',
-            11 => 'CD',
-            12 => 'ISE',
-            13 => 'V',
-            14 => 'PT',
-            2 => 'TI',
-            3 => 'NI',
-            4 => 'CE',
-            5 => 'NU',
-            6 => 'PA',
-            7 => 'RC',
-            8 => 'PEP',
-            9 => 'CB'
-        );
+        return coddoc_repleg_array();
     }
 
     public function CamposDisponibleDetalle($campo)

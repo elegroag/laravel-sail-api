@@ -29,6 +29,11 @@ const initialState: FormState = {
   companyCategory: "",
   userRole: "",
   position: "",
+  repName: "",
+  repIdentification: "",
+  repEmail: "",
+  repPhone: "",
+  contributionRate: "",
   errors: {},
   isSubmitting: false,
   isSuccess: false
@@ -132,6 +137,8 @@ export default function Register({
 
   const handleUserTypeSelect = (userType: UserType) => {
     dispatch({ type: "SET_USER_TYPE", payload: userType })
+    // Reiniciar tasa de contribución al cambiar entre tipos para evitar selecciones previas
+    dispatch({ type: "SET_FIELD", field: "contributionRate", value: "" })
     setStep(1)
   }
 
@@ -146,7 +153,9 @@ export default function Register({
 
   // Navegación entre pasos usando validación
   const handleNextStep = () => {
-    const maxSteps = state.selectedUserType === "empresa" ? 3 : 2
+    const isCompany = state.selectedUserType === "empresa"
+    const isWorker = state.selectedUserType === "trabajador"
+    const maxSteps = isCompany ? (state.userRole === 'delegado' ? 4 : 3) : (isWorker ? 3 : 2)
     if (validateStep()) {
       setStep((prev) => Math.min(prev + 1, maxSteps))
     }
@@ -165,27 +174,53 @@ export default function Register({
     try {
       const tipoValue = TipoFuncionario[state.selectedUserType as keyof typeof TipoFuncionario];
 
+      const isCompany = state.selectedUserType === 'empresa'
+      const isWorker = state.selectedUserType === 'trabajador'
+      const isIndependent = state.selectedUserType === 'independiente'
+      const isPensioner = state.selectedUserType === 'pensionado'
+
       // Mapeo de campos a las propiedades esperadas por el backend
-      const payload = {
+      const payload: Record<string, any> = {
         tipo: tipoValue,
         // Sesión
         coddoc: state.documentType,
         documento: state.identification,
         password: state.password,
-        // Empresa
-        razsoc: state.companyName,
-        nit: state.companyNit,
-        tipsoc: state.societyType,
-        tipper: state.companyCategory,
+        // Empresa (si aplica)
+        razsoc: state.companyName || undefined,
+        nit: state.companyNit || undefined,
+        tipsoc: state.societyType || undefined,
+        tipper: state.companyCategory || undefined,
         // Personales
         nombre: `${state.firstName} ${state.lastName}`.trim(),
         email: state.email,
         telefono: state.phone,
         codciu: state.city,
-        // Delegado/Representante
-        is_delegado: state.userRole === 'delegado',
-        cargo: state.userRole === 'delegado' ? state.position : null,
       }
+
+      // Delegado/Representante (empresa)
+      if (isCompany) {
+        payload.is_delegado = state.userRole === 'delegado'
+        payload.cargo = state.userRole === 'delegado' ? state.position : undefined
+        if (state.userRole === 'delegado') {
+          payload.rep_nombre = state.repName || undefined
+          payload.rep_documento = state.repIdentification || undefined
+          payload.rep_email = state.repEmail || undefined
+          payload.rep_telefono = state.repPhone || undefined
+        }
+      }
+
+      // Trabajador: también enviar cargo si fue diligenciado
+      if (isWorker && state.position) {
+        payload.cargo = state.position
+      }
+
+      // Independiente / Pensionado: tasa de contribución
+      if ((isIndependent || isPensioner) && state.contributionRate) {
+        // Nombre del campo genérico para tasa de contribución
+        payload.contribution_rate = state.contributionRate
+      }
+
       console.debug('Payload de registro (previo a envío):', payload)
 
       const response = await fetch(route('api.register'), {
@@ -215,8 +250,6 @@ export default function Register({
       dispatch({ type: "SET_SUBMITTING", payload: false })
     }
   }
-
-  const isCompanyType = state.selectedUserType === "empresa"
 
   return (
     <>
@@ -261,6 +294,11 @@ export default function Register({
                   companyCategory: state.companyCategory,
                   userRole: state.userRole,
                   position: state.position,
+                  contributionRate: state.contributionRate,
+                  repName: state.repName,
+                  repIdentification: state.repIdentification,
+                  repEmail: state.repEmail,
+                  repPhone: state.repPhone,
                 }}
                 errors={state.errors}
                 isSubmitting={state.isSubmitting}
@@ -307,11 +345,19 @@ export default function Register({
                   companyCategory: state.companyCategory,
                   userRole: state.userRole,
                   position: state.position,
+                  repName: state.repName,
+                  repIdentification: state.repIdentification,
+                  repEmail: state.repEmail,
+                  repPhone: state.repPhone,
+                  contributionRate: state.contributionRate,
                 }}
                 errors={state.errors}
                 isSubmitting={state.isSubmitting}
                 documentTypes={documentTypeOptions}
                 cityOptions={cityOptions}
+                isWorkerType={state.selectedUserType === 'trabajador'}
+                isIndependentType={state.selectedUserType === 'independiente'}
+                isPensionerType={state.selectedUserType === 'pensionado'}
                 onBack={handleBack}
                 onChange={(field, value) =>
                   dispatch({ type: "SET_FIELD", field: field as keyof FormState, value })

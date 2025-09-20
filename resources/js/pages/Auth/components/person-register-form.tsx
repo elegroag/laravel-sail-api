@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { ChevronLeft } from "lucide-react"
 import type { DocumentTypeOption } from "@/types/auth"
 import type { RegisterValues } from "@/types/register"
@@ -18,6 +19,12 @@ type Props = {
   isSubmitting: boolean
   documentTypes: DocumentTypeOption[]
   cityOptions: DocumentTypeOption[]
+  // Indica si el flujo es de Trabajador (requiere paso 2 con datos de empresa)
+  isWorkerType?: boolean
+  // Indica si el flujo es de Independiente (requiere tasa de contribución)
+  isIndependentType?: boolean
+  // Indica si el flujo es de Pensionado (requiere tasa de contribución)
+  isPensionerType?: boolean
   onBack: () => void
   onChange: (field: keyof RegisterValues, value: string) => void
   onSubmit: (e: React.FormEvent) => void
@@ -41,6 +48,9 @@ export default function PersonRegisterForm({
   isSubmitting,
   documentTypes,
   cityOptions,
+  isWorkerType = false,
+  isIndependentType = false,
+  isPensionerType = false,
   onBack,
   onChange,
   onSubmit,
@@ -181,19 +191,109 @@ export default function PersonRegisterForm({
               </Select>
               {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
             </div>
+            {(isIndependentType || isPensionerType) && (
+              <div>
+                <Label className="text-sm font-medium text-gray-700">
+                  {isIndependentType ? 'Contribución (Independiente)' : 'Contribución (Pensionado)'} *
+                </Label>
+                <RadioGroup
+                  value={values.contributionRate}
+                  onValueChange={(v: string) => onChange('contributionRate', v)}
+                  className="mt-2 gap-3"
+                >
+                  {isIndependentType && (
+                    <div className="flex flex-col gap-2 text-sm">
+                      <label className="inline-flex items-center gap-2 text-gray-800 select-none">
+                        <RadioGroupItem value="2" />
+                        <span>2%</span>
+                      </label>
+                      <label className="inline-flex items-center gap-2 text-gray-800 select-none">
+                        <RadioGroupItem value="0.6" />
+                        <span>0.6%</span>
+                      </label>
+                    </div>
+                  )}
+                  {isPensionerType && (
+                    <div className="flex flex-col gap-2 text-sm">
+                      <label className="inline-flex items-center gap-2 text-gray-800 select-none">
+                        <RadioGroupItem value="0" />
+                        <span>0%</span>
+                      </label>
+                      <label className="inline-flex items-center gap-2 text-gray-800 select-none">
+                        <RadioGroupItem value="2" />
+                        <span>2%</span>
+                      </label>
+                      <label className="inline-flex items-center gap-2 text-gray-800 select-none">
+                        <RadioGroupItem value="0.6" />
+                        <span>0.6%</span>
+                      </label>
+                    </div>
+                  )}
+                </RadioGroup>
+                {errors.contributionRate && (
+                  <p className="text-red-500 text-xs mt-1">{errors.contributionRate}</p>
+                )}
+              </div>
+            )}
             <div className="flex gap-3 mt-4">
-              <Button type="button" variant="secondary" onClick={onPrevStep}>
+              <Button type="button" variant="secondary" onClick={onBack}>
                 Volver
               </Button>
               <Button type="button" onClick={onNextStep} className="flex-1">
-                Siguiente: Datos de sesión
+                {isWorkerType ? 'Siguiente: Datos de empresa' : 'Siguiente: Datos de sesión'}
               </Button>
             </div>
           </>
         )}
 
-        {/* Paso 2: Datos sesión */}
-        {step === 2 && (
+        {/* Paso 2 (Trabajador): Datos de empresa */}
+        {isWorkerType && step === 2 && (
+          <>
+            <div>
+              <Label htmlFor="companyNit" className="text-sm font-medium text-gray-700">NIT de la empresa *</Label>
+              <Input
+                id="companyNit"
+                type="text"
+                value={values.companyNit}
+                onChange={(e) => onChange('companyNit', e.target.value)}
+                placeholder="NIT de la empresa"
+                className={`in-b-form mt-1 ${errors.companyNit ? 'border-red-500' : ''}`}
+              />
+              {errors.companyNit && <p className="text-red-500 text-xs mt-1">{errors.companyNit}</p>}
+            </div>
+            <div>
+              <Label htmlFor="companyName" className="text-sm font-medium text-gray-700">Razón social *</Label>
+              <Input
+                id="companyName"
+                type="text"
+                value={values.companyName}
+                onChange={(e) => onChange('companyName', e.target.value)}
+                placeholder="Razón social"
+                className={`in-b-form mt-1 ${errors.companyName ? 'border-red-500' : ''}`}
+              />
+              {errors.companyName && <p className="text-red-500 text-xs mt-1">{errors.companyName}</p>}
+            </div>
+            <div>
+              <Label htmlFor="position" className="text-sm font-medium text-gray-700">Cargo *</Label>
+              <Input
+                id="position"
+                type="text"
+                value={values.position}
+                onChange={(e) => onChange('position', e.target.value)}
+                placeholder="Cargo que ejerce"
+                className={`in-b-form mt-1 ${errors.position ? 'border-red-500' : ''}`}
+              />
+              {errors.position && <p className="text-red-500 text-xs mt-1">{errors.position}</p>}
+            </div>
+            <div className="flex gap-3 mt-4">
+              <Button type="button" variant="secondary" onClick={onPrevStep}>Volver</Button>
+              <Button type="button" onClick={onNextStep} className="flex-1">Siguiente: Datos de sesión</Button>
+            </div>
+          </>
+        )}
+
+        {/* Paso 2 (otros) o Paso 3 (Trabajador): Datos sesión */}
+        {((!isWorkerType && step === 2) || (isWorkerType && step === 3)) && (
           <>
             <div className="grid grid-cols-2 gap-4">
               <div>
