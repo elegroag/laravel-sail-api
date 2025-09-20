@@ -14,7 +14,8 @@ interface LoginFormProps {
   selectedUserType: string | null
   documentType: string
   identification: string
-  password: string
+  password: string,
+  processing: boolean,
   onBack: () => void
   onDocumentTypeChange: (value: string) => void
   onIdentificationChange: (value: string) => void
@@ -35,6 +36,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
   onIdentificationChange,
   onPasswordChange,
   onSubmit,
+  processing,
 }) => {
   // Sección UI del formulario
   return (
@@ -76,7 +78,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
           </Label>
           <Input
             id="identification"
-            type="text"
+            type="number"
             value={identification}
             onChange={(e) => onIdentificationChange(e.target.value)}
             placeholder="Ingresa tu número de identificación"
@@ -103,9 +105,9 @@ const LoginForm: React.FC<LoginFormProps> = ({
         <Button
           type="submit"
           className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white py-3 rounded-lg font-medium shadow-lg"
-          disabled={!documentType || !identification || !password}
+          disabled={!documentType || !identification || !password || processing}
         >
-          Iniciar sesión
+          {processing ? 'Iniciando sesión...' : 'Iniciar sesión'}
         </Button>
       </form>
 

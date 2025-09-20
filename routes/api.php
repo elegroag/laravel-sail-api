@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\EmpresaController;
 use App\Http\Controllers\Api\TrabajadorController;
 use App\Http\Controllers\Api\NucleoFamiliarController;
 use App\Http\Controllers\Api\ApiEndpointController;
+use App\Http\Controllers\Api\AuthMercurioController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,3 +42,5 @@ Route::get('empresas/{empresa}/trabajadores', [TrabajadorController::class, 'ind
     ->where('empresa', '[0-9]+');
 Route::get('trabajadores/{trabajador}/nucleos-familiares', [NucleoFamiliarController::class, 'index'])
     ->where('trabajador', '[0-9]+');
+
+Route::post('api/authenticate', [AuthMercurioController::class, 'authenticateAction'])->name('api.authenticate');

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AuthMercurioController;
 use App\Http\Controllers\Mercurio\AuthController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\WebController;

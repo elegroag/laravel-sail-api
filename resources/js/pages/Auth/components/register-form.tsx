@@ -115,7 +115,7 @@ export default function RegisterForm({
               <Input
                 id="companyNit"
                 ref={companyNitRef}
-                type="text"
+                type="number"
                 value={values.companyNit}
                 onChange={(e) => onChange("companyNit", e.target.value)}
                 placeholder="NIT de la empresa"
@@ -233,7 +233,7 @@ export default function RegisterForm({
                 <Input
                   id="identification"
                   ref={identificationRef}
-                  type="text"
+                  type="number"
                   value={values.identification}
                   onChange={(e) => onChange("identification", e.target.value)}
                   placeholder="Número de documento"

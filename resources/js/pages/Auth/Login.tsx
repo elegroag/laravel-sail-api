@@ -8,6 +8,8 @@ import AuthUserTypeStep from "@/pages/Auth/components/auth-user-type-step"
 import { userTypes, documentTypes } from "@/constants/auth"
 import type { UserType } from "@/types/auth"
 import AuthBackgroundShapes from "@/components/ui/auth-background-shapes"
+import { router } from '@inertiajs/react';
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 
 // Tipos y constantes centralizados importados
 
@@ -17,6 +19,9 @@ export default function Login()
   const [documentType, setDocumentType] = useState("")
   const [identification, setIdentification] = useState("")
   const [password, setPassword] = useState("")
+  const [processing, setProcessing] = useState(false);
+  // Estado para mostrar mensajes de error en un Alert
+  const [alertMessage, setAlertMessage] = useState<string | null>(null)
 
   const handleUserTypeSelect = (userType: UserType) => {
     setSelectedUserType(userType)
@@ -27,21 +32,55 @@ export default function Login()
     setDocumentType("")
     setIdentification("")
     setPassword("")
+    // Limpiar alertas al volver atrás
+    setAlertMessage(null)
   }
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleLogin = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setProcessing(true);
+      // Reiniciar cualquier alerta previa antes de intentar login
+      setAlertMessage(null)
+      try {
+        const response = await fetch(route('api.authenticate'), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+            },
+            body: JSON.stringify({
+              documentType,
+              password,
+              identification: identification ? parseInt(identification) : null,
+              selectedUserType
+            })
+        });
 
-    console.log("[v0] Login attempt:", {
-      selectedUserType,
-      documentType,
-      identification: identification.substring(0, 3) + "***", // Mask for security
-      passwordLength: password.length,
-    })
+        const data = await response.json();
 
-    // Simulate login process
-    alert(`Iniciando sesión como ${userTypes.find((ut) => ut.id === selectedUserType)?.label}...`)
-  }
+        if (response.ok && data.success) {
+            router.visit('/web/login');
+        } else {
+            // Mostrar mensaje proveniente de la API si está disponible
+            const msg = (typeof data?.message === 'string' && data.message.trim().length > 0)
+              ? data.message
+              : 'Ocurrió un error al iniciar sesión. Intenta nuevamente.'
+            const detail = data?.errors;
+            setAlertMessage(msg + (detail ? '\n' + JSON.stringify(detail) : ''));
+            if (data?.errors) {
+              console.error(data.errors);
+            } else {
+              console.error('Error desconocido:', data);
+            }
+        }
+      } catch (error) {
+          // Captura de excepciones de red/u otras y alerta genérica
+          console.error('Error al iniciar sesión:', error);
+          setAlertMessage('No fue posible conectar con el servidor. Intenta nuevamente.');
+      } finally {
+          setProcessing(false);
+      }
+  };
 
   return (
     <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
@@ -85,10 +124,22 @@ export default function Login()
               onIdentificationChange={setIdentification}
               onPasswordChange={setPassword}
               onSubmit={handleLogin}
+              processing={processing}
             />
           )}
         </div>
+
+         {/* Alert de error */}
+          {alertMessage && (
+            <div className="mt-4">
+              <Alert variant="destructive" className="w-100 mx-auto border-red-200" >
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{alertMessage}</AlertDescription>
+              </Alert>
+            </div>
+          )}
       </div>
     </AuthLayout>
   )
 }
+

@@ -672,7 +672,7 @@ class LoginController extends ApplicationController
                         <span style=\"font-size:30px;color:#11cdef\"><b>{$codigoVerify}</b></span>";
 
                 $asunto = "Generación nuevo PIN plataforma Comfaca En Línea";
-                $emailCaja = (new Mercurio01)->findFirst();
+                $emailCaja = Mercurio01::first();
                 $senderEmail = new SenderEmail();
                 $senderEmail->setters(
                     "emisor_email: {$emailCaja->getEmail()}",
