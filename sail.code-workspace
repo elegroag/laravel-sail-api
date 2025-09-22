@@ -43,6 +43,12 @@
 		"workbench.colorTheme": "Atom One Dark",
 		"editor.formatOnSave": true,
 		"php.validate.executablePath": "/usr/bin/php",
+		"[javascript]": {
+			"editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
+		},
+		"[typescript]": {
+			"editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
+		},
 		"workbench.colorCustomizations": {
 			"activityBar.activeBackground": "#0c7359",
 			"activityBar.activeBorder": "#ddf06f",

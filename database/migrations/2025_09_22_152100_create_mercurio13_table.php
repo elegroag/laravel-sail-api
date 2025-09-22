@@ -1,0 +1,60 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Ejecuta las migraciones.
+     */
+    public function up(): void
+    {
+        Schema::create('mercurio13', function (Blueprint $table) {
+            // Motor InnoDB
+            $table->engine = 'InnoDB';
+
+            // Columnas
+            $table->char('tipopc', 2); // NOT NULL
+            $table->integer('coddoc'); // NOT NULL
+            $table->char('obliga', 1); // NOT NULL
+            $table->tinyInteger('auto_generado')->default(0); // tinyint(1) DEFAULT '0'
+            $table->string('nota', 255)->nullable();
+
+            // PK compuesta
+            $table->primary(['tipopc', 'coddoc']);
+
+            // Índices
+            $table->index('tipopc', 'fk_mercurio13_mercurio091_idx');
+            $table->index('coddoc', 'fk_mercurio13_mercurio121_idx');
+
+            // FKs
+            $table->foreign('tipopc', 'fk_mercurio13_mercurio091')
+                ->references('tipopc')
+                ->on('mercurio09')
+                ->onDelete('restrict')
+                ->onUpdate('restrict');
+
+            $table->foreign('coddoc', 'fk_mercurio13_mercurio121')
+                ->references('coddoc')
+                ->on('mercurio12')
+                ->onDelete('restrict')
+                ->onUpdate('restrict');
+        });
+    }
+
+    /**
+     * Revierte las migraciones.
+     */
+    public function down(): void
+    {
+        Schema::table('mercurio13', function (Blueprint $table) {
+            $table->dropForeign('fk_mercurio13_mercurio091');
+            $table->dropForeign('fk_mercurio13_mercurio121');
+            $table->dropIndex('fk_mercurio13_mercurio091_idx');
+            $table->dropIndex('fk_mercurio13_mercurio121_idx');
+        });
+        Schema::dropIfExists('mercurio13');
+    }
+};

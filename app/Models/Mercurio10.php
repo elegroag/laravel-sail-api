@@ -4,13 +4,17 @@ namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
 use Carbon\Carbon;
+use Thiagoprz\CompositeKey\HasCompositeKey;
 
 class Mercurio10 extends ModelBase
 {
+    use HasCompositeKey;
 
     protected $table = 'mercurio10';
     public $timestamps = false;
-    protected $primaryKey = 'id';
+    // PK compuesta según migración
+    protected $primaryKey = ['tipopc', 'numero', 'item'];
+    public $incrementing = false;
 
     protected $fillable = [
         'tipopc',

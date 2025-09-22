@@ -67,3 +67,33 @@ export type LoginProps = {
 }
 
 export type DocumentTypeOption = { value: string; label: string }
+
+
+// Tipado fuerte del payload que se envía al backend (evita any)
+export interface RegisterPayload {
+    selected_user_type: string | null
+    tipo: string | number
+    // Sesión
+    coddoc: string
+    documento: string
+    password: string
+    // Empresa (opcionales)
+    razsoc?: string
+    nit?: string
+    tipsoc?: string
+    tipper?: string
+    // Personales
+    nombre: string
+    email: string
+    telefono: string
+    codciu: string
+    // Empresa (delegado/representante)
+    is_delegado?: boolean
+    cargo?: string
+    rep_nombre?: string
+    rep_documento?: string
+    rep_email?: string
+    rep_telefono?: string
+    // Independiente/Pensionado
+    contribution_rate?: string
+}

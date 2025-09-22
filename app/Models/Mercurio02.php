@@ -9,7 +9,10 @@ class Mercurio02 extends ModelBase
 
     protected $table = 'mercurio02';
     public $timestamps = false;
-    protected $primaryKey = 'id';
+    // PK es CHAR(6) 'codcaj' (no autoincremental)
+    protected $primaryKey = 'codcaj';
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
         'codcaj',

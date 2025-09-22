@@ -9,7 +9,10 @@ class Mercurio01 extends ModelBase
 
     protected $table = 'mercurio01';
     public $timestamps = false;
-    protected $primaryKey = 'id';
+    // PK es CHAR(2) 'codapl' (no autoincremental)
+    protected $primaryKey = 'codapl';
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
         'codapl',

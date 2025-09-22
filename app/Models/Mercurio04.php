@@ -9,7 +9,10 @@ class Mercurio04 extends ModelBase
 
     protected $table = 'mercurio04';
     public $timestamps = false;
-    protected $primaryKey = 'id';
+    // PK es CHAR(2) 'codofi' (no autoincremental)
+    protected $primaryKey = 'codofi';
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
         'codofi',

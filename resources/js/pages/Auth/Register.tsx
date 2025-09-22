@@ -8,7 +8,7 @@ import PersonRegisterForm from "@/pages/Auth/components/person-register-form";
 import imageLogo from "../../assets/comfaca-logo.png";
 import { useRegisterValidation } from "@/hooks/use-register-validation";
 import { TipoFuncionario, userTypes } from "@/constants/auth";
-import type { UserType, FormState, FormAction, LoginProps } from "@/types/auth";
+import type { UserType, FormState, FormAction, LoginProps, RegisterPayload } from "@/types/auth";
 import AuthBackgroundShapes from "@/components/ui/auth-background-shapes";
 
 const initialState: FormState = {
@@ -69,8 +69,7 @@ function formReducer(state: FormState, action: FormAction): FormState {
 export default function Register({
     Coddoc,
     Tipsoc,
-    Codciu,
-    Detadoc
+    Codciu
 }: LoginProps){
   const [state, dispatch] = useReducer(formReducer, initialState)
   const [step, setStep] = useState(1)
@@ -181,7 +180,7 @@ export default function Register({
       const isPensioner = state.selectedUserType === 'pensionado'
 
       // Mapeo de campos a las propiedades esperadas por el backend
-      const payload: Record<string, any> = {
+      const payload: RegisterPayload = {
         selected_user_type: state.selectedUserType,
         tipo: tipoValue,
         // Sesión
@@ -353,12 +352,14 @@ export default function Register({
                   repEmail: state.repEmail,
                   repPhone: state.repPhone,
                   contributionRate: state.contributionRate,
-                  documentTypeUser: state.documentTypeUser
+                  documentTypeUser: state.documentTypeUser,
                 }}
                 errors={state.errors}
                 isSubmitting={state.isSubmitting}
                 documentTypes={documentTypeOptions}
                 cityOptions={cityOptions}
+                societyOptions={societyOptions}
+                categoryOptions={companyCategoryOptions}
                 isWorkerType={state.selectedUserType === 'trabajador'}
                 isIndependentType={state.selectedUserType === 'independiente'}
                 isPensionerType={state.selectedUserType === 'pensionado'}
@@ -377,6 +378,9 @@ export default function Register({
                 identificationRef={identificationRef}
                 passwordRef={passwordRef}
                 confirmPasswordRef={confirmPasswordRef}
+                companyNameRef={companyNameRef}
+                companyNitRef={companyNitRef}
+                addressRef={addressRef}
               />
             )
           )}

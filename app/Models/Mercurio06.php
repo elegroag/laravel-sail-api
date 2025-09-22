@@ -9,7 +9,10 @@ class Mercurio06 extends ModelBase
 
     protected $table = 'mercurio06';
     public $timestamps = false;
-    protected $primaryKey = 'id';
+    // PK es CHAR(2) 'tipo' (no autoincremental)
+    protected $primaryKey = 'tipo';
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
         'tipo',
