@@ -16,7 +16,7 @@ return new class extends Migration
             $table->engine = 'InnoDB';
 
             // Columnas según SQL
-            $table->integer('numero');
+            $table->unsignedInteger('numero');
             $table->integer('item');
             $table->string('tipo', 2);
             $table->string('documento', 15);

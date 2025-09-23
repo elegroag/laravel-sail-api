@@ -19,7 +19,7 @@ return new class extends Migration
             $table->increments('numero');
 
             // Columnas según SQL
-            $table->integer('codsed');
+            $table->unsignedInteger('codsed');
             $table->string('detalle', 100);
             $table->integer('valor');
             $table->date('fecsis');

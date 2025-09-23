@@ -16,7 +16,7 @@ return new class extends Migration
             $table->engine = 'InnoDB';
 
             // Columnas según SQL
-            $table->integer('id'); // PK sin autoincremento
+            $table->unsignedInteger('id'); // PK sin autoincremento
             $table->integer('tipideacu');
             $table->char('numideacu', 15);
             $table->char('prinomacu', 30);

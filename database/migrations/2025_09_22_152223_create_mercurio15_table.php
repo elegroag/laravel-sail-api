@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('mercurio15', function (Blueprint $table) {
             // Motor y charset como en el SQL
             $table->engine = 'InnoDB';
-            $table->charset = 'latin1';
 
             // id int(2) NOT NULL AUTO_INCREMENT (firmado)
             $table->integer('id')->autoIncrement();

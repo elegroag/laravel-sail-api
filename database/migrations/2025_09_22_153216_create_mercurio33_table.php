@@ -19,7 +19,7 @@ return new class extends Migration
             $table->bigIncrements('id');
 
             // Columnas
-            $table->unsignedBigInteger('log');
+            $table->bigInteger('log');
             $table->char('tipo', 2);
             $table->char('coddoc', 2);
             $table->char('documento', 14);
