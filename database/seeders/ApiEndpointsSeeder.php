@@ -89,4 +89,21 @@ class ApiEndpointsSeeder extends Seeder
             );
         }
     }
+
+    public function sql()
+    {
+        $sql = "INSERT INTO `api_endpoints` VALUES 
+        (1,'ComfacaEmpresas','company','api-clisisu','2025-09-05 21:09:20','2025-09-05 21:09:20'),
+        (2,'ComfacaAfilia','affiliation','api-clisisu','2025-09-05 21:09:20','2025-09-05 21:09:20'),
+        (3,'AportesEmpresas','aportes','api-clisisu','2025-09-05 21:09:20','2025-09-05 21:09:20'),
+        (4,'Correspondencias','correspondencia','api-clisisu','2025-09-05 21:09:20','2025-09-05 21:09:20'),
+        (5,'Novedades','novedades','api-clisisu','2025-09-05 21:09:20','2025-09-05 21:09:20'),
+        (6,'ServicioSat','sat','api-clisisu','2025-09-05 21:09:20','2025-09-05 21:09:20'),
+        (7,'Tesoreria','tesoreria','api-clisisu','2025-09-05 21:09:20','2025-09-05 21:09:20'),
+        (8,'CruzarDaviplata','tippag','api-clisisu','2025-09-05 21:09:20','2025-09-05 21:09:20'),
+        (9,'Reprocesos','sat','api-clisisu','2025-09-05 21:09:20','2025-09-05 21:09:20'),
+        (10,'Certificados','certificados','api-clisisu','2025-09-05 21:09:20','2025-09-05 21:09:20'),
+        (11,'Usuarios','usuarios','api-clisisu','2025-09-05 21:09:20','2025-09-05 21:09:20'),
+        (12,'Funcionalidades','satservice','api-clisisu','2025-09-05 21:09:20','2025-09-05 21:09:20');";
+    }
 }

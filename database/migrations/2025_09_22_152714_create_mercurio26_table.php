@@ -18,9 +18,10 @@ return new class extends Migration
             // Columnas
             $table->integer('numero'); // NOT NULL
             $table->char('archivo', 45); // NOT NULL
+            $table->char('nota', 255)->nullable(); // DEFAULT NULL
             $table->integer('orden'); // NOT NULL
             $table->enum('tipo', ['F', 'V'])->nullable()->comment('V = Foto, V = Video');
-
+            $table->enum('estado', ['A', 'I'])->default('A')->comment('A = Activo, I = Inactivo');
             // PK
             $table->primary('numero');
         });

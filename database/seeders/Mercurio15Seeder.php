@@ -1,0 +1,138 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+class Mercurio15Seeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        $codigosVias = [
+            ['id' => 1, 'estado' => 'AC', 'detalle' => 'Avenida calle', 'tipo_rural' => 'N'],
+            ['id' => 2, 'estado' => 'AD', 'detalle' => 'Administracion', 'tipo_rural' => 'N'],
+            ['id' => 3, 'estado' => 'ADL', 'detalle' => 'Adelante', 'tipo_rural' => 'N'],
+            ['id' => 4, 'estado' => 'AER', 'detalle' => 'Aeropuerto', 'tipo_rural' => 'N'],
+            ['id' => 5, 'estado' => 'AG', 'detalle' => 'Agencia', 'tipo_rural' => 'N'],
+            ['id' => 6, 'estado' => 'AGP', 'detalle' => 'Agrupacion', 'tipo_rural' => 'N'],
+            ['id' => 7, 'estado' => 'AK', 'detalle' => 'Avenida carrera', 'tipo_rural' => 'N'],
+            ['id' => 8, 'estado' => 'AL', 'detalle' => 'Altillo', 'tipo_rural' => 'N'],
+            ['id' => 9, 'estado' => 'ALD', 'detalle' => 'Al lado', 'tipo_rural' => 'N'],
+            ['id' => 10, 'estado' => 'ALM', 'detalle' => 'Almacen', 'tipo_rural' => 'N'],
+            ['id' => 11, 'estado' => 'AP', 'detalle' => 'Apartamento', 'tipo_rural' => 'N'],
+            ['id' => 12, 'estado' => 'APTDO', 'detalle' => 'Apartado', 'tipo_rural' => 'N'],
+            ['id' => 13, 'estado' => 'ATR', 'detalle' => 'Atras', 'tipo_rural' => 'N'],
+            ['id' => 14, 'estado' => 'AUT', 'detalle' => 'Autopista', 'tipo_rural' => 'V'],
+            ['id' => 15, 'estado' => 'AV', 'detalle' => 'Avenida', 'tipo_rural' => 'N'],
+            ['id' => 16, 'estado' => 'AVIAL', 'detalle' => 'Anillo vial', 'tipo_rural' => 'S'],
+            ['id' => 17, 'estado' => 'BG', 'detalle' => 'Bodega', 'tipo_rural' => 'N'],
+            ['id' => 18, 'estado' => 'BL', 'detalle' => 'Bloque', 'tipo_rural' => 'N'],
+            ['id' => 19, 'estado' => 'BLV', 'detalle' => 'Boulevard', 'tipo_rural' => 'N'],
+            ['id' => 20, 'estado' => 'BRR', 'detalle' => 'Barrio', 'tipo_rural' => 'N'],
+            ['id' => 21, 'estado' => 'C', 'detalle' => 'Corregimiento', 'tipo_rural' => 'S'],
+            ['id' => 22, 'estado' => 'CA', 'detalle' => 'Casa', 'tipo_rural' => 'N'],
+            ['id' => 23, 'estado' => 'CAS', 'detalle' => 'Caserio', 'tipo_rural' => 'N'],
+            ['id' => 24, 'estado' => 'CC', 'detalle' => 'Centro comercial', 'tipo_rural' => 'N'],
+            ['id' => 25, 'estado' => 'CD', 'detalle' => 'Ciudadela', 'tipo_rural' => 'N'],
+            ['id' => 26, 'estado' => 'CEL', 'detalle' => 'Celula', 'tipo_rural' => 'N'],
+            ['id' => 27, 'estado' => 'CEN', 'detalle' => 'Centro', 'tipo_rural' => 'N'],
+            ['id' => 28, 'estado' => 'CIR', 'detalle' => 'Circular', 'tipo_rural' => 'N'],
+            ['id' => 29, 'estado' => 'CL', 'detalle' => 'Calle', 'tipo_rural' => 'N'],
+            ['id' => 30, 'estado' => 'CLJ', 'detalle' => 'Callejon', 'tipo_rural' => 'N'],
+            ['id' => 31, 'estado' => 'CN', 'detalle' => 'Camino', 'tipo_rural' => 'S'],
+            ['id' => 32, 'estado' => 'CON', 'detalle' => 'Conjunto residencial', 'tipo_rural' => 'N'],
+            ['id' => 33, 'estado' => 'CONJ', 'detalle' => 'Conjunto', 'tipo_rural' => 'N'],
+            ['id' => 34, 'estado' => 'CR', 'detalle' => 'Carrera', 'tipo_rural' => 'N'],
+            ['id' => 35, 'estado' => 'CRT', 'detalle' => 'Carretera', 'tipo_rural' => 'N'],
+            ['id' => 36, 'estado' => 'CRV', 'detalle' => 'Circunvalar', 'tipo_rural' => 'V'],
+            ['id' => 37, 'estado' => 'CS', 'detalle' => 'Consultorio', 'tipo_rural' => 'N'],
+            ['id' => 38, 'estado' => 'DG', 'detalle' => 'Diagonal', 'tipo_rural' => 'N'],
+            ['id' => 39, 'estado' => 'DP', 'detalle' => 'Deposito', 'tipo_rural' => 'N'],
+            ['id' => 40, 'estado' => 'DPTO', 'detalle' => 'Departamento', 'tipo_rural' => 'N'],
+            ['id' => 41, 'estado' => 'DS', 'detalle' => 'Deposito sotano', 'tipo_rural' => 'N'],
+            ['id' => 42, 'estado' => 'ED', 'detalle' => 'Edificio', 'tipo_rural' => 'N'],
+            ['id' => 43, 'estado' => 'EN', 'detalle' => 'Entrada', 'tipo_rural' => 'N'],
+            ['id' => 44, 'estado' => 'ES', 'detalle' => 'Escalera', 'tipo_rural' => 'N'],
+            ['id' => 45, 'estado' => 'ESQ', 'detalle' => 'Esquina', 'tipo_rural' => 'N'],
+            ['id' => 46, 'estado' => 'ESTE', 'detalle' => 'Este', 'tipo_rural' => 'N'],
+            ['id' => 47, 'estado' => 'ET', 'detalle' => 'Etapa', 'tipo_rural' => 'N'],
+            ['id' => 48, 'estado' => 'EX', 'detalle' => 'Exterior', 'tipo_rural' => 'V'],
+            ['id' => 49, 'estado' => 'FCA', 'detalle' => 'Finca', 'tipo_rural' => 'S'],
+            ['id' => 50, 'estado' => 'GJ', 'detalle' => 'Garaje', 'tipo_rural' => 'N'],
+            ['id' => 51, 'estado' => 'GS', 'detalle' => 'Garaje sóo', 'tipo_rural' => 'N'],
+            ['id' => 52, 'estado' => 'GT', 'detalle' => 'Glorieta', 'tipo_rural' => 'N'],
+            ['id' => 53, 'estado' => 'HC', 'detalle' => 'Hacienda', 'tipo_rural' => 'S'],
+            ['id' => 54, 'estado' => 'HG', 'detalle' => 'Hangar', 'tipo_rural' => 'N'],
+            ['id' => 55, 'estado' => 'IN', 'detalle' => 'Interior', 'tipo_rural' => 'N'],
+            ['id' => 56, 'estado' => 'IP', 'detalle' => 'Inspeccion Policia', 'tipo_rural' => 'N'],
+            ['id' => 57, 'estado' => 'IPD', 'detalle' => 'Inspeccion Departamental', 'tipo_rural' => 'N'],
+            ['id' => 58, 'estado' => 'IPM', 'detalle' => 'Inspeccion Municipal', 'tipo_rural' => 'N'],
+            ['id' => 59, 'estado' => 'KM', 'detalle' => 'Kilometro', 'tipo_rural' => 'S'],
+            ['id' => 60, 'estado' => 'LC', 'detalle' => 'Local', 'tipo_rural' => 'N'],
+            ['id' => 61, 'estado' => 'LM', 'detalle' => 'Local mezzanine', 'tipo_rural' => 'N'],
+            ['id' => 62, 'estado' => 'LT', 'detalle' => 'Lote', 'tipo_rural' => 'N'],
+            ['id' => 63, 'estado' => 'MD', 'detalle' => 'Modulo', 'tipo_rural' => 'N'],
+            ['id' => 64, 'estado' => 'MJ', 'detalle' => 'Mojon', 'tipo_rural' => 'N'],
+            ['id' => 65, 'estado' => 'MLL', 'detalle' => 'Muelle', 'tipo_rural' => 'S'],
+            ['id' => 66, 'estado' => 'MN', 'detalle' => 'Mezzanine', 'tipo_rural' => 'N'],
+            ['id' => 67, 'estado' => 'MZ', 'detalle' => 'Manzana', 'tipo_rural' => 'N'],
+            ['id' => 68, 'estado' => 'NOMB VIA', 'detalle' => 'Vias de nombre comun', 'tipo_rural' => 'N'],
+            ['id' => 69, 'estado' => 'NORTE', 'detalle' => 'Norte', 'tipo_rural' => 'N'],
+            ['id' => 70, 'estado' => 'O', 'detalle' => 'Oriente', 'tipo_rural' => 'N'],
+            ['id' => 71, 'estado' => 'OCC', 'detalle' => 'Occidente', 'tipo_rural' => 'N'],
+            ['id' => 72, 'estado' => 'OESTE', 'detalle' => 'Oeste', 'tipo_rural' => 'N'],
+            ['id' => 73, 'estado' => 'OF', 'detalle' => 'Oficina', 'tipo_rural' => 'N'],
+            ['id' => 74, 'estado' => 'P', 'detalle' => 'Piso', 'tipo_rural' => 'N'],
+            ['id' => 75, 'estado' => 'PA', 'detalle' => 'Parcela', 'tipo_rural' => 'S'],
+            ['id' => 76, 'estado' => 'PAR', 'detalle' => 'Parque', 'tipo_rural' => 'N'],
+            ['id' => 77, 'estado' => 'PD', 'detalle' => 'Predio', 'tipo_rural' => 'S'],
+            ['id' => 78, 'estado' => 'PH', 'detalle' => 'Penthouse', 'tipo_rural' => 'N'],
+            ['id' => 79, 'estado' => 'PJ', 'detalle' => 'Pasaje', 'tipo_rural' => 'N'],
+            ['id' => 80, 'estado' => 'PL', 'detalle' => 'Planta', 'tipo_rural' => 'N'],
+            ['id' => 81, 'estado' => 'PN', 'detalle' => 'Puente', 'tipo_rural' => 'V'],
+            ['id' => 82, 'estado' => 'POR', 'detalle' => 'Porteria', 'tipo_rural' => 'N'],
+            ['id' => 83, 'estado' => 'POS', 'detalle' => 'Poste', 'tipo_rural' => 'N'],
+            ['id' => 84, 'estado' => 'PQ', 'detalle' => 'Parqueadero', 'tipo_rural' => 'N'],
+            ['id' => 85, 'estado' => 'PRJ', 'detalle' => 'Paraje', 'tipo_rural' => 'N'],
+            ['id' => 86, 'estado' => 'PS', 'detalle' => 'Paseo', 'tipo_rural' => 'N'],
+            ['id' => 87, 'estado' => 'PT', 'detalle' => 'Puesto', 'tipo_rural' => 'N'],
+            ['id' => 88, 'estado' => 'PW', 'detalle' => 'Park Way', 'tipo_rural' => 'N'],
+            ['id' => 89, 'estado' => 'RP', 'detalle' => 'Round Point', 'tipo_rural' => 'N'],
+            ['id' => 90, 'estado' => 'SA', 'detalle' => 'Salon', 'tipo_rural' => 'N'],
+            ['id' => 91, 'estado' => 'SC', 'detalle' => 'Salon Comunal', 'tipo_rural' => 'N'],
+            ['id' => 92, 'estado' => 'SD', 'detalle' => 'Salida', 'tipo_rural' => 'N'],
+            ['id' => 93, 'estado' => 'SEC', 'detalle' => 'Sector', 'tipo_rural' => 'N'],
+            ['id' => 94, 'estado' => 'SL', 'detalle' => 'Solar', 'tipo_rural' => 'N'],
+            ['id' => 95, 'estado' => 'SM', 'detalle' => 'Super manzana', 'tipo_rural' => 'N'],
+            ['id' => 96, 'estado' => 'SS', 'detalle' => 'Semisotano', 'tipo_rural' => 'N'],
+            ['id' => 97, 'estado' => 'ST', 'detalle' => 'Sotano', 'tipo_rural' => 'N'],
+            ['id' => 98, 'estado' => 'SUITE', 'detalle' => 'Suite', 'tipo_rural' => 'N'],
+            ['id' => 99, 'estado' => 'SUR', 'detalle' => 'Sur', 'tipo_rural' => 'N'],
+            ['id' => 100, 'estado' => 'TER', 'detalle' => 'Terminal', 'tipo_rural' => 'V'],
+            ['id' => 101, 'estado' => 'TERPLN', 'detalle' => 'Terraple', 'tipo_rural' => 'N'],
+            ['id' => 102, 'estado' => 'TO', 'detalle' => 'Torre', 'tipo_rural' => 'N'],
+            ['id' => 103, 'estado' => 'TV', 'detalle' => 'Transversal', 'tipo_rural' => 'N'],
+            ['id' => 104, 'estado' => 'TZ', 'detalle' => 'Terraza', 'tipo_rural' => 'N'],
+            ['id' => 105, 'estado' => 'UN', 'detalle' => 'Unidad', 'tipo_rural' => 'N'],
+            ['id' => 106, 'estado' => 'UR', 'detalle' => 'Unidad residencial', 'tipo_rural' => 'N'],
+            ['id' => 107, 'estado' => 'URB', 'detalle' => 'Urbanizacion', 'tipo_rural' => 'N'],
+            ['id' => 108, 'estado' => 'VRD', 'detalle' => 'Vereda', 'tipo_rural' => 'S'],
+            ['id' => 109, 'estado' => 'VTE', 'detalle' => 'Variante', 'tipo_rural' => 'N'],
+            ['id' => 110, 'estado' => 'ZF', 'detalle' => 'Zona franca', 'tipo_rural' => 'V'],
+            ['id' => 111, 'estado' => 'ZN', 'detalle' => 'Zona', 'tipo_rural' => 'V'],
+        ];
+
+        foreach ($codigosVias as $via) {
+            \App\Models\Mercurio15::updateOrCreate(
+                ['id' => $via['id']],
+                $via
+            );
+        }
+    }
+
+    /* INSERT INTO `mercurio15` VALUES (1,'AC','Avenida calle','N'),(2,'AD','Administracion','N'),(3,'ADL','Adelante','N'),(4,'AER','Aeropuerto','N'),(5,'AG','Agencia','N'),(6,'AGP','Agrupacion','N'),(7,'AK','Avenida carrera','N'),(8,'AL','Altillo','N'),(9,'ALD','Al lado','N'),(10,'ALM','Almacen','N'),(11,'AP','Apartamento','N'),(12,'APTDO','Apartado','N'),(13,'ATR','Atras','N'),(14,'AUT','Autopista','V'),(15,'AV','Avenida','N'),(16,'AVIAL','Anillo vial','S'),(17,'BG','Bodega','N'),(18,'BL','Bloque','N'),(19,'BLV','Boulevard','N'),(20,'BRR','Barrio','N'),(21,'C','Corregimiento','S'),(22,'CA','Casa','N'),(23,'CAS','Caserio','N'),(24,'CC','Centro comercial','N'),(25,'CD','Ciudadela','N'),(26,'CEL','Celula','N'),(27,'CEN','Centro','N'),(28,'CIR','Circular','N'),(29,'CL','Calle','N'),(30,'CLJ','Callejon','N'),(31,'CN','Camino','S'),(32,'CON','Conjunto residencial','N'),(33,'CONJ','Conjunto','N'),(34,'CR','Carrera','N'),(35,'CRT','Carretera','N'),(36,'CRV','Circunvalar','V'),(37,'CS','Consultorio','N'),(38,'DG','Diagonal','N'),(39,'DP','Deposito','N'),(40,'DPTO','Departamento','N'),(41,'DS','Deposito sotano','N'),(42,'ED','Edificio','N'),(43,'EN','Entrada','N'),(44,'ES','Escalera','N'),(45,'ESQ','Esquina','N'),(46,'ESTE','Este','N'),(47,'ET','Etapa','N'),(48,'EX','Exterior','V'),(49,'FCA','Finca','S'),(50,'GJ','Garaje','N'),(51,'GS','Garaje sóo','N'),(52,'GT','Glorieta','N'),(53,'HC','Hacienda','S'),(54,'HG','Hangar','N'),(55,'IN','Interior','N'),(56,'IP','Inspeccion Policia','N'),(57,'IPD','Inspeccion Departamental','N'),(58,'IPM','Inspeccion Municipal','N'),(59,'KM','Kilometro','S'),(60,'LC','Local','N'),(61,'LM','Local mezzanine','N'),(62,'LT','Lote','N'),(63,'MD','Modulo','N'),(64,'MJ','Mojon','N'),(65,'MLL','Muelle','S'),(66,'MN','Mezzanine','N'),(67,'MZ','Manzana','N'),(68,'NOMB VIA','Vias de nombre comun','N'),(69,'NORTE','Norte','N'),(70,'O','Oriente','N'),(71,'OCC','Occidente','N'),(72,'OESTE','Oeste','N'),(73,'OF','Oficina','N'),(74,'P','Piso','N'),(75,'PA','Parcela','S'),(76,'PAR','Parque','N'),(77,'PD','Predio','S'),(78,'PH','Penthouse','N'),(79,'PJ','Pasaje','N'),(80,'PL','Planta','N'),(81,'PN','Puente','V'),(82,'POR','Porteria','N'),(83,'POS','Poste','N'),(84,'PQ','Parqueadero','N'),(85,'PRJ','Paraje','N'),(86,'PS','Paseo','N'),(87,'PT','Puesto','N'),(88,'PW','Park Way','N'),(89,'RP','Round Point','N'),(90,'SA','Salon','N'),(91,'SC','Salon Comunal','N'),(92,'SD','Salida','N'),(93,'SEC','Sector','N'),(94,'SL','Solar','N'),(95,'SM','Super manzana','N'),(96,'SS','Semisotano','N'),(97,'ST','Sotano','N'),(98,'SUITE','Suite','N'),(99,'SUR','Sur','N'),(100,'TER','Terminal','V'),(101,'TERPLN','Terraple','N'),(102,'TO','Torre','N'),(103,'TV','Transversal','N'),(104,'TZ','Terraza','N'),(105,'UN','Unidad','N'),(106,'UR','Unidad residencial','N'),(107,'URB','Urbanizacion','N'),(108,'VRD','Vereda','S'),(109,'VTE','Variante','N'),(110,'ZF','Zona franca','V'),(111,'ZN','Zona','V'); */
+}

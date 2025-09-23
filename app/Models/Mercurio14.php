@@ -17,6 +17,7 @@ class Mercurio14 extends ModelBase
         'coddoc',
         'obliga',
         'auto_generado',
+        'nota',
     ];
 
     public function setAuto_generado($auto_generado)
@@ -57,22 +58,22 @@ class Mercurio14 extends ModelBase
     }
 
     /**
-     * Metodo para establecer el valor del campo obliga
-     * @param string $obliga
+     * Metodo para establecer el valor del campo nota
+     * @param string $nota
      */
-    public function setObliga($obliga)
+    public function setNota($nota)
     {
-        $this->obliga = $obliga;
+        $this->nota = $nota;
     }
 
 
     /**
-     * Devuelve el valor del campo tipopc
+     * Devuelve el valor del campo nota
      * @return string
      */
-    public function getTipopc()
+    public function getNota()
     {
-        return $this->tipopc;
+        return $this->nota;
     }
 
     /**

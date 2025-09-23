@@ -9,7 +9,7 @@ class Mercurio26 extends ModelBase
 
     protected $table = 'mercurio26';
     public $timestamps = false;
-    protected $primaryKey = 'id';
+    protected $primaryKey = 'numero';
 
     protected $fillable = [
         'numero',

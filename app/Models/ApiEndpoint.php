@@ -15,7 +15,6 @@ class ApiEndpoint extends Model
      * @var array
      */
     protected $fillable = [
-        'id',
         'service_name',
         'endpoint_name',
         'connection_name',
