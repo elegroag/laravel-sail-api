@@ -13,67 +13,88 @@ use App\Services\Utils\Comman;
 class SignupService
 {
 
+    private $cedrep;
+    private $coddoc;
+    private $repleg;
+    private $email;
+    private $codciu;
+    private $tipper;
+    private $telefono;
+    private $tipo;
+    private $calemp;
+    private $tipsoc;
+    private $razsoc;
+    private $coddocrepleg;
+    private $nit;
+
     public function execute(SignupInterface|null $signupEntity, Request $request)
     {
-        $cedrep = $request->getParam('cedrep');
-        $coddoc = $request->getParam('coddoc');
-        $repleg = $request->getParam('repleg');
-        $email = $request->getParam('email');
-        $codciu = $request->getParam('codciu');
-        $tipper = $request->getParam('tipper');
-        $telefono = $request->getParam('telefono');
-        $tipo = $request->getParam('tipo');
-        $calemp = $request->getParam('calemp');
-        $tipsoc = $request->getParam('tipsoc');
-        $razsoc = $request->getParam('razsoc');
-        $coddocrepleg = $request->getParam('coddocrepleg');
-        $nit = $request->getParam('nit');
+        $this->cedrep = $request->getParam('cedrep');
+        $this->coddoc = $request->getParam('coddoc');
+        $this->repleg = $request->getParam('repleg');
+        $this->email = $request->getParam('email');
+        $this->codciu = $request->getParam('codciu');
+        $this->tipper = $request->getParam('tipper');
+        $this->telefono = $request->getParam('telefono');
+        $this->tipo = $request->getParam('tipo');
+        $this->calemp = $request->getParam('calemp');
+        $this->tipsoc = $request->getParam('tipsoc');
+        $this->razsoc = $request->getParam('razsoc');
+
+        $this->nit = $request->getParam('nit');
+
+        $str_coddocs = coddoc_repleg_array();
+        if ($request->getParam('is_delegado') == true) {
+            $this->coddocrepleg = $str_coddocs[$request->getParam('rep_coddoc')];
+        } else {
+            $this->coddocrepleg = $str_coddocs[$request->getParam('coddoc')];
+        }
 
         if ($signupEntity == null) {
             $signupParticular = new SignupParticular(
                 new Request(
                     array(
-                        "documento" => $cedrep,
-                        "coddoc" => $coddoc,
-                        "nombre" => $repleg,
-                        "email" => $email,
-                        "codciu" => $codciu,
-                        "tipo" => $tipo,
-                        "razsoc" => $razsoc
+                        "documento" => $this->cedrep,
+                        "coddoc" => $this->coddoc,
+                        "nombre" => $this->repleg,
+                        "email" => $this->email,
+                        "codciu" => $this->codciu,
+                        "tipo" => $this->tipo,
+                        "razsoc" => $this->razsoc
                     )
                 )
             );
             $signupParticular->createUserMercurio();
-            $solicitud = Mercurio07::where('coddoc', $coddoc)
-                ->where('documento', $cedrep)
-                ->where('tipo', $tipo)
+            $solicitud = Mercurio07::where('coddoc', $this->coddoc)
+                ->where('documento', $this->cedrep)
+                ->where('tipo', $this->tipo)
                 ->first();
         } else {
             //usa codciu para asignar funcionario
-            $usuario = (new AsignarFuncionario())->asignar($signupEntity->getTipopc(), $codciu);
+            $usuario = (new AsignarFuncionario())->asignar($signupEntity->getTipopc(), $this->codciu);
 
             $signupParticular = new SignupParticular(
                 new Request(
                     array(
-                        "nit" => $nit,
-                        "cedrep" => $cedrep,
-                        "coddoc" => $coddoc,
-                        "repleg" => $repleg,
-                        "email" => $email,
-                        "codciu" => $codciu,
-                        "tipper" => $tipper,
-                        "telefono" => $telefono,
-                        "calemp" => $calemp,
-                        "tipo" => $tipo,
-                        "tipsoc" => $tipsoc,
-                        "coddocrepleg" => $coddocrepleg,
-                        "razsoc" => $razsoc,
+                        "nit" => $this->nit,
+                        "cedrep" => $this->cedrep,
+                        "coddoc" => $this->coddoc,
+                        "repleg" => $this->repleg,
+                        "email" => $this->email,
+                        "codciu" => $this->codciu,
+                        "tipper" => $this->tipper,
+                        "telefono" => $this->telefono,
+                        "calemp" => $this->calemp,
+                        "tipo" => $this->tipo,
+                        "tipsoc" => $this->tipsoc,
+                        "coddocrepleg" => $this->coddocrepleg,
+                        "razsoc" => $this->razsoc,
                         "usuario" => $usuario
                     )
                 )
             );
             $signupParticular->main();
-            $this->crearSolicitud($signupEntity, $signupParticular, $request);
+            $this->crearSolicitud($signupEntity, $request);
             $solicitud = $signupEntity->getSolicitud();
         }
 
@@ -86,8 +107,8 @@ class SignupService
             "documento" => $solicitud->getDocumento(),
             "coddoc" => $solicitud->getCoddoc(),
             "tipo" => 'P',
-            "tipafi" => $tipo,
-            "id" => ($tipo == 'P') ? $solicitud->getDocumento() : $solicitud->getId()
+            "tipafi" => $this->tipo,
+            "id" => ($this->tipo == 'P') ? $solicitud->getDocumento() : $solicitud->getId()
         ];
     }
 
@@ -97,24 +118,23 @@ class SignupService
      */
     function crearSolicitud(
         SignupInterface $signupEntity,
-        SignupParticular $signupParticular,
         Request $request
     ) {
         $empresaSisuweb = $this->buscaEmpresaSisu($request->getParam('nit'));
         $entity = $signupEntity->findByDocumentTemp(
-            $signupParticular->documento,
-            $signupParticular->coddoc,
-            $signupParticular->calemp
+            $this->cedrep,
+            $this->coddoc,
+            $this->calemp
         );
 
 
         //si no existe ninguna solicitud
         if ($entity->getId() == null) {
             if ($empresaSisuweb) {
-                $empresaSisuweb['coddoc'] = $signupParticular->coddoc;
-                $empresaSisuweb['documento'] = $signupParticular->documento;
-                $empresaSisuweb['tipo'] = $signupParticular->tipo;
-                $empresaSisuweb['cedtra'] = $signupParticular->documento;
+                $empresaSisuweb['coddoc'] = $this->coddoc;
+                $empresaSisuweb['documento'] = $this->cedrep;
+                $empresaSisuweb['tipo'] = $this->tipo;
+                $empresaSisuweb['cedtra'] = $this->cedrep;
                 $empresaSisuweb['usuario'] = $request->getParam('usuario');
                 $empresaSisuweb['tipdoc'] = $request->getParam('tipdoc');
 
@@ -122,11 +142,11 @@ class SignupService
             } else {
                 $signupEntity->createSignupService(
                     array(
-                        'coddoc' => $signupParticular->coddoc,
-                        'documento' => $signupParticular->documento,
-                        'tipo' => $signupParticular->tipo,
-                        'cedrep' => $request->getParam('cedrep'),
-                        'cedtra' => $request->getParam('cedrep'),
+                        'coddoc' => $this->coddoc,
+                        'documento' => $this->cedrep,
+                        'tipo' => $this->tipo,
+                        'cedrep' => $this->cedrep,
+                        'cedtra' => $this->cedrep,
                         'tipdoc' => $request->getParam('tipdoc'),
                         'repleg' => $request->getParam('repleg'),
                         'email' => $request->getParam('email'),

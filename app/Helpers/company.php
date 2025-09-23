@@ -1,6 +1,10 @@
 <?php
 
 if (!function_exists('calemp_array')) {
+    /**
+     * 
+     * @return array
+     */
     function calemp_array()
     {
         return array(
@@ -14,6 +18,10 @@ if (!function_exists('calemp_array')) {
 }
 
 if (!function_exists('coddoc_repleg_array')) {
+    /**
+     * 
+     * @return array
+     */
     function coddoc_repleg_array()
     {
         return array(
@@ -36,6 +44,10 @@ if (!function_exists('coddoc_repleg_array')) {
 }
 
 if (!function_exists('tipper_array')) {
+    /**
+     * 
+     * @return array
+     */
     function tipper_array()
     {
         return array(
@@ -46,6 +58,11 @@ if (!function_exists('tipper_array')) {
 }
 
 if (!function_exists('calemp_detalle_value')) {
+    /**
+     * 
+     * @param string $calemp
+     * @return string|null
+     */
     function calemp_detalle_value($calemp)
     {
         switch ($calemp) {
@@ -72,6 +89,11 @@ if (!function_exists('calemp_detalle_value')) {
 }
 
 if (!function_exists('calemp_use_tipo_value')) {
+    /**
+     * 
+     * @param string $detalle
+     * @return string|null
+     */
     function calemp_use_tipo_value($detalle)
     {
         switch (strtolower($detalle)) {
@@ -99,6 +121,11 @@ if (!function_exists('calemp_use_tipo_value')) {
 
 
 if (!function_exists('estado_detalle_value')) {
+    /**
+     * 
+     * @param string $estado
+     * @return string
+     */
     function estado_detalle_value($estado)
     {
         $return = "";

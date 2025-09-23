@@ -87,8 +87,8 @@ export interface RegisterPayload {
     // Personales
     nombre: string
     email: string
-    telefono: string
-    codciu: string
+    telefono: number
+    codciu: number
     // Empresa (delegado/representante)
     is_delegado?: boolean
     cargo?: string
@@ -96,7 +96,9 @@ export interface RegisterPayload {
     rep_coddoc?: string
     rep_documento?: string
     rep_email?: string
-    rep_telefono?: string
+    rep_telefono?: number
     // Independiente/Pensionado
-    contribution_rate?: string
+    contribution_rate?: string,
+    first_name?: string,
+    last_name?: string,
 }

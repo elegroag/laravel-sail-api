@@ -55,7 +55,7 @@ class AuthMercurioController extends Controller
                 'message' => 'Error de validación',
                 'errors' => $e->errors()
             ], 422);
-        } catch (\Exception $e) {
+        } catch (DebugException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error al crear empresa: ' . $e->getMessage()
@@ -65,14 +65,42 @@ class AuthMercurioController extends Controller
 
     public function registerAction(Request $request)
     {
+        $this->db->begin();
         try {
-            $this->db->begin();
-            $signupService = new SignupService();
+            $request->validate([
+                'coddoc' => 'required|string|min:1',
+                'documento' => 'required|integer|digits_between:6,18',
+                'password' => 'required|string|min:8',
+                'tipdoc' => 'required|string|min:1',
+                'razsoc' => 'required|string|min:5',
+                'nit' => 'required|integer|digits_between:6,18',
+                'tipsoc' => 'required|string|min:1',
+                'tipper' => 'required|string|min:1',
+                'nombre' => 'required|string|min:5',
+                'email' => 'required|email',
+                'telefono' => 'required|integer|digits_between:6,10',
+                'codciu' => 'required|integer|digits:5',
+                'first_name' => 'required|string|min:5',
+                'last_name' => 'required|string|min:5',
+                'is_delegado' => 'required|boolean',
+            ]);
+
+
             $data = $request->all();
             $data['calemp'] = calemp_use_tipo_value($request->input('selected_user_type'));
 
             switch ($request->input('tipo')) {
                 case 'E':
+                    if ($request->input('is_delegado')) {
+                        $request->validate([
+                            'rep_nombre' => 'required|string|min:5',
+                            'rep_documento' => 'required|integer|digits_between:6,18',
+                            'rep_email' => 'required|email',
+                            'rep_telefono' => 'required|integer|digits_between:6,10',
+                            'rep_coddoc' => 'required|string|min:1',
+                            'cargo' => 'required|string|min:5'
+                        ]);
+                    }
                     $signupEntity = new SignupEmpresas();
                     break;
                 case 'I':
@@ -96,7 +124,7 @@ class AuthMercurioController extends Controller
                     break;
             }
 
-            $response = $signupService->execute(
+            $response = (new SignupService())->execute(
                 $signupEntity,
                 new RequestParam($data)
             );
@@ -107,8 +135,13 @@ class AuthMercurioController extends Controller
                 'message' => 'Registro exitoso',
                 'data' => $response
             ], 201);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error de validación',
+                'errors' => $e->errors()
+            ], 422);
         } catch (DebugException $e) {
-            $this->db->rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Error al crear empresa: ' . $e->getMessage()

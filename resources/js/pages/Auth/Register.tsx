@@ -197,8 +197,16 @@ export default function Register({
         // Personales
         nombre: `${state.firstName} ${state.lastName}`.trim(),
         email: state.email,
-        telefono: state.phone,
-        codciu: state.city,
+        telefono: Number(state.phone),
+        codciu: Number(state.city),
+        first_name: state.firstName,
+        last_name: state.lastName,
+        rep_nombre: '',
+        rep_documento: '',
+        rep_email: '',
+        rep_telefono: Number(state.phone),
+        rep_coddoc: '',
+        cargo: '',
       }
 
       // Delegado/Representante (empresa)
