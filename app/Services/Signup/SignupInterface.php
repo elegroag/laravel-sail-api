@@ -27,4 +27,6 @@ interface SignupInterface
      * @return object
      */
     public function getSolicitud();
+
+    public function getTipopc();
 }

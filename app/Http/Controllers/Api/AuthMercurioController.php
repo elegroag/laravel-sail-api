@@ -9,6 +9,11 @@ use App\Models\Adapter\DbBase;
 use App\Services\Autentications\AutenticaService;
 use Illuminate\Validation\ValidationException;
 use App\Services\Request as RequestParam;
+use App\Services\Signup\SignupDomestico;
+use App\Services\Signup\SignupEmpresas;
+use App\Services\Signup\SignupFacultativos;
+use App\Services\Signup\SignupIndependientes;
+use App\Services\Signup\SignupPensionados;
 use App\Services\Signup\SignupService;
 
 class AuthMercurioController extends Controller
@@ -66,7 +71,33 @@ class AuthMercurioController extends Controller
             $data = $request->all();
             $data['calemp'] = calemp_use_tipo_value($request->input('selected_user_type'));
 
+            switch ($request->input('tipo')) {
+                case 'E':
+                    $signupEntity = new SignupEmpresas();
+                    break;
+                case 'I':
+                    $signupEntity = new SignupIndependientes();
+                    break;
+                case 'F':
+                    $signupEntity = new SignupFacultativos();
+                    break;
+                case 'O':
+                    $signupEntity = new SignupPensionados();
+                    break;
+                case 'S':
+                    $signupEntity = new SignupDomestico();
+                    break;
+                case 'P':
+                case 'T':
+                    $signupEntity = null;
+                    break;
+                default:
+                    throw new DebugException("Error el tipo de afiliación es requerido", 1);
+                    break;
+            }
+
             $response = $signupService->execute(
+                $signupEntity,
                 new RequestParam($data)
             );
 

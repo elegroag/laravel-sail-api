@@ -4,16 +4,16 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { DocumentTypeOption } from "@/types/auth"
-import type { 
-  PropsCompanyRegisterForm, 
-  DataCompany, 
-  DataRepresentative, 
-  DataDelegado, 
+import type {
+  PropsCompanyRegisterForm,
+  DataCompany,
+  DataRepresentative,
+  DataDelegado,
 } from "@/types/register.d"
 import SessionRegister from "./session-register"
 import HeaderRegister from "./header-register"
 
-const DataCompanyRegister: React.FC<DataCompany> = ( 
+const DataCompanyRegister: React.FC<DataCompany> = (
   {
     values,
     categoryOptions,
@@ -53,12 +53,12 @@ return (
           <Label htmlFor="documentType" className="text-sm font-medium text-gray-700">
             Tipo de documento empresa *
           </Label>
-          <Select 
-            value={values.documentType} 
-            onValueChange={(v) => onChange("documentType", v)} 
+          <Select
+            value={values.documentType}
+            onValueChange={(v) => onChange("documentType", v)}
             disabled={isJuridicaRepresentative}
             >
-            <SelectTrigger 
+            <SelectTrigger
               className={`in-b-form mt-1 ${errors.documentType ? "border-red-500" : ""} ${isJuridicaRepresentative ? 'bg-gray-50 text-gray-600' : ''}`}>
               <SelectValue placeholder="Selecciona" />
             </SelectTrigger>
@@ -142,7 +142,7 @@ return (
   )
 }
 
-const DataRepresentaRegister: React.FC<DataRepresentative> = ({
+const DataDelegadoRegister: React.FC<DataRepresentative> = ({
   values,
   errors,
   onChange,
@@ -156,7 +156,7 @@ const DataRepresentaRegister: React.FC<DataRepresentative> = ({
   emailRef,
   phoneRef,
 })=> {
-  return ( 
+  return (
   <>
     <div>
       <Label htmlFor="userRole" className="text-sm font-medium text-gray-700">
@@ -284,16 +284,40 @@ const DataRepresentaRegister: React.FC<DataRepresentative> = ({
   )
 }
 
-const DataDelegadoRegister: React.FC<DataDelegado> = ({
+const DataRepresentanteRegister: React.FC<DataDelegado> = ({
   values,
   errors,
   onChange,
   onNextStep,
-  onPrevStep
+  onPrevStep,
+  documentTypes
 }) => {
   return (
     <>
       <div className="grid grid-cols-2 gap-4">
+        <div className="col-span-2">
+          <Label htmlFor="documentType" className="text-sm font-medium text-gray-700">
+            Tipo de documento representante *
+          </Label>
+          <Select
+            value={values.documentTypeRep}
+            onValueChange={(v) => onChange("documentTypeRep", v)}
+            >
+            <SelectTrigger
+              className={`in-b-form mt-1 ${errors.documentTypeRep ? "border-red-500" : ""}`}>
+              <SelectValue placeholder="Selecciona" />
+            </SelectTrigger>
+            <SelectContent>
+              {documentTypes.map((doc) => (
+                <SelectItem key={doc.value} value={doc.value}>
+                  {doc.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.documentTypeRep && <p className="text-red-500 text-xs mt-1">{errors.documentTypeRep}</p>}
+        </div>
+
         <div className="col-span-2">
           <Label htmlFor="repName" className="text-sm font-medium text-gray-700">Nombre del representante *</Label>
           <Input
@@ -306,6 +330,7 @@ const DataDelegadoRegister: React.FC<DataDelegado> = ({
           />
           {errors.repName && <p className="text-red-500 text-xs mt-1">{errors.repName}</p>}
         </div>
+
         <div>
           <Label htmlFor="repIdentification" className="text-sm font-medium text-gray-700">Identificación *</Label>
           <Input
@@ -319,18 +344,6 @@ const DataDelegadoRegister: React.FC<DataDelegado> = ({
           {errors.repIdentification && <p className="text-red-500 text-xs mt-1">{errors.repIdentification}</p>}
         </div>
         <div>
-          <Label htmlFor="repEmail" className="text-sm font-medium text-gray-700">Email *</Label>
-          <Input
-            id="repEmail"
-            type="email"
-            value={values.repEmail}
-            onChange={(e) => onChange("repEmail", e.target.value)}
-            placeholder="Correo del representante"
-            className={`in-b-form mt-1 ${errors.repEmail ? 'border-red-500' : ''}`}
-          />
-          {errors.repEmail && <p className="text-red-500 text-xs mt-1">{errors.repEmail}</p>}
-        </div>
-        <div>
           <Label htmlFor="repPhone" className="text-sm font-medium text-gray-700">Teléfono *</Label>
           <Input
             id="repPhone"
@@ -342,6 +355,19 @@ const DataDelegadoRegister: React.FC<DataDelegado> = ({
           />
           {errors.repPhone && <p className="text-red-500 text-xs mt-1">{errors.repPhone}</p>}
         </div>
+         <div className="col-span-2">
+          <Label htmlFor="repEmail" className="text-sm font-medium text-gray-700">Email *</Label>
+          <Input
+            id="repEmail"
+            type="email"
+            value={values.repEmail}
+            onChange={(e) => onChange("repEmail", e.target.value)}
+            placeholder="Correo del representante"
+            className={`in-b-form mt-1 ${errors.repEmail ? 'border-red-500' : ''}`}
+          />
+          {errors.repEmail && <p className="text-red-500 text-xs mt-1">{errors.repEmail}</p>}
+        </div>
+
       </div>
       <div className="flex gap-3 mt-4">
         <Button type="button" variant="secondary" onClick={onPrevStep}>Volver</Button>
@@ -464,7 +490,7 @@ export default function CompanyRegisterForm({
       <form onSubmit={onSubmit} className="space-y-3">
         {/* Paso 1: Datos empresa */}
         {step === 1 && (
-          <DataCompanyRegister 
+          <DataCompanyRegister
             values={values}
             categoryOptions={categoryOptions}
             documentTypes={documentTypes}
@@ -481,7 +507,7 @@ export default function CompanyRegisterForm({
 
         {/* Paso 2: Datos representante */}
         {step === 2 && (
-          <DataRepresentaRegister 
+          <DataDelegadoRegister
             values={values}
             errors={errors}
             onChange={onChange}
@@ -499,12 +525,13 @@ export default function CompanyRegisterForm({
 
         {/* Paso 3 (solo delegado): Datos del representante */}
         {step === 3 && values.userRole === 'delegado' && (
-          <DataDelegadoRegister
+          <DataRepresentanteRegister
             values={values}
             errors={errors}
             onChange={onChange}
             onNextStep={onNextStep}
             onPrevStep={onPrevStep}
+            documentTypes={documentTypes}
           />
         )}
 

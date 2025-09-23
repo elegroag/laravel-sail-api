@@ -35,6 +35,11 @@ class SignupDomestico
     private $procesadorComando;
     private $crearSolicitud;
 
+    public function getTipopc()
+    {
+        return null;
+    }
+
     public function __construct()
     {
         $this->procesadorComando = Comman::Api();

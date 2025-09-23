@@ -46,7 +46,8 @@ export interface FormState extends FormBasic {
     repIdentification: string
     repEmail: string
     repPhone: string,
-    documentTypeUser: string
+    documentTypeUser: string,
+    documentTypeRep: string
 }
 
 export type FormAction =
@@ -78,6 +79,7 @@ export interface RegisterPayload {
     documento: string
     password: string
     // Empresa (opcionales)
+    tipdoc?: string
     razsoc?: string
     nit?: string
     tipsoc?: string
@@ -91,6 +93,7 @@ export interface RegisterPayload {
     is_delegado?: boolean
     cargo?: string
     rep_nombre?: string
+    rep_coddoc?: string
     rep_documento?: string
     rep_email?: string
     rep_telefono?: string

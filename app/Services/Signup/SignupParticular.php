@@ -34,37 +34,23 @@ class SignupParticular
     public $tipemp;
     public $nit;
     public $nombre;
-
-    private $procesadorComando;
-    private $crearSolicitud = false;
-    private $signupEntity;
     private $codigo_verify;
 
-    /**
-     * __construct function
-     * @param bool $init
-     * @param SignupInterface $signupEntity
-     */
-    public function __construct($signupEntity = '')
-    {
-        $this->procesadorComando = Comman::Api();
-        $this->signupEntity = $signupEntity;
-    }
 
-    public function settings(Request $params)
+    public function __construct(Request| null $params = null)
     {
-        foreach ($params->getKeys() as $key) if (property_exists($this, $key)) $this->$key = $params->getParam($key);
+        if ($params instanceof Request) {
+            foreach ($params->getKeys() as $key) if (property_exists($this, $key)) $this->$key = $params->getParam($key);
+        }
     }
 
     /**
      * main function
-     * @return SignupInterface
+     * @return SignupParticular
      */
-    public function main(Request $params)
+    public function main()
     {
-        if ($params->count() > 0) $this->settings($params);
-
-        $coddocReps = (new Mercurio30)->getCoddocreplegArray();
+        $coddocReps = coddoc_repleg_array();
         if ($this->calemp == 'E') {
             $flip = array_flip($coddocReps);
             $codeDocumentoRep = $flip[$this->coddocrepleg];
@@ -80,21 +66,18 @@ class SignupParticular
         $this->nombre = ($this->tipper == 'J') ?  $this->razsoc : $this->repleg;
         $this->tipdoc = $codeDocumentoRep;
         $this->tipo = 'P';
-
         $this->createUserMercurio();
-        $this->crearSolicitud();
-        return $this->signupEntity;
+        return $this;
     }
 
     /**
      * createUserMercurio function
-     * @return void
+     * @return Mercurio07
      */
     public function createUserMercurio()
     {
         $this->generaCode();
-        $usuarioParticular = (new Mercurio07)->findFirst("tipo='P' AND coddoc='{$this->coddoc}' AND documento='{$this->documento}'");
-        $this->crearSolicitud = false;
+        $usuarioParticular = Mercurio07::where(["tipo" => 'P', "coddoc" => $this->coddoc, "documento" => $this->documento])->first();
 
         if ($usuarioParticular == false) {
             $out = Generales::GeneraClave();
@@ -113,98 +96,20 @@ class SignupParticular
             $usuarioParticular = $crearUsuario->procesar();
 
             $crearUsuario->crearOpcionesRecuperacion($this->codigo_verify);
-            $this->crearSolicitud = true;
         } else {
             if ($usuarioParticular->getEstado() == "A") {
                 throw new DebugException("El usuario ya existe y se encuentra registrado en el sistema. " .
                     "La solicitud para afiliación está pendiente de enviar, compruebe las credenciales de acceso en la dirección de correo registrada previamente: " .
                     mask_email($usuarioParticular->getEmail()) . ". <br/>" .
                     " Y ahora puedes ingresar por la opción \"2 Afiliación Pendiente\" continua el proceso de afiliación.", 501);
-            } else {
-                //actualiza y activa la cuenta de la persona solo si el correo es igual al reportado
-                $this->crearSolicitud = true;
             }
+            //actualiza y activa la cuenta de la persona solo si el correo es igual al reportado
         }
         $this->preparaMail($usuarioParticular, $clave);
+
+        return $usuarioParticular;
     }
 
-    /**
-     * crearSolicitud function
-     * @return object
-     */
-    public function crearSolicitud()
-    {
-        if ($this->crearSolicitud == false) return false;
-
-        $empresaSisuweb = $this->buscaEmpresaSisu($this->documento);
-        $entity = $this->signupEntity->findByDocumentTemp($this->documento, $this->coddoc, $this->calemp);
-
-        //si no existe ninguna solicitud
-        if ($entity->getId() == null) {
-            if ($empresaSisuweb) {
-                $empresaSisuweb['coddoc'] = $this->coddoc;
-                $empresaSisuweb['documento'] = $this->documento;
-                $empresaSisuweb['tipo'] = $this->tipo;
-                $empresaSisuweb['cedtra'] = $this->documento;
-                $empresaSisuweb['usuario'] = $this->usuario;
-                $empresaSisuweb['tipdoc'] = $this->tipdoc;
-
-                $this->signupEntity->createSignupService($empresaSisuweb);
-            } else {
-                $this->signupEntity->createSignupService(
-                    array(
-                        'coddoc' => $this->coddoc,
-                        'documento' => $this->documento,
-                        'tipo' => $this->tipo,
-                        'cedrep' => $this->cedrep,
-                        'cedtra' => $this->cedrep,
-                        'tipdoc' => $this->tipdoc,
-                        'repleg' => $this->repleg,
-                        'email' => $this->email,
-                        'codciu' => $this->codciu,
-                        'tipper' => $this->tipper,
-                        'telefono' => $this->telefono,
-                        'calemp' => $this->calemp,
-                        'tipsoc' => $this->tipsoc,
-                        'coddocrepleg' => $this->coddocrepleg,
-                        'razsoc' => $this->razsoc,
-                        'usuario' => $this->usuario,
-                        'tipemp' => $this->tipemp,
-                        'nit' => $this->nit
-                    )
-                );
-            }
-        } else {
-            throw new DebugException("Error la cuenta ya está registrada, y dispone de una solicitud en estado temporal.", 1);
-        }
-        $solicitud = $this->signupEntity->getSolicitud();
-        $solicitud->save();
-        return $solicitud;
-    }
-
-    /**
-     * buscaEmpresaSisu function
-     * @param integer $nit
-     * @return object
-     */
-    function buscaEmpresaSisu($nit)
-    {
-        $this->procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaEmpresas",
-                "metodo" => "informacion_empresa",
-                "params" => array(
-                    "nit" => $nit
-                )
-            )
-        );
-        if ($this->procesadorComando->isJson() == False) {
-            return false;
-        }
-        $out = $this->procesadorComando->toArray();
-        if ($out['success'] == false) return false;
-        return $out['data'];
-    }
 
     function preparaMail($usuario, $clave)
     {

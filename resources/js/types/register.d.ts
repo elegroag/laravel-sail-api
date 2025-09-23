@@ -6,15 +6,15 @@ interface BaseFormProps {
     errors: Record<string, string>
     onChange: (field: keyof RegisterValues, value: string) => void
 }
-  
+
 interface WithNextStep {
     onNextStep?: () => void
 }
-  
+
 interface WithPrevStep {
     onPrevStep?: () => void
 }
-  
+
 export interface DataCompany extends BaseFormProps, WithNextStep {
     categoryOptions: DocumentTypeOption[]
     documentTypes: DocumentTypeOption[]
@@ -24,7 +24,7 @@ export interface DataCompany extends BaseFormProps, WithNextStep {
     companyNitRef?: React.Ref<HTMLInputElement>
     addressRef?: React.Ref<HTMLInputElement>
 }
-  
+
 export interface DataRepresentative extends BaseFormProps, WithNextStep, WithPrevStep {
     isJuridica: boolean
     isNatural: boolean
@@ -48,9 +48,11 @@ export interface DataPersonRegister extends BaseFormProps, WithNextStep {
 }
 
 export interface DataEmpresaRegister extends BaseFormProps, WithNextStep, WithPrevStep {}
-  
-export interface DataDelegado extends BaseFormProps, WithNextStep, WithPrevStep {}
-  
+
+export interface DataDelegado extends BaseFormProps, WithNextStep, WithPrevStep {
+    documentTypes: DocumentTypeOption[]
+}
+
 export interface DataSession extends BaseFormProps, WithPrevStep {
     isJuridicaRepresentative: boolean;
     filteredDocumentTypes: DocumentTypeOption[];
@@ -95,7 +97,8 @@ export type RegisterValues = {
     repPhone: string
     // Aportes (independiente/pensionado): 2%, 0.6% o 0%
     contributionRate: string,
-    documentTypeUser: string
+    documentTypeUser: string,
+    documentTypeRep: string
 }
 
 export interface PropsCompanyRegisterForm {

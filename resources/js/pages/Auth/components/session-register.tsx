@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-import type { 
+import type {
     DataSession
   } from "@/types/register.d"
 
@@ -30,7 +30,7 @@ const SessionRegister: React.FC<DataSession> = ({
       <div className="grid grid-cols-1 gap-4">
         <div>
           <Label htmlFor="documentTypeUser" className="text-sm font-medium text-gray-700">
-            Tipo de documento *
+            Tipo de documento usuario *
           </Label>
           <Select value={values.documentTypeUser} onValueChange={(v) => onChange("documentTypeUser", v)}>
             <SelectTrigger className={`in-b-form mt-1 ${errors.documentTypeUser ? "border-red-500" : ""} ${isJuridicaRepresentative ? 'bg-gray-50 text-gray-600' : ''}`}>
@@ -50,7 +50,7 @@ const SessionRegister: React.FC<DataSession> = ({
       <div className="grid grid-cols-2 gap-4 pb-3">
         <div>
           <Label htmlFor="identification" className="text-sm font-medium text-gray-700">
-            Número *
+            Número documento usuario *
           </Label>
           <Input
             id="identification"
@@ -119,7 +119,7 @@ const SessionRegister: React.FC<DataSession> = ({
           </div>
           {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
         </div>
-  
+
         {/* Pista visual compacta */}
         <div className="w-full">
           <div className="mt-1 grid grid-cols-2 gap-x-4 gap-y-0.5 text-[11px] leading-tight">
@@ -149,7 +149,7 @@ const SessionRegister: React.FC<DataSession> = ({
           </div>
         </div>
       </div>
-  
+
       <div className="flex gap-3 mt-4">
         <Button type="button" variant="secondary" onClick={onPrevStep}>
           Volver

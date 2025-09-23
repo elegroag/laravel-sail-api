@@ -3,22 +3,17 @@
 namespace App\Services\Signup;
 
 use App\Exceptions\DebugException;
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio07;
 use App\Services\PreparaFormularios\GestionFirmaNoImage;
 use App\Services\Request;
-use App\Services\Signup\SignupEmpresas;
-use App\Services\Signup\SignupFacultativos;
-use App\Services\Signup\SignupIndependientes;
-use App\Services\Signup\SignupPensionados;
-use App\Services\Signup\SignupDomestico;
 use App\Services\Signup\SignupParticular;
 use App\Services\Utils\AsignarFuncionario;
+use App\Services\Utils\Comman;
 
 class SignupService
 {
 
-    public function execute(Request $request)
+    public function execute(SignupInterface|null $signupEntity, Request $request)
     {
         $cedrep = $request->getParam('cedrep');
         $coddoc = $request->getParam('coddoc');
@@ -34,56 +29,30 @@ class SignupService
         $coddocrepleg = $request->getParam('coddocrepleg');
         $nit = $request->getParam('nit');
 
-        switch ($tipo) {
-            case 'E':
-                $signupEntity = new SignupEmpresas();
-                break;
-            case 'I':
-                $signupEntity = new SignupIndependientes();
-                break;
-            case 'F':
-                $signupEntity = new SignupFacultativos();
-                break;
-            case 'O':
-                $signupEntity = new SignupPensionados();
-                break;
-            case 'S':
-                $signupEntity = new SignupDomestico();
-                break;
-            case 'P':
-            case 'T':
-                $signupParticular = new SignupParticular();
-                $signupParticular->settings(
-                    new Request(
-                        array(
-                            "documento" => $cedrep,
-                            "coddoc" => $coddoc,
-                            "nombre" => $repleg,
-                            "email" => $email,
-                            "codciu" => $codciu,
-                            "tipo" => $tipo,
-                            "razsoc" => $razsoc
-                        )
+        if ($signupEntity == null) {
+            $signupParticular = new SignupParticular(
+                new Request(
+                    array(
+                        "documento" => $cedrep,
+                        "coddoc" => $coddoc,
+                        "nombre" => $repleg,
+                        "email" => $email,
+                        "codciu" => $codciu,
+                        "tipo" => $tipo,
+                        "razsoc" => $razsoc
                     )
-                );
-                $signupParticular->createUserMercurio();
-                $solicitud = Mercurio07::where('coddoc', $coddoc)
-                    ->where('documento', $cedrep)
-                    ->where('tipo', $tipo)
-                    ->first();
-
-                break;
-            default:
-                throw new DebugException("Error el tipo de afiliación es requerido", 1);
-                break;
-        }
-
-        if ($tipo !== 'P' && $tipo !== 'T') {
+                )
+            );
+            $signupParticular->createUserMercurio();
+            $solicitud = Mercurio07::where('coddoc', $coddoc)
+                ->where('documento', $cedrep)
+                ->where('tipo', $tipo)
+                ->first();
+        } else {
             //usa codciu para asignar funcionario
             $usuario = (new AsignarFuncionario())->asignar($signupEntity->getTipopc(), $codciu);
 
-            $signupParticular = new SignupParticular($signupEntity);
-            $signupParticular->main(
+            $signupParticular = new SignupParticular(
                 new Request(
                     array(
                         "nit" => $nit,
@@ -103,6 +72,8 @@ class SignupService
                     )
                 )
             );
+            $signupParticular->main();
+            $this->crearSolicitud($signupEntity, $signupParticular, $request);
             $solicitud = $signupEntity->getSolicitud();
         }
 
@@ -118,6 +89,91 @@ class SignupService
             "tipafi" => $tipo,
             "id" => ($tipo == 'P') ? $solicitud->getDocumento() : $solicitud->getId()
         ];
+    }
+
+    /**
+     * crearSolicitud function
+     * @return object
+     */
+    function crearSolicitud(
+        SignupInterface $signupEntity,
+        SignupParticular $signupParticular,
+        Request $request
+    ) {
+        $empresaSisuweb = $this->buscaEmpresaSisu($request->getParam('nit'));
+        $entity = $signupEntity->findByDocumentTemp(
+            $signupParticular->documento,
+            $signupParticular->coddoc,
+            $signupParticular->calemp
+        );
+
+
+        //si no existe ninguna solicitud
+        if ($entity->getId() == null) {
+            if ($empresaSisuweb) {
+                $empresaSisuweb['coddoc'] = $signupParticular->coddoc;
+                $empresaSisuweb['documento'] = $signupParticular->documento;
+                $empresaSisuweb['tipo'] = $signupParticular->tipo;
+                $empresaSisuweb['cedtra'] = $signupParticular->documento;
+                $empresaSisuweb['usuario'] = $request->getParam('usuario');
+                $empresaSisuweb['tipdoc'] = $request->getParam('tipdoc');
+
+                $signupEntity->createSignupService($empresaSisuweb);
+            } else {
+                $signupEntity->createSignupService(
+                    array(
+                        'coddoc' => $signupParticular->coddoc,
+                        'documento' => $signupParticular->documento,
+                        'tipo' => $signupParticular->tipo,
+                        'cedrep' => $request->getParam('cedrep'),
+                        'cedtra' => $request->getParam('cedrep'),
+                        'tipdoc' => $request->getParam('tipdoc'),
+                        'repleg' => $request->getParam('repleg'),
+                        'email' => $request->getParam('email'),
+                        'codciu' => $request->getParam('codciu'),
+                        'tipper' => $request->getParam('tipper'),
+                        'telefono' => $request->getParam('telefono'),
+                        'calemp' => $request->getParam('calemp'),
+                        'tipsoc' => $request->getParam('tipsoc'),
+                        'coddocrepleg' => $request->getParam('coddocrepleg'),
+                        'razsoc' => $request->getParam('razsoc'),
+                        'usuario' => $request->getParam('usuario'),
+                        'tipemp' => $request->getParam('tipemp'),
+                        'nit' => $request->getParam('nit')
+                    )
+                );
+            }
+        } else {
+            throw new DebugException("Error la cuenta ya está registrada, y dispone de una solicitud en estado temporal.", 1);
+        }
+        $solicitud = $signupEntity->getSolicitud();
+        $solicitud->save();
+        return $solicitud;
+    }
+
+    /**
+     * buscaEmpresaSisu function
+     * @param integer $nit
+     * @return object
+     */
+    function buscaEmpresaSisu($nit)
+    {
+        $ps = Comman::Api();
+        $ps->runCli(
+            array(
+                "servicio" => "ComfacaEmpresas",
+                "metodo" => "informacion_empresa",
+                "params" => array(
+                    "nit" => $nit
+                )
+            )
+        );
+        if ($ps->isJson() == False) {
+            return false;
+        }
+        $out = $ps->toArray();
+        if ($out['success'] == false) return false;
+        return $out['data'];
     }
 
     function autoFirma($documento, $coddoc)

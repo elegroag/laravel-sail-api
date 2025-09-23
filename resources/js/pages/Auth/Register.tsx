@@ -15,6 +15,7 @@ const initialState: FormState = {
   selectedUserType: null,
   documentType: "",
   documentTypeUser: "",
+  documentTypeRep: "",
   identification: "",
   firstName: "",
   lastName: "",
@@ -184,10 +185,11 @@ export default function Register({
         selected_user_type: state.selectedUserType,
         tipo: tipoValue,
         // Sesión
-        coddoc: state.selectedUserType === 'empresa' ? (state.documentTypeUser || state.documentType) : state.documentType,
+        coddoc: state.selectedUserType === 'empresa' ? state.documentType : state.documentTypeUser,
         documento: state.identification,
         password: state.password,
         // Empresa (si aplica)
+        tipdoc: state.documentType || undefined,
         razsoc: state.companyName || undefined,
         nit: state.companyNit || undefined,
         tipsoc: state.societyType || undefined,
@@ -208,6 +210,7 @@ export default function Register({
           payload.rep_documento = state.repIdentification || undefined
           payload.rep_email = state.repEmail || undefined
           payload.rep_telefono = state.repPhone || undefined
+          payload.rep_coddoc = state.documentTypeRep || undefined
         }
       }
 
@@ -300,7 +303,8 @@ export default function Register({
                   repIdentification: state.repIdentification,
                   repEmail: state.repEmail,
                   repPhone: state.repPhone,
-                  documentTypeUser: state.documentTypeUser
+                  documentTypeUser: state.documentTypeUser,
+                  documentTypeRep: state.documentTypeRep
                 }}
                 errors={state.errors}
                 isSubmitting={state.isSubmitting}
@@ -353,6 +357,7 @@ export default function Register({
                   repPhone: state.repPhone,
                   contributionRate: state.contributionRate,
                   documentTypeUser: state.documentTypeUser,
+                  documentTypeRep: state.documentTypeRep
                 }}
                 errors={state.errors}
                 isSubmitting={state.isSubmitting}
