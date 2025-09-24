@@ -5,9 +5,7 @@ namespace App\Services\Signup;
 use App\Exceptions\DebugException;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
-use App\Models\Mercurio30;
 use App\Services\Request;
-use App\Services\Utils\Comman;
 use App\Services\Utils\CrearUsuario;
 use App\Services\Utils\Generales;
 use App\Services\Utils\SenderEmail;
@@ -65,7 +63,7 @@ class SignupParticular
         $this->documento = ($this->tipper == 'J') ? $this->nit : $this->cedrep;
         $this->nombre = ($this->tipper == 'J') ?  $this->razsoc : $this->repleg;
         $this->tipdoc = $codeDocumentoRep;
-        $this->tipo = 'P';
+        $this->tipo = $this->tipo; // Usar el tipo real del request en lugar de hardcodear 'P'
         $this->createUserMercurio();
         return $this;
     }
@@ -77,7 +75,7 @@ class SignupParticular
     public function createUserMercurio()
     {
         $this->generaCode();
-        $usuarioParticular = Mercurio07::where(["tipo" => 'P', "coddoc" => $this->coddoc, "documento" => $this->documento])->first();
+        $usuarioParticular = Mercurio07::where(["tipo" => $this->tipo, "coddoc" => $this->coddoc, "documento" => $this->documento])->first();
 
         if ($usuarioParticular == false) {
             $out = Generales::GeneraClave();
@@ -85,7 +83,7 @@ class SignupParticular
             $clave = $out[1];
             $crearUsuario = new CrearUsuario();
             $crearUsuario->setters(
-                "tipo: P",
+                "tipo: {$this->tipo}",
                 "coddoc: {$this->coddoc}",
                 "documento: {$this->documento}",
                 "nombre: {$this->nombre}",
@@ -121,7 +119,7 @@ class SignupParticular
             array(
                 "fecha" => $date->format("d - M - Y"),
                 "asunto" => "Acceso a usuario particular, Comfaca En Linea",
-                "tipo" => 'Usuario Particular',
+                "tipo" => ($this->tipo == 'P') ? 'Usuario Particular' : 'Usuario Empresa',
                 "nombre" => $this->nombre,
                 "razon" => $this->razsoc,
                 "msj" => "El usuario particular ha realizado el registro al portal web Comfaca En Línea.
@@ -138,7 +136,7 @@ class SignupParticular
             )
         )->render();
 
-        $asunto = "Registro de usuario particular portal Comfaca En Linea";
+        $asunto = ($this->tipo == 'P') ? "Registro de usuario particular portal Comfaca En Linea" : "Registro de usuario empresa portal Comfaca En Linea";
         $emailCaja = (new Mercurio01())->findFirst();
         $senderEmail = new SenderEmail();
         $senderEmail->setters(

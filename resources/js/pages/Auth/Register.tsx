@@ -10,6 +10,7 @@ import { useRegisterValidation } from "@/hooks/use-register-validation";
 import { TipoFuncionario, userTypes } from "@/constants/auth";
 import type { UserType, FormState, FormAction, LoginProps, RegisterPayload } from "@/types/auth";
 import AuthBackgroundShapes from "@/components/ui/auth-background-shapes";
+import { router } from "@inertiajs/react";
 
 const initialState: FormState = {
   selectedUserType: null,
@@ -217,7 +218,7 @@ export default function Register({
           payload.rep_nombre = state.repName || undefined
           payload.rep_documento = state.repIdentification || undefined
           payload.rep_email = state.repEmail || undefined
-          payload.rep_telefono = state.repPhone || undefined
+          payload.rep_telefono = Number(state.repPhone) || undefined
           payload.rep_coddoc = state.documentTypeRep || undefined
         }
       }
@@ -250,7 +251,16 @@ export default function Register({
         setToast({ message: '¡Registro exitoso! Serás redirigido al login.', type: 'success' })
         dispatch({ type: 'RESET_FORM' })
         setStep(1)
-        setTimeout(() => { window.location.href = '/' }, 1500)
+        setTimeout(() => {
+          router.visit('verify', {
+            method: 'post',
+            data: {
+                documento: state.identification,
+                coddoc: state.documentType,
+                tipo: state.selectedUserType,
+            },
+          });
+        }, 1500);
       } else {
         console.error('Error al registrar:', data)
         setToast({ message: typeof data?.message === 'string' ? data.message : 'No fue posible completar el registro.', type: 'error' })

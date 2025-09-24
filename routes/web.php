@@ -27,6 +27,11 @@ Route::get('/web/login', [AuthController::class, 'index'])->name('login');
 Route::get('/web/register', [AuthController::class, 'register'])->name('register');
 Route::get('/web/password/request', [AuthController::class, 'resetPassword'])->name('password.request');
 
+Route::post('/web/verify', [AuthController::class, 'verify'])->name('verify');
+Route::post('/web/verify/action', [AuthController::class, 'verifyAction'])->name('verify.action');
+Route::post('/web/token', [AuthController::class, 'token'])->name('token');
+
+
 Route::get('/web', [WebController::class, 'dashboard'])->name('dashboard');
 Route::get('/web/empresas', [WebController::class, 'empresas'])->name('empresas.index');
 Route::get('/web/trabajadores', [WebController::class, 'trabajadores'])->name('trabajadores.index');

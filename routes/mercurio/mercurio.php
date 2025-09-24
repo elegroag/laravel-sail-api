@@ -23,7 +23,7 @@ Route::post('/mercurio/paramsLogin', [LoginController::class, 'paramsLoginAction
 Route::get('/mercurio/show_registro', [LoginController::class, 'showRegisterAction'])->name('mercurio.register');
 Route::get('/mercurio/fuera_servicio', [LoginController::class, 'fueraServicioAction']);
 
-Route::post('/mercurio/verify', [LoginController::class, 'verifyAction']);
+
 Route::post('/mercurio/tokenParticular', [LoginController::class, 'tokenParticularAction']);
 Route::post('/mercurio/cambio_correo', [LoginController::class, 'cambioCorreoAction']);
 
