@@ -94,6 +94,7 @@ class SignupService
                 )
             );
             $signupParticular->main();
+            $request->setParam('usuario', $usuario);
             $this->crearSolicitud($signupEntity, $request);
             $solicitud = $signupEntity->getSolicitud();
         }
@@ -121,8 +122,11 @@ class SignupService
         Request $request
     ) {
         $empresaSisuweb = $this->buscaEmpresaSisu($request->getParam('nit'));
+        $documentoSolicitud = $request->getParam('tipper') === 'J'
+            ? $request->getParam('nit')
+            : $this->cedrep;
         $entity = $signupEntity->findByDocumentTemp(
-            $this->cedrep,
+            $documentoSolicitud,
             $this->coddoc,
             $this->calemp
         );
@@ -132,7 +136,7 @@ class SignupService
         if ($entity->getId() == null) {
             if ($empresaSisuweb) {
                 $empresaSisuweb['coddoc'] = $this->coddoc;
-                $empresaSisuweb['documento'] = $this->cedrep;
+                $empresaSisuweb['documento'] = $documentoSolicitud;
                 $empresaSisuweb['tipo'] = $this->tipo;
                 $empresaSisuweb['cedtra'] = $this->cedrep;
                 $empresaSisuweb['usuario'] = $request->getParam('usuario');
@@ -143,7 +147,7 @@ class SignupService
                 $signupEntity->createSignupService(
                     array(
                         'coddoc' => $this->coddoc,
-                        'documento' => $this->cedrep,
+                        'documento' => $documentoSolicitud,
                         'tipo' => $this->tipo,
                         'cedrep' => $this->cedrep,
                         'cedtra' => $this->cedrep,

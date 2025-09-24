@@ -89,6 +89,18 @@ class AuthMercurioController extends Controller
             $data = $request->all();
             $data['calemp'] = calemp_use_tipo_value($request->input('selected_user_type'));
 
+            $esDelegado = $request->boolean('is_delegado');
+
+            if ($esDelegado) {
+                $data['cedrep'] = $request->input('rep_documento');
+                $data['repleg'] = $request->input('rep_nombre');
+                $data['coddocrepleg'] = $request->input('rep_coddoc');
+            } else {
+                $data['cedrep'] = $request->input('documento');
+                $data['repleg'] = $request->input('nombre');
+                $data['coddocrepleg'] = $request->input('coddoc');
+            }
+
             switch ($request->input('tipo')) {
                 case 'E':
                     if ($request->input('is_delegado')) {
