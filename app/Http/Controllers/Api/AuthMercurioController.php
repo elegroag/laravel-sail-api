@@ -80,9 +80,10 @@ class AuthMercurioController extends Controller
                 'email' => 'required|email',
                 'telefono' => 'required|integer|digits_between:6,10',
                 'codciu' => 'required|integer|digits:5',
-                'first_name' => 'required|string|min:5',
-                'last_name' => 'required|string|min:5',
+                'first_name' => 'required|string|min:3',
+                'last_name' => 'required|string|min:3',
                 'is_delegado' => 'required|boolean',
+                'tipo' => 'required|string|min:1',
             ]);
 
 
@@ -148,12 +149,14 @@ class AuthMercurioController extends Controller
                 'data' => $response
             ], 201);
         } catch (ValidationException $e) {
+            $this->db->rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Error de validación',
                 'errors' => $e->errors()
             ], 422);
         } catch (DebugException $e) {
+            $this->db->rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Error al crear empresa: ' . $e->getMessage()

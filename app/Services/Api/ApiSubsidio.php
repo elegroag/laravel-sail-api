@@ -8,8 +8,6 @@ use App\Library\APIClient\BasicAuth;
 use App\Models\ApiEndpoint;
 use App\Models\Gener02;
 
-use function App\Library\APIClient\mapper_sisu_api;
-
 class ApiSubsidio extends ApiAbstract
 {
 
@@ -49,17 +47,12 @@ class ApiSubsidio extends ApiAbstract
         if (is_null($metodo) || $metodo === '') {
             throw new DebugException("Error no es valido el metodo de acceso API ", 501);
         }
-
-        if ($this->app->mode == "development") {
-            $hostConnection = "{$this->app->host_api_dev}/";
-        } else {
-            // $basicAuth->encript($this->app->encryption, $this->app->portal_clave);
-            $hostConnection = "{$this->app->host_api_pro}/";
-        }
-
         $endpoint = ApiEndpoint::where('connection_name', 'api-clisisu')
             ->where('service_name', $servicio)
             ->first();
+
+        $hostConnection = env('API_MODE') == 'development' ? $endpoint->host_dev : $endpoint->host_pro;
+        //$basicAuth->encript($this->app->encryption, $this->app->portal_clave);
 
         $url =  "{$endpoint->endpoint_name}/{$metodo}";
         $this->lineaComando =  $hostConnection . "\n" . $url . "\n" . json_encode($params);

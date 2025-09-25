@@ -15,8 +15,10 @@
         "laravel/tinker": "^2.10.1",
         "phpmailer/phpmailer": "^6.9",
         "phpoffice/phpspreadsheet": "*",
+        "ramsey/uuid": "^4.9",
         "tecnickcom/tcpdf": "*",
-        "tightenco/ziggy": "^2.4"
+        "tightenco/ziggy": "^2.4",
+        "tymon/jwt-auth": "^2.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -35,7 +37,6 @@
         },
         "files": [
             "./legacy/Thiagoprz/CompositeKey/HasCompositeKey.php",
-            "./legacy/JWT/JwtManager.php",
             "./app/Helpers/helpers.php",
             "./app/Helpers/files.php",
             "./app/Helpers/hashes.php"

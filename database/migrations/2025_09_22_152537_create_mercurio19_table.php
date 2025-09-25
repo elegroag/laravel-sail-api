@@ -22,7 +22,7 @@ return new class extends Migration
             $table->char('codigo', 3)->default(''); // NOT NULL DEFAULT ''
             $table->char('respuesta', 60)->nullable();
             $table->char('codver', 10)->nullable();
-            $table->string('token', 500)->nullable();
+            $table->string('token', 800)->nullable();
             $table->dateTime('inicio')->nullable();
             $table->smallInteger('intentos')->default(0); // smallint(2) DEFAULT '0'
 

@@ -71,7 +71,8 @@ function formReducer(state: FormState, action: FormAction): FormState {
 export default function Register({
     Coddoc,
     Tipsoc,
-    Codciu
+    Codciu,
+    errors
 }: LoginProps){
   const [state, dispatch] = useReducer(formReducer, initialState)
   const [step, setStep] = useState(1)
@@ -136,6 +137,27 @@ export default function Register({
       companyNitRef,
     },
   })
+
+  useEffect(() => {
+    if (!errors || Object.keys(errors).length === 0) {
+      return
+    }
+
+    dispatch({ type: "CLEAR_ERRORS" })
+
+    Object.entries(errors).forEach(([field, message]) => {
+      dispatch({ type: "SET_ERROR", field, error: message })
+    })
+
+    const detalleErrores = Object.entries(errors)
+      .map(([field, message]) => `${field}: ${message}`)
+      .join(" | ")
+
+    setToast({
+      message: `Se detectaron errores en el registro. ${detalleErrores}`,
+      type: 'error'
+    })
+  }, [errors, dispatch])
 
   const handleUserTypeSelect = (userType: UserType) => {
     dispatch({ type: "SET_USER_TYPE", payload: userType })
@@ -252,14 +274,11 @@ export default function Register({
         dispatch({ type: 'RESET_FORM' })
         setStep(1)
         setTimeout(() => {
-          router.visit('verify', {
-            method: 'post',
-            data: {
-                documento: state.identification,
-                coddoc: state.documentType,
-                tipo: state.selectedUserType,
-            },
-          });
+          router.visit(route('verify.show', {
+            tipo: tipoValue,
+            coddoc: state.documentType,
+            documento: state.identification,
+          }));
         }, 1500);
       } else {
         console.error('Error al registrar:', data)

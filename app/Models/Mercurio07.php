@@ -30,6 +30,7 @@ class Mercurio07 extends ModelBase
         'codciu',
         'fecreg',
         'estado',
+        'whatsapp',
         'fecha_syncron',
     ];
 
@@ -236,6 +237,16 @@ class Mercurio07 extends ModelBase
                 break;
         }
         return false;
+    }
+
+    public function getWhatsapp()
+    {
+        return $this->whatsapp;
+    }
+
+    public function setWhatsapp($whatsapp)
+    {
+        $this->whatsapp = $whatsapp;
     }
 
     public function createAttributes($data)

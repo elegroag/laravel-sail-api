@@ -136,7 +136,7 @@ class SignupParticular
             )
         )->render();
 
-        $asunto = ($this->tipo == 'P') ? "Registro de usuario particular portal Comfaca En Linea" : "Registro de usuario empresa portal Comfaca En Linea";
+        $asunto = ($this->tipo == 'P') ? "Registro de usuario particular portal Comfaca En Linea" : "Registro de usuario portal Comfaca En Linea";
         $emailCaja = (new Mercurio01())->findFirst();
         $senderEmail = new SenderEmail();
         $senderEmail->setters(

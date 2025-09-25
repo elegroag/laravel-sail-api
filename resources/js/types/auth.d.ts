@@ -65,6 +65,7 @@ export type LoginProps = {
     Tipsoc: { [key: string]: string };
     Codciu: { [key: string]: string };
     Detadoc: { [key: string]: string };
+    errors?: Record<string, string>,
 }
 
 export type DocumentTypeOption = { value: string; label: string }

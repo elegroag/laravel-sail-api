@@ -18,6 +18,8 @@ class CreateApiEndpointsTable extends Migration
             $table->string('service_name');
             $table->string('endpoint_name');
             $table->string('connection_name')->nullable();
+            $table->string('host_dev', 200);
+            $table->string('host_pro', 200);
             $table->timestamps();
 
             $table->unique(['service_name', 'endpoint_name']);

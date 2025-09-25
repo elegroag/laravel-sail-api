@@ -246,11 +246,11 @@ const DataDelegadoRegister: React.FC<DataRepresentative> = ({
         <Input
           id="phone"
           ref={phoneRef}
-          type="tel"
+          type="number"
           value={values.phone}
           onChange={(e) => onChange("phone", e.target.value)}
           placeholder="Teléfono representante"
-          className="in-b-form mt-1"
+          className="in-b-form mt-1 tel"
         />
       </div>
       <div>

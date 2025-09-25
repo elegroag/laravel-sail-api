@@ -87,7 +87,7 @@ class SignupService
                         "tipper" => $this->tipper,
                         "telefono" => $this->telefono,
                         "calemp" => $this->calemp,
-                        "tipo" => 'P',
+                        "tipo" => $this->tipo,
                         "tipsoc" => $this->tipsoc,
                         "coddocrepleg" => $this->coddocrepleg,
                         "razsoc" => $this->razsoc,
@@ -100,7 +100,7 @@ class SignupService
             $request->setParam('usuario', $usuario);
             $request->setParam('repleg', $this->repleg);
             $request->setParam('coddocrepleg', $this->coddocrepleg);
-            $request->setParam('tipo', 'P');
+            $request->setParam('tipo', $this->tipo);
 
             $this->crearSolicitud($signupEntity, $request);
             $solicitud = $signupEntity->getSolicitud();
@@ -114,7 +114,7 @@ class SignupService
                 "Vamos a continuar.\n",
             "documento" => $solicitud->getDocumento(),
             "coddoc" => $solicitud->getCoddoc(),
-            "tipo" => 'P',
+            "tipo" => $this->tipo,
             "tipafi" => $this->tipo,
             "id" => ($this->tipo == 'P') ? $solicitud->getDocumento() : $solicitud->getId()
         ];

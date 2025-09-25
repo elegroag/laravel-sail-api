@@ -36,7 +36,7 @@ class APIClient
     {
         // Aquí va el código para consumir la API
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, trim($this->hostConnection . '' . $this->apiUrl));
+        curl_setopt($ch, CURLOPT_URL, trim($this->hostConnection . '/' . $this->apiUrl));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_HEADER, $this->curlHeader);
@@ -85,12 +85,15 @@ class APIClient
 
         if (is_null($result) || $this->statusCode >= 400) {
             $error = curl_error($ch);
+            var_dump($error);
             curl_close($ch);
             throw new DebugException("Error access Api, detalles: " . $error, 501);
         } else {
             curl_close($ch);
             if ($this->auth instanceof AuthClientInterface) {
                 return $this->auth->procesaRequest($result);
+            } else {
+                return json_decode($result, true);
             }
         }
     }

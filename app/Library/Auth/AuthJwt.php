@@ -1,21 +1,24 @@
 <?php
+
 namespace App\Library\Auth;
 
 use App\Exceptions\AuthException;
 use App\Models\Gener02;
-use JwtManager;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Facades\JWTFactory;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
+use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 
 class AuthJwt
 {
-    protected $jwt;
     protected $token;
     protected $headers;
     protected $authorization;
     protected $auth_type;
 
-    private $key = "3ducl@c3s2o1p.@9l1c@c10n3duc@t3m@s";
-    private $encrypt = "HS384";
-    private $expire;
+    private $expire; // segundos
+    private $expireMinutes; // minutos para tymon/jwt-auth
     private $user;
     private $password;
 
@@ -24,11 +27,10 @@ class AuthJwt
         if ($expire) {
             $this->expire = $expire;
         }
-        $this->jwt = new JwtManager();
-        $this->jwt->setTokenKey($this->key);
-        $this->jwt->setTokenEncrypt($this->encrypt);
-        $this->jwt->setTokenExpire($this->expire);
-        $this->headers = getallheaders();
+        // tymon/jwt-auth utiliza minutos para TTL
+        $this->expireMinutes = (int) ceil(($this->expire ?? 7200) / 60);
+        // En entorno CLI (tests) getallheaders puede no existir
+        $this->headers = function_exists('getallheaders') ? getallheaders() : [];
     }
 
     /**
@@ -47,8 +49,11 @@ class AuthJwt
         } else {
             header("Content-type: application/x-www-form-urlencoded; charset=utf-8");
         }
-        $method = $_SERVER['REQUEST_METHOD'];
-        if ($method == "OPTIONS") die();
+        // En CLI (tests) REQUEST_METHOD puede no existir
+        $method = $_SERVER['REQUEST_METHOD'] ?? null;
+        if ($method === "OPTIONS") {
+            die();
+        }
     }
 
     /**
@@ -72,18 +77,17 @@ class AuthJwt
             throw new AuthException('La autenticación no requiere de Authorization Token', 404);
         }
 
-        $gener02 = new Gener02();
-        $usuario = $gener02->findFirst("gener02.*", "conditions: usuario='{$usuario}'");
+        $gener02 = Gener02::where('usuario', $usuario)->first();
 
-        if ($usuario == false) {
+        if ($gener02 == false) {
             throw new AuthException("El usuario no es valido para continuar con la autenticación.", 6);
         }
 
-        if (!clave_verify($this->password, $usuario->getPassword())) {
+        if (!clave_verify($this->password, $gener02->getPassword())) {
             throw new AuthException("La clave no es correcta para continuar con la autenticación.", 6);
         }
 
-        if (!$usuario) {
+        if (!$gener02) {
             throw new AuthException("El acceso no es correcto para continuar con la autenticación. 4", 4);
         }
 
@@ -91,7 +95,7 @@ class AuthJwt
             throw new AuthException("La clave es requerida para la autenticación. 3", 3);
         }
 
-        if (!clave_verify($clave, $usuario->getPassword())) {
+        if (!clave_verify($clave, $gener02->getPassword())) {
             throw new AuthException("La clave no es correcta para continuar con la autenticación. 6", 6);
         }
 
@@ -103,12 +107,23 @@ class AuthJwt
             $ip = $_SERVER['REMOTE_ADDR'];
         }
 
-        $this->token = $this->jwt->create(array(
-            "ip" => $ip,
-            "usuario" => $usuario->getUsuario(),
-            "tipfun" => $usuario->getTipfun(),
-            "estado" => $usuario->getEstado(),
-        ));
+        // Construimos claims personalizados y emitimos el token con TTL configurado
+        $claims = [
+            'sub' => $usuario->getUsuario(),
+            'ip' => $ip,
+            'usuario' => $usuario->getUsuario(),
+            'tipfun' => $usuario->getTipfun(),
+            'estado' => $usuario->getEstado(),
+        ];
+
+        try {
+            // Establecer TTL por emisión
+            JWTAuth::factory()->setTTL($this->expireMinutes);
+            $payload = JWTFactory::customClaims($claims)->make();
+            $this->token = JWTAuth::encode($payload)->get();
+        } catch (JWTException $e) {
+            throw new AuthException('No fue posible generar el token de autenticación: ' . $e->getMessage(), 500);
+        }
 
         return $this->token;
     }
@@ -136,8 +151,7 @@ class AuthJwt
                         $this->password = $exp[1];
                         $this->auth_type = 'basic';
 
-                        $gener02 = new Gener02();
-                        $gener02->findFirst("usuario='{$this->user}'");
+                        $gener02 = Gener02::where('usuario', $this->user)->first();
 
                         if (!clave_verify($this->password, $gener02->getCriptada())) {
                             throw new AuthException("La clave no es correcta para continuar con la autenticación.", 501);
@@ -152,18 +166,24 @@ class AuthJwt
                 if (preg_match('/^bearer/i', $this->authorization)) {
                     $this->token = trim(preg_replace('/^bearer/i', "", $this->authorization));
                     $this->auth_type = 'bearer';
-                    $res = $this->jwt->check($this->token);
-                    if ($res === false) {
-                        throw new AuthException("No es correcto el usuario para su ingreso.", 501);
-                    } else {
-                        $res = $this->jwt->show($this->token);
-                        $this->user = $res->data->user;
-                        $gener02 = new Gener02();
-                        $usuario = $gener02->findFirst("usuario='{$this->user}'");
-                        if ($usuario == false) {
-                            throw new AuthException("El usuario no es valido para su ingreso.", 501);
+
+                    try {
+                        $payload = JWTAuth::setToken($this->token)->getPayload();
+                        // Recuperar usuario desde claim si está disponible
+                        $this->user = $payload->get('usuario');
+                        if ($this->user) {
+                            $gener02 = Gener02::where('usuario', $this->user)->first();
+                            if ($gener02 == false) {
+                                throw new AuthException("El usuario no es valido para su ingreso.", 501);
+                            }
                         }
                         return true;
+                    } catch (TokenExpiredException $e) {
+                        throw new AuthException('El token ha expirado.', 401);
+                    } catch (TokenInvalidException $e) {
+                        throw new AuthException('El token no es válido.', 401);
+                    } catch (JWTException $e) {
+                        throw new AuthException('No se pudo procesar el token.', 500);
                     }
                 }
             } else {
@@ -176,9 +196,13 @@ class AuthJwt
 
     /**
      * SimpleToken function
+     * Genera un token "simple" con claims base e incluye opcionalmente claims personalizados.
+     * No permite sobreescribir claims reservados.
+     *
+     * @param array $extraClaims Claims adicionales a incluir en el payload
      * @return string token
      */
-    public function SimpleToken()
+    public function SimpleToken(array $extraClaims = [])
     {
         $this->loadHeaders(true);
         if (!is_ajax()) {
@@ -192,12 +216,32 @@ class AuthJwt
             $ip = $_SERVER['REMOTE_ADDR'];
         }
 
-        return $this->jwt->create(array(
-            "usuario" => null,
-            "tipfun" => null,
-            "estado" => null,
-            "ip" => $ip,
-        ));
+        $claims = [
+            'sub' => 'simple-token',
+            'usuario' => null,
+            'tipfun' => null,
+            'estado' => null,
+            'ip' => $ip,
+        ];
+
+        // Proteger claims reservados para no ser sobreescritos
+        $reserved = ['sub','usuario','tipfun','estado','ip','iat','exp','nbf','jti','iss'];
+        foreach ($reserved as $key) {
+            if (array_key_exists($key, $extraClaims)) {
+                unset($extraClaims[$key]);
+            }
+        }
+        if (!empty($extraClaims)) {
+            $claims = array_merge($claims, $extraClaims);
+        }
+
+        try {
+            JWTAuth::factory()->setTTL($this->expireMinutes);
+            $payload = JWTFactory::customClaims($claims)->make();
+            return JWTAuth::encode($payload)->get();
+        } catch (JWTException $e) {
+            throw new AuthException('No fue posible generar el token: ' . $e->getMessage(), 500);
+        }
     }
 
     public function findToken()
@@ -222,14 +266,19 @@ class AuthJwt
             throw new AuthException("El acceso no es correcto al servicio", 404);
         }
         $token = (is_null($token)) ? $this->findToken() : $token;
-        $res = $this->jwt->check($token);
-        if ($res) {
-            $data = $this->jwt->show($token);
-            if ($data->ip) {
+        try {
+            $payload = JWTAuth::setToken($token)->getPayload();
+            $ip = $payload->get('ip');
+            if ($ip) {
                 return true;
             }
-        } else {
-            throw new AuthException("Error el token no es valido para su ingreso", 5);
+            throw new AuthException("Error el token no contiene IP válida", 5);
+        } catch (TokenExpiredException $e) {
+            throw new AuthException('El token ha expirado.', 401);
+        } catch (TokenInvalidException $e) {
+            throw new AuthException('El token no es válido.', 401);
+        } catch (JWTException $e) {
+            throw new AuthException('No se pudo procesar el token.', 500);
         }
     }
 
@@ -241,7 +290,19 @@ class AuthJwt
 
     public function validaToken()
     {
-        return $this->jwt->check($this->token);
+        try {
+            if (!$this->token) {
+                $this->token = $this->findToken();
+            }
+            JWTAuth::setToken($this->token)->getPayload();
+            return true;
+        } catch (TokenExpiredException $e) {
+            return false;
+        } catch (TokenInvalidException $e) {
+            return false;
+        } catch (JWTException $e) {
+            return false;
+        }
     }
 
     public function validJson($data)
