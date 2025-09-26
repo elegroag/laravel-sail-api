@@ -103,3 +103,35 @@ export interface RegisterPayload {
     first_name?: string,
     last_name?: string,
 }
+
+
+export type VerificationState = {
+    code: string[]
+    error: string | null
+    canResend: boolean
+    resendTimer: number
+    isVerified: boolean
+    deliveryMethod: DeliveryMethod
+}
+
+
+export type VerificationAction =
+  | { type: 'SET_CODE_DIGIT'; index: number; value: string }
+  | { type: 'SET_ERROR'; error: string | null }
+  | { type: 'SET_CAN_RESEND'; canResend: boolean }
+  | { type: 'SET_RESEND_TIMER'; timer: number }
+  | { type: 'SET_VERIFIED'; verified: boolean }
+  | { type: 'SET_DELIVERY_METHOD'; method: DeliveryMethod }
+  | { type: 'RESET_CODE' }
+
+export type DeliveryMethod = 'email' | 'whatsapp'
+
+export type VerifyEmailProps = {
+  documento?: string
+  coddoc?: string
+  tipo?: string
+  status?: string
+  token?: string
+}
+
+
