@@ -3,7 +3,6 @@
 use App\Http\Controllers\Mercurio\CertificadosController;
 use App\Http\Controllers\Mercurio\PrincipalController;
 use App\Http\Controllers\Mercurio\MovimientosController;
-use App\Http\Controllers\Mercurio\FirmasController;
 use App\Http\Middleware\EnsureCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 

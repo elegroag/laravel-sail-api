@@ -6,7 +6,6 @@ use App\Exceptions\DebugException;
 use App\Library\APIClient\APIClient;
 use App\Library\APIClient\BasicAuth;
 use App\Models\ApiEndpoint;
-use App\Models\Gener02;
 
 class ApiWhatsapp extends ApiAbstract
 {
@@ -25,8 +24,7 @@ class ApiWhatsapp extends ApiAbstract
         if (is_null($metodo) || $metodo === '') {
             throw new DebugException("Error no es valido el metodo de acceso API ", 501);
         }
-        $userApi = Gener02::where('usuario', '2')->first();
-        $basicAuth = new BasicAuth('2', $userApi->clave);
+        $basicAuth = new BasicAuth(env('API_WHATSAPP_USER', '2'), env('API_WHATSAPP_PASSWORD', 'ok'));
 
         $api_end_point = ApiEndpoint::where('connection_name', 'api-whatsapp')
             ->where('service_name', $servicio)

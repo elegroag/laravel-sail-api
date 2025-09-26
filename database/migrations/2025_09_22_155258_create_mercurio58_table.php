@@ -29,8 +29,8 @@ return new class extends Migration
             $table->foreign('codare', 'fk_mercurio58_mercurio551')
                 ->references('codare')
                 ->on('mercurio55')
-                ->onDelete('restrict')
-                ->onUpdate('restrict');
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
         });
     }
 

@@ -130,8 +130,9 @@ export type VerifyEmailProps = {
   documento?: string
   coddoc?: string
   tipo?: string
+  errors: Record<string, string>
+  token?: string,
   status?: string
-  token?: string
 }
 
 

@@ -35,7 +35,8 @@ return new class extends Migration
             $table->foreign('parent_id', 'menu_items_ibfk_1')
                 ->references('id')
                 ->on('menu_items')
-                ->onDelete('cascade');
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
         });
     }
 

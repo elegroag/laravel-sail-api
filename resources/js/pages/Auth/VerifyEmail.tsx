@@ -29,7 +29,7 @@ export const DeliveryOptions: Array<{
 ]
 
 
-export default function VerifyEmail({ documento, coddoc, tipo, token, status }: VerifyEmailProps) {
+export default function VerifyEmail({ documento, coddoc, tipo, token, status, errors }: VerifyEmailProps) {
     const {
         state,
         inputRefs,
@@ -51,7 +51,7 @@ export default function VerifyEmail({ documento, coddoc, tipo, token, status }: 
         documento,
         coddoc,
         tipo,
-        status
+        errors
     })
 
 
@@ -92,7 +92,17 @@ export default function VerifyEmail({ documento, coddoc, tipo, token, status }: 
         </div>
       )}
       <div className="lg:w-1/2 p-8 flex flex-col justify-center relative overflow-y-auto max-h-[700px]">
-      <form onSubmit={handleVerify} className="mt-8 space-y-6">
+      {errors && Object.keys(errors).length > 0 && (
+        <div className="mb-4 rounded-md border border-red-300 bg-red-50 p-3 text-red-700 text-sm">
+          <p className="font-medium">No fue posible validar tu información:</p>
+          <ul className="mt-1 list-disc pl-5">
+            {Object.values(errors).map((err, idx) => (
+              <li key={idx}>{err}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      <form onSubmit={handleVerify} className="mt-4 space-y-6">
         <div className="text-center space-y-2">
           <VerificationChannelIcon className="h-12 w-12 text-emerald-600 mx-auto" />
           <p className="text-sm text-muted-foreground">

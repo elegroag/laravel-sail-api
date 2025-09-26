@@ -30,8 +30,8 @@ return new class extends Migration
             $table->foreign('numero')
                 ->references('id')
                 ->on('mercurio60')
-                ->restrictOnDelete()
-                ->restrictOnUpdate();
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
         });
     }
 
@@ -40,6 +40,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('mercurio61', function (Blueprint $table) {
+            $table->dropForeign('fk_mercurio61_mercurio601');
+            $table->dropIndex('fk_mercurio61_mercurio601');
+        });
         Schema::dropIfExists('mercurio61');
     }
 };

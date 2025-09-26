@@ -12,7 +12,7 @@ class Mercurio08Seeder extends Seeder
 {
     use WithoutModelEvents;
 
-    private const TABLE = 'mercurio.mercurio08';
+    private const TABLE = 'mercurio08';
 
     /**
      * Ejecuta el seeder cargando el SQL externo.
@@ -20,7 +20,7 @@ class Mercurio08Seeder extends Seeder
     public function run(): void
     {
         DB::transaction(function (): void {
-            //$this->limpiarTabla();
+            $this->limpiarTabla();
             DB::unprepared($this->sql());
         });
     }

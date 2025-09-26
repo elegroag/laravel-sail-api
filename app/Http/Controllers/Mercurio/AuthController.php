@@ -7,16 +7,16 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Http\Controllers\Controller;
 use App\Library\Auth\AuthJwt;
+use App\Library\Auth\SessionCookies;
 use App\Models\Gener09;
 use App\Models\Gener18;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio19;
 use App\Models\Subsi54;
-use App\Services\Api\ApiWhatsapp;
 use App\Services\Utils\SenderEmail;
 use Carbon\Carbon;
-use Dotenv\Exception\ValidationException;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -164,98 +164,6 @@ class AuthController extends Controller
         return Inertia::render('Auth/VerifyEmail', $payload);
     }
 
-    public function verifyStore(Request $request)
-    {
-        try {
-            $request->validate([
-                'documento' => 'required|numeric|digits_between:6,18',
-                'coddoc' => 'required|string|min:1|max:2',
-                'tipo' => 'required|string|size:1',
-                'delivery_method' => 'required|string|min:5|max:15',
-                'token' => 'nullable|string|min:40|max:5000',
-            ]);
-
-            $claims = [
-                'documento' => $request->input('documento'),
-                'coddoc' => $request->input('coddoc'),
-                'tipo' => $request->input('tipo'),
-                'delivery_method' => $request->input('delivery_method'),
-                'context' => 'verifyStore',
-            ];
-            $token = (new AuthJwt(10))->SimpleToken($claims);
-            // Primero validar existencia en mercurio07 para no romper la FK al insertar/actualizar mercurio19
-            $user07 = Mercurio07::where("documento", $request->input('documento'))
-                ->where("coddoc", $request->input('coddoc'))
-                ->where("tipo", $request->input('tipo'))
-                ->first();
-
-            if (!$user07) {
-                return response()->json([
-                    "success" => false,
-                    "msj" => "No existe un usuario registrado con los datos ingresados. Verifique o regístrese para continuar."
-                ]);
-            }
-
-            $user19 = Mercurio19::where("documento", $request->input('documento'))
-                ->where("coddoc", $request->input('coddoc'))
-                ->where("tipo", $request->input('tipo'))
-                ->first();
-
-            if ($user19) {
-                $user19->setToken($token);
-                $user19->update();
-            } else {
-                $user19 = new Mercurio19([
-                    'documento' => $request->input('documento'),
-                    'coddoc' => $request->input('coddoc'),
-                    'tipo' => $request->input('tipo'),
-                    'token' => $token,
-                ]);
-                $user19->save();
-            }
-
-            // $user07 ya está validado arriba
-
-            $codigoVerify = generaCode();
-            $inicio  = Carbon::now()->format('Y-m-d H:i:s');
-            $intentos = '0';
-
-            Mercurio19::where('documento', $request->input('documento'))
-                ->where('coddoc', $request->input('coddoc'))
-                ->where('tipo', $request->input('tipo'))
-                ->update([
-                    'inicio'   => $inicio,
-                    'intentos' => (int) $intentos,
-                    'codver'   => (string) $codigoVerify,
-                ]);
-
-            if ($request->input('delivery_method') == 'email') {
-                $res = $this->sendCodeEmail(
-                    $codigoVerify,
-                    $user07->getEmail()
-                );
-            } else {
-                $res = $this->sendCodeWhatsapp(
-                    $codigoVerify,
-                    $user07->getWhatsapp()
-                );
-            }
-
-            $salida = [
-                "success" => true,
-                "msj" => "Código de verificación enviado correctamente",
-                "token" => $token,
-                "res" => $res
-            ];
-        } catch (ValidationException $e) {
-            $salida = [
-                "success" => false,
-                "msj" => $e->getMessage()
-            ];
-        }
-        return response()->json($salida);
-    }
-
     public function verifyAction(Request $request)
     {
         try {
@@ -264,16 +172,16 @@ class AuthController extends Controller
                 'documento' => 'required|numeric|digits_between:6,18',
                 'coddoc' => 'required|string|min:1|max:2',
                 'tipo' => 'required|string|size:1',
-                'tipafi' => 'required|string|size:1',
-                'id' => 'required|numeric',
+                'code_1' => 'required|string|size:1',
+                'code_2' => 'required|string|size:1',
+                'code_3' => 'required|string|size:1',
+                'code_4' => 'required|string|size:1',
             ]);
 
             $token = $request->input('token');
             $documento = $request->input('documento');
             $coddoc = $request->input('coddoc');
             $tipo = $request->input('tipo');
-            $tipafi = $request->input('tipafi');
-            $id = $request->input('id');
 
             $auth_jwt_temporal = new AuthJwt(10);
             $auth_jwt_temporal->CheckSimpleToken($token);
@@ -331,8 +239,24 @@ class AuthController extends Controller
                         'codver'   => (string) $codigoVerify,
                     ]);
 
-                $this->sendCodeEmail($codigoVerify, $user07->getEmail());
-                $error .= "Ha superado el tiempo de validación y es necesario volver a generar un nuevo PIN, y se ha enviado a la dirección de correo registrada en la plataforma. Por favor comprobar en el buzon del correo e ingresar el nuevo PIN.\n";
+
+                $html = "Utiliza el siguiente código de verificación, para confirmar el propietario de la dirección de correo:<br/>
+                <span style=\"font-size:16px;color:#333\">CÓDIGO DE VERIFICACIÓN: </span><br/>
+                <span style=\"font-size:30px;color:#11cdef\"><b>{$codigoVerify}</b></span>";
+
+                $asunto = "Generación nuevo PIN plataforma Comfaca En Línea";
+                $emailCaja = Mercurio01::first();
+                $senderEmail = new SenderEmail();
+                $senderEmail->setters(
+                    "emisor_email: {$emailCaja->getEmail()}",
+                    "emisor_clave: {$emailCaja->getClave()}",
+                    "asunto: {$asunto}"
+                );
+                $senderEmail->send($user07->getEmail(), $html);
+
+                $error .= "Ha superado el tiempo de validación y es necesario volver a generar un nuevo PIN, " .
+                    "y se ha enviado a la dirección de correo registrada en la plataforma. " .
+                    "Por favor comprobar en el buzon del correo e ingresar el nuevo PIN.\n";
             }
 
             if (strlen($error) == 0) {
@@ -353,101 +277,75 @@ class AuthController extends Controller
                 }
             }
 
-            if (strlen($error) == 0) {
-                $tk = Kencrypt(
-                    json_encode(
-                        array(
-                            "documento" => $documento,
-                            "coddoc" => $coddoc,
-                            'tipo' => $tipo,
-                            'tipafi' => $tipafi,
-                            'id' => $id
-                        )
-                    )
-                );
-
-                if (!Mercurio07::where("documento", $documento)
-                    ->where("coddoc", $coddoc)
-                    ->where("tipo", $tipo)
-                    ->where("estado", "A")
-                    ->exists()) {
-                    throw new DebugException("Error en la autenticación del usuario", 501);
-                }
-
-                $salida = [
-                    "success" => true,
-                    "token" =>  base64_encode($tk[0] . '|' . $tk[1]),
-                    "isValid" => true,
-                    "location" => "principal/index",
-                    "msj" => "El proceso de registro como persona particular, se ha completado con éxito,
-                    vamos a continuar.<br/><p class='text-center'><i class='fa fa-arrow-down fa-2x' aria-hidden='true'></i></p>",
-                ];
-            } else {
-                // Reintento: regenerar token con claims para trazabilidad
-                $token = $auth_jwt_temporal->SimpleToken([
-                    'documento' => $documento,
-                    'coddoc' => $coddoc,
-                    'tipo' => $tipo,
-                    'context' => 'verifyAction.retry',
-                ]);
-                Mercurio19::where('documento', $documento)
-                    ->where('coddoc', $coddoc)
-                    ->where('tipo', $tipo)
-                    ->update(['token' => (string) $token]);
-
-                $salida = [
-                    "success" => true,
-                    "isValid" => false,
-                    "token" => $token,
-                    "msj" => $error
-                ];
+            switch ($tipo) {
+                case 'E':
+                    $url = "mercurio/empresa";
+                    break;
+                case 'I':
+                    $url = "mercurio/independiente";
+                    break;
+                case 'O':
+                    $url = "mercurio/pensionado";
+                    break;
+                case 'F':
+                    $url = "mercurio/facultativo";
+                    break;
+                default:
+                    $url = "principal/index";
+                    break;
             }
+
+            $auth = new SessionCookies(
+                "model: mercurio07",
+                "tipo: {$token->tipo}",
+                "coddoc: {$token->coddoc}",
+                "documento: {$token->documento}",
+                "estado: A"
+            );
+
+            if (!$auth->authenticate()) {
+                throw new DebugException("Error en la autenticación del usuario", 501);
+            }
+
+            set_flashdata(
+                "success",
+                array(
+                    "type" => "html",
+                    "msj" => "<p style='font-size:1rem' class='text-left'>El usuario ha realizado el pre-registro de forma correcta</p>" .
+                        "<p style='font-size:1rem' class='text-left'>El registro realizado es de tipo \"Particular\", ahora puedes realizar las afiliaciones de modo seguro.<br/>" .
+                        "Las credenciales de acceso le seran enviadas a la respectiva dirección de correo registrado.<br/></p>"
+                )
+            );
+
+            return redirect()->to($url ?? 'principal.index');
         } catch (ValidationException $e) {
-            $salida = [
+            $payload = [
                 "success" => false,
-                "msj" => $e->getMessage()
+                'message' => 'Error de validación',
+                'errors' => $e->errors()
             ];
         } catch (DebugException $e) {
-            $salida = [
+            $payload = [
                 "success" => false,
-                "msj" => $e->getMessage()
+                'message' => 'Error al crear empresa: ' . $e->getMessage()
             ];
         }
 
-        return response()->json($salida);
-    }
-
-    function sendCodeEmail($codigoVerify, $email)
-    {
-        $html = "Utiliza el siguiente código de verificación, para confirmar el propietario de la dirección de correo:<br/>
-        <span style=\"font-size:16px;color:#333\">CÓDIGO DE VERIFICACIÓN: </span><br/>
-        <span style=\"font-size:30px;color:#11cdef\"><b>{$codigoVerify}</b></span>";
-
-        $asunto = "Generación nuevo PIN plataforma Comfaca En Línea";
-        $emailCaja = Mercurio01::first();
-        $senderEmail = new SenderEmail();
-        $senderEmail->setters(
-            "emisor_email: {$emailCaja->getEmail()}",
-            "emisor_clave: {$emailCaja->getClave()}",
-            "asunto: {$asunto}"
-        );
-        return $senderEmail->send($email, $html);
-    }
-
-    function sendCodeWhatsapp($codigoVerify, $whatsapp)
-    {
-        $html = "Código de verificación:            
-        *{$codigoVerify}*. Generación de PIN plataforma Comfaca En Línea, 
-        utiliza el código de verificación para confirmar el propietario de la línea de whatsapp.";
-        $apiWhatsaap = new ApiWhatsapp();
-        $apiWhatsaap->send([
-            'servicio' => 'Whatsapp',
-            'metodo' => 'enviar',
-            'params' => [
-                'numero' => $whatsapp,
-                'mensaje' => $html
-            ],
+        $auth_jwt_temporal = new AuthJwt(10);
+        // Reintento: regenerar token con claims para trazabilidad
+        $token = $auth_jwt_temporal->SimpleToken([
+            'documento' => $documento,
+            'coddoc' => $coddoc,
+            'tipo' => $tipo,
+            'context' => 'verifyAction.retry',
         ]);
-        return $apiWhatsaap->toArray();
+
+        Mercurio19::where('documento', $documento)
+            ->where('coddoc', $coddoc)
+            ->where('tipo', $tipo)
+            ->update(['token' => (string) $token]);
+
+        $payload['token'] = $token;
+        return Inertia::render('Auth/VerifyEmail', $payload);
     }
 }

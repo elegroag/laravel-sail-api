@@ -23,15 +23,15 @@ return new class extends Migration
             $table->string('detalle', 45);
             $table->integer('codcat');
             $table->char('tipo', 2);
-            $table->enum('estado', ['A','I']);
+            $table->enum('estado', ['A', 'I']);
 
             // Índice y FK
             $table->index('codcat', 'fk_mercurio55_mercurio51_idx');
             $table->foreign('codcat', 'fk_mercurio55_mercurio51')
                 ->references('codcat')
                 ->on('mercurio51')
-                ->onDelete('restrict')
-                ->onUpdate('restrict');
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
         });
     }
 

@@ -85,7 +85,6 @@ class APIClient
 
         if (is_null($result) || $this->statusCode >= 400) {
             $error = curl_error($ch);
-            var_dump($error);
             curl_close($ch);
             throw new DebugException("Error access Api, detalles: " . $error, 501);
         } else {

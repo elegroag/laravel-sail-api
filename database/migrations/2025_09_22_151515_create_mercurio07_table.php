@@ -26,7 +26,7 @@ return new class extends Migration
             $table->char('autoriza', 1); // NOT NULL
             $table->char('codciu', 5); // NOT NULL
             $table->date('fecreg'); // NOT NULL
-            $table->enum('estado', ['A','I','P','X']); // NOT NULL
+            $table->enum('estado', ['A', 'I', 'P', 'X']); // NOT NULL
             $table->date('fecha_syncron')->nullable();
             $table->char('whatsapp', 10)->nullable();
 
@@ -38,8 +38,8 @@ return new class extends Migration
             $table->foreign('tipo', 'fk_mercurio07_mercurio061')
                 ->references('tipo')
                 ->on('mercurio06')
-                ->onDelete('restrict')
-                ->onUpdate('restrict');
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
         });
     }
 

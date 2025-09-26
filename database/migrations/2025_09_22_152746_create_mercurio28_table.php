@@ -29,8 +29,8 @@ return new class extends Migration
             $table->foreign('tipo', 'fk_mercurio28_mercurio061')
                 ->references('tipo')
                 ->on('mercurio06')
-                ->onDelete('restrict')
-                ->onUpdate('restrict');
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
         });
     }
 

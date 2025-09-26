@@ -38,14 +38,14 @@ return new class extends Migration
             $table->foreign('codsed', 'fk_mercurio66_mercurio651')
                 ->references('codsed')
                 ->on('mercurio65')
-                ->restrictOnDelete()
-                ->restrictOnUpdate();
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
 
             $table->foreign(['tipo', 'documento', 'coddoc'], 'fk_mercurio66_mercurio621')
                 ->references(['tipo', 'documento', 'coddoc'])
                 ->on('mercurio62')
-                ->restrictOnDelete()
-                ->restrictOnUpdate();
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
         });
     }
 
@@ -54,6 +54,12 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('mercurio66', function (Blueprint $table) {
+            $table->dropForeign('fk_mercurio66_mercurio651');
+            $table->dropIndex('fk_mercurio66_mercurio651_idx');
+            $table->dropForeign('fk_mercurio66_mercurio621');
+            $table->dropIndex('fk_mercurio66_mercurio621_idx');
+        });
         Schema::dropIfExists('mercurio66');
     }
 };

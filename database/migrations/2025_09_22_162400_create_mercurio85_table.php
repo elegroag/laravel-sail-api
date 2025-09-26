@@ -34,10 +34,12 @@ return new class extends Migration
             // FKs (RESTRICT)
             $table->foreign('tipideacu', 'mercurio85_ibfk_2')
                 ->references('tipide')->on('xml4b004')
-                ->restrictOnDelete()->restrictOnUpdate();
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
             $table->foreign('id', 'mercurio85_ibfk_3')
                 ->references('id')->on('mercurio83')
-                ->restrictOnDelete()->restrictOnUpdate();
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
         });
     }
 
@@ -46,6 +48,12 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('mercurio85', function (Blueprint $table) {
+            $table->dropForeign('mercurio85_ibfk_2');
+            $table->dropIndex('mercurio85_ibfk_2_idx');
+            $table->dropForeign('mercurio85_ibfk_3');
+            $table->dropIndex('mercurio85_ibfk_3_idx');
+        });
         Schema::dropIfExists('mercurio85');
     }
 };

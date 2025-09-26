@@ -33,14 +33,14 @@ return new class extends Migration
             $table->foreign('tipopc', 'fk_mercurio13_mercurio091')
                 ->references('tipopc')
                 ->on('mercurio09')
-                ->onDelete('restrict')
-                ->onUpdate('restrict');
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
 
             $table->foreign('coddoc', 'fk_mercurio13_mercurio121')
                 ->references('coddoc')
                 ->on('mercurio12')
-                ->onDelete('restrict')
-                ->onUpdate('restrict');
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
         });
     }
 
@@ -50,9 +50,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('mercurio13', function (Blueprint $table) {
+            // Eliminar FK e índice antes de dropear la tabla
             $table->dropForeign('fk_mercurio13_mercurio091');
-            $table->dropForeign('fk_mercurio13_mercurio121');
             $table->dropIndex('fk_mercurio13_mercurio091_idx');
+            $table->dropForeign('fk_mercurio13_mercurio121');
             $table->dropIndex('fk_mercurio13_mercurio121_idx');
         });
         Schema::dropIfExists('mercurio13');

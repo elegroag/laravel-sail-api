@@ -45,26 +45,26 @@ return new class extends Migration
             $table->foreign(['tipo', 'coddoc', 'documento'], 'fk_mercurio33_mercurio071')
                 ->references(['tipo', 'coddoc', 'documento'])
                 ->on('mercurio07')
-                ->onDelete('restrict')
-                ->onUpdate('restrict');
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
 
             $table->foreign('codest', 'fk_mercurio33_mercurio111')
                 ->references('codest')
                 ->on('mercurio11')
-                ->onDelete('restrict')
-                ->onUpdate('restrict');
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
 
             $table->foreign('log', 'fk_mercurio33_mercurio201')
                 ->references('log')
                 ->on('mercurio20')
-                ->onDelete('restrict')
-                ->onUpdate('restrict');
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
 
             $table->foreign(['tipo', 'campo'], 'fk_mercurio33_mercurio281')
                 ->references(['tipo', 'campo'])
                 ->on('mercurio28')
-                ->onDelete('restrict')
-                ->onUpdate('restrict');
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
         });
     }
 

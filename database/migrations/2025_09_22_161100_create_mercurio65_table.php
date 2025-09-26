@@ -38,8 +38,8 @@ return new class extends Migration
             $table->foreign('codcla', 'fk_mercurio65_mercurio671')
                 ->references('codcla')
                 ->on('mercurio67')
-                ->restrictOnDelete()
-                ->restrictOnUpdate();
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
         });
     }
 

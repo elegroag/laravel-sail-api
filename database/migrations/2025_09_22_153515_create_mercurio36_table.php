@@ -80,7 +80,7 @@ return new class extends Migration
                 ->references(['tipo', 'coddoc', 'documento'])
                 ->on('mercurio07')
                 ->onDelete('cascade')
-                ->onUpdate('restrict');
+                ->onUpdate('cascade');
         });
     }
 

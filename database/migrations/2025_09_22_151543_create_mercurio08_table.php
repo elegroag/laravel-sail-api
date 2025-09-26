@@ -32,15 +32,21 @@ return new class extends Migration
             // Claves foráneas
             $table->foreign('codofi', 'mercurio08_ibfk_1')
                 ->references('codofi')
-                ->on('mercurio04');
+                ->on('mercurio04')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
 
             $table->foreign('usuario', 'mercurio08_ibfk_2')
                 ->references('usuario')
-                ->on('gener02');
+                ->on('gener02')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
 
             $table->foreign('tipopc', 'mercurio08_ibfk_3')
                 ->references('tipopc')
-                ->on('mercurio09');
+                ->on('mercurio09')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
         });
     }
 
@@ -51,11 +57,11 @@ return new class extends Migration
     {
         Schema::table('mercurio08', function (Blueprint $table) {
             $table->dropForeign('mercurio08_ibfk_1');
-            $table->dropForeign('mercurio08_ibfk_2');
-            $table->dropForeign('mercurio08_ibfk_3');
             $table->dropIndex('fk_mercurio08_mercurio041_idx');
-            $table->dropIndex('fk_mercurio08_mercurio091_idx');
+            $table->dropForeign('mercurio08_ibfk_2');
             $table->dropIndex('fk_mercurio08_gener021_idx');
+            $table->dropForeign('mercurio08_ibfk_3');
+            $table->dropIndex('fk_mercurio08_mercurio091_idx');
         });
         Schema::dropIfExists('mercurio08');
     }

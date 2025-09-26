@@ -30,8 +30,8 @@ return new class extends Migration
             $table->foreign('tipopc', 'fk_mercurio37_mercurio091')
                 ->references('tipopc')
                 ->on('mercurio09')
-                ->onDelete('restrict')
-                ->onUpdate('restrict');
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
         });
     }
 

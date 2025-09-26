@@ -26,11 +26,9 @@ Route::resource('tasks', TaskController::class);
 Route::get('/web/login', [AuthController::class, 'index'])->name('login');
 Route::get('/web/register', [AuthController::class, 'register'])->name('register');
 Route::get('/web/password/request', [AuthController::class, 'resetPassword'])->name('password.request');
-
 Route::get('/web/verify/{tipo}/{coddoc}/{documento}', [AuthController::class, 'verify'])->name('verify.show');
 Route::post('/web/verify', [AuthController::class, 'verify'])->name('verify.request');
 Route::post('/web/verify_action', [AuthController::class, 'verifyAction'])->name('verify.action');
-Route::post('/web/verify_store', [AuthController::class, 'verifyStore'])->name('verify.resend');
 
 Route::get('/web', [WebController::class, 'dashboard'])->name('dashboard');
 Route::get('/web/empresas', [WebController::class, 'empresas'])->name('empresas.index');

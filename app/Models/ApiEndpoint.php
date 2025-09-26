@@ -9,6 +9,9 @@ class ApiEndpoint extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'id';
+    protected $table = 'api_endpoints';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -21,11 +24,4 @@ class ApiEndpoint extends Model
         'host_dev',
         'host_pro'
     ];
-
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    protected $table = 'api_endpoints';
 }

@@ -62,32 +62,41 @@ return new class extends Migration
             // FKs (NO ACTION => RESTRICT)
             $table->foreign('tipben', 'mercurio83_ibfk_1')
                 ->references('tipben')->on('xml4b081')
-                ->restrictOnDelete()->restrictOnUpdate();
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
             $table->foreign('facvul', 'mercurio83_ibfk_10')
                 ->references('facvul')->on('xml4b094')
-                ->restrictOnDelete()->restrictOnUpdate();
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
             $table->foreign('tipideben', 'mercurio83_ibfk_2')
                 ->references('tipide')->on('xml4b004')
-                ->restrictOnDelete()->restrictOnUpdate();
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
             $table->foreign('tipgenben', 'mercurio83_ibfk_3')
                 ->references('tipgen')->on('xml4b005')
-                ->restrictOnDelete()->restrictOnUpdate();
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
             $table->foreign('codpaiben', 'mercurio83_ibfk_4')
                 ->references('codpai')->on('xml4b091')
-                ->restrictOnDelete()->restrictOnUpdate();
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
             $table->foreign('codareresben', 'mercurio83_ibfk_5')
                 ->references('codare')->on('xml4b064')
-                ->restrictOnDelete()->restrictOnUpdate();
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
             $table->foreign('tipjor', 'mercurio83_ibfk_6')
                 ->references('tipjor')->on('xml4b070')
-                ->restrictOnDelete()->restrictOnUpdate();
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
             // Nota: ibfk_7 es duplicada en SQL, se omite por redundancia
             $table->foreign('codgru', 'mercurio83_ibfk_8')
                 ->references('codgru')->on('xml4b086')
-                ->restrictOnDelete()->restrictOnUpdate();
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
             $table->foreign('codpob', 'mercurio83_ibfk_9')
                 ->references('codpob')->on('xml4b087')
-                ->restrictOnDelete()->restrictOnUpdate();
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
         });
     }
 
@@ -96,6 +105,16 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('mercurio83', function (Blueprint $table) {
+            $table->dropForeign('mercurio83_ibfk_1');
+            $table->dropForeign('mercurio83_ibfk_2');
+            $table->dropForeign('mercurio83_ibfk_3');
+            $table->dropForeign('mercurio83_ibfk_4');
+            $table->dropForeign('mercurio83_ibfk_5');
+            $table->dropForeign('mercurio83_ibfk_6');
+            $table->dropForeign('mercurio83_ibfk_8');
+            $table->dropForeign('mercurio83_ibfk_9');
+        });
         Schema::dropIfExists('mercurio83');
     }
 };

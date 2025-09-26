@@ -54,6 +54,7 @@ export default function useVerification({
     coddoc,
     tipo,
     status,
+    errors,
 }: VerifyEmailProps) {
 
     const inputRefs = useRef<Array<HTMLInputElement | null>>([])
@@ -100,6 +101,15 @@ export default function useVerification({
         dispatch({ type: 'SET_CAN_RESEND', canResend: true })
       }
     }, [state.canResend, state.resendTimer])
+
+    // Mostrar errores iniciales provenientes de props (Inertia)
+    useEffect(() => {
+      if (errors && Object.keys(errors).length > 0) {
+        const first = Object.values(errors)[0]
+        const message = Array.isArray(first) ? first[0] : String(first)
+        dispatch({ type: 'SET_ERROR', error: message })
+      }
+    }, [errors])
 
     const handleInputChange = (index: number, value: string) => {
       if (!/^[0-9]{0,1}$/.test(value)) {
@@ -176,6 +186,11 @@ export default function useVerification({
       setData('code_2', state.code[1] ?? '')
       setData('code_3', state.code[2] ?? '')
       setData('code_4', state.code[3] ?? '')
+      
+      setData('token', data.token)
+      setData('tipo', data.tipo)
+      setData('coddoc', data.coddoc)
+      setData('documento', data.documento)
 
       post(route('verify.action'), {
         preserveScroll: true,
@@ -204,7 +219,7 @@ export default function useVerification({
       setIsResending(true)
 
       try {
-        const response = await fetch(route('verify.resend'), {
+        const response = await fetch(route('api.verify_store'), {
           method: 'POST',
           credentials: 'same-origin',
           headers: {

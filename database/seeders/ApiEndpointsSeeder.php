@@ -110,13 +110,13 @@ class ApiEndpointsSeeder extends Seeder
         ];
 
         foreach ($endpoints as $endpoint) {
-            ApiEndpoint::updateOrCreate(
+            ApiEndpoint::create(
                 [
                     'service_name' => $endpoint['service_name'],
                     'endpoint_name' => $endpoint['endpoint_name'],
-                ],
-                [
                     'connection_name' => $endpoint['connection_name'],
+                    'host_dev' => $endpoint['host_dev'],
+                    'host_pro' => $endpoint['host_pro'],
                 ]
             );
         }

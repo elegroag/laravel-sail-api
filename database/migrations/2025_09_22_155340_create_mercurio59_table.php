@@ -22,10 +22,10 @@ return new class extends Migration
             $table->string('archivo', 100)->nullable();
             $table->string('nota', 255);
             $table->string('email', 60);
-            $table->enum('precan', ['S','N']);
-            $table->enum('autser', ['S','N']);
-            $table->enum('consumo', ['S','N'])->nullable();
-            $table->enum('estado', ['A','I']);
+            $table->enum('precan', ['S', 'N']);
+            $table->enum('autser', ['S', 'N']);
+            $table->enum('consumo', ['S', 'N'])->nullable();
+            $table->enum('estado', ['A', 'I']);
             $table->date('fecini')->nullable();
             $table->date('fecfin')->nullable();
 
@@ -37,8 +37,8 @@ return new class extends Migration
             $table->foreign('codinf', 'fk_mercurio59_mercurio561')
                 ->references('codinf')
                 ->on('mercurio56')
-                ->onDelete('restrict')
-                ->onUpdate('restrict');
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
         });
     }
 

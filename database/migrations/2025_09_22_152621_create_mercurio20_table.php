@@ -37,8 +37,8 @@ return new class extends Migration
             $table->foreign(['tipo', 'coddoc', 'documento'], 'fk_mercurio20_mercurio071')
                 ->references(['tipo', 'coddoc', 'documento'])
                 ->on('mercurio07')
-                ->onDelete('restrict')
-                ->onUpdate('restrict');
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
         });
     }
 
@@ -50,7 +50,6 @@ return new class extends Migration
         Schema::table('mercurio20', function (Blueprint $table) {
             $table->dropForeign('fk_mercurio20_mercurio071');
             $table->dropIndex('fk_mercurio20_mercurio071_idx');
-            $table->dropUnique('id');
         });
         Schema::dropIfExists('mercurio20');
     }

@@ -25,8 +25,8 @@ return new class extends Migration
             $table->string('email', 60)->nullable();
             $table->string('login', 20)->nullable();
             $table->string('criptada', 200)->nullable();
-            $table->enum('acceso', ['R','H'])->default('H');
-            $table->enum('estado', ['A','I','B'])->default('A');
+            $table->enum('acceso', ['R', 'H'])->default('H');
+            $table->enum('estado', ['A', 'I', 'B'])->default('A');
             $table->bigInteger('cedtra')->nullable(); // bigint(15) NULL
             $table->string('clave', 80)->nullable();
 
@@ -34,7 +34,9 @@ return new class extends Migration
             $table->index('tipfun', 'tipfun');
             $table->foreign('tipfun', 'gener02_ibfk_1')
                 ->references('tipfun')
-                ->on('gener21');
+                ->on('gener21')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
         });
     }
 

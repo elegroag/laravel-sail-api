@@ -36,14 +36,14 @@ return new class extends Migration
             $table->foreign('tipopc', 'fk_mercurio10_mercurio091')
                 ->references('tipopc')
                 ->on('mercurio09')
-                ->onDelete('restrict')
-                ->onUpdate('restrict');
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
 
             $table->foreign('codest', 'fk_mercurio10_mercurio111')
                 ->references('codest')
                 ->on('mercurio11')
-                ->onDelete('restrict')
-                ->onUpdate('restrict');
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
         });
     }
 

@@ -12,7 +12,7 @@ class Gener09Seeder extends Seeder
 {
     use WithoutModelEvents;
 
-    private const TABLE = 'mercurio.gener09';
+    private const TABLE = 'gener09';
 
     /**
      * Ejecuta el seeder cargando el SQL externo.

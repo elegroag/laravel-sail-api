@@ -26,7 +26,9 @@ return new class extends Migration
             $table->index('codofi', 'fk_mercurio05_mercurio041_idx');
             $table->foreign('codofi', 'mercurio05_ibfk_1')
                 ->references('codofi')
-                ->on('mercurio04');
+                ->on('mercurio04')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
         });
     }
 

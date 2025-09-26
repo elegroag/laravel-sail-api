@@ -5,7 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Exceptions\DebugException;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Library\Auth\AuthJwt;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio01;
+use App\Models\Mercurio07;
+use App\Models\Mercurio19;
+use App\Services\Api\ApiWhatsapp;
 use App\Services\Autentications\AutenticaService;
 use Illuminate\Validation\ValidationException;
 use App\Services\Request as RequestParam;
@@ -15,6 +20,8 @@ use App\Services\Signup\SignupFacultativos;
 use App\Services\Signup\SignupIndependientes;
 use App\Services\Signup\SignupPensionados;
 use App\Services\Signup\SignupService;
+use App\Services\Utils\SenderEmail;
+use Carbon\Carbon;
 
 class AuthMercurioController extends Controller
 {
@@ -159,6 +166,123 @@ class AuthMercurioController extends Controller
             $this->db->rollBack();
             return response()->json([
                 'success' => false,
+                'message' => 'Error al crear empresa: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function verifyStore(Request $request)
+    {
+        try {
+            $request->validate([
+                'documento' => 'required|numeric|digits_between:6,18',
+                'coddoc' => 'required|string|min:1|max:2',
+                'tipo' => 'required|string|size:1',
+                'delivery_method' => 'required|string|min:5|max:15',
+                'token' => 'nullable|string|min:40|max:5000',
+            ]);
+
+            $claims = [
+                'documento' => $request->input('documento'),
+                'coddoc' => $request->input('coddoc'),
+                'tipo' => $request->input('tipo'),
+                'delivery_method' => $request->input('delivery_method'),
+                'context' => 'verifyStore',
+            ];
+            $token = (new AuthJwt(10))->SimpleToken($claims);
+            // Primero validar existencia en mercurio07 para no romper la FK al insertar/actualizar mercurio19
+            $user07 = Mercurio07::where("documento", $request->input('documento'))
+                ->where("coddoc", $request->input('coddoc'))
+                ->where("tipo", $request->input('tipo'))
+                ->first();
+
+            if (!$user07) {
+                return response()->json([
+                    "success" => false,
+                    "msj" => "No existe un usuario registrado con los datos ingresados. Verifique o regístrese para continuar."
+                ]);
+            }
+
+            $user19 = Mercurio19::where("documento", $request->input('documento'))
+                ->where("coddoc", $request->input('coddoc'))
+                ->where("tipo", $request->input('tipo'))
+                ->first();
+
+            if ($user19) {
+                $user19->setToken($token);
+                $user19->update();
+            } else {
+                $user19 = new Mercurio19([
+                    'documento' => $request->input('documento'),
+                    'coddoc' => $request->input('coddoc'),
+                    'tipo' => $request->input('tipo'),
+                    'token' => $token,
+                ]);
+                $user19->save();
+            }
+
+            // $user07 ya está validado arriba
+            $codigoVerify = generaCode();
+            $inicio  = Carbon::now()->format('Y-m-d H:i:s');
+            $intentos = '0';
+
+            Mercurio19::where('documento', $request->input('documento'))
+                ->where('coddoc', $request->input('coddoc'))
+                ->where('tipo', $request->input('tipo'))
+                ->update([
+                    'inicio'   => $inicio,
+                    'intentos' => (int) $intentos,
+                    'codver'   => (string) $codigoVerify,
+                ]);
+
+            if ($request->input('delivery_method') == 'email') {
+
+                $html = "Utiliza el siguiente código de verificación, para confirmar el propietario de la dirección de correo:<br/>
+                <span style=\"font-size:16px;color:#333\">CÓDIGO DE VERIFICACIÓN: </span><br/>
+                <span style=\"font-size:30px;color:#11cdef\"><b>{$codigoVerify}</b></span>";
+
+                $asunto = "Generación nuevo PIN plataforma Comfaca En Línea";
+                $emailCaja = Mercurio01::first();
+                $senderEmail = new SenderEmail();
+                $senderEmail->setters(
+                    "emisor_email: {$emailCaja->getEmail()}",
+                    "emisor_clave: {$emailCaja->getClave()}",
+                    "asunto: {$asunto}"
+                );
+                $senderEmail->send($user07->email, $html);
+            } else {
+                if (!$user07->whatsapp) {
+                    throw new DebugException("No se proporcionó número de whatsapp", 501);
+                }
+
+                $html = "> Código de verificación: 
+                *{$codigoVerify}*. Generación de PIN plataforma Comfaca En Línea, utiliza el código de verificación para confirmar el propietario de la línea de whatsapp.";
+                $apiWhatsaap = new ApiWhatsapp();
+                $apiWhatsaap->send([
+                    'servicio' => 'Whatsapp',
+                    'metodo' => 'enviar',
+                    'params' => [
+                        'numero' => $user07->whatsapp,
+                        'mensaje' => $html
+                    ],
+                ]);
+            }
+
+            return response()->json([
+                "success" => true,
+                "message" => "Código de verificación enviado correctamente",
+                "token" => $token
+            ], 201);
+        } catch (ValidationException $e) {
+            return response()->json([
+                "success" => false,
+                'message' => 'Error de validación',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (DebugException $e) {
+
+            return response()->json([
+                "success" => false,
                 'message' => 'Error al crear empresa: ' . $e->getMessage()
             ], 500);
         }
