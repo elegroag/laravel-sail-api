@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import AuthLayout from '@/layouts/auth-layout'
 import AuthWelcome from './components/auth-welcome'
 import type { DeliveryMethod, VerifyEmailProps } from '@/types/auth'
-import useVerification from '@/hooks/use-verification'
+import useVerifyController from '@/pages/Auth/controllers/use-verify-controller'
 
 export const DeliveryOptions: Array<{
     id: DeliveryMethod
@@ -46,7 +46,7 @@ export default function VerifyEmail({ documento, coddoc, tipo, token, status, er
         processing,
         toast,
         setToast
-    } = useVerification({
+    } = useVerifyController({
         token,
         documento,
         coddoc,

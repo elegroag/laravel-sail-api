@@ -48,12 +48,11 @@ const verificationReducer = (state: VerificationState, action: VerificationActio
 }
 
 
-export default function useVerification({
+export default function useVerifyController({
     token,
     documento,
     coddoc,
     tipo,
-    status,
     errors,
 }: VerifyEmailProps) {
 
@@ -295,20 +294,20 @@ export default function useVerification({
 
 
     return {
-        state,
-        inputRefs,
-        formattedCountdown,
-        deliveryChannelLabel,
-        VerificationChannelIcon,
-        handleDeliveryMethodChange,
-        handleInputChange,
-        handleKeyDown,
-        handlePaste,
-        handleVerify,
-        handleResend,
-        isResending,
-        processing: isSubmitting,
-        toast,
-        setToast
+      state,
+      inputRefs,
+      formattedCountdown,
+      deliveryChannelLabel,
+      VerificationChannelIcon,
+      handleDeliveryMethodChange,
+      handleInputChange,
+      handleKeyDown,
+      handlePaste,
+      handleVerify,
+      handleResend,
+      isResending,
+      processing: isSubmitting,
+      toast,
+      setToast
     }
 }

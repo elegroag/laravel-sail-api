@@ -64,7 +64,7 @@ export type LoginProps = {
     Coddoc: { [key: string]: string };
     Tipsoc: { [key: string]: string };
     Codciu: { [key: string]: string };
-    Detadoc: { [key: string]: string };
+    Detadoc?: { [key: string]: string };
     errors?: Record<string, string>,
 }
 
