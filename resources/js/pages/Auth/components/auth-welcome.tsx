@@ -31,7 +31,7 @@ export default function AuthWelcome({
   backText,
 }: AuthWelcomeProps) {
   return (
-    <div className="lg:w-1/2 bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-700 text-white p-12 flex flex-col justify-center relative overflow-hidden">
+    <>
       {/* Elementos decorativos */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full -translate-y-16 translate-x-16 opacity-60" />
       <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-emerald-800 to-emerald-600 rounded-full translate-y-12 -translate-x-12 opacity-40" />
@@ -97,6 +97,6 @@ export default function AuthWelcome({
           </Dialog>
         </div>
       </div>
-    </div>
+    </>
   )
 }

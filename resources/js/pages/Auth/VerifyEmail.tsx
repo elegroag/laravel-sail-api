@@ -78,6 +78,7 @@ export default function VerifyEmail({ documento, coddoc, tipo, token, status, er
       title="Verificación de correo electrónico"
       description="Ingresa el código enviado a tu correo para validar tu cuenta."
     >
+      <div id="welcome" className="lg:w-1/2 bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-700 text-white p-12 flex flex-col justify-center relative overflow-hidden">
       <AuthWelcome
         title="Verificación de correo"
         tagline="Confirma tu identidad"
@@ -85,7 +86,7 @@ export default function VerifyEmail({ documento, coddoc, tipo, token, status, er
         backHref={route('login')}
         backText="¿Ya tienes cuenta? Inicia sesión"
       />
-
+      </div>
       {status === 'verification-link-sent' && (
         <div className="mb-4 text-center text-sm font-medium text-emerald-600">
           Reenviamos un nuevo código de verificación a tu correo electrónico.

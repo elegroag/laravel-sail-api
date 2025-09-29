@@ -41,6 +41,7 @@ export default function Login({
   return (
     <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
       {/* Left Panel - Welcome Section */}
+      <div id="welcome" className="lg:w-1/2 bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-700 text-white p-12 flex flex-col justify-center relative overflow-hidden">
       <AuthWelcome
         title="BIENVENIDO"
         tagline="Comfaca En Línea"
@@ -48,6 +49,7 @@ export default function Login({
         backHref={route('register')}
         backText="Crear cuenta"
       />
+      </div>
 
       {/* Right Panel - Login Form */}
       <div className="lg:w-1/2 p-12 flex flex-col justify-center relative">

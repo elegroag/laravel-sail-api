@@ -162,6 +162,7 @@ export default function ResetPassword() {
   return (
     <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
      
+        <div id="welcome" className="lg:w-1/2 bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-700 text-white p-12 flex flex-col justify-center relative overflow-hidden">
           {/* Left Panel - Welcome Section */}
             <AuthWelcome
               title="RECUPERAR"
@@ -170,6 +171,7 @@ export default function ResetPassword() {
               backHref={route('login')}
               backText="¿Ya tienes cuenta? Inicia sesión"
             />
+          </div>
           {/* Right Panel - Forgot Password Form */}
           <div className="lg:w-1/2 p-12 flex flex-col justify-center relative">
           <AuthBackgroundShapes />
