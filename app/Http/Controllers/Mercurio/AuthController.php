@@ -168,7 +168,7 @@ class AuthController extends Controller
     {
         try {
             $request->validate([
-                'token' => 'required|string|max:255',
+                'token' => 'required|string|max:800',
                 'documento' => 'required|numeric|digits_between:6,18',
                 'coddoc' => 'required|string|min:1|max:2',
                 'tipo' => 'required|string|size:1',
@@ -279,27 +279,27 @@ class AuthController extends Controller
 
             switch ($tipo) {
                 case 'E':
-                    $url = "mercurio/empresa";
+                    $url = "mercurio/empresa/index";
                     break;
                 case 'I':
-                    $url = "mercurio/independiente";
+                    $url = "mercurio/independiente/index";
                     break;
                 case 'O':
-                    $url = "mercurio/pensionado";
+                    $url = "mercurio/pensionado/index";
                     break;
                 case 'F':
-                    $url = "mercurio/facultativo";
+                    $url = "mercurio/facultativo/index";
                     break;
                 default:
-                    $url = "principal/index";
+                    $url = "mercurio/principal/index";
                     break;
             }
 
             $auth = new SessionCookies(
                 "model: mercurio07",
-                "tipo: {$token->tipo}",
-                "coddoc: {$token->coddoc}",
-                "documento: {$token->documento}",
+                "tipo: {$tipo}",
+                "coddoc: {$coddoc}",
+                "documento: {$documento}",
                 "estado: A"
             );
 
@@ -317,7 +317,7 @@ class AuthController extends Controller
                 )
             );
 
-            return redirect()->to($url ?? 'principal.index');
+            return Inertia::location(url($url));
         } catch (ValidationException $e) {
             $payload = [
                 "success" => false,
@@ -332,17 +332,16 @@ class AuthController extends Controller
         }
 
         $auth_jwt_temporal = new AuthJwt(10);
-        // Reintento: regenerar token con claims para trazabilidad
         $token = $auth_jwt_temporal->SimpleToken([
-            'documento' => $documento,
-            'coddoc' => $coddoc,
-            'tipo' => $tipo,
+            'documento' => $request->input('documento'),
+            'coddoc' => $request->input('coddoc'),
+            'tipo' => $request->input('tipo'),
             'context' => 'verifyAction.retry',
         ]);
 
-        Mercurio19::where('documento', $documento)
-            ->where('coddoc', $coddoc)
-            ->where('tipo', $tipo)
+        Mercurio19::where('documento', $request->input('documento'))
+            ->where('coddoc', $request->input('coddoc'))
+            ->where('tipo', $request->input('tipo'))
             ->update(['token' => (string) $token]);
 
         $payload['token'] = $token;

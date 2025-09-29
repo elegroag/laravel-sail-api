@@ -4,11 +4,9 @@
 
 @section('content-main')
 @php
-use App\Services\Menu\Menu;
-
 $tipo = session()->get('tipo');
 $user = session()->get('user');
-list($menu, $migas) = Menu::showMenu();
+list($menu, $migas) = App\Services\Menu\Menu::showMenu();
 @endphp
 
 @push('styles')

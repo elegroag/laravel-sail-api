@@ -68,7 +68,7 @@ export default function useVerification({
     )
     const VerificationChannelIcon = useMemo(() => (state.deliveryMethod === 'email' ? Mail : MessageCircle), [state.deliveryMethod])
 
-    const { data, setData, post, processing } = useForm({
+    const { data, setData } = useForm({
       token: token ?? '',
       documento: documento ?? '',
       coddoc: coddoc ?? '',
@@ -152,6 +152,9 @@ export default function useVerification({
 
     const verificationCode = useMemo(() => state.code.join(''), [state.code])
 
+    // Estado local para manejo de envío con router.post
+    const [isSubmitting, setIsSubmitting] = useState(false)
+
 
     const handleDeliveryMethodChange = (method: DeliveryMethod) => {
       if (state.deliveryMethod === method) {
@@ -181,22 +184,24 @@ export default function useVerification({
         return
       }
 
-      // Cargar los dígitos en los campos esperados por el backend
-      setData('code_1', state.code[0] ?? '')
-      setData('code_2', state.code[1] ?? '')
-      setData('code_3', state.code[2] ?? '')
-      setData('code_4', state.code[3] ?? '')
-      
-      setData('token', data.token)
-      setData('tipo', data.tipo)
-      setData('coddoc', data.coddoc)
-      setData('documento', data.documento)
+      // Construir payload y enviar con Inertia router.post para evitar condiciones de carrera
+      const payload = {
+        token: data.token,
+        tipo: data.tipo,
+        coddoc: data.coddoc,
+        documento: data.documento,
+        code_1: state.code[0] ?? '',
+        code_2: state.code[1] ?? '',
+        code_3: state.code[2] ?? '',
+        code_4: state.code[3] ?? '',
+      }
 
-      post(route('verify.action'), {
+      router.post(route('verify.action'), payload, {
         preserveScroll: true,
+        onStart: () => setIsSubmitting(true),
         onSuccess: () => {
           dispatch({ type: 'SET_VERIFIED', verified: true })
-          router.visit(route('login'))
+          //router.visit(route('login'))
         },
         onError: (errors) => {
           dispatch({
@@ -205,6 +210,7 @@ export default function useVerification({
           })
         },
         onFinish: () => {
+          setIsSubmitting(false)
           // No limpiar el token, solo el código de verificación si aplica
           dispatch({ type: 'RESET_CODE' })
         },
@@ -301,7 +307,7 @@ export default function useVerification({
         handleVerify,
         handleResend,
         isResending,
-        processing,
+        processing: isSubmitting,
         toast,
         setToast
     }
