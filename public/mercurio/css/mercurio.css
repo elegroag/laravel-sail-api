@@ -6,9 +6,6 @@
 	z-index: 9;
 }
 
-.sidenav {
-	box-shadow: none;
-}
 
 .sidenav-header {
 	height: auto;
@@ -100,6 +97,10 @@ button.btn-link-file:active {
 
 .navbar-nav li.nav-item a.nav-link {
 	margin-top: 1px;
+}
+
+.navbar-nav li.nav-item a.nav-link:hover {
+	background: rgba(52, 73, 94, .5);
 }
 
 .navbar-nav li.nav-item a.nav-link.active {
@@ -331,10 +332,3 @@ label.is-invalid {
 	font-size: .85rem;
 }
 
-.main-content {
-	padding-bottom: 28px;
-}
-
-#consulta .table-bordered {
-	font-size: .83rem;
-}

@@ -30,13 +30,8 @@ return new class extends Migration
             $table->char('codapl', 2)->default('CA');
             $table->char('tipo', 1)->default('A');
 
-            // Índice y FK auto-referenciada
+            // Índice para búsquedas (sin foreign key constraint)
             $table->index('parent_id', 'parent_id');
-            $table->foreign('parent_id', 'menu_items_ibfk_1')
-                ->references('id')
-                ->on('menu_items')
-                ->onDelete('cascade')
-                ->onUpdate('cascade');
         });
     }
 
@@ -46,7 +41,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('menu_items', function (Blueprint $table) {
-            $table->dropForeign('menu_items_ibfk_1');
             $table->dropIndex('parent_id');
         });
 
