@@ -22,7 +22,7 @@
                                             <i class="{{ $crumb['icon'] }}"></i>
                                             @endif
                                         </span>
-                                        <a href="#">{{ $crumb['title'] ?? '' }}</a>
+                                        <a href="{{ $crumb['url'] ?? '' }}">{{ $crumb['title'] ?? '' }}</a>
                                     </li>
                                 @endforeach
                             @endif

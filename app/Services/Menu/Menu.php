@@ -13,6 +13,7 @@ class Menu
     private $db;
     private $codapl;
     private $pageTitle;
+    private $path;
 
     public function __construct($codapl)
     {
@@ -32,6 +33,7 @@ class Menu
         // Ahora breadcrumbs es una colección (array) con: icon, title, is_active
         $this->breadcrumbs = [];
         $this->menuItems = "";
+        $this->path = env('APP_URL') . ':' . env('APP_PORT');
     }
 
     private function getMenuItems($parentId)
@@ -85,6 +87,7 @@ class Menu
                 'icon' => $menu['icon'] ?? null,
                 'title' => $menu['title'] ?? '',
                 'is_active' => true,
+                'url' => ($menu['default_url']) ? $this->path . '/' . $menu['default_url'] : '#',
             ];
             $this->pageTitle = $menu['title'];
         }
@@ -95,7 +98,6 @@ class Menu
         if ($isParent) {
             $childItems = $this->getMenuItems($menu['id']);
             if (count($childItems) > 0) {
-                unset($this->breadcrumbs[0]);
                 return $this->buildParentMenuItem($menu, $title, $icon, $linkText, $childItems);
             }
         }
@@ -117,12 +119,14 @@ class Menu
                     'icon' => $menu['icon'] ?? null,
                     'title' => $menu['title'] ?? '',
                     'is_active' => false,
+                    'url' => ($menu['default_url']) ? $this->path . '/' . $menu['default_url'] : '#',
                 ];
                 // Agregar breadcrumb del hijo como activo
                 $this->breadcrumbs[] = [
                     'icon' => $child['icon'] ?? null,
                     'title' => $child['title'] ?? '',
                     'is_active' => true,
+                    'url' => ($child['default_url']) ? $this->path . '/' . $child['default_url'] : '#',
                 ];
                 $this->pageTitle = $menu['title'];
             }
@@ -151,12 +155,9 @@ class Menu
     {
         $activeClass = $isActive ? 'active' : '';
         $title = strtolower(str_replace(' ', '_', $child['title']));
-
-
-        $path = env('APP_URL') . ':' . env('APP_PORT');
         return "
             <li class='nav-item'>
-                <a data-id='{$title}' href='{$path}/" . $child['default_url'] . "'
+                <a data-id='{$title}' href='{$this->path}/" . $child['default_url'] . "'
                    class='nav-link {$activeClass}'>
                     {$child['title']}
                 </a>
@@ -166,10 +167,9 @@ class Menu
     private function buildSingleMenuItem($menu, $title, $icon, $linkText, $isActive)
     {
         $activeClass = $isActive ? 'active' : '';
-        $path = env('APP_URL') . ':' . env('APP_PORT');
         return "
             <li class='nav-item'>
-                <a class='nav-link {$activeClass}' href='{$path}/" . $menu['default_url'] . "'>
+                <a class='nav-link {$activeClass}' href='{$this->path}/" . $menu['default_url'] . "'>
                     {$icon}
                     {$linkText}
                 </a>
