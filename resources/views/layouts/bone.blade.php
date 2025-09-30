@@ -5,7 +5,7 @@
 @section('content-main')
 @php
 $user = session()->get('user');
-list($menu, $migas) = App\Services\Menu\Menu::showMenu();
+list($menu, $breadcrumbs, $pageTitle) = App\Services\Menu\Menu::showMenu('ME');
 @endphp
 
 @push('styles')
@@ -18,7 +18,7 @@ list($menu, $migas) = App\Services\Menu\Menu::showMenu();
 @include('templates.sidebar', array('menu' => $menu, '_tipo' => session()->get('tipo')))
 
 <div class="main-content" id="panel">
-@include('templates.navbar', array('user_name' => capitalize($user['nombre'])))    
+@include('templates.navbar', ['user_name' => capitalize($user['nombre']), 'breadcrumbs'=> $breadcrumbs, 'pageTitle'=> $pageTitle]) 
     @yield('content')
 @include('templates.footer')
 </div>

@@ -112,7 +112,7 @@ body {
 	margin: 0;
 	text-align: left;
 	color: rgba(20, 20, 20, 0.87);
-	background-color: #f4f3ef !important;
+	background-color: rgb(250, 244, 232) !important;
 	overflow-x: hidden;
 }
 
@@ -17582,11 +17582,30 @@ textarea[resize='horizontal'] {
 	margin-left: .5rem;
 	padding-right: 1rem;
 	padding-left: 1rem;
-	border-radius: 0px;
-	background: #e8f7e3b8;
-	color: #222;
+	background: #354452;	
 	font-weight: 500;
-	border-color: #e8f7e3b8;
+	border-radius: 1.3rem;
+}
+
+
+.navbar-vertical.navbar-expand-xs .navbar-nav>.nav-item>.nav-link:hover {
+	margin-right: .5rem;
+	margin-left: .5rem;
+	background: rgba(52, 73, 94, .5);
+	border-radius: .9rem;
+	padding-right: 1rem;
+	padding-left: 1rem;
+}
+
+.navbar-nav li.nav-item a.nav-link.active {
+	margin-right: 0.5rem;
+	margin-left: 0.5rem;
+	border-radius: 0px;
+	background: rgba(52, 73, 94, .5);
+	padding-right: 1rem;
+	padding-left: 1rem;
+	border-radius: .9rem;
+	color: #efefef;
 }
 
 .navbar-vertical.navbar-expand-xs .lavalamp-object {
@@ -17595,7 +17614,6 @@ textarea[resize='horizontal'] {
 	margin-left: .5rem;
 	padding-right: 1rem;
 	padding-left: 1rem;
-
 	color: #fff;
 	border-radius: .375rem;
 	background: #3f8349;

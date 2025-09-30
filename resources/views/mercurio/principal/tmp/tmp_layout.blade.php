@@ -1,17 +1,10 @@
-<div class="container-fluid bg-white p-3">
-    <div class="row">
-        <div class="col-auto">
-            <div class="pl-4">
-                <h2 class="header-title">Principal</h2>
-                <p>Ultima sincronización: <span id='show_date_syncron'></span></p>
-            </div>
-        </div>
-    </div>
-</div>
+
 <div class="container-fluid m-3">
+    <div class="pb-1">
+        <h3 for='afiliaciones'>Movimientos</h3>
+        <p class="text-muted">Gestiona y monitorea todas las solicitudes de afiliación en tiempo real</p>
+    </div>
     <div class="mb-4">
-        <h5 for='afiliaciones'>Movimientos</h5>
-        <p>Solicitudes de afiliación</p>
         <div class="row justify-content-around mt-4 mb-2" id="show_afiliaciones"></div>
     </div>
 

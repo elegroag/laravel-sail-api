@@ -10,11 +10,13 @@ class Menu
     private $currentUrl;
     private $breadcrumbs;
     private $menuItems;
-    private $tipo;
     private $db;
+    private $codapl;
+    private $pageTitle;
 
-    public function __construct()
+    public function __construct($codapl)
     {
+        $this->codapl = $codapl;
         if (session()->has('documento')) {
             $this->user = session()->all();
         }
@@ -27,23 +29,35 @@ class Menu
         if (!$this->user) {
             return null;
         }
-        $this->tipo = session()->get('tipo');
-        $this->currentUrl = request()->path();
-        $this->breadcrumbs = "";
+        // Ahora breadcrumbs es una colección (array) con: icon, title, is_active
+        $this->breadcrumbs = [];
         $this->menuItems = "";
     }
 
     private function getMenuItems($parentId)
     {
-        $menu_tipo = 'P';
-        if ($this->tipo == "T") $menu_tipo = 'T';
-        if ($this->tipo == "E") $menu_tipo = 'E';
-        if ($this->tipo == "P") $menu_tipo = 'P';
-        if ($this->tipo == "I") $menu_tipo = 'T';
-        if ($this->tipo == "O") $menu_tipo = 'T';
-        if ($this->tipo == "F") $menu_tipo = 'T';
+        switch (session('tipo')) {
+            case 'T':
+            case 'O':
+            case 'I':
+            case 'F':
+                $menu_tipo = 'T';
+                break;
+            case 'E':
+                $menu_tipo = 'E';
+            case 'P':
+                $menu_tipo = 'P';
+                break;
+            default:
+                $menu_tipo = 'P';
+                break;
+        }
 
-        $query = "SELECT * FROM menu_items WHERE is_visible = TRUE AND codapl='ME' AND tipo = '" . $menu_tipo . "'";
+        $query = "SELECT * FROM menu_items 
+        WHERE is_visible = TRUE AND 
+        codapl='{$this->codapl}' AND 
+        tipo = '{$menu_tipo}' ";
+
         if ($parentId === null) {
             $query .= " AND parent_id IS NULL";
         } else {
@@ -62,10 +76,17 @@ class Menu
     private function buildMenuItem($menu, $isParent = false)
     {
         $title = $this->normalizeTitle($menu['title']);
-        $isActive = ($menu['default_url'] == $this->currentUrl);
+        $this->currentUrl = request()->path();
 
+        $isActive = ($menu['default_url'] == $this->currentUrl);
         if ($isActive) {
-            $this->breadcrumbs = "<li class='breadcrumb-item active' aria-current='page'><a href=\"#\">{$menu['title']}</a></li>";
+            // Crumb activo único (sin hijos)
+            $this->breadcrumbs[] = [
+                'icon' => $menu['icon'] ?? null,
+                'title' => $menu['title'] ?? '',
+                'is_active' => true,
+            ];
+            $this->pageTitle = $menu['title'];
         }
 
         $icon = "<i class='{$menu['icon']} {$menu['color']}'></i>";
@@ -90,7 +111,18 @@ class Menu
             $childActive = ($child['default_url'] == $this->currentUrl);
             if ($childActive) {
                 $isActive = true;
-                $this->breadcrumbs .= "<li class='breadcrumb-item active'><a href=\"#\">{$child['title']}</a></li>";
+                // Agregar breadcrumb de padre como no activo
+                $this->breadcrumbs[] = [
+                    'icon' => $menu['icon'] ?? null,
+                    'title' => $menu['title'] ?? '',
+                    'is_active' => false,
+                ];
+                // Agregar breadcrumb del hijo como activo
+                $this->breadcrumbs[] = [
+                    'icon' => $child['icon'] ?? null,
+                    'title' => $child['title'] ?? '',
+                    'is_active' => true,
+                ];
             }
 
             $childHtml .= $this->buildChildMenuItem($child, $childActive);
@@ -118,9 +150,8 @@ class Menu
         $activeClass = $isActive ? 'active' : '';
         $title = strtolower(str_replace(' ', '_', $child['title']));
 
-        $app = $child['codapl'] == 'ME' ? 'mercurio' : 'caja';
-        $path = env('APP_URL') . ':' . env('APP_PORT') . '/' . $app;
 
+        $path = env('APP_URL') . ':' . env('APP_PORT');
         return "
             <li class='nav-item'>
                 <a data-id='{$title}' href='{$path}/" . $child['default_url'] . "'
@@ -133,10 +164,7 @@ class Menu
     private function buildSingleMenuItem($menu, $title, $icon, $linkText, $isActive)
     {
         $activeClass = $isActive ? 'active' : '';
-
-        $app = $menu['codapl'] == 'ME' ? 'mercurio' : 'caja';
-        $path = env('APP_URL') . ':' . env('APP_PORT') . '/' . $app;
-
+        $path = env('APP_URL') . ':' . env('APP_PORT');
         return "
             <li class='nav-item'>
                 <a class='nav-link {$activeClass}' href='{$path}/" . $menu['default_url'] . "'>
@@ -154,12 +182,12 @@ class Menu
             $this->menuItems .= $this->buildMenuItem($menu, true);
         }
 
-        return [$this->menuItems, $this->breadcrumbs];
+        return [$this->menuItems, $this->breadcrumbs, $this->pageTitle];
     }
 
-    public static function showMenu()
+    public static function showMenu($codapl)
     {
-        $menu = new Menu();
+        $menu = new Menu($codapl);
         return $menu->mainMenu();
     }
 }

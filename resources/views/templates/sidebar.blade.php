@@ -12,8 +12,10 @@ $array_tipos = [
 <nav class="sidenav fixed-lef navbar navbar-vertical navbar-expand-xs navbar-light" id="sidenav-main">
     <div class="scrollbar-inner">
         <div class="sidenav-header d-flex align-items-center p-3">
-            <a class="navbar-brand m-0" href="{{ route('principal.index') }}">
-                <img src="{{ asset('img/Mercurio/logo-min.png') }}" class="img img-center" width="130px" alt="Logo">
+            <a class="navbar-brand text-white img-center" href="{{ route('principal.index') }}">
+                <div class="img-thumbnail bg-white border-4 border-success rounded-pill p-2">
+                    <img src="{{ asset('img/Mercurio/logo-min.png') }}" width="80px" alt="Logo">
+                </div>
             </a>
             <div class="ms-auto">
                 <div class="sidenav-toggler d-none d-xl-block" data-action="sidenav-unpin" data-bs-target="#sidenav-main">
@@ -30,7 +32,7 @@ $array_tipos = [
                 <div class="position-relative">
                     <div class="p-3">
                         <div class="nav-link p-0 mb-2">
-                            <span class="nav-link-text fw-bold">
+                            <span class="nav-link-text">
                                 COMFACA EN LÍNEA<br>
                                 <small class="text-muted">Usuario tipo: <span class="text-primary">
                                     {{ isset($array_tipos[$_tipo]) ? htmlspecialchars($array_tipos[$_tipo]) : 'N/A' }}</span></small>

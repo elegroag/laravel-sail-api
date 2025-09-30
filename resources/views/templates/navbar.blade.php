@@ -6,6 +6,33 @@
         </button>
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <div class="navbar-search navbar-search-light form-inline mr-sm-3" id="navbar-search-main">
+                <div class="col-auto p-3">
+                    <h2 class="text-white d-inline-block mb-0">{{ $pageTitle }}</h2>
+                    <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+                        <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+                            @if(!empty($breadcrumbs) && is_array($breadcrumbs))
+                                @foreach($breadcrumbs as $crumb)
+                                    <li class="breadcrumb-item {{ !empty($crumb['is_active']) ? 'active' : '' }}" @if(!empty($crumb['is_active'])) aria-current="page" @endif>
+                                        <span class="text-white">
+                                            @if(!empty($crumb['icon']))
+                                                <i class="{{ $crumb['icon'] }}"></i>
+                                            @endif
+                                            @if(!$loop->first)
+                                                &nbsp;|&nbsp;
+                                            @endif
+                                        </span>
+                                        <a href="#">{{ $crumb['title'] ?? '' }}</a>
+                                    </li>
+                                @endforeach
+                            @endif
+                           {{--  <li class="breadcrumb-item"><span class="text-white"><i class="fas fa-home"></i></span></li>
+                            <li class="breadcrumb-item"><span class="text-white">&nbsp;|&nbsp;Listar solicitudes </span></li>
+                            <li class="breadcrumb-item"><span class="text-white"> </span></li> --}}
+                        </ol>
+                    </nav>
+                </div>
+            </div>
             <!-- Navbar links -->
             <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item dropdown me-3">

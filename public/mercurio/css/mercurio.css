@@ -99,19 +99,6 @@ button.btn-link-file:active {
 	margin-top: 1px;
 }
 
-.navbar-nav li.nav-item a.nav-link:hover {
-	background: rgba(52, 73, 94, .5);
-}
-
-.navbar-nav li.nav-item a.nav-link.active {
-	margin-right: 0.5rem;
-	margin-left: 0.5rem;
-	border-radius: 0px;
-	background: #cff5eb;
-	border-color: #cff5eb;
-	color: #333;
-}
-
 .btn-link-file {
 	border-radius: 1px;
 	margin-top: 5px;
