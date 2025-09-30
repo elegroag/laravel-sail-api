@@ -24,6 +24,9 @@
 
 	// Set sidenav state from cookie
 
+	// Evitar animaciones en la carga inicial
+	$('body').addClass('no-animate');
+
 	var $sidenavState = Cookies.get('sidenav-state') ? Cookies.get('sidenav-state') : 'pinned';
 
 	if ($(window).width() > 1200) {
@@ -34,6 +37,17 @@
 		if (Cookies.get('sidenav-state') == 'unpinned') {
 			unpinSidenav();
 		}
+	}
+
+	// Reactivar transiciones después de aplicar el estado inicial, garantizando 1 frame de pintura
+	if (document && document.body) {
+		requestAnimationFrame(function () {
+			requestAnimationFrame(function () {
+				$('body').removeClass('no-animate');
+			});
+		});
+	} else {
+		setTimeout(function () { $('body').removeClass('no-animate'); }, 0);
 	}
 
 	$('body').on('click', '[data-action]', function (e) {

@@ -15,20 +15,17 @@
                                 @foreach($breadcrumbs as $crumb)
                                     <li class="breadcrumb-item {{ !empty($crumb['is_active']) ? 'active' : '' }}" @if(!empty($crumb['is_active'])) aria-current="page" @endif>
                                         <span class="text-white">
-                                            @if(!empty($crumb['icon']))
-                                                <i class="{{ $crumb['icon'] }}"></i>
-                                            @endif
                                             @if(!$loop->first)
                                                 &nbsp;|&nbsp;
+                                            @endif
+                                            @if(!empty($crumb['icon']))
+                                            <i class="{{ $crumb['icon'] }}"></i>
                                             @endif
                                         </span>
                                         <a href="#">{{ $crumb['title'] ?? '' }}</a>
                                     </li>
                                 @endforeach
                             @endif
-                           {{--  <li class="breadcrumb-item"><span class="text-white"><i class="fas fa-home"></i></span></li>
-                            <li class="breadcrumb-item"><span class="text-white">&nbsp;|&nbsp;Listar solicitudes </span></li>
-                            <li class="breadcrumb-item"><span class="text-white"> </span></li> --}}
                         </ol>
                     </nav>
                 </div>

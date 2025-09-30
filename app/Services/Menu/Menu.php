@@ -95,6 +95,7 @@ class Menu
         if ($isParent) {
             $childItems = $this->getMenuItems($menu['id']);
             if (count($childItems) > 0) {
+                unset($this->breadcrumbs[0]);
                 return $this->buildParentMenuItem($menu, $title, $icon, $linkText, $childItems);
             }
         }
@@ -123,6 +124,7 @@ class Menu
                     'title' => $child['title'] ?? '',
                     'is_active' => true,
                 ];
+                $this->pageTitle = $menu['title'];
             }
 
             $childHtml .= $this->buildChildMenuItem($child, $childActive);

@@ -1,0 +1,261 @@
+
+.sidenav {
+	z-index: 9;
+	transition: all .3s ease;
+}
+
+.g-sidenav-pinned .sidenav {
+	max-width: 250px !important;
+}
+
+.g-sidenav-pinned .sidenav .navbar-brand,
+.g-sidenav-pinned .sidenav .navbar-heading {
+	display: block;
+}
+
+/* Botón toggler mejorado */
+.sidenav-toggler-inner {
+    position: relative;
+    width: 18px;
+    height: 14px;
+    cursor: pointer;
+    transition: transform .3s ease;
+}
+
+.sidenav-toggler-line {
+    position: absolute;
+    left: 0;
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: #ffffff;
+    border-radius: 2px;
+    transition: all .3s ease;
+    transform-origin: center;
+}
+
+/* Cuando sidebar está colapsado - expansión completa garantizada */
+.g-sidenav-hidden .main-content {
+    margin-left: 50px !important;
+    width: calc(100% - 50px) !important;
+    max-width: 100% !important;
+}
+
+.sidenav.fixed-left+.main-content {
+	margin-left: 62px;
+	transition: all .3s ease;
+}
+
+/* Deshabilitar transiciones al cargar para evitar "salto" lateral */
+body.no-animate .sidenav,
+body.no-animate .main-content,
+body.no-animate .sidenav.fixed-left + .main-content,
+body.no-animate .sidenav.fixed-right + .main-content {
+    transition: none !important;
+}
+
+.sidenav.fixed-right+.main-content {
+	margin-right: 62px;
+	transition: all .3s ease;
+}
+
+
+.sidenav .navbar-brand,
+.sidenav .navbar-heading {
+	display: none;
+	padding: 1.5rem;
+}
+
+.sidenav-header {
+	height: 78px;
+	background-color: rgb(52, 73, 94, 1);
+}
+
+.g-sidenav-show .sidenav .navbar-brand,
+.g-sidenav-show .sidenav .navbar-heading {
+	display: block;
+}
+
+.g-sidenav-show .sidenav .nav-item .collapse {
+	height: auto;
+	transition: all .3s ease;
+}
+
+
+.g-sidenav-hidden:not(.g-sidenav-show) .sidenav .navbar-nav>.nav-item>.nav-link:after {
+	content: '';
+}
+
+.g-sidenav-hidden:not(.g-sidenav-show) .sidenav .nav-item .collapse {
+	display: none !important;
+}
+
+.g-sidenav-hidden:not(.g-sidenav-show) .sidenav .nav-link-text {
+	display: none !important;
+}
+
+.g-sidenav-hide .sidenav .navbar-nav>.nav-item>.nav-link:after {
+	content: '';
+}
+
+.g-sidenav-hide .sidenav .nav-item .collapse {
+	display: none !important;
+}
+
+.g-sidenav-hide .sidenav .nav-link-text {
+	display: none !important;
+}
+
+.sidenav-toggler-inner,
+.sidenav-toggler-line {
+	width: 18px;
+	transition: all .3s ease;
+}
+
+.sidenav-toggler-inner {
+	position: relative;
+}
+
+.sidenav-toggler-inner:before {
+	position: absolute;
+	top: -14px;
+	left: -11px;
+
+	width: 40px;
+	height: 40px;
+
+	content: '';
+	transition: all .3s ease;
+	transform: scale(0);
+
+	border-radius: 50%;
+}
+
+.sidenav-toggler-line {
+	position: relative;
+	display: block;
+	height: 2px;
+	background-color: #ffff;
+}
+
+.sidenav-toggler-line:not(:last-child) {
+	margin-bottom: 3px;
+}
+
+.sidenav-toggler-dark .sidenav-toggler-line {
+	background-color: #fff;
+}
+
+.sidenav-toggler {
+	cursor: pointer;
+}
+
+.sidenav-toggler.active .sidenav-toggler-inner:before {
+	transform: scale(1);
+}
+
+.sidenav-toggler.active .sidenav-toggler-line:first-child {
+	width: 13px;
+	transform: translateX(5px);
+}
+
+.sidenav-toggler.active .sidenav-toggler-line:last-child {
+	width: 13px;
+	transform: translateX(5px);
+}
+
+.sidenav-pinned .navbar-top .navbar-brand {
+	display: none;
+}
+
+
+/* Animación del botón toggler */
+.sidebar-collapsed .sidenav-toggler-line:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+}
+
+.sidebar-collapsed .sidenav-toggler-line:nth-child(2) {
+    opacity: 0;
+    transform: scale(0);
+}
+
+.sidebar-collapsed .sidenav-toggler-line:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -6px);
+}
+
+/* Estado normal del botón */
+:not(.sidebar-collapsed) .sidenav-toggler-line:nth-child(1) {
+    transform: rotate(0deg) translate(0px, 0px);
+    top: 0;
+}
+
+:not(.sidebar-collapsed) .sidenav-toggler-line:nth-child(2) {
+    opacity: 1;
+    transform: scale(1);
+    top: 6px;
+}
+
+:not(.sidebar-collapsed) .sidenav-toggler-line:nth-child(3) {
+    transform: rotate(0deg) translate(0px, 0px);
+    top: 12px;
+}
+
+@media screen and (prefers-reduced-motion: reduce) {
+	.sidenav-toggler-inner:before {
+		transition: none;
+	}
+}
+
+@media screen and (prefers-reduced-motion: reduce) {
+	.sidenav-toggler-inner,
+	.sidenav-toggler-line {
+		transition: none;
+	}
+}
+
+
+@media screen and (prefers-reduced-motion: reduce) {
+	.sidenav.fixed-left+.main-content {
+		transition: none;
+	}
+}
+
+
+@media screen and (prefers-reduced-motion: reduce) {
+	.sidenav.fixed-right+.main-content {
+		transition: none;
+	}
+}
+
+@media (min-width: 1200px) {
+	.g-sidenav-pinned .sidenav.fixed-left+.main-content {
+		margin-left: 250px;
+	}
+
+	.g-sidenav-pinned .sidenav.fixed-right+.main-content {
+		margin-right: 250px;
+	}
+}
+
+@media screen and (prefers-reduced-motion: reduce) {
+	.sidenav {
+		transition: none;
+	}
+}
+
+@media (min-width: 1200px) {
+	.sidenav:hover {
+		max-width: 250px;
+	}
+
+	.sidenav .sidenav-toggler {
+		padding: .5rem;
+	}
+}
+
+
+@media screen and (prefers-reduced-motion: reduce) {
+	.g-sidenav-show .sidenav .nav-item .collapse {
+		transition: none;
+	}
+}
