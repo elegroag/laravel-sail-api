@@ -5,7 +5,8 @@ use App\Http\Controllers\Cajas\PrincipalController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('/cajas')->group(function () {
-    Route::get('/', [AuthController::class, 'indexAction'])->name('cajas.login');
+    // Redirige la raíz de Cajas a la ruta canónica de login para evitar nombres duplicados
+    Route::get('/', function () { return redirect()->route('cajas.login'); });
     Route::get('/login', [AuthController::class, 'indexAction'])->name('cajas.login');
     Route::post('/autenticar', [AuthController::class, 'authenticateAction'])->name('cajas.autenticar');
     Route::post('/salir', [AuthController::class, 'logoutAction'])->name('cajas.salir');
@@ -22,3 +23,4 @@ Route::prefix('/cajas/principal')->group(function () {
     Route::get('/download_global', [PrincipalController::class, 'downloadGlobalAction']);
     Route::get('/file_existe_global', [PrincipalController::class, 'fileExisteGlobalAction']);
 });
+

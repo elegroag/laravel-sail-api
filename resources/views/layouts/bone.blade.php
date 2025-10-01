@@ -16,7 +16,12 @@ list($menu, $breadcrumbs, $pageTitle) = App\Services\Menu\Menu::showMenu('ME');
 
 @include('partials.flash')
 
-@include('templates.sidebar', array('menu' => $menu, '_tipo' => session()->get('tipo')))
+@include('templates.sidebar', 
+    [
+        'menu' => $menu, 
+        '_tipo' => session()->get('tipo'), 
+        '_estado_afiliado' => session()->get('estado_afiliado')
+    ])
 
 <div class="main-content" id="panel">
 @include('templates.navbar', ['user_name' => capitalize($user['nombre']), 'breadcrumbs'=> $breadcrumbs, 'pageTitle'=> $pageTitle]) 

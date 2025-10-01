@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Library\Auth\SessionCookies;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 class EnsureCookieAuthenticated
 {
@@ -44,5 +45,17 @@ class EnsureCookieAuthenticated
         }
 
         return $next($request);
+    }
+
+    public function actionActive()
+    {
+        $route = Route::current(); // Illuminate\Routing\Route
+        $name = Route::currentRouteName(); // string
+        $action = Route::currentRouteAction(); // string
+        return [
+            'route' => $route,
+            'name' => $name,
+            'action' => $action
+        ];
     }
 }

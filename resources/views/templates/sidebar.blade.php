@@ -34,8 +34,11 @@ $array_tipos = [
                         <div class="nav-link p-0 mb-2">
                             <span class="nav-link-text">
                                 COMFACA EN LÍNEA<br>
-                                <small class="text-muted">Usuario tipo: <span class="text-primary">
+                                <small class="text-muted">Usuario tipo: <span class="text-info">
                                     {{ isset($array_tipos[$_tipo]) ? htmlspecialchars($array_tipos[$_tipo]) : 'N/A' }}</span></small>
+                                <small class="text-muted">Estado afiliado: <span class="text-info">
+                                    {{ $_estado_afiliado == 'I' ? 'INACTIVO' : 'ACTIVO' }}
+                                </span></small>
                             </span>
                         </div>
                     </div>

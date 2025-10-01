@@ -1,62 +1,13 @@
 <?php
 
-use App\Http\Controllers\Api\AuthMercurioController;
-use App\Http\Controllers\Mercurio\AuthController;
-use App\Http\Controllers\TaskController;
-use App\Http\Controllers\WebController;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
+use Illuminate\Http\Request;
 
-Route::get('/', function () {
-    return Inertia::render('welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+Route::get('/web', function () {
+    return redirect()->route('web.login');
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('dashboard');
-})->name('dash');
-
-Route::resource('tasks', TaskController::class);
-
-Route::get('/web/login', [AuthController::class, 'index'])->name('login');
-Route::post('/web/login', [AuthController::class, 'authenticate'])->name('login.authenticate');
-Route::get('/web/register', [AuthController::class, 'register'])->name('register');
-Route::get('/web/password/request', [AuthController::class, 'resetPassword'])->name('password.request');
-Route::get('/web/verify/{tipo}/{coddoc}/{documento}', [AuthController::class, 'verify'])->name('verify.show');
-Route::post('/web/verify', [AuthController::class, 'verify'])->name('verify.request');
-Route::post('/web/verify_action', [AuthController::class, 'verifyAction'])->name('verify.action');
-Route::get('/web/verify_action', [AuthController::class, 'verifyAction'])->name('verify.action');
-Route::post('/web/load_session', [AuthController::class, 'loadSession'])->name('load.session');
-
-Route::get('/web/prueba_session', [AuthController::class, 'pruebaSession'])->name('prueba.session');
-
-
-Route::get('/web', [WebController::class, 'dashboard'])->name('dashboard');
-Route::get('/web/empresas', [WebController::class, 'empresas'])->name('empresas.index');
-Route::get('/web/trabajadores', [WebController::class, 'trabajadores'])->name('trabajadores.index');
-Route::get('/web/nucleos-familiares', [WebController::class, 'nucleosFamiliares'])->name('nucleos-familiares.index');
-Route::get('/web/empresas/api', [WebController::class, 'pruebaApiEmpresas']);
-
-Route::get('/web/empresas/create', [WebController::class, 'empresasCreate'])->name('empresas.create');
-Route::get('/web/empresas/{id}/edit', [WebController::class, 'empresasEdit'])->name('empresas.edit');
-Route::get('/web/empresas/{id}', [WebController::class, 'empresasShow'])->name('empresas.show');
-
-Route::get('/web/trabajadores/create', [WebController::class, 'trabajadoresCreate'])->name('trabajadores.create');
-Route::get('/web/trabajadores/{id}/edit', [WebController::class, 'trabajadoresEdit'])->name('trabajadores.edit');
-Route::get('/web/trabajadores/{id}', [WebController::class, 'trabajadoresShow'])->name('trabajadores.show');
-
-Route::get('/web/nucleos-familiares/create', [WebController::class, 'nucleosFamiliaresCreate'])->name('nucleos-familiares.create');
-Route::get('/web/nucleos-familiares/{id}/edit', [WebController::class, 'nucleosFamiliaresEdit'])->name('nucleos-familiares.edit');
-Route::get('/web/nucleos-familiares/{id}', [WebController::class, 'nucleosFamiliaresShow'])->name('nucleos-familiares.show');
-
-require __DIR__ . '/settings.php';
 require __DIR__ . '/mercurio/mercurio.php';
-require __DIR__ . '/mercurio/auth.php';
 require __DIR__ . '/mercurio/trabajador.php';
 require __DIR__ . '/mercurio/empresa.php';
 require __DIR__ . '/mercurio/conyuge.php';
@@ -105,8 +56,16 @@ require __DIR__ . '/cajas/movile_menu.php';
 require __DIR__ . '/cajas/permisos_user.php';
 require __DIR__ . '/cajas/promociones_educacion.php';
 require __DIR__ . '/cajas/promociones_recreacion.php';
-require __DIR__ . '/cajas/promociones_turismo.php';
 require __DIR__ . '/cajas/servicios.php';
 require __DIR__ . '/cajas/notificaciones.php';
 require __DIR__ . '/cajas/archivo_areas.php';
 require __DIR__ . '/cajas/galeria.php';
+
+Route::fallback(function (Request $request) {
+    $ruta = $request->url();
+    if (!$ruta) {
+        return redirect()->route('web.login');
+    }
+    // Mostrar vista personalizada para rutas no disponibles en la web
+    return response()->view('errors.web-unavailable', ['ruta' => $ruta], 404);
+});
