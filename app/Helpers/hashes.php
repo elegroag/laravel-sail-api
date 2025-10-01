@@ -94,8 +94,8 @@ if (!function_exists('Kdecrypt')) {
     }
 }
 
-if (!function_exists('generaCode')) {
-    function generaCode(int|null $length = null)
+if (!function_exists('genera_clave')) {
+    function genera_clave(int|null $length = null)
     {
         $code = "";
         if (!$length) {
@@ -104,10 +104,22 @@ if (!function_exists('generaCode')) {
             foreach (array_rand($seed, 4) as $k) $code .= $seed[$k];
             return $code;
         } else {
-            $seed = str_split('abcdefghijklmnopqrstuvwxyz1234567890');
+            $seed = str_split('abcdefghijklmnopqrstuvwxyz1234567890$%&/()=?@.+-*');
             shuffle($seed);
             foreach (array_rand($seed, $length) as $k) $code .= $seed[$k];
         }
         return $code;
+    }
+}
+
+
+if (!function_exists('genera_code')) {
+    function genera_code()
+    {
+        $codigo_verify = "";
+        $seed = str_split('1234567890');
+        shuffle($seed);
+        foreach (array_rand($seed, 4) as $k) $codigo_verify .= $seed[$k];
+        return $codigo_verify;
     }
 }

@@ -26,6 +26,7 @@ class SignupService
     private $razsoc;
     private $coddocrepleg;
     private $nit;
+    private $password;
 
     public function execute(SignupInterface|null $signupEntity, Request $request)
     {
@@ -38,6 +39,7 @@ class SignupService
         $this->calemp = $request->getParam('calemp');
         $this->tipsoc = $request->getParam('tipsoc');
         $this->razsoc = $request->getParam('razsoc');
+        $this->password = $request->getParam('password');
 
         $this->nit = $request->getParam('nit');
 
@@ -62,7 +64,8 @@ class SignupService
                         "email" => $this->email,
                         "codciu" => $this->codciu,
                         "tipo" => $this->tipo, //aplica para particular o trabajador
-                        "razsoc" => $this->razsoc
+                        "razsoc" => $this->razsoc,
+                        "password" => $this->password
                     )
                 )
             );
@@ -91,7 +94,8 @@ class SignupService
                         "tipsoc" => $this->tipsoc,
                         "coddocrepleg" => $this->coddocrepleg,
                         "razsoc" => $this->razsoc,
-                        "usuario" => $usuario
+                        "usuario" => $usuario,
+                        "password" => $this->password
                     )
                 )
             );

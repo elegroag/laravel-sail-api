@@ -14,7 +14,6 @@ class AutenticaService
 {
     public function execute(Request $request): array|null
     {
-        $response = [];
         // Sanitización ligera
         $tipo = $request->getParam("tipo");
         $documento = $request->getParam("documento");
@@ -59,8 +58,8 @@ class AutenticaService
 
         if ($res == False) {
             return [
-                "access" => false,
-                'message' => $autentica->getMessage(),
+                false,
+                $autentica->getMessage(),
             ];
         }
 
@@ -140,22 +139,14 @@ class AutenticaService
                 $this->autoFirma($documento, $coddoc);
 
                 return [
-                    'success' => false,
-                    'msj' => "Alerta. El usuario ya posee un registro en plataforma y requiere de ingresar con PIN de validación.",
-                    'noAccess' => 2,
-                    "documento" => $documento,
-                    "coddoc" => $coddoc,
-                    "tipafi" => $tipo,
-                    "tipo" => $tipo,
-                    "id" => null
+                    false,
+                    "Alerta. El usuario ya posee un registro en plataforma y requiere de ingresar con PIN de validación.",
                 ];
             }
         }
 
-        // Comparación segura del hash de clave (esquema actual: md5(password_hash_old(clave)))
-        $expectedHash = md5(password_hash_old((string) $clave));
-        $storedHash = (string) $mercurio07->getClave();
-        if (!hash_equals($storedHash, $expectedHash)) {
+        $storedHash = $mercurio07->getClave();
+        if (!clave_verify($clave, $storedHash)) {
             throw new DebugException("Error el valor de la clave no es válido para ingresar a la plataforma.", 503);
         }
 
@@ -175,10 +166,9 @@ class AutenticaService
         }
         $this->autoFirma($documento, $coddoc);
 
-        $msj = "La autenticación se ha completado con éxito.";
         return [
-            "access" => true,
-            "message" => $msj
+            true,
+            "La autenticación se ha completado con éxito."
         ];
     }
 

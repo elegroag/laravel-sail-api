@@ -83,7 +83,9 @@ class AutenticaTrabajador extends AutenticaGeneral
                     $nombre = strtoupper($afiliado['prinom'] . ' ' . $afiliado['segnom'] . ' ' . $afiliado['priape'] . ' ' . $afiliado['segape']);
                     $codzon = ($afiliado['codzon'] == '') ? 18001 : $afiliado['codzon'];
 
-                    list($hash, $clave) = Generales::GeneraClave();
+                    $clave = genera_clave(8);
+                    $hash = clave_hash($clave);
+
                     $crearUsuario = new CrearUsuario();
                     $crearUsuario->setters(
                         "tipo: T",

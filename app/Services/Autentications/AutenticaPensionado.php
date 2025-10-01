@@ -115,7 +115,9 @@ class AutenticaPensionado extends AutenticaGeneral
                 /**
                  * se crea el usuario en mercurio07
                  */
-                list($hash, $clave) = Generales::GeneraClave();
+                $clave = genera_clave(8);
+                $hash = clave_hash($clave);
+
                 $crearUsuario = new CrearUsuario();
                 $crearUsuario->setters(
                     "tipo: P",
@@ -210,7 +212,9 @@ class AutenticaPensionado extends AutenticaGeneral
                 }
             } else {
 
-                list($hash, $clave) = Generales::GeneraClave();
+                $clave = genera_clave(8);
+                $hash = clave_hash($clave);
+
                 $crearUsuario = new CrearUsuario();
                 $crearUsuario->setters(
                     "tipo: O",

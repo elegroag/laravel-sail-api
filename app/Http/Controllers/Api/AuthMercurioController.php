@@ -51,9 +51,11 @@ class AuthMercurioController extends Controller
                 ])
             );
 
+            list($access, $message) = $response;
+
             return response()->json([
-                'success' => true,
-                'data' => $response
+                'success' => $access,
+                'message' => $message
             ], 201);
         } catch (ValidationException $e) {
             return response()->json([
@@ -221,7 +223,7 @@ class AuthMercurioController extends Controller
             }
 
             // $user07 ya está validado arriba
-            $codigoVerify = generaCode();
+            $codigoVerify = genera_code();
             $inicio  = Carbon::now()->format('Y-m-d H:i:s');
             $intentos = '0';
 

@@ -66,7 +66,7 @@ class AutenticaEmpresa extends AutenticaGeneral
             ->where('coddoc', $coddoc)
             ->first();
 
-        if ($afiliado == null || $afiliado == false) {
+        if (is_null($afiliado)) {
             if ($usuarioParticular || $usuarioEmpresa) {
                 $this->estadoAfiliado = 'I';
                 return true;
@@ -94,7 +94,8 @@ class AutenticaEmpresa extends AutenticaGeneral
                 /**
                  * se crea el usuario en mercurio07
                  */
-                list($hash, $clave) = Generales::GeneraClave();
+                $clave = genera_clave(8);
+                $hash = clave_hash($clave);
                 $crearUsuario = new CrearUsuario();
                 $crearUsuario->setters(
                     "tipo: P",
@@ -207,7 +208,8 @@ class AutenticaEmpresa extends AutenticaGeneral
                 }
             } else {
 
-                list($hash, $clave) = Generales::GeneraClave();
+                $clave = genera_clave(8);
+                $hash = clave_hash($clave);
                 $crearUsuario = new CrearUsuario();
                 $crearUsuario->setters(
                     "tipo: E",

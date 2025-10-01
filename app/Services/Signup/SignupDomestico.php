@@ -63,9 +63,9 @@ class SignupDomestico
         $this->crearSolicitud = false;
 
         if ($usuarioParticular == false) {
-            $out = Generales::GeneraClave();
-            $hash = $out[0];
-            $clave = $out[1];
+            $clave = genera_clave(8);
+            $hash = clave_hash($clave);
+
             $crearUsuario = new CrearUsuario();
             $crearUsuario->setters(
                 "tipo: N",
@@ -142,9 +142,6 @@ class SignupDomestico
 
     function generaCode()
     {
-        $this->codigo_verify = "";
-        $seed = str_split('1234567890');
-        shuffle($seed);
-        foreach (array_rand($seed, 4) as $k) $this->codigo_verify .= $seed[$k];
+        $this->codigo_verify = genera_code();
     }
 }

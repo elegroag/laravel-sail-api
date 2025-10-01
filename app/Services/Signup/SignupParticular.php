@@ -33,7 +33,7 @@ class SignupParticular
     public $nit;
     public $nombre;
     private $codigo_verify;
-
+    private $password;
 
     public function __construct(Request| null $params = null)
     {
@@ -78,9 +78,7 @@ class SignupParticular
         $usuarioParticular = Mercurio07::where(["tipo" => $this->tipo, "coddoc" => $this->coddoc, "documento" => $this->documento])->first();
 
         if ($usuarioParticular == false) {
-            $out = Generales::GeneraClave();
-            $hash = $out[0];
-            $clave = $out[1];
+            $hash = clave_hash($this->password);
             $crearUsuario = new CrearUsuario();
             $crearUsuario->setters(
                 "tipo: {$this->tipo}",
@@ -103,7 +101,7 @@ class SignupParticular
             }
             //actualiza y activa la cuenta de la persona solo si el correo es igual al reportado
         }
-        $this->preparaMail($usuarioParticular, $clave);
+        $this->preparaMail($usuarioParticular, $this->password);
 
         return $usuarioParticular;
     }
@@ -118,11 +116,11 @@ class SignupParticular
             "templates/tmp_register",
             array(
                 "fecha" => $date->format("d - M - Y"),
-                "asunto" => "Acceso a usuario particular, Comfaca En Linea",
-                "tipo" => ($this->tipo == 'P') ? 'Usuario Particular' : 'Usuario Empresa',
+                "asunto" => "Acceso a usuario, Comfaca En Linea",
+                "tipo" => ($this->tipo == 'P') ? 'Usuario' : 'Usuario Empresa',
                 "nombre" => $this->nombre,
                 "razon" => $this->razsoc,
-                "msj" => "El usuario particular ha realizado el registro al portal web Comfaca En Línea.
+                "msj" => "El usuario ha realizado el registro al portal web Comfaca En Línea.
                 Las siguientes son credeciales de acceso: <br>
                 TIPO DOCUMENTO {$coddoc_detalle}<br/>
                 DOCUMENTO {$this->documento}<br/>
@@ -150,9 +148,6 @@ class SignupParticular
 
     function generaCode()
     {
-        $this->codigo_verify = "";
-        $seed = str_split('1234567890');
-        shuffle($seed);
-        foreach (array_rand($seed, 4) as $k) $this->codigo_verify .= $seed[$k];
+        $this->codigo_verify = genera_code();
     }
 }

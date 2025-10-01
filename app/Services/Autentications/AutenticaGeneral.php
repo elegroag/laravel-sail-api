@@ -103,7 +103,11 @@ class AutenticaGeneral
     {
         if (is_null($this->afiliado)) return false;
 
-        list($hash, $clave) = Generales::GeneraClave();
+        $this->generaCode();
+
+        $clave = genera_clave(8);
+        $hash = clave_hash($clave);
+
         $this->afiliado->setClave($hash);
         $this->afiliado->save();
 

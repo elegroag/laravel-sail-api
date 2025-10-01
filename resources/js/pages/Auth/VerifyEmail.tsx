@@ -58,7 +58,17 @@ export default function VerifyEmail({ documento, coddoc, tipo, token, status, er
   if (state.isVerified) {
     return (
       <AuthLayout title="Cuenta verificada" description="Tu correo ya fue verificado correctamente.">
-        <div className="flex flex-col items-center justify-center space-y-6 text-center py-16">
+        <div id="welcome" className="lg:w-1/2 bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-700 text-white p-12 flex flex-col justify-center relative overflow-hidden">
+          <AuthWelcome
+            title="Verificación de correo"
+            tagline="Confirma tu identidad"
+            description="Te enviamos un código de 4 dígitos para asegurar que eres el propietario del correo registrado."
+            backHref={route('login')}
+            backText="¿Ya tienes cuenta? Inicia sesión"
+          />
+        </div>
+      
+        <div className="w-full lg:w-1/2 p-8 mx-auto flex flex-col items-center justify-center space-y-6 text-center min-h-[700px]">
           <CheckCircle className="h-16 w-16 text-emerald-600" />
           <h1 className="text-3xl font-semibold">¡Email verificado!</h1>
           <p className="text-muted-foreground max-w-md">

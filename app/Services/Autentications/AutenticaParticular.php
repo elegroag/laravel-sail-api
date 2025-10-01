@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services\Autentications;
 
 use App\Models\Mercurio07;
@@ -27,7 +28,11 @@ class AutenticaParticular extends AutenticaGeneral
         /**
          * buscar usuario particular en mercurio
          */
-        $usuarioParticular = (new Mercurio07)->findFirst("tipo='P' AND documento='{$documento}' AND coddoc='{$coddoc}'");
+        $usuarioParticular = Mercurio07::where("tipo", $this->tipo)
+            ->where("documento", $documento)
+            ->where("coddoc", $coddoc)
+            ->first();
+
         if ($usuarioParticular) {
             if ($usuarioParticular->getEstado() == 'I') {
                 $usuarioParticular->setEstado('A');

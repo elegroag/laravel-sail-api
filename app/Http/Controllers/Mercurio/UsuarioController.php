@@ -166,8 +166,8 @@ class UsuarioController extends ApplicationController
             $msubsi07->setCoddoc($coddoc);
 
             if (strlen($newclave) > 5 && strlen($newclave) < 80) {
-                $hash = Generales::GeneraClave($newclave);
-                $msubsi07->setClave($hash[0]);
+                $hash = clave_hash($newclave);
+                $msubsi07->setClave($hash);
             }
 
             $msubsi07->save();

@@ -14,6 +14,7 @@ use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio19;
 use App\Models\Subsi54;
+use App\Services\Utils\Comman;
 use App\Services\Utils\SenderEmail;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
@@ -130,7 +131,7 @@ class AuthController extends Controller
             ->where("tipo", $payload['tipo'])
             ->first();
 
-        $codigoVerify = generaCode();
+        $codigoVerify = genera_code();
         if ($user19) {
             $user19->token = $token;
             $user19->update();
@@ -226,7 +227,7 @@ class AuthController extends Controller
 
             if (strlen($error) == 0 && $diferenciaEnMinutos >= 5) {
                 //volver a generar PIN
-                $codigoVerify = generaCode();
+                $codigoVerify = genera_code();
                 $inicio  = Carbon::now()->format('Y-m-d H:i:s');
                 $intentos = '0';
 
@@ -241,8 +242,8 @@ class AuthController extends Controller
 
 
                 $html = "Utiliza el siguiente código de verificación, para confirmar el propietario de la dirección de correo:<br/>
-                <span style=\"font-size:16px;color:#333\">CÓDIGO DE VERIFICACIÓN: </span><br/>
-                <span style=\"font-size:30px;color:#11cdef\"><b>{$codigoVerify}</b></span>";
+                    <span style=\"font-size:16px;color:#333\">CÓDIGO DE VERIFICACIÓN: </span><br/>
+                    <span style=\"font-size:30px;color:#11cdef\"><b>{$codigoVerify}</b></span>";
 
                 $asunto = "Generación nuevo PIN plataforma Comfaca En Línea";
                 $emailCaja = Mercurio01::first();
@@ -277,30 +278,58 @@ class AuthController extends Controller
                 }
             }
 
+            $ps = Comman::Api();
             switch ($tipo) {
+                case 'T':
+                    $url = "mercurio/principal/index";
+                    $metodo = "informacion_trabajador";
+                    $params = ["cedtra" => $documento, "coddoc" => $coddoc];
+                    break;
                 case 'E':
                     $url = "mercurio/empresa/index";
+                    $metodo = "informacion_empresa";
+                    $params = ["nit" => $documento, "coddoc" => $coddoc];
                     break;
                 case 'I':
                     $url = "mercurio/independiente/index";
+                    $metodo = "informacion_empresa";
+                    $params = ["nit" => $documento, "coddoc" => $coddoc];
                     break;
                 case 'O':
                     $url = "mercurio/pensionado/index";
+                    $metodo = "informacion_empresa";
+                    $params = ["nit" => $documento, "coddoc" => $coddoc];
                     break;
                 case 'F':
                     $url = "mercurio/facultativo/index";
+                    $metodo = "informacion_empresa";
+                    $params = ["nit" => $documento, "coddoc" => $coddoc];
                     break;
                 default:
                     $url = "mercurio/principal/index";
+                    $metodo = "informacion_empresa";
+                    $params = ["nit" => $documento, "coddoc" => $coddoc];
                     break;
             }
+
+
+            $ps->runCli([
+                "servicio" => "ComfacaEmpresas",
+                "metodo" => $metodo,
+                "params" =>  $params
+            ]);
+
+            $out = $ps->toArray();
+            $afiliado = ($out['success'] == true && isset($out['data']) && $out['data'] != false) ? $out['data'] : null;
+            $estadoAfiliado = ($afiliado) ? $afiliado['estado'] : 'I';
 
             $auth = new SessionCookies(
                 "model: mercurio07",
                 "tipo: {$tipo}",
                 "coddoc: {$coddoc}",
                 "documento: {$documento}",
-                "estado: A"
+                "estado: A",
+                "estado_afiliado: {$estadoAfiliado}"
             );
 
             if (!$auth->authenticate()) {
@@ -328,6 +357,11 @@ class AuthController extends Controller
             $payload = [
                 "success" => false,
                 'message' => 'Error al crear empresa: ' . $e->getMessage()
+            ];
+        } catch (\Exception $e) {
+            $payload = [
+                "success" => false,
+                'message' => $e->getMessage()
             ];
         }
 

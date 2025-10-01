@@ -198,9 +198,9 @@ export default function useVerifyController({
       router.post(route('verify.action'), payload, {
         preserveScroll: true,
         onStart: () => setIsSubmitting(true),
-        onSuccess: () => {
+        onSuccess: (response) => {
+          console.log(response);
           dispatch({ type: 'SET_VERIFIED', verified: true })
-          //router.visit(route('login'))
         },
         onError: (errors) => {
           dispatch({

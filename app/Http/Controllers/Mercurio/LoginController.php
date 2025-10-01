@@ -138,7 +138,7 @@ class LoginController extends ApplicationController
                     throw new DebugException("Alerta. El usuario ya posee un registro en plataforma y requiere de ingresar con la clave valida.", 501);
                 } else {
                     //create validation mediante token
-                    $codigoVerify = generaCode();
+                    $codigoVerify = genera_code();
                     $autentica->verificaPin($mercurio07, $codigoVerify);
 
                     $authJwt = new AuthJwt();
@@ -654,7 +654,7 @@ class LoginController extends ApplicationController
 
             if (strlen($error) == 0 && $diferenciaEnMinutos >= 5) {
                 //volver a generar PIN
-                $codigoVerify = generaCode();
+                $codigoVerify = genera_code();
                 $inicio  = Carbon::now()->format('Y-m-d H:i:s');
                 $intentos = '0';
 
