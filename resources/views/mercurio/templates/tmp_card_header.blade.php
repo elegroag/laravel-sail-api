@@ -1,6 +1,4 @@
-<div class="col-md-6 col-auto">
-    ...
-</div>
+<div class="col-md-6 col-auto" id="card-content-left"></div>
 
 <div class="col-md-6 col-auto">
     <div class="d-flex justify-content-end">

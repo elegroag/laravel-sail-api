@@ -493,9 +493,7 @@ class EmpresaController extends ApplicationController
      */
     public function consultaDocumentosAction(Request $request, Response $response, int $id)
     {
-        $this->setResponse('ajax');
         try {
-
             $documento = $this->user['documento'] ?? '';
             $coddoc = $this->user['coddoc'] ?? '';
             $service = new EmpresaService();

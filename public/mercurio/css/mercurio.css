@@ -92,7 +92,8 @@ button.btn-link-file:active {
 }
 
 .nav-pills .nav-link {
-	border-radius: 1.3rem;
+	border-radius: .2rem;
+	padding: .8rem 1rem;
 }
 
 .navbar-nav li.nav-item a.nav-link {

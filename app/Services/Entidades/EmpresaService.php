@@ -180,39 +180,35 @@ class EmpresaService
             $corregir = explode(";", $campos);
         }
 
-        $mercurio14 = (new Mercurio14)->where('tipopc', $this->tipopc)
+        $mercurio14 = Mercurio14::where('tipopc', $this->tipopc)
             ->where('tipsoc', $solicitud->getTipsoc())
             ->orderBy('auto_generado', 'desc')
             ->get();
 
         foreach ($mercurio14 as $m14) {
-
-            $m12 = Mercurio12::where('coddoc', $m14->getCoddoc())->first();
-
+            $m12 = Mercurio12::where('coddoc', $m14->coddoc)->first();
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)
                 ->where('numero', $solicitud->getId())
-                ->where('coddoc', $m14->getCoddoc())
+                ->where('coddoc', $m14->coddoc)
                 ->first();
 
             $corrige = false;
-
             if ($corregir) {
-                if (in_array($m12->getCoddoc(), $corregir)) $corrige = true;
+                if (in_array($m12->coddoc, $corregir)) $corrige = true;
             }
 
             $archivo = $m14->getArray();
-            $archivo['obliga'] = ($m14->getObliga() == "S") ? "<br><small class='text-danger'>Obligatorio</small>" : "";
+            $archivo['obliga'] = ($m14->obliga == "S") ? "<br><small class='text-danger'>Obligatorio</small>" : "";
             $archivo['id'] = $solicitud->getId();
-            $archivo['detalle'] = capitalize($m12->getDetalle());
-            $archivo['diponible'] = ($mercurio37) ? $mercurio37->getArchivo() : false;
+            $archivo['detalle'] = capitalize($m12->detalle);
+            $archivo['diponible'] = ($mercurio37) ? $mercurio37->archivo : false;
             $archivo['corrige'] = $corrige;
             $archivos[] = $archivo;
         }
 
         $mercurio01 = Mercurio01::first();
-        $archivos_descargar = oficios_requeridos('E');
         return array(
-            "disponibles" => $archivos_descargar,
+            "disponibles" => false,
             "archivos" => $archivos,
             "path" => $mercurio01->getPath(),
             "puede_borrar" => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true

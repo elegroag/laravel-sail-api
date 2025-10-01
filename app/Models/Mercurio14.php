@@ -3,13 +3,20 @@
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
+use Thiagoprz\CompositeKey\HasCompositeKey;
 
 class Mercurio14 extends ModelBase
 {
 
+    use HasCompositeKey;
+
     protected $table = 'mercurio14';
     public $timestamps = false;
-    protected $primaryKey = 'id';
+    protected $primaryKey = [
+        'tipopc',
+        'tipsoc',
+        'coddoc',
+    ];
 
     protected $fillable = [
         'tipopc',

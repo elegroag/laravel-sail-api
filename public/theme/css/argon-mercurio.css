@@ -5553,6 +5553,12 @@ input[type='button'].btn-block {
 	color: #8898aa;
 }
 
+.breadcrumb-item i{
+	position: relative;
+	top: 2px;
+	padding: 3px;
+}
+
 .pagination {
 	display: flex;
 	padding-left: 0;
