@@ -12,6 +12,10 @@ use App\Models\Mercurio12;
 use App\Models\Mercurio13;
 use App\Models\Mercurio37;
 use App\Models\Mercurio01;
+use App\Models\Mercurio32;
+use App\Models\Mercurio34;
+use App\Models\Mercurio45;
+use App\Models\Mercurio47;
 use App\Services\Utils\Comman;
 use Illuminate\Support\Facades\DB;
 
@@ -411,5 +415,93 @@ class TrabajadorService
         if ($procesadorComando->isJson() == false) throw new DebugException("Error resultado de API", 501);
         $out = $procesadorComando->getObject();
         return ($out->success == True) ? $out->data : False;
+    }
+
+    public function resumenServicios()
+    {
+        $documento = $this->user['documento'];
+        $coddoc = $this->user['coddoc'];
+        $tipo = $this->tipo;
+
+        return [
+            'afiliacion' => [
+                [
+                    'name' => 'Solicitudes Cónyuges',
+                    'cantidad' => [
+                        'pendientes' => Mercurio32::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'aprobados' => Mercurio32::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'rechazados' => Mercurio32::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'devueltos' => Mercurio32::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'temporales' => Mercurio32::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
+                    ],
+                    'icon' => 'C',
+                    'url' => 'conyuge/index',
+                    'imagen' => 'conyuges.jpg',
+                ],
+                [
+                    'name' => 'Solicitudes Beneficiarios',
+                    'cantidad' => [
+                        'pendientes' => Mercurio34::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'aprobados' => Mercurio34::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'rechazados' => Mercurio34::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'devueltos' => Mercurio34::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'temporales' => Mercurio34::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
+                    ],
+                    'icon' => 'B',
+                    'url' => 'beneficiario/index',
+                    'imagen' => 'beneficiarios.jpg',
+                ],
+                [
+                    'name' => 'Actualización de datos',
+                    'cantidad' => [
+                        'pendientes' => Mercurio47::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'aprobados' => Mercurio47::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'rechazados' => Mercurio47::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'devueltos' => Mercurio47::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'temporales' => Mercurio47::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
+                    ],
+                    'icon' => 'A',
+                    'url' => 'actualizadatostra/index',
+                    'imagen' => 'datos_basicos.jpg',
+                ],
+                [
+                    'name' => 'Presentar Certificados',
+                    'cantidad' => [
+                        'pendientes' => Mercurio45::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'aprobados' => Mercurio45::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'rechazados' => Mercurio45::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'devueltos' => Mercurio45::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'temporales' => Mercurio45::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
+                    ],
+                    'icon' => 'D',
+                    'url' => 'certificados/index',
+                    'imagen' => 'presentar_certificado.jpg',
+                ]
+            ],
+            'productos' => [
+                [
+                    'name' => 'P. Complemento_nutricional',
+                    'url' => 'productos/complemento_nutricional',
+                    'imagen' => 'complemento.jpg',
+                ]
+            ],
+            'consultas' => [
+                [
+                    'name' => 'Consulta de gíro',
+                    'url' => 'subsidio/consulta_giro_view',
+                    'imagen' => 'consulta_giro.jpg',
+                ],
+                [
+                    'name' => 'Consulta nucleo familiar',
+                    'url' => 'subsidio/consulta_nucleo',
+                    'imagen' => 'conyuges.jpg',
+                ],
+                [
+                    'name' => 'Consulta planilla',
+                    'url' => 'subsidio/consulta_planilla_trabajador_view',
+                    'imagen' => 'consulta_trabajadores.jpg',
+                ]
+            ]
+        ];
     }
 }

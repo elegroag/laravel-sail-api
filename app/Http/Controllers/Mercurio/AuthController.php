@@ -123,29 +123,8 @@ class AuthController extends Controller
                 ], 401);
             }
 
-            $tipo = $request->input('tipo');
-            $coddoc = $request->input('documentType');
-            $documento = $request->input('identification');
-
-            // Crear la sesión del usuario
-            $auth = new SessionCookies(
-                "model: mercurio07",
-                "tipo: {$tipo}",
-                "coddoc: {$coddoc}",
-                "documento: {$documento}",
-                "estado: A",
-                "estado_afiliado: A"
-            );
-
-            if (!$auth->authenticate()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No fue posible crear la sesión. Verifique tipo/coddoc/documento o el estado del usuario.'
-                ], 422);
-            }
-
             // Redirección según tipo
-            switch ($tipo) {
+            switch ($request->input('tipo')) {
                 case 'T':
                     $url = 'mercurio/principal/index';
                     break;
@@ -505,10 +484,5 @@ class AuthController extends Controller
                 break;
         }
         return Inertia::location(url('web/prueba_session'));
-    }
-
-    public function pruebaSession(Request $request)
-    {
-        dd(session()->all());
     }
 }

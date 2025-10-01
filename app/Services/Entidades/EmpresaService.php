@@ -10,7 +10,11 @@ use App\Models\Mercurio10;
 use App\Models\Mercurio12;
 use App\Models\Mercurio14;
 use App\Models\Mercurio30;
+use App\Models\Mercurio31;
+use App\Models\Mercurio32;
+use App\Models\Mercurio34;
 use App\Models\Mercurio37;
+use App\Models\Mercurio47;
 use App\Models\Tranoms;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
@@ -20,6 +24,7 @@ class EmpresaService
 
     private $tipopc = "2";  // tipo de solicitud
     private $user;
+    private $tipo;
     private $db;
 
     /**
@@ -30,6 +35,7 @@ class EmpresaService
     public function __construct()
     {
         $this->user = session('user');
+        $this->tipo = session('tipo');
         $this->db = DbBase::rawConnect();
     }
 
@@ -442,5 +448,92 @@ class EmpresaService
 
         $paramsEmpresa = new ParamsEmpresa();
         $paramsEmpresa->setDatosCaptura($procesadorComando->toArray());
+    }
+
+    public function resumenServicios()
+    {
+        $documento = $this->user['documento'];
+        $coddoc = $this->user['coddoc'];
+        $tipo = $this->tipo;
+
+        return [
+            'afiliacion' => [
+                [
+                    'name' => 'Solicitudes Trabajadores',
+                    'cantidad' => array(
+                        'pendientes' => Mercurio31::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'aprobados' => Mercurio31::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'rechazados' => Mercurio31::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'devueltos' => Mercurio31::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'temporales' => Mercurio31::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
+                    ),
+                    'icon' => 'T',
+                    'url' => 'trabajador/index',
+                    'imagen' => 'trabajadores.jpg',
+                ],
+                [
+                    'name' => 'Solicitudes Cónyuges',
+                    'cantidad' => array(
+                        'pendientes' => Mercurio32::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'aprobados' => Mercurio32::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'rechazados' => Mercurio32::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'devueltos' => Mercurio32::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'temporales' => Mercurio32::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
+                    ),
+                    'icon' => 'C',
+                    'url' => 'conyuge/index',
+                    'imagen' => 'conyuges.jpg',
+                ],
+                [
+                    'name' => 'Solicitudes Beneficiarios',
+                    'cantidad' => array(
+                        'pendientes' => Mercurio34::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'aprobados' => Mercurio34::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'rechazados' => Mercurio34::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'devueltos' => Mercurio34::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'temporales' => Mercurio34::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
+                    ),
+                    'icon' => 'B',
+                    'url' => 'beneficiario/index',
+                    'imagen' => 'beneficiarios.jpg',
+                ],
+                [
+                    'name' => 'Solicitud Actualiza Datos',
+                    'cantidad' => array(
+                        'pendientes' => Mercurio47::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'aprobados' => Mercurio47::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'rechazados' => Mercurio47::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'devueltos' => Mercurio47::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                        'temporales' => Mercurio47::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
+                    ),
+                    'icon' => 'B',
+                    'url' => 'actualizadatos/index',
+                    'imagen' => 'datos_basicos.jpg',
+                ]
+            ],
+            'productos' => false,
+            'consultas' => [
+                [
+                    'name' => 'Consulta Trabajadores',
+                    'url' => 'subsidioemp/consulta_trabajadores_view',
+                    'imagen' => 'consulta_trabajadores.jpg',
+                ],
+                [
+                    'name' => 'Consulta de gíro',
+                    'url' => 'subsidioemp/consulta_giro_view',
+                    'imagen' => 'consulta_giro.jpg',
+                ],
+                [
+                    'name' => 'Consulta de aportes',
+                    'url' => 'subsidioemp/consulta_aportes_view',
+                    'imagen' => 'consulta_aportes.jpg',
+                ],
+                [
+                    'name' => 'Consulta de nominas',
+                    'url' => 'subsidioemp/consulta_nomina_view',
+                    'imagen' => 'consulta_aportes.jpg',
+                ]
+            ]
+        ];
     }
 }
