@@ -156,12 +156,15 @@ class AutenticaService
             throw new DebugException("Error el valor de la clave no es válido para ingresar a la plataforma.", 503);
         }
 
+        $estadoAfiliado = $autentica->getEstadoAfiliado();
+
         $auth = new SessionCookies(
             "model: mercurio07",
             "tipo: {$tipo}",
             "coddoc: {$coddoc}",
             "documento: {$documento}",
-            "estado: A"
+            "estado_afiliado: {$estadoAfiliado}",
+            "estado: A",
         );
 
         if (!$auth->authenticate()) {

@@ -5,7 +5,7 @@
         <div class="total-affiliations-card">
             <div class="total-affiliations-header">
                 <span class="total-affiliations-title">Total aprobadas</span>
-                <div class="people-icon"></div>
+                <div class="total-affiliations-icon text-success"><span class="fas fa-user"></span></div>
             </div>
             <div class="total-value">+12.5%
                 desde el mes pasado</div>
@@ -13,7 +13,7 @@
         <div class="total-affiliations-card">
             <div class="total-affiliations-header">
                 <span class="total-affiliations-title">Total activas</span>
-                <div class="people-icon"></div>
+                <div class="total-affiliations-icon text-warning"><span class="fas fa-user"></span></div>
             </div>
             <div class="total-value">+12.5%
                 desde el mes pasado</div>
@@ -21,7 +21,7 @@
         <div class="total-affiliations-card">
             <div class="total-affiliations-header">
                 <span class="total-affiliations-title">Total rechazadas</span>
-                <div class="people-icon"></div>
+                <div class="total-affiliations-icon text-danger"><span class="fas fa-user"></span></div>
             </div>
             <div class="total-value">+12.5%
                 desde el mes pasado</div>
@@ -29,7 +29,7 @@
         <div class="total-affiliations-card">
             <div class="total-affiliations-header">
                 <span class="total-affiliations-title">Total devoluciones</span>
-                <div class="people-icon"></div>
+                <div class="total-affiliations-icon text-info"><span class="fas fa-user"></span></div>
             </div>
             <div class="total-value">+12.5%
                 desde el mes pasado</div>

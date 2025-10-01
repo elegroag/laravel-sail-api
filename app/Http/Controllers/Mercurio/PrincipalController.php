@@ -42,8 +42,7 @@ class PrincipalController extends ApplicationController
         return view('mercurio/principal/index', [
             'tipo' => $this->tipo,
             'documento' => $this->user['documento'],
-            'nombre' => $this->user['nombre'],
-            'title' => "Panel Principal"
+            'nombre' => $this->user['nombre']
         ]);
     }
 
@@ -324,325 +323,327 @@ class PrincipalController extends ApplicationController
     {
         $this->setResponse("ajax");
         try {
+            session()->put('estado_afiliado', NULL);
+
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
-            $tipo = $this->tipo;
+            $tipo = session('tipo');
             $servicios = array();
             switch ($tipo) {
                 case 'E':
-                    $servicios = array(
-                        'afiliacion' => array(
-                            array(
+                    $servicios = [
+                        'afiliacion' => [
+                            [
                                 'name' => 'Solicitudes Trabajadores',
                                 'cantidad' => array(
-                                    'pendientes' => (new Mercurio31)->getCount("*", "conditions: estado='P' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'aprobados' => (new Mercurio31)->getCount("*", "conditions: estado='A' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'rechazados' => (new Mercurio31)->getCount("*", "conditions: estado='R' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'devueltos' => (new Mercurio31)->getCount("*", "conditions: estado='D' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'temporales' => (new Mercurio31)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
+                                    'pendientes' => Mercurio31::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'aprobados' => Mercurio31::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'rechazados' => Mercurio31::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'devueltos' => Mercurio31::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'temporales' => Mercurio31::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
                                 ),
                                 'icon' => 'T',
                                 'url' => 'trabajador/index',
                                 'imagen' => 'trabajadores.jpg',
-                            ),
-                            array(
+                            ],
+                            [
                                 'name' => 'Solicitudes Cónyuges',
                                 'cantidad' => array(
-                                    'pendientes' => (new Mercurio32)->getCount("*", "conditions: estado='P' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'aprobados' => (new Mercurio32)->getCount("*", "conditions: estado='A' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'rechazados' => (new Mercurio32)->getCount("*", "conditions: estado='R' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'devueltos' => (new Mercurio32)->getCount("*", "conditions: estado='D' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'temporales' => (new Mercurio32)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
+                                    'pendientes' => Mercurio32::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'aprobados' => Mercurio32::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'rechazados' => Mercurio32::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'devueltos' => Mercurio32::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'temporales' => Mercurio32::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
                                 ),
                                 'icon' => 'C',
                                 'url' => 'conyuge/index',
                                 'imagen' => 'conyuges.jpg',
-                            ),
-                            array(
+                            ],
+                            [
                                 'name' => 'Solicitudes Beneficiarios',
                                 'cantidad' => array(
-                                    'pendientes' => (new Mercurio34)->getCount("*", "conditions: estado='P' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'aprobados' => (new Mercurio34)->getCount("*", "conditions: estado='A' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'rechazados' => (new Mercurio34)->getCount("*", "conditions: estado='R' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'devueltos' => (new Mercurio34)->getCount("*", "conditions: estado='D' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'temporales' => (new Mercurio34)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
+                                    'pendientes' => Mercurio34::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'aprobados' => Mercurio34::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'rechazados' => Mercurio34::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'devueltos' => Mercurio34::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'temporales' => Mercurio34::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
                                 ),
                                 'icon' => 'B',
                                 'url' => 'beneficiario/index',
                                 'imagen' => 'beneficiarios.jpg',
-                            ),
-                            array(
+                            ],
+                            [
                                 'name' => 'Solicitud Actualiza Datos',
                                 'cantidad' => array(
-                                    'pendientes' => (new Mercurio47)->getCount("*", "conditions: estado='P' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'aprobados' => (new Mercurio47)->getCount("*", "conditions: estado='A' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'rechazados' => (new Mercurio47)->getCount("*", "conditions: estado='R' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'devueltos' => (new Mercurio47)->getCount("*", "conditions: estado='D' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'temporales' => (new Mercurio47)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
+                                    'pendientes' => Mercurio47::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'aprobados' => Mercurio47::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'rechazados' => Mercurio47::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'devueltos' => Mercurio47::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'temporales' => Mercurio47::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
                                 ),
                                 'icon' => 'B',
                                 'url' => 'actualizadatos/index',
                                 'imagen' => 'datos_basicos.jpg',
-                            )
-                        ),
+                            ]
+                        ],
                         'productos' => false,
-                        'consultas' => array(
-                            array(
+                        'consultas' => [
+                            [
                                 'name' => 'Consulta Trabajadores',
                                 'url' => 'subsidioemp/consulta_trabajadores_view',
                                 'imagen' => 'consulta_trabajadores.jpg',
-                            ),
-                            array(
+                            ],
+                            [
                                 'name' => 'Consulta de gíro',
                                 'url' => 'subsidioemp/consulta_giro_view',
                                 'imagen' => 'consulta_giro.jpg',
-                            ),
-                            array(
+                            ],
+                            [
                                 'name' => 'Consulta de aportes',
                                 'url' => 'subsidioemp/consulta_aportes_view',
                                 'imagen' => 'consulta_aportes.jpg',
-                            ),
-                            array(
+                            ],
+                            [
                                 'name' => 'Consulta de nominas',
                                 'url' => 'subsidioemp/consulta_nomina_view',
                                 'imagen' => 'consulta_aportes.jpg',
-                            )
-                        )
-                    );
+                            ]
+                        ]
+                    ];
                     break;
                 case 'P':
-                    $servicios = array(
-                        'afiliacion' => array(
-                            array(
+                    $servicios = [
+                        'afiliacion' => [
+                            [
                                 'name' => 'Solicitudes Empresas',
-                                'cantidad' => array(
-                                    'pendientes' => (new Mercurio30)->getCount("*", "conditions: estado='P' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'aprobados' => (new Mercurio30)->getCount("*", "conditions: estado='A' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'rechazados' => (new Mercurio30)->getCount("*", "conditions: estado='R' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'devueltos' => (new Mercurio30)->getCount("*", "conditions: estado='D' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'temporales' => (new Mercurio30)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
-                                ),
+                                'cantidad' => [
+                                    'pendientes' => Mercurio30::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'aprobados' => Mercurio30::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'rechazados' => Mercurio30::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'devueltos' => Mercurio30::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'temporales' => Mercurio30::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
+                                ],
                                 'icon' => 'E',
                                 'url' => 'empresa/index',
                                 'imagen' => 'empresas.jpg',
-                            ),
-                            array(
+                            ],
+                            [
                                 'name' => 'Solicitud Trabajador independiente',
-                                'cantidad' => array(
-                                    'pendientes' => (new Mercurio41)->getCount("*", "conditions: estado='P' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'aprobados' => (new Mercurio41)->getCount("*", "conditions: estado='A' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'rechazados' => (new Mercurio41)->getCount("*", "conditions: estado='R' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'devueltos' => (new Mercurio41)->getCount("*", "conditions: estado='D' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'temporales' => (new Mercurio41)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
-                                ),
+                                'cantidad' => [
+                                    'pendientes' => Mercurio41::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'aprobados' => Mercurio41::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'rechazados' => Mercurio41::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'devueltos' => Mercurio41::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'temporales' => Mercurio41::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
+                                ],
                                 'icon' => 'I',
                                 'url' => 'independiente/index',
                                 'imagen' => 'independiente.jpg',
-                            ),
-                            array(
+                            ],
+                            [
                                 'name' => 'Solicitud Pensionado',
-                                'cantidad' => array(
-                                    'pendientes' => (new Mercurio38)->getCount("*", "conditions: estado='P' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'aprobados' => (new Mercurio38)->getCount("*", "conditions: estado='A' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'rechazados' => (new Mercurio38)->getCount("*", "conditions: estado='R' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'devueltos' => (new Mercurio38)->getCount("*", "conditions: estado='D' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'temporales' => (new Mercurio38)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
-                                ),
+                                'cantidad' => [
+                                    'pendientes' => Mercurio38::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'aprobados' => Mercurio38::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'rechazados' => Mercurio38::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'devueltos' => Mercurio38::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'temporales' => Mercurio38::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
+                                ],
                                 'icon' => 'P',
                                 'url' => 'pensionado/index',
                                 'imagen' => 'pensionado.jpg',
-                            ),
-                            array(
+                            ],
+                            [
                                 'name' => 'Solicitud Facultativo',
-                                'cantidad' => array(
-                                    'pendientes' => (new Mercurio36)->getCount("*", "conditions: estado='P' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'aprobados' => (new Mercurio36)->getCount("*", "conditions: estado='A' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'rechazados' => (new Mercurio36)->getCount("*", "conditions: estado='R' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'devueltos' => (new Mercurio36)->getCount("*", "conditions: estado='D' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'temporales' => (new Mercurio36)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
-                                ),
+                                'cantidad' => [
+                                    'pendientes' => Mercurio36::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'aprobados' => Mercurio36::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'rechazados' => Mercurio36::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'devueltos' => Mercurio36::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'temporales' => Mercurio36::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
+                                ],
                                 'icon' => 'F',
                                 'url' => 'facultativo/index',
                                 'imagen' => 'facultativo.jpg',
-                            )
-                        ),
-                        'productos' => array(
-                            array(
+                            ],
+                        ],
+                        'productos' => [
+                            [
                                 'name' => 'P. Complemento_nutricional',
                                 'url' => 'productos/complemento_nutricional',
                                 'imagen' => 'complemento.jpg',
-                            )
-                        ),
+                            ]
+                        ],
                         'consultas' => false,
-                    );
+                    ];
                     break;
                 case 'I':
                 case 'F':
                 case 'O':
-                    $servicios = array(
-                        'afiliacion' => array(
-                            array(
+                    $servicios = [
+                        'afiliacion' => [
+                            [
                                 'name' => 'Solicitudes Cónyuges',
-                                'cantidad' => array(
-                                    'pendientes' => (new Mercurio32)->getCount("*", "conditions: estado='P' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'aprobados' => (new Mercurio32)->getCount("*", "conditions: estado='A' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'rechazados' => (new Mercurio32)->getCount("*", "conditions: estado='R' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'devueltos' => (new Mercurio32)->getCount("*", "conditions: estado='D' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'temporales' => (new Mercurio32)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
-                                ),
+                                'cantidad' => [
+                                    'pendientes' => Mercurio32::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'aprobados' => Mercurio32::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'rechazados' => Mercurio32::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'devueltos' => Mercurio32::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'temporales' => Mercurio32::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
+                                ],
                                 'icon' => 'C',
                                 'url' => 'conyuge/index',
                                 'imagen' => 'conyuges.jpg',
-                            ),
-                            array(
+                            ],
+                            [
                                 'name' => 'Solicitudes Beneficiarios',
-                                'cantidad' => array(
-                                    'pendientes' => (new Mercurio34)->getCount("*", "conditions: estado='P' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'aprobados' => (new Mercurio34)->getCount("*", "conditions: estado='A' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'rechazados' => (new Mercurio34)->getCount("*", "conditions: estado='R' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'devueltos' => (new Mercurio34)->getCount("*", "conditions: estado='D' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'temporales' => (new Mercurio34)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
-                                ),
+                                'cantidad' => [
+                                    'pendientes' => Mercurio34::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'aprobados' => Mercurio34::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'rechazados' => Mercurio34::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'devueltos' => Mercurio34::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'temporales' => Mercurio34::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
+                                ],
                                 'icon' => 'B',
                                 'url' => 'beneficiario/index',
                                 'imagen' => 'beneficiarios.jpg',
-                            ),
-                            array(
+                            ],
+                            [
                                 'name' => 'Actualización de  datos',
                                 'cantidad' => array(
-                                    'pendientes' => (new Mercurio47)->getCount("*", "conditions: estado='P' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'aprobados' => (new Mercurio47)->getCount("*", "conditions: estado='A' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'rechazados' => (new Mercurio47)->getCount("*", "conditions: estado='R' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'devueltos' => (new Mercurio47)->getCount("*", "conditions: estado='D' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'temporales' => (new Mercurio47)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
+                                    'pendientes' => Mercurio47::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'aprobados' => Mercurio47::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'rechazados' => Mercurio47::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'devueltos' => Mercurio47::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'temporales' => Mercurio47::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
                                 ),
                                 'icon' => 'B',
                                 'url' => 'actualizadatos/index',
                                 'imagen' => 'datos_basicos.jpg',
-                            )
-                        ),
-                        'productos' => array(
-                            array(
+                            ]
+                        ],
+                        'productos' => [
+                            [
                                 'name' => 'P. Complemento_nutricional',
                                 'url' => 'productos/complemento_nutricional',
                                 'imagen' => 'complemento.jpg',
-                            )
-                        ),
-                        'consultas' => array(
-                            array(
+                            ]
+                        ],
+                        'consultas' => [
+                            [
                                 'name' => 'Consulta Trabajadores',
                                 'url' => 'subsidio/consulta_trabajadores_view',
                                 'imagen' => 'consulta_trabajadores.jpg',
-                            ),
-                            array(
+                            ],
+                            [
                                 'name' => 'Consulta de gíro',
                                 'url' => 'subsidio/consulta_giro_view',
                                 'imagen' => 'consulta_giro.jpg',
-                            ),
-                            array(
+                            ],
+                            [
                                 'name' => 'Consulta de aportes',
                                 'url' => 'subsidio/consulta_aportes_view',
                                 'imagen' => 'consulta_aportes.jpg',
-                            )
-                        )
-                    );
+                            ]
+                        ]
+                    ];
                     break;
                 case 'T':
-                    $servicios = array(
-                        'afiliacion' => array(
-                            array(
+                    $servicios = [
+                        'afiliacion' => [
+                            [
                                 'name' => 'Solicitudes Cónyuges',
-                                'cantidad' => array(
-                                    'pendientes' => (new Mercurio32)->getCount("*", "conditions: estado='P' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'aprobados' => (new Mercurio32)->getCount("*", "conditions: estado='A' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'rechazados' => (new Mercurio32)->getCount("*", "conditions: estado='R' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'devueltos' => (new Mercurio32)->getCount("*", "conditions: estado='D' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'temporales' => (new Mercurio32)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
-                                ),
+                                'cantidad' => [
+                                    'pendientes' => Mercurio32::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'aprobados' => Mercurio32::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'rechazados' => Mercurio32::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'devueltos' => Mercurio32::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'temporales' => Mercurio32::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
+                                ],
                                 'icon' => 'C',
                                 'url' => 'conyuge/index',
                                 'imagen' => 'conyuges.jpg',
-                            ),
-                            array(
+                            ],
+                            [
                                 'name' => 'Solicitudes Beneficiarios',
-                                'cantidad' => array(
-                                    'pendientes' => (new Mercurio34)->getCount("*", "conditions: estado='P' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'aprobados' => (new Mercurio34)->getCount("*", "conditions: estado='A' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'rechazados' => (new Mercurio34)->getCount("*", "conditions: estado='R' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'devueltos' => (new Mercurio34)->getCount("*", "conditions: estado='D' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'temporales' => (new Mercurio34)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
-                                ),
+                                'cantidad' => [
+                                    'pendientes' => Mercurio34::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'aprobados' => Mercurio34::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'rechazados' => Mercurio34::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'devueltos' => Mercurio34::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'temporales' => Mercurio34::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
+                                ],
                                 'icon' => 'B',
                                 'url' => 'beneficiario/index',
                                 'imagen' => 'beneficiarios.jpg',
-                            ),
-                            array(
+                            ],
+                            [
                                 'name' => 'Actualización de datos',
-                                'cantidad' => array(
-                                    'pendientes' => (new Mercurio47)->getCount("*", "conditions: estado='P' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'aprobados' => (new Mercurio47)->getCount("*", "conditions: estado='A' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'rechazados' => (new Mercurio47)->getCount("*", "conditions: estado='R' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'devueltos' => (new Mercurio47)->getCount("*", "conditions: estado='D' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'temporales' => (new Mercurio47)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
-                                ),
+                                'cantidad' => [
+                                    'pendientes' => Mercurio47::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'aprobados' => Mercurio47::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'rechazados' => Mercurio47::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'devueltos' => Mercurio47::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'temporales' => Mercurio47::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
+                                ],
                                 'icon' => 'A',
                                 'url' => 'actualizadatostra/index',
                                 'imagen' => 'datos_basicos.jpg',
-                            ),
-                            array(
+                            ],
+                            [
                                 'name' => 'Presentar Certificados',
-                                'cantidad' => array(
-                                    'pendientes' => (new Mercurio45)->getCount("*", "conditions: estado='P' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'aprobados' => (new Mercurio45)->getCount("*", "conditions: estado='A' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'rechazados' => (new Mercurio45)->getCount("*", "conditions: estado='R' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'devueltos' => (new Mercurio45)->getCount("*", "conditions: estado='D' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'"),
-                                    'temporales' => (new Mercurio45)->getCount("*", "conditions: estado='T' and coddoc='{$coddoc}' and tipo='{$tipo}' and documento = '" . $documento . "'")
-                                ),
+                                'cantidad' => [
+                                    'pendientes' => Mercurio45::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'aprobados' => Mercurio45::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'rechazados' => Mercurio45::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'devueltos' => Mercurio45::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
+                                    'temporales' => Mercurio45::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
+                                ],
                                 'icon' => 'D',
                                 'url' => 'certificados/index',
                                 'imagen' => 'presentar_certificado.jpg',
-                            )
-                        ),
-                        'productos' => array(
-                            array(
+                            ]
+                        ],
+                        'productos' => [
+                            [
                                 'name' => 'P. Complemento_nutricional',
                                 'url' => 'productos/complemento_nutricional',
                                 'imagen' => 'complemento.jpg',
-                            )
-                        ),
-                        'consultas' => array(
-                            array(
+                            ]
+                        ],
+                        'consultas' => [
+                            [
                                 'name' => 'Consulta de gíro',
                                 'url' => 'subsidio/consulta_giro_view',
                                 'imagen' => 'consulta_giro.jpg',
-                            ),
-                            array(
+                            ],
+                            [
                                 'name' => 'Consulta nucleo familiar',
                                 'url' => 'subsidio/consulta_nucleo',
                                 'imagen' => 'conyuges.jpg',
-                            ),
-                            array(
+                            ],
+                            [
                                 'name' => 'Consulta planilla',
                                 'url' => 'subsidio/consulta_planilla_trabajador_view',
                                 'imagen' => 'consulta_trabajadores.jpg',
-                            )
-                        )
-                    );
+                            ]
+                        ]
+                    ];
                     break;
                 default:
                     break;
             }
 
-            $salida = array(
+            $salida = [
                 'success' => true,
                 'msj' => 'Proceso completado con éxito',
                 'data' => $servicios
-            );
+            ];
         } catch (DebugException $e) {
-            $salida = array(
+            $salida = [
                 'success' => false,
                 'msj' => $e->getMessage()
-            );
+            ];
         }
         return $this->renderObject($salida, false);
     }

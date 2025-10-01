@@ -16,6 +16,7 @@ class AutenticaGeneral
     protected $procesadorComando;
     protected $tipo;
     protected $tipoName;
+    protected $estadoAfiliado;
 
     public function __construct()
     {
@@ -183,5 +184,10 @@ class AutenticaGeneral
             )),
             $html
         );
+    }
+
+    public function getEstadoAfiliado()
+    {
+        return $this->estadoAfiliado;
     }
 }

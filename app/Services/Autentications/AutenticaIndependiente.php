@@ -42,11 +42,7 @@ class AutenticaIndependiente extends AutenticaGeneral
         $out = $this->procesadorComando->toArray();
         $afiliado = ($out['success'] == true) ? $out['data'] : null;
 
-        if (is_null($afiliado)) {
-            //ya no está registrado el afiliado empresa
-            $this->message = "Error acceso incorrecto. El afiliado independiente no está activo en el \"SISU\", para su ingreso a la plataforma.";
-            return false;
-        }
+
 
         $sucurIndepe = False;
         $sucursales = $out['sucursales'];
@@ -79,6 +75,18 @@ class AutenticaIndependiente extends AutenticaGeneral
         $usuarioParticular = (new Mercurio07)->findFirst("tipo='P' AND documento='{$documento}' AND coddoc='{$coddoc}'");
 
         $usuarioIndependiente = (new Mercurio07)->findFirst("tipo='{$this->tipo}' AND documento='{$documento}' AND coddoc='{$coddoc}'");
+
+        if (is_null($afiliado) || $afiliado == false) {
+            //ya no está registrado el afiliado empresa
+            if ($usuarioIndependiente) {
+                $this->estadoAfiliado = 'I';
+                return true;
+            } else {
+                $this->message = "El independiente no se encuentra registrado en el sistema principal de Subsidio, no dispone de acceso a la plataforma.";
+                return false;
+            }
+        }
+        $this->estadoAfiliado = ($afiliado['estado'] != 'I') ? 'A' : 'I';
 
         /**
          * Si está registrada la empresa en sisu, en estado inactivo

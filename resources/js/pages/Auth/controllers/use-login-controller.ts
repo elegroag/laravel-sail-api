@@ -60,14 +60,16 @@ const useLoginController = ({
         const data = await response.json();
 
         if (response.ok && data.success) {
-            router.visit('/web/login');
+            return router.visit(route('load.session'));
         } else {
             // Mostrar mensaje proveniente de la API si está disponible
             const msg = (typeof data?.message === 'string' && data.message.trim().length > 0)
               ? data.message
               : 'Ocurrió un error al iniciar sesión. Intenta nuevamente.'
+ 
             const detail = data?.errors;
             setAlertMessage(msg + (detail ? '\n' + JSON.stringify(detail) : ''));
+ 
             if (data?.errors) {
               console.error(data.errors);
             } else {

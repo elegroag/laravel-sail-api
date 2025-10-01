@@ -12,7 +12,6 @@ use App\Http\Middleware\EnsureCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/mercurio/login', [LoginController::class, 'indexAction'])->name('mercurio.login');
-//Route::post('/mercurio/autenticar', [LoginController::class, 'authenticateAction']);
 Route::post('/mercurio/salir', [LoginController::class, 'logoutAction'])->name('login.salir');
 Route::get('/mercurio/salir', [LoginController::class, 'logoutAction']);
 

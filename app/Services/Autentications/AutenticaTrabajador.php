@@ -47,16 +47,23 @@ class AutenticaTrabajador extends AutenticaGeneral
 
         $afiliado = ($out['success']) ? $out['data'] : false;
 
-        if ($afiliado == False) {
-            $this->message = "El trabajador no se encuentra registrado en el sistema principal de Subsidio, no dispone de acceso a la plataforma.";
-            return false;
-        }
-
         /// Si se encuentra el trabajador
         $usuarioTrabajador = Mercurio07::where('tipo', 'T')
             ->where('documento', $documento)
             ->where('coddoc', $coddoc)
             ->first();
+
+        if ($afiliado == null || $afiliado == false) {
+            if ($usuarioTrabajador) {
+                $this->estadoAfiliado = 'I';
+                return true;
+            } else {
+                $this->message = "El trabajador no se encuentra registrado en el sistema principal de Subsidio, no dispone de acceso a la plataforma.";
+                return false;
+            }
+        }
+
+        $this->estadoAfiliado = $afiliado['estado'];
 
         //trabajadores no inactivos y no muertos
         if ($afiliado['estado'] == 'I' || $afiliado['estado'] == 'M') {

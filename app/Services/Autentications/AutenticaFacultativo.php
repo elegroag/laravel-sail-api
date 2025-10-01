@@ -42,11 +42,7 @@ class AutenticaFacultativo extends AutenticaGeneral
         $out = $this->procesadorComando->toArray();
         $afiliado = ($out['success'] == true) ? $out['data'] : null;
 
-        if (is_null($afiliado)) {
-            //ya no está registrado el afiliado empresa
-            $this->message = "Error acceso incorrecto. El afiliado facultativo no está activo en el \"SISU\", para su ingreso a la plataforma.";
-            return false;
-        }
+
 
         $sucurFacu = False;
         $sucursales = $out['sucursales'];
@@ -79,6 +75,18 @@ class AutenticaFacultativo extends AutenticaGeneral
         $usuarioParticular = (new Mercurio07)->findFirst("tipo='P' AND documento='{$documento}' AND coddoc='{$coddoc}'");
 
         $usuarioFacultativo = (new Mercurio07)->findFirst("tipo='{$this->tipo}' AND documento='{$documento}' AND coddoc='{$coddoc}'");
+
+        if (is_null($afiliado) || $afiliado == false) {
+            //ya no está registrado el afiliado empresa
+            if ($usuarioFacultativo) {
+                $this->estadoAfiliado = 'I';
+                return true;
+            } else {
+                $this->message = "El facultativo no se encuentra registrado en el sistema principal de Subsidio, no dispone de acceso a la plataforma.";
+                return false;
+            }
+        }
+        $this->estadoAfiliado = ($afiliado['estado'] != 'I') ? 'A' : 'I';
 
         /**
          * Si está registrada la empresa en sisu, en estado inactivo

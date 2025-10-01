@@ -347,4 +347,45 @@ class AuthController extends Controller
         $payload['token'] = $token;
         return Inertia::render('Auth/VerifyEmail', $payload);
     }
+
+    public function loadSession()
+    {
+        $user = session('user');
+        $tipo = session('tipo');
+        $tipo = session('estado');
+        $token = (new AuthJwt(10))->SimpleToken([
+            'documento' => $user['documento'],
+            'coddoc' => $user['coddoc'],
+            'tipo' => $tipo,
+            'context' => 'verify',
+        ]);
+
+        if (session('estado_afiliado') == 'A') {
+            switch ($tipo) {
+                case 'E':
+                    $url = "mercurio/empresa/index";
+                    break;
+                case 'I':
+                    $url = "mercurio/independiente/index";
+                    break;
+                case 'O':
+                    $url = "mercurio/pensionado/index";
+                    break;
+                case 'F':
+                    $url = "mercurio/facultativo/index";
+                    break;
+                default:
+                    $url = "mercurio/principal/index";
+                    break;
+            }
+            return Inertia::location(url($url));
+        } else {
+            return Inertia::render('Auth/SessionEmail', [
+                'token' => $token,
+                'documento' => $user['documento'],
+                'coddoc' => $user['coddoc'],
+                'tipo' => $tipo,
+            ]);
+        }
+    }
 }

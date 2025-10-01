@@ -1,3 +1,8 @@
+
+.main-content {
+	padding-bottom: 5px;
+}
+
 .img-principal {
 	height: 90px;
 }
@@ -137,4 +142,38 @@
 	background: linear-gradient(to right, #7b8e9f, #a7b777); /* Gradiente azul a verde */
 	width: 70%; /* Ajusta según el porcentaje deseado */
 	border-radius: 4px;
+}
+
+
+.total-affiliations-card {
+	background-color: #ffffff;
+	border-radius: 15px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	padding: 25px;
+	max-width: 350px;
+	margin: auto; /* Centra la tarjeta */
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.total-affiliations-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 10px;
+}
+
+.total-affiliations-title {
+	font-size: .87rem;
+	color: #8c5f5f; /* Color marrón rojizo */
+	font-weight: 600;
+}
+
+.total-affiliations-icon {
+	width: 20px;
+	height: 20px;
+}
+
+.total-value {
+	font-size: .87rem;
+	color: #4e4e4e;
 }

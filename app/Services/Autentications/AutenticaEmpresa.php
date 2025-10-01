@@ -53,13 +53,6 @@ class AutenticaEmpresa extends AutenticaGeneral
 
         $out = $this->procesadorComando->toArray();
         $afiliado = ($out['success'] == true && isset($out['data']) && $out['data'] != false) ? $out['data'] : null;
-
-        if (is_null($afiliado)) {
-            //ya no está registrado el afiliado empresa
-            $this->message = "Error acceso incorrecto. La empresa no está activa en el \"SISU\", para su ingreso a la plataforma.";
-            return false;
-        }
-
         /**
          * buscar usuario de empresa en mercurio
          */
@@ -73,11 +66,19 @@ class AutenticaEmpresa extends AutenticaGeneral
             ->where('coddoc', $coddoc)
             ->first();
 
-        /**
-         * Si está registrada la empresa en sisu, en estado inactivo
-         */
-        if ($afiliado['estado'] == 'I') {
+        if ($afiliado == null || $afiliado == false) {
+            if ($usuarioParticular || $usuarioEmpresa) {
+                $this->estadoAfiliado = 'I';
+                return true;
+            } else {
+                $this->message = "Error acceso incorrecto. La empresa no está activa en el \"SISU\", para su ingreso a la plataforma.";
+                return false;
+            }
+        }
 
+        $this->estadoAfiliado = ($afiliado['estado'] != 'I') ? 'A' : 'I';
+
+        if ($afiliado['estado'] == 'I') {
             /**
              * cuando afiliado usuario de mercurio no existe, para inactivos de sisu
              */

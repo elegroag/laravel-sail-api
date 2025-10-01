@@ -42,11 +42,7 @@ class AutenticaPensionado extends AutenticaGeneral
         $out = $this->procesadorComando->toArray();
         $afiliado = ($out['success'] == true) ? $out['data'] : null;
 
-        if (is_null($afiliado)) {
-            //ya no está registrado el afiliado empresa
-            $this->message = "Error acceso incorrecto. El afiliado pensionado no está activo en el \"SISU\", para su ingreso a la plataforma.";
-            return false;
-        }
+
 
         $sucurPension = False;
         $sucursales = $out['sucursales'];
@@ -73,19 +69,31 @@ class AutenticaPensionado extends AutenticaGeneral
             return false;
         }
 
-        if ($afiliado['coddoc'] != $coddoc) {
-            $this->message = "El tipo documento del afiliado pensionado no es valido, debe solicitar el cambio en tipo documento a la dirección: " .
-                "<b>afiliacionyregistro@comfaca.com</b> indicando la comprobación del estado afiliado pensionado con tipo documento errado." .
-                "No olvidar el compartir la dirección email, el número de cedula y el nombre del afiliado, para poder identificar al afiliado.";
-            return false;
-        }
-
         /**
          * buscar usuario de empresa en mercurio
          */
         $usuarioParticular = (new Mercurio07)->findFirst("tipo='P' AND documento='{$documento}' AND coddoc='{$coddoc}'");
 
         $usuarioPensionado = (new Mercurio07)->findFirst("tipo='O' AND documento='{$documento}' AND coddoc='{$coddoc}'");
+
+        if (is_null($afiliado) || $afiliado == false) {
+            //ya no está registrado el afiliado empresa
+            if ($usuarioPensionado) {
+                $this->estadoAfiliado = 'I';
+                return true;
+            } else {
+                $this->message = "El pensionado no se encuentra registrado en el sistema principal de Subsidio, no dispone de acceso a la plataforma.";
+                return false;
+            }
+        }
+        $this->estadoAfiliado = ($afiliado['estado'] != 'I') ? 'A' : 'I';
+
+        if ($afiliado['coddoc'] != $coddoc) {
+            $this->message = "El tipo documento del afiliado pensionado no es valido, debe solicitar el cambio en tipo documento a la dirección: " .
+                "<b>afiliacionyregistro@comfaca.com</b> indicando la comprobación del estado afiliado pensionado con tipo documento errado." .
+                "No olvidar el compartir la dirección email, el número de cedula y el nombre del afiliado, para poder identificar al afiliado.";
+            return false;
+        }
 
         /**
          * Si está registrada la empresa en sisu, en estado inactivo

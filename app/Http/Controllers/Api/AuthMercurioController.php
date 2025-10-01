@@ -38,16 +38,16 @@ class AuthMercurioController extends Controller
                 'documentType' => 'required|string|min:1',
                 'identification' => 'required|integer|digits_between:6,18',
                 'password' => 'required|string|min:8',
-                'selectedUserType' => 'required|string|min:2'
+                'tipo' => 'required|string|min:1'
             ]);
 
             $autenticaService = new AutenticaService();
             $response = $autenticaService->execute(
                 new RequestParam([
-                    'coddoc' => $request->documentType,
-                    'documento' => $request->identification,
-                    'password' => $request->password,
-                    'tipo' => $request->selectedUserType
+                    'coddoc' => $request->input('documentType'),
+                    'documento' => $request->input('identification'),
+                    'password' => $request->input('password'),
+                    'tipo' => $request->input('tipo')
                 ])
             );
 

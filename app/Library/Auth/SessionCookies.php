@@ -6,7 +6,7 @@ use App\Models\Adapter\DbBase;
 
 class SessionCookies
 {
-    private $model, $tipo, $coddoc, $documento, $estado;
+    private $model, $tipo, $coddoc, $documento, $estado, $estado_afiliado;
     private $db;
 
     public function __construct(...$params)
@@ -18,6 +18,7 @@ class SessionCookies
         $this->coddoc = $arguments['coddoc'];
         $this->documento = $arguments['documento'];
         $this->estado = $arguments['estado'];
+        $this->estado_afiliado = $arguments['estado_afiliado'];
         $this->db = DbBase::rawConnect();
     }
 
@@ -52,12 +53,14 @@ class SessionCookies
             'nombre' => $usuario['nombre'],
             'email' => $usuario['email'],
             'codciu' => $usuario['codciu'],
+            'estado' => $usuario['estado'],
             'ts' => time(),
         ];
 
         session()->regenerate();
         session()->put('user', $userData);
         session()->put('tipo', $usuario['tipo']);
+        session()->put('estado_afiliado', $this->estado_afiliado);
         return true;
     }
 

@@ -29,6 +29,8 @@ Route::get('/web/password/request', [AuthController::class, 'resetPassword'])->n
 Route::get('/web/verify/{tipo}/{coddoc}/{documento}', [AuthController::class, 'verify'])->name('verify.show');
 Route::post('/web/verify', [AuthController::class, 'verify'])->name('verify.request');
 Route::post('/web/verify_action', [AuthController::class, 'verifyAction'])->name('verify.action');
+Route::get('/web/load_session', [AuthController::class, 'loadSession'])->name('load.session');
+
 
 Route::get('/web', [WebController::class, 'dashboard'])->name('dashboard');
 Route::get('/web/empresas', [WebController::class, 'empresas'])->name('empresas.index');
