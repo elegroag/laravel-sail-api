@@ -12,7 +12,7 @@ use App\Services\Utils\Table;
 use Carbon\Carbon;
 use Exception;
 
-class MadreComuniServices
+class MadresComuniServices
 {
 
     private $orderpag = 'ORDER BY fecsol DESC';

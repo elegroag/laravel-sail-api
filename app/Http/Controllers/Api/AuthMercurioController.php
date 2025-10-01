@@ -53,7 +53,6 @@ class AuthMercurioController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Validación exitosa',
                 'data' => $response
             ], 201);
         } catch (ValidationException $e) {
@@ -255,7 +254,7 @@ class AuthMercurioController extends Controller
                     throw new DebugException("No se proporcionó número de whatsapp", 501);
                 }
 
-                $html = "> Código de verificación: 
+                $html = "> Código de verificación:
                 *{$codigoVerify}*. Generación de PIN plataforma Comfaca En Línea, utiliza el código de verificación para confirmar el propietario de la línea de whatsapp.";
                 $apiWhatsaap = new ApiWhatsapp();
                 $apiWhatsaap->send([

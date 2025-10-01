@@ -14,7 +14,7 @@ class AutenticaService
 {
     public function execute(Request $request): array|null
     {
-        $response = null;
+        $response = [];
         // Sanitización ligera
         $tipo = $request->getParam("tipo");
         $documento = $request->getParam("documento");
@@ -58,14 +58,17 @@ class AutenticaService
         }
 
         if ($res == False) {
-            return array(
-                "success" => false,
-                'msj' => $autentica->getMessage(),
-                'noAccess' => -1
-            );
+            return [
+                "access" => false,
+                'message' => $autentica->getMessage(),
+            ];
         }
 
-        $mercurio07 = Mercurio07::where(["tipo" => $tipo, "documento" => $documento, "coddoc" => $coddoc])->first();
+        $mercurio07 = Mercurio07::where("tipo", $tipo)
+            ->where("documento", $documento)
+            ->where("coddoc", $coddoc)
+            ->first();
+
         if ($mercurio07 == False) $mercurio07 = $autentica->getAfiliado();
 
         if ($mercurio07 == False) {
@@ -169,18 +172,14 @@ class AutenticaService
 
         if (!$auth->authenticate()) {
             throw new DebugException("Error acceso incorrecto. No se logra completar la autenticación", 504);
-        } else {
-            $this->autoFirma($documento, $coddoc);
-
-            $msj = "La autenticación se ha completado con éxito.";
-            $response = [
-                "success" => true,
-                "location" => 'principal/index',
-                "msj" => $msj
-            ];
         }
+        $this->autoFirma($documento, $coddoc);
 
-        return $response;
+        $msj = "La autenticación se ha completado con éxito.";
+        return [
+            "access" => true,
+            "message" => $msj
+        ];
     }
 
 
