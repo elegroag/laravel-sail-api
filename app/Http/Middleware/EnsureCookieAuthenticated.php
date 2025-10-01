@@ -24,7 +24,7 @@ class EnsureCookieAuthenticated
                     'message' => 'No autenticado.'
                 ], 401);
             }
-            return redirect('mercurio/login');
+            return redirect('web/login');
         }
 
         $tipo = session()->has('tipo') ? session('tipo') : null;
@@ -33,14 +33,14 @@ class EnsureCookieAuthenticated
         if ($user && $user != null && $tipo && $tipo != null) {
             $request->attributes->set('mercurio_user', $user);
             $request->attributes->set('mercurio_tipo', $tipo);
-        }else{
+        } else {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'No autenticado.'
                 ], 401);
             }
-            return redirect('mercurio/login');
+            return redirect('web/login');
         }
 
         return $next($request);

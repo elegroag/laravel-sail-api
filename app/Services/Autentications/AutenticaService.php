@@ -88,7 +88,7 @@ class AutenticaService
                 throw new DebugException("Alerta. El usuario ya posee un registro en plataforma y requiere de ingresar con la clave valida.", 501);
             } else {
                 //create validation mediante token
-                $codigoVerify = generaCode();
+                $codigoVerify = genera_code();
                 $autentica->verificaPin($mercurio07, $codigoVerify);
 
                 $authJwt = new AuthJwt();

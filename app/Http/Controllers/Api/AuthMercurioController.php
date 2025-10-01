@@ -46,7 +46,7 @@ class AuthMercurioController extends Controller
                 new RequestParam([
                     'coddoc' => $request->input('documentType'),
                     'documento' => $request->input('identification'),
-                    'password' => $request->input('password'),
+                    'clave' => $request->input('password'),
                     'tipo' => $request->input('tipo')
                 ])
             );
@@ -66,7 +66,7 @@ class AuthMercurioController extends Controller
         } catch (DebugException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al crear empresa: ' . $e->getMessage()
+                'message' => 'Error al autenticar: ' . $e->getMessage()
             ], 500);
         }
     }

@@ -216,7 +216,8 @@ class LoginController extends ApplicationController
                 "tipo: {$tipo}",
                 "coddoc: {$coddoc}",
                 "documento: {$documento}",
-                "estado: A"
+                "estado: A",
+                "estado_afiliado: I"
             );
 
             if (!$auth->authenticate()) {

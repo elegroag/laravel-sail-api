@@ -40,49 +40,28 @@ const useLoginController = ({
       setProcessing(true);
       // Reiniciar cualquier alerta previa antes de intentar login
       setAlertMessage(null)
-      try {
-        const tipoValue = TipoFuncionario[selectedUserType as keyof typeof TipoFuncionario];
 
-        const response = await fetch(route('api.authenticate'), {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-            },
-            body: JSON.stringify({
-              documentType,
-              password,
-              identification: identification ? parseInt(identification) : null,
-              tipo: tipoValue,
-            })
-        });
+      const tipoValue = TipoFuncionario[selectedUserType as keyof typeof TipoFuncionario];
 
-        const data = await response.json();
-
-        if (response.ok && data.success) {
-            return router.visit(route('load.session'));
-        } else {
-            // Mostrar mensaje proveniente de la API si está disponible
-            const msg = (typeof data?.message === 'string' && data.message.trim().length > 0)
-              ? data.message
-              : 'Ocurrió un error al iniciar sesión. Intenta nuevamente.'
- 
-            const detail = data?.errors;
-            setAlertMessage(msg + (detail ? '\n' + JSON.stringify(detail) : ''));
- 
-            if (data?.errors) {
-              console.error(data.errors);
-            } else {
-              console.error('Error desconocido:', data);
-            }
-        }
-      } catch (error) {
-          // Captura de excepciones de red/u otras y alerta genérica
-          console.error('Error al iniciar sesión:', error);
-          setAlertMessage('No fue posible conectar con el servidor. Intenta nuevamente.');
-      } finally {
-          setProcessing(false);
-      }
+      // Usar el flujo WEB: el backend creará la sesión y redirigirá con Inertia
+      router.post(route('login.authenticate'), {
+        documentType,
+        password,
+        identification: identification ? parseInt(identification) : null,
+        tipo: tipoValue,
+      }, {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: () => {
+          // El backend redirige según el tipo; no es necesario manejar aquí
+        },
+        onError: (errors) => {
+          // Puede contener errores de validación; mostrar mensaje genérico o detallar si es necesario
+          console.error('Error de autenticación:', errors);
+          setAlertMessage('No fue posible iniciar sesión. Verifique sus datos e intente nuevamente.');
+        },
+        onFinish: () => setProcessing(false),
+      });
   };
 
   return {

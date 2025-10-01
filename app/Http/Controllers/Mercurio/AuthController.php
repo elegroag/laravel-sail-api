@@ -18,6 +18,8 @@ use App\Services\Utils\Comman;
 use App\Services\Utils\SenderEmail;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
+use App\Services\Autentications\AutenticaService;
+use App\Services\Request as RequestParam;
 
 class AuthController extends Controller
 {
@@ -89,6 +91,94 @@ class AuthController extends Controller
     public function resetPassword()
     {
         return Inertia::render('Auth/ResetPassword');
+    }
+
+    /**
+     * Autenticación vía WEB: valida credenciales, crea sesión Laravel y redirige
+     */
+    public function authenticate(Request $request)
+    {
+        try {
+            $request->validate([
+                'documentType' => 'required|string|min:1',
+                'identification' => 'required|integer|digits_between:6,18',
+                'password' => 'required|string|min:8',
+                'tipo' => 'required|string|min:1'
+            ]);
+
+            $service = new AutenticaService();
+            [$access, $message] = $service->execute(
+                new RequestParam([
+                    'coddoc' => $request->input('documentType'),
+                    'documento' => $request->input('identification'),
+                    'clave' => $request->input('password'),
+                    'tipo' => $request->input('tipo')
+                ])
+            );
+
+            if (!$access) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message
+                ], 401);
+            }
+
+            $tipo = $request->input('tipo');
+            $coddoc = $request->input('documentType');
+            $documento = $request->input('identification');
+
+            // Crear la sesión del usuario
+            $auth = new SessionCookies(
+                "model: mercurio07",
+                "tipo: {$tipo}",
+                "coddoc: {$coddoc}",
+                "documento: {$documento}",
+                "estado: A",
+                "estado_afiliado: A"
+            );
+
+            if (!$auth->authenticate()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No fue posible crear la sesión. Verifique tipo/coddoc/documento o el estado del usuario.'
+                ], 422);
+            }
+
+            // Redirección según tipo
+            switch ($tipo) {
+                case 'T':
+                    $url = 'mercurio/principal/index';
+                    break;
+                case 'E':
+                    $url = 'mercurio/empresa/index';
+                    break;
+                case 'I':
+                    $url = 'mercurio/independiente/index';
+                    break;
+                case 'O':
+                    $url = 'mercurio/pensionado/index';
+                    break;
+                case 'F':
+                    $url = 'mercurio/facultativo/index';
+                    break;
+                default:
+                    $url = 'mercurio/principal/index';
+                    break;
+            }
+
+            return Inertia::location(url($url));
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error de validación',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (DebugException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al autenticar: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function verify(Request $request, $tipo = null, $coddoc = null, $documento = null)
@@ -382,44 +472,43 @@ class AuthController extends Controller
         return Inertia::render('Auth/VerifyEmail', $payload);
     }
 
-    public function loadSession()
+    public function loadSession(Request $request)
     {
-        $user = session('user');
-        $tipo = session('tipo');
-        $tipo = session('estado');
-        $token = (new AuthJwt(10))->SimpleToken([
-            'documento' => $user['documento'],
-            'coddoc' => $user['coddoc'],
-            'tipo' => $tipo,
-            'context' => 'verify',
+        $request->validate([
+            'documento' => 'required|numeric|digits_between:6,18',
+            'coddoc' => 'required|string|min:1|max:2',
+            'tipo' => 'required|string|size:1'
         ]);
 
-        if (session('estado_afiliado') == 'A') {
-            switch ($tipo) {
-                case 'E':
-                    $url = "mercurio/empresa/index";
-                    break;
-                case 'I':
-                    $url = "mercurio/independiente/index";
-                    break;
-                case 'O':
-                    $url = "mercurio/pensionado/index";
-                    break;
-                case 'F':
-                    $url = "mercurio/facultativo/index";
-                    break;
-                default:
-                    $url = "mercurio/principal/index";
-                    break;
-            }
-            return Inertia::location(url($url));
-        } else {
-            return Inertia::render('Auth/SessionEmail', [
-                'token' => $token,
-                'documento' => $user['documento'],
-                'coddoc' => $user['coddoc'],
-                'tipo' => $tipo,
-            ]);
+        $tipo = $request->input('tipo');
+        $documento = $request->input('documento');
+        $coddoc = $request->input('coddoc');
+
+        switch ($tipo) {
+            case 'T':
+                $url = "mercurio/principal/index";
+                break;
+            case 'E':
+                $url = "mercurio/empresa/index";
+                break;
+            case 'I':
+                $url = "mercurio/independiente/index";
+                break;
+            case 'O':
+                $url = "mercurio/pensionado/index";
+                break;
+            case 'F':
+                $url = "mercurio/facultativo/index";
+                break;
+            default:
+                $url = "mercurio/principal/index";
+                break;
         }
+        return Inertia::location(url('web/prueba_session'));
+    }
+
+    public function pruebaSession(Request $request)
+    {
+        dd(session()->all());
     }
 }

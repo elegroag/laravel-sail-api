@@ -116,10 +116,6 @@ class CrearUsuario
 
     public static function generaCode()
     {
-        $codigo_verify = "";
-        $seed = str_split('1234567890');
-        shuffle($seed);
-        foreach (array_rand($seed, 4) as $k) $codigo_verify .= $seed[$k];
-        return $codigo_verify;
+        return genera_code();
     }
 }

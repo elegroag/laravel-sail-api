@@ -24,13 +24,16 @@ Route::get('/dashboard', function () {
 Route::resource('tasks', TaskController::class);
 
 Route::get('/web/login', [AuthController::class, 'index'])->name('login');
+Route::post('/web/login', [AuthController::class, 'authenticate'])->name('login.authenticate');
 Route::get('/web/register', [AuthController::class, 'register'])->name('register');
 Route::get('/web/password/request', [AuthController::class, 'resetPassword'])->name('password.request');
 Route::get('/web/verify/{tipo}/{coddoc}/{documento}', [AuthController::class, 'verify'])->name('verify.show');
 Route::post('/web/verify', [AuthController::class, 'verify'])->name('verify.request');
 Route::post('/web/verify_action', [AuthController::class, 'verifyAction'])->name('verify.action');
 Route::get('/web/verify_action', [AuthController::class, 'verifyAction'])->name('verify.action');
-Route::get('/web/load_session', [AuthController::class, 'loadSession'])->name('load.session');
+Route::post('/web/load_session', [AuthController::class, 'loadSession'])->name('load.session');
+
+Route::get('/web/prueba_session', [AuthController::class, 'pruebaSession'])->name('prueba.session');
 
 
 Route::get('/web', [WebController::class, 'dashboard'])->name('dashboard');

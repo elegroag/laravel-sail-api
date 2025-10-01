@@ -774,7 +774,8 @@ class PrincipalController extends ApplicationController
                 "tipo: {$token->tipo}",
                 "coddoc: {$token->coddoc}",
                 "documento: {$token->documento}",
-                "estado: A"
+                "estado: A",
+                "estado_afiliado: I"
             );
 
             if (!$auth->authenticate()) {
