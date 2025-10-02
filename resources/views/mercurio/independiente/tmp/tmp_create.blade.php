@@ -349,18 +349,16 @@
                     </div>
                 </div>
             </form>
-        </div>
-
-        <% if (estado == 'T' || estado == 'D' || estado == void 0) { %>
-        <div class="row justify-content-center">
-            <div class="col">
-                <button type="button" class="btn btn-primary" id='guardar_ficha'>
-                    <i class="fas fa-save"></i> Guardar y continuar
-                </button>
+            <% if (estado == 'T' || estado == 'D' || estado == void 0) { %>
+            <div class="row justify-content-center mt-4">
+                <div class="col-auto">
+                    <button type="button" class="btn btn-primary" id='guardar_ficha'>
+                        <i class="fas fa-save"></i> Guardar y continuar
+                    </button>
+                </div>
             </div>
+            <% } %>
         </div>
-        <% } %>
-
     </div>
     <div class="tab-pane fade" id="seguimiento" role="tabpanel" aria-labelledby="seguimiento-tab">...</div>
     <div class="tab-pane fade" id="documentos_adjuntos" role="tabpanel" aria-labelledby="documentos_adjuntos-tab">...</div>

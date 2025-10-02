@@ -133,7 +133,11 @@ class IndependienteAdjuntoService
     function cifrarDocumento()
     {
         $cifrarDocumento = new CifrarDocumento();
-        $this->outPdf = $cifrarDocumento->cifrar($this->filename, $this->lfirma->getKeyprivate());
+        $this->outPdf = $cifrarDocumento->cifrar(
+            $this->filename,
+            $this->lfirma->getKeyprivate(),
+            $this->request->getClaveCertificado()
+        );
         $this->fhash = $cifrarDocumento->getFhash();
     }
 

@@ -44,7 +44,7 @@ class CifrarDocumento
      * @author elegroag <elegroag@ibero.edu.co>
      * @return string
      */
-    public function cifrar($filename, $strClavePrivada)
+    public function cifrar($filename, $strClavePrivada, $claveUsuario)
     {
         if (!$this->algoritmo) $this->algoritmo = OPENSSL_ALGO_SHA256;
 

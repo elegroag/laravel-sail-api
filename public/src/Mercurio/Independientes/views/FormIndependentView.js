@@ -1,10 +1,10 @@
 import flatpickr from 'flatpickr';
 import { Spanish } from 'flatpickr/dist/l10n/es';
-import { $App } from '../../../App';
-import { ComponentModel } from '../../../Componentes/Models/ComponentModel';
-import { eventsFormControl } from '../../../Core';
-import { FormView } from '../../FormView';
-import { IndependienteModel } from '../models/IndependienteModel';
+import { $App } from '@/App';
+import { ComponentModel } from '@/Componentes/Models/ComponentModel';
+import { eventsFormControl } from '@/Core';
+import { FormView } from '@/Mercurio/FormView';
+import { IndependienteModel } from '@/Mercurio/Independientes/models/IndependienteModel';
 
 export class FormIndependentView extends FormView {
     #choiceComponents = null;
@@ -165,40 +165,77 @@ export class FormIndependentView extends FormView {
             return false;
         }
 
-        $App.trigger('confirma', {
-            message: 'Confirma que desea guardar los datos del formulario.',
-            callback: (status) => {
-                if (status) {
-                    this.trigger('form:save', {
-                        entity: entity,
-                        isNew: this.isNew,
-                        callback: (response) => {
-                            target.removeAttr('disabled');
-                            this.$el.find('#cedtra').attr('disabled', true);
-
-                            if (response) {
-                                if (response.success) {
-                                    $App.trigger('alert:success', { message: response.msj });
-                                    this.model.set({ id: parseInt(response.data.id) });
-                                    if (this.isNew === true) {
-                                        $App.router.navigate('proceso/' + this.model.get('id'), {
-                                            trigger: true,
-                                            replace: true,
-                                        });
-                                    } else {
-                                        const _tab = new bootstrap.Tab('a[href="#documentos_adjuntos"]');
-                                        _tab.show();
-                                    }
-                                } else {
-                                    $App.trigger('alert:error', { message: response.msj });
-                                }
-                            }
-                        },
-                    });
-                } else {
-                    target.removeAttr('disabled');
-                }
+        // Solicitar la clave de usuario antes de confirmar y guardar
+        Swal.fire({
+            title: 'Confirmación requerida',
+            html: `<p style='font-size:14px;margin-bottom:8px'>Ingrese su clave para confirmar el envío de la información.</p>`,
+            input: 'password',
+            inputAttributes: {
+                autocapitalize: 'off',
+                autocomplete: 'current-password',
             },
+            showCancelButton: true,
+            confirmButtonText: 'Continuar',
+            cancelButtonText: 'Cancelar',
+            preConfirm: (clave) => {
+                if (!clave) {
+                    Swal.showValidationMessage('La clave es requerida');
+                    return false;
+                }
+                return clave;
+            },
+        }).then((result) => {
+            if (!result.isConfirmed) {
+                target.removeAttr('disabled');
+                return;
+            }
+
+            const clave = result.value;
+            // Adjuntamos la clave al entity para que viaje al backend
+            try {
+                entity.set('clave', clave);
+            } catch (e) {
+                // fallback por si entity no es un Backbone.Model estándar
+                if (typeof entity === 'object' && typeof entity.set !== 'function') {
+                    entity.clave = clave;
+                }
+            }
+
+            $App.trigger('confirma', {
+                message: 'Confirma que desea guardar los datos del formulario.',
+                callback: (status) => {
+                    if (status) {
+                        this.trigger('form:save', {
+                            entity: entity,
+                            isNew: this.isNew,
+                            callback: (response) => {
+                                target.removeAttr('disabled');
+                                this.$el.find('#cedtra').attr('disabled', true);
+
+                                if (response) {
+                                    if (response.success) {
+                                        $App.trigger('alert:success', { message: response.msj });
+                                        this.model.set({ id: parseInt(response.data.id) });
+                                        if (this.isNew === true) {
+                                            $App.router.navigate('proceso/' + this.model.get('id'), {
+                                                trigger: true,
+                                                replace: true,
+                                            });
+                                        } else {
+                                            const _tab = new bootstrap.Tab('a[href="#documentos_adjuntos"]');
+                                            _tab.show();
+                                        }
+                                    } else {
+                                        $App.trigger('alert:error', { message: response.msj });
+                                    }
+                                }
+                            },
+                        });
+                    } else {
+                        target.removeAttr('disabled');
+                    }
+                },
+            });
         });
     }
 

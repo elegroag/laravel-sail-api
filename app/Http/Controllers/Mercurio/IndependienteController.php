@@ -126,6 +126,7 @@ class IndependienteController extends ApplicationController
         try {
 
             $id = $request->input('id');
+            $clave_certificado = $request->input('clave');
             $params = $this->serializeData($request);
 
             if (is_null($id) || $id == '') {
@@ -137,6 +138,7 @@ class IndependienteController extends ApplicationController
             }
 
             $independienteService->paramsApi();
+            $independienteService->setClaveCertificado($clave_certificado);
 
             $independienteAdjuntoService = new IndependienteAdjuntoService($independiente);
 

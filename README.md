@@ -220,6 +220,13 @@ php artisan make:model ModelName -mcr
 php artisan cache:clear
 php artisan config:clear
 php artisan view:clear
+
+
+./vendor/bin/sail build --no-cache laravel.test
+./vendor/bin/sail up -d --force-recreate --remove-orphans
+
+./vendor/bin/sail composer require setasign/fpdi-tcpdf:^2.4
+# ./vendor/bin/sail php artisan sail:publish
 ```
 
 ---
