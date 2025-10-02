@@ -74,6 +74,7 @@ class Mercurio41Factory extends Factory
             'codban' => $this->faker->optional()->numerify('###'),
             'tipcue' => $this->faker->optional()->randomElement(['A', 'C']),
             'fecapr' => $this->faker->optional()->date(),
+            'dirlab' => $this->faker->optional()->address(),
         ];
     }
 }

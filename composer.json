@@ -16,7 +16,6 @@
         "phpmailer/phpmailer": "^6.9",
         "phpoffice/phpspreadsheet": "*",
         "ramsey/uuid": "^4.9",
-        "setasign/fpdi-tcpdf": "^2.3",
         "tecnickcom/tcpdf": "*",
         "tightenco/ziggy": "^2.4",
         "tymon/jwt-auth": "^2.0"

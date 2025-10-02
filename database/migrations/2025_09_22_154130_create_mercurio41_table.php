@@ -39,6 +39,7 @@ return new class extends Migration
             $table->char('codciu', 6)->nullable();
             $table->char('codzon', 6)->nullable();
             $table->string('direccion', 120)->nullable();
+            $table->string('dirlab', 120)->nullable();
             $table->char('barrio', 45)->nullable();
             $table->char('telefono', 10)->nullable();
             $table->char('celular', 10)->nullable();

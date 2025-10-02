@@ -136,7 +136,7 @@ class AutenticaService
                     }
                 }
 
-                $this->autoFirma($documento, $coddoc);
+                $this->autoFirma($documento, $coddoc, $clave);
 
                 return [
                     false,
@@ -164,7 +164,7 @@ class AutenticaService
         if (!$auth->authenticate()) {
             throw new DebugException("Error acceso incorrecto. No se logra completar la autenticación", 504);
         }
-        $this->autoFirma($documento, $coddoc);
+        $this->autoFirma($documento, $coddoc, $clave);
 
         return [
             true,
@@ -173,7 +173,7 @@ class AutenticaService
     }
 
 
-    function autoFirma($documento, $coddoc)
+    function autoFirma($documento, $coddoc, $clave)
     {
         $gestionFirmas = new GestionFirmaNoImage(
             array(
@@ -183,12 +183,12 @@ class AutenticaService
         );
         if ($gestionFirmas->hasFirma() == False) {
             $gestionFirmas->guardarFirma();
-            $gestionFirmas->generarClaves();
+            $gestionFirmas->generarClaves($clave);
         } else {
             $firma = $gestionFirmas->getFirma();
             if (is_null($firma->getKeypublic()) || is_null($firma->getKeyprivate())) {
                 $gestionFirmas->guardarFirma();
-                $gestionFirmas->generarClaves();
+                $gestionFirmas->generarClaves($clave);
             }
         }
     }

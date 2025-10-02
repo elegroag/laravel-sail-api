@@ -61,186 +61,6 @@ class LoginController extends ApplicationController
         return view('mercurio.auth.register');
     }
 
-    public function authenticateAction(Request $request, Response $response)
-    {
-        try {
-            // Sanitización ligera
-            $tipo = $request->input("tipo");
-            $documento = $request->input("documento");
-            $coddoc = $request->input("coddoc");
-            $clave = $request->input("clave");
-            $res = False;
-
-            // Validación básica de requeridos
-            if ($tipo === '' || $documento === '' || $coddoc === '') {
-                throw new DebugException("Error de acceso, los parámetros tipo, documento y coddoc son requeridos.", 422);
-            }
-
-            switch ($tipo) {
-                case 'E':
-                    $autentica = new AutenticaEmpresa();
-                    $res = $autentica->comprobarSISU($documento, $coddoc);
-                    break;
-                case 'T':
-                    $autentica = new AutenticaTrabajador();
-                    $res = $autentica->comprobarSISU($documento, $coddoc);
-                    break;
-                case 'I':
-                    $autentica = new AutenticaIndependiente();
-                    $res = $autentica->comprobarSISU($documento, $coddoc);
-                    break;
-                case 'O':
-                    $autentica = new AutenticaPensionado();
-                    $res = $autentica->comprobarSISU($documento, $coddoc);
-                    break;
-                case 'F':
-                    $autentica = new AutenticaFacultativo();
-                    $res = $autentica->comprobarSISU($documento, $coddoc);
-                    break;
-                case 'P':
-                    $autentica = new AutenticaParticular();
-                    $res = $autentica->comprobarSISU($documento, $coddoc);
-                    break;
-                default:
-                    throw new DebugException("Error de acceso, el tipo ingreso es requerido.", 501);
-                    break;
-            }
-
-            if ($res == False) {
-                return $this->renderObject(
-                    array(
-                        "success" => false,
-                        'msj' => $autentica->getMessage(),
-                        'noAccess' => -1
-                    ),
-                    false
-                );
-            }
-
-            $mercurio07 = (new Mercurio07)->findFirst(" tipo='{$tipo}' AND documento='{$documento}' AND coddoc='{$coddoc}'");
-            if ($mercurio07 == False) $mercurio07 = $autentica->getAfiliado();
-
-            if ($mercurio07 == False) {
-                throw new DebugException("Error acceso incorrecto. Los datos no corresponden a un usuario registrado en el sistema.", 501);
-            }
-
-            // Validar estado activo si existe campo estado
-            if (method_exists($mercurio07, 'getEstado')) {
-                $estado = $mercurio07->getEstado();
-                if (!empty($estado) && $estado !== 'A') {
-                    throw new DebugException("La cuenta no se encuentra activa para iniciar sesión.", 403);
-                }
-            }
-
-            if ($clave === 'xxxx') {
-
-                if ($tipo == 'N' || $tipo == 'P') {
-                    throw new DebugException("Alerta. El usuario ya posee un registro en plataforma y requiere de ingresar con la clave valida.", 501);
-                } else {
-                    //create validation mediante token
-                    $codigoVerify = genera_code();
-                    $autentica->verificaPin($mercurio07, $codigoVerify);
-
-                    $authJwt = new AuthJwt();
-                    $token = $authJwt->SimpleToken();
-
-                    $user19 = (new Mercurio19())->findFirst("documento='{$documento}' AND coddoc='{$coddoc}' AND tipo='{$tipo}'");
-                    $inicio  = date('Y-m-d H:i:s');
-                    if ($user19) {
-                        $momento = new \DateTime($user19->getInicio());
-                        // Obtener el momento actual
-                        $ahora = new \DateTime("now");
-                        // Calcular la diferencia
-                        $diferencia = $momento->diff($ahora);
-                        // Convertir la diferencia a minutos
-                        $diferenciaEnMinutos = ($diferencia->days * 24 * 60) + ($diferencia->h * 60) + $diferencia->i;
-                        if ($diferenciaEnMinutos >= 5) {
-                            $intentos = 0;
-                        } else {
-                            $intentos = $user19->getIntentos() ? $user19->getIntentos() + 1 : 0;
-                        }
-
-                        Mercurio19::where('documento', $documento)
-                            ->where('coddoc', $coddoc)
-                            ->where('tipo', $tipo)
-                            ->update([
-                                'intentos' => (int) $intentos,
-                                'inicio'   => $inicio,
-                                'codver'   => (string) $codigoVerify,
-                                'token'    => (string) $token,
-                            ]);
-                    } else {
-                        $user19 = new Mercurio19();
-                        $user19->setTipo($tipo);
-                        $user19->setCoddoc($coddoc);
-                        $user19->setDocumento($documento);
-                        $user19->setIntentos(0);
-                        $user19->setInicio($inicio);
-                        $user19->setCodver($codigoVerify);
-                        $user19->setToken($token);
-                        $user19->setCodigo(1);
-                        if (!$user19->save()) {
-                            $msj = '';
-                            foreach ($user19->getMessages() as $message)  $msj .= ' ' . $message->getMessage();
-                            throw new DebugException("Error al guardar Token Access, {$msj}", 501);
-                        }
-                    }
-
-                    $this->autoFirma($documento, $coddoc);
-
-                    return $this->renderObject(
-                        array(
-                            'success' => false,
-                            'msj' => "Alerta. El usuario ya posee un registro en plataforma y requiere de ingresar con PIN de validación.",
-                            'noAccess' => 2,
-                            "documento" => $documento,
-                            "coddoc" => $coddoc,
-                            "tipafi" => $tipo,
-                            "tipo" => $tipo,
-                            "id" => null
-                        ),
-                        false
-                    );
-                }
-            }
-
-            // Comparación segura del hash de clave (esquema actual: md5(password_hash_old(clave)))
-            $expectedHash = md5(password_hash_old((string) $clave));
-            $storedHash = (string) $mercurio07->getClave();
-            if (!hash_equals($storedHash, $expectedHash)) {
-                throw new DebugException("Error el valor de la clave no es válido para ingresar a la plataforma.", 503);
-            }
-
-            $auth = new SessionCookies(
-                "model: mercurio07",
-                "tipo: {$tipo}",
-                "coddoc: {$coddoc}",
-                "documento: {$documento}",
-                "estado: A",
-                "estado_afiliado: I"
-            );
-
-            if (!$auth->authenticate()) {
-                throw new DebugException("Error acceso incorrecto. No se logra completar la autenticación", 504);
-            } else {
-                $this->autoFirma($documento, $coddoc);
-                $msj = "La autenticación se ha completado con éxito.";
-                $response = array(
-                    "success" => true,
-                    "location" => 'principal/index',
-                    "msj" => $msj
-                );
-            }
-        } catch (DebugException $e) {
-            $response = array(
-                "success" => false,
-                "msj" => $e->getMessage() . ' ' . $e->getLine() . ' ' . basename($e->getFile())
-            );
-        }
-
-        return $this->renderObject($response);
-    }
-
     public function logoutAction()
     {
         SessionCookies::destroyIdentity();
@@ -313,7 +133,7 @@ class LoginController extends ApplicationController
                 throw new DebugException("Error no es posible el cambiar la clave del usuario, el afiliado no es valido", 501);
             }
 
-            $this->autoFirma($mercurio07->getDocumento(), $mercurio07->getCoddoc());
+            $this->autoFirma($mercurio07->getDocumento(), $mercurio07->getCoddoc(), '12345');
 
             $response = array(
                 "success" => true,
@@ -328,125 +148,6 @@ class LoginController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    /**
-     * registroAction function
-     * @changed [2024-03-20]
-     * @author elegroag <elegroag@ibero.edu.co>
-     * @return void
-     */
-    public function registroAction(Request $request)
-    {
-        try {
-            $this->db->begin();
-            $cedrep = $request->input('cedrep');
-            $coddoc = $request->input('coddoc');
-            $repleg = $request->input('repleg');
-            $email = $request->input('email');
-            $codciu = $request->input('codciu');
-            $tipper = $request->input('tipper');
-            $telefono = $request->input('telefono');
-            $tipo = $request->input('tipo');
-            $calemp = $request->input('calemp');
-            $tipsoc = $request->input('tipsoc');
-            $razsoc = $request->input('razsoc');
-            $coddocrepleg = $request->input('coddocrepleg');
-            $nit = $request->input('nit');
-
-            switch ($tipo) {
-                case 'E':
-                    $signupEntity = new SignupEmpresas();
-                    break;
-                case 'I':
-                    $signupEntity = new SignupIndependientes();
-                    break;
-                case 'F':
-                    $signupEntity = new SignupFacultativos();
-                    break;
-                case 'O':
-                    $signupEntity = new SignupPensionados();
-                    break;
-                case 'S':
-                    $signupEntity = new SignupDomestico();
-                    break;
-                case 'P':
-                    $signupParticular = new SignupParticular();
-                    $signupParticular->settings(
-                        new RequestParams(
-                            array(
-                                "documento" => $cedrep,
-                                "coddoc" => $coddoc,
-                                "nombre" => $repleg,
-                                "email" => $email,
-                                "codciu" => $codciu,
-                                "tipo" => $tipo,
-                                "razsoc" => $razsoc
-                            )
-                        )
-                    );
-                    $signupParticular->createUserMercurio();
-                    $solicitud = Mercurio07::where('coddoc', $coddoc)
-                        ->where('documento', $cedrep)
-                        ->where('tipo', $tipo)
-                        ->first();
-
-                    break;
-                default:
-                    throw new DebugException("Error el tipo de afiliación es requerido", 1);
-                    break;
-            }
-
-            if ($tipo !== 'P') {
-                $this->asignarFuncionario = new AsignarFuncionario();
-                //usa codciu para asignar funcionario 
-                $usuario = $this->asignarFuncionario->asignar($signupEntity->getTipopc(), $codciu);
-
-                $signupParticular = new SignupParticular($signupEntity);
-                $signupParticular->main(
-                    new RequestParams(
-                        array(
-                            "nit" => $nit,
-                            "cedrep" => $cedrep,
-                            "coddoc" => $coddoc,
-                            "repleg" => $repleg,
-                            "email" => $email,
-                            "codciu" => $codciu,
-                            "tipper" => $tipper,
-                            "telefono" => $telefono,
-                            "calemp" => $calemp,
-                            "tipo" => $tipo,
-                            "tipsoc" => $tipsoc,
-                            "coddocrepleg" => $coddocrepleg,
-                            "razsoc" => $razsoc,
-                            "usuario" => $usuario
-                        )
-                    )
-                );
-                $solicitud = $signupEntity->getSolicitud();
-            }
-
-            $this->autoFirma($solicitud->getDocumento(), $solicitud->getCoddoc());
-            $response = array(
-                "success" => true,
-                "msj" => "El proceso de registro como persona particular, se ha completado con éxito, " .
-                    "las credenciales de acceso le serán enviadas al respectivo correo registrado. " .
-                    "Vamos a continuar.\n",
-                "documento" => $solicitud->getDocumento(),
-                "coddoc" => $solicitud->getCoddoc(),
-                "tipo" => 'P',
-                "tipafi" => $tipo,
-                "id" => ($tipo == 'P') ? $solicitud->getDocumento() : $solicitud->getId()
-            );
-            $this->db->commit();
-        } catch (DebugException $e) {
-            $response = array(
-                "success" => false,
-                "msj" => $e->getMessage() . "<br/> También puedes comunicar a soporte técnico el problema presentado, dirección soportesistemas.comfaca@gmail.com, línea 4366300 ext 1012",
-                "error" => $e->getMessage() . ' ' . $e->getLine() . ' ' . $e->getFile()
-            );
-            $this->db->rollBack();
-        }
-        return $this->renderObject($response, false);
-    }
 
     public function guiaVideosAction()
     {
@@ -875,7 +576,7 @@ class LoginController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    function autoFirma($documento, $coddoc)
+    function autoFirma($documento, $coddoc, $clave)
     {
         $gestionFirmas = new GestionFirmaNoImage(
             array(
@@ -885,12 +586,12 @@ class LoginController extends ApplicationController
         );
         if ($gestionFirmas->hasFirma() == False) {
             $gestionFirmas->guardarFirma();
-            $gestionFirmas->generarClaves();
+            $gestionFirmas->generarClaves($clave);
         } else {
             $firma = $gestionFirmas->getFirma();
             if (is_null($firma->getKeypublic()) || is_null($firma->getKeyprivate())) {
                 $gestionFirmas->guardarFirma();
-                $gestionFirmas->generarClaves();
+                $gestionFirmas->generarClaves($clave);
             }
         }
     }

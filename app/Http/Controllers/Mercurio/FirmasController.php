@@ -55,6 +55,7 @@ class FirmasController extends ApplicationController
             $user = session()->has('user') ? session('user') : [];
             $documento = $user['documento'] ?? null;
             $coddoc = $user['coddoc'] ?? null;
+            $clave = $user['clave'] ?? null;
 
             if (!$documento || !$coddoc) {
                 throw new DebugException('Sesión inválida, no se encontró el usuario.', 401);
@@ -76,7 +77,7 @@ class FirmasController extends ApplicationController
             }
 
             $gestionFirmas->guardarFirma($imagen, $usuario);
-            $gestionFirmas->generarClaves();
+            $gestionFirmas->generarClaves($clave);
 
             $salida = ['success' => true, 'msj' => 'Imagen guardada correctamente.'];
         } catch (\Exception $err) {

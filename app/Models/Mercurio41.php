@@ -68,6 +68,7 @@ class Mercurio41 extends ModelBase
         'cargo',
         'codban',
         'tipcue',
+        'dirlab'
     ];
 
     public function setTipcue($tipcue)
@@ -288,6 +289,16 @@ class Mercurio41 extends ModelBase
     public function getDireccion()
     {
         return $this->direccion;
+    }
+
+    public function setDirlab($dirlab)
+    {
+        $this->dirlab = $dirlab;
+    }
+
+    public function getDirlab()
+    {
+        return $this->dirlab;
     }
 
     public function setBarrio($barrio)

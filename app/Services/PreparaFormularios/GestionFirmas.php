@@ -142,7 +142,7 @@ class GestionFirmas
      * @author elegroag <elegroag@ibero.edu.co>
      * @return array
      */
-    public function generarClaves()
+    public function generarClaves($claveUsuario)
     {
         if ($this->lfirma->getKeyprivate()) {
             if (file_exists(storage_path('temp/' . $this->lfirma->getKeyprivate()))) {
@@ -166,7 +166,7 @@ class GestionFirmas
         $claves = openssl_pkey_new($config);
 
         // Extraer la clave privada
-        openssl_pkey_export($claves, $clavePrivada);
+        openssl_pkey_export($claves, $clavePrivada, $claveUsuario);
 
         // Extraer la clave pública
         $informacionClave = openssl_pkey_get_details($claves);

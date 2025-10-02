@@ -17,6 +17,7 @@ class IndependienteAdjuntoService
     private $filename;
     private $outPdf;
     private $fhash;
+    private $claveCertificado;
 
     public function __construct($request)
     {
@@ -136,7 +137,7 @@ class IndependienteAdjuntoService
         $this->outPdf = $cifrarDocumento->cifrar(
             $this->filename,
             $this->lfirma->getKeyprivate(),
-            $this->request->getClaveCertificado()
+            $this->claveCertificado
         );
         $this->fhash = $cifrarDocumento->getFhash();
     }
@@ -149,5 +150,10 @@ class IndependienteAdjuntoService
             'out' => $this->outPdf,
             'fhash' => $this->fhash
         ];
+    }
+
+    public function setClaveCertificado($clave)
+    {
+        $this->claveCertificado = $clave;
     }
 }

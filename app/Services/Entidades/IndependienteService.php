@@ -27,7 +27,6 @@ class IndependienteService
     private $user;
     private $tipo;
     private $db;
-    private $claveCertificado;
 
     /**
      * __construct function
@@ -475,15 +474,5 @@ class IndependienteService
                 ]
             ]
         ];
-    }
-
-    public function setClaveCertificado($clave)
-    {
-        $this->claveCertificado = $clave;
-    }
-
-    public function getClaveCertificado()
-    {
-        return $this->claveCertificado;
     }
 }

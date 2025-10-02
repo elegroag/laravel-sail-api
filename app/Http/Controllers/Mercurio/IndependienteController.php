@@ -11,7 +11,6 @@ use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
 use App\Models\Gener09;
 use App\Models\Gener18;
-use App\Models\Mercurio01;
 use App\Models\Mercurio10;
 use App\Models\Mercurio30;
 use App\Models\Mercurio31;
@@ -67,8 +66,8 @@ class IndependienteController extends ApplicationController
             "title" => "Afiliación Independientes",
             "calemp" => "I",
             "tipper" => "N",
-            "cedtra" => parent::getActUser("documento"),
-            "coddoc" => parent::getActUser("coddoc")
+            "cedtra" => $this->user['documento'],
+            "coddoc" => $this->user['coddoc']
         ]);
     }
 
@@ -124,7 +123,6 @@ class IndependienteController extends ApplicationController
 
         $independienteService = new IndependienteService();
         try {
-
             $id = $request->input('id');
             $clave_certificado = $request->input('clave');
             $params = $this->serializeData($request);
@@ -138,11 +136,10 @@ class IndependienteController extends ApplicationController
             }
 
             $independienteService->paramsApi();
-            $independienteService->setClaveCertificado($clave_certificado);
+            $adjuntoService = new IndependienteAdjuntoService($independiente);
+            $adjuntoService->setClaveCertificado($clave_certificado);
 
-            $independienteAdjuntoService = new IndependienteAdjuntoService($independiente);
-
-            $out = $independienteAdjuntoService->formulario()->getResult();
+            $out = $adjuntoService->formulario()->getResult();
             (new GuardarArchivoService(
                 array(
                     'tipopc' => $this->tipopc,
@@ -151,7 +148,7 @@ class IndependienteController extends ApplicationController
                 )
             ))->salvarDatos($out);
 
-            $out = $independienteAdjuntoService->tratamientoDatos()->getResult();
+            $out = $adjuntoService->tratamientoDatos()->getResult();
             (new GuardarArchivoService(
                 array(
                     'tipopc' => $this->tipopc,
@@ -161,7 +158,7 @@ class IndependienteController extends ApplicationController
             ))->salvarDatos($out);
 
 
-            $out = $independienteAdjuntoService->cartaSolicitud()->getResult();
+            $out = $adjuntoService->cartaSolicitud()->getResult();
             (new GuardarArchivoService(
                 array(
                     'tipopc' => $this->tipopc,

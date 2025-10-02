@@ -222,12 +222,12 @@ class SignupService
         );
         if ($gestionFirmas->hasFirma() == False) {
             $gestionFirmas->guardarFirma();
-            $gestionFirmas->generarClaves();
+            $gestionFirmas->generarClaves($this->password);
         } else {
             $firma = $gestionFirmas->getFirma();
             if (is_null($firma->getKeypublic()) || is_null($firma->getKeyprivate())) {
                 $gestionFirmas->guardarFirma();
-                $gestionFirmas->generarClaves();
+                $gestionFirmas->generarClaves($this->password);
             }
         }
     }
