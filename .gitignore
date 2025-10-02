@@ -53,3 +53,4 @@ public/cajas/build
 .pnpm-store/
 resources/js/assets/
 database/seeders/dbsql
+storage/app/testing

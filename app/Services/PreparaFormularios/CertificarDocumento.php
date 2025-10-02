@@ -115,7 +115,8 @@ class CertificarDocumento
                 'Reason' => 'Aprobación de documento',
                 'ContactInfo' => 'noreply@example.com',
             ];
-            $pdf->setSignature($certPemPath, $keyPemPath, $claveUsuario ?? '', '', 2, $info);
+            // Importante: usar esquema file:// para que OpenSSL interprete rutas de archivo
+            $pdf->setSignature('file://' . $certPemPath, 'file://' . $keyPemPath, $claveUsuario ?? '', '', 2, $info);
 
             // Importar PDF existente con FPDI y replicar páginas
             $pageCount = $pdf->setSourceFile($filename);
