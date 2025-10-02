@@ -1,5 +1,6 @@
 import { PrincipalLayout } from './PrincipalLayout';
 import { ServiciosView } from './ServiciosView';
+import { TotalesView } from './TotalesView';
 
 class ControllerPrincipal {
     constructor(options) {
@@ -47,6 +48,9 @@ class ControllerPrincipal {
                             this.layout.getRegion('consultas').append(view);
                         });
                     }
+
+                    const view = new TotalesView({ model: response.totales });
+                    this.layout.getRegion('totales').append(view);
                 }
             },
             silent: false,
@@ -65,7 +69,7 @@ class ControllerPrincipal {
                 if (response) {
                     if (response.success === true) {
                         _.extend(this.App.Collections, response.data);
-                        return callback(response.msj);
+                        return callback(response);
                     }
                 }
                 return callback(false);

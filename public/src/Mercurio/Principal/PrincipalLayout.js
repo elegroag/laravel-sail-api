@@ -9,6 +9,7 @@ class PrincipalLayout extends Layout {
 				afiliaciones: '#show_afiliaciones',
 				productos: '#show_productos',
 				consultas: '#show_consultas',
+				totales: '#show_totales',
 			},
 		});
 	}

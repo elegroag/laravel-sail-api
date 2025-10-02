@@ -352,10 +352,33 @@ class PrincipalController extends ApplicationController
             }
 
             $servicios = $mservice->resumenServicios();
+            // Totales por estados de afiliación
+            $totales = [
+                'pendientes' => 0,
+                'aprobados' => 0,
+                'rechazados' => 0,
+                'devueltos' => 0,
+                'temporales' => 0,
+            ];
+
+            // Sumar sobre la sección 'afiliacion' si existe
+            if (isset($servicios['afiliacion']) && is_array($servicios['afiliacion'])) {
+                foreach ($servicios['afiliacion'] as $item) {
+                    if (isset($item['cantidad']) && is_array($item['cantidad'])) {
+                        foreach ($totales as $estado => $valor) {
+                            if (isset($item['cantidad'][$estado])) {
+                                $totales[$estado] += (int)$item['cantidad'][$estado];
+                            }
+                        }
+                    }
+                }
+            }
+
             $salida = [
                 'success' => true,
                 'msj' => 'Proceso completado con éxito',
-                'data' => $servicios
+                'data' => $servicios,
+                'totales' => $totales
             ];
         } catch (DebugException $e) {
             $salida = [

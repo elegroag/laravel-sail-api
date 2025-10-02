@@ -1,41 +1,5 @@
-
+<div class="container-fluid m-3" id="show_totales"></div>
 <div class="container-fluid m-3">
-
-    <div class="row justify-content-between mb-3">
-        <div class="total-affiliations-card">
-            <div class="total-affiliations-header">
-                <span class="total-affiliations-title">Total aprobadas</span>
-                <div class="total-affiliations-icon text-success"><span class="fas fa-user"></span></div>
-            </div>
-            <div class="total-value">+12.5%
-                desde el mes pasado</div>
-        </div>
-        <div class="total-affiliations-card">
-            <div class="total-affiliations-header">
-                <span class="total-affiliations-title">Total activas</span>
-                <div class="total-affiliations-icon text-warning"><span class="fas fa-user"></span></div>
-            </div>
-            <div class="total-value">+12.5%
-                desde el mes pasado</div>
-        </div>
-        <div class="total-affiliations-card">
-            <div class="total-affiliations-header">
-                <span class="total-affiliations-title">Total rechazadas</span>
-                <div class="total-affiliations-icon text-danger"><span class="fas fa-user"></span></div>
-            </div>
-            <div class="total-value">+12.5%
-                desde el mes pasado</div>
-        </div>
-        <div class="total-affiliations-card">
-            <div class="total-affiliations-header">
-                <span class="total-affiliations-title">Total devoluciones</span>
-                <div class="total-affiliations-icon text-info"><span class="fas fa-user"></span></div>
-            </div>
-            <div class="total-value">+12.5%
-                desde el mes pasado</div>
-        </div>
-    </div>
-
     <div class="pb-1">
         <h4 class="font-weight-bold" for='afiliaciones'>Movimientos</h4>
         <p class="text-muted">Gestiona y monitorea todas las solicitudes de afiliación en tiempo real</p>
