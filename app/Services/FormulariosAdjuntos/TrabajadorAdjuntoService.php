@@ -18,6 +18,7 @@ class TrabajadorAdjuntoService
     private $filename;
     private $outPdf;
     private $fhash;
+    private $claveCertificado;
 
     /**
      * request variable
@@ -161,7 +162,11 @@ class TrabajadorAdjuntoService
     function cifrarDocumento()
     {
         $cifrarDocumento = new CifrarDocumento();
-        $this->outPdf = $cifrarDocumento->cifrar($this->filename, $this->lfirma->getKeyprivate());
+        $this->outPdf = $cifrarDocumento->cifrar(
+            $this->filename,
+            $this->lfirma->getKeyprivate(),
+            $this->claveCertificado
+        );
         $this->fhash = $cifrarDocumento->getFhash();
     }
 
@@ -173,5 +178,10 @@ class TrabajadorAdjuntoService
             'out' => $this->outPdf,
             'fhash' => $this->fhash
         );
+    }
+
+    public function setClaveCertificado($clave)
+    {
+        $this->claveCertificado = $clave;
     }
 }

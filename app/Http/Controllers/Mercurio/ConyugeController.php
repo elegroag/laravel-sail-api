@@ -363,6 +363,7 @@ class ConyugeController extends ApplicationController
 
         try {
             $id = $request->input('id');
+            $clave_certificado = $request->input('clave');
             $params = $this->serializeData($request);
 
             if (is_null($id) || $id == "") {
@@ -381,6 +382,7 @@ class ConyugeController extends ApplicationController
             $solicitud = $conyugeService->findById($id);
 
             $conyugeAdjuntoService = new ConyugeAdjuntoService($solicitud);
+            $conyugeAdjuntoService->setClaveCertificado($clave_certificado);
             $out = $conyugeAdjuntoService->formulario()->getResult();
             (new GuardarArchivoService(
                 array(

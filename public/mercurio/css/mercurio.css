@@ -6,23 +6,6 @@
 	z-index: 9;
 }
 
-
-.sidenav-header {
-	height: auto;
-}
-
-.sidenav .navbar-brand,
-.sidenav .navbar-heading {
-	padding: 0 15px;
-}
-
-.navbar-brand-img,
-.navbar-brand>img {
-	margin-top: 0px;
-	max-width: 200px;
-	min-height: 1rem;
-}
-
 .form-control-label {
 	font-size: .82rem;
 	margin-bottom: 1px;

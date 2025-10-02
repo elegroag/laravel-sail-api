@@ -26,6 +26,7 @@ class ConyugeAdjuntoService
     private $filename;
     private $outPdf;
     private $fhash;
+    private $claveCertificado;
 
     /**
      * lfirma variable
@@ -160,7 +161,7 @@ class ConyugeAdjuntoService
     function cifrarDocumento()
     {
         $cifrarDocumento = new CifrarDocumento();
-        $this->outPdf = $cifrarDocumento->cifrar($this->filename, $this->lfirma->getKeyprivate());
+        $this->outPdf = $cifrarDocumento->cifrar($this->filename, $this->lfirma->getKeyprivate(), $this->claveCertificado);
         $this->fhash = $cifrarDocumento->getFhash();
     }
 
@@ -172,5 +173,10 @@ class ConyugeAdjuntoService
             'out' => $this->outPdf,
             'fhash' => $this->fhash
         );
+    }
+
+    public function setClaveCertificado($clave)
+    {
+        $this->claveCertificado = $clave;
     }
 }

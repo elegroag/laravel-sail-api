@@ -11,6 +11,7 @@ list($menu, $breadcrumbs, $pageTitle) = App\Services\Menu\Menu::showMenu('ME');
 @push('styles')
     <link rel="stylesheet" href="{{ asset('theme/css/argon-mercurio.css') }}" />
     <link rel="stylesheet" href="{{ asset('theme/css/argon-sidenav.css') }}" />
+    <link rel="stylesheet" href="{{ asset('theme/css/argon-content.css') }}" />
     <link rel="stylesheet" href="{{ asset('mercurio/css/mercurio.css') }}" />
 @endpush
 

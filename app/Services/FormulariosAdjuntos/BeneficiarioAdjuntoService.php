@@ -27,6 +27,7 @@ class BeneficiarioAdjuntoService
     private $filename;
     private $outPdf;
     private $fhash;
+    private $claveCertificado;
 
     public function __construct($request)
     {
@@ -230,7 +231,7 @@ class BeneficiarioAdjuntoService
     function cifrarDocumento()
     {
         $cifrarDocumento = new CifrarDocumento();
-        $this->outPdf = $cifrarDocumento->cifrar($this->filename, $this->lfirma->getKeyprivate());
+        $this->outPdf = $cifrarDocumento->cifrar($this->filename, $this->lfirma->getKeyprivate(), $this->claveCertificado);
         $this->fhash = $cifrarDocumento->getFhash();
     }
 
@@ -242,5 +243,10 @@ class BeneficiarioAdjuntoService
             'out' => $this->outPdf,
             'fhash' => $this->fhash
         );
+    }
+
+    public function setClaveCertificado($clave)
+    {
+        $this->claveCertificado = $clave;
     }
 }

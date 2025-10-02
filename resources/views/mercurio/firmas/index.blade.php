@@ -1,4 +1,4 @@
-@extends('layouts.dash')
+@extends('layouts.bone')
 
 @section('content')
 <div id='boneLayout'>

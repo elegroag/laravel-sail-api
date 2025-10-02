@@ -10,7 +10,7 @@ use App\Http\Controllers\Mercurio\UsuarioController;
 use App\Http\Middleware\EnsureCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/web/login', [AuthController::class, 'index'])->name('web.login');
+Route::get('/web/login', [AuthController::class, 'index'])->name('login');
 Route::post('/web/login', [AuthController::class, 'authenticate'])->name('login.authenticate');
 Route::get('/web/register', [AuthController::class, 'register'])->name('register');
 Route::get('/web/password/request', [AuthController::class, 'resetPassword'])->name('password.request');
@@ -18,10 +18,8 @@ Route::get('/web/verify/{tipo}/{coddoc}/{documento}', [AuthController::class, 'v
 Route::post('/web/verify', [AuthController::class, 'verify'])->name('verify.request');
 Route::post('/web/verify_action', [AuthController::class, 'verifyAction'])->name('verify.action');
 Route::post('/web/load_session', [AuthController::class, 'loadSession'])->name('load.session');
-
-Route::get('/mercurio/login', [LoginController::class, 'indexAction'])->name('mercurio.login');
-Route::post('/mercurio/salir', [LoginController::class, 'logoutAction'])->name('login.salir');
-Route::get('/mercurio/salir', [LoginController::class, 'logoutAction']);
+Route::post('/web/salir', [AuthController::class, 'logoutAction'])->name('login.salir');
+Route::get('/web/salir', [AuthController::class, 'logoutAction'])->name('logout');
 
 Route::post('/mercurio/recuperar_clave', [LoginController::class, 'recuperarClaveAction']);
 Route::post('/mercurio/registro', [LoginController::class, 'registroAction']);
@@ -42,8 +40,6 @@ Route::post('mercurio/principal/ingreso_dirigido', [PrincipalController::class, 
 // Movimientos
 Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
     Route::get('/mercurio/usuario/index', [UsuarioController::class, 'indexAction'])->name('usuario.index');
-    Route::get('/mercurio/movimientos/historial', [MovimientosController::class, 'historialAction'])->name('movimientos.historial');
-
     Route::get('/mercurio/notificaciones/index', [NotificacionesController::class, 'indexAction'])->name('mercurio.notificaciones.index');
     Route::post('/mercurio/notificaciones/procesar_notificacion', [NotificacionesController::class, 'procesarNotificacionAction']);
     Route::post('/mercurio/usuario/show_perfil', [UsuarioController::class, 'showPerfilAction']);

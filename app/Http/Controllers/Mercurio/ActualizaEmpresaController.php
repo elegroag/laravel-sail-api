@@ -61,6 +61,7 @@ class ActualizaEmpresaController extends ApplicationController
         $this->db->begin();
         $actualizaEmpresaService = new ActualizaEmpresaService();
         try {
+            $clave_certificado = $request->input('clave');
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
             $tipo = $this->tipo;
@@ -159,6 +160,7 @@ class ActualizaEmpresaController extends ApplicationController
                     'nit' => $documento,
                 ]
             );
+            $actualizaEmpresaService->setClaveCertificado($clave_certificado);
 
             $out = $actualizaEmpresaService->formulario()->getResult();
             (new GuardarArchivoService(

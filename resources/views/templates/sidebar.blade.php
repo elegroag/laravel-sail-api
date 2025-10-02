@@ -59,32 +59,3 @@ $array_tipos = [
         </div>
     </div>
 </nav>
-
-<style rel="stylesheet">
-.sidebar-status-indicator {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 1rem;
-    border-top: 1px solid #698cce; /* border-sidebar-border */
-    background-color: rgba(94, 99, 107, 0.5); /* bg-sidebar/50 */
-}
-
-.sidebar-status-content {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.75rem; /* text-xs */
-    color: rgba(244, 244, 255, 0.856); /* text-sidebar-foreground/50 */
-}
-
-.status-dot {
-    width: 0.5rem;
-    height: 0.5rem;
-    background-color: #10b981; /* bg-green-400 equivalente */
-    border-radius: 9999px; /* rounded-full */
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; /* animate-pulse */
-}
-
-</style>

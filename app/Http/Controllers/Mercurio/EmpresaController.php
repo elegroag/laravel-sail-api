@@ -104,6 +104,7 @@ class EmpresaController extends ApplicationController
         $this->db->begin();
         try {
             $id = $request->input('id', null);
+            $clave_certificado = $request->input('clave');
             $params = $this->serializeData($request);
 
             if (is_null($id)) {
@@ -119,8 +120,9 @@ class EmpresaController extends ApplicationController
                 $empresa->getId()
             );
 
-            $empresaAdjuntoService = new EmpresaAdjuntoService($empresa);
-            $out = $empresaAdjuntoService->formulario()->getResult();
+            $adjuntoService = new EmpresaAdjuntoService($empresa);
+            $adjuntoService->setClaveCertificado($clave_certificado);
+            $out = $adjuntoService->formulario()->getResult();
             (new GuardarArchivoService(
                 array(
                     'tipopc' => $this->tipopc,
@@ -129,7 +131,7 @@ class EmpresaController extends ApplicationController
                 )
             ))->salvarDatos($out);
 
-            $out = $empresaAdjuntoService->tratamientoDatos()->getResult();
+            $out = $adjuntoService->tratamientoDatos()->getResult();
             (new GuardarArchivoService(
                 array(
                     'tipopc' => $this->tipopc,
@@ -138,7 +140,7 @@ class EmpresaController extends ApplicationController
                 )
             ))->salvarDatos($out);
 
-            $out = $empresaAdjuntoService->cartaSolicitud()->getResult();
+            $out = $adjuntoService->cartaSolicitud()->getResult();
             (new GuardarArchivoService(
                 array(
                     'tipopc' => $this->tipopc,
@@ -147,7 +149,7 @@ class EmpresaController extends ApplicationController
                 )
             ))->salvarDatos($out);
 
-            $out = $empresaAdjuntoService->trabajadoresNomina()->getResult();
+            $out = $adjuntoService->trabajadoresNomina()->getResult();
             (new GuardarArchivoService(
                 array(
                     'tipopc' => $this->tipopc,

@@ -114,7 +114,8 @@ class FacultativoController extends ApplicationController
         $this->db->begin();
 
         try {
-            $id = $request->input('id', "addslaches", "extraspaces", "striptags");
+            $id = $request->input('id');
+            $clave_certificado = $request->input('clave');
             $params = $this->serializeData($request);
 
             $params['tipo'] = $this->tipo;
@@ -136,6 +137,8 @@ class FacultativoController extends ApplicationController
 
             $facultativoService->paramsApi();
             $facultativoAdjuntoService = new FacultativoAdjuntoService($facultativo);
+            $facultativoAdjuntoService->setClaveCertificado($clave_certificado);
+
             $out = $facultativoAdjuntoService->formulario()->getResult();
             (new GuardarArchivoService(
                 array(

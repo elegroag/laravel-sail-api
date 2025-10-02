@@ -460,9 +460,6 @@ class AuthController extends Controller
         ]);
 
         $tipo = $request->input('tipo');
-        $documento = $request->input('documento');
-        $coddoc = $request->input('coddoc');
-
         switch ($tipo) {
             case 'T':
                 $url = "mercurio/principal/index";
@@ -483,6 +480,12 @@ class AuthController extends Controller
                 $url = "mercurio/principal/index";
                 break;
         }
-        return Inertia::location(url('web/prueba_session'));
+        return Inertia::location(url($url));
+    }
+
+    public function logoutAction()
+    {
+        SessionCookies::destroyIdentity();
+        return redirect()->to("web/login");
     }
 }

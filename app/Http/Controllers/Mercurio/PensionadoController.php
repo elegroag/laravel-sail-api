@@ -133,6 +133,7 @@ class PensionadoController extends ApplicationController
         try {
             $asignarFuncionario = new AsignarFuncionario();
             $id = $request->input('id');
+            $clave_certificado = $request->input('clave');
             $params = $this->serializeData($request);
             $params['tipo'] = $this->tipo;
             $params['coddoc'] = $this->user['coddoc'];
@@ -154,6 +155,7 @@ class PensionadoController extends ApplicationController
             $pensionadoService->paramsApi();
 
             $pensionadoAdjuntoService = new PensionadoAdjuntoService($pensionado);
+            $pensionadoAdjuntoService->setClaveCertificado($clave_certificado);
 
             // Procesar formulario
             $out = $pensionadoAdjuntoService->formulario()->getResult();

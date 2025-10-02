@@ -29,7 +29,7 @@
             </p>
             
             <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                <a href="{{ route('web.login') }}" class="btn btn-primary">
+                <a href="{{ route('login') }}" class="btn btn-primary">
                     Ir al inicio de sesión
                 </a>
                 <a href="{{ url('/') }}" class="btn btn-outline-secondary">

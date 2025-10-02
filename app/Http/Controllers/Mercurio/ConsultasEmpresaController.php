@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Library\Auth\AuthJwt;
-use App\Library\Auth\SessionCookies;
 use App\Library\Collections\ParamsBeneficiario;
 use App\Library\Collections\ParamsConyuge;
 use App\Library\Collections\ParamsTrabajador;
@@ -54,6 +52,10 @@ class ConsultasEmpresaController extends ApplicationController
         $tipo = $this->tipo;
         $coddoc = $this->user['coddoc'];
         $documento = $this->user['documento'];
+        $estado_afiliado = session()->has('estado_afiliado') ? session('estado_afiliado') : null;
+        if ($estado_afiliado == 'I') {
+            return redirect()->route('particular.historial');
+        }
 
         $mercurio31 = Mercurio31::where('nit', $documento)
             ->orderBy('id', 'desc');
@@ -79,179 +81,12 @@ class ConsultasEmpresaController extends ApplicationController
             'documento' => $documento,
         ])->orderBy('id', 'desc');
 
-        $html_afiliacion  = "<table class='table table-hover align-items-center table-bordered'>";
-        $html_afiliacion .= "<thead>";
-        $html_afiliacion .= "<tr>";
-        $html_afiliacion .= "<th scope='col'>Cedula</th>";
-        $html_afiliacion .= "<th scope='col'>Nombre </th>";
-        $html_afiliacion .= "<th scope='col'>Fecha de Solicitud</th>";
-        $html_afiliacion .= "<th scope='col'>Estado</th>";
-        $html_afiliacion .= "<th scope='col'>Fecha de Estado</th>";
-        $html_afiliacion .= "<th scope='col'>Motivo</th>";
-        $html_afiliacion .= "</tr>";
-        $html_afiliacion .= "</thead>";
-        $html_afiliacion .= "<tbody class='list'>";
-        if ($mercurio31->count() == 0) {
-            $html_afiliacion .= "<tr align='center'>";
-            $html_afiliacion .= "<td colspan=6><label>No hay datos para mostrar</label></td>";
-            $html_afiliacion .= "<tr>";
-            $html_afiliacion .= "</tr>";
-        }
-        foreach ($mercurio31->get() as $mmercurio31) {
-            $html_afiliacion .= "<tr>";
-            $html_afiliacion .= "<td>{$mmercurio31->getCedtra()}</td>";
-            $html_afiliacion .= "<td>{$mmercurio31->getPriape()} {$mmercurio31->getPrinom()}</td>";
-            $html_afiliacion .= "<td>{$mmercurio31->getFecsol()}</td>";
-            $html_afiliacion .= "<td>{$mmercurio31->getEstadoDetalle()}</td>";
-            $html_afiliacion .= "<td>{$mmercurio31->getFecest()}</td>";
-            $html_afiliacion .= "<td>{$mmercurio31->getMotivo()}</td>";
-            $html_afiliacion .= "</tr>";
-        }
-        $html_afiliacion .= "</tbody>";
-        $html_afiliacion .= "</table>";
-
-        $html_retiro  = "<table class='table table-hover align-items-center table-bordered'>";
-        $html_retiro .= "<thead>";
-        $html_retiro .= "<tr>";
-        $html_retiro .= "<th scope='col'>Cedula</th>";
-        $html_retiro .= "<th scope='col'>Nombre </th>";
-        $html_retiro .= "<th scope='col'>Estado</th>";
-        $html_retiro .= "<th scope='col'>Fecha Estado</th>";
-        $html_retiro .= "<th scope='col'>Motivo</th>";
-        $html_retiro .= "</tr>";
-        $html_retiro .= "</thead>";
-        $html_retiro .= "<tbody class='list'>";
-        if ($mercurio35->count() == 0) {
-            $html_retiro .= "<tr align='center'>";
-            $html_retiro .= "<td colspan=5><label>No hay datos para mostrar</label></td>";
-            $html_retiro .= "<tr>";
-            $html_retiro .= "</tr>";
-        }
-        foreach ($mercurio35->get() as $mmercurio35) {
-            $html_retiro .= "<tr>";
-            $html_retiro .= "<td>{$mmercurio35->getCedtra()}</td>";
-            $html_retiro .= "<td>{$mmercurio35->getNomtra()}</td>";
-            $html_retiro .= "<td>{$mmercurio35->getEstadoDetalle()}</td>";
-            $html_retiro .= "<td>{$mmercurio35->getFecest()}</td>";
-            $html_retiro .= "<td>{$mmercurio35->getMotivo()}</td>";
-            $html_retiro .= "</tr>";
-        }
-        $html_retiro .= "</tbody>";
-        $html_retiro .= "</table>";
-
-
-        $html_afiliacion_conyuge  = "<table class='table table-hover align-items-center table-bordered'>";
-        $html_afiliacion_conyuge .= "<thead>";
-        $html_afiliacion_conyuge .= "<tr>";
-        $html_afiliacion_conyuge .= "<th scope='col'>Cedula Trabajador</th>";
-        $html_afiliacion_conyuge .= "<th scope='col'>Cedula</th>";
-        $html_afiliacion_conyuge .= "<th scope='col'>Nombre </th>";
-        $html_afiliacion_conyuge .= "<th scope='col'>Estado</th>";
-        $html_afiliacion_conyuge .= "<th scope='col'>Fecha Estado</th>";
-        $html_afiliacion_conyuge .= "<th scope='col'>Motivo</th>";
-        $html_afiliacion_conyuge .= "</tr>";
-        $html_afiliacion_conyuge .= "</thead>";
-        $html_afiliacion_conyuge .= "<tbody class='list'>";
-
-        if ($mercurio32->count() == 0) {
-            $html_afiliacion_conyuge .= "<tr align='center'>";
-            $html_afiliacion_conyuge .= "<td colspan=6><label>No hay datos para mostrar</label></td>";
-            $html_afiliacion_conyuge .= "<tr>";
-            $html_afiliacion_conyuge .= "</tr>";
-        } else {
-
-            if ($mercurio32) {
-                foreach ($mercurio32->get() as $mmercurio32) {
-                    $html_afiliacion_conyuge .= "<tr>";
-                    $html_afiliacion_conyuge .= "<td>{$mmercurio32->getCedtra()}</td>";
-                    $html_afiliacion_conyuge .= "<td>{$mmercurio32->getCedcon()}</td>";
-                    $html_afiliacion_conyuge .= "<td>{$mmercurio32->getPriape()} {$mmercurio32->getPrinom()}</td>";
-                    $html_afiliacion_conyuge .= "<td>{$mmercurio32->getEstadoDetalle()}</td>";
-                    $html_afiliacion_conyuge .= "<td>{$mmercurio32->getFecest()}</td>";
-                    $html_afiliacion_conyuge .= "<td>{$mmercurio32->getMotivo()}</td>";
-                    $html_afiliacion_conyuge .= "</tr>";
-                }
-            }
-        }
-
-
-        $html_afiliacion_conyuge .= "</tbody>";
-        $html_afiliacion_conyuge .= "</table>";
-
-        $html_afiliacion_beneficiario  = "<table class='table table-hover align-items-center table-bordered'>";
-        $html_afiliacion_beneficiario .= "<thead>";
-        $html_afiliacion_beneficiario .= "<tr>";
-        $html_afiliacion_beneficiario .= "<th scope='col'>Cedula Trabajador</th>";
-        $html_afiliacion_beneficiario .= "<th scope='col'>Documento</th>";
-        $html_afiliacion_beneficiario .= "<th scope='col'>Nombre </th>";
-        $html_afiliacion_beneficiario .= "<th scope='col'>Estado</th>";
-        $html_afiliacion_beneficiario .= "<th scope='col'>Fecha Estado</th>";
-        $html_afiliacion_beneficiario .= "<th scope='col'>Motivo</th>";
-        $html_afiliacion_beneficiario .= "</tr>";
-        $html_afiliacion_beneficiario .= "</thead>";
-        $html_afiliacion_beneficiario .= "<tbody class='list'>";
-        if ($mercurio34->count() == 0) {
-            $html_afiliacion_beneficiario .= "<tr align='center'>";
-            $html_afiliacion_beneficiario .= "<td colspan=6><label>No hay datos para mostrar</label></td>";
-            $html_afiliacion_beneficiario .= "<tr>";
-            $html_afiliacion_beneficiario .= "</tr>";
-        }
-        foreach ($mercurio34->get() as $mmercurio34) {
-            $html_afiliacion_beneficiario .= "<tr>";
-            $html_afiliacion_beneficiario .= "<td>{$mmercurio34->getCedtra()}</td>";
-            $html_afiliacion_beneficiario .= "<td>{$mmercurio34->getNumdoc()}</td>";
-            $html_afiliacion_beneficiario .= "<td>{$mmercurio34->getPriape()} {$mmercurio34->getPrinom()}</td>";
-            $html_afiliacion_beneficiario .= "<td>{$mmercurio34->getEstadoDetalle()}</td>";
-            $html_afiliacion_beneficiario .= "<td>{$mmercurio34->getFecest()}</td>";
-            $html_afiliacion_beneficiario .= "<td>{$mmercurio34->getMotivo()}</td>";
-            $html_afiliacion_beneficiario .= "</tr>";
-        }
-        $html_afiliacion_beneficiario .= "</tbody>";
-        $html_afiliacion_beneficiario .= "</table>";
-
-
-
-        $actualizacion_basico  = "<table class='table table-hover align-items-center table-bordered'>";
-        $actualizacion_basico .= "<thead>";
-        $actualizacion_basico .= "<tr>";
-        $actualizacion_basico .= "<th scope='col'>Campo</th>";
-        $actualizacion_basico .= "<th scope='col'>Valor Anterior </th>";
-        $actualizacion_basico .= "<th scope='col'>Valor Nuevo</th>";
-        $actualizacion_basico .= "<th scope='col'>Estado</th>";
-        $actualizacion_basico .= "<th scope='col'>Fecha Estado</th>";
-        $actualizacion_basico .= "<th scope='col'>Motivo</th>";
-        $actualizacion_basico .= "</tr>";
-        $actualizacion_basico .= "</thead>";
-        $actualizacion_basico .= "<tbody class='list'>";
-        if ($mercurio33->count() == 0) {
-            $actualizacion_basico .= "<tr align='center'>";
-            $actualizacion_basico .= "<td colspan=6><label>No hay datos para mostrar</label></td>";
-            $actualizacion_basico .= "<tr>";
-            $actualizacion_basico .= "</tr>";
-        }
-        foreach ($mercurio33->get() as $mmercurio33) {
-            $mmercurio28 = Mercurio28::where('campo', $mmercurio33->campo)->first();
-            $actualizacion_basico .= "<tr>";
-            $actualizacion_basico .= "<td>{$mmercurio28->getDetalle()}</td>";
-            $actualizacion_basico .= "<td>{$mmercurio33->antval}</td>";
-            $actualizacion_basico .= "<td>{$mmercurio33->valor}</td>";
-            $actualizacion_basico .= "<td>{$mmercurio33->getEstadoDetalle()}</td>";
-            $actualizacion_basico .= "<td>{$mmercurio33->fecest}</td>";
-            $actualizacion_basico .= "<td>{$mmercurio33->motivo}</td>";
-            $actualizacion_basico .= "</tr>";
-        }
-        $actualizacion_basico .= "</tbody>";
-        $actualizacion_basico .= "</table>";
-
         return view("mercurio/subsidioemp/historial", [
-            "hide_header" => true,
-            "help" => false,
-            "title" => "Historial",
-            "html_afiliacion" => $html_afiliacion,
-            "html_retiro" => $html_retiro,
-            "html_afiliacion_beneficiario" => $html_afiliacion_beneficiario,
-            "html_afiliacion_conyuge" => $html_afiliacion_conyuge,
-            "actualizacion_basico" => $actualizacion_basico
+            "mercurio31" => $mercurio31,
+            "mercurio35" => $mercurio35,
+            "mercurio34" => $mercurio34,
+            "mercurio32" => $mercurio32,
+            "mercurio33" => $mercurio33
         ]);
     }
 

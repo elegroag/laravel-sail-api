@@ -735,6 +735,7 @@ class BeneficiarioController extends ApplicationController
         $this->db->begin();
         try {
             $id = $this->cleanInput($request->input('id'));
+            $clave_certificado = $request->input('clave');
             $params = $this->serializeData($request);
             $params['tipo'] = $this->tipo;
             $params['coddoc'] = $this->user['coddoc'];
@@ -752,6 +753,8 @@ class BeneficiarioController extends ApplicationController
             }
 
             $beneficiarioAdjuntoService = new BeneficiarioAdjuntoService($solicitud);
+            $beneficiarioAdjuntoService->setClaveCertificado($clave_certificado);
+
             $out = $beneficiarioAdjuntoService->formulario()->getResult();
             (new GuardarArchivoService(
                 array(

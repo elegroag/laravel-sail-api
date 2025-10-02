@@ -29,11 +29,12 @@
         top: 0;
         z-index: 99999;
         background: none repeat scroll 0 0;
-        background-color: rgba(4, 4, 4, 0.5);
+        background-color: rgba(5, 5, 5, 0.8);
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
         flex-flow: row nowrap;
+        transition: all .3s ease;
         -webkit-flex-flow: row nowrap;
         -ms-flex-flow: row nowrap;
         -ms-flex-align: center;
@@ -41,6 +42,7 @@
 
     .loader-white {
         background-color: rgba(255, 255, 255);
+        transition: all .3s ease;
     }
 
     .loader-inner {
@@ -52,6 +54,7 @@
         right: 0;
         top: 0;
         width: 100px;
+        transition: all .3s ease;
     }
 
     .loader-line-wrap {
@@ -64,6 +67,7 @@
         top: 0;
         transform-origin: 50% 100%;
         width: 100px;
+        transition: all .3s ease;
     }
 
     .loader-line {
@@ -77,6 +81,7 @@
         right: 0;
         top: 0;
         width: 100px;
+        transition: all .3s ease;
     }
 
     .loader-line-wrap:nth-child(1) {
@@ -104,6 +109,7 @@
         height: 90px;
         width: 90px;
         top: 7px;
+        transition: all .3s ease;
     }
 
     .loader-line-wrap:nth-child(2) .loader-line {
@@ -111,6 +117,7 @@
         height: 76px;
         width: 76px;
         top: 14px;
+        transition: all .3s ease;
     }
 
     .loader-line-wrap:nth-child(3) .loader-line {
@@ -118,6 +125,7 @@
         height: 62px;
         width: 62px;
         top: 21px;
+        transition: all .3s ease;
     }
 
     .loader-line-wrap:nth-child(4) .loader-line {
@@ -125,6 +133,7 @@
         height: 48px;
         width: 48px;
         top: 28px;
+        transition: all .3s ease;
     }
 
     .loader-line-wrap:nth-child(5) .loader-line {
@@ -132,6 +141,7 @@
         height: 34px;
         width: 34px;
         top: 35px;
+        transition: all .3s ease;
     }
 
     @keyframes spin {

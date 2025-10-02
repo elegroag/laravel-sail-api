@@ -467,11 +467,13 @@ class TrabajadorController extends ApplicationController
         $trabajadorService = new TrabajadorService();
 
         try {
+            $clave_certificado = $request->input('clave');
             $id = $request->get('id');
             $params = $this->serializeData($request);
             $params['tipo'] = $this->tipo;
             $params['coddoc'] = $this->user['coddoc'];
             $params['documento'] = $this->user['documento'];
+
 
             if (is_null($id) || $id == "") {
                 $solicitud = $trabajadorService->createByFormData($params);
@@ -483,6 +485,7 @@ class TrabajadorController extends ApplicationController
 
             $trabajadorService->paramsApi();
             $trabajadorAdjuntoService = new TrabajadorAdjuntoService($solicitud);
+            $trabajadorAdjuntoService->setClaveCertificado($clave_certificado);
 
             $out = $trabajadorAdjuntoService->formulario()->getResult();
             $coddoc_adjunto = 1;

@@ -272,6 +272,7 @@ class IndependienteController extends ApplicationController
             'codcaj' => $request->input('codcaj', ''),
             'coddocrepleg' => $request->input('coddocrepleg', ''),
             'facvul' => $request->input('facvul', ''),
+            'dirlab' => $request->input('dirlab', '')
         ];
     }
 

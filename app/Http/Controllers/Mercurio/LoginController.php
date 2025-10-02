@@ -61,12 +61,6 @@ class LoginController extends ApplicationController
         return view('mercurio.auth.register');
     }
 
-    public function logoutAction()
-    {
-        SessionCookies::destroyIdentity();
-        return redirect()->to("mercurio/login");
-    }
-
     /**
      * recuperar_claveAction function
      * Opción solo para el caso de olvido de clave, para empresas o afiliados comfaca.

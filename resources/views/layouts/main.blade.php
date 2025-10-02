@@ -35,7 +35,7 @@
     @stack('styles')
 </head>
 
-<body class="bg-gray-100 flex items-center justify-center h-screen">
+<body class="bg-gray-100 flex items-center justify-center h-screen g-sidenav-pinned">
     @include('templates.loading')
 
     @yield('content-main')

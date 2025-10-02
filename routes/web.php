@@ -20,6 +20,8 @@ require __DIR__ . '/mercurio/datos_trabajador.php';
 require __DIR__ . '/mercurio/principal.php';
 require __DIR__ . '/mercurio/firma.php';
 require __DIR__ . '/mercurio/productos.php';
+require __DIR__ . '/mercurio/consultas_empresa.php';
+require __DIR__ . '/mercurio/consultas_trabajador.php';
 
 require __DIR__ . '/cajas/cajas.php';
 require __DIR__ . '/cajas/aprueba_beneficiario.php';

@@ -278,11 +278,9 @@ class ActualizaTrabajadorController extends ApplicationController
     {
         $this->setResponse("ajax");
         $datosTrabajadorService = new DatosTrabajadorService();
-        //$datosTrabajadorService->setTransa();
-
         try {
             $asignarFuncionario = new AsignarFuncionario();
-            $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
+            $id = $request->input('id');
             $tipo_actualizacion = $request->input('tipo_actualizacion');
             $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
             $params = array(

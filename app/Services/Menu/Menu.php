@@ -8,7 +8,7 @@ class Menu
 {
     private $user;
     private $currentUrl;
-    private $breadcrumbs;
+    private $breadcrumbs = array();
     private $menuItems;
     private $db;
     private $codapl;
@@ -30,8 +30,6 @@ class Menu
         if (!$this->user) {
             return null;
         }
-        // Ahora breadcrumbs es una colección (array) con: icon, title, is_active
-        $this->breadcrumbs = [];
         $this->menuItems = "";
         $this->path = env('APP_URL') . ':' . env('APP_PORT');
     }
@@ -47,6 +45,7 @@ class Menu
                 break;
             case 'E':
                 $menu_tipo = 'E';
+                break;
             case 'P':
                 $menu_tipo = 'P';
                 break;
@@ -54,6 +53,9 @@ class Menu
                 $menu_tipo = 'P';
                 break;
         }
+        $estado_afiliado = session('estado_afiliado');
+
+        if ($estado_afiliado == 'I') $menu_tipo = 'P';
 
         $query = "SELECT * FROM menu_items 
         WHERE is_visible = TRUE AND 
