@@ -33,7 +33,7 @@ class ControllerEmpresas extends ControllerRequest {
 
     __paramsServer({ callback = undefined, silent = false }) {
         this.App.trigger('syncro', {
-            url: this.App.url('empresas/params'),
+            url: this.App.url('empresa/params'),
             silent,
             callback: (response) => {
                 if (response && response.success === true) {

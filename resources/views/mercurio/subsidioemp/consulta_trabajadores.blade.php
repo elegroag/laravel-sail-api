@@ -1,6 +1,4 @@
-
-@extends('layouts.dash')
-
+@extends('layouts.bone')
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.css') }}" />
@@ -40,26 +38,28 @@
 @endpush
 
 @section('content')
-<div class="card mb-0">
-    <div class="card-header">
-        <div class="col-md-auto d-flex mr-auto">
-            <button type="button" class="btn btn-primary align-self-center" id="bt_consulta_trabajadores">Consultar</button>
-        </div>
-    </div>
-    <div class="card-body">
-        <form id="form" class="validation_form" autocomplete="off" novalidate>
-            <div class="d-flex justify-content-center">
-                <div class="form-group">
-                    <label for="estado" class="form-control-label">Indica el estado de afiliación</label>
-                    <select name="estado" id="estado" class="form-control">
-                        <option value="A">ACTIVOS</option>
-                        <option value="I">INACTIVOS</option>
-                        <option value="T">TODOS</option>
-                    </select>
-                </div>
+<div class="col-12 mt-3">
+    <div class="card mb-0">
+        <div class="card-header">
+            <div class="col-md-auto d-flex mr-auto">
+                <button type="button" class="btn btn-primary align-self-center" id="bt_consulta_trabajadores">Consultar</button>
             </div>
-        </form>
-        <div id="consulta" class="table-responsive"></div>
+        </div>
+        <div class="card-body">
+            <form id="form" class="validation_form" autocomplete="off" novalidate>
+                <div class="d-flex justify-content-center">
+                    <div class="form-group">
+                        <label for="estado" class="form-control-label">Indica el estado de afiliación</label>
+                        <select name="estado" id="estado" class="form-control">
+                            <option value="A">ACTIVOS</option>
+                            <option value="I">INACTIVOS</option>
+                            <option value="T">TODOS</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+            <div id="consulta" class="table-responsive"></div>
+        </div>
     </div>
 </div>
 

@@ -8,7 +8,7 @@ import PlanillaTrabajadorView from '../Componentes/Views/PlanillaTrabajadorView'
 function ConsultaGiro() {
     $.ajax({
         type: 'POST',
-        url: $App.url('consulta_giro'),
+        url: $App.url('subsidioemp/consulta_giro'),
         data: {
             perini: $('#perini').val(),
             perfin: $('#perfin').val(),
@@ -49,7 +49,7 @@ function ConsultaGiro() {
 function ConsultaNoGiro() {
     $.ajax({
         type: 'POST',
-        url: $App.url('consulta_no_giro'),
+        url: $App.url('subsidioemp/consulta_no_giro'),
         data: {
             perini: $('#perini').val(),
             perfin: $('#perfin').val(),
@@ -90,7 +90,7 @@ function ConsultaNoGiro() {
 function ConsultaPlanillaTrabajador() {
     $.ajax({
         type: 'POST',
-        url: $App.url('consulta_planilla_trabajador'),
+        url: $App.url('subsidioemp/consulta_planilla_trabajador'),
         data: {
             perini: $('#perini').val(),
             perfin: $('#perfin').val(),

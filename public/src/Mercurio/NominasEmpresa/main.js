@@ -1,5 +1,7 @@
-import { langDataTable } from '../../Core';
-import { $App } from '../../App';
+import { langDataTable } from '@/Core';
+import { $App } from '@/App';
+
+window.App = $App;
 
 $(() => {
 	$App.initialize();
@@ -22,8 +24,8 @@ $(() => {
 			return;
 		}
 
-		$App.trigger('syncro', {
-			url: $App.url('consulta_nomina'),
+		window.App.trigger('syncro', {
+			url: window.App.url('subsidioemp/consulta_nomina'),
 			data: {
 				periodo: $('#periodo').val()
 			},

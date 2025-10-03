@@ -9,7 +9,6 @@ use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
 use App\Models\Gener09;
 use App\Models\Gener18;
-use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio30;
 use App\Models\Mercurio37;
@@ -18,13 +17,11 @@ use App\Models\Mercurio31;
 use App\Models\Subsi54;
 use App\Models\Tranoms;
 use App\Services\Entidades\EmpresaService;
-use App\Services\FormulariosAdjuntos\DatosEmpresaService;
 use App\Services\FormulariosAdjuntos\EmpresaAdjuntoService;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
-use App\Services\Utils\GeneralService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -633,5 +630,70 @@ class EmpresaController extends ApplicationController
             'coddoc' => $this->user['coddoc'],
             'documento' => $this->user['documento']
         );
+    }
+
+    public function miEmpresaAction()
+    {
+        $ps = Comman::Api();
+        $ps->runCli(
+            array(
+                "servicio" => "ComfacaEmpresas",
+                "metodo" => "informacion_empresa",
+                "params" => array(
+                    'nit' => $this->user['documento']
+                )
+            )
+        );
+
+        $empresa = $ps->toArray();
+        if ($empresa['success'] == false) {
+            set_flashdata("error", array(
+                "msj" => 'Error al acceder al servicio de información de la empresa. Verifique que el NIT sea correcto.',
+                "code" => 401
+            ));
+            return redirect()->route('principal/index');
+        }
+
+        $ps = Comman::Api();
+        $ps->runCli(
+            array(
+                "servicio" => "ComfacaAfilia",
+                "metodo" => "parametros_empresa"
+            )
+        );
+        $paramsEmpresa = new ParamsEmpresa();
+        $paramsEmpresa->setDatosCaptura($ps->toArray());
+
+        $params = array(
+            'calemp' => ParamsEmpresa::getCalidadEmpresa(),
+            'ciudad' => ParamsEmpresa::getCiudades(),
+            'codzon' => ParamsEmpresa::getZonas(),
+            'codigo_cajas' => ParamsEmpresa::getCodigoCajas(),
+            'coddoc' => ParamsEmpresa::getTipoDocumentos(),
+            'coddocrepleg' => ParamsEmpresa::getCodruaDocumentos(),
+            'tipsoc' => ParamsEmpresa::getTipoSociedades(),
+            'codact' => ParamsEmpresa::getActividades(),
+            'tipper' => ParamsEmpresa::getTipoPersona(),
+            'tipemp' => ParamsEmpresa::getTipoEmpresa(),
+            'departamentos' => ParamsEmpresa::getDepartamentos(),
+            'tipo_duracion' => ParamsEmpresa::getTipoDuracion(),
+            'codind' => ParamsEmpresa::getCodigoIndice(),
+            'paga_mes' => ParamsEmpresa::getPagaMes(),
+            'forma_presentacion' => ParamsEmpresa::getFormaPresentacion(),
+            'pymes' => ParamsEmpresa::getPymes(),
+            'contratista' => ParamsEmpresa::getContratista(),
+            'tipapo' => ParamsEmpresa::getTipoAportante(),
+            'oficina' => ParamsEmpresa::getOficina(),
+            'colegio' => ParamsEmpresa::getColegio(),
+            "estado" => array("A" => "ACTIVA", "I" => "INACTIVA", 'S' => "SUSPENDIDA", 'D' => "DESACTUALIZADA"),
+            "autoriza" => array("S" => 'SI', "N" => "NO"),
+        );
+
+        return view('mercurio/empresa/miempresa', [
+            "empresa" => $empresa['data'],
+            "trayectorias" => $empresa['data']['trayectoria'],
+            "sucursales" => $empresa['data']['sucursales'],
+            "parametros" => $params
+        ]);
     }
 }

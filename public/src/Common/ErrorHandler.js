@@ -47,7 +47,7 @@ export default class ErrorHandler {
         `;
 		} else {
 			// Fallback a alert si no hay tabla disponible
-			alert(message);
+			console.log(message);
 		}
 	}
 }

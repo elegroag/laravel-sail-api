@@ -24,7 +24,7 @@
         <div class="d-flex justify-content-center">
             <div class="form-group">
                 <label for="periodo" class="form-control-label">Periodo</label>
-                <input type="text" id="periodo" name="periodo" class="form-control" placeholder="Periodo">
+                <input type="number" id="periodo" name="periodo" class="form-control" placeholder="Periodo">
             </div>
         </div>
         </form>

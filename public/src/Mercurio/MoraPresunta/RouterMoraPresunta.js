@@ -1,4 +1,3 @@
-import { $App } from '@/App';
 import MoraPresuntaApp from './MoraPresuntaApp';
 
 class RouterMoraPresunta extends Backbone.Router {
@@ -14,7 +13,8 @@ class RouterMoraPresunta extends Backbone.Router {
 			},
 		});
 
-		this.currentApp = $App.startSubApplication(MoraPresuntaApp);
+		this.App = options.App || window.App;
+		this.currentApp = this.App.startSubApplication(MoraPresuntaApp);
 		this._bindRoutes();
 	}
 
@@ -37,7 +37,11 @@ class RouterMoraPresunta extends Backbone.Router {
 		try {
 			if (!this.#dataManager) {
 				const response = await this.#fetchData();
-				this.#dataManager = response.data;
+				if (response.success) {
+					this.#dataManager = response.data;
+				} else {
+					this.#handleError(response.msj, 'Error al cargar los datos');
+				}
 			}
 			this.currentApp.setDataManager(this.#dataManager);
 		} catch (error) {
@@ -47,13 +51,13 @@ class RouterMoraPresunta extends Backbone.Router {
 	}
 
 	#handleError(error, message) {
-		$App.trigger('alert:error', { message: `${message}: ${error.message}` });
+		this.App.trigger('alert:error', { message: `${message}: ${error.message}` });
 	}
 
 	#fetchData() {
 		return new Promise((resolve, reject) => {
-			$App.trigger('syncro', {
-				url: $App.url('mora_presunta'),
+			this.App.trigger('syncro', {
+				url: this.App.url('subsidioemp/mora_presunta'),
 				data: {},
 				callback: (response) => resolve(response),
 				error: (error) => reject(error.message),

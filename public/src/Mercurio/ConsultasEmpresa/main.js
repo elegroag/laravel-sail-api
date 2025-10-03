@@ -21,8 +21,10 @@ import { Region } from '@/Common/Region';
 
 import { ConsultaGiro } from '../TrabajadorServices';
 
+window.App = $App;
+
 $(() => {
-	$App.initialize();
+	window.App.initialize();
 
 	$(document).on('click', '#bt_consulta_giro', function (e) {
 		e.preventDefault();
@@ -75,7 +77,7 @@ $(() => {
 		if (!cedtra) return;
 		$.ajax({
 			type: 'POST',
-			url: $App.url('consulta_nucleo'),
+			url: window.App.url('subsidioemp/consulta_nucleo'),
 			data: {
 				cedtra: cedtra,
 			},

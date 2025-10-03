@@ -14,7 +14,7 @@ const ConsultaTrabajadores = (e) => {
 	}
 	$.ajax({
 		type: 'POST',
-		url: $App.url('consulta_trabajadores'),
+		url: $App.url('subsidioemp/consulta_trabajadores'),
 		data: {
 			estado: $('#estado').val(),
 		},
@@ -34,7 +34,7 @@ const ConsultaTrabajadores = (e) => {
 const ConsultaGiro = () => {
 	$.ajax({
 		type: 'POST',
-		url: $App.url('consulta_giro'),
+		url: $App.url('subsidioemp/consulta_giro'),
 		data: {
 			periodo: $('#periodo').val(),
 		},
@@ -63,7 +63,7 @@ const ConsultaNomina = (e) => {
 	}
 	$.ajax({
 		type: 'POST',
-		url: $App.url('consulta_nomina'),
+		url: $App.url('subsidioemp/consulta_nomina'),
 		data: {
 			periodo: $('#periodo').val(),
 		},
@@ -97,7 +97,7 @@ const ConsultaAportes = (e) => {
 
 	$.ajax({
 		type: 'POST',
-		url: $App.url('consulta_aportes'),
+		url: $App.url('subsidioemp/consulta_aportes'),
 		data: {
 			perini: $('#perini').val(),
 			perfin: $('#perfin').val(),
@@ -123,7 +123,7 @@ const buscar_trabajador = () => {
 	}
 	$.ajax({
 		type: 'POST',
-		url: $App.url('buscar_trabajador'),
+		url: $App.url('subsidioemp/buscar_trabajador'),
 		data: {
 			cedtra: $('#cedtra').val(),
 		},
@@ -158,7 +158,7 @@ const NovedadRetiro = () => {
 		return;
 	}
 	$('#archivo').upload(
-		$App.url('novedad_retiro'),
+		$App.url('subsidioemp/novedad_retiro'),
 		{
 			cedtra: $('#cedtra').val(),
 			nombre: $('#nombre').val(),
@@ -193,7 +193,7 @@ const ActualizaDatosBasicosOld = () => {
 		if (result.value) {
 			$.ajax({
 				type: 'POST',
-				url: $App.url('actualiza_datos_basicos'),
+				url: $App.url('subsidioemp/actualiza_datos_basicos'),
 				data: $('#form').serialize(),
 			})
 				.done(function (transport) {
@@ -241,7 +241,7 @@ const AfiliaMasivaTrabajador = () => {
 		Messages.display('Adjunte algun Archivo', 'error');
 		return;
 	}
-	$('#archivo').upload($App.url('afilia_masiva_trabajador'), {}, function (response) {
+	$('#archivo').upload($App.url('subsidioemp/afilia_masiva_trabajador'), {}, function (response) {
 		if (response['flag'] == true) {
 			Messages.display(response['msg'], 'success');
 		} else {
@@ -281,7 +281,7 @@ const ActivacionMasivaTrabajador = () => {
 		Messages.display('Adjunte algun Archivo', 'error');
 		return;
 	}
-	$('#archivo').upload($App.url('activacion_masiva_trabajador'), {}, function (response) {
+	$('#archivo').upload($App.url('subsidioemp/activacion_masiva_trabajador'), {}, function (response) {
 		if (response['flag'] == true) {
 			Messages.display(response['msg'], 'success');
 			window.open(Utils.getURL(response['file']), '_blank');

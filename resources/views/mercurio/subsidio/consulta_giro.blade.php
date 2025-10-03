@@ -1,8 +1,4 @@
-@extends('layouts.dash')
-
-@php
-use App\Services\Tag;
-@endphp
+@extends('layouts.bone')
 
 @push('styles')
 <style>
@@ -96,13 +92,13 @@ use App\Services\Tag;
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="perini" class="form-control-label">Periodo Inicial</label>
-                        <input type="date" name="perini" placeholder="Periodo Inicial" class="form-control" value="<?php echo date('Y-m-d', strtotime('-3 month')); ?>">
+                        <input type="date" name="perini" placeholder="Periodo Inicial" class="form-control" value="@php echo date('Y-m-d', strtotime('-3 month')); @endphp">
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="perfin" class="form-control-label">Periodo Final</label>
-                        <input type="date" name="perfin" placeholder="Periodo Final" class="form-control" value="<?php echo date('Y-m-d'); ?>">
+                        <input type="date" name="perfin" placeholder="Periodo Final" class="form-control" value="@php echo date('Y-m-d'); @endphp">
                     </div>
                 </div>
             </div>

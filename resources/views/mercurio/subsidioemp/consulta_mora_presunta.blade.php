@@ -1,8 +1,49 @@
-<?php
-echo View::getContent();
-echo TagUser::help($title, $help);
-?>
+@extends('layouts.bone')
 
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.min.css') }}">
+    <style>
+        .list-group-item {
+            cursor: pointer;
+        }
+    
+        .list-group-item.active {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+    
+        .btn-sucursal {
+            min-width: 120px;
+        }
+    
+        .table th,
+        .table td {
+            vertical-align: middle;
+        }
+    
+        #periodo-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+    
+        .badge-afiliado {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+        }
+    
+        .badge-pago {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+        }
+    
+        .list-group-item.active {
+            background-color: rgb(171, 231, 184);
+            border-color: #c2ffcd;
+        }
+    </style>
+@endpush
+
+@push('scripts')
 <script type="text/template" id="tmp_mora_presunta">
     <div class="mb-0">
         <div class="col-auto">
@@ -74,47 +115,11 @@ echo TagUser::help($title, $help);
         </div>
     </div>
 </script>
+@endpush
 
-<div id='boneLayout'></div>
-
-<?= Tag::javascriptInclude('Mercurio/morapresunta/morapresunta.build'); ?>
-
-<style>
-    .list-group-item {
-        cursor: pointer;
-    }
-
-    .list-group-item.active {
-        background-color: #0d6efd;
-        border-color: #0d6efd;
-    }
-
-    .btn-sucursal {
-        min-width: 120px;
-    }
-
-    .table th,
-    .table td {
-        vertical-align: middle;
-    }
-
-    #periodo-list {
-        max-height: 600px;
-        overflow-y: auto;
-    }
-
-    .badge-afiliado {
-        font-size: 0.8rem;
-        padding: 0.25rem 0.5rem;
-    }
-
-    .badge-pago {
-        font-size: 0.8rem;
-        padding: 0.25rem 0.5rem;
-    }
-
-    .list-group-item.active {
-        background-color: rgb(171, 231, 184);
-        border-color: #c2ffcd;
-    }
-</style>
+@section('content')
+<div class="col-12 mt-3">
+    <div id='boneLayout'></div>
+</div>
+<script src="{{ asset('mercurio/build/MoraPresunta.js') }}"></script>
+@endsection

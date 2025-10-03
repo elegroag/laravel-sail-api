@@ -21,7 +21,6 @@ class ApiEndpointsSeeder extends Seeder
                 'connection_name' => 'api-clisisu',
                 'host_dev' => 'http://172.168.0.40:9000',
                 'host_pro' => 'http://172.168.0.7:9000',
-
             ],
             [
                 'service_name' => 'ComfacaAfilia',
@@ -96,6 +95,13 @@ class ApiEndpointsSeeder extends Seeder
             [
                 'service_name' => 'Funcionalidades',
                 'endpoint_name' => 'satservice',
+                'connection_name' => 'api-clisisu',
+                'host_dev' => 'http://172.168.0.40:9000',
+                'host_pro' => 'http://172.168.0.7:9000',
+            ],
+            [
+                'service_name' => 'CuotaMonetaria',
+                'endpoint_name' => 'cuotas_by_empresa_and_periodo',
                 'connection_name' => 'api-clisisu',
                 'host_dev' => 'http://172.168.0.40:9000',
                 'host_pro' => 'http://172.168.0.7:9000',

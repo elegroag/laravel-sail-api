@@ -93,8 +93,6 @@ class ConsultasEmpresaController extends ApplicationController
     public function consultaTrabajadoresViewAction()
     {
         return view("mercurio/subsidioemp/consulta_trabajadores", [
-            "hide_header" => true,
-            "help" => false,
             "title" => "Consulta Trabajadores",
             'documento' => $this->user['documento'],
             'coddoc' => $this->user['coddoc'],
@@ -149,15 +147,12 @@ class ConsultasEmpresaController extends ApplicationController
     public function consultaGiroViewAction()
     {
         return view("mercurio/subsidioemp/consulta_giro", [
-            "hide_header" => true,
-            "help" => false,
             "title" => "Consulta Giro"
         ]);
     }
 
     public function consultaGiroAction(Request $request)
     {
-        $this->setResponse("ajax");
         try {
             $nit = $this->user['documento'];
             $perini = $request->input('perini');
@@ -202,8 +197,6 @@ class ConsultasEmpresaController extends ApplicationController
     public function consultaNominaViewAction()
     {
         return view("mercurio/subsidioemp/consulta_nomina", [
-            "hide_header" => true,
-            "help" => false,
             "title" => "Consulta Nomina"
         ]);
     }
@@ -306,70 +299,68 @@ class ConsultasEmpresaController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function consulta_mora_presuntaAction()
+    public function consultaMoraPresuntaAction()
     {
         return view("mercurio/subsidioemp/consulta_mora_presunta", [
-            "hide_header" => true,
-            "help" => false,
             "title" => "Consulta Mora Presunta"
         ]);
     }
 
-    public function mora_presuntaAction()
+    public function moraPresuntaAction()
     {
-        $this->setResponse("ajax");
         try {
-            $nit = parent::getActUser("documento");
+            $nit = $this->user['documento'];
             $ps = Comman::Api();
-            $ps->runCli(
-                array(
-                    "servicio" => "AportesEmpresas",
-                    'metodo' => 'mora_presunta_by_nit',
-                    "params" => array(
-                        "nit" => $nit
-                    )
-                )
-            );
+            $ps->runCli([
+                "servicio" => "AportesEmpresas",
+                'metodo' => 'mora_presunta_by_nit',
+                "params" => [
+                    "nit" => $nit
+                ]
+            ]);
+
             $consulta  = $ps->toArray();
             if (!$consulta['success']) {
                 throw new DebugException($consulta['msj']);
             }
 
             $ps = Comman::Api();
-            $ps->runCli(
-                array(
-                    "servicio" => "ComfacaEmpresas",
-                    "metodo" => "buscar_sucursales_en_empresa",
-                    "params" => $nit
-                )
-            );
+            $ps->runCli([
+                "servicio" => "ComfacaEmpresas",
+                "metodo" => "buscar_sucursales_en_empresa",
+                "params" => [
+                    'nit' => $nit
+                ]
+            ]);
+
             $out  = $ps->toArray();
             if (!$out['success']) {
                 throw new DebugException($out['msj']);
             }
-            $sucursales = array();
+
+            $sucursales = [];
             foreach ($out['data'] as $sucursal) {
-                $sucursales[] = array(
+                $sucursales[] = [
                     'codsuc' => $sucursal['codsuc'],
                     'detalle' => $sucursal['detalle'],
                     'codzon' => $sucursal['codzon']
-                );
+                ];
             }
 
             $data = $consulta['data'];
-            $salida = array(
+            $salida = [
                 'success' => true,
-                'data' => array(
+                'data' => [
                     'cartera' => $data['moras'],
                     'periodos' => $data['periodos'],
                     'sucursales' => $sucursales,
-                )
-            );
+                ]
+            ];
         } catch (DebugException $e) {
-            $salida = array(
+            $salida = [
                 'success' => false,
                 'msj' => $e->getMessage()
-            );
+            ];
         }
         return $this->renderObject($salida, false);
     }

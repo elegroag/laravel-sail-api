@@ -1,5 +1,5 @@
-import { langDataTable } from '../../Core';
-import { $App } from '../../App';
+import { langDataTable } from '@/Core';
+import { $App } from '@/App';
 
 window.App = $App;
 
@@ -22,7 +22,7 @@ $(() => {
 		}
 
 		window.App.trigger('syncro', {
-			url: window.App.url('consulta_aportes'),
+			url: window.App.url('subsidioemp/consulta_aportes'),
 			data: {
 				perini: $('#perini').val(),
 				perfin: $('#perfin').val(),

@@ -92,11 +92,12 @@ class MoraPresuntaApp {
 	#periodo;
 	#collectionSucursales;
 
-	constructor() {
+	constructor(options = {}) {
 		_.extend(this, Backbone.Events);
 		this.#errorHandler = new ErrorHandler();
 		this.#logger = new Logger();
 		this.#layout = new MoraLayout();
+		this.App = options.App || window.App;
 	}
 
 	setDataManager(dataManager) {

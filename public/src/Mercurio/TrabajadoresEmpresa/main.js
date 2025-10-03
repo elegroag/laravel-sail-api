@@ -1,7 +1,7 @@
-import { langDataTable } from '../../Core';
-import { $App } from '../../App';
-import { Region } from '../../Common/Region';
-import { ConsultaBeneficiarioView, ConsultaConyugeView } from '../ConsultaNucleo/ConsultaTrabajadorView';
+import { langDataTable } from '@/Core';
+import { $App } from '@/App';
+import { Region } from '@/Common/Region';
+import { ConsultaBeneficiarioView, ConsultaConyugeView } from '@/Mercurio/ConsultaNucleo/ConsultaTrabajadorView';
 
 window.App = $App;
 
@@ -17,7 +17,7 @@ $(() => {
 		if (!$('#form').valid()) return;
 
 		$App.trigger('syncro', {
-			url: $App.url('consulta_trabajadores'),
+			url: $App.url('subsidioemp/consulta_trabajadores'),
 			data: {
 				estado: $('#estado').val(),
 			},
@@ -80,7 +80,7 @@ $(() => {
 		);
 
 		$App.trigger('syncro', {
-			url: $App.url('consulta_nucleo'),
+			url: $App.url('subsidioemp/consulta_nucleo'),
 			data: {
 				cedtra: cedtra,
 			},

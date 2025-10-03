@@ -1,4 +1,4 @@
-@extends('layouts.bone')
+@extends('layouts.dash')
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
@@ -9,6 +9,8 @@
     <script src="{{ asset('assets/datatables.net/js/dataTables.min.js') }}"></script>
     <script src="{{ asset('assets/datatables.net.bs5/js/dataTables.bootstrap5.min.js') }}"></script>
 @endpush
+
+@section('title', 'Historial')
 
 @section('content')
 <div class="col-12">

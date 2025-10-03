@@ -4,15 +4,14 @@
 
 @section('content-main')
 @php
-use App\Services\Menu\Menu;
-
-$tipo = session()->get('tipo');
 $user = session()->get('user');
-list($menu, $migas) = Menu::showMenu();
+list($menu, $breadcrumbs, $pageTitle) = App\Services\Menu\Menu::showMenu('ME');
 @endphp
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('theme/argon-mercurio.css') }}" />
+    <link rel="stylesheet" href="{{ asset('theme/css/argon-mercurio.css') }}" />
+    <link rel="stylesheet" href="{{ asset('theme/css/argon-sidenav.css') }}" />
+    <link rel="stylesheet" href="{{ asset('theme/css/argon-content.css') }}" />
     <link rel="stylesheet" href="{{ asset('mercurio/css/mercurio.css') }}" />
 @endpush
 
@@ -24,40 +23,25 @@ list($menu, $migas) = Menu::showMenu();
 
 @include('partials.flash')
 
-@include('templates.sidebar', array('menu' => $menu, '_tipo' => $tipo))
+@include('templates.sidebar', 
+    [
+        'menu' => $menu, 
+        '_tipo' => session()->get('tipo'), 
+        '_estado_afiliado' => session()->get('estado_afiliado')
+    ])
 
 <div class="main-content" id="panel">
-@include('templates.navbar', array('user_name' => capitalize($user['nombre'])))    
+@include('templates.navbar', ['user_name' => capitalize($user['nombre']), 'breadcrumbs'=> $breadcrumbs, 'pageTitle'=> ($pageTitle)? $pageTitle : $title ]) 
 
-<div class="header bg-gradient-primary pb-6 navbar-dark" id='header_group_button'>
-    <div class="container-fluid">
-        <div class="header-body">
-            <div class="row align-items-center py-4">
-                <div class="col-md-4 col-auto mr-auto">
-                    <h4 class="text-white d-inline-block mb-0">{{ isset($title) ? $title : "Sin Titulo" }}</h4>
-                    <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
-                        <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
-                            <li class="breadcrumb-item"><a href="#"><i class="fas fa-home"></i> Dashboard</a></li>
-                            @php echo $migas @endphp
-                        </ol>
-                    </nav>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<div class="container-fluid mt--6">
+<div class="container-fluid mt-3">
     <div class="row">
-        <div class="col">
-            <div class="card">
-                @if (isset($hide_header))
-                @else
-                    <div class="card-header border-0">
-                        <h5 class="mb-0">{{ (isset($title)) ? $title : "Sin Titulo"; }}</h5>
-                    </div>
-                @endif
+        <div class="col-12">
+            <div class="card border-0">
+                <div class="card-header">
+                    <h4 class="font-weight-bold">
+                        @yield('title')
+                    </h4>
+                </div>
                 @yield('content')
             </div>
         </div>
