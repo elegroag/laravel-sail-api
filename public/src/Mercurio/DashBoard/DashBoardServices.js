@@ -1,14 +1,13 @@
-import { $App } from '@/App';
+
 import { Messages } from '@/Utils';
 
 const TraerAportesEmpresa = () => {
-	$.ajax({
-		type: 'POST',
-		url: $App.url('traerAportesEmpresa'),
-		data: {},
-	})
-		.done((response) => {
-			if (response && _.size(response.data) > 0) {
+	window.App.trigger('syncro', {
+		url: window.App.url('principal/traer_aportes_empresa'), 
+		data: {}, 
+		silent: false,
+		callback: (response) => {
+			if (response.success === true) {
 				const ctx = document.getElementById('chart-aportes').getContext('2d');
 				new Chart(ctx, {
 					type: 'bar',
@@ -37,21 +36,19 @@ const TraerAportesEmpresa = () => {
 				$('#render_chart_aportes').html(
 					"<div class='card'><div class='card-body'><h5>Informe de aportes</h5><p>La empresa no posee datos relacionados a los aportes realizados. </p></div></div>",
 				);
+				Messages.display(response.message, 'error');
 			}
-		})
-		.fail((jqXHR, textStatus) => {
-			Messages.display(jqXHR.statusText, 'error');
-		});
+		}
+	});
 };
 
 const TraerCategoriasEmpresa = () => {
-	$.ajax({
-		type: 'POST',
-		url: $App.url('traerCategoriasEmpresa'),
+	window.App.trigger('syncro', {
+		url: window.App.url('principal/traer_categorias_empresa'),
 		data: {},
-	})
-		.done(function (response) {
-			if (_.size(response.data) > 0) {
+		silent: false,
+		callback: (response) => {
+			if (response.success === true) {
 				var ctx = document.getElementById('chart-categorias').getContext('2d');
 				new Chart(ctx, {
 					type: 'pie',
@@ -73,20 +70,19 @@ const TraerCategoriasEmpresa = () => {
 				$('#render_chart_categorias').html(
 					"<div class='card'><div class='card-body'><h5>Informe trabajadores por categorias</h5><p>La empresa no posee datos suficientes de trabajadores por categorias.</p></div></div>",
 				);
+				Messages.display(response.message, 'error');
 			}
-		})
-		.fail(function (jqXHR, textStatus) {
-			Messages.display(jqXHR.statusText, 'error');
-		});
+		}
+	});
 };
 
 const TraerGiroEmpresa = () => {
-	$.ajax({
-		type: 'POST',
-		url: $App.url('traerGiroEmpresa'),
+	window.App.trigger('syncro', {
+		url: window.App.url('principal/traer_giro_empresa'),
 		data: {},
-	})
-		.done(function (response) {
+		silent: false,
+		callback: (response) => {
+			if (response.success === true) {
 			const  ctx = document.getElementById('chart-giro').getContext('2d');
 			new Chart(ctx, {
 				type: 'bar',
@@ -111,10 +107,14 @@ const TraerGiroEmpresa = () => {
 					},
 				},
 			});
-		})
-		.fail(function (jqXHR, textStatus) {
-			Messages.display(jqXHR.statusText, 'error');
-		});
-};
+			} else {
+				$('#render_chart_giro').html(
+					"<div class='card'><div class='card-body'><h5>Informe giro empresa</h5><p>La empresa no posee datos suficientes de giro.</p></div></div>",
+				);
+				Messages.display(response.message, 'error');
+			}
+		}
+	});
+};	
 
 export { TraerAportesEmpresa, TraerGiroEmpresa, TraerCategoriasEmpresa };

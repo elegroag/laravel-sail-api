@@ -3,8 +3,6 @@
 @section('title', 'Dashboard Trabajador')
 
 @section('content')
-@csrf
-
 <script src="{{ asset('assets/chart/Chart.min.js') }}" />
 <script src="{{ asset('assets/chart/Chart.extension.js') }}" />
 

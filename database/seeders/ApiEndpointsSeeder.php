@@ -113,6 +113,13 @@ class ApiEndpointsSeeder extends Seeder
                 'host_dev' => 'http://172.168.0.7:3001',
                 'host_pro' => 'http://172.168.0.7:3001',
             ],
+            [
+                'service_name' => 'PoblacionAfiliada',
+                'endpoint_name' => 'poblation',
+                'connection_name' => 'api-clisisu',
+                'host_dev' => 'http://172.168.0.40:9000',
+                'host_pro' => 'http://172.168.0.7:9000',
+            ],
         ];
 
         foreach ($endpoints as $endpoint) {

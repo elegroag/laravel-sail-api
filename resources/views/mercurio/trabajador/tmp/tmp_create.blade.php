@@ -45,7 +45,7 @@
 
                                 <div class="col-md-3">
                                     <div class='form-group' group-for='tipdoc'>
-                                        <label for="tipdoc" class="control-label">Tipo documento</label>
+                                        <label for="tipdoc" class="control-label">Tipo documento trabajador</label>
                                         <span id='component_tipdoc'></span>
                                     </div>
                                 </div>

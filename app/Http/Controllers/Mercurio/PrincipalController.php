@@ -52,10 +52,8 @@ class PrincipalController extends ApplicationController
 
     public function dashboardEmpresaAction()
     {
-        return view('principal.dashboard_empresa', [
-            'help' => false,
+        return view('mercurio/principal/dashboard_empresa', [
             'title' => "Dashboard Empresas",
-            'hide_header' => true,
             'tipo' => $this->tipo,
             'documento' => $this->user['documento'],
             'nombre' => $this->user['nombre'],
@@ -76,122 +74,142 @@ class PrincipalController extends ApplicationController
 
     public function traerAportesEmpresaAction()
     {
-        $this->setResponse("ajax");
+        try {
+            $response['labels'] = array(
+                "Enero",
+                "Febrero",
+                "Marzo",
+                "Abril",
+                "Mayo",
+                "Junio",
+                "Julio",
+                "Agosto",
+                "Septiembre",
+                "Octubre",
+                "Noviembre",
+                "Diciembre",
+            );
+            $data = array();
 
-        $response['labels'] = array(
-            "Enero",
-            "Febrero",
-            "Marzo",
-            "Abril",
-            "Mayo",
-            "Junio",
-            "Julio",
-            "Agosto",
-            "Septiembre",
-            "Octubre",
-            "Noviembre",
-            "Diciembre",
-        );
-        $data = array();
-
-        $ps = Comman::Api();
-        $ps->runCli(
-            array(
-                "servicio" => "AportesEmpresas",
-                "metodo" => "aportes_empresa_mensual",
-                "params" => array(
-                    "nit" => $this->user['documento'],
-                    "vigencia" => date("Y")
+            $ps = Comman::Api();
+            $ps->runCli(
+                array(
+                    "servicio" => "AportesEmpresas",
+                    "metodo" => "aportes_empresa_mensual",
+                    "params" => array(
+                        "nit" => $this->user['documento'],
+                        "vigencia" => date("Y")
+                    )
                 )
-            )
-        );
+            );
 
-        $subsi11 = $ps->toArray();
-        foreach ($subsi11['data'] as $msubsi11) {
-            $data[] = $msubsi11['valcon'];
+            $subsi11 = $ps->toArray();
+            foreach ($subsi11['data'] as $msubsi11) {
+                $data[] = $msubsi11['valcon'];
+            }
+
+            $response['data'] = $data;
+        } catch (\Throwable $th) {
+            $response = [
+                'success' => false,
+                'message' => $th->getMessage()
+            ];
         }
-
-        $response['data'] = $data;
-
         return $this->renderObject($response, false);
     }
 
     public function traerCategoriasEmpresaAction()
     {
-        $this->setResponse("ajax");
-        $data = array();
-        $labels = array();
+        try {
+            $data = array();
+            $labels = array();
 
-        $ps = Comman::Api();
-        $ps->runCli(
-            array(
-                "servicio" => "PoblacionAfiliada",
-                "metodo" => "categoria_trabajador_empresa",
-                "params" => array(
-                    "nit" => $this->user['documento']
+            $ps = Comman::Api();
+            $ps->runCli(
+                array(
+                    "servicio" => "PoblacionAfiliada",
+                    "metodo" => "categoria_trabajador_empresa",
+                    "params" => array(
+                        "nit" => $this->user['documento']
+                    )
                 )
-            )
-        );
-        $subsi11 = $ps->toArray();
-        if (!$subsi11['success']) {
-            return $this->renderObject([
+            );
+            $subsi11 = $ps->toArray();
+            if (!$subsi11['success']) {
+                return $this->renderObject([
+                    'success' => false,
+                    'msj' => "No se pudo traer las categorias"
+                ]);
+            }
+
+            foreach ($subsi11['data'] as $msubsi11) {
+                $data[] = $msubsi11['cantidad'];
+                $labels[] = $msubsi11['codcat'];
+            }
+
+            $response = [
+                'success' => true,
+                'data' => $data,
+                'labels' => $labels
+            ];
+        } catch (\Throwable $th) {
+            $response = [
                 'success' => false,
-                'msj' => "No se pudo traer las categorias"
-            ]);
+                'message' => $th->getMessage(),
+            ];
         }
-
-        foreach ($subsi11['data'] as $msubsi11) {
-            $data[] = $msubsi11['cantidad'];
-            $labels[] = $msubsi11['codcat'];
-        }
-
-        $response['data'] = $data;
-        $response['labels'] = $labels;
 
         return $this->renderObject($response, false);
     }
 
     public function traerGiroEmpresaAction()
     {
-        $this->setResponse("ajax");
-        $data = array();
-        $response['labels'] = array(
-            "Enero",
-            "Febrero",
-            "Marzo",
-            "Abril",
-            "Mayo",
-            "Junio",
-            "Julio",
-            "Agosto",
-            "Septiembre",
-            "Octubre",
-            "Noviembre",
-            "Diciembre",
-        );
+        try {
+            $this->setResponse("ajax");
+            $data = array();
+            $response['labels'] = array(
+                "Enero",
+                "Febrero",
+                "Marzo",
+                "Abril",
+                "Mayo",
+                "Junio",
+                "Julio",
+                "Agosto",
+                "Septiembre",
+                "Octubre",
+                "Noviembre",
+                "Diciembre",
+            );
 
-        $ps = Comman::Api();
-        $ps->runCli(
-            array(
-                "servicio" => "CuotaMonetaria",
-                "metodo" => "giro_trabajador_empresa",
-                "params" => array(
-                    "nit" => $this->user['documento']
+            $ps = Comman::Api();
+            $ps->runCli(
+                array(
+                    "servicio" => "CuotaMonetaria",
+                    "metodo" => "giro_trabajador_empresa",
+                    "params" => array(
+                        "nit" => $this->user['documento']
+                    )
                 )
-            )
-        );
-        $subsi09 = $ps->toArray();
-        if (!$subsi09['success']) {
-            return $this->renderObject([
-                'success' => false,
-                'msj' => "No se pudo traer el giro"
-            ]);
-        }
+            );
+            $subsi09 = $ps->toArray();
+            if (!$subsi09['success']) {
+                return $this->renderObject([
+                    'success' => false,
+                    'msj' => "No se pudo traer el giro"
+                ]);
+            }
 
-        foreach ($subsi09['data'] as $msubsi09) {
-            $data[] = $msubsi09['valor'];
+            foreach ($subsi09['data'] as $msubsi09) {
+                $data[] = $msubsi09['valor'];
+            }
+            $response['data'] = $data;
+        } catch (\Throwable $th) {
+            $response = [
+                'success' => false,
+                'message' => $th->getMessage(),
+            ];
         }
-        $response['data'] = $data;
 
         return $this->renderObject($response, false);
     }

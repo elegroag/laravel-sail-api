@@ -1,14 +1,11 @@
-
 @extends('layouts.dash')
 
-@push('scripts')
-<script src="{{ asset('Mercurio/consultasempresa/consultasempresa.build.js') }}"></script>
-@endpush
+@section('title', 'Certificado de afiliación')
 
 @section('content')
 <div class="pb-3">
     <div class="card-body">
-        <?php echo Tag::form("subsidioemp/certificado_afiliacion", "id: form", "class: validation_form", "autocomplete: off", "novalidate"); ?>
+        <form id="form" class="validation_form" action="{{ url('subsidioemp/certificado_afiliacion') }}" method="POST" autocomplete="off" novalidate>
         <div class="row">
             <p class="text-center">Genera el certificado de afiliación</p>
             <div class="col-md-auto d-flex m-auto">
@@ -18,8 +15,9 @@
                 </button>
             </div>
         </div>
-        <?php echo Tag::endform(); ?>
+        </form>
     </div>
 </div>
 
+<script src="{{ asset('mercurio/build/ConsultasEmpresa.js') }}"></script>
 @endsection

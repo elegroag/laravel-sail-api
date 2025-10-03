@@ -14,11 +14,15 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
         Route::get('/consulta_nomina_view', [ConsultasEmpresaController::class, 'consultaNominaViewAction']);
         Route::get('/historial', [ConsultasEmpresaController::class, 'historialAction']);
         Route::get('/consulta_mora_presunta', [ConsultasEmpresaController::class, 'consultaMoraPresuntaAction']);
+        Route::get('/certificado_afiliacion', [ConsultasEmpresaController::class, 'certificadoAfiliacionViewAction']);
+        Route::get('/certificado_para_trabajador', [ConsultasEmpresaController::class, 'certificadoParaTrabajadorViewAction']);
 
         Route::post('/consulta_nomina', [ConsultasEmpresaController::class, 'consultaNominaAction']);
         Route::post('/consulta_aportes', [ConsultasEmpresaController::class, 'consultaAportesAction']);
         Route::post('/consulta_giro', [ConsultasEmpresaController::class, 'consultaGiroAction']);
         Route::post('/consulta_trabajadores', [ConsultasEmpresaController::class, 'consultaTrabajadoresAction']);
         Route::post('/mora_presunta', [ConsultasEmpresaController::class, 'moraPresuntaAction']);
+        Route::post('/certificado_afiliacion', [ConsultasEmpresaController::class, 'certificadoAfiliacionAction']);
+        Route::post('/certificado_para_trabajador', [ConsultasEmpresaController::class, 'certificadoParaTrabajadorAction']);
     });
 });

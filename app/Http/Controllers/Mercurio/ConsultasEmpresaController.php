@@ -690,25 +690,23 @@ class ConsultasEmpresaController extends ApplicationController
         $file = "public/docs/" . "ejemplo_planilla_masiva.xlsx";
     }
 
-    public function certificado_afiliacion_viewAction()
+    public function certificadoAfiliacionViewAction()
     {
-        return view("subsidioemp/certificado_afiliacion", [
-            "hide_header" => true,
-            "help" => false,
+        return view("mercurio/subsidioemp/certificado_afiliacion", [
             "title" => "Certificado Afiliacion",
             "document_title" => "Certificado Afiliacion"
         ]);
     }
 
-    public function certificado_afiliacionAction()
+    public function certificadoAfiliacionAction()
     {
         $logger = new Logger();
         $logger->registrarLog(false, "Certificado De Afiliacion", "");
-        header("Location: https://comfacaenlinea.com.co/SYS/Subsidio/subflo/gene_certi_emp/x/" . parent::getActUser("documento"));
+        header("Location: https://comfacaenlinea.com.co/SYS/Subsidio/subflo/gene_certi_emp/x/" . $this->user['documento']);
     }
 
 
-    public function certificado_para_trabajador_viewAction()
+    public function certificadoParaTrabajadorViewAction()
     {
         $ps = Comman::Api();
         $ps->runCli(
@@ -716,7 +714,7 @@ class ConsultasEmpresaController extends ApplicationController
                 "servicio" => "ComfacaAfilia",
                 "metodo" => "listar_trabajadores",
                 "params" => array(
-                    "nit" => parent::getActUser("documento"),
+                    "nit" => $this->user['documento'],
                     "estado" => "A"
                 )
             )
@@ -726,28 +724,20 @@ class ConsultasEmpresaController extends ApplicationController
             throw new DebugException($out['msj']);
         }
 
-        $_cedtra = array();
+        $trabajadores = [];
         $subsi15 = $out['data'];
         foreach ($subsi15 as $msubsi15) {
-            $_cedtra[$msubsi15['cedtra']] = $msubsi15['nombre'];
+            $trabajadores[$msubsi15['cedtra']] = $msubsi15['nombre'];
         }
 
-        return view("subsidioemp/certificado_para_trabajador", [
-            "hide_header" => true,
-            "help" => false,
+        return view("mercurio/subsidioemp/certificado_para_trabajador", [
             "title" => "Certificado Para Trabajador",
             "document_title" => "Certificado Para Trabajador",
-            "_cedtra" => $_cedtra,
-            "tipo" => array(
-                "A" => "Certificado Afiliacion Principal",
-                "I" => "Certificacion Con Nucleo",
-                "T" => "Certificacion de Multiafiliacion",
-                "P" => "Reporte trabajador en planillas"
-            )
+            "trabajadores" => $trabajadores
         ]);
     }
 
-    public function certificado_para_trabajadorAction(Request $request)
+    public function certificadoParaTrabajadorAction(Request $request)
     {
         $logger = new Logger();
         $tipo = $request->input("tipo");

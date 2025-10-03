@@ -6,8 +6,10 @@ import {
 	TraerGiroEmpresa,
 } from './DashBoardServices';
 
+window.App = $App;
+
 $(() => {
-	$App.initialize();
+	window.App.initialize();
 	TraerAportesEmpresa();
 	TraerCategoriasEmpresa();
 	TraerGiroEmpresa();
