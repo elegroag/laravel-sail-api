@@ -31,46 +31,6 @@ class AuthMercurioController extends Controller
         $this->db = DbBase::rawConnect();
     }
 
-    public function authenticateAction(Request $request)
-    {
-        try {
-            $request->validate([
-                'documentType' => 'required|string|min:1',
-                'identification' => 'required|integer|digits_between:6,18',
-                'password' => 'required|string|min:8',
-                'tipo' => 'required|string|min:1'
-            ]);
-
-            $autenticaService = new AutenticaService();
-            $response = $autenticaService->execute(
-                new RequestParam([
-                    'coddoc' => $request->input('documentType'),
-                    'documento' => $request->input('identification'),
-                    'clave' => $request->input('password'),
-                    'tipo' => $request->input('tipo')
-                ])
-            );
-
-            list($access, $message) = $response;
-
-            return response()->json([
-                'success' => $access,
-                'message' => $message
-            ], 201);
-        } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error de validación',
-                'errors' => $e->errors()
-            ], 422);
-        } catch (DebugException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al autenticar: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
     public function registerAction(Request $request)
     {
         $this->db->begin();
@@ -79,21 +39,14 @@ class AuthMercurioController extends Controller
                 'coddoc' => 'required|string|min:1',
                 'documento' => 'required|integer|digits_between:6,18',
                 'password' => 'required|string|min:8',
-                'tipdoc' => 'required|string|min:1',
-                'razsoc' => 'required|string|min:5',
-                'nit' => 'required|integer|digits_between:6,18',
-                'tipsoc' => 'required|string|min:1',
-                'tipper' => 'required|string|min:1',
                 'nombre' => 'required|string|min:5',
                 'email' => 'required|email',
                 'telefono' => 'required|integer|digits_between:6,10',
                 'codciu' => 'required|integer|digits:5',
                 'first_name' => 'required|string|min:3',
                 'last_name' => 'required|string|min:3',
-                'is_delegado' => 'required|boolean',
                 'tipo' => 'required|string|min:1',
             ]);
-
 
             $data = $request->all();
             $data['calemp'] = calemp_use_tipo_value($request->input('selected_user_type'));
@@ -110,6 +63,24 @@ class AuthMercurioController extends Controller
                 $data['coddocrepleg'] = $request->input('coddoc');
             }
 
+            if (
+                $request->input('tipo') == 'I' ||
+                $request->input('tipo') == 'O' ||
+                $request->input('tipo') == 'S' ||
+                $request->input('tipo') == 'F'
+            ) {
+                $request->validate([
+                    'contribution_rate' => 'required'
+                ]);
+            }
+
+            if ($request->input('tipo') == 'T') {
+                $request->validate([
+                    'razsoc' => 'required|string|min:5',
+                    'nit' => 'required|integer|digits_between:6,18'
+                ]);
+            }
+
             switch ($request->input('tipo')) {
                 case 'E':
                     if ($request->input('is_delegado')) {
@@ -119,7 +90,13 @@ class AuthMercurioController extends Controller
                             'rep_email' => 'required|email',
                             'rep_telefono' => 'required|integer|digits_between:6,10',
                             'rep_coddoc' => 'required|string|min:1',
-                            'cargo' => 'required|string|min:5'
+                            'cargo' => 'required|string|min:5',
+                            'tipdoc' => 'required|string|min:1',
+                            'razsoc' => 'required|string|min:5',
+                            'nit' => 'required|integer|digits_between:6,18',
+                            'tipsoc' => 'required|string|min:1',
+                            'tipper' => 'required|string|min:1',
+                            'is_delegado' => 'required|boolean',
                         ]);
                     }
                     $signupEntity = new SignupEmpresas();
@@ -136,8 +113,8 @@ class AuthMercurioController extends Controller
                 case 'S':
                     $signupEntity = new SignupDomestico();
                     break;
-                case 'P':
                 case 'T':
+                case 'P':
                     $signupEntity = null;
                     break;
                 default:

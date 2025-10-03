@@ -179,9 +179,10 @@ export function useRegisterValidation({ state, step, refs, dispatch }: UseRegist
       || (isWorker && step === 3)
       || (!isCompany && !isWorker && step === 2)
     ) {
-      // En empresa el tipo de documento de sesión es documentTypeUser; en otros flujos sigue siendo documentType
-      const docTypeField = isCompany ? 'documentTypeUser' : 'documentType'
-      const docTypeValue = (state as any)[docTypeField] as string
+      // En empresa el tipo de documento de sesión es "documentType"; en otros flujos es "documentTypeUser"
+      // Debe coincidir con el payload en handleRegister y con el UI en SessionRegister
+      const docTypeField: 'documentType' | 'documentTypeUser' = isCompany ? 'documentType' : 'documentTypeUser'
+      const docTypeValue = state[docTypeField]
       if (!docTypeValue) {
         dispatch({ type: "SET_ERROR", field: docTypeField, error: "El tipo de documento es requerido" })
         isValid = false

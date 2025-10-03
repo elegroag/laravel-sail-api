@@ -55,6 +55,12 @@ class SignupService
         }
 
         if ($signupEntity == null) {
+            if ($this->tipo == 'T') {
+                $res = $this->validaTrabajadorEmpresa();
+                if ($res == false) {
+                    throw new DebugException("Error al validar el trabajador no está afiliado a la empresa con nit: " . $this->nit, 501);
+                }
+            }
             $signupParticular = new SignupParticular(
                 new Request(
                     array(
@@ -120,7 +126,7 @@ class SignupService
             "coddoc" => $solicitud->getCoddoc(),
             "tipo" => $this->tipo,
             "tipafi" => $this->tipo,
-            "id" => ($this->tipo == 'P') ? $solicitud->getDocumento() : $solicitud->getId()
+            "id" => ($this->tipo == 'P' || $this->tipo == 'T') ? $solicitud->getDocumento() : $solicitud->getId()
         ];
     }
 
@@ -230,5 +236,41 @@ class SignupService
                 $gestionFirmas->generarClaves($this->password);
             }
         }
+    }
+
+    function validaTrabajadorEmpresa()
+    {
+        $ps = Comman::Api();
+        $ps->runCli(
+            array(
+                "servicio" => "ComfacaEmpresas",
+                "metodo" => "informacion_empresa",
+                "params" => array(
+                    "nit" => $this->nit
+                )
+            )
+        );
+        if ($ps->isJson() == False) {
+            return false;
+        }
+        $out = $ps->toArray();
+        if ($out['success'] == false) return false;
+
+        $ps->runCli(
+            array(
+                "servicio" => "ComfacaEmpresas",
+                "metodo" => "informacion_trabajador",
+                "params" => array(
+                    "cedtra" => $this->cedrep
+                )
+            )
+        );
+        if ($ps->isJson() == False) {
+            return false;
+        }
+        $out = $ps->toArray();
+        if ($out['success'] == false) return false;
+
+        return ($out['data']['nit'] == $this->nit) ? $out['data'] : false;
     }
 }

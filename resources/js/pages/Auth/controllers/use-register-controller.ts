@@ -261,22 +261,22 @@ const useRegisterController = ({
           body: JSON.stringify(payload)
         })
   
-        const data = await response.json()
+        const responseJson = await response.json()
   
-        if (response.ok && data?.success) {
+        if (response.ok && responseJson?.success) {
           setToast({ message: '¡Registro exitoso! Serás redirigido al login.', type: 'success' })
           dispatch({ type: 'RESET_FORM' })
           setStep(1)
           setTimeout(() => {
             router.visit(route('verify.show', {
-              tipo: tipoValue,
-              coddoc: state.documentType,
-              documento: state.identification,
+              tipo: responseJson.data.tipo,
+              coddoc: responseJson.data.coddoc,
+              documento: responseJson.data.documento,
             }));
           }, 1500);
         } else {
-          console.error('Error al registrar:', data)
-          setToast({ message: typeof data?.message === 'string' ? data.message : 'No fue posible completar el registro.', type: 'error' })
+          console.error('Error al registrar:', responseJson)
+          setToast({ message: typeof responseJson?.message === 'string' ? responseJson.message : 'No fue posible completar el registro.', type: 'error' })
         }
       } catch (error) {
         console.log("Error en el registro. Por favor intenta nuevamente.", error)
