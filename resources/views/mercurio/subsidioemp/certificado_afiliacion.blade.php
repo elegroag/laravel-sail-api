@@ -5,7 +5,7 @@
 @section('content')
 <div class="pb-3">
     <div class="card-body">
-        <form id="form" class="validation_form" action="{{ url('subsidioemp/certificado_afiliacion') }}" method="POST" autocomplete="off" novalidate>
+        <form id="form" class="validation_form" action="{{ url('mercurio/subsidioemp/certificado_afiliacion') }}" method="POST" autocomplete="off" novalidate>
         <div class="row">
             <p class="text-center">Genera el certificado de afiliación</p>
             <div class="col-md-auto d-flex m-auto">

@@ -700,11 +700,9 @@ class ConsultasEmpresaController extends ApplicationController
 
     public function certificadoAfiliacionAction()
     {
-        $logger = new Logger();
-        $logger->registrarLog(false, "Certificado De Afiliacion", "");
-        header("Location: https://comfacaenlinea.com.co/SYS/Subsidio/subflo/gene_certi_emp/x/" . $this->user['documento']);
+        $this->setResponse("view");
+        return header("Location: https://comfacaenlinea.com.co/SYS/Subsidio/subflo/gene_certi_emp/x/" . $this->user['documento']);
     }
-
 
     public function certificadoParaTrabajadorViewAction()
     {

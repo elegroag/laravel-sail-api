@@ -85,7 +85,7 @@ const DatosPersonalesRegister: React.FC<DataPersonRegister> = ({
       <Input
         id="phone"
         ref={phoneRef}
-        type="tel"
+        type="number"
         value={values.phone}
         onChange={(e) => onChange("phone", e.target.value)}
         placeholder="Teléfono"

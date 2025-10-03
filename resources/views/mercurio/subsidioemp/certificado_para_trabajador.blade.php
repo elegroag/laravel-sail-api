@@ -18,7 +18,13 @@ $tipo = [
 @endphp
 <div class="card mb-0">
     <div class="card-body">
-        <form id="form" class="validation_form" action="{{ url('mercurio/subsidioemp/certificado_para_trabajador') }}" method="POST" autocomplete="off" novalidate>
+        <form 
+            id="form" 
+            class="validation_form" 
+            action="{{ url('mercurio/subsidioemp/certificado_para_trabajador') }}" 
+            method="POST" 
+            autocomplete="off" 
+            novalidate>
         <div class="row">
             <div class="col-md-4 ml-auto">
                 <div class="form-group">
