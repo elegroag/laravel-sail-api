@@ -1,4 +1,3 @@
-import { $App } from '@/App';
 import { ControllerRequest } from '../ControllerRequest';
 import { FormIndependentView } from './views/FormIndependentView';
 import { IndependientesView } from './views/IndependientesView';
@@ -15,7 +14,7 @@ class ControllerIndependientes extends ControllerRequest {
 			headerOptions: {
 				estado: '',
 				tipo: 'I',
-				url_nueva: $App.url('nueva'),
+				url_nueva: options.App.url('nueva'),
 				breadcrumb_menu: 'Crear solicitud',
 				titulo: 'Afiliación independiente',
 				url_masivo: null,
@@ -30,8 +29,8 @@ class ControllerIndependientes extends ControllerRequest {
 		this.on('form:digit', this.afiService.digitVer);
 		this.once('params', this.afiService.paramsServer);
 
-		$App.Collections.formParams = null;
-		$App.Collections.firmas = null;
+		options.App.Collections.formParams = null;
+		options.App.Collections.firmas = null;
 	}
 }
 

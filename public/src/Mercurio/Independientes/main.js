@@ -1,6 +1,8 @@
 import { $App } from '@/App';
 import { RouterIndependientes } from './RouterIndependientes';
 
+window.App = $App;
+
 $(() => {
-	$App.startApp(RouterIndependientes, 'list', '#boneLayout');
+	window.App.startApp(RouterIndependientes, 'list', '#boneLayout');
 });

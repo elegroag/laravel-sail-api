@@ -1,6 +1,7 @@
 import { $App } from '@/App';
 import { RouterConyuges } from './RouterConyuges';
+window.App = $App;
 
 $(() => {
-	$App.startApp(RouterConyuges, 'list', '#boneLayout');
+	window.App.startApp(RouterConyuges, 'list', '#boneLayout');
 });

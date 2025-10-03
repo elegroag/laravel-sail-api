@@ -1,4 +1,3 @@
-import { $App } from '@/App';
 import { ControllerRequest } from '../ControllerRequest';
 import { PensionadoModel } from './models/PensionadoModel';
 import { PensionadosView } from './views/PensionadosView';
@@ -15,7 +14,7 @@ class ControllerPensionados extends ControllerRequest {
 			headerOptions: {
 				estado: '',
 				tipo: 'P',
-				url_nueva: $App.url('nueva'),
+				url_nueva: options.App.url('nueva'),
 				breadcrumb_menu: 'Crear solicitud',
 				titulo: 'Afiliación pensionado',
 				url_masivo: null,
@@ -31,8 +30,8 @@ class ControllerPensionados extends ControllerRequest {
 		this.on('form:digit', this.afiService.digitVer);
 		this.once('params', this.afiService.paramsServer);
 
-		$App.Collections.formParams = null;
-		$App.Collections.firmas = null;
+		options.App.Collections.formParams = null;
+		options.App.Collections.firmas = null;
 	}
 }
 

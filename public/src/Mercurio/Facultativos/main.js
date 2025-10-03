@@ -1,6 +1,8 @@
 import { $App } from '@/App';
 import { RouterFacultativos } from './RouterFacultativos';
 
+window.App = $App;
+
 $(function () {
-	$App.startApp(RouterFacultativos, 'list', '#boneLayout');
+	window.App.startApp(RouterFacultativos, 'list', '#boneLayout');
 });

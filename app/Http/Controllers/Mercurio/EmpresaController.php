@@ -16,6 +16,7 @@ use App\Models\Mercurio37;
 use App\Models\Mercurio10;
 use App\Models\Mercurio31;
 use App\Models\Subsi54;
+use App\Models\Tranoms;
 use App\Services\Entidades\EmpresaService;
 use App\Services\FormulariosAdjuntos\DatosEmpresaService;
 use App\Services\FormulariosAdjuntos\EmpresaAdjuntoService;
@@ -476,6 +477,8 @@ class EmpresaController extends ApplicationController
             }
             $data = method_exists($solicitud, 'getArray') ? $solicitud->getArray() : [];
 
+            $tranoms = Tranoms::where('request', $id)->get();
+            $data['tranoms'] = $tranoms->toArray();
             $salida = [
                 'success' => true,
                 'data' => $data,

@@ -1,8 +1,10 @@
 import { langDataTable } from '../../Core';
 import { $App } from '../../App';
 
+window.App = $App;
+
 $(() => {
-	$App.initialize();
+	window.App.initialize();
 	$(document).on('click', '#bt_consulta_aportes', (e) => {
 		e.preventDefault();
 		$('#form').validate({
@@ -19,15 +21,15 @@ $(() => {
 			return;
 		}
 
-		$App.trigger('syncro', {
-			url: $App.url('consulta_aportes'),
+		window.App.trigger('syncro', {
+			url: window.App.url('consulta_aportes'),
 			data: {
 				perini: $('#perini').val(),
 				perfin: $('#perfin').val(),
 			},
 			callback: (response={}) => {
 				if (!response || response.success == false) {
-					$App.trigger('alert:error', { message: response.msg });
+					window.App.trigger('alert:error', { message: response.msg });
 				} else {
 					$('#consulta').html(response.data);
 					$('#dataTable').DataTable({

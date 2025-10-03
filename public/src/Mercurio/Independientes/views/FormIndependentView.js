@@ -1,6 +1,5 @@
 import flatpickr from 'flatpickr';
 import { Spanish } from 'flatpickr/dist/l10n/es';
-import { $App } from '@/App';
 import { ComponentModel } from '@/Componentes/Models/ComponentModel';
 import { eventsFormControl } from '@/Core';
 import { FormView } from '@/Mercurio/FormView';
@@ -146,7 +145,7 @@ export class FormIndependentView extends FormView {
 
         if (_err > 0) {
             target.removeAttr('disabled');
-            $App.trigger('alert:warning', {
+            this.App.trigger('alert:warning', {
                 message: 'Se requiere de resolver los campos requeridos para continuar.',
             });
             setTimeout(() => $('label.error').text(''), 6000);
@@ -160,7 +159,7 @@ export class FormIndependentView extends FormView {
 
         if (entity.isValid() !== true) {
             target.removeAttr('disabled');
-            $App.trigger('alert:warning', { message: entity.validationError.join(' ') });
+            this.App.trigger('alert:warning', { message: entity.validationError.join(' ') });
             setTimeout(() => $('label.error').text(''), 6000);
             return false;
         }
@@ -201,7 +200,7 @@ export class FormIndependentView extends FormView {
                 }
             }
 
-            $App.trigger('confirma', {
+            this.App.trigger('confirma', {
                 message: 'Confirma que desea guardar los datos del formulario.',
                 callback: (status) => {
                     if (status) {
@@ -214,10 +213,10 @@ export class FormIndependentView extends FormView {
 
                                 if (response) {
                                     if (response.success) {
-                                        $App.trigger('alert:success', { message: response.msj });
+                                        this.App.trigger('alert:success', { message: response.msj });
                                         this.model.set({ id: parseInt(response.data.id) });
                                         if (this.isNew === true) {
-                                            $App.router.navigate('proceso/' + this.model.get('id'), {
+                                            this.App.router.navigate('proceso/' + this.model.get('id'), {
                                                 trigger: true,
                                                 replace: true,
                                             });
@@ -226,7 +225,7 @@ export class FormIndependentView extends FormView {
                                             _tab.show();
                                         }
                                     } else {
-                                        $App.trigger('alert:error', { message: response.msj });
+                                        this.App.trigger('alert:error', { message: response.msj });
                                     }
                                 }
                             },
@@ -263,7 +262,7 @@ export class FormIndependentView extends FormView {
         let cedtra = this.$el.find(e.currentTarget).val();
         if (cedtra === '') return false;
 
-        $App.trigger('form:find', {
+        this.App.trigger('form:find', {
             cedtra: cedtra,
             callback: () => {
                 this.actualizaForm();

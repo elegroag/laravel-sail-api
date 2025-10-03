@@ -3,8 +3,10 @@ import { $App } from '../../App';
 import { Region } from '../../Common/Region';
 import { ConsultaBeneficiarioView, ConsultaConyugeView } from '../ConsultaNucleo/ConsultaTrabajadorView';
 
+window.App = $App;
+
 $(() => {
-	$App.initialize();
+	window.App.initialize();
 	$(document).on('click', '#bt_consulta_trabajadores', function (e) {
 		$('#form').validate({
 			rules: {

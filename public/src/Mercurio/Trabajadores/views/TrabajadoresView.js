@@ -1,9 +1,9 @@
-import { $App } from '@/App';
 import { langDataTable } from '@/Core';
 
 class TrabajadoresView extends Backbone.View {
     constructor(options = {}) {
         super(options);
+        this.App = options.App || window.App;
     }
 
     get className() {
@@ -43,17 +43,17 @@ class TrabajadoresView extends Backbone.View {
     procesoPendiente(e) {
         const id = this.$el.find(e.currentTarget).attr('data-cid');
         this.remove();
-        $App.router.navigate('proceso/' + id, { trigger: true });
+        this.App.router.navigate('proceso/' + id, { trigger: true });
     }
 
     cambioCuenta(event) {
         const target = $(event.currentTarget);
-        $App.trigger('confirma', {
+        this.App.trigger('confirma', {
             message:
                 'Se requiere de confirmar que estás de acuerdo en el cambio de cuenta para administrar la empresa seleccionada. Esta opción le permitirá afiliar trabajadores, cónyuges y beneficiarios',
             callback: (status) => {
                 if (status) {
-                    const _url = $App.kumbiaURL('' + target.attr('data-href'));
+                    const _url = this.App.kumbiaURL('' + target.attr('data-href'));
                     window.location.href = _url;
                 }
             },

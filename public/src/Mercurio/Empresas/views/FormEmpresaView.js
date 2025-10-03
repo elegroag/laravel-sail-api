@@ -1,8 +1,7 @@
-import { $App } from '../../../App';
-import { ComponentModel } from '../../../Componentes/Models/ComponentModel';
-import { TrabajadorNominaModel } from '../../../Componentes/Models/TrabajadorNominaModel';
-import { eventsFormControl } from '../../../Core';
-import { FormView } from '../../FormView';
+import { ComponentModel } from '@/Componentes/Models/ComponentModel';
+import { TrabajadorNominaModel } from '@/Componentes/Models/TrabajadorNominaModel';
+import { eventsFormControl } from '@/Core';
+import { FormView } from '@/Mercurio/FormView';
 import { TraNomCollection } from '../../Trabajadores/collections/TrabajadoresCollection';
 import { EmpresaModel } from '../models/EmpresaModel';
 import { TrabajadoresNominaView } from './TrabajadoresNominaView';
@@ -141,7 +140,7 @@ export class FormEmpresaView extends FormView {
         if (this.form.valid() == false) _err++;
         if (_err > 0) {
             target.removeAttr('disabled');
-            $App.trigger('alert:warning', {
+            this.App.trigger('alert:warning', {
                 message: 'Se requiere de resolver los campos requeridos para continuar.',
             });
             return false;
@@ -153,14 +152,14 @@ export class FormEmpresaView extends FormView {
 
         if (entity.isValid() !== true) {
             target.removeAttr('disabled');
-            $App.trigger('alert:warning', { message: entity.validationError.join(' ') });
+            this.App.trigger('alert:warning', { message: entity.validationError.join(' ') });
             setTimeout(() => $('label.error').text(''), 6000);
             return false;
         }
 
         if (_.size(this.trabajadoresNomina) == 0) {
             target.removeAttr('disabled');
-            $App.trigger('alert:warning', {
+            this.App.trigger('alert:warning', {
                 message:
                     'Error, se requiere de tener minimo un trabajador en nomina. Adicionalo en la sección inferior de "Relaciona trabajadores en nomina"',
             });
@@ -172,40 +171,78 @@ export class FormEmpresaView extends FormView {
 
         entity.set({ tranoms: this.trabajadoresNomina.toJSON() });
 
-        $App.trigger('confirma', {
-            message: 'Confirma que desea guardar los datos del formulario.',
-            callback: (status) => {
-                if (status) {
-                    this.trigger('form:save', {
-                        entity: entity,
-                        callback: (response) => {
-                            target.removeAttr('disabled');
-                            this.$el.find('#nit').attr('disabled', true);
-
-                            if (response) {
-                                if (response.success) {
-                                    $App.trigger('alert:success', { message: response.msj });
-                                    this.model.set({ id: parseInt(response.data.id) });
-                                    if (this.isNew === true) {
-                                        $App.router.navigate('proceso/' + this.model.get('id'), {
-                                            trigger: true,
-                                            replace: true,
-                                        });
-                                    } else {
-                                        const _tab = new bootstrap.Tab('a[href="#documentos_adjuntos"]');
-                                        _tab.show();
-                                    }
-                                } else {
-                                    $App.trigger('alert:error', { message: response.msj });
-                                }
-                            }
-                        },
-                    });
-                } else {
-                    target.removeAttr('disabled');
-                }
+        Swal.fire({
+            title: 'Confirmación requerida',
+            html: `<p style='font-size:14px;margin-bottom:8px'>Ingrese su clave para confirmar el envío de la información.</p>`,
+            input: 'password',
+            inputAttributes: {
+                autocapitalize: 'off',
+                autocomplete: 'current-password',
             },
+            showCancelButton: true,
+            confirmButtonText: 'Continuar',
+            cancelButtonText: 'Cancelar',
+            preConfirm: (clave) => {
+                if (!clave) {
+                    Swal.showValidationMessage('La clave es requerida');
+                    return false;
+                }
+                return clave;
+            },
+        }).then((result) => {
+            if (!result.isConfirmed) {
+                target.removeAttr('disabled');
+                return;
+            }
+
+            const clave = result.value;
+            // Adjuntamos la clave al entity para que viaje al backend
+            try {
+                entity.set('clave', clave);
+            } catch (e) {
+                // fallback por si entity no es un Backbone.Model estándar
+                if (typeof entity === 'object' && typeof entity.set !== 'function') {
+                    entity.clave = clave;
+                }
+            }
+            this.App.trigger('confirma', {
+                message: 'Confirma que desea guardar los datos del formulario.',
+                callback: (status) => {
+                    if (status) {
+                        this.trigger('form:save', {
+                            entity: entity,
+                            callback: (response) => {
+                                target.removeAttr('disabled');
+                                this.$el.find('#nit').attr('disabled', true);
+    
+                                if (response) {
+                                    if (response.success) {
+                                        this.App.trigger('alert:success', { message: response.msj });
+                                        this.model.set({ id: parseInt(response.data.id) });
+                                        if (this.isNew === true) {
+                                            this.App.router.navigate('proceso/' + this.model.get('id'), {
+                                                trigger: true,
+                                                replace: true,
+                                            });
+                                        } else {
+                                            const _tab = new bootstrap.Tab('a[href="#documentos_adjuntos"]');
+                                            _tab.show();
+                                        }
+                                    } else {
+                                        this.App.trigger('alert:error', { message: response.msj });
+                                    }
+                                }
+                            },
+                        });
+                    } else {
+                        target.removeAttr('disabled');
+                    }
+                },
+            });
+           
         });
+
+        
     }
 
     nameRepleg() {
@@ -247,7 +284,7 @@ export class FormEmpresaView extends FormView {
             },
             callback: (solicitud) => {
                 if (solicitud) {
-                    $App.trigger('confirma', {
+                    this.App.trigger('confirma', {
                         message:
                             'El sistema identifica datos de la empresa en su sistema principal. ¿Desea que se actualice el presente formulario con los datos existentes?.',
                         callback: (status) => {
@@ -256,7 +293,7 @@ export class FormEmpresaView extends FormView {
                                 solicitud.fecsol = null;
                                 this.model.set(solicitud);
                                 this.actualizaForm();
-                                $('#nit').attr('disabled', true);
+                                this.$el.find('#nit').attr('disabled', true);
 
                                 $.each(this.selectores, (index, element) => {
                                     const name = this.model.get(element.name);
@@ -333,7 +370,7 @@ export class FormEmpresaView extends FormView {
 
         if (!trabajador.isValid()) {
             $('label.error').fadeIn();
-            $App.trigger('alert:warning', { message: trabajador.validationError.join(', ') });
+            this.App.trigger('alert:warning', { message: trabajador.validationError.join(', ') });
             setTimeout(() => $('label.error').fadeOut(), 6000);
             return false;
         }

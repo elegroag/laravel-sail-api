@@ -1,9 +1,9 @@
-import { $App } from '@/App';
-import { langDataTable } from '../../../Core';
+import { langDataTable } from '@/Core';
 
 class IndependientesView extends Backbone.View {
     constructor(options) {
         super(options);
+        this.App = options.App || window.App;
     }
 
     get className() {
@@ -43,19 +43,19 @@ class IndependientesView extends Backbone.View {
     procesoPendiente(e) {
         const id = this.$el.find(e.currentTarget).attr('data-cid');
         this.remove();
-        $App.router.navigate('proceso/' + id, { trigger: true });
+        this.App.router.navigate('proceso/' + id, { trigger: true });
     }
 
     cambioCuenta(event) {
         let target = $(event.currentTarget);
         const id = target.attr('data-cid');
-        $App.trigger('confirma', {
+        this.App.trigger('confirma', {
             message:
                 'Se requiere de confirmar que estás de acuerdo en el cambio de cuenta para administrar la empresa seleccionada. ' +
                 'Esta opción le permitirá afiliar trabajadores, cónyuges y beneficiarios',
             callback: (status) => {
                 if (status) {
-                    window.location.href = $App.url('administrar_cuenta/' + id);
+                    window.location.href = this.App.url('administrar_cuenta/' + id);
                 }
             },
         });

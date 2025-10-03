@@ -1,4 +1,3 @@
-import { $App } from '@/App';
 import { ControllerRequest } from '@/Mercurio/ControllerRequest';
 import { FormTrabajadorView } from './views/FormTrabajadorView';
 import { TrabajadoresView } from './views/TrabajadoresView';
@@ -15,7 +14,7 @@ class ControllerTrabajadores extends ControllerRequest {
 			headerOptions: {
 				estado: '',
 				tipo: 'T',
-				url_nueva: $App.url('nueva'),
+				url_nueva: options.App.url('nueva'),
 				breadcrumb_menu: 'Crear solicitud',
 				titulo: 'Afiliación trabajadores',
 				url_masivo: null,
@@ -28,7 +27,7 @@ class ControllerTrabajadores extends ControllerRequest {
 		this.on('form:cancel', this.destroy);
 		this.on('form:digit', this.afiService.digitVer);
 		this.on('params', this.afiService.paramsServer);
-		$App.Collections.formParams = null;
+		options.App.Collections.formParams = null;
 	}
 }
 

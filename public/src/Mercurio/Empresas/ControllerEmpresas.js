@@ -1,4 +1,3 @@
-import { $App } from '@/App';
 import { ControllerRequest } from '@/Mercurio/ControllerRequest';
 import { EmpresaModel } from './models/EmpresaModel';
 import { EmpresasView } from './views/EmpresasView';
@@ -15,7 +14,7 @@ class ControllerEmpresas extends ControllerRequest {
             headerOptions: {
                 estado: '',
                 tipo: 'E',
-                url_nueva: $App.url('nueva'),
+                url_nueva: options.App.url('nueva'),
                 breadcrumb_menu: 'Crear solicitud',
                 titulo: 'Afiliación empresa',
                 url_masivo: null,
@@ -28,18 +27,18 @@ class ControllerEmpresas extends ControllerRequest {
 
         this.on('form:cancel', this.destroy);
         this.on('params', this.__paramsServer);
-        $App.Collections.formParams = null;
-        $App.Collections.firmas = null;
+        options.App.Collections.formParams = null;
+        options.App.Collections.firmas = null;
     }
 
     __paramsServer({ callback = undefined, silent = false }) {
-        $App.trigger('syncro', {
-            url: $App.url('empresas/params'),
+        this.App.trigger('syncro', {
+            url: this.App.url('empresas/params'),
             silent,
             callback: (response) => {
                 if (response && response.success === true) {
-                    if (_.isNull($App.Collections.formParams)) $App.Collections.formParams = [];
-                    _.extend($App.Collections.formParams, response.data);
+                    if (_.isNull(this.App.Collections.formParams)) this.App.Collections.formParams = [];
+                    _.extend(this.App.Collections.formParams, response.data);
                     return callback !== false ? callback(response.msj) : null;
                 }
                 return callback !== false ? callback(false) : null;

@@ -2,7 +2,6 @@ import { ControllerRequest } from '../ControllerRequest';
 import { ConyugeModel } from './models/ConyugeModel';
 import { ConyugesView } from './views/ConyugesView';
 import { FormConyugeView } from './views/FormConyugeView';
-import { $App } from '@/App';
 
 class ControllerConyuges extends ControllerRequest {
 	constructor(options) {
@@ -15,7 +14,7 @@ class ControllerConyuges extends ControllerRequest {
 			headerOptions: {
 				estado: '',
 				tipo: 'C',
-				url_nueva: $App.url('nueva'),
+				url_nueva: options.App.url('nueva'),
 				breadcrumb_menu: 'Crear solicitud',
 				titulo: 'Afiliación cónyuge',
 				url_masivo: null,
@@ -30,14 +29,14 @@ class ControllerConyuges extends ControllerRequest {
 		this.on('form:digit', this.afiService.digitVer);
 		this.on('params', this.afiService.paramsServer);
 
-		$App.Collections.formParams = null;
-		$App.Collections.firmas = null;
+		options.App.Collections.formParams = null;
+		options.App.Collections.firmas = null;
 	}
 
 	__validaConyuge(transfer) {
 		const { cedcon, callback } = transfer;
-		$App.trigger('syncro', {
-			url: $App.url('valida'),
+		this.App.trigger('syncro', {
+			url: this.App.url('valida'),
 			data: {
 				cedcon,
 			},
@@ -54,7 +53,7 @@ class ControllerConyuges extends ControllerRequest {
 						}
 						return callback(solicitud);
 					} else {
-						$App.trigger('alert:error', { message: response.msj });
+						this.App.trigger('alert:error', { message: response.msj });
 					}
 				}
 				return callback(false);
@@ -64,8 +63,8 @@ class ControllerConyuges extends ControllerRequest {
 
 	__traerConyugue(transfer) {
 		const { cedcon, callback } = transfer;
-		$App.trigger('suncro', {
-			url: $App.url('traerConyugue'),
+		this.App.trigger('suncro', {
+			url: this.App.url('traerConyugue'),
 			data: {
 				cedcon,
 			},

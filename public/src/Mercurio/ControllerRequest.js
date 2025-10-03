@@ -1,4 +1,3 @@
-import { $App } from '@/App';
 import { Region } from '@/Common/Region';
 import { LayoutView } from '@/Componentes/Views/LayoutView';
 import loading from '@/Componentes/Views/Loading';
@@ -7,27 +6,29 @@ class ControllerRequest {
     constructor(options = {}) {
         this.region = {};
         this.afiService = {};
+        this.App = {};
+        this.headerOptions = {};
+        
         this.TableView = undefined;
         this.EntityModel = undefined;
-        this.headerOptions = undefined;
         this.FormRequest = undefined;
         this.trigger = undefined;
         this.layout = undefined;
-
+        
         _.extend(this, Backbone.Events);
         _.extend(this, options);
 
-        $App.layout = new LayoutView();
+        this.App.layout = new LayoutView();
         if (this.region instanceof Region) {
-            this.region.show($App.layout);
+            this.region.show(this.App.layout);
         } else {
-            if (_.isString(this.region)) $(this.region).html($App.layout);
+            if (_.isString(this.region)) $(this.region).html(this.App.layout);
         }
         loading.hide();
     }
 
     serealizeParams() {
-        const resources = _.keys($App.Collections.formParams);
+        const resources = _.keys(this.App.Collections.formParams);
         const collection = _.map(resources, (item) => {
             return {
                 name: item,
@@ -40,7 +41,7 @@ class ControllerRequest {
     }
 
     listRequests(tipo) {
-        if (_.isNull($App.Collections.formParams)) this.trigger('params', { silent: true, callback: false });
+        if (_.isNull(this.App.Collections.formParams)) this.trigger('params', { silent: true, callback: false });
 
         const view = new this.TableView({ model: { tipo } });
 
@@ -48,7 +49,7 @@ class ControllerRequest {
         this.listenTo(view, 'remove:solicitud', this.afiService.cancelaSolicitud);
         this.listenTo(view, 'admin:cuenta', this.__adminCuenta);
 
-        $App.layout.getRegion('body').show(view);
+        this.App.layout.getRegion('body').show(view);
 
         this.afiService.initHeaderView({
             ...this.headerOptions,
@@ -60,7 +61,7 @@ class ControllerRequest {
 
     createRequest() {
         const model = new this.EntityModel();
-        if (_.isNull($App.Collections.formParams)) {
+        if (_.isNull(this.App.Collections.formParams)) {
             this.trigger('params', {
                 callback: (response) => {
                     if (response) this.renderCreateRequest(model);
@@ -84,7 +85,7 @@ class ControllerRequest {
         this.listenTo(view, 'form:find', this.afiService.validePk);
         this.listenTo(view, 'form:digit', this.afiService.digitVer);
 
-        $App.layout.getRegion('body').show(view);
+        this.App.layout.getRegion('body').show(view);
 
         this.afiService.initHeaderView({
             ...this.headerOptions,
@@ -95,7 +96,7 @@ class ControllerRequest {
     }
 
     procesoRute(id) {
-        if (_.isNull($App.Collections.formParams)) {
+        if (_.isNull(this.App.Collections.formParams)) {
             this.trigger('params', {
                 silent: true,
                 callback: (response) => {
@@ -108,7 +109,7 @@ class ControllerRequest {
                                         const model = new this.EntityModel(response.data);
                                         this.renderCreateRequest(model);
                                     } else {
-                                        $App.trigger('alert:error', { message: response.msj });
+                                        this.App.trigger('alert:error', { message: response.msj });
                                     }
                                 }
                             },
@@ -125,7 +126,7 @@ class ControllerRequest {
                             const model = new this.EntityModel(response.data);
                             this.renderCreateRequest(model);
                         } else {
-                            $App.trigger('alert:error', { message: response.msj });
+                            this.App.trigger('alert:error', { message: response.msj });
                         }
                     }
                 },
@@ -134,7 +135,7 @@ class ControllerRequest {
     }
 
     __adminCuenta({ id }) {
-        window.location = $App.url('administrar_cuenta/' + id);
+        window.location = this.App.url('administrar_cuenta/' + id);
     }
 
     destroy() {

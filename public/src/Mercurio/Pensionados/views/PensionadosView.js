@@ -1,9 +1,10 @@
-import { $App } from '@/App';
-import { langDataTable } from '../../../Core';
+
+import { langDataTable } from '@/Core';
 
 class PensionadosView extends Backbone.View {
     constructor(options = {}) {
         super(options);
+        this.App = options.App || window.App;
     }
 
     get className() {
@@ -19,7 +20,7 @@ class PensionadosView extends Backbone.View {
         const template = _.template(this.template);
         this.$el.html(template());
 
-        this.trigger('load:table', {
+        this.App.trigger('load:table', {
             url: this.model.tipo ? 'pensionado/render_table/' + this.model.tipo : 'pensionado/render_table',
             callback: (html) => {
                 this.$el.find('#consulta').html(html);
@@ -43,19 +44,19 @@ class PensionadosView extends Backbone.View {
     procesoPendiente(e) {
         const id = this.$el.find(e.currentTarget).attr('data-cid');
         this.remove();
-        $App.router.navigate('proceso/' + id, { trigger: true });
+        this.App.router.navigate('proceso/' + id, { trigger: true });
     }
 
     cambioCuenta(event) {
         let target = $(event.currentTarget);
         const id = target.attr('data-cid');
-        $App.trigger('confirma', {
+        this.App.trigger('confirma', {
             message:
                 'Se requiere de confirmar que estás de acuerdo en el cambio de cuenta para administrar la empresa seleccionada. ' +
                 'Esta opción le permitirá afiliar trabajadores, cónyuges y beneficiarios',
             callback: (status) => {
                 if (status) {
-                    window.location.href = $App.url('administrar_cuenta/' + id);
+                    window.location.href = this.App.url('administrar_cuenta/' + id);
                 }
             },
         });
@@ -105,7 +106,7 @@ class PensionadosView extends Backbone.View {
     cancelarSolicitud(e) {
         e.preventDefault();
         const id = this.$el.find(e.currentTarget).attr('data-cid');
-        this.trigger('remove:solicitud', {
+        this.App.trigger('remove:solicitud', {
             id: id,
             callback: (res) => {
                 if (res) Backbone.history.loadUrl();

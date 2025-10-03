@@ -1,4 +1,3 @@
-import { $App } from '@/App';
 import { AfiliationRouter } from '@/Componentes/Routers/AfiliationRouter';
 import { AfiliationService } from '@/Componentes/Services/AfiliationService';
 import { ControllerTrabajadores } from './ControllerTrabajadores';
@@ -7,7 +6,7 @@ class RouterTrabajadores extends AfiliationRouter {
 	constructor(options = {}) {
 		super({
 			...options,
-			controller: $App.startSubApplication(
+			controller: window.App.startSubApplication(
 				ControllerTrabajadores,
 				{
 					name: 'afiService',

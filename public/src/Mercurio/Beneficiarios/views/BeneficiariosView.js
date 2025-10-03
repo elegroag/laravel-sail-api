@@ -1,9 +1,9 @@
-import { $App } from '@/App';
 import { langDataTable } from '@/Core';
 
 class BeneficiariosView extends Backbone.View {
     constructor(options) {
         super(options);
+        this.App = options.App || window.App;
     }
 
     get className() {
@@ -43,7 +43,7 @@ class BeneficiariosView extends Backbone.View {
     procesoPendiente(e) {
         const id = this.$el.find(e.currentTarget).attr('data-cid');
         this.remove();
-        $App.router.navigate('proceso/' + id, { trigger: true });
+        this.App.router.navigate('proceso/' + id, { trigger: true });
     }
 
     cambioCuenta(event) {
@@ -58,7 +58,7 @@ class BeneficiariosView extends Backbone.View {
             cancelButtonText: 'NO',
         }).then((result) => {
             if (result.value) {
-                let _url = $App.kumbiaURL('' + target.attr('data-href'));
+                let _url = this.App.kumbiaURL('' + target.attr('data-href'));
                 window.location.href = _url;
             }
         });

@@ -2,6 +2,11 @@ import { Region } from '@/Common/Region';
 import loading from '@/Componentes/Views/Loading';
 import { $Kumbia } from '@/Utils';
 
+Backbone.$ = $;
+window.$ = $;
+window.jQuery = $;
+window._ = _;
+
 const $App = {
     Models: {},
     Collections: {},

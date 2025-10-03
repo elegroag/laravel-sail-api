@@ -1,4 +1,3 @@
-import { $App } from '@/App';
 import { ControllerRequest } from '../ControllerRequest';
 import { FormBeneficiarioView } from './views/FormBeneficiarioView';
 import { BeneficiariosView } from './views/BeneficiariosView';
@@ -15,7 +14,7 @@ class ControllerBeneficiarios extends ControllerRequest {
 			headerOptions: {
 				estado: '',
 				tipo: 'B',
-				url_nueva: $App.url('nueva'),
+				url_nueva: options.App.url('nueva'),
 				breadcrumb_menu: 'Crear solicitud',
 				titulo: 'Afiliación beneficiarios',
 				url_masivo: null,
@@ -29,14 +28,14 @@ class ControllerBeneficiarios extends ControllerRequest {
 		this.on('form:digit', this.afiService.digitVer);
 		this.on('params', this.afiService.paramsServer);
 
-		$App.Collections.formParams = null;
-		$App.Collections.firmas = null;
+		options.App.Collections.formParams = null;
+		options.App.Collections.firmas = null;
 	}
 
 	__validaBeneficiario(transfer) {
 		const { cedcon, callback } = transfer;
-		$App.trigger('syncro', {
-			url: $App.url('valida'),
+		this.App.trigger('syncro', {
+			url: this.App.url('valida'),
 			data: {
 				cedcon,
 			},
@@ -53,7 +52,7 @@ class ControllerBeneficiarios extends ControllerRequest {
 						}
 						return callback(solicitud);
 					} else {
-						$App.trigger('alert:error', { message: response.msj });
+						this.App.trigger('alert:error', { message: response.msj });
 					}
 				}
 				return callback(false);
@@ -63,8 +62,8 @@ class ControllerBeneficiarios extends ControllerRequest {
 
 	__traerConyugue(transfer) {
 		const { cedcon, callback } = transfer;
-		$App.trigger('suncro', {
-			url: $App.url('traerConyugue'),
+		this.App.trigger('suncro', {
+			url: this.App.url('traerConyugue'),
 			data: {
 				cedcon,
 			},

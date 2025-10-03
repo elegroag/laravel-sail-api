@@ -1,5 +1,4 @@
-import { $App } from '../App';
-import { GestionAdjuntoService } from '../Componentes/Services/GestionAdjuntoService';
+import { GestionAdjuntoService } from '@/Componentes/Services/GestionAdjuntoService';
 import {
     DateComponent,
     DialogComponent,
@@ -8,16 +7,15 @@ import {
     RadioComponent,
     SelectComponent,
     TextComponent,
-} from '../Componentes/Views/ComponentsView';
-import { LoadDocumentsView } from '../Componentes/Views/LoadDocumentsView';
-import { SeguimientosView } from '../Componentes/Views/SeguimientosView';
-import { SubHeaderView } from '../Componentes/Views/SubHeaderView';
-import { is_numeric } from '../Core';
+} from '@/Componentes/Views/ComponentsView';
+import { LoadDocumentsView } from '@/Componentes/Views/LoadDocumentsView';
+import { SeguimientosView } from '@/Componentes/Views/SeguimientosView';
+import { SubHeaderView } from '@/Componentes/Views/SubHeaderView';
+import { is_numeric } from '@/Core';
 
 export class FormView extends Backbone.View {
     #onRender = null;
-    App = null;
-
+   
     constructor(options = {}) {
         super(options);
         this.children = new Array();
@@ -32,7 +30,7 @@ export class FormView extends Backbone.View {
         this.viewDocuments = null;
         _.extend(this, options);
         this.#onRender = options.onRender || null;
-        this.App = options.App || $App;
+        this.App = options.App || window.App;
     }
 
     render() {

@@ -1,9 +1,8 @@
 import flatpickr from 'flatpickr';
 import { Spanish } from 'flatpickr/dist/l10n/es';
-import { $App } from '../../../App';
-import { ComponentModel } from '../../../Componentes/Models/ComponentModel';
-import { eventsFormControl } from '../../../Core';
-import { FormView } from '../../FormView';
+import { ComponentModel } from '@/Componentes/Models/ComponentModel';
+import { eventsFormControl } from '@/Core';
+import { FormView } from '@/Mercurio/FormView';
 import { BeneficiarioModel } from '../models/BeneficiarioModel';
 
 export class FormBeneficiarioView extends FormView {
@@ -156,7 +155,7 @@ export class FormBeneficiarioView extends FormView {
 
         if (_err > 0) {
             target.removeAttr('disabled');
-            $App.trigger('alert:warning', {
+            this.App.trigger('alert:warning', {
                 message: 'Se requiere de resolver los campos requeridos para continuar.',
             });
             setTimeout(() => $('label.error').text(''), 6000);
@@ -175,46 +174,81 @@ export class FormBeneficiarioView extends FormView {
 
         if (entity.isValid() === false) {
             target.removeAttr('disabled');
-            $App.trigger('alert:warning', {
+            this.App.trigger('alert:warning', {
                 message: 'Alerta algunos de los campos son requeridos: <br/> ' + entity.validationError.join('<br/>'),
             });
             setTimeout(() => $('label.error').text(''), 6000);
             return false;
         }
 
-        $App.trigger('confirma', {
-            message: 'Confirma que desea guardar los datos del formulario y continuar el proceso de solicitud de afiliación',
-            callback: (status) => {
-                if (status) {
-                    this.trigger('form:save', {
-                        entity: entity,
-                        isNew: this.isNew,
-                        callback: (response) => {
-                            target.removeAttr('disabled');
-                            this.$el.find('#cedtra').attr('disabled', true);
-
-                            if (response.success) {
-                                $App.trigger('alert:success', { message: response.msj });
-                                this.model.set({ id: parseInt(response.data.id) });
-                                if (this.isNew === true) {
-                                    $App.router.navigate('proceso/' + this.model.get('id'), {
-                                        trigger: true,
-                                        replace: true,
-                                    });
-                                } else {
-                                    const _tab = new bootstrap.Tab('a[href="#documentos_adjuntos"]');
-                                    _tab.show();
-                                }
-                            } else {
-                                $App.trigger('alert:error', { message: response.msj });
-                            }
-                        },
-                    });
-                } else {
-                    target.removeAttr('disabled');
-                }
+        Swal.fire({
+            title: 'Confirmación requerida',
+            html: `<p style='font-size:14px;margin-bottom:8px'>Ingrese su clave para confirmar el envío de la información.</p>`,
+            input: 'password',
+            inputAttributes: {
+                autocapitalize: 'off',
+                autocomplete: 'current-password',
             },
+            showCancelButton: true,
+            confirmButtonText: 'Continuar',
+            cancelButtonText: 'Cancelar',
+            preConfirm: (clave) => {
+                if (!clave) {
+                    Swal.showValidationMessage('La clave es requerida');
+                    return false;
+                }
+                return clave;
+            },
+        }).then((result) => {
+            if (!result.isConfirmed) {
+                target.removeAttr('disabled');
+                return;
+            }
+            const clave = result.value;
+            try {
+                entity.set('clave', clave);
+            } catch (e) {
+                if (typeof entity === 'object' && typeof entity.set !== 'function') {
+                    entity.clave = clave;
+                }
+            }
+            this.App.trigger('confirma', {
+                message: 'Confirma que desea guardar los datos del formulario y continuar el proceso de solicitud de afiliación',
+                callback: (status) => {
+                    if (status) {
+                        this.trigger('form:save', {
+                            entity: entity,
+                            isNew: this.isNew,
+                            callback: (response) => {
+                                target.removeAttr('disabled');
+                                this.$el.find('#cedtra').attr('disabled', true);
+    
+                                if (response.success) {
+                                    this.App.trigger('alert:success', { message: response.msj });
+                                    this.model.set({ id: parseInt(response.data.id) });
+                                    if (this.isNew === true) {
+                                        this.App.router.navigate('proceso/' + this.model.get('id'), {
+                                            trigger: true,
+                                            replace: true,
+                                        });
+                                    } else {
+                                        const _tab = new bootstrap.Tab('a[href="#documentos_adjuntos"]');
+                                        _tab.show();
+                                    }
+                                } else {
+                                    this.App.trigger('alert:error', { message: response.msj });
+                                }
+                            },
+                        });
+                    } else {
+                        target.removeAttr('disabled');
+                    }
+                },
+            });
+            
         });
+
+        
     }
 
     validaBeneficiario(e) {
@@ -228,7 +262,7 @@ export class FormBeneficiarioView extends FormView {
             cedcon: cedcon,
             callback: (solicitud) => {
                 if (solicitud) {
-                    $App.trigger('confirma', {
+                    this.App.trigger('confirma', {
                         message:
                             'El sistema identifica información del afiliado en el sistema central de la Caja. ¿Desea que se actualice el presente formulario con los datos existentes?.',
                         callback: (status) => {
@@ -456,8 +490,8 @@ export class FormBeneficiarioView extends FormView {
         let list = [];
         let has = [];
 
-        const afili = $App.Collections.formParams.list_afiliados;
-        const mtrab = $App.Collections.formParams.trabajadores;
+        const afili = this.App.Collections.formParams.list_afiliados;
+        const mtrab = this.App.Collections.formParams.trabajadores;
 
         if (afili !== false && mtrab !== false) {
             list = _.union(afili, mtrab);
@@ -471,7 +505,7 @@ export class FormBeneficiarioView extends FormView {
 
         if (_.isEmpty(has)) {
             this.setInput('cedtra', '');
-            $App.trigger('alert:warning', {
+            this.App.trigger('alert:warning', {
                 message:
                     'El número de identificación del trabajador no existe como afiliado o como una solicitud pendiente de validación. Se recomienda primero crear la solicitud del trabajador para poder continuar.',
             });
@@ -485,8 +519,8 @@ export class FormBeneficiarioView extends FormView {
         if (cedcon == '') return false;
 
         let has = false;
-        const afili = $App.Collections.formParams.list_conyuges;
-        const cedcons = $App.Collections.formParams.conyuges;
+        const afili = this.App.Collections.formParams.list_conyuges;
+        const cedcons = this.App.Collections.formParams.conyuges;
         let list;
 
         if (afili !== false && cedcons !== false) {
@@ -505,7 +539,7 @@ export class FormBeneficiarioView extends FormView {
         }
         if (has == false) {
             this.setInput('cedcon', '');
-            $App.trigger('alert:warning', {
+            this.App.trigger('alert:warning', {
                 message:
                     'El número de identificación no existe como afiliado o como una solicitud pendiente de validación. Se recomienda primero crear la solicitud para poder continuar.',
             });
