@@ -6,7 +6,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('/cajas')->group(function () {
     // Redirige la raíz de Cajas a la ruta canónica de login para evitar nombres duplicados
-    Route::get('/', function () { return redirect()->route('cajas.login'); });
+    Route::get('/', function () {
+        return redirect()->route('cajas.login');
+    });
     Route::get('/login', [AuthController::class, 'indexAction'])->name('cajas.login');
     Route::post('/autenticar', [AuthController::class, 'authenticateAction'])->name('cajas.autenticar');
     Route::post('/salir', [AuthController::class, 'logoutAction'])->name('cajas.salir');
@@ -14,7 +16,7 @@ Route::prefix('/cajas')->group(function () {
 });
 
 Route::prefix('/cajas/principal')->group(function () {
-    Route::get('/', [PrincipalController::class, 'indexAction'])->name('cajas.principal');
+    Route::get('/index', [PrincipalController::class, 'indexAction'])->name('cajas.principal');
     Route::get('/dashboard', [PrincipalController::class, 'dashboardAction'])->name('cajas.dashboard');
     Route::get('/traer_usuarios_registrados', [PrincipalController::class, 'traerUsuariosRegistradosAction']);
     Route::get('/traer_opcion_mas_usuada', [PrincipalController::class, 'traerOpcionMasUsuadaAction']);
@@ -23,4 +25,3 @@ Route::prefix('/cajas/principal')->group(function () {
     Route::get('/download_global', [PrincipalController::class, 'downloadGlobalAction']);
     Route::get('/file_existe_global', [PrincipalController::class, 'fileExisteGlobalAction']);
 });
-

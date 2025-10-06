@@ -151,21 +151,22 @@ const borrarFiltro = (e = '') => {
 const aplicarFiltro = (e = '') => {
 	let cantidad = $('#cantidad_paginate').val();
 	if (cantidad === null || cantidad === '') cantidad = 15;
-	$.ajax({
-		type: 'POST',
-		url: Utils.getKumbiaURL($Kumbia.controller + '/aplicarFiltro'),
+
+	window.App.trigger('syncro', {
+		url: window.App.url('aplicarFiltro'),
 		data: {
 			...__readFiltro(),
 			numero: cantidad,
 		},
-	})
-		.done((response) => {
-			$('#consulta').html(response.consulta);
-			$('#paginate').html(response.paginate);
-		})
-		.fail((jqXHR, textStatus) => {
-			alert('Request failed: ' + textStatus);
-		});
+		callback: (response) => {
+			if(response){
+				$('#consulta').html(response.consulta);
+				$('#paginate').html(response.paginate);
+			}else{
+				Messages.display(response, 'error');
+			}
+		},
+	});
 };
 
 const delFiltro = function (elem) {

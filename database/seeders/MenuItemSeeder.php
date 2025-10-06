@@ -22,8 +22,8 @@ class MenuItemSeeder extends Seeder
             $this->limpiarTabla();
             $menu_mercurio = [
                 ["id" => 1, "title" => "Inicio", "default_url" => "cajas/principal/index", "icon" => "fas fa-home", "color" => "text-primary", "nota" => "texto", "position" => 1, "parent_id" => NULL, "is_visible" => 1, "codapl" => "CA", "tipo" => "A"],
-                ["id" => 2, "title" => "Estadística", "default_url" => "cajas/principal/dashboard", "icon" => "ni ni-hat-3", "color" => "text-yellow", "nota" => "texto", "position" => 6, "parent_id" => NULL, "is_visible" => 1, "codapl" => "CA", "tipo" => "A"],
-                ["id" => 3, "title" => "Basicas", "default_url" => NULL, "icon" => "ni ni-bullet-list-67", "color" => "text-default", "nota" => NULL, "position" => 3, "parent_id" => NULL, "is_visible" => 1, "codapl" => "CA", "tipo" => "A"],
+                ["id" => 2, "title" => "Estadística", "default_url" => "cajas/principal/dashboard", "icon" => "ni ni-hat-3", "color" => "text-pink", "nota" => "texto", "position" => 6, "parent_id" => NULL, "is_visible" => 1, "codapl" => "CA", "tipo" => "A"],
+                ["id" => 3, "title" => "Basicas", "default_url" => NULL, "icon" => "ni ni-bullet-list-67", "color" => "text-black", "nota" => NULL, "position" => 3, "parent_id" => NULL, "is_visible" => 1, "codapl" => "CA", "tipo" => "A"],
                 ["id" => 4, "title" => "Configuración", "default_url" => NULL, "icon" => "ni ni-settings", "color" => "text-info", "nota" => NULL, "position" => 4, "parent_id" => NULL, "is_visible" => 1, "codapl" => "CA", "tipo" => "A"],
                 ["id" => 5, "title" => "Solicitudes Empleadores", "default_url" => NULL, "icon" => "ni ni-briefcase-24", "color" => "text-warning", "nota" => NULL, "position" => 5, "parent_id" => NULL, "is_visible" => 1, "codapl" => "CA", "tipo" => "A"],
                 ["id" => 6, "title" => "Solicitudes Trabajadores", "default_url" => NULL, "icon" => "ni ni-briefcase-24", "color" => "text-yellow", "nota" => NULL, "position" => 6, "parent_id" => NULL, "is_visible" => 1, "codapl" => "CA", "tipo" => "A"],

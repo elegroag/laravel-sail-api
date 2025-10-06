@@ -76,11 +76,10 @@ class Mercurio01Controller extends ApplicationController
 
     public function indexAction()
     {
-        $help = "Esta opcion permite manejar los ";
-        $this->setParamToView("help", $help);
-        $this->setParamToView("title", "Basica");
-        if ($this->Mercurio01->count() == 0) $this->setParamToView("buttons", array("N"));
-        #Tag::setDocumentTitle('Basica');
+        return view('cajas.mercurio01.index', [
+            'title' => "Basica",
+            'buttons' => Mercurio01::count() == 0 ? array("N") : array("N", "E"),
+        ]);
     }
 
 

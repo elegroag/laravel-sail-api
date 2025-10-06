@@ -262,7 +262,7 @@ class Tag
             $attributes .= 'style="' . $params['style'] . '" ';
         }
 
-        if ($params['readonly'] != '') {
+        if (isset($params['readonly']) && $params['readonly'] != '') {
             $attributes .= 'readonly ';
         }
 
@@ -578,5 +578,22 @@ class Tag
         $page->last = $page->total_pages;
         $page->next = ($page->current < $page->last) ? ($page->current + 1) : $page->current;
         return $page;
+    }
+
+    public static function ModalGeneric(
+        $titulo = '',
+        $contenido = '',
+        $evento = 'data-toggle="guardar"',
+        $btnShowModal = 'btCaptureModal',
+        $idModal = 'capture-modal'
+    ) {
+        $html = view("partials.modal_generic", [
+            "titulo" => $titulo,
+            "contenido" => $contenido,
+            "evento" => $evento,
+            "btnShowModal" => $btnShowModal,
+            "idModal" => $idModal
+        ])->render();
+        return $html;
     }
 }

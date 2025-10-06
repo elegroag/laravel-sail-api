@@ -1,9 +1,12 @@
+import { $App } from '@/App';
 import { $Kumbia, Messages, Utils } from '@/Utils';
 import { aplicarFiltro, buscar, validePk } from '../Glob/Glob';
 
+window.App = $App;
 let validator = undefined;
 
 $(() => {
+	window.App.initialize();
 	aplicarFiltro();
 
 	validator = $('#form').validate({
@@ -31,14 +34,14 @@ $(() => {
 	$(document).on('click', "[data-toggle='editar']", (e) => {
 		e.preventDefault();
 		const codapl = e.target.cid;
-		$.ajax({
-			type: 'POST',
-			url: Utils.getKumbiaURL($Kumbia.controller + '/editar'),
+
+		window.App.trigger('syncro', {
+			url: window.App.url('/editar'),
 			data: {
 				codapl: codapl,
 			},
-		})
-			.done(function (response) {
+			callback: (response) => {
+				if(response){
 				$.each(response, function (key, value) {
 					$('#' + key.toString()).val(value);
 				});
@@ -47,10 +50,10 @@ $(() => {
 				setTimeout(() => {
 					$('#detalle').trigger('focus');
 				}, 500);
-			})
-			.fail(function (jqXHR, textStatus) {
-				Messages.display(jqXHR.statusText, 'error');
-			});
+			}else{
+				Messages.display(response.error, 'error');
+			}
+		}});
 	});
 
 	$(document).on('click', "[data-toggle='guardar']", (e) => {
@@ -61,22 +64,18 @@ $(() => {
 			$(this).removeAttr('disabled');
 		});
 
-		$.ajax({
-			type: 'POST',
-			url: Utils.getKumbiaURL($Kumbia.controller + '/guardar'),
+		window.App.trigger('syncro', {
+			url: window.App.url('/guardar'),
 			data: $('#form').serialize(),
-		})
-			.done(function (response) {
-				if (response['flag'] == true) {
+			callback: (response) => {
+				if(response){
 					buscar();
 					Messages.display(response['msg'], 'success');
 					$('#capture-modal').modal('hide');
-				} else {
-					Messages.display(response['msg'], 'error');
+				}else{
+					Messages.display(response.error, 'error');
 				}
-			})
-			.fail(function (jqXHR, textStatus) {
-				Messages.display(jqXHR.statusText, 'error');
-			});
+			},
+		});
 	});
 });

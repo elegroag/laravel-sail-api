@@ -15,9 +15,15 @@ list($menu, $breadcrumbs, $pageTitle) = App\Services\Menu\MenuCajas::showMenu('C
     <link rel="stylesheet" href="{{ asset('mercurio/css/mercurio.css') }}" />
 @endpush
 
+@push('scripts')
+    <script src="{{ asset('core/messages.js') }}"></script>
+    <script src="{{ asset('core/global.js') }}"></script>
+    <script src="{{ asset('core/base-source.js') }}"></script>
+@endpush
+
 @include('partials.flash')
 
-@include('templates.sidebar', 
+@include('templates.sidebar-cajas', 
     [
         'menu' => $menu, 
         '_tipo' => session()->get('tipo'), 
