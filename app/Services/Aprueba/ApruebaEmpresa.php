@@ -9,7 +9,7 @@ use App\Models\Mercurio30;
 use App\Services\Entities\EmpresaEntity;
 use App\Services\Entities\ListasEntity;
 use App\Services\Entities\SucursalEntity;
-use App\Services\Request;
+use App\Services\Srequest;
 use App\Services\SatApi\SatServices;
 use App\Services\Utils\Comman;
 use App\Services\Utils\RegistroSeguimiento;
@@ -181,7 +181,7 @@ class ApruebaEmpresa
         $fecapr = $postData['fecapr'];
 
         $crearUsuario = new CrearUsuario(
-            new Request(
+            new Srequest(
                 array(
                     "tipo" => "E",
                     "coddoc" => $this->solicitud->getTipdoc(),
@@ -246,7 +246,7 @@ class ApruebaEmpresa
 
         $emailCaja = (new Mercurio01)->findFirst();
         $sender = new SenderEmail(
-            new Request(
+            new Srequest(
                 array(
                     "emisor_email" => $emailCaja->getEmail(),
                     "emisor_clave" => $emailCaja->getClave(),

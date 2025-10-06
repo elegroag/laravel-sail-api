@@ -5,7 +5,7 @@ namespace App\Services\CajaServices;
 use App\Exceptions\DebugException;
 use App\Models\Mercurio10;
 use App\Models\Mercurio30;
-use App\Services\Request;
+use App\Services\Srequest;
 use App\Services\Tag;
 use App\Services\Utils\CalculatorDias;
 use App\Services\Utils\RegistroSeguimiento;
@@ -334,7 +334,7 @@ class EmpresaServices
         return $empresas;
     }
 
-    public function findByUserAndEstado(Request $request)
+    public function findByUserAndEstado(Srequest $request)
     {
         $filtro = $request->getParam('filtro');
         $usuario = $request->getParam('usuario');

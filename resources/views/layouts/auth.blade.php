@@ -21,10 +21,10 @@
     <link rel="stylesheet" href="{{ asset('assets/sweetalert2/dist/sweetalert2.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/flatpickr/flatpickr.min.css') }}" />
 
-    <link rel="stylesheet" href="{{ asset('theme/headroom.css') }}" />
-    <link rel="stylesheet" href="{{ asset('theme/nucleo.css') }}" />
-    <link rel="stylesheet" href="{{ asset('theme/nucleo.svg.css') }}" />
-    <link rel="stylesheet" href="{{ asset('theme/argon-mercurio.css') }}" />
+    <link rel="stylesheet" href="{{ asset('theme/css/headroom.css') }}" />
+    <link rel="stylesheet" href="{{ asset('theme/css/nucleo.css') }}" />
+    <link rel="stylesheet" href="{{ asset('theme/css/nucleo.svg.css') }}" />
+    <link rel="stylesheet" href="{{ asset('theme/css/argon-mercurio.css') }}" />
 
     <script type="text/javascript" src="{{ asset('assets/jquery/jquery.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/sweetalert2/dist/sweetalert2.all.min.js') }}"></script>
@@ -34,6 +34,7 @@
     <script type="text/javascript" src="{{ asset('assets/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/noty/noty.js') }}"></script>
     @stack('styles')
+    @include('partials.flash')
 </head>
 
 <body class="bg-gray-100 flex items-center justify-center h-screen bg-gradient-primary">
@@ -48,8 +49,8 @@
     <script type="text/javascript" src="{{ asset('assets/validators/jquery.validate.min.js') }}"></script>
     <script src="{{ asset('assets/validators/messages_es.min.js') }}"></script>
 
-    <script src="{{ asset('assets/argon/headroom.js') }}"></script>
-    <script src="{{ asset('assets/argon/argon.js') }}"></script>
+    <script src="{{ asset('theme/js/headroom.js') }}"></script>
+    <script src="{{ asset('theme/js/select2.js') }}"></script>
     @stack('scripts')
 </body>
 

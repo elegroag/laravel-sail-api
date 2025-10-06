@@ -1,7 +1,8 @@
 <?php
+
 namespace App\Services;
 
-class Request
+class Srequest
 {
     private $params;
 

@@ -10,7 +10,7 @@ use App\Services\Entities\IndependienteEntity;
 use App\Services\Entities\ListasEntity;
 use App\Services\Entities\SucursalEntity;
 use App\Services\Entities\TrabajadorEntity;
-use App\Services\Request;
+use App\Services\Srequest;
 use App\Services\Utils\Comman;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
@@ -242,7 +242,7 @@ class ApruebaIndependiente
         $fecapr = $postData['fecapr'];
 
         $crearUsuario = new CrearUsuario(
-            new Request(
+            new Srequest(
                 array(
                     "tipo" => "I",
                     "coddoc" => $this->solicitud->getTipdoc(),
@@ -303,13 +303,15 @@ class ApruebaIndependiente
         $asunto = "Afiliación trabajador independiente realizada con éxito, identificación {$this->solicitud->getCedtra()}";
 
         $emailCaja = (new Mercurio01)->findFirst();
-        $senderEmail = new SenderEmail(new Request(
-            array(
-                "emisor_email" => $emailCaja->getEmail(),
-                "emisor_clave" => $emailCaja->getClave(),
-                "asunto" => $asunto
+        $senderEmail = new SenderEmail(
+            new Srequest(
+                array(
+                    "emisor_email" => $emailCaja->getEmail(),
+                    "emisor_clave" => $emailCaja->getClave(),
+                    "asunto" => $asunto
+                )
             )
-        ));
+        );
 
         $senderEmail->send(array(
             array(

@@ -22,7 +22,7 @@ use App\Library\DbException;
 use App\Models\Mercurio07;
 use App\Library\View;
 use App\Library\Exception;
-use App\Services\Request as RequestParam;
+use App\Services\Srequest;
 use App\Services\Utils\AsignarFuncionario;
 
 class ApruebaBeneficiarioController extends ApplicationController
@@ -68,7 +68,7 @@ class ApruebaBeneficiarioController extends ApplicationController
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
-            new RequestParam([
+            new Srequest([
                 "cantidadPaginas" => $cantidad_pagina,
                 "query" => $query_str,
                 "estado" => $estado

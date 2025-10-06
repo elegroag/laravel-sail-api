@@ -20,6 +20,7 @@ use App\Services\Entidades\EmpresaService;
 use App\Services\Entidades\IndependienteService;
 use App\Services\Entidades\ParticularService;
 use App\Services\Entidades\TrabajadorService;
+use App\Services\Srequest;
 use App\Services\Utils\Comman;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -528,16 +529,19 @@ class PrincipalController extends ApplicationController
                 throw new DebugException("La identificación de la solicitud no es correcto", 404);
             }
 
-            $auth = new SessionCookies(
-                "model: mercurio07",
-                "tipo: {$token->tipo}",
-                "coddoc: {$token->coddoc}",
-                "documento: {$token->documento}",
-                "estado: A",
-                "estado_afiliado: I"
-            );
 
-            if (!$auth->authenticate()) {
+            if (!SessionCookies::authenticate(
+                'mercurio',
+                new Srequest(
+                    [
+                        "tipo" => $token->tipo,
+                        "coddoc" => $token->coddoc,
+                        "documento" => $token->documento,
+                        "estado" => "A",
+                        "estado_afiliado" => "I"
+                    ]
+                )
+            )) {
                 throw new DebugException("Error en la autenticación del usuario", 501);
             }
 

@@ -8,11 +8,11 @@ use App\Library\Auth\SessionCookies;
 use App\Models\Mercurio07;
 use App\Models\Mercurio19;
 use App\Services\PreparaFormularios\GestionFirmaNoImage;
-use App\Services\Request;
+use App\Services\Srequest;
 
 class AutenticaService
 {
-    public function execute(Request $request): array|null
+    public function execute(Srequest $request): array|null
     {
         // Sanitización ligera
         $tipo = $request->getParam("tipo");
@@ -151,18 +151,19 @@ class AutenticaService
         }
 
         $estadoAfiliado = $autentica->getEstadoAfiliado();
-
-        $auth = new SessionCookies(
-            "model: mercurio07",
-            "tipo: {$tipo}",
-            "coddoc: {$coddoc}",
-            "documento: {$documento}",
-            "estado_afiliado: {$estadoAfiliado}",
-            "estado: A",
-        );
-
-        if (!$auth->authenticate()) {
-            throw new DebugException("Error acceso incorrecto. No se logra completar la autenticación", 504);
+        if (!SessionCookies::authenticate(
+            'mercurio',
+            new Srequest(
+                [
+                    "tipo" => $tipo,
+                    "coddoc" => $coddoc,
+                    "documento" => $documento,
+                    "estado_afiliado" => $estadoAfiliado,
+                    "estado" => "A",
+                ]
+            )
+        )) {
+            throw new DebugException("Error en la autenticación del usuario", 501);
         }
         $this->autoFirma($documento, $coddoc, $clave);
 

@@ -5,7 +5,7 @@ namespace App\Services\Utils;
 use App\Models\Mercurio01;
 use App\Models\Mercurio02;
 use App\Models\Mercurio07;
-use App\Services\Request;
+use App\Services\Srequest;
 
 class NotifyEmailServices
 {
@@ -39,7 +39,7 @@ class NotifyEmailServices
         $emailCaja = Mercurio01::first();
 
         $senderEmail = new SenderEmail(
-            new Request(
+            new Srequest(
                 array(
                     "emisor_email" => $emailCaja->getEmail(),
                     "emisor_clave" => $emailCaja->getClave(),
@@ -79,7 +79,7 @@ class NotifyEmailServices
         $html = view("cajas/layouts/devolver", $params)->render();
         $emailCaja = Mercurio01::first();
         $senderEmail = new SenderEmail(
-            new Request(
+            new Srequest(
                 array(
                     "emisor_email" => $emailCaja->getEmail(),
                     "emisor_clave" => $emailCaja->getClave(),

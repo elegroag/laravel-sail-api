@@ -5,7 +5,7 @@ namespace App\Services\Signup;
 use App\Exceptions\DebugException;
 use App\Models\Mercurio07;
 use App\Services\PreparaFormularios\GestionFirmaNoImage;
-use App\Services\Request;
+use App\Services\Srequest;
 use App\Services\Signup\SignupParticular;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
@@ -28,7 +28,7 @@ class SignupService
     private $nit;
     private $password;
 
-    public function execute(SignupInterface|null $signupEntity, Request $request)
+    public function execute(SignupInterface|null $signupEntity, Srequest $request)
     {
         $this->coddoc = $request->getParam('coddoc');
         $this->email = $request->getParam('email');
@@ -62,7 +62,7 @@ class SignupService
                 }
             }
             $signupParticular = new SignupParticular(
-                new Request(
+                new Srequest(
                     array(
                         "documento" => $this->cedrep,
                         "coddoc" => $this->coddoc,
@@ -85,7 +85,7 @@ class SignupService
             $usuario = (new AsignarFuncionario())->asignar($signupEntity->getTipopc(), $this->codciu);
 
             $signupParticular = new SignupParticular(
-                new Request(
+                new Srequest(
                     array(
                         "nit" => $this->nit,
                         "cedrep" => $this->cedrep,
@@ -136,7 +136,7 @@ class SignupService
      */
     function crearSolicitud(
         SignupInterface $signupEntity,
-        Request $request
+        Srequest $request
     ) {
         $empresaSisuweb = $this->buscaEmpresaSisu($request->getParam('nit'));
         $documentoSolicitud = $request->getParam('tipper') === 'J'

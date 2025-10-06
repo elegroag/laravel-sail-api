@@ -3,7 +3,7 @@
 namespace App\Services\CajaServices;
 
 use App\Models\Notificaciones;
-use App\Services\Request;
+use App\Services\Srequest;
 use App\Models\Adapter\DbBase;
 
 class NotificacionService

@@ -6,7 +6,7 @@ use App\Exceptions\DebugException;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio45;
-use App\Services\Request;
+use App\Services\Srequest;
 use App\Services\Utils\Comman;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
@@ -86,7 +86,7 @@ class ApruebaCertificado
 
         $emailCaja = (new Mercurio01())->findFirst();
         $senderEmail = new SenderEmail(
-            new Request(
+            new Srequest(
                 array(
                     "emisor_email" => $emailCaja->getEmail(),
                     "emisor_clave" => $emailCaja->getClave(),

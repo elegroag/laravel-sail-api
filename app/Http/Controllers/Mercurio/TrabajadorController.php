@@ -32,7 +32,7 @@ use App\Services\Utils\SenderValidationCaja;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use App\Services\Request as RequestParams;
+use App\Services\Srequest;
 
 class TrabajadorController extends ApplicationController
 {
@@ -66,7 +66,7 @@ class TrabajadorController extends ApplicationController
         }
         $razsoc = ($xempresas->count() == 1) ? $xempresas[0]->razsoc : '';
         $input_nits = Tag::selectStatic(
-            new RequestParams([
+            new Srequest([
                 'name' => 'nit',
                 'class' => 'form-control top',
                 'id' => 'nit',

@@ -10,7 +10,7 @@ use App\Services\Entities\IndependienteEntity;
 use App\Services\Entities\ListasEntity;
 use App\Services\Entities\SucursalEntity;
 use App\Services\Entities\TrabajadorEntity;
-use App\Services\Request;
+use App\Services\Srequest;
 use App\Services\Utils\Comman;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
@@ -225,7 +225,7 @@ class ApruebaFacultativo
         $fecapr = $postData['fecapr'];
 
         $crearUsuario = new CrearUsuario(
-            new Request(
+            new Srequest(
                 array(
                     "tipo" => "F",
                     "coddoc" => $this->solicitud->getTipdoc(),
@@ -286,7 +286,7 @@ class ApruebaFacultativo
         $asunto = "Afiliación de facultativo realizada con éxito, identificación {$this->solicitud->getCedtra()}";
         $emailCaja = (new Mercurio01)->findFirst();
         $senderEmail = new SenderEmail(
-            new Request(
+            new Srequest(
                 array(
                     "emisor_email" => $emailCaja->getEmail(),
                     "emisor_clave" => $emailCaja->getClave(),

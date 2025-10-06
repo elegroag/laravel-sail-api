@@ -2,65 +2,38 @@
 
 namespace App\Library\Auth;
 
-use App\Models\Adapter\DbBase;
+use App\Services\Srequest;
 
 class SessionCookies
 {
-    private $model, $tipo, $coddoc, $documento, $estado, $estado_afiliado;
-    private $db;
 
-    public function __construct(...$params)
-    {
-        $arguments = get_params_destructures($params);
-        // Aceptar tanto 'model' como 'class' para compatibilidad
-        $this->model = $arguments['model'] ?? $arguments['class'] ?? null;
-        $this->tipo = $arguments['tipo'];
-        $this->coddoc = $arguments['coddoc'];
-        $this->documento = $arguments['documento'];
-        $this->estado = $arguments['estado'];
-        $this->estado_afiliado = $arguments['estado_afiliado'];
-        $this->db = DbBase::rawConnect();
-    }
 
     /**
      * authenticate function
      * @return bool
      */
-    public function authenticate()
+    public static function authenticate(string $useApp = '', Srequest $request)
     {
-        // Validaciones básicas de parámetros
-        if (empty($this->model) || empty($this->tipo) || empty($this->coddoc) || empty($this->documento)) {
-            return false;
+        switch ($useApp) {
+            case 'mercurio':
+                $session = new SessionMercurio();
+                break;
+            case 'cajas':
+                $session = new SessionCajas();
+                break;
+            default:
+                return false;
+                break;
         }
-
-
-        // Construir condición de búsqueda
-        $condiciones = " tipo='{$this->tipo}' AND coddoc='{$this->coddoc}' AND documento='{$this->documento}'";
-        if (!empty($this->estado)) {
-            $condiciones .= " AND estado='{$this->estado}'";
-        }
-
-        // Buscar usuario
-        $usuario = $this->db->fetchOne("SELECT * FROM {$this->model} WHERE {$condiciones}");
-        if (!$usuario) {
-            return false;
-        }
-
-        // Definimos una clave unificada 'user' y campos planos para compatibilidad
-        $userData = [
-            'documento' => $usuario['documento'],
-            'coddoc' => $usuario['coddoc'],
-            'nombre' => $usuario['nombre'],
-            'email' => $usuario['email'],
-            'codciu' => $usuario['codciu'],
-            'estado' => $usuario['estado'],
-            'ts' => time(),
-        ];
 
         session()->regenerate();
+        $userData = $session->authenticate($request);
+
+        if (!$userData) {
+            return false;
+        }
+
         session()->put('user', $userData);
-        session()->put('tipo', $usuario['tipo']);
-        session()->put('estado_afiliado', $this->estado_afiliado);
         return true;
     }
 

@@ -10,7 +10,7 @@ use App\Services\Entities\ListasEntity;
 use App\Services\Entities\PensionadoEntity;
 use App\Services\Entities\SucursalEntity;
 use App\Services\Entities\TrabajadorEntity;
-use App\Services\Request;
+use App\Services\Srequest;
 use App\Services\Utils\Comman;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
@@ -250,7 +250,7 @@ class ApruebaPensionado
         $fecapr = $postData['fecapr'];
 
         $crearUsuario = new CrearUsuario(
-            new Request(
+            new Srequest(
                 array(
                     "tipo" => "O",
                     "coddoc" => $this->solicitud->getTipdoc(),

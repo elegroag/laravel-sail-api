@@ -5,7 +5,7 @@ namespace App\Services\Signup;
 use App\Exceptions\DebugException;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
-use App\Services\Request;
+use App\Services\Srequest;
 use App\Services\Utils\CrearUsuario;
 use App\Services\Utils\Generales;
 use App\Services\Utils\SenderEmail;
@@ -35,9 +35,9 @@ class SignupParticular
     private $codigo_verify;
     private $password;
 
-    public function __construct(Request| null $params = null)
+    public function __construct(Srequest| null $params = null)
     {
-        if ($params instanceof Request) {
+        if ($params instanceof Srequest) {
             foreach ($params->getKeys() as $key) if (property_exists($this, $key)) $this->$key = $params->getParam($key);
         }
     }

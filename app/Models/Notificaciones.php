@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
-use App\Services\Request;
 
 class Notificaciones extends ModelBase
 {

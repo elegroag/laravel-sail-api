@@ -4,8 +4,7 @@ namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Library\Auth\AuthJwt;
-use App\Library\Auth\SessionCookies;
+
 use App\Library\Collections\ParamsBeneficiario;
 use App\Library\Collections\ParamsConyuge;
 use App\Library\Collections\ParamsTrabajador;

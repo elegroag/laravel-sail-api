@@ -12,7 +12,7 @@ use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
 use App\Exceptions\DebugException;
 use App\Services\CajaServices\TrabajadorServices;
-use App\Services\Request;
+use App\Services\Srequest;
 use App\Services\Utils\NotifyEmailServices;
 
 class ApruebaConyuge
@@ -140,7 +140,7 @@ class ApruebaConyuge
         $emailCaja = (new Mercurio01)->findFirst();
 
         $senderEmail = new SenderEmail(
-            new Request(
+            new Srequest(
                 array(
                     "emisor_email" => $emailCaja->getEmail(),
                     "emisor_clave" => $emailCaja->getClave(),

@@ -1,4 +1,3 @@
-
 @extends('layouts.auth')
 
 @section('application', 'cajas')
@@ -34,14 +33,6 @@
                         <p class='text-justify'>
                             COMFACA identificado con Nit 891.190.047-2 es responsable del tratamiento de datos personales de su población afiliada incluyendo trabajadores, beneficiarios y empleadores, y en tal virtud informamos que al ingresar al sistema SISUWEB, usted como funcionario debe velar por la seguridad y confidencialidad de los datos, recuerde que la información debe ser protegida de acuerdo con nuestras políticas de protección de datos personales conforme a la Ley 1581 del 2012 y el decreto 1074 del 2015. <br />Todos los reportes generados con su usuario quedaran registrados bajo el mismo y usted asume la responsabilidad de acuerdo con lo declarado anteriormente.<br />
                             Para más información de la política puede vistar nuestro sitio web <br /> <a class='link-text' href='https://comfaca.dataprotected.co' target="_blank">comfaca.dataprotected.co</a></p>
-
-                        <p class='text-left'>
-                            <label class='checkbox text-info'>
-                                <input type='checkbox' id='comfirmar_politica' name='confirmar_politica'>
-                                Confirme que ha leído el anterior mensaje de compromiso, confidencialidad y buen uso de la información.
-                            </label>
-                        </p>
-                        <p>Si ya ha aceptado la política previamente puede omitir este paso.</p>
                     </div>
                 </div>
             </div>
@@ -99,8 +90,8 @@
         <div class="container">
             <div class="row align-items-center justify-content-xl-between">
                 <div class="col-xl-12">
-                    <div class="copyright text-center text-muted text-white">
-                        &copy; 2022 <a href="http://comfaca.com/master" class="font-weight-bold ml-1" target="_blank">COMFACA.COM</a>
+                    <div class="copyright text-center text-white">
+                        &copy; 2022 <a href="http://comfaca.com/master" class="font-weight-bold ml-1 text-white" target="_blank">COMFACA.COM</a>
                     </div>
                 </div>
             </div>

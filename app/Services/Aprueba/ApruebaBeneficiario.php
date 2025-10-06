@@ -8,7 +8,7 @@ use App\Models\Mercurio07;
 use App\Models\Mercurio34;
 use App\Services\CajaServices\TrabajadorServices;
 use App\Services\Entities\BeneficiarioEntity;
-use App\Services\Request;
+use App\Services\Srequest;
 use App\Services\Utils\Comman;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\RegistroSeguimiento;
@@ -161,13 +161,15 @@ class ApruebaBeneficiario
         $asunto = "Afiliación beneficiario realizada con éxito, identificación {$this->solicitud->getNumdoc()}";
 
         $emailCaja = (new Mercurio01())->findFirst();
-        $senderEmail = new SenderEmail(new Request(
-            array(
-                "emisor_email" => $emailCaja->getEmail(),
-                "emisor_clave" => $emailCaja->getClave(),
-                "asunto" => $asunto,
+        $senderEmail = new SenderEmail(
+            new Srequest(
+                array(
+                    "emisor_email" => $emailCaja->getEmail(),
+                    "emisor_clave" => $emailCaja->getClave(),
+                    "asunto" => $asunto,
+                )
             )
-        ));
+        );
 
         $senderEmail->send(array(
             array(

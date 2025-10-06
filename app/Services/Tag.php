@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Pagination\Paginator as SimplePaginator;
 use Illuminate\Support\Collection;
+use App\Services\Srequest;
 
 class Tag
 {
@@ -54,7 +55,7 @@ class Tag
         return '<img ' . $attributes . ' />';
     }
 
-    public static function selectStatic(Request $params)
+    public static function selectStatic(Srequest $params)
     {
         $attributes = '';
         if ($params->getParam('name') != '') {

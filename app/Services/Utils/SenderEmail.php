@@ -3,7 +3,7 @@
 namespace App\Services\Utils;
 
 use App\Exceptions\DebugException;
-use App\Services\Request;
+use App\Services\Srequest;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception as PHPMailerException;
 
@@ -41,11 +41,11 @@ class SenderEmail
         $this->mail->CharSet = 'UTF-8';
     }
 
-    public function __construct(Request|null $params = null)
+    public function __construct(Srequest|null $params = null)
     {
         $this->mail = new PHPMailer(true);
         $this->configureSMTP();
-        if ($params instanceof Request) {
+        if ($params instanceof Srequest) {
             $this->emisor_email = $params->getParam('emisor_email');
             $this->emisor_clave = $params->getParam('emisor_clave');
             $this->asunto = $params->getParam('asunto');

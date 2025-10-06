@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Library\Auth\AuthJwt;
-use App\Library\Auth\SessionCookies;
 use App\Models\Adapter\DbBase;
 use App\Models\Gener09;
 use App\Models\Gener18;
@@ -30,7 +28,7 @@ use App\Services\Signup\SignupParticular;
 use App\Services\Signup\SignupPensionados;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use App\Services\Request as RequestParams;
+use App\Services\Srequest;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\SenderEmail;
 use Carbon\Carbon;

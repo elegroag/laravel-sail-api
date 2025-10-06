@@ -4,13 +4,10 @@ namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Library\Auth\AuthJwt;
-use App\Library\Auth\SessionCookies;
 use App\Models\Adapter\DbBase;
 use App\Models\Gener09;
 use App\Models\Gener18;
 use App\Models\Mercurio07;
-use App\Services\Utils\Generales;
 use Illuminate\Http\Request;
 
 class UsuarioController extends ApplicationController

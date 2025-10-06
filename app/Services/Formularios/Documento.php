@@ -4,7 +4,7 @@ namespace App\Services\Formularios;
 
 use App\Exceptions\DebugException;
 use App\Library\Tcpdf\KumbiaPDF;
-use App\Services\Request;
+use App\Services\Srequest;
 
 abstract class Documento
 {
@@ -20,7 +20,7 @@ abstract class Documento
     /**
      * request variable
      *
-     * @var Request
+     * @var Srequest
      */
     protected $request;
 
@@ -38,7 +38,7 @@ abstract class Documento
 
     public function setParamsInit($params)
     {
-        $this->request = new Request($params);
+        $this->request = new Srequest($params);
         $this->filename = $this->request->getParam('filename');
 
         $background = $this->request->getParam('background');

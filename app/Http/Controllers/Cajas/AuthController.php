@@ -11,17 +11,10 @@ use App\Services\CajaServices\UsuarioServices;
 use App\Exceptions\AuthException;
 use App\Exceptions\DebugException;
 use App\Library\Auth\AuthJwt;
-use App\Helpers\Session;
-use App\Helpers\View;
-use App\Helpers\Core;
-use App\Models\Gener02;
-use App\Library\Router;
-use App\Helpers\Flash;
 use App\Library\Auth\AuthCajas;
 use App\Services\Utils\SenderEmail;
 use App\Services\View as ServicesView;
 use Exception;
-use Illuminate\Support\Facades\Mail;
 
 class AuthController extends ApplicationController
 {
@@ -39,31 +32,29 @@ class AuthController extends ApplicationController
 
     public function indexAction()
     {
-        return view('cajas.auth.login', [
-            'titulo' => 'Login'
-        ]);
+        return view('cajas.auth.login');
     }
 
     public function authenticateAction(Request $request, Response $response)
     {
-
-        $this->setResponse("ajax");
         $user = $request->input("user");
         $clave = $request->input("password");
-        $politica = $request->input("politica");
         try {
             try {
                 $auth = new AuthCajas();
                 $usuarioServices = new UsuarioServices();
                 $auth->buscarUsuario($usuarioServices, $user);
-                $auth->principal($clave, $politica);
+                $auth->principal($clave);
                 $msj = $auth->getResultado();
                 $usuarioServices->actualizaUsuario($auth->getUsuario());
 
-                set_flashdata("success", [
-                    "msj" => $msj,
-                    "template" => "tmp_bienvenida"
-                ]);
+                set_flashdata(
+                    "success",
+                    [
+                        "msj" => $msj,
+                        "template" => "tmp_bienvenida"
+                    ]
+                );
             } catch (AuthException $auth_err) {
 
                 $code = $auth_err->getCode();
@@ -275,33 +266,23 @@ class AuthController extends ApplicationController
         $request = request();
         $this->setResponse("ajax");
         try {
-
             $db = DbBase::rawConnect();
-
-            $usuario = htmlentities(trim($request->input("usuario")));
-            $clave = htmlentities(trim($request->input("password")));
-            $client_id = htmlentities(trim($request->input("client_id")));
-            $client_secret = htmlentities(trim($request->input("client_secret")));
-            $grant_type = htmlentities(trim($request->input("grant_type")));
+            $usuario = $request->input("usuario");
+            $clave = $request->input("password");
+            $client_id = $request->input("client_id");
+            $client_secret = $request->input("client_secret");
+            $grant_type = $request->input("grant_type");
 
             $auth_jwt = new AuthJwt();
             $auth_jwt->AuthHttp($db, $clave, $usuario, $client_id, $grant_type);
             $token = $auth_jwt->getToken();
-            $clientes = AuthJwt::clientesId();
             $servicio_url = false;
-
-            foreach ($clientes as $ai => $cliente) {
-                if ($cliente['cliente_id'] == $client_id) {
-                    $servicio_url = $cliente['url'];
-                    break;
-                }
-            }
-            $salida = array(
+            $salida = [
                 "access_token" => $token,
                 "token_type" => 'bearer',
                 "expires_in" => 1199,
                 "url" => "http://186.119.116.228:8091/{$servicio_url}"
-            );
+            ];
         } catch (Exception $err) {
             $salida = array(
                 "message" => "Error " . $err->getMessage() . ' ' . basename($err->getFile()) . ' ' . $err->getLine(),

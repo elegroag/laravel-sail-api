@@ -5,7 +5,7 @@ namespace App\Services\Utils;
 use App\Exceptions\DebugException;
 use App\Models\Mercurio07;
 use App\Models\Mercurio19;
-use App\Services\Request;
+use App\Services\Srequest;
 use Carbon\Carbon;
 
 class CrearUsuario
@@ -23,11 +23,11 @@ class CrearUsuario
     private $autoriza = 'S';
     private $fecapr;
 
-    public function __construct(Request|null $args = null)
+    public function __construct(Srequest|null $args = null)
     {
         $this->today = Carbon::parse('now');
         $this->codciu = '18001';
-        if ($args instanceof Request) {
+        if ($args instanceof Srequest) {
             $this->tipo = $args->getParam('tipo');
             $this->coddoc = $args->getParam('coddoc');
             $this->documento = $args->getParam('documento');

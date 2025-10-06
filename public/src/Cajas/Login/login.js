@@ -6,7 +6,6 @@ const AutenticarCajas = (event) => {
     const nerr = 0;
     const _password = $('#password').val();
     const _user = $('#user').val();
-    const _comfirmar_politica = document.getElementById('comfirmar_politica').checked ? 'S' : 'N';
 
     if (_user == '') {
         document.querySelector('.error_user').innerHTML = '<span>El campo usuario es un valor requerido.</span>';
@@ -26,7 +25,6 @@ const AutenticarCajas = (event) => {
         $('#password').val(_password.trim());
         const url = Utils.getKumbiaURL('autenticar');
         document.getElementById('form_autenticar').setAttribute('action', url);
-        document.getElementById('politica').value = _comfirmar_politica;
         $('#form_autenticar').submit();
     } else {
         loading.hide();

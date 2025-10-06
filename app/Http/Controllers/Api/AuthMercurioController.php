@@ -13,7 +13,7 @@ use App\Models\Mercurio19;
 use App\Services\Api\ApiWhatsapp;
 use App\Services\Autentications\AutenticaService;
 use Illuminate\Validation\ValidationException;
-use App\Services\Request as RequestParam;
+use App\Services\Srequest;
 use App\Services\Signup\SignupDomestico;
 use App\Services\Signup\SignupEmpresas;
 use App\Services\Signup\SignupFacultativos;
@@ -124,7 +124,7 @@ class AuthMercurioController extends Controller
 
             $response = (new SignupService())->execute(
                 $signupEntity,
-                new RequestParam($data)
+                new Srequest($data)
             );
 
             $this->db->commit();

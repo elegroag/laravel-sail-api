@@ -8,7 +8,7 @@ use App\Models\Mercurio07;
 use App\Models\Mercurio30;
 use App\Models\Mercurio33;
 use App\Models\Mercurio47;
-use App\Services\Request;
+use App\Services\Srequest;
 use App\Services\Utils\Comman;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
@@ -120,7 +120,7 @@ class ApruebaDatosEmpresa
 
         $emailCaja = (new Mercurio01)->findFirst();
         $sender = new SenderEmail(
-            new Request(
+            new Srequest(
                 array(
                     "emisor_email" => $emailCaja->getEmail(),
                     "emisor_clave" => $emailCaja->getClave(),

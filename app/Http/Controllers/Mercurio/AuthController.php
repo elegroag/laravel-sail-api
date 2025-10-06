@@ -19,7 +19,7 @@ use App\Services\Utils\SenderEmail;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
 use App\Services\Autentications\AutenticaService;
-use App\Services\Request as RequestParam;
+use App\Services\Srequest;
 
 class AuthController extends Controller
 {
@@ -108,7 +108,7 @@ class AuthController extends Controller
 
             $service = new AutenticaService();
             [$access, $message] = $service->execute(
-                new RequestParam([
+                new Srequest([
                     'coddoc' => $request->input('documentType'),
                     'documento' => $request->input('identification'),
                     'clave' => $request->input('password'),
@@ -392,16 +392,18 @@ class AuthController extends Controller
             $afiliado = ($out['success'] == true && isset($out['data']) && $out['data'] != false) ? $out['data'] : null;
             $estadoAfiliado = ($afiliado) ? $afiliado['estado'] : 'I';
 
-            $auth = new SessionCookies(
-                "model: mercurio07",
-                "tipo: {$tipo}",
-                "coddoc: {$coddoc}",
-                "documento: {$documento}",
-                "estado: A",
-                "estado_afiliado: {$estadoAfiliado}"
-            );
-
-            if (!$auth->authenticate()) {
+            if (!SessionCookies::authenticate(
+                'mercurio',
+                new Srequest(
+                    [
+                        "tipo" => $tipo,
+                        "coddoc" => $coddoc,
+                        "documento" => $documento,
+                        "estado" => "A",
+                        "estado_afiliado" => $estadoAfiliado
+                    ]
+                )
+            )) {
                 throw new DebugException("Error en la autenticación del usuario", 501);
             }
 

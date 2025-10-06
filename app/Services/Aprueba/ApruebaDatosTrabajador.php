@@ -3,10 +3,13 @@
 namespace App\Services\Aprueba;
 
 use App\Exceptions\DebugException;
+use App\Models\Mercurio01;
 use App\Models\Mercurio33;
 use App\Models\Mercurio47;
+use App\Services\Srequest;
 use App\Services\Utils\Comman;
 use App\Services\Utils\RegistroSeguimiento;
+use App\Services\Utils\SenderEmail;
 use Carbon\Carbon;
 
 class ApruebaDatosTrabajador
@@ -106,7 +109,7 @@ class ApruebaDatosTrabajador
      */
     public function enviarMail($actapr, $feccap)
     {
-        $feccap = new DateTime($feccap);
+        $feccap = new \DateTime($feccap);
         $dia = $feccap->format("d");
         $mes = get_mes_name($feccap->format("m"));
         $anno = $feccap->format("Y");
@@ -121,9 +124,9 @@ class ApruebaDatosTrabajador
         $data['anno'] = $anno;
         $data['msj'] = "Se informa que los datos del trabajador fueron actualizados con éxito.";
 
-        $emailCaja = (new Mercurio01)->findFirst();
+        $emailCaja = (new Mercurio01())->findFirst();
         $sender = new SenderEmail(
-            new Request(
+            new Srequest(
                 array(
                     "emisor_email" => $emailCaja->getEmail(),
                     "emisor_clave" => $emailCaja->getClave(),
@@ -132,7 +135,7 @@ class ApruebaDatosTrabajador
             )
         );
 
-        $html = View::render("layouts/mail_aprobar", $data);
+        $html = View("layouts/mail_aprobar", $data)->render();
         $sender->send(
             $this->solicitante->getEmail(),
             $html

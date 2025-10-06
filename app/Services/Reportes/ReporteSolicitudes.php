@@ -7,18 +7,18 @@ use App\Models\Mercurio31;
 use App\Models\Mercurio32;
 use App\Models\Mercurio34;
 use App\Services\FactoryReportes\ExcelReportFactory;
-use App\Services\Request;
+use App\Services\Srequest;
 
 class ReporteSolicitudes
 {
     /**
      * main function
      *
-     * @param Request $request
+     * @param Srequest $request
      * @param [type] $recurso
      * @return string
      */
-    public function main(Request $request)
+    public function main(Srequest $request)
     {
         $estado = $request->getParam('estado');
         $fecha_solicitud = $request->getParam('fecha_solicitud');

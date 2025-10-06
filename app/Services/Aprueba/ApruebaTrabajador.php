@@ -8,7 +8,7 @@ use App\Models\Mercurio07;
 use App\Models\Mercurio31;
 use App\Services\CajaServices\TrabajadorServices;
 use App\Services\Entities\TrabajadorEntity;
-use App\Services\Request;
+use App\Services\Srequest;
 use App\Services\Utils\Comman;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\RegistroSeguimiento;
@@ -157,7 +157,7 @@ class ApruebaTrabajador
         $asunto = "Afiliación trabajador realizada con éxito, identificación {$this->solicitud->getCedtra()}";
         $emailCaja = (new Mercurio01)->findFirst();
         $senderEmail = new SenderEmail(
-            new Request(
+            new Srequest(
                 array(
                     "emisor_email" => $emailCaja->getEmail(),
                     "emisor_clave" => $emailCaja->getClave(),

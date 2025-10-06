@@ -50,6 +50,7 @@
     <script src="{{ asset('assets/validators/messages_es.min.js') }}"></script>
     <script src="{{ asset('theme/js/headroom.js') }}"></script>
     <script src="{{ asset('theme/js/sidenav.js') }}"></script>
+    <script src="{{ asset('theme/js/select2.js') }}"></script>
     @stack('scripts')
 </body>
 
