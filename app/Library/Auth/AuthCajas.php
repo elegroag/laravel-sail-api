@@ -12,48 +12,21 @@ class AuthCajas
 	private $month_enable = 2;
 	private $usuario;
 	private $resultado = '';
-	public static $adapter;
 
-
-	public function principal($clave)
+	public function autenticar($user, $clave)
 	{
+		$this->buscarUsuario($user);
 		if (!$this->usuario) {
 			throw new AuthException("El usuario es requerido para la autenticación. 2", 2);
 		}
 		if (!$clave) {
 			throw new AuthException("La clave es requerida para la autenticación. 3", 3);
 		}
-		$fecha  = $this->usuario->getUpdate_at();
 		$criptada = $this->usuario->getCriptada();
-
 		if (!clave_verify($clave, $criptada)) {
 			throw new AuthException("La clave no es correcta para continuar con la autenticación. 6", 6);
 		}
-		$this->validarVigenciaClave($fecha);
-		$this->resetearIntentos();
 		$this->crearSession();
-	}
-
-	public function validarVigenciaClave($fecha)
-	{
-		$now = Carbon::now();
-		$parsedDate = Carbon::parse($fecha);
-		$interval = $now->diffInMonths($parsedDate);
-		if ($interval >= $this->month_enable) {
-			throw new AuthException("El cambio de clave es requerido para continuar con la autenticación. Han pasado {$interval} días desde el ultimo cambio.", 8);
-		}
-	}
-
-	public function resetearIntentos()
-	{
-		if ($this->usuario->getIntentos() > 0) {
-			$update_at = date('Y-m-d H:i:s');
-			Gener02::where("usuario", $this->usuario->getUsuario())->update([
-				"intentos" => '0',
-				"estado" => 'A',
-				"update_at" => $update_at
-			]);
-		}
 	}
 
 	public function crearSession()
@@ -106,11 +79,7 @@ class AuthCajas
 
 	public function buscarUsuario($user)
 	{
-		$this->usuario = Gener02::where([
-			"estado IN('A','B')",
-			"usuario" => $user
-		])->first();
-
+		$this->usuario = Gener02::where("usuario", $user)->whereIn("estado", ['A', 'B'])->first();
 		if (!$this->usuario) {
 			throw new AuthException("El usuario no es correcto para continuar con la autenticación. 4", 4);
 		}

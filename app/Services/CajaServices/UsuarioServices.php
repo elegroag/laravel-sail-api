@@ -28,21 +28,41 @@ class UsuarioServices
 
     public function actualizaUsuario($datos)
     {
-        $gener21 = new Gener21();
-        $gener21->setTipfun($datos->tipfun);
-        $gener21->setDetalle($datos->tipfun_detalle);
-        $gener21->save();
+        $ngener21 = Gener21::where('tipfun', $datos->tipfun);
+        if ($ngener21->exists()) {
+            $ngener21->update([
+                'detalle' => $datos->tipfun_detalle
+            ]);
+        } else {
+            $gener21 = new Gener21();
+            $gener21->setTipfun($datos->tipfun);
+            $gener21->setDetalle($datos->tipfun_detalle);
+            $gener21->save();
+        }
 
-        $gener02 = new Gener02();
-        $gener02->setUsuario($datos->usuario);
-        $gener02->setNombre($datos->nombre);
-        $gener02->setTipfun($datos->tipfun);
-        $gener02->setEmail($datos->estacion);
-        $gener02->setLogin($datos->login);
-        $gener02->setCriptada($datos->criptada);
-        $gener02->setCedtra($datos->cedtra);
-        $gener02->setEstado($datos->estado);
-        $gener02->save();
+        $ngener02 = Gener02::where('usuario', $datos->usuario);
+        if ($ngener02->exists()) {
+            $ngener02->update([
+                'nombre' => $datos->nombre,
+                'tipfun' => $datos->tipfun,
+                'email' => $datos->estacion,
+                'login' => $datos->login,
+                'criptada' => $datos->criptada,
+                'cedtra' => $datos->cedtra,
+                'estado' => $datos->estado
+            ]);
+        } else {
+            $gener02 = new Gener02();
+            $gener02->setUsuario($datos->usuario);
+            $gener02->setNombre($datos->nombre);
+            $gener02->setTipfun($datos->tipfun);
+            $gener02->setEmail($datos->estacion);
+            $gener02->setLogin($datos->login);
+            $gener02->setCriptada($datos->criptada);
+            $gener02->setCedtra($datos->cedtra);
+            $gener02->setEstado($datos->estado);
+            $gener02->save();
+        }
     }
 
     public function buscarUsuarioByUser($user)

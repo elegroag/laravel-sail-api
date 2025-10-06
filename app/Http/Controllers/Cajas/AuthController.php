@@ -42,16 +42,14 @@ class AuthController extends ApplicationController
         try {
             try {
                 $auth = new AuthCajas();
+                $auth->autenticar($user, $clave);
                 $usuarioServices = new UsuarioServices();
-                $auth->buscarUsuario($usuarioServices, $user);
-                $auth->principal($clave);
-                $msj = $auth->getResultado();
                 $usuarioServices->actualizaUsuario($auth->getUsuario());
 
                 set_flashdata(
                     "success",
                     [
-                        "msj" => $msj,
+                        "msj" => "Bienvenido al sistema",
                         "template" => "tmp_bienvenida"
                     ]
                 );

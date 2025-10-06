@@ -28,11 +28,24 @@ class CajasCookieAuthenticated
         }
 
         $tipo = session()->has('tipo') ? session('tipo') : null;
+        if ($tipo) {
+            //no es valido es usuario de mercurio no de cajas
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuario de mercurio no autorizado para acceso a Sistema de Caja.'
+                ], 401);
+            }
+            //redirigir a la pantalla de login de mercurio
+            return redirect('web/login');
+        }
+
+        $tipfun = session()->has('tipfun') ? session('tipfun') : null;
         $user = session()->has('user') ? session('user') : null;
 
-        if ($user && $user != null && $tipo && $tipo != null) {
-            $request->attributes->set('cajas_user', $user);
-            $request->attributes->set('cajas_tipo', $tipo);
+        if ($user && $user != null && $tipfun && $tipfun != null) {
+            $request->attributes->set('user', $user);
+            $request->attributes->set('tipfun', $tipfun);
         } else {
             if ($request->expectsJson()) {
                 return response()->json([

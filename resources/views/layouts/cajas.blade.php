@@ -4,24 +4,28 @@
 
 @section('content-main')
 @php
-use App\Services\Menu\Menu;
-
-$tipo = session()->get('tipo');
 $user = session()->get('user');
-list($menu, $migas) = Menu::showMenu();
+list($menu, $breadcrumbs, $pageTitle) = App\Services\Menu\MenuCajas::showMenu('CA');
 @endphp
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('theme/argon-cajas.css') }}" />
-    <link rel="stylesheet" href="{{ asset('cajas/css/cajas.css') }}" />
+    <link rel="stylesheet" href="{{ asset('theme/css/argon-mercurio.css') }}" />
+    <link rel="stylesheet" href="{{ asset('theme/css/argon-sidenav.css') }}" />
+    <link rel="stylesheet" href="{{ asset('theme/css/argon-content.css') }}" />
+    <link rel="stylesheet" href="{{ asset('mercurio/css/mercurio.css') }}" />
 @endpush
 
 @include('partials.flash')
 
-@include('templates.sidebar', array('menu' => $menu, '_tipo' => $tipo))
+@include('templates.sidebar', 
+    [
+        'menu' => $menu, 
+        '_tipo' => session()->get('tipo'), 
+        '_estado_afiliado' => session()->get('estado_afiliado')
+    ])
 
 <div class="main-content" id="panel">
-@include('templates.navbar', array('user_name' => capitalize($user['nombre'])))    
+@include('templates.navbar', ['user_name' => capitalize($user['nombre']), 'breadcrumbs'=> $breadcrumbs, 'pageTitle'=> $pageTitle]) 
     @yield('content')
 @include('templates.footer')
 </div>

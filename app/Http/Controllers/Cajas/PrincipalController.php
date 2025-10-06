@@ -13,137 +13,131 @@ use App\Models\Mercurio34;
 use App\Models\Mercurio38;
 use App\Models\Mercurio41;
 use App\Models\Mercurio47;
-use App\Services\SatApi\SatConsultaServices;
-use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class PrincipalController extends ApplicationController
 {
 
     protected $db;
     protected $user;
-    protected $tipo;
+    protected $tipfun;
 
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
-        $this->setParamToView("instancePath", env('APP_URL') . 'Cajas/');
+        $this->tipfun = session()->has('tipfun') ? session('tipfun') : null;
     }
 
-    public function indexAction($permiso_menu = 1)
+    public function indexAction()
     {
-        $this->setParamToView("hide_header", true);
-        $this->setParamToView("title", "Inicio");
-        $user = parent::getActUser("usuario");
+        $user = $this->user['usuario'];
         $servicios = array(
             'afiliacion' => array(
                 array(
                     'name' => 'Afiliación Empresas',
                     'cantidad' => array(
-                        'pendientes' => (new Mercurio30())->count("*", "conditions: estado='P' and usuario = '" . $user . "'"),
-                        'aprobados' => (new Mercurio30)->count("*", "conditions: estado='A' and usuario = '" . $user . "'"),
-                        'rechazados' => (new Mercurio30)->count("*", "conditions: estado='R' and usuario = '" . $user . "'"),
-                        'devueltos' => (new Mercurio30)->count("*", "conditions: estado='D' and usuario = '" . $user . "'"),
-                        'temporales' => (new Mercurio30)->count("*", "conditions: estado='T'")
+                        'pendientes' => Mercurio30::where(["estado" => 'P', "usuario" => $user])->count(),
+                        'aprobados' => Mercurio30::where(["estado" => 'A', "usuario" => $user])->count(),
+                        'rechazados' => Mercurio30::where(["estado" => 'R', "usuario" => $user])->count(),
+                        'devueltos' => Mercurio30::where(["estado" => 'D', "usuario" => $user])->count(),
+                        'temporales' => Mercurio30::where(["estado" => 'T', "usuario" => $user])->count()
                     ),
                     'icon' => 'E',
                     'url' => 'aprobacionemp/index',
-                    'imagen' => env('APP_URL') . 'img/Mercurio/empresas.jpg',
+                    'imagen' => 'empresas.jpg',
                 ),
                 array(
                     'name' => 'Afiliación Independientes',
                     'cantidad' => array(
-                        'pendientes' => (new Mercurio41())->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
-                        'aprobados' => (new Mercurio41)->count("id.*", "conditions: estado='A' and usuario = '" . $user . "'"),
-                        'rechazados' => (new Mercurio41)->count("id.*", "conditions: estado='R' and usuario = '" . $user . "'"),
-                        'devueltos' => (new Mercurio41)->count("id.*", "conditions: estado='D' and usuario = '" . $user . "'"),
-                        'temporales' => (new Mercurio41)->count("id.*", "conditions: estado='T'"),
+                        'pendientes' => Mercurio41::where(["estado" => 'P', "usuario" => $user])->count(),
+                        'aprobados' => Mercurio41::where(["estado" => 'A', "usuario" => $user])->count(),
+                        'rechazados' => Mercurio41::where(["estado" => 'R', "usuario" => $user])->count(),
+                        'devueltos' => Mercurio41::where(["estado" => 'D', "usuario" => $user])->count(),
+                        'temporales' => Mercurio41::where(["estado" => 'T', "usuario" => $user])->count(),
                     ),
                     'icon' => 'I',
                     'url' => 'aprobaindepen/index',
-                    'imagen' => env('APP_URL') . 'img/Mercurio/independiente.jpg',
+                    'imagen' => 'independiente.jpg',
                 ),
                 array(
                     'name' => 'Afiliación Pensionados',
                     'cantidad' => array(
-                        'pendientes' => (new Mercurio38())->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
-                        'aprobados' => (new Mercurio38)->count("id.*", "conditions: estado='A' and usuario = '" . $user . "'"),
-                        'rechazados' => (new Mercurio38)->count("id.*", "conditions: estado='R' and usuario = '" . $user . "'"),
-                        'devueltos' => (new Mercurio38)->count("id.*", "conditions: estado='D' and usuario = '" . $user . "'"),
-                        'temporales' => (new Mercurio38)->count("id.*", "conditions: estado='T'"),
+                        'pendientes' => Mercurio38::where(["estado" => 'P', "usuario" => $user])->count(),
+                        'aprobados' => Mercurio38::where(["estado" => 'A', "usuario" => $user])->count(),
+                        'rechazados' => Mercurio38::where(["estado" => 'R', "usuario" => $user])->count(),
+                        'devueltos' => Mercurio38::where(["estado" => 'D', "usuario" => $user])->count(),
+                        'temporales' => Mercurio38::where(["estado" => 'T', "usuario" => $user])->count(),
                     ),
                     'icon' => 'P',
                     'url' => 'aprobacionpen/index',
-                    'imagen' => env('APP_URL') . 'img/Mercurio/pensionado.jpg',
+                    'imagen' => 'pensionado.jpg',
                 ),
                 array(
                     'name' => 'Afiliación Trabajadores',
                     'cantidad' => array(
-                        'pendientes' => (new Mercurio31())->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
-                        'aprobados' => (new Mercurio31)->count("id.*", "conditions: estado='A' and usuario = '" . $user . "'"),
-                        'rechazados' => (new Mercurio31)->count("id.*", "conditions: estado='R' and usuario = '" . $user . "'"),
-                        'devueltos' => (new Mercurio31)->count("id.*", "conditions: estado='D' and usuario = '" . $user . "'"),
-                        'temporales' => (new Mercurio31)->count("id.*", "conditions: estado='T'"),
+                        'pendientes' => Mercurio31::where(["estado" => 'P', "usuario" => $user])->count(),
+                        'aprobados' => Mercurio31::where(["estado" => 'A', "usuario" => $user])->count(),
+                        'rechazados' => Mercurio31::where(["estado" => 'R', "usuario" => $user])->count(),
+                        'devueltos' => Mercurio31::where(["estado" => 'D', "usuario" => $user])->count(),
+                        'temporales' => Mercurio31::where(["estado" => 'T', "usuario" => $user])->count(),
                     ),
                     'icon' => 'T',
                     'url' => 'aprobaciontra/index',
-                    'imagen' => env('APP_URL') . 'img/Mercurio/trabajadores.jpg',
+                    'imagen' => 'trabajadores.jpg',
                 ),
                 array(
                     'name' => 'Afiliación Conyuges',
                     'cantidad' => array(
-                        'pendientes' => (new Mercurio32())->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
-                        'aprobados' => (new Mercurio32)->count("id.*", "conditions: estado='A' and usuario = '" . $user . "'"),
-                        'rechazados' => (new Mercurio32)->count("id.*", "conditions: estado='R' and usuario = '" . $user . "'"),
-                        'devueltos' => (new Mercurio32)->count("id.*", "conditions: estado='D' and usuario = '" . $user . "'"),
-                        'temporales' => (new Mercurio32)->count("id.*", "conditions: estado='T'"),
+                        'pendientes' => Mercurio32::where(["estado" => 'P', "usuario" => $user])->count(),
+                        'aprobados' => Mercurio32::where(["estado" => 'A', "usuario" => $user])->count(),
+                        'rechazados' => Mercurio32::where(["estado" => 'R', "usuario" => $user])->count(),
+                        'devueltos' => Mercurio32::where(["estado" => 'D', "usuario" => $user])->count(),
+                        'temporales' => Mercurio32::where(["estado" => 'T', "usuario" => $user])->count(),
                     ),
                     'icon' => 'C',
                     'url' => 'aprobacioncon/index',
-                    'imagen' => env('APP_URL') . 'img/Mercurio/conyuges.jpg',
+                    'imagen' => 'conyuges.jpg',
                 ),
                 array(
                     'name' => 'Afiliación Beneficiarios',
                     'cantidad' => array(
-                        'pendientes' => (new Mercurio34())->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
-                        'aprobados' => (new Mercurio34)->count("id.*", "conditions: estado='A' and usuario = '" . $user . "'"),
-                        'rechazados' => (new Mercurio34)->count("id.*", "conditions: estado='R' and usuario = '" . $user . "'"),
-                        'devueltos' => (new Mercurio34)->count("id.*", "conditions: estado='D' and usuario = '" . $user . "'"),
-                        'temporales' => (new Mercurio34)->count("id.*", "conditions: estado='T'"),
+                        'pendientes' => Mercurio34::where(["estado" => 'P', "usuario" => $user])->count(),
+                        'aprobados' => Mercurio34::where(["estado" => 'A', "usuario" => $user])->count(),
+                        'rechazados' => Mercurio34::where(["estado" => 'R', "usuario" => $user])->count(),
+                        'devueltos' => Mercurio34::where(["estado" => 'D', "usuario" => $user])->count(),
+                        'temporales' => Mercurio34::where(["estado" => 'T', "usuario" => $user])->count(),
                     ),
                     'icon' => 'B',
                     'url' => 'aprobacionben/index',
-                    'imagen' => env('APP_URL') . 'img/Mercurio/beneficiarios.jpg',
+                    'imagen' => 'beneficiarios.jpg',
                 ),
                 array(
                     'name' => 'Actualización datos Empresas',
                     'cantidad' => array(
-                        'pendientes' => (new Mercurio33())->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
-                        'aprobados' => (new Mercurio33)->count("id.*", "conditions: estado='A' and usuario = '" . $user . "'"),
-                        'rechazados' => (new Mercurio33)->count("id.*", "conditions: estado='R' and usuario = '" . $user . "'"),
-                        'devueltos' => (new Mercurio33)->count("id.*", "conditions: estado='D' and usuario = '" . $user . "'"),
-                        'temporales' => (new Mercurio33)->count("id.*", "conditions: estado='T'"),
+                        'pendientes' => Mercurio33::where(["estado" => 'P', "usuario" => $user])->count(),
+                        'aprobados' => Mercurio33::where(["estado" => 'A', "usuario" => $user])->count(),
+                        'rechazados' => Mercurio33::where(["estado" => 'R', "usuario" => $user])->count(),
+                        'devueltos' => Mercurio33::where(["estado" => 'D', "usuario" => $user])->count(),
+                        'temporales' => Mercurio33::where(["estado" => 'T', "usuario" => $user])->count(),
                     ),
                     'icon' => 'AE',
                     'url' => 'actualizardatos/index',
-                    'imagen' => env('APP_URL') . 'img/Mercurio/empresas.jpg',
+                    'imagen' => 'empresas.jpg',
                 ),
                 array(
                     'name' => 'Actualización datos Trabajador',
                     'cantidad' => array(
-                        'pendientes' => (new Mercurio47())->count("id.*", "conditions: estado='P' and usuario = '" . $user . "'"),
-                        'aprobados' => (new Mercurio47)->count("id.*", "conditions: estado='A' and usuario = '" . $user . "'"),
-                        'rechazados' => (new Mercurio47)->count("id.*", "conditions: estado='R' and usuario = '" . $user . "'"),
-                        'devueltos' => (new Mercurio47)->count("id.*", "conditions: estado='D' and usuario = '" . $user . "'"),
-                        'temporales' => (new Mercurio47)->count("id.*", "conditions: estado='T'"),
+                        'pendientes' => Mercurio47::where(["estado" => 'P', "usuario" => $user])->count(),
+                        'aprobados' => Mercurio47::where(["estado" => 'A', "usuario" => $user])->count(),
+                        'rechazados' => Mercurio47::where(["estado" => 'R', "usuario" => $user])->count(),
+                        'devueltos' => Mercurio47::where(["estado" => 'D', "usuario" => $user])->count(),
+                        'temporales' => Mercurio47::where(["estado" => 'T', "usuario" => $user])->count(),
                     ),
                     'icon' => 'AT',
                     'url' => 'aprobaciondatos/index',
-                    'imagen' => env('APP_URL') . 'img/Mercurio/datos_basicos.jpg',
+                    'imagen' => 'datos_basicos.jpg',
                 )
             ),
             'productos' => array(
@@ -152,20 +146,24 @@ class PrincipalController extends ApplicationController
                     'cantidad' => 0,
                     'icon' => 'L',
                     'url' => 'admproductos/lista',
-                    'imagen' => env('APP_URL') . 'img/Mercurio/registro_empresa.jpg',
+                    'imagen' => 'registro_empresa.jpg',
                 ),
                 array(
                     'name' => 'Complemento nutricional',
                     'cantidad' => 0,
                     'icon' => 'N',
                     'url' => 'admproductos/aplicados/27',
-                    'imagen' => env('APP_URL') . 'img/Mercurio/complemento.jpg',
+                    'imagen' => 'complemento.jpg',
                 )
             )
         );
 
-        $this->setParamToView("servicios", $servicios);
-        #Tag::displayTo("permiso_menu", $permiso_menu);
+        return view('cajas/principal/index', [
+            'tipfun' => $this->tipfun,
+            'usuario' => $this->user['usuario'],
+            'nombre' => $this->user['nombre'],
+            "servicios" => $servicios
+        ]);
     }
 
     public function dashboardAction()

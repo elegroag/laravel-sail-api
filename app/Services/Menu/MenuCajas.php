@@ -4,9 +4,8 @@ namespace App\Services\Menu;
 
 use App\Models\Adapter\DbBase;
 
-class Menu
+class MenuCajas
 {
-    private $user;
     private $currentUrl;
     private $breadcrumbs = array();
     private $menuItems;
@@ -18,49 +17,22 @@ class Menu
     public function __construct($codapl)
     {
         $this->codapl = $codapl;
-        if (session()->has('user')) {
-            $this->user = session()->all();
-        }
         $this->db = DbBase::rawConnect();
         $this->initialize();
     }
 
     private function initialize()
     {
-        if (!$this->user) {
-            return null;
-        }
         $this->menuItems = "";
         $this->path = env('APP_URL') . ':' . env('APP_PORT');
     }
 
     private function getMenuItems($parentId)
     {
-        switch (session('tipo')) {
-            case 'T':
-            case 'O':
-            case 'I':
-            case 'F':
-                $menu_tipo = 'T';
-                break;
-            case 'E':
-                $menu_tipo = 'E';
-                break;
-            case 'P':
-                $menu_tipo = 'P';
-                break;
-            default:
-                $menu_tipo = 'P';
-                break;
-        }
-        $estado_afiliado = session('estado_afiliado');
-
-        if ($estado_afiliado == 'I') $menu_tipo = 'P';
-
         $query = "SELECT * FROM menu_items 
-        WHERE is_visible = TRUE AND 
-        codapl='{$this->codapl}' AND 
-        tipo = '{$menu_tipo}' ";
+        WHERE 
+        is_visible = TRUE AND 
+        codapl='{$this->codapl}'";
 
         if ($parentId === null) {
             $query .= " AND parent_id IS NULL";
@@ -191,7 +163,7 @@ class Menu
 
     public static function showMenu($codapl)
     {
-        $menu = new Menu($codapl);
+        $menu = new MenuCajas($codapl);
         return $menu->mainMenu();
     }
 }
