@@ -4,29 +4,24 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio65;
-use App\Services\Tag;
 use App\Services\Utils\GeneralService;
-use App\Services\Utils\UploadFile;
+use App\Services\Utils\Paginate;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class Mercurio65Controller extends ApplicationController
 {
-
     protected $query = "1=1";
-    protected $cantidad_pagina = 0;
+    protected $cantidad_pagina = 10;
     protected $db;
     protected $user;
     protected $tipo;
 
     public function __construct()
     {
-        $this->cantidad_pagina = $this->numpaginate;
-        $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        parent::__construct();
+        $this->user = session('user');
+        $this->tipo = session('tipo');
     }
 
     public function showTabla($paginate)
@@ -67,80 +62,84 @@ class Mercurio65Controller extends ApplicationController
         return $html;
     }
 
-    public function aplicarFiltroAction()
+    public function aplicarFiltroAction(Request $request)
     {
-        $this->setResponse("ajax");
         $consultasOldServices = new GeneralService();
         $this->query = $consultasOldServices->converQuery();
-        #self::buscarAction();
+        return $this->buscarAction($request);
     }
 
-    public function changeCantidadPaginaAction(Request $request)
+    public function changeCantidadPagina(Request $request)
     {
-        $this->setResponse("ajax");
         $this->cantidad_pagina = $request->input("numero");
-        #self::buscarAction();
+        return $this->buscarAction($request);
     }
 
     public function indexAction()
     {
-        $campo_field = array(
+        $campo_field = [
             "nit" => "Nit",
-            "razsoc" => "Razon Social",
+            "razsoc" => "Razón Social",
             "estado" => "Estado",
-        );
-        $this->setParamToView("campo_filtro", $campo_field);
-        $help = "Esta opcion permite manejar los ";
-        $this->setParamToView("help", $help);
-        $this->setParamToView("buttons", array("N", "F", "R"));
-        $this->setParamToView("title", "Comercios");
-        #Tag::setDocumentTitle('Comercios');
+        ];
+
+        return view('cajas.mercurio65.index', [
+            'title' => "Comercios",
+            'campo_filtro' => $campo_field,
+            'help' => "Esta opción permite gestionar los comercios",
+            'buttons' => ["N", "F", "R"],
+        ]);
     }
 
 
     public function buscarAction(Request $request)
     {
-        $this->setResponse("ajax");
-        $pagina = $request->input('pagina');
-        if ($pagina == "") $pagina = 1;
-        $paginate = Tag::paginate($this->Mercurio65->find("$this->query"), $pagina, $this->cantidad_pagina);
-        $html = self::showTabla($paginate);
+        $pagina = ($request->input('pagina') == '') ? 1 : $request->input('pagina');
+        $query = Mercurio65::whereRaw($this->query);
+
+        $paginate = Paginate::execute(
+            $query->get(),
+            $pagina,
+            $this->cantidad_pagina
+        );
+
+        $html = $this->showTabla($paginate);
+
         $consultasOldServices = new GeneralService();
         $html_paginate = $consultasOldServices->showPaginate($paginate);
-        $response['consulta'] = $html;
-        $response['paginate'] = $html_paginate;
-        $this->renderObject($response, false);
+
+        return $this->renderObject([
+            'consulta' => $html,
+            'paginate' => $html_paginate
+        ], false);
     }
 
-    public function editarAction(Request $request)
+    public function editarAction()
     {
-        try {
-            $this->setResponse("ajax");
-            $codsed = $request->input('codsed');
-            $mercurio65 = $this->Mercurio65->findFirst("codsed = '$codsed'");
-            if ($mercurio65 == false) $mercurio65 = new Mercurio65();
-            $this->renderObject($mercurio65->getArray(), false);
-        } catch (DebugException $e) {
-            parent::setLogger($e->getMessage());
-            $this->db->rollback();
+        $mercurio65 = Mercurio65::first();
+        if (!$mercurio65) {
+            $mercurio65 = new Mercurio65();
         }
+        return $this->renderObject($mercurio65->toArray(), false);
     }
 
     public function borrarAction(Request $request)
     {
         try {
-
-            $this->setResponse("ajax");
             $codsed = $request->input('codsed');
-            $modelos = array("Mercurio65");
 
-            $response = $this->db->begin();
-            $this->Mercurio65->deleteAll("codsed = '$codsed'");
-            $this->db->commit();
-            $response = parent::successFunc("Borrado Con Exito");
+            $deleted = Mercurio65::where('codsed', $codsed)->delete();
+
+            if ($deleted) {
+                $response = parent::successFunc("Borrado con éxito");
+            } else {
+                $response = parent::errorFunc("No se pudo eliminar el registro");
+            }
+
             return $this->renderObject($response, false);
-        } catch (DebugException $e) {
-            $response = parent::errorFunc("No se puede Borrar el Registro");
+        } catch (\Exception $e) {
+            parent::setLogger($e->getMessage());
+            $response = parent::errorFunc("Error al intentar eliminar el registro");
             return $this->renderObject($response, false);
         }
     }
@@ -148,61 +147,60 @@ class Mercurio65Controller extends ApplicationController
     public function guardarAction(Request $request)
     {
         try {
-
             $this->setResponse("ajax");
-            $codsed = $request->input('codsed');
-            $nit = $request->input('nit');
-            $razsoc = $request->input('razsoc');
-            $direccion = $request->input('direccion');
-            $email = $request->input('email');
-            $celular = $request->input('celular');
-            $codcla = $request->input('codcla');
-            $detalle = $request->input('detalle');
-            $estado = $request->input('estado');
-            $lat = $request->input('lat');
-            $log = $request->input('log');
 
+            $validatedData = $request->validate([
+                'codsed' => 'required|string|max:50',
+                'nit' => 'required|string|max:20',
+                'razsoc' => 'required|string|max:255',
+                'direccion' => 'nullable|string|max:255',
+                'email' => 'nullable|email|max:100',
+                'celular' => 'nullable|string|max:20',
+                'codcla' => 'nullable|string|max:10',
+                'detalle' => 'nullable|string',
+                'estado' => 'required|string|max:1',
+                'lat' => 'nullable|numeric',
+                'log' => 'nullable|numeric',
+            ]);
 
             $response = $this->db->begin();
-            $mercurio65 = new Mercurio65();
 
-            $mercurio65->setCodsed($codsed);
-            $mercurio65->setNit($nit);
-            $mercurio65->setRazsoc($razsoc);
-            $mercurio65->setDireccion($direccion);
-            $mercurio65->setEmail($email);
-            $mercurio65->setCelular($celular);
-            $mercurio65->setCodcla($codcla);
-            $mercurio65->setDetalle($detalle);
-            $mercurio65->setLat($lat);
-            $mercurio65->setLog($log);
-            $mercurio65->setEstado($estado);
-            $mercurio01 = $this->Mercurio01->findFirst();
-            if (isset($_FILES['archivo']['name']) && $_FILES['archivo']['name'] != "") {
-                $extension = explode(".", $_FILES['archivo']['name']);
-                $name = $codsed . "_comercios." . end($extension);
-                $_FILES['archivo']['name'] = $name;
+            // Buscar o crear un nuevo registro
+            $mercurio65 = Mercurio65::firstOrNew(['codsed' => $request->input('codsed')]);
 
-                $uploadFile = new UploadFile();
-                $estado = $uploadFile->upload("archivo", $mercurio01->getPath());
-                if ($estado != false) {
-                    $mercurio65->setArchivo($name);
-                    if (!$mercurio65->save()) {
-                        parent::setLogger($mercurio65->getMessages());
-                        $this->db->rollback();
-                    }
-                    $response = parent::successFunc("Se adjunto con exito el archivo");
-                } else {
-                    $response = parent::errorFunc("No se cargo: Tamano del archivo muy grande o No es Valido");
-                }
-            } else {
-                $response = parent::errorFunc("No se cargo el archivo");
+            // Actualizar atributos
+            $mercurio65->fill($validatedData);
+
+            // Manejo de archivo si existe
+            if ($request->hasFile('archivo')) {
+                $file = $request->file('archivo');
+                $extension = $file->getClientOriginalExtension();
+                $fileName = $request->input('codsed') . '_comercios.' . $extension;
+
+                // Guardar el archivo usando el almacenamiento de Laravel
+                $path = $file->storeAs('uploads', $fileName, 'public');
+                $mercurio65->archivo = $fileName;
             }
-            $this->db->commit();
-            $response = parent::successFunc("Creacion Con Exito");
+
+            if (!$mercurio65->save()) {
+                parent::setLogger($mercurio65->getMessages());
+                $this->db->rollback();
+                $response = parent::errorFunc("Error al guardar los datos");
+            } else {
+                $this->db->commit();
+                $response = parent::successFunc("Datos guardados correctamente");
+            }
+
             return $this->renderObject($response, false);
-        } catch (DebugException $e) {
-            $response = parent::errorFunc("No se puede guardar/editar el Registro");
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $response = parent::errorFunc("Error de validación: " . $e->getMessage());
+            return $this->renderObject($response, false);
+        } catch (\Exception $e) {
+            if (isset($this->db)) {
+                $this->db->rollback();
+            }
+            parent::setLogger($e->getMessage());
+            $response = parent::errorFunc("Error al procesar la solicitud: " . $e->getMessage());
             return $this->renderObject($response, false);
         }
     }
