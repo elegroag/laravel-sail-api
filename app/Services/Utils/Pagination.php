@@ -2,8 +2,6 @@
 
 namespace App\Services\Utils;
 
-use App\Services\Tag;
-
 class Pagination
 {
     public $cantidadPaginas = 0;
@@ -23,9 +21,9 @@ class Pagination
      */
     public function filter($campo, $condi, $value)
     {
-        $campo = self::converSerialize($campo, 'mcampo');
-        $condi = self::converSerialize($condi, 'mcondi');
-        $value = self::converSerialize($value, 'mvalue');
+        $campo = $this->converSerialize($campo, 'mcampo');
+        $condi = $this->converSerialize($condi, 'mcondi');
+        $value = $this->converSerialize($value, 'mvalue');
         $this->procesarFilter($campo, $condi, $value);
         return $this->query;
     }
@@ -84,7 +82,7 @@ class Pagination
         $this->query = (count($data) > 0) ? $this->query . ' AND ' . implode(" AND ", $data) : $this->query;
     }
 
-    public static function converSerialize($str, $indice)
+    public function converSerialize($str, $indice)
     {
         $data = array();
         $strArray = preg_split("/&/", $str);
@@ -122,8 +120,7 @@ class Pagination
             );
         }
 
-        $paginate = Tag::paginate($modelEntity, $this->pagina, $this->cantidadPaginas);
-
+        $paginate = Paginate::execute($modelEntity, $this->pagina, $this->cantidadPaginas);
         $html = $service->showTabla($paginate);
         $html_paginate = view('layouts/paginate', array(
             'paginate' => $paginate,

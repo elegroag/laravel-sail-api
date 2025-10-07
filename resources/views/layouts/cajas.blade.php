@@ -17,8 +17,6 @@ list($menu, $breadcrumbs, $pageTitle) = App\Services\Menu\MenuCajas::showMenu('C
 
 @push('scripts')
     <script src="{{ asset('core/messages.js') }}"></script>
-    <script src="{{ asset('core/global.js') }}"></script>
-    <script src="{{ asset('core/base-source.js') }}"></script>
 @endpush
 
 @include('partials.flash')

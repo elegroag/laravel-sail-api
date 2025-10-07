@@ -6,29 +6,29 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use App\Models\Mercurio09;
+use App\Models\Mercurio12;
 use App\Models\Mercurio13;
 use App\Models\Mercurio14;
-use App\Services\Tag;
 use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
+use App\Services\Utils\Paginate;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class Mercurio09Controller extends ApplicationController
 {
 
     protected $query = "1=1";
-    protected $cantidad_pagina = 0;
+    protected $cantidad_pagina = 10;
     protected $db;
     protected $user;
     protected $tipo;
 
     public function __construct()
     {
-        $this->cantidad_pagina = $this->numpaginate;
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->cantidad_pagina = $this->numpaginate ?? 10;
     }
 
     public function showTabla($paginate)
@@ -68,19 +68,17 @@ class Mercurio09Controller extends ApplicationController
         return $html;
     }
 
-    public function aplicarFiltroAction()
+    public function aplicarFiltroAction(Request $request)
     {
-        $this->setResponse("ajax");
         $consultasOldServices = new GeneralService();
         $this->query = $consultasOldServices->converQuery();
-        #self::buscarAction();
+        return $this->buscarAction($request);
     }
 
     public function changeCantidadPaginaAction(Request $request)
     {
-        $this->setResponse("ajax");
         $this->cantidad_pagina = $request->input("numero");
-        #self::buscarAction();
+        return $this->buscarAction($request);
     }
 
     public function indexAction()
@@ -89,12 +87,9 @@ class Mercurio09Controller extends ApplicationController
             "tipopc" => "Codigo",
             "detalle" => "Detalle",
         );
+
         $this->setParamToView("campo_filtro", $campo_field);
-        $help = "Esta opcion permite manejar los ";
-        $this->setParamToView("help", $help);
         $this->setParamToView("title", "Tipos Opciones");
-        $this->setParamToView("buttons", array("N", "F", "R"));
-        # Tag::setDocumentTitle('Motivos Tipos Opciones');
 
         $apiRest = Comman::Api();
         $apiRest->runCli(
@@ -105,22 +100,35 @@ class Mercurio09Controller extends ApplicationController
         );
         $datos_captura = $apiRest->toArray();
         $_tipsoc = array();
-        foreach ($datos_captura['tipo_sociedades'] as $data) $_tipsoc[$data['tipsoc']] = $data['detalle'];
+        foreach ($datos_captura['tipo_sociedades'] as $data) {
+            $_tipsoc[$data['tipsoc']] = $data['detalle'];
+        }
         $this->setParamToView("_tipsoc", $_tipsoc);
+
+        return view('cajas.mercurio09.index', [
+            'title' => "Tipos Opciones",
+            'campo_filtro' => $campo_field,
+            '_tipsoc' => $_tipsoc
+        ]);
     }
 
     public function buscarAction(Request $request)
     {
-        $this->setResponse("ajax");
-        $pagina = $request->input('pagina');
-        if ($pagina == "") $pagina = 1;
-        $paginate = Tag::paginate($this->Mercurio09->find("$this->query"), $pagina, $this->cantidad_pagina);
-        $html = self::showTabla($paginate);
+        $pagina = ($request->input('pagina') == "") ? 1 : $request->input('pagina');
+
+        $paginate = Paginate::execute(
+            Mercurio09::whereRaw("{$this->query}")->get(),
+            $pagina,
+            $this->cantidad_pagina
+        );
+
+        $html = $this->showTabla($paginate);
         $consultasOldServices = new GeneralService();
-        $html_paginate = $consultasOldServices->showPaginate($paginate, $event = 'toggle');
+        $html_paginate = $consultasOldServices->showPaginate($paginate);
+
         $response['consulta'] = $html;
         $response['paginate'] = $html_paginate;
-        $this->renderObject($response, false);
+        return $this->renderObject($response, false);
     }
 
     public function editarAction(Request $request)
@@ -128,32 +136,31 @@ class Mercurio09Controller extends ApplicationController
         try {
             $this->setResponse("ajax");
             $tipopc = $request->input('tipopc');
-            $mercurio09 = $this->Mercurio09->findFirst("tipopc = '$tipopc'");
-            if ($mercurio09 == false) $mercurio09 = new Mercurio09();
-            $this->renderObject($mercurio09->getArray(), false);
+            $mercurio09 = Mercurio09::where('tipopc', $tipopc)->first();
+            if ($mercurio09 == false) {
+                $mercurio09 = new Mercurio09();
+            }
+            return $this->renderObject($mercurio09->toArray(), false);
         } catch (DebugException $e) {
-
-            $this->db->rollback();
+            $response = parent::errorFunc("Error al obtener el registro");
+            return $this->renderObject($response, false);
         }
     }
 
     public function borrarAction(Request $request)
     {
         try {
-            try {
-                $this->setResponse("ajax");
-                $tipopc = $request->input('tipopc');
-                $modelos = array("Mercurio09");
+            $this->setResponse("ajax");
+            $tipopc = $request->input('tipopc');
 
-                $response = $this->db->begin();
-                $this->Mercurio09->deleteAll("tipopc = '$tipopc'");
-                $this->db->commit();
-                $response = parent::successFunc("Borrado Con Exito");
-                return $this->renderObject($response, false);
-            } catch (DebugException $e) {
-                $this->db->rollback();
-            }
+            $this->db->begin();
+            Mercurio09::where('tipopc', $tipopc)->delete();
+            $this->db->commit();
+
+            $response = parent::successFunc("Borrado Con Exito");
+            return $this->renderObject($response, false);
         } catch (DebugException $e) {
+            $this->db->rollback();
             $response = parent::errorFunc("No se puede Borrar el Registro");
             return $this->renderObject($response, false);
         }
@@ -163,26 +170,33 @@ class Mercurio09Controller extends ApplicationController
     {
         try {
             $this->setResponse("ajax");
-            $tipopc = $request->input('tipopc', "addslaches", "alpha", "extraspaces", "striptags");
-            $detalle = $request->input('detalle', "addslaches", "alpha", "extraspaces", "striptags");
-            $dias = $request->input('dias', "addslaches", "alpha", "extraspaces", "striptags");
-            $modelos = array("Mercurio09");
+            $tipopc = $request->input('tipopc');
+            $detalle = $request->input('detalle');
+            $dias = $request->input('dias');
 
-            $response = $this->db->begin();
-            $mercurio09 = new Mercurio09();
+            $this->db->begin();
+            $mercurio09 = Mercurio09::where('tipopc', $tipopc)->first();
 
-            $mercurio09->setTipopc($tipopc);
+            if (!$mercurio09) {
+                $mercurio09 = new Mercurio09();
+                $mercurio09->setTipopc($tipopc);
+            }
+
             $mercurio09->setDetalle($detalle);
             $mercurio09->setDias($dias);
+
             if (!$mercurio09->save()) {
                 parent::setLogger($mercurio09->getMessages());
                 $this->db->rollback();
+                throw new DebugException("Error al guardar el registro");
             }
+
             $this->db->commit();
             $response = parent::successFunc("Creacion Con Exito");
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $response = parent::errorFunc("No se puede guardar/editar el Registro");
+            $this->db->rollback();
+            $response = parent::errorFunc("No se puede guardar/editar el Registro: " . $e->getMessage());
             return $this->renderObject($response, false);
         }
     }
@@ -191,9 +205,9 @@ class Mercurio09Controller extends ApplicationController
     {
         try {
             $this->setResponse("ajax");
-            $tipopc = $request->input('tipopc', "addslaches", "alpha", "extraspaces", "striptags");
+            $tipopc = $request->input('tipopc');
             $response = parent::successFunc("");
-            $l = $this->Mercurio09->count("*", "conditions: tipopc = '$tipopc'");
+            $l = Mercurio09::where('tipopc', $tipopc)->count();
             if ($l > 0) {
                 $response = parent::errorFunc("El Registro ya se encuentra Digitado");
             }
@@ -207,15 +221,13 @@ class Mercurio09Controller extends ApplicationController
     public function archivos_viewAction(Request $request)
     {
         try {
-            $this->setResponse("view");
-            $tipopc = $request->input('tipopc', "addslaches", "alpha", "extraspaces", "striptags");
-            $response = "";
-            $mercurio12 = $this->Mercurio12->find();
-            return view('mercurio09/tmp/archivos_view', array(
+            $tipopc = $request->input('tipopc');
+            $mercurio12 = Mercurio12::all();
+            return view('cajas.mercurio09.tmp.archivos_view', [
                 'tipopc' => $tipopc,
                 'mercurio12' => $mercurio12,
                 "Mercurio13" => new Mercurio13()
-            ));
+            ]);
         } catch (DebugException $e) {
             $response = parent::errorFunc("No se pudo validar la informacion");
             return $this->renderText($response);
@@ -225,33 +237,31 @@ class Mercurio09Controller extends ApplicationController
     public function guardarArchivosAction(Request $request)
     {
         try {
-
             $this->setResponse("ajax");
-            $tipopc = $request->input('tipopc', "addslaches", "alpha", "extraspaces", "striptags");
-            $coddoc = $request->input('coddoc', "addslaches", "alpha", "extraspaces", "striptags");
-            $acc = $request->input('acc', "addslaches", "extraspaces", "striptags");
-            $item = 1;
-            $modelos = array("mercurio13");
+            $tipopc = $request->input('tipopc');
+            $coddoc = $request->input('coddoc');
+            $acc = $request->input('acc');
 
-            $response = $this->db->begin();
+            $this->db->begin();
             if ($acc == "1") {
                 $mercurio13 = new Mercurio13();
-
                 $mercurio13->setTipopc($tipopc);
                 $mercurio13->setCoddoc($coddoc);
                 $mercurio13->setObliga("N");
                 if (!$mercurio13->save()) {
                     parent::setLogger($mercurio13->getMessages());
                     $this->db->rollback();
+                    throw new DebugException("Error al guardar archivo");
                 }
             } else {
-                $this->Mercurio13->deleteAll("tipopc='$tipopc' and coddoc='$coddoc' ");
+                Mercurio13::where('tipopc', $tipopc)->where('coddoc', $coddoc)->delete();
             }
             $this->db->commit();
             $response = parent::successFunc("Movimiento Realizado Con Exito");
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $response = parent::errorFunc("No se pudo realizar el movimiento");
+            $this->db->rollback();
+            $response = parent::errorFunc("No se pudo realizar el movimiento: " . $e->getMessage());
             return $this->renderObject($response, false);
         }
     }
@@ -264,12 +274,13 @@ class Mercurio09Controller extends ApplicationController
             $coddoc = $request->input('coddoc');
             $obliga = $request->input('obliga');
 
-            $response = $this->db->begin();
-            $this->Mercurio13->updateAll("obliga='$obliga'", "conditions: tipopc='$tipopc' and coddoc='$coddoc' ");
+            $this->db->begin();
+            Mercurio13::where('tipopc', $tipopc)->where('coddoc', $coddoc)->update(['obliga' => $obliga]);
             $this->db->commit();
             $response = parent::successFunc("Movimiento Realizado Con Exito");
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
+            $this->db->rollback();
             $response = parent::errorFunc("No se pudo realizar el movimiento");
             return $this->renderObject($response, false);
         }
@@ -277,18 +288,16 @@ class Mercurio09Controller extends ApplicationController
 
     public function archivos_empresa_viewAction(Request $request)
     {
-        $this->setResponse("view");
         try {
-            $tipopc = $request->input('tipopc', "addslaches", "alpha", "extraspaces", "striptags");
-            $tipsoc = $request->input('tipsoc', "addslaches", "alpha", "extraspaces", "striptags");
-            $response = "";
-            $mercurio12 = $this->Mercurio12->find();
-            return view('mercurio09/tmp/archivos_empresas', array(
+            $tipopc = $request->input('tipopc');
+            $tipsoc = $request->input('tipsoc');
+            $mercurio12 = Mercurio12::all();
+            return view('cajas.mercurio09.tmp.archivos_empresas', [
                 'tipopc' => $tipopc,
                 'tipsoc' => $tipsoc,
                 'mercurio12' => $mercurio12,
                 "Mercurio14" => new Mercurio14()
-            ));
+            ]);
         } catch (DebugException $e) {
             $response = parent::errorFunc("No se pudo validar la informacion");
             return $this->renderText($response);
@@ -298,17 +307,15 @@ class Mercurio09Controller extends ApplicationController
     public function guardarEmpresaArchivosAction(Request $request)
     {
         try {
-
             $this->setResponse("ajax");
             $tipopc = $request->input('tipopc');
             $tipsoc = $request->input('tipsoc');
             $coddoc = $request->input('coddoc');
             $acc = $request->input('acc');
 
-            $response = $this->db->begin();
+            $this->db->begin();
             if ($acc == "1") {
                 $mercurio14 = new Mercurio14();
-
                 $mercurio14->setTipopc($tipopc);
                 $mercurio14->setTipsoc($tipsoc);
                 $mercurio14->setCoddoc($coddoc);
@@ -316,15 +323,17 @@ class Mercurio09Controller extends ApplicationController
                 if (!$mercurio14->save()) {
                     parent::setLogger($mercurio14->getMessages());
                     $this->db->rollback();
+                    throw new DebugException("Error al guardar archivo de empresa");
                 }
             } else {
-                $this->Mercurio14->deleteAll("tipopc='$tipopc' and tipsoc='$tipsoc' and coddoc='$coddoc' ");
+                Mercurio14::where('tipopc', $tipopc)->where('tipsoc', $tipsoc)->where('coddoc', $coddoc)->delete();
             }
             $this->db->commit();
             $response = parent::successFunc("Movimiento Realizado Con Exito");
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $response = parent::errorFunc("No se pudo realizar el movimiento");
+            $this->db->rollback();
+            $response = parent::errorFunc("No se pudo realizar el movimiento: " . $e->getMessage());
             return $this->renderObject($response, false);
         }
     }
@@ -338,12 +347,16 @@ class Mercurio09Controller extends ApplicationController
             $coddoc = $request->input('coddoc');
             $obliga = $request->input('obliga');
 
-            $response = $this->db->begin();
-            $this->Mercurio14->updateAll("obliga='$obliga'", "conditions: tipopc='$tipopc' and tipsoc='$tipsoc' and coddoc='$coddoc' ");
+            $this->db->begin();
+            Mercurio14::where('tipopc', $tipopc)
+                ->where('tipsoc', $tipsoc)
+                ->where('coddoc', $coddoc)
+                ->update(['obliga' => $obliga]);
             $this->db->commit();
             $response = parent::successFunc("Movimiento Realizado Con Exito");
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
+            $this->db->rollback();
             $response = parent::errorFunc("No se pudo realizar el movimiento");
             return $this->renderObject($response, false);
         }

@@ -109,12 +109,6 @@ $(function () {
 		});
 	} */
 
-	$('.modal').on('hidden.bs.modal', function (e) {
-		if ($('.modal:visible').length) {
-			$('body').addClass('modal-open');
-		}
-	});
-
 	$(document).on('click', '#button_address_modal', function (event) {
 		event.preventDefault();
 		let barrio = '';

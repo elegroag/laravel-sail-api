@@ -9,30 +9,29 @@
                 <div class="d-flex p-2">
                     <div class="col-sm-6 col-md-3" style="padding:5px;">
                         <div class="form-group">
-                            @php echo Tag::selectStatic("campo-filtro", $campo_filtro, "class: form-control", "style: padding:8px;height:35px"); @endphp
+                            <select class="form-control" style="padding:8px;height:35px" name="campo-filtro" id="campo-filtro">
+                                @foreach ($campo_filtro as $key => $value)
+                                    <option value="{{ $key }}">{{ $value }}</option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
                     <div class="col-sm-6 col-md-3" style="padding:5px;">
                         <div class="form-group">
-                            @php echo Tag::selectStatic(
-                                "condi-filtro",
-                                array(
-                                    "como" => "Coincidencia",
-                                    "igual" => "Igual",
-                                    "mayor" => "Mayor",
-                                    "mayorigual" => "Mayor Igual",
-                                    "menorigual" => "Menor Igual",
-                                    "menor" => "Menor",
-                                    "diferente" => "Diferente"
-                                ),
-                                "class: form-control",
-                                "style: padding:8px;height:35px"
-                            ); @endphp
+                            <select class="form-control" style="padding:8px;height:35px">
+                                <option value="como">Coincidencia</option>
+                                <option value="igual">Igual</option>
+                                <option value="mayor">Mayor</option>
+                                <option value="mayorigual">Mayor Igual</option>
+                                <option value="menorigual">Menor Igual</option>
+                                <option value="menor">Menor</option>
+                                <option value="diferente">Diferente</option>
+                            </select>
                         </div>
                     </div>
                     <div class="col-sm-6 col-md-3" style="padding:5px;">
                         <div class="form-group">
-                            @php echo Tag::textUpperField("value-filtro", "class: form-control", "placeholder: Valor filtro", "style: padding:8px;height:35px"); @endphp
+                            <input type="text" class="form-control" placeholder="Valor filtro" style="padding:8px;height:35px" name="value-filtro" id="value-filtro" />
                         </div>
                     </div>
                     <div class="form-group" style="padding:5px;">

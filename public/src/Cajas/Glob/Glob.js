@@ -122,7 +122,7 @@ const buscar = function (elem = undefined) {
 	if (pagina === 0) return;
 	$.ajax({
 		type: 'POST',
-		url: Utils.getKumbiaURL($Kumbia.controller + '/buscar'),
+		url: window.App.url(window.ServerController + '/buscar'),
 		data: {
 			...__readFiltro(),
 			pagina: pagina,
@@ -142,7 +142,7 @@ const borrarFiltro = (e = '') => {
 	$.ajax({
 		method: 'GET',
 		dataType: 'JSON',
-		url: Utils.getKumbiaURL($Kumbia.controller + '/borrarFiltro'),
+		url: window.App.url(window.ServerController + '/borrar_filtro'),
 	}).done(function (response) {
 		aplicarFiltro();
 	});
@@ -153,7 +153,7 @@ const aplicarFiltro = (e = '') => {
 	if (cantidad === null || cantidad === '') cantidad = 15;
 
 	window.App.trigger('syncro', {
-		url: window.App.url('aplicarFiltro'),
+		url: window.App.url(window.ServerController + '/aplicar_filtro'),
 		data: {
 			...__readFiltro(),
 			numero: cantidad,
@@ -178,7 +178,7 @@ const changeCantidadPagina = (e = '') => {
 	let cantidad = $('#cantidad_paginate').val();
 	$.ajax({
 		type: 'POST',
-		url: Utils.getKumbiaURL($Kumbia.controller + '/changeCantidadPagina'),
+		url: window.App.url(window.ServerController + '/change_cantidad_pagina'),
 		data: {
 			...__readFiltro(),
 			numero: cantidad,

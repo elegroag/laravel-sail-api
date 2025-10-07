@@ -1,14 +1,10 @@
 import { $App } from '@/App';
-import { $Kumbia, Messages, Utils } from '@/Utils';
+import { Messages } from '@/Utils';
 import { aplicarFiltro, buscar, validePk } from '../Glob/Glob';
 
-window.App = $App;
 let validator = undefined;
 
-$(() => {
-	window.App.initialize();
-	aplicarFiltro();
-
+const validatorInit = () => {
 	validator = $('#form').validate({
 		rules: {
 			codapl: { required: false },
@@ -17,12 +13,19 @@ $(() => {
 			path: { required: false },
 		},
 	});
+}
+
+window.App = $App;
+$(() => {
+	window.App.initialize();
+	aplicarFiltro();
+
 
 	$(document).on('blur', '#codapl', (e) => {
 		validePk('#codapl');
 	});
 
-	$('#capture-modal').on('hide.bs.modal', (e) => {
+	$('#captureModal').on('hide.bs.modal', (e) => {
 		if (validator !== undefined) {
 			validator.resetForm();
 			$('.select2-selection')
@@ -36,24 +39,23 @@ $(() => {
 		const codapl = e.target.cid;
 
 		window.App.trigger('syncro', {
-			url: window.App.url('/editar'),
+			url: window.App.url(window.ServerController + '/editar'),
 			data: {
 				codapl: codapl,
 			},
 			callback: (response) => {
 				if(response){
-				$.each(response, function (key, value) {
-					$('#' + key.toString()).val(value);
-				});
-				$('#codapl').attr('disabled', 'true');
-				document.getElementById('btCaptureModal').click();
-				setTimeout(() => {
-					$('#detalle').trigger('focus');
-				}, 500);
-			}else{
-				Messages.display(response.error, 'error');
+					$('#codapl').attr('disabled', 'true');
+					const instance = new bootstrap.Modal(document.getElementById('captureModal'));
+					instance.show();
+					const tpl = _.template(document.getElementById('tmp_form').innerHTML);
+					$('#captureModalbody').html(tpl(response));
+					validatorInit();
+				} else {
+					Messages.display(response.error, 'error');
+				}
 			}
-		}});
+		});
 	});
 
 	$(document).on('click', "[data-toggle='guardar']", (e) => {
@@ -65,13 +67,27 @@ $(() => {
 		});
 
 		window.App.trigger('syncro', {
-			url: window.App.url('/guardar'),
+			url: window.App.url(window.ServerController + '/guardar'),
 			data: $('#form').serialize(),
 			callback: (response) => {
 				if(response){
 					buscar();
 					Messages.display(response['msg'], 'success');
-					$('#capture-modal').modal('hide');
+					const instance = new bootstrap.Modal(document.getElementById('captureModal'));
+					instance.show();
+					const tpl = _.template(document.getElementById('tmp_form').innerHTML);
+					$('#captureModalbody').html(tpl({
+						codapl: '',
+						email: '',
+						clave: '',
+						path: '',
+						ftpserver: '',
+						pathserver: '',
+						userserver: '',
+						passserver: '',
+					}));
+					validatorInit();
+					
 				}else{
 					Messages.display(response.error, 'error');
 				}

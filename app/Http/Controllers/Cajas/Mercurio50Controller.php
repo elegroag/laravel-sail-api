@@ -6,16 +6,15 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use App\Models\Mercurio50;
-use App\Services\Tag;
 use App\Services\Utils\GeneralService;
+use App\Services\Utils\Paginate;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class Mercurio50Controller extends ApplicationController
 {
 
     protected $query = "1=1";
-    protected $cantidad_pagina = 0;
+    protected $cantidad_pagina = 10;
     protected $db;
     protected $user;
     protected $tipo;
@@ -25,7 +24,7 @@ class Mercurio50Controller extends ApplicationController
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
-        $this->cantidad_pagina = $this->numpaginate;
+        $this->cantidad_pagina = $this->numpaginate ?? 10;
     }
 
     public function showTabla($paginate)
@@ -50,7 +49,7 @@ class Mercurio50Controller extends ApplicationController
             $html .= "<td>{$mtable->getUrlonl()}</td>";
             $html .= "<td>{$mtable->getPuncom()}</td>";
             $html .= "<td class='table-actions'>";
-            $html .= "<a href='#!' class='table-action btn btn-xs btn-primary' title='Editar' onclick='editar()'>";
+            $html .= "<a href='#!' class='table-action btn btn-xs btn-primary' title='Editar' data-cid='{$mtable->getCodapl()}' data-toggle='editar'>";
             $html .= "<i class='fas fa-user-edit text-white'></i>";
             $html .= "</a>";
             $html .= "</td>";
@@ -61,91 +60,96 @@ class Mercurio50Controller extends ApplicationController
         return $html;
     }
 
-    public function aplicarFiltroAction()
+    public function aplicarFiltroAction(Request $request)
     {
-        $this->setResponse("ajax");
         $consultasOldServices = new GeneralService();
         $this->query = $consultasOldServices->converQuery();
-        #self::buscarAction();
+        return $this->buscarAction($request);
     }
 
     public function changeCantidadPaginaAction(Request $request)
     {
-        $this->setResponse("ajax");
         $this->cantidad_pagina = $request->input("numero");
-        #self::buscarAction();
+        return $this->buscarAction($request);
     }
 
     public function indexAction()
     {
-        $help = "Esta opcion permite manejar los ";
-        $this->setParamToView("help", $help);
-        $this->setParamToView("title", "Basica");
-        if ($this->Mercurio50->count() == 0) $this->setParamToView("buttons", array("N"));
-        #Tag::setDocumentTitle('Basica');
+        return view('cajas.mercurio50.index', [
+            'title' => 'Basica',
+            'showNewButton' => Mercurio50::count() == 0
+        ]);
     }
 
 
     public function buscarAction(Request $request)
     {
-        $this->setResponse("ajax");
-        $pagina = $request->input('pagina');
-        if ($pagina == "") $pagina = 1;
-        $paginate = Tag::paginate($this->Mercurio50->find("$this->query"), $pagina, $this->cantidad_pagina);
+        $pagina = ($request->input('pagina') == "") ? 1 : $request->input('pagina');
+
+        $paginate = Paginate::execute(
+            Mercurio50::whereRaw("{$this->query}")->get(),
+            $pagina,
+            $this->cantidad_pagina
+        );
+
         $html = $this->showTabla($paginate);
         $consultasOldServices = new GeneralService();
         $html_paginate = $consultasOldServices->showPaginate($paginate);
+
         $response['consulta'] = $html;
         $response['paginate'] = $html_paginate;
-        $this->renderObject($response, false);
+        return $this->renderObject($response, false);
     }
 
-    public function editarAction(Request $request)
+    public function editarAction()
     {
         try {
             $this->setResponse("ajax");
-            $mercurio50 = $this->Mercurio50->findFirst();
-            if ($mercurio50 == false) $mercurio50 = new Mercurio50();
-            $this->renderObject($mercurio50->getArray(), false);
+            $mercurio50 = Mercurio50::first();
+            if ($mercurio50 == false) {
+                $mercurio50 = new Mercurio50();
+            }
+            return $this->renderObject($mercurio50->toArray(), false);
         } catch (DebugException $e) {
-            parent::setLogger($e->getMessage());
-            $this->db->rollback();
+            $response = parent::errorFunc("Error al obtener el registro");
+            return $this->renderObject($response, false);
         }
     }
 
     public function guardarAction(Request $request)
     {
         try {
-            try {
-                $this->setResponse("ajax");
-                $codapl = $request->input('codapl');
-                $webser = $request->input('webser');
-                $path = $request->input('path');
-                $urlonl = $request->input('urlonl');
-                $puncom = $request->input('puncom');
-                $modelos = array("Mercurio50");
+            $this->setResponse("ajax");
+            $codapl = $request->input('codapl');
+            $webser = $request->input('webser');
+            $path = $request->input('path');
+            $urlonl = $request->input('urlonl');
+            $puncom = $request->input('puncom');
 
-                $response = $this->db->begin();
+            $this->db->begin();
+            $mercurio50 = Mercurio50::first();
+            if (!$mercurio50) {
                 $mercurio50 = new Mercurio50();
-
-                $mercurio50->setCodapl($codapl);
-                $mercurio50->setWebser($webser);
-                $mercurio50->setPath($path);
-                $mercurio50->setUrlonl($urlonl);
-                $mercurio50->setPuncom($puncom);
-                if (!$mercurio50->save()) {
-                    parent::setLogger($mercurio50->getMessages());
-                    $this->db->rollback();
-                }
-                $this->db->commit();
-                $response = parent::successFunc("Creacion Con Exito");
-                return $this->renderObject($response, false);
-            } catch (DebugException $e) {
-                parent::setLogger($e->getMessage());
-                $this->db->rollback();
             }
+
+            $mercurio50->setCodapl($codapl);
+            $mercurio50->setWebser($webser);
+            $mercurio50->setPath($path);
+            $mercurio50->setUrlonl($urlonl);
+            $mercurio50->setPuncom($puncom);
+
+            if (!$mercurio50->save()) {
+                parent::setLogger($mercurio50->getMessages());
+                $this->db->rollback();
+                throw new DebugException("Error al guardar el registro");
+            }
+
+            $this->db->commit();
+            $response = parent::successFunc("Creacion Con Exito");
+            return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $response = parent::errorFunc("No se puede guardar/editar el Registro");
+            $this->db->rollback();
+            $response = parent::errorFunc("No se puede guardar/editar el Registro: " . $e->getMessage());
             return $this->renderObject($response, false);
         }
     }

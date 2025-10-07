@@ -4,38 +4,20 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Cajas\Mercurio06Controller;
 
-// Ruta GET para mostrar la página principal de tipos de acceso
-Route::get('/tipo-acceso', [Mercurio06Controller::class, 'indexAction']);
+Route::prefix('/cajas/mercurio06')->group(function () {
+    Route::get('/index', [Mercurio06Controller::class, 'indexAction']);
+    Route::post('/buscar', [Mercurio06Controller::class, 'buscarAction']);
+    Route::get('/editar/{tipo?}', [Mercurio06Controller::class, 'editarAction']);
+    Route::post('/borrar', [Mercurio06Controller::class, 'borrarAction']);
+    Route::post('/guardar', [Mercurio06Controller::class, 'guardarAction']);
+    Route::post('/valide-pk', [Mercurio06Controller::class, 'validePkAction']);
+    Route::post('/valide-pk-campo', [Mercurio06Controller::class, 'validePkCampoAction']);
+    Route::get('/campo-view/{tipo?}', [Mercurio06Controller::class, 'campo_viewAction']);
+    Route::post('/guardar-campo', [Mercurio06Controller::class, 'guardarCampoAction']);
+    Route::get('/editar-campo', [Mercurio06Controller::class, 'editarCampoAction']);
+    Route::post('/borrar-campo', [Mercurio06Controller::class, 'borrarCampoAction']);
+    Route::get('/reporte/{format?}', [Mercurio06Controller::class, 'reporteAction']);
 
-// Ruta POST para buscar tipos de acceso (método AJAX)
-Route::post('/tipo-acceso/buscar', [Mercurio06Controller::class, 'buscarAction']);
-
-// Ruta GET para editar tipos de acceso (método AJAX, con parámetro opcional)
-Route::get('/tipo-acceso/editar/{tipo?}', [Mercurio06Controller::class, 'editarAction']);
-
-// Ruta POST para borrar tipos de acceso (método AJAX)
-Route::post('/tipo-acceso/borrar', [Mercurio06Controller::class, 'borrarAction']);
-
-// Ruta POST para guardar tipos de acceso (método AJAX)
-Route::post('/tipo-acceso/guardar', [Mercurio06Controller::class, 'guardarAction']);
-
-// Ruta POST para validar clave primaria (método AJAX)
-Route::post('/tipo-acceso/valide-pk', [Mercurio06Controller::class, 'validePkAction']);
-
-// Ruta POST para validar clave primaria de campos (método AJAX)
-Route::post('/tipo-acceso/valide-pk-campo', [Mercurio06Controller::class, 'validePkCampoAction']);
-
-// Ruta GET para vista de campos (método AJAX, con parámetro opcional)
-Route::get('/tipo-acceso/campo-view/{tipo?}', [Mercurio06Controller::class, 'campo_viewAction']);
-
-// Ruta POST para guardar campos (método AJAX)
-Route::post('/tipo-acceso/guardar-campo', [Mercurio06Controller::class, 'guardarCampoAction']);
-
-// Ruta GET para editar campos (método AJAX)
-Route::get('/tipo-acceso/editar-campo', [Mercurio06Controller::class, 'editarCampoAction']);
-
-// Ruta POST para borrar campos (método AJAX)
-Route::post('/tipo-acceso/borrar-campo', [Mercurio06Controller::class, 'borrarCampoAction']);
-
-// Ruta GET para generar reportes de tipos de acceso (con parámetro de formato)
-Route::get('/tipo-acceso/reporte/{format?}', [Mercurio06Controller::class, 'reporteAction']);
+    Route::post('/aplicar_filtro', [Mercurio06Controller::class, 'aplicarFiltroAction']);
+    Route::post('/change_cantidad_pagina', [Mercurio06Controller::class, 'changeCantidadPaginaAction']);
+});

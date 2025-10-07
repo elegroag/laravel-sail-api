@@ -6,26 +6,25 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use App\Models\Mercurio51;
-use App\Services\Tag;
 use App\Services\Utils\GeneralService;
+use App\Services\Utils\Paginate;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class Mercurio51Controller extends ApplicationController
 {
 
     protected $query = "1=1";
-    protected $cantidad_pagina = 0;
+    protected $cantidad_pagina = 10;
     protected $db;
     protected $user;
     protected $tipo;
 
     public function __construct()
     {
-        $this->cantidad_pagina = $this->numpaginate;
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->cantidad_pagina = $this->numpaginate ?? 10;
     }
 
     public function showTabla($paginate)
@@ -35,7 +34,7 @@ class Mercurio51Controller extends ApplicationController
         $html .= "<tr>";
         $html .= "<th scope='col'>Codigo</th>";
         $html .= "<th scope='col'>Detalle</th>";
-        $html .= "<th scope='col'>Categoria</th>";
+        $html .= "<th scope='col'>Categoria Padre</th>";
         $html .= "<th scope='col'>Tipo</th>";
         $html .= "<th scope='col'>Estado</th>";
         $html .= "<th scope='col'></th>";
@@ -43,17 +42,21 @@ class Mercurio51Controller extends ApplicationController
         $html .= "</thead>";
         $html .= "<tbody class='list'>";
         foreach ($paginate->items as $mtable) {
+            $tipoDetalle = $mtable->tipo == 'P' ? 'Producto' : ($mtable->tipo == 'S' ? 'Servicio' : 'N/A');
+            $estadoDetalle = $mtable->estado == 'A' ? 'Activo' : 'Inactivo';
+            $parentDetalle = $mtable->parent->detalle ?? 'Principal';
+
             $html .= "<tr>";
-            $html .= "<td>{$mtable->getCodcat()}</td>";
-            $html .= "<td>{$mtable->getDetalle()}</td>";
-            $html .= "<td>{$mtable->getCodcatDetalle()}</td>";
-            $html .= "<td>{$mtable->getTipoDetalle()}</td>";
-            $html .= "<td>{$mtable->getEstadoDetalle()}</td>";
+            $html .= "<td>{$mtable->codcat}</td>";
+            $html .= "<td>{$mtable->detalle}</td>";
+            $html .= "<td>{$parentDetalle}</td>";
+            $html .= "<td>{$tipoDetalle}</td>";
+            $html .= "<td>{$estadoDetalle}</td>";
             $html .= "<td class='table-actions'>";
-            $html .= "<a href='#!' class='table-action btn btn-xs btn-primary' title='Editar' onclick='editar(\"{$mtable->getCodcat()}\")'>";
+            $html .= "<a href='#!' class='table-action btn btn-xs btn-primary' title='Editar' data-cid='{$mtable->codcat}' data-toggle='editar'>";
             $html .= "<i class='fas fa-user-edit text-white'></i>";
             $html .= "</a>";
-            $html .= "<a href='#!' class='table-action table-action-delete btn btn-xs btn-danger' title='Borrar' onclick='borrar(\"{$mtable->getCodcat()}\")'>";
+            $html .= "<a href='#!' class='table-action table-action-delete btn btn-xs btn-danger' title='Borrar' data-cid='{$mtable->codcat}' data-toggle='borrar'>";
             $html .= "<i class='fas fa-trash text-white'></i>";
             $html .= "</a>";
             $html .= "</td>";
@@ -64,56 +67,65 @@ class Mercurio51Controller extends ApplicationController
         return $html;
     }
 
-    public function aplicarFiltroAction()
+    public function aplicarFiltroAction(Request $request)
     {
-        $this->setResponse("ajax");
         $consultasOldServices = new GeneralService();
         $this->query = $consultasOldServices->converQuery();
-        #self::buscarAction();
+        return $this->buscarAction($request);
     }
 
     public function changeCantidadPaginaAction(Request $request)
     {
-        $this->setResponse("ajax");
         $this->cantidad_pagina = $request->input("numero");
-        #self::buscarAction();
+        return $this->buscarAction($request);
     }
 
     public function indexAction()
     {
-        $campo_field = array(
+        $campo_field = [
             "codcat" => "Codigo",
             "detalle" => "Detalle",
-        );
-        $this->setParamToView("campo_filtro", $campo_field);
-        $help = "Esta opcion permite manejar los ";
-        $this->setParamToView("help", $help);
-        $this->setParamToView("title", "Categorias");
-        $this->setParamToView("buttons", array("N", "F", "R"));
-        #Tag::setDocumentTitle('Categorias');
+        ];
+        $categorias = ['' => 'Principal'] + Mercurio51::pluck('detalle', 'codcat')->toArray();
+
+        return view('cajas.mercurio51.index', [
+            'title' => "Categorias",
+            'campo_filtro' => $campo_field,
+            'categorias' => $categorias
+        ]);
     }
 
     public function nuevoAction()
     {
-        $this->setResponse("ajax");
-        $numero = $this->Mercurio51->maximum("codcat") + 1;
-        $response = parent::successFunc("ok", $numero);
-        $this->renderObject($response, false);
+        try {
+            $this->setResponse("ajax");
+            $numero = (Mercurio51::max('codcat') ?? 0) + 1;
+            $response = parent::successFunc("ok", $numero);
+            return $this->renderObject($response, false);
+        } catch (DebugException $e) {
+            $response = parent::errorFunc("No se pudo generar un nuevo código");
+            return $this->renderObject($response, false);
+        }
     }
 
 
     public function buscarAction(Request $request)
     {
-        $this->setResponse("ajax");
-        $pagina = $request->input('pagina');
-        if ($pagina == "") $pagina = 1;
-        $paginate = Tag::paginate($this->Mercurio51->find("$this->query"), $pagina, $this->cantidad_pagina);
-        $html = self::showTabla($paginate);
+        $pagina = ($request->input('pagina') == "") ? 1 : $request->input('pagina');
+
+        $paginate = Paginate::execute(
+            Mercurio51::with('parent')->whereRaw("{$this->query}")->get(),
+            $pagina,
+            $this->cantidad_pagina
+        );
+
+        $html = $this->showTabla($paginate);
         $consultasOldServices = new GeneralService();
         $html_paginate = $consultasOldServices->showPaginate($paginate);
+
         $response['consulta'] = $html;
         $response['paginate'] = $html_paginate;
-        $this->renderObject($response, false);
+        return $this->renderObject($response, false);
     }
 
     public function editarAction(Request $request)
@@ -121,29 +133,31 @@ class Mercurio51Controller extends ApplicationController
         try {
             $this->setResponse("ajax");
             $codcat = $request->input('codcat');
-            $mercurio51 = $this->Mercurio51->findFirst("codcat = '$codcat'");
-            if ($mercurio51 == false) $mercurio51 = new Mercurio51();
-            $this->renderObject($mercurio51->getArray(), false);
+            $mercurio51 = Mercurio51::where('codcat', $codcat)->first();
+            if ($mercurio51 == false) {
+                $mercurio51 = new Mercurio51();
+            }
+            return $this->renderObject($mercurio51->toArray(), false);
         } catch (DebugException $e) {
-            parent::setLogger($e->getMessage());
-            $this->db->rollback();
+            $response = parent::errorFunc("Error al obtener el registro");
+            return $this->renderObject($response, false);
         }
     }
 
     public function borrarAction(Request $request)
     {
         try {
-
             $this->setResponse("ajax");
             $codcat = $request->input('codcat');
-            $modelos = array("Mercurio51");
 
-            $response = $this->db->begin();
-            $this->Mercurio51->deleteAll("codcat = '$codcat'");
+            $this->db->begin();
+            Mercurio51::where('codcat', $codcat)->delete();
             $this->db->commit();
+
             $response = parent::successFunc("Borrado Con Exito");
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
+            $this->db->rollback();
             $response = parent::errorFunc("No se puede Borrar el Registro");
             return $this->renderObject($response, false);
         }
@@ -157,24 +171,28 @@ class Mercurio51Controller extends ApplicationController
             $detalle = $request->input('detalle');
             $tipo = $request->input('tipo');
             $estado = $request->input('estado');
+            $codcat_padre = $request->input('codcat_padre');
 
+            $this->db->begin();
+            $mercurio51 = Mercurio51::firstOrNew(['codcat' => $codcat]);
 
-            $response = $this->db->begin();
-            $mercurio51 = new Mercurio51();
+            $mercurio51->detalle = $detalle;
+            $mercurio51->tipo = $tipo;
+            $mercurio51->estado = $estado;
+            $mercurio51->codcat_padre = $codcat_padre ?: null;
 
-            $mercurio51->setCodcat($codcat);
-            $mercurio51->setDetalle($detalle);
-            $mercurio51->setTipo($tipo);
-            $mercurio51->setEstado($estado);
             if (!$mercurio51->save()) {
                 parent::setLogger($mercurio51->getMessages());
                 $this->db->rollback();
+                throw new DebugException("Error al guardar el registro");
             }
+
             $this->db->commit();
             $response = parent::successFunc("Creacion Con Exito");
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $response = parent::errorFunc("No se puede guardar/editar el Registro");
+            $this->db->rollback();
+            $response = parent::errorFunc("No se puede guardar/editar el Registro: " . $e->getMessage());
             return $this->renderObject($response, false);
         }
     }
@@ -185,13 +203,12 @@ class Mercurio51Controller extends ApplicationController
             $this->setResponse("ajax");
             $codcat = $request->input('codcat');
             $response = parent::successFunc("");
-            $l = $this->Mercurio51->count("*", "conditions: codcat = '$codcat'");
-            if ($l > 0) {
+            $exists = Mercurio51::where('codcat', $codcat)->exists();
+            if ($exists) {
                 $response = parent::errorFunc("El Registro ya se encuentra Digitado");
             }
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            parent::setLogger($e->getMessage());
             $response = parent::errorFunc("No se pudo validar la informacion");
             return $this->renderObject($response, false);
         }

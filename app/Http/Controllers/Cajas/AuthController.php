@@ -67,7 +67,7 @@ class AuthController extends ApplicationController
                     "msj" => $msj,
                     "code" => $code
                 ));
-                return redirect('cajas/login');
+                return redirect()->route('cajas.login');
             }
         } catch (Exception $err) {
 
@@ -75,9 +75,9 @@ class AuthController extends ApplicationController
                 "msj" => $err->getMessage() . " " . $err->getFile() . " " . $err->getLine(),
                 "code" => $err->getCode()
             ));
-            return redirect('cajas/login');
+            return redirect()->route('cajas.login');
         }
-        return redirect('cajas/principal');
+        return redirect()->route('cajas.principal');
     }
 
     public function salirAction()

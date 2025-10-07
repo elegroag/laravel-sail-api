@@ -4,145 +4,144 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
+use App\Models\Adapter\DbBase;
 use App\Models\Mercurio09;
 use App\Models\Mercurio12;
 use App\Models\Mercurio14;
 use App\Models\Subsi54;
-use App\Services\CajaServices\Mercurio14Services;
 use App\Services\Utils\GeneralService;
-use App\Services\Utils\Pagination;
+use App\Services\Utils\Paginate;
 use Illuminate\Http\Request;
 
 class Mercurio14Controller extends ApplicationController
 {
-    /**
-     * pagination variable
-     * @var Pagination
-     */
-    protected $pagination;
+    protected $query = "1=1";
+    protected $cantidad_pagina = 10;
+    protected $db;
+    protected $user;
+    protected $tipo;
 
-    /**
-     * query variable
-     * @var string
-     */
-    protected $query;
-
-    public function initialize()
+    public function __construct()
     {
-        $this->pagination = new Pagination();
+        $this->db = DbBase::rawConnect();
+        $this->user = session()->has('user') ? session('user') : null;
+        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->cantidad_pagina = $this->numpaginate ?? 10;
     }
 
     public function indexAction()
     {
-        $this->setParamToView(
-            "campo_filtro",
-            array(
+        $tipopc = ['' => 'Selecciona aquí...'] + Mercurio09::pluck('detalle', 'tipopc')->toArray();
+        $coddoc = ['' => 'Selecciona aquí...'] + Mercurio12::pluck('detalle', 'coddoc')->toArray();
+        $tipsoc = ['' => 'Selecciona aquí...'] + Subsi54::pluck('detalle', 'tipsoc')->toArray();
+
+        return view('cajas.mercurio14.index', [
+            'title' => 'Documentos requeridos empleadores',
+            'campo_filtro' => [
                 "tipopc" => "Tipo servicio afiliación",
                 "tipsoc" => "Tipo sociedad",
                 "coddoc" => "Tipo documento"
-            )
-        );
-        $tipopc = array("" => "Selecciona aquí...");
-        foreach ((new Mercurio09())->find() as $mer09) {
-            $tipopc[$mer09->getTipopc()] = $mer09->getDetalle();
-        }
-
-        $coddoc = array("" => "Selecciona aquí...");
-        foreach ((new Mercurio12())->find() as $mer12) {
-            $coddoc[$mer12->getCoddoc()] = $mer12->getDetalle();
-        }
-
-        $tipsoc = array("" => "Selecciona aquí...");
-        foreach ((new Subsi54())->find() as $sub54) {
-            $tipsoc[$sub54->getTipsoc()] = $sub54->getDetalle();
-        }
-
-        $this->setParamToView("tipopc", $tipopc);
-        $this->setParamToView("coddoc", $coddoc);
-        $this->setParamToView("tipsoc", $tipsoc);
-
-        $this->setParamToView("filters", get_flashdata_item("filter_params"));
-        $this->setParamToView("title", "Documentos requeridos empleadores");
-        $this->setParamToView("buttons", array("N", "F"));
+            ],
+            'tipopc' => $tipopc,
+            'coddoc' => $coddoc,
+            'tipsoc' => $tipsoc,
+        ]);
     }
 
     public function aplicarFiltroAction(Request $request)
     {
+        $consultasOldServices = new GeneralService();
+        $this->query = $consultasOldServices->converQuery();
         return $this->buscarAction($request);
     }
 
     public function changeCantidadPaginaAction(Request $request)
     {
+        $this->cantidad_pagina = $request->input("numero");
         return $this->buscarAction($request);
+    }
+
+    public function showTabla($paginate)
+    {
+        $html = '<table border="0" cellpadding="0" cellspacing="0" class="table table-bordered">';
+        $html .= "<thead class='thead-light'>";
+        $html .= "<tr>";
+        $html .= "<th scope='col'>Tipo Servicio</th>";
+        $html .= "<th scope='col'>Tipo Sociedad</th>";
+        $html .= "<th scope='col'>Documento</th>";
+        $html .= "<th scope='col'>Obligatorio</th>";
+        $html .= "<th scope='col'></th>";
+        $html .= "</tr>";
+        $html .= "</thead>";
+        $html .= "<tbody class='list'>";
+        foreach ($paginate->items as $mtable) {
+            $html .= "<tr>";
+            $html .= "<td>{$mtable->mercurio09->detalle}</td>";
+            $html .= "<td>{$mtable->subsi54->detalle}</td>";
+            $html .= "<td>{$mtable->mercurio12->detalle}</td>";
+            $html .= "<td>{$mtable->obliga}</td>";
+            $html .= "<td class='table-actions'>";
+            $html .= "<a href='#!' class='table-action btn btn-primary btn-xs' title='Editar' data-tipopc='{$mtable->tipopc}' data-tipsoc='{$mtable->tipsoc}' data-coddoc='{$mtable->coddoc}' data-toggle='editar'>";
+            $html .= "<i class='fas fa-user-edit text-white'></i>";
+            $html .= "</a>";
+            $html .= "<a href='#!' class='table-action table-action-delete btn btn-danger btn-xs' title='Borrar' data-tipopc='{$mtable->tipopc}' data-tipsoc='{$mtable->tipsoc}' data-coddoc='{$mtable->coddoc}' data-toggle='borrar'>";
+            $html .= "<i class='fas fa-trash text-white'></i>";
+            $html .= "</a>";
+            $html .= "</td>";
+            $html .= "</tr>";
+        }
+        $html .= "</tbody>";
+        $html .= "</table>";
+        return $html;
     }
 
     public function buscarAction(Request $request)
     {
-        $this->setResponse("ajax");
+        $pagina = ($request->input('pagina') == "") ? 1 : $request->input('pagina');
 
-        $consultasOldServices = new GeneralService();
-        $this->query = $consultasOldServices->converQuery();
-
-        $pagina = ($request->input('pagina')) ? $request->input('pagina') : 1;
-        $cantidad_pagina = ($request->input("numero")) ? $request->input("numero") : 10;
-        if ($pagina == "") $pagina = 1;
-
-        if (!$this->query) $this->query = "1=1";
-
-        $this->pagination->setters(
-            "cantidadPaginas: {$cantidad_pagina}",
-            "pagina: {$pagina}",
-            "query: {$this->query}"
+        $paginate = Paginate::execute(
+            Mercurio14::with(['mercurio09', 'mercurio12', 'subsi54'])->whereRaw("{$this->query}")->get(),
+            $pagina,
+            $this->cantidad_pagina
         );
-        return $this->renderObject($this->pagination->render(new Mercurio14Services()), false);
-    }
 
+        $html = $this->showTabla($paginate);
+        $consultasOldServices = new GeneralService();
+        $html_paginate = $consultasOldServices->showPaginate($paginate);
 
-    /**
-     * infor function
-     * Consulta y retorna los datos del registro de mercurio14 para poder ser editado 
-     * @return void
-     */
-    public function inforAction(Request $request)
-    {
-        $this->setResponse("ajax");
-        try {
-            $tipopc = $request->input('tipopc');
-            $coddoc = $request->input('coddoc');
-            $tipsoc = $request->input('tipsoc');
-            $num14 = (new Mercurio14())->count("*", "conditions: tipopc='{$tipopc}' AND coddoc='{$coddoc}' AND tipsoc='{$tipsoc}'");
-            if ($num14 > 0) {
-                $mer14 = (new Mercurio14())->findFirst(" tipopc='{$tipopc}' AND coddoc='{$coddoc}' AND tipsoc='{$tipsoc}'");
-                $tipopc_detalle = $mer14->getMercurio09()->getDetalle();
-                $coddoc_detalle = $mer14->getMercurio12()->getDetalle();
-                $data = $mer14->getArray();
-                $data['tipopc_detalle'] = $tipopc_detalle;
-                $data['coddoc_detalle'] = $coddoc_detalle;
-
-                $response = array(
-                    'success' => true,
-                    'data' => $data,
-                );
-            }
-        } catch (DebugException $e) {
-            $response = array(
-                'success' => false,
-                'data' => null,
-                'msj' => $e->getMessage(),
-            );
-        }
+        $response['consulta'] = $html;
+        $response['paginate'] = $html_paginate;
         return $this->renderObject($response, false);
     }
 
-    /**
-     * guardarAction function
-     *
-     * @return void
-     */
+    public function editarAction(Request $request)
+    {
+        try {
+            $this->setResponse("ajax");
+            $tipopc = $request->input('tipopc');
+            $coddoc = $request->input('coddoc');
+            $tipsoc = $request->input('tipsoc');
+
+            $mercurio14 = Mercurio14::where('tipopc', $tipopc)
+                ->where('coddoc', $coddoc)
+                ->where('tipsoc', $tipsoc)
+                ->first();
+
+            if (!$mercurio14) {
+                $mercurio14 = new Mercurio14();
+            }
+
+            return $this->renderObject($mercurio14->toArray(), false);
+        } catch (DebugException $e) {
+            $response = parent::errorFunc("Error al obtener el registro");
+            return $this->renderObject($response, false);
+        }
+    }
+
     public function guardarAction(Request $request)
     {
-        $this->setResponse("ajax");
         try {
+            $this->setResponse("ajax");
             $tipopc = $request->input('tipopc');
             $coddoc = $request->input('coddoc');
             $tipsoc = $request->input('tipsoc');
@@ -150,80 +149,58 @@ class Mercurio14Controller extends ApplicationController
             $nota = $request->input('nota');
             $auto_generado = $request->input('auto_generado');
 
-            $num = (new Mercurio14)->count(
-                "*",
-                "conditions: coddoc='{$coddoc}' AND tipopc='{$tipopc}' AND tipsoc='{$tipsoc}'"
-            );
-            if ($num == 0) {
-                $mercurio14 = new Mercurio14();
-                $mercurio14->setTipopc($tipopc);
-                $mercurio14->setCoddoc($coddoc);
-                $mercurio14->setTipsoc($tipsoc);
-                $mercurio14->setObliga($obliga);
-                $mercurio14->setNota($nota);
-                $mercurio14->setAuto_generado($auto_generado);
-                if (!$mercurio14->save()) {
-                    throw new DebugException("Error no se puede guardar el registro", 501);
-                }
-            } else {
-                (new Mercurio14)->updateAll(
-                    " obliga='{$obliga}', auto_generado='{$auto_generado}', nota='{$nota}'",
-                    "conditions: coddoc='{$coddoc}' AND tipopc='{$tipopc}' AND tipsoc='{$tipsoc}'"
-                );
+            $this->db->begin();
+
+            $mercurio14 = Mercurio14::firstOrNew([
+                'tipopc' => $tipopc,
+                'coddoc' => $coddoc,
+                'tipsoc' => $tipsoc
+            ]);
+            $mercurio14->obliga = $obliga;
+            $mercurio14->nota = $nota;
+            $mercurio14->auto_generado = $auto_generado;
+
+            if (!$mercurio14->save()) {
+                parent::setLogger($mercurio14->getMessages());
+                $this->db->rollback();
+                throw new DebugException("Error no se puede guardar el registro");
             }
 
-            $data = (new Mercurio14)->findFirst("coddoc='{$coddoc}' AND tipopc='{$tipopc}' AND tipsoc='{$tipsoc}'");
-            $response = array(
-                'success' => true,
-                'msj' => 'El registro se completo con éxito.',
-                'data' => $data->getArray()
-            );
+            $this->db->commit();
+            $response = parent::successFunc('El registro se completo con éxito.');
+            return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $response = array(
-                'success' => false,
-                'msj' => $e->getMessage()
-            );
+            $this->db->rollback();
+            $response = parent::errorFunc($e->getMessage());
+            return $this->renderObject($response, false);
         }
-        return $this->renderObject($response, false);
     }
 
-    /**
-     * @name function borrarAction
-     * @description []
-     * ? requeriments:
-     * @date update 2025/04/25
-     * @author edwin <soportesistemas.comfaca@gmail.com>
-     * @return void
-     */
     public function borrarAction(Request $request)
     {
-        $this->setResponse("ajax");
         try {
+            $this->setResponse("ajax");
             $tipopc = $request->input('tipopc');
             $coddoc = $request->input('coddoc');
             $tipsoc = $request->input('tipsoc');
 
-            $num = (new Mercurio14)->count(
-                "*",
-                "conditions: coddoc='{$coddoc}' AND tipopc='{$tipopc}' AND tipsoc='{$tipsoc}'"
-            );
-            $res = 0;
-            if ($num > 0) {
-                $res = (new Mercurio14)->deleteAll(" tipopc='{$tipopc}' AND coddoc='{$coddoc}' AND tipsoc='{$tipsoc}'", "limit: 1");
-            } else {
-                throw new DebugException("Error no se puede borrar el registro, no está disponible.", 501);
+            $this->db->begin();
+            $deleted = Mercurio14::where('tipopc', $tipopc)
+                ->where('coddoc', $coddoc)
+                ->where('tipsoc', $tipsoc)
+                ->delete();
+
+            if ($deleted == 0) {
+                throw new DebugException("Error no se puede borrar el registro, no está disponible.");
             }
-            $response = array(
-                'success' => true,
-                'msj' => 'El registro se borro con éxito.',
-                'result' => ($res) ? true : false
-            );
+
+            $this->db->commit();
+            $response = parent::successFunc('El registro se borro con éxito.');
+            return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $response = array(
-                'success' => false,
-                'msj' => $e->getMessage()
-            );
+            $this->db->rollback();
+            $response = parent::errorFunc($e->getMessage());
+            return $this->renderObject($response, false);
         }
-        return $this->renderObject($response, false);
     }
 }

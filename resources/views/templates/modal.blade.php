@@ -1,4 +1,4 @@
-<div class="modal fade" id="modal_generic" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade" id="modal_generic" tabindex="-1" role="dialog" aria-labelledby="notice" aria-hidden="true">
     <div class="modal-dialog" id='size_modal_generic'>
         <div class="modal-content">
             <div class="modal-body p-0">
@@ -24,7 +24,6 @@
         </div>
     </div>
 </div>
-
 
 <script type="text/template" id="tmp_direction">
     <div class="card-header bg-primary">

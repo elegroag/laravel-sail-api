@@ -8,6 +8,8 @@ use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Services\Tag;
 use App\Services\Utils\GeneralService;
+use App\Services\Utils\Paginate;
+use App\Services\Utils\Pagination;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -15,17 +17,23 @@ class Mercurio01Controller extends ApplicationController
 {
 
     protected $query = "1=1";
-    protected $cantidad_pagina = 0;
+    protected $cantidad_pagina = 10;
     protected $db;
     protected $user;
     protected $tipo;
 
     public function __construct()
     {
-        $this->cantidad_pagina = $this->numpaginate;
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
+    }
+
+    public function indexAction()
+    {
+        return view('cajas.mercurio01.index', [
+            'title' => "Configuración basica"
+        ]);
     }
 
     public function showTabla($paginate)
@@ -59,57 +67,41 @@ class Mercurio01Controller extends ApplicationController
         return $html;
     }
 
-    public function aplicarFiltroAction()
+    public function aplicarFiltroAction(Request $request)
     {
-        $this->setResponse("ajax");
         $consultasOldServices = new GeneralService();
         $this->query = $consultasOldServices->converQuery();
-        #self::buscarAction();
+        return $this->buscarAction($request);
     }
 
-    public function changeCantidadPaginaAction(Request $request)
+    public function changeCantidadPagina(Request $request)
     {
-        $this->setResponse("ajax");
         $this->cantidad_pagina = $request->input("numero");
-        #self::buscarAction();
+        return $this->buscarAction($request);
     }
-
-    public function indexAction()
-    {
-        return view('cajas.mercurio01.index', [
-            'title' => "Basica",
-            'buttons' => Mercurio01::count() == 0 ? array("N") : array("N", "E"),
-        ]);
-    }
-
 
     public function buscarAction(Request $request)
     {
-        $this->setResponse("ajax");
-        $pagina = $request->input('pagina');
-        if ($pagina == "") $pagina = 1;
-        $paginate = Tag::paginate($this->Mercurio01->find("$this->query"), $pagina, $this->cantidad_pagina);
-        $html = self::showTabla($paginate);
+        $pagina = ($request->input('pagina') == "") ? 1 : $request->input('pagina');
+        $paginate = Paginate::execute(
+            Mercurio01::whereRaw("{$this->query}")->get(),
+            $pagina,
+            $this->cantidad_pagina
+        );
+        $html = $this->showTabla($paginate);
 
         $consultasOldServices = new GeneralService();
         $html_paginate = $consultasOldServices->showPaginate($paginate);
         $response['consulta'] = $html;
         $response['paginate'] = $html_paginate;
-        $this->renderObject($response, false);
+        return $this->renderObject($response, false);
     }
 
     public function editarAction()
     {
-        try {
-            $this->setResponse("ajax");
-            $mercurio01 = $this->Mercurio01->findFirst();
-            if ($mercurio01 == false) $mercurio01 = new Mercurio01();
-
-            return $this->renderObject($mercurio01->getArray(), false);
-        } catch (DebugException $e) {
-            parent::setLogger($e->getMessage());
-            $this->db->rollback();
-        }
+        $mercurio01 = Mercurio01::first();
+        if ($mercurio01 == false) $mercurio01 = new Mercurio01();
+        return $this->renderObject($mercurio01->toArray(), false);
     }
 
     public function guardarAction(Request $request)

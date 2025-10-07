@@ -6,16 +6,15 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use App\Models\Mercurio18;
-use App\Services\Tag;
 use App\Services\Utils\GeneralService;
+use App\Services\Utils\Paginate;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class Mercurio18Controller extends ApplicationController
 {
 
     protected $query = "1=1";
-    protected $cantidad_pagina = 0;
+    protected $cantidad_pagina = 10;
     protected $db;
     protected $user;
     protected $tipo;
@@ -25,7 +24,7 @@ class Mercurio18Controller extends ApplicationController
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
-        $this->cantidad_pagina = $this->numpaginate;
+        $this->cantidad_pagina = $this->numpaginate ?? 10;
     }
 
     public function showTabla($paginate)
@@ -44,10 +43,10 @@ class Mercurio18Controller extends ApplicationController
             $html .= "<td>{$mtable->getCodigo()}</td>";
             $html .= "<td>{$mtable->getDetalle()}</td>";
             $html .= "<td class='table-actions'>";
-            $html .= "<a href='#!' class='table-action btn btn-xs btn-primary' title='Editar' onclick='editar(\"{$mtable->getCodigo()}\")'>";
+            $html .= "<a href='#!' class='table-action btn btn-xs btn-primary' title='Editar' data-cid='{$mtable->getCodigo()}' data-toggle='editar'>";
             $html .= "<i class='fas fa-user-edit text-white'></i>";
             $html .= "</a>";
-            $html .= "<a href='#!' class='table-action table-action-delete btn btn-xs btn-danger' title='Borrar' onclick='borrar(\"{$mtable->getCodigo()}\")'>";
+            $html .= "<a href='#!' class='table-action table-action-delete btn btn-xs btn-danger' title='Borrar' data-cid='{$mtable->getCodigo()}' data-toggle='borrar'>";
             $html .= "<i class='fas fa-trash text-white'></i>";
             $html .= "</a>";
             $html .= "</td>";
@@ -58,19 +57,17 @@ class Mercurio18Controller extends ApplicationController
         return $html;
     }
 
-    public function aplicarFiltroAction()
+    public function aplicarFiltroAction(Request $request)
     {
-        $this->setResponse("ajax");
         $consultasOldServices = new GeneralService();
         $this->query = $consultasOldServices->converQuery();
-        #self::buscarAction();
+        return $this->buscarAction($request);
     }
 
     public function changeCantidadPaginaAction(Request $request)
     {
-        $this->setResponse("ajax");
         $this->cantidad_pagina = $request->input("numero");
-        #self::buscarAction();
+        return $this->buscarAction($request);
     }
 
     public function indexAction()
@@ -79,27 +76,31 @@ class Mercurio18Controller extends ApplicationController
             "codigo" => "Codigo",
             "detalle" => "Detalle",
         );
-        $this->setParamToView("campo_filtro", $campo_field);
-        $help = "Esta opcion permite manejar los ";
-        $this->setParamToView("help", $help);
-        $this->setParamToView("title", "Preguntas Seguridad");
-        $this->setParamToView("buttons", array("N", "F", "R"));
-        #Tag::setDocumentTitle('Motivos Preguntas Seguridad');
+
+        return view('cajas.mercurio18.index', [
+            'title' => "Preguntas Seguridad",
+            'campo_filtro' => $campo_field
+        ]);
     }
 
 
     public function buscarAction(Request $request)
     {
-        $this->setResponse("ajax");
-        $pagina = $request->input('pagina');
-        if ($pagina == "") $pagina = 1;
-        $paginate = Tag::paginate($this->Mercurio18->find("$this->query"), $pagina, $this->cantidad_pagina);
-        $html = self::showTabla($paginate);
+        $pagina = ($request->input('pagina') == "") ? 1 : $request->input('pagina');
+
+        $paginate = Paginate::execute(
+            Mercurio18::whereRaw("{$this->query}")->get(),
+            $pagina,
+            $this->cantidad_pagina
+        );
+
+        $html = $this->showTabla($paginate);
         $consultasOldServices = new GeneralService();
         $html_paginate = $consultasOldServices->showPaginate($paginate);
+
         $response['consulta'] = $html;
         $response['paginate'] = $html_paginate;
-        $this->renderObject($response, false);
+        return $this->renderObject($response, false);
     }
 
     public function editarAction(Request $request)
@@ -107,29 +108,31 @@ class Mercurio18Controller extends ApplicationController
         try {
             $this->setResponse("ajax");
             $codigo = $request->input('codigo');
-            $mercurio18 = $this->Mercurio18->findFirst("codigo = '$codigo'");
-            if ($mercurio18 == false) $mercurio18 = new Mercurio18();
-            $this->renderObject($mercurio18->getArray(), false);
+            $mercurio18 = Mercurio18::where('codigo', $codigo)->first();
+            if ($mercurio18 == false) {
+                $mercurio18 = new Mercurio18();
+            }
+            return $this->renderObject($mercurio18->toArray(), false);
         } catch (DebugException $e) {
-            parent::setLogger($e->getMessage());
-            $this->db->rollback();
+            $response = parent::errorFunc("Error al obtener el registro");
+            return $this->renderObject($response, false);
         }
     }
 
     public function borrarAction(Request $request)
     {
         try {
-
             $this->setResponse("ajax");
             $codigo = $request->input('codigo');
-            $modelos = array("Mercurio18");
 
-            $response = $this->db->begin();
-            $this->Mercurio18->deleteAll("codigo = '$codigo'");
+            $this->db->begin();
+            Mercurio18::where('codigo', $codigo)->delete();
             $this->db->commit();
+
             $response = parent::successFunc("Borrado Con Exito");
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
+            $this->db->rollback();
             $response = parent::errorFunc("No se puede Borrar el Registro");
             return $this->renderObject($response, false);
         }
@@ -138,26 +141,32 @@ class Mercurio18Controller extends ApplicationController
     public function guardarAction(Request $request)
     {
         try {
-
             $this->setResponse("ajax");
             $codigo = $request->input('codigo');
             $detalle = $request->input('detalle');
 
+            $this->db->begin();
+            $mercurio18 = Mercurio18::where('codigo', $codigo)->first();
 
-            $response = $this->db->begin();
-            $mercurio18 = new Mercurio18();
+            if (!$mercurio18) {
+                $mercurio18 = new Mercurio18();
+                $mercurio18->setCodigo($codigo);
+            }
 
-            $mercurio18->setCodigo($codigo);
             $mercurio18->setDetalle($detalle);
+
             if (!$mercurio18->save()) {
                 parent::setLogger($mercurio18->getMessages());
                 $this->db->rollback();
+                throw new DebugException("Error al guardar el registro");
             }
+
             $this->db->commit();
             $response = parent::successFunc("Creacion Con Exito");
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $response = parent::errorFunc("No se puede guardar/editar el Registro");
+            $this->db->rollback();
+            $response = parent::errorFunc("No se puede guardar/editar el Registro: " . $e->getMessage());
             return $this->renderObject($response, false);
         }
     }
@@ -168,7 +177,7 @@ class Mercurio18Controller extends ApplicationController
             $this->setResponse("ajax");
             $codigo = $request->input('codigo');
             $response = parent::successFunc("");
-            $l = $this->Mercurio18->count("*", "conditions: codigo = '$codigo'");
+            $l = Mercurio18::where('codigo', $codigo)->count();
             if ($l > 0) {
                 $response = parent::errorFunc("El Registro ya se encuentra Digitado");
             }

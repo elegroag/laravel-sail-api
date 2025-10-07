@@ -1,89 +1,112 @@
-import { $Kumbia, Messages, Utils } from '@/Utils';
+import { $App } from '@/App';
+import { Messages } from '@/Utils';
 import { aplicarFiltro, buscar, validePk } from '../Glob/Glob';
 
-var validator = undefined;
+let validator = undefined;
 
+const validatorInit = () => {
+    validator = $('#form').validate({
+        rules: {
+            codcaj: { required: false },
+            nit: { required: false },
+            razsoc: { required: false },
+            sigla: { required: false },
+            email: { required: false, email: true },
+            direccion: { required: false },
+            telefono: { required: false },
+            codciu: { required: false },
+            pagweb: { required: false },
+            pagfac: { required: false },
+            pagtwi: { required: false },
+            pagyou: { required: false },
+        },
+    });
+};
+
+window.App = $App;
 $(() => {
-	aplicarFiltro();
-	validator = $('#form').validate({
-		rules: {
-			codcaj: { required: false },
-			nit: { required: false },
-			razsoc: { required: false },
-			sigla: { required: false },
-			email: { required: false, email: true },
-			direccion: { required: false },
-			telefono: { required: false },
-			codciu: { required: false },
-			pagweb: { required: false },
-			pagfac: { required: false },
-			pagtwi: { required: false },
-			pagyou: { required: false },
-		},
-	});
+    window.App.initialize();
+    aplicarFiltro();
+   
+    $(document).on('blur', '#codcaj', (e) => {
+        validePk('#codcaj');
+    });
 
-	$(document).on('blur', '#codcaj', (e) => {
-		validePk('#codcaj');
-	});
+    $('#captureModal').on('hide.bs.modal', (e) => {
+        if (validator !== undefined) {
+            validator.resetForm();
+            $('.select2-selection')
+                .removeClass(validator.settings.errorClass)
+                .removeClass(validator.settings.validClass);
+        }
+    });
 
-	$('#capture-modal').on('hide.bs.modal', function (e) {
-		if (validator !== undefined) {
-			validator.resetForm();
-			$('.select2-selection')
-				.removeClass(validator.settings.errorClass)
-				.removeClass(validator.settings.validClass);
-		}
-	});
+    $(document).on('click', "[data-toggle='editar']", (e) => {
+        e.preventDefault();
+        const codcaj = e.target.cid;
 
-	$(document).on('click', "[data-toggle='editar']", (e) => {
-		e.preventDefault();
-		const codcaj = e.target.cid;
-		$.ajax({
-			type: 'POST',
-			url: Utils.getKumbiaURL($Kumbia.controller + '/editar'),
-			data: {
-				codcaj: codcaj,
-			},
-		})
-			.done(function (transport) {
-				var response = transport;
-				$.each(response, function (key, value) {
-					$('#' + key.toString()).val(value);
-				});
-				$('#codcaj').attr('disabled', 'true');
-				document.getElementById('btCaptureModal').click();
-				setTimeout(() => {
-					$('#nit').trigger('focus');
-				}, 500);
-			})
-			.fail(function (jqXHR, textStatus) {
-				Messages.display(jqXHR.statusText, 'error');
-			});
-	});
+        window.App.trigger('syncro', {
+            url: window.App.url(window.ServerController + '/editar'),
+            data: {
+                codcaj: codcaj,
+            },
+            callback: (response) => {
+                if (response) {
+                    $('#codcaj').attr('disabled', 'true');
+                    const instance = new bootstrap.Modal(document.getElementById('captureModal'));
+                    instance.show();
+                    const tpl = _.template(document.getElementById('tmp_form').innerHTML);
+                    $('#captureModalbody').html(tpl(response));
+                    validatorInit();
+                    setTimeout(() => {
+                        $('#nit').trigger('focus');
+                    }, 500);
+                } else {
+                    Messages.display(response.error, 'error');
+                }
+            }
+        });
+    });
 
-	$(document).on('click', "[data-toggle='guardar']", (e) => {
-		e.preventDefault();
-		if (!$('#form').valid()) return;
+    $(document).on('click', "[data-toggle='guardar']", (e) => {
+        e.preventDefault();
+        if (!$('#form').valid()) return;
 
-		$('#form :input').each(function (elem) {
-			$(this).removeAttr('disabled');
-		});
-		$.ajax({
-			type: 'POST',
-			url: Utils.getKumbiaURL($Kumbia.controller + '/guardar'),
-			data: $('#form').serialize(),
-		})
-			.done(function (response) {
-				if (response.flag == true) {
-					buscar();
-					Messages.display(response.msg, 'success');
-					$('#capture-modal').modal('hide');
-				} else {
-					Messages.display(response.msg, 'error');
-				}
-			})
-			.fail(function (jqXHR, textStatus) {
-				Messages.display(jqXHR.statusText, 'error');
-			});
-	});
+        $('#form :input').each(function (elem) {
+            $(this).removeAttr('disabled');
+        });
+
+        window.App.trigger('syncro', {
+            url: window.App.url(window.ServerController + '/guardar'),
+            data: $('#form').serialize(),
+            callback: (response) => {
+                if (response) {
+                    buscar();
+                    Messages.display(response.msg, 'success');
+                    const instance = new bootstrap.Modal(document.getElementById('captureModal'));
+                    instance.hide();
+                    
+                    // Resetear el formulario
+                    const tpl = _.template(document.getElementById('tmp_form').innerHTML);
+                    $('#captureModalbody').html(tpl({
+                        codcaj: '',
+                        nit: '',
+                        razsoc: '',
+                        sigla: '',
+                        email: '',
+                        direccion: '',
+                        telefono: '',
+                        codciu: '',
+                        pagweb: '',
+                        pagfac: '',
+                        pagtwi: '',
+                        pagyou: ''
+                    }));
+                    validatorInit();
+                } else {
+                    Messages.display(response.error, 'error');
+                }
+            },
+        });
+    });
 });

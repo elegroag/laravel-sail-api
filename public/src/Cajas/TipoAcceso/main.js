@@ -1,331 +1,157 @@
-import { $Kumbia, Messages, Utils } from '@/Utils';
-import { actualizar_select, aplicarFiltro, buscar } from '../Glob/Glob';
+import { $App } from '@/App';
+import { Messages } from '@/Utils';
+import { aplicarFiltro, buscar, validePk } from '../Glob/Glob';
 
 let validator = undefined;
 let validator_campo = undefined;
 let tipo_global = undefined;
 
-$(function () {
-	aplicarFiltro();
-	validator = $('#form').validate({
-		rules: {
-			tipo: { required: true },
-			detalle: { required: true },
-		},
-	});
+/**
+ * Inicializa los validadores de formularios
+ */
+const initValidators = () => {
+    // Validador del formulario principal
+    validator = $('#form').validate({
+        rules: {
+            tipo: { required: true },
+            detalle: { required: true },
+        },
+        messages: {
+            tipo: 'El campo tipo es obligatorio',
+            detalle: 'El campo detalle es obligatorio'
+        }
+    });
 
-	validator_campo = $('#form_campo').validate({
-		rules: {
-			campo_28: { required: true },
-			detalle_28: { required: true },
-			orden_28: { required: true },
-		},
-	});
+    // Validador del formulario de campos
+    validator_campo = $('#form_campo').validate({
+        rules: {
+            campo_28: { required: true },
+            detalle_28: { required: true },
+            orden_28: { 
+                required: true, 
+                number: true,
+                min: 1
+            },
+        },
+        messages: {
+            campo_28: 'El campo es obligatorio',
+            detalle_28: 'El detalle es obligatorio',
+            orden_28: {
+                required: 'El orden es obligatorio',
+                number: 'Debe ser un número válido',
+                min: 'El valor mínimo es 1'
+            }
+        }
+    });
+};
 
-	$(document).on('blur', '#tipo', function () {
-		if ($('#tipo').val() == '') return;
-		$.ajax({
-			type: 'POST',
-			url: Utils.getKumbiaURL($Kumbia.controller + '/validePk'),
-			data: {
-				tipo: $('#tipo').val(),
-			},
-		})
-			.done(function (transport) {
-				var response = transport;
-				if (response['flag'] == false) {
-					Messages.display(response['msg'], 'warning');
-					$('#tipo').val('');
-					$('#tipo').trigger('focus');
-				}
-			})
-			.fail(function (jqXHR, textStatus) {
-				Messages.display(jqXHR.statusText, 'error');
-			});
-	});
+/**
+ * Valida si una clave primaria ya existe
+ * @param {string} campoId - ID del campo a validar
+ * @param {string} tipo - Tipo de validación
+ */
+const validarClaveUnica = (campoId, tipo) => {
+    const $campo = $(`#${campoId}`);
+    if ($campo.val().trim() === '') return;
 
-	$(document).on('blur', '#campo_28', function () {
-		if ($('#campo_28').val() == '') return;
-		$.ajax({
-			type: 'POST',
-			url: Utils.getKumbiaURL($Kumbia.controller + '/validePkCampo'),
-			data: {
-				tipo: tipo_global,
-				campo_28: $('#campo_28').val(),
-			},
-		})
-			.done(function (transport) {
-				var response = transport;
-				if (response['flag'] == false) {
-					Messages.display(response['msg'], 'warning');
-					$('#campo_28').val('');
-					$('#campo_28').focus().select();
-				}
-			})
-			.fail(function (jqXHR, textStatus) {
-				Messages.display(jqXHR.statusText, 'error');
-			});
-	});
+    window.App.trigger('syncro', {
+        url: window.App.url(`${window.ServerController}/validePkCampo`),
+        data: {
+            tipo: tipo || tipo_global,
+            campo_28: $campo.val()
+        },
+        callback: (response) => {
+            if (response?.flag === false) {
+                Messages.display(response.msg || 'El campo ya existe', 'warning');
+                $campo.val('').trigger('focus');
+            }
+        }
+    });
+};
 
-	$('#capture-modal').on('hide.bs.modal', function (e) {
-		validator.resetForm();
-		$('.select2-selection')
-			.removeClass(validator.settings.errorClass)
-			.removeClass(validator.settings.validClass);
-	});
+/**
+ * Carga los campos asociados a un tipo
+ * @param {string} tipo - Tipo de acceso
+ */
+const cargarCampos = (tipo) => {
+    if (!tipo) return;
+    
+    window.App.trigger('syncro', {
+        url: window.App.url(`${window.ServerController}/campo_view`),
+        data: { tipo },
+        callback: (html) => {
+            if (html) {
+                $('#result_campos').html(html);
+            }
+        }
+    });
+};
 
-	$(document).on('click', "[data-toggle='editar']", (e) => {
-		e.preventDefault();
-		const tipo = $(e.currentTarget).attr('data-cid');
-		$.ajax({
-			type: 'POST',
-			url: Utils.getKumbiaURL($Kumbia.controller + '/editar'),
-			data: {
-				tipo: tipo,
-			},
-		})
-			.done(function (response) {
-				$.each(response, function (key, value) {
-					$('#' + key.toString()).val(value);
-				});
-				$('#tipo').attr('disabled', 'true');
-				document.getElementById('btCaptureModal').click();
-			})
-			.fail(function (jqXHR, textStatus) {
-				Messages.display(jqXHR.statusText, 'error');
-			});
-	});
+// Inicialización de la aplicación
+window.App = $App;
 
-	$(document).on('click', "[data-toggle='guardar']", (e) => {
-		e.preventDefault();
-		if (!$('#form').valid()) return;
+$(() => {
+    // Inicialización
+    window.App.initialize();
+    aplicarFiltro();
+    initValidators();
 
-		$('#form :input').each(function (elem) {
-			$(this).removeAttr('disabled');
-		});
+    // Eventos de validación
+    $(document).on('blur', '#tipo', function() {
+        if ($(this).val().trim() === '') return;
+        validePk('#tipo');
+    });
 
-		$.ajax({
-			type: 'POST',
-			url: Utils.getKumbiaURL($Kumbia.controller + '/guardar'),
-			data: $('#form').serialize(),
-		})
-			.done(function (response) {
-				if (response['flag'] == true) {
-					buscar();
-					Messages.display(response['msg'], 'success');
-					$('#capture-modal').modal('hide');
-				} else {
-					Messages.display(response['msg'], 'error');
-				}
-			})
-			.fail(function (jqXHR, textStatus) {
-				Messages.display(jqXHR.statusText, 'error');
-			});
-	});
+    $(document).on('blur', '#campo_28', function() {
+        validarClaveUnica('campo_28');
+    });
 
-	$(document).on('click', "[data-toggle='borrar']", (e) => {
-		e.preventDefault();
-		const tipo = $(e.currentTarget).attr('data-cid');
-		Swal.fire({
-			title: 'Esta seguro de borrar?',
-			text: '',
-			type: 'warning',
-			showCancelButton: true,
-			confirmButtonClass: 'btn btn-success btn-fill',
-			cancelButtonClass: 'btn btn-danger btn-fill',
-			confirmButtonText: 'SI',
-			cancelButtonText: 'NO',
-		}).then((result) => {
-			if (result.value) {
-				$.ajax({
-					type: 'POST',
-					url: Utils.getKumbiaURL($Kumbia.controller + '/borrar'),
-					data: {
-						tipo: tipo,
-					},
-				})
-					.done(function (transport) {
-						var response = transport;
-						if (response['flag'] == true) {
-							buscar();
-							Messages.display(response['msg'], 'success');
-						} else {
-							Messages.display(response['msg'], 'error');
-						}
-					})
-					.fail(function (jqXHR, textStatus) {
-						Messages.display(jqXHR.statusText, 'error');
-					});
-			}
-		});
-	});
+    // Limpiar formulario al cerrar el modal
+    $('#captureModalCampo').on('hide.bs.modal', function () {
+        const $form = $('#form_campo');
+        $form[0].reset();
+        
+        if (validator_campo) {
+            validator_campo.resetForm();
+            $('.select2-selection', $form)
+                .removeClass(validator_campo.settings.errorClass)
+                .removeClass(validator_campo.settings.validClass);
+        }
+    });
 
-	$(document).on('click', "[data-toggle='nuevo']", (e) => {
-		e.preventDefault();
-		$('#form :input').each(function (elem) {
-			$(this).val('');
-			$(this).removeAttr('disabled');
-		});
-		actualizar_select();
-		document.getElementById('btCaptureModal').click();
-	});
+    // Editar
+    $(document).on('click', "[data-toggle='editar']", function () {
+        const tipo = $(this).data('tipo');
+        const campo = $(this).data('campo');
 
-	$(document).on('click', "[data-toggle='reporte']", (e) => {
-		e.preventDefault();
-		const tipo = $(e.currentTarget).attr('data-type');
-		window.location.href = Utils.getKumbiaURL($Kumbia.controller + '/reporte/' + tipo);
-	});
+        if (!tipo) return;
 
-	$(document).on('click', "[data-toggle='filtrar']", (e) => {
-		e.preventDefault();
-		const Modal = new bootstrap.Modal(document.getElementById('filtrar-modal'), {});
-		Modal.show();
-	});
+        window.App.trigger('syncro', {
+            url: window.App.url(`${window.ServerController}/editar`),
+            data: { tipo, campo },
+            callback: (response) => {
+                if (response) {
+                    $('#tipo_edit').val(response.tipo || '');
+                    $('#campo_28_edit').val(response.campo || '');
+                    $('#detalle_28_edit').val(response.detalle || '');
+                    $('#orden_28_edit').val(response.orden || '');
 
-	$(document).on('click', "[data-toggle='campo-view']", (e) => {
-		e.preventDefault();
-		const tipo = $(e.currentTarget).attr('data-cid');
-		tipo_global = tipo;
-		$.ajax({
-			type: 'POST',
-			url: Utils.getKumbiaURL($Kumbia.controller + '/campo_view'),
-			data: {
-				tipo: tipo,
-			},
-		})
-			.done(function (response) {
-				$('#result_campos').html(response);
-				document.getElementById('btModalCapturarCampo').click();
+                    // Mostrar el modal de edición
+                    const modal = new bootstrap.Modal(document.getElementById('editModal'));
+                    modal.show();
+                } else {
+                    Messages.display('No se pudieron cargar los datos', 'error');
+                }
+            },
+            error: (xhr) => {
+                Messages.display('Error al cargar los datos: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
+            }
+        });
+    });
 
-				$('#form_campo :input').each(function (elem) {
-					if (this.type !== 'button') {
-						$(this).val('');
-						$(this).removeAttr('disabled');
-					}
-				});
-			})
-			.fail(function (jqXHR, textStatus) {
-				alert('Request failed: ' + textStatus);
-			});
-	});
-
-	$(document).on('click', "[data-toggle='campo-guardar']", (e) => {
-		e.preventDefault();
-		if (!validator_campo.valid()) return;
-
-		$.ajax({
-			type: 'POST',
-			url: Utils.getKumbiaURL($Kumbia.controller + '/guardarCampo'),
-			data: {
-				tipo: tipo_global,
-				campo: $('#campo_28').val(),
-				detalle: $('#detalle_28').val(),
-				orden: $('#orden_28').val(),
-			},
-		})
-			.done(function (transport) {
-				var response = transport;
-				if (response['flag'] == true) {
-					Messages.display(response['msg'], 'success');
-					$.ajax({
-						type: 'POST',
-						url: Utils.getKumbiaURL($Kumbia.controller + '/campo_view'),
-						data: {
-							tipo: tipo_global,
-						},
-					})
-						.done(function (response) {
-							$('#result_campos').html(response);
-							document.getElementById('btModalCapturarCampo').click();
-
-							$('#form_campo :input').each(function (elem) {
-								if (this.type !== 'button') {
-									$(this).val('');
-									$(this).removeAttr('disabled');
-								}
-							});
-						})
-						.fail(function (jqXHR, textStatus) {
-							alert('Request failed: ' + textStatus);
-						});
-				} else {
-					Messages.display(response['msg'], 'error');
-				}
-			})
-			.fail(function (jqXHR, textStatus) {
-				alert('Request failed: ' + textStatus);
-			});
-	});
-
-	$(document).on('click', "[data-toggle='campo-borrar']", (e) => {
-		e.preventDefault();
-		const tipo = $(e.currentTarget).attr('data-tipo');
-		const campo = $(e.currentTarget).attr('data-campo');
-		$.ajax({
-			type: 'POST',
-			url: Utils.getKumbiaURL($Kumbia.controller + '/borrarCampo'),
-			data: {
-				tipo: tipo,
-				campo: campo,
-			},
-		})
-			.done(function (response) {
-				if (response['flag'] == true) {
-					Messages.display(response['msg'], 'success');
-					$.ajax({
-						type: 'POST',
-						url: Utils.getKumbiaURL($Kumbia.controller + '/campo_view'),
-						data: {
-							tipo: tipo_global,
-						},
-					})
-						.done(function (response) {
-							$('#result_campos').html(response);
-							document.getElementById('btModalCapturarCampo').click();
-
-							$('#form_campo :input').each(function (elem) {
-								if (this.type !== 'button') {
-									$(this).val('');
-									$(this).removeAttr('disabled');
-								}
-							});
-						})
-						.fail(function (jqXHR, textStatus) {
-							alert('Request failed: ' + textStatus);
-						});
-				} else {
-					Messages.display(response['msg'], 'error');
-				}
-			})
-			.fail(function (jqXHR, textStatus) {
-				alert('Request failed: ' + textStatus);
-			});
-	});
-
-	$(document).on('click', "[data-toggle='campo-editar']", (e) => {
-		const tipo = $(e.currentTarget).attr('data-tipo');
-		const campo = $(e.currentTarget).attr('data-campo');
-		$.ajax({
-			type: 'POST',
-			url: Utils.getKumbiaURL($Kumbia.controller + '/editarCampo'),
-			data: {
-				tipo: tipo,
-				campo: campo,
-			},
-		})
-			.done(function (response) {
-				$('#campo_28').val(response.campo);
-				$('#detalle_28').val(response.detalle);
-				$('#orden_28').val(response.orden);
-				$('#campo_28').attr('disabled', 'true');
-			})
-			.fail(function (jqXHR, textStatus) {
-				Messages.display(jqXHR.statusText, 'error');
-			});
-	});
-
-	$(document).on('click', "[data-toggle='page-buscar']", (e) => {
-		e.preventDefault();
-		buscar($(e.currentTarget));
-	});
+    // Buscar
+    $(document).on('click', "[data-toggle='page-buscar']", function (e) {
+        e.preventDefault();
+        buscar($(e.currentTarget));
+    });
 });

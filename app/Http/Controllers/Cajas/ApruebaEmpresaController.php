@@ -23,7 +23,7 @@ use App\Services\Utils\NotifyEmailServices;
 use App\Library\DbException;
 use App\Models\Mercurio10;
 use App\Services\Aprueba\ApruebaSolicitud;
-use App\Services\Request as ServicesRequest;
+use App\Services\Srequest;
 use App\Services\Utils\CalculatorDias;
 use Illuminate\Support\Facades\View;
 use App\Services\Utils\Comman;
@@ -64,7 +64,7 @@ class ApruebaEmpresaController extends ApplicationController
         $usuario = session()->get('user');
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
-        $pagination = new Pagination(new Request([
+        $pagination = new Pagination(new Srequest([
             'query' => $query_str,
             'estado' => $estado,
             'cantidadPaginas' => $cantidad_pagina
@@ -95,11 +95,13 @@ class ApruebaEmpresaController extends ApplicationController
             );
 
             $empresaServices = new EmpresaServices();
-            $out = $empresaServices->findByUserAndEstado(new ServicesRequest(array(
-                'usuario' => session()->get('user'),
-                'estado' => $estado,
-                'filtro' => $filtro
-            )));
+            $out = $empresaServices->findByUserAndEstado(
+                new Srequest([
+                    'usuario' => session()->get('user'),
+                    'estado' => $estado,
+                    'filtro' => $filtro
+                ])
+            );
 
             $response = array(
                 'success' => true,

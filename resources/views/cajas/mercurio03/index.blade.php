@@ -6,17 +6,31 @@
 @endpush
 
 @section('content')
-@php echo Tag::filtro($campo_filtro); @endphp
+    @include('cajas/templates/tmp_filtro', [
+        'campo_filtro' => $campo_filtro
+    ])
 
-@php echo Tag::ModalGeneric(
-    $title,
-    View::render("mercurio03/tmp/form")
-) @endphp
-
-<div id='consulta' class='table-responsive'></div>
-<div id='paginate' class='card-footer py-4'></div>
+    <div class="card border-0 m-2">
+        <div class="card-header">
+            <h4 class="font-weight-bold">{{ $title }}</h4>
+        </div>
+        <div id='consulta' class='table-responsive'></div>
+        <div id='paginate' class='card-footer py-4'></div>
+    </div>
 @endsection
 
-@section('scripts')
-<script src="{{ asset('Cajas/build/Firmas.js') }}"></script>
+@push('scripts')
+    @include("partials.modal_generic", [
+        "titulo" => 'Configuración básica',
+        "contenido" => '',
+        "evento" => 'data-toggle="guardar"',
+        "btnShowModal" => 'btCaptureModal',
+        "idModal" => 'captureModal']
+    )
+
+    <script>
+        window.ServerController = 'mercurio03';
+    </script>
+
+    <script src="{{ asset('cajas/build/Firmas.js') }}"></script>
 @endpush

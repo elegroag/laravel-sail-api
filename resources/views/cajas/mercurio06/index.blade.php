@@ -1,26 +1,45 @@
-@php
-use App\Services\Tag;
-echo Tag::filtro($campo_filtro);
-@endphp
+@extends('layouts.cajas')
 
-<div id='consulta' class='table-responsive'></div>
-<div id='paginate' class='card-footer py-4'></div>
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.css') }}" />
+@endpush
 
-<!-- Modal Captura -->
-@php echo Tag::ModalGeneric(
-    $title,
-    View::render(
-        "mercurio06/tmp/form"
+@section('content')
+    @include('cajas/templates/tmp_filtro', [
+        'campo_filtro' => $campo_filtro
+    ])
+
+    <div class="card border-0 m-2">
+        <div class="card-header">
+            <h4 class="font-weight-bold">{{ $title }}</h4>
+        </div>
+        <div id='consulta' class='table-responsive'></div>
+        <div id='paginate' class='card-footer py-4'></div>
+    </div>
+@endsection
+
+@push('scripts')
+    @include("partials.modal_generic", [
+        "titulo" => $title,
+        "contenido" => '',
+        "evento" => 'data-toggle="guardar"',
+        "btnShowModal" => 'btGenericoModal',
+        "idModal" => 'genericoModal']
     )
-); @endphp
 
-<!-- Modal Captura -->
-@php echo Tag::ModalCapture(
-    array(
-        'name' => 'ModalCapturarCampo',
-        'titulo' => 'Capturar campo',
-        'contenido' => View::render("mercurio06/tmp/capture_campo")
+    @include("partials.modal_generic", [
+        "titulo" => 'Configuración básica',
+        "contenido" => '',
+        "evento" => 'data-toggle="guardar"',
+        "btnShowModal" => 'btCaptureModal',
+        "idModal" => 'captureModal']
     )
-); @endphp
 
-<?= Tag::javascriptInclude('Cajas/tipoacceso/build.tipoacceso'); ?>
+    <script>
+        window.ServerController = 'mercurio06';
+    </script>
+
+    <script src="{{ asset('cajas/build/TipoAcceso.js') }}"></script>
+    @endpush
+

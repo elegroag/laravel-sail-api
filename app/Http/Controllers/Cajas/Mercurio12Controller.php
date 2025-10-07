@@ -6,10 +6,9 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use App\Models\Mercurio12;
-use App\Services\Tag;
 use App\Services\Utils\GeneralService;
+use App\Services\Utils\Paginate;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class Mercurio12Controller extends ApplicationController
 {
@@ -25,8 +24,7 @@ class Mercurio12Controller extends ApplicationController
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
-
-        $this->cantidad_pagina = $this->numpaginate;
+        $this->cantidad_pagina = $this->numpaginate ?? 10;
     }
 
     public function showTabla($paginate)
@@ -59,14 +57,17 @@ class Mercurio12Controller extends ApplicationController
         return $html;
     }
 
-    public function aplicarFiltroAction()
+    public function aplicarFiltroAction(Request $request)
     {
-        #return $this->buscarAction();
+        $consultasOldServices = new GeneralService();
+        $this->query = $consultasOldServices->converQuery();
+        return $this->buscarAction($request);
     }
 
-    public function changeCantidadPaginaAction()
+    public function changeCantidadPaginaAction(Request $request)
     {
-        #return $this->buscarAction();
+        $this->cantidad_pagina = $request->input("numero");
+        return $this->buscarAction($request);
     }
 
     public function indexAction()
@@ -75,31 +76,27 @@ class Mercurio12Controller extends ApplicationController
             "coddoc" => "Codigo",
             "detalle" => "Detalle",
         );
-        $this->setParamToView("campo_filtro", $campo_field);
-        $help = "Esta opcion permite manejar los ";
-        $this->setParamToView("help", $help);
-        $this->setParamToView("title", "Documentos");
-        $this->setParamToView("buttons", array("N", "F", "R"));
-        #Tag::setDocumentTitle('Motivos Documentos');
+
+        return view('cajas.mercurio12.index', [
+            'title' => "Documentos",
+            'campo_filtro' => $campo_field
+        ]);
     }
 
 
     public function buscarAction(Request $request)
     {
-        $this->setResponse("ajax");
+        $pagina = ($request->input('pagina') == "") ? 1 : $request->input('pagina');
+
+        $paginate = Paginate::execute(
+            Mercurio12::whereRaw("{$this->query}")->get(),
+            $pagina,
+            $this->cantidad_pagina
+        );
+
+        $html = $this->showTabla($paginate);
         $consultasOldServices = new GeneralService();
-        $this->query = $consultasOldServices->converQuery();
-
-        $pagina = ($request->input('pagina')) ? $request->input('pagina') : 1;
-        $this->cantidad_pagina = ($request->input("numero")) ? $request->input("numero") : 10;
-
-        if ($pagina == "") $pagina = 1;
-
-        $paginate = Tag::paginate($this->Mercurio12->find("$this->query"), $pagina, $this->cantidad_pagina);
-        $html = self::showTabla($paginate);
-
-        $consultasOldServices = new GeneralService();
-        $html_paginate = $consultasOldServices->showPaginate($paginate, $event = 'toggle');
+        $html_paginate = $consultasOldServices->showPaginate($paginate);
 
         $response['consulta'] = $html;
         $response['paginate'] = $html_paginate;
@@ -111,34 +108,31 @@ class Mercurio12Controller extends ApplicationController
         try {
             $this->setResponse("ajax");
             $coddoc = $request->input('coddoc');
-            $mercurio12 = $this->Mercurio12->findFirst("coddoc = '$coddoc'");
-            if ($mercurio12 == false) $mercurio12 = new Mercurio12();
-
-            return $this->renderObject($mercurio12->getArray(), false);
+            $mercurio12 = Mercurio12::where('coddoc', $coddoc)->first();
+            if ($mercurio12 == false) {
+                $mercurio12 = new Mercurio12();
+            }
+            return $this->renderObject($mercurio12->toArray(), false);
         } catch (DebugException $e) {
-
-            $this->db->rollback();
+            $response = parent::errorFunc("Error al obtener el registro");
+            return $this->renderObject($response, false);
         }
     }
 
     public function borrarAction(Request $request)
     {
         try {
-            try {
-                $this->setResponse("ajax");
-                $coddoc = $request->input('coddoc');
-                $modelos = array("Mercurio12");
+            $this->setResponse("ajax");
+            $coddoc = $request->input('coddoc');
 
-                $response = $this->db->begin();
-                $this->Mercurio12->deleteAll("coddoc = '$coddoc'");
-                $this->db->commit();
-                $response = parent::successFunc("Borrado Con Exito");
-                return $this->renderObject($response, false);
-            } catch (DebugException $e) {
-                parent::setLogger($e->getMessage());
-                $this->db->rollback();
-            }
+            $this->db->begin();
+            Mercurio12::where('coddoc', $coddoc)->delete();
+            $this->db->commit();
+
+            $response = parent::successFunc("Borrado Con Exito");
+            return $this->renderObject($response, false);
         } catch (DebugException $e) {
+            $this->db->rollback();
             $response = parent::errorFunc("No se puede Borrar el Registro");
             return $this->renderObject($response, false);
         }
@@ -147,25 +141,32 @@ class Mercurio12Controller extends ApplicationController
     public function guardarAction(Request $request)
     {
         try {
-
             $this->setResponse("ajax");
             $coddoc = $request->input('coddoc');
             $detalle = $request->input('detalle');
 
-            $response = $this->db->begin();
-            $mercurio12 = new Mercurio12();
+            $this->db->begin();
+            $mercurio12 = Mercurio12::where('coddoc', $coddoc)->first();
 
-            $mercurio12->setCoddoc($coddoc);
+            if (!$mercurio12) {
+                $mercurio12 = new Mercurio12();
+                $mercurio12->setCoddoc($coddoc);
+            }
+
             $mercurio12->setDetalle($detalle);
+
             if (!$mercurio12->save()) {
                 parent::setLogger($mercurio12->getMessages());
                 $this->db->rollback();
+                throw new DebugException("Error al guardar el registro");
             }
+
             $this->db->commit();
             $response = parent::successFunc("Creacion Con Exito");
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $response = parent::errorFunc("No se puede guardar/editar el Registro");
+            $this->db->rollback();
+            $response = parent::errorFunc("No se puede guardar/editar el Registro: " . $e->getMessage());
             return $this->renderObject($response, false);
         }
     }
@@ -176,7 +177,7 @@ class Mercurio12Controller extends ApplicationController
             $this->setResponse("ajax");
             $coddoc = $request->input('coddoc');
             $response = parent::successFunc("");
-            $l = $this->Mercurio12->count("*", "conditions: coddoc = '$coddoc'");
+            $l = Mercurio12::where('coddoc', $coddoc)->count();
             if ($l > 0) {
                 $response = parent::errorFunc("El Registro ya se encuentra Digitado");
             }
