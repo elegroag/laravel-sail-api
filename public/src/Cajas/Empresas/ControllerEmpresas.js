@@ -1,4 +1,3 @@
-import { $App } from '@/App';
 import { ReportesController } from '@/Cajas/ReportesController';
 import { Controller } from '@/Common/Controller';
 import loading from '@/Componentes/Views/Loading';
@@ -25,7 +24,7 @@ class ControllerEmpresas extends Controller {
 
     infoRequest(id = 0) {
         const app = this.startController(EmpresaInformation);
-        $App.trigger('syncro', {
+        this.App.trigger('syncro', {
             url: 'infor',
             data: {
                 id,
@@ -49,11 +48,11 @@ class ControllerEmpresas extends Controller {
 
     aportesRequest(id) {
         const app = this.startController(EmpresaAportes);
-        const url = $App.kumbiaURL('aprobacionemp/aportes/' + id);
-        $App.trigger('syncro', {
+        const url = this.App.url('aprobacionemp/aportes/' + id);
+        this.App.trigger('syncro', {
             url: url,
             data: {
-                id: id,
+                id: id
             },
             callback: (response) => {
                 loading.hide();
@@ -62,19 +61,19 @@ class ControllerEmpresas extends Controller {
                     const solicitud = new EmpresaModel(response.solicitud);
                     app.aportesRequest(solicitud, aportes);
                 } else {
-                    $App.trigger('alert:error', { message: 'No se pudo cargar la solicitud' });
-                    $App.router.navigate('list', { trigger: true });
+                    this.App.trigger('alert:error', { message: 'No se pudo cargar la solicitud' });
+                    this.App.router.navigate('list', { trigger: true });
                 }
-            },
+            }
         });
     }
 
     editarRequest(id) {
         const app = this.startController(EmpresaEditar);
-        $App.trigger('syncro', {
+        this.App.trigger('syncro', {
             url: 'infor',
             data: {
-                id: id,
+                id: id
             },
             callback: (response) => {
                 if (response) {
@@ -87,7 +86,7 @@ class ControllerEmpresas extends Controller {
                     };
                     app.editarRequest(solicitud, collection);
                 }
-            },
+            }
         });
     }
 

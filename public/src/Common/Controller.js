@@ -7,7 +7,7 @@ export class Controller {
 	constructor(options) {
 		this.currentController = undefined;
 		this.region = options.region;
-		this.App = options.App;
+		this.App = options.App || window.App;
 	}
 
 	startController(Controller) {

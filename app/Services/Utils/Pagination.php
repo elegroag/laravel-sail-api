@@ -2,6 +2,8 @@
 
 namespace App\Services\Utils;
 
+use App\Services\Srequest;
+
 class Pagination
 {
     public $cantidadPaginas = 0;
@@ -10,7 +12,15 @@ class Pagination
     public $estado = 'P';
     public $filters = false;
 
-    public function __construct() {}
+    public function __construct(Srequest|null $argv = null)
+    {
+        if ($argv instanceof Srequest) {
+            $this->cantidadPaginas = $argv->getParam('cantidadPaginas');
+            $this->query = $argv->getParam('query');
+            $this->estado = $argv->getParam('estado');
+            if ($argv->getParam('pagina')) $this->pagina = $argv->getParam('pagina');
+        }
+    }
 
     /**
      * filter function
@@ -122,7 +132,7 @@ class Pagination
 
         $paginate = Paginate::execute($modelEntity, $this->pagina, $this->cantidadPaginas);
         $html = $service->showTabla($paginate);
-        $html_paginate = view('layouts/paginate', array(
+        $html_paginate = view('cajas/layouts/paginate', array(
             'paginate' => $paginate,
             'estado'   => $this->estado,
             'event'    => "buscar_pagina(this, '{$this->estado}')",

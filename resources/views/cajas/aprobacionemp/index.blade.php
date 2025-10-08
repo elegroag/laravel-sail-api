@@ -59,8 +59,9 @@
 </script>
 
 <script id='tmp_filtro' type="text/template">
-    @include('cajas/aprobacionemp/tmp/tmp_filtro')
+    @include('cajas/templates/tmp_filtro', ['campo_filtro' => $campo_filtro])
 </script>
+
 
 <script id='tmp_trayectoria' type='text/template'>
     <h4>Trayectoria</h4>
@@ -173,7 +174,7 @@
 	<div id='filtro'></div>
 </script>
 
-<script src="{{ asset('Cajas/build/Empresas.js') }}"></script>
+<script src="{{ asset('cajas/build/Empresas.js') }}"></script>
 @endpush
 
 @section('content')

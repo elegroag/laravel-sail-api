@@ -22,6 +22,7 @@ class ControllerValidation {
         _.extend(this, options);
         _.extend(this, Backbone.Events);
         this.validationService = ValidationService;
+        this.App = options.App || window.App;
     }
 
     initialize() {

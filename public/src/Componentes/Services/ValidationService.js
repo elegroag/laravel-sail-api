@@ -6,7 +6,7 @@
 class ValidationService {
 	static aplicarFiltro(app, transfer = { callback: void 0, cantidad: 10, tipo: '' }) {
 		const { callback = void 0, cantidad = 10, tipo = '' } = transfer;
-		const url = tipo !== '' ? 'aplicarFiltro/' + tipo : 'aplicarFiltro/P';
+		const url = tipo !== '' ? 'aplicar_filtro/' + tipo : 'aplicar_filtro/P';
 
 		app.trigger('syncro', {
 			url: url,
@@ -27,7 +27,7 @@ class ValidationService {
 		transfer = { callback: void 0, cantidad: 10, tipo: '', pagina: 1 },
 	) {
 		const { callback, cantidad, tipo, pagina } = transfer;
-		const url = 'changeCantidadPagina/' + tipo;
+		const url = 'change_cantidad_pagina/' + tipo;
 
 		app.trigger('syncro', {
 			url: url,

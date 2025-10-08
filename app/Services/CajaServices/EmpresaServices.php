@@ -15,7 +15,7 @@ use Exception;
 
 class EmpresaServices
 {
-    private $orderpag = 'ORDER BY fecini DESC';
+    private $orderpag = 'fecini';
     private $tipopc = 2;
     private $controller_name;
 
@@ -88,8 +88,7 @@ class EmpresaServices
 
     public function findPagination($query)
     {
-        $entity = new Mercurio30();
-        return $entity->find($query, $this->orderpag);
+        return Mercurio30::whereRaw($query)->orderBy($this->orderpag, 'DESC')->get();
     }
 
     public function getTemplateTable()

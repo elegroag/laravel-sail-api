@@ -59,16 +59,17 @@ class ApruebaEmpresaController extends ApplicationController
      */
     public function aplicarFiltroAction(Request $request, string $estado = 'P')
     {
-        $this->setResponse("ajax");
         $cantidad_pagina = $request->input("numero", 10);
-        $usuario = session()->get('user');
+        $usuario = $this->user['usuario'];
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
-        $pagination = new Pagination(new Srequest([
-            'query' => $query_str,
-            'estado' => $estado,
-            'cantidadPaginas' => $cantidad_pagina
-        ]));
+        $pagination = new Pagination(
+            new Srequest([
+                'query' => $query_str,
+                'estado' => $estado,
+                'cantidadPaginas' => $cantidad_pagina
+            ])
+        );
 
         $query = $pagination->filter(
             $request->input('campo'),
@@ -140,21 +141,23 @@ class ApruebaEmpresaController extends ApplicationController
      */
     public function indexAction()
     {
-        $this->setParamToView("hide_header", true);
-        $campo_field = array(
+        $campo_field = [
             "nit" => "NIT",
             "razsoc" => "Razon social",
             "codzon" => "Codigo zona",
             "documento" => "ID",
             "fecini" => "Fecha inicio",
             "cedrep" => "Cedula representante"
-        );
-        $this->setParamToView("campo_filtro", $campo_field);
-        $this->setParamToView("filters", get_flashdata_item("filter_params"));
-        $this->setParamToView("buttons", array("F"));
-        $this->setParamToView("title", "Aprueba Empresa");
-        $this->loadParametrosView();
-        $this->setParamToView("mercurio11", $this->Mercurio11->find());
+        ];
+
+        $params = $this->loadParametrosView();
+        return view('cajas.aprobacionemp.index', [
+            ...$params,
+            "campo_filtro" => $campo_field,
+            "filters" => get_flashdata_item("filter_params"),
+            "title" => "Aprueba Empresa",
+            "mercurio11" => Mercurio11::get()
+        ]);
     }
 
     /**
@@ -193,14 +196,13 @@ class ApruebaEmpresaController extends ApplicationController
      */
     public function buscarAction(Request $request, $estado = 'P')
     {
-        $this->setResponse("ajax");
         $pagina = $request->input('pagina', 1);
         $cantidad_pagina = $request->input("numero", 10);
         $usuario = session()->get('user');
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
-            new Request(
+            new Srequest(
                 array(
                     'query' => $query_str,
                     'estado' => $estado,
@@ -598,25 +600,27 @@ class ApruebaEmpresaController extends ApplicationController
             $_coddocrepleg[$ai] = $valor;
         }
 
-        $this->setParamToView("_tipdur", ParamsEmpresa::getTipoDuracion());
-        $this->setParamToView("_codind", ParamsEmpresa::getCodigoIndice());
-        $this->setParamToView("_contratista", ParamsEmpresa::getContratista());
-        $this->setParamToView("_todmes", ParamsEmpresa::getPagaMes());
-        $this->setParamToView("_forpre", ParamsEmpresa::getFormaPresentacion());
-        $this->setParamToView("_tipsoc", ParamsEmpresa::getTipoSociedades());
-        $this->setParamToView("_pymes", ParamsEmpresa::getPymes());
-        $this->setParamToView("_tipemp", ParamsEmpresa::getTipoEmpresa());
-        $this->setParamToView("_tipapo", ParamsEmpresa::getTipoAportante());
-        $this->setParamToView("_ofiafi", ParamsEmpresa::getOficina());
-        $this->setParamToView("_colegio", ParamsEmpresa::getColegio());
-        $this->setParamToView("_tipper", ParamsEmpresa::getTipoPersona());
-        $this->setParamToView("_codzon", ParamsEmpresa::getZonas());
-        $this->setParamToView("_calemp", ParamsEmpresa::getCalidadEmpresa());
-        $this->setParamToView("_codciu", ParamsEmpresa::getCiudades());
-        $this->setParamToView("_codact", ParamsEmpresa::getActividades());
-        $this->setParamToView("_coddoc", ParamsEmpresa::getTipoDocumentos());
-        $this->setParamToView("_ciupri", ParamsEmpresa::getCiudadesComerciales());
-        $this->setParamToView("_coddocrepleg", $_coddocrepleg);
+        return [
+            "_tipdur" => ParamsEmpresa::getTipoDuracion(),
+            "_codind" => ParamsEmpresa::getCodigoIndice(),
+            "_contratista" => ParamsEmpresa::getContratista(),
+            "_todmes" => ParamsEmpresa::getPagaMes(),
+            "_forpre" => ParamsEmpresa::getFormaPresentacion(),
+            "_tipsoc" => ParamsEmpresa::getTipoSociedades(),
+            "_pymes" => ParamsEmpresa::getPymes(),
+            "_tipemp" => ParamsEmpresa::getTipoEmpresa(),
+            "_tipapo" => ParamsEmpresa::getTipoAportante(),
+            "_ofiafi" => ParamsEmpresa::getOficina(),
+            "_colegio" => ParamsEmpresa::getColegio(),
+            "_tipper" => ParamsEmpresa::getTipoPersona(),
+            "_codzon" => ParamsEmpresa::getZonas(),
+            "_calemp" => ParamsEmpresa::getCalidadEmpresa(),
+            "_codciu" => ParamsEmpresa::getCiudades(),
+            "_codact" => ParamsEmpresa::getActividades(),
+            "_coddoc" => ParamsEmpresa::getTipoDocumentos(),
+            "_ciupri" => ParamsEmpresa::getCiudadesComerciales(),
+            "_coddocrepleg" => $_coddocrepleg
+        ];
     }
 
     public function editarViewAction($id)

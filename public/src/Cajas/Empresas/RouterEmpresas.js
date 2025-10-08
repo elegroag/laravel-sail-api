@@ -1,6 +1,5 @@
 import { ControllerEmpresas } from './ControllerEmpresas';
 import { ApruebaRouter } from '@/Componentes/Routers/ApruebaRouter';
-import { $App } from '@/App';
 
 class RouterEmpresas extends ApruebaRouter {
 	constructor(options) {
@@ -10,7 +9,7 @@ class RouterEmpresas extends ApruebaRouter {
 				'aportes/:id': 'aportesRute',
 				reportes: 'reportesRute',
 			},
-			controller: $App.startSubApplication(ControllerEmpresas),
+			controller: window.App.startSubApplication(ControllerEmpresas),
 		});
 	}
 }

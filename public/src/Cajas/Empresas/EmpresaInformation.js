@@ -2,7 +2,6 @@ import { ControllerValidation } from '@/Cajas/ControllerValidation';
 import { LayoutCajasView } from '@/Componentes/Views/LayoutCajasView';
 import { HeaderInfoView } from '@/Cajas/HeaderInfoView';
 import { HeaderCajasView } from '@/Cajas/HeaderCajasView';
-import { $App } from '@/App';
 import EmpresaAprobarModel from './models/EmpresaAprobarModel';
 import EmpresaInfoView from './views/EmpresaInfoView';
 
@@ -76,12 +75,12 @@ class EmpresaInformation extends ControllerValidation {
 
 	deshacerSolicitud() {
 		const id = this.solicitudModel.get('id');
-		$App.router.navigate('deshacer/' + id, { trigger: true, replace: true });
+		this.App.router.navigate('deshacer/' + id, { trigger: true, replace: true });
 	}
 
 	reaprobarSolicitud() {
 		const id = this.solicitudModel.get('id');
-		$App.router.navigate('reaprobar/' + id, { trigger: true, replace: true });
+		this.App.router.navigate('reaprobar/' + id, { trigger: true, replace: true });
 	}
 }
 

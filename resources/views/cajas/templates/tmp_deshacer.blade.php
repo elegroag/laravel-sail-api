@@ -8,17 +8,23 @@
 					<div class="col-6">
 						<div class="form-group mb-3">
 							<label class="form-label">Acción Comfaca En Línea:</label>
-							@php echo Tag::selectStatic("action", array(
-								'D' => 'Devolver',
-								'R' => 'Rechazar',
-								'I' => 'Inactivo',
-							), "use_dummy: true", "dummyValue: ", "class: form-select", "value: R"); @endphp
+							<select name="action" class="form-control">
+								<option value="">Seleccione un motivo</option>
+								<option value="D">Devolver</option>
+								<option value="R">Rechazar</option>
+								<option value="I">Inactivo</option>
+							</select>
 						</div>
 					</div>
 					<div class="col-6">
 						<div class="form-group mb-3">
 							<label class="form-label"> Motivo de la acción:</label>
-							@php echo Tag::select("codest", $mercurio11, "using: codest,detalle", "use_dummy: true", "dummyValue: ", "class: form-control"); @endphp
+							<select  name="codest" class="form-control">
+								<option value="">Seleccione un motivo</option>
+								@foreach ($mercurio11 as $codest)
+								<option value="{{ $codest->getCodest() }}">{{ $codest->getDetalle() }}</option>
+								@endforeach
+							</select>
 						</div>
 					</div>
 				</div>

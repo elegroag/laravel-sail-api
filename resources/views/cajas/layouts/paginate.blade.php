@@ -7,11 +7,9 @@
                 class='form-control form-control-sm d-sm-inline-block w-auto'
                 toggle-event='change'>
                 <option value=''>Seleccionar aquí</option>
-                <option <?= ($numero == 10) ? 'selected' : '' ?> value='10'>10</option>
-                <option <?= ($numero == 20) ? 'selected' : '' ?> value='20'>20</option>
-                <option <?= ($numero == 30) ? 'selected' : '' ?> value='30'>30</option>
-                <option <?= ($numero == 50) ? 'selected' : '' ?> value='50'>50</option>
-                <option <?= ($numero == 100) ? 'selected' : '' ?> value='100'>100</option>
+                @foreach([10, 20, 30, 50, 100] as $num)
+                    <option value='{{ $num }}'>{{ $num }}</option>
+                @endforeach
             </select> registros
         </label>
     </div>
@@ -19,38 +17,36 @@
         <nav aria-label='...'>
             <ul class='pagination justify-content-center justify-content-md-end mb-0'>
 
-                <li class='page-item' toggle-event='buscar' pagina='<?= $paginate->first ?>'>
+                <li class='page-item' toggle-event='buscar' pagina='{{ $paginate->first }}'>
                     <a class='page-link'>
                         <i class='fas fa-angle-double-left'></i>
                     </a>
                 </li>
 
-                <li class='page-item' toggle-event='buscar' pagina='<?= $paginate->before ?>'>
+                <li class='page-item' toggle-event='buscar' pagina='{{ $paginate->before }}'>
                     <a class='page-link'><i class='fas fa-angle-left'></i></a>
                 </li>
-                <?
-                for ($i = $paginate->current - 5; $i < $paginate->current; $i++) {
-                    if ($i < $paginate->first) continue;
-                ?>
+                @for ($i = $paginate->current - 5; $i < $paginate->current; $i++)
+                    @if ($i < $paginate->first) @continue
+                    @endif
                     <li class='page-item' toggle-event='buscar'>
-                        <a class='page-link'><?= $i ?></a>
+                        <a class='page-link'>{{ $i }}</a>
                     </li>
-                <? } ?>
+                @endfor
 
-                <?
-                for ($i = $paginate->current; $i <= ($paginate->current + 5); $i++) {
-                    $clase = '';
-                    if ($i == $paginate->current) $clase = "active";
-                    if ($i > $paginate->last) continue;
-                ?>
-                    <li class="page-item <?= $clase ?>" toggle-event='buscar'>
-                        <a class='page-link'><?= $i ?></a>
+                @for ($i = $paginate->current; $i <= ($paginate->current + 5); $i++)
+                    @if ($i > $paginate->last) @continue
+                    @endif
+                    <li class="page-item {{ ($i == $paginate->current) ? "active" : "" }}" toggle-event='buscar'>
+                        <a class='page-link'>{{ $i }}</a>
                     </li>
-                <? } ?>
-                <li class='page-item' toggle-event='buscar' pagina='<?= $paginate->next ?>'>
+                @endfor
+
+                <li class='page-item' toggle-event='buscar' pagina='{{ $paginate->next }}'>
                     <a class='page-link'><i class='fas fa-angle-right'></i></a>
                 </li>
-                <li class='page-item' toggle-event='buscar' pagina='<?= $paginate->last ?>'>
+
+                <li class='page-item' toggle-event='buscar' pagina='{{ $paginate->last }}'>
                     <a class='page-link'><i class='fas fa-angle-double-right'></i></a>
                 </li>
             </ul>
