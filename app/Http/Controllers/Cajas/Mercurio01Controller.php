@@ -92,8 +92,10 @@ class Mercurio01Controller extends ApplicationController
 
         $consultasOldServices = new GeneralService();
         $html_paginate = $consultasOldServices->showPaginate($paginate);
-        $response['consulta'] = $html;
-        $response['paginate'] = $html_paginate;
+        $response = [
+            'consulta' => $html,
+            'paginate' => $html_paginate
+        ];
         return $this->renderObject($response, false);
     }
 

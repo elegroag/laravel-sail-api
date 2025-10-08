@@ -11,4 +11,5 @@ Route::prefix('/cajas/usuario')->group(function () {
     Route::post('/change_cantidad_pagina/{tipo?}', [UsuarioController::class, 'changeCantidadPagina']);
     Route::post('/show_user', [UsuarioController::class, 'showUserAction']);
     Route::post('/params', [UsuarioController::class, 'paramsAction']);
+    Route::post('/borrar_usuario', [UsuarioController::class, 'borrarUsuarioAction']);
 });

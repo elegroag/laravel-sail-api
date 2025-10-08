@@ -288,12 +288,14 @@ const validePk = (el = '') => {
 };
 
 const EventsPagination = () => {
+	aplicarFiltro();
+
 	const modalFilter = new bootstrap.Modal(document.getElementById('filtrar-modal'));
 
 	$(document).on('click', "[data-toggle='reporte']", (e) => {
 		e.preventDefault();
 		const tipo = $(e.currentTarget).attr('data-type');
-		window.location.href = Utils.getKumbiaURL($Kumbia.controller + '/reporte/' + tipo);
+		window.location.href = window.App.url(window.ServerController + '/reporte/' + tipo);
 	});
 
 	$(document).on('click', "[data-toggle='filtrar']", (e) => {
@@ -310,7 +312,9 @@ const EventsPagination = () => {
 		changeCantidadPagina();
 	});
 
-	aplicarFiltro();
+	$(document).on('click', "[toggle-event='aplicar_filtro']", aplicarFiltro);
+    $(document).on('click', "[toggle-event='add_filtro']", addFiltro);
+    $(document).on('click', "[toggle-event='remove']", (e) => delFiltro($(e.currentTarget)));
 };
 
 export {

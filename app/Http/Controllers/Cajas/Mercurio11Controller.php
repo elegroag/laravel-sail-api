@@ -24,7 +24,6 @@ class Mercurio11Controller extends ApplicationController
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
-        $this->cantidad_pagina = $this->numpaginate ?? 10;
     }
 
     public function showTabla($paginate)
@@ -98,25 +97,32 @@ class Mercurio11Controller extends ApplicationController
         $consultasOldServices = new GeneralService();
         $html_paginate = $consultasOldServices->showPaginate($paginate);
 
-        $response['consulta'] = $html;
-        $response['paginate'] = $html_paginate;
+        $response = [
+            'consulta' => $html,
+            'paginate' => $html_paginate
+        ];
         return $this->renderObject($response, false);
     }
 
     public function editarAction(Request $request)
     {
         try {
-            $this->setResponse("ajax");
             $codest = $request->input('codest');
             $mercurio11 = Mercurio11::where('codest', $codest)->first();
             if ($mercurio11 == false) {
                 $mercurio11 = new Mercurio11();
             }
-            return $this->renderObject($mercurio11->toArray(), false);
+            $response = [
+                'success' => true,
+                'data' => $mercurio11->toArray()
+            ];
         } catch (DebugException $e) {
-            $response = parent::errorFunc("Error al obtener el registro");
-            return $this->renderObject($response, false);
+            $response = [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
         }
+        return $this->renderObject($response, false);
     }
 
     public function borrarAction(Request $request)

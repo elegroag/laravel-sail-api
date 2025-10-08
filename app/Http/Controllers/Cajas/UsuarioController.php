@@ -23,6 +23,7 @@ use App\Services\Utils\Pagination;
 use App\Services\Utils\SenderEmail;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 class UsuarioController extends ApplicationController
 {
@@ -375,71 +376,34 @@ class UsuarioController extends ApplicationController
             $tipo = $request->input('tipo');
             $coddoc = $request->input('coddoc');
 
-            $hasUser = (new Mercurio07)->getCount(
-                "*",
-                "conditions: documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'"
-            );
-            if ($hasUser > 0) {
-                $hasRequests = (new Mercurio30())->getCount(
-                    "*",
-                    "conditions: documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'"
-                );
-                if ($hasRequests > 0) {
-                    (new Mercurio30)->deleteAll(" documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'");
-                }
+            $user = Mercurio07::where('documento', $documento)
+                ->where('tipo', $tipo)
+                ->where('coddoc', $coddoc)
+                ->first();
 
-                $hasRequests = (new Mercurio31())->getCount(
-                    "*",
-                    "conditions: documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'"
-                );
-                if ($hasRequests > 0) {
-                    (new Mercurio31)->deleteAll(" documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'");
-                }
-
-                $hasRequests = (new Mercurio32())->getCount(
-                    "*",
-                    "conditions: documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'"
-                );
-                if ($hasRequests > 0) {
-                    (new Mercurio32)->deleteAll(" documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'");
-                }
-
-                $hasRequests = (new Mercurio36())->getCount(
-                    "*",
-                    "conditions: documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'"
-                );
-                if ($hasRequests > 0) {
-                    (new Mercurio36)->deleteAll(" documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'");
-                }
-
-                $hasRequests = (new Mercurio19())->count(
-                    "*",
-                    "conditions: documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'"
-                );
-                if ($hasRequests > 0) {
-                    (new Mercurio19)->deleteAll(" documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'");
-                }
-
-                $hasRequests = (new Mercurio20())->count(
-                    "*",
-                    "conditions: documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'"
-                );
-                if ($hasRequests > 0) {
-                    (new Mercurio20)->deleteAll(" documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'");
-                }
-
-                $hasRequests = (new Mercurio34())->count(
-                    "*",
-                    "conditions: documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'"
-                );
-                if ($hasRequests > 0) {
-                    (new Mercurio34)->deleteAll(" documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'");
-                }
-
-                (new Mercurio07)->deleteAll(" documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'", "limit: 1");
-            } else {
-                throw new DebugException("El usuario no existe.", 501);
+            if (!$user) {
+                throw new DebugException("El usuario no existe.", 404);
             }
+
+            DB::transaction(function () use ($documento, $tipo, $coddoc, $user) {
+                $whereClause = [
+                    'documento' => $documento,
+                    'tipo' => $tipo,
+                    'coddoc' => $coddoc,
+                ];
+
+                Mercurio30::where($whereClause)->delete();
+                Mercurio31::where($whereClause)->delete();
+                Mercurio32::where($whereClause)->delete();
+                Mercurio36::where($whereClause)->delete();
+                Mercurio19::where($whereClause)->delete();
+                Mercurio20::where($whereClause)->delete();
+                Mercurio34::where($whereClause)->delete();
+
+                // Finally delete the user
+                $user->delete();
+            });
+
 
             $response = array(
                 "success" => true,
@@ -449,6 +413,13 @@ class UsuarioController extends ApplicationController
             $response = array(
                 'success' => false,
                 'msj' => $err->getMessage()
+            );
+        } catch (\Exception $e) {
+            // Catch potential transaction failures
+            $response = array(
+                'success' => false,
+                'msj' => 'Ocurrió un error al eliminar el usuario.',
+                'error' => config('app.debug') ? $e->getMessage() : null,
             );
         }
         return $this->renderObject($response, false);

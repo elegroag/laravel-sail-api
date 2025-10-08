@@ -1,27 +1,30 @@
 import { $App } from '@/App';
 import { Messages } from '@/Utils';
-import { actualizar_select, buscar, EventsPagination, validePk } from '../Glob/Glob';
+import { buscar, EventsPagination, validePk } from '../Glob/Glob';
 
-let validator;
+window.App = $App;
+let validator = undefined;
+
+const validatorInit = () => {
+    validator = $('#form').validate({
+        rules: {
+			codest: { required: true },
+			detalle: { required: true }
+        },
+    });
+};
 
 $(() => {
-	$App.initialize();
+	window.App.initialize();
 	EventsPagination();
-	const modalCapture = new bootstrap.Modal(document.getElementById('capture-modal'));
-
-	validator = $('#form').validate({
-		rules: {
-			codest: { required: true },
-			detalle: { required: true },
-		},
-	});
+	
+	const modalCapture = new bootstrap.Modal(document.getElementById('captureModal'));
 
 	$(document).on('blur', '#codest', function () {
 		validePk('#codest');
 	});
 
-	$('#capture-modal').on('hide.bs.modal', function (e) {
-		validator.resetForm();
+	$('#captureModal').on('hide.bs.modal', function (e) {
 		$('.select2-selection')
 			.removeClass(validator.settings.errorClass)
 			.removeClass(validator.settings.validClass);
@@ -30,23 +33,28 @@ $(() => {
 	$(document).on('click', "[data-toggle='editar']", (e) => {
 		e.preventDefault();
 		const codest = $(e.currentTarget).attr('data-cid');
-		$.ajax({
-			type: 'POST',
-			url: $App.url('editar'),
+		window.App.trigger('syncro', {
+			url: window.App.url(window.ServerController + '/editar'),
 			data: {
 				codest: codest,
 			},
-		})
-			.done(function (response) {
-				$.each(response, function (key, value) {
-					$('#' + key.toString()).val(value);
-				});
-				$('#codest').attr('disabled', 'true');
-				modalCapture.show();
-			})
-			.fail(function (jqXHR, textStatus) {
-				Messages.display(jqXHR.statusText, 'error');
-			});
+			callback: function (response) {
+				if(response.success){
+
+					$.each(response, function (key, value) {
+						$('#' + key.toString()).val(value);
+					});
+					$('#codest').attr('disabled', 'true');
+					
+					const tpl = _.template(document.getElementById('tmp_form').innerHTML);
+                    $('#captureModalbody').html(tpl(response.data));
+					modalCapture.show();
+					validatorInit();
+				} else {
+					Messages.display(response.msg, 'error');
+				}
+			}
+		});
 	});
 
 	$(document).on('click', "[data-toggle='guardar']", (e) => {
@@ -57,23 +65,19 @@ $(() => {
 			$(this).removeAttr('disabled');
 		});
 
-		$.ajax({
-			type: 'POST',
-			url: $App.url('guardar'),
+		window.App.trigger('syncro', {
+			url: window.App.url(window.ServerController + '/guardar'),
 			data: $('#form').serialize(),
-		})
-			.done(function (response) {
-				if (response['flag'] == true) {
+			callback: function (response) {
+				if (response.success) {
 					buscar();
-					Messages.display(response['msg'], 'success');
+					Messages.display(response.msg, 'success');
 					modalCapture.hide();
 				} else {
-					Messages.display(response['msg'], 'error');
+					Messages.display(response.msg, 'error');
 				}
-			})
-			.fail(function (jqXHR, textStatus) {
-				Messages.display(jqXHR.statusText, 'error');
-			});
+			}
+		});
 	});
 
 	$(document).on('click', "[data-toggle='borrar']", (e) => {
@@ -90,25 +94,22 @@ $(() => {
 			cancelButtonText: 'NO',
 		}).then((result) => {
 			if (result.isConfirmed) {
-				$.ajax({
-					type: 'POST',
-					url: $App.url('borrar'),
+				window.App.trigger('syncro', {
+					url: window.App.url(window.ServerController + '/borrar'),
 					data: {
 						codest: codest,
 					},
-				})
-					.done(function (transport) {
-						var response = transport;
-						if (response['flag'] == true) {
-							buscar();
-							Messages.display(response['msg'], 'success');
+					callback: function (response) {
+						if (response) {
+							if(response.success){
+								buscar();
+								Messages.display(response.msg, 'success');
+							}
 						} else {
-							Messages.display(response['msg'], 'error');
+							Messages.display(response.msg, 'error');
 						}
-					})
-					.fail(function (jqXHR, textStatus) {
-						Messages.display(jqXHR.statusText, 'error');
-					});
+					},
+				});
 			}
 		});
 	});
@@ -119,7 +120,12 @@ $(() => {
 			$(this).val('');
 			$(this).removeAttr('disabled');
 		});
-		actualizar_select();
+		const tpl = _.template(document.getElementById('tmp_form').innerHTML);
+		$('#captureModalbody').html(tpl({
+			codest: '',
+			detalle: '',
+		}));
 		modalCapture.show();
+		validatorInit();
 	});
 });
