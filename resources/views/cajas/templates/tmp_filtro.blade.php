@@ -18,7 +18,7 @@
                     </div>
                     <div class="col-sm-6 col-md-3" style="padding:5px;">
                         <div class="form-group">
-                            <select class="form-control" style="padding:8px;height:35px">
+                            <select class="form-control" name="condi-filtro" id="condi-filtro" style="padding:8px;height:35px">
                                 <option value="como">Coincidencia</option>
                                 <option value="igual">Igual</option>
                                 <option value="mayor">Mayor</option>

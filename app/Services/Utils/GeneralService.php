@@ -12,6 +12,7 @@ use App\Models\Mercurio10;
 use App\Models\Mercurio20;
 use App\Services\Api\PortalMercurio;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class GeneralService
 {
@@ -34,11 +35,11 @@ class GeneralService
         return $data;
     }
 
-    public function converQuery()
+    public function converQuery(Request $request)
     {
-        $campo = $this->converserialize($_POST['campo'], 'mcampo');
-        $condi = $this->converserialize($_POST['condi'], 'mcondi');
-        $value = $this->converserialize($_POST['value'], 'mvalue');
+        $campo = $this->converserialize($request->input('campo'), 'mcampo');
+        $condi = $this->converserialize($request->input('condi'), 'mcondi');
+        $value = $this->converserialize($request->input('value'), 'mvalue');
         $query = array();
         for ($i = 0; $i < count($campo); $i++) {
             $mcampo = $campo[$i]['mcampo'];
