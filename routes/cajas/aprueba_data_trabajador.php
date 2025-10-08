@@ -4,9 +4,9 @@ use App\Http\Controllers\Cajas\ApruebaUpTrabajadorController;
 use App\Http\Middleware\CajasCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
-// Definir rutas para ApruebaUpTrabajadorController
-Route::middleware(['cajas.cookie.authenticated'])->group(function () {
-    Route::prefix('aproba-up-trabajador')->group(function () {
+
+Route::middleware([CajasCookieAuthenticated::class])->group(function () {
+    Route::prefix('/cajas/actualizadatostra')->group(function () {
         Route::get('/index', [ApruebaUpTrabajadorController::class, 'indexAction'])->name('aprueba_up_trabajador.index');
         Route::post('/aplicar_filtro/{estado?}', [ApruebaUpTrabajadorController::class, 'aplicarFiltroAction'])->name('aprueba_up_trabajador.aplicarFiltro');
         Route::post('/buscar/{estado?}', [ApruebaUpTrabajadorController::class, 'buscarAction'])->name('aprueba_up_trabajador.buscar');

@@ -5,25 +5,19 @@ namespace App\Http\Controllers\Cajas;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Carbon\Carbon;
 use App\Exceptions\DebugException;
 use App\Services\Utils\Pagination;
 use App\Services\CajaServices\UpDatosTrabajadorService;
 use App\Models\Mercurio47;
 use App\Models\Mercurio33;
-use App\Models\Mercurio10;
-use App\Models\Mercurio31;
-use App\Models\Mercurio01;
-use App\Models\Mercurio06;
-use App\Library\Auth;
 use App\Models\Gener42;
 use App\Services\Aprueba\ApruebaDatosTrabajador;
-use App\Library\DbException;
 use Illuminate\Support\Facades\View;
 use App\Services\Utils\SenderEmail;
 use App\Library\Collections\ParamsTrabajador;
-use App\Services\Request as ServicesRequest;
+use App\Models\Mercurio11;
+use App\Services\Srequest;
 use App\Services\Utils\Comman;
 
 class ApruebaUpTrabajadorController extends ApplicationController
@@ -51,11 +45,11 @@ class ApruebaUpTrabajadorController extends ApplicationController
     {
         $this->setResponse("ajax");
         $cantidad_pagina = $request->input("numero", 10);
-        $usuario = parent::getActUser();
+        $usuario = $this->user['usuario'];
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
-            new Request([
+            new Srequest([
                 "cantidadPaginas" => $cantidad_pagina,
                 "query" => $query_str,
                 "estado" => $estado
@@ -86,12 +80,16 @@ class ApruebaUpTrabajadorController extends ApplicationController
         $campo_field = array(
             "documento" => "Documento",
         );
-        $this->setParamToView("campo_filtro", $campo_field);
-        $this->setParamToView("title", "Aprobacion Datos Basicos");
-        $this->setParamToView("buttons", array("F"));
-        //Tag::setDocumentTitle('Aprobacion Datos Basicos');
-        $this->loadParametrosView();
-        $this->setParamToView("mercurio11", $this->Mercurio11->find());
+
+        $params = $this->loadParametrosView();
+        return view('cajas.actualizardatos.index', [
+            ...$params,
+            "campo_filtro" => $campo_field,
+            "filters" => get_flashdata_item("filter_params"),
+            "title" => "Aprueba actualización",
+            "buttons" => array("F"),
+            "mercurio11" => Mercurio11::get()
+        ]);
     }
 
     function loadParametrosView()
@@ -113,37 +111,39 @@ class ApruebaUpTrabajadorController extends ApplicationController
             if ($ai < 19001 && $ai >= 18001) $_codzon[$ai] = $valor;
         }
         $_tipsal = $this->Mercurio31->getTipsalArray();
-        $this->setParamToView("_ciunac", $_ciunac);
-        $this->setParamToView("_tipsal", $_tipsal);
-        $this->setParamToView("_codciu", $_codciu);
-        $this->setParamToView("_codzon", $_codzon);
-        $this->setParamToView("_coddoc", ParamsTrabajador::getTiposDocumentos());
-        $this->setParamToView("_sexo",  ParamsTrabajador::getSexos());
-        $this->setParamToView("_estciv", ParamsTrabajador::getEstadoCivil());
-        $this->setParamToView("_cabhog", ParamsTrabajador::getCabezaHogar());
-        $this->setParamToView("_captra",  ParamsTrabajador::getCapacidadTrabajar());
-        $this->setParamToView("_tipdis", ParamsTrabajador::getTipoDiscapacidad());
-        $this->setParamToView("_nivedu", ParamsTrabajador::getNivelEducativo());
-        $this->setParamToView("_rural", ParamsTrabajador::getRural());
-        $this->setParamToView("_tipcon", ParamsTrabajador::getTipoContrato());
-        $this->setParamToView("_vivienda", ParamsTrabajador::getVivienda());
-        $this->setParamToView("_tipafi", ParamsTrabajador::getTipoAfiliado());
-        $this->setParamToView("_trasin", ParamsTrabajador::getSindicalizado());
-        $this->setParamToView("_bancos", ParamsTrabajador::getBancos());
-        $this->setParamToView("_tipafi", ParamsTrabajador::getTipoAfiliado());
-        $this->setParamToView("_cargo", ParamsTrabajador::getOcupaciones());
-        $this->setParamToView("_orisex", ParamsTrabajador::getOrientacionSexual());
-        $this->setParamToView("_facvul", ParamsTrabajador::getVulnerabilidades());
-        $this->setParamToView("_peretn", ParamsTrabajador::getPertenenciaEtnicas());
-        $this->setParamToView("_vendedor", ParamsTrabajador::getVendedor());
-        $this->setParamToView("_empleador", ParamsTrabajador::getEmpleador());
-        $this->setParamToView("_tippag", ParamsTrabajador::getTipoPago());
-        $this->setParamToView("_tipcue", ParamsTrabajador::getTipoCuenta());
-        $this->setParamToView("_giro", ParamsTrabajador::getGiro());
-        $this->setParamToView("_codgir", ParamsTrabajador::getCodigoGiro());
-        $this->setParamToView("_bancos", ParamsTrabajador::getBancos());
-        $this->setParamToView("tipo",   'T');
-        $this->setParamToView("tipopc",  $this->tipopc);
+        return [
+            "_ciunac" => $_ciunac,
+            "_tipsal" => $_tipsal,
+            "_codciu" => $_codciu,
+            "_codzon" => $_codzon,
+            "_coddoc" => ParamsTrabajador::getTiposDocumentos(),
+            "_sexo" =>  ParamsTrabajador::getSexos(),
+            "_estciv" => ParamsTrabajador::getEstadoCivil(),
+            "_cabhog" => ParamsTrabajador::getCabezaHogar(),
+            "_captra" =>  ParamsTrabajador::getCapacidadTrabajar(),
+            "_tipdis" => ParamsTrabajador::getTipoDiscapacidad(),
+            "_nivedu" => ParamsTrabajador::getNivelEducativo(),
+            "_rural" => ParamsTrabajador::getRural(),
+            "_tipcon" => ParamsTrabajador::getTipoContrato(),
+            "_vivienda" => ParamsTrabajador::getVivienda(),
+            "_tipafi" => ParamsTrabajador::getTipoAfiliado(),
+            "_trasin" => ParamsTrabajador::getSindicalizado(),
+            "_bancos" => ParamsTrabajador::getBancos(),
+            "_tipafi" => ParamsTrabajador::getTipoAfiliado(),
+            "_cargo" => ParamsTrabajador::getOcupaciones(),
+            "_orisex" => ParamsTrabajador::getOrientacionSexual(),
+            "_facvul" => ParamsTrabajador::getVulnerabilidades(),
+            "_peretn" => ParamsTrabajador::getPertenenciaEtnicas(),
+            "_vendedor" => ParamsTrabajador::getVendedor(),
+            "_empleador" => ParamsTrabajador::getEmpleador(),
+            "_tippag" => ParamsTrabajador::getTipoPago(),
+            "_tipcue" => ParamsTrabajador::getTipoCuenta(),
+            "_giro" => ParamsTrabajador::getGiro(),
+            "_codgir" => ParamsTrabajador::getCodigoGiro(),
+            "_bancos" => ParamsTrabajador::getBancos(),
+            "tipo" =>   'T',
+            "tipopc" =>  $this->tipopc
+        ];
     }
 
     public function buscarAction(Request $request, $estado = 'P')
@@ -151,11 +151,11 @@ class ApruebaUpTrabajadorController extends ApplicationController
         $this->setResponse("ajax");
         $pagina = $request->input('pagina', 1);
         $cantidad_pagina = $request->input("numero", 10);
-        $usuario = parent::getActUser();
+        $usuario = $this->user['usuario'];
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
-            new Request([
+            new Srequest([
                 "cantidadPaginas" => $cantidad_pagina,
                 "pagina" => $pagina,
                 "query" => $query_str,
@@ -344,11 +344,13 @@ class ApruebaUpTrabajadorController extends ApplicationController
             $mercurio07 = $this->Mercurio07->findFirst("tipo='{$mercurio33->getTipo()}' and documento = '{$mercurio33->getDocumento()}'");
             $asunto = "Actualizacion de datos";
             $msj  = "Se rechazo la actualizacion de datos";
-            $senderEmail = new SenderEmail(new ServicesRequest([
-                "email_emisor" => $mercurio07->getEmail(),
-                "email_clave" => $mercurio07->getClave(),
-                "asunto" => $asunto,
-            ]));
+            $senderEmail = new SenderEmail(
+                new Srequest([
+                    "email_emisor" => $mercurio07->getEmail(),
+                    "email_clave" => $mercurio07->getClave(),
+                    "asunto" => $asunto,
+                ])
+            );
             $senderEmail->send($mercurio07->getEmail(), $msj);
 
             $this->db->commit();

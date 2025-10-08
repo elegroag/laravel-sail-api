@@ -16,9 +16,10 @@ use App\Models\Mercurio10;
 use App\Models\Mercurio33;
 use App\Models\Mercurio47;
 use App\Models\Gener42;
+use App\Models\Mercurio11;
 use App\Services\Aprueba\ApruebaSolicitud;
+use App\Services\Srequest;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Carbon\Carbon;
 
 class ApruebaUpEmpresaController extends ApplicationController
@@ -36,15 +37,15 @@ class ApruebaUpEmpresaController extends ApplicationController
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    public function aplicarFiltroAction(\Illuminate\Http\Request $request, string $estado = 'P')
+    public function aplicarFiltroAction(Request $request, string $estado = 'P')
     {
         $this->setResponse("ajax");
         $cantidad_pagina = $request->input("numero", 10);
-        $usuario = parent::getActUser();
+        $usuario = $this->user['usuario'];
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
-            new \Illuminate\Http\Request([
+            new Srequest([
                 "cantidadPaginas" => $cantidad_pagina,
                 "query" => $query_str,
                 "estado" => $estado
@@ -64,14 +65,13 @@ class ApruebaUpEmpresaController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    public function changeCantidadPaginaAction($estado = 'P')
+    public function changeCantidadPaginaAction(Request $request, string $estado = 'P')
     {
-        //$this->buscarAction($estado);
+        return $this->buscarAction($request, $estado);
     }
 
     public function indexAction()
     {
-        $this->setParamToView("hide_header", true);
         $campo_field = array(
             "nit" => "NIT",
             "priape" => "Primer apellido",
@@ -81,12 +81,16 @@ class ApruebaUpEmpresaController extends ApplicationController
             "cedrep" => "Cedula representante",
             "fecsol" => "Fecha solicitud",
         );
-        $this->setParamToView("campo_filtro", $campo_field);
-        $this->setParamToView("filters", get_flashdata_item("filter_params"));
-        $this->setParamToView("title", "Aprueba Actualización Datos Empleador");
-        $this->setParamToView("buttons", array("F"));
-        $this->loadParametrosView();
-        $this->setParamToView("mercurio11", $this->Mercurio11->find());
+
+        $params = $this->loadParametrosView();
+        return view('cajas.actualizardatos.index', [
+            ...$params,
+            "campo_filtro" => $campo_field,
+            "filters" => get_flashdata_item("filter_params"),
+            "title" => "Aprueba actualización",
+            "buttons" => array("F"),
+            "mercurio11" => Mercurio11::get()
+        ]);
     }
 
     public function opcionalAction($estado = 'P')
@@ -139,11 +143,11 @@ class ApruebaUpEmpresaController extends ApplicationController
         $this->setResponse("ajax");
         $pagina = $request->input('pagina', 1);
         $cantidad_pagina = $request->input("numero", 10);
-        $usuario = parent::getActUser();
+        $usuario = $this->user['usuario'];
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
-            new Request([
+            new Srequest([
                 "cantidadPaginas" => $cantidad_pagina,
                 "pagina" => $pagina,
                 "query" => $query_str,
@@ -379,25 +383,27 @@ class ApruebaUpEmpresaController extends ApplicationController
             $_coddocrepleg["{$data['codrua']}"] = $data['detdoc'];
         }
 
-        $this->setParamToView("_tipdur", $_tipdur);
-        $this->setParamToView("_codind", $_codind);
-        $this->setParamToView("_contratista", $_contratista);
-        $this->setParamToView("_todmes", $_todmes);
-        $this->setParamToView("_forpre", $_forpre);
-        $this->setParamToView("_tipsoc", $_tipsoc);
-        $this->setParamToView("_pymes", $_pymes);
-        $this->setParamToView("_tipemp", $_tipemp);
-        $this->setParamToView("_tipapo", $_tipapo);
-        $this->setParamToView("_ofiafi", $_ofiafi);
-        $this->setParamToView("_colegio", $_colegio);
-        $this->setParamToView("_tipper", $_tipper);
-        $this->setParamToView("_codzon", $_codzon);
-        $this->setParamToView("_calemp", $_calemp);
-        $this->setParamToView("_codciu", $_codciu);
-        $this->setParamToView("_codact", $_codact);
-        $this->setParamToView("_coddoc", $_coddoc);
-        $this->setParamToView("_ciupri", $_ciupri);
-        $this->setParamToView("_coddocrepleg", $_coddocrepleg);
+        return [
+            "_tipdur" => $_tipdur,
+            "_codind" => $_codind,
+            "_contratista" => $_contratista,
+            "_todmes" => $_todmes,
+            "_forpre" => $_forpre,
+            "_tipsoc" => $_tipsoc,
+            "_pymes" => $_pymes,
+            "_tipemp" => $_tipemp,
+            "_tipapo" => $_tipapo,
+            "_ofiafi" => $_ofiafi,
+            "_colegio" => $_colegio,
+            "_tipper" => $_tipper,
+            "_codzon" => $_codzon,
+            "_calemp" => $_calemp,
+            "_codciu" => $_codciu,
+            "_codact" => $_codact,
+            "_coddoc" => $_coddoc,
+            "_ciupri" => $_ciupri,
+            "_coddocrepleg" => $_coddocrepleg,
+        ];
     }
 
     public function loadDisplay($mercurio33)
