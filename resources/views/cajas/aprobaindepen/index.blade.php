@@ -11,7 +11,7 @@
 
 @push('scripts')
 <script id='tmp_filtro' type="text/template">
-    @php echo Tag::filtro($campo_filtro, 'aplicar_filtro') @endphp
+    @include('cajas/templates/tmp_filtro', ['campo_filtro' => $campo_filtro])
 </script>
 
 <script id='tmp_list_header' type="text/template">
@@ -171,15 +171,15 @@
 	<div class="col-md-5" id='show_listas'></div>
 </script>
 
+<script src="{{ asset('cajas/build/Independientes.js') }}"></script>
+@endpush
+
+@section('content')
 <script id='tmp_table' type="text/template">
     <div id='consulta' class='table-responsive'></div>
 	<div id='paginate' class='card-footer py-4'></div>
 	<div id='filtro'></div>
 </script>
 
-<script src="{{ asset('Cajas/build/Independientes.js') }}"></script>
-@endpush
-
-@section('content')
 <div id='boneLayout'></div>
 @endsection

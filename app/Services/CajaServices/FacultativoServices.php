@@ -14,7 +14,7 @@ use Exception;
 
 class FacultativoServices
 {
-    private $orderpag = 'ORDER BY fecsol DESC';
+    private $orderpag = 'fecsol';
     private $tipopc = 10;
     private $tipsoc = '08';
     private $controller_name;
@@ -87,8 +87,7 @@ class FacultativoServices
 
     public function findPagination($query)
     {
-        $mercurio36 = new Mercurio36();
-        return $mercurio36->find($query, $this->orderpag);
+        return Mercurio36::whereRaw($query)->orderBy($this->orderpag, 'DESC')->get();
     }
 
     public function getTemplateTable()

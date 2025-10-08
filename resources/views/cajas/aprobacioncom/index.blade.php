@@ -7,7 +7,7 @@
 
 @push('scripts')
     <script id='tmp_filtro' type="text/template">
-        @php echo Tag::filtro($campo_filtro, 'aplicar_filtro') @endphp
+        @include('cajas/templates/tmp_filtro', ['campo_filtro' => $campo_filtro])
     </script>
 
     <script id='tmp_list_header' type="text/template">
@@ -54,7 +54,7 @@
         <div id='filtro'></div>
     </script>
 
-    <script src="{{ asset('Cajas/build/MadresComunitarias.js') }}"></script>
+    <script src="{{ asset('cajas/build/MadresComunitarias.js') }}"></script>
 @endpush
 
 @section('content')

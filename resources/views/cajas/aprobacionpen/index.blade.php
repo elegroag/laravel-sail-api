@@ -7,7 +7,7 @@
 
 @push('scripts')
 <script id='tmp_filtro' type="text/template">
-    @include('cajas/aprobacionpen/tmp/tmp_filtro')
+    @include('cajas/templates/tmp_filtro', ['campo_filtro' => $campo_filtro])
 </script>
 
 <script id='tmp_list_header' type="text/template">
@@ -170,7 +170,7 @@
     <div id='filtro'></div>
 </script>
 
-<script src="{{ asset('Cajas/pensionados/build.pensionados') }}"></script>
+<script src="{{ asset('cajas/build/Pensionados.js') }}"></script>
 @endpush
 
 @section('content')

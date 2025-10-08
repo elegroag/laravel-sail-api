@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Library\Collections;
 
 class ParamsIndependiente
@@ -31,6 +32,11 @@ class ParamsIndependiente
     static $estado_civil;
     static $nivel_educativo;
     static $tipo_afiliado;
+    static $tipo_pago;
+    static $bancos;
+    static $tipo_cuenta;
+    static $giro;
+    static $codigo_giro;
 
 
     public function setDatosCaptura($datos_captura)
@@ -202,5 +208,47 @@ class ParamsIndependiente
             self::$tipo_afiliado[$data['tipcot']] = $data['detalle'];
         }
         return self::$tipo_afiliado;
+    }
+
+    public static function getTipoPago()
+    {
+        foreach (self::$datos_captura['tipo_pago'] as $data) {
+            if ($data['estado'] == 'C') continue;
+            if ($data['estado'] == 'T') $data['detalle'] = 'PENDIENTE FORMA DE PAGO';
+            self::$tipo_pago[$data['estado']] = $data['detalle'];
+        }
+        return self::$tipo_pago;
+    }
+
+    public static function getGiro()
+    {
+        foreach (self::$datos_captura['giro'] as $data) {
+            self::$giro[$data['estado']] = $data['detalle'];
+        }
+        return self::$giro;
+    }
+
+    public static function getCodigoGiro()
+    {
+        foreach (self::$datos_captura['codigo_giro'] as $data) {
+            self::$codigo_giro[$data['codgir']] = $data['detalle'];
+        }
+        return self::$codigo_giro;
+    }
+
+    public static function getTipoCuenta()
+    {
+        foreach (self::$datos_captura['tipo_cuenta'] as $data) {
+            self::$tipo_cuenta[$data['estado']] = $data['detalle'];
+        }
+        return self::$tipo_cuenta;
+    }
+
+    public static function getBancos()
+    {
+        foreach (self::$datos_captura['bancos'] as $data) {
+            self::$bancos[$data['codban']] = $data['detalle'];
+        }
+        return self::$bancos;
     }
 }

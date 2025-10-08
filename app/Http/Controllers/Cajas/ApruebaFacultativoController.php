@@ -22,6 +22,7 @@ use App\Models\Gener42;
 use App\Services\Utils\NotifyEmailServices;
 use App\Library\DbException;
 use App\Services\Aprueba\ApruebaSolicitud;
+use App\Services\Srequest;
 use Illuminate\Support\Facades\View;
 use App\Services\Utils\Comman;
 use Exception;
@@ -70,10 +71,10 @@ class ApruebaFacultativoController extends ApplicationController
     {
         $this->setResponse("ajax");
         $cantidad_pagina = ($request->input("numero")) ? $request->input("numero") : 10;
-        $usuario = parent::getActUser();
+        $usuario = $this->user['usuario'];
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
         $pagination = new Pagination(
-            new Request(
+            new Srequest(
                 array(
                     "cantidadPaginas" => $cantidad_pagina,
                     "query" => $query_str,
@@ -99,9 +100,9 @@ class ApruebaFacultativoController extends ApplicationController
     }
 
 
-    public function changeCantidadPaginaAction($estado = 'P')
+    public function changeCantidadPaginaAction(Request $request, $estado = 'P')
     {
-        //$this->buscarAction($estado);
+        return $this->buscarAction($request, $estado);
     }
 
     public function indexAction()
@@ -115,12 +116,14 @@ class ApruebaFacultativoController extends ApplicationController
             "segnom" => "Segundo Nombre",
         );
 
-        $this->setParamToView("campo_filtro", $campo_field);
-        $this->setParamToView("filters", get_flashdata_item("filter_params"));
-        $this->setParamToView("title", "Aprueba Facultativo");
-        $this->setParamToView("buttons", array("F"));
-        $this->loadParametrosView();
-        $this->setParamToView("mercurio11", $this->Mercurio11->find());
+        $params = $this->loadParametrosView();
+        return view('cajas.aprobacionfac.index', [
+            ...$params,
+            "campo_filtro" => $campo_field,
+            "filters" => get_flashdata_item("filter_params"),
+            "title" => "Aprueba Facultativo",
+            "mercurio11" => Mercurio11::get()
+        ]);
     }
 
     public function buscarAction(Request $request, string $estado = 'P')
@@ -128,11 +131,11 @@ class ApruebaFacultativoController extends ApplicationController
         $this->setResponse("ajax");
         $pagina = $request->input('pagina', 1);
         $cantidad_pagina = $request->input("numero", 10);
-        $usuario = session()->get('user');
+        $usuario = $this->user['usuario'];
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
-            new Request([
+            new Srequest([
                 "cantidadPaginas" => $cantidad_pagina,
                 "pagina" => $pagina,
                 "query" => $query_str,
@@ -435,25 +438,27 @@ class ApruebaFacultativoController extends ApplicationController
             $_coddocrepleg[$ai] = $valor;
         }
 
-        $this->setParamToView("_tipdur", ParamsFacultativo::getTipoDuracion());
-        $this->setParamToView("_codind", ParamsFacultativo::getCodigoIndice());
-        $this->setParamToView("_todmes", ParamsFacultativo::getPagaMes());
-        $this->setParamToView("_forpre", ParamsFacultativo::getFormaPresentacion());
-        $this->setParamToView("_tipsoc", ParamsFacultativo::getTipoSociedades());
-        $this->setParamToView("_tipemp", ParamsFacultativo::getTipoEmpresa());
-        $this->setParamToView("_tipapo", ParamsFacultativo::getTipoAportante());
-        $this->setParamToView("_tipper", ParamsFacultativo::getTipoPersona());
-        $this->setParamToView("_codzon", ParamsFacultativo::getZonas());
-        $this->setParamToView("_calemp", ParamsFacultativo::getCalidadEmpresa());
-        $this->setParamToView("_codciu", ParamsFacultativo::getCiudades());
-        $this->setParamToView("_codact", ParamsFacultativo::getActividades());
-        $this->setParamToView("_coddoc", ParamsFacultativo::getTipoDocumentos());
-        $this->setParamToView("_tippag", ParamsFacultativo::getTipoPago());
-        $this->setParamToView("_bancos", ParamsFacultativo::getBancos());
-        $this->setParamToView("_tipcue", ParamsFacultativo::getTipoCuenta());
-        $this->setParamToView("_giro", ParamsFacultativo::getGiro());
-        $this->setParamToView("_codgir", ParamsFacultativo::getCodigoGiro());
-        $this->setParamToView("_coddocrepleg", $_coddocrepleg);
+        return [
+            "_tipdur" => ParamsFacultativo::getTipoDuracion(),
+            "_codind" => ParamsFacultativo::getCodigoIndice(),
+            "_todmes" => ParamsFacultativo::getPagaMes(),
+            "_forpre" => ParamsFacultativo::getFormaPresentacion(),
+            "_tipsoc" => ParamsFacultativo::getTipoSociedades(),
+            "_tipemp" => ParamsFacultativo::getTipoEmpresa(),
+            "_tipapo" => ParamsFacultativo::getTipoAportante(),
+            "_tipper" => ParamsFacultativo::getTipoPersona(),
+            "_codzon" => ParamsFacultativo::getZonas(),
+            "_calemp" => ParamsFacultativo::getCalidadEmpresa(),
+            "_codciu" => ParamsFacultativo::getCiudades(),
+            "_codact" => ParamsFacultativo::getActividades(),
+            "_coddoc" => ParamsFacultativo::getTipoDocumentos(),
+            "_tippag" => ParamsFacultativo::getTipoPago(),
+            "_bancos" => ParamsFacultativo::getBancos(),
+            "_tipcue" => ParamsFacultativo::getTipoCuenta(),
+            "_giro" => ParamsFacultativo::getGiro(),
+            "_codgir" => ParamsFacultativo::getCodigoGiro(),
+            "_coddocrepleg" => $_coddocrepleg,
+        ];
     }
 
     public function rechazarAction(Request $request)

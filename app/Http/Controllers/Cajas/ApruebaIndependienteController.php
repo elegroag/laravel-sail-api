@@ -12,8 +12,10 @@ use App\Services\Utils\Pagination;
 use App\Services\Utils\NotifyEmailServices;
 use App\Library\Collections\ParamsIndependiente;
 use App\Models\Gener42;
+use App\Models\Mercurio11;
 use App\Models\Mercurio41;
 use App\Services\Aprueba\ApruebaSolicitud;
+use App\Services\Srequest;
 use App\Services\Utils\CalculatorDias;
 use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
@@ -52,16 +54,14 @@ class ApruebaIndependienteController extends ApplicationController
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    public function aplicarFiltroAction($estado = 'P')
+    public function aplicarFiltroAction(Request $request, $estado = 'P')
     {
-        $this->setResponse("ajax");
-        $request = request();
         $cantidad_pagina = ($request->input("numero")) ? $request->input("numero") : 10;
-        $usuario = parent::getActUser();
+        $usuario = $this->user['usuario'];
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
-            new Request(
+            new Srequest(
                 array(
                     "cantidadPaginas" => $cantidad_pagina,
                     "query" => $query_str,
@@ -83,9 +83,9 @@ class ApruebaIndependienteController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function changeCantidadPaginaAction($estado = 'P')
+    public function changeCantidadPaginaAction(Request $request, $estado = 'P')
     {
-        $this->buscarAction($estado);
+        $this->buscarAction($request, $estado);
     }
 
     public function indexAction()
@@ -99,12 +99,14 @@ class ApruebaIndependienteController extends ApplicationController
             "fecsol" => "Fecha solicitud"
         );
 
-        $this->setParamToView("campo_filtro", $campo_field);
-        $this->setParamToView("filters", get_flashdata_item("filter_params"));
-        $this->setParamToView("mercurio11", $this->Mercurio11->find());
-        $this->setParamToView("title", "Aprueba Independientes");
-        $this->setParamToView("buttons", array("F"));
-        $this->loadParametrosView();
+        $params = $this->loadParametrosView();
+        return view('cajas.aprobaindepen.index', [
+            ...$params,
+            "campo_filtro" => $campo_field,
+            "filters" => get_flashdata_item("filter_params"),
+            "title" => "Aprueba Independientes",
+            "mercurio11" => Mercurio11::get()
+        ]);
     }
 
     public function opcionalAction($estado = 'P')
@@ -156,17 +158,15 @@ class ApruebaIndependienteController extends ApplicationController
         $this->setParamToView("pagina_con_estado", $estado);
     }
 
-    public function buscarAction($estado = 'P')
+    public function buscarAction(Request $request, $estado = 'P')
     {
-        $this->setResponse("ajax");
-        $request = request();
         $pagina = ($request->input('pagina')) ? $request->input('pagina') : 1;
         $cantidad_pagina = ($request->input("numero")) ? $request->input("numero") : 10;
-        $usuario = parent::getActUser();
+        $usuario = $this->user['usuario'];
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
-            new Request(
+            new Srequest(
                 array(
                     "cantidadPaginas" => $cantidad_pagina,
                     "pagina" => $pagina,
@@ -202,10 +202,8 @@ class ApruebaIndependienteController extends ApplicationController
      * devolverAction function
      * @return void
      */
-    public function devolverAction()
+    public function devolverAction(Request $request)
     {
-        $this->setResponse("ajax");
-        $request = request();
         $independienteServices = new IndependienteServices();
         $notifyEmailServices = new NotifyEmailServices();
         try {
@@ -551,30 +549,37 @@ class ApruebaIndependienteController extends ApplicationController
             if ($valor == 'TI' || $valor == 'RC') continue;
             $_coddocrepleg[$ai] = $valor;
         }
+        $_tippag = [
+            "T" => "PENDIENTE DEFINIR FORMA DE PAGO",
+            "A" => "ABONO A CUNETA DE BANCO",
+            "D" => "DAVIPLATA"
+        ];
 
-        $this->setParamToView("_tipdur", ParamsIndependiente::getTipoDuracion());
-        $this->setParamToView("_codind", ParamsIndependiente::getCodigoIndice());
-        $this->setParamToView("_contratista", array('estado' => 'N', 'detalle' => 'NO'));
-        $this->setParamToView("_todmes", ParamsIndependiente::getPagaMes());
-        $this->setParamToView("_forpre", ParamsIndependiente::getFormaPresentacion());
-        $this->setParamToView("_tipsoc", ParamsIndependiente::getTipoSociedades());
-        $this->setParamToView("_pymes",  array('estado' => 'N', 'detalle' => 'NO'));
-        $this->setParamToView("_tipemp", ParamsIndependiente::getTipoEmpresa());
-        $this->setParamToView("_tipapo", ParamsIndependiente::getTipoAportante());
-        $this->setParamToView("_ofiafi", array('estado' => '13', 'detalle' => '13'));
-        $this->setParamToView("_colegio", array('estado' => 'N', 'detalle' => 'NO'));
-        $this->setParamToView("_tipper", ParamsIndependiente::getTipoPersona());
-        $this->setParamToView("_codzon", ParamsIndependiente::getZonas());
-        $this->setParamToView("_calemp", ParamsIndependiente::getCalidadEmpresa());
-        $this->setParamToView("_codciu", ParamsIndependiente::getCiudades());
-        $this->setParamToView("_codact", ParamsIndependiente::getActividades());
-        $this->setParamToView("_coddoc", ParamsIndependiente::getTipoDocumentos());
-        /*   $this->setParamToView("_tippag", ParamsIndependiente::getTipoPago());
-        $this->setParamToView("_bancos", ParamsIndependiente::getBancos());
-        $this->setParamToView("_tipcue", ParamsIndependiente::getTipoCuenta());
-        $this->setParamToView("_giro", ParamsIndependiente::getGiro());
-        $this->setParamToView("_codgir", ParamsIndependiente::getCodigoGiro()); */
-        $this->setParamToView("_coddocrepleg", $_coddocrepleg);
+        return [
+            "_tipdur" => ParamsIndependiente::getTipoDuracion(),
+            "_codind" => ParamsIndependiente::getCodigoIndice(),
+            "_contratista" => array('estado' => 'N', 'detalle' => 'NO'),
+            "_todmes" => ParamsIndependiente::getPagaMes(),
+            "_forpre" => ParamsIndependiente::getFormaPresentacion(),
+            "_tipsoc" => ParamsIndependiente::getTipoSociedades(),
+            "_pymes" =>  array('estado' => 'N', 'detalle' => 'NO'),
+            "_tipemp" => ParamsIndependiente::getTipoEmpresa(),
+            "_tipapo" => ParamsIndependiente::getTipoAportante(),
+            "_ofiafi" => array('estado' => '13', 'detalle' => '13'),
+            "_colegio" => array('estado' => 'N', 'detalle' => 'NO'),
+            "_tipper" => ParamsIndependiente::getTipoPersona(),
+            "_codzon" => ParamsIndependiente::getZonas(),
+            "_calemp" => ParamsIndependiente::getCalidadEmpresa(),
+            "_codciu" => ParamsIndependiente::getCiudades(),
+            "_codact" => ParamsIndependiente::getActividades(),
+            "_coddoc" => ParamsIndependiente::getTipoDocumentos(),
+            "_coddocrepleg" => $_coddocrepleg,
+            '_tippag' => $_tippag,
+            '_bancos' => ParamsIndependiente::getBancos(),
+            '_tipcue' => ParamsIndependiente::getTipoCuenta(),
+            '_giro' => ParamsIndependiente::getGiro(),
+            '_codgir' => ParamsIndependiente::getCodigoGiro(),
+        ];
     }
 
     /**

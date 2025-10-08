@@ -11,7 +11,7 @@
 
 @push('scripts')
 <script id='tmp_filtro' type="text/template">
-    @php echo Tag::filtro($campo_filtro, 'aplicar_filtro') @endphp
+    @include('cajas/templates/tmp_filtro', ['campo_filtro' => $campo_filtro])
 </script>
 
 <script id='tmp_list_header' type="text/template">

@@ -6,6 +6,10 @@
 @endpush
 
 @push('scripts')
+<script id='tmp_filtro' type="text/template">
+    @include('cajas/templates/tmp_filtro', ['campo_filtro' => $campo_filtro])
+</script>
+
 <script id='tmp_list_header' type="text/template">
     @include('cajas/templates/tmp_list_header')
 </script>
@@ -57,11 +61,6 @@
 <script type="text/template" id='tmp_aprobar'>
     @include('cajas/aprobacionemp/tmp/tmp_aprobar')
 </script>
-
-<script id='tmp_filtro' type="text/template">
-    @include('cajas/templates/tmp_filtro', ['campo_filtro' => $campo_filtro])
-</script>
-
 
 <script id='tmp_trayectoria' type='text/template'>
     <h4>Trayectoria</h4>

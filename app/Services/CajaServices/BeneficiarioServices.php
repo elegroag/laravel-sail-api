@@ -15,7 +15,7 @@ use App\Services\Tag;
 class BeneficiarioServices
 {
 
-    private $orderpag = 'ORDER BY fecsol DESC';
+    private $orderpag = 'fecsol';
     private $tipopc = 4;
     private $controller_name;
 
@@ -48,8 +48,7 @@ class BeneficiarioServices
      */
     public function findPagination($query)
     {
-        $mercurio34 = new Mercurio34();
-        return $mercurio34->find($query, $this->orderpag);
+        return Mercurio34::whereRaw($query)->orderBy($this->orderpag, 'DESC')->get();
     }
 
     /**

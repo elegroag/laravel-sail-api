@@ -15,7 +15,7 @@ use Exception;
 class ServicioDomesticoServices
 {
 
-    private $orderpag = 'ORDER BY fecsol DESC';
+    private $orderpag = 'fecsol';
     private $tipopc = 12;
     private $tipsoc = '08';
     private $controller_name;
@@ -88,8 +88,7 @@ class ServicioDomesticoServices
 
     public function findPagination($query)
     {
-        $mercurio40 = new Mercurio40();
-        return $mercurio40->find($query, $this->orderpag);
+        return Mercurio40::whereRaw($query)->orderBy($this->orderpag, 'DESC')->get();
     }
 
     public function getTemplateTable()

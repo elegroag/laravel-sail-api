@@ -24,6 +24,7 @@ use App\Services\Utils\Comman;
 use App\Services\Utils\CalculatorDias;
 use App\Services\Aprueba\ApruebaTrabajador;
 use App\Services\Request as ServicesRequest;
+use App\Services\Srequest;
 use App\Services\Tag;
 
 class ApruebaTrabajadorController extends ApplicationController
@@ -69,7 +70,7 @@ class ApruebaTrabajadorController extends ApplicationController
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
-            new Request([
+            new Srequest([
                 "cantidadPaginas" => $cantidad_pagina,
                 "query" => $query_str,
                 "estado" => $estado
@@ -118,12 +119,14 @@ class ApruebaTrabajadorController extends ApplicationController
             "nit"    => "Nit Empresa",
         );
 
-        $this->setParamToView("campo_filtro", $campo_field);
-        $this->setParamToView("filters", get_flashdata_item("filter_params"));
-        $this->setParamToView("title", "Aprueba Trabajador");
-        $this->setParamToView("buttons", array("F"));
-        $this->setParamToView("mercurio11", $this->Mercurio11->find());
-        $this->loadParametrosView();
+        $params = $this->loadParametrosView();
+        return view('cajas.aprobaindepen.index', [
+            ...$params,
+            "campo_filtro" => $campo_field,
+            "filters" => get_flashdata_item("filter_params"),
+            "title" => "Aprueba Trabajador",
+            "mercurio11" => Mercurio11::get()
+        ]);
     }
 
     public function buscarAction(Request $request, string $estado = 'P')
@@ -135,7 +138,7 @@ class ApruebaTrabajadorController extends ApplicationController
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
-            new ServicesRequest(
+            new Srequest(
                 array(
                     "cantidadPaginas" => $cantidad_pagina,
                     "query" => $query_str,
@@ -567,35 +570,37 @@ class ApruebaTrabajadorController extends ApplicationController
             if ($ai < 19001 && $ai >= 18001) $_codzon[$ai] = $valor;
         }
         $_tipsal = $this->Mercurio31->getTipsalArray();
-        $this->setParamToView("_ciunac", $_ciunac);
-        $this->setParamToView("_tipsal", $_tipsal);
-        $this->setParamToView("_codciu", $_codciu);
-        $this->setParamToView("_codzon", $_codzon);
-        $this->setParamToView("_coddoc", ParamsTrabajador::getTiposDocumentos());
-        $this->setParamToView("_sexo",  ParamsTrabajador::getSexos());
-        $this->setParamToView("_estciv", ParamsTrabajador::getEstadoCivil());
-        $this->setParamToView("_cabhog", ParamsTrabajador::getCabezaHogar());
-        $this->setParamToView("_captra",  ParamsTrabajador::getCapacidadTrabajar());
-        $this->setParamToView("_tipdis", ParamsTrabajador::getTipoDiscapacidad());
-        $this->setParamToView("_nivedu", ParamsTrabajador::getNivelEducativo());
-        $this->setParamToView("_rural", ParamsTrabajador::getRural());
-        $this->setParamToView("_tipcon", ParamsTrabajador::getTipoContrato());
-        $this->setParamToView("_trasin", ParamsTrabajador::getSindicalizado());
-        $this->setParamToView("_vivienda", ParamsTrabajador::getVivienda());
-        $this->setParamToView("_tipafi", ParamsTrabajador::getTipoAfiliado());
-        $this->setParamToView("_cargo", ParamsTrabajador::getOcupaciones());
-        $this->setParamToView("_orisex", ParamsTrabajador::getOrientacionSexual());
-        $this->setParamToView("_facvul", ParamsTrabajador::getVulnerabilidades());
-        $this->setParamToView("_peretn", ParamsTrabajador::getPertenenciaEtnicas());
-        $this->setParamToView("_vendedor", ParamsTrabajador::getVendedor());
-        $this->setParamToView("_empleador", ParamsTrabajador::getEmpleador());
-        $this->setParamToView("_tippag", ParamsTrabajador::getTipoPago());
-        $this->setParamToView("_tipcue", ParamsTrabajador::getTipoCuenta());
-        $this->setParamToView("_giro", ParamsTrabajador::getGiro());
-        $this->setParamToView("_codgir", ParamsTrabajador::getCodigoGiro());
-        $this->setParamToView("_bancos", ParamsTrabajador::getBancos());
-        $this->setParamToView("tipo",   'T');
-        $this->setParamToView("tipopc",  $this->tipopc);
+        return [
+            "_ciunac" => $_ciunac,
+            "_tipsal" => $_tipsal,
+            "_codciu" => $_codciu,
+            "_codzon" => $_codzon,
+            "_coddoc" => ParamsTrabajador::getTiposDocumentos(),
+            "_sexo" => ParamsTrabajador::getSexos(),
+            "_estciv" => ParamsTrabajador::getEstadoCivil(),
+            "_cabhog" => ParamsTrabajador::getCabezaHogar(),
+            "_captra" =>  ParamsTrabajador::getCapacidadTrabajar(),
+            "_tipdis" => ParamsTrabajador::getTipoDiscapacidad(),
+            "_nivedu" => ParamsTrabajador::getNivelEducativo(),
+            "_rural" => ParamsTrabajador::getRural(),
+            "_tipcon" => ParamsTrabajador::getTipoContrato(),
+            "_trasin" => ParamsTrabajador::getSindicalizado(),
+            "_vivienda" => ParamsTrabajador::getVivienda(),
+            "_tipafi" => ParamsTrabajador::getTipoAfiliado(),
+            "_cargo" => ParamsTrabajador::getOcupaciones(),
+            "_orisex" => ParamsTrabajador::getOrientacionSexual(),
+            "_facvul" => ParamsTrabajador::getVulnerabilidades(),
+            "_peretn" => ParamsTrabajador::getPertenenciaEtnicas(),
+            "_vendedor" => ParamsTrabajador::getVendedor(),
+            "_empleador" => ParamsTrabajador::getEmpleador(),
+            "_tippag" => ParamsTrabajador::getTipoPago(),
+            "_tipcue" => ParamsTrabajador::getTipoCuenta(),
+            "_giro" => ParamsTrabajador::getGiro(),
+            "_codgir" => ParamsTrabajador::getCodigoGiro(),
+            "_bancos" => ParamsTrabajador::getBancos(),
+            "tipo" =>   'T',
+            "tipopc" =>  $this->tipopc
+        ];
     }
 
     public function editarViewAction($id = 0)

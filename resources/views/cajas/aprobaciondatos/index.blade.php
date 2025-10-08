@@ -7,7 +7,7 @@
 
 @push('scripts')
 <script id='tmp_filtro' type="text/template">
-    @include('cajas/aprobaciondatos/tmp/tmp_filtro')
+    @include('cajas/templates/tmp_filtro', ['campo_filtro' => $campo_filtro])
 </script>
 
 <script id='tmp_list_header' type="text/template">

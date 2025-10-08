@@ -52,6 +52,7 @@ class Mercurio39 extends ModelBase
         'tipo',
         'coddoc',
         'documento',
+        'fecsol'
     ];
 
     /**
@@ -784,5 +785,15 @@ class Mercurio39 extends ModelBase
     public function getDocumento()
     {
         return $this->documento;
+    }
+
+    public function getFecsol()
+    {
+        return Carbon::parse($this->fecsol);
+    }
+
+    public function setFecsol($fecsol)
+    {
+        $this->fecsol = $fecsol;
     }
 }

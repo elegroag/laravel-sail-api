@@ -9,7 +9,6 @@ use Illuminate\Http\Response;
 use Carbon\Carbon;
 use App\Exceptions\DebugException;
 use App\Services\Utils\Pagination;
-use App\Services\CajaServices\MadreComuniServices;
 use App\Services\Aprueba\ApruebaSolicitud;
 use App\Models\Mercurio39;
 use App\Models\Mercurio10;
@@ -20,7 +19,10 @@ use App\Models\Gener42;
 use App\Services\Utils\NotifyEmailServices;
 use App\Library\DbException;
 use App\Library\View;
+use App\Models\Mercurio11;
+use App\Models\Mercurio31;
 use App\Services\Utils\Comman;
+use App\Services\CajaServices\MadresComuniServices;
 
 
 class ApruebaComunitariaController extends ApplicationController
@@ -67,7 +69,7 @@ class ApruebaComunitariaController extends ApplicationController
     {
         $this->setResponse("ajax");
         $cantidad_pagina = $request->input("numero", 10);
-        $usuario = parent::getActUser();
+        $usuario = $this->user['usuario'];
 
         $this->pagination->setters(
             "cantidadPaginas: {$cantidad_pagina}",
@@ -86,14 +88,14 @@ class ApruebaComunitariaController extends ApplicationController
         set_flashdata("filter_params", $this->pagination->filters, true);
 
         $response = $this->pagination->render(
-            new MadreComuniServices()
+            new MadresComuniServices()
         );
         return $this->renderObject($response, false);
     }
 
-    public function changeCantidadPaginaAction($estado = 'P')
+    public function changeCantidadPaginaAction(Request $request, $estado = 'P')
     {
-        //$this->buscarAction($estado);
+        return $this->buscarAction($request, $estado);
     }
 
 
@@ -108,12 +110,14 @@ class ApruebaComunitariaController extends ApplicationController
             "fecsol" => "Fecha solicitud"
         );
 
-        $this->setParamToView("campo_filtro", $campo_field);
-        $this->setParamToView("filters", get_flashdata_item("filter_params"));
-        $this->setParamToView("title", "Aprueba Madres Comunitarias");
-        $this->setParamToView("buttons", array("F"));
-        $this->loadParametrosView();
-        $this->setParamToView("mercurio11", $this->Mercurio11->find());
+        $params = $this->loadParametrosView();
+        return view('cajas.aprobacioncom.index', [
+            ...$params,
+            "campo_filtro" => $campo_field,
+            "filters" => get_flashdata_item("filter_params"),
+            "title" => "Aprueba Madres Comunitarias",
+            "mercurio11" => Mercurio11::get()
+        ]);
     }
 
 
@@ -122,7 +126,7 @@ class ApruebaComunitariaController extends ApplicationController
         $this->setResponse("ajax");
         $pagina = $request->input('pagina', 1);
         $cantidad_pagina = $request->input("numero", 10);
-        $usuario = parent::getActUser();
+        $usuario = $this->user['usuario'];
         $query = "usuario='{$usuario}' and estado='{$estado}'";
 
         $this->pagination->setters(
@@ -142,7 +146,7 @@ class ApruebaComunitariaController extends ApplicationController
         set_flashdata("filter_params", $this->pagination->filters, true);
 
         $response = $this->pagination->render(
-            new MadreComuniServices()
+            new MadresComuniServices()
         );
 
         return $this->renderObject($response, false);
@@ -155,7 +159,7 @@ class ApruebaComunitariaController extends ApplicationController
      */
     public function inforAction($id = 0)
     {
-        $madreComuniServices = new MadreComuniServices();
+        $madreComuniServices = new MadresComuniServices();
         if (!$id) {
             return redirect("aprobacioncom/index");
             exit;
@@ -246,36 +250,38 @@ class ApruebaComunitariaController extends ApplicationController
         foreach (ParamsTrabajador::getZonas() as $ai => $valor) {
             if ($ai < 19001 && $ai >= 18001) $_codzon[$ai] = $valor;
         }
-        $_tipsal = $this->Mercurio31->getTipsalArray();
-        $this->setParamToView("_ciunac", $_ciunac);
-        $this->setParamToView("_tipsal", $_tipsal);
-        $this->setParamToView("_codciu", $_codciu);
-        $this->setParamToView("_codzon", $_codzon);
-        $this->setParamToView("_coddoc", ParamsTrabajador::getTiposDocumentos());
-        $this->setParamToView("_sexo",  ParamsTrabajador::getSexos());
-        $this->setParamToView("_estciv", ParamsTrabajador::getEstadoCivil());
-        $this->setParamToView("_cabhog", ParamsTrabajador::getCabezaHogar());
-        $this->setParamToView("_captra",  ParamsTrabajador::getCapacidadTrabajar());
-        $this->setParamToView("_tipdis", ParamsTrabajador::getTipoDiscapacidad());
-        $this->setParamToView("_nivedu", ParamsTrabajador::getNivelEducativo());
-        $this->setParamToView("_rural", ParamsTrabajador::getRural());
-        $this->setParamToView("_tipcon", ParamsTrabajador::getTipoContrato());
-        $this->setParamToView("_trasin", ParamsTrabajador::getSindicalizado());
-        $this->setParamToView("_vivienda", ParamsTrabajador::getVivienda());
-        $this->setParamToView("_tipafi", ParamsTrabajador::getTipoAfiliado());
-        $this->setParamToView("_cargo", ParamsTrabajador::getOcupaciones());
-        $this->setParamToView("_orisex", ParamsTrabajador::getOrientacionSexual());
-        $this->setParamToView("_facvul", ParamsTrabajador::getVulnerabilidades());
-        $this->setParamToView("_peretn", ParamsTrabajador::getPertenenciaEtnicas());
-        $this->setParamToView("_vendedor", ParamsTrabajador::getVendedor());
-        $this->setParamToView("_empleador", ParamsTrabajador::getEmpleador());
-        $this->setParamToView("_tippag", ParamsTrabajador::getTipoPago());
-        $this->setParamToView("_tipcue", ParamsTrabajador::getTipoCuenta());
-        $this->setParamToView("_giro", ParamsTrabajador::getGiro());
-        $this->setParamToView("_codgir", ParamsTrabajador::getCodigoGiro());
-        $this->setParamToView("_bancos", ParamsTrabajador::getBancos());
-        $this->setParamToView("tipo",   'T');
-        $this->setParamToView("tipopc",  $this->tipopc);
+        $_tipsal = (new Mercurio31())->getTipsalArray();
+        return [
+            "_ciunac" => $_ciunac,
+            "_tipsal" => $_tipsal,
+            "_codciu" => $_codciu,
+            "_codzon" => $_codzon,
+            "_coddoc" => ParamsTrabajador::getTiposDocumentos(),
+            "_sexo" => ParamsTrabajador::getSexos(),
+            "_estciv" => ParamsTrabajador::getEstadoCivil(),
+            "_cabhog" => ParamsTrabajador::getCabezaHogar(),
+            "_captra" =>  ParamsTrabajador::getCapacidadTrabajar(),
+            "_tipdis" => ParamsTrabajador::getTipoDiscapacidad(),
+            "_nivedu" => ParamsTrabajador::getNivelEducativo(),
+            "_rural" => ParamsTrabajador::getRural(),
+            "_tipcon" => ParamsTrabajador::getTipoContrato(),
+            "_trasin" => ParamsTrabajador::getSindicalizado(),
+            "_vivienda" => ParamsTrabajador::getVivienda(),
+            "_tipafi" => ParamsTrabajador::getTipoAfiliado(),
+            "_cargo" => ParamsTrabajador::getOcupaciones(),
+            "_orisex" => ParamsTrabajador::getOrientacionSexual(),
+            "_facvul" => ParamsTrabajador::getVulnerabilidades(),
+            "_peretn" => ParamsTrabajador::getPertenenciaEtnicas(),
+            "_vendedor" => ParamsTrabajador::getVendedor(),
+            "_empleador" => ParamsTrabajador::getEmpleador(),
+            "_tippag" => ParamsTrabajador::getTipoPago(),
+            "_tipcue" => ParamsTrabajador::getTipoCuenta(),
+            "_giro" => ParamsTrabajador::getGiro(),
+            "_codgir" => ParamsTrabajador::getCodigoGiro(),
+            "_bancos" => ParamsTrabajador::getBancos(),
+            "tipo" =>   'T',
+            "tipopc" =>  $this->tipopc
+        ];
     }
 
 
@@ -330,7 +336,7 @@ class ApruebaComunitariaController extends ApplicationController
     public function devolverAction(Request $request)
     {
         $this->setResponse("ajax");
-        $this->madreComuniServices = new MadreComuniServices();
+        $this->madreComuniServices = new MadresComuniServices();
         $notifyEmailServices = new NotifyEmailServices();
         try {
             $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
@@ -377,7 +383,7 @@ class ApruebaComunitariaController extends ApplicationController
     {
         $this->setResponse("ajax");
         $notifyEmailServices = new NotifyEmailServices();
-        $this->madreComuniServices =  new MadreComuniServices();
+        $this->madreComuniServices =  new MadresComuniServices();
         try {
             $id = $request->input('id', "addslaches", "alpha", "extraspaces", "striptags");
             $nota = sanetizar($request->input('nota'));

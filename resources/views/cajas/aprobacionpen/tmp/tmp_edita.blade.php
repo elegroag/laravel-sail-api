@@ -1,35 +1,40 @@
-@php
-use App\Http\Helpers\Tag;
-@endphp
-
-@php echo Tag::form("", "id: formulario_empresa", "class: validation_form", "autocomplete: off", "novalidate"); @endphp
-
+<form id="formulario_empresa" class="validation_form" autocomplete="off" novalidate>
 <div class="row">
     <div class="col-md-3">
         <div class="form-group">
             <label for="nit" class="form-control-label">NIT o documento empresa:</label>
-            @php echo Tag::numericField("nit", "class: form-control"); @endphp
-            @php echo Tag::numericField("id", "class: d-none"); @endphp
-            @php echo Tag::numericField("repleg", "class: d-none"); @endphp
+            <input type="text" name="nit" class="form-control" placeholder="Ingrese nit">
+            <input type="text" name="id" class="d-none">
+            <input type="text" name="repleg" class="d-none">
         </div>
     </div>
     <div class="col-md-4">
         <div class="form-group" style="overflow: hidden">
             <label for="tipdoc" class="form-control-label">Tipo documento empresa:</label>
-            @php echo Tag::selectStatic("tipdoc", $_coddoc, "class: form-control", "use_dummy: true", "dummyValue: "); @endphp
+            <select name="tipdoc" class="form-control">
+                <option value="">Seleccione un tipo de documento</option>
+                @foreach($_coddoc as $key => $value)
+                    <option value="{{ $key }}">{{ $value }}</option>
+                @endforeach
+            </select>
             <label id="tipdoc-error" class="error" for="tipdoc"></label>
         </div>
     </div>
     <div class="col-md-2">
         <div class="form-group">
             <label for="digver" class="form-control-label">Digito verificación:</label>
-            @php echo Tag::numericField("digver", "class: form-control", "placeholder: Digito Verificacion"); @endphp
+            <input type="text" name="digver" class="form-control" placeholder="Digito Verificacion">
         </div>
     </div>
     <div class="col-md-3">
         <div class="form-group">
             <label for="tipson" class="form-control-label">Tipo empresa:</label>
-            @php echo Tag::selectStatic("tipemp", $_tipemp, "class: form-control", "use_dummy: true", "dummyValue: "); @endphp
+            <select name="tipemp" class="form-control">
+                <option value="">Seleccione un tipo de documento</option>
+                @foreach($_tipemp as $key => $value)
+                    <option value="{{ $key }}">{{ $value }}</option>
+                @endforeach
+            </select>
         </div>
     </div>
 </div>
@@ -37,26 +42,31 @@ use App\Http\Helpers\Tag;
     <div class="col-md-2">
         <div class="form-group">
             <label for="tipper" class="form-control-label">Tipo persona:</label>
-            @php echo Tag::selectStatic("tipper", $_tipper, "class: form-control", "use_dummy: true", "dummyValue: "); @endphp
+            <select name="tipper" class="form-control">
+                <option value="">Seleccione un tipo de documento</option>
+                @foreach($_tipper as $key => $value)
+                    <option value="{{ $key }}">{{ $value }}</option>
+                @endforeach
+            </select>
             <label id="tipper-error" class="error" for="tipper"></label>
         </div>
     </div>
     <div class="col-md-5">
         <div class="form-group">
             <label for="razsoc" class="form-control-label">Razón social:</label>
-            @php echo Tag::textUpperField("razsoc", "class: form-control", "placeholder: Razon Social"); @endphp
+            <input type="text" name="razsoc" class="form-control" placeholder="Razon Social">
         </div>
     </div>
     <div class="col-md-2">
         <div class="form-group">
             <label for="sigla" class="form-control-label">Sigla:</label>
-            @php echo Tag::textUpperField("sigla", "class: form-control", "placeholder: Sigla"); @endphp
+            <input type="text" name="sigla" class="form-control" placeholder="Sigla">
         </div>
     </div>
     <div class="col-md-3">
         <div class="form-group">
             <label for="matmer" class="form-control-label">Mat. mercantil:</label>
-            @php echo Tag::textUpperField("matmer", "class: form-control", "placeholder: Matricula Mercantil"); @endphp
+            <input type="text" name="matmer" class="form-control" placeholder="Matricula Mercantil">
         </div>
     </div>
 </div>
@@ -64,27 +74,27 @@ use App\Http\Helpers\Tag;
     <div class="col-md-3">
         <div class="form-group">
             <label for="priape" class="form-control-label">Primer apellido:</label>
-            @php echo Tag::textUpperField("priape", "class: form-control", "placeholder: Primer Apellido"); @endphp
+            <input type="text" name="priape" class="form-control" placeholder="Primer Apellido">
             <label id="priape-error" class="error" for="priape"></label>
         </div>
     </div>
     <div class="col-md-3">
         <div class="form-group">
             <label for="segape" class="form-control-label">Segundo apellido:</label>
-            @php echo Tag::textUpperField("segape", "class: form-control", "placeholder: Segundo Apellido"); @endphp
+            <input type="text" name="segape" class="form-control" placeholder="Segundo Apellido">
         </div>
     </div>
     <div class="col-md-3">
         <div class="form-group">
             <label for="prinom" class="form-control-label">Primer nombre:</label>
-            @php echo Tag::textUpperField("prinom", "class: form-control", "placeholder: Primer Nombre"); @endphp
+            <input type="text" name="prinom" class="form-control" placeholder="Primer Nombre">
             <label id="prinom-error" class="error" for="prinom"></label>
         </div>
     </div>
     <div class="col-md-3">
         <div class="form-group">
             <label for="segnom" class="form-control-label">Segundo nombre:</label>
-            @php echo Tag::textUpperField("segnom", "class: form-control", "placeholder: Segundo Nombre"); @endphp
+            <input type="text" name="segnom" class="form-control" placeholder="Segundo Nombre">
         </div>
     </div>
 </div>
@@ -92,20 +102,30 @@ use App\Http\Helpers\Tag;
     <div class="col-md-3">
         <div class="form-group">
             <label for="calemp" class="form-control-label">Calidad afiliación:</label>
-            @php echo Tag::selectStatic("calemp", $_calemp, "class: form-control", "use_dummy: true", "dummyValue: "); @endphp
+            <select name="calemp" class="form-control">
+                <option value="">Seleccione un tipo de documento</option>
+                @foreach($_calemp as $key => $value)
+                    <option value="{{ $key }}">{{ $value }}</option>
+                @endforeach
+            </select>
         </div>
     </div>
     <div class="col-md-5">
         <div class="form-group">
             <label for="coddocrepleg" class="form-control-label">Tipo documento rep. legal:</label>
-            @php echo Tag::selectStatic("coddocrepleg", $_coddocrepleg, "class: form-control", "use_dummy: true", "dummyValue: "); @endphp
+            <select name="coddocrepleg" class="form-control">
+                <option value="">Seleccione un tipo de documento</option>
+                @foreach($_coddocrepleg as $key => $value)
+                    <option value="{{ $key }}">{{ $value }}</option>
+                @endforeach
+            </select>
             <label id="coddocrepleg-error" class="error" for="priaperepleg"></label>
         </div>
     </div>
     <div class="col-md-4">
         <div class="form-group">
             <label for="cedrep" class="form-control-label">Cedula representante legal:</label>
-            @php echo Tag::textUpperField("cedrep", "class: form-control", "placeholder: Cedula representante"); @endphp
+            <input type="text" name="cedrep" class="form-control" placeholder="Cedula representante">
         </div>
     </div>
 </div>
@@ -113,27 +133,27 @@ use App\Http\Helpers\Tag;
     <div class="col-md-3">
         <div class="form-group">
             <label for="priaperepleg" class="form-control-label">Primer apellido rep. legal:</label>
-            {{ Tag::textUpperField("priaperepleg", "class: form-control", "placeholder: Primer Apellido") }}
+            <input type="text" name="priaperepleg" class="form-control" placeholder="Primer Apellido">
             <label id="priaperepleg-error" class="error" for="priaperepleg"></label>
         </div>
     </div>
     <div class="col-md-3">
         <div class="form-group">
             <label for="segaperepleg" class="form-control-label">Segundo apellido rep. legal:</label>
-            @php echo Tag::textUpperField("segaperepleg", "class: form-control", "placeholder: Segundo Apellido"); @endphp
+            <input type="text" name="segaperepleg" class="form-control" placeholder="Segundo Apellido">
         </div>
     </div>
     <div class="col-md-3">
         <div class="form-group">
             <label for="prinomrepleg" class="form-control-label">Primer nombre rep. legal:</label>
-            @php echo Tag::textUpperField("prinomrepleg", "class: form-control", "placeholder: Primer Nombre"); @endphp
+            <input type="text" name="prinomrepleg" class="form-control" placeholder="Primer Nombre">
             <label id="prinomrepleg-error" class="error" for="prinomrepleg"></label>
         </div>
     </div>
     <div class="col-md-3">
         <div class="form-group">
             <label for="segnomrepleg" class="form-control-label">Segundo nombre rep. legal:</label>
-            @php echo Tag::textUpperField("segnomrepleg", "class: form-control", "placeholder: Segundo Nombre"); @endphp
+            <input type="text" name="segnomrepleg" class="form-control" placeholder="Segundo Nombre">
         </div>
     </div>
 </div>
@@ -141,20 +161,30 @@ use App\Http\Helpers\Tag;
     <div class="col-md-4">
         <div class="form-group">
             <label for="direccion" class="form-control-label">Direccion notificación:</label>
-            @php echo Tag::textUpperField("direccion", "class: form-control", "placeholder: Direccion"); @endphp
+            <input type="text" name="direccion" class="form-control" placeholder="Direccion">
         </div>
     </div>
     <div class="col-md-4">
         <div class="form-group">
             <label for="codciu" class="form-control-label">Ciudad notificación:</label>
-            @php echo Tag::selectStatic("codciu", $_codciu, "class: form-control", "use_dummy: true", "dummyValue: ", "select2: true"); @endphp
+            <select name="codciu" class="form-control">
+                <option value="">Seleccione un tipo de documento</option>
+                @foreach($_codciu as $key => $value)
+                    <option value="{{ $key }}">{{ $value }}</option>
+                @endforeach
+            </select>
             <label id="codciu-error" class="error" for="codciu"></label>
         </div>
     </div>
     <div class="col-md-4">
         <div class="form-group">
             <label for="codzon" class="form-control-label">Lugar donde laboran trabajadores:</label>
-            @php echo Tag::selectStatic("codzon", $_codzon, "class: form-control", "use_dummy: true", "dummyValue: ", "select2: true"); @endphp
+            <select name="codzon" class="form-control">
+                <option value="">Seleccione un tipo de documento</option>
+                @foreach($_codzon as $key => $value)
+                    <option value="{{ $key }}">{{ $value }}</option>
+                @endforeach
+            </select>
             <label id="codzon-error" class="error" for="codzon"></label>
         </div>
     </div>
@@ -163,13 +193,13 @@ use App\Http\Helpers\Tag;
     <div class="col-md-4">
         <div class="form-group">
             <label for="telefono" class="form-control-label">Telefono notificación con indicativo:</label>
-            @php echo Tag::numericField("telefono", "class: form-control", "placeholder: Telefono con Indicativo"); @endphp
+            <input type="text" name="telefono" class="form-control" placeholder="Telefono con Indicativo">
         </div>
     </div>
     <div class="col-md-4">
         <div class="form-group">
             <label for="celular" class="form-control-label">Celular notificación</label>
-            @php echo Tag::numericField("celular", "class: form-control", "placeholder: Celular"); @endphp
+            <input type="text" name="celular" class="form-control" placeholder="Celular">
         </div>
     </div>
 </div>
@@ -177,21 +207,26 @@ use App\Http\Helpers\Tag;
     <div class="col-md-4">
         <div class="form-group">
             <label for="email" class="form-control-label">Email notificación empresarial</label>
-            @php echo Tag::textUpperField("email", "class: form-control", "placeholder: Email"); @endphp
+            <input type="text" name="email" class="form-control" placeholder="Email">
             <label id="email-error" class="error" for="email"></label>
         </div>
     </div>
     <div class="col-md-4">
         <div class="form-group" style="overflow: hidden">
             <label for="codact" class="form-control-label">Digite el código CIUU-DIAN de la actividad economica:</label>
-            @php echo Tag::selectStatic("codact", $_codact, "class: form-control", "select2: true"); @endphp
+            <select name="codact" class="form-control">
+                <option value="">Seleccione un tipo de documento</option>
+                @foreach($_codact as $key => $value)
+                    <option value="{{ $key }}">{{ $value }}</option>
+                @endforeach
+            </select>
             <label id="codact-error" class="error" for="codact"></label>
         </div>
     </div>
     <div class="col-md-4">
         <div class="form-group">
             <label for="fecini" class="form-control-label">Fecha inicio:</label>
-            @php echo Tag::calendar("fecini", "class: form-control", "placeholder: Fecha Inicial"); @endphp
+            <input type="text" name="fecini" class="form-control" placeholder="Fecha Inicial">
         </div>
     </div>
 </div>
@@ -199,26 +234,36 @@ use App\Http\Helpers\Tag;
     <div class="col-md-2">
         <div class="form-group">
             <label for="tottra" class="form-control-label">Total trabajadores:</label>
-            @php echo Tag::textUpperField("tottra", "class: form-control", "placeholder: Total Trabajadores"); @endphp
+            <input type="text" name="tottra" class="form-control" placeholder="Total Trabajadores">
         </div>
     </div>
     <div class="col-md-3">
         <div class="form-group">
             <label for="valnom" class="form-control-label">Valor nomina:</label>
-            @php echo Tag::textUpperField("valnom", "class: form-control", "placeholder: Valor Nomina"); @endphp
+            <input type="text" name="valnom" class="form-control" placeholder="Valor Nomina">
         </div>
     </div>
     <div class="col-md-3">
         <div class="form-group">
             <label for="tipsoc" class="form-control-label">Tipo sociedad:</label>
-            @php echo Tag::selectStatic("tipsoc", $_tipsoc, "class: form-control", "use_dummy: true", "dummyValue: "); @endphp
+            <select name="tipsoc" class="form-control">
+                <option value="">Seleccione un tipo de documento</option>
+                @foreach($_tipsoc as $key => $value)
+                    <option value="{{ $key }}">{{ $value }}</option>
+                @endforeach
+            </select>
             <label id="tipsoc-error" class="error" for="tipsoc"></label>
         </div>
     </div>
     <div class="col-md-4">
         <div class="form-group">
             <label for="ciupri" class="form-control-label">Ciudad comercial:</label>
-            @php echo Tag::selectStatic("ciupri", $_ciupri, "class: form-control", "use_dummy: true", "dummyValue: ", "select2: true"); @endphp
+            <select name="ciupri" class="form-control">
+                <option value="">Seleccione un tipo de documento</option>
+                @foreach($_ciupri as $key => $value)
+                    <option value="{{ $key }}">{{ $value }}</option>
+                @endforeach
+            </select>
             <label id="ciupri-error" class="error" for="ciupri"></label>
         </div>
     </div>
@@ -228,13 +273,13 @@ use App\Http\Helpers\Tag;
     <div class="col-md-4">
         <div class="form-group">
             <label for="celpri" class="form-control-label">Celular comercial:</label>
-            @php echo Tag::numericField("celpri", "class: form-control", "placeholder: Celular Principal"); @endphp
+            <input type="text" name="celpri" class="form-control" placeholder="Celular Principal">
         </div>
     </div>
     <div class="col-md-4">
         <div class="form-group">
             <label for="emailpri" class="form-control-label">Email comercial:</label>
-            @php echo Tag::textUpperField("emailpri", "class: form-control", "placeholder: Email Principal"); @endphp
+            <input type="text" name="emailpri" class="form-control" placeholder="Email Principal">
             <label id="emailpri-error" class="error" for="emailpri"></label>
         </div>
     </div>
@@ -242,7 +287,7 @@ use App\Http\Helpers\Tag;
     <div class="col-md-4">
         <div class="form-group">
             <label for="dirpri" class="form-control-label">Dirección comercial:</label>
-            @php echo Tag::textUpperField("dirpri", "class: form-control", "placeholder: dirección comercial"); @endphp
+            <input type="text" name="dirpri" class="form-control" placeholder="Dirección Principal">
             <label id="dirpri-error" class="error" for="dirpri"></label>
         </div>
     </div>
@@ -250,7 +295,7 @@ use App\Http\Helpers\Tag;
     <div class="col-md-4">
         <div class="form-group">
             <label for="telpri" class="form-control-label">Teléfono comercial:</label>
-            @php echo Tag::textUpperField("telpri", "class: form-control", "placeholder: dirección comercial"); @endphp
+            <input type="text" name="telpri" class="form-control" placeholder="Teléfono Principal">
             <label id="telpri-error" class="error" for="telpri"></label>
         </div>
     </div>
@@ -258,4 +303,4 @@ use App\Http\Helpers\Tag;
 <div class="card-footer">
     <button type="button" class="btn btn-primary" id='guardar_ficha'><i class="fas fa-save"></i> Guardar los cambios</button>
 </div>
-@php echo Tag::endform(); @endphp
+</form>

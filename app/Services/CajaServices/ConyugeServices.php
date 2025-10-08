@@ -15,7 +15,7 @@ use Exception;
 class ConyugeServices
 {
 
-    private $orderpag = 'ORDER BY fecsol DESC';
+    private $orderpag = 'fecsol';
     private $tipopc = 3;
     private $controller_name;
 
@@ -48,8 +48,7 @@ class ConyugeServices
      */
     public function findPagination($query)
     {
-        $mercurio32 = new Mercurio32();
-        return $mercurio32->find($query, $this->orderpag);
+        return Mercurio32::whereRaw($query)->orderBy($this->orderpag, 'DESC')->get();
     }
 
     /**

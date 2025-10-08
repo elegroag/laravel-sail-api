@@ -14,7 +14,7 @@ use Exception;
 
 class TrabajadorServices
 {
-    private $orderpag = 'ORDER BY fecsol DESC';
+    private $orderpag = 'fecsol';
     private $tipopc = 1;
     private $controller_name;
 
@@ -47,8 +47,7 @@ class TrabajadorServices
      */
     public function findPagination($query)
     {
-        $mercurio31 = new Mercurio31();
-        return $mercurio31->find($query, $this->orderpag);
+        return Mercurio31::whereRaw($query)->orderBy($this->orderpag, 'DESC')->get();
     }
 
     /**

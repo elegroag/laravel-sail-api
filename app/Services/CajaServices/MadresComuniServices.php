@@ -15,7 +15,7 @@ use Exception;
 class MadresComuniServices
 {
 
-    private $orderpag = 'ORDER BY fecsol DESC';
+    private $orderpag = 'fecsol';
     private $tipopc = 11;
     private $tipsoc = '08';
     private $controller_name;
@@ -87,8 +87,7 @@ class MadresComuniServices
 
     public function findPagination($query)
     {
-        $mercurio39 = new Mercurio39();
-        return $mercurio39->find($query, $this->orderpag);
+        return Mercurio39::whereRaw($query)->orderBy($this->orderpag, 'DESC')->get();
     }
 
     public function getTemplateTable()

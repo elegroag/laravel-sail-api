@@ -17,12 +17,15 @@ use App\Models\Mercurio11;
 use App\Models\Mercurio37;
 use App\Library\Collections\ParamsPensionado;
 use App\Library\Auth;
+use App\Library\Collections\ParamsIndependiente;
 use App\Models\Gener42;
 use App\Services\Utils\NotifyEmailServices;
 use App\Library\DbException;
+use App\Models\Mercurio31;
 use Illuminate\Support\Facades\View;
 use App\Services\Utils\Comman;
 use App\Services\Aprueba\ApruebaSolicitud;
+use App\Services\Srequest;
 
 class ApruebaPensionadoController extends ApplicationController
 {
@@ -70,10 +73,10 @@ class ApruebaPensionadoController extends ApplicationController
     {
         $this->setResponse("ajax");
         $cantidad_pagina = ($request->input("numero")) ? $request->input("numero") : 10;
-        $usuario = parent::getActUser();
+        $usuario = $this->user['usuario'];
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
         $pagination = new Pagination(
-            new Request(
+            new Srequest(
                 array(
                     "cantidadPaginas" => $cantidad_pagina,
                     "query" => $query_str,
@@ -129,12 +132,14 @@ class ApruebaPensionadoController extends ApplicationController
             "segnom" => "Segundo Nombre",
         );
 
-        $this->setParamToView("campo_filtro", $campo_field);
-        $this->setParamToView("filters", get_flashdata_item("filter_params"));
-        $this->setParamToView("title", "Aprueba Pensionado");
-        $this->setParamToView("buttons", array("F"));
-        $this->setParamToView("mercurio11", $this->Mercurio11->find());
-        //$this->loadParametrosView();
+        $params = $this->loadParametrosView();
+        return view('cajas.aprobacionpen.index', [
+            ...$params,
+            "campo_filtro" => $campo_field,
+            "filters" => get_flashdata_item("filter_params"),
+            "title" => "Aprueba Pensionado",
+            "mercurio11" => Mercurio11::get()
+        ]);
     }
 
 
@@ -155,7 +160,7 @@ class ApruebaPensionadoController extends ApplicationController
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
-            new Request(
+            new Srequest(
                 array(
                     "cantidadPaginas" => $cantidad_pagina,
                     "pagina" => $pagina,
@@ -723,5 +728,62 @@ class ApruebaPensionadoController extends ApplicationController
             );
         }
         return $this->renderObject($salida);
+    }
+
+    function loadParametrosView()
+    {
+        $procesadorComando = Comman::Api();
+        $procesadorComando->runCli(
+            array(
+                "servicio" => "ComfacaAfilia",
+                "metodo"  => "parametros_pensionado",
+            )
+        );
+
+        $paramsTrabajador = new ParamsIndependiente();
+        $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
+
+        $_codciu = ParamsIndependiente::getCiudades();
+        $_ciunac = $_codciu;
+        foreach (ParamsIndependiente::getZonas() as $ai => $valor) {
+            if ($ai < 19001 && $ai >= 18001) $_codzon[$ai] = $valor;
+        }
+        $_tipsal = (new Mercurio31())->getTipsalArray();
+
+        $_tippag = [
+            "T" => "PENDIENTE DEFINIR FORMA DE PAGO",
+            "A" => "ABONO A CUNETA DE BANCO",
+            "D" => "DAVIPLATA"
+        ];
+        return [
+            "_ciunac" => $_ciunac,
+            "_tipsal" => $_tipsal,
+            "_codciu" => $_codciu,
+            "_codzon" => $_codzon,
+            "_tippag" => $_tippag,
+            "_tipdur" => ParamsIndependiente::getTipoDuracion(),
+            "_codind" => ParamsIndependiente::getCodigoIndice(),
+            "_contratista" => array('estado' => 'N', 'detalle' => 'NO'),
+            "_todmes" => ParamsIndependiente::getPagaMes(),
+            "_forpre" => ParamsIndependiente::getFormaPresentacion(),
+            "_tipsoc" => ParamsIndependiente::getTipoSociedades(),
+            "_pymes" =>  array('estado' => 'N', 'detalle' => 'NO'),
+            "_tipemp" => ParamsIndependiente::getTipoEmpresa(),
+            "_tipapo" => ParamsIndependiente::getTipoAportante(),
+            "_ofiafi" => array('estado' => '13', 'detalle' => '13'),
+            "_colegio" => array('estado' => 'N', 'detalle' => 'NO'),
+            "_tipper" => ParamsIndependiente::getTipoPersona(),
+            "_codzon" => ParamsIndependiente::getZonas(),
+            "_calemp" => ParamsIndependiente::getCalidadEmpresa(),
+            "_codciu" => ParamsIndependiente::getCiudades(),
+            "_codact" => ParamsIndependiente::getActividades(),
+            "_coddoc" => ParamsIndependiente::getTipoDocumentos(),
+            '_bancos' => ParamsIndependiente::getBancos(),
+            '_tipcue' => ParamsIndependiente::getTipoCuenta(),
+            '_giro' => ParamsIndependiente::getGiro(),
+            '_codgir' => ParamsIndependiente::getCodigoGiro(),
+            "tipo" =>   'T',
+            "tipopc" =>  $this->tipopc
+        ];
     }
 }

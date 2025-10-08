@@ -15,7 +15,7 @@ use Exception;
 
 class CertificadosServices
 {
-    private $orderpag = 'ORDER BY fecha DESC';
+    private $orderpag = 'fecha';
     private $tipopc = 8;
     private $controller_name;
 
@@ -48,8 +48,7 @@ class CertificadosServices
      */
     public function findPagination($query)
     {
-        $mercurio45 = new Mercurio45();
-        return $mercurio45->find($query, $this->orderpag);
+        return Mercurio45::whereRaw($query)->orderBy($this->orderpag, 'DESC')->get();
     }
 
     /**
