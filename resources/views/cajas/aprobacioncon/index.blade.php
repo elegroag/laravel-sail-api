@@ -1,7 +1,3 @@
-@php
-    use App\Http\Helpers\Tag;
-@endphp
-
 @extends('layouts.cajas')
 
 @push('styles')
@@ -60,15 +56,10 @@
 <script id='tmp_table' type="text/template">
 	<div id='consulta' class='table-responsive'></div>
 	<div id='paginate' class='card-footer py-4'></div>
-	<div class='card-footer'>
-		<div style='float:right'>
-			<a class='btn btn-xs' id='btPendienteEmail' data-href="aprobacionemp/pendiente_email">Procesar Notificación Pendiente</a>
-		</div>
-	</div>
 	<div id='filtro'></div>
 </script>
 
-<script src="{{ asset('Cajas/build/Conyuges.js') }}"></script>
+<script src="{{ asset('cajas/build/Conyuges.js') }}"></script>
 @endpush
 
 @section('content')

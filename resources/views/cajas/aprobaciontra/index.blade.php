@@ -194,7 +194,7 @@
 	<div id='filtro'></div>
 </script>
 
-<script src="{{ asset('Cajas/build/Trabajadores.js') }}"></script>
+<script src="{{ asset('cajas/build/Trabajadores.js') }}"></script>
 @endpush
 
 @section('content')

@@ -1,6 +1,3 @@
-@php
-	use App\Services\Tag;
-@endphp
 <h4>Aprobar</h4>
 <p>Esta opción es para aprobar al trabajador y enviar los datos a Subsidio</p>
 
@@ -27,35 +24,55 @@
 		<div class='col-md-4' group-for='vendedor'>
 			<div class='d-flex align-items-center'>
 				<label for='vendedor' class='form-label me-2 mb-0 flex-shrink-0'>Vendedor</label>
-				@php echo Tag::selectStatic("vendedor", $_vendedor, "use_dummy: true", "dummyValue: ", "class: form-select", "placeholder: Selecciona una opción"); @endphp
+				<select name="vendedor" class="form-control">
+                    <option value="">Seleccione un tipo de documento</option>
+                    @foreach($_vendedor as $key => $value)
+                        <option value="{{ $key }}">{{ $value }}</option>
+                    @endforeach
+                </select>
 			</div>
 		</div>
 
 		<div class='col-md-4' group-for='empleador'>
 			<div class='d-flex align-items-center'>
 				<label for='empleador' class='form-label me-2 mb-0 flex-shrink-0'>Empleador</label>
-				@php echo Tag::selectStatic("empleador", $_empleador, "use_dummy: true", "dummyValue: ", "class: form-select", "placeholder: Selecciona una opción"); @endphp
+				<select name="empleador" class="form-control">
+                    <option value="">Seleccione un tipo de documento</option>
+                    @foreach($_empleador as $key => $value)
+                        <option value="{{ $key }}">{{ $value }}</option>
+                    @endforeach
+                </select>
 			</div>
 		</div>
 
 		<div class='col-md-4' group-for='tippag'>
 			<div class='d-flex align-items-center'>
 				<label for='tippag' class='form-label me-2 mb-0 flex-shrink-0'>Tipo pago cuota:</label>
-				@php echo Tag::selectStatic("tippag", $_tippag, "use_dummy: true", "dummyValue: ", "class: form-select", "placeholder: Selecciona una opción"); @endphp
+				<select name="tippag" class="form-control">
+                    <option value="">Seleccione un tipo de documento</option>
+                    @foreach($_tippag as $key => $value)
+                        <option value="{{ $key }}">{{ $value }}</option>
+                    @endforeach
+                </select>
 			</div>
 		</div>
 
 		<div class='col-md-4' group-for='codban'>
 			<div class='d-flex align-items-center'>
 				<label for='codban' class='form-label me-2 mb-0 flex-shrink-0'>Banco</label>
-				@php echo Tag::selectStatic("codban", $_bancos, "use_dummy: true", "dummyValue: ", "class: form-select", "placeholder: Selecciona una opción"); @endphp
+				<select name="codban" class="form-control">
+                    <option value="">Seleccione un tipo de documento</option>
+                    @foreach($_bancos as $key => $value)
+                        <option value="{{ $key }}">{{ $value }}</option>
+                    @endforeach
+                </select>
 			</div>
 		</div>
 
 		<div class='col-md-4' group-for='numcue'>
 			<div class='d-flex align-items-center'>
 				<label for='numcue' class='form-label me-2 mb-0 flex-shrink-0'>Número cuenta</label>
-				@php echo Tag::numericField("numcue", "class: form-control", "type: number", "placeholder: Número de cuenta"); @endphp
+				<input type="number" name="numcue" class="form-control" placeholder="Número de cuenta">
 				<label id="numcue-error" class="error" for="numcue"></label>
 			</div>
 		</div>
@@ -63,35 +80,50 @@
 		<div class='col-md-4' group-for='tipcue'>
 			<div class='d-flex align-items-center'>
 				<label for='tipcue' class='form-label me-2 mb-0 flex-shrink-0'>Tipo cuenta</label>
-				@php echo Tag::selectStatic("tipcue", $_tipcue, "use_dummy: true", "dummyValue: ", "class: form-select", "placeholder: Selecciona una opción"); @endphp
+				<select name="tipcue" class="form-control">
+                    <option value="">Seleccione un tipo de documento</option>
+                    @foreach($_tipcue as $key => $value)
+                        <option value="{{ $key }}">{{ $value }}</option>
+                    @endforeach
+                </select>
 			</div>
 		</div>
 
 		<div class='col-md-3' group-for='giro'>
 			<div class='d-flex align-items-center'>
 				<label for='giro' class='form-label me-2 mb-0 flex-shrink-0'>Giro</label>
-				@php echo Tag::selectStatic("giro", $_giro, "use_dummy: true", "dummyValue: ", "class: form-select", "placeholder: Selecciona una opción"); @endphp
+				<select name="giro" class="form-control">
+                    <option value="">Seleccione un tipo de documento</option>
+                    @foreach($_giro as $key => $value)
+                        <option value="{{ $key }}">{{ $value }}</option>
+                    @endforeach
+                </select>
 			</div>
 		</div>
 
 		<div class='col-md-4' group-for='codgir'>
 			<div class='d-flex align-items-center'>
 				<label for='codgir' class='form-label me-2 mb-0 flex-shrink-0'>Motivo no giro</label>
-				@php echo Tag::selectStatic("codgir", $_codgir, "use_dummy: true", "dummyValue: ", "class: form-select", "placeholder: Selecciona una opción"); @endphp
+				<select name="codgir" class="form-control">
+                    <option value="">Seleccione un tipo de documento</option>
+                    @foreach($_codgir as $key => $value)
+                        <option value="{{ $key }}">{{ $value }}</option>
+                    @endforeach
+                </select>
 			</div>
 		</div>
 
 		<div class='col-md-4' group-for='fecafi'>
 			<div class='d-flex align-items-center'>
 				<label for='fecafi' class='form-label me-2 mb-0 flex-shrink-0'>Fecha afiliación</label>
-				@php echo Tag::calendar("fecafi", "class: form-control", "placeholder: Fecha de afiliación"); @endphp
+				<input type="date" name="fecafi" class="form-control" placeholder="Fecha de afiliación">
 			</div>
 		</div>
 
 		<div class='col-md-4' group-for='fecapr'>
 			<div class='d-flex align-items-center'>
 				<label for='fecapr' class='form-label me-2 mb-0 flex-shrink-0'>Fecha aprobación resolución</label>
-				@php echo Tag::calendar("fecapr", "class: form-control", "placeholder: Fecha de aprobación"); @endphp
+				<input type="date" name="fecapr" class="form-control" placeholder="Fecha de aprobación">
 			</div>
 		</div>
 

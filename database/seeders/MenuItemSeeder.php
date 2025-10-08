@@ -20,7 +20,7 @@ class MenuItemSeeder extends Seeder
     {
         DB::transaction(function (): void {
             $this->limpiarTabla();
-            $menu_mercurio = [
+            $menu_caja = [
                 ["id" => 1, "title" => "Inicio", "default_url" => "cajas/principal/index", "icon" => "fas fa-home", "color" => "text-primary", "nota" => "texto", "position" => 1, "parent_id" => NULL, "is_visible" => 1, "codapl" => "CA", "tipo" => "A"],
                 ["id" => 2, "title" => "Estadística", "default_url" => "cajas/principal/dashboard", "icon" => "ni ni-hat-3", "color" => "text-pink", "nota" => "texto", "position" => 7, "parent_id" => NULL, "is_visible" => 1, "codapl" => "CA", "tipo" => "A"],
                 ["id" => 3, "title" => "Basicas", "default_url" => NULL, "icon" => "ni ni-bullet-list-67", "color" => "text-black", "nota" => NULL, "position" => 3, "parent_id" => NULL, "is_visible" => 1, "codapl" => "CA", "tipo" => "A"],
@@ -47,12 +47,12 @@ class MenuItemSeeder extends Seeder
                 ["id" => 24, "title" => "Pensionados", "default_url" => "cajas/aprobacionpen/index", "icon" => NULL, "color" => "text-primary", "nota" => "texto", "position" => "3", "parent_id" => "5", "is_visible" => "1", "codapl" => "CA", "tipo" => "A"],
                 ["id" => 25, "title" => "Facultativos", "default_url" => "cajas/aprobacionfac/index", "icon" => NULL, "color" => "text-primary", "nota" => "texto", "position" => "4", "parent_id" => "5", "is_visible" => "1", "codapl" => "CA", "tipo" => "A"],
                 ["id" => 26, "title" => "Madres Comunitarias", "default_url" => "cajas/aprobacioncom/index", "icon" => NULL, "color" => "text-primary", "nota" => "texto", "position" => "5", "parent_id" => "5", "is_visible" => "1", "codapl" => "CA", "tipo" => "A"],
-                ["id" => 28, "title" => "Datos Basicos Empresa", "default_url" => "cajas/actualizardatos/index", "icon" => NULL, "color" => "text-primary", "nota" => "texto", "position" => "7", "parent_id" => "5", "is_visible" => "1", "codapl" => "CA", "tipo" => "A"],
+                ["id" => 28, "title" => "Datos Basicos Empresa", "default_url" => "cajas/actualizaemp/index", "icon" => NULL, "color" => "text-primary", "nota" => "texto", "position" => "7", "parent_id" => "5", "is_visible" => "1", "codapl" => "CA", "tipo" => "A"],
                 ["id" => 29, "title" => "Trabajadores", "default_url" => "cajas/aprobaciontra/index", "icon" => NULL, "color" => "text-primary", "nota" => "texto", "position" => "1", "parent_id" => "6", "is_visible" => "1", "codapl" => "CA", "tipo" => "A"],
                 ["id" => 30, "title" => "Conyuge", "default_url" => "cajas/aprobacioncon/index", "icon" => NULL, "color" => "text-primary", "nota" => "texto", "position" => "2", "parent_id" => "6", "is_visible" => "1", "codapl" => "CA", "tipo" => "A"],
                 ["id" => 31, "title" => "Beneficiario", "default_url" => "cajas/aprobacionben/index", "icon" => NULL, "color" => "text-primary", "nota" => "texto", "position" => "3", "parent_id" => "6", "is_visible" => "1", "codapl" => "CA", "tipo" => "A"],
                 ["id" => 32, "title" => "Certificados", "default_url" => "cajas/aprobacioncer/index", "icon" => NULL, "color" => "text-primary", "nota" => "texto", "position" => "4", "parent_id" => "6", "is_visible" => "1", "codapl" => "CA", "tipo" => "A"],
-                ["id" => 33, "title" => "Datos Basicos Trabajador", "default_url" => "cajas/aprobaciondatos/index", "icon" => NULL, "color" => "text-primary", "nota" => "texto", "position" => "5", "parent_id" => "6", "is_visible" => "1", "codapl" => "CA", "tipo" => "A"],
+                ["id" => 33, "title" => "Datos Basicos Trabajador", "default_url" => "cajas/actualizatra/index", "icon" => NULL, "color" => "text-primary", "nota" => "texto", "position" => "5", "parent_id" => "6", "is_visible" => "1", "codapl" => "CA", "tipo" => "A"],
                 ["id" => 34, "title" => "Consulta de Auditoria", "default_url" => "cajas/consulta/consulta_auditoria_view", "icon" => NULL, "color" => "text-primary", "nota" => "texto", "position" => "1", "parent_id" => "7", "is_visible" => "1", "codapl" => "CA", "tipo" => "A"],
                 ["id" => 35, "title" => "Consulta de Activacion Masiva", "default_url" => "cajas/consulta/consulta_activacion_masiva_view", "icon" => NULL, "color" => "text-primary", "nota" => "texto", "position" => "2", "parent_id" => "7", "is_visible" => "1", "codapl" => "CA", "tipo" => "A"],
                 ["id" => 36, "title" => "Reasignar Solicitudes", "default_url" => "cajas/reasigna/index", "icon" => NULL, "color" => "text-primary", "nota" => "texto", "position" => "3", "parent_id" => "7", "is_visible" => "1", "codapl" => "CA", "tipo" => "A"],
@@ -78,7 +78,7 @@ class MenuItemSeeder extends Seeder
                 ["id" => 56, "title" => "Reportes solicitudes", "default_url" => "cajas/reportesol/index", "icon" => "ni ni-bullet-list-67", "color" => "text-success", "nota" => NULL, "position" => "10", "parent_id" => "10", "is_visible" => "1", "codapl" => "CA", "tipo" => "A"],
             ];
 
-            $menu_cajas = [
+            $menu_mercurio = [
                 ["id" => 178, "title" => "Inicio", "default_url" => "mercurio/principal/index", "icon" => "fas fa-home", "color" => "text-primary", "nota" => "texto", "position" => "1", "parent_id" => NULL, "is_visible" => "1", "codapl" => "ME", "tipo" => "T"],
                 ["id" => 179, "title" => "Reportar errores del sistema", "default_url" => "mercurio/notificaciones/index", "icon" => "fas fa-box", "color" => "text-red", "nota" => "texto", "position" => "10", "parent_id" => NULL, "is_visible" => "1", "codapl" => "ME", "tipo" => "T"],
                 ["id" => 180, "title" => "Productos y servicios", "default_url" => NULL, "icon" => "ni ni-briefcase-24", "color" => "text-orange", "nota" => NULL, "position" => "9", "parent_id" => NULL, "is_visible" => "1", "codapl" => "ME", "tipo" => "T"],
@@ -148,7 +148,7 @@ class MenuItemSeeder extends Seeder
                 MenuItem::create($item1);
             }
 
-            foreach ($menu_cajas as $item2) {
+            foreach ($menu_caja as $item2) {
                 MenuItem::create($item2);
             }
         });

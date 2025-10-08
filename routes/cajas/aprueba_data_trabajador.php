@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::middleware([CajasCookieAuthenticated::class])->group(function () {
-    Route::prefix('/cajas/actualizadatostra')->group(function () {
+    Route::prefix('/cajas/actualizatra')->group(function () {
         Route::get('/index', [ApruebaUpTrabajadorController::class, 'indexAction'])->name('aprueba_up_trabajador.index');
         Route::post('/aplicar_filtro/{estado?}', [ApruebaUpTrabajadorController::class, 'aplicarFiltroAction'])->name('aprueba_up_trabajador.aplicarFiltro');
         Route::post('/buscar/{estado?}', [ApruebaUpTrabajadorController::class, 'buscarAction'])->name('aprueba_up_trabajador.buscar');

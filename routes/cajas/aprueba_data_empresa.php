@@ -5,7 +5,7 @@ use App\Http\Middleware\CajasCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware([CajasCookieAuthenticated::class])->group(function () {
-    Route::prefix('/cajas/actualizardatos')->group(function () {
+    Route::prefix('/cajas/actualizaemp')->group(function () {
         Route::get('/index', [ApruebaUpEmpresaController::class, 'indexAction'])->name('aprueba_up_empresa.index');
         Route::post('/aplicar_filtro/{estado?}', [ApruebaUpEmpresaController::class, 'aplicarFiltroAction'])->name('aprueba_up_empresa.aplicarFiltro');
         Route::post('/change_cantidad_pagina', [ApruebaUpEmpresaController::class, 'changeCantidadPaginaAction'])->name('aprueba_up_empresa.changeCantidadPagina');

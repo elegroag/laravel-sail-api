@@ -64,9 +64,8 @@ class ApruebaTrabajadorController extends ApplicationController
      */
     public function aplicarFiltroAction(Request $request, string $estado = 'P')
     {
-        $this->setResponse("ajax");
         $cantidad_pagina = $request->input("numero", 10);
-        $usuario = session()->get('user');
+        $usuario = $this->user['usuario'];
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
@@ -92,9 +91,9 @@ class ApruebaTrabajadorController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function changeCantidadPaginaAction($estado = 'P')
+    public function changeCantidadPaginaAction(Request $request, string $estado = 'P')
     {
-        # $this->buscarAction($estado);
+        $this->buscarAction($request, $estado);
     }
 
     /**
@@ -134,7 +133,7 @@ class ApruebaTrabajadorController extends ApplicationController
         $this->setResponse("ajax");
         $pagina = ($request->input('pagina')) ? $request->input('pagina') : 1;
         $cantidad_pagina = ($request->input("numero")) ? $request->input("numero") : 10;
-        $usuario = parent::getActUser();
+        $usuario = $this->user['usuario'];
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
@@ -569,12 +568,16 @@ class ApruebaTrabajadorController extends ApplicationController
         foreach (ParamsTrabajador::getZonas() as $ai => $valor) {
             if ($ai < 19001 && $ai >= 18001) $_codzon[$ai] = $valor;
         }
-        $_tipsal = $this->Mercurio31->getTipsalArray();
+        $_tipsal = (new Mercurio31)->getTipsalArray();
         return [
             "_ciunac" => $_ciunac,
             "_tipsal" => $_tipsal,
             "_codciu" => $_codciu,
             "_codzon" => $_codzon,
+            "_codind" => [],
+            "_todmes" => [],
+            "_tipapo" => [],
+            "_tipsoc" => [],
             "_coddoc" => ParamsTrabajador::getTiposDocumentos(),
             "_sexo" => ParamsTrabajador::getSexos(),
             "_estciv" => ParamsTrabajador::getEstadoCivil(),

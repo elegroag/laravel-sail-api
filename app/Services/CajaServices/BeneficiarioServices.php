@@ -110,7 +110,7 @@ class BeneficiarioServices
      */
     public function getTemplateTable()
     {
-        /* return template_tables(); */
+        return Table::TmpGeneral();
     }
 
     /**
@@ -304,7 +304,7 @@ class BeneficiarioServices
             }
 
             $method = ($mercurio->getEstado() == 'A') ? "infoAprobadoView" : "info";
-            $url = Core::getInstancePath() . Router::getApplication() . '/' . $this->controller_name . '/' . $method . '/' . $mercurio->getId();
+            $url = base_path() . '/' . config('app.url') . '/' . $this->controller_name . '/' . $method . '/' . $mercurio->getId();
 
             $sat = "NORMAL";
             $beneficiarios[] = array(

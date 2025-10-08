@@ -35,7 +35,7 @@
 </script>
 
 <script type="text/template" id='tmp_aprobar'>
-    @include('cajas/actualizardatos/tmp/tmp_aprobar')
+    @include('cajas/actualizatra/tmp/tmp_aprobar')
 </script>
 
 <script id='tmp_aportes' type='text/template'>
@@ -58,14 +58,11 @@
     <div id='consulta' class='table-responsive'></div>
     <div id='paginate' class='card-footer py-4'></div>
     <div class='card-footer'>
-        <div style='float:right'>
-            <a class='btn btn-xs' id='btPendienteEmail' data-href="actualizardatos/pendiente_email">Procesar Notificación Pendiente</a>
-        </div>
     </div>
     <div id='filtro'></div>
 </script>
 
-<script src="{{ asset('js/cajas/actualizardatos.js') }}"></script>
+<script src="{{ asset('cajas/build/DatosTrabajador.js') }}"></script>
 @endpush
 
 @section('content')

@@ -20,6 +20,8 @@ use App\Library\DbException;
 use Illuminate\Support\Facades\View;
 use App\Services\Utils\NotifyEmailServices;
 use App\Library\Collections\ParamsConyuge;
+use App\Models\Mercurio11;
+use App\Services\Srequest;
 use App\Services\Utils\Comman;
 
 class ApruebaConyugeController extends ApplicationController
@@ -68,11 +70,11 @@ class ApruebaConyugeController extends ApplicationController
     {
         $this->setResponse("ajax");
         $cantidad_pagina = $request->input("numero", 10);
-        $usuario = parent::getActUser();
+        $usuario = $this->user['usuario'];
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
-            new Request([
+            new Srequest([
                 "cantidadPaginas" => $cantidad_pagina,
                 "query" => $query_str,
                 "estado" => $estado
@@ -101,9 +103,9 @@ class ApruebaConyugeController extends ApplicationController
      * @param string $estado
      * @return void
      */
-    public function changeCantidadPaginaAction($estado = 'P')
+    public function changeCantidadPaginaAction(Request $request, string $estado = 'P')
     {
-        //$this->buscarAction($estado);
+        $this->buscarAction($request, $estado);
     }
 
     /**
@@ -127,12 +129,16 @@ class ApruebaConyugeController extends ApplicationController
             "fecsol" => "Fecha Solicitud",
         );
 
-        $this->setParamToView("campo_filtro", $campo_field);
-        $this->setParamToView("filters", get_flashdata_item("filter_params"));
-        $this->setParamToView("title", "Aprueba Conyuge");
-        $this->setParamToView("buttons", array("F"));
-        $this->setParamToView("mercurio11", $this->Mercurio11->find());
-        $this->loadParametrosView();
+        $params = $this->loadParametrosView();
+
+        return view("cajas.aprobacioncon.index", [
+            ...$params,
+            "campo_filtro" => $campo_field,
+            "filters" => get_flashdata_item("filter_params"),
+            "title" => "Aprueba Conyuge",
+            "buttons" => array("F"),
+            "mercurio11" => Mercurio11::get(),
+        ]);
     }
 
     /**
@@ -468,28 +474,29 @@ class ApruebaConyugeController extends ApplicationController
             if ($ai < 19001 && $ai >= 18001) $_codciu[$ai] = $valor;
         }
 
-        $this->setParamToView("_coddoc", ParamsConyuge::getTiposDocumentos());
-        $this->setParamToView("_sexo", ParamsConyuge::getSexos());
-        $this->setParamToView("_estciv", ParamsConyuge::getEstadoCivil());
-        $this->setParamToView("_codciu", $_codciu);
-        $this->setParamToView("_codzon", ParamsConyuge::getZonas());
-        $this->setParamToView("_captra", ParamsConyuge::getCapacidadTrabajar());
-        $this->setParamToView("_nivedu", ParamsConyuge::getNivelEducativo());
-        $this->setParamToView("_ciunac", $_ciunac);
-        $this->setParamToView("_tippag", ParamsConyuge::getTipoPago());
-        $this->setParamToView("_codcue", ParamsConyuge::getCodigoCuenta());
-        $this->setParamToView("_tipcue", ParamsConyuge::getTipoCuenta());
-        $this->setParamToView("_recsub", ParamsConyuge::getRecibeSubsidio());
-        $this->setParamToView("_comper", ParamsConyuge::getCompaneroPermanente());
-        $this->setParamToView("_bancos", ParamsConyuge::getBancos());
-        $this->setParamToView("_ciures", $_ciures);
-        $this->setParamToView("_vivienda", ParamsConyuge::getVivienda());
-        $this->setParamToView("_codocu", ParamsConyuge::getOcupaciones());
-
         $mercurio32 = new Mercurio32();
-        $this->setParamToView("_tipsal", $mercurio32->getTipsalArray());
-        $this->setParamToView("tipo",   parent::getActUser("tipo"));
-        $this->setParamToView("tipopc",  $this->tipopc);
+        return [
+            "_coddoc" => ParamsConyuge::getTiposDocumentos(),
+            "_sexo" => ParamsConyuge::getSexos(),
+            "_estciv" => ParamsConyuge::getEstadoCivil(),
+            "_codciu" => $_codciu,
+            "_codzon" => ParamsConyuge::getZonas(),
+            "_captra" => ParamsConyuge::getCapacidadTrabajar(),
+            "_nivedu" => ParamsConyuge::getNivelEducativo(),
+            "_ciunac" => $_ciunac,
+            "_tippag" => ParamsConyuge::getTipoPago(),
+            "_codcue" => ParamsConyuge::getCodigoCuenta(),
+            "_tipcue" => ParamsConyuge::getTipoCuenta(),
+            "_recsub" => ParamsConyuge::getRecibeSubsidio(),
+            "_comper" => ParamsConyuge::getCompaneroPermanente(),
+            "_bancos" => ParamsConyuge::getBancos(),
+            "_ciures" => $_ciures,
+            "_vivienda" => ParamsConyuge::getVivienda(),
+            "_codocu" => ParamsConyuge::getOcupaciones(),
+            "_tipsal" => $mercurio32->getTipsalArray(),
+            "tipo" =>   parent::getActUser("tipo"),
+            "tipopc" =>  $this->tipopc,
+        ];
     }
 
     /**

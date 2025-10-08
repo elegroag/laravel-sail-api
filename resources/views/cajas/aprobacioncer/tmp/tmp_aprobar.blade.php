@@ -1,6 +1,3 @@
-@php
-use App\Services\Tag;
-@endphp
 <h4>Aprobar</h4>
 <p>Esta opción es para aprobar el certificado.</p>
 
@@ -9,7 +6,7 @@ use App\Services\Tag;
 		<div class='col-md-4' group-for='fecapr'>
 			<div class='d-flex align-items-center'>
 				<label for='fecapr' class='form-label me-2 mb-0 flex-shrink-0'>Fecha aprobación resolución</label>
-				@php echo Tag::calendar("fecapr", "class: form-control", "placeholder: Fecha de aprobación"); @endphp
+				<input type="date" class="form-control" id="fecapr" name="fecapr">
 			</div>
 		</div>
 

@@ -11,10 +11,10 @@ use App\Services\Utils\Pagination;
 use App\Services\CajaServices\CertificadosServices;
 use App\Models\Mercurio10;
 use App\Models\Mercurio45;
-use App\Models\Mercurio07;
 use App\Models\Gener42;
+use App\Models\Mercurio11;
 use App\Services\Aprueba\ApruebaCertificado;
-use App\Services\Request as ServicesRequest;
+use App\Services\Srequest;
 use Illuminate\Support\Facades\View;
 use App\Services\Utils\SenderEmail;
 
@@ -41,12 +41,11 @@ class ApruebaCertificadoController extends ApplicationController
 
     public function aplicarFiltroAction(Request $request, string $estado = 'P')
     {
-        $this->setResponse("ajax");
         $cantidad_pagina = $request->input("numero", 10);
-        $usuario = parent::getActUser();
+        $usuario = $this->user['usuario'];
 
         $pagination = new Pagination(
-            new Request(
+            new Srequest(
                 array(
                     "cantidadPaginas" => $cantidad_pagina,
                     "query" => "usuario='{$usuario}' and estado='{$estado}'",
@@ -80,11 +79,13 @@ class ApruebaCertificadoController extends ApplicationController
             "nombre" => "Primer Apellido",
         );
 
-        $this->setParamToView("campo_filtro", $campo_field);
-        $this->setParamToView("title", "Aprobacion Certificados");
-        $this->setParamToView("buttons", array("F"));
-        $this->setParamToView("mercurio11", $this->Mercurio11->find());
-        //Tag::setDocumentTitle('Aprobacion Certificados');
+        return view("cajas.aprobacioncer.index", [
+            "campo_filtro" => $campo_field,
+            "filters" => get_flashdata_item("filter_params"),
+            "title" => "Aprueba Certificado",
+            "buttons" => array("F"),
+            "mercurio11" => Mercurio11::all(),
+        ]);
     }
 
     public function buscarAction(Request $request, string $estado = 'P')
@@ -95,7 +96,7 @@ class ApruebaCertificadoController extends ApplicationController
         $usuario = parent::getActUser();
 
         $pagination = new Pagination(
-            new Request(
+            new Srequest(
                 array(
                     "cantidadPaginas" => $cantidad_pagina,
                     "query" => "usuario='{$usuario}' and estado='{$estado}'",
@@ -239,11 +240,13 @@ class ApruebaCertificadoController extends ApplicationController
             $mercurio07 = $this->Mercurio07->findFirst("tipo='{$mercurio45->getTipo()}' and coddoc='{$mercurio45->getCoddoc()}' and documento = '{$mercurio45->getDocumento()}'");
             $asunto = "Certificado";
             $msj  = "acabas de utilizar";
-            $senderEmail = new SenderEmail(new ServicesRequest([
-                "email_emisor" => $mercurio07->getEmail(),
-                "email_clave" => $mercurio07->getClave(),
-                "asunto" => $asunto,
-            ]));
+            $senderEmail = new SenderEmail(
+                new Srequest([
+                    "email_emisor" => $mercurio07->getEmail(),
+                    "email_clave" => $mercurio07->getClave(),
+                    "asunto" => $asunto,
+                ])
+            );
 
             $senderEmail->send($mercurio07->getEmail(), $asunto);
             $this->db->commit();

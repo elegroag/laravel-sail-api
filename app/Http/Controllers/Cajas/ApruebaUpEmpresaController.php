@@ -83,7 +83,7 @@ class ApruebaUpEmpresaController extends ApplicationController
         );
 
         $params = $this->loadParametrosView();
-        return view('cajas.actualizardatos.index', [
+        return view('cajas.actualizaemp.index', [
             ...$params,
             "campo_filtro" => $campo_field,
             "filters" => get_flashdata_item("filter_params"),

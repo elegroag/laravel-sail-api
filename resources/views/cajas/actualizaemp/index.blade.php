@@ -35,7 +35,7 @@
 </script>
 
 <script type="text/template" id='tmp_aprobar'>
-    @include('cajas/aprobaciondatos/tmp/tmp_aprobar')
+    @include('cajas/actualizaemp/tmp/tmp_aprobar')
 </script>
 
 <script id='tmp_aportes' type='text/template'>
@@ -57,12 +57,10 @@
 <script id='tmp_table' type="text/template">
     <div id='consulta' class='table-responsive'></div>
     <div id='paginate' class='card-footer py-4'></div>
-    <div class='card-footer'>
-    </div>
     <div id='filtro'></div>
 </script>
 
-<script src="{{ asset('Cajas/build/AprobacionDatos.js') }}"></script>
+<script src="{{ asset('cajas/build/DatosEmpresa.js') }}"></script>
 @endpush
 
 @section('content')

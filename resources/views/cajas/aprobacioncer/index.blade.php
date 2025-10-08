@@ -63,7 +63,7 @@
 	<div id='filtro'></div>
 </script>
 
-<script src="{{ asset('Cajas/build/Certificados.js') }}"></script>
+<script src="{{ asset('cajas/build/Certificados.js') }}"></script>
 @endpush
 
 @section('content')

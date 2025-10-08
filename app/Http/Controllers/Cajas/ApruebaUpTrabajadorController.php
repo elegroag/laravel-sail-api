@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\View;
 use App\Services\Utils\SenderEmail;
 use App\Library\Collections\ParamsTrabajador;
 use App\Models\Mercurio11;
+use App\Models\Mercurio31;
 use App\Services\Srequest;
 use App\Services\Utils\Comman;
 
@@ -82,7 +83,7 @@ class ApruebaUpTrabajadorController extends ApplicationController
         );
 
         $params = $this->loadParametrosView();
-        return view('cajas.actualizardatos.index', [
+        return view('cajas.actualizatra.index', [
             ...$params,
             "campo_filtro" => $campo_field,
             "filters" => get_flashdata_item("filter_params"),
@@ -110,7 +111,7 @@ class ApruebaUpTrabajadorController extends ApplicationController
         foreach (ParamsTrabajador::getZonas() as $ai => $valor) {
             if ($ai < 19001 && $ai >= 18001) $_codzon[$ai] = $valor;
         }
-        $_tipsal = $this->Mercurio31->getTipsalArray();
+        $_tipsal = (new Mercurio31())->getTipsalArray();
         return [
             "_ciunac" => $_ciunac,
             "_tipsal" => $_tipsal,
@@ -230,7 +231,7 @@ class ApruebaUpTrabajadorController extends ApplicationController
 
             $datostra = array_merge($datosTraSisu, $mercurio47->getArray(), $dataItems);
 
-            $htmlEmpresa = View::render('aprobaciondatos/tmp/consulta', array(
+            $htmlEmpresa = View::render('cajas/actualizatra/tmp/consulta', array(
                 'datostra' => $datostra,
                 'dataItems' => $dataItems,
                 'mercurio01' => $this->Mercurio01->findFirst(),

@@ -22,6 +22,7 @@ use App\Library\DbException;
 use App\Models\Mercurio07;
 use App\Library\View;
 use App\Library\Exception;
+use App\Models\Mercurio11;
 use App\Services\Srequest;
 use App\Services\Utils\AsignarFuncionario;
 
@@ -62,9 +63,8 @@ class ApruebaBeneficiarioController extends ApplicationController
      */
     public function aplicarFiltroAction(Request $request, string $estado = 'P')
     {
-        $this->setResponse("ajax");
         $cantidad_pagina = $request->input("numero", 10);
-        $usuario = parent::getActUser();
+        $usuario = $this->user['usuario'];
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
@@ -87,9 +87,9 @@ class ApruebaBeneficiarioController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function changeCantidadPaginaAction($estado = 'P')
+    public function changeCantidadPaginaAction(Request $request, $estado = 'P')
     {
-        //$this->buscarAction($estado);
+        $this->buscarAction($request, $estado);
     }
 
     /**
@@ -112,12 +112,17 @@ class ApruebaBeneficiarioController extends ApplicationController
             "cedtra" => "Cedula trabajador",
             "fecsol" => "Fecha solicitud",
         );
-        $this->setParamToView("campo_filtro", $campo_field);
-        $this->setParamToView("filters", get_flashdata_item("filter_params"));
-        $this->setParamToView("title", "Aprueba Beneficiario");
-        $this->setParamToView("buttons", array("F"));
-        $this->setParamToView("mercurio11", $this->Mercurio11->find());
-        $this->loadParametrosView();
+
+        $params = $this->loadParametrosView();
+
+        return view("cajas.aprobacionben.index", [
+            ...$params,
+            "campo_filtro" => $campo_field,
+            "filters" => get_flashdata_item("filter_params"),
+            "title" => "Aprueba Beneficiario",
+            "buttons" => array("F"),
+            "mercurio11" => Mercurio11::get(),
+        ]);
     }
 
     /**
@@ -137,7 +142,7 @@ class ApruebaBeneficiarioController extends ApplicationController
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
-            new Request([
+            new Srequest([
                 "cantidadPaginas" => $cantidad_pagina,
                 "query" => $query_str,
                 "estado" => $estado,
@@ -468,22 +473,24 @@ class ApruebaBeneficiarioController extends ApplicationController
         $paramsBeneficiario = new ParamsBeneficiario();
         $paramsBeneficiario->setDatosCaptura($procesadorComando->toArray());
 
-        $this->setParamToView("_cedcon", array());
-        $this->setParamToView("_giro", ParamsBeneficiario::getTieneGiro());
-        $this->setParamToView("_pago", ParamsBeneficiario::getPago());
-        $this->setParamToView("_coddoc", ParamsBeneficiario::getTiposDocumentos());
-        $this->setParamToView("_sexo", ParamsBeneficiario::getSexos());
-        $this->setParamToView("_estciv", ParamsBeneficiario::getEstadoCivil());
-        $this->setParamToView("_ciunac", ParamsBeneficiario::getCiudades());
-        $this->setParamToView("_captra", ParamsBeneficiario::getCapacidadTrabajar());
-        $this->setParamToView("_parent", ParamsBeneficiario::getParentesco());
-        $this->setParamToView("_huerfano", ParamsBeneficiario::getHuerfano());
-        $this->setParamToView("_tiphij", ParamsBeneficiario::getTipoHijo());
-        $this->setParamToView("_nivedu", ParamsBeneficiario::getNivelEducativo());
-        $this->setParamToView("_tipdis", ParamsBeneficiario::getTipoDiscapacidad());
-        $this->setParamToView("_calendario", ParamsBeneficiario::getCalendario());
-        $this->setParamToView("_codgir", ParamsBeneficiario::getCodigoGiro());
-        $this->setParamToView("tipo", parent::getActUser("tipo"));
+        return [
+            "_cedcon" => [],
+            "_giro" => ParamsBeneficiario::getTieneGiro(),
+            "_pago" => ParamsBeneficiario::getPago(),
+            "_coddoc" => ParamsBeneficiario::getTiposDocumentos(),
+            "_sexo" => ParamsBeneficiario::getSexos(),
+            "_estciv" => ParamsBeneficiario::getEstadoCivil(),
+            "_ciunac" => ParamsBeneficiario::getCiudades(),
+            "_captra" => ParamsBeneficiario::getCapacidadTrabajar(),
+            "_parent" => ParamsBeneficiario::getParentesco(),
+            "_huerfano" => ParamsBeneficiario::getHuerfano(),
+            "_tiphij" => ParamsBeneficiario::getTipoHijo(),
+            "_nivedu" => ParamsBeneficiario::getNivelEducativo(),
+            "_tipdis" => ParamsBeneficiario::getTipoDiscapacidad(),
+            "_calendario" => ParamsBeneficiario::getCalendario(),
+            "_codgir" => ParamsBeneficiario::getCodigoGiro(),
+            "tipo" => ""
+        ];
     }
 
     public function editar_solicitudAction(Request $request)
