@@ -7,15 +7,15 @@
 
 @push('scripts')
     <script id='tmp_filtro' type="text/template">
-        @php echo Tag::filtro($campo_filtro, 'aplicar_filtro'); @endphp
+        @include('cajas/templates/tmp_filtro', ['campo_filtro' => $campo_filtro])
     </script>
 
     <script type="text/template" id='tmp_layout'>
-        @php echo View::renderView("usuario/tmp/tmp_layout"); @endphp
+        @include('cajas/usuario/tmp/tmp_layout')
     </script>
 
     <script type="text/template" id='tmp_header'>
-        @php echo View::renderView("templates/tmp_header"); @endphp
+        @include('cajas/templates/tmp_header')
     </script>
 
     <script type="text/template" id='tmp_tabla_usuarios'>
@@ -26,7 +26,7 @@
     </script>
 
     <script type="text/template" id='tmp_detalle'>
-        @php echo View::renderView("usuario/tmp/tmp_detalle"); @endphp
+        @include('cajas/usuario/tmp/tmp_detalle')
     </script>
 
     <script id='tmp_list_header' type="text/template">
@@ -42,7 +42,7 @@
         </div>
     </script>
 
-    <script src="{{ asset('Cajas/build/Usuario.js') }}"></script>
+    <script src="{{ asset('cajas/build/Usuario.js') }}"></script>
 @endpush
 
 @section('content')

@@ -1,5 +1,4 @@
 import { ComponentModel } from '@/Componentes/Models/ComponentModel';
-import { $App } from '@/App';
 import {
 	DialogComponent,
 	RadioComponent,
@@ -78,19 +77,19 @@ class DetalleUsuarioView extends Backbone.View {
 		const documento = this.model.get('documento');
 		const tipo = this.model.get('tipo');
 		const coddoc = this.model.get('coddoc');
-		$App.router.navigate('editar/' + documento + '/' + tipo + '/' + coddoc, {
+		window.App.router.navigate('editar/' + documento + '/' + tipo + '/' + coddoc, {
 			trigger: true,
 		});
 	}
 
 	closeEdit(e) {
 		e.preventDefault();
-		$App.trigger('confirma', {
+		window.App.trigger('confirma', {
 			message: 'Confirma que desea salir del modo edición de Perfil.',
 			callback: (status) => {
 				if (status) {
 					this.remove();
-					$App.router.navigate('list', { trigger: true });
+					window.App.router.navigate('list', { trigger: true });
 				}
 			},
 		});
@@ -140,7 +139,7 @@ class DetalleUsuarioView extends Backbone.View {
 	}
 
 	addComponent(model, type) {
-		const collection = $App.Collections.formParams;
+		const collection = window.App.Collections.formParams;
 		let view;
 		if (_.size(this.children) > 0) {
 			if (_.indexOf(this.children, model.get('cid')) != -1) {
@@ -183,7 +182,7 @@ class DetalleUsuarioView extends Backbone.View {
 
 		if (_err > 0) {
 			target.removeAttr('disabled');
-			$App.trigger('alert:warning', {
+			window.App.trigger('alert:warning', {
 				message: 'Se requiere de resolver los campos requeridos para continuar.',
 			});
 			setTimeout(() => this.$el.find('label.error').text(''), 6000);
@@ -200,12 +199,12 @@ class DetalleUsuarioView extends Backbone.View {
 
 		if (entity.isValid() !== true) {
 			target.removeAttr('disabled');
-			$App.trigger('alert:warning', { message: entity.validationError.join('<br/>') });
+			window.App.trigger('alert:warning', { message: entity.validationError.join('<br/>') });
 			setTimeout(() => $('label.error').text(''), 6000);
 			return false;
 		}
 
-		$App.trigger('confirma', {
+		window.App.trigger('confirma', {
 			message: 'Confirma que desea guardar los datos del formulario.',
 			callback: (status) => {
 				if (status) {
@@ -236,7 +235,7 @@ class DetalleUsuarioView extends Backbone.View {
 										const coddoc = this.model.get('coddoc');
 										this.remove();
 
-										$App.router.navigate(
+										window.App.router.navigate(
 											'detalle/' + documento + '/' + tipo + '/' + coddoc,
 											{
 												trigger: true,
@@ -244,7 +243,7 @@ class DetalleUsuarioView extends Backbone.View {
 										);
 									});
 								} else {
-									$App.trigger('alert:error', { message: response.msj });
+									window.App.trigger('alert:error', { message: response.msj });
 								}
 							}
 						},

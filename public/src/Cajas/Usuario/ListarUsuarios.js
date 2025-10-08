@@ -1,4 +1,3 @@
-import { $App } from '@/App';
 import { UsuariosCollection } from './collections/UsuariosCollection';
 import { LayoutUsuario } from './views/LayoutUsuario';
 import { TableUsuariosView } from './views/TableUsuariosView';
@@ -9,7 +8,7 @@ export default class ListarUsuarios {
 	constructor(options) {
 		this.region = options.region;
 		_.extend(this, Backbone.Events);
-		$App.Collections.usuarios = new UsuariosCollection();
+		window.App.Collections.usuarios = new UsuariosCollection();
 	}
 
 	listarUsuarios(tipo = '') {
@@ -49,10 +48,10 @@ export default class ListarUsuarios {
 		const { callback = void 0, cantidad = 10, tipo = '' } = transfer;
 		const url =
 			tipo !== '' && tipo !== null && tipo !== undefined
-				? 'aplicarFiltro/' + tipo
-				: 'aplicarFiltro';
+				? 'aplicar_filtro/' + tipo
+				: 'aplicar_filtro';
 
-		$App.trigger('syncro', {
+		window.App.trigger('syncro', {
 			url: url,
 			data: {
 				campo: $("input[type='hidden'][name='mcampo-filtro[]']").serialize(),
@@ -68,8 +67,8 @@ export default class ListarUsuarios {
 
 	__borrarUsuario(transfer = {}) {
 		const { callback = void 0, data = void 0 } = transfer;
-		const url = 'borrarUsuario';
-		$App.trigger('syncro', {
+		const url = 'borrar_usuario';
+		window.App.trigger('syncro', {
 			url: url,
 			data: data,
 			callback: (response) => {
@@ -89,10 +88,10 @@ export default class ListarUsuarios {
 		const { callback = void 0, cantidad = 10, pagina = 1, tipo = '' } = transfer;
 		const url =
 			tipo !== '' && tipo !== null && tipo !== undefined
-				? 'changeCantidadPagina/' + tipo
-				: 'changeCantidadPagina';
+				? 'change_cantidad_pagina/' + tipo
+				: 'change_cantidad_pagina';
 
-		$App.trigger('syncro', {
+		window.App.trigger('syncro', {
 			url: url,
 			data: {
 				pagina: pagina,
@@ -108,7 +107,7 @@ export default class ListarUsuarios {
 		const { callback = void 0, cantidad = 10, pagina = 0, tipo = '' } = transfer;
 		const url =
 			tipo !== '' && tipo !== null && tipo !== undefined ? 'buscar/' + tipo : 'buscar';
-		$App.trigger('syncro', {
+		window.App.trigger('syncro', {
 			url: url,
 			data: {
 				pagina: pagina,

@@ -1,4 +1,3 @@
-import { $App } from '@/App';
 import { ControllerUsuario } from './ControllerUsuario';
 
 class RouterUsuario extends Backbone.Router {
@@ -13,13 +12,13 @@ class RouterUsuario extends Backbone.Router {
 			},
 		});
 
-		this.currentApp = $App.startSubApplication(ControllerUsuario);
+		this.currentApp = window.App.startSubApplication(ControllerUsuario);
 		this._bindRoutes();
 	}
 
 	detalleUsuario(id = '', tipo = '', coddoc = '') {
 		if (_.isUndefined(id) == true || _.isNull(id) == true || id == '') {
-			$App.trigger('alert:error', {
+			window.App.trigger('alert:error', {
 				message: 'No hay un usuario seleccionado para continuar.',
 			});
 			this.navigate('list', { trigger: true });
@@ -30,7 +29,7 @@ class RouterUsuario extends Backbone.Router {
 
 	editarUsuario(id = '', tipo = '', coddoc = '') {
 		if (_.isUndefined(id) == true || _.isNull(id) == true || id == '') {
-			$App.trigger('alert:error', {
+			window.App.trigger('alert:error', {
 				message: 'No hay un usuario seleccionado para continuar.',
 			});
 			this.navigate('list', { trigger: true });

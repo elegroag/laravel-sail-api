@@ -1,6 +1,8 @@
 import { $App } from '@/App';
 import { RouterUsuario } from './RouterUsuario';
 
+window.App = $App;
+
 $(() => {
-	$App.startApp(RouterUsuario, 'list', '#boneLayout');
+	window.App.startApp(RouterUsuario, 'list', '#boneLayout');
 });

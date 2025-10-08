@@ -1,7 +1,4 @@
 import { FiltroView } from '@/Componentes/Views/FiltroView';
-import { ModelView } from '@/Common/ModelView';
-import { Region } from '@/Common/Region';
-import { $App } from '@/App';
 
 class TableUsuariosView extends Backbone.View {
 	constructor(options = {}) {
@@ -92,7 +89,7 @@ class TableUsuariosView extends Backbone.View {
 		const documento = target.attr('data-cid');
 		const tipo = target.attr('data-tipo');
 		const coddoc = target.attr('data-coddoc');
-		$App.router.navigate('detalle/' + documento + '/' + tipo + '/' + coddoc, {
+		window.App.router.navigate('detalle/' + documento + '/' + tipo + '/' + coddoc, {
 			trigger: true,
 		});
 	}
@@ -104,7 +101,7 @@ class TableUsuariosView extends Backbone.View {
 		const tipo = target.attr('data-tipo');
 		const coddoc = target.attr('data-coddoc');
 
-		$App.trigger('confirma', {
+		window.App.trigger('confirma', {
 			message:
 				'Confirma que desea eliminar el usuario. Está acción borra todo registro asociado al usuario, como solicitudes de afiliación de trabajadores, beneficiarios, etc.',
 			title: '¿Confirmar?',
@@ -122,12 +119,12 @@ class TableUsuariosView extends Backbone.View {
 								target.find('a').parent('tr').remove();
 								this.__applyFiltro();
 
-								$App.trigger('alert:success', {
+								window.App.trigger('alert:success', {
 									message: 'El usuario se ha eliminado exitosamente.',
 								});
-								$App.router.navigate('list', { trigger: true });
+								window.App.router.navigate('list', { trigger: true });
 							} else {
-								$App.trigger('alert:error', {
+								window.App.trigger('alert:error', {
 									message: 'Ocurrió un error al eliminar el usuario.',
 								});
 							}

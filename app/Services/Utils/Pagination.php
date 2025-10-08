@@ -14,12 +14,7 @@ class Pagination
 
     public function __construct(Srequest|null $argv = null)
     {
-        if ($argv instanceof Srequest) {
-            $this->cantidadPaginas = $argv->getParam('cantidadPaginas');
-            $this->query = $argv->getParam('query');
-            $this->estado = $argv->getParam('estado');
-            if ($argv->getParam('pagina')) $this->pagina = $argv->getParam('pagina');
-        }
+        $this->setters($argv);
     }
 
     /**
@@ -106,11 +101,14 @@ class Pagination
         return $data;
     }
 
-    public function setters(...$params)
+    public function setters(Srequest|null $argv = null)
     {
-        $arguments = get_params_destructures($params);
-        foreach ($arguments as $prop => $valor) if (property_exists($this, $prop)) $this->$prop = "{$valor}";
-        return $this;
+        if ($argv instanceof Srequest) {
+            $this->cantidadPaginas = $argv->getParam('cantidadPaginas');
+            $this->query = $argv->getParam('query');
+            $this->estado = $argv->getParam('estado');
+            if ($argv->getParam('pagina')) $this->pagina = $argv->getParam('pagina');
+        }
     }
 
     /**

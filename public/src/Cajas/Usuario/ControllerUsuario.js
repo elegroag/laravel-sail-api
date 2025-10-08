@@ -1,4 +1,3 @@
-import { $App } from '@/App';
 import { Controller } from '@/Common/Controller';
 import { UsuarioModel } from './models/UsuarioModel';
 import { DetalleUsuario } from './DetalleUsuario';
@@ -11,7 +10,7 @@ class ControllerUsuario extends Controller {
 
 	detalleUsuario(documento, tipo, coddoc) {
 		this.startController(DetalleUsuario);
-		$App.trigger('syncro', {
+		this.App.trigger('syncro', {
 			data: {
 				documento: documento,
 				tipo: tipo,
@@ -31,7 +30,7 @@ class ControllerUsuario extends Controller {
 
 	editarUsuario(documento, tipo, coddoc) {
 		this.startController(DetalleUsuario);
-		$App.trigger('syncro', {
+		this.App.trigger('syncro', {
 			data: {
 				documento: documento,
 				tipo: tipo,

@@ -123,7 +123,7 @@ class PrincipalController extends ApplicationController
                         'temporales' => Mercurio33::where(["estado" => 'T', "usuario" => $user])->count(),
                     ),
                     'icon' => 'AE',
-                    'url' => 'actualizardatos/index',
+                    'url' => 'actualizaemp/index',
                     'imagen' => 'empresas.jpg',
                 ),
                 array(
@@ -136,7 +136,7 @@ class PrincipalController extends ApplicationController
                         'temporales' => Mercurio47::where(["estado" => 'T', "usuario" => $user])->count(),
                     ),
                     'icon' => 'AT',
-                    'url' => 'aprobaciondatos/index',
+                    'url' => 'actualizatra/index',
                     'imagen' => 'datos_basicos.jpg',
                 )
             ),

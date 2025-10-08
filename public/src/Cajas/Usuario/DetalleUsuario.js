@@ -1,9 +1,6 @@
-import { UsuarioModel } from './models/UsuarioModel';
 import { LayoutUsuario } from './views/LayoutUsuario';
 import { DetalleUsuarioView } from './views/DetalleUsuarioView';
-import { HeaderListView } from '@/Cajas/HeaderListView';
 import { HeaderCajasView } from '@/Cajas/HeaderCajasView';
-import { $App } from '@/App';
 
 export class DetalleUsuario {
 	layout = null;
@@ -11,7 +8,7 @@ export class DetalleUsuario {
 	constructor(options) {
 		this.region = options.region;
 		_.extend(this, Backbone.Events);
-		$App.Collections.formParams = null;
+		window.App.Collections.formParams = null;
 	}
 
 	detalleUsuario(model) {
@@ -28,12 +25,12 @@ export class DetalleUsuario {
 
 		this.layout.getRegion('header').show(this.headerMain);
 
-		$App.trigger('syncro', {
+		window.App.trigger('syncro', {
 			url: 'params',
 			data: {},
 			callback: (response) => {
-				if (_.isNull($App.Collections.formParams)) $App.Collections.formParams = [];
-				_.extend($App.Collections.formParams, response.data);
+				if (_.isNull(window.App.Collections.formParams)) window.App.Collections.formParams = [];
+				_.extend(window.App.Collections.formParams, response.data);
 
 				const view = new DetalleUsuarioView({
 					model: model,
@@ -49,7 +46,7 @@ export class DetalleUsuario {
 	__savePerfil(transfer) {
 		const { entity, callback } = transfer;
 		const url = 'guardar';
-		$App.trigger('syncro', {
+		window.App.trigger('syncro', {
 			url: url,
 			data: entity.toJSON(),
 			callback: (response) => {
@@ -59,7 +56,7 @@ export class DetalleUsuario {
 	}
 
 	__serealizeParams() {
-		const resources = _.keys($App.Collections.formParams);
+		const resources = _.keys(window.App.Collections.formParams);
 		const collection = _.map(resources, (item) => {
 			return {
 				name: item,

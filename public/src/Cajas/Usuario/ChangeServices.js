@@ -1,5 +1,3 @@
-import { $App } from '@/App';
-
 const cambioEmail = function () {
 	var validator = $('#form').validate({
 		rules: {
@@ -22,7 +20,7 @@ const cambioEmail = function () {
 		if (result.value) {
 			var request = $.ajax({
 				type: 'POST',
-				url: $App.url($Kumbia.controller + '/cambio_email'),
+				url: window.App.url('cambio_email'),
 				data: {
 					email: $('#email').val(),
 				},
@@ -66,7 +64,7 @@ const cambioClave = function () {
 		if (result.value) {
 			var request = $.ajax({
 				type: 'POST',
-				url: $App.url($Kumbia.controller + '/cambio_clave'),
+				url: window.App.url('cambio_clave'),
 				data: {
 					claant: $('#claant').val(),
 					clave: $('#clave').val(),

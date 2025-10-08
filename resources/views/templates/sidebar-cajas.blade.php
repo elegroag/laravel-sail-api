@@ -1,7 +1,7 @@
 <nav class="sidenav fixed-lef navbar navbar-vertical navbar-expand-xs navbar-light" id="sidenav-main">
     <div class="scrollbar-inner">
         <div class="sidenav-header d-flex align-items-center p-3">
-            <a class="navbar-brand text-white img-center" href="{{ route('principal.index') }}">
+            <a class="navbar-brand text-white img-center" href="{{ route('cajas.principal') }}">
                 <div class="img-thumbnail bg-white border-4 border-success rounded-pill p-2">
                     <img src="{{ asset('img/Mercurio/logo-min.png') }}" width="80px" alt="Logo">
                 </div>

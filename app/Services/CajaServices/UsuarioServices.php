@@ -12,7 +12,6 @@ use App\Services\Utils\Table;
 class UsuarioServices
 {
     protected $procesadorComando;
-    protected $orderpag;
 
     /**
      * table variable
@@ -90,8 +89,7 @@ class UsuarioServices
 
     public function findPagination($query)
     {
-        $mercurio07 = new Mercurio07();
-        return $mercurio07->find($query, $this->orderpag);
+        return Mercurio07::whereRaw($query)->get();
     }
 
     public function showTabla($paginate)
@@ -108,11 +106,12 @@ class UsuarioServices
         );
 
         if ($paginate->items) {
+            $coddoc_array = coddoc_repleg_array();
             foreach ($paginate->items as $entity) {
                 $this->table->add_row(
                     "<a data-cid='{$entity->getDocumento()}' data-tipo='{$entity->getTipo()}' data-coddoc='{$entity->getCoddoc()}' data-toggle='info' class='btn btn-xs btn-primary' title='Info'> <i class='fas fa-hand-point-up text-white'></i></a>
                      <a data-cid='{$entity->getDocumento()}' data-tipo='{$entity->getTipo()}' data-coddoc='{$entity->getCoddoc()}' data-toggle='borrar'  class='btn btn-xs btn-danger' title='Borrar'> <i class='fas fa-trash text-black'></i></a>",
-                    $entity->getCoddocDetalle(),
+                    $coddoc_array[$entity->getCoddoc()],
                     $entity->getDocumento(),
                     $entity->getNombre(),
                     strtolower($entity->getEmail()),

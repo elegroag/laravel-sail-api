@@ -14,7 +14,7 @@
                 @if ($ai == 'afiliacion')
                     @foreach ($register as $aj => $row)
                     <div class='col-xs-12 col-lg-3 mt-3'> 
-                        <a href="{{ $row['url'] }}">
+                        <a href="{{ url('cajas/' . $row['url']) }}">
                             <div class="company-affiliation-card">
                                 <div class="header-section"> 
                                     <img src='{{ asset('img/Mercurio/' . $row['imagen']) }}' class="img img-principal p-2" />        

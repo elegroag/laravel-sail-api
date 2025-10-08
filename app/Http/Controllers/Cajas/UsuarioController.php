@@ -17,6 +17,7 @@ use App\Models\Mercurio32;
 use App\Models\Mercurio34;
 use App\Models\Mercurio36;
 use App\Services\CajaServices\UsuarioServices;
+use App\Services\Srequest;
 use App\Services\Utils\Generales;
 use App\Services\Utils\Pagination;
 use App\Services\Utils\SenderEmail;
@@ -59,43 +60,53 @@ class UsuarioController extends ApplicationController
             "tipo" => "Tipo usuario",
             "email" => "Email",
         );
-        $this->setParamToView("campo_filtro", $campo_field);
-        $this->setParamToView("filters", get_flashdata_item("filter_params"));
-        $this->setParamToView("title", "Perfil usuario");
+        return view("cajas.usuario.index", [
+            "campo_filtro" => $campo_field,
+            "filters" => get_flashdata_item("filter_params"),
+            "title" => "Perfil usuario"
+        ]);
     }
 
+    /**
+     * Obtiene los parámetros necesarios para el formulario de usuarios
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function paramsAction()
     {
         $this->setResponse("ajax");
+
         try {
-            $coddoc = array();
-            foreach ((new Gener18())->find() as $entity) {
-                $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
-            }
+            // Obtener tipos de documento usando Eloquent
+            $coddoc = Gener18::pluck('detdoc', 'coddoc')->toArray();
+
+            // Obtener tipos de usuario
             $tipo = (new Mercurio07())->getArrayTipos();
 
-            $codciu = array();
-            foreach ((new Gener09())->find("*", "conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
-                $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
-            }
+            // Obtener ciudades usando Eloquent con whereBetween
+            $codciu = Gener09::whereBetween('codzon', ['18000', '19000'])
+                ->pluck('detzon', 'codzon')
+                ->toArray();
 
-            $salida = array(
+            $response = [
                 "success" => true,
-                "data" => array(
+                "data" => [
                     'coddoc' => $coddoc,
                     'tipo' => $tipo,
                     'codciu' => $codciu,
                     'estado' => (new Mercurio07)->getArrayEstados()
-                ),
-                "msj" => 'OK'
-            );
-        } catch (DebugException $err) {
-            $salida = array(
+                ],
+                "msj" => 'Parámetros obtenidos correctamente'
+            ];
+        } catch (\Exception $e) {
+            $response = [
                 "success" => false,
-                "msj" => $err->getMessage()
-            );
+                "msj" => 'Error al obtener los parámetros: ' . $e->getMessage(),
+                "trace" => config('app.debug') ? $e->getTraceAsString() : null
+            ];
         }
-        return $this->renderObject($salida, false);
+
+        return $this->renderObject($response, false);
     }
 
     public function guardarAction(Request $request)
@@ -231,18 +242,23 @@ class UsuarioController extends ApplicationController
      * @param string $estado
      * @return void
      */
-    public function aplicarFiltroAction(Request $request)
+    public function aplicarFiltroAction(Request $request, string $tipo = '')
     {
-        $this->setResponse("ajax");
         $cantidad_pagina = ($request->input("numero")) ? $request->input("numero") : 10;
-
-        $ftipo = ($request->input("tipo") == '') ? " 1=1 " : " tipo='{$request->input("tipo")}'";
-        $festado = ($request->input("estado") == '') ? " 1=1 " : " estado='{$request->input("estado")}'";
+        if ($tipo == '') {
+            $query_str = ($request->input("tipo") == '') ? "1=1" : "tipo='{$request->input("tipo")}'";
+        } else {
+            $query_str = ($tipo == '') ? "1=1" : "tipo='{$tipo}'";
+        }
 
         $this->pagination->setters(
-            "cantidadPaginas: {$cantidad_pagina}",
-            "query: {$ftipo}",
-            "estado: {$festado}"
+            new Srequest(
+                [
+                    "cantidadPaginas" => $cantidad_pagina,
+                    "query" => $query_str,
+                    "estado" => "A"
+                ]
+            )
         );
 
         $query = $this->pagination->filter(
@@ -273,20 +289,22 @@ class UsuarioController extends ApplicationController
      * @param string $estado
      * @return void
      */
-    public function buscarAction(Request $request)
+    public function buscarAction(Request $request, string $estado = '')
     {
-        $this->setResponse("ajax");
-
         $pagina = ($request->input('pagina')) ? $request->input('pagina') : 1;
         $cantidad_pagina = ($request->input("numero")) ? $request->input("numero") : 10;
         $ftipo = ($request->input("tipo") == '') ? " 1=1 " : " tipo='{$request->input("tipo")}'";
         $festado = ($request->input("estado") == '') ? " 1=1 " : " estado='{$request->input("estado")}'";
 
         $this->pagination->setters(
-            "cantidadPaginas: $cantidad_pagina",
-            "pagina: {$pagina}",
-            "query: {$ftipo}",
-            "estado: {$festado}"
+            new Srequest(
+                [
+                    "cantidadPaginas" => $cantidad_pagina,
+                    "pagina" => $pagina,
+                    "query" => $ftipo,
+                    "estado" => $festado
+                ]
+            )
         );
         if (
             get_flashdata_item("filter_usuarios") != false
@@ -321,17 +339,17 @@ class UsuarioController extends ApplicationController
      * @author edwin <soportesistemas.comfaca@gmail.com>
      * @return void
      */
-    public function show_userAction(Request $request)
+    public function showUserAction(Request $request)
     {
-        $this->setResponse("ajax");
         $documento = $request->input('documento');
         $tipo = $request->input('tipo');
         $coddoc = $request->input('coddoc');
 
-        $user = (new Mercurio07)->findFirst(" documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'");
+        $user = Mercurio07::whereRaw("documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'")->first();
         $data = $user->getArray();
+        $coddoc_array = coddoc_repleg_array();
         $data['estado_detalle'] = $user->getEstadoDetalle();
-        $data['coddoc_detalle'] = $user->getCoddocDetalle();
+        $data['coddoc_detalle'] = $coddoc_array[$user->getCoddoc()];
         $data['tipo_detalle'] = $user->getTipoDetalle();
 
         return $this->renderObject(array(
@@ -357,12 +375,12 @@ class UsuarioController extends ApplicationController
             $tipo = $request->input('tipo');
             $coddoc = $request->input('coddoc');
 
-            $hasUser = (new Mercurio07)->count(
+            $hasUser = (new Mercurio07)->getCount(
                 "*",
                 "conditions: documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'"
             );
             if ($hasUser > 0) {
-                $hasRequests = (new Mercurio30())->count(
+                $hasRequests = (new Mercurio30())->getCount(
                     "*",
                     "conditions: documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'"
                 );
@@ -370,7 +388,7 @@ class UsuarioController extends ApplicationController
                     (new Mercurio30)->deleteAll(" documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'");
                 }
 
-                $hasRequests = (new Mercurio31())->count(
+                $hasRequests = (new Mercurio31())->getCount(
                     "*",
                     "conditions: documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'"
                 );
@@ -378,7 +396,7 @@ class UsuarioController extends ApplicationController
                     (new Mercurio31)->deleteAll(" documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'");
                 }
 
-                $hasRequests = (new Mercurio32())->count(
+                $hasRequests = (new Mercurio32())->getCount(
                     "*",
                     "conditions: documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'"
                 );
@@ -386,7 +404,7 @@ class UsuarioController extends ApplicationController
                     (new Mercurio32)->deleteAll(" documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'");
                 }
 
-                $hasRequests = (new Mercurio36())->count(
+                $hasRequests = (new Mercurio36())->getCount(
                     "*",
                     "conditions: documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'"
                 );

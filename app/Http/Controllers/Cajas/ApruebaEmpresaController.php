@@ -198,7 +198,7 @@ class ApruebaEmpresaController extends ApplicationController
     {
         $pagina = $request->input('pagina', 1);
         $cantidad_pagina = $request->input("numero", 10);
-        $usuario = session()->get('user');
+        $usuario = $this->user['usuario'];
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
