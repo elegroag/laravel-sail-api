@@ -9,17 +9,17 @@
 
 @include('cajas/templates/tmp_header_adapter', ['sub_title' => $title, 'filtrar' => true, 'listar' => false, 'salir' => false, 'add' => true])
 <div class="container-fluid mt--9 pb-4">
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header bg-green-blue p-1"></div>
-            <div class="card-body p-0 m-3">
-                <div id='consulta' class='table-responsive'></div>
-                <div id='paginate' class='card-footer py-4'></div>            
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-green-blue p-1"></div>
+                <div class="card-body p-0 m-3">
+                    <div id='consulta' class='table-responsive'></div>
+                    <div id='paginate' class='card-footer py-4'></div>            
+                </div>
             </div>
         </div>
     </div>
-</div>
 </div>
 @endsection
 

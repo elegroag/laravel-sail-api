@@ -71,12 +71,12 @@ class Mercurio04Controller extends ApplicationController
         return $html;
     }
 
-    public function aplicarFiltroAction()
+    public function aplicarFiltroAction(Request $request)
     {
         $this->setResponse("ajax");
         $consultasOldServices = new GeneralService();
-        $this->query = $consultasOldServices->converQuery();
-        #self::buscarAction();
+        $this->query = $consultasOldServices->converQuery($request);
+        return $this->buscarAction($request);
     }
 
     public function changeCantidadPaginaAction(Request $request)

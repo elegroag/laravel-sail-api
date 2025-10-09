@@ -1,7 +1,8 @@
 import { $App } from '@/App';
 import { Messages } from '@/Utils';
-import { aplicarFiltro, buscar, validePk } from '../Glob/Glob';
+import { buscar, EventsPagination, validePk } from '../Glob/Glob';
 
+window.App = $App;
 let validator = undefined;
 
 const validatorInit = () => {
@@ -15,44 +16,41 @@ const validatorInit = () => {
 	});
 }
 
-window.App = $App;
 $(() => {
 	window.App.initialize();
-	aplicarFiltro();
-
+	EventsPagination();
+	const modalCapture = new bootstrap.Modal(document.getElementById('captureModal'));
 
 	$(document).on('blur', '#codapl', (e) => {
 		validePk('#codapl');
 	});
 
 	$('#captureModal').on('hide.bs.modal', (e) => {
-		if (validator !== undefined) {
-			validator.resetForm();
-			$('.select2-selection')
-				.removeClass(validator.settings.errorClass)
-				.removeClass(validator.settings.validClass);
-		}
+		$('.select2-selection')
+			.removeClass(validator.settings.errorClass)
+			.removeClass(validator.settings.validClass);
 	});
 
 	$(document).on('click', "[data-toggle='editar']", (e) => {
 		e.preventDefault();
-		const codapl = e.target.cid;
-
+		const codapl = $(e.currentTarget).attr('data-cid');
 		window.App.trigger('syncro', {
 			url: window.App.url(window.ServerController + '/editar'),
 			data: {
 				codapl: codapl,
 			},
 			callback: (response) => {
-				if(response){
+				if(response.success){
+					$.each(response, function (key, value) {
+						$('#' + key.toString()).val(value);
+					});
 					$('#codapl').attr('disabled', 'true');
-					const instance = new bootstrap.Modal(document.getElementById('captureModal'));
-					instance.show();
 					const tpl = _.template(document.getElementById('tmp_form').innerHTML);
-					$('#captureModalbody').html(tpl(response));
+					$('#captureModalbody').html(tpl(response.data));
+					modalCapture.show();
 					validatorInit();
 				} else {
-					Messages.display(response.error, 'error');
+					Messages.display(response, 'error');
 				}
 			}
 		});
@@ -72,9 +70,8 @@ $(() => {
 			callback: (response) => {
 				if(response){
 					buscar();
-					Messages.display(response['msg'], 'success');
-					const instance = new bootstrap.Modal(document.getElementById('captureModal'));
-					instance.show();
+					Messages.display(response.msj, 'success');
+					modalCapture.show();
 					const tpl = _.template(document.getElementById('tmp_form').innerHTML);
 					$('#captureModalbody').html(tpl({
 						codapl: '',
@@ -86,12 +83,34 @@ $(() => {
 						userserver: '',
 						passserver: '',
 					}));
-					validatorInit();
-					
-				}else{
-					Messages.display(response.error, 'error');
+					validatorInit();	
+				} else {
+					Messages.display(response, 'error');
 				}
 			},
 		});
+	});
+
+	$(document).on('click', "[data-toggle='header-nuevo']", (e) => {
+		e.preventDefault();
+		$('#form :input').each(function (elem) {
+			$(this).val('');
+			$(this).removeAttr('disabled');
+		});
+
+		const tpl = _.template(document.getElementById('tmp_form').innerHTML);
+		$('#captureModalbody').html(tpl({
+			codapl: '',
+			detalle: '',
+			email: '',
+			clave: '',
+			path: '',
+			ftpserver: '',
+			pathserver: '',
+			userserver: '',
+			passserver: '',
+		}));
+		modalCapture.show();
+		validatorInit();
 	});
 });

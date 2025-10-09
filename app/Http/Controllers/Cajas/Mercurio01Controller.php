@@ -32,7 +32,10 @@ class Mercurio01Controller extends ApplicationController
     public function indexAction()
     {
         return view('cajas.mercurio01.index', [
-            'title' => "Configuración basica"
+            'title' => "Configuración basica",
+            'campo_filtro' => [
+                "codapl" => "Aplicativo",
+            ]
         ]);
     }
 
@@ -70,7 +73,7 @@ class Mercurio01Controller extends ApplicationController
     public function aplicarFiltroAction(Request $request)
     {
         $consultasOldServices = new GeneralService();
-        $this->query = $consultasOldServices->converQuery();
+        $this->query = $consultasOldServices->converQuery($request);
         return $this->buscarAction($request);
     }
 
@@ -103,7 +106,10 @@ class Mercurio01Controller extends ApplicationController
     {
         $mercurio01 = Mercurio01::first();
         if ($mercurio01 == false) $mercurio01 = new Mercurio01();
-        return $this->renderObject($mercurio01->toArray(), false);
+        return $this->renderObject([
+            'success' => true,
+            'data' => $mercurio01->toArray()
+        ], false);
     }
 
     public function guardarAction(Request $request)
@@ -142,5 +148,17 @@ class Mercurio01Controller extends ApplicationController
             $response = parent::errorFunc("No se puede guardar/editar el Registro");
             return $this->renderObject($response, false);
         }
+    }
+
+    public function borrarFiltroAction()
+    {
+        set_flashdata("filter_mercurio01", false, true);
+        set_flashdata("filter_params", false, true);
+
+        return $this->renderObject([
+            'success' => true,
+            'query' => get_flashdata_item("filter_mercurio01"),
+            'filter' => get_flashdata_item("filter_params"),
+        ]);
     }
 }

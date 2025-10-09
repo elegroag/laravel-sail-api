@@ -5,6 +5,10 @@
     // Calcular rangos de páginas para mostrar
     $startPage = max($paginate->current - 5, $paginate->first);
     $endPage = min($paginate->current + 5, $paginate->last);
+    
+    // Determinar si los botones de navegación deben estar deshabilitados
+    $isFirstPage = $paginate->current <= $paginate->first;
+    $isLastPage = $paginate->current >= $paginate->last;
 @endphp
 
 <div class='row'>
@@ -33,13 +37,23 @@
         <nav aria-label='Paginación'>
             <ul class='pagination justify-content-center justify-content-md-end mb-0'>
                 <!-- Primera página -->
-                <li class='page-item' data-toggle='paginate-buscar' pagina='{{ $paginate->first }}'>
-                    <a class='page-link'><i class='fas fa-angle-double-left'></i></a>
+                <li 
+                    class='page-item {{ $isFirstPage ? 'disabled' : '' }}' 
+                    data-toggle='paginate-buscar' 
+                    pagina='{{ $paginate->first }}' {{ $isFirstPage ? 'disabled' : '' }}>
+                    <a class='page-link' {{ $isFirstPage ? 'tabindex="-1" aria-disabled="true"' : '' }}>
+                        <i class='fas fa-angle-double-left'></i>
+                    </a>
                 </li>
                 
                 <!-- Página anterior -->
-                <li class='page-item' data-toggle='paginate-buscar' pagina='{{ $paginate->before }}'>
-                    <a class='page-link'><i class='fas fa-angle-left'></i></a>
+                <li 
+                    class='page-item {{ $isFirstPage ? 'disabled' : '' }}' 
+                    data-toggle='paginate-buscar' 
+                    pagina='{{ $paginate->before }}' {{ $isFirstPage ? 'disabled' : '' }}>
+                    <a class='page-link' {{ $isFirstPage ? 'tabindex="-1" aria-disabled="true"' : '' }}>
+                        <i class='fas fa-angle-left'></i>
+                    </a>
                 </li>
                 
                 <!-- Rango de páginas -->
@@ -53,13 +67,23 @@
                 @endfor
                 
                 <!-- Siguiente página -->
-                <li class='page-item' data-toggle='paginate-buscar' pagina='{{ $paginate->next }}'>
-                    <a class='page-link'><i class='fas fa-angle-right'></i></a>
+                <li 
+                    class='page-item {{ $isLastPage ? 'disabled' : '' }}' 
+                    data-toggle='paginate-buscar' 
+                    pagina='{{ $paginate->next }}' {{ $isLastPage ? 'disabled' : '' }}>
+                    <a class='page-link' {{ $isLastPage ? 'tabindex="-1" aria-disabled="true"' : '' }}>
+                        <i class='fas fa-angle-right'></i>
+                    </a>
                 </li>
                 
                 <!-- Última página -->
-                <li class='page-item' data-toggle='paginate-buscar' pagina='{{ $paginate->last }}'>
-                    <a class='page-link'><i class='fas fa-angle-double-right'></i></a>
+                <li 
+                    class='page-item {{ $isLastPage ? 'disabled' : '' }}' 
+                    data-toggle='paginate-buscar' 
+                    pagina='{{ $paginate->last }}' {{ $isLastPage ? 'disabled' : '' }}>
+                    <a class='page-link' {{ $isLastPage ? 'tabindex="-1" aria-disabled="true"' : '' }}>
+                        <i class='fas fa-angle-double-right'></i>
+                    </a>
                 </li>
             </ul>
         </nav>

@@ -65,7 +65,7 @@ class Mercurio65Controller extends ApplicationController
     public function aplicarFiltroAction(Request $request)
     {
         $consultasOldServices = new GeneralService();
-        $this->query = $consultasOldServices->converQuery();
+        $this->query = $consultasOldServices->converQuery($request);
         return $this->buscarAction($request);
     }
 

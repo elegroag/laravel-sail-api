@@ -268,7 +268,9 @@ const EventsPagination = () => {
 
 	$(document).on('click', "[data-toggle='paginate-buscar']", (e) => {
 		e.preventDefault();
-		buscar($(e.currentTarget));
+		const target = $(e.currentTarget);
+		if(target.hasClass('disabled')) return;
+		buscar(target);
 	});
 
 	$(document).on('change', "[data-toggle='paginate-change']", changeCantidadPagina);
