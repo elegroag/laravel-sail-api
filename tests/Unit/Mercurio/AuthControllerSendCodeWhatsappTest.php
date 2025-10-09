@@ -24,20 +24,21 @@ class AuthControllerSendCodeWhatsappTest extends TestCase
         $codigo = '1234';
         $whatsapp = '3157145942';
         $expected = ['ok' => true, 'id' => 'abc123'];
-        new AuthController();
+        new AuthController;
 
         $html = "Código de verificación:            
             *{$codigo}*. Generación de PIN plataforma Comfaca En Línea, 
             utiliza el código de verificación para confirmar el propietario de la línea de whatsapp.";
-        $apiWhatsaap = new ApiWhatsapp();
+        $apiWhatsaap = new ApiWhatsapp;
         $apiWhatsaap->send([
             'servicio' => 'Whatsapp',
             'metodo' => 'enviar',
             'params' => [
                 'numero' => $whatsapp,
-                'mensaje' => $html
+                'mensaje' => $html,
             ],
         ]);
+
         return $apiWhatsaap->toArray();
 
         // Assert

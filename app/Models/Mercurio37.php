@@ -13,7 +13,9 @@ class Mercurio37 extends ModelBase
     use ValidateWithRules;
 
     protected $table = 'mercurio37';
+
     public $timestamps = false;
+
     protected $primaryKey = ['tipopc', 'numero', 'coddoc'];
 
     protected $fillable = [
@@ -51,10 +53,10 @@ class Mercurio37 extends ModelBase
         return $this->fhash;
     }
 
-
     /**
      * Metodo para establecer el valor del campo tipopc
-     * @param string $tipopc
+     *
+     * @param  string  $tipopc
      */
     public function setTipopc($tipopc)
     {
@@ -63,7 +65,8 @@ class Mercurio37 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo numero
-     * @param integer $numero
+     *
+     * @param  int  $numero
      */
     public function setNumero($numero)
     {
@@ -72,7 +75,8 @@ class Mercurio37 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo coddoc
-     * @param integer $coddoc
+     *
+     * @param  int  $coddoc
      */
     public function setCoddoc($coddoc)
     {
@@ -81,16 +85,17 @@ class Mercurio37 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo archivo
-     * @param string $archivo
+     *
+     * @param  string  $archivo
      */
     public function setArchivo($archivo)
     {
         $this->archivo = $archivo;
     }
 
-
     /**
      * Devuelve el valor del campo tipopc
+     *
      * @return string
      */
     public function getTipopc()
@@ -100,7 +105,8 @@ class Mercurio37 extends ModelBase
 
     /**
      * Devuelve el valor del campo numero
-     * @return integer
+     *
+     * @return int
      */
     public function getNumero()
     {
@@ -109,7 +115,8 @@ class Mercurio37 extends ModelBase
 
     /**
      * Devuelve el valor del campo coddoc
-     * @return integer
+     *
+     * @return int
      */
     public function getCoddoc()
     {
@@ -118,6 +125,7 @@ class Mercurio37 extends ModelBase
 
     /**
      * Devuelve el valor del campo archivo
+     *
      * @return string
      */
     public function getArchivo()

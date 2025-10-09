@@ -7,11 +7,12 @@ use Thiagoprz\CompositeKey\HasCompositeKey;
 
 class Mercurio14 extends ModelBase
 {
-
     use HasCompositeKey;
 
     protected $table = 'mercurio14';
+
     public $timestamps = false;
+
     protected $primaryKey = [
         'tipopc',
         'tipsoc',
@@ -39,7 +40,8 @@ class Mercurio14 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo tipopc
-     * @param string $tipopc
+     *
+     * @param  string  $tipopc
      */
     public function setTipopc($tipopc)
     {
@@ -48,7 +50,8 @@ class Mercurio14 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo tipsoc
-     * @param string $tipsoc
+     *
+     * @param  string  $tipsoc
      */
     public function setTipsoc($tipsoc)
     {
@@ -57,7 +60,8 @@ class Mercurio14 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo coddoc
-     * @param integer $coddoc
+     *
+     * @param  int  $coddoc
      */
     public function setCoddoc($coddoc)
     {
@@ -66,16 +70,17 @@ class Mercurio14 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo nota
-     * @param string $nota
+     *
+     * @param  string  $nota
      */
     public function setNota($nota)
     {
         $this->nota = $nota;
     }
 
-
     /**
      * Devuelve el valor del campo nota
+     *
      * @return string
      */
     public function getNota()
@@ -85,6 +90,7 @@ class Mercurio14 extends ModelBase
 
     /**
      * Devuelve el valor del campo tipsoc
+     *
      * @return string
      */
     public function getTipsoc()
@@ -94,7 +100,8 @@ class Mercurio14 extends ModelBase
 
     /**
      * Devuelve el valor del campo coddoc
-     * @return integer
+     *
+     * @return int
      */
     public function getCoddoc()
     {
@@ -103,6 +110,7 @@ class Mercurio14 extends ModelBase
 
     /**
      * Devuelve el valor del campo obliga
+     *
      * @return string
      */
     public function getObliga()

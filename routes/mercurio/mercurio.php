@@ -2,10 +2,9 @@
 
 use App\Http\Controllers\Mercurio\AuthController;
 use App\Http\Controllers\Mercurio\LoginController;
-use App\Http\Controllers\Mercurio\MovimientosController;
-use App\Http\Controllers\Mercurio\PrincipalController;
 use App\Http\Controllers\Mercurio\NotificacionesController;
 use App\Http\Controllers\Mercurio\ParticularController;
+use App\Http\Controllers\Mercurio\PrincipalController;
 use App\Http\Controllers\Mercurio\UsuarioController;
 use App\Http\Middleware\EnsureCookieAuthenticated;
 use Illuminate\Support\Facades\Route;

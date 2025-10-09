@@ -8,13 +8,14 @@ use App\Services\Srequest;
 
 class ChangeCuentaService
 {
-
     /**
      * initializa function
+     *
      * @changed [2023-12-00]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     * @param Srequest $request
+     *
+     * @param  Srequest  $request
      * @return void
      */
     public function initializa($request)
@@ -24,9 +25,9 @@ class ChangeCuentaService
         $documento = $request->getParam('documento');
         $usuario = $request->getParam('usuario');
 
-        $empresa_registrada = (new Mercurio07())->findFirst(" documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}' AND estado='A'");
+        $empresa_registrada = (new Mercurio07)->findFirst(" documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}' AND estado='A'");
         if ($empresa_registrada == false) {
-            throw new AuthException("La empresa no está disponible para su administración.", 501);
+            throw new AuthException('La empresa no está disponible para su administración.', 501);
         }
 
         /* $auth = new Auth('model', "class: Mercurio07", "tipo: {$tipo}", "coddoc: {$coddoc}", "documento: {$documento}", "estado: A");

@@ -4,7 +4,6 @@ use App\Http\Controllers\Cajas\AdmproductosController;
 use App\Http\Middleware\CajasCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
-
 // Conyuge (migrado desde Kumbia)
 Route::middleware([CajasCookieAuthenticated::class])->group(function () {
     // Lista de productos y servicios

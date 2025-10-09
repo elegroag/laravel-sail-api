@@ -6,12 +6,15 @@ use App\Models\Adapter\ModelBase;
 
 class Mercurio02 extends ModelBase
 {
-
     protected $table = 'mercurio02';
+
     public $timestamps = false;
+
     // PK es CHAR(6) 'codcaj' (no autoincremental)
     protected $primaryKey = 'codcaj';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -31,7 +34,8 @@ class Mercurio02 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo codcaj
-     * @param string $codcaj
+     *
+     * @param  string  $codcaj
      */
     public function setCodcaj($codcaj)
     {
@@ -40,7 +44,8 @@ class Mercurio02 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo nit
-     * @param string $nit
+     *
+     * @param  string  $nit
      */
     public function setNit($nit)
     {
@@ -49,7 +54,8 @@ class Mercurio02 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo razsoc
-     * @param string $razsoc
+     *
+     * @param  string  $razsoc
      */
     public function setRazsoc($razsoc)
     {
@@ -58,7 +64,8 @@ class Mercurio02 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo sigla
-     * @param string $sigla
+     *
+     * @param  string  $sigla
      */
     public function setSigla($sigla)
     {
@@ -67,7 +74,8 @@ class Mercurio02 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo email
-     * @param string $email
+     *
+     * @param  string  $email
      */
     public function setEmail($email)
     {
@@ -76,7 +84,8 @@ class Mercurio02 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo direccion
-     * @param string $direccion
+     *
+     * @param  string  $direccion
      */
     public function setDireccion($direccion)
     {
@@ -85,7 +94,8 @@ class Mercurio02 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo telefono
-     * @param string $telefono
+     *
+     * @param  string  $telefono
      */
     public function setTelefono($telefono)
     {
@@ -94,7 +104,8 @@ class Mercurio02 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo codciu
-     * @param string $codciu
+     *
+     * @param  string  $codciu
      */
     public function setCodciu($codciu)
     {
@@ -103,7 +114,8 @@ class Mercurio02 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo pagweb
-     * @param string $pagweb
+     *
+     * @param  string  $pagweb
      */
     public function setPagweb($pagweb)
     {
@@ -112,7 +124,8 @@ class Mercurio02 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo pagfac
-     * @param string $pagfac
+     *
+     * @param  string  $pagfac
      */
     public function setPagfac($pagfac)
     {
@@ -121,7 +134,8 @@ class Mercurio02 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo pagtwi
-     * @param string $pagtwi
+     *
+     * @param  string  $pagtwi
      */
     public function setPagtwi($pagtwi)
     {
@@ -130,16 +144,17 @@ class Mercurio02 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo pagyou
-     * @param string $pagyou
+     *
+     * @param  string  $pagyou
      */
     public function setPagyou($pagyou)
     {
         $this->pagyou = $pagyou;
     }
 
-
     /**
      * Devuelve el valor del campo codcaj
+     *
      * @return string
      */
     public function getCodcaj()
@@ -149,6 +164,7 @@ class Mercurio02 extends ModelBase
 
     /**
      * Devuelve el valor del campo nit
+     *
      * @return string
      */
     public function getNit()
@@ -158,6 +174,7 @@ class Mercurio02 extends ModelBase
 
     /**
      * Devuelve el valor del campo razsoc
+     *
      * @return string
      */
     public function getRazsoc()
@@ -167,6 +184,7 @@ class Mercurio02 extends ModelBase
 
     /**
      * Devuelve el valor del campo sigla
+     *
      * @return string
      */
     public function getSigla()
@@ -176,6 +194,7 @@ class Mercurio02 extends ModelBase
 
     /**
      * Devuelve el valor del campo email
+     *
      * @return string
      */
     public function getEmail()
@@ -185,6 +204,7 @@ class Mercurio02 extends ModelBase
 
     /**
      * Devuelve el valor del campo direccion
+     *
      * @return string
      */
     public function getDireccion()
@@ -194,6 +214,7 @@ class Mercurio02 extends ModelBase
 
     /**
      * Devuelve el valor del campo telefono
+     *
      * @return string
      */
     public function getTelefono()
@@ -203,6 +224,7 @@ class Mercurio02 extends ModelBase
 
     /**
      * Devuelve el valor del campo codciu
+     *
      * @return string
      */
     public function getCodciu()
@@ -212,6 +234,7 @@ class Mercurio02 extends ModelBase
 
     /**
      * Devuelve el valor del campo pagweb
+     *
      * @return string
      */
     public function getPagweb()
@@ -221,6 +244,7 @@ class Mercurio02 extends ModelBase
 
     /**
      * Devuelve el valor del campo pagfac
+     *
      * @return string
      */
     public function getPagfac()
@@ -230,6 +254,7 @@ class Mercurio02 extends ModelBase
 
     /**
      * Devuelve el valor del campo pagtwi
+     *
      * @return string
      */
     public function getPagtwi()
@@ -239,6 +264,7 @@ class Mercurio02 extends ModelBase
 
     /**
      * Devuelve el valor del campo pagyou
+     *
      * @return string
      */
     public function getPagyou()

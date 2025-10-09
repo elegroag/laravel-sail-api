@@ -6,9 +6,10 @@ use App\Models\Adapter\ModelBase;
 
 class PinesAfiliado extends ModelBase
 {
-
     protected $table = 'pines_afiliados';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [

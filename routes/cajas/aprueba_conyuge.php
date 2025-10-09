@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Cajas\ApruebaBeneficiarioController;
 use App\Http\Controllers\Cajas\ApruebaConyugeController;
 use App\Http\Middleware\CajasCookieAuthenticated;
 use Illuminate\Support\Facades\Route;

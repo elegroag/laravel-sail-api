@@ -7,7 +7,9 @@ use App\Models\Adapter\ModelBase;
 class Gener42 extends ModelBase
 {
     protected $table = 'gener42';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [

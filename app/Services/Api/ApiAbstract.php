@@ -1,18 +1,20 @@
 <?php
+
 namespace App\Services\Api;
 
 abstract class ApiAbstract
 {
-
     protected $app;
+
     protected $db;
-    protected $output = array();
+
+    protected $output = [];
+
     protected $lineaComando;
 
-    public function __construct(){
-    }
+    public function __construct() {}
 
-    public abstract function send($attr);
+    abstract public function send($attr);
 
     public function getLineaComando()
     {
@@ -21,15 +23,20 @@ abstract class ApiAbstract
 
     public function isJson()
     {
-        if ($this->output == '' || is_null($this->output) || $this->output == false) return false;
+        if ($this->output == '' || is_null($this->output) || $this->output == false) {
+            return false;
+        }
+
         return true;
     }
 
     /**
      * toArray function
+     *
      * @changed [2023-12-00]
      *
      * @author elegroag <elegroag@ibero.edu.co>
+     *
      * @return array
      */
     public function toArray()
@@ -39,9 +46,11 @@ abstract class ApiAbstract
 
     /**
      * getObject function
+     *
      * @changed [2023-12-00]
      *
      * @author elegroag <elegroag@ibero.edu.co>
+     *
      * @return object
      */
     public function getObject()

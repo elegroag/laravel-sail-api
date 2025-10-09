@@ -1,8 +1,8 @@
 <?php
 
 // Importar facades y controlador necesarios
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Cajas\Mercurio72Controller;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('promociones-turismo')->group(function () {
     // Definir rutas para el controlador Mercurio72

@@ -6,9 +6,10 @@ use App\Models\Adapter\ModelBase;
 
 class Gener18 extends ModelBase
 {
-
     protected $table = 'gener18';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -18,7 +19,7 @@ class Gener18 extends ModelBase
     ];
 
     /**
-     * @param string $coddoc
+     * @param  string  $coddoc
      */
     public function setCoddoc($coddoc)
     {
@@ -26,7 +27,7 @@ class Gener18 extends ModelBase
     }
 
     /**
-     * @param string $detdoc
+     * @param  string  $detdoc
      */
     public function setDetdoc($detdoc)
     {
@@ -34,13 +35,12 @@ class Gener18 extends ModelBase
     }
 
     /**
-     * @param string $detdoc
+     * @param  string  $detdoc
      */
     public function setCodrua($codrua)
     {
         $this->codrua = $codrua;
     }
-
 
     /**
      * @return string

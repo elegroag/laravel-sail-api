@@ -29,13 +29,13 @@ return new class extends Migration
             $table->integer('valtot');
             $table->date('fecsis');
             $table->char('hora', 8);
-            $table->enum('tipmov', ['B','U','P'])->nullable();
+            $table->enum('tipmov', ['B', 'U', 'P'])->nullable();
             $table->integer('online')->nullable();
             $table->char('consumo', 1);
             $table->date('feccon')->nullable();
             $table->integer('punuti')->nullable();
             $table->integer('puntos')->nullable();
-            $table->enum('estado', ['A','P']);
+            $table->enum('estado', ['A', 'P']);
         });
     }
 

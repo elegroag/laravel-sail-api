@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Mercurio26;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class Mercurio26Seeder extends Seeder

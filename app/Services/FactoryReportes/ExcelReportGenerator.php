@@ -4,31 +4,38 @@ namespace App\Services\FactoryReportes;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
-
 
 class ExcelReportGenerator implements ReportGenerator
 {
     private static $SpreadSheet;
+
     private static $j;
+
     private static $excel;
+
     private $filepath;
+
     private $path;
+
     private $columns;
+
     private $file;
+
     private $title;
 
     public function initializa()
     {
-        $this->filepath = ($this->path) ? "{$this->path}/{$this->file}.xls" : storage_path() . "/temp/{$this->file}.xls";
-        self::$SpreadSheet = new Spreadsheet();
+        $this->filepath = ($this->path) ? "{$this->path}/{$this->file}.xls" : storage_path()."/temp/{$this->file}.xls";
+        self::$SpreadSheet = new Spreadsheet;
         self::$excel = self::$SpreadSheet->getActiveSheet();
 
         self::$j = 0;
-        if ($this->title) $this->addTitle();
-        if ($this->columns) $this->addColumns($this->columns, 11);
+        if ($this->title) {
+            $this->addTitle();
+        }
+        if ($this->columns) {
+            $this->addColumns($this->columns, 11);
+        }
     }
 
     public function addTitle($title = '', $position = 0)
@@ -50,10 +57,11 @@ class ExcelReportGenerator implements ReportGenerator
     /**
      * generateReport function
      * Generar reporte en Excel con las condiciones aplicadas a los trabajadores
+     *
      * @param [type] $trabajadores
      * @return void
      */
-    public function generateReport($title,  $file, $columns)
+    public function generateReport($title, $file, $columns)
     {
         $this->file = $file;
         $this->columns = $columns;
@@ -63,6 +71,7 @@ class ExcelReportGenerator implements ReportGenerator
 
     /**
      * addLine function
+     *
      * @return void
      */
     public function addLine($data, $fsize = 10, $cborder = 1)
@@ -74,7 +83,9 @@ class ExcelReportGenerator implements ReportGenerator
         $columnStyle->setColor('000000');
 
         $i = 0;
-        foreach ($data as $val) self::$excel->write(self::$j, $i++, $val, $columnStyle);
+        foreach ($data as $val) {
+            self::$excel->write(self::$j, $i++, $val, $columnStyle);
+        }
         self::$j++;
     }
 
@@ -131,6 +142,7 @@ class ExcelReportGenerator implements ReportGenerator
         self::$SpreadSheet->close();
         self::$excel = null;
         self::$j = 0;
+
         return $this->filepath;
     }
 

@@ -7,8 +7,11 @@ use App\Models\Adapter\ModelBase;
 class RecepcionSat extends ModelBase
 {
     protected $table = 'recepcionsat';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
+
     public $incrementing = true;
 
     protected $fillable = [
@@ -67,24 +70,28 @@ class RecepcionSat extends ModelBase
         if ($contenido) {
             return json_decode($contenido, true);
         }
+
         return null;
     }
 
     public function getResultado()
     {
         $json = $this->getContenidoJson();
+
         return $json['resultado'] ?? null;
     }
 
     public function getMensaje()
     {
         $json = $this->getContenidoJson();
+
         return $json['mensaje'] ?? null;
     }
 
     public function getCodigo()
     {
         $json = $this->getContenidoJson();
+
         return $json['codigo'] ?? null;
     }
 }

@@ -26,14 +26,15 @@ class NotificacionService
         $notificacion = new Notificaciones([
             'titulo' => $data['titulo'],
             'descri' => $data['descripcion'],
-            'user'   => $data['user'],
+            'user' => $data['user'],
             'estado' => 'P',
             'result' => '',
             'dia' => date('Y-m-d'),
             'hora' => date('H:i:s'),
-            'progre' => 0
+            'progre' => 0,
         ]);
         $notificacion->save();
+
         return $notificacion;
     }
 }

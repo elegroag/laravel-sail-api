@@ -6,7 +6,6 @@ use App\Models\Adapter\ModelBase;
 
 class Gener08 extends ModelBase
 {
-
     protected $table = 'gener08';
 
     public $timestamps = false;

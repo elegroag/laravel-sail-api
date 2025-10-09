@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Mercurio05;
+use Illuminate\Database\Seeder;
 
 class Mercurio05Seeder extends Seeder
 {

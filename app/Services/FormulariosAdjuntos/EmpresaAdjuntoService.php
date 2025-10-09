@@ -2,23 +2,26 @@
 
 namespace App\Services\FormulariosAdjuntos;
 
-use App\Models\Mercurio16;
-use App\Services\Utils\Comman;
-
 use App\Library\Collections\ParamsEmpresa;
 use App\Library\Tcpdf\KumbiaPDF;
+use App\Models\Mercurio16;
 use App\Models\Tranoms;
 use App\Services\Formularios\FactoryDocuments;
 use App\Services\PreparaFormularios\CifrarDocumento;
-
+use App\Services\Utils\Comman;
 
 class EmpresaAdjuntoService
 {
     private $request;
+
     private $lfirma;
+
     private $filename;
+
     private $outPdf;
+
     private $fhash;
+
     private $claveCertificado;
 
     public function __construct($request)
@@ -35,14 +38,14 @@ class EmpresaAdjuntoService
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "parametros_empresa"
-            )
+            [
+                'servicio' => 'ComfacaAfilia',
+                'metodo' => 'parametros_empresa',
+            ]
         );
 
-        $datos_captura =  $procesadorComando->toArray();
-        $paramsEmpresa = new ParamsEmpresa();
+        $datos_captura = $procesadorComando->toArray();
+        $paramsEmpresa = new ParamsEmpresa;
         $paramsEmpresa->setDatosCaptura($datos_captura);
     }
 
@@ -52,21 +55,22 @@ class EmpresaAdjuntoService
         KumbiaPDF::setFooterImage(false);
         KumbiaPDF::setBackgroundImage(false);
 
-        $fabrica = new FactoryDocuments();
+        $fabrica = new FactoryDocuments;
         $documento = $fabrica->crearPolitica('empresa');
 
         $documento->setParamsInit(
-            array(
+            [
                 'empresa' => $this->request,
                 'firma' => $this->lfirma,
                 'filename' => $this->filename,
                 'background' => false,
-                'rfirma' => false
-            )
+                'rfirma' => false,
+            ]
         );
         $documento->main();
         $documento->outPut();
         $this->cifrarDocumento();
+
         return $this;
     }
 
@@ -76,19 +80,20 @@ class EmpresaAdjuntoService
         $background = 'img/form/oficios/oficio_solicitud_empresa.jpg';
         KumbiaPDF::setFooterImage(false);
 
-        $fabrica = new FactoryDocuments();
+        $fabrica = new FactoryDocuments;
         $documento = $fabrica->crearOficio('empresa');
         $documento->setParamsInit(
-            array(
+            [
                 'background' => $background,
                 'empresa' => $this->request,
                 'firma' => $this->lfirma,
-                'filename' => $this->filename
-            )
+                'filename' => $this->filename,
+            ]
         );
         $documento->main();
         $documento->outPut();
         $this->cifrarDocumento();
+
         return $this;
     }
 
@@ -96,17 +101,18 @@ class EmpresaAdjuntoService
     {
         $this->filename = "formulario_empresa_{$this->request->getNit()}.pdf";
         $background = 'img/form/empresa/form-empresa.jpg';
-        $fabrica = new FactoryDocuments();
+        $fabrica = new FactoryDocuments;
         $documento = $fabrica->crearFormulario('empresa');
         $documento->setParamsInit([
             'background' => $background,
             'empresa' => $this->request,
             'firma' => $this->lfirma,
-            'filename' => $this->filename
+            'filename' => $this->filename,
         ]);
         $documento->main();
         $documento->outPut();
         $this->cifrarDocumento();
+
         return $this;
     }
 
@@ -119,24 +125,25 @@ class EmpresaAdjuntoService
 
         $this->filename = "tranom_empresa_{$this->request->getNit()}.pdf";
 
-        $fabrica = new FactoryDocuments();
+        $fabrica = new FactoryDocuments;
         $documento = $fabrica->crearOficio('trabajador_nomina');
 
         $documento->setParamsInit([
             'empresa' => $this->request,
             'firma' => $this->lfirma,
             'filename' => $this->filename,
-            'tranoms' => $tranoms
+            'tranoms' => $tranoms,
         ]);
         $documento->main();
         $documento->outPut();
         $this->cifrarDocumento();
+
         return $this;
     }
 
-    function cifrarDocumento()
+    public function cifrarDocumento()
     {
-        $cifrarDocumento = new CifrarDocumento();
+        $cifrarDocumento = new CifrarDocumento;
         $this->outPdf = $cifrarDocumento->cifrar(
             $this->filename,
             $this->lfirma->getKeyprivate(),
@@ -148,10 +155,10 @@ class EmpresaAdjuntoService
     public function getResult()
     {
         return [
-            "name" => $this->filename,
-            "file" => basename($this->outPdf),
+            'name' => $this->filename,
+            'file' => basename($this->outPdf),
             'out' => $this->outPdf,
-            'fhash' => $this->fhash
+            'fhash' => $this->fhash,
         ];
     }
 

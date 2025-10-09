@@ -1,10 +1,10 @@
 <?php
+
 // En tu controlador, comando de Artisan, o cualquier otro archivo PHP
 // donde ejecutas el script que genera warnings.
 
 class ScriptLegacy
 {
-
     public function execute($dir)
     {
         // 1. Guardar el nivel de reporte de errores actual
@@ -26,7 +26,6 @@ class ScriptLegacy
         // si los warnings se están mostrando directamente en la salida.
         $originalDisplayErrors = ini_get('display_errors');
         ini_set('display_errors', 'Off');
-
 
         // 3. Incluir o ejecutar tu script problemático aquí
         // Asegúrate de que la ruta sea correcta.

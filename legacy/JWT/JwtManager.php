@@ -1,16 +1,19 @@
 <?php
-require_once __DIR__ . '/Firebase/JWT.php';
+
+require_once __DIR__.'/Firebase/JWT.php';
 
 class JwtManager
 {
     private $token_key;
-    private $token_encrypt = "HS384";
-    private $token_expire = 3600;
 
+    private $token_encrypt = 'HS384';
+
+    private $token_expire = 3600;
 
     /**
      * Create function
-     * @param array $data
+     *
+     * @param  array  $data
      * @return void
      */
     public function create($data)
@@ -22,18 +25,20 @@ class JwtManager
             return false;
         }
         $time = time();
-        $token = array(
-            'iat'   => $time,
-            'exp'   => $time + $this->token_expire,
-            'aud'   => $this->cliente(),
-            'data'  => base64_encode(json_encode($data))
-        );
+        $token = [
+            'iat' => $time,
+            'exp' => $time + $this->token_expire,
+            'aud' => $this->cliente(),
+            'data' => base64_encode(json_encode($data)),
+        ];
+
         return Firebase\JWT::encode($token, $this->token_key, $this->token_encrypt);
     }
 
     /**
      * check function
-     * @param string $token
+     *
+     * @param  string  $token
      * @return bool
      */
     public function check($token)
@@ -48,7 +53,7 @@ class JwtManager
             return false;
         } else {
             Firebase\JWT::$leeway = 60;
-            $decode = Firebase\JWT::decode($token, $this->token_key, array($this->token_encrypt));
+            $decode = Firebase\JWT::decode($token, $this->token_key, [$this->token_encrypt]);
             if ($decode->aud == $this->cliente()) {
                 return true;
             } else {
@@ -68,28 +73,31 @@ class JwtManager
         $decode = Firebase\JWT::decode(
             $token,
             $this->token_key,
-            array($this->token_encrypt)
+            [$this->token_encrypt]
         );
+
         return json_decode(base64_decode($decode->data));
     }
 
     private function cliente()
     {
         $token_auth = '';
-        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        if (! empty($_SERVER['HTTP_CLIENT_IP'])) {
             $token_auth = $_SERVER['HTTP_CLIENT_IP'];
-        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        } elseif (! empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
             $token_auth = $_SERVER['HTTP_X_FORWARDED_FOR'];
         } else {
             $token_auth = $_SERVER['REMOTE_ADDR'];
         }
         $token_auth .= @$_SERVER['HTTP_USER_AGENT'];
         $token_auth .= gethostname();
+
         return sha1($token_auth);
     }
 
     /**
      * setTokenKey function
+     *
      * @param [type] $token_key
      * @return void
      */
@@ -100,6 +108,7 @@ class JwtManager
 
     /**
      * setTokenEncrypt function
+     *
      * @param [type] $token_encrypt
      * @return void
      */
@@ -110,6 +119,7 @@ class JwtManager
 
     /**
      * setTokenExpire function
+     *
      * @param [type] $token_expire
      * @return void
      */

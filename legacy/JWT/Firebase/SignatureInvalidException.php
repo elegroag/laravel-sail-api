@@ -1,7 +1,5 @@
 <?php
+
 namespace Firebase;
 
-class SignatureInvalidException extends \UnexpectedValueException
-{
-
-}
+class SignatureInvalidException extends \UnexpectedValueException {}

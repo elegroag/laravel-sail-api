@@ -11,9 +11,11 @@ class Mercurio16 extends ModelBase
     use ValidateWithRules;
 
     protected $table = 'mercurio16';
+
     protected $primaryKey = 'id';
 
     public $incrementing = true;
+
     public $timestamps = false;
 
     protected $fillable = [
@@ -22,7 +24,7 @@ class Mercurio16 extends ModelBase
         'firma',
         'coddoc',
         'keyprivate',
-        'keypublic'
+        'keypublic',
     ];
 
     protected function rules()
@@ -36,6 +38,7 @@ class Mercurio16 extends ModelBase
                     if ($this->exists) {
                         $query->where('id', '!=', $this->id);
                     }
+
                     return $query->where('documento', $this->documento)
                         ->where('coddoc', $this->coddoc);
                 }),

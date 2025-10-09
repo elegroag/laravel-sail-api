@@ -8,7 +8,9 @@ use Carbon\Carbon;
 class Mercurio83 extends ModelBase
 {
     protected $table = 'mercurio83';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -33,7 +35,7 @@ class Mercurio83 extends ModelBase
         'tipjor',
         'idacudiente',
         'nivedu',
-        'codgra'
+        'codgra',
     ];
 
     public function setId($id)

@@ -6,29 +6,40 @@ use App\Exceptions\DebugException;
 use App\Models\Mercurio07;
 use App\Services\PreparaFormularios\GestionFirmaNoImage;
 use App\Services\Srequest;
-use App\Services\Signup\SignupParticular;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
 
 class SignupService
 {
-
     private $cedrep;
+
     private $coddoc;
+
     private $repleg;
+
     private $email;
+
     private $codciu;
+
     private $tipper;
+
     private $telefono;
+
     private $tipo;
+
     private $calemp;
+
     private $tipsoc;
+
     private $razsoc;
+
     private $coddocrepleg;
+
     private $nit;
+
     private $password;
 
-    public function execute(SignupInterface|null $signupEntity, Srequest $request)
+    public function execute(?SignupInterface $signupEntity, Srequest $request)
     {
         $this->coddoc = $request->getParam('coddoc');
         $this->email = $request->getParam('email');
@@ -58,21 +69,21 @@ class SignupService
             if ($this->tipo == 'T') {
                 $res = $this->validaTrabajadorEmpresa();
                 if ($res == false) {
-                    throw new DebugException("Error al validar el trabajador no está afiliado a la empresa con nit: " . $this->nit, 501);
+                    throw new DebugException('Error al validar el trabajador no está afiliado a la empresa con nit: '.$this->nit, 501);
                 }
             }
             $signupParticular = new SignupParticular(
                 new Srequest(
-                    array(
-                        "documento" => $this->cedrep,
-                        "coddoc" => $this->coddoc,
-                        "nombre" => $this->repleg,
-                        "email" => $this->email,
-                        "codciu" => $this->codciu,
-                        "tipo" => $this->tipo, //aplica para particular o trabajador
-                        "razsoc" => $this->razsoc,
-                        "password" => $this->password
-                    )
+                    [
+                        'documento' => $this->cedrep,
+                        'coddoc' => $this->coddoc,
+                        'nombre' => $this->repleg,
+                        'email' => $this->email,
+                        'codciu' => $this->codciu,
+                        'tipo' => $this->tipo, // aplica para particular o trabajador
+                        'razsoc' => $this->razsoc,
+                        'password' => $this->password,
+                    ]
                 )
             );
             $signupParticular->createUserMercurio();
@@ -81,28 +92,28 @@ class SignupService
                 ->where('tipo', $this->tipo)
                 ->first();
         } else {
-            //usa codciu para asignar funcionario
-            $usuario = (new AsignarFuncionario())->asignar($signupEntity->getTipopc(), $this->codciu);
+            // usa codciu para asignar funcionario
+            $usuario = (new AsignarFuncionario)->asignar($signupEntity->getTipopc(), $this->codciu);
 
             $signupParticular = new SignupParticular(
                 new Srequest(
-                    array(
-                        "nit" => $this->nit,
-                        "cedrep" => $this->cedrep,
-                        "coddoc" => $this->coddoc,
-                        "repleg" => $this->repleg,
-                        "email" => $this->email,
-                        "codciu" => $this->codciu,
-                        "tipper" => $this->tipper,
-                        "telefono" => $this->telefono,
-                        "calemp" => $this->calemp,
-                        "tipo" => $this->tipo,
-                        "tipsoc" => $this->tipsoc,
-                        "coddocrepleg" => $this->coddocrepleg,
-                        "razsoc" => $this->razsoc,
-                        "usuario" => $usuario,
-                        "password" => $this->password
-                    )
+                    [
+                        'nit' => $this->nit,
+                        'cedrep' => $this->cedrep,
+                        'coddoc' => $this->coddoc,
+                        'repleg' => $this->repleg,
+                        'email' => $this->email,
+                        'codciu' => $this->codciu,
+                        'tipper' => $this->tipper,
+                        'telefono' => $this->telefono,
+                        'calemp' => $this->calemp,
+                        'tipo' => $this->tipo,
+                        'tipsoc' => $this->tipsoc,
+                        'coddocrepleg' => $this->coddocrepleg,
+                        'razsoc' => $this->razsoc,
+                        'usuario' => $usuario,
+                        'password' => $this->password,
+                    ]
                 )
             );
             $signupParticular->main();
@@ -117,24 +128,26 @@ class SignupService
         }
 
         $this->autoFirma($solicitud->getDocumento(), $solicitud->getCoddoc());
+
         return [
-            "success" => true,
-            "msj" => "El proceso de registro como persona particular, se ha completado con éxito, " .
-                "las credenciales de acceso le serán enviadas al respectivo correo registrado. " .
+            'success' => true,
+            'msj' => 'El proceso de registro como persona particular, se ha completado con éxito, '.
+                'las credenciales de acceso le serán enviadas al respectivo correo registrado. '.
                 "Vamos a continuar.\n",
-            "documento" => $solicitud->getDocumento(),
-            "coddoc" => $solicitud->getCoddoc(),
-            "tipo" => $this->tipo,
-            "tipafi" => $this->tipo,
-            "id" => ($this->tipo == 'P' || $this->tipo == 'T') ? $solicitud->getDocumento() : $solicitud->getId()
+            'documento' => $solicitud->getDocumento(),
+            'coddoc' => $solicitud->getCoddoc(),
+            'tipo' => $this->tipo,
+            'tipafi' => $this->tipo,
+            'id' => ($this->tipo == 'P' || $this->tipo == 'T') ? $solicitud->getDocumento() : $solicitud->getId(),
         ];
     }
 
     /**
      * crearSolicitud function
+     *
      * @return object
      */
-    function crearSolicitud(
+    public function crearSolicitud(
         SignupInterface $signupEntity,
         Srequest $request
     ) {
@@ -149,8 +162,7 @@ class SignupService
             $this->calemp
         );
 
-
-        //si no existe ninguna solicitud
+        // si no existe ninguna solicitud
         if ($entity->getId() == null) {
             if ($empresaSisuweb) {
                 $empresaSisuweb['coddoc'] = $this->coddoc;
@@ -163,7 +175,7 @@ class SignupService
                 $signupEntity->createSignupService($empresaSisuweb);
             } else {
                 $signupEntity->createSignupService(
-                    array(
+                    [
                         'coddoc' => $this->coddoc,
                         'documento' => $documentoSolicitud,
                         'cedrep' => $this->cedrep,
@@ -181,52 +193,57 @@ class SignupService
                         'razsoc' => $request->getParam('razsoc'),
                         'usuario' => $request->getParam('usuario'),
                         'tipemp' => $request->getParam('tipemp'),
-                        'nit' => $request->getParam('nit')
-                    )
+                        'nit' => $request->getParam('nit'),
+                    ]
                 );
             }
         } else {
-            throw new DebugException("Error la cuenta ya está registrada, y dispone de una solicitud en estado temporal.", 1);
+            throw new DebugException('Error la cuenta ya está registrada, y dispone de una solicitud en estado temporal.', 1);
         }
         $solicitud = $signupEntity->getSolicitud();
         $solicitud->save();
+
         return $solicitud;
     }
 
     /**
      * buscaEmpresaSisu function
-     * @param integer $nit
+     *
+     * @param  int  $nit
      * @return object
      */
-    function buscaEmpresaSisu($nit)
+    public function buscaEmpresaSisu($nit)
     {
         $ps = Comman::Api();
         $ps->runCli(
-            array(
-                "servicio" => "ComfacaEmpresas",
-                "metodo" => "informacion_empresa",
-                "params" => array(
-                    "nit" => $nit
-                )
-            )
+            [
+                'servicio' => 'ComfacaEmpresas',
+                'metodo' => 'informacion_empresa',
+                'params' => [
+                    'nit' => $nit,
+                ],
+            ]
         );
-        if ($ps->isJson() == False) {
+        if ($ps->isJson() == false) {
             return false;
         }
         $out = $ps->toArray();
-        if ($out['success'] == false) return false;
+        if ($out['success'] == false) {
+            return false;
+        }
+
         return $out['data'];
     }
 
-    function autoFirma($documento, $coddoc)
+    public function autoFirma($documento, $coddoc)
     {
         $gestionFirmas = new GestionFirmaNoImage(
-            array(
-                "documento" => $documento,
-                "coddoc" => $coddoc
-            )
+            [
+                'documento' => $documento,
+                'coddoc' => $coddoc,
+            ]
         );
-        if ($gestionFirmas->hasFirma() == False) {
+        if ($gestionFirmas->hasFirma() == false) {
             $gestionFirmas->guardarFirma();
             $gestionFirmas->generarClaves($this->password);
         } else {
@@ -238,38 +255,42 @@ class SignupService
         }
     }
 
-    function validaTrabajadorEmpresa()
+    public function validaTrabajadorEmpresa()
     {
         $ps = Comman::Api();
         $ps->runCli(
-            array(
-                "servicio" => "ComfacaEmpresas",
-                "metodo" => "informacion_empresa",
-                "params" => array(
-                    "nit" => $this->nit
-                )
-            )
+            [
+                'servicio' => 'ComfacaEmpresas',
+                'metodo' => 'informacion_empresa',
+                'params' => [
+                    'nit' => $this->nit,
+                ],
+            ]
         );
-        if ($ps->isJson() == False) {
+        if ($ps->isJson() == false) {
             return false;
         }
         $out = $ps->toArray();
-        if ($out['success'] == false) return false;
+        if ($out['success'] == false) {
+            return false;
+        }
 
         $ps->runCli(
-            array(
-                "servicio" => "ComfacaEmpresas",
-                "metodo" => "informacion_trabajador",
-                "params" => array(
-                    "cedtra" => $this->cedrep
-                )
-            )
+            [
+                'servicio' => 'ComfacaEmpresas',
+                'metodo' => 'informacion_trabajador',
+                'params' => [
+                    'cedtra' => $this->cedrep,
+                ],
+            ]
         );
-        if ($ps->isJson() == False) {
+        if ($ps->isJson() == false) {
             return false;
         }
         $out = $ps->toArray();
-        if ($out['success'] == false) return false;
+        if ($out['success'] == false) {
+            return false;
+        }
 
         return ($out['data']['nit'] == $this->nit) ? $out['data'] : false;
     }

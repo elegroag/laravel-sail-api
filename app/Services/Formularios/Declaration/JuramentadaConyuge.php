@@ -10,7 +10,6 @@ use Carbon\Carbon;
 
 class JuramentadaConyuge extends Documento
 {
-
     /**
      * $trabajador variable
      *
@@ -27,14 +26,17 @@ class JuramentadaConyuge extends Documento
 
     /**
      * main function
+     *
      * @changed [2023-12-00]
+     *
      * @author elegroag <elegroag@ibero.edu.co>
+     *
      * @return void
      */
     public function main()
     {
-        if (!$this->request->getParam('conyuge')) {
-            throw new DebugException("Error el conyuge no esté disponible", 501);
+        if (! $this->request->getParam('conyuge')) {
+            throw new DebugException('Error el conyuge no esté disponible', 501);
         }
 
         $this->conyuge = $this->request->getParam('conyuge');
@@ -43,22 +45,26 @@ class JuramentadaConyuge extends Documento
         $this->bloqueConyuge();
         $selloFirma = public_path('img/firmas/sello-firma.png');
         $this->pdf->Image($selloFirma, 160, 265, 30, 20, '', '', '', false, 300, '', false, false, 0);
+
         return $this;
     }
 
     /**
      * bloqueConyuge function
+     *
      * @changed [2023-12-00]
+     *
      * @author elegroag <elegroag@ibero.edu.co>
+     *
      * @return void
      */
-    function bloqueTrabajador()
+    public function bloqueTrabajador()
     {
         $_codciu = ParamsConyuge::getCiudades();
-        $nomtra = capitalize($this->trabajador->getPrinom() . ' ' . $this->trabajador->getSegnom() . ' ' . $this->trabajador->getPriape() . ' ' . $this->trabajador->getSegape());
+        $nomtra = capitalize($this->trabajador->getPrinom().' '.$this->trabajador->getSegnom().' '.$this->trabajador->getPriape().' '.$this->trabajador->getSegape());
         $today = Carbon::now();
         $ciudad = ($this->conyuge->getCodzon()) ? $_codciu[$this->conyuge->getCodzon()] : 'Florencia';
-        $mtipoDocumentos = new Gener18();
+        $mtipoDocumentos = new Gener18;
         $mtidocs = $mtipoDocumentos->findFirst(" coddoc='{$this->trabajador->getTipdoc()}'");
         $detdoc = ($mtidocs) ? $mtidocs->getDetdoc() : 'Cedula de Ciudadania';
 
@@ -72,18 +78,19 @@ class JuramentadaConyuge extends Documento
             ['lb' => 'TipoDoc trabajador', 'texto' => $detdoc, 'x' => 72, 'y' => 31],
             ['lb' => 'Numero documento', 'texto' => $this->trabajador->getCedtra(), 'x' => 156, 'y' => 31],
             $this->posCompaPermanente(),
-            $this->postEstadoCivil()
+            $this->postEstadoCivil(),
         ];
         $this->addBloq($datos);
+
         return $this->pdf;
     }
 
-    function bloqueConyuge()
+    public function bloqueConyuge()
     {
-        $mtipoDocumentos = new Gener18();
+        $mtipoDocumentos = new Gener18;
         $mtidocs = $mtipoDocumentos->findFirst(" coddoc='{$this->conyuge->getTipdoc()}'");
         $detdoc = ($mtidocs) ? $mtidocs->getCodrua() : 'CC';
-        $nomcony = capitalize($this->conyuge->getPrinom() . ' ' . $this->conyuge->getSegnom() . ' ' . $this->conyuge->getPriape() . ' ' . $this->conyuge->getSegape());
+        $nomcony = capitalize($this->conyuge->getPrinom().' '.$this->conyuge->getSegnom().' '.$this->conyuge->getPriape().' '.$this->conyuge->getSegape());
 
         $this->pdf->SetFont('helvetica', '', 9);
         $datos = [
@@ -97,48 +104,52 @@ class JuramentadaConyuge extends Documento
             ['lb' => 'Cedula conyuge', 'texto' => $this->conyuge->getCedcon(), 'x' => 60, 'y' => 125],
             ['lb' => 'Tiempo convive', 'texto' => $this->conyuge->getTiecon(), 'x' => 33, 'y' => 130],
             ['lb' => 'Meses convive', 'texto' => '1', 'x' => 53, 'y' => 130],
-            $this->posOcupacion()
+            $this->posOcupacion(),
         ];
         $this->addBloq($datos);
+
         return $this->pdf;
     }
 
-    function posOcupacion()
+    public function posOcupacion()
     {
         switch ($this->conyuge->getCodocu()) {
             case '01':
-                #EMPLEADO
+                // EMPLEADO
                 $x = 54;
                 break;
             case '04':
-                #INDEPENDIENTE
+                // INDEPENDIENTE
                 $x = 86;
                 break;
             case '03':
-                #PENSIONADO
+                // PENSIONADO
                 $x = 120;
                 break;
             case '02':
-                #ESTUDIANTE
+                // ESTUDIANTE
                 $x = 148;
                 break;
             default:
-                # Ninguna
+                // Ninguna
                 $x = 174;
                 break;
         }
-        return array('lb' => 'Ocupacion', 'texto' => 'X', 'x' => $x, 'y' => 142);
+
+        return ['lb' => 'Ocupacion', 'texto' => 'X', 'x' => $x, 'y' => 142];
     }
 
-    function posCompaPermanente()
+    public function posCompaPermanente()
     {
         $v = ($this->conyuge->getComper() == 'S') ? 'X' : '';
-        return array('lb' => 'Compañera permanente', 'texto' => $v, 'x' => 88, 'y' => 49);
+
+        return ['lb' => 'Compañera permanente', 'texto' => $v, 'x' => 88, 'y' => 49];
     }
 
-    function postEstadoCivil()
+    public function postEstadoCivil()
     {
         $v = ($this->conyuge->getEstciv() == 2 || $this->conyuge->getEstciv() == 4) ? 'X' : '';
-        return array('lb' => 'Compañera union libre', 'texto' => $v, 'x' => 158.5, 'y' => 50);
+
+        return ['lb' => 'Compañera union libre', 'texto' => $v, 'x' => 158.5, 'y' => 50];
     }
 }

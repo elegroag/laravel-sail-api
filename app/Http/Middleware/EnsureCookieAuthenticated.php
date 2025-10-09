@@ -12,19 +12,18 @@ class EnsureCookieAuthenticated
     /**
      * Manejar una solicitud entrante.
      *
-     * @param Request $request
-     * @param Closure $next
      * @return mixed
      */
     public function handle(Request $request, Closure $next)
     {
-        if (!SessionCookies::check()) {
+        if (! SessionCookies::check()) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No autenticado.'
+                    'message' => 'No autenticado.',
                 ], 401);
             }
+
             return redirect('web/login');
         }
 
@@ -38,9 +37,10 @@ class EnsureCookieAuthenticated
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No autenticado.'
+                    'message' => 'No autenticado.',
                 ], 401);
             }
+
             return redirect('web/login');
         }
 
@@ -52,10 +52,11 @@ class EnsureCookieAuthenticated
         $route = Route::current(); // Illuminate\Routing\Route
         $name = Route::currentRouteName(); // string
         $action = Route::currentRouteAction(); // string
+
         return [
             'route' => $route,
             'name' => $name,
-            'action' => $action
+            'action' => $action,
         ];
     }
 }

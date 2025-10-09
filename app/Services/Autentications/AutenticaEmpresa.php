@@ -7,12 +7,10 @@ use App\Models\Mercurio30;
 use App\Models\Mercurio31;
 use App\Models\Mercurio32;
 use App\Models\Mercurio34;
-use App\Services\Utils\Generales;
 use App\Services\Utils\CrearUsuario;
 
 class AutenticaEmpresa extends AutenticaGeneral
 {
-
     public function __construct()
     {
         parent::__construct();
@@ -26,6 +24,7 @@ class AutenticaEmpresa extends AutenticaGeneral
      * comprobar que la empresa este registrada en SISU
      * comprueba que este el usuario de la empresa en mercurio
      * hace los registro de forma automatica
+     *
      * @param [type] $documento
      * @param [type] $coddoc
      * @return bool
@@ -36,18 +35,19 @@ class AutenticaEmpresa extends AutenticaGeneral
          * buscar empresa en sisu
          */
         $this->procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaEmpresas",
-                "metodo" => "informacion_empresa",
-                "params" =>  array(
-                    "nit" => $documento,
-                    "coddoc" => $coddoc
-                )
-            )
+            [
+                'servicio' => 'ComfacaEmpresas',
+                'metodo' => 'informacion_empresa',
+                'params' => [
+                    'nit' => $documento,
+                    'coddoc' => $coddoc,
+                ],
+            ]
         );
 
-        if ($this->procesadorComando->isJson() === False) {
-            $this->message = "Se genero un error al buscar la empresa usando el servicio CLI-Comando. ";
+        if ($this->procesadorComando->isJson() === false) {
+            $this->message = 'Se genero un error al buscar la empresa usando el servicio CLI-Comando. ';
+
             return false;
         }
 
@@ -69,9 +69,11 @@ class AutenticaEmpresa extends AutenticaGeneral
         if (is_null($afiliado)) {
             if ($usuarioParticular || $usuarioEmpresa) {
                 $this->estadoAfiliado = 'I';
+
                 return true;
             } else {
-                $this->message = "Error acceso incorrecto. La empresa no está activa en el \"SISU\", para su ingreso a la plataforma.";
+                $this->message = 'Error acceso incorrecto. La empresa no está activa en el "SISU", para su ingreso a la plataforma.';
+
                 return false;
             }
         }
@@ -85,9 +87,10 @@ class AutenticaEmpresa extends AutenticaGeneral
             if ($usuarioParticular == false) {
 
                 if (strlen($afiliado['email']) == 0) {
-                    $this->message = "La dirección email no es valida para realizar el registro. " .
-                        "Debe solicitar cambio del correo personal a la dirección afiliacionyregistro@comfaca.com, indicando la necesidad. " .
-                        "No olvidar el compartir la dirección email, el número de cedula y el nombre del afiliado, para realizar la comprobación y los cambios solicitados.";
+                    $this->message = 'La dirección email no es valida para realizar el registro. '.
+                        'Debe solicitar cambio del correo personal a la dirección afiliacionyregistro@comfaca.com, indicando la necesidad. '.
+                        'No olvidar el compartir la dirección email, el número de cedula y el nombre del afiliado, para realizar la comprobación y los cambios solicitados.';
+
                     return false;
                 }
 
@@ -96,9 +99,9 @@ class AutenticaEmpresa extends AutenticaGeneral
                  */
                 $clave = genera_clave(8);
                 $hash = clave_hash($clave);
-                $crearUsuario = new CrearUsuario();
+                $crearUsuario = new CrearUsuario;
                 $crearUsuario->setters(
-                    "tipo: P",
+                    'tipo: P',
                     "coddoc: {$coddoc}",
                     "documento: {$documento}",
                     "nombre: {$afiliado['razsoc']}",
@@ -111,11 +114,11 @@ class AutenticaEmpresa extends AutenticaGeneral
                 $codigoVerify = $this->generaCode();
                 $crearUsuario->crearOpcionesRecuperacion($codigoVerify);
 
-                $this->prepareMail($usuarioParticular, $clave, "Particular");
+                $this->prepareMail($usuarioParticular, $clave, 'Particular');
 
-                $this->message = "La empresa no está activa en el sistema principal de Subsidio, debe realizar el proceso de afiliación, para acceder a los servicios de comfaca en línea. " .
-                    "Es necesario readicar una nueva solicitud de afiliación ya que la empresa se encuentra (INACTIVA)." .
-                    "Las credenciales de acceso le serán enviadas al respectivo correo registrado.";
+                $this->message = 'La empresa no está activa en el sistema principal de Subsidio, debe realizar el proceso de afiliación, para acceder a los servicios de comfaca en línea. '.
+                    'Es necesario readicar una nueva solicitud de afiliación ya que la empresa se encuentra (INACTIVA).'.
+                    'Las credenciales de acceso le serán enviadas al respectivo correo registrado.';
             } else {
                 /**
                  * Si existe el usuario de mercurio, dado que la empresa está inactiva en sisu.
@@ -179,8 +182,8 @@ class AutenticaEmpresa extends AutenticaGeneral
                     $usuarioParticular->save();
                 }
 
-                $this->message = "La empresa no está activa en el sistema principal de Subsidio, debe realizar el proceso de afiliación, para acceder a los servicios de comfaca en línea. " .
-                    "Es necesario radicar una nueva solicitud de afiliación ya que la empresa se encuentra (INACTIVA)";
+                $this->message = 'La empresa no está activa en el sistema principal de Subsidio, debe realizar el proceso de afiliación, para acceder a los servicios de comfaca en línea. '.
+                    'Es necesario radicar una nueva solicitud de afiliación ya que la empresa se encuentra (INACTIVA)';
             }
 
             /**
@@ -191,6 +194,7 @@ class AutenticaEmpresa extends AutenticaGeneral
                 $usuarioEmpresa->setEstado('I');
                 $usuarioEmpresa->save();
             }
+
             return false;
         } else {
             /**
@@ -210,9 +214,9 @@ class AutenticaEmpresa extends AutenticaGeneral
 
                 $clave = genera_clave(8);
                 $hash = clave_hash($clave);
-                $crearUsuario = new CrearUsuario();
+                $crearUsuario = new CrearUsuario;
                 $crearUsuario->setters(
-                    "tipo: E",
+                    'tipo: E',
                     "coddoc: {$coddoc}",
                     "documento: {$documento}",
                     "nombre: {$afiliado['razsoc']}",
@@ -226,12 +230,14 @@ class AutenticaEmpresa extends AutenticaGeneral
                 $crearUsuario->crearOpcionesRecuperacion($codigoVerify);
 
                 $this->prepareMail($usuarioEmpresa, $clave);
-                $this->message = "La empresa está activa y se ha creado de forma automatica la cuenta de usuario tipo Empresa, " .
-                    "las credenciales de acceso le serán enviadas al respectivo correo registrado, y debe usar la nueva clave generada.";
+                $this->message = 'La empresa está activa y se ha creado de forma automatica la cuenta de usuario tipo Empresa, '.
+                    'las credenciales de acceso le serán enviadas al respectivo correo registrado, y debe usar la nueva clave generada.';
+
                 return false;
             }
 
             $this->afiliado = $usuarioEmpresa;
+
             return true;
         }
     }

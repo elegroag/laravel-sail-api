@@ -3,10 +3,10 @@
 namespace Tests\Unit;
 
 use App\Library\Auth\AuthJwt;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Providers\JWT\Provider;
-use PHPUnit\Framework\Attributes\Test;
 
 class AuthJwtTest extends TestCase
 {

@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Mercurio\ConsultasTrabajadorController;
 use App\Http\Controllers\Mercurio\TrabajadorController;
 use App\Http\Middleware\EnsureCookieAuthenticated;
 use Illuminate\Support\Facades\Route;

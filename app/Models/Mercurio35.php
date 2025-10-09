@@ -7,9 +7,10 @@ use Carbon\Carbon;
 
 class Mercurio35 extends ModelBase
 {
-
     protected $table = 'mercurio35';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -34,7 +35,8 @@ class Mercurio35 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo id
-     * @param integer $id
+     *
+     * @param  int  $id
      */
     public function setId($id)
     {
@@ -43,7 +45,8 @@ class Mercurio35 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo log
-     * @param integer $log
+     *
+     * @param  int  $log
      */
     public function setLog($log)
     {
@@ -52,7 +55,8 @@ class Mercurio35 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo nit
-     * @param string $nit
+     *
+     * @param  string  $nit
      */
     public function setNit($nit)
     {
@@ -61,7 +65,8 @@ class Mercurio35 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo tipdoc
-     * @param string $tipdoc
+     *
+     * @param  string  $tipdoc
      */
     public function setTipdoc($tipdoc)
     {
@@ -70,7 +75,8 @@ class Mercurio35 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo cedtra
-     * @param string $cedtra
+     *
+     * @param  string  $cedtra
      */
     public function setCedtra($cedtra)
     {
@@ -79,7 +85,8 @@ class Mercurio35 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo nomtra
-     * @param string $nomtra
+     *
+     * @param  string  $nomtra
      */
     public function setNomtra($nomtra)
     {
@@ -88,7 +95,8 @@ class Mercurio35 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo codest
-     * @param string $codest
+     *
+     * @param  string  $codest
      */
     public function setCodest($codest)
     {
@@ -97,7 +105,6 @@ class Mercurio35 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo fecret
-
      */
     public function setFecret($fecret)
     {
@@ -106,7 +113,8 @@ class Mercurio35 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo nota
-     * @param string $nota
+     *
+     * @param  string  $nota
      */
     public function setNota($nota)
     {
@@ -115,7 +123,8 @@ class Mercurio35 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo usuario
-     * @param integer $usuario
+     *
+     * @param  int  $usuario
      */
     public function setUsuario($usuario)
     {
@@ -124,7 +133,8 @@ class Mercurio35 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo archivo
-     * @param string $archivo
+     *
+     * @param  string  $archivo
      */
     public function setArchivo($archivo)
     {
@@ -133,7 +143,8 @@ class Mercurio35 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo estado
-     * @param string $estado
+     *
+     * @param  string  $estado
      */
     public function setEstado($estado)
     {
@@ -142,7 +153,6 @@ class Mercurio35 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo fecest
-
      */
     public function setFecest($fecest)
     {
@@ -151,7 +161,8 @@ class Mercurio35 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo motivo
-     * @param string $motivo
+     *
+     * @param  string  $motivo
      */
     public function setMotivo($motivo)
     {
@@ -160,7 +171,8 @@ class Mercurio35 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo motrec
-     * @param string $motrec
+     *
+     * @param  string  $motrec
      */
     public function setMotrec($motrec)
     {
@@ -169,7 +181,8 @@ class Mercurio35 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo tipo
-     * @param string $tipo
+     *
+     * @param  string  $tipo
      */
     public function setTipo($tipo)
     {
@@ -178,7 +191,8 @@ class Mercurio35 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo coddoc
-     * @param string $coddoc
+     *
+     * @param  string  $coddoc
      */
     public function setCoddoc($coddoc)
     {
@@ -187,17 +201,18 @@ class Mercurio35 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo documento
-     * @param string $documento
+     *
+     * @param  string  $documento
      */
     public function setDocumento($documento)
     {
         $this->documento = $documento;
     }
 
-
     /**
      * Devuelve el valor del campo id
-     * @return integer
+     *
+     * @return int
      */
     public function getId()
     {
@@ -206,7 +221,8 @@ class Mercurio35 extends ModelBase
 
     /**
      * Devuelve el valor del campo log
-     * @return integer
+     *
+     * @return int
      */
     public function getLog()
     {
@@ -215,6 +231,7 @@ class Mercurio35 extends ModelBase
 
     /**
      * Devuelve el valor del campo nit
+     *
      * @return string
      */
     public function getNit()
@@ -224,6 +241,7 @@ class Mercurio35 extends ModelBase
 
     /**
      * Devuelve el valor del campo tipdoc
+     *
      * @return string
      */
     public function getTipdoc()
@@ -233,6 +251,7 @@ class Mercurio35 extends ModelBase
 
     /**
      * Devuelve el valor del campo cedtra
+     *
      * @return string
      */
     public function getCedtra()
@@ -242,6 +261,7 @@ class Mercurio35 extends ModelBase
 
     /**
      * Devuelve el valor del campo nomtra
+     *
      * @return string
      */
     public function getNomtra()
@@ -251,6 +271,7 @@ class Mercurio35 extends ModelBase
 
     /**
      * Devuelve el valor del campo codest
+     *
      * @return string
      */
     public function getCodest()
@@ -260,7 +281,6 @@ class Mercurio35 extends ModelBase
 
     /**
      * Devuelve el valor del campo fecret
-
      */
     public function getFecret()
     {
@@ -269,6 +289,7 @@ class Mercurio35 extends ModelBase
 
     /**
      * Devuelve el valor del campo nota
+     *
      * @return string
      */
     public function getNota()
@@ -278,7 +299,8 @@ class Mercurio35 extends ModelBase
 
     /**
      * Devuelve el valor del campo usuario
-     * @return integer
+     *
+     * @return int
      */
     public function getUsuario()
     {
@@ -287,6 +309,7 @@ class Mercurio35 extends ModelBase
 
     /**
      * Devuelve el valor del campo archivo
+     *
      * @return string
      */
     public function getArchivo()
@@ -296,6 +319,7 @@ class Mercurio35 extends ModelBase
 
     /**
      * Devuelve el valor del campo estado
+     *
      * @return string
      */
     public function getEstado()
@@ -305,18 +329,28 @@ class Mercurio35 extends ModelBase
 
     public function getEstadoDetalle()
     {
-        $return = "";
-        if ($this->estado == "T") $return = "TEMPORAL";
-        if ($this->estado == "D") $return = "DEVUELTO";
-        if ($this->estado == "A") $return = "APROBADO";
-        if ($this->estado == "X") $return = "RECHAZADO";
-        if ($this->estado == "P") $return = "PENDIENTE";
+        $return = '';
+        if ($this->estado == 'T') {
+            $return = 'TEMPORAL';
+        }
+        if ($this->estado == 'D') {
+            $return = 'DEVUELTO';
+        }
+        if ($this->estado == 'A') {
+            $return = 'APROBADO';
+        }
+        if ($this->estado == 'X') {
+            $return = 'RECHAZADO';
+        }
+        if ($this->estado == 'P') {
+            $return = 'PENDIENTE';
+        }
+
         return $return;
     }
 
     /**
      * Devuelve el valor del campo fecest
-
      */
     public function getFecest()
     {
@@ -325,6 +359,7 @@ class Mercurio35 extends ModelBase
 
     /**
      * Devuelve el valor del campo motivo
+     *
      * @return string
      */
     public function getMotivo()
@@ -334,6 +369,7 @@ class Mercurio35 extends ModelBase
 
     /**
      * Devuelve el valor del campo motrec
+     *
      * @return string
      */
     public function getMotrec()
@@ -343,6 +379,7 @@ class Mercurio35 extends ModelBase
 
     /**
      * Devuelve el valor del campo tipo
+     *
      * @return string
      */
     public function getTipo()
@@ -352,6 +389,7 @@ class Mercurio35 extends ModelBase
 
     /**
      * Devuelve el valor del campo coddoc
+     *
      * @return string
      */
     public function getCoddoc()
@@ -361,6 +399,7 @@ class Mercurio35 extends ModelBase
 
     /**
      * Devuelve el valor del campo documento
+     *
      * @return string
      */
     public function getDocumento()

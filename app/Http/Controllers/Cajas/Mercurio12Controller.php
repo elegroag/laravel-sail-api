@@ -12,11 +12,14 @@ use Illuminate\Http\Request;
 
 class Mercurio12Controller extends ApplicationController
 {
+    protected $query = '1=1';
 
-    protected $query = "1=1";
     protected $cantidad_pagina = 10;
+
     protected $db;
+
     protected $user;
+
     protected $tipo;
 
     public function __construct()
@@ -29,64 +32,66 @@ class Mercurio12Controller extends ApplicationController
 
     public function showTabla($paginate)
     {
-        $html  = '<table border="0" cellpadding="0" cellspacing="0" class="table table-bordered">';
+        $html = '<table border="0" cellpadding="0" cellspacing="0" class="table table-bordered">';
         $html .= "<thead class='thead-light'>";
-        $html .= "<tr>";
+        $html .= '<tr>';
         $html .= "<th scope='col'>Documento</th>";
         $html .= "<th scope='col'>Detalle</th>";
         $html .= "<th scope='col'></th>";
-        $html .= "</tr>";
-        $html .= "</thead>";
+        $html .= '</tr>';
+        $html .= '</thead>';
         $html .= "<tbody class='list'>";
         foreach ($paginate->items as $mtable) {
-            $html .= "<tr>";
+            $html .= '<tr>';
             $html .= "<td>{$mtable->getCoddoc()}</td>";
             $html .= "<td>{$mtable->getDetalle()}</td>";
             $html .= "<td class='table-actions'>";
             $html .= "<a href='#!' class='table-action btn btn-xs btn-primary' title='Editar' data-cid='{$mtable->getCoddoc()}' data-toggle='editar'>";
             $html .= "<i class='fas fa-user-edit text-white'></i>";
-            $html .= "</a>";
+            $html .= '</a>';
             $html .= "<a href='#!' class='table-action table-action-delete btn btn-xs btn-danger' title='Borrar' data-cid='{$mtable->getCoddoc()}' data-toggle='borrar'>";
             $html .= "<i class='fas fa-trash text-white'></i>";
-            $html .= "</a>";
-            $html .= "</td>";
-            $html .= "</tr>";
+            $html .= '</a>';
+            $html .= '</td>';
+            $html .= '</tr>';
         }
-        $html .= "</tbody>";
-        $html .= "</table>";
+        $html .= '</tbody>';
+        $html .= '</table>';
+
         return $html;
     }
 
     public function aplicarFiltroAction(Request $request)
     {
-        $consultasOldServices = new GeneralService();
+        $consultasOldServices = new GeneralService;
         $this->query = $consultasOldServices->converQuery($request);
+
         return $this->buscarAction($request);
     }
 
     public function changeCantidadPaginaAction(Request $request)
     {
-        $this->cantidad_pagina = $request->input("numero");
+        $this->cantidad_pagina = $request->input('numero');
+
         return $this->buscarAction($request);
     }
 
     public function indexAction()
     {
-        $campo_field = array(
-            "coddoc" => "Codigo",
-            "detalle" => "Detalle",
-        );
+        $campo_field = [
+            'coddoc' => 'Codigo',
+            'detalle' => 'Detalle',
+        ];
 
         return view('cajas.mercurio12.index', [
-            'title' => "Documentos",
-            'campo_filtro' => $campo_field
+            'title' => 'Documentos',
+            'campo_filtro' => $campo_field,
         ]);
     }
 
-
     public function buscarAction(Request $request)
     {
-        $pagina = ($request->input('pagina') == "") ? 1 : $request->input('pagina');
+        $pagina = ($request->input('pagina') == '') ? 1 : $request->input('pagina');
 
         $paginate = Paginate::execute(
             Mercurio12::whereRaw("{$this->query}")->get(),
@@ -95,26 +100,29 @@ class Mercurio12Controller extends ApplicationController
         );
 
         $html = $this->showTabla($paginate);
-        $consultasOldServices = new GeneralService();
+        $consultasOldServices = new GeneralService;
         $html_paginate = $consultasOldServices->showPaginate($paginate);
 
         $response['consulta'] = $html;
         $response['paginate'] = $html_paginate;
+
         return $this->renderObject($response, false);
     }
 
     public function editarAction(Request $request)
     {
         try {
-            $this->setResponse("ajax");
+            $this->setResponse('ajax');
             $coddoc = $request->input('coddoc');
             $mercurio12 = Mercurio12::where('coddoc', $coddoc)->first();
             if ($mercurio12 == false) {
-                $mercurio12 = new Mercurio12();
+                $mercurio12 = new Mercurio12;
             }
+
             return $this->renderObject($mercurio12->toArray(), false);
         } catch (DebugException $e) {
-            $response = parent::errorFunc("Error al obtener el registro");
+            $response = parent::errorFunc('Error al obtener el registro');
+
             return $this->renderObject($response, false);
         }
     }
@@ -122,18 +130,20 @@ class Mercurio12Controller extends ApplicationController
     public function borrarAction(Request $request)
     {
         try {
-            $this->setResponse("ajax");
+            $this->setResponse('ajax');
             $coddoc = $request->input('coddoc');
 
             $this->db->begin();
             Mercurio12::where('coddoc', $coddoc)->delete();
             $this->db->commit();
 
-            $response = parent::successFunc("Borrado Con Exito");
+            $response = parent::successFunc('Borrado Con Exito');
+
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $this->db->rollback();
-            $response = parent::errorFunc("No se puede Borrar el Registro");
+            $response = parent::errorFunc('No se puede Borrar el Registro');
+
             return $this->renderObject($response, false);
         }
     }
@@ -141,32 +151,34 @@ class Mercurio12Controller extends ApplicationController
     public function guardarAction(Request $request)
     {
         try {
-            $this->setResponse("ajax");
+            $this->setResponse('ajax');
             $coddoc = $request->input('coddoc');
             $detalle = $request->input('detalle');
 
             $this->db->begin();
             $mercurio12 = Mercurio12::where('coddoc', $coddoc)->first();
 
-            if (!$mercurio12) {
-                $mercurio12 = new Mercurio12();
+            if (! $mercurio12) {
+                $mercurio12 = new Mercurio12;
                 $mercurio12->setCoddoc($coddoc);
             }
 
             $mercurio12->setDetalle($detalle);
 
-            if (!$mercurio12->save()) {
+            if (! $mercurio12->save()) {
                 parent::setLogger($mercurio12->getMessages());
                 $this->db->rollback();
-                throw new DebugException("Error al guardar el registro");
+                throw new DebugException('Error al guardar el registro');
             }
 
             $this->db->commit();
-            $response = parent::successFunc("Creacion Con Exito");
+            $response = parent::successFunc('Creacion Con Exito');
+
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $this->db->rollback();
-            $response = parent::errorFunc("No se puede guardar/editar el Registro: " . $e->getMessage());
+            $response = parent::errorFunc('No se puede guardar/editar el Registro: '.$e->getMessage());
+
             return $this->renderObject($response, false);
         }
     }
@@ -174,28 +186,31 @@ class Mercurio12Controller extends ApplicationController
     public function validePkAction(Request $request)
     {
         try {
-            $this->setResponse("ajax");
+            $this->setResponse('ajax');
             $coddoc = $request->input('coddoc');
-            $response = parent::successFunc("");
+            $response = parent::successFunc('');
             $l = Mercurio12::where('coddoc', $coddoc)->count();
             if ($l > 0) {
-                $response = parent::errorFunc("El Registro ya se encuentra Digitado");
+                $response = parent::errorFunc('El Registro ya se encuentra Digitado');
             }
+
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $response = parent::errorFunc("No se pudo validar la informacion");
+            $response = parent::errorFunc('No se pudo validar la informacion');
+
             return $this->renderObject($response, false);
         }
     }
 
     public function reporteAction($format = 'P')
     {
-        $this->setResponse("ajax");
-        $_fields = array();
-        $_fields["coddoc"] = array('header' => "Codigo", 'size' => "15", 'align' => "C");
-        $_fields["detalle"] = array('header' => "Detalle", 'size' => "31", 'align' => "C");
-        $consultasOldServices = new GeneralService();
-        $file = $consultasOldServices->createReport("mercurio12", $_fields, $this->query, "Documentos", $format);
+        $this->setResponse('ajax');
+        $_fields = [];
+        $_fields['coddoc'] = ['header' => 'Codigo', 'size' => '15', 'align' => 'C'];
+        $_fields['detalle'] = ['header' => 'Detalle', 'size' => '31', 'align' => 'C'];
+        $consultasOldServices = new GeneralService;
+        $file = $consultasOldServices->createReport('mercurio12', $_fields, $this->query, 'Documentos', $format);
+
         return $this->renderObject($file, false);
     }
 }

@@ -6,9 +6,10 @@ use App\Models\Adapter\ModelBase;
 
 class Tranoms extends ModelBase
 {
-
     protected $table = 'tranoms';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [

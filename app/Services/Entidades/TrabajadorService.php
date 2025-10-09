@@ -5,15 +5,15 @@ namespace App\Services\Entidades;
 use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
-use App\Models\Mercurio31;
-use App\Models\Mercurio10;
+use App\Models\Mercurio01;
 use App\Models\Mercurio07;
+use App\Models\Mercurio10;
 use App\Models\Mercurio12;
 use App\Models\Mercurio13;
-use App\Models\Mercurio37;
-use App\Models\Mercurio01;
+use App\Models\Mercurio31;
 use App\Models\Mercurio32;
 use App\Models\Mercurio34;
+use App\Models\Mercurio37;
 use App\Models\Mercurio45;
 use App\Models\Mercurio47;
 use App\Services\Utils\Comman;
@@ -21,11 +21,14 @@ use Illuminate\Support\Facades\DB;
 
 class TrabajadorService
 {
-
     private $tipopc = '1';
+
     private $user;
+
     private $db;
+
     private $tipo;
+
     public function __construct()
     {
         $this->user = session('user');
@@ -35,7 +38,8 @@ class TrabajadorService
 
     /**
      * findAllByEstado function
-     * @param string $estado
+     *
+     * @param  string  $estado
      * @return array
      */
     public function findAllByEstado($estado = '')
@@ -44,7 +48,7 @@ class TrabajadorService
         $coddoc = $this->user['coddoc'];
 
         if ((new Mercurio31)->getCount(
-            "*",
+            '*',
             "conditions: documento='{$documento}' and coddoc='{$coddoc}'"
         ) == 0) {
             return [];
@@ -56,7 +60,7 @@ class TrabajadorService
             $conditions = "and m31.estado='{$estado}' ";
         }
 
-        $sql  = "SELECT m31.*,
+        $sql = "SELECT m31.*,
             (SELECT COUNT(*) FROM mercurio10 as me10 WHERE me10.tipopc='13' and m31.id = me10.numero) as cantidad_eventos,
             (SELECT MAX(fecsis) FROM mercurio10 as mr10 WHERE mr10.tipopc='13' and m31.id = mr10.numero) as fecha_ultima_solicitud,
             (CASE
@@ -78,6 +82,7 @@ class TrabajadorService
     /**
      * buscarEmpresaSubsidio function
      * buscar empresa en subsidio sin importar el estado
+     *
      * @param [type] $nit
      * @return void
      */
@@ -86,15 +91,15 @@ class TrabajadorService
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaEmpresas",
-                "metodo" => "informacion_empresa",
-                "params" => array(
-                    "nit" => $nit
-                )
-            )
+            [
+                'servicio' => 'ComfacaEmpresas',
+                'metodo' => 'informacion_empresa',
+                'params' => [
+                    'nit' => $nit,
+                ],
+            ]
         );
-        $salida =  $procesadorComando->toArray();
+        $salida = $procesadorComando->toArray();
         if ($salida['success']) {
             return $salida;
         } else {
@@ -104,8 +109,10 @@ class TrabajadorService
 
     public function archivosRequeridos($solicitud)
     {
-        if ($solicitud == false) return false;
-        $archivos = array();
+        if ($solicitud == false) {
+            return false;
+        }
+        $archivos = [];
 
         $db = DbBase::rawConnect();
 
@@ -137,7 +144,7 @@ class TrabajadorService
                 }
             }
 
-            $obliga = ($m13->getObliga() == "S") ? "<br><small class='text-danger'>Obligatorio</small>" : "";
+            $obliga = ($m13->getObliga() == 'S') ? "<br><small class='text-danger'>Obligatorio</small>" : '';
             $archivo = new \stdClass;
             $archivo->obliga = $obliga;
             $archivo->id = $solicitud->getId();
@@ -149,11 +156,11 @@ class TrabajadorService
         }
 
         $mercurio01 = Mercurio01::first();
-        $html = view("empresa/tmp/archivos_requeridos", array(
-            "load_archivos" => $archivos,
-            "path" => $mercurio01->getPath(),
-            "puede_borrar" => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true
-        ))->render();
+        $html = view('empresa/tmp/archivos_requeridos', [
+            'load_archivos' => $archivos,
+            'path' => $mercurio01->getPath(),
+            'puede_borrar' => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true,
+        ])->render();
 
         return $html;
     }
@@ -161,8 +168,10 @@ class TrabajadorService
     public function dataArchivosRequeridos($solicitud)
     {
 
-        if ($solicitud == false) return false;
-        $archivos = array();
+        if ($solicitud == false) {
+            return false;
+        }
+        $archivos = [];
 
         $mercurio10 = Mercurio10::where('numero', $solicitud->getId())
             ->where('tipopc', $this->tipopc)
@@ -193,7 +202,7 @@ class TrabajadorService
             }
 
             $archivo = $m13->getArray();
-            $archivo['obliga'] = ($m13->getObliga() == "S") ? "<br><small class='text-danger'>Obligatorio</small>" : "";
+            $archivo['obliga'] = ($m13->getObliga() == 'S') ? "<br><small class='text-danger'>Obligatorio</small>" : '';
             $archivo['id'] = $solicitud->getId();
             $archivo['detalle'] = capitalize($m12->getDetalle());
             $archivo['diponible'] = ($mercurio37) ? $mercurio37->getArchivo() : false;
@@ -203,19 +212,20 @@ class TrabajadorService
 
         $mercurio01 = Mercurio01::first();
         $archivos_descargar = oficios_requeridos('T');
+
         return [
-            "disponibles" => $archivos_descargar,
-            "archivos" => $archivos,
-            "path" => $mercurio01->getPath(),
-            "puede_borrar" => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true
+            'disponibles' => $archivos_descargar,
+            'archivos' => $archivos,
+            'path' => $mercurio01->getPath(),
+            'puede_borrar' => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true,
         ];
     }
 
-
     /**
      * updateByFormData function
-     * @param int $id
-     * @param array $data
+     *
+     * @param  int  $id
+     * @param  array  $data
      * @return bool
      */
     public function updateByFormData($id, $data)
@@ -223,6 +233,7 @@ class TrabajadorService
         $solicitud = $this->findById($id);
         if ($solicitud) {
             $solicitud->fill($data);
+
             return $solicitud->save();
         } else {
             return false;
@@ -231,7 +242,8 @@ class TrabajadorService
 
     /**
      * create function
-     * @param array $data
+     *
+     * @param  array  $data
      * @return Mercurio31
      */
     public function create($data)
@@ -248,7 +260,8 @@ class TrabajadorService
 
     /**
      * createByFormData function
-     * @param array $data
+     *
+     * @param  array  $data
      * @return Mercurio31
      */
     public function createByFormData($data)
@@ -256,12 +269,14 @@ class TrabajadorService
         $data['log'] = 0;
         $data['estado'] = 'T';
         $trabajador = $this->create($data);
+
         return $trabajador;
     }
 
     /**
      * findById function
-     * @param integer $id
+     *
+     * @param  int  $id
      * @return Mercurio31
      */
     public function findById($id)
@@ -271,10 +286,11 @@ class TrabajadorService
 
     /**
      * enviarCaja function
-     * @param SenderValidationCaja $senderValidationCaja
-     * @param integer $id
-     * @param integer $documento
-     * @param integer $coddoc
+     *
+     * @param  SenderValidationCaja  $senderValidationCaja
+     * @param  int  $id
+     * @param  int  $documento
+     * @param  int  $coddoc
      * @return void
      */
     public function enviarCaja($senderValidationCaja, $id, $usuario)
@@ -282,23 +298,23 @@ class TrabajadorService
         $solicitud = $this->findById($id);
 
         $cm37 = (new Mercurio37)->getCount(
-            "*",
-            "conditions: tipopc='{$this->tipopc}' AND " .
-                "numero='{$id}' AND " .
+            '*',
+            "conditions: tipopc='{$this->tipopc}' AND ".
+                "numero='{$id}' AND ".
                 "coddoc IN(SELECT coddoc FROM mercurio13 WHERE tipopc='{$this->tipopc}' AND obliga='S')"
         );
 
         $cm13 = (new Mercurio13)->getCount(
-            "*",
+            '*',
             "conditions: tipopc='{$this->tipopc}' and obliga='S'"
         );
         if ($cm37 < $cm13) {
-            throw new DebugException("Adjunte los archivos obligatorios", 500);
+            throw new DebugException('Adjunte los archivos obligatorios', 500);
         }
 
         Mercurio31::where('id', $id)->update([
             'usuario' => $usuario,
-            'estado' => 'P'
+            'estado' => 'P',
         ]);
 
         $ai = Mercurio10::where('tipopc', $this->tipopc)
@@ -320,25 +336,28 @@ class TrabajadorService
 
     /**
      * buscarTrabajadorSubsidio function
+     *
      * @changed [2023-12-00]
      *
      * @author elegroag <elegroag@ibero.edu.co>
+     *
      * @param [type] $cedtra
-     * @return array|boolean
+     * @return array|bool
      */
     public function buscarTrabajadorSubsidio($cedtra)
     {
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaEmpresas",
-                "metodo" => "informacion_trabajador",
-                "params" => array(
-                    "cedtra" => $cedtra,
-                )
-            )
+            [
+                'servicio' => 'ComfacaEmpresas',
+                'metodo' => 'informacion_trabajador',
+                'params' => [
+                    'cedtra' => $cedtra,
+                ],
+            ]
         );
-        $out =  $procesadorComando->toArray();
+        $out = $procesadorComando->toArray();
+
         return ($out['success'] == true) ? $out['data'] : false;
     }
 
@@ -351,36 +370,40 @@ class TrabajadorService
             ->map(function ($row) {
                 $campos = explode(';', $row->campos_corregir);
                 $row->corregir = $campos;
+
                 return $row;
             })
             ->toArray();
 
-        return array(
+        return [
             'seguimientos' => $seguimientos,
             'campos_disponibles' => (new Mercurio31)->CamposDisponibles(),
-            'estados_detalles' => (new Mercurio10)->getArrayEstados()
-        );
+            'estados_detalles' => (new Mercurio10)->getArrayEstados(),
+        ];
     }
 
     public function paramsApi()
     {
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "parametros_trabajadores"
-            ),
+            [
+                'servicio' => 'ComfacaAfilia',
+                'metodo' => 'parametros_trabajadores',
+            ],
             false
         );
-        $paramsTrabajador = new ParamsTrabajador();
+        $paramsTrabajador = new ParamsTrabajador;
         $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
     }
 
     /**
      * findRequestByDocuCod function
+     *
      * @changed [2023-12-00]
      * buscar solicitudes por trabajadores que se tengan registradas por la empresa x
+     *
      * @author elegroag <elegroag@ibero.edu.co>
+     *
      * @param [type] $documento
      * @param [type] $coddoc
      * @return void
@@ -392,29 +415,32 @@ class TrabajadorService
                 ['documento', $documento],
                 ['coddoc', $coddoc],
                 ['estado', '<>', 'X'],
-                ['estado', '<>', 'I']
+                ['estado', '<>', 'I'],
             ])
             ->get()
             ->toArray();
 
-        return (is_array($datos) === True) ? $datos : false;
+        return (is_array($datos) === true) ? $datos : false;
     }
 
     public function findApiTrabajadoresByNit($nit)
     {
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "listar_trabajadores",
-                "params" => array(
-                    'nit' => $nit
-                )
-            )
+            [
+                'servicio' => 'ComfacaAfilia',
+                'metodo' => 'listar_trabajadores',
+                'params' => [
+                    'nit' => $nit,
+                ],
+            ]
         );
-        if ($procesadorComando->isJson() == false) throw new DebugException("Error resultado de API", 501);
+        if ($procesadorComando->isJson() == false) {
+            throw new DebugException('Error resultado de API', 501);
+        }
         $out = $procesadorComando->getObject();
-        return ($out->success == True) ? $out->data : False;
+
+        return ($out->success == true) ? $out->data : false;
     }
 
     public function resumenServicios()
@@ -428,11 +454,11 @@ class TrabajadorService
                 [
                     'name' => 'Solicitudes Cónyuges',
                     'cantidad' => [
-                        'pendientes' => Mercurio32::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'aprobados' => Mercurio32::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'rechazados' => Mercurio32::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'devueltos' => Mercurio32::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'temporales' => Mercurio32::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
+                        'pendientes' => Mercurio32::where(['estado' => 'P', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'aprobados' => Mercurio32::where(['estado' => 'A', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'rechazados' => Mercurio32::where(['estado' => 'R', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'devueltos' => Mercurio32::where(['estado' => 'D', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'temporales' => Mercurio32::where(['estado' => 'T', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
                     ],
                     'icon' => 'C',
                     'url' => 'conyuge/index',
@@ -441,11 +467,11 @@ class TrabajadorService
                 [
                     'name' => 'Solicitudes Beneficiarios',
                     'cantidad' => [
-                        'pendientes' => Mercurio34::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'aprobados' => Mercurio34::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'rechazados' => Mercurio34::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'devueltos' => Mercurio34::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'temporales' => Mercurio34::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
+                        'pendientes' => Mercurio34::where(['estado' => 'P', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'aprobados' => Mercurio34::where(['estado' => 'A', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'rechazados' => Mercurio34::where(['estado' => 'R', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'devueltos' => Mercurio34::where(['estado' => 'D', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'temporales' => Mercurio34::where(['estado' => 'T', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
                     ],
                     'icon' => 'B',
                     'url' => 'beneficiario/index',
@@ -454,11 +480,11 @@ class TrabajadorService
                 [
                     'name' => 'Actualización de datos',
                     'cantidad' => [
-                        'pendientes' => Mercurio47::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'aprobados' => Mercurio47::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'rechazados' => Mercurio47::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'devueltos' => Mercurio47::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'temporales' => Mercurio47::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
+                        'pendientes' => Mercurio47::where(['estado' => 'P', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'aprobados' => Mercurio47::where(['estado' => 'A', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'rechazados' => Mercurio47::where(['estado' => 'R', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'devueltos' => Mercurio47::where(['estado' => 'D', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'temporales' => Mercurio47::where(['estado' => 'T', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
                     ],
                     'icon' => 'A',
                     'url' => 'actualizadatostra/index',
@@ -467,23 +493,23 @@ class TrabajadorService
                 [
                     'name' => 'Presentar Certificados',
                     'cantidad' => [
-                        'pendientes' => Mercurio45::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'aprobados' => Mercurio45::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'rechazados' => Mercurio45::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'devueltos' => Mercurio45::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'temporales' => Mercurio45::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
+                        'pendientes' => Mercurio45::where(['estado' => 'P', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'aprobados' => Mercurio45::where(['estado' => 'A', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'rechazados' => Mercurio45::where(['estado' => 'R', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'devueltos' => Mercurio45::where(['estado' => 'D', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'temporales' => Mercurio45::where(['estado' => 'T', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
                     ],
                     'icon' => 'D',
                     'url' => 'certificados/index',
                     'imagen' => 'presentar_certificado.jpg',
-                ]
+                ],
             ],
             'productos' => [
                 [
                     'name' => 'P. Complemento_nutricional',
                     'url' => 'productos/complemento_nutricional',
                     'imagen' => 'complemento.jpg',
-                ]
+                ],
             ],
             'consultas' => [
                 [
@@ -500,8 +526,8 @@ class TrabajadorService
                     'name' => 'Consulta planilla',
                     'url' => 'subsidio/consulta_planilla_trabajador_view',
                     'imagen' => 'consulta_trabajadores.jpg',
-                ]
-            ]
+                ],
+            ],
         ];
     }
 }

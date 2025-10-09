@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('email', 60);
             $table->char('telefono', 10)->nullable();
             $table->string('nota', 255);
-            $table->enum('estado', ['A','I']);
+            $table->enum('estado', ['A', 'I']);
         });
     }
 

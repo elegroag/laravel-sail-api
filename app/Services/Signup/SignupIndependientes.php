@@ -6,14 +6,15 @@ use App\Models\Mercurio10;
 use App\Models\Mercurio37;
 use App\Models\Mercurio41;
 
-class SignupIndependientes  implements SignupInterface
+class SignupIndependientes implements SignupInterface
 {
-
     /**
      * solicitud variable
+     *
      * @var Mercurio41
      */
     protected $solicitud;
+
     private $tipopc = 13;
 
     public function __construct() {}
@@ -31,15 +32,17 @@ class SignupIndependientes  implements SignupInterface
             ->where('estado', 'T')
             ->first();
 
-        if ($this->solicitud == FALSE) {
-            $this->solicitud = new Mercurio41();
+        if ($this->solicitud == false) {
+            $this->solicitud = new Mercurio41;
         }
+
         return $this->solicitud;
     }
 
     /**
      * create function
-     * @param array $data
+     *
+     * @param  array  $data
      * @return void
      */
     public function createSignupService($data)
@@ -92,7 +95,7 @@ class SignupIndependientes  implements SignupInterface
         $segnom = '';
         $segape = '';
         if (strlen($data['repleg']) > 0) {
-            $exp = explode(" ", trim($data['repleg']));
+            $exp = explode(' ', trim($data['repleg']));
             switch (count($exp)) {
                 case 6:
                 case 7:
@@ -100,13 +103,13 @@ class SignupIndependientes  implements SignupInterface
                     $prinom = $exp[0];
                     $segnom = $exp[1];
                     $priape = $exp[2];
-                    $segape = $exp[3] . ' ' . $exp[4] . ' ' . $exp[5];
+                    $segape = $exp[3].' '.$exp[4].' '.$exp[5];
                     break;
                 case 5:
                     $prinom = $exp[0];
                     $segnom = $exp[1];
                     $priape = $exp[2];
-                    $segape = $exp[3] . ' ' . $exp[4];
+                    $segape = $exp[3].' '.$exp[4];
                     break;
                 case 4:
                     $prinom = $exp[0];
@@ -116,7 +119,7 @@ class SignupIndependientes  implements SignupInterface
                     break;
                 case 3:
                     $prinom = $exp[0];
-                    $priape = $exp[1] . ' ' . $exp[2];
+                    $priape = $exp[1].' '.$exp[2];
                     break;
                 case 2:
                     $prinom = $exp[0];

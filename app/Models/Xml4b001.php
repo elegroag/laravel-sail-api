@@ -8,7 +8,9 @@ use Illuminate\Validation\Rule;
 class Xml4b001 extends ModelBase
 {
     protected $table = 'xml4b001';
+
     public $timestamps = false;
+
     protected $primaryKey = 'tipsec';
 
     protected $fillable = [
@@ -65,13 +67,14 @@ class Xml4b001 extends ModelBase
             'O' => 'OFICIAL',
             'P' => 'PRIVADA',
             'M' => 'MIXTA',
-            'N' => 'NO APLICA'
+            'N' => 'NO APLICA',
         ];
     }
 
     public function getTipempDetalle()
     {
         $tipos = $this->getTipempArray();
+
         return $tipos[$this->tipemp] ?? '';
     }
 }

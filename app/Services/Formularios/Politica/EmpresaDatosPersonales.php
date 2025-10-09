@@ -9,7 +9,6 @@ use Carbon\Carbon;
 
 class EmpresaDatosPersonales extends Documento
 {
-
     /**
      * empresa variable
      *
@@ -19,23 +18,25 @@ class EmpresaDatosPersonales extends Documento
 
     /**
      * main function
+     *
      * @changed [2023-12-00]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     * @param TCPDF $pdf
+     *
+     * @param  TCPDF  $pdf
      * @param [type] $params
      * @return void
      */
     public function main()
     {
-        if (!$this->request->getParam('empresa')) {
-            throw new DebugException("Error la facultativo no esté disponible", 501);
+        if (! $this->request->getParam('empresa')) {
+            throw new DebugException('Error la facultativo no esté disponible', 501);
         }
         $this->empresa = $this->request->getParam('empresa');
         $this->pdf->SetTitle("Oficio de tratamiento de datos personales, NIT {$this->empresa->getNit()}, COMFACA");
         $this->pdf->SetAuthor("{$this->empresa->getPriape()} {$this->empresa->getSegape()} {$this->empresa->getPrinom()} {$this->empresa->getSegnom()}, COMFACA");
-        $this->pdf->SetSubject("Oficio de tratamiento de datos personales");
-        $this->pdf->SetCreator("Plataforma Web: comfacaenlinea.com.co, COMFACA");
+        $this->pdf->SetSubject('Oficio de tratamiento de datos personales');
+        $this->pdf->SetCreator('Plataforma Web: comfacaenlinea.com.co, COMFACA');
         $this->pdf->SetKeywords('COMFACA');
 
         $imagen = public_path('img/form/datos-personales/datos-personales-empresa-01.jpg');
@@ -51,43 +52,46 @@ class EmpresaDatosPersonales extends Documento
         $this->pdf->Image($selloFirma, 160, 265, 30, 20, '', '', '', false, 300, '', false, false, 0);
     }
 
-
     /**
      * bloqueEmpresa function
+     *
      * @changed [2023-12-00]
+     *
      * @author elegroag <elegroag@ibero.edu.co>
-     * @param Mercurio30 $empresa
-     * @param TCPDF $this->pdf
+     *
+     * @param  Mercurio30  $empresa
+     * @param  TCPDF  $this->pdf
      * @return void
      */
-    function bloqueEmpresa()
+    public function bloqueEmpresa()
     {
         $_codciu = ParamsEmpresa::getCiudades();
         $repleg = $this->empresa->getRepleg();
         $razon_social = $this->empresa->getRazsoc();
 
-        $ciudad = (!$this->empresa->getCodzon()) ? 'Florencia' : $_codciu[$this->empresa->getCodzon()];
+        $ciudad = (! $this->empresa->getCodzon()) ? 'Florencia' : $_codciu[$this->empresa->getCodzon()];
         $coddorepleg = $this->empresa->getCoddocreplegArray();
         $tipo_documento = $coddorepleg[$this->empresa->getTipdoc()];
         $today = Carbon::now();
 
         $this->pdf->SetFont('helvetica', '', 9);
-        $datos = array(
-            array('lb' => 'Razon social', 'texto' => capitalize($razon_social), 'x' => 75, 'y' => 86),
-            array('lb' => 'Tipo documento', 'texto' => $tipo_documento, 'x' => 75, 'y' => 95),
-            array('lb' => 'Nit', 'texto' => $this->empresa->getNit(), 'x' => 148, 'y' => 95),
-            array('lb' => 'Nombre representante', 'texto' => capitalize($repleg), 'x' => 75, 'y' => 103),
-            array('lb' => 'Tipo documento representante', 'texto' => $this->empresa->getCoddocrepleg(), 'x' => 75, 'y' => 112),
-            array('lb' => 'Documento representante', 'texto' => $this->empresa->getCedrep(), 'x' => 148, 'y' => 112),
-            array('lb' => 'Ciudad', 'texto' => $ciudad, 'x' => 55, 'y' => 120),
-            array('lb' => 'Fecha', 'texto' => $today->format('Y-m-d'), 'x' => 148, 'y' => 120),
-            array('lb' => 'Dirección', 'texto' => $this->empresa->getDireccion(), 'x' => 75, 'y' => 130),
-            array('lb' => 'Telefono', 'texto' => $this->empresa->getTelefono(), 'x' => 75, 'y' => 136),
-            array('lb' => 'Celular', 'texto' => $this->empresa->getCelular(), 'x' => 148, 'y' => 136),
-            array('lb' => 'Email', 'texto' => $this->empresa->getEmail(), 'x' => 75, 'y' => 147),
-        );
+        $datos = [
+            ['lb' => 'Razon social', 'texto' => capitalize($razon_social), 'x' => 75, 'y' => 86],
+            ['lb' => 'Tipo documento', 'texto' => $tipo_documento, 'x' => 75, 'y' => 95],
+            ['lb' => 'Nit', 'texto' => $this->empresa->getNit(), 'x' => 148, 'y' => 95],
+            ['lb' => 'Nombre representante', 'texto' => capitalize($repleg), 'x' => 75, 'y' => 103],
+            ['lb' => 'Tipo documento representante', 'texto' => $this->empresa->getCoddocrepleg(), 'x' => 75, 'y' => 112],
+            ['lb' => 'Documento representante', 'texto' => $this->empresa->getCedrep(), 'x' => 148, 'y' => 112],
+            ['lb' => 'Ciudad', 'texto' => $ciudad, 'x' => 55, 'y' => 120],
+            ['lb' => 'Fecha', 'texto' => $today->format('Y-m-d'), 'x' => 148, 'y' => 120],
+            ['lb' => 'Dirección', 'texto' => $this->empresa->getDireccion(), 'x' => 75, 'y' => 130],
+            ['lb' => 'Telefono', 'texto' => $this->empresa->getTelefono(), 'x' => 75, 'y' => 136],
+            ['lb' => 'Celular', 'texto' => $this->empresa->getCelular(), 'x' => 148, 'y' => 136],
+            ['lb' => 'Email', 'texto' => $this->empresa->getEmail(), 'x' => 75, 'y' => 147],
+        ];
 
         $this->addBloq($datos);
+
         return $this->pdf;
     }
 }

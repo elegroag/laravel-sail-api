@@ -11,9 +11,12 @@ class Mercurio10 extends ModelBase
     use HasCompositeKey;
 
     protected $table = 'mercurio10';
+
     public $timestamps = false;
+
     // PK compuesta según migración
     protected $primaryKey = ['tipopc', 'numero', 'item'];
+
     public $incrementing = false;
 
     protected $fillable = [
@@ -31,6 +34,7 @@ class Mercurio10 extends ModelBase
     {
         $this->campos_corregir = $campos_corregir;
     }
+
     public function getCamposCorregir()
     {
         return $this->campos_corregir;
@@ -38,13 +42,14 @@ class Mercurio10 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo numero
-     * @param integer $numero
+     *
+     * @param  int  $numero
      */
-
     public function setTipopc($tipopc)
     {
         $this->tipopc = $tipopc;
     }
+
     public function setNumero($numero)
     {
         $this->numero = $numero;
@@ -52,7 +57,8 @@ class Mercurio10 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo item
-     * @param integer $item
+     *
+     * @param  int  $item
      */
     public function setItem($item)
     {
@@ -61,7 +67,8 @@ class Mercurio10 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo estado
-     * @param string $estado
+     *
+     * @param  string  $estado
      */
     public function setEstado($estado)
     {
@@ -70,7 +77,8 @@ class Mercurio10 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo nota
-     * @param string $nota
+     *
+     * @param  string  $nota
      */
     public function setNota($nota)
     {
@@ -79,7 +87,6 @@ class Mercurio10 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo fecsis
-
      */
     public function setFecsis($fecsis)
     {
@@ -88,19 +95,19 @@ class Mercurio10 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo codest
-     * @param string $codest
+     *
+     * @param  string  $codest
      */
     public function setCodest($codest)
     {
         $this->codest = $codest;
     }
 
-
     /**
      * Devuelve el valor del campo numero
-     * @return integer
+     *
+     * @return int
      */
-
     public function getTipopc()
     {
         return $this->tipopc;
@@ -113,7 +120,8 @@ class Mercurio10 extends ModelBase
 
     /**
      * Devuelve el valor del campo item
-     * @return integer
+     *
+     * @return int
      */
     public function getItem()
     {
@@ -122,6 +130,7 @@ class Mercurio10 extends ModelBase
 
     /**
      * Devuelve el valor del campo estado
+     *
      * @return string
      */
     public function getEstado()
@@ -131,6 +140,7 @@ class Mercurio10 extends ModelBase
 
     /**
      * Devuelve el valor del campo nota
+     *
      * @return string
      */
     public function getNota()
@@ -140,7 +150,6 @@ class Mercurio10 extends ModelBase
 
     /**
      * Devuelve el valor del campo fecsis
-
      */
     public function getFecsis()
     {
@@ -149,6 +158,7 @@ class Mercurio10 extends ModelBase
 
     /**
      * Devuelve el valor del campo codest
+     *
      * @return string
      */
     public function getCodest()
@@ -160,19 +170,19 @@ class Mercurio10 extends ModelBase
     {
         switch ($this->estado) {
             case 'T':
-                return "Temporal";
+                return 'Temporal';
                 break;
             case 'D':
-                return "Devuelto";
+                return 'Devuelto';
                 break;
             case 'A':
-                return "Aprobado";
+                return 'Aprobado';
                 break;
             case 'X':
-                return "Rechazado";
+                return 'Rechazado';
                 break;
             case 'P':
-                return "Pendiente de verificación";
+                return 'Pendiente de verificación';
                 break;
             default:
                 return false;
@@ -182,12 +192,12 @@ class Mercurio10 extends ModelBase
 
     public function getArrayEstados()
     {
-        return array(
-            'T' => "Temporal",
-            'D' => "Devuelto",
-            'A' => "Aprobado",
-            'X' => "Rechazado",
-            'P' => "Pendiente de verificación"
-        );
+        return [
+            'T' => 'Temporal',
+            'D' => 'Devuelto',
+            'A' => 'Aprobado',
+            'X' => 'Rechazado',
+            'P' => 'Pendiente de verificación',
+        ];
     }
 }

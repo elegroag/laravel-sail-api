@@ -1,8 +1,8 @@
 <?php
 
 // Importar facades y controlador necesarios
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Cajas\Mercurio59Controller;
+use Illuminate\Support\Facades\Route;
 
 // Rutas para Mercurio59Controller - Servicios
 Route::get('/servicios/index', [Mercurio59Controller::class, 'indexAction'])->name('mercurio59.index')->middleware('auth');

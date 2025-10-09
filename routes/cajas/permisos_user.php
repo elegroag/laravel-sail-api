@@ -1,8 +1,8 @@
 <?php
 
 // Importar facades y controlador necesarios
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Cajas\Gener42Controller;
+use Illuminate\Support\Facades\Route;
 
 // Ruta GET para mostrar la página principal de permisos
 Route::get('/permisos/user', [Gener42Controller::class, 'indexAction']);

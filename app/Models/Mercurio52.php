@@ -7,7 +7,9 @@ use App\Models\Adapter\ModelBase;
 class Mercurio52 extends ModelBase
 {
     protected $table = 'mercurio52';
+
     public $timestamps = false;
+
     protected $primaryKey = 'codmen';
 
     protected $fillable = [
@@ -69,7 +71,8 @@ class Mercurio52 extends ModelBase
     public function getCodareDetalle()
     {
         $area = $this->area();
-        return $area ? $area->getDetalle() : "";
+
+        return $area ? $area->getDetalle() : '';
     }
 
     public function getUrl()
@@ -84,13 +87,14 @@ class Mercurio52 extends ModelBase
 
     public function getTipoArray()
     {
-        return ["T" => "TRABAJADOR", "E" => "EMPRESA", "C" => "CONYUGE", "B" => "BENEFICIARIO"];
+        return ['T' => 'TRABAJADOR', 'E' => 'EMPRESA', 'C' => 'CONYUGE', 'B' => 'BENEFICIARIO'];
     }
 
     public function getTipoDetalle()
     {
         $tipos = $this->getTipoArray();
-        return $tipos[$this->tipo] ?? "";
+
+        return $tipos[$this->tipo] ?? '';
     }
 
     public function getEstado()
@@ -100,13 +104,14 @@ class Mercurio52 extends ModelBase
 
     public function getEstadoArray()
     {
-        return ["A" => "ACTIVO", "I" => "INACTIVO"];
+        return ['A' => 'ACTIVO', 'I' => 'INACTIVO'];
     }
 
     public function getEstadoDetalle()
     {
         $estados = $this->getEstadoArray();
-        return $estados[$this->estado] ?? "";
+
+        return $estados[$this->estado] ?? '';
     }
 
     // Relación Eloquent

@@ -16,9 +16,10 @@ use Illuminate\Http\Request;
 
 class MovimientosController extends ApplicationController
 {
-
     protected $db;
+
     protected $user;
+
     protected $tipo;
 
     public function __construct()
@@ -32,54 +33,55 @@ class MovimientosController extends ApplicationController
     {
         return view('mercurio.movimientos.index', [
             'hide_header' => true,
-            'title' => 'Movimientos'
+            'title' => 'Movimientos',
         ]);
     }
 
     public function historialAction()
     {
-        $logger = new Logger();
-        $logger->registrarLog(false, "Historial", "");
-        if ($this->tipo == "E") {
-            return redirect()->to("mercurio/subsidioemp/historial");
+        $logger = new Logger;
+        $logger->registrarLog(false, 'Historial', '');
+        if ($this->tipo == 'E') {
+            return redirect()->to('mercurio/subsidioemp/historial');
         }
-        if ($this->tipo  == "T") {
-            return redirect()->to("mercurio/subsidio/historial");
+        if ($this->tipo == 'T') {
+            return redirect()->to('mercurio/subsidio/historial');
         }
-        if ($this->tipo == "P") {
-            return redirect()->to("mercurio/particular/historial");
+        if ($this->tipo == 'P') {
+            return redirect()->to('mercurio/particular/historial');
         }
     }
 
     public function cambioEmailViewAction()
     {
-        return view("mercurio.movimientos.cambio_email", [
-            "title" => "Cambio Email",
-            "email" => "email"
+        return view('mercurio.movimientos.cambio_email', [
+            'title' => 'Cambio Email',
+            'email' => 'email',
         ]);
     }
 
     public function cambioEmailAction(Request $request)
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         try {
             $email = $request->input('email');
             $user = Mercurio07::where('tipo', $this->tipo)
                 ->where('documento', $this->user['documento'])
                 ->update(['email' => $email]);
 
-            $asunto = "Cambio de Email";
-            $msj  = "acabas de utilizar nuestro servicio de cambio de email de aviso. Te informamos que fue exitoso";
-            $generalService = new GeneralService();
-            $generalService->sendEmail($user['email'], $user['nombre'], $asunto, $msj, "");
+            $asunto = 'Cambio de Email';
+            $msj = 'acabas de utilizar nuestro servicio de cambio de email de aviso. Te informamos que fue exitoso';
+            $generalService = new GeneralService;
+            $generalService->sendEmail($user['email'], $user['nombre'], $asunto, $msj, '');
 
-            $response = "Cambio de Email de Aviso con Exito";
+            $response = 'Cambio de Email de Aviso con Exito';
 
-            $logger = new Logger();
-            $logger->registrarLog(false, "Cambio de Email", "");
+            $logger = new Logger;
+            $logger->registrarLog(false, 'Cambio de Email', '');
+
             return $this->renderText(json_encode($response));
         } catch (DebugException $e) {
-            $response = "No se pudo realizar la accion";
+            $response = 'No se pudo realizar la accion';
         }
 
         return $this->renderObject($response);
@@ -88,18 +90,17 @@ class MovimientosController extends ApplicationController
     public function cambioClaveViewAction()
     {
         return view('mercurio.movimientos.cambio_clave', [
-            "title" => "Cambio Clave"
+            'title' => 'Cambio Clave',
         ]);
     }
 
     public function cambioClaveAction(Request $request)
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         try {
             $claant = $request->input('claant');
             $clave = $request->input('clave');
             $clacon = $request->input('clacon');
-
 
             $tipo = $this->tipo;
             $documento = $this->user['documento'];
@@ -111,20 +112,22 @@ class MovimientosController extends ApplicationController
                 ->first();
 
             $claant = password_hash_old($claant);
-            $claant = md5("" . $claant);
+            $claant = md5(''.$claant);
 
             if ($claant != $mercurio07->getClave()) {
-                $response = "La clave no coincide con la actual";
+                $response = 'La clave no coincide con la actual';
+
                 return $this->renderText(json_encode($response));
             }
 
             if ($clave != $clacon) {
-                $response = "Las claves no coinciden";
+                $response = 'Las claves no coinciden';
+
                 return $this->renderText(json_encode($response));
             }
 
             $mclave = password_hash_old($clave);
-            $mclave = md5("" . $mclave);
+            $mclave = md5(''.$mclave);
 
             Mercurio07::where('tipo', $tipo)
                 ->where('documento', $documento)
@@ -133,13 +136,13 @@ class MovimientosController extends ApplicationController
 
             $ps = Comman::Api();
             $ps->runCli(
-                array(
-                    "servicio" => "ComfacaAfilia",
-                    "metodo" => "parametros_empresa"
-                )
+                [
+                    'servicio' => 'ComfacaAfilia',
+                    'metodo' => 'parametros_empresa',
+                ]
             );
             $datos_captura = $ps->toArray();
-            $coddoc_detalle = "";
+            $coddoc_detalle = '';
             foreach ($datos_captura['coddoc'] as $data) {
                 if ($data['coddoc'] == $coddoc) {
                     $coddoc_detalle = $data['detalle'];
@@ -149,44 +152,45 @@ class MovimientosController extends ApplicationController
 
             $mercurio02 = Mercurio02::first();
 
-            $params = array(
-                "titulo" => "Cordial saludo, señor@ {$mercurio07->getNombre()}",
-                "msj" => "Bienvenido a La Caja de Compensación Familiar del Caqueta COMFACA, " .
-                    "Acabas de utilizar nuestro servicio de cambio de clave. Le informamos que fue exitosa.<br/>Las siguientes son las credeciales de acceso",
-                "rutaImg" => "https://comfacaenlinea.com.co/public/img/header_reporte_ugpp.png",
-                "url_activa" => "https://comfacaenlinea.com.co/Mercurio/Mercurio/login/index",
-                "tipo_documento" => $coddoc_detalle,
-                "documento" => $documento,
-                "clave" => $clave,
-                "mercurio02" => array(
-                    "razsoc"    => $mercurio02->getRazsoc(),
-                    "direccion" => $mercurio02->getDireccion(),
-                    "email"     => $mercurio02->getEmail(),
-                    "telefono"  => $mercurio02->getTelefono(),
-                    "pagweb"    => $mercurio02->getPagweb()
-                )
-            );
+            $params = [
+                'titulo' => "Cordial saludo, señor@ {$mercurio07->getNombre()}",
+                'msj' => 'Bienvenido a La Caja de Compensación Familiar del Caqueta COMFACA, '.
+                    'Acabas de utilizar nuestro servicio de cambio de clave. Le informamos que fue exitosa.<br/>Las siguientes son las credeciales de acceso',
+                'rutaImg' => 'https://comfacaenlinea.com.co/public/img/header_reporte_ugpp.png',
+                'url_activa' => 'https://comfacaenlinea.com.co/Mercurio/Mercurio/login/index',
+                'tipo_documento' => $coddoc_detalle,
+                'documento' => $documento,
+                'clave' => $clave,
+                'mercurio02' => [
+                    'razsoc' => $mercurio02->getRazsoc(),
+                    'direccion' => $mercurio02->getDireccion(),
+                    'email' => $mercurio02->getEmail(),
+                    'telefono' => $mercurio02->getTelefono(),
+                    'pagweb' => $mercurio02->getPagweb(),
+                ],
+            ];
 
-            $html = view("emails/change-clave", $params)->render();
+            $html = view('emails/change-clave', $params)->render();
 
-            $asunto = "Cambio De Clave Portal Comfaca En Línea";
+            $asunto = 'Cambio De Clave Portal Comfaca En Línea';
             $email_caja = Mercurio01::first();
 
-            $sender_email = new SenderEmail();
+            $sender_email = new SenderEmail;
             $sender_email->setters(
-                "asunto:" . $asunto,
-                "emisor_email:" . $email_caja->getEmail(),
-                "emisor_clave:" . $email_caja->getClave()
+                'asunto:'.$asunto,
+                'emisor_email:'.$email_caja->getEmail(),
+                'emisor_clave:'.$email_caja->getClave()
             );
 
             $sender_email->send($mercurio07->getEmail(), $html);
-            $logger = new Logger();
-            $logger->registrarLog(false, "Cambio de Clave", "");
+            $logger = new Logger;
+            $logger->registrarLog(false, 'Cambio de Clave', '');
 
-            $response = "Cambio de clave se ha realizado con éxito.";
+            $response = 'Cambio de clave se ha realizado con éxito.';
         } catch (DebugException $e) {
-            $response = "No se pudo realizar la accion";
+            $response = 'No se pudo realizar la accion';
         }
+
         return $this->renderObject($response);
     }
 }

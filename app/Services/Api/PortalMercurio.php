@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services\Api;
 
 use App\Library\APIClient\APIClient;
@@ -20,32 +21,32 @@ class PortalMercurio extends ApiAbstract
         $user = isset($attr['user']) ? $attr['user'] : 2;
 
         if (is_array($params)) {
-            $params = array_merge($params, array(
-                "_user" => $user,
-                "_sistema" =>  'Mercurio', //Core::getInstanceName(),
-                "_env" => $this->app->mode
-            ));
+            $params = array_merge($params, [
+                '_user' => $user,
+                '_sistema' => 'Mercurio', // Core::getInstanceName(),
+                '_env' => $this->app->mode,
+            ]);
         } else {
-            $params = array(
-                "_user" => $user,
-                "_sistema" =>  'Mercurio', //Core::getInstanceName(),
-                "_env" => $this->app->mode
-            );
+            $params = [
+                '_user' => $user,
+                '_sistema' => 'Mercurio', // Core::getInstanceName(),
+                '_env' => $this->app->mode,
+            ];
         }
 
         $userApi = (new Gener02)->findFirst("usuario='{$user}'");
         $basicAuth = new BasicAuth('2', $userApi->getClave());
 
-        if ($this->app->mode == "development") {
+        if ($this->app->mode == 'development') {
             $hostConnection = "{$this->app->host_portal_dev}/";
         } else {
             // $basicAuth->encript($this->app->encryption, $this->app->portal_clave);
             $hostConnection = "{$this->app->host_portal_pro}/";
         }
-        $url = $this->app->portal . "/{$servicio}.php";
+        $url = $this->app->portal."/{$servicio}.php";
 
-        $this->lineaComando =  $hostConnection . "\n" . $url . "\n" . json_encode($params);
-        $api = new APIClient($basicAuth, $hostConnection,  $url);
+        $this->lineaComando = $hostConnection."\n".$url."\n".json_encode($params);
+        $api = new APIClient($basicAuth, $hostConnection, $url);
         $api->setTypeJson(false);
         $this->output = $api->consumeAPI(
             'POST',

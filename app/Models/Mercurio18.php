@@ -6,9 +6,10 @@ use App\Models\Adapter\ModelBase;
 
 class Mercurio18 extends ModelBase
 {
-
     protected $table = 'mercurio18';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -18,7 +19,8 @@ class Mercurio18 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo codigo
-     * @param string $codigo
+     *
+     * @param  string  $codigo
      */
     public function setCodigo($codigo)
     {
@@ -27,16 +29,17 @@ class Mercurio18 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo detalle
-     * @param string $detalle
+     *
+     * @param  string  $detalle
      */
     public function setDetalle($detalle)
     {
         $this->detalle = $detalle;
     }
 
-
     /**
      * Devuelve el valor del campo codigo
+     *
      * @return string
      */
     public function getCodigo()
@@ -46,6 +49,7 @@ class Mercurio18 extends ModelBase
 
     /**
      * Devuelve el valor del campo detalle
+     *
      * @return string
      */
     public function getDetalle()

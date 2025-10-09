@@ -7,8 +7,11 @@ use App\Models\Adapter\ModelBase;
 class Xml4b004 extends ModelBase
 {
     protected $table = 'xml4b004';
+
     public $timestamps = false;
+
     protected $primaryKey = 'tipide';
+
     public $incrementing = false;
 
     protected $fillable = [

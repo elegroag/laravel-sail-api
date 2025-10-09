@@ -1,8 +1,8 @@
 <?php
 
 // Importar facades y controlador necesarios
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Cajas\Mercurio65Controller;
+use Illuminate\Support\Facades\Route;
 
 // Rutas para Mercurio65Controller - Comercios
 Route::get('/comercios/index', [Mercurio65Controller::class, 'indexAction'])->name('mercurio65.index')->middleware('auth');

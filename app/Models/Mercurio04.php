@@ -6,12 +6,15 @@ use App\Models\Adapter\ModelBase;
 
 class Mercurio04 extends ModelBase
 {
-
     protected $table = 'mercurio04';
+
     public $timestamps = false;
+
     // PK es CHAR(2) 'codofi' (no autoincremental)
     protected $primaryKey = 'codofi';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -23,7 +26,8 @@ class Mercurio04 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo codofi
-     * @param string $codofi
+     *
+     * @param  string  $codofi
      */
     public function setCodofi($codofi)
     {
@@ -32,7 +36,8 @@ class Mercurio04 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo detalle
-     * @param string $detalle
+     *
+     * @param  string  $detalle
      */
     public function setDetalle($detalle)
     {
@@ -41,7 +46,8 @@ class Mercurio04 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo principal
-     * @param string $principal
+     *
+     * @param  string  $principal
      */
     public function setPrincipal($principal)
     {
@@ -50,16 +56,17 @@ class Mercurio04 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo estado
-     * @param string $estado
+     *
+     * @param  string  $estado
      */
     public function setEstado($estado)
     {
         $this->estado = $estado;
     }
 
-
     /**
      * Devuelve el valor del campo codofi
+     *
      * @return string
      */
     public function getCodofi()
@@ -69,6 +76,7 @@ class Mercurio04 extends ModelBase
 
     /**
      * Devuelve el valor del campo detalle
+     *
      * @return string
      */
     public function getDetalle()
@@ -78,6 +86,7 @@ class Mercurio04 extends ModelBase
 
     /**
      * Devuelve el valor del campo principal
+     *
      * @return string
      */
     public function getPrincipal()
@@ -87,20 +96,25 @@ class Mercurio04 extends ModelBase
 
     public function getPrincipalArray()
     {
-        return array("S" => "SI", "N" => "NO");
+        return ['S' => 'SI', 'N' => 'NO'];
     }
 
     public function getPrincipalDetalle()
     {
-        $return = "";
-        if ($this->principal == "S") $return = "SI";
-        if ($this->principal == "N") $return = "NO";
+        $return = '';
+        if ($this->principal == 'S') {
+            $return = 'SI';
+        }
+        if ($this->principal == 'N') {
+            $return = 'NO';
+        }
+
         return $return;
     }
 
-
     /**
      * Devuelve el valor del campo estado
+     *
      * @return string
      */
     public function getEstado()
@@ -110,14 +124,19 @@ class Mercurio04 extends ModelBase
 
     public function getEstadoArray()
     {
-        return array("A" => "ACTIVO", "I" => "INACTIVO");
+        return ['A' => 'ACTIVO', 'I' => 'INACTIVO'];
     }
 
     public function getEstadoDetalle()
     {
-        $return = "";
-        if ($this->estado == "A") $return = "ACTIVO";
-        if ($this->estado == "I") $return = "INACTIVO";
+        $return = '';
+        if ($this->estado == 'A') {
+            $return = 'ACTIVO';
+        }
+        if ($this->estado == 'I') {
+            $return = 'INACTIVO';
+        }
+
         return $return;
     }
 }

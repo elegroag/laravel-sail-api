@@ -2,15 +2,15 @@
 
 namespace Tests\Unit;
 
-use Tests\TestCase;
-use App\Services\Signup\SignupService;
+use App\Models\Mercurio07;
+use App\Services\PreparaFormularios\GestionFirmaNoImage;
 use App\Services\Request;
 use App\Services\Signup\SignupEmpresas;
 use App\Services\Signup\SignupParticular;
+use App\Services\Signup\SignupService;
 use App\Services\Utils\AsignarFuncionario;
-use App\Models\Mercurio07;
-use App\Services\PreparaFormularios\GestionFirmaNoImage;
 use Mockery;
+use Tests\TestCase;
 
 class SignupServiceTest extends TestCase
 {
@@ -47,7 +47,7 @@ class SignupServiceTest extends TestCase
             'rep_email' => 'voxevipup@mailinator.com',
             'rep_telefono' => '+1 (724) 372-2298',
             'rep_coddoc' => '5',
-            'calemp' => 'valor_calculado' // Asumiendo un valor calculado
+            'calemp' => 'valor_calculado', // Asumiendo un valor calculado
         ];
 
         $request = Mockery::mock(Request::class);
@@ -91,7 +91,7 @@ class SignupServiceTest extends TestCase
 
         // Mock para SignupParticular
         $signupParticular = Mockery::mock(SignupParticular::class);
-        $signupParticular->shouldReceive('main')->with(Mockery::on(function($req) {
+        $signupParticular->shouldReceive('main')->with(Mockery::on(function ($req) {
             return $req->getParam('tipo') === 'E';
         }))->andReturn(null);
 
@@ -105,7 +105,7 @@ class SignupServiceTest extends TestCase
         $gestionFirma->shouldReceive('generarClaves');
 
         // Ejecutar el test
-        $service = new SignupService();
+        $service = new SignupService;
         $result = $service->execute($request);
 
         // Verificaciones
@@ -123,7 +123,7 @@ class SignupServiceTest extends TestCase
         $request = Mockery::mock(Request::class);
         $request->shouldReceive('getParam')->with('tipo')->andReturn('X'); // Tipo inválido
 
-        $service = new SignupService();
+        $service = new SignupService;
         $this->expectException(\App\Exceptions\DebugException::class);
         $this->expectExceptionMessage('Error el tipo de afiliación es requerido');
         $service->execute($request);
@@ -137,7 +137,7 @@ class SignupServiceTest extends TestCase
         $request = Mockery::mock(Request::class);
         $request->shouldReceive('getParam')->andReturn(null); // Simular parámetros nulos
 
-        $service = new SignupService();
+        $service = new SignupService;
         // Asumir que un parámetro clave como 'documento' es nulo causará fallo en downstream
         $this->expectException(\Exception::class); // O especificar la excepción esperada
         $service->execute($request);

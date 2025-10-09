@@ -7,7 +7,9 @@ use App\Models\Adapter\ModelBase;
 class Mercurio73 extends ModelBase
 {
     protected $table = 'mercurio73';
+
     public $timestamps = false;
+
     protected $primaryKey = 'numedu';
 
     protected $fillable = [
@@ -15,7 +17,7 @@ class Mercurio73 extends ModelBase
         'archivo',
         'orden',
         'url',
-        'estado'
+        'estado',
     ];
 
     public function setNumedu($numedu)

@@ -4,15 +4,17 @@ namespace App\Services\Utils;
 
 use App\Exceptions\DebugException;
 use App\Models\Adapter\DbBase;
-use App\Models\Mercurio01;
 use App\Models\Mercurio10;
 use App\Models\Mercurio37;
 
 class GuardarArchivoService
 {
     private $tipopc;
+
     private $coddoc;
+
     private $id;
+
     private $db;
 
     public function __construct($argv)
@@ -27,26 +29,26 @@ class GuardarArchivoService
     {
         $time = strtotime('now');
         if (is_null($_FILES)) {
-            throw new DebugException("Error no hay archivos disponibles en servidor", 301);
+            throw new DebugException('Error no hay archivos disponibles en servidor', 301);
         }
-        $item = 'archivo_' . $this->id . '_' . $this->coddoc;
-        if (!isset($_FILES[$item])) {
-            throw new DebugException("Error no es valido el name del activo", 301);
+        $item = 'archivo_'.$this->id.'_'.$this->coddoc;
+        if (! isset($_FILES[$item])) {
+            throw new DebugException('Error no es valido el name del activo', 301);
         }
 
-        $extension = explode(".", $_FILES[$item]['name']);
-        $name = $this->tipopc . "_" . $this->id . "_{$this->coddoc}_{$time}." . end($extension);
+        $extension = explode('.', $_FILES[$item]['name']);
+        $name = $this->tipopc.'_'.$this->id."_{$this->coddoc}_{$time}.".end($extension);
         $_FILES[$item]['name'] = $name;
 
         $estado = $this->uploadFile($item, 'temp/');
         if ($estado != false) {
             $mercurio37 = $this->salvarDatos($name);
         } else {
-            throw new DebugException("No se cargo el tamaño del archivo muy grande o no es valido", 301);
+            throw new DebugException('No se cargo el tamaño del archivo muy grande o no es valido', 301);
         }
+
         return $mercurio37;
     }
-
 
     public function salvarDatos($params)
     {
@@ -66,7 +68,7 @@ class GuardarArchivoService
             $mercurio37->setArchivo($name);
             $mercurio37->setFhash($fhash);
         } else {
-            $mercurio37 = new Mercurio37();
+            $mercurio37 = new Mercurio37;
             $mercurio37->setTipopc($this->tipopc);
             $mercurio37->setNumero($this->id);
             $mercurio37->setCoddoc($this->coddoc);
@@ -82,13 +84,13 @@ class GuardarArchivoService
             ->first();
 
         if ($mercurio10) {
-            //los campos devueltos se borran
+            // los campos devueltos se borran
             if ($mercurio10->estado == 'D') {
-                $corregir = explode(";", $mercurio10->campos_corregir);
+                $corregir = explode(';', $mercurio10->campos_corregir);
                 $nuevos = array_filter($corregir, function ($row) {
                     return intval($row) != intval($this->coddoc);
                 });
-                $campos_corregir = (count($nuevos) > 0) ? implode(';', $nuevos) : "";
+                $campos_corregir = (count($nuevos) > 0) ? implode(';', $nuevos) : '';
                 $mercurio10->campos_corregir = $campos_corregir;
                 $mercurio10->save();
             }
@@ -97,9 +99,9 @@ class GuardarArchivoService
         return $mercurio37;
     }
 
-    function uploadFile($name, string|null $dir = null)
+    public function uploadFile($name, ?string $dir = null)
     {
-        if (!isset($_FILES[$name])) {
+        if (! isset($_FILES[$name])) {
             return false;
         }
 
@@ -107,7 +109,8 @@ class GuardarArchivoService
             ob_clean();
 
             $dir = storage_path($dir ?? 'temp/');
-            return move_uploaded_file($_FILES[$name]['tmp_name'], $dir . htmlspecialchars($_FILES[$name]['name']));
+
+            return move_uploaded_file($_FILES[$name]['tmp_name'], $dir.htmlspecialchars($_FILES[$name]['name']));
         } else {
             return false;
         }

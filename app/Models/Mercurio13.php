@@ -6,9 +6,10 @@ use App\Models\Adapter\ModelBase;
 
 class Mercurio13 extends ModelBase
 {
-
     protected $table = 'mercurio13';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -20,7 +21,8 @@ class Mercurio13 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo tipopc
-     * @param string $tipopc
+     *
+     * @param  string  $tipopc
      */
     public function setTipopc($tipopc)
     {
@@ -29,7 +31,8 @@ class Mercurio13 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo coddoc
-     * @param integer $coddoc
+     *
+     * @param  int  $coddoc
      */
     public function setCoddoc($coddoc)
     {
@@ -38,16 +41,17 @@ class Mercurio13 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo obliga
-     * @param string $obliga
+     *
+     * @param  string  $obliga
      */
     public function setObliga($obliga)
     {
         $this->obliga = $obliga;
     }
 
-
     /**
      * Devuelve el valor del campo tipopc
+     *
      * @return string
      */
     public function getTipopc()
@@ -57,7 +61,8 @@ class Mercurio13 extends ModelBase
 
     /**
      * Devuelve el valor del campo coddoc
-     * @return integer
+     *
+     * @return int
      */
     public function getCoddoc()
     {
@@ -66,6 +71,7 @@ class Mercurio13 extends ModelBase
 
     /**
      * Devuelve el valor del campo obliga
+     *
      * @return string
      */
     public function getObliga()

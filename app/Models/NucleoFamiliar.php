@@ -24,7 +24,7 @@ class NucleoFamiliar extends Model
         'estado_civil',
         'ocupacion',
         'dependiente_economico',
-        'trabajador_id'
+        'trabajador_id',
     ];
 
     protected $casts = [

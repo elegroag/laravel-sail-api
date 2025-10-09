@@ -8,9 +8,13 @@ use Illuminate\Validation\Rule;
 class Xml4d088 extends ModelBase
 {
     protected $table = 'xml4d088';
+
     public $timestamps = false;
+
     protected $primaryKey = 'codinf';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -163,6 +167,7 @@ class Xml4d088 extends ModelBase
     public function getNcodareDetalle()
     {
         $area = $this->area();
+
         return $area ? $area->getNombre() : '';
     }
 

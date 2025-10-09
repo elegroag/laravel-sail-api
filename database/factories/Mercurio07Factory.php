@@ -18,25 +18,25 @@ class Mercurio07Factory extends Factory
     public function definition(): array
     {
         // tipo: coincide con Mercurio06 (1 letra válida), almacenada en CHAR(2)
-        $tipo = $this->faker->randomElement(['P','T','E','I','O','F','S']);
+        $tipo = $this->faker->randomElement(['P', 'T', 'E', 'I', 'O', 'F', 'S']);
 
         // coddoc: 2 letras (tipo de documento)
         $coddoc = strtoupper($this->faker->lexify('??'));
 
         // documento: hasta 15 chars, usamos numérico
-        $documento = substr($this->faker->numerify(str_repeat('#', 10) . '#####'), 0, 15);
+        $documento = substr($this->faker->numerify(str_repeat('#', 10).'#####'), 0, 15);
 
         $nombre = substr($this->faker->name(), 0, 120);
         $email = substr($this->faker->safeEmail(), 0, 60);
 
         // clave: hash tipo bcrypt (60 chars), cabe en CHAR(255)
-        $clave = password_hash('Passw0rd!' . $documento, PASSWORD_BCRYPT);
+        $clave = password_hash('Passw0rd!'.$documento, PASSWORD_BCRYPT);
 
         $feccla = $this->faker->dateTimeBetween('-2 years', 'now')->format('Y-m-d');
-        $autoriza = $this->faker->randomElement(['S','N']);
+        $autoriza = $this->faker->randomElement(['S', 'N']);
         $codciu = str_pad((string) $this->faker->numberBetween(1, 99999), 5, '0', STR_PAD_LEFT);
         $fecreg = $this->faker->dateTimeBetween($feccla, 'now')->format('Y-m-d');
-        $estado = $this->faker->randomElement(['A','I','P','X']);
+        $estado = $this->faker->randomElement(['A', 'I', 'P', 'X']);
         $fechaSyn = $this->faker->optional()->date('Y-m-d');
         $whatsapp = $this->faker->optional()->numerify('##########');
 

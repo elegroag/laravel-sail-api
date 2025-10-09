@@ -19,7 +19,7 @@ class ApiEndpointService
     /**
      * Obtener un endpoint por ID.
      *
-     * @param int $id
+     * @param  int  $id
      * @return ApiEndpoint|null
      */
     public function getEndpointById($id)
@@ -30,7 +30,7 @@ class ApiEndpointService
     /**
      * Crear un nuevo endpoint.
      *
-     * @param array $data
+     * @param  array  $data
      * @return ApiEndpoint
      */
     public function createEndpoint($data)
@@ -41,43 +41,44 @@ class ApiEndpointService
     /**
      * Actualizar un endpoint existente.
      *
-     * @param int $id
-     * @param array $data
+     * @param  int  $id
+     * @param  array  $data
      * @return ApiEndpoint|null
      */
     public function updateEndpoint($id, $data)
     {
         $endpoint = ApiEndpoint::find($id);
-        
+
         if ($endpoint) {
             $endpoint->update($data);
+
             return $endpoint;
         }
-        
+
         return null;
     }
 
     /**
      * Eliminar un endpoint.
      *
-     * @param int $id
+     * @param  int  $id
      * @return bool
      */
     public function deleteEndpoint($id)
     {
         $endpoint = ApiEndpoint::find($id);
-        
+
         if ($endpoint) {
             return $endpoint->delete();
         }
-        
+
         return false;
     }
 
     /**
      * Obtener endpoint por nombre de servicio.
      *
-     * @param string $serviceName
+     * @param  string  $serviceName
      * @return ApiEndpoint|null
      */
     public function getEndpointByServiceName($serviceName)
@@ -88,19 +89,20 @@ class ApiEndpointService
     /**
      * Actualizar nombre de conexión para un servicio.
      *
-     * @param string $serviceName
-     * @param string $connectionName
+     * @param  string  $serviceName
+     * @param  string  $connectionName
      * @return ApiEndpoint|null
      */
     public function updateConnectionName($serviceName, $connectionName)
     {
         $endpoint = ApiEndpoint::where('service_name', $serviceName)->first();
-        
+
         if ($endpoint) {
             $endpoint->update(['connection_name' => $connectionName]);
+
             return $endpoint;
         }
-        
+
         return null;
     }
 

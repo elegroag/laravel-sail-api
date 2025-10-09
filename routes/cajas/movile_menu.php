@@ -1,8 +1,8 @@
 <?php
 
 // Importar facades y controlador necesarios
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Cajas\Mercurio52Controller;
+use Illuminate\Support\Facades\Route;
 
 // Rutas para Mercurio52Controller - Menú Móvil
 Route::get('/movile-menu/index', [Mercurio52Controller::class, 'indexAction'])->name('mercurio52.index')->middleware('auth');

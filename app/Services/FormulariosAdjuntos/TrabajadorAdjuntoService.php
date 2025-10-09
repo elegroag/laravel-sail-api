@@ -14,20 +14,24 @@ use App\Services\Utils\Comman;
 
 class TrabajadorAdjuntoService
 {
-
     private $filename;
+
     private $outPdf;
+
     private $fhash;
+
     private $claveCertificado;
 
     /**
      * request variable
+     *
      * @var Mercurio31
      */
     protected $request;
 
     /**
      * lfirma variable
+     *
      * @var Mercurio16
      */
     protected $lfirma;
@@ -43,19 +47,19 @@ class TrabajadorAdjuntoService
     {
         $this->lfirma = Mercurio16::where([
             'documento' => $this->request->getDocumento(),
-            'coddoc' => $this->request->getCoddoc()
+            'coddoc' => $this->request->getCoddoc(),
         ])->first();
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "parametros_empresa"
-            )
+            [
+                'servicio' => 'ComfacaAfilia',
+                'metodo' => 'parametros_empresa',
+            ]
         );
 
-        $datos_captura =  $procesadorComando->toArray();
-        $paramsEmpresa = new ParamsEmpresa();
+        $datos_captura = $procesadorComando->toArray();
+        $paramsEmpresa = new ParamsEmpresa;
         $paramsEmpresa->setDatosCaptura($datos_captura);
     }
 
@@ -63,21 +67,22 @@ class TrabajadorAdjuntoService
     {
         $this->filename = "tratamiento_datos_trabajador_{$this->request->getCedtra()}.pdf";
         KumbiaPDF::setBackgroundImage(false);
-        $fabrica = new FactoryDocuments();
+        $fabrica = new FactoryDocuments;
         $documento = $fabrica->crearPolitica('trabajador');
         $documento->setParamsInit(
-            array(
+            [
                 'trabajador' => $this->request,
                 'firma' => $this->lfirma,
                 'filename' => $this->filename,
                 'background' => false,
-                'rfirma' => false
-            )
+                'rfirma' => false,
+            ]
         );
 
         $documento->main();
         $documento->outPut();
         $this->cifrarDocumento();
+
         return $this;
     }
 
@@ -85,64 +90,69 @@ class TrabajadorAdjuntoService
     {
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaEmpresas",
-                "metodo" => "informacion_trabajador",
-                "params" => array('cedtra' => $this->request->getCedtra())
-            )
+            [
+                'servicio' => 'ComfacaEmpresas',
+                'metodo' => 'informacion_trabajador',
+                'params' => ['cedtra' => $this->request->getCedtra()],
+            ]
         );
 
-        if ($procesadorComando->isJson() == False) {
-            d("Se genero un error al buscar al trabajador usando el servicio CLI-Comando. ");
+        if ($procesadorComando->isJson() == false) {
+            d('Se genero un error al buscar al trabajador usando el servicio CLI-Comando. ');
         }
 
         $out = $procesadorComando->toArray();
         $this->filename = "carta_solicitud_independiente_{$this->request->getCedtra()}.pdf";
         KumbiaPDF::setBackgroundImage(false);
 
-        $fabrica = new FactoryDocuments();
+        $fabrica = new FactoryDocuments;
         $documento = $fabrica->crearOficio('trabajador');
         $documento->setParamsInit([
             'trabajador' => $this->request,
             'firma' => $this->lfirma,
             'filename' => $this->filename,
-            'previus' => $out['success'] ? $out['data'] : null
+            'previus' => $out['success'] ? $out['data'] : null,
         ]);
 
         $documento->main();
         $documento->outPut();
         $this->cifrarDocumento();
+
         return $this;
     }
 
     public function formulario()
     {
-        if (!$this->lfirma) throw new DebugException("Error no hay firma digital", 501);
+        if (! $this->lfirma) {
+            throw new DebugException('Error no hay firma digital', 501);
+        }
 
         $conyuge = Mercurio32::where([
             'documento' => $this->request->getDocumento(),
             'coddoc' => $this->request->getCoddoc(),
             'cedtra' => $this->request->getCedtra(),
-            'comper' => 'S'
+            'comper' => 'S',
         ])->first();
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaEmpresas",
-                "metodo" => "informacion_empresa",
-                "params" => array(
-                    "nit" => $this->request->getNit()
-                )
-            )
+            [
+                'servicio' => 'ComfacaEmpresas',
+                'metodo' => 'informacion_empresa',
+                'params' => [
+                    'nit' => $this->request->getNit(),
+                ],
+            ]
         );
 
-        if ($procesadorComando->isJson() == false) throw new DebugException("Error al consultar la empresa", 501);
+        if ($procesadorComando->isJson() == false) {
+            throw new DebugException('Error al consultar la empresa', 501);
+        }
         $out = $procesadorComando->toArray();
         $empresa = new Mercurio30($out['data']);
 
-        $this->filename = strtotime('now') . "_{$this->request->getCedtra()}.pdf";
-        $fabrica = new FactoryDocuments();
+        $this->filename = strtotime('now')."_{$this->request->getCedtra()}.pdf";
+        $fabrica = new FactoryDocuments;
         $documento = $fabrica->crearFormulario('trabajador');
         $documento->setParamsInit([
             'background' => 'img/form/trabajador/form-001-tra-p01.png',
@@ -150,18 +160,19 @@ class TrabajadorAdjuntoService
             'empresa' => $empresa,
             'conyuge' => $conyuge,
             'firma' => $this->lfirma,
-            'filename' => $this->filename
+            'filename' => $this->filename,
         ]);
 
         $documento->main();
         $documento->outPut();
         $this->cifrarDocumento();
+
         return $this;
     }
 
-    function cifrarDocumento()
+    public function cifrarDocumento()
     {
-        $cifrarDocumento = new CifrarDocumento();
+        $cifrarDocumento = new CifrarDocumento;
         $this->outPdf = $cifrarDocumento->cifrar(
             $this->filename,
             $this->lfirma->getKeyprivate(),
@@ -172,12 +183,12 @@ class TrabajadorAdjuntoService
 
     public function getResult()
     {
-        return array(
-            "name" => $this->filename,
-            "file" => basename($this->outPdf),
+        return [
+            'name' => $this->filename,
+            'file' => basename($this->outPdf),
             'out' => $this->outPdf,
-            'fhash' => $this->fhash
-        );
+            'fhash' => $this->fhash,
+        ];
     }
 
     public function setClaveCertificado($clave)

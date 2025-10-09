@@ -1,12 +1,13 @@
 <?php
- 
- use Illuminate\Support\Facades\Session;
 
-if (!function_exists('set_flashdata')) {
+use Illuminate\Support\Facades\Session;
+
+if (! function_exists('set_flashdata')) {
     /**
      * capitalize
-     * dar formato a las palabras que estan en mayusculas 
-     * @param  mixed $string
+     * dar formato a las palabras que estan en mayusculas
+     *
+     * @param  mixed  $string
      * @return string
      */
     function set_flashdata($item, $data, $persiste = false)
@@ -27,7 +28,7 @@ if (!function_exists('set_flashdata')) {
     }
 }
 
-if (!function_exists('get_flashdata')) {
+if (! function_exists('get_flashdata')) {
     function get_flashdata($destroy = false)
     {
         $messages = session('FLASH', []);
@@ -35,11 +36,12 @@ if (!function_exists('get_flashdata')) {
             // Opcionalmente eliminar inmediatamente (aunque flash expira solo)
             Session::forget('FLASH');
         }
+
         return $messages;
     }
 }
 
-if (!function_exists('get_flashdata_item')) {
+if (! function_exists('get_flashdata_item')) {
     function get_flashdata_item($item, $destroy = false)
     {
         $messages1 = session('FLASH', []);
@@ -53,6 +55,7 @@ if (!function_exists('get_flashdata_item')) {
         if (empty($msj)) {
             $msj = isset($messages2["{$item}"]) ? $messages2["{$item}"] : false;
         }
+
         return $msj;
     }
 }

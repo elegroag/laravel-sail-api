@@ -7,9 +7,10 @@ use App\Models\Adapter\ModelBase;
 
 class Mercurio47 extends ModelBase
 {
-
     protected $table = 'mercurio47';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -20,7 +21,7 @@ class Mercurio47 extends ModelBase
         'fecha_estado',
         'estado',
         'tipo_actualizacion',
-        'usuario'
+        'usuario',
     ];
 
     public function setUsuario($usuario)
@@ -36,6 +37,7 @@ class Mercurio47 extends ModelBase
     /**
      * setId function
      * campos id key
+     *
      * @param [type] $id
      * @return void
      */
@@ -47,6 +49,7 @@ class Mercurio47 extends ModelBase
     /**
      * getId function
      * campos id key
+     *
      * @return void
      */
     public function getId()
@@ -57,6 +60,7 @@ class Mercurio47 extends ModelBase
     /**
      * setDocumento function
      * campos documento realacionado con el documento mercurio07 solicitante
+     *
      * @param [type] $documento
      * @return void
      */
@@ -68,6 +72,7 @@ class Mercurio47 extends ModelBase
     /**
      * setTipo function
      * campos tipo realacionado con el tipo mercurio07 solicitante
+     *
      * @param [type] $tipo
      * @return void
      */
@@ -79,6 +84,7 @@ class Mercurio47 extends ModelBase
     /**
      * setCoddoc function
      * campos coddoc realacionado con el coddoc mercurio07 solicitante
+     *
      * @param [type] $coddoc
      * @return void
      */
@@ -90,6 +96,7 @@ class Mercurio47 extends ModelBase
     /**
      * getDocumento function
      * campos documento realacionado con el documento mercurio07 solicitante
+     *
      * @return @documento
      */
     public function getDocumento()
@@ -100,6 +107,7 @@ class Mercurio47 extends ModelBase
     /**
      * getTipo function
      * campos tipo realacionado con el tipo mercurio07 solicitante
+     *
      * @return @tipo
      */
     public function getTipo()
@@ -110,6 +118,7 @@ class Mercurio47 extends ModelBase
     /**
      * getCoddoc function
      * campos coddoc realacionado con el coddoc mercurio07 solicitante
+     *
      * @return @coddoc
      */
     public function getCoddoc()
@@ -159,42 +168,44 @@ class Mercurio47 extends ModelBase
 
     public function getEstadosArray()
     {
-        return array(
+        return [
             'A' => 'Aprobado',
             'P' => 'Pendiente',
             'D' => 'Devuelto',
             'X' => 'Rechazado',
-            'T' => 'Temporal'
-        );
+            'T' => 'Temporal',
+        ];
     }
 
     public function getEstadoInArray($estado = '')
     {
-        if (!empty($estado)) {
+        if (! empty($estado)) {
             $this->estado = $estado;
         }
         $estados = $this->getEstadosArray();
+
         return (isset($estados["{$this->estado}"])) ? $estados["{$this->estado}"] : false;
     }
 
     public function getTipoActualizacionArray()
     {
-        return array(
+        return [
             'E' => 'Empresa',
             'I' => 'Independiente',
             'T' => 'Trabajador',
             'P' => 'Pensionado',
             'B' => 'Beneficiario',
-            'C' => 'Conyuge'
-        );
+            'C' => 'Conyuge',
+        ];
     }
 
     public function getTipoActualizacionInArray($tipo_actualizacion = '')
     {
-        if (!empty($tipo_actualizacion)) {
+        if (! empty($tipo_actualizacion)) {
             $this->tipo_actualizacion = $tipo_actualizacion;
         }
         $tipo_actualizaciones = $this->getTipoActualizacionArray();
+
         return (isset($tipo_actualizaciones["{$this->tipo_actualizacion}"])) ? $tipo_actualizaciones["{$this->tipo_actualizacion}"] : false;
     }
 
@@ -206,15 +217,19 @@ class Mercurio47 extends ModelBase
     public function CamposDisponibles()
     {
         $db = DbBase::rawConnect();
-        $rqs = $db->inQueryAssoc("SELECT * FROM mercurio12");
-        $data = array();
-        foreach ($rqs as $ai => $row) $data[$row['coddoc']] = $row['detalle'];
+        $rqs = $db->inQueryAssoc('SELECT * FROM mercurio12');
+        $data = [];
+        foreach ($rqs as $ai => $row) {
+            $data[$row['coddoc']] = $row['detalle'];
+        }
+
         return $data;
     }
 
     public function CamposDisponibleDetalle($campo)
     {
         $data = $this->CamposDisponibles();
+
         return $data["{$campo}"];
     }
 }

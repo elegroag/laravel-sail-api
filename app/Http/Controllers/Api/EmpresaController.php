@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Empresa;
-use App\Http\Resources\EmpresaResource;
 use App\Http\Resources\EmpresaCollection;
-use Illuminate\Http\Request;
+use App\Http\Resources\EmpresaResource;
+use App\Models\Empresa;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 class EmpresaController extends Controller
@@ -18,6 +18,7 @@ class EmpresaController extends Controller
     public function index(): EmpresaCollection
     {
         $empresas = Empresa::with('trabajadores')->get();
+
         return new EmpresaCollection($empresas);
     }
 
@@ -36,7 +37,7 @@ class EmpresaController extends Controller
                 'sector_economico' => 'nullable|string|max:255',
                 'numero_empleados' => 'nullable|integer|min:0',
                 'descripcion' => 'nullable|string',
-                'estado' => 'nullable|in:activa,inactiva'
+                'estado' => 'nullable|in:activa,inactiva',
             ]);
 
             $empresa = Empresa::create($validatedData);
@@ -44,7 +45,7 @@ class EmpresaController extends Controller
             return (new EmpresaResource($empresa))
                 ->additional([
                     'success' => true,
-                    'message' => 'Empresa creada exitosamente'
+                    'message' => 'Empresa creada exitosamente',
                 ])
                 ->response()
                 ->setStatusCode(201);
@@ -52,12 +53,12 @@ class EmpresaController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error de validación',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al crear empresa: ' . $e->getMessage()
+                'message' => 'Error al crear empresa: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -68,6 +69,7 @@ class EmpresaController extends Controller
     public function show(string $id): EmpresaResource
     {
         $empresa = Empresa::with('trabajadores.nucleosFamiliares')->findOrFail($id);
+
         return new EmpresaResource($empresa);
     }
 
@@ -81,14 +83,14 @@ class EmpresaController extends Controller
 
             $validatedData = $request->validate([
                 'nombre' => 'sometimes|required|string|max:255',
-                'rut' => 'sometimes|required|string|max:255|unique:empresas,rut,' . $id,
+                'rut' => 'sometimes|required|string|max:255|unique:empresas,rut,'.$id,
                 'direccion' => 'sometimes|required|string|max:255',
                 'telefono' => 'nullable|string|max:255',
                 'email' => 'nullable|email|max:255',
                 'sector_economico' => 'nullable|string|max:255',
                 'numero_empleados' => 'nullable|integer|min:0',
                 'descripcion' => 'nullable|string',
-                'estado' => 'nullable|in:activa,inactiva'
+                'estado' => 'nullable|in:activa,inactiva',
             ]);
 
             $empresa->update($validatedData);
@@ -96,19 +98,19 @@ class EmpresaController extends Controller
             return (new EmpresaResource($empresa))
                 ->additional([
                     'success' => true,
-                    'message' => 'Empresa actualizada exitosamente'
+                    'message' => 'Empresa actualizada exitosamente',
                 ])
                 ->response();
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error de validación',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al actualizar empresa: ' . $e->getMessage()
+                'message' => 'Error al actualizar empresa: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -124,12 +126,12 @@ class EmpresaController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Empresa eliminada exitosamente'
+                'message' => 'Empresa eliminada exitosamente',
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al eliminar empresa: ' . $e->getMessage()
+                'message' => 'Error al eliminar empresa: '.$e->getMessage(),
             ], 500);
         }
     }

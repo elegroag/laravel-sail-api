@@ -8,38 +8,33 @@ use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
 use App\Models\Gener09;
 use App\Models\Gener18;
-use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio10;
 use App\Models\Mercurio30;
 use App\Models\Mercurio31;
-use App\Models\Mercurio32;
-use App\Models\Mercurio34;
 use App\Models\Mercurio37;
-use App\Models\Mercurio38;
-use App\Models\Mercurio41;
-use App\Models\Mercurio45;
-use App\Models\Mercurio47;
 use App\Models\Subsi54;
 use App\Services\Entidades\TrabajadorService;
 use App\Services\FormulariosAdjuntos\TrabajadorAdjuntoService;
+use App\Services\Srequest;
 use App\Services\Tag;
-use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
+use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use App\Services\Srequest;
 
 class TrabajadorController extends ApplicationController
 {
-
     protected $db;
+
     protected $user;
+
     protected $tipo;
+
     protected $tipopc = '1';
 
     public function __construct()
@@ -54,7 +49,9 @@ class TrabajadorController extends ApplicationController
      */
     public function indexAction()
     {
-        if ($this->tipo !== 'E') return redirect()->route('mercurio.index');
+        if ($this->tipo !== 'E') {
+            return redirect()->route('mercurio.index');
+        }
         $input_nits = null;
 
         $xempresas = Mercurio30::where('documento', $this->user['documento'])
@@ -71,7 +68,7 @@ class TrabajadorController extends ApplicationController
                 'class' => 'form-control top',
                 'id' => 'nit',
                 'options' => $nits,
-                'dummyText' => 'Seleccione un nit'
+                'dummyText' => 'Seleccione un nit',
             ])
         );
 
@@ -89,7 +86,7 @@ class TrabajadorController extends ApplicationController
             'coddoc' => $this->user['coddoc'],
             'title' => 'Afiliación de trabajadores',
             'input_nits' => $input_nits,
-            'input_razsoc' => $input_razsoc
+            'input_razsoc' => $input_razsoc,
         ]);
     }
 
@@ -102,28 +99,31 @@ class TrabajadorController extends ApplicationController
         $this->setResponse('ajax');
         try {
             $nit = $this->clp($request, 'nit');
-            if (!$nit) throw new DebugException('El nit es requerido', 422);
+            if (! $nit) {
+                throw new DebugException('El nit es requerido', 422);
+            }
 
             $ps = Comman::Api();
             $ps->runCli([
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',
-                'params' => ['nit' => $nit]
+                'params' => ['nit' => $nit],
             ]);
             $datos = $ps->toArray();
 
-            if (!isset($datos['data']) || count($datos['data']) == 0) {
+            if (! isset($datos['data']) || count($datos['data']) == 0) {
                 $response = ['success' => false, 'msj' => 'El nit no existe'];
             } elseif (($datos['data']['estado'] ?? null) === 'I') {
                 $response = ['success' => false, 'msj' => 'La empresa esta inactiva no puede crear nuevos trabajadores'];
             } else {
                 $response = ['success' => true, 'msj' => '', 'data' => $datos['data']['razsoc'] ?? null];
             }
+
             return $this->renderObject($response);
         } catch (DebugException $e) {
             return $this->renderObject([
                 'success' => false,
-                'msj' => $e->getMessage()
+                'msj' => $e->getMessage(),
             ]);
         }
     }
@@ -133,13 +133,13 @@ class TrabajadorController extends ApplicationController
      */
     public function borrarArchivoAction(Request $request)
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         try {
             $numero = $this->clp($request, 'id');
             $coddoc = $this->clp($request, 'coddoc');
-            $mercurio37 = Mercurio37::where("tipopc", $this->tipopc)->where("numero", $numero)->where("coddoc", $coddoc)->first();
+            $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
+            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -149,16 +149,17 @@ class TrabajadorController extends ApplicationController
                 ->where('coddoc', $coddoc)
                 ->delete();
 
-            $response = array(
-                "success" => true,
-                "msj" => "El archivo se borro de forma correcta"
-            );
+            $response = [
+                'success' => true,
+                'msj' => 'El archivo se borro de forma correcta',
+            ];
         } catch (DebugException $e) {
-            $response = array(
-                "success" => false,
-                "msj" => $e->getMessage()
-            );
+            $response = [
+                'success' => false,
+                'msj' => $e->getMessage(),
+            ];
         }
+
         return $this->renderObject($response, false);
     }
 
@@ -187,6 +188,7 @@ class TrabajadorController extends ApplicationController
         } catch (\Exception $e) {
             $response = ['success' => false, 'msj' => $e->getMessage()];
         }
+
         return $this->renderObject($response);
     }
 
@@ -206,8 +208,8 @@ class TrabajadorController extends ApplicationController
             'servicio' => 'ComfacaEmpresas',
             'metodo' => 'informacion_trabajador',
             'params' => [
-                'cedtra' => $cedtra
-            ]
+                'cedtra' => $cedtra,
+            ],
         ]);
 
         $out = $ps->toArray();
@@ -220,7 +222,9 @@ class TrabajadorController extends ApplicationController
 
         $response = [];
         $response['multi'] = false;
-        if ($mercurio31->getNit() != $nit) $response['multi'] = true;
+        if ($mercurio31->getNit() != $nit) {
+            $response['multi'] = true;
+        }
 
         $response['flag'] = true;
         if ($mercurio31->getNit() == $nit && $mercurio31->getEstado() == 'A') {
@@ -229,10 +233,11 @@ class TrabajadorController extends ApplicationController
         }
 
         if ($mercurio31->getCedtra() == '') {
-            $mercurio31 = Mercurio31::where('cedtra', $cedtra)->first() ?: new Mercurio31();
+            $mercurio31 = Mercurio31::where('cedtra', $cedtra)->first() ?: new Mercurio31;
         }
 
         $response['data'] = $mercurio31->toArray();
+
         return $this->renderObject($response);
     }
 
@@ -244,14 +249,15 @@ class TrabajadorController extends ApplicationController
         $this->setResponse('ajax');
         try {
             $id = $this->clp($request, 'id');
-            $trabajadorService = new TrabajadorService();
-            $asignarFuncionario = new AsignarFuncionario();
+            $trabajadorService = new TrabajadorService;
+            $asignarFuncionario = new AsignarFuncionario;
             $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
-            $trabajadorService->enviarCaja(new SenderValidationCaja(), $id, $usuario); // TODO: importar/clase correcta si existe
+            $trabajadorService->enviarCaja(new SenderValidationCaja, $id, $usuario); // TODO: importar/clase correcta si existe
             $salida = ['success' => true, 'msj' => 'El envio de la solicitud se ha completado con éxito'];
         } catch (\Exception $e) {
             $salida = ['success' => false, 'msj' => $e->getMessage()];
         }
+
         return $this->renderObject($salida);
     }
 
@@ -262,97 +268,106 @@ class TrabajadorController extends ApplicationController
     {
         $this->setResponse('ajax');
         try {
-            $trabajadorService = new TrabajadorService();
+            $trabajadorService = new TrabajadorService;
             $out = $trabajadorService->consultaSeguimiento($id);
             $salida = ['success' => true, 'data' => $out];
         } catch (\Exception $e) {
             $salida = ['success' => false, 'msj' => $e->getMessage()];
         }
+
         return $this->renderObject($salida);
     }
 
     public function paramsAction()
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
 
         try {
             $nit = $this->user['documento'];
 
-            $mtipoDocumentos = new Gener18();
-            $tipoDocumentos = array();
+            $mtipoDocumentos = new Gener18;
+            $tipoDocumentos = [];
 
             foreach ($mtipoDocumentos->all() as $mtipo) {
-                if ($mtipo->getCoddoc() == '7' || $mtipo->getCoddoc() == '2') continue;
+                if ($mtipo->getCoddoc() == '7' || $mtipo->getCoddoc() == '2') {
+                    continue;
+                }
                 $tipoDocumentos["{$mtipo->getCoddoc()}"] = $mtipo->getDetdoc();
             }
 
-            $msubsi54 = new Subsi54();
-            $tipsoc = array();
+            $msubsi54 = new Subsi54;
+            $tipsoc = [];
             foreach ($msubsi54->all() as $entity) {
                 $tipsoc["{$entity->getTipsoc()}"] = $entity->getDetalle();
             }
 
-            $coddoc = array();
+            $coddoc = [];
             foreach ($mtipoDocumentos->all() as $entity) {
-                if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') continue;
+                if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') {
+                    continue;
+                }
                 $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
             }
 
-            $coddocrepleg = array();
+            $coddocrepleg = [];
             foreach ($mtipoDocumentos->all() as $entity) {
-                if ($entity->getCodrua() == 'TI' || $entity->getCodrua() == 'RC') continue;
+                if ($entity->getCodrua() == 'TI' || $entity->getCodrua() == 'RC') {
+                    continue;
+                }
                 $coddocrepleg["{$entity->getCodrua()}"] = $entity->getDetdoc();
             }
 
-            $codciu = array();
-            $mzonas = Gener09::where("codzon",  '>=', 18000)->where("codzon", '<=', 19000)->get();
+            $codciu = [];
+            $mzonas = Gener09::where('codzon', '>=', 18000)->where('codzon', '<=', 19000)->get();
             foreach ($mzonas as $entity) {
                 $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
             }
 
             $procesadorComando = Comman::Api();
             $procesadorComando->runCli(
-                array(
-                    "servicio" => "ComfacaAfilia",
-                    "metodo" => "parametros_trabajadores"
-                )
+                [
+                    'servicio' => 'ComfacaAfilia',
+                    'metodo' => 'parametros_trabajadores',
+                ]
             );
-            $paramsTrabajador = new ParamsTrabajador();
+            $paramsTrabajador = new ParamsTrabajador;
             $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
 
             $procesadorComando = Comman::Api();
             $procesadorComando->runCli(
-                array(
-                    "servicio" => "ComfacaEmpresas",
-                    "metodo" => "buscar_sucursales_en_empresa/{$nit}",
-                    "params" => [
-                        'nit' => $nit
-                    ]
-                )
+                [
+                    'servicio' => 'ComfacaEmpresas',
+                    'metodo' => "buscar_sucursales_en_empresa/{$nit}",
+                    'params' => [
+                        'nit' => $nit,
+                    ],
+                ]
             );
             $rqs = $procesadorComando->toArray();
 
-            $codsuc = array();
+            $codsuc = [];
             $sucursales = $rqs['data'];
             if ($sucursales) {
                 foreach ($sucursales as $data) {
-                    if ($data['estado'] == 'I') continue;
+                    if ($data['estado'] == 'I') {
+                        continue;
+                    }
                     if (isset($codciu[$data['codzon']])) {
-                        $codsuc["{$data['codsuc']}"] = $data['detalle'] . ' - DE ' . $codciu[$data['codzon']];
+                        $codsuc["{$data['codsuc']}"] = $data['detalle'].' - DE '.$codciu[$data['codzon']];
                     } else {
                         $codsuc["{$data['codsuc']}"] = $data['detalle'];
                     }
                 }
             }
 
-            $tipafi = (new Mercurio07())->getArrayTipos();
+            $tipafi = (new Mercurio07)->getArrayTipos();
             $coddoc = $tipoDocumentos;
 
-            $salida = array(
-                "success" => true,
-                "msj" => 'OK',
-                "data" => array(
-                    'tipo'   => $tipafi,
+            $salida = [
+                'success' => true,
+                'msj' => 'OK',
+                'data' => [
+                    'tipo' => $tipafi,
                     'tipdoc' => $coddoc,
                     'tipper' => (new Mercurio30)->getTipperArray(),
                     'tipsoc' => $tipsoc,
@@ -383,88 +398,97 @@ class TrabajadorController extends ApplicationController
                     'tipsal' => (new Mercurio31)->getTipsalArray(),
                     'tipcue' => ParamsTrabajador::getTipoCuenta(),
                     'ruralt' => ParamsTrabajador::getRural(),
-                    'tipjor' => array("C" => "COMPLETA", "M" => "MEDIA", "P" => "PARCIAL"),
-                    "autoriza" => array("S" => "SI", "N" => "NO"),
-                    "comision" => array("S" => "SI", "N" => "NO"),
-                    'labora_otra_empresa' => array("S" => "SI", "N" => "NO"),
-                    'codsuc' => $codsuc
-                )
-            );
+                    'tipjor' => ['C' => 'COMPLETA', 'M' => 'MEDIA', 'P' => 'PARCIAL'],
+                    'autoriza' => ['S' => 'SI', 'N' => 'NO'],
+                    'comision' => ['S' => 'SI', 'N' => 'NO'],
+                    'labora_otra_empresa' => ['S' => 'SI', 'N' => 'NO'],
+                    'codsuc' => $codsuc,
+                ],
+            ];
         } catch (DebugException $err) {
-            $salida = array(
-                "success" => false,
-                "msj" => $err->getMessage()
-            );
+            $salida = [
+                'success' => false,
+                'msj' => $err->getMessage(),
+            ];
         }
+
         return $this->renderObject($salida);
     }
 
     /**
      * renderTableAction function
+     *
      * @changed [2023-12-00]
+     *
      * @author elegroag <elegroag@ibero.edu.co>
-     * @param string $estado
+     *
+     * @param  string  $estado
      * @return string
      */
     public function renderTableAction($estado = '')
     {
-        $this->setResponse("view");
-        $trabajadorService = new TrabajadorService();
+        $this->setResponse('view');
+        $trabajadorService = new TrabajadorService;
         $html = view(
-            "mercurio/trabajador/tmp/solicitudes",
-            array(
-                "path" => base_path(),
-                "trabajadores" => $trabajadorService->findAllByEstado($estado)
-            )
+            'mercurio/trabajador/tmp/solicitudes',
+            [
+                'path' => base_path(),
+                'trabajadores' => $trabajadorService->findAllByEstado($estado),
+            ]
         )->render();
+
         return $this->renderText($html);
     }
 
     public function searchRequestAction($id)
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         try {
             if (is_null($id)) {
-                throw new DebugException("Error no hay solicitud a buscar", 301);
+                throw new DebugException('Error no hay solicitud a buscar', 301);
             }
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
 
-            $solicitud = Mercurio31::where("id", $id)
-                ->where("documento", $documento)
-                ->where("coddoc", $coddoc)
+            $solicitud = Mercurio31::where('id', $id)
+                ->where('documento', $documento)
+                ->where('coddoc', $coddoc)
                 ->first();
 
-            if ($solicitud == False) {
-                throw new DebugException("Error la solicitud no está disponible para acceder.", 301);
+            if ($solicitud == false) {
+                throw new DebugException('Error la solicitud no está disponible para acceder.', 301);
             } else {
                 $data = $solicitud->toArray();
             }
 
             $salida = [
-                "success" => true,
-                "data" => $data,
-                "msj" => 'OK'
+                'success' => true,
+                'data' => $data,
+                'msj' => 'OK',
             ];
         } catch (DebugException $err) {
             $salida = [
-                "success" => false,
-                "msj" => $err->getMessage()
+                'success' => false,
+                'msj' => $err->getMessage(),
             ];
         }
+
         return $this->renderObject($salida);
     }
 
     /**
      * guardarAction function
+     *
      * @changed [2024-03-10]
+     *
      * @author elegroag <elegroag@ibero.edu.co>
+     *
      * @return void
      */
     public function guardarAction(Request $request)
     {
-        $this->setResponse("ajax");
-        $trabajadorService = new TrabajadorService();
+        $this->setResponse('ajax');
+        $trabajadorService = new TrabajadorService;
 
         try {
             $clave_certificado = $request->input('clave');
@@ -474,12 +498,13 @@ class TrabajadorController extends ApplicationController
             $params['coddoc'] = $this->user['coddoc'];
             $params['documento'] = $this->user['documento'];
 
-
-            if (is_null($id) || $id == "") {
+            if (is_null($id) || $id == '') {
                 $solicitud = $trabajadorService->createByFormData($params);
             } else {
                 $res = $trabajadorService->updateByFormData($id, $params);
-                if ($res == false) throw new DebugException("Error no se actualizo los datos", 301);
+                if ($res == false) {
+                    throw new DebugException('Error no se actualizo los datos', 301);
+                }
                 $solicitud = $trabajadorService->findById($id);
             }
 
@@ -490,45 +515,46 @@ class TrabajadorController extends ApplicationController
             $out = $trabajadorAdjuntoService->formulario()->getResult();
             $coddoc_adjunto = 1;
             (new GuardarArchivoService(
-                array(
+                [
                     'tipopc' => $this->tipopc,
                     'coddoc' => $coddoc_adjunto,
-                    'id' => $solicitud->getId()
-                )
+                    'id' => $solicitud->getId(),
+                ]
             ))->salvarDatos($out);
 
             $out = $trabajadorAdjuntoService->tratamientoDatos()->getResult();
             $coddoc_adjunto = 25;
             (new GuardarArchivoService(
-                array(
+                [
                     'tipopc' => $this->tipopc,
                     'coddoc' => $coddoc_adjunto,
-                    'id' => $solicitud->getId()
-                )
+                    'id' => $solicitud->getId(),
+                ]
             ))->salvarDatos($out);
 
             ob_end_clean();
 
             $response = [
-                "msj" => "Proceso se ha completado con éxito",
-                "success" => true,
-                "data" => $solicitud->toArray()
+                'msj' => 'Proceso se ha completado con éxito',
+                'success' => true,
+                'data' => $solicitud->toArray(),
             ];
         } catch (DebugException $err) {
             $response = [
                 'success' => false,
-                'msj' => $err->getMessage()
+                'msj' => $err->getMessage(),
             ];
         }
+
         return $this->renderObject($response);
     }
 
-    function serializeData(Request $request)
+    public function serializeData(Request $request)
     {
-        $asignarFuncionario = new AsignarFuncionario();
+        $asignarFuncionario = new AsignarFuncionario;
         $fecsol = Carbon::now();
 
-        return array(
+        return [
             'fecsol' => $fecsol->format('Y-m-d'),
             'nit' => $request->get('nit'),
             'razsoc' => $request->get('razsoc'),
@@ -538,7 +564,7 @@ class TrabajadorController extends ApplicationController
             'segape' => $request->get('segape'),
             'prinom' => $request->get('prinom'),
             'segnom' => $request->get('segnom'),
-            'fecnac' => $request->get('fecnac', "addslaches", "extraspaces", "striptags"),
+            'fecnac' => $request->get('fecnac', 'addslaches', 'extraspaces', 'striptags'),
             'ciunac' => $request->get('ciunac'),
             'sexo' => $request->get('sexo'),
             'estciv' => $request->get('estciv'),
@@ -579,38 +605,38 @@ class TrabajadorController extends ApplicationController
             'codban' => $request->get('codban'),
             'tipcue' => $request->get('tipcue'),
             'tippag' => $request->get('tippag'),
-            'log' =>  '0',
-            'usuario' => $asignarFuncionario->asignar($this->tipopc, $this->user['codciu'])
-        );
+            'log' => '0',
+            'usuario' => $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']),
+        ];
     }
 
     public function consultaDocumentosAction($id)
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         try {
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
 
-            $traService = new TrabajadorService();
-            $mtrabajador = Mercurio31::where("id", $id)
-                ->where("documento", $documento)
-                ->where("coddoc", $coddoc)
-                ->whereNotIn("estado", ['I', 'X'])->first();
+            $traService = new TrabajadorService;
+            $mtrabajador = Mercurio31::where('id', $id)
+                ->where('documento', $documento)
+                ->where('coddoc', $coddoc)
+                ->whereNotIn('estado', ['I', 'X'])->first();
 
             if ($mtrabajador == false) {
-                throw new DebugException("Error no se puede identificar el propietario de la solicitud", 301);
+                throw new DebugException('Error no se puede identificar el propietario de la solicitud', 301);
             }
 
             $salida = [
                 'success' => true,
                 'data' => $traService->dataArchivosRequeridos($mtrabajador),
-                'msj' => 'OK'
+                'msj' => 'OK',
             ];
         } catch (DebugException $err) {
-            $salida = array(
-                "success" => false,
-                "msj" => $err->getMessage()
-            );
+            $salida = [
+                'success' => false,
+                'msj' => $err->getMessage(),
+            ];
         }
 
         return $this->renderObject($salida);
@@ -618,8 +644,8 @@ class TrabajadorController extends ApplicationController
 
     public function borrarAction(Request $request, Response $response, $id)
     {
-        $this->setResponse("ajax");
-        $generales = new GeneralService();
+        $this->setResponse('ajax');
+        $generales = new GeneralService;
         try {
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
@@ -629,7 +655,9 @@ class TrabajadorController extends ApplicationController
                 ->where('coddoc', $coddoc)
                 ->first();
             if ($m31) {
-                if ($m31->estado != 'T') Mercurio10::where('numero', $id)->where('tipopc', $this->tipopc)->delete();
+                if ($m31->estado != 'T') {
+                    Mercurio10::where('numero', $id)->where('tipopc', $this->tipopc)->delete();
+                }
             }
 
             Mercurio31::where('id', $id)
@@ -639,35 +667,36 @@ class TrabajadorController extends ApplicationController
 
             $response = [
                 'success' => true,
-                'msj' => 'Ok'
+                'msj' => 'Ok',
             ];
         } catch (DebugException $e) {
             $response = [
                 'success' => false,
-                'msj' => $e->getMessage()
+                'msj' => $e->getMessage(),
             ];
         }
+
         return $this->renderObject($response);
     }
 
     public function validaAction(Request $request)
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         try {
-            $empresa = array();
+            $empresa = [];
             $nit = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
             $cedtra = $request->get('cedtra');
 
             $procesadorComando = Comman::Api();
             $procesadorComando->runCli(
-                array(
-                    "servicio" => "ComfacaEmpresas",
-                    "metodo" => "informacion_empresa",
-                    "params" => array(
-                        'nit' => $nit
-                    )
-                )
+                [
+                    'servicio' => 'ComfacaEmpresas',
+                    'metodo' => 'informacion_empresa',
+                    'params' => [
+                        'nit' => $nit,
+                    ],
+                ]
             );
 
             $out = $procesadorComando->toArray();
@@ -676,12 +705,12 @@ class TrabajadorController extends ApplicationController
             }
 
             $solicitud_previa = (new Mercurio31)->getCount(
-                "*",
+                '*',
                 "conditions: nit='{$nit}' and cedtra='{$cedtra}' and estado IN('T','P')"
             );
 
             $trabajador = false;
-            $trabajadorService = new TrabajadorService();
+            $trabajadorService = new TrabajadorService;
             $out = $trabajadorService->buscarTrabajadorSubsidio($cedtra);
             if ($out) {
                 if (count($out) > 0) {
@@ -694,70 +723,72 @@ class TrabajadorController extends ApplicationController
             }
 
             $response = [
-                "success" => true,
-                "solicitud_previa" => ($solicitud_previa > 0) ? true : false,
-                "trabajador" => $trabajador
+                'success' => true,
+                'solicitud_previa' => ($solicitud_previa > 0) ? true : false,
+                'trabajador' => $trabajador,
             ];
         } catch (DebugException $err) {
             $response = [
-                "success" => false,
-                "msj" => $err->getMessage()
+                'success' => false,
+                'msj' => $err->getMessage(),
             ];
         }
+
         return $this->renderObject($response);
     }
 
     public function buscarTrabajadorAction(Request $request)
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         try {
 
-            $cedtra = $request->input("cedtra");
+            $cedtra = $request->input('cedtra');
             $ps = Comman::Api();
-            $ps->runCli(array(
-                "servicio" => "PoblacionAfiliada",
-                "metodo" => "datosTrabajador",
-                "params" => array("cedtra" => $cedtra)
-            ));
+            $ps->runCli([
+                'servicio' => 'PoblacionAfiliada',
+                'metodo' => 'datosTrabajador',
+                'params' => ['cedtra' => $cedtra],
+            ]);
 
             $out = $ps->toArray();
-            if (!$out['success']) {
-                $salida = array(
+            if (! $out['success']) {
+                $salida = [
                     'flag' => false,
                     'success' => false,
-                    'msj' => $out['msj']
-                );
+                    'msj' => $out['msj'],
+                ];
             }
 
             $subsi15 = $out['data'];
             if (count($subsi15) == 0) {
-                $salida = array(
+                $salida = [
                     'flag' => false,
                     'success' => false,
-                    'msj' => "No Existe la cedula dada"
-                );
+                    'msj' => 'No Existe la cedula dada',
+                ];
             }
 
             if ($subsi15['nit'] != $this->user['documento']) {
-                $salida = array(
+                $salida = [
                     'flag' => false,
                     'success' => false,
-                    'msj' => "el trabajador no esta registrado a su empresa"
-                );
+                    'msj' => 'el trabajador no esta registrado a su empresa',
+                ];
             }
 
-            $salida = array(
+            $salida = [
                 'flag' => true,
                 'success' => true,
-                'data' => $subsi15
-            );
+                'data' => $subsi15,
+            ];
         } catch (DebugException $e) {
-            $salida = array(
+            $salida = [
                 'flag' => false,
                 'success' => false,
-                'msj' => $e->getMessage()
-            );
+                'msj' => $e->getMessage(),
+            ];
         }
+
         return $this->renderObject($salida);
     }
 }

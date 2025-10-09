@@ -22,7 +22,7 @@ return new class extends Migration
             // Columnas
             $table->string('detalle', 45);
             $table->char('tipo', 2);
-            $table->enum('estado', ['A','I']);
+            $table->enum('estado', ['A', 'I']);
         });
     }
 

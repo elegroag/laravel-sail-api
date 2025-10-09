@@ -17,10 +17,15 @@ class DatosEmpresaService
      * @var array
      */
     private $request;
+
     private $lfirma;
+
     private $filename;
+
     private $outPdf;
+
     private $fhash;
+
     private $claveCertificado;
 
     public function __construct($request)
@@ -31,59 +36,60 @@ class DatosEmpresaService
 
     private function initialize()
     {
-        $this->lfirma = Mercurio16::where("documento", $this->request['documento'])
-            ->where("coddoc", $this->request['coddoc'])
+        $this->lfirma = Mercurio16::where('documento', $this->request['documento'])
+            ->where('coddoc', $this->request['coddoc'])
             ->first();
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "parametros_empresa"
-            )
+            [
+                'servicio' => 'ComfacaAfilia',
+                'metodo' => 'parametros_empresa',
+            ]
         );
 
-        $datos_captura =  $procesadorComando->toArray();
-        $paramsEmpresa = new ParamsEmpresa();
+        $datos_captura = $procesadorComando->toArray();
+        $paramsEmpresa = new ParamsEmpresa;
         $paramsEmpresa->setDatosCaptura($datos_captura);
     }
 
     public function formulario()
     {
-        $this->filename = strtotime('now') . "_{$this->request['nit']}.pdf";
+        $this->filename = strtotime('now')."_{$this->request['nit']}.pdf";
         KumbiaPDF::setBackgroundImage(public_path('docs/form/empresa/form-empresa.jpg'));
 
-        $fabrica = new FactoryDocuments();
+        $fabrica = new FactoryDocuments;
         $documento = $fabrica->crearFormulario('actualizadatos');
         $documento->setParamsInit(
-            array(
+            [
                 'empresa' => $this->request['empresa'],
                 'campos' => $this->request['campos'],
-                'filename' => $this->filename
-            )
+                'filename' => $this->filename,
+            ]
         );
 
         $documento->main();
         $documento->outPut();
         $this->cifrarDocumento();
+
         return $this;
     }
 
-    function cifrarDocumento()
+    public function cifrarDocumento()
     {
-        $cifrarDocumento = new CifrarDocumento();
+        $cifrarDocumento = new CifrarDocumento;
         $this->outPdf = $cifrarDocumento->cifrar($this->filename, $this->lfirma->getKeyprivate(), $this->claveCertificado);
         $this->fhash = $cifrarDocumento->getFhash();
     }
 
     public function getResult()
     {
-        return array(
-            "name" => $this->filename,
-            "file" => basename($this->outPdf),
+        return [
+            'name' => $this->filename,
+            'file' => basename($this->outPdf),
             'out' => $this->outPdf,
-            'fhash' => $this->fhash
-        );
+            'fhash' => $this->fhash,
+        ];
     }
 
     public function setClaveCertificado($clave)

@@ -7,7 +7,9 @@ use App\Models\Adapter\ModelBase;
 class Mercurio81 extends ModelBase
 {
     protected $table = 'mercurio81';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -15,7 +17,7 @@ class Mercurio81 extends ModelBase
         'coddan',
         'codare',
         'tipsec',
-        'sede'
+        'sede',
     ];
 
     public function setId($id)

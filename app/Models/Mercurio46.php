@@ -6,9 +6,10 @@ use App\Models\Adapter\ModelBase;
 
 class Mercurio46 extends ModelBase
 {
-
     protected $table = 'mercurio46';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -20,7 +21,8 @@ class Mercurio46 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo codapl
-     * @param string $codapl
+     *
+     * @param  string  $codapl
      */
     public function setId($id)
     {
@@ -29,7 +31,8 @@ class Mercurio46 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo email
-     * @param string $email
+     *
+     * @param  string  $email
      */
     public function setLog($log)
     {
@@ -38,7 +41,8 @@ class Mercurio46 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo clave
-     * @param string $clave
+     *
+     * @param  string  $clave
      */
     public function setNit($nit)
     {
@@ -47,7 +51,8 @@ class Mercurio46 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo path
-     * @param string $path
+     *
+     * @param  string  $path
      */
     public function setFecsis($fecsis)
     {
@@ -56,7 +61,8 @@ class Mercurio46 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo ftpserver
-     * @param string $ftpserver
+     *
+     * @param  string  $ftpserver
      */
     public function setArchivo($archivo)
     {
@@ -65,6 +71,7 @@ class Mercurio46 extends ModelBase
 
     /**
      * Devuelve el valor del campo codapl
+     *
      * @return string
      */
     public function getId()
@@ -74,6 +81,7 @@ class Mercurio46 extends ModelBase
 
     /**
      * Devuelve el valor del campo email
+     *
      * @return string
      */
     public function getLog()
@@ -83,6 +91,7 @@ class Mercurio46 extends ModelBase
 
     /**
      * Devuelve el valor del campo clave
+     *
      * @return string
      */
     public function getNit()
@@ -92,6 +101,7 @@ class Mercurio46 extends ModelBase
 
     /**
      * Devuelve el valor del campo path
+     *
      * @return string
      */
     public function getFecsis()
@@ -101,6 +111,7 @@ class Mercurio46 extends ModelBase
 
     /**
      * Devuelve el valor del campo ftpserver
+     *
      * @return string
      */
     public function getArchivo()

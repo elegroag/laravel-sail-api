@@ -12,9 +12,9 @@ use App\Services\Entities\SucursalEntity;
 use App\Services\Entities\TrabajadorEntity;
 use App\Services\Srequest;
 use App\Services\Utils\Comman;
+use App\Services\Utils\CrearUsuario;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
-use App\Services\Utils\CrearUsuario;
 use Carbon\Carbon;
 use DateTime;
 use Exception;
@@ -22,9 +22,13 @@ use Exception;
 class ApruebaIndependiente
 {
     private $today;
+
     private $tipopc = 13;
+
     private $solicitante;
+
     private $solicitud;
+
     private $dominio;
 
     public function __construct()
@@ -35,6 +39,7 @@ class ApruebaIndependiente
 
     /**
      * procesar function
+     *
      * @param [type] $postData
      * @return bool
      */
@@ -45,30 +50,34 @@ class ApruebaIndependiente
         /**
          * buscar registro de la empresa
          */
-        $repleg = $this->solicitud->getPriape() . ' '
-            . $this->solicitud->getSegape() . ' '
-            . $this->solicitud->getPrinom() . ' '
-            . $this->solicitud->getSegnom();
+        $repleg = $this->solicitud->getPriape().' '
+            .$this->solicitud->getSegape().' '
+            .$this->solicitud->getPrinom().' '
+            .$this->solicitud->getSegnom();
 
-        $tipper = "N";
+        $tipper = 'N';
         $params = array_merge($this->solicitud->getArray(), $postData);
         /**
          * valida indice de aportes
          * 14 => aportes del 0.2% independiente
          * 50 => aportes del 0.6% independiente
          */
-        if (($params['codind'] == '50' || $params['codind'] == '14') == False) {
-            throw new Exception("Error, el indice de aportes no es valido para independientes", 501);
+        if (($params['codind'] == '50' || $params['codind'] == '14') == false) {
+            throw new Exception('Error, el indice de aportes no es valido para independientes', 501);
         }
 
         if ($this->solicitud->getTipdoc() == 3) {
-            throw new Exception("Error, el tipo documento para independientes no puede ser tipo NIT.", 501);
+            throw new Exception('Error, el tipo documento para independientes no puede ser tipo NIT.', 501);
         }
 
-        if ($params['codind'] == '14') $tipcot = 3;
-        if ($params['codind'] == '50') $tipcot = 65;
+        if ($params['codind'] == '14') {
+            $tipcot = 3;
+        }
+        if ($params['codind'] == '50') {
+            $tipcot = 65;
+        }
 
-        $fullname = $this->solicitud->getPriape() . ' ' . $this->solicitud->getSegape() . ' ' . $this->solicitud->getPrinom() . ' ' . $this->solicitud->getSegnom();
+        $fullname = $this->solicitud->getPriape().' '.$this->solicitud->getSegape().' '.$this->solicitud->getPrinom().' '.$this->solicitud->getSegnom();
         $params['nit'] = $this->solicitud->getCedtra();
         $params['coddoc'] = $this->solicitud->getTipdoc();
         $params['estado'] = 'A';
@@ -77,32 +86,38 @@ class ApruebaIndependiente
         $params['tipper'] = $tipper;
         $params['tipapo'] = 'I';
         $params['tipsoc'] = '08';
-        $params["celpri"] = $this->solicitud->getCelular();
-        $params["emailpri"] = $this->solicitud->getEmail();
-        $params["repleg"] = $repleg;
-        $params["razsoc"] =  $params["repleg"];
-        $params["fax"] =  "0";
-        $params["ofiafi"] = "13";
-        $params["horas"]  = "240";
+        $params['celpri'] = $this->solicitud->getCelular();
+        $params['emailpri'] = $this->solicitud->getEmail();
+        $params['repleg'] = $repleg;
+        $params['razsoc'] = $params['repleg'];
+        $params['fax'] = '0';
+        $params['ofiafi'] = '13';
+        $params['horas'] = '240';
 
-        if (!$params['codsuc']) $params["codsuc"] = "010";
-        if (!$params['codsuc']) $params["codlis"] = "010";
-        if ($params['codsuc']) $params["codlis"] = $params["codsuc"];
+        if (! $params['codsuc']) {
+            $params['codsuc'] = '010';
+        }
+        if (! $params['codsuc']) {
+            $params['codlis'] = '010';
+        }
+        if ($params['codsuc']) {
+            $params['codlis'] = $params['codsuc'];
+        }
 
-        $params["digver"] =  "0";
-        $params["tottra"] =  "1";
-        $params['nomcon'] = substr($this->solicitud->getPriape() . ' ' . $this->solicitud->getSegape(), 0, 39);
-        $params['fecsis'] = $hoy; //fecha captura del sistema
-        $params['feccam'] = $hoy; //fecha de actualizacion
+        $params['digver'] = '0';
+        $params['tottra'] = '1';
+        $params['nomcon'] = substr($this->solicitud->getPriape().' '.$this->solicitud->getSegape(), 0, 39);
+        $params['fecsis'] = $hoy; // fecha captura del sistema
+        $params['feccam'] = $hoy; // fecha de actualizacion
         $params['codase'] = '1';
         $params['estado'] = 'A';
-        $params['telt'] =  $this->solicitud->getCelular();
-        $params['telr'] =  $this->solicitud->getTelefono();
+        $params['telt'] = $this->solicitud->getCelular();
+        $params['telr'] = $this->solicitud->getTelefono();
         $params['mailr'] = $this->solicitud->getEmail();
         $params['calsuc'] = $this->solicitud->getCalemp();
         $params['detalle'] = $repleg;
         $params['nomemp'] = $repleg;
-        $params['fecapr'] =  $postData['fecapr'];
+        $params['fecapr'] = $postData['fecapr'];
         $params['observacion'] = $postData['nota_aprobar'];
         $params['totapo'] = '0';
         $params['totcon'] = '0';
@@ -118,7 +133,7 @@ class ApruebaIndependiente
         $params['feccor'] = null;
         $params['valmor'] = null;
         $params['permor'] = null;
-        $params['giass']  = null;
+        $params['giass'] = null;
         $params['actugp'] = null;
         $params['correo'] = 'N';
         $params['agro'] = 'N';
@@ -128,15 +143,19 @@ class ApruebaIndependiente
         $params['fecpre'] = $params['fecafi'];
         $params['ruaf'] = 'N';
         $params['tipcon'] = 'F';
-        $params['tipcot'] =  "{$tipcot}";
+        $params['tipcot'] = "{$tipcot}";
         $params['vendedor'] = 'N';
         $params['fecsal'] = $params['fecafi'];
         $params['subpla'] = $postData['codsuc'];
         $params['coddiv'] = $params['codciu'];
 
         $params['horas'] = '240';
-        if (!$this->solicitud->getPub_indigena_id()) $params['pub_indigena_id'] = 2;
-        if (!$this->solicitud->getResguardo_id()) $params['resguardo_id'] = 2;
+        if (! $this->solicitud->getPub_indigena_id()) {
+            $params['pub_indigena_id'] = 2;
+        }
+        if (! $this->solicitud->getResguardo_id()) {
+            $params['resguardo_id'] = 2;
+        }
 
         $params['traapo'] = '0';
         $params['valapo'] = '0';
@@ -149,62 +168,62 @@ class ApruebaIndependiente
         $params['codgir'] = (isset($params['codgir'])) ? $params['codgir'] : 'NU';
         $params['codgir2'] = $params['codgir'];
 
-        if (!$params['tippag'] || $params['tippag'] == 'T') {
+        if (! $params['tippag'] || $params['tippag'] == 'T') {
             $params['numcue'] = '0';
             $params['tippag'] = 'T';
             $params['codban'] = null;
             $params['tipcue'] = null;
         }
 
-        $entity = new IndependienteEntity();
+        $entity = new IndependienteEntity;
         $entity->create($params);
-        if (!$entity->validate()) {
+        if (! $entity->validate()) {
             throw new DebugException(
-                "Error, no se puede crear el trabajador independiente por validación previa.",
+                'Error, no se puede crear el trabajador independiente por validación previa.',
                 501,
-                array(
+                [
                     'errors' => $entity->getValidationErrors(),
                     'attributes' => $entity->getData(),
-                )
+                ]
             );
         }
 
-        $sucursal = new SucursalEntity();
+        $sucursal = new SucursalEntity;
         $sucursal->create($params);
-        if (!$sucursal->validate()) {
+        if (! $sucursal->validate()) {
             throw new DebugException(
-                "Error, no se puede crear la sucursal por validación previa.",
+                'Error, no se puede crear la sucursal por validación previa.',
                 501,
-                array(
+                [
                     'errors' => $sucursal->getValidationErrors(),
                     'attributes' => $sucursal->getData(),
-                )
+                ]
             );
         }
 
-        $listas = new ListasEntity();
+        $listas = new ListasEntity;
         $listas->create($params);
-        if (!$listas->validate()) {
+        if (! $listas->validate()) {
             throw new DebugException(
-                "Error, no se puede crear la lista por validación previa.",
+                'Error, no se puede crear la lista por validación previa.',
                 501,
-                array(
+                [
                     'errors' => $listas->getValidationErrors(),
                     'attributes' => $listas->getData(),
-                )
+                ]
             );
         }
 
-        $trabajador = new TrabajadorEntity();
+        $trabajador = new TrabajadorEntity;
         $trabajador->create($params);
-        if (!$trabajador->validate()) {
+        if (! $trabajador->validate()) {
             throw new DebugException(
-                "Error, no se puede crear el trabajador por validación previa.",
+                'Error, no se puede crear el trabajador por validación previa.',
                 501,
-                array(
+                [
                     'errors' => $trabajador->getValidationErrors(),
                     'attributes' => $trabajador->getData(),
-                )
+                ]
             );
         }
 
@@ -213,29 +232,35 @@ class ApruebaIndependiente
          */
         $ps = Comman::Api();
         $ps->runCli(
-            array(
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "afilia_independiente",
-                "params" => array(
-                    'post' => array_merge($entity->getData(), $sucursal->getData(), $listas->getData(), $trabajador->getData())
-                )
-            )
+            [
+                'servicio' => 'ComfacaAfilia',
+                'metodo' => 'afilia_independiente',
+                'params' => [
+                    'post' => array_merge($entity->getData(), $sucursal->getData(), $listas->getData(), $trabajador->getData()),
+                ],
+            ]
         );
-        if ($ps->isJson() == false) throw new DebugException("Error, no hay respuesta del servidor para validación del resultado.", 501);
+        if ($ps->isJson() == false) {
+            throw new DebugException('Error, no hay respuesta del servidor para validación del resultado.', 501);
+        }
         $out = $ps->toArray();
 
-        if (is_null($out) || $out == false) throw new DebugException("Error, no hay respuesta del servidor para validación del resultado.", 501);
+        if (is_null($out) || $out == false) {
+            throw new DebugException('Error, no hay respuesta del servidor para validación del resultado.', 501);
+        }
 
-        if ($out['success'] == false) throw new DebugException($out['message'], 501);
+        if ($out['success'] == false) {
+            throw new DebugException($out['message'], 501);
+        }
 
-        $registroSeguimiento = new RegistroSeguimiento();
+        $registroSeguimiento = new RegistroSeguimiento;
         $registroSeguimiento->crearNota($this->tipopc, $this->solicitud->getId(), $postData['nota_aprobar'], 'A');
 
         /**
          * Crea de una vez e registro, permitiendo que el usuario entre con la misma password
          * como empresa sin tener que hacer la solicitud de clave
          */
-        $empresa = (new Mercurio07())->findFirst("coddoc='{$this->solicitud->getTipdoc()}' and documento='{$this->solicitud->getCedtra()}' and tipo='I'");
+        $empresa = (new Mercurio07)->findFirst("coddoc='{$this->solicitud->getTipdoc()}' and documento='{$this->solicitud->getCedtra()}' and tipo='I'");
 
         $fecreg = $this->solicitante->getFecreg();
         $feccla = $this->solicitante->getFeccla();
@@ -243,19 +268,19 @@ class ApruebaIndependiente
 
         $crearUsuario = new CrearUsuario(
             new Srequest(
-                array(
-                    "tipo" => "I",
-                    "coddoc" => $this->solicitud->getTipdoc(),
-                    "documento" => $this->solicitud->getCedtra(),
-                    "nombre" => $fullname,
-                    "email" => $this->solicitud->getEmail(),
-                    "codciu" => $this->solicitud->getCodciu(),
-                    "autoriza" => $this->solicitante->getAutoriza(),
-                    "clave" => $this->solicitante->getClave(),
-                    "fecreg" => $fecreg->getUsingFormatDefault(),
+                [
+                    'tipo' => 'I',
+                    'coddoc' => $this->solicitud->getTipdoc(),
+                    'documento' => $this->solicitud->getCedtra(),
+                    'nombre' => $fullname,
+                    'email' => $this->solicitud->getEmail(),
+                    'codciu' => $this->solicitud->getCodciu(),
+                    'autoriza' => $this->solicitante->getAutoriza(),
+                    'clave' => $this->solicitante->getClave(),
+                    'fecreg' => $fecreg->getUsingFormatDefault(),
                     'feccla' => $feccla,
-                    "fecapr" => $fecapr
-                )
+                    'fecapr' => $fecapr,
+                ]
             )
         );
 
@@ -272,11 +297,13 @@ class ApruebaIndependiente
         $mercurio41->setFecest($hoy);
         $mercurio41->setFecapr($postData['fecapr']);
         $mercurio41->save();
+
         return true;
     }
 
     /**
      * enviarMail function
+     *
      * @param [type] $Mercurio41
      * @param [type] $actapr
      * @param [type] $feccap
@@ -285,9 +312,9 @@ class ApruebaIndependiente
     public function enviarMail($actapr, $feccap)
     {
         $feccap = new DateTime($feccap);
-        $dia = $feccap->format("d");
-        $mes = get_mes_name($feccap->format("m"));
-        $anno = $feccap->format("Y");
+        $dia = $feccap->format('d');
+        $mes = get_mes_name($feccap->format('m'));
+        $anno = $feccap->format('Y');
 
         $data = $this->solicitud->getArray();
         $data['membrete'] = "{$this->dominio}public/img/membrete_aprueba.jpg";
@@ -299,39 +326,44 @@ class ApruebaIndependiente
         $data['repleg'] = $this->solicitante->getNombre();
         $data['razsoc'] = $this->solicitante->getNombre();
 
-        $html = view("layouts/aprobar", $data)->render();
+        $html = view('layouts/aprobar', $data)->render();
         $asunto = "Afiliación trabajador independiente realizada con éxito, identificación {$this->solicitud->getCedtra()}";
 
         $emailCaja = (new Mercurio01)->findFirst();
         $senderEmail = new SenderEmail(
             new Srequest(
-                array(
-                    "emisor_email" => $emailCaja->getEmail(),
-                    "emisor_clave" => $emailCaja->getClave(),
-                    "asunto" => $asunto
-                )
+                [
+                    'emisor_email' => $emailCaja->getEmail(),
+                    'emisor_clave' => $emailCaja->getClave(),
+                    'asunto' => $asunto,
+                ]
             )
         );
 
-        $senderEmail->send(array(
-            array(
-                "email" => $this->solicitante->getEmail(),
-                "nombre" => $this->solicitante->getNombre(),
-            )
-        ), $html);
-        return  true;
+        $senderEmail->send([
+            [
+                'email' => $this->solicitante->getEmail(),
+                'nombre' => $this->solicitante->getNombre(),
+            ],
+        ], $html);
+
+        return true;
     }
 
     /**
      * findSolicitud function
+     *
      * @changed [2023-12-00]
+     *
      * @author elegroag <elegroag@ibero.edu.co>
-     * @param int $id
+     *
+     * @param  int  $id
      * @return void
      */
     public function findSolicitud($id)
     {
         $this->solicitud = (new Mercurio41)->findFirst(" id='{$id}'");
+
         return $this->solicitud;
     }
 
@@ -340,6 +372,7 @@ class ApruebaIndependiente
         $this->solicitante = (new Mercurio07)->findFirst(
             "documento='{$this->solicitud->getDocumento()}' and coddoc='{$this->solicitud->getCoddoc()}' and tipo='{$this->solicitud->getTipo()}'"
         );
+
         return $this->solicitante;
     }
 }

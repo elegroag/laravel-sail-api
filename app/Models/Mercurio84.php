@@ -7,12 +7,14 @@ use App\Models\Adapter\ModelBase;
 class Mercurio84 extends ModelBase
 {
     protected $table = 'mercurio84';
+
     public $timestamps = false;
+
     protected $primaryKey = ['evento', 'beneficiario'];
 
     protected $fillable = [
         'evento',
-        'beneficiario'
+        'beneficiario',
     ];
 
     public function setEvento($evento)

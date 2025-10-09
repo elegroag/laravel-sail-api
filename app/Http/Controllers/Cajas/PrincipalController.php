@@ -18,9 +18,10 @@ use Illuminate\Http\Request;
 
 class PrincipalController extends ApplicationController
 {
-
     protected $db;
+
     protected $user;
+
     protected $tipfun;
 
     public function __construct()
@@ -33,152 +34,152 @@ class PrincipalController extends ApplicationController
     public function indexAction()
     {
         $user = $this->user['usuario'];
-        $servicios = array(
-            'afiliacion' => array(
-                array(
+        $servicios = [
+            'afiliacion' => [
+                [
                     'name' => 'Afiliación Empresas',
-                    'cantidad' => array(
-                        'pendientes' => Mercurio30::where(["estado" => 'P', "usuario" => $user])->count(),
-                        'aprobados' => Mercurio30::where(["estado" => 'A', "usuario" => $user])->count(),
-                        'rechazados' => Mercurio30::where(["estado" => 'R', "usuario" => $user])->count(),
-                        'devueltos' => Mercurio30::where(["estado" => 'D', "usuario" => $user])->count(),
-                        'temporales' => Mercurio30::where(["estado" => 'T', "usuario" => $user])->count()
-                    ),
+                    'cantidad' => [
+                        'pendientes' => Mercurio30::where(['estado' => 'P', 'usuario' => $user])->count(),
+                        'aprobados' => Mercurio30::where(['estado' => 'A', 'usuario' => $user])->count(),
+                        'rechazados' => Mercurio30::where(['estado' => 'R', 'usuario' => $user])->count(),
+                        'devueltos' => Mercurio30::where(['estado' => 'D', 'usuario' => $user])->count(),
+                        'temporales' => Mercurio30::where(['estado' => 'T', 'usuario' => $user])->count(),
+                    ],
                     'icon' => 'E',
                     'url' => 'aprobacionemp/index',
                     'imagen' => 'empresas.jpg',
-                ),
-                array(
+                ],
+                [
                     'name' => 'Afiliación Independientes',
-                    'cantidad' => array(
-                        'pendientes' => Mercurio41::where(["estado" => 'P', "usuario" => $user])->count(),
-                        'aprobados' => Mercurio41::where(["estado" => 'A', "usuario" => $user])->count(),
-                        'rechazados' => Mercurio41::where(["estado" => 'R', "usuario" => $user])->count(),
-                        'devueltos' => Mercurio41::where(["estado" => 'D', "usuario" => $user])->count(),
-                        'temporales' => Mercurio41::where(["estado" => 'T', "usuario" => $user])->count(),
-                    ),
+                    'cantidad' => [
+                        'pendientes' => Mercurio41::where(['estado' => 'P', 'usuario' => $user])->count(),
+                        'aprobados' => Mercurio41::where(['estado' => 'A', 'usuario' => $user])->count(),
+                        'rechazados' => Mercurio41::where(['estado' => 'R', 'usuario' => $user])->count(),
+                        'devueltos' => Mercurio41::where(['estado' => 'D', 'usuario' => $user])->count(),
+                        'temporales' => Mercurio41::where(['estado' => 'T', 'usuario' => $user])->count(),
+                    ],
                     'icon' => 'I',
                     'url' => 'aprobaindepen/index',
                     'imagen' => 'independiente.jpg',
-                ),
-                array(
+                ],
+                [
                     'name' => 'Afiliación Pensionados',
-                    'cantidad' => array(
-                        'pendientes' => Mercurio38::where(["estado" => 'P', "usuario" => $user])->count(),
-                        'aprobados' => Mercurio38::where(["estado" => 'A', "usuario" => $user])->count(),
-                        'rechazados' => Mercurio38::where(["estado" => 'R', "usuario" => $user])->count(),
-                        'devueltos' => Mercurio38::where(["estado" => 'D', "usuario" => $user])->count(),
-                        'temporales' => Mercurio38::where(["estado" => 'T', "usuario" => $user])->count(),
-                    ),
+                    'cantidad' => [
+                        'pendientes' => Mercurio38::where(['estado' => 'P', 'usuario' => $user])->count(),
+                        'aprobados' => Mercurio38::where(['estado' => 'A', 'usuario' => $user])->count(),
+                        'rechazados' => Mercurio38::where(['estado' => 'R', 'usuario' => $user])->count(),
+                        'devueltos' => Mercurio38::where(['estado' => 'D', 'usuario' => $user])->count(),
+                        'temporales' => Mercurio38::where(['estado' => 'T', 'usuario' => $user])->count(),
+                    ],
                     'icon' => 'P',
                     'url' => 'aprobacionpen/index',
                     'imagen' => 'pensionado.jpg',
-                ),
-                array(
+                ],
+                [
                     'name' => 'Afiliación Trabajadores',
-                    'cantidad' => array(
-                        'pendientes' => Mercurio31::where(["estado" => 'P', "usuario" => $user])->count(),
-                        'aprobados' => Mercurio31::where(["estado" => 'A', "usuario" => $user])->count(),
-                        'rechazados' => Mercurio31::where(["estado" => 'R', "usuario" => $user])->count(),
-                        'devueltos' => Mercurio31::where(["estado" => 'D', "usuario" => $user])->count(),
-                        'temporales' => Mercurio31::where(["estado" => 'T', "usuario" => $user])->count(),
-                    ),
+                    'cantidad' => [
+                        'pendientes' => Mercurio31::where(['estado' => 'P', 'usuario' => $user])->count(),
+                        'aprobados' => Mercurio31::where(['estado' => 'A', 'usuario' => $user])->count(),
+                        'rechazados' => Mercurio31::where(['estado' => 'R', 'usuario' => $user])->count(),
+                        'devueltos' => Mercurio31::where(['estado' => 'D', 'usuario' => $user])->count(),
+                        'temporales' => Mercurio31::where(['estado' => 'T', 'usuario' => $user])->count(),
+                    ],
                     'icon' => 'T',
                     'url' => 'aprobaciontra/index',
                     'imagen' => 'trabajadores.jpg',
-                ),
-                array(
+                ],
+                [
                     'name' => 'Afiliación Conyuges',
-                    'cantidad' => array(
-                        'pendientes' => Mercurio32::where(["estado" => 'P', "usuario" => $user])->count(),
-                        'aprobados' => Mercurio32::where(["estado" => 'A', "usuario" => $user])->count(),
-                        'rechazados' => Mercurio32::where(["estado" => 'R', "usuario" => $user])->count(),
-                        'devueltos' => Mercurio32::where(["estado" => 'D', "usuario" => $user])->count(),
-                        'temporales' => Mercurio32::where(["estado" => 'T', "usuario" => $user])->count(),
-                    ),
+                    'cantidad' => [
+                        'pendientes' => Mercurio32::where(['estado' => 'P', 'usuario' => $user])->count(),
+                        'aprobados' => Mercurio32::where(['estado' => 'A', 'usuario' => $user])->count(),
+                        'rechazados' => Mercurio32::where(['estado' => 'R', 'usuario' => $user])->count(),
+                        'devueltos' => Mercurio32::where(['estado' => 'D', 'usuario' => $user])->count(),
+                        'temporales' => Mercurio32::where(['estado' => 'T', 'usuario' => $user])->count(),
+                    ],
                     'icon' => 'C',
                     'url' => 'aprobacioncon/index',
                     'imagen' => 'conyuges.jpg',
-                ),
-                array(
+                ],
+                [
                     'name' => 'Afiliación Beneficiarios',
-                    'cantidad' => array(
-                        'pendientes' => Mercurio34::where(["estado" => 'P', "usuario" => $user])->count(),
-                        'aprobados' => Mercurio34::where(["estado" => 'A', "usuario" => $user])->count(),
-                        'rechazados' => Mercurio34::where(["estado" => 'R', "usuario" => $user])->count(),
-                        'devueltos' => Mercurio34::where(["estado" => 'D', "usuario" => $user])->count(),
-                        'temporales' => Mercurio34::where(["estado" => 'T', "usuario" => $user])->count(),
-                    ),
+                    'cantidad' => [
+                        'pendientes' => Mercurio34::where(['estado' => 'P', 'usuario' => $user])->count(),
+                        'aprobados' => Mercurio34::where(['estado' => 'A', 'usuario' => $user])->count(),
+                        'rechazados' => Mercurio34::where(['estado' => 'R', 'usuario' => $user])->count(),
+                        'devueltos' => Mercurio34::where(['estado' => 'D', 'usuario' => $user])->count(),
+                        'temporales' => Mercurio34::where(['estado' => 'T', 'usuario' => $user])->count(),
+                    ],
                     'icon' => 'B',
                     'url' => 'aprobacionben/index',
                     'imagen' => 'beneficiarios.jpg',
-                ),
-                array(
+                ],
+                [
                     'name' => 'Actualización datos Empresas',
-                    'cantidad' => array(
-                        'pendientes' => Mercurio33::where(["estado" => 'P', "usuario" => $user])->count(),
-                        'aprobados' => Mercurio33::where(["estado" => 'A', "usuario" => $user])->count(),
-                        'rechazados' => Mercurio33::where(["estado" => 'R', "usuario" => $user])->count(),
-                        'devueltos' => Mercurio33::where(["estado" => 'D', "usuario" => $user])->count(),
-                        'temporales' => Mercurio33::where(["estado" => 'T', "usuario" => $user])->count(),
-                    ),
+                    'cantidad' => [
+                        'pendientes' => Mercurio33::where(['estado' => 'P', 'usuario' => $user])->count(),
+                        'aprobados' => Mercurio33::where(['estado' => 'A', 'usuario' => $user])->count(),
+                        'rechazados' => Mercurio33::where(['estado' => 'R', 'usuario' => $user])->count(),
+                        'devueltos' => Mercurio33::where(['estado' => 'D', 'usuario' => $user])->count(),
+                        'temporales' => Mercurio33::where(['estado' => 'T', 'usuario' => $user])->count(),
+                    ],
                     'icon' => 'AE',
                     'url' => 'actualizaemp/index',
                     'imagen' => 'empresas.jpg',
-                ),
-                array(
+                ],
+                [
                     'name' => 'Actualización datos Trabajador',
-                    'cantidad' => array(
-                        'pendientes' => Mercurio47::where(["estado" => 'P', "usuario" => $user])->count(),
-                        'aprobados' => Mercurio47::where(["estado" => 'A', "usuario" => $user])->count(),
-                        'rechazados' => Mercurio47::where(["estado" => 'R', "usuario" => $user])->count(),
-                        'devueltos' => Mercurio47::where(["estado" => 'D', "usuario" => $user])->count(),
-                        'temporales' => Mercurio47::where(["estado" => 'T', "usuario" => $user])->count(),
-                    ),
+                    'cantidad' => [
+                        'pendientes' => Mercurio47::where(['estado' => 'P', 'usuario' => $user])->count(),
+                        'aprobados' => Mercurio47::where(['estado' => 'A', 'usuario' => $user])->count(),
+                        'rechazados' => Mercurio47::where(['estado' => 'R', 'usuario' => $user])->count(),
+                        'devueltos' => Mercurio47::where(['estado' => 'D', 'usuario' => $user])->count(),
+                        'temporales' => Mercurio47::where(['estado' => 'T', 'usuario' => $user])->count(),
+                    ],
                     'icon' => 'AT',
                     'url' => 'actualizatra/index',
                     'imagen' => 'datos_basicos.jpg',
-                )
-            ),
-            'productos' => array(
-                array(
+                ],
+            ],
+            'productos' => [
+                [
                     'name' => 'Lista Productos',
                     'cantidad' => 0,
                     'icon' => 'L',
                     'url' => 'admproductos/lista',
                     'imagen' => 'registro_empresa.jpg',
-                ),
-                array(
+                ],
+                [
                     'name' => 'Complemento nutricional',
                     'cantidad' => 0,
                     'icon' => 'N',
                     'url' => 'admproductos/aplicados/27',
                     'imagen' => 'complemento.jpg',
-                )
-            )
-        );
+                ],
+            ],
+        ];
 
         return view('cajas/principal/index', [
             'tipfun' => $this->tipfun,
             'usuario' => $this->user['usuario'],
             'nombre' => $this->user['nombre'],
-            "servicios" => $servicios
+            'servicios' => $servicios,
         ]);
     }
 
     public function dashboardAction()
     {
-        $this->setParamToView("hide_header", true);
-        $this->setParamToView("title", "Estadística");
+        $this->setParamToView('hide_header', true);
+        $this->setParamToView('title', 'Estadística');
     }
 
     public function traerUsuariosRegistradosAction()
     {
-        $this->setResponse("ajax");
-        $data = array();
-        $labels = array();
-        $params['nit'] = parent::getActUser("documento");
-        $mercurio07 = $this->Mercurio07->findAllBySql("select tipo,count(*) as documento from mercurio07 group by 1");
+        $this->setResponse('ajax');
+        $data = [];
+        $labels = [];
+        $params['nit'] = parent::getActUser('documento');
+        $mercurio07 = $this->Mercurio07->findAllBySql('select tipo,count(*) as documento from mercurio07 group by 1');
         foreach ($mercurio07 as $mmercurio07) {
             $mercurio06 = $this->Mercurio06->findFirst("tipo='{$mmercurio07->getTipo()}'");
             $data[] = $mmercurio07->getDocumento();
@@ -192,26 +193,27 @@ class PrincipalController extends ApplicationController
 
     public function traerOpcionMasUsuadaAction()
     {
-        $this->setResponse("ajax");
-        $data = array();
-        $params['nit'] = parent::getActUser("documento");
-        $mercurio20 = $this->Mercurio20->findAllBySql("select accion,count(*) as log from mercurio20 group by 1");
+        $this->setResponse('ajax');
+        $data = [];
+        $params['nit'] = parent::getActUser('documento');
+        $mercurio20 = $this->Mercurio20->findAllBySql('select accion,count(*) as log from mercurio20 group by 1');
         foreach ($mercurio20 as $mmercurio20) {
             $data[] = $mmercurio20->getLog();
             $labels[] = $mmercurio20->getAccion();
         }
         $response['data'] = $data;
         $response['labels'] = $labels;
+
         return $this->renderObject($response, false);
     }
 
     public function traerMotivoMasUsuadaAction()
     {
-        $this->setResponse("ajax");
-        $labels = array();
-        $data = array();
-        $params['nit'] = parent::getActUser("documento");
-        $mercurio10 = $this->Mercurio10->findAllBySql("select codest,count(*) as numero from mercurio10 WHERE codest is not null group by 1");
+        $this->setResponse('ajax');
+        $labels = [];
+        $data = [];
+        $params['nit'] = parent::getActUser('documento');
+        $mercurio10 = $this->Mercurio10->findAllBySql('select codest,count(*) as numero from mercurio10 WHERE codest is not null group by 1');
         foreach ($mercurio10 as $mmercurio10) {
             $mercurio11 = $this->Mercurio11->findFirst("codest='{$mmercurio10->getCodest()}'");
             $data[] = $mmercurio10->getNumero();
@@ -219,19 +221,20 @@ class PrincipalController extends ApplicationController
         }
         $response['data'] = $data;
         $response['labels'] = $labels;
+
         return $this->renderObject($response, false);
     }
 
     public function traerCargaLaboralAction()
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         try {
-            $data = array();
-            $params['nit'] = parent::getActUser("documento");
+            $data = [];
+            $params['nit'] = parent::getActUser('documento');
             $gener02 = $this->Gener02->findAllBySql(
-                "SELECT distinct gener02.usuario, gener02.nombre, gener02.login
+                'SELECT distinct gener02.usuario, gener02.nombre, gener02.login
             FROM gener02,mercurio08
-            WHERE gener02.usuario = mercurio08.usuario"
+            WHERE gener02.usuario = mercurio08.usuario'
             );
 
             foreach ($gener02 as $mgener02) {
@@ -240,29 +243,30 @@ class PrincipalController extends ApplicationController
                 foreach ($mercurio09 as $mmercurio09) {
                     $condi = "estado='P'";
 
-                    $generalService = new GeneralService();
-                    $result = $generalService->consultaTipopc($mmercurio09->getTipopc(), 'count', "", $mgener02->getUsuario(), $condi);
+                    $generalService = new GeneralService;
+                    $result = $generalService->consultaTipopc($mmercurio09->getTipopc(), 'count', '', $mgener02->getUsuario(), $condi);
                     $count += $result['count'];
                 }
                 $data[] = $count;
                 $labels[] = $mgener02->getNombre();
             }
 
-            $response = array(
+            $response = [
                 'data' => $data,
                 'labels' => $labels,
-                'success' => true
-            );
+                'success' => true,
+            ];
         } catch (DebugException $err) {
-            $response = array(
+            $response = [
                 'success' => false,
-                'msj' => $err->getMessage()
-            );
+                'msj' => $err->getMessage(),
+            ];
         }
+
         return $this->renderObject($response, false);
     }
 
-    public function downloadGlobalAction($filepath = "")
+    public function downloadGlobalAction($filepath = '')
     {
         $archivo = base64_decode($filepath);
         if (preg_match('/(public)(\/)(temp)/i', $archivo) == false) {
@@ -271,7 +275,7 @@ class PrincipalController extends ApplicationController
             $fichero = $archivo;
             $archivo = basename($archivo);
         }
-        $ext = substr(strrchr($archivo, "."), 1);
+        $ext = substr(strrchr($archivo, '.'), 1);
         if (file_exists($fichero)) {
             header('Content-Description: File Transfer');
             header("Content-Type: application/{$ext}");
@@ -279,7 +283,7 @@ class PrincipalController extends ApplicationController
             header('Cache-Control: must-revalidate');
             header('Expires: 0');
             header('Pragma: public');
-            header('Content-Length: ' . filesize($fichero));
+            header('Content-Length: '.filesize($fichero));
             ob_clean();
             readfile($fichero);
             exit();
@@ -290,7 +294,7 @@ class PrincipalController extends ApplicationController
 
     public function fileExisteGlobalAction(Request $request)
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         $filepath = $request->input('filepath');
         $archivo = base64_decode($filepath);
         if (preg_match('/(public)(\/)(temp)/i', $archivo) == false) {
@@ -299,11 +303,11 @@ class PrincipalController extends ApplicationController
             $fichero = $archivo;
             $archivo = basename($archivo);
         }
-        $ext = substr(strrchr($archivo, "."), 1);
+        $ext = substr(strrchr($archivo, '.'), 1);
         if (file_exists($fichero)) {
-            echo "{\"success\":true}";
+            echo '{"success":true}';
         } else {
-            echo "{\"success\":false}";
+            echo '{"success":false}';
         }
     }
 }

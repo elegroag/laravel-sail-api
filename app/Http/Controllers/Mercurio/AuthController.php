@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
 use App\Http\Controllers\Controller;
 use App\Library\Auth\AuthJwt;
 use App\Library\Auth\SessionCookies;
@@ -14,37 +12,43 @@ use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio19;
 use App\Models\Subsi54;
+use App\Services\Autentications\AutenticaService;
+use App\Services\Srequest;
 use App\Services\Utils\Comman;
 use App\Services\Utils\SenderEmail;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-use App\Services\Autentications\AutenticaService;
-use App\Services\Srequest;
+use Inertia\Inertia;
 
 class AuthController extends Controller
 {
     public function index()
     {
-        $tipsoc = array();
-        $coddoc = array();
-        $detadoc = array();
-        $codciu = array();
+        $tipsoc = [];
+        $coddoc = [];
+        $detadoc = [];
+        $codciu = [];
 
         foreach (Subsi54::all() as $entity) {
             $tipsoc["{$entity->getTipsoc()}"] = $entity->getDetalle();
         }
 
         foreach (Gener18::all() as $entity) {
-            if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') continue;
+            if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') {
+                continue;
+            }
             $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
         }
 
         foreach (Gener18::all() as $entity) {
-            if ($entity->getCodrua() == 'TI' || $entity->getCodrua() == 'RC') continue;
+            if ($entity->getCodrua() == 'TI' || $entity->getCodrua() == 'RC') {
+                continue;
+            }
             $detadoc["{$entity->getCodrua()}"] = $entity->getDetdoc();
         }
 
-        foreach (Gener09::where("codzon", '>=',  18000)->where("codzon", '<=', 19000)->get() as $entity) {
+        foreach (Gener09::where('codzon', '>=', 18000)->where('codzon', '<=', 19000)->get() as $entity) {
             $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
         }
 
@@ -52,39 +56,44 @@ class AuthController extends Controller
             'Coddoc' => $coddoc,
             'Tipsoc' => $tipsoc,
             'Codciu' => $codciu,
-            'Detadoc' => $detadoc
+            'Detadoc' => $detadoc,
         ]);
     }
 
     public function register()
     {
-        $tipsoc = array();
-        $coddoc = array();
-        $detadoc = array();
-        $codciu = array();
+        $tipsoc = [];
+        $coddoc = [];
+        $detadoc = [];
+        $codciu = [];
 
         foreach (Subsi54::all() as $entity) {
             $tipsoc["{$entity->getTipsoc()}"] = $entity->getDetalle();
         }
 
         foreach (Gener18::all() as $entity) {
-            if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') continue;
+            if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') {
+                continue;
+            }
             $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
         }
 
         foreach (Gener18::all() as $entity) {
-            if ($entity->getCodrua() == 'TI' || $entity->getCodrua() == 'RC') continue;
+            if ($entity->getCodrua() == 'TI' || $entity->getCodrua() == 'RC') {
+                continue;
+            }
             $detadoc["{$entity->getCodrua()}"] = $entity->getDetdoc();
         }
 
-        foreach (Gener09::where("codzon", '>=',  18000)->where("codzon", '<=', 19000)->get() as $entity) {
+        foreach (Gener09::where('codzon', '>=', 18000)->where('codzon', '<=', 19000)->get() as $entity) {
             $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
         }
+
         return Inertia::render('Auth/Register', [
             'Coddoc' => $coddoc,
             'Tipsoc' => $tipsoc,
             'Codciu' => $codciu,
-            'Detadoc' => $detadoc
+            'Detadoc' => $detadoc,
         ]);
     }
 
@@ -103,23 +112,23 @@ class AuthController extends Controller
                 'documentType' => 'required|string|min:1',
                 'identification' => 'required|integer|digits_between:6,18',
                 'password' => 'required|string|min:8',
-                'tipo' => 'required|string|min:1'
+                'tipo' => 'required|string|min:1',
             ]);
 
-            $service = new AutenticaService();
+            $service = new AutenticaService;
             [$access, $message] = $service->execute(
                 new Srequest([
                     'coddoc' => $request->input('documentType'),
                     'documento' => $request->input('identification'),
                     'clave' => $request->input('password'),
-                    'tipo' => $request->input('tipo')
+                    'tipo' => $request->input('tipo'),
                 ])
             );
 
-            if (!$access) {
+            if (! $access) {
                 return response()->json([
                     'success' => false,
-                    'message' => $message
+                    'message' => $message,
                 ], 401);
             }
 
@@ -150,12 +159,12 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error de validación',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (DebugException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al autenticar: ' . $e->getMessage()
+                'message' => 'Error al autenticar: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -190,14 +199,14 @@ class AuthController extends Controller
         ];
         $token = (new AuthJwt(10))->SimpleToken($claims);
         // Validar existencia del padre en mercurio07 para evitar romper la FK
-        $user07 = Mercurio07::where("documento", $payload['documento'])
-            ->where("coddoc", $payload['coddoc'])
-            ->where("tipo", $payload['tipo'])
+        $user07 = Mercurio07::where('documento', $payload['documento'])
+            ->where('coddoc', $payload['coddoc'])
+            ->where('tipo', $payload['tipo'])
             ->first();
 
-        $user19 = Mercurio19::where("documento", $payload['documento'])
-            ->where("coddoc", $payload['coddoc'])
-            ->where("tipo", $payload['tipo'])
+        $user19 = Mercurio19::where('documento', $payload['documento'])
+            ->where('coddoc', $payload['coddoc'])
+            ->where('tipo', $payload['tipo'])
             ->first();
 
         $codigoVerify = genera_code();
@@ -206,16 +215,16 @@ class AuthController extends Controller
             $user19->update();
         } else {
             // Si no existe el usuario padre en mercurio07, no crear mercurio19 para no violar la FK
-            if (!$user07) {
+            if (! $user07) {
                 return Inertia::render('Auth/VerifyEmail', [
                     'documento' => $payload['documento'],
                     'coddoc' => $payload['coddoc'],
                     'tipo' => $payload['tipo'],
                     'token' => $token,
-                    'error' => 'No existe un usuario registrado con los datos ingresados. Por favor verifique o regístrese.'
+                    'error' => 'No existe un usuario registrado con los datos ingresados. Por favor verifique o regístrese.',
                 ]);
             }
-            $user19 = new Mercurio19();
+            $user19 = new Mercurio19;
             $user19->fill([
                 'tipo' => $payload['tipo'],
                 'coddoc' => $payload['coddoc'],
@@ -231,6 +240,7 @@ class AuthController extends Controller
         }
 
         $payload['token'] = $token;
+
         return Inertia::render('Auth/VerifyEmail', $payload);
     }
 
@@ -263,19 +273,19 @@ class AuthController extends Controller
                 $request->input('code_4'),
             ];
 
-            $user07 = Mercurio07::where("documento", $documento)
-                ->where("coddoc", $coddoc)
-                ->where("tipo", $tipo)
+            $user07 = Mercurio07::where('documento', $documento)
+                ->where('coddoc', $coddoc)
+                ->where('tipo', $tipo)
                 ->first();
 
-            if (!$user07) {
-                throw new DebugException("Error no es valido el usuario particular", 301);
+            if (! $user07) {
+                throw new DebugException('Error no es valido el usuario particular', 301);
             }
 
             $error = '';
-            $user19 = Mercurio19::where("documento", $documento)
-                ->where("coddoc", $coddoc)
-                ->where("tipo", $tipo)
+            $user19 = Mercurio19::where('documento', $documento)
+                ->where('coddoc', $coddoc)
+                ->where('tipo', $tipo)
                 ->first();
 
             if ($token != $user19->getToken()) {
@@ -288,35 +298,34 @@ class AuthController extends Controller
             // Calcular la diferencia
             $diferenciaEnMinutos = $momento->diffInMinutes($ahora);
 
-            //para mas de tres intentos fallidos
+            // para mas de tres intentos fallidos
             if ($user19->getIntentos() >= 3 && $diferenciaEnMinutos < 5) {
                 // Verificar si la diferencia es exactamente 10 minutos
                 $error .= "Ha superado el número de intentos permitidos para acceder a la cuenta con PIN de seguridad. Espera un poco más, han pasado {$diferenciaEnMinutos} minutos para poder volver acceder. \n";
             }
 
             if (strlen($error) == 0 && $diferenciaEnMinutos >= 5) {
-                //volver a generar PIN
+                // volver a generar PIN
                 $codigoVerify = genera_code();
-                $inicio  = Carbon::now()->format('Y-m-d H:i:s');
+                $inicio = Carbon::now()->format('Y-m-d H:i:s');
                 $intentos = '0';
 
                 Mercurio19::where('documento', $documento)
                     ->where('coddoc', $coddoc)
                     ->where('tipo', $tipo)
                     ->update([
-                        'inicio'   => $inicio,
+                        'inicio' => $inicio,
                         'intentos' => (int) $intentos,
-                        'codver'   => (string) $codigoVerify,
+                        'codver' => (string) $codigoVerify,
                     ]);
-
 
                 $html = "Utiliza el siguiente código de verificación, para confirmar el propietario de la dirección de correo:<br/>
                     <span style=\"font-size:16px;color:#333\">CÓDIGO DE VERIFICACIÓN: </span><br/>
                     <span style=\"font-size:30px;color:#11cdef\"><b>{$codigoVerify}</b></span>";
 
-                $asunto = "Generación nuevo PIN plataforma Comfaca En Línea";
+                $asunto = 'Generación nuevo PIN plataforma Comfaca En Línea';
                 $emailCaja = Mercurio01::first();
-                $senderEmail = new SenderEmail();
+                $senderEmail = new SenderEmail;
                 $senderEmail->setters(
                     "emisor_email: {$emailCaja->getEmail()}",
                     "emisor_clave: {$emailCaja->getClave()}",
@@ -324,22 +333,22 @@ class AuthController extends Controller
                 );
                 $senderEmail->send($user07->getEmail(), $html);
 
-                $error .= "Ha superado el tiempo de validación y es necesario volver a generar un nuevo PIN, " .
-                    "y se ha enviado a la dirección de correo registrada en la plataforma. " .
+                $error .= 'Ha superado el tiempo de validación y es necesario volver a generar un nuevo PIN, '.
+                    'y se ha enviado a la dirección de correo registrada en la plataforma. '.
                     "Por favor comprobar en el buzon del correo e ingresar el nuevo PIN.\n";
             }
 
             if (strlen($error) == 0) {
                 $codver = trim(implode('', $code));
                 if ($codver != trim($user19->getCodver())) {
-                    $inicio  = date('Y-m-d H:i:s');
+                    $inicio = date('Y-m-d H:i:s');
                     $intentos = $user19->getIntentos() + 1;
 
                     Mercurio19::where('documento', $documento)
                         ->where('coddoc', $coddoc)
                         ->where('tipo', $tipo)
                         ->update([
-                            'inicio'   => $inicio,
+                            'inicio' => $inicio,
                             'intentos' => (int) $intentos,
                         ]);
 
@@ -350,89 +359,88 @@ class AuthController extends Controller
             $ps = Comman::Api();
             switch ($tipo) {
                 case 'T':
-                    $url = "mercurio/principal/index";
-                    $metodo = "informacion_trabajador";
-                    $params = ["cedtra" => $documento, "coddoc" => $coddoc];
+                    $url = 'mercurio/principal/index';
+                    $metodo = 'informacion_trabajador';
+                    $params = ['cedtra' => $documento, 'coddoc' => $coddoc];
                     break;
                 case 'E':
-                    $url = "mercurio/empresa/index";
-                    $metodo = "informacion_empresa";
-                    $params = ["nit" => $documento, "coddoc" => $coddoc];
+                    $url = 'mercurio/empresa/index';
+                    $metodo = 'informacion_empresa';
+                    $params = ['nit' => $documento, 'coddoc' => $coddoc];
                     break;
                 case 'I':
-                    $url = "mercurio/independiente/index";
-                    $metodo = "informacion_empresa";
-                    $params = ["nit" => $documento, "coddoc" => $coddoc];
+                    $url = 'mercurio/independiente/index';
+                    $metodo = 'informacion_empresa';
+                    $params = ['nit' => $documento, 'coddoc' => $coddoc];
                     break;
                 case 'O':
-                    $url = "mercurio/pensionado/index";
-                    $metodo = "informacion_empresa";
-                    $params = ["nit" => $documento, "coddoc" => $coddoc];
+                    $url = 'mercurio/pensionado/index';
+                    $metodo = 'informacion_empresa';
+                    $params = ['nit' => $documento, 'coddoc' => $coddoc];
                     break;
                 case 'F':
-                    $url = "mercurio/facultativo/index";
-                    $metodo = "informacion_empresa";
-                    $params = ["nit" => $documento, "coddoc" => $coddoc];
+                    $url = 'mercurio/facultativo/index';
+                    $metodo = 'informacion_empresa';
+                    $params = ['nit' => $documento, 'coddoc' => $coddoc];
                     break;
                 default:
-                    $url = "mercurio/principal/index";
-                    $metodo = "informacion_empresa";
-                    $params = ["nit" => $documento, "coddoc" => $coddoc];
+                    $url = 'mercurio/principal/index';
+                    $metodo = 'informacion_empresa';
+                    $params = ['nit' => $documento, 'coddoc' => $coddoc];
                     break;
             }
 
-
             $ps->runCli([
-                "servicio" => "ComfacaEmpresas",
-                "metodo" => $metodo,
-                "params" =>  $params
+                'servicio' => 'ComfacaEmpresas',
+                'metodo' => $metodo,
+                'params' => $params,
             ]);
 
             $out = $ps->toArray();
             $afiliado = ($out['success'] == true && isset($out['data']) && $out['data'] != false) ? $out['data'] : null;
             $estadoAfiliado = ($afiliado) ? $afiliado['estado'] : 'I';
 
-            if (!SessionCookies::authenticate(
+            if (! SessionCookies::authenticate(
                 'mercurio',
                 new Srequest(
                     [
-                        "tipo" => $tipo,
-                        "coddoc" => $coddoc,
-                        "documento" => $documento,
-                        "estado" => "A",
-                        "estado_afiliado" => $estadoAfiliado
+                        'tipo' => $tipo,
+                        'coddoc' => $coddoc,
+                        'documento' => $documento,
+                        'estado' => 'A',
+                        'estado_afiliado' => $estadoAfiliado,
                     ]
                 )
             )) {
-                throw new DebugException("Error en la autenticación del usuario", 501);
+                throw new DebugException('Error en la autenticación del usuario', 501);
             }
 
             set_flashdata(
-                "success",
-                array(
-                    "type" => "html",
-                    "msj" => "<p style='font-size:1rem' class='text-left'>El usuario ha realizado el pre-registro de forma correcta</p>" .
-                        "<p style='font-size:1rem' class='text-left'>El registro realizado es de tipo \"Particular\", ahora puedes realizar las afiliaciones de modo seguro.<br/>" .
-                        "Las credenciales de acceso le seran enviadas a la respectiva dirección de correo registrado.<br/></p>"
-                )
+                'success',
+                [
+                    'type' => 'html',
+                    'msj' => "<p style='font-size:1rem' class='text-left'>El usuario ha realizado el pre-registro de forma correcta</p>".
+                        "<p style='font-size:1rem' class='text-left'>El registro realizado es de tipo \"Particular\", ahora puedes realizar las afiliaciones de modo seguro.<br/>".
+                        'Las credenciales de acceso le seran enviadas a la respectiva dirección de correo registrado.<br/></p>',
+                ]
             );
 
             return Inertia::location(url($url));
         } catch (ValidationException $e) {
             $payload = [
-                "success" => false,
+                'success' => false,
                 'message' => 'Error de validación',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ];
         } catch (DebugException $e) {
             $payload = [
-                "success" => false,
-                'message' => 'Error al crear empresa: ' . $e->getMessage()
+                'success' => false,
+                'message' => 'Error al crear empresa: '.$e->getMessage(),
             ];
         } catch (\Exception $e) {
             $payload = [
-                "success" => false,
-                'message' => $e->getMessage()
+                'success' => false,
+                'message' => $e->getMessage(),
             ];
         }
 
@@ -450,6 +458,7 @@ class AuthController extends Controller
             ->update(['token' => (string) $token]);
 
         $payload['token'] = $token;
+
         return Inertia::render('Auth/VerifyEmail', $payload);
     }
 
@@ -458,36 +467,38 @@ class AuthController extends Controller
         $request->validate([
             'documento' => 'required|numeric|digits_between:6,18',
             'coddoc' => 'required|string|min:1|max:2',
-            'tipo' => 'required|string|size:1'
+            'tipo' => 'required|string|size:1',
         ]);
 
         $tipo = $request->input('tipo');
         switch ($tipo) {
             case 'T':
-                $url = "mercurio/principal/index";
+                $url = 'mercurio/principal/index';
                 break;
             case 'E':
-                $url = "mercurio/empresa/index";
+                $url = 'mercurio/empresa/index';
                 break;
             case 'I':
-                $url = "mercurio/independiente/index";
+                $url = 'mercurio/independiente/index';
                 break;
             case 'O':
-                $url = "mercurio/pensionado/index";
+                $url = 'mercurio/pensionado/index';
                 break;
             case 'F':
-                $url = "mercurio/facultativo/index";
+                $url = 'mercurio/facultativo/index';
                 break;
             default:
-                $url = "mercurio/principal/index";
+                $url = 'mercurio/principal/index';
                 break;
         }
+
         return Inertia::location(url($url));
     }
 
     public function logoutAction()
     {
         SessionCookies::destroyIdentity();
-        return redirect()->to("web/login");
+
+        return redirect()->to('web/login');
     }
 }

@@ -34,11 +34,11 @@ class EmpresaResource extends JsonResource
             // Estadísticas calculadas
             'total_trabajadores' => $this->when(
                 $this->relationLoaded('trabajadores'),
-                fn() => $this->trabajadores->count()
+                fn () => $this->trabajadores->count()
             ),
             'trabajadores_activos' => $this->when(
                 $this->relationLoaded('trabajadores'),
-                fn() => $this->trabajadores->where('estado', 'activo')->count()
+                fn () => $this->trabajadores->where('estado', 'activo')->count()
             ),
         ];
     }

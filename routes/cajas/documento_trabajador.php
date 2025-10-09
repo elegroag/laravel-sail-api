@@ -1,8 +1,8 @@
 <?php
 
 // Importar facades y controlador necesarios
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Cajas\Mercurio13Controller;
+use Illuminate\Support\Facades\Route;
 
 // Ruta GET para mostrar la página principal de documentos de trabajador
 Route::get('/documento-trabajador', [Mercurio13Controller::class, 'indexAction']);

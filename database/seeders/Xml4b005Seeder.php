@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Xml4b005;
+use Illuminate\Database\Seeder;
 
 class Xml4b005Seeder extends Seeder
 {

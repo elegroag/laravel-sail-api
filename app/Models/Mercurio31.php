@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
-use App\Models\Adapter\DbBase;
 use App\Models\Adapter\ModelBase;
 use Carbon\Carbon;
 
 class Mercurio31 extends ModelBase
 {
-
     protected $table = 'mercurio31';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     public function __construct(array $attributes = [])
@@ -224,6 +224,7 @@ class Mercurio31 extends ModelBase
     {
         $this->tipjor = $tipjor;
     }
+
     public function setFacvul($facvul)
     {
         $this->facvul = $facvul;
@@ -233,17 +234,21 @@ class Mercurio31 extends ModelBase
     {
         $this->dirlab = $dirlab;
     }
+
     public function setRuralt($ruralt)
     {
         $this->ruralt = $ruralt;
     }
+
     public function setComision($comision)
     {
         $this->comision = $comision;
     }
+
     /**
      * Metodo para establecer el valor del campo log
-     * @param integer $log
+     *
+     * @param  int  $log
      */
     public function setLog($log)
     {
@@ -252,7 +257,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo nit
-     * @param string $nit
+     *
+     * @param  string  $nit
      */
     public function setNit($nit)
     {
@@ -261,7 +267,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo razsoc
-     * @param string $razsoc
+     *
+     * @param  string  $razsoc
      */
     public function setRazsoc($razsoc)
     {
@@ -270,7 +277,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo cedtra
-     * @param string $cedtra
+     *
+     * @param  string  $cedtra
      */
     public function setCedtra($cedtra)
     {
@@ -279,7 +287,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo tipdoc
-     * @param string $tipdoc
+     *
+     * @param  string  $tipdoc
      */
     public function setTipdoc($tipdoc)
     {
@@ -288,7 +297,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo priape
-     * @param string $priape
+     *
+     * @param  string  $priape
      */
     public function setPriape($priape)
     {
@@ -297,7 +307,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo segape
-     * @param string $segape
+     *
+     * @param  string  $segape
      */
     public function setSegape($segape)
     {
@@ -306,7 +317,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo prinom
-     * @param string $prinom
+     *
+     * @param  string  $prinom
      */
     public function setPrinom($prinom)
     {
@@ -315,7 +327,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo segnom
-     * @param string $segnom
+     *
+     * @param  string  $segnom
      */
     public function setSegnom($segnom)
     {
@@ -329,7 +342,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo ciunac
-     * @param string $ciunac
+     *
+     * @param  string  $ciunac
      */
     public function setCiunac($ciunac)
     {
@@ -338,12 +352,14 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo sexo
-     * @param string $sexo
+     *
+     * @param  string  $sexo
      */
     public function setSexo($sexo)
     {
         $this->sexo = $sexo;
     }
+
     public function setOrisex($orisex)
     {
         $this->orisex = $orisex;
@@ -351,7 +367,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo estciv
-     * @param string $estciv
+     *
+     * @param  string  $estciv
      */
     public function setEstciv($estciv)
     {
@@ -360,7 +377,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo cabhog
-     * @param string $cabhog
+     *
+     * @param  string  $cabhog
      */
     public function setCabhog($cabhog)
     {
@@ -369,7 +387,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo codciu
-     * @param string $codciu
+     *
+     * @param  string  $codciu
      */
     public function setCodciu($codciu)
     {
@@ -378,7 +397,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo codzon
-     * @param string $codzon
+     *
+     * @param  string  $codzon
      */
     public function setCodzon($codzon)
     {
@@ -387,7 +407,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo direccion
-     * @param string $direccion
+     *
+     * @param  string  $direccion
      */
     public function setDireccion($direccion)
     {
@@ -396,7 +417,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo barrio
-     * @param string $barrio
+     *
+     * @param  string  $barrio
      */
     public function setBarrio($barrio)
     {
@@ -405,7 +427,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo telefono
-     * @param string $telefono
+     *
+     * @param  string  $telefono
      */
     public function setTelefono($telefono)
     {
@@ -414,7 +437,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo celular
-     * @param string $celular
+     *
+     * @param  string  $celular
      */
     public function setCelular($celular)
     {
@@ -423,7 +447,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo fax
-     * @param string $fax
+     *
+     * @param  string  $fax
      */
     public function setFax($fax)
     {
@@ -432,7 +457,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo email
-     * @param string $email
+     *
+     * @param  string  $email
      */
     public function setEmail($email)
     {
@@ -443,9 +469,9 @@ class Mercurio31 extends ModelBase
     {
         $this->fecsol = $fecsol;
     }
+
     /**
      * Metodo para establecer el valor del campo fecing
-
      */
     public function setFecing($fecing)
     {
@@ -454,7 +480,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo salario
-     * @param integer $salario
+     *
+     * @param  int  $salario
      */
     public function setSalario($salario)
     {
@@ -463,7 +490,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo captra
-     * @param string $captra
+     *
+     * @param  string  $captra
      */
     public function setCaptra($captra)
     {
@@ -472,7 +500,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo tipdis
-     * @param string $tipdis
+     *
+     * @param  string  $tipdis
      */
     public function setTipdis($tipdis)
     {
@@ -481,7 +510,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo nivedu
-     * @param string $nivedu
+     *
+     * @param  string  $nivedu
      */
     public function setNivedu($nivedu)
     {
@@ -490,7 +520,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo rural
-     * @param string $rural
+     *
+     * @param  string  $rural
      */
     public function setRural($rural)
     {
@@ -499,7 +530,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo horas
-     * @param integer $horas
+     *
+     * @param  int  $horas
      */
     public function setHoras($horas)
     {
@@ -508,12 +540,14 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo tipcon
-     * @param string $tipcon
+     *
+     * @param  string  $tipcon
      */
     public function setTipcon($tipcon)
     {
         $this->tipcon = $tipcon;
     }
+
     public function setTrasin($trasin)
     {
         $this->trasin = $trasin;
@@ -521,7 +555,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo vivienda
-     * @param string $vivienda
+     *
+     * @param  string  $vivienda
      */
     public function setVivienda($vivienda)
     {
@@ -530,7 +565,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo tipafi
-     * @param string $tipafi
+     *
+     * @param  string  $tipafi
      */
     public function setTipafi($tipafi)
     {
@@ -539,7 +575,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo profesion
-     * @param string $profesion
+     *
+     * @param  string  $profesion
      */
     public function setProfesion($profesion)
     {
@@ -548,7 +585,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo cargo
-     * @param string $cargo
+     *
+     * @param  string  $cargo
      */
     public function setCargo($cargo)
     {
@@ -557,7 +595,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo autoriza
-     * @param string $autoriza
+     *
+     * @param  string  $autoriza
      */
     public function setAutoriza($autoriza)
     {
@@ -566,7 +605,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo usuario
-     * @param integer $usuario
+     *
+     * @param  int  $usuario
      */
     public function setUsuario($usuario)
     {
@@ -575,7 +615,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo estado
-     * @param string $estado
+     *
+     * @param  string  $estado
      */
     public function setEstado($estado)
     {
@@ -584,7 +625,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo codest
-     * @param string $codest
+     *
+     * @param  string  $codest
      */
     public function setCodest($codest)
     {
@@ -593,7 +635,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo motivo
-     * @param string $motivo
+     *
+     * @param  string  $motivo
      */
     public function setMotivo($motivo)
     {
@@ -602,7 +645,6 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo fecest
-
      */
     public function setFecest($fecest)
     {
@@ -611,7 +653,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo tipo
-     * @param string $tipo
+     *
+     * @param  string  $tipo
      */
     public function setTipo($tipo)
     {
@@ -620,7 +663,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo coddoc
-     * @param string $coddoc
+     *
+     * @param  string  $coddoc
      */
     public function setCoddoc($coddoc)
     {
@@ -629,17 +673,18 @@ class Mercurio31 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo documento
-     * @param string $documento
+     *
+     * @param  string  $documento
      */
     public function setDocumento($documento)
     {
         $this->documento = $documento;
     }
 
-
     /**
      * Devuelve el valor del campo id
-     * @return integer
+     *
+     * @return int
      */
     public function getId()
     {
@@ -648,7 +693,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo log
-     * @return integer
+     *
+     * @return int
      */
     public function getLog()
     {
@@ -657,6 +703,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo nit
+     *
      * @return string
      */
     public function getNit()
@@ -666,6 +713,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo razsoc
+     *
      * @return string
      */
     public function getRazsoc()
@@ -675,6 +723,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo cedtra
+     *
      * @return string
      */
     public function getCedtra()
@@ -684,6 +733,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo tipdoc
+     *
      * @return string
      */
     public function getTipdoc()
@@ -693,6 +743,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo priape
+     *
      * @return string
      */
     public function getPriape()
@@ -702,6 +753,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo segape
+     *
      * @return string
      */
     public function getSegape()
@@ -711,6 +763,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo prinom
+     *
      * @return string
      */
     public function getPrinom()
@@ -720,13 +773,13 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo segnom
+     *
      * @return string
      */
     public function getSegnom()
     {
         return $this->segnom;
     }
-
 
     public function getFecnac()
     {
@@ -735,6 +788,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo ciunac
+     *
      * @return string
      */
     public function getCiunac()
@@ -744,13 +798,13 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo sexo
+     *
      * @return string
      */
     public function getSexo()
     {
         return $this->sexo;
     }
-
 
     public function getOrisex()
     {
@@ -759,6 +813,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo estciv
+     *
      * @return string
      */
     public function getEstciv()
@@ -768,6 +823,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo cabhog
+     *
      * @return string
      */
     public function getCabhog()
@@ -777,6 +833,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo codciu
+     *
      * @return string
      */
     public function getCodciu()
@@ -786,6 +843,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo codzon
+     *
      * @return string
      */
     public function getCodzon()
@@ -795,6 +853,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo direccion
+     *
      * @return string
      */
     public function getDireccion()
@@ -804,6 +863,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo barrio
+     *
      * @return string
      */
     public function getBarrio()
@@ -813,6 +873,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo telefono
+     *
      * @return string
      */
     public function getTelefono()
@@ -822,6 +883,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo celular
+     *
      * @return string
      */
     public function getCelular()
@@ -831,6 +893,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo fax
+     *
      * @return string
      */
     public function getFax()
@@ -840,6 +903,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo email
+     *
      * @return string
      */
     public function getEmail()
@@ -849,12 +913,12 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo fecing
-
      */
     public function getFecsol()
     {
         return Carbon::parse($this->fecsol);
     }
+
     public function getFecing()
     {
         return Carbon::parse($this->fecing);
@@ -862,7 +926,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo salario
-     * @return integer
+     *
+     * @return int
      */
     public function getSalario()
     {
@@ -871,6 +936,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo captra
+     *
      * @return string
      */
     public function getCaptra()
@@ -880,6 +946,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo tipdis
+     *
      * @return string
      */
     public function getTipdis()
@@ -889,6 +956,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo nivedu
+     *
      * @return string
      */
     public function getNivedu()
@@ -898,6 +966,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo rural
+     *
      * @return string
      */
     public function getRural()
@@ -907,7 +976,8 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo horas
-     * @return integer
+     *
+     * @return int
      */
     public function getHoras()
     {
@@ -916,6 +986,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo tipcon
+     *
      * @return string
      */
     public function getTipcon()
@@ -930,6 +1001,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo vivienda
+     *
      * @return string
      */
     public function getVivienda()
@@ -939,6 +1011,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo tipafi
+     *
      * @return string
      */
     public function getTipafi()
@@ -948,6 +1021,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo profesion
+     *
      * @return string
      */
     public function getProfesion()
@@ -957,6 +1031,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo cargo
+     *
      * @return string
      */
     public function getCargo()
@@ -966,6 +1041,7 @@ class Mercurio31 extends ModelBase
 
     /**
      * Devuelve el valor del campo autoriza
+     *
      * @return string
      */
     public function getAutoriza()
@@ -985,23 +1061,36 @@ class Mercurio31 extends ModelBase
 
     public function getEstadoArray()
     {
-        return array(
-            "A" => "APROBO",
-            "X" => "RECHAZO",
-            "P" => "PENDIENTE",
-            "D" => "DEVOLVIO",
-        );
+        return [
+            'A' => 'APROBO',
+            'X' => 'RECHAZO',
+            'P' => 'PENDIENTE',
+            'D' => 'DEVOLVIO',
+        ];
     }
 
     public function getEstadoDetalle()
     {
-        $return = "";
-        if ($this->estado == "T") $return = "TEMPORAL";
-        if ($this->estado == "D") $return = "DEVUELTO";
-        if ($this->estado == "A") $return = "APROBADO";
-        if ($this->estado == "X") $return = "RECHAZADO";
-        if ($this->estado == "P") $return = "PENDIENTE";
-        if ($this->estado == "C") $return = "CANCELAR";
+        $return = '';
+        if ($this->estado == 'T') {
+            $return = 'TEMPORAL';
+        }
+        if ($this->estado == 'D') {
+            $return = 'DEVUELTO';
+        }
+        if ($this->estado == 'A') {
+            $return = 'APROBADO';
+        }
+        if ($this->estado == 'X') {
+            $return = 'RECHAZADO';
+        }
+        if ($this->estado == 'P') {
+            $return = 'PENDIENTE';
+        }
+        if ($this->estado == 'C') {
+            $return = 'CANCELAR';
+        }
+
         return $return;
     }
 
@@ -1033,6 +1122,7 @@ class Mercurio31 extends ModelBase
     {
         return $this->coddoc;
     }
+
     public function getFacvul()
     {
         return $this->facvul;
@@ -1042,18 +1132,22 @@ class Mercurio31 extends ModelBase
     {
         return $this->peretn;
     }
+
     public function getRuralt()
     {
         return $this->ruralt;
     }
+
     public function getDirlab()
     {
         return $this->dirlab;
     }
+
     public function getComision()
     {
         return $this->comision;
     }
+
     public function getTipjor()
     {
         return $this->tipjor;
@@ -1064,7 +1158,7 @@ class Mercurio31 extends ModelBase
         return $this->ciulab;
     }
 
-    //SAT
+    // SAT
     public function getTipsal()
     {
         return trim($this->tipsal);
@@ -1077,16 +1171,16 @@ class Mercurio31 extends ModelBase
 
     public function getTipsalArray()
     {
-        return array(
+        return [
             'F' => 'FIJO',
             'V' => 'VARIABLE',
-            'I' => 'INTEGRAL'
-        );
+            'I' => 'INTEGRAL',
+        ];
     }
 
     public function getCoddocArray()
     {
-        return array(
+        return [
             1 => 'CC',
             10 => 'TMF',
             11 => 'CD',
@@ -1100,8 +1194,8 @@ class Mercurio31 extends ModelBase
             6 => 'PA',
             7 => 'RC',
             8 => 'PEP',
-            9 => 'CB'
-        );
+            9 => 'CB',
+        ];
     }
 
     public function getDocumento()
@@ -1111,12 +1205,12 @@ class Mercurio31 extends ModelBase
 
     public function getNombre()
     {
-        return $this->priape . " " . $this->prinom;
+        return $this->priape.' '.$this->prinom;
     }
 
     public function getNombreCompleto()
     {
-        return $this->priape . " " . $this->segape . " " . $this->prinom . " " . $this->segnom;
+        return $this->priape.' '.$this->segape.' '.$this->prinom.' '.$this->segnom;
     }
 
     public function get_all()
@@ -1126,15 +1220,19 @@ class Mercurio31 extends ModelBase
 
     public function CamposDisponibles()
     {
-        $rqs = $this->db->inQueryAssoc("SELECT * FROM mercurio12");
-        $data = array();
-        foreach ($rqs as $ai => $row) $data[$row['coddoc']] = $row['detalle'];
+        $rqs = $this->db->inQueryAssoc('SELECT * FROM mercurio12');
+        $data = [];
+        foreach ($rqs as $ai => $row) {
+            $data[$row['coddoc']] = $row['detalle'];
+        }
+
         return $data;
     }
 
     public function CamposDisponibleDetalle($campo)
     {
         $data = $this->CamposDisponibles();
+
         return $data["{$campo}"];
     }
 

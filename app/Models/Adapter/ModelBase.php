@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 class ModelBase extends Model
 {
     use HasFactory;
+
     protected $db;
 
     public function __construct(array $attributes = [])
@@ -25,7 +26,7 @@ class ModelBase extends Model
         if (isset($params['conditions'])) {
             $conditions = $params['conditions'];
             if (is_array($conditions)) {
-                $conditions = implode(",", $conditions);
+                $conditions = implode(',', $conditions);
             }
             $query->whereRaw($conditions);
         } else {
@@ -58,6 +59,7 @@ class ModelBase extends Model
             foreach ($result as $key => $value) {
                 $this->$key = $value;
             }
+
             return $this;
         } else {
             return null;
@@ -74,12 +76,13 @@ class ModelBase extends Model
         $results = DB::select($sqlQuery);
         $collectObjects = collect();
         foreach ($results as $result) {
-            $obj = new static();
+            $obj = new static;
             foreach ($result as $key => $value) {
                 $obj->$key = $value;
             }
             $collectObjects->push($obj);
         }
+
         return $collectObjects;
     }
 
@@ -88,10 +91,11 @@ class ModelBase extends Model
         $results = DB::select($sqlQuery);
         if (count($results) > 0) {
             $result = $results[0];
-            $obj = new static();
+            $obj = new static;
             foreach ($result as $key => $value) {
                 $obj->$key = $value;
             }
+
             return $obj;
         } else {
             return null;
@@ -106,7 +110,7 @@ class ModelBase extends Model
         if (isset($params['conditions'])) {
             $conditions = $params['conditions'];
             if (is_array($conditions)) {
-                $conditions = implode(",", $conditions);
+                $conditions = implode(',', $conditions);
             }
             $query->whereRaw($conditions);
         } else {
@@ -134,22 +138,23 @@ class ModelBase extends Model
         }
 
         if (isset($params['limit'])) {
-            $query->limit((int)$params['limit']);
+            $query->limit((int) $params['limit']);
         }
 
         if (isset($params['offset'])) {
-            $query->offset((int)$params['offset']);
+            $query->offset((int) $params['offset']);
         }
 
         $results = $query->get();
         $collectObjects = collect();
         foreach ($results as $result) {
-            $obj = new static();
+            $obj = new static;
             foreach ($result as $key => $value) {
                 $obj->$key = $value;
             }
             $collectObjects->push($obj);
         }
+
         return $collectObjects;
     }
 
@@ -172,11 +177,10 @@ class ModelBase extends Model
         if (isset($params['conditions'])) {
             $conditions = $params['conditions'];
             if (is_array($conditions)) {
-                $conditions = implode(",", $conditions);
+                $conditions = implode(',', $conditions);
             }
             $query->whereRaw($conditions);
         }
-
 
         // grouped maximum -> return collection of objects with group columns + maximum
         if (isset($params['group']) && $params['group']) {
@@ -205,28 +209,30 @@ class ModelBase extends Model
             }
 
             if (isset($params['limit'])) {
-                $query->limit((int)$params['limit']);
+                $query->limit((int) $params['limit']);
             }
 
             if (isset($params['offset'])) {
-                $query->offset((int)$params['offset']);
+                $query->offset((int) $params['offset']);
             }
 
             $results = $query->get();
             $collectObjects = collect();
             foreach ($results as $result) {
-                $obj = new static();
+                $obj = new static;
                 foreach ($result as $key => $value) {
                     $obj->$key = $value;
                 }
                 $collectObjects->push($obj);
             }
+
             return $collectObjects;
         }
 
         // simple maximum (no group) -> return scalar
         // order/limit/offset are ignored for a scalar aggregate
         $maximum = $query->max(DB::raw($column));
+
         return $maximum;
     }
 
@@ -249,11 +255,10 @@ class ModelBase extends Model
         if (isset($params['conditions'])) {
             $conditions = $params['conditions'];
             if (is_array($conditions)) {
-                $conditions = implode(",", $conditions);
+                $conditions = implode(',', $conditions);
             }
             $query->whereRaw($conditions);
         }
-
 
         // grouped minimum -> return collection of objects with group columns + minimum
         if (isset($params['group']) && $params['group']) {
@@ -282,27 +287,29 @@ class ModelBase extends Model
             }
 
             if (isset($params['limit'])) {
-                $query->limit((int)$params['limit']);
+                $query->limit((int) $params['limit']);
             }
 
             if (isset($params['offset'])) {
-                $query->offset((int)$params['offset']);
+                $query->offset((int) $params['offset']);
             }
 
             $results = $query->get();
             $collectObjects = collect();
             foreach ($results as $result) {
-                $obj = new static();
+                $obj = new static;
                 foreach ($result as $key => $value) {
                     $obj->$key = $value;
                 }
                 $collectObjects->push($obj);
             }
+
             return $collectObjects;
         }
 
         // simple minimum (no group) -> return scalar
         $minimum = $query->min(DB::raw($column));
+
         return $minimum;
     }
 
@@ -313,7 +320,10 @@ class ModelBase extends Model
 
         // Helper para detectar array asociativo
         $isAssoc = function ($arr) {
-            if (!is_array($arr)) return false;
+            if (! is_array($arr)) {
+                return false;
+            }
+
             return array_keys($arr) !== range(0, count($arr) - 1);
         };
 
@@ -329,7 +339,9 @@ class ModelBase extends Model
                 } else {
                     // Lista: ["col=val", ...]
                     foreach ($conditions as $cond) {
-                        if (!is_string($cond) || strpos($cond, '=') === false) continue;
+                        if (! is_string($cond) || strpos($cond, '=') === false) {
+                            continue;
+                        }
                         [$col, $val] = array_map('trim', explode('=', $cond, 2));
                         // Normalizar valor
                         if (strcasecmp($val, 'NULL') === 0) {
@@ -360,14 +372,18 @@ class ModelBase extends Model
                 // Lista o string: "col=val,col2=val2"
                 $setItems = is_array($sets) ? $sets : explode(',', $sets);
                 foreach ($setItems as $item) {
-                    if (!is_string($item)) continue;
-                    if (strpos($item, '=') === false) continue;
+                    if (! is_string($item)) {
+                        continue;
+                    }
+                    if (strpos($item, '=') === false) {
+                        continue;
+                    }
                     [$col, $val] = array_map('trim', explode('=', $item, 2));
                     // normalizar valor
                     if (strcasecmp($val, 'NULL') === 0) {
                         $value = null;
                     } elseif (is_numeric($val)) {
-                        $value = (strpos($val, '.') !== false) ? (float)$val : (int)$val;
+                        $value = (strpos($val, '.') !== false) ? (float) $val : (int) $val;
                     } else {
                         if ((str_starts_with($val, "'") && str_ends_with($val, "'")) || (str_starts_with($val, '"') && str_ends_with($val, '"'))) {
                             $value = substr($val, 1, -1);
@@ -382,12 +398,14 @@ class ModelBase extends Model
             // fallback: first param contains set clause
             $setItems = explode(',', $params[0]);
             foreach ($setItems as $item) {
-                if (strpos($item, '=') === false) continue;
+                if (strpos($item, '=') === false) {
+                    continue;
+                }
                 [$col, $val] = array_map('trim', explode('=', $item, 2));
                 if (strcasecmp($val, 'NULL') === 0) {
                     $value = null;
                 } elseif (is_numeric($val)) {
-                    $value = (strpos($val, '.') !== false) ? (float)$val : (int)$val;
+                    $value = (strpos($val, '.') !== false) ? (float) $val : (int) $val;
                 } else {
                     if ((str_starts_with($val, "'") && str_ends_with($val, "'")) || (str_starts_with($val, '"') && str_ends_with($val, '"'))) {
                         $value = substr($val, 1, -1);
@@ -406,6 +424,7 @@ class ModelBase extends Model
 
         // execute update with bindings
         $affected = $query->update($updateData);
+
         return $affected;
     }
 
@@ -417,7 +436,7 @@ class ModelBase extends Model
         if (isset($params['conditions'])) {
             $conditions = $params['conditions'];
             if (is_array($conditions)) {
-                $conditions = implode(",", $conditions);
+                $conditions = implode(',', $conditions);
             }
             $query->whereRaw($conditions);
         } else {
@@ -427,6 +446,7 @@ class ModelBase extends Model
                 return 0; // no conditions -> prevent deleting all records
             }
         }
+
         return $query->delete();
     }
 
@@ -454,7 +474,7 @@ class ModelBase extends Model
         if (isset($params['conditions'])) {
             $conditions = $params['conditions'];
             if (is_array($conditions)) {
-                $conditions = implode(",", $conditions);
+                $conditions = implode(',', $conditions);
             }
             $query->whereRaw($conditions);
         }
@@ -469,6 +489,7 @@ class ModelBase extends Model
 
         // Para expresiones como DISTINCT o columnas específicas
         $query->selectRaw("count($item) as num");
+
         return (int) ($query->value('num') ?? 0);
     }
 }

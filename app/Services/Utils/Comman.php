@@ -9,12 +9,14 @@ use App\Services\Api\PortalMercurio;
 class Comman
 {
     protected $procesadorComandos = null;
+
     protected $app;
+
     public $models;
 
     public function initEnvironment()
     {
-        $this->app = new \stdClass();
+        $this->app = new \stdClass;
         $this->app->cli = env('USE_CLI', false);
         $this->app->mode = env('API_MODE', 'development');
         $this->app->host_portal_dev = env('HOST_PORTAL_DEV', 'http://localhost:8000');
@@ -34,6 +36,7 @@ class Comman
     /**
      * runCli function
      * Adapter consumo de servicio cliente
+     *
      * @return ApiSubsidio
      */
     public function runCli($attr, $base64 = null)
@@ -52,14 +55,16 @@ class Comman
 
     /**
      * init function
-     * @param string $procesador
+     *
+     * @param  string  $procesador
      * @return object
      */
     public static function init($procesador = 'p7')
     {
-        $comman = new Comman();
+        $comman = new Comman;
         if ($comman->app->cli) {
             $comman->procesadorComandos = new ProcesadorComandos($procesador);
+
             return $comman->procesadorComandos;
         } else {
             return $comman;
@@ -68,24 +73,30 @@ class Comman
 
     /**
      * Api function
+     *
      * @changed [2024-04-00]
+     *
      * @author elegroag <elegroag@ibero.edu.co>
+     *
      * @return Comman
      */
     public static function Api()
     {
-        $comman = new Comman();
+        $comman = new Comman;
+
         return $comman;
     }
 
     /**
      * Cli function
+     *
      * @return void
      */
     public static function Cli($procesador = 'p7')
     {
         $comman = self::init($procesador);
         $comman->procesadorComandos = new ProcesadorComandos($procesador);
+
         return $comman->procesadorComandos;
     }
 
@@ -99,12 +110,13 @@ class Comman
         return $this->procesadorComandos->isJson();
     }
 
-
     /**
      * toArray function
+     *
      * @changed [2023-12-00]
      *
      * @author elegroag <elegroag@ibero.edu.co>
+     *
      * @return array
      */
     public function toArray()
@@ -114,9 +126,11 @@ class Comman
 
     /**
      * getObject function
+     *
      * @changed [2023-12-00]
      *
      * @author elegroag <elegroag@ibero.edu.co>
+     *
      * @return object
      */
     public function getObject()

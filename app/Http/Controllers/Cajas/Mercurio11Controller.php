@@ -12,11 +12,14 @@ use Illuminate\Http\Request;
 
 class Mercurio11Controller extends ApplicationController
 {
+    protected $query = '1=1';
 
-    protected $query = "1=1";
     protected $cantidad_pagina = 10;
+
     protected $db;
+
     protected $user;
+
     protected $tipo;
 
     public function __construct()
@@ -28,64 +31,40 @@ class Mercurio11Controller extends ApplicationController
 
     public function showTabla($paginate)
     {
-        $html  = '<table border="0" cellpadding="0" cellspacing="0" class="table table-bordered">';
-        $html .= "<thead class='thead-light'>";
-        $html .= "<tr>";
-        $html .= "<th scope='col'>Codigo</th>";
-        $html .= "<th scope='col'>Detalle</th>";
-        $html .= "<th scope='col'></th>";
-        $html .= "</tr>";
-        $html .= "</thead>";
-        $html .= "<tbody class='list'>";
-        foreach ($paginate->items as $mtable) {
-            $html .= "<tr>";
-            $html .= "<td>{$mtable->getCodest()}</td>";
-            $html .= "<td>{$mtable->getDetalle()}</td>";
-            $html .= "<td class='table-actions'>";
-            $html .= "<a href='#!' class='table-action btn btn-primary btn-xs' title='Editar' data-cid='{$mtable->getCodest()}' data-toggle='editar'>";
-            $html .= "<i class='fas fa-user-edit text-white'></i>";
-            $html .= "</a>";
-            $html .= "<a href='#!' class='table-action table-action-delete btn btn-danger btn-xs' title='Borrar' data-cid='{$mtable->getCodest()}' data-toggle='borrar'>";
-            $html .= "<i class='fas fa-trash text-white'></i>";
-            $html .= "</a>";
-            $html .= "</td>";
-            $html .= "</tr>";
-        }
-        $html .= "</tbody>";
-        $html .= "</table>";
-        return $html;
+        return view('cajas.mercurio11._table', compact('paginate'))->render();
     }
 
     public function aplicarFiltroAction(Request $request)
     {
-        $consultasOldServices = new GeneralService();
+        $consultasOldServices = new GeneralService;
         $this->query = $consultasOldServices->converQuery($request);
+
         return $this->buscarAction($request);
     }
 
     public function changeCantidadPaginaAction(Request $request)
     {
-        $this->cantidad_pagina = $request->input("numero");
+        $this->cantidad_pagina = $request->input('numero');
+
         return $this->buscarAction($request);
     }
 
     public function indexAction()
     {
-        $campo_field = array(
-            "codest" => "Codest",
-            "detalle" => "Detalle",
-        );
+        $campo_field = [
+            'codest' => 'Codest',
+            'detalle' => 'Detalle',
+        ];
 
         return view('cajas.mercurio11.index', [
-            'title' => "Motivos Rechazo",
-            'campo_filtro' => $campo_field
+            'title' => 'Motivos Rechazo',
+            'campo_filtro' => $campo_field,
         ]);
     }
 
-
     public function buscarAction(Request $request)
     {
-        $pagina = ($request->input('pagina') == "") ? 1 : $request->input('pagina');
+        $pagina = ($request->input('pagina') == '') ? 1 : $request->input('pagina');
 
         $paginate = Paginate::execute(
             Mercurio11::whereRaw("{$this->query}")->get(),
@@ -94,14 +73,15 @@ class Mercurio11Controller extends ApplicationController
         );
 
         $html = $this->showTabla($paginate);
-        $consultasOldServices = new GeneralService();
+        $consultasOldServices = new GeneralService;
         $html_paginate = $consultasOldServices->showPaginate($paginate);
 
         $response = [
             'consulta' => $html,
             'query' => $this->query,
-            'paginate' => $html_paginate
+            'paginate' => $html_paginate,
         ];
+
         return $this->renderObject($response, false);
     }
 
@@ -111,18 +91,19 @@ class Mercurio11Controller extends ApplicationController
             $codest = $request->input('codest');
             $mercurio11 = Mercurio11::where('codest', $codest)->first();
             if ($mercurio11 == false) {
-                $mercurio11 = new Mercurio11();
+                $mercurio11 = new Mercurio11;
             }
             $response = [
                 'success' => true,
-                'data' => $mercurio11->toArray()
+                'data' => $mercurio11->toArray(),
             ];
         } catch (DebugException $e) {
             $response = [
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ];
         }
+
         return $this->renderObject($response, false);
     }
 
@@ -136,15 +117,16 @@ class Mercurio11Controller extends ApplicationController
 
             $response = [
                 'success' => true,
-                'msj' => 'Proceso completado con éxito.'
+                'msj' => 'Proceso completado con éxito.',
             ];
         } catch (DebugException $e) {
             $this->db->rollback();
             $response = [
                 'success' => false,
-                'msj' => $e->getMessage()
+                'msj' => $e->getMessage(),
             ];
         }
+
         return $this->renderObject($response, false);
     }
 
@@ -157,8 +139,8 @@ class Mercurio11Controller extends ApplicationController
             $this->db->begin();
             $mercurio11 = Mercurio11::where('codest', $codest)->first();
 
-            if (!$mercurio11) {
-                $mercurio11 = new Mercurio11();
+            if (! $mercurio11) {
+                $mercurio11 = new Mercurio11;
                 $mercurio11->setCodest($codest);
                 $mercurio11->setDetalle($detalle);
             } else {
@@ -169,54 +151,59 @@ class Mercurio11Controller extends ApplicationController
 
             $response = [
                 'success' => true,
-                'msj' => 'Proceso completado con éxito.'
+                'msj' => 'Proceso completado con éxito.',
             ];
         } catch (\Exception $e) {
             $this->db->rollback();
             $response = [
                 'success' => false,
-                'msj' => $e->getMessage()
+                'msj' => $e->getMessage(),
             ];
         }
+
         return $this->renderObject($response, false);
     }
 
     public function validePkAction(Request $request)
     {
         try {
-            $this->setResponse("ajax");
+            $this->setResponse('ajax');
             $codest = $request->input('codest');
-            $response = parent::successFunc("");
+            $response = parent::successFunc('');
             $l = Mercurio11::where('codest', $codest)->count();
             if ($l > 0) {
-                $response = parent::errorFunc("El Registro ya se encuentra Digitado");
+                $response = parent::errorFunc('El Registro ya se encuentra Digitado');
             }
+
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $response = parent::errorFunc("No se pudo validar la informacion");
+            $response = parent::errorFunc('No se pudo validar la informacion');
+
             return $this->renderObject($response, false);
         }
     }
 
     public function reporteAction($format = 'P')
     {
-        $this->setResponse("ajax");
-        $_fields = array();
-        $_fields["codest"] = array('header' => "Codigo", 'size' => "15", 'align' => "C");
-        $_fields["detalle"] = array('header' => "Detalle", 'size' => "31", 'align' => "C");
-        $consultasOldServices = new GeneralService();
-        $file = $consultasOldServices->createReport("mercurio11", $_fields, $this->query, "Motivos Rechazo", $format);
+        $this->setResponse('ajax');
+        $_fields = [];
+        $_fields['codest'] = ['header' => 'Codigo', 'size' => '15', 'align' => 'C'];
+        $_fields['detalle'] = ['header' => 'Detalle', 'size' => '31', 'align' => 'C'];
+        $consultasOldServices = new GeneralService;
+        $file = $consultasOldServices->createReport('mercurio11', $_fields, $this->query, 'Motivos Rechazo', $format);
+
         return $this->renderObject($file, false);
     }
 
     public function borrarFiltroAction()
     {
-        set_flashdata("filter_mercurio11", false, true);
-        set_flashdata("filter_params", false, true);
+        set_flashdata('filter_mercurio11', false, true);
+        set_flashdata('filter_params', false, true);
+
         return $this->renderObject([
             'success' => true,
-            'query' => get_flashdata_item("filter_mercurio11"),
-            'filter' => get_flashdata_item("filter_params"),
+            'query' => get_flashdata_item('filter_mercurio11'),
+            'filter' => get_flashdata_item('filter_params'),
         ]);
     }
 }

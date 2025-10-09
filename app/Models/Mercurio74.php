@@ -7,7 +7,9 @@ use App\Models\Adapter\ModelBase;
 class Mercurio74 extends ModelBase
 {
     protected $table = 'mercurio74';
+
     public $timestamps = false;
+
     protected $primaryKey = 'numrec';
 
     protected $fillable = [
@@ -15,7 +17,7 @@ class Mercurio74 extends ModelBase
         'archivo',
         'orden',
         'url',
-        'estado'
+        'estado',
     ];
 
     public function setNumrec($numrec)

@@ -22,7 +22,7 @@ class Mercurio10Factory extends Factory
         $item = $this->faker->numberBetween(1, 99);
 
         // Otros campos
-        $estado = $this->faker->randomElement(['T','D','A','X','P']);
+        $estado = $this->faker->randomElement(['T', 'D', 'A', 'X', 'P']);
         $nota = substr($this->faker->paragraph(), 0, 800);
         $codest = $this->faker->optional()->randomElement(['01', '02', '03', '04']);
         $fecsis = $this->faker->date('Y-m-d');

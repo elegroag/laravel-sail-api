@@ -21,7 +21,7 @@ class Mercurio02Factory extends Factory
         $codcaj = substr($codcaj, 0, 6);
 
         // Campos con tamaños definidos en la migración
-        $nit = substr($this->faker->numerify(str_repeat('#', 10)) . $this->faker->randomDigit(), 0, 13);
+        $nit = substr($this->faker->numerify(str_repeat('#', 10)).$this->faker->randomDigit(), 0, 13);
         $razsoc = substr($this->faker->company(), 0, 60);
         $sigla = substr(strtoupper($this->faker->lexify('??????')), 0, 30);
         $email = substr($this->faker->companyEmail(), 0, 90);

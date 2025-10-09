@@ -13,10 +13,15 @@ use App\Services\Utils\Comman;
 class FacultativoAdjuntoService
 {
     private $request;
+
     private $lfirma;
+
     private $filename;
+
     private $outPdf;
+
     private $fhash;
+
     private $claveCertificado;
 
     public function __construct($request)
@@ -29,19 +34,19 @@ class FacultativoAdjuntoService
     {
         $this->lfirma = Mercurio16::where([
             'documento' => $this->request->getDocumento(),
-            'coddoc' => $this->request->getCoddoc()
+            'coddoc' => $this->request->getCoddoc(),
         ])->first();
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
             [
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "parametros_empresa"
+                'servicio' => 'ComfacaAfilia',
+                'metodo' => 'parametros_empresa',
             ]
         );
 
-        $datos_captura =  $procesadorComando->toArray();
-        $paramsEmpresa = new ParamsFacultativo();
+        $datos_captura = $procesadorComando->toArray();
+        $paramsEmpresa = new ParamsFacultativo;
         $paramsEmpresa->setDatosCaptura($datos_captura);
     }
 
@@ -51,7 +56,7 @@ class FacultativoAdjuntoService
         KumbiaPDF::setFooterImage(false);
         KumbiaPDF::setBackgroundImage(false);
 
-        $fabrica = new FactoryDocuments();
+        $fabrica = new FactoryDocuments;
         $documento = $fabrica->crearPolitica('facultativo');
         $documento->setParamsInit(
             [
@@ -59,13 +64,14 @@ class FacultativoAdjuntoService
                 'firma' => $this->lfirma,
                 'filename' => $this->filename,
                 'background' => false,
-                'rfirma' => false
+                'rfirma' => false,
             ]
         );
         $documento->main();
         $documento->outPut();
 
         $this->cifrarDocumento();
+
         return $this;
     }
 
@@ -74,19 +80,19 @@ class FacultativoAdjuntoService
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
             [
-                "servicio" => "ComfacaEmpresas",
-                "metodo" => "informacion_trabajador",
-                "params" => array('cedtra' => $this->request->getCedtra())
+                'servicio' => 'ComfacaEmpresas',
+                'metodo' => 'informacion_trabajador',
+                'params' => ['cedtra' => $this->request->getCedtra()],
             ]
         );
 
-        if ($procesadorComando->isJson() == False) {
-            d("Se genero un error al buscar al trabajador usando el servicio CLI-Comando. ");
+        if ($procesadorComando->isJson() == false) {
+            d('Se genero un error al buscar al trabajador usando el servicio CLI-Comando. ');
         }
 
         $out = $procesadorComando->toArray();
         $this->filename = "carta_solicitud_facultativo_{$this->request->getCedtra()}.pdf";
-        $fabrica = new FactoryDocuments();
+        $fabrica = new FactoryDocuments;
 
         $documento = $fabrica->crearOficio('facultativo');
         $documento->setParamsInit(
@@ -95,7 +101,7 @@ class FacultativoAdjuntoService
                 'facultativo' => $this->request,
                 'firma' => $this->lfirma,
                 'filename' => $this->filename,
-                'previus' => $out['success'] ? $out['data'] : null
+                'previus' => $out['success'] ? $out['data'] : null,
             ]
         );
 
@@ -103,6 +109,7 @@ class FacultativoAdjuntoService
         $documento->outPut();
 
         $this->cifrarDocumento();
+
         return $this;
     }
 
@@ -112,12 +119,12 @@ class FacultativoAdjuntoService
             'documento' => $this->request->getDocumento(),
             'coddoc' => $this->request->getCoddoc(),
             'cedtra' => $this->request->getCedtra(),
-            'comper' => 'S'
+            'comper' => 'S',
         ])->first();
 
         $this->filename = "formulario_facultativo_{$this->request->getCedtra()}.pdf";
 
-        $fabrica = new FactoryDocuments();
+        $fabrica = new FactoryDocuments;
         $documento = $fabrica->crearFormulario('facultativo');
         $documento->setParamsInit(
             [
@@ -133,12 +140,13 @@ class FacultativoAdjuntoService
         $documento->outPut();
 
         $this->cifrarDocumento();
+
         return $this;
     }
 
-    function cifrarDocumento()
+    public function cifrarDocumento()
     {
-        $cifrarDocumento = new CifrarDocumento();
+        $cifrarDocumento = new CifrarDocumento;
         $this->outPdf = $cifrarDocumento->cifrar($this->filename, $this->lfirma->getKeyprivate(), $this->claveCertificado);
         $this->fhash = $cifrarDocumento->getFhash();
     }
@@ -146,10 +154,10 @@ class FacultativoAdjuntoService
     public function getResult()
     {
         return [
-            "name" => $this->filename,
-            "file" => basename($this->outPdf),
+            'name' => $this->filename,
+            'file' => basename($this->outPdf),
             'out' => $this->outPdf,
-            'fhash' => $this->fhash
+            'fhash' => $this->fhash,
         ];
     }
 

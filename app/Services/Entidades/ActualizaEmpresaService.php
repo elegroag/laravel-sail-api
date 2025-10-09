@@ -5,25 +5,27 @@ namespace App\Services\Entidades;
 use App\Exceptions\DebugException;
 use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
+use App\Models\Mercurio07;
+use App\Models\Mercurio10;
 use App\Models\Mercurio12;
 use App\Models\Mercurio14;
 use App\Models\Mercurio37;
 use App\Models\Mercurio47;
-use App\Models\Mercurio10;
-use App\Models\Mercurio07;
 use App\Services\Utils\Comman;
 
 class ActualizaEmpresaService
 {
+    private $tipopc = '5';
 
-    private $tipopc = "5";
     private $user;
+
     private $db;
 
     /**
      * __construct function
-     * @param bool $init
-     * @param Services $servicios
+     *
+     * @param  bool  $init
+     * @param  Services  $servicios
      */
     public function __construct()
     {
@@ -33,12 +35,13 @@ class ActualizaEmpresaService
 
     /**
      * findAllByEstado function
-     * @param string $estado
+     *
+     * @param  string  $estado
      * @return array
      */
     public function findAllByEstado($estado = '')
     {
-        //usuario empresa, unica solicitud de afiliación
+        // usuario empresa, unica solicitud de afiliación
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
 
@@ -78,17 +81,19 @@ class ActualizaEmpresaService
             ");
 
             $mercurio47[$ai] = $row;
-            $mercurio47[$ai]["cantidad_eventos"] = $rqs['cantidad'];
-            $mercurio47[$ai]["fecha_ultima_solicitud"] = $trayecto['fecsis'];
-            $mercurio47[$ai]["estado_detalle"] = (new Mercurio47)->getEstadoInArray($row['estado']);
-            $mercurio47[$ai]["tipo_actualizacion_detalle"] = (new Mercurio47)->getTipoActualizacionInArray($row['tipo_actualizacion']);
+            $mercurio47[$ai]['cantidad_eventos'] = $rqs['cantidad'];
+            $mercurio47[$ai]['fecha_ultima_solicitud'] = $trayecto['fecsis'];
+            $mercurio47[$ai]['estado_detalle'] = (new Mercurio47)->getEstadoInArray($row['estado']);
+            $mercurio47[$ai]['tipo_actualizacion_detalle'] = (new Mercurio47)->getTipoActualizacionInArray($row['tipo_actualizacion']);
         }
+
         return $mercurio47;
     }
 
     /**
      * buscarEmpresaSubsidio function
      * buscar empresa en subsidio sin importar el estado
+     *
      * @param [type] $nit
      * @return void
      */
@@ -96,23 +101,26 @@ class ActualizaEmpresaService
     {
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaEmpresas",
-                "metodo" => "informacion_empresa",
-                "params" => array(
-                    "nit" => $nit
-                )
-            )
+            [
+                'servicio' => 'ComfacaEmpresas',
+                'metodo' => 'informacion_empresa',
+                'params' => [
+                    'nit' => $nit,
+                ],
+            ]
         );
 
-        $salida =  $procesadorComando->toArray();
+        $salida = $procesadorComando->toArray();
+
         return ($salida['success'] == true) ? $salida : false;
     }
 
     public function archivosRequeridos($solicitud)
     {
-        if ($solicitud == false) return false;
-        $archivos = array();
+        if ($solicitud == false) {
+            return false;
+        }
+        $archivos = [];
 
         $mercurio10 = Mercurio10::where('numero', $solicitud->getId())
             ->where('tipopc', $this->tipopc)
@@ -122,7 +130,7 @@ class ActualizaEmpresaService
         $corregir = false;
         if ($mercurio10 && $mercurio10->estado == 'D') {
             $campos = $mercurio10->campos_corregir;
-            $corregir = explode(";", $campos);
+            $corregir = explode(';', $campos);
         }
 
         $mercurio14 = Mercurio14::where('tipopc', $this->tipopc)
@@ -144,7 +152,7 @@ class ActualizaEmpresaService
                     $corrige = true;
                 }
             }
-            $obliga = ($m14->getObliga() == "S") ? "<br><small class='text-danger'>Obligatorio</small>" : "";
+            $obliga = ($m14->getObliga() == 'S') ? "<br><small class='text-danger'>Obligatorio</small>" : '';
             $archivo = new \stdClass;
             $archivo->obliga = $obliga;
             $archivo->id = $solicitud->getId();
@@ -157,24 +165,28 @@ class ActualizaEmpresaService
 
         $mercurio01 = Mercurio01::first();
         $html = view('partials.archivos_requeridos', [
-            "load_archivos" => $archivos,
-            "path" => $mercurio01->getPath(),
-            "puede_borrar" => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true
+            'load_archivos' => $archivos,
+            'path' => $mercurio01->getPath(),
+            'puede_borrar' => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true,
         ]);
+
         return $html;
     }
 
     /**
      * dataArchivosRequeridos function
-     * @param Mercurio47 $solicitud
+     *
+     * @param  Mercurio47  $solicitud
      * @return array
      */
     public function dataArchivosRequeridos($solicitud)
     {
 
-        $archivos = array();
-        if ($solicitud == false || is_null($solicitud)) return false;
-        $archivos = array();
+        $archivos = [];
+        if ($solicitud == false || is_null($solicitud)) {
+            return false;
+        }
+        $archivos = [];
 
         $mercurio10 = Mercurio10::where('numero', $solicitud->getId())
             ->where('tipopc', $this->tipopc)
@@ -184,7 +196,7 @@ class ActualizaEmpresaService
         $corregir = false;
         if ($mercurio10 && $mercurio10->estado == 'D') {
             $campos = $mercurio10->campos_corregir;
-            $corregir = explode(";", $campos);
+            $corregir = explode(';', $campos);
         }
 
         $mercurio14 = Mercurio14::where('tipopc', $this->tipopc)
@@ -202,10 +214,12 @@ class ActualizaEmpresaService
             $corrige = false;
 
             if ($corregir) {
-                if (in_array($m12->getCoddoc(), $corregir)) $corrige = true;
+                if (in_array($m12->getCoddoc(), $corregir)) {
+                    $corrige = true;
+                }
             }
             $archivo = $m14->getArray();
-            $archivo['obliga'] = ($m14->getObliga() == "S") ? "<br><small class='text-danger'>Obligatorio</small>" : "";
+            $archivo['obliga'] = ($m14->getObliga() == 'S') ? "<br><small class='text-danger'>Obligatorio</small>" : '';
             $archivo['id'] = $solicitud->getId();
             $archivo['coddoc'] = $m14->getCoddoc();
             $archivo['detalle'] = capitalize($m12->getDetalle());
@@ -216,17 +230,19 @@ class ActualizaEmpresaService
 
         $mercurio01 = Mercurio01::first();
         $archivos_descargar = oficios_requeridos('U');
-        return array(
-            "disponibles" => $archivos_descargar,
-            "archivos" => $archivos,
-            "path" => $mercurio01->getPath(),
-            "puede_borrar" => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true
-        );
+
+        return [
+            'disponibles' => $archivos_descargar,
+            'archivos' => $archivos,
+            'path' => $mercurio01->getPath(),
+            'puede_borrar' => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true,
+        ];
     }
 
     /**
      * loadDisplay function
-     * @param Mercurio47 $solicitud
+     *
+     * @param  Mercurio47  $solicitud
      * @return void
      */
     public function loadDisplay($solicitud)
@@ -264,7 +280,7 @@ class ActualizaEmpresaService
         Tag::displayTo("coddocrepleg", $solicitud->getCoddocrepleg()); */
     }
 
-    function loadDisplaySubsidio($empresa)
+    public function loadDisplaySubsidio($empresa)
     {
         /* Tag::displayTo("tipdoc", $empresa['coddoc']);
         Tag::displayTo("digver", $empresa['digver']);
@@ -298,8 +314,9 @@ class ActualizaEmpresaService
 
     /**
      * update function
-     * @param integer $id
-     * @param array $data
+     *
+     * @param  int  $id
+     * @param  array  $data
      * @return Mercurio47
      */
     public function update($id, $data)
@@ -308,15 +325,18 @@ class ActualizaEmpresaService
         if ($empresa != false) {
             $empresa->fill($data);
             $empresa->save();
+
             return $empresa;
         }
+
         return false;
     }
 
     /**
      * updateByFormData function
-     * @param int $id
-     * @param array $data
+     *
+     * @param  int  $id
+     * @param  array  $data
      * @return bool
      */
     public function updateByFormData($id, $data)
@@ -324,6 +344,7 @@ class ActualizaEmpresaService
         $empresa = $this->findById($id);
         if ($empresa) {
             $empresa->fill($data);
+
             return $empresa->save();
         } else {
             return false;
@@ -332,7 +353,8 @@ class ActualizaEmpresaService
 
     /**
      * create function
-     * @param array $data
+     *
+     * @param  array  $data
      * @return Mercurio47
      */
     public function createByFormData($data)
@@ -347,20 +369,22 @@ class ActualizaEmpresaService
 
     /**
      * findById function
-     * @param integer $id
+     *
+     * @param  int  $id
      * @return Mercurio47
      */
     public function findById($id)
     {
-        return Mercurio47::where("id", $id)->first();
+        return Mercurio47::where('id', $id)->first();
     }
 
     /**
      * enviarCaja function
-     * @param SenderValidationCaja $senderValidationCaja
-     * @param integer $id
-     * @param integer $documento
-     * @param integer $coddoc
+     *
+     * @param  SenderValidationCaja  $senderValidationCaja
+     * @param  int  $id
+     * @param  int  $documento
+     * @param  int  $coddoc
      * @return void
      */
     public function enviarCaja($senderValidationCaja, $id, $usuario)
@@ -368,24 +392,24 @@ class ActualizaEmpresaService
         $solicitud = $this->findById($id);
 
         $cm37 = (new Mercurio37)->getCount(
-            "*",
-            "conditions: tipopc='{$this->tipopc}' AND " .
-                "numero='{$id}' AND " .
+            '*',
+            "conditions: tipopc='{$this->tipopc}' AND ".
+                "numero='{$id}' AND ".
                 "coddoc IN(SELECT coddoc FROM mercurio14 WHERE tipopc='{$this->tipopc}' and obliga='S')"
         );
 
         $cm14 = (new Mercurio14)->getCount(
-            "*",
+            '*',
             "conditions: tipopc='{$this->tipopc}' and obliga='S'"
         );
         if ($cm37 < $cm14) {
-            throw new DebugException("Adjunte los archivos obligatorios", 500);
+            throw new DebugException('Adjunte los archivos obligatorios', 500);
         }
 
         Mercurio47::where('id', $id)
             ->update([
                 'usuario' => (string) $usuario,
-                'estado'  => 'P',
+                'estado' => 'P',
             ]);
 
         $ai = Mercurio10::where('tipopc', $this->tipopc)
@@ -405,7 +429,6 @@ class ActualizaEmpresaService
         $senderValidationCaja->send($this->tipopc, $solicitud);
     }
 
-
     public function consultaSeguimiento($id)
     {
         $seguimientos = Mercurio10::where('numero', $id)
@@ -417,23 +440,26 @@ class ActualizaEmpresaService
             $seguimientos[$ai]['corregir'] = explode(';', $row['campos_corregir']);
         }
 
-        return array(
+        return [
             'seguimientos' => $seguimientos,
             'campos_disponibles' => (new Mercurio47)->CamposDisponibles(),
-            'estados_detalles' => (new Mercurio10)->getArrayEstados()
-        );
+            'estados_detalles' => (new Mercurio10)->getArrayEstados(),
+        ];
     }
 
     public function digver($mnit)
     {
-        $arreglo = array(71, 67, 59, 53, 47, 43, 41, 37, 29, 23, 19, 17, 13, 7, 3);
-        $nit = sprintf("%015s", $mnit);
+        $arreglo = [71, 67, 59, 53, 47, 43, 41, 37, 29, 23, 19, 17, 13, 7, 3];
+        $nit = sprintf('%015s', $mnit);
         $suma = 0;
         for ($i = 1; $i <= count($arreglo); $i++) {
-            $suma += (int)(substr($nit, $i - 1, 1)) * $arreglo[$i - 1];
+            $suma += (int) (substr($nit, $i - 1, 1)) * $arreglo[$i - 1];
         }
         $retorno = $suma % 11;
-        if ($retorno >= 2) $retorno = 11 - $retorno;
+        if ($retorno >= 2) {
+            $retorno = 11 - $retorno;
+        }
+
         return $retorno;
     }
 }

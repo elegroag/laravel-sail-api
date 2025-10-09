@@ -6,6 +6,6 @@ class PDFReportFactory implements ReportFactory
 {
     public function createReportGenerator()
     {
-        return new PDFReportGenerator();
+        return new PDFReportGenerator;
     }
 }

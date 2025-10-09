@@ -8,7 +8,7 @@ class ListasEntity
 {
     use ValidatorTrait;
 
-    protected $fillable = array(
+    protected $fillable = [
         'nit',
         'codlis',
         'detalle',
@@ -17,21 +17,21 @@ class ListasEntity
         'fax',
         'coddiv',
         'nomcon',
-        'email'
-    );
+        'email',
+    ];
 
     protected function getRules()
     {
-        return array(
-            'nit' => array('type' => 'string', 'max' => 18, 'required' => true),
-            'codlis' => array('type' => 'string', 'max' => 3, 'required' => true),
-            'detalle' => array('type' => 'string', 'max' => 140, 'required' => true),
-            'direccion' => array('type' => 'string', 'max' => 120, 'required' => false),
-            'telefono' => array('type' => 'string', 'max' => 20, 'required' => false),
-            'fax' => array('type' => 'string', 'max' => 13, 'required' => false, 'is_null' => true),
-            'coddiv' => array('type' => 'string', 'max' => 5, 'required' => true, 'is_null' => false),
-            'nomcon' => array('type' => 'string', 'max' => 40, 'required' => false),
-            'email' => array('type' => 'email', 'max' => 60, 'required' => false)
-        );
+        return [
+            'nit' => ['type' => 'string', 'max' => 18, 'required' => true],
+            'codlis' => ['type' => 'string', 'max' => 3, 'required' => true],
+            'detalle' => ['type' => 'string', 'max' => 140, 'required' => true],
+            'direccion' => ['type' => 'string', 'max' => 120, 'required' => false],
+            'telefono' => ['type' => 'string', 'max' => 20, 'required' => false],
+            'fax' => ['type' => 'string', 'max' => 13, 'required' => false, 'is_null' => true],
+            'coddiv' => ['type' => 'string', 'max' => 5, 'required' => true, 'is_null' => false],
+            'nomcon' => ['type' => 'string', 'max' => 40, 'required' => false],
+            'email' => ['type' => 'email', 'max' => 60, 'required' => false],
+        ];
     }
 }

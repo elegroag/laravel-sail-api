@@ -7,10 +7,10 @@ use Carbon\Carbon;
 
 class Mercurio20 extends ModelBase
 {
-
-
     protected $table = 'mercurio20';
+
     public $timestamps = false;
+
     protected $primaryKey = 'log';
 
     protected $fillable = [
@@ -25,10 +25,10 @@ class Mercurio20 extends ModelBase
         'nota',
     ];
 
-
     /**
      * Metodo para establecer el valor del campo log
-     * @param integer $log
+     *
+     * @param  int  $log
      */
     public function setLog($log)
     {
@@ -37,7 +37,8 @@ class Mercurio20 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo tipo
-     * @param string $tipo
+     *
+     * @param  string  $tipo
      */
     public function setTipo($tipo)
     {
@@ -46,7 +47,8 @@ class Mercurio20 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo coddoc
-     * @param string $coddoc
+     *
+     * @param  string  $coddoc
      */
     public function setCoddoc($coddoc)
     {
@@ -55,7 +57,8 @@ class Mercurio20 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo documento
-     * @param string $documento
+     *
+     * @param  string  $documento
      */
     public function setDocumento($documento)
     {
@@ -64,7 +67,8 @@ class Mercurio20 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo ip
-     * @param string $ip
+     *
+     * @param  string  $ip
      */
     public function setIp($ip)
     {
@@ -78,7 +82,8 @@ class Mercurio20 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo hora
-     * @param string $hora
+     *
+     * @param  string  $hora
      */
     public function setHora($hora)
     {
@@ -87,7 +92,8 @@ class Mercurio20 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo accion
-     * @param string $accion
+     *
+     * @param  string  $accion
      */
     public function setAccion($accion)
     {
@@ -96,17 +102,18 @@ class Mercurio20 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo nota
-     * @param string $nota
+     *
+     * @param  string  $nota
      */
     public function setNota($nota)
     {
         $this->nota = $nota;
     }
 
-
     /**
      * Devuelve el valor del campo log
-     * @return integer
+     *
+     * @return int
      */
     public function getLog()
     {
@@ -115,6 +122,7 @@ class Mercurio20 extends ModelBase
 
     /**
      * Devuelve el valor del campo tipo
+     *
      * @return string
      */
     public function getTipo()
@@ -124,6 +132,7 @@ class Mercurio20 extends ModelBase
 
     /**
      * Devuelve el valor del campo coddoc
+     *
      * @return string
      */
     public function getCoddoc()
@@ -133,6 +142,7 @@ class Mercurio20 extends ModelBase
 
     /**
      * Devuelve el valor del campo documento
+     *
      * @return string
      */
     public function getDocumento()
@@ -142,13 +152,13 @@ class Mercurio20 extends ModelBase
 
     /**
      * Devuelve el valor del campo ip
+     *
      * @return string
      */
     public function getIp()
     {
         return $this->ip;
     }
-
 
     public function getFecha()
     {
@@ -157,6 +167,7 @@ class Mercurio20 extends ModelBase
 
     /**
      * Devuelve el valor del campo hora
+     *
      * @return string
      */
     public function getHora()
@@ -166,6 +177,7 @@ class Mercurio20 extends ModelBase
 
     /**
      * Devuelve el valor del campo accion
+     *
      * @return string
      */
     public function getAccion()
@@ -175,6 +187,7 @@ class Mercurio20 extends ModelBase
 
     /**
      * Devuelve el valor del campo nota
+     *
      * @return string
      */
     public function getNota()

@@ -4,16 +4,21 @@ namespace App\Services\Utils;
 
 use App\Exceptions\DebugException;
 use App\Services\Srequest;
-use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception as PHPMailerException;
+use PHPMailer\PHPMailer\PHPMailer;
 
 class SenderEmail
 {
-    protected $email_pruebas = "soportesistemas.comfaca@gmail.com";
+    protected $email_pruebas = 'soportesistemas.comfaca@gmail.com';
+
     protected $emisor_email;
+
     protected $emisor_nombre;
+
     protected $emisor_clave;
+
     protected $asunto;
+
     protected $mail;
 
     private function configureSMTP()
@@ -41,7 +46,7 @@ class SenderEmail
         $this->mail->CharSet = 'UTF-8';
     }
 
-    public function __construct(Srequest|null $params = null)
+    public function __construct(?Srequest $params = null)
     {
         $this->mail = new PHPMailer(true);
         $this->configureSMTP();
@@ -55,17 +60,22 @@ class SenderEmail
     public function setters(...$params)
     {
         $arguments = get_params_destructures($params);
-        foreach ($arguments as $prop => $valor) if (property_exists($this, $prop)) $this->$prop = "{$valor}";
+        foreach ($arguments as $prop => $valor) {
+            if (property_exists($this, $prop)) {
+                $this->$prop = "{$valor}";
+            }
+        }
+
         return $this;
     }
 
     public function send(
         string|array $to = '',
         string $body = '',
-        array|null $attachments = null,
+        ?array $attachments = null,
         string $altBody = '',
-        array|null $cc = null,
-        array|null $bcc = null
+        ?array $cc = null,
+        ?array $bcc = null
     ) {
         try {
             // Remitente
@@ -115,6 +125,7 @@ class SenderEmail
             }
 
             $this->mail->send();
+
             return 'Correo enviado exitosamente';
         } catch (PHPMailerException $e) {
             throw new DebugException("Error al enviar el correo: {$this->mail->ErrorInfo}");

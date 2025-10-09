@@ -7,27 +7,33 @@ use TCPDF;
 interface GeneratePdfInterface
 {
     public function crear($filename, $titulo, $x_with);
+
     public function out();
 }
 
-
 class KumbiaPDF extends TCPDF
 {
-
     public static $_titulo;
+
     public static $x_with;
+
     public static $backgroundImage;
+
     public static $footerImage;
+
     public static $format = 'A4';
+
     public static $unidad = 'mm';
 
-    public function __construct($titulo = null, $orientation = "P")
+    public function __construct($titulo = null, $orientation = 'P')
     {
-        if ($titulo) $this->SetTitle($titulo);
+        if ($titulo) {
+            $this->SetTitle($titulo);
+        }
         parent::__construct($orientation, self::$unidad, self::$format, true, 'UTF-8', false);
         $this->SetHeaderMargin(0);
         $this->SetFooterMargin(0);
-        $this->SetAutoPageBreak(TRUE, 10);
+        $this->SetAutoPageBreak(true, 10);
     }
 
     public static function setInicializa($titulo, $x_with)
@@ -36,19 +42,19 @@ class KumbiaPDF extends TCPDF
         self::$x_with = $x_with;
     }
 
-    public static function setBackgroundImage(string|null $image = null)
+    public static function setBackgroundImage(?string $image = null)
     {
         self::$backgroundImage = $image;
     }
 
-    public static function setFooterImage(string|null $image = null)
+    public static function setFooterImage(?string $image = null)
     {
         self::$footerImage = $image;
     }
 
     public function Header()
     {
-        if (!is_null(self::$backgroundImage)) {
+        if (! is_null(self::$backgroundImage)) {
             // get the current page break margin
             $bMargin = $this->getBreakMargin();
             // get current auto-page-break mode
@@ -68,7 +74,7 @@ class KumbiaPDF extends TCPDF
 
     public function Footer()
     {
-        if (!is_null(self::$footerImage)) {
+        if (! is_null(self::$footerImage)) {
             $this->setY(-50);
             $this->Image(self::$footerImage, 90, $this->getY(), 30, 20, 'PNG');
         }

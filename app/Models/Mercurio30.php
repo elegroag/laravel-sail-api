@@ -4,15 +4,16 @@ namespace App\Models;
 
 use App\Models\Adapter\DbBase;
 use App\Models\Adapter\ModelBase;
-use App\Models\Mercurio07;
 use Carbon\Carbon;
 
 class Mercurio30 extends ModelBase
 {
-
     protected $table = 'mercurio30';
+
     protected $primaryKey = 'id';
+
     public $incrementing = true;
+
     public $timestamps = false;
 
     protected $fillable = [
@@ -113,54 +114,67 @@ class Mercurio30 extends ModelBase
     {
         $this->id = $id;
     }
+
     public function setLog($log)
     {
         $this->log = $log;
     }
+
     public function setNit($nit)
     {
         $this->nit = $nit;
     }
+
     public function setTipemp($tipemp)
     {
         $this->tipemp = $tipemp;
     }
+
     public function setTipdoc($tipdoc)
     {
         $this->tipdoc = $tipdoc;
     }
+
     public function setRazsoc($razsoc)
     {
         $this->razsoc = $razsoc;
     }
+
     public function setSigla($sigla)
     {
         $this->sigla = $sigla;
     }
+
     public function setDigver($digver)
     {
         $this->digver = $digver;
     }
+
     public function setCalemp($calemp)
     {
         $this->calemp = $calemp;
     }
+
     public function setCedrep($cedrep)
     {
         $this->cedrep = $cedrep;
     }
+
     public function setRepleg($repleg)
     {
         $this->repleg = $repleg;
     }
+
     public function setDireccion($direccion)
     {
         $this->direccion = $direccion;
     }
+
     public function setCodciu($codciu)
     {
         $this->codciu = $codciu;
     }
+
     public function setCodzon($codzon)
     {
         $this->codzon = $codzon;
@@ -438,6 +452,7 @@ class Mercurio30 extends ModelBase
     {
         return $this->telpri;
     }
+
     public function getCelpri()
     {
         return $this->celpri;
@@ -462,6 +477,7 @@ class Mercurio30 extends ModelBase
     {
         return $this->documento;
     }
+
     public function getTipemp()
     {
         return $this->tipemp;
@@ -471,66 +487,82 @@ class Mercurio30 extends ModelBase
     {
         $this->prinom = $prinom;
     }
+
     public function setSegnom($segnom)
     {
         $this->segnom = $segnom;
     }
+
     public function setPriape($priape)
     {
         $this->priape = $priape;
     }
+
     public function setSegape($segape)
     {
         $this->segape = $segape;
     }
+
     public function setMatmer($matmer)
     {
         $this->matmer = $matmer;
     }
+
     public function setTipper($tipper)
     {
         $this->tipper = $tipper;
     }
+
     public function setCoddocrepleg($coddocrepleg)
     {
         $this->coddocrepleg = $coddocrepleg;
     }
+
     public function setPriaperepleg($priaperepleg)
     {
         $this->priaperepleg = $priaperepleg;
     }
+
     public function setSegaperepleg($segaperepleg)
     {
         $this->segaperepleg = $segaperepleg;
     }
+
     public function setPrinomrepleg($prinomrepleg)
     {
         $this->prinomrepleg = $prinomrepleg;
     }
+
     public function setSegnomrepleg($segnomrepleg)
     {
         $this->segnomrepleg = $segnomrepleg;
     }
+
     public function setCodcaj($codcaj)
     {
         $this->codcaj = $codcaj;
     }
+
     public function getPrinom()
     {
         return trim($this->prinom);
     }
+
     public function getSegnom()
     {
         return trim($this->segnom);
     }
+
     public function getPriape()
     {
         return trim($this->priape);
     }
+
     public function getSegape()
     {
         return trim($this->segape);
     }
+
     public function getMatmer()
     {
         return trim($this->matmer);
@@ -540,10 +572,12 @@ class Mercurio30 extends ModelBase
     {
         return trim($this->tipper);
     }
+
     public function getTipperArray()
     {
         return tipper_array();
     }
+
     public function getCoddocrepleg()
     {
         return trim($this->coddocrepleg);
@@ -568,6 +602,7 @@ class Mercurio30 extends ModelBase
     {
         return trim($this->segnomrepleg);
     }
+
     public function getCodcaj()
     {
         return trim($this->codcaj);
@@ -576,9 +611,12 @@ class Mercurio30 extends ModelBase
     public function CamposDisponibles()
     {
         $db = DbBase::rawConnect();
-        $rqs = $db->inQueryAssoc("SELECT * FROM mercurio12");
-        $data = array();
-        foreach ($rqs as $ai => $row) $data[$row['coddoc']] = $row['detalle'];
+        $rqs = $db->inQueryAssoc('SELECT * FROM mercurio12');
+        $data = [];
+        foreach ($rqs as $ai => $row) {
+            $data[$row['coddoc']] = $row['detalle'];
+        }
+
         return $data;
     }
 
@@ -600,6 +638,7 @@ class Mercurio30 extends ModelBase
     public function CamposDisponibleDetalle($campo)
     {
         $data = $this->CamposDisponibles();
+
         return $data["{$campo}"];
     }
 
@@ -607,7 +646,6 @@ class Mercurio30 extends ModelBase
     {
         return (isset($this->fecini)) ? $this->fecini : null;
     }
-
 
     public function solicitante()
     {

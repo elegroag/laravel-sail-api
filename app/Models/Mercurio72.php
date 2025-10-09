@@ -7,7 +7,9 @@ use App\Models\Adapter\ModelBase;
 class Mercurio72 extends ModelBase
 {
     protected $table = 'mercurio72';
+
     public $timestamps = false;
+
     protected $primaryKey = 'numtur';
 
     protected $fillable = [
@@ -15,7 +17,7 @@ class Mercurio72 extends ModelBase
         'archivo',
         'orden',
         'url',
-        'estado'
+        'estado',
     ];
 
     public function setNumtur($numtur)

@@ -24,7 +24,7 @@ return new class extends Migration
             $table->integer('codare');
             $table->string('url', 45);
             $table->char('tipo', 2);
-            $table->enum('estado', ['A','I']);
+            $table->enum('estado', ['A', 'I']);
 
             // Índice (sin FK ya que MyISAM no soporta claves foráneas)
             $table->index('codare', 'fk_mercurio52_mercurio551_idx');

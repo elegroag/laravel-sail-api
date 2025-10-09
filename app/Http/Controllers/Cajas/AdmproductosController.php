@@ -2,25 +2,26 @@
 
 namespace App\Http\Controllers\Cajas;
 
-use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use App\Models\ServiciosCupos;
-use App\Models\PinesAfiliado;
 use App\Exceptions\DebugException;
+use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsTrabajador;
+use App\Models\Adapter\DbBase;
+use App\Models\PinesAfiliado;
+use App\Models\ServiciosCupos;
 use App\Services\Utils\Comman;
+use Illuminate\Http\Request;
 
 class AdmproductosController extends ApplicationController
 {
     protected $db;
+
     protected $user;
+
     protected $tipo;
 
     public function __construct()
     {
-        $this->setParamToView("instancePath", env('APP_URL') . 'Cajas/');
+        $this->setParamToView('instancePath', env('APP_URL').'Cajas/');
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
@@ -28,15 +29,15 @@ class AdmproductosController extends ApplicationController
 
     public function listaAction()
     {
-        $this->setParamToView("hide_header", true);
-        $this->setParamToView("title", "Productos y Servicios");
+        $this->setParamToView('hide_header', true);
+        $this->setParamToView('title', 'Productos y Servicios');
     }
 
     public function buscarListaAction()
     {
         $this->setResponse('ajax');
-        $serviciosCupos = new ServiciosCupos();
-        $todosServicios = array();
+        $serviciosCupos = new ServiciosCupos;
+        $todosServicios = [];
         $collect = $serviciosCupos->find();
         $ai = 0;
         foreach ($collect as $servicioCupo) {
@@ -51,17 +52,17 @@ class AdmproductosController extends ApplicationController
         }
 
         return $this->renderObject(
-            array(
-                "success" => true,
-                "data" => $todosServicios
-            )
+            [
+                'success' => true,
+                'data' => $todosServicios,
+            ]
         );
     }
 
     public function nuevoAction()
     {
-        $this->setParamToView("hide_header", true);
-        $this->setParamToView("title", "Productos y Servicios");
+        $this->setParamToView('hide_header', true);
+        $this->setParamToView('title', 'Productos y Servicios');
     }
 
     public function guardarAction(Request $request, $id = '')
@@ -74,17 +75,17 @@ class AdmproductosController extends ApplicationController
             $estado = $request->input('estado');
 
             if ($id == '') {
-                $serviciosCupos = new ServiciosCupos();
+                $serviciosCupos = new ServiciosCupos;
                 $serviciosCupos->setId(null);
                 $serviciosCupos->setCodser($codser);
                 $serviciosCupos->setCupos($cupos);
                 $serviciosCupos->setServicio($servicio);
                 $serviciosCupos->setEstado($estado);
             } else {
-                $model = new ServiciosCupos();
+                $model = new ServiciosCupos;
                 $serviciosCupos = $model->findFirst(" id='{$id}'");
                 if ($serviciosCupos == false) {
-                    throw new DebugException("Error el servicio no es valido para continuar.", 501);
+                    throw new DebugException('Error el servicio no es valido para continuar.', 501);
                 }
                 $serviciosCupos->setCodser($codser);
                 $serviciosCupos->setCupos($cupos);
@@ -92,22 +93,24 @@ class AdmproductosController extends ApplicationController
                 $serviciosCupos->setEstado($estado);
             }
 
-            if (!$serviciosCupos->save()) {
+            if (! $serviciosCupos->save()) {
                 $msj = '';
-                foreach ($serviciosCupos->getMessages() as $message)  $msj .= $message->getMessage() . "\n";
-                throw new DebugException("Error al guardar el servicio." . $msj, 501);
+                foreach ($serviciosCupos->getMessages() as $message) {
+                    $msj .= $message->getMessage()."\n";
+                }
+                throw new DebugException('Error al guardar el servicio.'.$msj, 501);
             }
 
-            $salida =  array(
-                "success" => true,
+            $salida = [
+                'success' => true,
                 'msj' => 'El proceso de guardado se completo con éxito.',
-                "data" => $serviciosCupos->getArray()
-            );
+                'data' => $serviciosCupos->getArray(),
+            ];
         } catch (DebugException $err) {
-            $salida = array(
-                "success" => false,
-                "msj" => $err->getMessage()
-            );
+            $salida = [
+                'success' => false,
+                'msj' => $err->getMessage(),
+            ];
         }
 
         return $this->renderObject($salida);
@@ -116,27 +119,29 @@ class AdmproductosController extends ApplicationController
     public function editarAction($id = '')
     {
         if ($id == '') {
-            set_flashdata("error", array(
-                "msj" => "El servicio no está disponible para editar.",
-                "code" => '505'
-            ));
-            return redirect("admproductos/lista");
+            set_flashdata('error', [
+                'msj' => 'El servicio no está disponible para editar.',
+                'code' => '505',
+            ]);
+
+            return redirect('admproductos/lista');
             exit;
         }
 
-        $model = new ServiciosCupos();
+        $model = new ServiciosCupos;
         $servicioCupo = $model->findFirst("id='{$id}'");
         if ($servicioCupo == false) {
-            set_flashdata("error", array(
-                "msj" => "El servicio no está disponible para editar.",
-                "code" => '505'
-            ));
-            return redirect("admproductos/lista");
+            set_flashdata('error', [
+                'msj' => 'El servicio no está disponible para editar.',
+                'code' => '505',
+            ]);
+
+            return redirect('admproductos/lista');
             exit;
         }
-        $this->setParamToView("servicio", $servicioCupo);
-        $this->setParamToView("hide_header", true);
-        $this->setParamToView("title", "Productos y Servicios");
+        $this->setParamToView('servicio', $servicioCupo);
+        $this->setParamToView('hide_header', true);
+        $this->setParamToView('title', 'Productos y Servicios');
     }
 
     public function changeEstadoAction(Request $request)
@@ -146,49 +151,53 @@ class AdmproductosController extends ApplicationController
             $id = $request->input('id');
             $estado = $request->input('estado');
 
-            $model = new ServiciosCupos();
+            $model = new ServiciosCupos;
             $serviciosCupo = $model->findFirst(" id='{$id}'");
             $serviciosCupo->setEstado($estado);
 
-            if (!$serviciosCupo->save()) {
+            if (! $serviciosCupo->save()) {
                 $msj = '';
-                foreach ($serviciosCupo->getMessages() as $message)  $msj .= $message->getMessage() . "\n";
-                throw new DebugException("Error al guardar el servicio." . $msj, 501);
+                foreach ($serviciosCupo->getMessages() as $message) {
+                    $msj .= $message->getMessage()."\n";
+                }
+                throw new DebugException('Error al guardar el servicio.'.$msj, 501);
             }
 
-            $salida =  array(
-                "success" => true,
+            $salida = [
+                'success' => true,
                 'msj' => 'El registro se actualizo con éxito.',
-                "data" => $serviciosCupo->getArray()
-            );
+                'data' => $serviciosCupo->getArray(),
+            ];
         } catch (DebugException $err) {
-            $salida = array(
-                "success" => false,
-                "msj" => $err->getMessage()
-            );
+            $salida = [
+                'success' => false,
+                'msj' => $err->getMessage(),
+            ];
         }
+
         return $this->renderObject($salida);
     }
 
     public function aplicadosAction($codser = '')
     {
         if ($codser == '') {
-            set_flashdata("error", array(
-                "msj" => "El servicio no está disponible.",
-                "code" => '505'
-            ));
-            return redirect("admproductos/lista");
+            set_flashdata('error', [
+                'msj' => 'El servicio no está disponible.',
+                'code' => '505',
+            ]);
+
+            return redirect('admproductos/lista');
             exit;
         }
         $servicioCupo = $this->ServiciosCupos->findFirst(" codser='{$codser}'");
-        $pinesAfiliado = new PinesAfiliado();
+        $pinesAfiliado = new PinesAfiliado;
         $collect = $pinesAfiliado->find(" codser='{$servicioCupo->getCodser()}'");
 
-        $this->setParamToView("hide_header", true);
-        $this->setParamToView("servicio", $servicioCupo);
-        $this->setParamToView("codser", $codser);
-        $this->setParamToView("aplicados", $collect);
-        $this->setParamToView("title", "Productos y Servicios");
+        $this->setParamToView('hide_header', true);
+        $this->setParamToView('servicio', $servicioCupo);
+        $this->setParamToView('codser', $codser);
+        $this->setParamToView('aplicados', $collect);
+        $this->setParamToView('title', 'Productos y Servicios');
     }
 
     public function buscarAfiliadosAplicadosAction(Request $request, $codser = '')
@@ -197,53 +206,55 @@ class AdmproductosController extends ApplicationController
 
         try {
             if ($codser == '') {
-                throw new DebugException("Error el servicio no es valido para continuar.", 501);
+                throw new DebugException('Error el servicio no es valido para continuar.', 501);
             }
 
-            $pinesAfiliado = new PinesAfiliado();
+            $pinesAfiliado = new PinesAfiliado;
             $servicioCupo = $this->ServiciosCupos->findFirst(" codser='{$codser}'");
 
             $collect = $pinesAfiliado->find(" codser='{$servicioCupo->getCodser()}'");
             $ai = 0;
-            $todosAplicados = array();
+            $todosAplicados = [];
             foreach ($collect as $pinAfiliado) {
                 $todosAplicados[$ai] = $pinAfiliado->getArray();
                 $ai++;
             }
 
-            $salida = array(
-                "success" => true,
-                "data" => $todosAplicados
-            );
+            $salida = [
+                'success' => true,
+                'data' => $todosAplicados,
+            ];
         } catch (DebugException $err) {
-            $salida = array(
-                "msj" => $err->getMessage(),
-                "success" => false,
-                "data" => false,
-            );
+            $salida = [
+                'msj' => $err->getMessage(),
+                'success' => false,
+                'data' => false,
+            ];
         }
+
         return $this->renderObject($salida);
     }
 
     public function cargue_pagosAction($codser = '')
     {
         if ($codser == '') {
-            set_flashdata("error", array(
-                "msj" => "El servicio no está disponible.",
-                "code" => '505'
-            ));
-            return redirect("admproductos/lista");
+            set_flashdata('error', [
+                'msj' => 'El servicio no está disponible.',
+                'code' => '505',
+            ]);
+
+            return redirect('admproductos/lista');
             exit;
         }
         $servicioCupo = $this->ServiciosCupos->findFirst(" codser='{$codser}'");
-        $pinesAfiliado = new PinesAfiliado();
+        $pinesAfiliado = new PinesAfiliado;
         $collect = $pinesAfiliado->find(" codser='{$servicioCupo->getCodser()}'");
 
-        $this->setParamToView("hide_header", true);
-        $this->setParamToView("servicio", $servicioCupo);
-        $this->setParamToView("codser", $codser);
-        $this->setParamToView("aplicados", $collect);
-        $this->setParamToView("title", "Productos y Servicios");
+        $this->setParamToView('hide_header', true);
+        $this->setParamToView('servicio', $servicioCupo);
+        $this->setParamToView('codser', $codser);
+        $this->setParamToView('aplicados', $collect);
+        $this->setParamToView('title', 'Productos y Servicios');
     }
 
     public function detalleAplicadoAction(Request $request, $id)
@@ -251,10 +262,10 @@ class AdmproductosController extends ApplicationController
         $this->setResponse('ajax');
         try {
             if ($id == '') {
-                throw new DebugException("Error el servicio no es valido para continuar.", 501);
+                throw new DebugException('Error el servicio no es valido para continuar.', 501);
             }
 
-            $model = new PinesAfiliado();
+            $model = new PinesAfiliado;
             $pineAfiliado = $model->findfirst(" id='{$id}'");
             $pinAfiliado = $pineAfiliado->getArray();
             $pinAfiliado['beneficiario'] = false;
@@ -263,28 +274,28 @@ class AdmproductosController extends ApplicationController
 
             $procesadorComando = Comman::Api();
             $procesadorComando->runCli(
-                array(
-                    "servicio" => "ComfacaAfilia",
-                    "metodo"  => "parametros_trabajadores",
-                    "params"  => true
-                )
+                [
+                    'servicio' => 'ComfacaAfilia',
+                    'metodo' => 'parametros_trabajadores',
+                    'params' => true,
+                ]
             );
 
             if ($procesadorComando->isJson()) {
                 $datos_captura = $procesadorComando->toArray();
-                $paramsTrabajador = new ParamsTrabajador();
+                $paramsTrabajador = new ParamsTrabajador;
                 $paramsTrabajador->setDatosCaptura($datos_captura);
             }
 
             $procesadorComando = Comman::Api();
             $procesadorComando->runCli(
-                array(
-                    "servicio" => "ComfacaAfilia",
-                    "metodo" => "trabajador",
-                    "params" => array(
-                        "cedtra" => $pineAfiliado->getCedtra()
-                    )
-                )
+                [
+                    'servicio' => 'ComfacaAfilia',
+                    'metodo' => 'trabajador',
+                    'params' => [
+                        'cedtra' => $pineAfiliado->getCedtra(),
+                    ],
+                ]
             );
 
             if ($procesadorComando->isJson()) {
@@ -292,17 +303,17 @@ class AdmproductosController extends ApplicationController
                 if ($out['success']) {
                     $pinAfiliado['trabajador'] = $out['data'];
                     $zonas = ParamsTrabajador::getZonas();
-                    $pinAfiliado['trabajador']['zona_detalle'] =  $zonas[$pinAfiliado['trabajador']['codzon']];
+                    $pinAfiliado['trabajador']['zona_detalle'] = $zonas[$pinAfiliado['trabajador']['codzon']];
                 }
             }
 
             $procesadorComando = Comman::Api();
             $procesadorComando->runCli(
-                array(
-                    "servicio" => "ComfacaEmpresas",
-                    "metodo" => "informacion_beneficiario",
-                    "params" =>  $pineAfiliado->getDocben()
-                )
+                [
+                    'servicio' => 'ComfacaEmpresas',
+                    'metodo' => 'informacion_beneficiario',
+                    'params' => $pineAfiliado->getDocben(),
+                ]
             );
 
             if ($procesadorComando->isJson()) {
@@ -312,17 +323,18 @@ class AdmproductosController extends ApplicationController
                 }
             }
 
-            $salida = array(
-                "success" => true,
-                "data" => $pinAfiliado
-            );
+            $salida = [
+                'success' => true,
+                'data' => $pinAfiliado,
+            ];
         } catch (DebugException $err) {
-            $salida = array(
-                "msj" => $err->getMessage(),
-                "success" => false,
-                "data" => false,
-            );
+            $salida = [
+                'msj' => $err->getMessage(),
+                'success' => false,
+                'data' => false,
+            ];
         }
+
         return $this->renderObject($salida);
     }
 
@@ -331,31 +343,32 @@ class AdmproductosController extends ApplicationController
         $this->setResponse('ajax');
         try {
             if ($id == '') {
-                throw new DebugException("Error el servicio no es valido para continuar.", 501);
+                throw new DebugException('Error el servicio no es valido para continuar.', 501);
             }
 
-            $model = new PinesAfiliado();
+            $model = new PinesAfiliado;
             $pineAfiliado = $model->findfirst(" id='{$id}'");
             $pineAfiliado->setEstado('R');
             $pineAfiliado->save();
 
-            $servicioCupo = new ServiciosCupos();
+            $servicioCupo = new ServiciosCupos;
             $servicioCupo->findFirst("codser='{$pineAfiliado->getCodser()}'");
             $servicioCupo->setCupos($servicioCupo->getCupos() + 1);
             $servicioCupo->save();
 
-            $salida = array(
-                "success" => true,
-                "msj" => 'El registro se rechazo con éxito',
-                "data" => $pineAfiliado->getArray()
-            );
+            $salida = [
+                'success' => true,
+                'msj' => 'El registro se rechazo con éxito',
+                'data' => $pineAfiliado->getArray(),
+            ];
         } catch (DebugException $err) {
-            $salida = array(
-                "msj" => $err->getMessage(),
-                "success" => false,
-                "data" => false,
-            );
+            $salida = [
+                'msj' => $err->getMessage(),
+                'success' => false,
+                'data' => false,
+            ];
         }
+
         return $this->renderObject($salida);
     }
 }

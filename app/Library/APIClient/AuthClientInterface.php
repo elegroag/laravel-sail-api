@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Library\APIClient;
 
 interface AuthClientInterface
@@ -7,6 +8,7 @@ interface AuthClientInterface
 
     /**
      * procesaRequest function
+     *
      * @param [string] $result
      * @return array
      */

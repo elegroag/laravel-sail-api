@@ -17,20 +17,20 @@ class ApiEndpointFactory extends Factory
     public function definition(): array
     {
         $service = fake()->randomElement([
-            'sat', 'cajas', 'mercurio', 'aportesoracle', 'firmas', 'reportes'
+            'sat', 'cajas', 'mercurio', 'aportesoracle', 'firmas', 'reportes',
         ]);
 
         // Generamos un endpoint legible y único para evitar choques
         $endpointBase = fake()->unique()->randomElement([
-            'consulta', 'guardar', 'actualizar', 'eliminar', 'descargar', 'sincronizar'
+            'consulta', 'guardar', 'actualizar', 'eliminar', 'descargar', 'sincronizar',
         ]);
-        $endpoint = $endpointBase . '-' . fake()->unique()->numberBetween(1, 99999);
+        $endpoint = $endpointBase.'-'.fake()->unique()->numberBetween(1, 99999);
 
         return [
             'service_name' => $service,
             'endpoint_name' => $endpoint,
             'connection_name' => fake()->optional(0.5)->randomElement([
-                'mysql', 'pgsql', 'sqlsrv', 'oracle', 'mongo'
+                'mysql', 'pgsql', 'sqlsrv', 'oracle', 'mongo',
             ]),
         ];
     }

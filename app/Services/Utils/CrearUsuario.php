@@ -2,7 +2,6 @@
 
 namespace App\Services\Utils;
 
-use App\Exceptions\DebugException;
 use App\Models\Mercurio07;
 use App\Models\Mercurio19;
 use App\Services\Srequest;
@@ -11,19 +10,30 @@ use Carbon\Carbon;
 class CrearUsuario
 {
     private $today;
+
     private $tipo;
+
     private $coddoc;
+
     private $documento;
+
     private $nombre;
+
     private $email;
+
     private $codciu;
+
     private $clave;
+
     private $feccla;
+
     private $fecreg;
+
     private $autoriza = 'S';
+
     private $fecapr;
 
-    public function __construct(Srequest|null $args = null)
+    public function __construct(?Srequest $args = null)
     {
         $this->today = Carbon::parse('now');
         $this->codciu = '18001';
@@ -44,13 +54,19 @@ class CrearUsuario
     public function setters(...$params)
     {
         $arguments = get_params_destructures($params);
-        foreach ($arguments as $prop => $valor) if (property_exists($this, $prop)) $this->$prop = "{$valor}";
+        foreach ($arguments as $prop => $valor) {
+            if (property_exists($this, $prop)) {
+                $this->$prop = "{$valor}";
+            }
+        }
+
         return $this;
     }
 
     /**
      * crear_usuario function
-     * @return Object
+     *
+     * @return object
      */
     public function procesar()
     {
@@ -58,9 +74,9 @@ class CrearUsuario
         $feccla = ($this->feccla) ? $this->feccla : $this->today->addMonths(3);
 
         $mercurio07 = Mercurio07::where([
-            "tipo" => $this->tipo,
-            "coddoc" => $this->coddoc,
-            "documento" => $this->documento
+            'tipo' => $this->tipo,
+            'coddoc' => $this->coddoc,
+            'documento' => $this->documento,
         ])->first();
 
         if ($mercurio07 == false) {
@@ -73,18 +89,20 @@ class CrearUsuario
         }
 
         $mercurio07->setCodciu($this->codciu);
-        $mercurio07->setEstado("A");
+        $mercurio07->setEstado('A');
         $mercurio07->setFechaSyncron($this->today->format('Y-m-d'));
         $mercurio07->setAutoriza($this->autoriza);
         $mercurio07->setNombre($this->nombre);
         $mercurio07->setEmail($this->email);
         $mercurio07->setClave($this->clave);
         $mercurio07->save();
+
         return $mercurio07;
     }
 
     /**
      * crearOpcionesRecuperacion function
+     *
      * @param [type] $pregunta1
      * @param [type] $pregunta2
      * @param [type] $respuesta1
@@ -94,13 +112,13 @@ class CrearUsuario
     public function crearOpcionesRecuperacion($codigo)
     {
         $mercurio19 = Mercurio19::where([
-            "tipo" => $this->tipo,
-            "coddoc" => $this->coddoc,
-            "documento" => $this->documento
+            'tipo' => $this->tipo,
+            'coddoc' => $this->coddoc,
+            'documento' => $this->documento,
         ])->first();
 
-        if (!$mercurio19) {
-            $mercurio19 = new Mercurio19();
+        if (! $mercurio19) {
+            $mercurio19 = new Mercurio19;
             $mercurio19->setTipo($this->tipo);
             $mercurio19->setCoddoc($this->coddoc);
             $mercurio19->setDocumento($this->documento);
@@ -111,6 +129,7 @@ class CrearUsuario
         $mercurio19->setCodigo(1);
         $mercurio19->setCodver($codigo);
         $mercurio19->save();
+
         return true;
     }
 

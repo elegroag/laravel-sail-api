@@ -6,10 +6,10 @@ use App\Models\Adapter\ModelBase;
 
 class Mercurio08 extends ModelBase
 {
-
-
     protected $table = 'mercurio08';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -21,7 +21,8 @@ class Mercurio08 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo codofi
-     * @param string $codofi
+     *
+     * @param  string  $codofi
      */
     public function setCodofi($codofi)
     {
@@ -30,7 +31,8 @@ class Mercurio08 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo tipopc
-     * @param string $tipopc
+     *
+     * @param  string  $tipopc
      */
     public function setTipopc($tipopc)
     {
@@ -39,7 +41,8 @@ class Mercurio08 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo usuario
-     * @param integer $usuario
+     *
+     * @param  int  $usuario
      */
     public function setUsuario($usuario)
     {
@@ -48,16 +51,17 @@ class Mercurio08 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo orden
-     * @param integer $orden
+     *
+     * @param  int  $orden
      */
     public function setOrden($orden)
     {
         $this->orden = $orden;
     }
 
-
     /**
      * Devuelve el valor del campo codofi
+     *
      * @return string
      */
     public function getCodofi()
@@ -67,6 +71,7 @@ class Mercurio08 extends ModelBase
 
     /**
      * Devuelve el valor del campo tipopc
+     *
      * @return string
      */
     public function getTipopc()
@@ -80,13 +85,14 @@ class Mercurio08 extends ModelBase
         if ($foreing != false) {
             return $foreing->getDetalle();
         } else {
-            return "";
+            return '';
         }
     }
 
     /**
      * Devuelve el valor del campo usuario
-     * @return integer
+     *
+     * @return int
      */
     public function getUsuario()
     {
@@ -99,13 +105,14 @@ class Mercurio08 extends ModelBase
         if ($foreing != false) {
             return $foreing->getNombre();
         } else {
-            return "";
+            return '';
         }
     }
 
     /**
      * Devuelve el valor del campo orden
-     * @return integer
+     *
+     * @return int
      */
     public function getOrden()
     {
@@ -114,8 +121,8 @@ class Mercurio08 extends ModelBase
 
     public function initialize()
     {
-        $this->belongsTo("tipopc", "mercurio09", "tipopc");
-        $this->belongsTo("usuario", "gener02", "usuario");
-        $this->belongsTo("codofi", "mercurio04", "codofi");
+        $this->belongsTo('tipopc', 'mercurio09', 'tipopc');
+        $this->belongsTo('usuario', 'gener02', 'usuario');
+        $this->belongsTo('codofi', 'mercurio04', 'codofi');
     }
 }

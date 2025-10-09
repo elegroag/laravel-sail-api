@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Middleware\CajasCookieAuthenticated;
 use App\Http\Controllers\Cajas\ApruebaFacultativoController;
+use App\Http\Middleware\CajasCookieAuthenticated;
+use Illuminate\Support\Facades\Route;
 
 Route::middleware([CajasCookieAuthenticated::class])->group(function () {
     Route::prefix('/cajas/aprobacionfac')->group(function () {

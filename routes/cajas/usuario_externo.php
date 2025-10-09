@@ -1,8 +1,8 @@
 <?php
 
 // Importar facades y controlador necesarios
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Cajas\UsuarioController;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('/cajas/usuario')->group(function () {
     Route::get('/index', [UsuarioController::class, 'indexAction']);

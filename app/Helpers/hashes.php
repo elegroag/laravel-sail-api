@@ -1,25 +1,29 @@
 <?php
-if (!function_exists('clave_hash')) {
+
+if (! function_exists('clave_hash')) {
     /**
      * password_hash
+     *
      * @return void
      */
     function clave_hash($password, $cost = 10)
     {
         $salt = substr(base64_encode(openssl_random_pseudo_bytes(17)), 0, 22);
-        $salt = str_replace("+", ".", $salt);
-        $param = '$' . implode('$', array(
-            "2y", //select the most secure version of blowfish (>=PHP 5.3.7)
-            str_pad($cost, 2, "0", STR_PAD_LEFT), //add the cost in two digits
-            $salt //add the salt
-        ));
+        $salt = str_replace('+', '.', $salt);
+        $param = '$'.implode('$', [
+            '2y', // select the most secure version of blowfish (>=PHP 5.3.7)
+            str_pad($cost, 2, '0', STR_PAD_LEFT), // add the cost in two digits
+            $salt, // add the salt
+        ]);
+
         return crypt($password, $param);
     }
 }
 
-if (!function_exists('clave_verify')) {
+if (! function_exists('clave_verify')) {
     /**
      * clave_verify
+     *
      * @return void
      */
     function clave_verify($password, $hash)
@@ -31,10 +35,11 @@ if (!function_exists('clave_verify')) {
     }
 }
 
-if (!function_exists('password_hash_old')) {
+if (! function_exists('password_hash_old')) {
     /**
      * password_hash_old
      * procesar la clave vieja de autenticacion
+     *
      * @return string
      */
     function password_hash_old($password)
@@ -48,18 +53,20 @@ if (!function_exists('password_hash_old')) {
             }
             $mclave .= chr(ord(substr($password, $i, 1)) + $x + 5);
         }
+
         return $mclave;
     }
 }
 
-
-if (!function_exists('generate_key')) {
+if (! function_exists('generate_key')) {
     function generate_key()
     {
-        $pass = "";
+        $pass = '';
         $seed = str_split('abcdefghijklmnopqrstuvwxyz1234567890');
         shuffle($seed);
-        foreach (array_rand($seed, 5) as $k) $pass .= $seed[$k];
+        foreach (array_rand($seed, 5) as $k) {
+            $pass .= $seed[$k];
+        }
         $mclave = '';
         for ($i = 0; $i < strlen($pass); $i++) {
             if ($i % 2 != 0) {
@@ -69,57 +76,69 @@ if (!function_exists('generate_key')) {
             }
             $mclave .= chr(ord(substr($pass, $i, 1)) + $x + 5);
         }
-        return array(md5($mclave), $pass);
+
+        return [md5($mclave), $pass];
     }
 }
 
-
-if (!function_exists('Kencrypt')) {
+if (! function_exists('Kencrypt')) {
     function Kencrypt($token)
     {
-        $iv = "";
+        $iv = '';
         $seed = str_split('1234567890123456');
         shuffle($seed);
-        foreach (array_rand($seed, 16) as $k) $iv .= $seed["$k"];
-        $encryptedData = openssl_encrypt($token, "AES-256-CTR", "8QGTBVnqGh5A4a2WST0ztVU0eB9p2lSHwWWXy1GlSAhPoXyNMw-2023", 0, $iv);
-        return array($encryptedData, $iv);
+        foreach (array_rand($seed, 16) as $k) {
+            $iv .= $seed["$k"];
+        }
+        $encryptedData = openssl_encrypt($token, 'AES-256-CTR', '8QGTBVnqGh5A4a2WST0ztVU0eB9p2lSHwWWXy1GlSAhPoXyNMw-2023', 0, $iv);
+
+        return [$encryptedData, $iv];
     }
 }
 
-if (!function_exists('Kdecrypt')) {
+if (! function_exists('Kdecrypt')) {
     function Kdecrypt($encryptedData, $iv)
     {
         $token = openssl_decrypt($encryptedData, 'AES-256-CTR', '8QGTBVnqGh5A4a2WST0ztVU0eB9p2lSHwWWXy1GlSAhPoXyNMw-2023', 0, $iv);
+
         return $token;
     }
 }
 
-if (!function_exists('genera_clave')) {
-    function genera_clave(int|null $length = null)
+if (! function_exists('genera_clave')) {
+    function genera_clave(?int $length = null)
     {
-        $code = "";
-        if (!$length) {
+        $code = '';
+        if (! $length) {
             $seed = str_split('1234567890');
             shuffle($seed);
-            foreach (array_rand($seed, 4) as $k) $code .= $seed[$k];
+            foreach (array_rand($seed, 4) as $k) {
+                $code .= $seed[$k];
+            }
+
             return $code;
         } else {
             $seed = str_split('abcdefghijklmnopqrstuvwxyz1234567890$%&/()=?@.+-*');
             shuffle($seed);
-            foreach (array_rand($seed, $length) as $k) $code .= $seed[$k];
+            foreach (array_rand($seed, $length) as $k) {
+                $code .= $seed[$k];
+            }
         }
+
         return $code;
     }
 }
 
-
-if (!function_exists('genera_code')) {
+if (! function_exists('genera_code')) {
     function genera_code()
     {
-        $codigo_verify = "";
+        $codigo_verify = '';
         $seed = str_split('1234567890');
         shuffle($seed);
-        foreach (array_rand($seed, 4) as $k) $codigo_verify .= $seed[$k];
+        foreach (array_rand($seed, 4) as $k) {
+            $codigo_verify .= $seed[$k];
+        }
+
         return $codigo_verify;
     }
 }

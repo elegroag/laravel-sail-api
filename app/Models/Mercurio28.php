@@ -6,13 +6,13 @@ use App\Models\Adapter\ModelBase;
 
 class Mercurio28 extends ModelBase
 {
-
-
     protected $table = 'mercurio28';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
-    protected $fillable  = [
+    protected $fillable = [
         'tipo',
         'campo',
         'detalle',
@@ -21,7 +21,8 @@ class Mercurio28 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo tipo
-     * @param string $tipo
+     *
+     * @param  string  $tipo
      */
     public function setTipo($tipo)
     {
@@ -30,7 +31,8 @@ class Mercurio28 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo campo
-     * @param string $campo
+     *
+     * @param  string  $campo
      */
     public function setCampo($campo)
     {
@@ -39,7 +41,8 @@ class Mercurio28 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo detalle
-     * @param string $detalle
+     *
+     * @param  string  $detalle
      */
     public function setDetalle($detalle)
     {
@@ -48,16 +51,17 @@ class Mercurio28 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo orden
-     * @param integer $orden
+     *
+     * @param  int  $orden
      */
     public function setOrden($orden)
     {
         $this->orden = $orden;
     }
 
-
     /**
      * Devuelve el valor del campo tipo
+     *
      * @return string
      */
     public function getTipo()
@@ -67,6 +71,7 @@ class Mercurio28 extends ModelBase
 
     /**
      * Devuelve el valor del campo campo
+     *
      * @return string
      */
     public function getCampo()
@@ -76,6 +81,7 @@ class Mercurio28 extends ModelBase
 
     /**
      * Devuelve el valor del campo detalle
+     *
      * @return string
      */
     public function getDetalle()
@@ -85,7 +91,8 @@ class Mercurio28 extends ModelBase
 
     /**
      * Devuelve el valor del campo orden
-     * @return integer
+     *
+     * @return int
      */
     public function getOrden()
     {

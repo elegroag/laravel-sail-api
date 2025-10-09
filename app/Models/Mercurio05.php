@@ -6,9 +6,10 @@ use App\Models\Adapter\ModelBase;
 
 class Mercurio05 extends ModelBase
 {
-
     protected $table = 'mercurio05';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -18,7 +19,8 @@ class Mercurio05 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo codofi
-     * @param string $codofi
+     *
+     * @param  string  $codofi
      */
     public function setCodofi($codofi)
     {
@@ -27,16 +29,17 @@ class Mercurio05 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo codciu
-     * @param string $codciu
+     *
+     * @param  string  $codciu
      */
     public function setCodciu($codciu)
     {
         $this->codciu = $codciu;
     }
 
-
     /**
      * Devuelve el valor del campo codofi
+     *
      * @return string
      */
     public function getCodofi()
@@ -46,6 +49,7 @@ class Mercurio05 extends ModelBase
 
     /**
      * Devuelve el valor del campo codciu
+     *
      * @return string
      */
     public function getCodciu()
@@ -59,7 +63,7 @@ class Mercurio05 extends ModelBase
         if ($foreing != false) {
             return $foreing->getDetciu();
         } else {
-            return "";
+            return '';
         }
     }
 

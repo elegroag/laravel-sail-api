@@ -4,21 +4,27 @@ namespace App\Services\FactoryReportes;
 
 class PDFReportGenerator implements ReportGenerator
 {
-
     public static $pdf;
+
     public static $x_with = 10;
+
     public static $xr_with = 8;
+
     public static $y_max = 170;
+
     public static $orientation = 'L';
+
     private $filepath;
+
     private $file;
+
     private $title;
 
     public function initializa()
     {
-        $this->filepath = storage_path() . "temp/{$this->file}.pdf";
+        $this->filepath = storage_path()."temp/{$this->file}.pdf";
         Tpdf::setInicializa(self::$orientation, $this->title, ((self::$orientation == 'L') ? 15 : 10));
-        self::$pdf = new Tpdf();
+        self::$pdf = new Tpdf;
         self::$pdf->SetMargins(((self::$orientation == 'L') ? 8 : self::$x_with), ((self::$orientation == 'L') ? 20 : 30), self::$xr_with);
         self::$pdf->AddPage();
         self::$y_max = ((self::$orientation == 'L') ? 170 : 250);
@@ -34,6 +40,7 @@ class PDFReportGenerator implements ReportGenerator
 
     /**
      * addLine function
+     *
      * @return void
      */
     public function addLine($data, $fsize = 8)
@@ -48,13 +55,14 @@ class PDFReportGenerator implements ReportGenerator
         }
         if (self::$pdf->GetY() >= self::$y_max) {
             self::$pdf->AddPage();
-            self::$pdf->SetAutoPageBreak(TRUE, 0);
+            self::$pdf->SetAutoPageBreak(true, 0);
             self::$pdf->setPageMark();
         }
     }
 
     /**
      * addHeader function
+     *
      * @return void
      */
     public function addHeader($headers, $subtitle, $fsize = 9)
@@ -79,7 +87,7 @@ class PDFReportGenerator implements ReportGenerator
 
         if (self::$pdf->GetY() >= self::$y_max) {
             self::$pdf->AddPage();
-            self::$pdf->SetAutoPageBreak(TRUE, 0);
+            self::$pdf->SetAutoPageBreak(true, 0);
             self::$pdf->setPageMark();
         }
     }
@@ -112,11 +120,13 @@ class PDFReportGenerator implements ReportGenerator
 
     /**
      * outFile function
+     *
      * @return void
      */
     public function outFile()
     {
         self::$pdf->Output($this->filepath, 'F');
+
         return $this->filepath;
     }
 }

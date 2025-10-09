@@ -8,9 +8,10 @@ use Carbon\Carbon;
 
 class Mercurio38 extends ModelBase
 {
-
     protected $table = 'mercurio38';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -101,6 +102,7 @@ class Mercurio38 extends ModelBase
     {
         return $this->numcue;
     }
+
     public function setTippag($tippag)
     {
         $this->tippag = $tippag;
@@ -203,7 +205,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * setTipper function
-     * @param string $tipper
+     *
+     * @param  string  $tipper
      * @return void
      */
     public function setTipper($tipper)
@@ -213,6 +216,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * getTipper function
+     *
      * @return string
      */
     public function getTipper()
@@ -222,7 +226,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * setFecini function
-     * @param string $fecini
+     *
+     * @param  string  $fecini
      * @return void
      */
     public function setFecini($fecini)
@@ -232,6 +237,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * getFecini function
+     *
      * @return string
      */
     public function getFecini()
@@ -241,7 +247,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * setTipsoc function
-     * @param string $tipsoc
+     *
+     * @param  string  $tipsoc
      * @return void
      */
     public function setTipsoc($tipsoc)
@@ -251,6 +258,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * getTipsoc function
+     *
      * @return string
      */
     public function getTipsoc()
@@ -260,7 +268,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * setTipemp function
-     * @param string $tipemp
+     *
+     * @param  string  $tipemp
      * @return void
      */
     public function setTipemp($tipemp)
@@ -270,6 +279,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * getTipemp function
+     *
      * @return string
      */
     public function getTipemp()
@@ -279,7 +289,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * setCoddocrepleg function
-     * @param string $coddocrepleg
+     *
+     * @param  string  $coddocrepleg
      * @return void
      */
     public function setCoddocrepleg($coddocrepleg)
@@ -289,6 +300,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * getCoddocrepleg function
+     *
      * @return string
      */
     public function getCoddocrepleg()
@@ -298,7 +310,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * setCodcaj function
-     * @param integer $codcaj
+     *
+     * @param  int  $codcaj
      * @return void
      */
     public function setCodcaj($codcaj)
@@ -308,17 +321,18 @@ class Mercurio38 extends ModelBase
 
     /**
      * getCodcaj function
-     * @return integer
+     *
+     * @return int
      */
     public function getCodcaj()
     {
         return $this->codcaj;
     }
 
-
     /**
      * setId function
-     * @param integer $id
+     *
+     * @param  int  $id
      */
     public function setId($id)
     {
@@ -327,7 +341,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo log
-     * @param integer $log
+     *
+     * @param  int  $log
      */
     public function setLog($log)
     {
@@ -336,7 +351,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo cedtra
-     * @param string $cedtra
+     *
+     * @param  string  $cedtra
      */
     public function setCedtra($cedtra)
     {
@@ -345,7 +361,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo tipdoc
-     * @param string $tipdoc
+     *
+     * @param  string  $tipdoc
      */
     public function setTipdoc($tipdoc)
     {
@@ -354,7 +371,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo priape
-     * @param string $priape
+     *
+     * @param  string  $priape
      */
     public function setPriape($priape)
     {
@@ -363,7 +381,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo segape
-     * @param string $segape
+     *
+     * @param  string  $segape
      */
     public function setSegape($segape)
     {
@@ -372,7 +391,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo prinom
-     * @param string $prinom
+     *
+     * @param  string  $prinom
      */
     public function setPrinom($prinom)
     {
@@ -381,7 +401,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo segnom
-     * @param string $segnom
+     *
+     * @param  string  $segnom
      */
     public function setSegnom($segnom)
     {
@@ -390,7 +411,6 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo fecnac
-
      */
     public function setFecnac($fecnac)
     {
@@ -399,7 +419,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo ciunac
-     * @param string $ciunac
+     *
+     * @param  string  $ciunac
      */
     public function setCiunac($ciunac)
     {
@@ -408,7 +429,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo sexo
-     * @param string $sexo
+     *
+     * @param  string  $sexo
      */
     public function setSexo($sexo)
     {
@@ -417,7 +439,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo estciv
-     * @param string $estciv
+     *
+     * @param  string  $estciv
      */
     public function setEstciv($estciv)
     {
@@ -426,7 +449,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo cabhog
-     * @param string $cabhog
+     *
+     * @param  string  $cabhog
      */
     public function setCabhog($cabhog)
     {
@@ -435,7 +459,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo codciu
-     * @param string $codciu
+     *
+     * @param  string  $codciu
      */
     public function setCodciu($codciu)
     {
@@ -444,7 +469,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo codzon
-     * @param string $codzon
+     *
+     * @param  string  $codzon
      */
     public function setCodzon($codzon)
     {
@@ -453,7 +479,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo direccion
-     * @param string $direccion
+     *
+     * @param  string  $direccion
      */
     public function setDireccion($direccion)
     {
@@ -462,7 +489,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo barrio
-     * @param string $barrio
+     *
+     * @param  string  $barrio
      */
     public function setBarrio($barrio)
     {
@@ -471,7 +499,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo telefono
-     * @param string $telefono
+     *
+     * @param  string  $telefono
      */
     public function setTelefono($telefono)
     {
@@ -480,7 +509,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo celular
-     * @param string $celular
+     *
+     * @param  string  $celular
      */
     public function setCelular($celular)
     {
@@ -489,7 +519,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo email
-     * @param string $email
+     *
+     * @param  string  $email
      */
     public function setEmail($email)
     {
@@ -498,7 +529,6 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo fecing
-
      */
     public function setFecing($fecing)
     {
@@ -507,7 +537,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo salario
-     * @param integer $salario
+     *
+     * @param  int  $salario
      */
     public function setSalario($salario)
     {
@@ -516,7 +547,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo captra
-     * @param string $captra
+     *
+     * @param  string  $captra
      */
     public function setCaptra($captra)
     {
@@ -525,7 +557,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo tipdis
-     * @param string $tipdis
+     *
+     * @param  string  $tipdis
      */
     public function setTipdis($tipdis)
     {
@@ -534,7 +567,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo nivedu
-     * @param string $nivedu
+     *
+     * @param  string  $nivedu
      */
     public function setNivedu($nivedu)
     {
@@ -543,7 +577,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo rural
-     * @param string $rural
+     *
+     * @param  string  $rural
      */
     public function setRural($rural)
     {
@@ -552,7 +587,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo vivienda
-     * @param string $vivienda
+     *
+     * @param  string  $vivienda
      */
     public function setVivienda($vivienda)
     {
@@ -561,7 +597,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo tipafi
-     * @param string $tipafi
+     *
+     * @param  string  $tipafi
      */
     public function setTipafi($tipafi)
     {
@@ -570,7 +607,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo autoriza
-     * @param string $autoriza
+     *
+     * @param  string  $autoriza
      */
     public function setAutoriza($autoriza)
     {
@@ -579,7 +617,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo codact
-     * @param string $codact
+     *
+     * @param  string  $codact
      */
     public function setCodact($codact)
     {
@@ -588,7 +627,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo calemp
-     * @param string $calemp
+     *
+     * @param  string  $calemp
      */
     public function setCalemp($calemp)
     {
@@ -597,7 +637,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo usuario
-     * @param integer $usuario
+     *
+     * @param  int  $usuario
      */
     public function setUsuario($usuario)
     {
@@ -606,7 +647,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo estado
-     * @param string $estado
+     *
+     * @param  string  $estado
      */
     public function setEstado($estado)
     {
@@ -615,7 +657,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo codest
-     * @param string $codest
+     *
+     * @param  string  $codest
      */
     public function setCodest($codest)
     {
@@ -624,7 +667,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo motivo
-     * @param string $motivo
+     *
+     * @param  string  $motivo
      */
     public function setMotivo($motivo)
     {
@@ -633,7 +677,6 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo fecest
-
      */
     public function setFecest($fecest)
     {
@@ -642,7 +685,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo tipo
-     * @param string $tipo
+     *
+     * @param  string  $tipo
      */
     public function setTipo($tipo)
     {
@@ -651,7 +695,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo coddoc
-     * @param string $coddoc
+     *
+     * @param  string  $coddoc
      */
     public function setCoddoc($coddoc)
     {
@@ -660,17 +705,18 @@ class Mercurio38 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo documento
-     * @param string $documento
+     *
+     * @param  string  $documento
      */
     public function setDocumento($documento)
     {
         $this->documento = $documento;
     }
 
-
     /**
      * Devuelve el valor del campo id
-     * @return integer
+     *
+     * @return int
      */
     public function getId()
     {
@@ -679,7 +725,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo log
-     * @return integer
+     *
+     * @return int
      */
     public function getLog()
     {
@@ -688,6 +735,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo cedtra
+     *
      * @return string
      */
     public function getCedtra()
@@ -697,6 +745,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo tipdoc
+     *
      * @return string
      */
     public function getTipdoc()
@@ -706,6 +755,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo priape
+     *
      * @return string
      */
     public function getPriape()
@@ -715,6 +765,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo segape
+     *
      * @return string
      */
     public function getSegape()
@@ -724,6 +775,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo prinom
+     *
      * @return string
      */
     public function getPrinom()
@@ -733,6 +785,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo segnom
+     *
      * @return string
      */
     public function getSegnom()
@@ -742,7 +795,6 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo fecnac
-
      */
     public function getFecnac()
     {
@@ -751,6 +803,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo ciunac
+     *
      * @return string
      */
     public function getCiunac()
@@ -760,6 +813,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo sexo
+     *
      * @return string
      */
     public function getSexo()
@@ -769,6 +823,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo estciv
+     *
      * @return string
      */
     public function getEstciv()
@@ -778,6 +833,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo cabhog
+     *
      * @return string
      */
     public function getCabhog()
@@ -787,6 +843,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo codciu
+     *
      * @return string
      */
     public function getCodciu()
@@ -796,6 +853,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo codzon
+     *
      * @return string
      */
     public function getCodzon()
@@ -805,6 +863,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo direccion
+     *
      * @return string
      */
     public function getDireccion()
@@ -814,6 +873,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo barrio
+     *
      * @return string
      */
     public function getBarrio()
@@ -823,6 +883,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo telefono
+     *
      * @return string
      */
     public function getTelefono()
@@ -832,6 +893,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo celular
+     *
      * @return string
      */
     public function getCelular()
@@ -841,6 +903,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo email
+     *
      * @return string
      */
     public function getEmail()
@@ -850,7 +913,6 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo fecing
-
      */
     public function getFecing()
     {
@@ -859,7 +921,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo salario
-     * @return integer
+     *
+     * @return int
      */
     public function getSalario()
     {
@@ -868,6 +931,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo captra
+     *
      * @return string
      */
     public function getCaptra()
@@ -877,6 +941,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo tipdis
+     *
      * @return string
      */
     public function getTipdis()
@@ -886,6 +951,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo nivedu
+     *
      * @return string
      */
     public function getNivedu()
@@ -895,6 +961,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo rural
+     *
      * @return string
      */
     public function getRural()
@@ -904,6 +971,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo vivienda
+     *
      * @return string
      */
     public function getVivienda()
@@ -913,6 +981,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo tipafi
+     *
      * @return string
      */
     public function getTipafi()
@@ -922,6 +991,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo autoriza
+     *
      * @return string
      */
     public function getAutoriza()
@@ -931,6 +1001,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo codact
+     *
      * @return string
      */
     public function getCodact()
@@ -940,6 +1011,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo calemp
+     *
      * @return string
      */
     public function getCalemp()
@@ -949,7 +1021,8 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo usuario
-     * @return integer
+     *
+     * @return int
      */
     public function getUsuario()
     {
@@ -958,6 +1031,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo estado
+     *
      * @return string
      */
     public function getEstado()
@@ -967,17 +1041,29 @@ class Mercurio38 extends ModelBase
 
     public function getEstadoDetalle()
     {
-        $return = "";
-        if ($this->estado == "T") $return = "TEMPORAL";
-        if ($this->estado == "D") $return = "DEVUELTO";
-        if ($this->estado == "A") $return = "APROBADO";
-        if ($this->estado == "X") $return = "RECHAZADO";
-        if ($this->estado == "P") $return = "PENDIENTE";
+        $return = '';
+        if ($this->estado == 'T') {
+            $return = 'TEMPORAL';
+        }
+        if ($this->estado == 'D') {
+            $return = 'DEVUELTO';
+        }
+        if ($this->estado == 'A') {
+            $return = 'APROBADO';
+        }
+        if ($this->estado == 'X') {
+            $return = 'RECHAZADO';
+        }
+        if ($this->estado == 'P') {
+            $return = 'PENDIENTE';
+        }
+
         return $return;
     }
 
     /**
      * Devuelve el valor del campo codest
+     *
      * @return string
      */
     public function getCodest()
@@ -987,6 +1073,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo motivo
+     *
      * @return string
      */
     public function getMotivo()
@@ -996,7 +1083,6 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo fecest
-
      */
     public function getFecest()
     {
@@ -1005,6 +1091,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo tipo
+     *
      * @return string
      */
     public function getTipo()
@@ -1014,6 +1101,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo coddoc
+     *
      * @return string
      */
     public function getCoddoc()
@@ -1023,6 +1111,7 @@ class Mercurio38 extends ModelBase
 
     /**
      * Devuelve el valor del campo documento
+     *
      * @return string
      */
     public function getDocumento()
@@ -1043,21 +1132,25 @@ class Mercurio38 extends ModelBase
     public function CamposDisponibles()
     {
         $db = DbBase::rawConnect();
-        $rqs = $db->inQueryAssoc("SELECT * FROM mercurio12");
-        $data = array();
-        foreach ($rqs as $ai => $row) $data[$row['coddoc']] = $row['detalle'];
+        $rqs = $db->inQueryAssoc('SELECT * FROM mercurio12');
+        $data = [];
+        foreach ($rqs as $ai => $row) {
+            $data[$row['coddoc']] = $row['detalle'];
+        }
+
         return $data;
     }
 
     public function CamposDisponibleDetalle($campo)
     {
         $data = $this->CamposDisponibles();
+
         return $data["{$campo}"];
     }
 
     public function getCoddocreplegArray()
     {
-        return array(
+        return [
             1 => 'CC',
             10 => 'TMF',
             11 => 'CD',
@@ -1071,8 +1164,8 @@ class Mercurio38 extends ModelBase
             6 => 'PA',
             7 => 'RC',
             8 => 'PEP',
-            9 => 'CB'
-        );
+            9 => 'CB',
+        ];
     }
 
     public function getCalempDetalle()
@@ -1101,6 +1194,6 @@ class Mercurio38 extends ModelBase
 
     public function getNombreCompleto()
     {
-        return $this->priape . " " . $this->segape . " " . $this->prinom . " " . $this->segnom;
+        return $this->priape.' '.$this->segape.' '.$this->prinom.' '.$this->segnom;
     }
 }

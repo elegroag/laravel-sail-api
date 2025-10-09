@@ -7,15 +7,16 @@ use App\Services\Utils\Table;
 
 class Mercurio13Services
 {
-
     /**
      * table variable
+     *
      * @var Table
      */
     private $table;
 
     /**
      * controller_name variable
+     *
      * @var string
      */
     private $controller_name;
@@ -23,7 +24,7 @@ class Mercurio13Services
     public function __construct()
     {
 
-        $this->table = new Table();
+        $this->table = new Table;
         $this->controller_name = 'mercurio13';
     }
 
@@ -31,13 +32,13 @@ class Mercurio13Services
     {
         $this->table->set_template($this->getTemplateTable());
         $this->table->set_heading(
-            array(
+            [
                 'OPT',
                 'Tipo afiliación',
                 'Tipo documento',
                 'Obligatorio',
-                'Auto generado'
-            )
+                'Auto generado',
+            ]
         );
         if ($paginate->items) {
             foreach ($paginate->items as $entity) {
@@ -56,12 +57,13 @@ class Mercurio13Services
             $this->table->add_row('');
             $this->table->set_empty("<tr><td colspan='5'> &nbsp; No hay registros que mostrar</td></tr>");
         }
+
         return $this->table->generate();
     }
 
     public function findPagination($query)
     {
-        return (new Mercurio13())->find($query);
+        return (new Mercurio13)->find($query);
     }
 
     public function getTemplateTable()

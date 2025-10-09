@@ -8,12 +8,14 @@ use Carbon\Carbon;
 
 class Mercurio41 extends ModelBase
 {
-
     protected $table = 'mercurio41';
+
     protected $primaryKey = 'id';
 
     public $incrementing = true;
+
     public $keyType = 'int';
+
     public $timestamps = false;
 
     protected $fillable = [
@@ -68,7 +70,7 @@ class Mercurio41 extends ModelBase
         'cargo',
         'codban',
         'tipcue',
-        'dirlab'
+        'dirlab',
     ];
 
     public function setTipcue($tipcue)
@@ -604,9 +606,12 @@ class Mercurio41 extends ModelBase
     public function CamposDisponibles()
     {
         $db = DbBase::rawConnect();
-        $rqs = $db->inQueryAssoc("SELECT * FROM mercurio12");
-        $data = array();
-        foreach ($rqs as $ai => $row) $data[$row['coddoc']] = $row['detalle'];
+        $rqs = $db->inQueryAssoc('SELECT * FROM mercurio12');
+        $data = [];
+        foreach ($rqs as $ai => $row) {
+            $data[$row['coddoc']] = $row['detalle'];
+        }
+
         return $data;
     }
 
@@ -636,18 +641,18 @@ class Mercurio41 extends ModelBase
 
     public function getCalempArray()
     {
-        return array(
+        return [
             'E' => 'EMPRESA',
             'I' => 'INDEPENDIENTE',
             'P' => 'PENSIONADO',
             'F' => 'FACULTATIVO',
-            'D' => 'DESEMPLEADO'
-        );
+            'D' => 'DESEMPLEADO',
+        ];
     }
 
     public function getCoddocreplegArray()
     {
-        return array(
+        return [
             1 => 'CC',
             10 => 'TMF',
             11 => 'CD',
@@ -661,23 +666,33 @@ class Mercurio41 extends ModelBase
             6 => 'PA',
             7 => 'RC',
             8 => 'PEP',
-            9 => 'CB'
-        );
+            9 => 'CB',
+        ];
     }
 
     public function getEstadoDetalle()
     {
-        $return = "";
-        if ($this->estado == "T") $return = "TEMPORAL";
-        if ($this->estado == "D") $return = "DEVUELTO";
-        if ($this->estado == "A") $return = "APROBADO";
-        if ($this->estado == "X") $return = "RECHAZADO";
+        $return = '';
+        if ($this->estado == 'T') {
+            $return = 'TEMPORAL';
+        }
+        if ($this->estado == 'D') {
+            $return = 'DEVUELTO';
+        }
+        if ($this->estado == 'A') {
+            $return = 'APROBADO';
+        }
+        if ($this->estado == 'X') {
+            $return = 'RECHAZADO';
+        }
+
         return $return;
     }
 
     public function CamposDisponibleDetalle($campo)
     {
         $data = $this->CamposDisponibles();
+
         return $data["{$campo}"];
     }
 
@@ -688,6 +703,6 @@ class Mercurio41 extends ModelBase
 
     public function getNombreCompleto()
     {
-        return $this->priape . " " . $this->segape . " " . $this->prinom . " " . $this->segnom;
+        return $this->priape.' '.$this->segape.' '.$this->prinom.' '.$this->segnom;
     }
 }

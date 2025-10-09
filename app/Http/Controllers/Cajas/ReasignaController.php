@@ -15,13 +15,13 @@ use App\Services\Tag;
 use App\Services\Utils\GeneralService;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class ReasignaController extends ApplicationController
 {
-
     protected $db;
+
     protected $user;
+
     protected $tipo;
 
     public function __construct()
@@ -33,57 +33,60 @@ class ReasignaController extends ApplicationController
 
     public function indexAction()
     {
-        $help = "Esta opcion permite manejar los ";
-        $this->setParamToView("help", $help);
-        $this->setParamToView("title", "Reasigna");
-        #Tag::setDocumentTitle('Reasigna');
+        $help = 'Esta opcion permite manejar los ';
+        $this->setParamToView('help', $help);
+        $this->setParamToView('title', 'Reasigna');
+        // Tag::setDocumentTitle('Reasigna');
     }
 
     public function proceso_reasignar_masivoAction(Request $request)
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         try {
-            $tipopc = $request->input("tipopc_proceso");
-            $usuori = $request->input("usuori");
-            $usudes = $request->input("usudes");
-            $fecini = $request->input("fecini");
-            $fecfin = $request->input("fecfin");
+            $tipopc = $request->input('tipopc_proceso');
+            $usuori = $request->input('usuori');
+            $usudes = $request->input('usudes');
+            $fecini = $request->input('fecini');
+            $fecfin = $request->input('fecfin');
             $model = '';
             if ($tipopc == 1) {
-                $model = new Mercurio31();
+                $model = new Mercurio31;
             }
             if ($tipopc == 2) {
-                $model = new Mercurio30(); // No tiene el campo fecsol
+                $model = new Mercurio30; // No tiene el campo fecsol
             }
             if ($tipopc == 3) {
-                $model = new Mercurio32();
+                $model = new Mercurio32;
             }
             if ($tipopc == 4) {
-                $model = new Mercurio34();
+                $model = new Mercurio34;
             }
             if ($tipopc == 7) {
-                $model = new Mercurio35();
+                $model = new Mercurio35;
             }
             $this->reasigna_proceso($model, $usuori, $usudes, $fecini, $fecfin);
 
-            $response = array(
+            $response = [
                 'success' => true,
                 'flag' => true,
-                'msj' => "Asignacion de solicitudes con exito"
-            );
+                'msj' => 'Asignacion de solicitudes con exito',
+            ];
         } catch (Exception $e) {
-            $response = array(
+            $response = [
                 'success' => false,
                 'flag' => false,
-                'msj' => $e->getMessage()
-            );
+                'msj' => $e->getMessage(),
+            ];
         }
+
         return $this->renderObject($response, false);
     }
 
-    function reasigna_proceso($model, $usuori, $usudes, $fecini, $fecfin)
+    public function reasigna_proceso($model, $usuori, $usudes, $fecini, $fecfin)
     {
-        if (!$model) return;
+        if (! $model) {
+            return;
+        }
         $tablaData = $model->find(" usuario ='{$usuori}' AND fecsol between '{$fecini}' AND '{$fecfin}' AND estado = 'P'");
         foreach ($tablaData as $mtabla) {
             $mtabla->setUsuario($usudes);
@@ -93,80 +96,85 @@ class ReasignaController extends ApplicationController
 
     public function traerDatosAction(Request $request)
     {
-        $this->setResponse("ajax");
-        $tipopc = $request->input("tipopc");
-        $usuario = $request->input("usuario");
-        $response  = "<table class='table table-hover align-items-center table-bordered'>";
+        $this->setResponse('ajax');
+        $tipopc = $request->input('tipopc');
+        $usuario = $request->input('usuario');
+        $response = "<table class='table table-hover align-items-center table-bordered'>";
         $response .= "<thead class='thead-dark'>";
-        $response .= "<tr>";
+        $response .= '<tr>';
         $response .= "<th scope='col'>Id</th>";
         $response .= "<th scope='col'>Documento</th>";
         $response .= "<th scope='col'>Nombre</th>";
-        if ($tipopc == "8" || $tipopc == "5") $response .= "<th scope='col'></th>";
+        if ($tipopc == '8' || $tipopc == '5') {
+            $response .= "<th scope='col'></th>";
+        }
         $response .= "<th scope='col'></th>";
-        $response .= "</tr>";
-        $response .= "</thead>";
+        $response .= '</tr>';
+        $response .= '</thead>';
         $response .= "<tbody class='list'>";
 
-        $consultasOldServices = new  GeneralService();
-        $mercurio = $consultasOldServices->consultaTipopc($tipopc, "alluser", "", $usuario);
+        $consultasOldServices = new GeneralService;
+        $mercurio = $consultasOldServices->consultaTipopc($tipopc, 'alluser', '', $usuario);
 
         foreach ($mercurio['datos'] as $mmercurio) {
-            if ($tipopc == 1 || $tipopc == 9 || $tipopc == 10 || $tipopc == 11 || $tipopc == 12) { //trabajador
-                $documento = "getCedtra";
-                $nombre = "getNombre";
+            if ($tipopc == 1 || $tipopc == 9 || $tipopc == 10 || $tipopc == 11 || $tipopc == 12) { // trabajador
+                $documento = 'getCedtra';
+                $nombre = 'getNombre';
             }
-            if ($tipopc == 2) { //empresa
-                $documento = "getNit";
-                $nombre = "getRazsoc";
+            if ($tipopc == 2) { // empresa
+                $documento = 'getNit';
+                $nombre = 'getRazsoc';
             }
-            if ($tipopc == 3) { //conyuge
-                $documento = "getCedcon";
-                $nombre = "getNombre";
+            if ($tipopc == 3) { // conyuge
+                $documento = 'getCedcon';
+                $nombre = 'getNombre';
             }
-            if ($tipopc == 4) { //beneficiario
-                $documento = "getDocumento";
-                $nombre = "getNombre";
+            if ($tipopc == 4) { // beneficiario
+                $documento = 'getDocumento';
+                $nombre = 'getNombre';
             }
-            if ($tipopc == 5) { //basicos
-                $documento = "getDocumento";
-                $nombre = "getDocumentoDetalle";
-                $extra = $mmercurio->getCampoDetalle() . " - " . $mmercurio->getAntval() . " - " . $mmercurio->getValor();
+            if ($tipopc == 5) { // basicos
+                $documento = 'getDocumento';
+                $nombre = 'getDocumentoDetalle';
+                $extra = $mmercurio->getCampoDetalle().' - '.$mmercurio->getAntval().' - '.$mmercurio->getValor();
             }
-            if ($tipopc == 7) { //retiro
-                $documento = "getCedtra";
-                $nombre = "getNomtra";
+            if ($tipopc == 7) { // retiro
+                $documento = 'getCedtra';
+                $nombre = 'getNomtra';
             }
-            if ($tipopc == 8) { //certificiados
-                $documento = "getCodben";
-                $nombre = "getNombre";
+            if ($tipopc == 8) { // certificiados
+                $documento = 'getCodben';
+                $nombre = 'getNombre';
                 $extra = $mmercurio->getNomcer();
             }
-            $response .= "<tr>";
+            $response .= '<tr>';
             $response .= "<td>{$mmercurio->getId()}</td>";
             $response .= "<td>{$mmercurio->$documento()}</td>";
             $response .= "<td>{$mmercurio->$nombre()}</td>";
-            if ($tipopc == "8" || $tipopc == "5") $response .= "<td>$extra</td>";
+            if ($tipopc == '8' || $tipopc == '5') {
+                $response .= "<td>$extra</td>";
+            }
             $response .= "<td class='table-actions'>";
             $response .= "<a href='#!' class='table-action btn btn-xs btn-primary' title='Info' onclick=\"info('$tipopc','{$mmercurio->getId()}')\">";
             $response .= "<i class='fas fa-info'></i>";
-            $response .= "</a>";
-            $response .= "</td>";
-            $response .= "</tr>";
+            $response .= '</a>';
+            $response .= '</td>';
+            $response .= '</tr>';
         }
-        $response .= "</tbody>";
-        $response .= "</table>";
+        $response .= '</tbody>';
+        $response .= '</table>';
+
         return $this->renderObject($response, false);
     }
 
     public function inforAction(Request $request)
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         $tipopc = $request->input('tipopc');
         $id = $request->input('id');
-        $response = "";
-        $consultasOldServices = new  GeneralService();
-        $result = $consultasOldServices->consultaTipopc($tipopc, "info", $id);
+        $response = '';
+        $consultasOldServices = new GeneralService;
+        $result = $consultasOldServices->consultaTipopc($tipopc, 'info', $id);
 
         $response = $result['consulta'];
         $response .= "<div class='jumbotron'>";
@@ -176,17 +184,18 @@ class ReasignaController extends ApplicationController
         $response .= "<p class='lead'>";
         $response .= "<div class='form-group'>";
         $response .= Tag::selectStatic(new ServicesRequest([
-            "name" => "usuario_rea",
-            "options" => $this->Gener02->find("usuario in (select usuario from mercurio08 where tipopc='$tipopc')"),
-            "using" => "usuario,nombre",
-            "use_dummy" => true,
-            "dummyValue" => "",
-            "class" => "form-control"
+            'name' => 'usuario_rea',
+            'options' => $this->Gener02->find("usuario in (select usuario from mercurio08 where tipopc='$tipopc')"),
+            'using' => 'usuario,nombre',
+            'use_dummy' => true,
+            'dummyValue' => '',
+            'class' => 'form-control',
         ]));
-        $response .= "</div>";
+        $response .= '</div>';
         $response .= "<button type='button' class='btn btn-warning btn-lg btn-block' onclick='cambiar_usuario($tipopc,$id)'>Cambiar Usuario Responsable</button>";
-        $response .= "</p>";
-        $response .= "</div>";
+        $response .= '</p>';
+        $response .= '</div>';
+
         return $this->renderText($response);
     }
 
@@ -194,27 +203,29 @@ class ReasignaController extends ApplicationController
     {
         try {
 
-            $this->setResponse("ajax");
+            $this->setResponse('ajax');
             $tipopc = $request->input('tipopc');
             $id = $request->input('id');
             $usuario = $request->input('usuario');
-            $modelos = array("mercurio33", "Mercurio35");
+            $modelos = ['mercurio33', 'Mercurio35'];
 
             $response = $this->db->begin();
-            $consultasOldServices = new  GeneralService();
-            $result = $consultasOldServices->consultaTipopc($tipopc, "one", $id);
+            $consultasOldServices = new GeneralService;
+            $result = $consultasOldServices->consultaTipopc($tipopc, 'one', $id);
 
             $mercurio = $result['datos'];
             $mercurio->setUsuario($usuario);
-            if (!$mercurio->save()) {
+            if (! $mercurio->save()) {
                 parent::setLogger($mercurio->getMessages());
                 $this->db->rollback();
             }
             $this->db->commit();
-            $response = parent::successFunc("Cambio de Usuario con Exito");
+            $response = parent::successFunc('Cambio de Usuario con Exito');
+
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $response = parent::errorFunc("No se pudo realizar la opcion");
+            $response = parent::errorFunc('No se pudo realizar la opcion');
+
             return $this->renderObject($response, false);
         }
     }

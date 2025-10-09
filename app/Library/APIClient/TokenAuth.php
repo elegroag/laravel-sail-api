@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Library\APIClient;
 
 use App\Exceptions\AuthException;
@@ -6,8 +7,11 @@ use App\Exceptions\AuthException;
 class TokenAuth implements AuthClientInterface
 {
     private $token;
+
     private $host;
+
     private $credentials;
+
     private $point;
 
     public function __construct($credentials, $host, $point)
@@ -19,7 +23,7 @@ class TokenAuth implements AuthClientInterface
 
     public function authenticate()
     {
-        return $this->newToken($this->host . '' . $this->point);
+        return $this->newToken($this->host.''.$this->point);
     }
 
     public function newToken($endpoint)
@@ -40,47 +44,50 @@ class TokenAuth implements AuthClientInterface
         if ($out) {
             if ($out['response']['status'] == true) {
                 $this->token = (isset($out['response']['access_token']) ? $out['response']['access_token'] : $out['response']['token']);
+
                 return $this->token;
             } else {
-                throw new AuthException("Error " . $out['response']['message'], 1);
+                throw new AuthException('Error '.$out['response']['message'], 1);
             }
         } else {
-            throw new AuthException("Error, no es posible generar el token para el servicio", 1);
+            throw new AuthException('Error, no es posible generar el token para el servicio', 1);
         }
     }
 
     public function getHeader($autenticar = 0)
     {
         if ($autenticar == true) {
-            return array('Content-Type: application/x-www-form-urlencoded');
+            return ['Content-Type: application/x-www-form-urlencoded'];
         } else {
-            return array(
-                "Content-Type: application/json",
-                "Authorization: Bearer {$this->token}"
-            );
+            return [
+                'Content-Type: application/json',
+                "Authorization: Bearer {$this->token}",
+            ];
         }
     }
 
-
     /**
      * procesaRequest function
+     *
      * @param [string] $result
      * @return array
      */
     public function procesaRequest($result)
     {
-        if($result == '' || is_null($result)) return false;
-        
+        if ($result == '' || is_null($result)) {
+            return false;
+        }
+
         $macth = preg_match('/^\{(.*)\:(.*)\}$/', trim($result));
         if ($macth === 0 || $macth === false) {
             $macth = preg_match('/^\[(.*)\:(.*)\]$/', trim($result));
         }
         if ($macth === 0 || $macth === false) {
-            return array(
-                "success" => false,
-                "response" => array(),
-                "errors" => "Error:\n{$result}"
-            );
+            return [
+                'success' => false,
+                'response' => [],
+                'errors' => "Error:\n{$result}",
+            ];
         } else {
             return json_decode($result, true);
         }

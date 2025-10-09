@@ -10,7 +10,7 @@ class Formularios
 
     public function __construct()
     {
-        $this->fabrica = new FactoryDocuments();
+        $this->fabrica = new FactoryDocuments;
     }
 
     private function generarDocumento($tipo, $metodo, $params)
@@ -18,6 +18,7 @@ class Formularios
         $documento = $this->fabrica->$metodo($tipo);
         $request = $documento->setParamsInit($params);
         $documento->main($request);
+
         return $documento->outPut();
     }
 

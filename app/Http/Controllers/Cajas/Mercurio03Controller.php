@@ -2,26 +2,26 @@
 
 namespace App\Http\Controllers\Cajas;
 
-use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio03;
-use App\Services\Tag;
 use App\Services\Utils\GeneralService;
-use App\Services\Utils\Table;
-use App\Services\Utils\UploadFile;
 use App\Services\Utils\Paginate;
+use App\Services\Utils\Table;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class Mercurio03Controller extends ApplicationController
 {
+    protected $query = '1=1';
 
-    protected $query = "1=1";
     protected $cantidad_pagina = 10;
+
     protected $db;
+
     protected $user;
+
     protected $tipo;
 
     public function __construct()
@@ -33,15 +33,15 @@ class Mercurio03Controller extends ApplicationController
 
     public function showTabla($paginate)
     {
-        $table = new Table();
+        $table = new Table;
         $table->set_template(Table::TmpGeneral());
         $table->set_heading(
-            "OPT",
-            "Codigo",
-            "Nombre",
-            "Cargo",
-            "Archivo",
-            "Email"
+            'OPT',
+            'Codigo',
+            'Nombre',
+            'Cargo',
+            'Archivo',
+            'Email'
         );
 
         if (count($paginate->items) > 0) {
@@ -64,42 +64,44 @@ class Mercurio03Controller extends ApplicationController
             $table->add_row('');
             $table->set_empty("<tr><td colspan='6'> &nbsp; No hay registros que mostrar</td></tr>");
         }
+
         return $table->generate();
     }
 
     public function aplicarFiltroAction(Request $request)
     {
-        $consultasOldServices = new GeneralService();
+        $consultasOldServices = new GeneralService;
         $this->query = $consultasOldServices->converQuery($request);
+
         return $this->buscarAction($request);
     }
 
     public function changeCantidadPaginaAction(Request $request)
     {
-        $this->cantidad_pagina = $request->input("numero");
+        $this->cantidad_pagina = $request->input('numero');
+
         return $this->buscarAction($request);
     }
 
     public function indexAction()
     {
-        $campo_field = array(
-            "codfir" => "Código",
-            "nombre" => "Nombre",
-            "cargo" => "Cargo",
-            "email" => "Email"
-        );
+        $campo_field = [
+            'codfir' => 'Código',
+            'nombre' => 'Nombre',
+            'cargo' => 'Cargo',
+            'email' => 'Email',
+        ];
 
         return view('cajas.mercurio03.index', [
-            'title' => "Gestión de Firmas",
-            'campo_filtro' => $campo_field
+            'title' => 'Gestión de Firmas',
+            'campo_filtro' => $campo_field,
         ]);
     }
-
 
     public function buscarAction(Request $request)
     {
         try {
-            $pagina = ($request->input('pagina') == "") ? 1 : $request->input('pagina');
+            $pagina = ($request->input('pagina') == '') ? 1 : $request->input('pagina');
             $query = Mercurio03::whereRaw($this->query);
 
             $paginate = Paginate::execute(
@@ -109,7 +111,7 @@ class Mercurio03Controller extends ApplicationController
             );
 
             $html = $this->showTabla($paginate);
-            $consultasOldServices = new GeneralService();
+            $consultasOldServices = new GeneralService;
             $html_paginate = $consultasOldServices->showPaginate($paginate);
 
             $response['consulta'] = $html;
@@ -119,7 +121,7 @@ class Mercurio03Controller extends ApplicationController
         } catch (\Exception $e) {
             return $this->renderObject([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], false);
         }
     }
@@ -130,15 +132,16 @@ class Mercurio03Controller extends ApplicationController
             $codfir = $request->input('codfir');
             $mercurio03 = Mercurio03::where('codfir', $codfir)->first();
 
-            if (!$mercurio03) {
-                $mercurio03 = new Mercurio03();
+            if (! $mercurio03) {
+                $mercurio03 = new Mercurio03;
                 $mercurio03->setCodfir($codfir);
             }
 
             return $this->renderObject($mercurio03->toArray(), false);
         } catch (\Exception $e) {
             parent::setLogger($e->getMessage());
-            $response = parent::errorFunc("Error al obtener el registro: " . $e->getMessage());
+            $response = parent::errorFunc('Error al obtener el registro: '.$e->getMessage());
+
             return $this->renderObject($response, false);
         }
     }
@@ -155,25 +158,26 @@ class Mercurio03Controller extends ApplicationController
             if ($mercurio03) {
                 // Eliminar archivo físico si existe
                 $mercurio01 = Mercurio01::first();
-                if ($mercurio01 && $mercurio03->getArchivo() && file_exists($mercurio01->getPath() . $mercurio03->getArchivo())) {
-                    unlink($mercurio01->getPath() . $mercurio03->getArchivo());
+                if ($mercurio01 && $mercurio03->getArchivo() && file_exists($mercurio01->getPath().$mercurio03->getArchivo())) {
+                    unlink($mercurio01->getPath().$mercurio03->getArchivo());
                 }
 
-                if (!$mercurio03->delete()) {
-                    throw new \Exception("No se pudo eliminar el registro");
+                if (! $mercurio03->delete()) {
+                    throw new \Exception('No se pudo eliminar el registro');
                 }
 
                 DB::commit();
-                $response = parent::successFunc("Registro eliminado correctamente");
+                $response = parent::successFunc('Registro eliminado correctamente');
             } else {
-                $response = parent::errorFunc("El registro no existe");
+                $response = parent::errorFunc('El registro no existe');
             }
 
             return $this->renderObject($response, false);
         } catch (\Exception $e) {
             DB::rollBack();
             parent::setLogger($e->getMessage());
-            $response = parent::errorFunc("Error al eliminar el registro: " . $e->getMessage());
+            $response = parent::errorFunc('Error al eliminar el registro: '.$e->getMessage());
+
             return $this->renderObject($response, false);
         }
     }
@@ -190,10 +194,10 @@ class Mercurio03Controller extends ApplicationController
 
             // Buscar o crear una nueva instancia
             $mercurio03 = Mercurio03::where('codfir', $codfir)->first();
-            $isNew = !$mercurio03;
+            $isNew = ! $mercurio03;
 
             if ($isNew) {
-                $mercurio03 = new Mercurio03();
+                $mercurio03 = new Mercurio03;
                 $mercurio03->setCodfir($codfir);
             }
 
@@ -206,18 +210,18 @@ class Mercurio03Controller extends ApplicationController
             if ($request->hasFile('archivo') && $request->file('archivo')->isValid()) {
                 $mercurio01 = Mercurio01::first();
 
-                if (!$mercurio01 || !$mercurio01->getPath()) {
-                    throw new \Exception("No se ha configurado la ruta para guardar archivos");
+                if (! $mercurio01 || ! $mercurio01->getPath()) {
+                    throw new \Exception('No se ha configurado la ruta para guardar archivos');
                 }
 
                 // Eliminar archivo anterior si existe
-                if (!$isNew && $mercurio03->getArchivo() && file_exists($mercurio01->getPath() . $mercurio03->getArchivo())) {
-                    unlink($mercurio01->getPath() . $mercurio03->getArchivo());
+                if (! $isNew && $mercurio03->getArchivo() && file_exists($mercurio01->getPath().$mercurio03->getArchivo())) {
+                    unlink($mercurio01->getPath().$mercurio03->getArchivo());
                 }
 
                 $file = $request->file('archivo');
                 $extension = $file->getClientOriginalExtension();
-                $fileName = $codfir . "_firma." . $extension;
+                $fileName = $codfir.'_firma.'.$extension;
 
                 // Mover el archivo
                 $file->move($mercurio01->getPath(), $fileName);
@@ -225,17 +229,19 @@ class Mercurio03Controller extends ApplicationController
             }
 
             // Guardar el registro
-            if (!$mercurio03->save()) {
-                throw new \Exception("Error al guardar el registro");
+            if (! $mercurio03->save()) {
+                throw new \Exception('Error al guardar el registro');
             }
 
             DB::commit();
-            $response = parent::successFunc($isNew ? "Registro creado correctamente" : "Registro actualizado correctamente");
+            $response = parent::successFunc($isNew ? 'Registro creado correctamente' : 'Registro actualizado correctamente');
+
             return $this->renderObject($response, false);
         } catch (\Exception $e) {
             DB::rollBack();
             parent::setLogger($e->getMessage());
-            $response = parent::errorFunc("Error al guardar el registro: " . $e->getMessage());
+            $response = parent::errorFunc('Error al guardar el registro: '.$e->getMessage());
+
             return $this->renderObject($response, false);
         }
     }
@@ -247,15 +253,16 @@ class Mercurio03Controller extends ApplicationController
             $exists = Mercurio03::where('codfir', $codfir)->exists();
 
             if ($exists) {
-                $response = parent::errorFunc("El código ya existe");
+                $response = parent::errorFunc('El código ya existe');
             } else {
-                $response = parent::successFunc("");
+                $response = parent::successFunc('');
             }
 
             return $this->renderObject($response, false);
         } catch (\Exception $e) {
             parent::setLogger($e->getMessage());
-            $response = parent::errorFunc("Error al validar el código: " . $e->getMessage());
+            $response = parent::errorFunc('Error al validar el código: '.$e->getMessage());
+
             return $this->renderObject($response, false);
         }
     }
@@ -264,26 +271,27 @@ class Mercurio03Controller extends ApplicationController
     {
         try {
             $_fields = [
-                "codfir" => ['header' => "Código", 'size' => "15", 'align' => "C"],
-                "nombre" => ['header' => "Nombre", 'size' => "31", 'align' => "L"],
-                "cargo" => ['header' => "Cargo", 'size' => "31", 'align' => "L"],
-                "archivo" => ['header' => "Archivo", 'size' => "31", 'align' => "L"],
-                "email" => ['header' => "Email", 'size' => "31", 'align' => "L"]
+                'codfir' => ['header' => 'Código', 'size' => '15', 'align' => 'C'],
+                'nombre' => ['header' => 'Nombre', 'size' => '31', 'align' => 'L'],
+                'cargo' => ['header' => 'Cargo', 'size' => '31', 'align' => 'L'],
+                'archivo' => ['header' => 'Archivo', 'size' => '31', 'align' => 'L'],
+                'email' => ['header' => 'Email', 'size' => '31', 'align' => 'L'],
             ];
 
-            $consultasOldServices = new GeneralService();
+            $consultasOldServices = new GeneralService;
             $file = $consultasOldServices->createReport(
-                "mercurio03",
+                'mercurio03',
                 $_fields,
                 $this->query,
-                "Reporte de Firmas",
+                'Reporte de Firmas',
                 $format
             );
 
             return $this->renderObject($file, false);
         } catch (\Exception $e) {
             parent::setLogger($e->getMessage());
-            $response = parent::errorFunc("Error al generar el reporte: " . $e->getMessage());
+            $response = parent::errorFunc('Error al generar el reporte: '.$e->getMessage());
+
             return $this->renderObject($response, false);
         }
     }

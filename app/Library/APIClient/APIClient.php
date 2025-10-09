@@ -2,26 +2,33 @@
 
 namespace App\Library\APIClient;
 
-use App\Exceptions\AuthException;
 use App\Exceptions\DebugException;
 
 class APIClient
 {
     /**
      * auth variable
+     *
      * @var [AuthInterface]
      */
     private $auth;
+
     private $hostConnection;
+
     private $apiUrl;
+
     private $statusCode;
-    private $curlHeader = false; #'1L'
-    private $curlVerbose = false; # true
+
+    private $curlHeader = false; // '1L'
+
+    private $curlVerbose = false; // true
+
     private $typeJson = true;
 
     /**
      * __construct function
-     * @param AuthClientInterface $auth
+     *
+     * @param  AuthClientInterface  $auth
      * @param [type] $app
      * @param [type] $url
      */
@@ -36,7 +43,7 @@ class APIClient
     {
         // Aquí va el código para consumir la API
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, trim($this->hostConnection . '/' . $this->apiUrl));
+        curl_setopt($ch, CURLOPT_URL, trim($this->hostConnection.'/'.$this->apiUrl));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_HEADER, $this->curlHeader);
@@ -47,9 +54,9 @@ class APIClient
 
         if ($this->auth instanceof BasicAuth) {
             $this->auth->authenticate();
-            // Colocar headers solo en caso de usar json Request 
+            // Colocar headers solo en caso de usar json Request
             if ($this->typeJson === true) {
-                curl_setopt($ch, CURLOPT_HTTPHEADER,  $this->auth->getHeader());
+                curl_setopt($ch, CURLOPT_HTTPHEADER, $this->auth->getHeader());
             }
         }
 
@@ -74,7 +81,7 @@ class APIClient
                 curl_setopt($ch, CURLOPT_POST, false);
                 break;
             default:
-                throw new DebugException("Error no está definido el metodo http", 1);
+                throw new DebugException('Error no está definido el metodo http', 1);
                 break;
         }
 
@@ -86,7 +93,7 @@ class APIClient
         if (is_null($result) || $this->statusCode >= 400) {
             $error = curl_error($ch);
             curl_close($ch);
-            throw new DebugException("Error access Api, detalles: " . $error, 501);
+            throw new DebugException('Error access Api, detalles: '.$error, 501);
         } else {
             curl_close($ch);
             if ($this->auth instanceof AuthClientInterface) {
@@ -99,7 +106,8 @@ class APIClient
 
     /**
      * setTypeJson function
-     * @param bool $value
+     *
+     * @param  bool  $value
      * @return void
      */
     public function setTypeJson($value)

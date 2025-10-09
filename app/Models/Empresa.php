@@ -6,9 +6,10 @@ use App\Models\Adapter\ModelBase;
 
 class Empresa extends ModelBase
 {
+    protected $table = 'empresas';
 
-    protected $table = 'empresas';      
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -20,7 +21,7 @@ class Empresa extends ModelBase
         'sector_economico',
         'numero_empleados',
         'descripcion',
-        'estado'
+        'estado',
     ];
 
     protected $casts = [

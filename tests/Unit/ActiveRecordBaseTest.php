@@ -2,12 +2,10 @@
 
 namespace Tests\Unit;
 
-use Tests\TestCase;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\Adapter\DbBase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Tests\TestCase;
 
 class ActiveRecordBaseTest extends TestCase
 {
@@ -45,7 +43,7 @@ class ActiveRecordBaseTest extends TestCase
         $this->assertEquals('Juan', $one['nombres']);
     }
 
-    public function test_inQuery_and_fetchArray()
+    public function test_in_query_and_fetch_array()
     {
         $ar = DbBase::rawConnect();
         DB::table('trabajadores')->insert([
@@ -93,7 +91,7 @@ class ActiveRecordBaseTest extends TestCase
         $updated = $ar->update('trabajadores', ['salario'], [1800.00], "rut='33333333-3'", false);
         $this->assertGreaterThanOrEqual(0, $updated);
 
-        $num = $ar->numRows("SELECT * FROM trabajadores WHERE salario = 1800.00");
+        $num = $ar->numRows('SELECT * FROM trabajadores WHERE salario = 1800.00');
         $this->assertEquals(1, $num);
 
         $ar->begin();

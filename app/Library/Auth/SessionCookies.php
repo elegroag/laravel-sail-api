@@ -6,20 +6,19 @@ use App\Services\Srequest;
 
 class SessionCookies
 {
-
-
     /**
      * authenticate function
+     *
      * @return bool
      */
-    public static function authenticate(string $useApp = '', Srequest $request)
+    public static function authenticate(string $useApp, Srequest $request)
     {
         switch ($useApp) {
             case 'mercurio':
-                $session = new SessionMercurio();
+                $session = new SessionMercurio;
                 break;
             case 'cajas':
-                $session = new SessionCajas();
+                $session = new SessionCajas;
                 break;
             default:
                 return false;
@@ -29,11 +28,12 @@ class SessionCookies
         session()->regenerate();
         $userData = $session->authenticate($request);
 
-        if (!$userData) {
+        if (! $userData) {
             return false;
         }
 
         session()->put('user', $userData);
+
         return true;
     }
 
@@ -47,17 +47,17 @@ class SessionCookies
     public static function user(): ?array
     {
         // Retornar identidad desde la sesión de Laravel
-        if (!function_exists('session')) {
+        if (! function_exists('session')) {
             return null;
         }
-        if (!session()->has('user')) {
+        if (! session()->has('user')) {
             return null;
         }
         $payload = (array) session('user');
 
         return [
             'valid' => true,
-            'payload' => $payload
+            'payload' => $payload,
         ];
     }
 

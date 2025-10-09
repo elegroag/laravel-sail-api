@@ -7,9 +7,10 @@ use Illuminate\Support\Facades\DB;
 
 class Gener02 extends ModelBase
 {
-
     protected $table = 'gener02';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -39,14 +40,17 @@ class Gener02 extends ModelBase
     {
         return $this->acceso;
     }
+
     public function getCedtra()
     {
         return $this->cedtra;
     }
+
     public function getCriptada()
     {
         return $this->criptada;
     }
+
     public function getEstado()
     {
         return $this->estado;
@@ -56,14 +60,17 @@ class Gener02 extends ModelBase
     {
         $this->acceso = $acceso;
     }
+
     public function setCedtra($cedtra)
     {
         $this->cedtra = $cedtra;
     }
+
     public function setCriptada($criptada)
     {
         $this->criptada = $criptada;
     }
+
     public function setEstado($estado)
     {
         $this->estado = $estado;
@@ -73,38 +80,47 @@ class Gener02 extends ModelBase
     {
         $this->usuario = $usuario;
     }
+
     public function setNombre($nombre)
     {
         $this->nombre = $nombre;
     }
+
     public function setTipfun($tipfun)
     {
         $this->tipfun = $tipfun;
     }
+
     public function setEmail($email)
     {
         $this->email = $email;
     }
+
     public function setLogin($login)
     {
         $this->login = $login;
     }
+
     public function getUsuario()
     {
         return $this->usuario;
     }
+
     public function getNombre()
     {
         return $this->nombre;
     }
+
     public function getTipfun()
     {
         return $this->tipfun;
     }
+
     public function getEmail()
     {
         return $this->email;
     }
+
     public function getLogin()
     {
         return $this->login;
@@ -118,6 +134,7 @@ class Gener02 extends ModelBase
         foreach ($rows as $row) {
             $data[$row->tipfun] = $row->detalle;
         }
+
         return $data;
     }
 
@@ -131,9 +148,10 @@ class Gener02 extends ModelBase
             ->where('tipfun', $this->tipfun)
             ->first();
 
-        if (!$row) {
+        if (! $row) {
             return false;
         }
+
         return $row->detalle;
     }
 }

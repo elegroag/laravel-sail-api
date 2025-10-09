@@ -7,9 +7,13 @@ use App\Models\Adapter\ModelBase;
 class Mercurio56 extends ModelBase
 {
     protected $table = 'mercurio56';
+
     public $timestamps = false;
+
     protected $primaryKey = 'codinf';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -85,12 +89,13 @@ class Mercurio56 extends ModelBase
 
     public function getEstadoArray()
     {
-        return ["A"=>"ACTIVO","I"=>"INACTIVO"];
+        return ['A' => 'ACTIVO', 'I' => 'INACTIVO'];
     }
 
     public function getEstadoDetalle()
     {
         $estados = $this->getEstadoArray();
-        return $estados[$this->estado] ?? "";
+
+        return $estados[$this->estado] ?? '';
     }
 }

@@ -6,9 +6,10 @@ use App\Models\Adapter\ModelBase;
 
 class Comandos extends ModelBase
 {
-
     protected $table = 'comandos';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -136,17 +137,17 @@ class Comandos extends ModelBase
 
     public function getEstadosArray()
     {
-        return array(
+        return [
             'P' => 'Pendiente',
             'F' => 'Finalizado',
             'X' => 'Cancelado',
-            'E' => 'Ejecución'
-        );
+            'E' => 'Ejecución',
+        ];
     }
 
     public function getEstadoDetalle($estado = '')
     {
-        if (!empty($estado)) {
+        if (! empty($estado)) {
             $this->estado = $estado;
         }
         switch ($this->estado) {
@@ -167,7 +168,7 @@ class Comandos extends ModelBase
 
     public function initialize()
     {
-        $this->hasMany("id", "comandos", "estructura");
-        $this->belongsTo("id", "comandos", "estructura");
+        $this->hasMany('id', 'comandos', 'estructura');
+        $this->belongsTo('id', 'comandos', 'estructura');
     }
 }

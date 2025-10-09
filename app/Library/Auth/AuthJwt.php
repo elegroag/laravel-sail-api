@@ -4,22 +4,28 @@ namespace App\Library\Auth;
 
 use App\Exceptions\AuthException;
 use App\Models\Gener02;
-use Tymon\JWTAuth\Facades\JWTAuth;
-use Tymon\JWTAuth\Facades\JWTFactory;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Facades\JWTFactory;
 
 class AuthJwt
 {
     protected $token;
+
     protected $headers;
+
     protected $authorization;
+
     protected $auth_type;
 
     private $expire; // segundos
+
     private $expireMinutes; // minutos para tymon/jwt-auth
+
     private $user;
+
     private $password;
 
     public function __construct($expire = 7200)
@@ -35,29 +41,31 @@ class AuthJwt
 
     /**
      * loadHeaders function
+     *
      * @param [type] $ajax
      * @return void
      */
     public function loadHeaders($ajax)
     {
         header('Access-Control-Allow-Origin: *');
-        header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
-        header("Access-Control-Allow-Methods: POST");
-        header("Allow: POST");
+        header('Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method');
+        header('Access-Control-Allow-Methods: POST');
+        header('Allow: POST');
         if ($ajax) {
-            header("Content-type: application/json; charset=utf-8");
+            header('Content-type: application/json; charset=utf-8');
         } else {
-            header("Content-type: application/x-www-form-urlencoded; charset=utf-8");
+            header('Content-type: application/x-www-form-urlencoded; charset=utf-8');
         }
         // En CLI (tests) REQUEST_METHOD puede no existir
         $method = $_SERVER['REQUEST_METHOD'] ?? null;
-        if ($method === "OPTIONS") {
-            die();
+        if ($method === 'OPTIONS') {
+            exit();
         }
     }
 
     /**
      * AuthHttp function
+     *
      * @param [type] $clave
      * @param [type] $usuario
      * @return string token
@@ -67,7 +75,7 @@ class AuthJwt
         $this->loadHeaders(false);
 
         if (is_ajax()) {
-            throw new AuthException("El acceso AJAX no es correcto al servicio solicitado", 404);
+            throw new AuthException('El acceso AJAX no es correcto al servicio solicitado', 404);
         }
         /**
          * no existe el authorization
@@ -80,28 +88,28 @@ class AuthJwt
         $gener02 = Gener02::where('usuario', $usuario)->first();
 
         if ($gener02 == false) {
-            throw new AuthException("El usuario no es valido para continuar con la autenticación.", 6);
+            throw new AuthException('El usuario no es valido para continuar con la autenticación.', 6);
         }
 
-        if (!clave_verify($this->password, $gener02->getPassword())) {
-            throw new AuthException("La clave no es correcta para continuar con la autenticación.", 6);
+        if (! clave_verify($this->password, $gener02->getPassword())) {
+            throw new AuthException('La clave no es correcta para continuar con la autenticación.', 6);
         }
 
-        if (!$gener02) {
-            throw new AuthException("El acceso no es correcto para continuar con la autenticación. 4", 4);
+        if (! $gener02) {
+            throw new AuthException('El acceso no es correcto para continuar con la autenticación. 4', 4);
         }
 
-        if (!$clave) {
-            throw new AuthException("La clave es requerida para la autenticación. 3", 3);
+        if (! $clave) {
+            throw new AuthException('La clave es requerida para la autenticación. 3', 3);
         }
 
-        if (!clave_verify($clave, $gener02->getPassword())) {
-            throw new AuthException("La clave no es correcta para continuar con la autenticación. 6", 6);
+        if (! clave_verify($clave, $gener02->getPassword())) {
+            throw new AuthException('La clave no es correcta para continuar con la autenticación. 6', 6);
         }
 
-        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        if (! empty($_SERVER['HTTP_CLIENT_IP'])) {
             $ip = $_SERVER['HTTP_CLIENT_IP'];
-        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        } elseif (! empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
             $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
         } else {
             $ip = $_SERVER['REMOTE_ADDR'];
@@ -122,7 +130,7 @@ class AuthJwt
             $payload = JWTFactory::customClaims($claims)->make();
             $this->token = JWTAuth::encode($payload)->get();
         } catch (JWTException $e) {
-            throw new AuthException('No fue posible generar el token de autenticación: ' . $e->getMessage(), 500);
+            throw new AuthException('No fue posible generar el token de autenticación: '.$e->getMessage(), 500);
         }
 
         return $this->token;
@@ -130,21 +138,22 @@ class AuthJwt
 
     /**
      * InitRest function
+     *
      * @return bool
      */
     public function InitRest()
     {
         try {
             $this->loadHeaders(true);
-            if (!is_ajax()) {
-                throw new AuthException("El acceso no es correcto al servicio", 404);
+            if (! is_ajax()) {
+                throw new AuthException('El acceso no es correcto al servicio', 404);
             }
 
             $this->authorization = (isset($this->headers['Authorization'])) ? $this->headers['Authorization'] : null;
 
             if ($this->authorization) {
                 if (preg_match('/^basic/i', $this->authorization)) {
-                    $tk = base64_decode(trim(preg_replace('/^basic/i', "", $this->authorization)));
+                    $tk = base64_decode(trim(preg_replace('/^basic/i', '', $this->authorization)));
                     $exp = explode(':', $tk);
                     if (count($exp) == 2) {
                         $this->user = $exp[0];
@@ -153,8 +162,8 @@ class AuthJwt
 
                         $gener02 = Gener02::where('usuario', $this->user)->first();
 
-                        if (!clave_verify($this->password, $gener02->getCriptada())) {
-                            throw new AuthException("La clave no es correcta para continuar con la autenticación.", 501);
+                        if (! clave_verify($this->password, $gener02->getCriptada())) {
+                            throw new AuthException('La clave no es correcta para continuar con la autenticación.', 501);
                         } else {
                             return true;
                         }
@@ -164,7 +173,7 @@ class AuthJwt
                 }
 
                 if (preg_match('/^bearer/i', $this->authorization)) {
-                    $this->token = trim(preg_replace('/^bearer/i', "", $this->authorization));
+                    $this->token = trim(preg_replace('/^bearer/i', '', $this->authorization));
                     $this->auth_type = 'bearer';
 
                     try {
@@ -174,9 +183,10 @@ class AuthJwt
                         if ($this->user) {
                             $gener02 = Gener02::where('usuario', $this->user)->first();
                             if ($gener02 == false) {
-                                throw new AuthException("El usuario no es valido para su ingreso.", 501);
+                                throw new AuthException('El usuario no es valido para su ingreso.', 501);
                             }
                         }
+
                         return true;
                     } catch (TokenExpiredException $e) {
                         throw new AuthException('El token ha expirado.', 401);
@@ -187,7 +197,7 @@ class AuthJwt
                     }
                 }
             } else {
-                throw new AuthException("No se ha recepcionado las credenciales de acceso.", 501);
+                throw new AuthException('No se ha recepcionado las credenciales de acceso.', 501);
             }
         } catch (AuthException $err) {
             return $err->getMessage();
@@ -199,18 +209,18 @@ class AuthJwt
      * Genera un token "simple" con claims base e incluye opcionalmente claims personalizados.
      * No permite sobreescribir claims reservados.
      *
-     * @param array $extraClaims Claims adicionales a incluir en el payload
+     * @param  array  $extraClaims  Claims adicionales a incluir en el payload
      * @return string token
      */
     public function SimpleToken(array $extraClaims = [])
     {
         $this->loadHeaders(true);
-        if (!is_ajax()) {
-            throw new AuthException("El acceso no es correcto al servicio, la solicitud no es REST", 404);
+        if (! is_ajax()) {
+            throw new AuthException('El acceso no es correcto al servicio, la solicitud no es REST', 404);
         }
-        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        if (! empty($_SERVER['HTTP_CLIENT_IP'])) {
             $ip = $_SERVER['HTTP_CLIENT_IP'];
-        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        } elseif (! empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
             $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
         } else {
             $ip = $_SERVER['REMOTE_ADDR'];
@@ -225,22 +235,23 @@ class AuthJwt
         ];
 
         // Proteger claims reservados para no ser sobreescritos
-        $reserved = ['sub','usuario','tipfun','estado','ip','iat','exp','nbf','jti','iss'];
+        $reserved = ['sub', 'usuario', 'tipfun', 'estado', 'ip', 'iat', 'exp', 'nbf', 'jti', 'iss'];
         foreach ($reserved as $key) {
             if (array_key_exists($key, $extraClaims)) {
                 unset($extraClaims[$key]);
             }
         }
-        if (!empty($extraClaims)) {
+        if (! empty($extraClaims)) {
             $claims = array_merge($claims, $extraClaims);
         }
 
         try {
             JWTAuth::factory()->setTTL($this->expireMinutes);
             $payload = JWTFactory::customClaims($claims)->make();
+
             return JWTAuth::encode($payload)->get();
         } catch (JWTException $e) {
-            throw new AuthException('No fue posible generar el token: ' . $e->getMessage(), 500);
+            throw new AuthException('No fue posible generar el token: '.$e->getMessage(), 500);
         }
     }
 
@@ -249,21 +260,22 @@ class AuthJwt
         $authorization = (isset($this->headers['Authorization'])) ? $this->headers['Authorization'] : null;
         if (is_null($authorization) == false) {
             if (preg_match('/^bearer/i', $authorization)) {
-                $this->token = trim(preg_replace('/^bearer/i', "", $authorization));
+                $this->token = trim(preg_replace('/^bearer/i', '', $authorization));
             } else {
-                throw new AuthException("Error no hay un token de validación", 5);
+                throw new AuthException('Error no hay un token de validación', 5);
             }
         } else {
-            throw new AuthException("No se ha recepcionado las credenciales de acceso.", 6);
+            throw new AuthException('No se ha recepcionado las credenciales de acceso.', 6);
         }
+
         return $this->token;
     }
 
     public function CheckSimpleToken($token)
     {
         $this->loadHeaders(true);
-        if (!is_ajax()) {
-            throw new AuthException("El acceso no es correcto al servicio", 404);
+        if (! is_ajax()) {
+            throw new AuthException('El acceso no es correcto al servicio', 404);
         }
         $token = (is_null($token)) ? $this->findToken() : $token;
         try {
@@ -272,7 +284,7 @@ class AuthJwt
             if ($ip) {
                 return true;
             }
-            throw new AuthException("Error el token no contiene IP válida", 5);
+            throw new AuthException('Error el token no contiene IP válida', 5);
         } catch (TokenExpiredException $e) {
             throw new AuthException('El token ha expirado.', 401);
         } catch (TokenInvalidException $e) {
@@ -287,14 +299,14 @@ class AuthJwt
         return $this->token;
     }
 
-
     public function validaToken()
     {
         try {
-            if (!$this->token) {
+            if (! $this->token) {
                 $this->token = $this->findToken();
             }
             JWTAuth::setToken($this->token)->getPayload();
+
             return true;
         } catch (TokenExpiredException $e) {
             return false;
@@ -313,6 +325,7 @@ class AuthJwt
         if (preg_match('/^\{(.*)\:(.*)\}$/', $data)) {
             return true;
         }
+
         return false;
     }
 }

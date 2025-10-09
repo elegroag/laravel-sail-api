@@ -1,30 +1,28 @@
 <?php
 
-if (!function_exists('calemp_array')) {
+if (! function_exists('calemp_array')) {
     /**
-     * 
      * @return array
      */
     function calemp_array()
     {
-        return array(
+        return [
             'E' => 'EMPRESA',
             'I' => 'INDEPENDIENTE',
             'P' => 'PENSIONADO',
             'F' => 'FACULTATIVO',
-            'D' => 'DESEMPLEADO'
-        );
+            'D' => 'DESEMPLEADO',
+        ];
     }
 }
 
-if (!function_exists('coddoc_repleg_array')) {
+if (! function_exists('coddoc_repleg_array')) {
     /**
-     * 
      * @return array
      */
     function coddoc_repleg_array()
     {
-        return array(
+        return [
             1 => 'CC',
             10 => 'TMF',
             11 => 'CD',
@@ -38,29 +36,27 @@ if (!function_exists('coddoc_repleg_array')) {
             6 => 'PA',
             7 => 'RC',
             8 => 'PEP',
-            9 => 'CB'
-        );
+            9 => 'CB',
+        ];
     }
 }
 
-if (!function_exists('tipper_array')) {
+if (! function_exists('tipper_array')) {
     /**
-     * 
      * @return array
      */
     function tipper_array()
     {
-        return array(
+        return [
             'N' => 'NATURAL',
-            'J' => 'JURIDICA'
-        );
+            'J' => 'JURIDICA',
+        ];
     }
 }
 
-if (!function_exists('calemp_detalle_value')) {
+if (! function_exists('calemp_detalle_value')) {
     /**
-     * 
-     * @param string $calemp
+     * @param  string  $calemp
      * @return string|null
      */
     function calemp_detalle_value($calemp)
@@ -88,10 +84,9 @@ if (!function_exists('calemp_detalle_value')) {
     }
 }
 
-if (!function_exists('calemp_use_tipo_value')) {
+if (! function_exists('calemp_use_tipo_value')) {
     /**
-     * 
-     * @param string $detalle
+     * @param  string  $detalle
      * @return string|null
      */
     function calemp_use_tipo_value($detalle)
@@ -119,20 +114,27 @@ if (!function_exists('calemp_use_tipo_value')) {
     }
 }
 
-
-if (!function_exists('estado_detalle_value')) {
+if (! function_exists('estado_detalle_value')) {
     /**
-     * 
-     * @param string $estado
+     * @param  string  $estado
      * @return string
      */
     function estado_detalle_value($estado)
     {
-        $return = "";
-        if ($estado == "T") $return = "TEMPORAL";
-        if ($estado == "D") $return = "DEVUELTO";
-        if ($estado == "A") $return = "APROBADO";
-        if ($estado == "X") $return = "RECHAZADO";
+        $return = '';
+        if ($estado == 'T') {
+            $return = 'TEMPORAL';
+        }
+        if ($estado == 'D') {
+            $return = 'DEVUELTO';
+        }
+        if ($estado == 'A') {
+            $return = 'APROBADO';
+        }
+        if ($estado == 'X') {
+            $return = 'RECHAZADO';
+        }
+
         return $return;
     }
 }

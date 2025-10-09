@@ -22,7 +22,7 @@ class ConyugeRequest extends FormRequest
             'segnom' => 'nullable|string|max:255',
             'telefono' => 'required|numeric|digits:10',
             'celular' => 'required|numeric|digits:10',
-            'email' => 'required|email|max:255'
+            'email' => 'required|email|max:255',
         ];
     }
 
@@ -32,7 +32,7 @@ class ConyugeRequest extends FormRequest
             'required' => 'El campo :attribute es obligatorio',
             'numeric' => 'El campo :attribute debe ser numérico',
             'email' => 'El campo :attribute debe ser un email válido',
-            'digits' => 'El campo :attribute debe tener :digits dígitos'
+            'digits' => 'El campo :attribute debe tener :digits dígitos',
         ];
     }
 }

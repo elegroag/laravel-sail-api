@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class Mercurio18Seeder extends Seeder
@@ -30,7 +29,6 @@ class Mercurio18Seeder extends Seeder
             );
         }
     }
-
 
     /* INSERT INTO `mercurio18` VALUES ('1','SU CIUDAD FAVORITA'),('2','NOMBRE DE MEJOR AMIGO DE INFANCIA'); */
 }

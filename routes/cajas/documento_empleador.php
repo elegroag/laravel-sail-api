@@ -1,8 +1,8 @@
 <?php
 
 // Importar facades y controlador necesarios
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Cajas\Mercurio14Controller;
+use Illuminate\Support\Facades\Route;
 
 // Rutas corregidas para Mercurio14Controller - Documentos y Empleador
 Route::get('/documentos-empleador/index', [Mercurio14Controller::class, 'indexAction'])->name('mercurio14.index')->middleware('auth');

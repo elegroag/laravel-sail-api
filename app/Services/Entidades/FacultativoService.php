@@ -17,10 +17,12 @@ use App\Services\Utils\Comman;
 
 class FacultativoService
 {
-
     private $tipopc = 10;
+
     private $tipsoc = '08';
+
     private $user;
+
     private $db;
 
     public function __construct()
@@ -31,12 +33,13 @@ class FacultativoService
 
     /**
      * findAllByEstado function
-     * @param string $estado
+     *
+     * @param  string  $estado
      * @return array
      */
     public function findAllByEstado($estado = '')
     {
-        //usuario empresa, unica solicitud de afiliación
+        // usuario empresa, unica solicitud de afiliación
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
 
@@ -66,12 +69,14 @@ class FacultativoService
             ORDER BY solis.fecsol ASC;";
 
         $solicitudes = $this->db->inQueryAssoc($sql);
+
         return $solicitudes;
     }
 
     /**
      * buscarEmpresaSubsidio function
      * buscar empresa en subsidio sin importar el estado
+     *
      * @param [type] $nit
      * @return void
      */
@@ -79,15 +84,15 @@ class FacultativoService
     {
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaEmpresas",
-                "metodo" => "informacion_empresa",
-                "params" => array(
-                    "nit" => $nit
-                )
-            )
+            [
+                'servicio' => 'ComfacaEmpresas',
+                'metodo' => 'informacion_empresa',
+                'params' => [
+                    'nit' => $nit,
+                ],
+            ]
         );
-        $salida =  $procesadorComando->toArray();
+        $salida = $procesadorComando->toArray();
         if ($salida['success']) {
             return $salida;
         } else {
@@ -97,8 +102,10 @@ class FacultativoService
 
     public function archivosRequeridos($solicitud)
     {
-        if ($solicitud == false) return false;
-        $archivos = array();
+        if ($solicitud == false) {
+            return false;
+        }
+        $archivos = [];
 
         $mercurio10 = Mercurio10::where('numero', $solicitud->getId())
             ->where('tipopc', $this->tipopc)
@@ -108,7 +115,7 @@ class FacultativoService
         $corregir = false;
         if ($mercurio10 && $mercurio10->estado == 'D') {
             $campos = $mercurio10->campos_corregir;
-            $corregir = explode(";", $campos);
+            $corregir = explode(';', $campos);
         }
 
         $mercurio14 = Mercurio14::where('tipopc', $this->tipopc)
@@ -132,7 +139,7 @@ class FacultativoService
                 }
             }
 
-            $obliga = ($m14->getObliga() == "S") ? "<br><small class='text-danger'>Obligatorio</small>" : "";
+            $obliga = ($m14->getObliga() == 'S') ? "<br><small class='text-danger'>Obligatorio</small>" : '';
             $archivo = new \stdClass;
             $archivo->obliga = $obliga;
             $archivo->id = $solicitud->getId();
@@ -144,21 +151,20 @@ class FacultativoService
         }
 
         $mercurio01 = Mercurio01::first();
-        $html = view("partials/archivos_requeridos", [
-            "load_archivos" => $archivos,
-            "path" => $mercurio01->getPath(),
-            "puede_borrar" => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true
+        $html = view('partials/archivos_requeridos', [
+            'load_archivos' => $archivos,
+            'path' => $mercurio01->getPath(),
+            'puede_borrar' => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true,
         ])->render();
 
         return $html;
     }
 
-
-
     /**
      * update function
-     * @param integer $id
-     * @param array $data
+     *
+     * @param  int  $id
+     * @param  array  $data
      * @return Mercurio36
      */
     public function update($id, $data)
@@ -166,15 +172,18 @@ class FacultativoService
         $empresa = $this->findById($id);
         if ($empresa != false) {
             $empresa->fill($data);
+
             return $empresa->save();
         }
+
         return false;
     }
 
     /**
      * updateByFormData function
-     * @param int $id
-     * @param array $data
+     *
+     * @param  int  $id
+     * @param  array  $data
      * @return bool
      */
     public function updateByFormData($id, $data)
@@ -182,6 +191,7 @@ class FacultativoService
         $solicitud = $this->findById($id);
         if ($solicitud) {
             $solicitud->fill($data);
+
             return $solicitud->save();
         } else {
             return false;
@@ -190,7 +200,8 @@ class FacultativoService
 
     /**
      * create function
-     * @param array $data
+     *
+     * @param  array  $data
      * @return Mercurio36
      */
     public function create($data)
@@ -201,25 +212,29 @@ class FacultativoService
 
         Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
         Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
+
         return $facultativo;
     }
 
     /**
      * create function
-     * @param array $data
+     *
+     * @param  array  $data
      * @return Mercurio36
      */
     public function createByFormData($data)
     {
-        $data['estado'] = "T";
-        $data['log'] = "0";
+        $data['estado'] = 'T';
+        $data['log'] = '0';
         $facultativo = $this->create($data);
+
         return $facultativo;
     }
 
     /**
      * findById function
-     * @param integer $id
+     *
+     * @param  int  $id
      * @return Mercurio36
      */
     public function findById($id)
@@ -229,10 +244,11 @@ class FacultativoService
 
     /**
      * enviarCaja function
-     * @param SenderValidationCaja $senderValidationCaja
-     * @param integer $id
-     * @param integer $documento
-     * @param integer $coddoc
+     *
+     * @param  SenderValidationCaja  $senderValidationCaja
+     * @param  int  $id
+     * @param  int  $documento
+     * @param  int  $coddoc
      * @return void
      */
     public function enviarCaja($senderValidationCaja, $id, $usuario)
@@ -240,18 +256,18 @@ class FacultativoService
         $solicitud = $this->findById($id);
 
         $cm37 = (new Mercurio37)->getCount(
-            "*",
-            "conditions: tipopc='{$this->tipopc}' AND " .
-                "numero='{$id}' AND " .
+            '*',
+            "conditions: tipopc='{$this->tipopc}' AND ".
+                "numero='{$id}' AND ".
                 "coddoc IN(SELECT coddoc FROM mercurio14 WHERE tipopc='{$this->tipopc}' AND tipsoc='{$this->tipsoc}' AND obliga='S')"
         );
 
         $cm14 = (new Mercurio14)->getCount(
-            "*",
+            '*',
             "conditions: tipopc='{$this->tipopc}' and tipsoc='{$this->tipsoc}' and obliga='S'"
         );
         if ($cm37 < $cm14) {
-            throw new DebugException("Adjunte los archivos obligatorios", 500);
+            throw new DebugException('Adjunte los archivos obligatorios', 500);
         }
 
         Mercurio36::where('id', $id)->update([
@@ -276,7 +292,6 @@ class FacultativoService
         $senderValidationCaja->send($this->tipopc, $solicitud);
     }
 
-
     public function consultaSeguimiento($id)
     {
         $seguimientos = Mercurio10::where('numero', $id)
@@ -286,21 +301,24 @@ class FacultativoService
             ->map(function ($row) {
                 $campos = explode(';', $row->campos_corregir);
                 $row->corregir = $campos;
+
                 return $row;
             })
             ->toArray();
 
-        return array(
+        return [
             'seguimientos' => $seguimientos,
             'campos_disponibles' => (new Mercurio36)->CamposDisponibles(),
-            'estados_detalles' => (new Mercurio10)->getArrayEstados()
-        );
+            'estados_detalles' => (new Mercurio10)->getArrayEstados(),
+        ];
     }
 
     public function dataArchivosRequeridos($solicitud)
     {
-        if ($solicitud == false) return false;
-        $archivos = array();
+        if ($solicitud == false) {
+            return false;
+        }
+        $archivos = [];
 
         $mercurio10 = Mercurio10::where('numero', $solicitud->getId())
             ->where('tipopc', $this->tipopc)
@@ -310,7 +328,7 @@ class FacultativoService
         $corregir = false;
         if ($mercurio10 && $mercurio10->estado == 'D') {
             $campos = $mercurio10->campos_corregir;
-            $corregir = explode(";", $campos);
+            $corregir = explode(';', $campos);
         }
 
         $mercurio14 = Mercurio14::where('tipopc', $this->tipopc)
@@ -327,11 +345,13 @@ class FacultativoService
 
             $corrige = false;
             if ($corregir) {
-                if (in_array($m12->getCoddoc(), $corregir)) $corrige = true;
+                if (in_array($m12->getCoddoc(), $corregir)) {
+                    $corrige = true;
+                }
             }
 
             $archivo = $m14->getArray();
-            $archivo['obliga'] = ($m14->getObliga() == "S") ? "<br><small class='text-danger'>Obligatorio</small>" : "";
+            $archivo['obliga'] = ($m14->getObliga() == 'S') ? "<br><small class='text-danger'>Obligatorio</small>" : '';
             $archivo['id'] = $solicitud->getId();
             $archivo['detalle'] = capitalize($m12->getDetalle());
             $archivo['diponible'] = ($mercurio37) ? $mercurio37->getArchivo() : false;
@@ -341,35 +361,36 @@ class FacultativoService
 
         $mercurio01 = Mercurio01::first();
         $archivos_descargar = oficios_requeridos('O');
-        return array(
-            "disponibles" => $archivos_descargar,
-            "archivos" => $archivos,
-            "path" => $mercurio01->getPath(),
-            "puede_borrar" => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true
-        );
+
+        return [
+            'disponibles' => $archivos_descargar,
+            'archivos' => $archivos,
+            'path' => $mercurio01->getPath(),
+            'puede_borrar' => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true,
+        ];
     }
 
     public function paramsApi()
     {
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "parametros_empresa"
-            )
+            [
+                'servicio' => 'ComfacaAfilia',
+                'metodo' => 'parametros_empresa',
+            ]
         );
 
-        $paramsFacultativo = new ParamsFacultativo();
+        $paramsFacultativo = new ParamsFacultativo;
         $paramsFacultativo->setDatosCaptura($procesadorComando->toArray());
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "parametros_trabajadores"
-            )
+            [
+                'servicio' => 'ComfacaAfilia',
+                'metodo' => 'parametros_trabajadores',
+            ]
         );
-        $paramsTrabajador = new ParamsTrabajador();
+        $paramsTrabajador = new ParamsTrabajador;
         $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
     }
 }

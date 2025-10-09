@@ -6,28 +6,27 @@ use App\Models\Mercurio01;
 use App\Models\Mercurio10;
 use App\Models\Mercurio12;
 use App\Models\Mercurio37;
-use App\Services\Utils\Table;
 
 class RegistroSeguimiento
 {
-
     /**
      * crearNota function
      * Se crea la nota de seguimeinto
+     *
      * @param [type] $tipopc
      * @param [type] $id
      * @param [type] $nota
-     * @param string $estado
+     * @param  string  $estado
      * @return void
      */
     public function crearNota($tipopc, $id, $nota, $estado)
     {
         $item = Mercurio10::where([
-            "tipopc" => $tipopc,
-            "numero" => $id
-        ])->max("item") + 1;
+            'tipopc' => $tipopc,
+            'numero' => $id,
+        ])->max('item') + 1;
 
-        $mercurio10 = new Mercurio10();
+        $mercurio10 = new Mercurio10;
         $mercurio10->setTipopc($tipopc);
         $mercurio10->setNumero($id);
         $mercurio10->setItem($item);
@@ -39,11 +38,13 @@ class RegistroSeguimiento
 
     /**
      * consultaSeguimiento function
+     *
      * @changed [2023-12-27]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     * @param integer $tipopc
-     * @param object $mercurio
+     *
+     * @param  int  $tipopc
+     * @param  object  $mercurio
      * @return void
      */
     public function consultaSeguimiento($tipopc, $mercurio)
@@ -52,16 +53,16 @@ class RegistroSeguimiento
             ->where('numero', $mercurio->getId())
             ->orderBy('item', 'asc');
 
-        $table = new Table();
+        $table = new Table;
         $table->set_template($this->getTemplateTable());
         $table->set_heading(
-            "Observaciones",
+            'Observaciones',
             'Estado',
             'Fecha del seguimiento'
         );
 
         if ($mercurio10->count() == 0) {
-            $table->add_row("No hay datos de seguimiento", "");
+            $table->add_row('No hay datos de seguimiento', '');
         } else {
             foreach ($mercurio10->get() as $mmercurio10) {
                 $nota = strip_tags(strtolower($mmercurio10->getNota()));
@@ -72,47 +73,50 @@ class RegistroSeguimiento
                 );
             }
         }
+
         return $table->generate();
     }
 
     /**
      * loadAdjuntos function
+     *
      * @changed [2023-12-27]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     * @param integer $tipopc
-     * @param object $mercurio30
+     *
+     * @param  int  $tipopc
+     * @param  object  $mercurio30
      * @return string
      */
     public function loadAdjuntos($tipopc, $mercurio30)
     {
         $mercurio01 = Mercurio01::first();
         $mercurio37 = Mercurio37::where([
-            "tipopc" => $tipopc,
-            "numero" => $mercurio30->getId()
+            'tipopc' => $tipopc,
+            'numero' => $mercurio30->getId(),
         ])->get();
 
         $adjuntos = '';
         foreach ($mercurio37 as $mmercurio37) {
 
             $mercurio12 = Mercurio12::where([
-                "coddoc" => $mmercurio37->getCoddoc()
+                'coddoc' => $mmercurio37->getCoddoc(),
             ])->first();
 
             $adjuntos .= "<div class='col-md-4 mb-2 shw-adjuntos'>";
             $adjuntos .= "<button class='btn-icon btn-block btn-outline-default' type='button' data-toggle='adjunto' data-path='{$mercurio01->getPath()}' data-file='{$mmercurio37->getArchivo()}' >";
             $adjuntos .= "<span class='btn-inner--icon'><i class='fas fa-file-download'></i></span>";
             $adjuntos .= "<span class='btn-inner--text'>{$mercurio12->getDetalle()}</span>";
-            $adjuntos .= "</button>";
-            $adjuntos .= "</div>";
+            $adjuntos .= '</button>';
+            $adjuntos .= '</div>';
         }
+
         return $adjuntos;
     }
 
-
     public function getTemplateTable()
     {
-        return array(
+        return [
             'table_open' => '<table border="0" cellpadding="0" cellspacing="0" class="table table-bordered table-hover">',
             'thead_open' => '<thead class="thead-light">',
             'thead_close' => '</thead>',
@@ -125,12 +129,12 @@ class RegistroSeguimiento
             'row_start' => '<tr>',
             'row_end' => '</tr>',
             'cell_start' => '<td style="white-space:initial;font-size:0.95rem">',
-            'cell_end'  => '</td>',
+            'cell_end' => '</td>',
             'row_alt_start' => '<tr>',
             'row_alt_end' => '</tr>',
             'cell_alt_start' => '<td>',
             'cell_alt_end' => '</td>',
-            'table_close' => '</table>'
-        );
+            'table_close' => '</table>',
+        ];
     }
 }

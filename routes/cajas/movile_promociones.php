@@ -1,8 +1,8 @@
 <?php
 
 // Importar facades y controlador necesarios
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Cajas\Mercurio57Controller;
+use Illuminate\Support\Facades\Route;
 
 // Rutas para Mercurio57Controller - Promociones Móvil
 Route::get('/movile-promociones/index', [Mercurio57Controller::class, 'indexAction'])->name('mercurio57.index')->middleware('auth');

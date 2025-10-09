@@ -1,8 +1,8 @@
 <?php
 
 // Importar facades y controlador necesarios
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Cajas\Mercurio06Controller;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('/cajas/mercurio06')->group(function () {
     Route::get('/index', [Mercurio06Controller::class, 'indexAction']);

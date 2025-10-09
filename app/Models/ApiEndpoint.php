@@ -10,6 +10,7 @@ class ApiEndpoint extends Model
     use HasFactory;
 
     protected $primaryKey = 'id';
+
     protected $table = 'api_endpoints';
 
     /**
@@ -22,6 +23,6 @@ class ApiEndpoint extends Model
         'endpoint_name',
         'connection_name',
         'host_dev',
-        'host_pro'
+        'host_pro',
     ];
 }

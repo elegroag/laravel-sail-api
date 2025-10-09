@@ -7,7 +7,9 @@ use App\Models\Adapter\ModelBase;
 class Mercurio58 extends ModelBase
 {
     protected $table = 'mercurio58';
+
     public $timestamps = false;
+
     protected $primaryKey = 'numero';
 
     protected $fillable = [

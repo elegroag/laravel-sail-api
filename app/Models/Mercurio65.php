@@ -7,7 +7,9 @@ use App\Models\Adapter\ModelBase;
 class Mercurio65 extends ModelBase
 {
     protected $table = 'mercurio65';
+
     public $timestamps = false;
+
     protected $primaryKey = 'codsed';
 
     protected $fillable = [
@@ -125,7 +127,8 @@ class Mercurio65 extends ModelBase
     public function getCodclaDetalle()
     {
         $clasificacion = $this->clasificacion();
-        return $clasificacion ? $clasificacion->getDetalle() : "";
+
+        return $clasificacion ? $clasificacion->getDetalle() : '';
     }
 
     public function getDetalle()
@@ -155,13 +158,14 @@ class Mercurio65 extends ModelBase
 
     public function getEstadoArray()
     {
-        return ["A"=>"ACTIVO","I"=>"INACTIVO"];
+        return ['A' => 'ACTIVO', 'I' => 'INACTIVO'];
     }
 
     public function getEstadoDetalle()
     {
         $estados = $this->getEstadoArray();
-        return $estados[$this->estado] ?? "";
+
+        return $estados[$this->estado] ?? '';
     }
 
     // Relación Eloquent

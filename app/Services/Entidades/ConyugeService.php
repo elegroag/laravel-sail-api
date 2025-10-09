@@ -17,10 +17,12 @@ use Illuminate\Support\Facades\DB;
 
 class ConyugeService
 {
-
     private $tipopc = '3';
+
     private $user;
+
     private $tipo;
+
     private $db;
 
     public function __construct()
@@ -32,17 +34,18 @@ class ConyugeService
 
     /**
      * findAllByEstado function
-     * @param string $estado
+     *
+     * @param  string  $estado
      * @return array
      */
     public function findAllByEstado($estado = '')
     {
-        //usuario empresa, unica solicitud de afiliación
+        // usuario empresa, unica solicitud de afiliación
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
 
         if ((new Mercurio32)->getCount(
-            "*",
+            '*',
             "conditions: documento='{$documento}' and coddoc='{$coddoc}'"
         ) == 0) {
             return [];
@@ -50,7 +53,7 @@ class ConyugeService
 
         $conditions = (empty($estado)) ? " AND m32.estado NOT IN('I') " : " AND m32.estado='{$estado}' ";
 
-        $sql =  "SELECT m32.*,
+        $sql = "SELECT m32.*,
             (SELECT COUNT(*) FROM mercurio10 as me10 WHERE me10.tipopc='{$this->tipopc}' and m32.id = me10.numero) as 'cantidad_eventos',
             (SELECT MAX(fecsis) FROM mercurio10 as mr10 WHERE mr10.tipopc='{$this->tipopc}' and m32.id = mr10.numero) as 'fecha_ultima_solicitud',
             (CASE
@@ -72,6 +75,7 @@ class ConyugeService
     /**
      * buscarEmpresaSubsidio function
      * buscar empresa en subsidio sin importar el estado
+     *
      * @param [type] $nit
      * @return void
      */
@@ -80,15 +84,15 @@ class ConyugeService
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaEmpresas",
-                "metodo" => "informacion_empresa",
-                "params" => array(
-                    "nit" => $nit
-                )
-            )
+            [
+                'servicio' => 'ComfacaEmpresas',
+                'metodo' => 'informacion_empresa',
+                'params' => [
+                    'nit' => $nit,
+                ],
+            ]
         );
-        $salida =  $procesadorComando->toArray();
+        $salida = $procesadorComando->toArray();
         if ($salida['success']) {
             return $salida;
         } else {
@@ -98,7 +102,7 @@ class ConyugeService
 
     public function archivosRequeridos($solicitud)
     {
-        $archivos = array();
+        $archivos = [];
         $mercurio13 = Mercurio13::where('tipopc', $this->tipopc)->orderBy('auto_generado', 'desc')->get();
 
         $mercurio10 = Mercurio10::where('numero', $solicitud->getId())
@@ -132,7 +136,7 @@ class ConyugeService
                 }
             }
 
-            $obliga = ($m13->getObliga() == "S") ? "<br><small class='text-danger'>Obligatorio</small>" : "";
+            $obliga = ($m13->getObliga() == 'S') ? "<br><small class='text-danger'>Obligatorio</small>" : '';
             $archivo = new \stdClass;
             $archivo->obliga = $obliga;
             $archivo->id = $solicitud->getId();
@@ -143,19 +147,21 @@ class ConyugeService
         }
 
         $mercurio01 = Mercurio01::first();
-        $html = view("conyuge/tmp/archivos_requeridos", array(
-            "load_archivos" => $archivos,
-            "path" => $mercurio01->getPath(),
-            "puede_borrar" => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true
-        ))->render();
+        $html = view('conyuge/tmp/archivos_requeridos', [
+            'load_archivos' => $archivos,
+            'path' => $mercurio01->getPath(),
+            'puede_borrar' => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true,
+        ])->render();
 
         return $html;
     }
 
     public function dataArchivosRequeridos($solicitud)
     {
-        if ($solicitud == false) return false;
-        $archivos = array();
+        if ($solicitud == false) {
+            return false;
+        }
+        $archivos = [];
 
         $mercurio10 = Mercurio10::where('numero', $solicitud->getId())
             ->where('tipopc', $this->tipopc)
@@ -165,7 +171,7 @@ class ConyugeService
         $corregir = false;
         if ($mercurio10 && $mercurio10->estado == 'D') {
             $campos = $mercurio10->campos_corregir;
-            $corregir = explode(";", $campos);
+            $corregir = explode(';', $campos);
         }
 
         $mercurio13 = Mercurio13::where('tipopc', $this->tipopc)->orderBy('auto_generado', 'desc')->get();
@@ -186,7 +192,7 @@ class ConyugeService
                 }
             }
             $archivo = $m13->getArray();
-            $archivo['obliga'] = ($m13->getObliga() == "S") ? "<br><small class='text-danger'>Obligatorio</small>" : "";
+            $archivo['obliga'] = ($m13->getObliga() == 'S') ? "<br><small class='text-danger'>Obligatorio</small>" : '';
             $archivo['id'] = $solicitud->getId();
             $archivo['detalle'] = capitalize($m12->getDetalle());
             $archivo['diponible'] = ($mercurio37) ? $mercurio37->getArchivo() : false;
@@ -196,18 +202,20 @@ class ConyugeService
 
         $mercurio01 = Mercurio01::first();
         $archivos_descargar = oficios_requeridos('C');
-        return array(
-            "disponibles" => $archivos_descargar,
-            "archivos" => $archivos,
-            "path" => $mercurio01->getPath(),
-            "puede_borrar" => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true
-        );
+
+        return [
+            'disponibles' => $archivos_descargar,
+            'archivos' => $archivos,
+            'path' => $mercurio01->getPath(),
+            'puede_borrar' => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true,
+        ];
     }
 
     /**
      * updateByFormData function
-     * @param int $id
-     * @param array $data
+     *
+     * @param  int  $id
+     * @param  array  $data
      * @return bool
      */
     public function updateByFormData($id, $data)
@@ -215,6 +223,7 @@ class ConyugeService
         $solicitud = $this->findById($id);
         if ($solicitud) {
             $solicitud->fill($data);
+
             return $solicitud->save();
         } else {
             return false;
@@ -223,7 +232,8 @@ class ConyugeService
 
     /**
      * create function
-     * @param array $data
+     *
+     * @param  array  $data
      * @return Mercurio32
      */
     public function create($data)
@@ -240,19 +250,22 @@ class ConyugeService
 
     /**
      * createByFormData function
-     * @param array $data
+     *
+     * @param  array  $data
      * @return Mercurio32
      */
     public function createByFormData($data)
     {
         $data['estado'] = 'T';
         $conyuge = $this->create($data);
+
         return $conyuge;
     }
 
     /**
      * findById function
-     * @param integer $id
+     *
+     * @param  int  $id
      * @return Mercurio32
      */
     public function findById($id)
@@ -262,10 +275,11 @@ class ConyugeService
 
     /**
      * enviarCaja function
-     * @param SenderValidationCaja $senderValidationCaja
-     * @param integer $id
-     * @param integer $documento
-     * @param integer $coddoc
+     *
+     * @param  SenderValidationCaja  $senderValidationCaja
+     * @param  int  $id
+     * @param  int  $documento
+     * @param  int  $coddoc
      * @return void
      */
     public function enviarCaja($senderValidationCaja, $id, $usuario)
@@ -273,18 +287,18 @@ class ConyugeService
         $solicitud = $this->findById($id);
 
         $cm37 = (new Mercurio37)->getCount(
-            "*",
-            "conditions: tipopc='{$this->tipopc}' AND " .
-                "numero='{$id}' AND " .
+            '*',
+            "conditions: tipopc='{$this->tipopc}' AND ".
+                "numero='{$id}' AND ".
                 "coddoc IN(SELECT coddoc FROM mercurio13 WHERE tipopc='{$this->tipopc}' and obliga='S')"
         );
 
         $cm13 = (new Mercurio13)->getCount(
-            "*",
+            '*',
             "conditions: tipopc='{$this->tipopc}' and obliga='S'"
         );
         if ($cm37 < $cm13) {
-            throw new DebugException("Adjunte los archivos obligatorios", 500);
+            throw new DebugException('Adjunte los archivos obligatorios', 500);
         }
 
         Mercurio32::where('id', $id)->update([
@@ -292,7 +306,7 @@ class ConyugeService
             'estado' => 'P',
         ]);
 
-        $ai = Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->maximum("item") + 1;
+        $ai = Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->maximum('item') + 1;
 
         $solicitud->item = $ai;
         $solicitante = Mercurio07::where('documento', $solicitud->getDocumento())
@@ -307,18 +321,17 @@ class ConyugeService
         $senderValidationCaja->send($this->tipopc, $solicitud);
     }
 
-
     public function buscarConyugeSubsidio($cedcon)
     {
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaEmpresas",
-                "metodo" => "informacion_conyuge",
-                "params" => $cedcon
-            )
+            [
+                'servicio' => 'ComfacaEmpresas',
+                'metodo' => 'informacion_conyuge',
+                'params' => $cedcon,
+            ]
         );
-        $salida =  $procesadorComando->toArray();
+        $salida = $procesadorComando->toArray();
         if ($salida['success']) {
             return ($salida['data']) ? $salida['data'] : false;
         } else {
@@ -335,27 +348,28 @@ class ConyugeService
             ->map(function ($row) {
                 $campos = explode(';', $row->campos_corregir);
                 $row->corregir = $campos;
+
                 return $row;
             })
             ->toArray();
 
-        return array(
+        return [
             'seguimientos' => $seguimientos,
             'campos_disponibles' => (new Mercurio32)->CamposDisponibles(),
-            'estados_detalles' => (new Mercurio10)->getArrayEstados()
-        );
+            'estados_detalles' => (new Mercurio10)->getArrayEstados(),
+        ];
     }
 
     public function paramsApi()
     {
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "parametros_conyuges"
-            )
+            [
+                'servicio' => 'ComfacaAfilia',
+                'metodo' => 'parametros_conyuges',
+            ]
         );
-        $paramsTrabajador = new ParamsTrabajador();
+        $paramsTrabajador = new ParamsTrabajador;
         $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
     }
 
@@ -384,16 +398,16 @@ class ConyugeService
     {
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "listar_conyuges",
-                "params" => array(
-                    'nit' => $nit
-                )
-            )
+            [
+                'servicio' => 'ComfacaAfilia',
+                'metodo' => 'listar_conyuges',
+                'params' => [
+                    'nit' => $nit,
+                ],
+            ]
         );
         $out = $procesadorComando->toArray();
-        if ($out['success'] == False) {
+        if ($out['success'] == false) {
             return false;
         } else {
             return $out['data'];

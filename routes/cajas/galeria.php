@@ -1,8 +1,8 @@
 <?php
 
 // Importar facades y controlador necesarios
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Cajas\Mercurio26Controller;
+use Illuminate\Support\Facades\Route;
 
 // Rutas para Mercurio26Controller - Galería
 Route::get('/galeria/index', [Mercurio26Controller::class, 'indexAction'])->name('mercurio26.index')->middleware('auth');

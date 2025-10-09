@@ -23,13 +23,13 @@ class ApiEndpointController extends Controller
     public function index()
     {
         $endpoints = $this->apiEndpointService->getAllEndpoints();
+
         return response()->json($endpoints);
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -41,6 +41,7 @@ class ApiEndpointController extends Controller
         ]);
 
         $endpoint = $this->apiEndpointService->createEndpoint($validatedData);
+
         return response()->json($endpoint, 201);
     }
 
@@ -53,26 +54,25 @@ class ApiEndpointController extends Controller
     public function show($id)
     {
         $endpoint = $this->apiEndpointService->getEndpointById($id);
-        
-        if (!$endpoint) {
+
+        if (! $endpoint) {
             return response()->json(['message' => 'Endpoint not found'], 404);
         }
-        
+
         return response()->json($endpoint);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
     {
         $endpoint = $this->apiEndpointService->getEndpointById($id);
-        
-        if (!$endpoint) {
+
+        if (! $endpoint) {
             return response()->json(['message' => 'Endpoint not found'], 404);
         }
 
@@ -83,13 +83,13 @@ class ApiEndpointController extends Controller
         ]);
 
         $updatedEndpoint = $this->apiEndpointService->updateEndpoint($id, $validatedData);
+
         return response()->json($updatedEndpoint);
     }
 
     /**
      * Update only the connection name for a service.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  string  $serviceName
      * @return \Illuminate\Http\Response
      */
@@ -100,11 +100,11 @@ class ApiEndpointController extends Controller
         ]);
 
         $endpoint = $this->apiEndpointService->updateConnectionName($serviceName, $validatedData['connection_name']);
-        
-        if (!$endpoint) {
+
+        if (! $endpoint) {
             return response()->json(['message' => 'Endpoint not found'], 404);
         }
-        
+
         return response()->json($endpoint);
     }
 
@@ -117,11 +117,11 @@ class ApiEndpointController extends Controller
     public function destroy($id)
     {
         $deleted = $this->apiEndpointService->deleteEndpoint($id);
-        
-        if (!$deleted) {
+
+        if (! $deleted) {
             return response()->json(['message' => 'Endpoint not found'], 404);
         }
-        
+
         return response()->json(['message' => 'Endpoint deleted successfully']);
     }
 
@@ -133,6 +133,7 @@ class ApiEndpointController extends Controller
     public function syncDefaults()
     {
         $this->apiEndpointService->syncDefaultEndpoints();
+
         return response()->json(['message' => 'Endpoints synced with defaults']);
     }
 }

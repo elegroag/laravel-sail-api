@@ -6,9 +6,10 @@ use App\Models\Adapter\ModelBase;
 
 class Notificaciones extends ModelBase
 {
-
     protected $table = 'notificaciones';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [

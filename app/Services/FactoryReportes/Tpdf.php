@@ -7,16 +7,20 @@ use TCPDF;
 class Tpdf extends TCPDF
 {
     public static $titulo = '';
+
     public static $tipoHoja = 'Legal';
+
     public static $unidades = 'mm';
+
     public static $pX = 15;
+
     public static $orientationHoja = 'P';
 
     public function __construct()
     {
         $this->SetTitle(self::$titulo);
         parent::__construct(self::$orientationHoja, self::$unidades, self::$tipoHoja);
-        $this->SetAutoPageBreak(TRUE, 0);
+        $this->SetAutoPageBreak(true, 0);
         $this->SetHeaderMargin(5);
         $this->SetFooterMargin(5);
     }
@@ -57,6 +61,6 @@ class Tpdf extends TCPDF
     {
         $this->SetY(-12);
         $this->SetFont('helvetica', 'I', 8);
-        $this->Cell(0, 10, 'Page ' . $this->getAliasNumPage() . '/' . $this->getAliasNbPages(), 0, false, 'C', 0, '', 0, false, 'T', 'M');
+        $this->Cell(0, 10, 'Page '.$this->getAliasNumPage().'/'.$this->getAliasNbPages(), 0, false, 'C', 0, '', 0, false, 'T', 'M');
     }
 }

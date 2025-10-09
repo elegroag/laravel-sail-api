@@ -1,13 +1,15 @@
 <?php
 
 // Importar facades y controlador necesarios
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Cajas\Mercurio51Controller;
+use Illuminate\Support\Facades\Route;
 
 // Rutas para Mercurio51Controller - Categorías
 Route::prefix('/cajas/categorias')->group(function () {
     // Redirige a la ruta canónica '/index' para evitar nombres duplicados
-    Route::get('/', function () { return redirect()->route('mercurio51.index'); });
+    Route::get('/', function () {
+        return redirect()->route('mercurio51.index');
+    });
     Route::get('/index', [Mercurio51Controller::class, 'indexAction'])->name('mercurio51.index');
     Route::post('/aplicar-filtro', [Mercurio51Controller::class, 'aplicarFiltroAction'])->name('mercurio51.aplicar-filtro');
     Route::post('/change-cantidad-pagina', [Mercurio51Controller::class, 'changeCantidadPaginaAction'])->name('mercurio51.change-cantidad-pagina');
@@ -18,4 +20,3 @@ Route::prefix('/cajas/categorias')->group(function () {
     Route::post('/valide-pk', [Mercurio51Controller::class, 'validePkAction'])->name('mercurio51.valide-pk');
     Route::get('/reporte/{format?}', [Mercurio51Controller::class, 'reporteAction'])->name('mercurio51.reporte');
 });
-

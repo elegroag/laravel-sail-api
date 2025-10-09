@@ -7,9 +7,13 @@ use App\Models\Adapter\ModelBase;
 class Mercurio59 extends ModelBase
 {
     protected $table = 'mercurio59';
+
     public $timestamps = false;
+
     protected $primaryKey = 'codinf';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -114,13 +118,14 @@ class Mercurio59 extends ModelBase
 
     public function getPrecanArray()
     {
-        return ["S"=>"SI","N"=>"NO"];
+        return ['S' => 'SI', 'N' => 'NO'];
     }
 
     public function getPrecanDetalle()
     {
         $precan = $this->getPrecanArray();
-        return $precan[$this->precan] ?? "";
+
+        return $precan[$this->precan] ?? '';
     }
 
     public function getAutser()
@@ -130,13 +135,14 @@ class Mercurio59 extends ModelBase
 
     public function getAutserArray()
     {
-        return ["S"=>"SI","N"=>"NO"];
+        return ['S' => 'SI', 'N' => 'NO'];
     }
 
     public function getAutserDetalle()
     {
         $autser = $this->getAutserArray();
-        return $autser[$this->autser] ?? "";
+
+        return $autser[$this->autser] ?? '';
     }
 
     public function getConsumo()
@@ -146,13 +152,14 @@ class Mercurio59 extends ModelBase
 
     public function getConsumoArray()
     {
-        return ["S"=>"SI","N"=>"NO"];
+        return ['S' => 'SI', 'N' => 'NO'];
     }
 
     public function getConsumoDetalle()
     {
         $consumo = $this->getConsumoArray();
-        return $consumo[$this->consumo] ?? "";
+
+        return $consumo[$this->consumo] ?? '';
     }
 
     public function getEstado()
@@ -162,12 +169,13 @@ class Mercurio59 extends ModelBase
 
     public function getEstadoArray()
     {
-        return ["A"=>"ACTIVO","I"=>"INACTIVO"];
+        return ['A' => 'ACTIVO', 'I' => 'INACTIVO'];
     }
 
     public function getEstadoDetalle()
     {
         $estados = $this->getEstadoArray();
-        return $estados[$this->estado] ?? "";
+
+        return $estados[$this->estado] ?? '';
     }
 }

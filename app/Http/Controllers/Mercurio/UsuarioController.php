@@ -13,7 +13,9 @@ use Illuminate\Http\Request;
 class UsuarioController extends ApplicationController
 {
     protected $db;
+
     protected $user;
+
     protected $tipo;
 
     public function __construct()
@@ -29,75 +31,82 @@ class UsuarioController extends ApplicationController
             'title' => 'Perfil usuario',
             'documento' => $this->user['documento'],
             'coddoc' => $this->user['coddoc'],
-            'tipo' => $this->tipo
+            'tipo' => $this->tipo,
         ]);
     }
 
     public function paramsAction()
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         try {
-            $mtipoDocumentos = new Gener18();
-            $coddoc = array();
+            $mtipoDocumentos = new Gener18;
+            $coddoc = [];
             foreach ($mtipoDocumentos->all() as $entity) {
-                if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') continue;
+                if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') {
+                    continue;
+                }
                 $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
             }
 
-            $coddocrepleg = array();
+            $coddocrepleg = [];
             foreach ($mtipoDocumentos->all() as $entity) {
-                if ($entity->getCodrua() == 'TI' || $entity->getCodrua() == 'RC') continue;
+                if ($entity->getCodrua() == 'TI' || $entity->getCodrua() == 'RC') {
+                    continue;
+                }
                 $coddocrepleg["{$entity->getCodrua()}"] = $entity->getDetdoc();
             }
 
-            $codciu = array();
-            $mgener09 = new Gener09();
+            $codciu = [];
+            $mgener09 = new Gener09;
             foreach ($mgener09->getFind("conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
                 $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
             }
 
-            $tipo = (new Mercurio07())->getArrayTipos();
-            $salida = array(
-                "success" => true,
-                "data" => array(
+            $tipo = (new Mercurio07)->getArrayTipos();
+            $salida = [
+                'success' => true,
+                'data' => [
                     'coddoc' => $coddoc,
                     'tipo' => $tipo,
                     'codciu' => $codciu,
-                    'coddocrepleg' => $coddocrepleg
-                ),
-                "msj" => 'OK'
-            );
+                    'coddocrepleg' => $coddocrepleg,
+                ],
+                'msj' => 'OK',
+            ];
         } catch (DebugException $e) {
-            $salida = array(
-                "success" => false,
-                "msj" => $e->getMessage()
-            );
+            $salida = [
+                'success' => false,
+                'msj' => $e->getMessage(),
+            ];
         }
+
         return $this->renderObject($salida, false);
     }
 
     public function showPerfilAction()
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         try {
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
             $tipo = $this->tipo;
 
             $mtipoDocumentos = Gener18::all();
-            $mcoddoc = array();
+            $mcoddoc = [];
             foreach ($mtipoDocumentos as $entity) {
-                if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') continue;
+                if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') {
+                    continue;
+                }
                 $mcoddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
             }
 
-            $mcodciu = array();
+            $mcodciu = [];
             $mgener09 = Gener09::whereBetween('codzon', ['18000', '19000'])->get();
             foreach ($mgener09 as $entity) {
                 $mcodciu["{$entity->codzon}"] = $entity->detzon;
             }
 
-            $mtipos = (new Mercurio07())->getArrayTipos();
+            $mtipos = (new Mercurio07)->getArrayTipos();
 
             $msubsi07 = Mercurio07::where('documento', $documento)
                 ->where('tipo', $tipo)
@@ -111,23 +120,24 @@ class UsuarioController extends ApplicationController
             $entity['codciu_detalle'] = $mcodciu[$msubsi07->getCodciu()];
             $entity['estado_detalle'] = $msubsi07->getEstadoDetalle();
 
-            $salida = array(
-                "success" => true,
-                "data" => $entity,
-                "msj" => 'OK'
-            );
+            $salida = [
+                'success' => true,
+                'data' => $entity,
+                'msj' => 'OK',
+            ];
         } catch (DebugException $e) {
-            $salida = array(
-                "success" => false,
-                "msj" => $e->getMessage()
-            );
+            $salida = [
+                'success' => false,
+                'msj' => $e->getMessage(),
+            ];
         }
+
         return $this->renderObject($salida, false);
     }
 
     public function guardarAction(Request $request)
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         try {
             $tipo = $request->input('tipo');
             $coddoc = $request->input('coddoc');
@@ -148,7 +158,7 @@ class UsuarioController extends ApplicationController
                 ->first();
 
             if ($msubsi07) {
-                throw new DebugException("Error el registro de usuario ya existe registrado", 501);
+                throw new DebugException('Error el registro de usuario ya existe registrado', 501);
             }
 
             $msubsi07 = Mercurio07::where('documento', $documento)
@@ -169,17 +179,18 @@ class UsuarioController extends ApplicationController
 
             $msubsi07->save();
             $entity = $msubsi07->getArray();
-            $response = array(
-                "msj" => "Proceso se ha completado con éxito",
-                "success" => true,
-                "data" => $entity
-            );
+            $response = [
+                'msj' => 'Proceso se ha completado con éxito',
+                'success' => true,
+                'data' => $entity,
+            ];
         } catch (DebugException $e) {
-            $response = array(
+            $response = [
                 'success' => false,
-                'msj' => $e->getMessage()
-            );
+                'msj' => $e->getMessage(),
+            ];
         }
+
         return $this->renderObject($response, false);
     }
 }

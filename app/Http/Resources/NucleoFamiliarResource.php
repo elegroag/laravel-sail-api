@@ -18,7 +18,7 @@ class NucleoFamiliarResource extends JsonResource
             'id' => $this->id,
             'nombres' => $this->nombres,
             'apellidos' => $this->apellidos,
-            'nombre_completo' => $this->nombres . ' ' . $this->apellidos,
+            'nombre_completo' => $this->nombres.' '.$this->apellidos,
             'rut' => $this->rut,
             'fecha_nacimiento' => $this->fecha_nacimiento?->format('Y-m-d'),
             'edad' => $this->fecha_nacimiento?->age,
@@ -42,7 +42,7 @@ class NucleoFamiliarResource extends JsonResource
             // Información adicional del trabajador cuando está cargado
             'empresa_trabajador' => $this->when(
                 $this->relationLoaded('trabajador') && $this->trabajador->relationLoaded('empresa'),
-                fn() => [
+                fn () => [
                     'nombre_empresa' => $this->trabajador->empresa->nombre,
                     'cargo_trabajador' => $this->trabajador->cargo,
                 ]

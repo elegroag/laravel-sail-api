@@ -1,8 +1,8 @@
 <?php
 
 // Importar facades y controlador necesarios
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Cajas\Mercurio67Controller;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('clasificaciones')->group(function () {
     // Definir rutas para Mercurio67Controller

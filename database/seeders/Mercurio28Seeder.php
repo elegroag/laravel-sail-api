@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class Mercurio28Seeder extends Seeder
@@ -78,7 +77,6 @@ class Mercurio28Seeder extends Seeder
             );
         }
     }
-
 
     /* INSERT INTO `mercurio28` VALUES ('E','barrio_comercial','BARRIO COMERCIAL',23),('E','barrio_notificacion','BARRIO NOTIFICACIONES',22),('E','cedrep','DOCUMENTO REPRESENTANTE',5),('E','celpri','CELULAR COMERCIAL',18),('E','celular','CELULAR NOTIFICACIONES',21),('E','ciupri','CIUDAD COMERCIAL',16),('E','codact','ACTIVIDAD ECONOMICA',19),('E','codciu','CIUDAD DE NOTIFICACIONES',17),('E','coddocrepleg','TIPO DOCUMENTO REPRESENTANTE LEGAL',11),('E','codsuc','SUCURSAL',20),('E','codzon','CIUDAD DE ACTIVIDAD LABORAL',18),('E','direccion','DIRECCION NOTIFICACIONES',2),('E','dirpri','DIRECCIÓN COMERCIAL',15),('E','email','CORREO',3),('E','emailpri','EMAIL COMERCIAL',19),('E','matmer','MATRICULA MERCANTIL',10),('E','nit','NIT',0),('E','priape','PRIMER APELLIDO REPRESENTANTE',15),('E','prinom','PRIMER NOMBRE REPRESENTANTE',13),('E','razsoc','RAZON SOCIAL',8),('E','repleg','NOMBRE REPRESENTANTE',6),('E','segape','SEGUNDO APELLIDO REPRESENTANTE',16),('E','segnom','SEGUNDO NOMBRE REPRESENTANTE',14),('E','sigla','SIGLAS',9),('E','telefono','TELEFONO NOTIFICACIONES',1),('E','telpri','TELEFONO COMERCIAL',17),('E','tipsoc','TIPO SOCIEDAD',12),('T','banco','BANCO',15),('T','celular','CELULAR',5),('T','codciu','CIUDAD RESIDENCIA',6),('T','codzon','CIUDAD LABORAL',7),('T','direccion','DIRECCION',1),('T','dirlab','DIRECCION LABORAL',8),('T','email','EMAIL',2),('T','expedicion','FECHA EXPEDICIÓN DOCUMENTO',13),('T','numcue','CUENTA',12),('T','priape','PRIMER APELLIDO',3),('T','prinom','PRIMER NOMBRE',1),('T','respo_banco','RESPONSABLE BANCO',15),('T','respo_celular','RESPONSABLE CELULAR',5),('T','respo_email','RESPONSABLE EMAIL',2),('T','respo_expedicion','RESPONSABLE FECHA EXPEDICIÓN',13),('T','respo_numcue','RESPONSABLE CUENTA',11),('T','respo_priape','RESPONSABLE PRIMER APELLIDO',3),('T','respo_prinom','RESPONSABLE PRIMER NOMBRE',1),('T','respo_segape','RESPONSABLE SEGUNDO APELLIDO',4),('T','respo_segnom','RESPONSABLE SEGUNDO NOMBRE',2),('T','respo_telefono','RESPONSABLE TELEFONO',1),('T','respo_tipcuenta','RESPONSABLE TIPO DE CUENTA',14),('T','respo_tippag','RESPONSABLE TIPO PAGO',10),('T','segape','SEGUNDO APELLIDO',4),('T','segnom','SEGUNDO NOMBRE',2),('T','telefono','TELEFONO',1),('T','tipcuenta','TIPO DE CUENTA',14),('T','tippag','TIPO PAGO',10); */
 }

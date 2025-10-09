@@ -6,12 +6,15 @@ use App\Models\Adapter\ModelBase;
 
 class Mercurio06 extends ModelBase
 {
-
     protected $table = 'mercurio06';
+
     public $timestamps = false;
+
     // PK es CHAR(2) 'tipo' (no autoincremental)
     protected $primaryKey = 'tipo';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -21,7 +24,8 @@ class Mercurio06 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo tipo
-     * @param string $tipo
+     *
+     * @param  string  $tipo
      */
     public function setTipo($tipo)
     {
@@ -30,16 +34,17 @@ class Mercurio06 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo detalle
-     * @param string $detalle
+     *
+     * @param  string  $detalle
      */
     public function setDetalle($detalle)
     {
         $this->detalle = $detalle;
     }
 
-
     /**
      * Devuelve el valor del campo tipo
+     *
      * @return string
      */
     public function getTipo()
@@ -49,6 +54,7 @@ class Mercurio06 extends ModelBase
 
     /**
      * Devuelve el valor del campo detalle
+     *
      * @return string
      */
     public function getDetalle()

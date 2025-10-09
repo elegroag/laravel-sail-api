@@ -6,9 +6,10 @@ use App\Models\Adapter\ModelBase;
 
 class Mercurio12 extends ModelBase
 {
-
     protected $table = 'mercurio12';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -18,7 +19,8 @@ class Mercurio12 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo coddoc
-     * @param integer $coddoc
+     *
+     * @param  int  $coddoc
      */
     public function setCoddoc($coddoc)
     {
@@ -27,17 +29,18 @@ class Mercurio12 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo detalle
-     * @param string $detalle
+     *
+     * @param  string  $detalle
      */
     public function setDetalle($detalle)
     {
         $this->detalle = $detalle;
     }
 
-
     /**
      * Devuelve el valor del campo coddoc
-     * @return integer
+     *
+     * @return int
      */
     public function getCoddoc()
     {
@@ -46,6 +49,7 @@ class Mercurio12 extends ModelBase
 
     /**
      * Devuelve el valor del campo detalle
+     *
      * @return string
      */
     public function getDetalle()

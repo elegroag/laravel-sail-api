@@ -4,7 +4,7 @@ use App\Http\Controllers\Mercurio\FirmasController;
 use App\Http\Middleware\EnsureCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
-# Firmas
+// Firmas
 Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
     Route::prefix('/mercurio')->group(function () {
         Route::get('/firmas/index', [FirmasController::class, 'indexAction'])->name('firmas.index');

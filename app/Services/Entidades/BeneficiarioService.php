@@ -15,11 +15,14 @@ use App\Services\Utils\Comman;
 
 class BeneficiarioService
 {
-
     private $tipopc = '4';
+
     private $user;
+
     private $tipo;
+
     private $db;
+
     public function __construct()
     {
         $this->user = session('user');
@@ -29,17 +32,18 @@ class BeneficiarioService
 
     /**
      * findAllByEstado function
-     * @param string $estado
+     *
+     * @param  string  $estado
      * @return array
      */
     public function findAllByEstado($estado = '')
     {
-        //usuario empresa, unica solicitud de afiliación
+        // usuario empresa, unica solicitud de afiliación
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
 
         if ((new Mercurio34)->getCount(
-            "*",
+            '*',
             "conditions: documento='{$documento}' AND coddoc='{$coddoc}'"
         ) == 0) {
             return [];
@@ -68,6 +72,7 @@ class BeneficiarioService
     /**
      * buscarEmpresaSubsidio function
      * buscar empresa en subsidio sin importar el estado
+     *
      * @param [type] $nit
      * @return void
      */
@@ -75,15 +80,15 @@ class BeneficiarioService
     {
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaEmpresas",
-                "metodo" => "informacion_empresa",
-                "params" => array(
-                    "nit" => $nit
-                )
-            )
+            [
+                'servicio' => 'ComfacaEmpresas',
+                'metodo' => 'informacion_empresa',
+                'params' => [
+                    'nit' => $nit,
+                ],
+            ]
         );
-        $salida =  $procesadorComando->toArray();
+        $salida = $procesadorComando->toArray();
         if ($salida['success']) {
             return $salida;
         } else {
@@ -93,8 +98,10 @@ class BeneficiarioService
 
     public function archivosRequeridos($solicitud)
     {
-        if ($solicitud == false) return false;
-        $archivos = array();
+        if ($solicitud == false) {
+            return false;
+        }
+        $archivos = [];
 
         $mercurio10 = Mercurio10::where('numero', $solicitud->getId())
             ->where('tipopc', $this->tipopc)
@@ -104,7 +111,7 @@ class BeneficiarioService
         $corregir = false;
         if ($mercurio10 && $mercurio10->estado == 'D') {
             $campos = $mercurio10->campos_corregir;
-            $corregir = explode(";", $campos);
+            $corregir = explode(';', $campos);
         }
 
         $mercurio13 = Mercurio13::where('tipopc', $this->tipopc)->get();
@@ -125,7 +132,7 @@ class BeneficiarioService
                 }
             }
 
-            $obliga = ($m13->getObliga() == "S") ? "<br><small class='text-danger'>Obligatorio</small>" : "";
+            $obliga = ($m13->getObliga() == 'S') ? "<br><small class='text-danger'>Obligatorio</small>" : '';
             $archivo = new \stdClass;
             $archivo->obliga = $obliga;
             $archivo->id = $solicitud->getId();
@@ -137,10 +144,10 @@ class BeneficiarioService
         }
 
         $mercurio01 = Mercurio01::first();
-        $html = view("partial/archivos_requeridos", [
-            "load_archivos" => $archivos,
-            "path" => $mercurio01->getPath(),
-            "puede_borrar" => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true
+        $html = view('partial/archivos_requeridos', [
+            'load_archivos' => $archivos,
+            'path' => $mercurio01->getPath(),
+            'puede_borrar' => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true,
         ])->render();
 
         return $html;
@@ -148,7 +155,8 @@ class BeneficiarioService
 
     /**
      * loadDisplaySubsidio function
-     * @param array $trabajador
+     *
+     * @param  array  $trabajador
      * @return void
      */
     public function loadDisplaySubsidio($trabajador)
@@ -170,8 +178,9 @@ class BeneficiarioService
 
     /**
      * updateByFormData function
-     * @param int $id
-     * @param array $data
+     *
+     * @param  int  $id
+     * @param  array  $data
      * @return bool
      */
     public function updateByFormData($id, $data)
@@ -179,6 +188,7 @@ class BeneficiarioService
         $solicitud = $this->findById($id);
         if ($solicitud) {
             $solicitud->fill($data);
+
             return $solicitud->save();
         } else {
             return false;
@@ -187,7 +197,8 @@ class BeneficiarioService
 
     /**
      * create function
-     * @param array $data
+     *
+     * @param  array  $data
      * @return Mercurio34
      */
     public function create($data)
@@ -198,12 +209,14 @@ class BeneficiarioService
 
         Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
         Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
+
         return $beneficiario;
     }
 
     /**
      * createByFormData function
-     * @param array $data
+     *
+     * @param  array  $data
      * @return Mercurio34
      */
     public function createByFormData($data)
@@ -211,12 +224,14 @@ class BeneficiarioService
         $data['estado'] = 'T';
         $data['log'] = '0';
         $beneficiario = $this->create($data);
+
         return $beneficiario;
     }
 
     /**
      * findById function
-     * @param integer $id
+     *
+     * @param  int  $id
      * @return Mercurio34
      */
     public function findById($id)
@@ -226,10 +241,11 @@ class BeneficiarioService
 
     /**
      * enviarCaja function
-     * @param SenderValidationCaja $senderValidationCaja
-     * @param integer $id
-     * @param integer $documento
-     * @param integer $coddoc
+     *
+     * @param  SenderValidationCaja  $senderValidationCaja
+     * @param  int  $id
+     * @param  int  $documento
+     * @param  int  $coddoc
      * @return void
      */
     public function enviarCaja($senderValidationCaja, $id, $usuario)
@@ -237,24 +253,24 @@ class BeneficiarioService
         $solicitud = $this->findById($id);
 
         $cm37 = (new Mercurio37)->getCount(
-            "*",
-            "conditions: tipopc='{$this->tipopc}' AND " .
-                "numero='{$id}' AND " .
+            '*',
+            "conditions: tipopc='{$this->tipopc}' AND ".
+                "numero='{$id}' AND ".
                 "coddoc IN(SELECT coddoc FROM mercurio13 WHERE tipopc='{$this->tipopc}' AND obliga='S')"
         );
 
         $cm13 = (new Mercurio13)->getCount(
-            "*",
+            '*',
             "conditions: tipopc='{$this->tipopc}' AND obliga='S'"
         );
         if ($cm37 < $cm13) {
-            throw new DebugException("Adjunte los archivos obligatorios", 500);
+            throw new DebugException('Adjunte los archivos obligatorios', 500);
         }
 
         Mercurio34::where('id', $id)
             ->update([
                 'usuario' => (string) $usuario,
-                'estado'  => 'P',
+                'estado' => 'P',
             ]);
 
         $ai = Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->max('item') + 1;
@@ -276,14 +292,14 @@ class BeneficiarioService
     {
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaEmpresas",
-                "metodo" => "informacion_beneficiario",
-                "params" => $numdoc
-            )
+            [
+                'servicio' => 'ComfacaEmpresas',
+                'metodo' => 'informacion_beneficiario',
+                'params' => $numdoc,
+            ]
         );
 
-        $datos_captura =  $procesadorComando->toArray();
+        $datos_captura = $procesadorComando->toArray();
         if ($datos_captura['success']) {
             return $datos_captura;
         } else {
@@ -294,8 +310,10 @@ class BeneficiarioService
     public function dataArchivosRequeridos($solicitud)
     {
 
-        if ($solicitud == false) return false;
-        $archivos = array();
+        if ($solicitud == false) {
+            return false;
+        }
+        $archivos = [];
 
         $mercurio10 = Mercurio10::where('numero', $solicitud->getId())
             ->where('tipopc', $this->tipopc)
@@ -305,7 +323,7 @@ class BeneficiarioService
         $corregir = false;
         if ($mercurio10 && $mercurio10->estado == 'D') {
             $campos = $mercurio10->campos_corregir;
-            $corregir = explode(";", $campos);
+            $corregir = explode(';', $campos);
         }
 
         $mercurio13 = Mercurio13::where('tipopc', $this->tipopc)->orderBy('auto_generado', 'desc')->get();
@@ -327,7 +345,7 @@ class BeneficiarioService
             }
 
             $archivo = $m13->getArray();
-            $archivo['obliga'] = ($m13->getObliga() == "S") ? "<br><small class='text-danger'>Obligatorio</small>" : "";
+            $archivo['obliga'] = ($m13->getObliga() == 'S') ? "<br><small class='text-danger'>Obligatorio</small>" : '';
             $archivo['id'] = $solicitud->getId();
             $archivo['detalle'] = capitalize($m12->getDetalle());
             $archivo['diponible'] = ($mercurio37) ? $mercurio37->getArchivo() : false;
@@ -337,12 +355,13 @@ class BeneficiarioService
 
         $mercurio01 = Mercurio01::first();
         $archivos_descargar = oficios_requeridos('B');
-        return array(
-            "disponibles" => $archivos_descargar,
-            "archivos" => $archivos,
-            "path" => $mercurio01->getPath(),
-            "puede_borrar" => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true
-        );
+
+        return [
+            'disponibles' => $archivos_descargar,
+            'archivos' => $archivos,
+            'path' => $mercurio01->getPath(),
+            'puede_borrar' => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true,
+        ];
     }
 
     public function consultaSeguimiento($id)
@@ -354,14 +373,15 @@ class BeneficiarioService
             ->map(function ($row) {
                 $campos = explode(';', $row->campos_corregir);
                 $row->corregir = $campos;
+
                 return $row;
             })
             ->toArray();
 
-        return array(
+        return [
             'seguimientos' => $seguimientos,
             'campos_disponibles' => (new Mercurio34)->CamposDisponibles(),
-            'estados_detalles' => (new Mercurio10)->getArrayEstados()
-        );
+            'estados_detalles' => (new Mercurio10)->getArrayEstados(),
+        ];
     }
 }

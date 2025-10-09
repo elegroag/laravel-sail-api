@@ -12,9 +12,13 @@ use App\Models\Adapter\ModelBase;
 class MenuPermission extends ModelBase
 {
     protected $table = 'menu_permissions';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
+
     public $incrementing = true;
+
     protected $keyType = 'int';
 
     protected $fillable = [
@@ -24,11 +28,38 @@ class MenuPermission extends ModelBase
     ];
 
     // Getters/Setters simples (compatibilidad y claridad)
-    public function getId() { return $this->id; }
-    public function setMenuItemId($v) { $this->menu_item_id = $v; }
-    public function getMenuItemId() { return $this->menu_item_id; }
-    public function setRoleId($v) { $this->role_id = $v; }
-    public function getRoleId() { return $this->role_id; }
-    public function setCanView($v) { $this->can_view = $v; }
-    public function getCanView() { return $this->can_view; }
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    public function setMenuItemId($v)
+    {
+        $this->menu_item_id = $v;
+    }
+
+    public function getMenuItemId()
+    {
+        return $this->menu_item_id;
+    }
+
+    public function setRoleId($v)
+    {
+        $this->role_id = $v;
+    }
+
+    public function getRoleId()
+    {
+        return $this->role_id;
+    }
+
+    public function setCanView($v)
+    {
+        $this->can_view = $v;
+    }
+
+    public function getCanView()
+    {
+        return $this->can_view;
+    }
 }

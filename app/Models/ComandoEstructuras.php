@@ -6,9 +6,10 @@ use App\Models\Adapter\ModelBase;
 
 class ComandoEstructuras extends ModelBase
 {
-
     protected $table = 'comando_estructuras';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -114,18 +115,18 @@ class ComandoEstructuras extends ModelBase
 
     public function getProcesadorArray()
     {
-        return array(
-            'php'   => 'PHP5.4',
-            'p7'    => 'PHP7.3',
-            'py'    => 'PYTHON3',
+        return [
+            'php' => 'PHP5.4',
+            'p7' => 'PHP7.3',
+            'py' => 'PYTHON3',
             'javac' => 'JAVA COMPILER',
-            'npm'   => 'NODE.JS'
-        );
+            'npm' => 'NODE.JS',
+        ];
     }
 
     public function getProcesadorDetalle($procesador = '')
     {
-        if (!empty($procesador)) {
+        if (! empty($procesador)) {
             $this->procesador = $procesador;
         }
         switch ($this->procesador) {
@@ -149,7 +150,7 @@ class ComandoEstructuras extends ModelBase
 
     public function initialize()
     {
-        $this->hasMany("estructura", "comandos", "id");
-        $this->belongsTo("estructura", "comandos", "id");
+        $this->hasMany('estructura', 'comandos', 'id');
+        $this->belongsTo('estructura', 'comandos', 'id');
     }
 }

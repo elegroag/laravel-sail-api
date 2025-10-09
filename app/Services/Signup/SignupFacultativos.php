@@ -6,13 +6,15 @@ use App\Models\Mercurio10;
 use App\Models\Mercurio36;
 use App\Models\Mercurio37;
 
-class SignupFacultativos  implements SignupInterface
+class SignupFacultativos implements SignupInterface
 {
     /**
      * solicitud variable
+     *
      * @var Mercurio36
      */
     protected $solicitud;
+
     private $tipopc = 10;
 
     public function __construct() {}
@@ -24,20 +26,22 @@ class SignupFacultativos  implements SignupInterface
 
     public function findByDocumentTemp($documento, $coddoc, $calemp = '')
     {
-        $this->solicitud = (new Mercurio36())->findFirst(
-            "coddoc='{$coddoc}' and " .
-                "documento='{$documento}' and " .
+        $this->solicitud = (new Mercurio36)->findFirst(
+            "coddoc='{$coddoc}' and ".
+                "documento='{$documento}' and ".
                 "estado='T'"
         );
-        if ($this->solicitud == FALSE) {
-            $this->solicitud = new Mercurio36();
+        if ($this->solicitud == false) {
+            $this->solicitud = new Mercurio36;
         }
+
         return $this->solicitud;
     }
 
     /**
      * create function
-     * @param array $data
+     *
+     * @param  array  $data
      * @return void
      */
     public function createSignupService($data)
@@ -48,7 +52,7 @@ class SignupFacultativos  implements SignupInterface
         $this->solicitud->setDocumento($data['documento']);
         $this->solicitud->setCoddoc($data['coddoc']);
         $this->solicitud->setTipo($data['tipo']);
-        $this->solicitud->setDireccion("CR");
+        $this->solicitud->setDireccion('CR');
         $this->solicitud->setCodact('0000');
         $this->solicitud->setTelefono($data['telefono']);
         $this->solicitud->setCelular($data['telefono']);
@@ -73,8 +77,8 @@ class SignupFacultativos  implements SignupInterface
         $this->solicitud->setRural('N');
         $this->solicitud->setAutoriza('S');
         $this->solicitud->setLog('0');
-        $this->solicitud->setEstado("T");
-        $this->solicitud->setCodest(NULL);
+        $this->solicitud->setEstado('T');
+        $this->solicitud->setCodest(null);
         $this->solicitud->setPeretn(7);
         $this->solicitud->setResguardo_id(2);
         $this->solicitud->setPub_indigena_id(2);
@@ -88,7 +92,7 @@ class SignupFacultativos  implements SignupInterface
         $segnom = '';
         $segape = '';
         if (strlen($data['repleg']) > 0) {
-            $exp = explode(" ", trim($data['repleg']));
+            $exp = explode(' ', trim($data['repleg']));
             switch (count($exp)) {
                 case 6:
                 case 7:
@@ -96,13 +100,13 @@ class SignupFacultativos  implements SignupInterface
                     $prinom = $exp[0];
                     $segnom = $exp[1];
                     $priape = $exp[2];
-                    $segape = $exp[3] . ' ' . $exp[4] . ' ' . $exp[5];
+                    $segape = $exp[3].' '.$exp[4].' '.$exp[5];
                     break;
                 case 5:
                     $prinom = $exp[0];
                     $segnom = $exp[1];
                     $priape = $exp[2];
-                    $segape = $exp[3] . ' ' . $exp[4];
+                    $segape = $exp[3].' '.$exp[4];
                     break;
                 case 4:
                     $prinom = $exp[0];
@@ -112,7 +116,7 @@ class SignupFacultativos  implements SignupInterface
                     break;
                 case 3:
                     $prinom = $exp[0];
-                    $priape = $exp[1] . ' ' . $exp[2];
+                    $priape = $exp[1].' '.$exp[2];
                     break;
                 case 2:
                     $prinom = $exp[0];
@@ -133,8 +137,8 @@ class SignupFacultativos  implements SignupInterface
         $this->solicitud->save();
         $id = $this->solicitud->getId();
 
-        Mercurio37::where("tipopc", $this->tipopc)->where("numero", $id)->delete();
-        Mercurio10::where("tipopc", $this->tipopc)->where("numero", $id)->delete();
+        Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
+        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
     }
 
     public function getSolicitud()

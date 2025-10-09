@@ -2,28 +2,29 @@
 
 namespace App\Services\Signup;
 
-
 interface SignupInterface
 {
-
     /**
      * findByDocumentTemp function
-     * @param int $documento
-     * @param int $coddoc
-     * @param string $calemp
+     *
+     * @param  int  $documento
+     * @param  int  $coddoc
+     * @param  string  $calemp
      * @return object
      */
     public function findByDocumentTemp($documento, $coddoc, $calemp = '');
 
     /**
      * createSignupService function
-     * @param array $data
+     *
+     * @param  array  $data
      * @return void
      */
     public function createSignupService($data);
 
     /**
      * getSolicitud function
+     *
      * @return object
      */
     public function getSolicitud();

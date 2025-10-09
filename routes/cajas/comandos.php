@@ -1,8 +1,8 @@
 <?php
 
 // Importar facades y controlador necesarios
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Cajas\ComandoController;
+use Illuminate\Support\Facades\Route;
 
 // Ruta para obtener el estado de un comando
 Route::get('/comando/status', [ComandoController::class, 'statusComandoAction']);

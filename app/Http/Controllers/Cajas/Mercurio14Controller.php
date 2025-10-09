@@ -15,10 +15,14 @@ use Illuminate\Http\Request;
 
 class Mercurio14Controller extends ApplicationController
 {
-    protected $query = "1=1";
+    protected $query = '1=1';
+
     protected $cantidad_pagina = 10;
+
     protected $db;
+
     protected $user;
+
     protected $tipo;
 
     public function __construct()
@@ -38,9 +42,9 @@ class Mercurio14Controller extends ApplicationController
         return view('cajas.mercurio14.index', [
             'title' => 'Documentos requeridos empleadores',
             'campo_filtro' => [
-                "tipopc" => "Tipo servicio afiliación",
-                "tipsoc" => "Tipo sociedad",
-                "coddoc" => "Tipo documento"
+                'tipopc' => 'Tipo servicio afiliación',
+                'tipsoc' => 'Tipo sociedad',
+                'coddoc' => 'Tipo documento',
             ],
             'tipopc' => $tipopc,
             'coddoc' => $coddoc,
@@ -50,14 +54,16 @@ class Mercurio14Controller extends ApplicationController
 
     public function aplicarFiltroAction(Request $request)
     {
-        $consultasOldServices = new GeneralService();
+        $consultasOldServices = new GeneralService;
         $this->query = $consultasOldServices->converQuery($request);
+
         return $this->buscarAction($request);
     }
 
     public function changeCantidadPaginaAction(Request $request)
     {
-        $this->cantidad_pagina = $request->input("numero");
+        $this->cantidad_pagina = $request->input('numero');
+
         return $this->buscarAction($request);
     }
 
@@ -65,17 +71,17 @@ class Mercurio14Controller extends ApplicationController
     {
         $html = '<table border="0" cellpadding="0" cellspacing="0" class="table table-bordered">';
         $html .= "<thead class='thead-light'>";
-        $html .= "<tr>";
+        $html .= '<tr>';
         $html .= "<th scope='col'>Tipo Servicio</th>";
         $html .= "<th scope='col'>Tipo Sociedad</th>";
         $html .= "<th scope='col'>Documento</th>";
         $html .= "<th scope='col'>Obligatorio</th>";
         $html .= "<th scope='col'></th>";
-        $html .= "</tr>";
-        $html .= "</thead>";
+        $html .= '</tr>';
+        $html .= '</thead>';
         $html .= "<tbody class='list'>";
         foreach ($paginate->items as $mtable) {
-            $html .= "<tr>";
+            $html .= '<tr>';
             $html .= "<td>{$mtable->mercurio09->detalle}</td>";
             $html .= "<td>{$mtable->subsi54->detalle}</td>";
             $html .= "<td>{$mtable->mercurio12->detalle}</td>";
@@ -83,21 +89,22 @@ class Mercurio14Controller extends ApplicationController
             $html .= "<td class='table-actions'>";
             $html .= "<a href='#!' class='table-action btn btn-primary btn-xs' title='Editar' data-tipopc='{$mtable->tipopc}' data-tipsoc='{$mtable->tipsoc}' data-coddoc='{$mtable->coddoc}' data-toggle='editar'>";
             $html .= "<i class='fas fa-user-edit text-white'></i>";
-            $html .= "</a>";
+            $html .= '</a>';
             $html .= "<a href='#!' class='table-action table-action-delete btn btn-danger btn-xs' title='Borrar' data-tipopc='{$mtable->tipopc}' data-tipsoc='{$mtable->tipsoc}' data-coddoc='{$mtable->coddoc}' data-toggle='borrar'>";
             $html .= "<i class='fas fa-trash text-white'></i>";
-            $html .= "</a>";
-            $html .= "</td>";
-            $html .= "</tr>";
+            $html .= '</a>';
+            $html .= '</td>';
+            $html .= '</tr>';
         }
-        $html .= "</tbody>";
-        $html .= "</table>";
+        $html .= '</tbody>';
+        $html .= '</table>';
+
         return $html;
     }
 
     public function buscarAction(Request $request)
     {
-        $pagina = ($request->input('pagina') == "") ? 1 : $request->input('pagina');
+        $pagina = ($request->input('pagina') == '') ? 1 : $request->input('pagina');
 
         $paginate = Paginate::execute(
             Mercurio14::with(['mercurio09', 'mercurio12', 'subsi54'])->whereRaw("{$this->query}")->get(),
@@ -106,18 +113,19 @@ class Mercurio14Controller extends ApplicationController
         );
 
         $html = $this->showTabla($paginate);
-        $consultasOldServices = new GeneralService();
+        $consultasOldServices = new GeneralService;
         $html_paginate = $consultasOldServices->showPaginate($paginate);
 
         $response['consulta'] = $html;
         $response['paginate'] = $html_paginate;
+
         return $this->renderObject($response, false);
     }
 
     public function editarAction(Request $request)
     {
         try {
-            $this->setResponse("ajax");
+            $this->setResponse('ajax');
             $tipopc = $request->input('tipopc');
             $coddoc = $request->input('coddoc');
             $tipsoc = $request->input('tipsoc');
@@ -127,13 +135,14 @@ class Mercurio14Controller extends ApplicationController
                 ->where('tipsoc', $tipsoc)
                 ->first();
 
-            if (!$mercurio14) {
-                $mercurio14 = new Mercurio14();
+            if (! $mercurio14) {
+                $mercurio14 = new Mercurio14;
             }
 
             return $this->renderObject($mercurio14->toArray(), false);
         } catch (DebugException $e) {
-            $response = parent::errorFunc("Error al obtener el registro");
+            $response = parent::errorFunc('Error al obtener el registro');
+
             return $this->renderObject($response, false);
         }
     }
@@ -141,7 +150,7 @@ class Mercurio14Controller extends ApplicationController
     public function guardarAction(Request $request)
     {
         try {
-            $this->setResponse("ajax");
+            $this->setResponse('ajax');
             $tipopc = $request->input('tipopc');
             $coddoc = $request->input('coddoc');
             $tipsoc = $request->input('tipsoc');
@@ -154,24 +163,26 @@ class Mercurio14Controller extends ApplicationController
             $mercurio14 = Mercurio14::firstOrNew([
                 'tipopc' => $tipopc,
                 'coddoc' => $coddoc,
-                'tipsoc' => $tipsoc
+                'tipsoc' => $tipsoc,
             ]);
             $mercurio14->obliga = $obliga;
             $mercurio14->nota = $nota;
             $mercurio14->auto_generado = $auto_generado;
 
-            if (!$mercurio14->save()) {
+            if (! $mercurio14->save()) {
                 parent::setLogger($mercurio14->getMessages());
                 $this->db->rollback();
-                throw new DebugException("Error no se puede guardar el registro");
+                throw new DebugException('Error no se puede guardar el registro');
             }
 
             $this->db->commit();
             $response = parent::successFunc('El registro se completo con éxito.');
+
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $this->db->rollback();
             $response = parent::errorFunc($e->getMessage());
+
             return $this->renderObject($response, false);
         }
     }
@@ -179,7 +190,7 @@ class Mercurio14Controller extends ApplicationController
     public function borrarAction(Request $request)
     {
         try {
-            $this->setResponse("ajax");
+            $this->setResponse('ajax');
             $tipopc = $request->input('tipopc');
             $coddoc = $request->input('coddoc');
             $tipsoc = $request->input('tipsoc');
@@ -191,15 +202,17 @@ class Mercurio14Controller extends ApplicationController
                 ->delete();
 
             if ($deleted == 0) {
-                throw new DebugException("Error no se puede borrar el registro, no está disponible.");
+                throw new DebugException('Error no se puede borrar el registro, no está disponible.');
             }
 
             $this->db->commit();
             $response = parent::successFunc('El registro se borro con éxito.');
+
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $this->db->rollback();
             $response = parent::errorFunc($e->getMessage());
+
             return $this->renderObject($response, false);
         }
     }

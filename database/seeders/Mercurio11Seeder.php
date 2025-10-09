@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Mercurio11;
+use Illuminate\Database\Seeder;
 
 class Mercurio11Seeder extends Seeder
 {
@@ -48,7 +47,7 @@ class Mercurio11Seeder extends Seeder
         }
     }
 
-    /* INSERT INTO `mercurio11` VALUES 
+    /* INSERT INTO `mercurio11` VALUES
     ('01','DOCUMENTACION INCOMPLETA'),('02','FALTA DE FIRMAS'),
     ('03','DATOS INCOMPLETOS'),
     ('04','DATOS INCONSISTENTES PARA LA AFILIACION'),

@@ -6,10 +6,10 @@ use App\Models\Adapter\ModelBase;
 
 class Subsi54 extends ModelBase
 {
-
-
     protected $table = 'subsi54';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [

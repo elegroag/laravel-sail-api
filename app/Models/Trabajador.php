@@ -25,7 +25,7 @@ class Trabajador extends Model
         'fecha_ingreso',
         'fecha_salida',
         'estado',
-        'empresa_id'
+        'empresa_id',
     ];
 
     protected $casts = [

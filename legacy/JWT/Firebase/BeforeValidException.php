@@ -1,7 +1,5 @@
 <?php
+
 namespace Firebase;
 
-class BeforeValidException extends \UnexpectedValueException
-{
-
-}
+class BeforeValidException extends \UnexpectedValueException {}

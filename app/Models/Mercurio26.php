@@ -6,9 +6,10 @@ use App\Models\Adapter\ModelBase;
 
 class Mercurio26 extends ModelBase
 {
-
     protected $table = 'mercurio26';
+
     public $timestamps = false;
+
     protected $primaryKey = 'numero';
 
     protected $fillable = [
@@ -22,7 +23,8 @@ class Mercurio26 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo numero
-     * @param integer $numero
+     *
+     * @param  int  $numero
      */
     public function setNumero($numero)
     {
@@ -31,7 +33,8 @@ class Mercurio26 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo archivo
-     * @param string $archivo
+     *
+     * @param  string  $archivo
      */
     public function setArchivo($archivo)
     {
@@ -40,7 +43,8 @@ class Mercurio26 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo nota
-     * @param string $nota
+     *
+     * @param  string  $nota
      */
     public function setNota($nota)
     {
@@ -49,7 +53,8 @@ class Mercurio26 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo estado
-     * @param string $estado
+     *
+     * @param  string  $estado
      */
     public function setEstado($estado)
     {
@@ -58,7 +63,8 @@ class Mercurio26 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo tipo
-     * @param string $tipo
+     *
+     * @param  string  $tipo
      */
     public function setTipo($tipo)
     {
@@ -67,7 +73,8 @@ class Mercurio26 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo orden
-     * @param string $orden
+     *
+     * @param  string  $orden
      */
     public function setOrden($orden)
     {
@@ -76,7 +83,8 @@ class Mercurio26 extends ModelBase
 
     /**
      * Devuelve el valor del campo numero
-     * @return integer
+     *
+     * @return int
      */
     public function getNumero()
     {
@@ -85,6 +93,7 @@ class Mercurio26 extends ModelBase
 
     /**
      * Devuelve el valor del campo archivo
+     *
      * @return string
      */
     public function getArchivo()
@@ -94,6 +103,7 @@ class Mercurio26 extends ModelBase
 
     /**
      * Devuelve el valor del campo nota
+     *
      * @return string
      */
     public function getNota()
@@ -103,6 +113,7 @@ class Mercurio26 extends ModelBase
 
     /**
      * Devuelve el valor del campo estado
+     *
      * @return string
      */
     public function getEstado()
@@ -112,6 +123,7 @@ class Mercurio26 extends ModelBase
 
     /**
      * Devuelve el valor del campo tipo
+     *
      * @return string
      */
     public function getTipo()
@@ -121,6 +133,7 @@ class Mercurio26 extends ModelBase
 
     /**
      * Devuelve el valor del campo orden
+     *
      * @return string
      */
     public function getOrden()

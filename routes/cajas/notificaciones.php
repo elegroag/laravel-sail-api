@@ -1,8 +1,8 @@
 <?php
 
 // Importar facades y controlador necesarios
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Cajas\NotificacionesController;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('notificaciones')->group(function () {
     // Definir rutas para el controlador Notificaciones

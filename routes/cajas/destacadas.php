@@ -1,8 +1,8 @@
 <?php
 
 // Importar facades y controlador necesarios
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Cajas\Mercurio53Controller;
+use Illuminate\Support\Facades\Route;
 
 // Rutas para Mercurio53Controller - Destacadas
 Route::get('/destacadas/index', [Mercurio53Controller::class, 'indexAction'])->name('mercurio53.index')->middleware('auth');

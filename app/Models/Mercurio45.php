@@ -7,9 +7,10 @@ use Carbon\Carbon;
 
 class Mercurio45 extends ModelBase
 {
-
     protected $table = 'mercurio45';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -31,10 +32,10 @@ class Mercurio45 extends ModelBase
         'documento',
     ];
 
-
     /**
      * Metodo para establecer el valor del campo id
-     * @param integer $id
+     *
+     * @param  int  $id
      */
     public function setId($id)
     {
@@ -43,7 +44,8 @@ class Mercurio45 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo log
-     * @param integer $log
+     *
+     * @param  int  $log
      */
     public function setLog($log)
     {
@@ -52,7 +54,8 @@ class Mercurio45 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo cedtra
-     * @param string $cedtra
+     *
+     * @param  string  $cedtra
      */
     public function setCedtra($cedtra)
     {
@@ -61,7 +64,8 @@ class Mercurio45 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo codben
-     * @param integer $codben
+     *
+     * @param  int  $codben
      */
     public function setCodben($codben)
     {
@@ -70,7 +74,8 @@ class Mercurio45 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo nombre
-     * @param string $nombre
+     *
+     * @param  string  $nombre
      */
     public function setNombre($nombre)
     {
@@ -79,7 +84,6 @@ class Mercurio45 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo fecha
-
      */
     public function setFecha($fecha)
     {
@@ -88,7 +92,8 @@ class Mercurio45 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo codcer
-     * @param string $codcer
+     *
+     * @param  string  $codcer
      */
     public function setCodcer($codcer)
     {
@@ -97,7 +102,8 @@ class Mercurio45 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo nomcer
-     * @param string $nomcer
+     *
+     * @param  string  $nomcer
      */
     public function setNomcer($nomcer)
     {
@@ -106,7 +112,8 @@ class Mercurio45 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo archivo
-     * @param string $archivo
+     *
+     * @param  string  $archivo
      */
     public function setArchivo($archivo)
     {
@@ -115,7 +122,8 @@ class Mercurio45 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo usuario
-     * @param integer $usuario
+     *
+     * @param  int  $usuario
      */
     public function setUsuario($usuario)
     {
@@ -124,7 +132,8 @@ class Mercurio45 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo estado
-     * @param string $estado
+     *
+     * @param  string  $estado
      */
     public function setEstado($estado)
     {
@@ -133,7 +142,8 @@ class Mercurio45 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo motivo
-     * @param string $motivo
+     *
+     * @param  string  $motivo
      */
     public function setMotivo($motivo)
     {
@@ -142,7 +152,6 @@ class Mercurio45 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo fecest
-
      */
     public function setFecest($fecest)
     {
@@ -151,7 +160,8 @@ class Mercurio45 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo codest
-     * @param string $codest
+     *
+     * @param  string  $codest
      */
     public function setCodest($codest)
     {
@@ -160,7 +170,8 @@ class Mercurio45 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo tipo
-     * @param string $tipo
+     *
+     * @param  string  $tipo
      */
     public function setTipo($tipo)
     {
@@ -169,7 +180,8 @@ class Mercurio45 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo coddoc
-     * @param string $coddoc
+     *
+     * @param  string  $coddoc
      */
     public function setCoddoc($coddoc)
     {
@@ -178,17 +190,18 @@ class Mercurio45 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo documento
-     * @param string $documento
+     *
+     * @param  string  $documento
      */
     public function setDocumento($documento)
     {
         $this->documento = $documento;
     }
 
-
     /**
      * Devuelve el valor del campo id
-     * @return integer
+     *
+     * @return int
      */
     public function getId()
     {
@@ -197,7 +210,8 @@ class Mercurio45 extends ModelBase
 
     /**
      * Devuelve el valor del campo log
-     * @return integer
+     *
+     * @return int
      */
     public function getLog()
     {
@@ -206,6 +220,7 @@ class Mercurio45 extends ModelBase
 
     /**
      * Devuelve el valor del campo cedtra
+     *
      * @return string
      */
     public function getCedtra()
@@ -215,7 +230,8 @@ class Mercurio45 extends ModelBase
 
     /**
      * Devuelve el valor del campo codben
-     * @return integer
+     *
+     * @return int
      */
     public function getCodben()
     {
@@ -224,6 +240,7 @@ class Mercurio45 extends ModelBase
 
     /**
      * Devuelve el valor del campo nombre
+     *
      * @return string
      */
     public function getNombre()
@@ -233,7 +250,6 @@ class Mercurio45 extends ModelBase
 
     /**
      * Devuelve el valor del campo fecha
-
      */
     public function getFecha()
     {
@@ -242,6 +258,7 @@ class Mercurio45 extends ModelBase
 
     /**
      * Devuelve el valor del campo codcer
+     *
      * @return string
      */
     public function getCodcer()
@@ -251,6 +268,7 @@ class Mercurio45 extends ModelBase
 
     /**
      * Devuelve el valor del campo nomcer
+     *
      * @return string
      */
     public function getNomcer()
@@ -260,6 +278,7 @@ class Mercurio45 extends ModelBase
 
     /**
      * Devuelve el valor del campo archivo
+     *
      * @return string
      */
     public function getArchivo()
@@ -269,7 +288,8 @@ class Mercurio45 extends ModelBase
 
     /**
      * Devuelve el valor del campo usuario
-     * @return integer
+     *
+     * @return int
      */
     public function getUsuario()
     {
@@ -278,6 +298,7 @@ class Mercurio45 extends ModelBase
 
     /**
      * Devuelve el valor del campo estado
+     *
      * @return string
      */
     public function getEstado()
@@ -287,17 +308,29 @@ class Mercurio45 extends ModelBase
 
     public function getEstadoDetalle()
     {
-        $return = "";
-        if ($this->estado == "T") $return = "TEMPORAL";
-        if ($this->estado == "D") $return = "DEVUELTO";
-        if ($this->estado == "A") $return = "APROBADO";
-        if ($this->estado == "X") $return = "RECHAZADO";
-        if ($this->estado == "P") $return = "PENDIENTE";
+        $return = '';
+        if ($this->estado == 'T') {
+            $return = 'TEMPORAL';
+        }
+        if ($this->estado == 'D') {
+            $return = 'DEVUELTO';
+        }
+        if ($this->estado == 'A') {
+            $return = 'APROBADO';
+        }
+        if ($this->estado == 'X') {
+            $return = 'RECHAZADO';
+        }
+        if ($this->estado == 'P') {
+            $return = 'PENDIENTE';
+        }
+
         return $return;
     }
 
     /**
      * Devuelve el valor del campo motivo
+     *
      * @return string
      */
     public function getMotivo()
@@ -307,7 +340,6 @@ class Mercurio45 extends ModelBase
 
     /**
      * Devuelve el valor del campo fecest
-
      */
     public function getFecest()
     {
@@ -316,6 +348,7 @@ class Mercurio45 extends ModelBase
 
     /**
      * Devuelve el valor del campo codest
+     *
      * @return string
      */
     public function getCodest()
@@ -325,6 +358,7 @@ class Mercurio45 extends ModelBase
 
     /**
      * Devuelve el valor del campo tipo
+     *
      * @return string
      */
     public function getTipo()
@@ -334,6 +368,7 @@ class Mercurio45 extends ModelBase
 
     /**
      * Devuelve el valor del campo coddoc
+     *
      * @return string
      */
     public function getCoddoc()
@@ -343,6 +378,7 @@ class Mercurio45 extends ModelBase
 
     /**
      * Devuelve el valor del campo documento
+     *
      * @return string
      */
     public function getDocumento()

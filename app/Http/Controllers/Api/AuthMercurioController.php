@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Exceptions\DebugException;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Library\Auth\AuthJwt;
 use App\Models\Adapter\DbBase;
@@ -11,21 +10,22 @@ use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio19;
 use App\Services\Api\ApiWhatsapp;
-use App\Services\Autentications\AutenticaService;
-use Illuminate\Validation\ValidationException;
-use App\Services\Srequest;
 use App\Services\Signup\SignupDomestico;
 use App\Services\Signup\SignupEmpresas;
 use App\Services\Signup\SignupFacultativos;
 use App\Services\Signup\SignupIndependientes;
 use App\Services\Signup\SignupPensionados;
 use App\Services\Signup\SignupService;
+use App\Services\Srequest;
 use App\Services\Utils\SenderEmail;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class AuthMercurioController extends Controller
 {
     private $db;
+
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
@@ -70,14 +70,14 @@ class AuthMercurioController extends Controller
                 $request->input('tipo') == 'F'
             ) {
                 $request->validate([
-                    'contribution_rate' => 'required'
+                    'contribution_rate' => 'required',
                 ]);
             }
 
             if ($request->input('tipo') == 'T') {
                 $request->validate([
                     'razsoc' => 'required|string|min:5',
-                    'nit' => 'required|integer|digits_between:6,18'
+                    'nit' => 'required|integer|digits_between:6,18',
                 ]);
             }
 
@@ -99,52 +99,55 @@ class AuthMercurioController extends Controller
                             'is_delegado' => 'required|boolean',
                         ]);
                     }
-                    $signupEntity = new SignupEmpresas();
+                    $signupEntity = new SignupEmpresas;
                     break;
                 case 'I':
-                    $signupEntity = new SignupIndependientes();
+                    $signupEntity = new SignupIndependientes;
                     break;
                 case 'F':
-                    $signupEntity = new SignupFacultativos();
+                    $signupEntity = new SignupFacultativos;
                     break;
                 case 'O':
-                    $signupEntity = new SignupPensionados();
+                    $signupEntity = new SignupPensionados;
                     break;
                 case 'S':
-                    $signupEntity = new SignupDomestico();
+                    $signupEntity = new SignupDomestico;
                     break;
                 case 'T':
                 case 'P':
                     $signupEntity = null;
                     break;
                 default:
-                    throw new DebugException("Error el tipo de afiliación es requerido", 1);
+                    throw new DebugException('Error el tipo de afiliación es requerido', 1);
                     break;
             }
 
-            $response = (new SignupService())->execute(
+            $response = (new SignupService)->execute(
                 $signupEntity,
                 new Srequest($data)
             );
 
             $this->db->commit();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Registro exitoso',
-                'data' => $response
+                'data' => $response,
             ], 201);
         } catch (ValidationException $e) {
             $this->db->rollBack();
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error de validación',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (DebugException $e) {
             $this->db->rollBack();
+
             return response()->json([
                 'success' => false,
-                'message' => 'Error al crear empresa: ' . $e->getMessage()
+                'message' => 'Error al crear empresa: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -169,21 +172,21 @@ class AuthMercurioController extends Controller
             ];
             $token = (new AuthJwt(10))->SimpleToken($claims);
             // Primero validar existencia en mercurio07 para no romper la FK al insertar/actualizar mercurio19
-            $user07 = Mercurio07::where("documento", $request->input('documento'))
-                ->where("coddoc", $request->input('coddoc'))
-                ->where("tipo", $request->input('tipo'))
+            $user07 = Mercurio07::where('documento', $request->input('documento'))
+                ->where('coddoc', $request->input('coddoc'))
+                ->where('tipo', $request->input('tipo'))
                 ->first();
 
-            if (!$user07) {
+            if (! $user07) {
                 return response()->json([
-                    "success" => false,
-                    "msj" => "No existe un usuario registrado con los datos ingresados. Verifique o regístrese para continuar."
+                    'success' => false,
+                    'msj' => 'No existe un usuario registrado con los datos ingresados. Verifique o regístrese para continuar.',
                 ]);
             }
 
-            $user19 = Mercurio19::where("documento", $request->input('documento'))
-                ->where("coddoc", $request->input('coddoc'))
-                ->where("tipo", $request->input('tipo'))
+            $user19 = Mercurio19::where('documento', $request->input('documento'))
+                ->where('coddoc', $request->input('coddoc'))
+                ->where('tipo', $request->input('tipo'))
                 ->first();
 
             if ($user19) {
@@ -201,16 +204,16 @@ class AuthMercurioController extends Controller
 
             // $user07 ya está validado arriba
             $codigoVerify = genera_code();
-            $inicio  = Carbon::now()->format('Y-m-d H:i:s');
+            $inicio = Carbon::now()->format('Y-m-d H:i:s');
             $intentos = '0';
 
             Mercurio19::where('documento', $request->input('documento'))
                 ->where('coddoc', $request->input('coddoc'))
                 ->where('tipo', $request->input('tipo'))
                 ->update([
-                    'inicio'   => $inicio,
+                    'inicio' => $inicio,
                     'intentos' => (int) $intentos,
-                    'codver'   => (string) $codigoVerify,
+                    'codver' => (string) $codigoVerify,
                 ]);
 
             if ($request->input('delivery_method') == 'email') {
@@ -219,9 +222,9 @@ class AuthMercurioController extends Controller
                 <span style=\"font-size:16px;color:#333\">CÓDIGO DE VERIFICACIÓN: </span><br/>
                 <span style=\"font-size:30px;color:#11cdef\"><b>{$codigoVerify}</b></span>";
 
-                $asunto = "Generación nuevo PIN plataforma Comfaca En Línea";
+                $asunto = 'Generación nuevo PIN plataforma Comfaca En Línea';
                 $emailCaja = Mercurio01::first();
-                $senderEmail = new SenderEmail();
+                $senderEmail = new SenderEmail;
                 $senderEmail->setters(
                     "emisor_email: {$emailCaja->getEmail()}",
                     "emisor_clave: {$emailCaja->getClave()}",
@@ -229,39 +232,39 @@ class AuthMercurioController extends Controller
                 );
                 $senderEmail->send($user07->email, $html);
             } else {
-                if (!$user07->whatsapp) {
-                    throw new DebugException("No se proporcionó número de whatsapp", 501);
+                if (! $user07->whatsapp) {
+                    throw new DebugException('No se proporcionó número de whatsapp', 501);
                 }
 
                 $html = "> Código de verificación:
                 *{$codigoVerify}*. Generación de PIN plataforma Comfaca En Línea, utiliza el código de verificación para confirmar el propietario de la línea de whatsapp.";
-                $apiWhatsaap = new ApiWhatsapp();
+                $apiWhatsaap = new ApiWhatsapp;
                 $apiWhatsaap->send([
                     'servicio' => 'Whatsapp',
                     'metodo' => 'enviar',
                     'params' => [
                         'numero' => $user07->whatsapp,
-                        'mensaje' => $html
+                        'mensaje' => $html,
                     ],
                 ]);
             }
 
             return response()->json([
-                "success" => true,
-                "message" => "Código de verificación enviado correctamente",
-                "token" => $token
+                'success' => true,
+                'message' => 'Código de verificación enviado correctamente',
+                'token' => $token,
             ], 201);
         } catch (ValidationException $e) {
             return response()->json([
-                "success" => false,
+                'success' => false,
                 'message' => 'Error de validación',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (DebugException $e) {
 
             return response()->json([
-                "success" => false,
-                'message' => 'Error al crear empresa: ' . $e->getMessage()
+                'success' => false,
+                'message' => 'Error al crear empresa: '.$e->getMessage(),
             ], 500);
         }
     }

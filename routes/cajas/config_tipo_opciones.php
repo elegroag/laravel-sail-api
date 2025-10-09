@@ -1,8 +1,8 @@
 <?php
 
 // Importar facades y controlador necesarios
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Cajas\Mercurio09Controller;
+use Illuminate\Support\Facades\Route;
 
 // Ruta GET para mostrar la página principal de tipos de opciones
 Route::get('/tipo-opciones', [Mercurio09Controller::class, 'indexAction']);

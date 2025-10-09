@@ -6,9 +6,10 @@ use App\Models\Adapter\ModelBase;
 
 class AfiliadoHabil extends ModelBase
 {
-
     protected $table = 'afiliado_habil';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [

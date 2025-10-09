@@ -19,6 +19,7 @@ class AutenticaParticular extends AutenticaGeneral
      * comprobar que la empresa este registrada en SISU
      * comprueba que este el usuario de la empresa en mercurio
      * hace los registro de forma automatica
+     *
      * @param [type] $documento
      * @param [type] $coddoc
      * @return bool
@@ -28,9 +29,9 @@ class AutenticaParticular extends AutenticaGeneral
         /**
          * buscar usuario particular en mercurio
          */
-        $usuarioParticular = Mercurio07::where("tipo", $this->tipo)
-            ->where("documento", $documento)
-            ->where("coddoc", $coddoc)
+        $usuarioParticular = Mercurio07::where('tipo', $this->tipo)
+            ->where('documento', $documento)
+            ->where('coddoc', $coddoc)
             ->first();
 
         if ($usuarioParticular) {
@@ -40,6 +41,7 @@ class AutenticaParticular extends AutenticaGeneral
             }
         }
         $this->afiliado = $usuarioParticular;
+
         return true;
     }
 }

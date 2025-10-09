@@ -18,7 +18,7 @@ class TrabajadorResource extends JsonResource
             'id' => $this->id,
             'nombres' => $this->nombres,
             'apellidos' => $this->apellidos,
-            'nombre_completo' => $this->nombres . ' ' . $this->apellidos,
+            'nombre_completo' => $this->nombres.' '.$this->apellidos,
             'rut' => $this->rut,
             'email' => $this->email,
             'telefono' => $this->telefono,
@@ -28,7 +28,7 @@ class TrabajadorResource extends JsonResource
             'direccion' => $this->direccion,
             'cargo' => $this->cargo,
             'salario' => $this->salario,
-            'salario_formateado' => '$' . number_format($this->salario, 0, ',', '.'),
+            'salario_formateado' => '$'.number_format($this->salario, 0, ',', '.'),
             'fecha_ingreso' => $this->fecha_ingreso?->format('Y-m-d'),
             'fecha_salida' => $this->fecha_salida?->format('Y-m-d'),
             'antiguedad_dias' => $this->fecha_ingreso?->diffInDays(now()),
@@ -43,11 +43,11 @@ class TrabajadorResource extends JsonResource
             // Estadísticas calculadas
             'total_familiares' => $this->when(
                 $this->relationLoaded('nucleosFamiliares'),
-                fn() => $this->nucleosFamiliares->count()
+                fn () => $this->nucleosFamiliares->count()
             ),
             'dependientes_economicos' => $this->when(
                 $this->relationLoaded('nucleosFamiliares'),
-                fn() => $this->nucleosFamiliares->where('dependiente_economico', true)->count()
+                fn () => $this->nucleosFamiliares->where('dependiente_economico', true)->count()
             ),
         ];
     }

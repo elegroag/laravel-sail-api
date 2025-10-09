@@ -7,17 +7,16 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsBeneficiario;
 use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
-use App\Models\Mercurio34;
+use App\Models\Gener09;
+use App\Models\Mercurio10;
 use App\Models\Mercurio30;
 use App\Models\Mercurio31;
 use App\Models\Mercurio32;
-use App\Models\Gener09;
-use App\Models\Mercurio01;
-use App\Models\Mercurio10;
+use App\Models\Mercurio34;
 use App\Models\Mercurio37;
 use App\Services\Entidades\BeneficiarioService;
-use App\Services\Entidades\TrabajadorService;
 use App\Services\Entidades\ConyugeService;
+use App\Services\Entidades\TrabajadorService;
 use App\Services\FormulariosAdjuntos\BeneficiarioAdjuntoService;
 use App\Services\FormulariosAdjuntos\Formularios;
 use App\Services\Tag;
@@ -25,19 +24,19 @@ use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
-use App\Services\Utils\Date;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\View;
-
 
 class BeneficiarioController extends ApplicationController
 {
+    protected $tipopc = '4';
 
-    protected $tipopc = "4";
     protected $db;
+
     protected $user;
+
     protected $tipo;
+
     protected $codciu;
 
     public function __construct()
@@ -60,60 +59,63 @@ class BeneficiarioController extends ApplicationController
         ) {
             $procesadorComando = Comman::Api();
             $procesadorComando->runCli(
-                array(
-                    "servicio" => "ComfacaEmpresas",
-                    "metodo" => "informacion_empresa",
-                    "params" => array('nit' => $documento)
-                )
+                [
+                    'servicio' => 'ComfacaEmpresas',
+                    'metodo' => 'informacion_empresa',
+                    'params' => ['nit' => $documento],
+                ]
             );
 
             $empresa = $procesadorComando->toArray();
-            if (!isset($empresa['data'])) {
-                set_flashdata("error", array(
-                    "msj" => 'Error al acceder al servicio de consulta de empresa.',
-                    "code" => 401
-                ));
+            if (! isset($empresa['data'])) {
+                set_flashdata('error', [
+                    'msj' => 'Error al acceder al servicio de consulta de empresa.',
+                    'code' => 401,
+                ]);
+
                 return redirect('principal/index');
             }
 
             if ($empresa['data']['estado'] === 'I') {
-                set_flashdata("error", array(
-                    "msj" => 'La empresa ya no está activa para realizar afiliación de beneficiarios.',
-                    "code" => 401
-                ));
+                set_flashdata('error', [
+                    'msj' => 'La empresa ya no está activa para realizar afiliación de beneficiarios.',
+                    'code' => 401,
+                ]);
+
                 return redirect('principal/index');
             }
         }
+
         return view('mercurio/beneficiario/index', [
             'tipo' => $this->tipo,
             'documento' => $documento,
             'title' => 'Afiliación de beneficiarios',
-            'empresa' => $empresa
+            'empresa' => $empresa,
         ]);
     }
 
     public function traerConyugesAction(Request $request)
     {
-        $this->setResponse("ajax");
-        $cedtra = $request->input("cedtra");
+        $this->setResponse('ajax');
+        $cedtra = $request->input('cedtra');
 
         $cedcons = Mercurio32::where('cedtra', $cedtra)
             ->get(['cedcon', 'priape', 'segape', 'prinom'])
             ->pluck('cedcon', 'priape', 'segape', 'prinom')
             ->map(function ($conyuge) {
-                return $conyuge->cedcon . "-" . $conyuge->priape . " " . $conyuge->segape . " " . $conyuge->prinom;
+                return $conyuge->cedcon.'-'.$conyuge->priape.' '.$conyuge->segape.' '.$conyuge->prinom;
             })
             ->toArray();
 
         $ps = Comman::Api();
         $ps->runCli(
-            array(
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "listar_conyuges_trabajador",
-                "params" => array(
-                    "cedtra" => $cedtra
-                )
-            )
+            [
+                'servicio' => 'ComfacaAfilia',
+                'metodo' => 'listar_conyuges_trabajador',
+                'params' => [
+                    'cedtra' => $cedtra,
+                ],
+            ]
         );
 
         $subsi20 = $ps->toArray();
@@ -121,24 +123,25 @@ class BeneficiarioController extends ApplicationController
             $subsi20 = $subsi20['data'];
             if (count($subsi20) > 0) {
                 foreach ($subsi20 as $msubsi20) {
-                    $cedcons[$msubsi20['cedcon']] = $msubsi20['cedcon'] . "-" . $msubsi20['priape'] . " " . $msubsi20['prinom'];
+                    $cedcons[$msubsi20['cedcon']] = $msubsi20['cedcon'].'-'.$msubsi20['priape'].' '.$msubsi20['prinom'];
                 }
             }
         }
 
-        $response = Tag::selectStatic("cedcon", $cedcons, "use_dummy: true", "dummyValue: ", "class: form-control");
+        $response = Tag::selectStatic('cedcon', $cedcons, 'use_dummy: true', 'dummyValue: ', 'class: form-control');
+
         return $this->renderObject($response, false);
     }
 
     public function borrarArchivoAction(Request $request)
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         try {
             $numero = $this->clp($request, 'id');
             $coddoc = $this->clp($request, 'coddoc');
-            $mercurio37 = Mercurio37::where("tipopc", $this->tipopc)->where("numero", $numero)->where("coddoc", $coddoc)->first();
+            $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
+            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -148,93 +151,98 @@ class BeneficiarioController extends ApplicationController
                 ->where('coddoc', $coddoc)
                 ->delete();
 
-            $response = array(
-                "success" => true,
-                "msj" => "El archivo se borro de forma correcta"
-            );
+            $response = [
+                'success' => true,
+                'msj' => 'El archivo se borro de forma correcta',
+            ];
         } catch (DebugException $e) {
-            $response = array(
-                "success" => false,
-                "msj" => $e->getMessage()
-            );
+            $response = [
+                'success' => false,
+                'msj' => $e->getMessage(),
+            ];
         }
+
         return $this->renderObject($response, false);
     }
 
     public function enviarCajaAction(Request $request)
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         try {
             $id = $this->cleanInput($request->input('id'));
-            $beneficiarioService = new BeneficiarioService();
-            //$beneficiarioService->setTransa();
+            $beneficiarioService = new BeneficiarioService;
+            // $beneficiarioService->setTransa();
 
-            $asignarFuncionario = new AsignarFuncionario();
+            $asignarFuncionario = new AsignarFuncionario;
             $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
 
-            $beneficiarioService->enviarCaja(new SenderValidationCaja(), $id, $usuario);
-            //$beneficiarioService->endTransa();
+            $beneficiarioService->enviarCaja(new SenderValidationCaja, $id, $usuario);
+            // $beneficiarioService->endTransa();
 
-            $salida = array(
-                "success" => true,
-                "msj" => "El envio de la solicitud se ha completado con éxito"
-            );
+            $salida = [
+                'success' => true,
+                'msj' => 'El envio de la solicitud se ha completado con éxito',
+            ];
         } catch (DebugException $e) {
-            $salida = array(
-                "success" => false,
-                "msj" => $e->getMessage()
-            );
+            $salida = [
+                'success' => false,
+                'msj' => $e->getMessage(),
+            ];
         }
+
         return $this->renderObject($salida);
     }
 
     public function traerBeneficiarioAction(Request $request)
     {
-        $this->setResponse("ajax");
-        $numdoc = $request->input("numdoc");
+        $this->setResponse('ajax');
+        $numdoc = $request->input('numdoc');
 
-        $datos_beneficiario = array();
+        $datos_beneficiario = [];
 
         $ps = Comman::Api();
         $ps->runCli(
-            array(
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "beneficiario",
-                "params" => array(
-                    "documento" => $numdoc
-                )
-            )
+            [
+                'servicio' => 'ComfacaAfilia',
+                'metodo' => 'beneficiario',
+                'params' => [
+                    'documento' => $numdoc,
+                ],
+            ]
         );
         $out = $ps->toArray();
         if ($out['success'] == true) {
             $datos_beneficiario = $out['data'];
         }
         $mercurio34 = new Mercurio34($datos_beneficiario);
+
         return $this->renderObject($mercurio34->toArray());
     }
 
     public function borrarAction(Request $request)
     {
         try {
-            $this->setResponse("ajax");
+            $this->setResponse('ajax');
             $id = $request->input('id');
             Mercurio34::where('id', $id)->delete();
 
-            $response = "Borrado Con Exito";
+            $response = 'Borrado Con Exito';
+
             return $this->renderObject(json_encode($response));
         } catch (DebugException $e) {
-            $response = "No se puede Borrar el Registro";
+            $response = 'No se puede Borrar el Registro';
         }
+
         return $this->renderObject(json_encode($response));
     }
 
     public function buscarBeneficiarios($estado)
     {
 
-        //usuario empresa, unica solicitud de afiliación
-        $documento = parent::getActUser("documento");
-        $tipo = parent::getActUser("tipo");
-        $coddoc = parent::getActUser("coddoc");
+        // usuario empresa, unica solicitud de afiliación
+        $documento = parent::getActUser('documento');
+        $tipo = parent::getActUser('tipo');
+        $coddoc = parent::getActUser('coddoc');
 
         if (empty($estado)) {
             $beneficiarios = $this->db->inQueryAssoc("SELECT * FROM mercurio34
@@ -259,37 +267,38 @@ class BeneficiarioController extends ApplicationController
             ");
 
             $beneficiarios[$ai] = $row;
-            $beneficiarios[$ai]["cantidad_eventos"] = $rqs['cantidad'];
-            $beneficiarios[$ai]["fecha_ultima_solicitud"] = $trayecto['fecsis'];
+            $beneficiarios[$ai]['cantidad_eventos'] = $rqs['cantidad'];
+            $beneficiarios[$ai]['fecha_ultima_solicitud'] = $trayecto['fecsis'];
             switch ($row['estado']) {
                 case 'T':
-                    $beneficiarios[$ai]["estado_detalle"] = "TEMPORAL";
+                    $beneficiarios[$ai]['estado_detalle'] = 'TEMPORAL';
                     break;
                 case 'D':
-                    $beneficiarios[$ai]["estado_detalle"] = "DEVUELTO";
+                    $beneficiarios[$ai]['estado_detalle'] = 'DEVUELTO';
                     break;
                 case 'A':
-                    $beneficiarios[$ai]["estado_detalle"] = "APROBADO";
+                    $beneficiarios[$ai]['estado_detalle'] = 'APROBADO';
                     break;
                 case 'X':
-                    $beneficiarios[$ai]["estado_detalle"] = "RECHAZADO";
+                    $beneficiarios[$ai]['estado_detalle'] = 'RECHAZADO';
                     break;
                 case 'P':
-                    $beneficiarios[$ai]["estado_detalle"] = "Pendinete De Validación CAJA";
+                    $beneficiarios[$ai]['estado_detalle'] = 'Pendinete De Validación CAJA';
                     break;
                 default:
-                    $beneficiarios[$ai]["estado_detalle"] = "T";
+                    $beneficiarios[$ai]['estado_detalle'] = 'T';
                     break;
             }
         }
+
         return $beneficiarios;
     }
 
     public function cancelar_solicitudAction(Request $request)
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         try {
-            $documento = parent::getActUser("documento");
+            $documento = parent::getActUser('documento');
             $id = $request->input('id');
 
             $m34 = Mercurio34::where('id', $id)->where('documento', $documento)->first();
@@ -299,46 +308,48 @@ class BeneficiarioController extends ApplicationController
                 }
                 Mercurio34::where('id', $id)->where('documento', $documento)->delete();
             }
-            $salida = array(
-                "success" => true,
-                "msj" => "El registro se borro con éxito del sistema."
-            );
+            $salida = [
+                'success' => true,
+                'msj' => 'El registro se borro con éxito del sistema.',
+            ];
         } catch (DebugException $e) {
-            $salida = array(
-                "success" => false,
-                "msj" => $e->getMessage()
-            );
+            $salida = [
+                'success' => false,
+                'msj' => $e->getMessage(),
+            ];
         }
+
         return $this->renderObject($salida);
     }
 
     /**
      * buscar_conyuges_trabajadorAction function
+     *
      * @return void
      */
     public function buscar_conyuges_trabajadorAction(Request $request)
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         try {
-            $cedtra = $request->input("cedtra");
-            $documento =  parent::getActUser("documento");
-            $tipo = parent::getActUser("tipo");
+            $cedtra = $request->input('cedtra');
+            $documento = parent::getActUser('documento');
+            $tipo = parent::getActUser('tipo');
             $procesadorComando = Comman::Api();
-            $datos_captura = array();
+            $datos_captura = [];
 
-            //solo conyuges activas a buscar
+            // solo conyuges activas a buscar
             if ($tipo == 'T') {
                 $trabajador = (new Mercurio31)->findFirst("documento='{$documento}' AND estado='A'");
                 $documento = ($trabajador) ? $trabajador->getCedtra() : $documento;
 
                 $procesadorComando->runCli(
-                    array(
-                        "servicio" => "ComfacaAfilia",
-                        "metodo" => "listar_conyuges_trabajador",
-                        "params" => array(
-                            "cedtra" => $documento
-                        )
-                    )
+                    [
+                        'servicio' => 'ComfacaAfilia',
+                        'metodo' => 'listar_conyuges_trabajador',
+                        'params' => [
+                            'cedtra' => $documento,
+                        ],
+                    ]
                 );
 
                 $out = $procesadorComando->toArray();
@@ -349,13 +360,13 @@ class BeneficiarioController extends ApplicationController
                 $empresa = Mercurio30::where('documento', $documento)->where('estado', 'A')->first();
                 $nit = ($empresa) ? $empresa->getNit() : $documento;
                 $procesadorComando->runCli(
-                    array(
-                        "servicio" => "ComfacaAfilia",
-                        "metodo" => "listar_conyuges",
-                        "params" => array(
-                            "nit" => $nit
-                        )
-                    )
+                    [
+                        'servicio' => 'ComfacaAfilia',
+                        'metodo' => 'listar_conyuges',
+                        'params' => [
+                            'nit' => $nit,
+                        ],
+                    ]
                 );
                 $out = $procesadorComando->toArray();
                 if ($out['success'] == true) {
@@ -363,81 +374,82 @@ class BeneficiarioController extends ApplicationController
                 }
             }
 
-            $_cedcon = array();
+            $_cedcon = [];
             foreach ($datos_captura as $data) {
                 if ($cedtra == '') {
-                    $_cedcon[$data['cedcon']] = $data['cedcon'] . ' - ' . $data['nombre'];
+                    $_cedcon[$data['cedcon']] = $data['cedcon'].' - '.$data['nombre'];
                 } else {
                     if ($cedtra == $data['cedtra']) {
-                        $_cedcon[$data['cedcon']] = $data['cedcon'] . ' - ' . $data['nombre'];
+                        $_cedcon[$data['cedcon']] = $data['cedcon'].' - '.$data['nombre'];
                     }
                 }
             }
 
             $conyuguesPendientes = (new Mercurio32)->getFind("documento='{$documento}' AND estado NOT IN('I','X')");
             foreach ($conyuguesPendientes as $conCp) {
-                if (!isset($_cedcon[$conCp->getCedcon()])) {
-                    $_cedcon[$conCp->getCedcon()] = $conCp->getCedcon() . ' - ' . $conCp->getPrinom() . ' ' . $conCp->getSegnom() . ' ' . $conCp->getPriape() . ' ' . $conCp->getSegape();
+                if (! isset($_cedcon[$conCp->getCedcon()])) {
+                    $_cedcon[$conCp->getCedcon()] = $conCp->getCedcon().' - '.$conCp->getPrinom().' '.$conCp->getSegnom().' '.$conCp->getPriape().' '.$conCp->getSegape();
                 }
             }
 
-            $html = Tag::selectStatic("cedcon", $_cedcon, "use_dummy: true", "dummyValue: ", "class: form-control");
-            $salida = array(
-                "success"  => true,
-                "list" => $html,
+            $html = Tag::selectStatic('cedcon', $_cedcon, 'use_dummy: true', 'dummyValue: ', 'class: form-control');
+            $salida = [
+                'success' => true,
+                'list' => $html,
 
-            );
+            ];
         } catch (DebugException $e) {
-            $salida = array(
-                "success"  => false,
-                "list" => "",
-                "msj" => $e->getMessage()
-            );
+            $salida = [
+                'success' => false,
+                'list' => '',
+                'msj' => $e->getMessage(),
+            ];
         }
+
         return $this->renderObject($salida);
     }
 
-    function mapper()
+    public function mapper()
     {
-        return array(
-            "cedtra" => "cedula",
-            "tipdoc" => "tipo documento",
-            "priape" => "primer apellido",
-            "segape" => "segundo apellido",
-            "prinom" => "primer nombre",
-            "segnom" => "segundo nombre",
-            "fecnac" => "fecha nacimiento",
-            "ciunac" => "codigo ciudad nacimiento",
-            "estciv" => "estado civil",
-            "cabhog" => "cabeza hogar",
-            "codciu" => "código ciudad residencia",
-            "codzon" => "código ciudad laboral",
-            "fecing" => "fecha ingreso",
-            "tipsal" => "tipo salario",
-            "captra" => "capacidad trabajar",
-            "tipdis" => "tipo discapacidad",
-            "nivedu" => "nivel educativo",
-            "rural" => "residencia rural",
-            "horas" => "horas trabajar",
-            "tipcon" => "tipo contrato",
-            "trasin" => "sindicalizado",
-            "tipafi" => "tipo afiliado",
-            "orisex" => "orientación sexual",
-            "facvul" => "factor vulnerabilidad",
-            "peretn" => "etnica",
-            "dirlab" => "direccion laboral",
-            "autoriza" => "tratamiento datos",
-            "tipjor" => "tipo jornada",
-            "ruralt" => "labor rural",
-            "comision" => "recibe comisión",
-            "fecsol" => "fecha solicitid"
-        );
+        return [
+            'cedtra' => 'cedula',
+            'tipdoc' => 'tipo documento',
+            'priape' => 'primer apellido',
+            'segape' => 'segundo apellido',
+            'prinom' => 'primer nombre',
+            'segnom' => 'segundo nombre',
+            'fecnac' => 'fecha nacimiento',
+            'ciunac' => 'codigo ciudad nacimiento',
+            'estciv' => 'estado civil',
+            'cabhog' => 'cabeza hogar',
+            'codciu' => 'código ciudad residencia',
+            'codzon' => 'código ciudad laboral',
+            'fecing' => 'fecha ingreso',
+            'tipsal' => 'tipo salario',
+            'captra' => 'capacidad trabajar',
+            'tipdis' => 'tipo discapacidad',
+            'nivedu' => 'nivel educativo',
+            'rural' => 'residencia rural',
+            'horas' => 'horas trabajar',
+            'tipcon' => 'tipo contrato',
+            'trasin' => 'sindicalizado',
+            'tipafi' => 'tipo afiliado',
+            'orisex' => 'orientación sexual',
+            'facvul' => 'factor vulnerabilidad',
+            'peretn' => 'etnica',
+            'dirlab' => 'direccion laboral',
+            'autoriza' => 'tratamiento datos',
+            'tipjor' => 'tipo jornada',
+            'ruralt' => 'labor rural',
+            'comision' => 'recibe comisión',
+            'fecsol' => 'fecha solicitid',
+        ];
     }
 
-    public function download_docsAction($archivo = "")
+    public function download_docsAction($archivo = '')
     {
-        $fichero = "public/docs/formulario_mercurio/" . $archivo;
-        $ext = substr(strrchr($archivo, "."), 1);
+        $fichero = 'public/docs/formulario_mercurio/'.$archivo;
+        $ext = substr(strrchr($archivo, '.'), 1);
         if (file_exists($fichero)) {
             header('Content-Description: File Transfer');
             header("Content-Type: application/{$ext}");
@@ -445,7 +457,7 @@ class BeneficiarioController extends ApplicationController
             header('Cache-Control: must-revalidate');
             header('Expires: 0');
             header('Pragma: public');
-            header('Content-Length: ' . filesize($fichero));
+            header('Content-Length: '.filesize($fichero));
             ob_clean();
             readfile($fichero);
             exit;
@@ -455,9 +467,9 @@ class BeneficiarioController extends ApplicationController
         }
     }
 
-    public function download_reporteAction($archivo = "")
+    public function download_reporteAction($archivo = '')
     {
-        $fichero = "public/temp/" . $archivo;
+        $fichero = 'public/temp/'.$archivo;
         if (file_exists($fichero)) {
             header('Content-Description: File Transfer');
             header('Content-Type: application/csv');
@@ -465,7 +477,7 @@ class BeneficiarioController extends ApplicationController
             header('Cache-Control: must-revalidate');
             header('Expires: 0');
             header('Pragma: public');
-            header('Content-Length: ' . filesize($fichero));
+            header('Content-Length: '.filesize($fichero));
             ob_clean();
             readfile($fichero);
             exit;
@@ -477,17 +489,17 @@ class BeneficiarioController extends ApplicationController
 
     public function descargar_declaracionAction()
     {
-        $this->setResponse("view");
-        $archivo = "declaracion_juramentada_nueva.pdf";
-        $fichero = "public/docs/formulario_mercurio/" . $archivo;
-        $ext = substr(strrchr($archivo, "."), 1);
+        $this->setResponse('view');
+        $archivo = 'declaracion_juramentada_nueva.pdf';
+        $fichero = 'public/docs/formulario_mercurio/'.$archivo;
+        $ext = substr(strrchr($archivo, '.'), 1);
         header('Content-Description: File Transfer');
         header("Content-Type: application/{$ext}");
         header("Content-Disposition: attachment; filename={$archivo}");
         header('Cache-Control: must-revalidate');
         header('Expires: 0');
         header('Pragma: public');
-        header('Content-Length: ' . filesize($fichero));
+        header('Content-Length: '.filesize($fichero));
         ob_clean();
         readfile($fichero);
         exit;
@@ -495,7 +507,7 @@ class BeneficiarioController extends ApplicationController
 
     public function paramsAction()
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         try {
             $tipo = $this->tipo;
 
@@ -505,30 +517,30 @@ class BeneficiarioController extends ApplicationController
 
             $listAfiliados = false;
             $listConyuges = false;
-            $conyuges = array();
-            $cedtras = array();
+            $conyuges = [];
+            $cedtras = [];
 
-            $trabajadorService = new TrabajadorService();
+            $trabajadorService = new TrabajadorService;
             if ($tipo == 'E') {
                 $cedtras = $trabajadorService->findRequestByDocumentoCoddoc($documento, $coddoc);
 
                 if ($list = $trabajadorService->findApiTrabajadoresByNit($documento)) {
-                    $listAfiliados = array();
+                    $listAfiliados = [];
                     foreach ($list as $row) {
-                        $listAfiliados[] = array('cedula' => $row['cedtra'], 'nombre_completo' => $row['nombre']);
+                        $listAfiliados[] = ['cedula' => $row['cedtra'], 'nombre_completo' => $row['nombre']];
                     }
                 }
             } else {
-                $cedtras[] = array('cedula' => $documento,  'nombre_completo' => $nombre);
+                $cedtras[] = ['cedula' => $documento,  'nombre_completo' => $nombre];
             }
 
-            $conyugeService = new ConyugeService();
+            $conyugeService = new ConyugeService;
             if ($tipo == 'E') {
                 $conyuges[] = $conyugeService->findRequestByDocumentoCoddoc($documento, $coddoc);
                 $list = $conyugeService->findApiConyugesByNit($documento);
-                $listConyuges = array();
+                $listConyuges = [];
                 foreach ($list as $row) {
-                    $listConyuges[] = array('cedula' => $row['cedcon'], 'nombre_completo' => $row['nombre']);
+                    $listConyuges[] = ['cedula' => $row['cedcon'], 'nombre_completo' => $row['nombre']];
                 }
             } else {
                 $conyuges = $conyugeService->findRequestByCedtra($documento);
@@ -538,36 +550,36 @@ class BeneficiarioController extends ApplicationController
 
             $procesadorComando = Comman::Api();
             $procesadorComando->runCli(
-                array(
-                    "servicio" => "ComfacaAfilia",
-                    "metodo" => "parametros_beneficiarios"
-                ),
+                [
+                    'servicio' => 'ComfacaAfilia',
+                    'metodo' => 'parametros_beneficiarios',
+                ],
                 false
             );
 
-            $biourbana = array('S' => 'SI', 'N' => 'NO');
-            $biodesco = array('S' => 'SI', 'N' => 'NO');
-            $paramsConyuge = new ParamsBeneficiario();
+            $biourbana = ['S' => 'SI', 'N' => 'NO'];
+            $biodesco = ['S' => 'SI', 'N' => 'NO'];
+            $paramsConyuge = new ParamsBeneficiario;
             $paramsConyuge->setDatosCaptura($procesadorComando->toArray());
 
-            $salida = array(
-                "success" => true,
-                "data" => array(
-                    "biotipdoc" => ParamsBeneficiario::getTiposDocumentos(),
-                    "tipdoc" => ParamsBeneficiario::getTiposDocumentos(),
-                    "sexo" => ParamsBeneficiario::getSexos(),
-                    "estciv" => ParamsBeneficiario::getEstadoCivil(),
-                    "ciunac" => ParamsBeneficiario::getCiudades(),
-                    "captra" => ParamsBeneficiario::getCapacidadTrabajar(),
-                    "parent" => ParamsBeneficiario::getParentesco(),
-                    "huerfano" => ParamsBeneficiario::getHuerfano(),
-                    "tiphij" => ParamsBeneficiario::getTipoHijo(),
-                    "nivedu" => ParamsBeneficiario::getNivelEducativo(),
-                    "tipdis" => ParamsBeneficiario::getTipoDiscapacidad(),
-                    "calendario" => ParamsBeneficiario::getCalendario(),
+            $salida = [
+                'success' => true,
+                'data' => [
+                    'biotipdoc' => ParamsBeneficiario::getTiposDocumentos(),
+                    'tipdoc' => ParamsBeneficiario::getTiposDocumentos(),
+                    'sexo' => ParamsBeneficiario::getSexos(),
+                    'estciv' => ParamsBeneficiario::getEstadoCivil(),
+                    'ciunac' => ParamsBeneficiario::getCiudades(),
+                    'captra' => ParamsBeneficiario::getCapacidadTrabajar(),
+                    'parent' => ParamsBeneficiario::getParentesco(),
+                    'huerfano' => ParamsBeneficiario::getHuerfano(),
+                    'tiphij' => ParamsBeneficiario::getTipoHijo(),
+                    'nivedu' => ParamsBeneficiario::getNivelEducativo(),
+                    'tipdis' => ParamsBeneficiario::getTipoDiscapacidad(),
+                    'calendario' => ParamsBeneficiario::getCalendario(),
                     'resguardo_id' => ParamsBeneficiario::getResguardos(),
                     'pub_indigena_id' => ParamsBeneficiario::getPueblosIndigenas(),
-                    "biocodciu" => ParamsBeneficiario::getCiudades(),
+                    'biocodciu' => ParamsBeneficiario::getCiudades(),
                     'peretn' => ParamsBeneficiario::getPertenenciaEtnicas(),
                     'tippag' => ParamsBeneficiario::getTipoPago(),
                     'codban' => ParamsBeneficiario::getBancos(),
@@ -575,77 +587,80 @@ class BeneficiarioController extends ApplicationController
                     'codzon' => $codzons,
                     'biourbana' => $biourbana,
                     'biodesco' => $biodesco,
-                    "trabajadores" => $cedtras,
-                    "conyuges" => $conyuges,
+                    'trabajadores' => $cedtras,
+                    'conyuges' => $conyuges,
                     'list_conyuges' => $listConyuges,
-                    "convive" => (new Mercurio34())->getConvive(),
-                    'list_afiliados' => $listAfiliados
-                ),
-                "msj" => 'OK'
-            );
+                    'convive' => (new Mercurio34)->getConvive(),
+                    'list_afiliados' => $listAfiliados,
+                ],
+                'msj' => 'OK',
+            ];
         } catch (DebugException $e) {
-            $salida = array(
-                "success" => false,
-                "msj" => $e->getMessage() . ' ' . $e->getLine() . ' ' . basename($e->getFile())
-            );
+            $salida = [
+                'success' => false,
+                'msj' => $e->getMessage().' '.$e->getLine().' '.basename($e->getFile()),
+            ];
         }
+
         return $this->renderObject($salida);
     }
 
     public function renderTableAction($estado = '')
     {
-        $this->setResponse("view");
-        $benService = new BeneficiarioService();
+        $this->setResponse('view');
+        $benService = new BeneficiarioService;
         $html = view(
-            "mercurio/beneficiario/tmp/solicitudes",
-            array(
-                "path" => base_path(),
-                "beneficiarios" => $benService->findAllByEstado($estado)
-            )
+            'mercurio/beneficiario/tmp/solicitudes',
+            [
+                'path' => base_path(),
+                'beneficiarios' => $benService->findAllByEstado($estado),
+            ]
         )->render();
+
         return $this->renderText($html);
     }
 
     public function searchRequestAction($id)
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         try {
             if (is_null($id)) {
-                throw new DebugException("Error no hay solicitud a buscar", 301);
+                throw new DebugException('Error no hay solicitud a buscar', 301);
             }
-            $documento = parent::getActUser("documento");
-            $coddoc = parent::getActUser("coddoc");
+            $documento = parent::getActUser('documento');
+            $coddoc = parent::getActUser('coddoc');
 
             $solicitud = Mercurio34::where('id', $id)
                 ->where('documento', $documento)
                 ->where('coddoc', $coddoc)
                 ->first();
 
-            if ($solicitud == False) {
-                throw new DebugException("Error la solicitud no está disponible para acceder.", 301);
+            if ($solicitud == false) {
+                throw new DebugException('Error la solicitud no está disponible para acceder.', 301);
             } else {
                 $data = $solicitud->getArray();
             }
-            $salida = array(
-                "success" => true,
-                "data" => $data,
-                "msj" => 'OK'
-            );
+            $salida = [
+                'success' => true,
+                'data' => $data,
+                'msj' => 'OK',
+            ];
         } catch (DebugException $e) {
-            $salida = array(
-                "success" => false,
-                "msj" => $e->getMessage()
-            );
+            $salida = [
+                'success' => false,
+                'msj' => $e->getMessage(),
+            ];
         }
+
         return $this->renderObject($salida, false);
     }
 
     public function validaAction(Request $request)
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         try {
-            $documento = parent::getActUser("documento");
-            $coddoc = parent::getActUser("coddoc");
+            $documento = parent::getActUser('documento');
+            $coddoc = parent::getActUser('coddoc');
 
             $numdoc = $request->input('numdoc');
             $solicitud_previa = (new Mercurio34)->findFirst(" numdoc='{$numdoc}' and documento='{$documento}' and coddoc='{$coddoc}'");
@@ -655,34 +670,35 @@ class BeneficiarioController extends ApplicationController
                 $beneficiario = $solicitud_previa->getArray();
             }
 
-            if (!$beneficiario) {
-                $benefiService = new BeneficiarioService();
+            if (! $beneficiario) {
+                $benefiService = new BeneficiarioService;
                 $rqs = $benefiService->buscarBeneficiarioSubsidio($numdoc);
                 if ($rqs) {
                     $beneficiario = (count($rqs['data']) > 0) ? $rqs['data'] : false;
                 }
             }
 
-            $response = array(
-                "success" => true,
-                "solicitud_previa" => ($solicitud_previa > 0) ? true : false,
-                "beneficiario" => $beneficiario
-            );
+            $response = [
+                'success' => true,
+                'solicitud_previa' => ($solicitud_previa > 0) ? true : false,
+                'beneficiario' => $beneficiario,
+            ];
         } catch (DebugException $e) {
-            $response = array(
-                "success" => false,
-                "msj" => $e->getMessage()
-            );
+            $response = [
+                'success' => false,
+                'msj' => $e->getMessage(),
+            ];
         }
 
         return $this->renderObject($response);
     }
 
-    function serializeData(Request $request)
+    public function serializeData(Request $request)
     {
         $fecsol = Carbon::now();
-        $asignarFuncionario = new AsignarFuncionario();
-        return array(
+        $asignarFuncionario = new AsignarFuncionario;
+
+        return [
             'usuario' => $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']),
             'log' => '0',
             'fecsol' => $fecsol->format('Y-m-d'),
@@ -724,14 +740,14 @@ class BeneficiarioController extends ApplicationController
             'tippag' => $this->clp($request, 'tippag'),
             'tipcue' => $this->clp($request, 'tipcue'),
             'numcue' => $this->clp($request, 'numcue'),
-            'codban' => $this->clp($request, 'codban')
-        );
+            'codban' => $this->clp($request, 'codban'),
+        ];
     }
 
     public function guardarAction(Request $request)
     {
-        //$this->setResponse("ajax");
-        $benefiService = new BeneficiarioService();
+        // $this->setResponse("ajax");
+        $benefiService = new BeneficiarioService;
         $this->db->begin();
         try {
             $id = $this->cleanInput($request->input('id'));
@@ -747,7 +763,7 @@ class BeneficiarioController extends ApplicationController
             } else {
                 $res = $benefiService->updateByFormData($id, $params);
                 if ($res == false) {
-                    throw new DebugException("Error no se actualizo los datos", 301);
+                    throw new DebugException('Error no se actualizo los datos', 301);
                 }
                 $solicitud = $benefiService->findById($id);
             }
@@ -757,33 +773,33 @@ class BeneficiarioController extends ApplicationController
 
             $out = $beneficiarioAdjuntoService->formulario()->getResult();
             (new GuardarArchivoService(
-                array(
+                [
                     'tipopc' => $this->tipopc,
                     'coddoc' => 1,
-                    'id' => $solicitud->getId()
-                )
+                    'id' => $solicitud->getId(),
+                ]
             ))->salvarDatos($out);
 
             $out = $beneficiarioAdjuntoService->declaraJurament()->getResult();
             (new GuardarArchivoService(
-                array(
+                [
                     'tipopc' => $this->tipopc,
                     'coddoc' => 4,
-                    'id' => $solicitud->getId()
-                )
+                    'id' => $solicitud->getId(),
+                ]
             ))->salvarDatos($out);
 
             $salida = [
-                "msj" => "Proceso se ha completado con éxito",
-                "success" => true,
-                "data" => $solicitud->getArray()
+                'msj' => 'Proceso se ha completado con éxito',
+                'success' => true,
+                'data' => $solicitud->getArray(),
             ];
 
             $this->db->commit();
         } catch (DebugException $erro) {
             $salida = [
-                "error" => $erro->getMessage(),
-                "success" => false,
+                'error' => $erro->getMessage(),
+                'success' => false,
             ];
             $this->db->rollBack();
         }
@@ -793,11 +809,11 @@ class BeneficiarioController extends ApplicationController
 
     public function consultaDocumentosAction($id)
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         try {
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
-            $benService = new BeneficiarioService();
+            $benService = new BeneficiarioService;
 
             $sindepe = Mercurio34::where('id', $id)
                 ->where('documento', $documento)
@@ -806,36 +822,37 @@ class BeneficiarioController extends ApplicationController
                 ->first();
 
             if ($sindepe == false) {
-                throw new DebugException("Error no se puede identificar el propietario de la solicitud", 301);
+                throw new DebugException('Error no se puede identificar el propietario de la solicitud', 301);
             }
-            $salida = array(
+            $salida = [
                 'success' => true,
                 'data' => $benService->dataArchivosRequeridos($sindepe),
-                'msj' => 'OK'
-            );
+                'msj' => 'OK',
+            ];
         } catch (DebugException $e) {
-            $salida = array(
-                "success" => false,
-                "msj" => $e->getMessage()
-            );
+            $salida = [
+                'success' => false,
+                'msj' => $e->getMessage(),
+            ];
         }
+
         return $this->renderObject($salida);
     }
 
     public function formularioAction($id)
     {
         try {
-            $paramsTrabajador = new ParamsTrabajador();
-            $adicionPersonaCargo =  true;
+            $paramsTrabajador = new ParamsTrabajador;
+            $adicionPersonaCargo = true;
             $tipo = $this->user['tipo'];
             $documento = $this->user['documento'];
 
             $procesadorComando = Comman::Api();
             $procesadorComando->runCli(
-                array(
-                    "servicio" => "ComfacaAfilia",
-                    "metodo" => "parametros_trabajadores"
-                ),
+                [
+                    'servicio' => 'ComfacaAfilia',
+                    'metodo' => 'parametros_trabajadores',
+                ],
                 false
             );
 
@@ -846,19 +863,21 @@ class BeneficiarioController extends ApplicationController
             $cedtra = $mercurio34->getCedtra();
 
             $nit = ($mercurio34->getNit()) ? $mercurio34->getNit() : 0;
-            if ($nit == 0 && $tipo == 'E') $nit = $documento;
+            if ($nit == 0 && $tipo == 'E') {
+                $nit = $documento;
+            }
 
-            //traer primero de sisuweb
+            // traer primero de sisuweb
             $procesadorComando->runCli(
-                array(
-                    "servicio" => "ComfacaAfilia",
-                    "metodo" => "trabajador_empresa",
-                    "params" => array(
-                        "cedtra" => $cedtra,
-                        "nit" => $nit,
-                        "estado" => "A"
-                    )
-                )
+                [
+                    'servicio' => 'ComfacaAfilia',
+                    'metodo' => 'trabajador_empresa',
+                    'params' => [
+                        'cedtra' => $cedtra,
+                        'nit' => $nit,
+                        'estado' => 'A',
+                    ],
+                ]
             );
 
             $mercurio31 = false;
@@ -884,35 +903,34 @@ class BeneficiarioController extends ApplicationController
             }
 
             if ($mercurio31 == false) {
-                throw new DebugException("El trabajador no esta correctamente afiliado.", 505);
+                throw new DebugException('El trabajador no esta correctamente afiliado.', 505);
             }
 
-
             $procesadorComando->runCli(
-                array(
-                    "servicio" => "ComfacaEmpresas",
-                    "metodo" => "informacion_empresa",
-                    "params" => array(
-                        "nit" => $mercurio31->getNit()
-                    )
-                )
+                [
+                    'servicio' => 'ComfacaEmpresas',
+                    'metodo' => 'informacion_empresa',
+                    'params' => [
+                        'nit' => $mercurio31->getNit(),
+                    ],
+                ]
             );
 
             $empresa = false;
             if ($out = $procesadorComando->toArray()) {
                 $datos_empresa = ($out['success'] == true) ? $out['data'] : false;
                 if ($datos_empresa) {
-                    $empresa = new Mercurio30();
+                    $empresa = new Mercurio30;
                     $datos_empresa['telefono'] = ($datos_empresa['telr'] == '') ? $datos_empresa['telefono'] : $datos_empresa['telr'];
                     $empresa->createAttributes($datos_empresa);
                 }
             }
 
-            if (!$empresa) {
-                throw new DebugException("Error los datos de la empresa no estan disponibles", 505);
+            if (! $empresa) {
+                throw new DebugException('Error los datos de la empresa no estan disponibles', 505);
             }
 
-            /*para beneficiarios hijos buscar conyuge*/
+            /* para beneficiarios hijos buscar conyuge */
             $mercurio32 = false;
             if ($mercurio34->getParent() == 1) {
                 $mercurio32 = Mercurio32::where('cedtra', $cedtra)
@@ -920,22 +938,22 @@ class BeneficiarioController extends ApplicationController
                     ->where('cedcon', $mercurio34->getCedcon())
                     ->first();
 
-                if (!$mercurio32) {
+                if (! $mercurio32) {
 
                     $procesadorComando->runCli(
-                        array(
-                            "servicio" => "ComfacaAfilia",
-                            "metodo" => "conyugue_trabajador_beneficiario",
-                            "params" => array(
+                        [
+                            'servicio' => 'ComfacaAfilia',
+                            'metodo' => 'conyugue_trabajador_beneficiario',
+                            'params' => [
                                 'documento' => $mercurio34->getNumdoc(),
-                                'cedtra' => $mercurio34->getCedtra()
-                            )
-                        )
+                                'cedtra' => $mercurio34->getCedtra(),
+                            ],
+                        ]
                     );
 
                     if ($out = $procesadorComando->toArray()) {
 
-                        $data = ($out['success']) ? $out['data'] : array();
+                        $data = ($out['success']) ? $out['data'] : [];
                         $has = 0;
                         foreach ($data as $datos_conyuge) {
                             if ($datos_conyuge['cedcon'] == $mercurio34->getCedcon()) {
@@ -951,17 +969,17 @@ class BeneficiarioController extends ApplicationController
                     }
                 }
 
-                if (!$mercurio32) {
+                if (! $mercurio32) {
 
                     $procesadorComando = Comman::Api();
                     $procesadorComando->runCli(
-                        array(
-                            "servicio" => "ComfacaAfilia",
-                            "metodo" => "listar_conyuges_trabajador",
-                            "params" => array(
-                                "cedtra" => $mercurio34->getCedtra()
-                            )
-                        )
+                        [
+                            'servicio' => 'ComfacaAfilia',
+                            'metodo' => 'listar_conyuges_trabajador',
+                            'params' => [
+                                'cedtra' => $mercurio34->getCedtra(),
+                            ],
+                        ]
                     );
 
                     if ($out = $procesadorComando->toArray()) {
@@ -984,31 +1002,31 @@ class BeneficiarioController extends ApplicationController
                 }
             }
 
-            //buscar mas beneficiarios al formulario
+            // buscar mas beneficiarios al formulario
             $beneficiariosTodos = Mercurio34::where('cedtra', $cedtra)
                 ->whereIn('estado', ['P', 'D', 'T'])
                 ->where('documento', $documento)
                 ->get();
 
             $file = "formulario_afiliacion_acargo{$cedtra}.pdf";
-            $formularios = new Formularios();
+            $formularios = new Formularios;
 
             $formularios->trabajadorAfiliacion(
-                array(
+                [
                     'trabajador' => $mercurio31,
                     'empresa' => $empresa,
                     'adicionPersonaCargo' => $adicionPersonaCargo,
                     'conyuge' => $mercurio32,
-                    'beneficiarios' => $beneficiariosTodos
-                ),
+                    'beneficiarios' => $beneficiariosTodos,
+                ],
                 $file
             )->outFile();
         } catch (DebugException $e) {
 
-            $msj = $e->getMessage() . ' linea: ' . $e->getLine();
-            set_flashdata("error", array(
-                "msj" => $msj
-            ));
+            $msj = $e->getMessage().' linea: '.$e->getLine();
+            set_flashdata('error', [
+                'msj' => $msj,
+            ]);
 
             return redirect('beneficiario.index');
         }
@@ -1016,7 +1034,7 @@ class BeneficiarioController extends ApplicationController
 
     public function guardarArchivoAction(Request $request)
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         try {
             $id = $this->clp($request, 'id');
             $coddoc = $this->clp($request, 'coddoc');
@@ -1031,30 +1049,32 @@ class BeneficiarioController extends ApplicationController
             $response = [
                 'success' => true,
                 'msj' => 'Ok archivo procesado',
-                'data' => $mercurio37->toArray()
+                'data' => $mercurio37->toArray(),
             ];
         } catch (DebugException $ert) {
             $response = [
                 'success' => false,
-                'msj' => $ert->getMessage()
+                'msj' => $ert->getMessage(),
             ];
         }
+
         return $this->renderObject($response);
     }
 
     public function seguimientoAction($id)
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         try {
-            $beneficiarioService = new BeneficiarioService();
+            $beneficiarioService = new BeneficiarioService;
             $out = $beneficiarioService->consultaSeguimiento($id);
-            $salida = array(
-                "success" => true,
-                "data" => $out
-            );
+            $salida = [
+                'success' => true,
+                'data' => $out,
+            ];
         } catch (DebugException $e) {
-            $salida = array('success' => false, 'msj' => $e->getMessage());
+            $salida = ['success' => false, 'msj' => $e->getMessage()];
         }
+
         return $this->renderObject($salida, false);
     }
 }

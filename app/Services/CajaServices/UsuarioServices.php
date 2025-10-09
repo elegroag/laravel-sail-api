@@ -15,6 +15,7 @@ class UsuarioServices
 
     /**
      * table variable
+     *
      * @var Table
      */
     private $table;
@@ -22,7 +23,7 @@ class UsuarioServices
     public function __construct()
     {
         $this->procesadorComando = Comman::Api();
-        $this->table = new Table();
+        $this->table = new Table;
     }
 
     public function actualizaUsuario($datos)
@@ -30,10 +31,10 @@ class UsuarioServices
         $ngener21 = Gener21::where('tipfun', $datos->tipfun);
         if ($ngener21->exists()) {
             $ngener21->update([
-                'detalle' => $datos->tipfun_detalle
+                'detalle' => $datos->tipfun_detalle,
             ]);
         } else {
-            $gener21 = new Gener21();
+            $gener21 = new Gener21;
             $gener21->setTipfun($datos->tipfun);
             $gener21->setDetalle($datos->tipfun_detalle);
             $gener21->save();
@@ -48,10 +49,10 @@ class UsuarioServices
                 'login' => $datos->login,
                 'criptada' => $datos->criptada,
                 'cedtra' => $datos->cedtra,
-                'estado' => $datos->estado
+                'estado' => $datos->estado,
             ]);
         } else {
-            $gener02 = new Gener02();
+            $gener02 = new Gener02;
             $gener02->setUsuario($datos->usuario);
             $gener02->setNombre($datos->nombre);
             $gener02->setTipfun($datos->tipfun);
@@ -67,23 +68,24 @@ class UsuarioServices
     public function buscarUsuarioByUser($user)
     {
         $this->procesadorComando->runCli(
-            array(
-                "servicio" => "Usuarios",
-                "metodo" => "trae_usuario",
-                "params" => $user
-            )
+            [
+                'servicio' => 'Usuarios',
+                'metodo' => 'trae_usuario',
+                'params' => $user,
+            ]
         );
 
         $salida = $this->procesadorComando->toArray();
         $usuario = (object) $salida['data'];
-        if (!$usuario) {
-            throw new AuthException("El usuario no es correcto para continuar con la autenticación. 4", 4);
+        if (! $usuario) {
+            throw new AuthException('El usuario no es correcto para continuar con la autenticación. 4', 4);
         }
         if ($usuario->estado == 'B') {
-            throw new AuthException("El usuario se encuentra bloqueado, por fallar en la autenticación con más de 3 intentos." .
-                " Para poder desbloquear su cuenta puede recuperar la cuenta de usuario o solicitar el desbloqueo de su cuenta, " .
-                "al aréa de sistemas, soporte_sistemas@comfaca.com.", 5);
+            throw new AuthException('El usuario se encuentra bloqueado, por fallar en la autenticación con más de 3 intentos.'.
+                ' Para poder desbloquear su cuenta puede recuperar la cuenta de usuario o solicitar el desbloqueo de su cuenta, '.
+                'al aréa de sistemas, soporte_sistemas@comfaca.com.', 5);
         }
+
         return $usuario;
     }
 
@@ -96,7 +98,7 @@ class UsuarioServices
     {
         $this->table->set_template($this->getTemplateTable());
         $this->table->set_heading(
-            "OPT",
+            'OPT',
             'Tipo documento',
             'Identificación',
             'Nombre',
@@ -123,14 +125,18 @@ class UsuarioServices
             $this->table->add_row('');
             $this->table->set_empty("<tr><td colspan='7'> &nbsp; No hay registros que mostrar</td></tr>");
         }
+
         return $this->table->generate();
     }
 
     /**
      * getTemplateTable function
+     *
      * @changed [2023-12-19]
 
+     *
      * @author elegroag <elegroag@ibero.edu.co>
+     *
      * @return void
      */
     public function getTemplateTable()

@@ -2,17 +2,18 @@
 
 namespace App\Services\Validator;
 
-use Exception;
 use DateTime;
+use Exception;
 
 trait ValidatorTrait
 {
     protected $validator;
+
     protected $entity;
 
     public function create($data)
     {
-        $this->entity = array();
+        $this->entity = [];
         foreach ($this->fillable as $key) {
             $this->entity[$key] = isset($data[$key]) ? $data[$key] : null;
         }
@@ -25,15 +26,16 @@ trait ValidatorTrait
 
     public function initValidator()
     {
-        $this->validator = new ValidatorEntity();
+        $this->validator = new ValidatorEntity;
         $this->validator->setRules($this->getRules());
     }
 
     public function validate()
     {
-        if (!$this->validator) {
+        if (! $this->validator) {
             $this->initValidator();
         }
+
         return $this->validator->validate($this->entity);
     }
 
@@ -79,7 +81,7 @@ class ValidatorEntity
 
     protected function validateField($field, $value, $rules)
     {
-        if (is_null($value) && isset($rules['is_null']) && !$rules['is_null']) {
+        if (is_null($value) && isset($rules['is_null']) && ! $rules['is_null']) {
             $this->addError($field, "El campo {$field} no puede ser nulo");
         }
 
@@ -89,44 +91,44 @@ class ValidatorEntity
         // Validar tipo de dato
         switch ($rules['type']) {
             case 'numeric':
-                if (!empty($value) && !is_numeric($value)) {
-                    $this->addError($field, "El campo debe ser numérico");
+                if (! empty($value) && ! is_numeric($value)) {
+                    $this->addError($field, 'El campo debe ser numérico');
                 }
                 break;
             case 'email':
-                if (!empty($value) && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
-                    $this->addError($field, "El campo debe ser un email válido");
+                if (! empty($value) && ! filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                    $this->addError($field, 'El campo debe ser un email válido');
                 }
                 break;
             case 'rangelength':
-                if (!empty($value) && strlen($value) < $rules['min'] || strlen($value) > $rules['max']) {
+                if (! empty($value) && strlen($value) < $rules['min'] || strlen($value) > $rules['max']) {
                     $this->addError($field, "El campo {$field} debe tener entre {$rules['min']} y {$rules['max']} caracteres");
                 }
                 break;
             case 'enum':
-                if (!empty($value) && !in_array($value, $rules['values'])) {
-                    $this->addError($field, "El campo {$field} debe ser uno de los siguientes valores: " . implode(', ', $rules['values']));
+                if (! empty($value) && ! in_array($value, $rules['values'])) {
+                    $this->addError($field, "El campo {$field} debe ser uno de los siguientes valores: ".implode(', ', $rules['values']));
                 }
                 break;
             case 'date':
-                if (!empty($value) && !$this->isValidDate($value)) {
+                if (! empty($value) && ! $this->isValidDate($value)) {
                     $this->addError($field, "El campo {$field} debe ser una fecha válida");
                 }
                 break;
             case 'integer':
-                if (!empty($value) && !is_int($value)) {
+                if (! empty($value) && ! is_int($value)) {
                     $this->addError($field, "El campo {$field} debe ser un entero");
                 }
                 break;
             case 'string':
-                if (!empty($value) && !is_string($value)) {
+                if (! empty($value) && ! is_string($value)) {
                     $this->addError($field, "El campo {$field} debe ser un string");
                 }
                 break;
             default:
-                if (!isset($rules['is_null']) || !$rules['is_null']) {
+                if (! isset($rules['is_null']) || ! $rules['is_null']) {
                     if (empty($value)) {
-                        $this->addError($field, "El campo es obligatorio");
+                        $this->addError($field, 'El campo es obligatorio');
                     }
                 }
                 break;
@@ -146,15 +148,18 @@ class ValidatorEntity
 
     protected function isValidDate($date)
     {
-        if (empty($date)) return true;
+        if (empty($date)) {
+            return true;
+        }
 
         $d = DateTime::createFromFormat('Y-m-d', $date);
+
         return $d && $d->format('Y-m-d') === $date;
     }
 
     protected function addError($field, $message)
     {
-        if (!isset($this->errors[$field])) {
+        if (! isset($this->errors[$field])) {
             $this->errors[$field] = [];
             $this->attrerrors[] = $field;
         }
@@ -172,10 +177,10 @@ class ValidatorEntity
     }
 }
 
-
 class EntityException extends Exception
 {
     public $errors;
+
     public function __construct($errors)
     {
         parent::__construct('Error validación de datos', 501);

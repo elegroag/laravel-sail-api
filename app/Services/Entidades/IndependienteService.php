@@ -12,7 +12,6 @@ use App\Models\Mercurio10;
 use App\Models\Mercurio12;
 use App\Models\Mercurio14;
 use App\Models\Mercurio32;
-use App\Models\Mercurio33;
 use App\Models\Mercurio34;
 use App\Models\Mercurio37;
 use App\Models\Mercurio41;
@@ -23,15 +22,20 @@ use App\Services\Utils\Comman;
 class IndependienteService
 {
     private $tipopc = 13;
+
     private $tipsoc = '08';
+
     private $user;
+
     private $tipo;
+
     private $db;
 
     /**
      * __construct function
-     * @param bool $init
-     * @param Services $servicios
+     *
+     * @param  bool  $init
+     * @param  Services  $servicios
      */
     public function __construct()
     {
@@ -42,12 +46,13 @@ class IndependienteService
 
     /**
      * findAllByEstado function
-     * @param string $estado
+     *
+     * @param  string  $estado
      * @return array
      */
     public function findAllByEstado($estado = '')
     {
-        //usuario empresa, unica solicitud de afiliación
+        // usuario empresa, unica solicitud de afiliación
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
 
@@ -88,6 +93,7 @@ class IndependienteService
     /**
      * buscarEmpresaSubsidio function
      * buscar empresa en subsidio sin importar el estado
+     *
      * @param [type] $nit
      * @return void
      */
@@ -96,15 +102,15 @@ class IndependienteService
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaEmpresas",
-                "metodo" => "informacion_empresa",
-                "params" => array(
-                    "nit" => $nit
-                )
-            )
+            [
+                'servicio' => 'ComfacaEmpresas',
+                'metodo' => 'informacion_empresa',
+                'params' => [
+                    'nit' => $nit,
+                ],
+            ]
         );
-        $salida =  $procesadorComando->toArray();
+        $salida = $procesadorComando->toArray();
         if ($salida['success']) {
             return $salida;
         } else {
@@ -114,13 +120,16 @@ class IndependienteService
 
     /**
      * archivosRequeridos function
-     * @param Mercurio41 $solicitud
+     *
+     * @param  Mercurio41  $solicitud
      * @return string
      */
     public function archivosRequeridos($solicitud)
     {
-        if ($solicitud == false) return false;
-        $archivos = array();
+        if ($solicitud == false) {
+            return false;
+        }
+        $archivos = [];
 
         $mercurio10 = Mercurio10::where('numero', $solicitud->getId())
             ->where('tipopc', $this->tipopc)
@@ -130,7 +139,7 @@ class IndependienteService
         $corregir = false;
         if ($mercurio10 && $mercurio10->estado == 'D') {
             $campos = $mercurio10->campos_corregir;
-            $corregir = explode(";", $campos);
+            $corregir = explode(';', $campos);
         }
 
         $mercurio14 = Mercurio14::where('tipopc', $this->tipopc)
@@ -152,7 +161,7 @@ class IndependienteService
                     $corrige = true;
                 }
             }
-            $obliga = ($m14->getObliga() == "S") ? "<br><small class='text-danger'>Obligatorio</small>" : "";
+            $obliga = ($m14->getObliga() == 'S') ? "<br><small class='text-danger'>Obligatorio</small>" : '';
             $archivo = new \stdClass;
             $archivo->obliga = $obliga;
             $archivo->id = $solicitud->getId();
@@ -164,25 +173,27 @@ class IndependienteService
         }
 
         $mercurio01 = Mercurio01::first();
-        $html = view("partials/archivos_requeridos", array(
-            "load_archivos" => $archivos,
-            "path" => $mercurio01->getPath(),
-            "puede_borrar" => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true
-        ))->render();
+        $html = view('partials/archivos_requeridos', [
+            'load_archivos' => $archivos,
+            'path' => $mercurio01->getPath(),
+            'puede_borrar' => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true,
+        ])->render();
 
         return $html;
     }
 
-
     /**
      * dataArchivosRequeridos function
-     * @param Mercurio41 $solicitud
+     *
+     * @param  Mercurio41  $solicitud
      * @return array
      */
     public function dataArchivosRequeridos($solicitud)
     {
-        if ($solicitud == false || is_null($solicitud)) return false;
-        $archivos = array();
+        if ($solicitud == false || is_null($solicitud)) {
+            return false;
+        }
+        $archivos = [];
 
         $mercurio10 = Mercurio10::where('numero', $solicitud->getId())
             ->where('tipopc', $this->tipopc)
@@ -192,7 +203,7 @@ class IndependienteService
         $corregir = false;
         if ($mercurio10 && $mercurio10->estado == 'D') {
             $campos = $mercurio10->campos_corregir;
-            $corregir = explode(";", $campos);
+            $corregir = explode(';', $campos);
         }
 
         $mercurio14 = Mercurio14::where('tipopc', $this->tipopc)
@@ -210,11 +221,13 @@ class IndependienteService
                 ->first();
             $corrige = false;
             if ($corregir) {
-                if (in_array($m12->getCoddoc(), $corregir)) $corrige = true;
+                if (in_array($m12->getCoddoc(), $corregir)) {
+                    $corrige = true;
+                }
             }
 
             $archivo = $m14->getArray();
-            $archivo['obliga'] = ($m14->getObliga() == "S") ? "<br><small class='text-danger'>Obligatorio</small>" : "";
+            $archivo['obliga'] = ($m14->getObliga() == 'S') ? "<br><small class='text-danger'>Obligatorio</small>" : '';
             $archivo['id'] = $solicitud->getId();
             $archivo['detalle'] = capitalize($m12->getDetalle());
             $archivo['diponible'] = ($mercurio37) ? $mercurio37->getArchivo() : false;
@@ -224,18 +237,20 @@ class IndependienteService
 
         $mercurio01 = Mercurio01::first();
         $archivos_descargar = oficios_requeridos('I');
-        return array(
-            "disponibles" => $archivos_descargar,
-            "archivos" => $archivos,
-            "path" => $mercurio01->getPath(),
-            "puede_borrar" => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true
-        );
+
+        return [
+            'disponibles' => $archivos_descargar,
+            'archivos' => $archivos,
+            'path' => $mercurio01->getPath(),
+            'puede_borrar' => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true,
+        ];
     }
 
     /**
      * update function
-     * @param integer $id
-     * @param array $data
+     *
+     * @param  int  $id
+     * @param  array  $data
      * @return Mercurio41
      */
     public function update($id, $data)
@@ -243,15 +258,18 @@ class IndependienteService
         $independiente = $this->findById($id);
         if ($independiente) {
             $independiente->fill($data);
+
             return $independiente->save();
         }
+
         return false;
     }
 
     /**
      * updateByFormData function
-     * @param int $id
-     * @param array $data
+     *
+     * @param  int  $id
+     * @param  array  $data
      * @return bool
      */
     public function updateByFormData($id, $data)
@@ -259,15 +277,18 @@ class IndependienteService
         $independiente = $this->findById($id);
         if ($independiente) {
             $independiente->fill($data);
-            $independiente->setUsuario((new AsignarFuncionario())->asignar($this->tipopc, $this->user['codciu']));
+            $independiente->setUsuario((new AsignarFuncionario)->asignar($this->tipopc, $this->user['codciu']));
+
             return $independiente->save();
         }
+
         return false;
     }
 
     /**
      * create function
-     * @param array $data
+     *
+     * @param  array  $data
      * @return Mercurio41
      */
     public function create($data)
@@ -275,32 +296,35 @@ class IndependienteService
         $independiente = new Mercurio41($data);
         $independiente->setCoddoc($this->user['coddoc']);
         $independiente->setDocumento($this->user['documento']);
-        $independiente->setUsuario((new AsignarFuncionario())->asignar($this->tipopc, $this->user['codciu']));
+        $independiente->setUsuario((new AsignarFuncionario)->asignar($this->tipopc, $this->user['codciu']));
         $independiente->save();
         $id = $independiente->getId();
 
         Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
         Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
+
         return $independiente;
     }
 
-
     /**
      * createByFormData function
-     * @param array $data
+     *
+     * @param  array  $data
      * @return Mercurio41
      */
     public function createByFormData($data)
     {
-        $data['estado'] = "T";
-        $data['log'] = "0";
+        $data['estado'] = 'T';
+        $data['log'] = '0';
         $independiente = $this->create($data);
+
         return $independiente;
     }
 
     /**
      * findById function
-     * @param integer $id
+     *
+     * @param  int  $id
      * @return Mercurio41
      */
     public function findById($id)
@@ -316,22 +340,24 @@ class IndependienteService
             ->get()
             ->map(function ($seguimiento) {
                 $seguimiento->corregir = explode(';', $seguimiento->campos_corregir);
+
                 return $seguimiento;
             });
 
-        return array(
+        return [
             'seguimientos' => $seguimientos,
             'campos_disponibles' => (new Mercurio41)->CamposDisponibles(),
-            'estados_detalles' => (new Mercurio10)->getArrayEstados()
-        );
+            'estados_detalles' => (new Mercurio10)->getArrayEstados(),
+        ];
     }
 
     /**
      * enviarCaja function
-     * @param SenderValidationCaja $senderValidationCaja
-     * @param integer $id
-     * @param integer $documento
-     * @param integer $coddoc
+     *
+     * @param  SenderValidationCaja  $senderValidationCaja
+     * @param  int  $id
+     * @param  int  $documento
+     * @param  int  $coddoc
      * @return void
      */
     public function enviarCaja($senderValidationCaja, $id, $usuario)
@@ -339,19 +365,19 @@ class IndependienteService
         $mercurio41 = $this->findById($id);
 
         $cm37 = (new Mercurio37)->getCount(
-            "*",
-            "conditions: tipopc='{$this->tipopc}' AND " .
-                "numero='{$id}' AND " .
+            '*',
+            "conditions: tipopc='{$this->tipopc}' AND ".
+                "numero='{$id}' AND ".
                 "coddoc IN(SELECT coddoc FROM mercurio14 WHERE tipopc='{$this->tipopc}' AND tipsoc='{$this->tipsoc}' AND obliga='S')"
         );
 
         $cm14 = (new Mercurio14)->getCount(
-            "*",
+            '*',
             "conditions: tipopc='{$this->tipopc}' and tipsoc='{$this->tipsoc}' and obliga='S'"
         );
 
         if ($cm37 < $cm14) {
-            throw new DebugException("Adjunte los archivos obligatorios", 500);
+            throw new DebugException('Adjunte los archivos obligatorios', 500);
         }
 
         Mercurio41::where('id', $id)->update([
@@ -381,42 +407,42 @@ class IndependienteService
     {
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "parametros_empresa"
-            )
+            [
+                'servicio' => 'ComfacaAfilia',
+                'metodo' => 'parametros_empresa',
+            ]
         );
 
-        $paramsPensionado = new ParamsIndependiente();
+        $paramsPensionado = new ParamsIndependiente;
         $paramsPensionado->setDatosCaptura($procesadorComando->toArray());
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "parametros_trabajadores"
-            )
+            [
+                'servicio' => 'ComfacaAfilia',
+                'metodo' => 'parametros_trabajadores',
+            ]
         );
-        $paramsTrabajador = new ParamsTrabajador();
+        $paramsTrabajador = new ParamsTrabajador;
         $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
     }
-
 
     public function resumenServicios()
     {
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
         $tipo = $this->tipo;
+
         return [
             'afiliacion' => [
                 [
                     'name' => 'Solicitudes Cónyuges',
                     'cantidad' => [
-                        'pendientes' => Mercurio32::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'aprobados' => Mercurio32::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'rechazados' => Mercurio32::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'devueltos' => Mercurio32::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'temporales' => Mercurio32::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
+                        'pendientes' => Mercurio32::where(['estado' => 'P', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'aprobados' => Mercurio32::where(['estado' => 'A', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'rechazados' => Mercurio32::where(['estado' => 'R', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'devueltos' => Mercurio32::where(['estado' => 'D', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'temporales' => Mercurio32::where(['estado' => 'T', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
                     ],
                     'icon' => 'C',
                     'url' => 'conyuge/index',
@@ -425,11 +451,11 @@ class IndependienteService
                 [
                     'name' => 'Solicitudes Beneficiarios',
                     'cantidad' => [
-                        'pendientes' => Mercurio34::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'aprobados' => Mercurio34::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'rechazados' => Mercurio34::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'devueltos' => Mercurio34::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'temporales' => Mercurio34::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
+                        'pendientes' => Mercurio34::where(['estado' => 'P', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'aprobados' => Mercurio34::where(['estado' => 'A', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'rechazados' => Mercurio34::where(['estado' => 'R', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'devueltos' => Mercurio34::where(['estado' => 'D', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'temporales' => Mercurio34::where(['estado' => 'T', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
                     ],
                     'icon' => 'B',
                     'url' => 'beneficiario/index',
@@ -437,24 +463,24 @@ class IndependienteService
                 ],
                 [
                     'name' => 'Actualización de  datos',
-                    'cantidad' => array(
-                        'pendientes' => Mercurio47::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'aprobados' => Mercurio47::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'rechazados' => Mercurio47::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'devueltos' => Mercurio47::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'temporales' => Mercurio47::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
-                    ),
+                    'cantidad' => [
+                        'pendientes' => Mercurio47::where(['estado' => 'P', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'aprobados' => Mercurio47::where(['estado' => 'A', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'rechazados' => Mercurio47::where(['estado' => 'R', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'devueltos' => Mercurio47::where(['estado' => 'D', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'temporales' => Mercurio47::where(['estado' => 'T', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                    ],
                     'icon' => 'B',
                     'url' => 'actualizadatos/index',
                     'imagen' => 'datos_basicos.jpg',
-                ]
+                ],
             ],
             'productos' => [
                 [
                     'name' => 'P. Complemento_nutricional',
                     'url' => 'productos/complemento_nutricional',
                     'imagen' => 'complemento.jpg',
-                ]
+                ],
             ],
             'consultas' => [
                 [
@@ -471,8 +497,8 @@ class IndependienteService
                     'name' => 'Consulta de aportes',
                     'url' => 'subsidio/consulta_aportes_view',
                     'imagen' => 'consulta_aportes.jpg',
-                ]
-            ]
+                ],
+            ],
         ];
     }
 }

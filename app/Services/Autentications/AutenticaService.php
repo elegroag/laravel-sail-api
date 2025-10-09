@@ -12,94 +12,96 @@ use App\Services\Srequest;
 
 class AutenticaService
 {
-    public function execute(Srequest $request): array|null
+    public function execute(Srequest $request): ?array
     {
         // Sanitización ligera
-        $tipo = $request->getParam("tipo");
-        $documento = $request->getParam("documento");
-        $coddoc = $request->getParam("coddoc");
-        $clave = $request->getParam("clave");
-        $res = False;
+        $tipo = $request->getParam('tipo');
+        $documento = $request->getParam('documento');
+        $coddoc = $request->getParam('coddoc');
+        $clave = $request->getParam('clave');
+        $res = false;
 
         // Validación básica de requeridos
         if ($tipo === '' || $documento === '' || $coddoc === '') {
-            throw new DebugException("Error de acceso, los parámetros tipo, documento y coddoc son requeridos.", 422);
+            throw new DebugException('Error de acceso, los parámetros tipo, documento y coddoc son requeridos.', 422);
         }
 
         switch ($tipo) {
             case 'E':
-                $autentica = new AutenticaEmpresa();
+                $autentica = new AutenticaEmpresa;
                 $res = $autentica->comprobarSISU($documento, $coddoc);
                 break;
             case 'T':
-                $autentica = new AutenticaTrabajador();
+                $autentica = new AutenticaTrabajador;
                 $res = $autentica->comprobarSISU($documento, $coddoc);
                 break;
             case 'I':
-                $autentica = new AutenticaIndependiente();
+                $autentica = new AutenticaIndependiente;
                 $res = $autentica->comprobarSISU($documento, $coddoc);
                 break;
             case 'O':
-                $autentica = new AutenticaPensionado();
+                $autentica = new AutenticaPensionado;
                 $res = $autentica->comprobarSISU($documento, $coddoc);
                 break;
             case 'F':
-                $autentica = new AutenticaFacultativo();
+                $autentica = new AutenticaFacultativo;
                 $res = $autentica->comprobarSISU($documento, $coddoc);
                 break;
             case 'P':
-                $autentica = new AutenticaParticular();
+                $autentica = new AutenticaParticular;
                 $res = $autentica->comprobarSISU($documento, $coddoc);
                 break;
             default:
-                throw new DebugException("Error de acceso, el tipo ingreso es requerido.", 501);
+                throw new DebugException('Error de acceso, el tipo ingreso es requerido.', 501);
                 break;
         }
 
-        if ($res == False) {
+        if ($res == false) {
             return [
                 false,
                 $autentica->getMessage(),
             ];
         }
 
-        $mercurio07 = Mercurio07::where("tipo", $tipo)
-            ->where("documento", $documento)
-            ->where("coddoc", $coddoc)
+        $mercurio07 = Mercurio07::where('tipo', $tipo)
+            ->where('documento', $documento)
+            ->where('coddoc', $coddoc)
             ->first();
 
-        if ($mercurio07 == False) $mercurio07 = $autentica->getAfiliado();
+        if ($mercurio07 == false) {
+            $mercurio07 = $autentica->getAfiliado();
+        }
 
-        if ($mercurio07 == False) {
-            throw new DebugException("Error acceso incorrecto. Los datos no corresponden a un usuario registrado en el sistema.", 501);
+        if ($mercurio07 == false) {
+            throw new DebugException('Error acceso incorrecto. Los datos no corresponden a un usuario registrado en el sistema.', 501);
         }
 
         // Validar estado activo si existe campo estado
         if (method_exists($mercurio07, 'getEstado')) {
             $estado = $mercurio07->getEstado();
-            if (!empty($estado) && $estado !== 'A') {
-                throw new DebugException("La cuenta no se encuentra activa para iniciar sesión.", 403);
+            if (! empty($estado) && $estado !== 'A') {
+                throw new DebugException('La cuenta no se encuentra activa para iniciar sesión.', 403);
             }
         }
 
         if ($clave === 'xxxx') {
 
             if ($tipo == 'N' || $tipo == 'P') {
-                throw new DebugException("Alerta. El usuario ya posee un registro en plataforma y requiere de ingresar con la clave valida.", 501);
+                throw new DebugException('Alerta. El usuario ya posee un registro en plataforma y requiere de ingresar con la clave valida.', 501);
             } else {
-                //create validation mediante token
+                // create validation mediante token
                 $codigoVerify = genera_code();
                 $autentica->verificaPin($mercurio07, $codigoVerify);
 
-                $authJwt = new AuthJwt();
+                $authJwt = new AuthJwt;
                 $token = $authJwt->SimpleToken();
 
-                $user19 = Mercurio19::where(["documento" => $documento, "coddoc" => $coddoc, "tipo" => $tipo])->first();
-                $inicio  = date('Y-m-d H:i:s');
+                $user19 = Mercurio19::where(['documento' => $documento, 'coddoc' => $coddoc, 'tipo' => $tipo])->first();
+                $inicio = date('Y-m-d H:i:s');
                 if ($user19) {
                     $momento = new \DateTime($user19->getInicio());
                     // Obtener el momento actual
-                    $ahora = new \DateTime("now");
+                    $ahora = new \DateTime('now');
                     // Calcular la diferencia
                     $diferencia = $momento->diff($ahora);
                     // Convertir la diferencia a minutos
@@ -115,12 +117,12 @@ class AutenticaService
                         ->where('tipo', $tipo)
                         ->update([
                             'intentos' => (int) $intentos,
-                            'inicio'   => $inicio,
-                            'codver'   => (string) $codigoVerify,
-                            'token'    => (string) $token,
+                            'inicio' => $inicio,
+                            'codver' => (string) $codigoVerify,
+                            'token' => (string) $token,
                         ]);
                 } else {
-                    $user19 = new Mercurio19();
+                    $user19 = new Mercurio19;
                     $user19->setTipo($tipo);
                     $user19->setCoddoc($coddoc);
                     $user19->setDocumento($documento);
@@ -129,9 +131,11 @@ class AutenticaService
                     $user19->setCodver($codigoVerify);
                     $user19->setToken($token);
                     $user19->setCodigo(1);
-                    if (!$user19->save()) {
+                    if (! $user19->save()) {
                         $msj = '';
-                        foreach ($user19->getMessages() as $message)  $msj .= ' ' . $message->getMessage();
+                        foreach ($user19->getMessages() as $message) {
+                            $msj .= ' '.$message->getMessage();
+                        }
                         throw new DebugException("Error al guardar Token Access, {$msj}", 501);
                     }
                 }
@@ -140,49 +144,48 @@ class AutenticaService
 
                 return [
                     false,
-                    "Alerta. El usuario ya posee un registro en plataforma y requiere de ingresar con PIN de validación.",
+                    'Alerta. El usuario ya posee un registro en plataforma y requiere de ingresar con PIN de validación.',
                 ];
             }
         }
 
         $storedHash = $mercurio07->getClave();
-        if (!clave_verify($clave, $storedHash)) {
-            throw new DebugException("Error el valor de la clave no es válido para ingresar a la plataforma.", 503);
+        if (! clave_verify($clave, $storedHash)) {
+            throw new DebugException('Error el valor de la clave no es válido para ingresar a la plataforma.', 503);
         }
 
         $estadoAfiliado = $autentica->getEstadoAfiliado();
-        if (!SessionCookies::authenticate(
+        if (! SessionCookies::authenticate(
             'mercurio',
             new Srequest(
                 [
-                    "tipo" => $tipo,
-                    "coddoc" => $coddoc,
-                    "documento" => $documento,
-                    "estado_afiliado" => $estadoAfiliado,
-                    "estado" => "A",
+                    'tipo' => $tipo,
+                    'coddoc' => $coddoc,
+                    'documento' => $documento,
+                    'estado_afiliado' => $estadoAfiliado,
+                    'estado' => 'A',
                 ]
             )
         )) {
-            throw new DebugException("Error en la autenticación del usuario", 501);
+            throw new DebugException('Error en la autenticación del usuario', 501);
         }
         $this->autoFirma($documento, $coddoc, $clave);
 
         return [
             true,
-            "La autenticación se ha completado con éxito."
+            'La autenticación se ha completado con éxito.',
         ];
     }
 
-
-    function autoFirma($documento, $coddoc, $clave)
+    public function autoFirma($documento, $coddoc, $clave)
     {
         $gestionFirmas = new GestionFirmaNoImage(
-            array(
-                "documento" => $documento,
-                "coddoc" => $coddoc
-            )
+            [
+                'documento' => $documento,
+                'coddoc' => $coddoc,
+            ]
         );
-        if ($gestionFirmas->hasFirma() == False) {
+        if ($gestionFirmas->hasFirma() == false) {
             $gestionFirmas->guardarFirma();
             $gestionFirmas->generarClaves($clave);
         } else {

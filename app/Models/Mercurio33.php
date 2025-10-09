@@ -7,7 +7,9 @@ use App\Models\Adapter\ModelBase;
 class Mercurio33 extends ModelBase
 {
     protected $table = 'mercurio33';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -22,22 +24,33 @@ class Mercurio33 extends ModelBase
         'fecest',
         'usuario',
         'actualizacion',
-        'log'
+        'log',
     ];
 
-    public function __construct(array|null $attributes = [])
+    public function __construct(?array $attributes = [])
     {
         parent::__construct($attributes);
     }
 
     public function getEstadoDetalle()
     {
-        $return = "";
-        if ($this->estado == "T") $return = "TEMPORAL";
-        if ($this->estado == "D") $return = "DEVUELTO";
-        if ($this->estado == "A") $return = "APROBADO";
-        if ($this->estado == "X") $return = "RECHAZADO";
-        if ($this->estado == "P") $return = "PENDIENTE";
+        $return = '';
+        if ($this->estado == 'T') {
+            $return = 'TEMPORAL';
+        }
+        if ($this->estado == 'D') {
+            $return = 'DEVUELTO';
+        }
+        if ($this->estado == 'A') {
+            $return = 'APROBADO';
+        }
+        if ($this->estado == 'X') {
+            $return = 'RECHAZADO';
+        }
+        if ($this->estado == 'P') {
+            $return = 'PENDIENTE';
+        }
+
         return $return;
     }
 

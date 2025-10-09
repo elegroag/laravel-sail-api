@@ -12,9 +12,9 @@ use App\Services\Entities\SucursalEntity;
 use App\Services\Entities\TrabajadorEntity;
 use App\Services\Srequest;
 use App\Services\Utils\Comman;
+use App\Services\Utils\CrearUsuario;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
-use App\Services\Utils\CrearUsuario;
 use Carbon\Carbon;
 use DateTime;
 use Exception;
@@ -22,9 +22,13 @@ use Exception;
 class ApruebaPensionado
 {
     private $today;
+
     private $tipopc = 9;
+
     private $solicitante;
+
     private $solicitud;
+
     private $dominio;
 
     public function __construct()
@@ -35,6 +39,7 @@ class ApruebaPensionado
 
     /**
      * procesar function
+     *
      * @param [type] $postData
      * @return bool
      */
@@ -45,8 +50,8 @@ class ApruebaPensionado
         /**
          * buscar registro de la empresa
          */
-        $fullname = $this->solicitud->getPriape() . ' ' . $this->solicitud->getSegape() . ' ' . $this->solicitud->getPrinom() . ' ' . $this->solicitud->getSegnom();
-        $tipper = "N";
+        $fullname = $this->solicitud->getPriape().' '.$this->solicitud->getSegape().' '.$this->solicitud->getPrinom().' '.$this->solicitud->getSegnom();
+        $tipper = 'N';
         $params = array_merge($this->solicitud->getArray(), $postData);
 
         /**
@@ -60,18 +65,26 @@ class ApruebaPensionado
             $params['codind'] == '49' ||
             $params['codind'] == '47' ||
             $params['codind'] == '48' ||
-            $params['codind'] == '07') == False) {
-            throw new Exception("Error, el indice de aportes no es valido para pensionados", 501);
+            $params['codind'] == '07') == false) {
+            throw new Exception('Error, el indice de aportes no es valido para pensionados', 501);
         }
 
         if ($this->solicitud->getTipdoc() == 3) {
-            throw new Exception("Error, el tipo documento para pensionado no puede ser tipo NIT.", 501);
+            throw new Exception('Error, el tipo documento para pensionado no puede ser tipo NIT.', 501);
         }
 
-        if ($params['codind'] == '07') $tipcot = 10;
-        if ($params['codind'] == '47') $tipcot = 66;
-        if ($params['codind'] == '48') $tipcot = 67;
-        if ($params['codind'] == '49') $tipcot = 64;
+        if ($params['codind'] == '07') {
+            $tipcot = 10;
+        }
+        if ($params['codind'] == '47') {
+            $tipcot = 66;
+        }
+        if ($params['codind'] == '48') {
+            $tipcot = 67;
+        }
+        if ($params['codind'] == '49') {
+            $tipcot = 64;
+        }
 
         $params['estado'] = 'A';
         $params['fecest'] = null;
@@ -79,13 +92,13 @@ class ApruebaPensionado
         $params['tipper'] = $tipper;
         $params['tipapo'] = 'O';
         $params['calsuc'] = $this->solicitud->getCalemp();
-        $params["celpri"] = $this->solicitud->getCelular();
-        $params["emailpri"] = $this->solicitud->getEmail();
+        $params['celpri'] = $this->solicitud->getCelular();
+        $params['emailpri'] = $this->solicitud->getEmail();
 
-        $repleg = $this->solicitud->getPriape() . ' '
-            . $this->solicitud->getSegape() . ' '
-            . $this->solicitud->getPrinom() . ' '
-            . $this->solicitud->getSegnom();
+        $repleg = $this->solicitud->getPriape().' '
+            .$this->solicitud->getSegape().' '
+            .$this->solicitud->getPrinom().' '
+            .$this->solicitud->getSegnom();
 
         $params['repleg'] = $repleg;
         $params['razsoc'] = $repleg;
@@ -96,18 +109,24 @@ class ApruebaPensionado
         $params['tottra'] = '1';
         $params['fax'] = '0';
 
-        if (!$params['codsuc']) $params["codsuc"] = "020";
-        if (!$params['codsuc']) $params["codlis"] = "020";
-        if ($params['codsuc']) $params["codlis"] = $params["codsuc"];
+        if (! $params['codsuc']) {
+            $params['codsuc'] = '020';
+        }
+        if (! $params['codsuc']) {
+            $params['codlis'] = '020';
+        }
+        if ($params['codsuc']) {
+            $params['codlis'] = $params['codsuc'];
+        }
 
-        $params['nomcon'] = substr($this->solicitud->getPriape() . ' ' . $this->solicitud->getSegape(), 0, 39);
+        $params['nomcon'] = substr($this->solicitud->getPriape().' '.$this->solicitud->getSegape(), 0, 39);
         $params['codase'] = '1';
         $params['resest'] = null;
         $params['fecmer'] = null;
         $params['feccor'] = null;
         $params['valmor'] = null;
         $params['permor'] = null;
-        $params['giass']  = null;
+        $params['giass'] = null;
         $params['actugp'] = null;
         $params['jefper'] = null;
         $params['cedpro'] = null;
@@ -132,7 +151,7 @@ class ApruebaPensionado
 
         $params['ruaf'] = 'N';
         $params['tipcon'] = 'F';
-        $params['tipcot'] =  "{$tipcot}";
+        $params['tipcot'] = "{$tipcot}";
         $params['vendedor'] = 'N';
         $params['fecsis'] = $hoy;
         $params['horas'] = '240';
@@ -147,7 +166,7 @@ class ApruebaPensionado
         $params['tratot'] = '0';
         $params['coddiv'] = $params['codciu'];
 
-        if (!$params['tippag'] || $params['tippag'] == 'T') {
+        if (! $params['tippag'] || $params['tippag'] == 'T') {
             $params['numcue'] = '0';
             $params['tippag'] = 'T';
             $params['codban'] = null;
@@ -159,56 +178,55 @@ class ApruebaPensionado
          */
         $params['tipsoc'] = ($params['tipsoc'] == '') ? '06' : $params['tipsoc'];
 
-
-        $entity = new PensionadoEntity();
+        $entity = new PensionadoEntity;
         $entity->create($params);
-        if (!$entity->validate()) {
+        if (! $entity->validate()) {
             throw new DebugException(
-                "Error, no se puede crear el trabajador pensionado por validación previa.",
+                'Error, no se puede crear el trabajador pensionado por validación previa.',
                 501,
-                array(
+                [
                     'errors' => $entity->getValidationErrors(),
                     'attributes' => $entity->getData(),
-                )
+                ]
             );
         }
 
-        $sucursal = new SucursalEntity();
+        $sucursal = new SucursalEntity;
         $sucursal->create($params);
-        if (!$sucursal->validate()) {
+        if (! $sucursal->validate()) {
             throw new DebugException(
-                "Error, no se puede crear la sucursal por validación previa.",
+                'Error, no se puede crear la sucursal por validación previa.',
                 501,
-                array(
+                [
                     'errors' => $sucursal->getValidationErrors(),
                     'attributes' => $sucursal->getData(),
-                )
+                ]
             );
         }
 
-        $listas = new ListasEntity();
+        $listas = new ListasEntity;
         $listas->create($params);
-        if (!$listas->validate()) {
+        if (! $listas->validate()) {
             throw new DebugException(
-                "Error, no se puede crear la lista por validación previa.",
+                'Error, no se puede crear la lista por validación previa.',
                 501,
-                array(
+                [
                     'errors' => $listas->getValidationErrors(),
                     'attributes' => $listas->getData(),
-                )
+                ]
             );
         }
 
-        $trabajador = new TrabajadorEntity();
+        $trabajador = new TrabajadorEntity;
         $trabajador->create($params);
-        if (!$trabajador->validate()) {
+        if (! $trabajador->validate()) {
             throw new DebugException(
-                "Error, no se puede crear el trabajador por validación previa.",
+                'Error, no se puede crear el trabajador por validación previa.',
                 501,
-                array(
+                [
                     'errors' => $trabajador->getValidationErrors(),
                     'attributes' => $trabajador->getData(),
-                )
+                ]
             );
         }
 
@@ -217,27 +235,29 @@ class ApruebaPensionado
          */
         $ps = Comman::Api();
         $ps->runCli(
-            array(
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "afilia_pensionado",
-                "params" => array(
-                    'post' => array_merge($entity->getData(), $sucursal->getData(), $listas->getData(), $trabajador->getData())
-                )
-            )
+            [
+                'servicio' => 'ComfacaAfilia',
+                'metodo' => 'afilia_pensionado',
+                'params' => [
+                    'post' => array_merge($entity->getData(), $sucursal->getData(), $listas->getData(), $trabajador->getData()),
+                ],
+            ]
         );
 
         if ($ps->isJson() == false) {
-            throw new DebugException("Error, no hay respuesta del servidor para validación del resultado.", 501);
+            throw new DebugException('Error, no hay respuesta del servidor para validación del resultado.', 501);
         }
         $out = $ps->toArray();
 
         if (is_null($out)) {
-            throw new DebugException("Error, no hay respuesta del servidor para validación del resultado.", 501);
+            throw new DebugException('Error, no hay respuesta del servidor para validación del resultado.', 501);
         }
 
-        if ($out['success'] == false) throw new DebugException($out['msj'], 501);
+        if ($out['success'] == false) {
+            throw new DebugException($out['msj'], 501);
+        }
 
-        $registroSeguimiento = new RegistroSeguimiento();
+        $registroSeguimiento = new RegistroSeguimiento;
         $registroSeguimiento->crearNota($this->tipopc, $this->solicitud->getId(), $postData['nota_aprobar'], 'A');
 
         /**
@@ -251,19 +271,19 @@ class ApruebaPensionado
 
         $crearUsuario = new CrearUsuario(
             new Srequest(
-                array(
-                    "tipo" => "O",
-                    "coddoc" => $this->solicitud->getTipdoc(),
-                    "documento" => $this->solicitud->getNit(),
-                    "nombre" => $fullname,
-                    "email" => $this->solicitud->getEmail(),
-                    "codciu" => $this->solicitud->getCodciu(),
-                    "autoriza" => $this->solicitante->getAutoriza(),
-                    "clave" => $this->solicitante->getClave(),
-                    "fecreg" => $fecreg->getUsingFormatDefault(),
-                    "feccla" => $feccla->getUsingFormatDefault(),
-                    "fecapr" => $fecapr
-                )
+                [
+                    'tipo' => 'O',
+                    'coddoc' => $this->solicitud->getTipdoc(),
+                    'documento' => $this->solicitud->getNit(),
+                    'nombre' => $fullname,
+                    'email' => $this->solicitud->getEmail(),
+                    'codciu' => $this->solicitud->getCodciu(),
+                    'autoriza' => $this->solicitante->getAutoriza(),
+                    'clave' => $this->solicitante->getClave(),
+                    'fecreg' => $fecreg->getUsingFormatDefault(),
+                    'feccla' => $feccla->getUsingFormatDefault(),
+                    'fecapr' => $fecapr,
+                ]
             )
         );
 
@@ -281,11 +301,13 @@ class ApruebaPensionado
         $mercurio38->setTipper($tipper);
         $mercurio38->setFecapr($postData['fecapr']);
         $mercurio38->save();
+
         return true;
     }
 
     /**
      * enviarMail function
+     *
      * @param [type] $Mercurio38
      * @param [type] $actapr
      * @param [type] $feccap
@@ -293,25 +315,25 @@ class ApruebaPensionado
      */
     public function enviarMail($actapr, $feccap)
     {
-        $meses = array(
-            "Enero",
-            "Febrero",
-            "Marzo",
-            "Abril",
-            "Mayo",
-            "Junio",
-            "Julio",
-            "Agosto",
-            "Septiembre",
-            "Octubre",
-            "Noviembre",
-            "Diciembre"
-        );
+        $meses = [
+            'Enero',
+            'Febrero',
+            'Marzo',
+            'Abril',
+            'Mayo',
+            'Junio',
+            'Julio',
+            'Agosto',
+            'Septiembre',
+            'Octubre',
+            'Noviembre',
+            'Diciembre',
+        ];
 
         $feccap = new DateTime($feccap);
-        $dia = $feccap->format("d");
-        $mes = $meses[intval($feccap->format("m") - 1)];
-        $anno = $feccap->format("Y");
+        $dia = $feccap->format('d');
+        $mes = $meses[intval($feccap->format('m') - 1)];
+        $anno = $feccap->format('Y');
 
         $data = $this->solicitud->getArray();
         $data['membrete'] = "{$this->dominio}public/img/membrete_aprueba.jpg";
@@ -321,10 +343,10 @@ class ApruebaPensionado
         $data['mes'] = $mes;
         $data['anno'] = $anno;
 
-        $html = view("layouts/aprobar", $data)->render();
+        $html = view('layouts/aprobar', $data)->render();
         $asunto = "Afiliación trabajador pensionado realizada con éxito, identificación {$this->solicitud->getNit()}";
         $emailCaja = (new Mercurio01)->findFirst();
-        $senderEmail = new SenderEmail();
+        $senderEmail = new SenderEmail;
 
         $senderEmail->setters(
             "emisor_email: {$emailCaja->getEmail()}",
@@ -332,25 +354,27 @@ class ApruebaPensionado
             "asunto: {$asunto}"
         );
 
-        $senderEmail->send(array(
-            array(
-                "email" => $this->solicitante->getEmail(),
-                "nombre" => $this->solicitante->getNombre(),
-            )
-        ), $html);
+        $senderEmail->send([
+            [
+                'email' => $this->solicitante->getEmail(),
+                'nombre' => $this->solicitante->getNombre(),
+            ],
+        ], $html);
 
-        return  true;
+        return true;
     }
 
     public function findSolicitud($idSolicitud)
     {
         $this->solicitud = (new Mercurio38)->findFirst("id='{$idSolicitud}'");
+
         return $this->solicitud;
     }
 
     public function findSolicitante()
     {
         $this->solicitante = (new Mercurio07)->findFirst("documento='{$this->solicitud->getDocumento()}' and coddoc='{$this->solicitud->getCoddoc()}' and tipo='{$this->solicitud->getTipo()}'");
+
         return $this->solicitante;
     }
 }

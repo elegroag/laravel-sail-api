@@ -7,12 +7,19 @@ use App\Models\Adapter\DbBase;
 class Menu
 {
     private $user;
+
     private $currentUrl;
-    private $breadcrumbs = array();
+
+    private $breadcrumbs = [];
+
     private $menuItems;
+
     private $db;
+
     private $codapl;
+
     private $pageTitle;
+
     private $path;
 
     public function __construct($codapl)
@@ -27,11 +34,11 @@ class Menu
 
     private function initialize()
     {
-        if (!$this->user) {
+        if (! $this->user) {
             return null;
         }
-        $this->menuItems = "";
-        $this->path = env('APP_URL') . ':' . env('APP_PORT');
+        $this->menuItems = '';
+        $this->path = env('APP_URL').':'.env('APP_PORT');
     }
 
     private function getMenuItems($parentId)
@@ -55,7 +62,9 @@ class Menu
         }
         $estado_afiliado = session('estado_afiliado');
 
-        if ($estado_afiliado == 'I') $menu_tipo = 'P';
+        if ($estado_afiliado == 'I') {
+            $menu_tipo = 'P';
+        }
 
         $query = "SELECT * FROM menu_items 
         WHERE is_visible = TRUE AND 
@@ -63,18 +72,19 @@ class Menu
         tipo = '{$menu_tipo}' ";
 
         if ($parentId === null) {
-            $query .= " AND parent_id IS NULL";
+            $query .= ' AND parent_id IS NULL';
         } else {
-            $query .= " AND parent_id = " . intval($parentId);
+            $query .= ' AND parent_id = '.intval($parentId);
         }
-        $query .= " ORDER BY position ASC";
+        $query .= ' ORDER BY position ASC';
         $sql = $this->db->inQueryAssoc($query);
+
         return $sql;
     }
 
     private function normalizeTitle($title)
     {
-        return str_replace(" ", "_", $title);
+        return str_replace(' ', '_', $title);
     }
 
     private function buildMenuItem($menu, $isParent = false)
@@ -89,7 +99,7 @@ class Menu
                 'icon' => $menu['icon'] ?? null,
                 'title' => $menu['title'] ?? '',
                 'is_active' => true,
-                'url' => ($menu['default_url']) ? $this->path . '/' . $menu['default_url'] : '#',
+                'url' => ($menu['default_url']) ? $this->path.'/'.$menu['default_url'] : '#',
             ];
             $this->pageTitle = $menu['title'];
         }
@@ -110,7 +120,7 @@ class Menu
     private function buildParentMenuItem($menu, $title, $icon, $linkText, $childItems)
     {
         $isActive = false;
-        $childHtml = "";
+        $childHtml = '';
 
         foreach ($childItems as $child) {
             $childActive = ($child['default_url'] == $this->currentUrl);
@@ -121,14 +131,14 @@ class Menu
                     'icon' => $menu['icon'] ?? null,
                     'title' => $menu['title'] ?? '',
                     'is_active' => false,
-                    'url' => ($menu['default_url']) ? $this->path . '/' . $menu['default_url'] : '#',
+                    'url' => ($menu['default_url']) ? $this->path.'/'.$menu['default_url'] : '#',
                 ];
                 // Agregar breadcrumb del hijo como activo
                 $this->breadcrumbs[] = [
                     'icon' => $child['icon'] ?? null,
                     'title' => $child['title'] ?? '',
                     'is_active' => true,
-                    'url' => ($child['default_url']) ? $this->path . '/' . $child['default_url'] : '#',
+                    'url' => ($child['default_url']) ? $this->path.'/'.$child['default_url'] : '#',
                 ];
                 $this->pageTitle = $menu['title'];
             }
@@ -157,9 +167,10 @@ class Menu
     {
         $activeClass = $isActive ? 'active' : '';
         $title = strtolower(str_replace(' ', '_', $child['title']));
+
         return "
             <li class='nav-item'>
-                <a data-id='{$title}' href='{$this->path}/" . $child['default_url'] . "'
+                <a data-id='{$title}' href='{$this->path}/".$child['default_url']."'
                    class='nav-link {$activeClass}'>
                     {$child['title']}
                 </a>
@@ -169,9 +180,10 @@ class Menu
     private function buildSingleMenuItem($menu, $title, $icon, $linkText, $isActive)
     {
         $activeClass = $isActive ? 'active' : '';
+
         return "
             <li class='nav-item'>
-                <a class='nav-link {$activeClass}' href='{$this->path}/" . $menu['default_url'] . "'>
+                <a class='nav-link {$activeClass}' href='{$this->path}/".$menu['default_url']."'>
                     {$icon}
                     {$linkText}
                 </a>
@@ -192,6 +204,7 @@ class Menu
     public static function showMenu($codapl)
     {
         $menu = new Menu($codapl);
+
         return $menu->mainMenu();
     }
 }

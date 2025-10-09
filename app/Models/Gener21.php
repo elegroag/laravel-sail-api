@@ -7,9 +7,13 @@ use App\Models\Adapter\ModelBase;
 class Gener21 extends ModelBase
 {
     protected $table = 'gener21';
+
     public $timestamps = false;
+
     protected $primaryKey = 'tipfun';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [

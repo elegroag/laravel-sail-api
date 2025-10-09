@@ -9,13 +9,12 @@ use App\Models\Mercurio30;
 use App\Services\Entities\EmpresaEntity;
 use App\Services\Entities\ListasEntity;
 use App\Services\Entities\SucursalEntity;
-use App\Services\Srequest;
 use App\Services\SatApi\SatServices;
+use App\Services\Srequest;
 use App\Services\Utils\Comman;
+use App\Services\Utils\CrearUsuario;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
-use App\Services\Utils\CrearUsuario;
-use App\Services\View;
 use Carbon\Carbon;
 use DateTime;
 use Exception;
@@ -23,10 +22,13 @@ use Exception;
 class ApruebaEmpresa
 {
     private $today;
+
     private $tipopc = 2;
 
     private $solicitante;
+
     private $solicitud;
+
     private $dominio;
 
     public function __construct()
@@ -37,6 +39,7 @@ class ApruebaEmpresa
 
     /**
      * procesar function
+     *
      * @param [type] $postData
      * @return bool
      */
@@ -47,7 +50,7 @@ class ApruebaEmpresa
         /**
          * buscar registro de la empresa
          */
-        $tipper = ($this->solicitud->getTipdoc() == 3) ? "J" : "N";
+        $tipper = ($this->solicitud->getTipdoc() == 3) ? 'J' : 'N';
         $params = array_merge($this->solicitud->getArray(), $postData);
 
         /**
@@ -60,7 +63,7 @@ class ApruebaEmpresa
             $params['codind'] == '50' ||
             $params['codind'] == '14'
         ) {
-            throw new Exception("Error, el indice de aportes no es valido para empresas aportantes", 501);
+            throw new Exception('Error, el indice de aportes no es valido para empresas aportantes', 501);
         }
 
         $params['estado'] = 'A';
@@ -68,17 +71,17 @@ class ApruebaEmpresa
         $params['codest'] = null;
         $params['tipper'] = $tipper;
         $params['coddoc'] = $mercurio30->getTipdoc();
-        $params['fecsis'] = $hoy; //fecha captura del sistema
-        $params['feccam'] = $hoy; //fecha de actualizacion
+        $params['fecsis'] = $hoy; // fecha captura del sistema
+        $params['feccam'] = $hoy; // fecha de actualizacion
         $params['estado'] = 'A';
-        $params['telt'] =  $mercurio30->getCelpri();
-        $params['telr'] =  $mercurio30->getTelefono();
+        $params['telt'] = $mercurio30->getCelpri();
+        $params['telr'] = $mercurio30->getTelefono();
         $params['mailr'] = $mercurio30->getEmailpri();
         $params['calsuc'] = $mercurio30->getCalemp();
-        $params['nomcon'] = $mercurio30->getPriape() . ' ' . $mercurio30->getSegape();
+        $params['nomcon'] = $mercurio30->getPriape().' '.$mercurio30->getSegape();
         $params['detalle'] = $mercurio30->getRazsoc();
         $params['nomemp'] = $mercurio30->getRazsoc();
-        $params['fecapr'] =  $postData['fecapr'];
+        $params['fecapr'] = $postData['fecapr'];
         $params['observacion'] = $postData['nota_aprobar'];
         $params['totapo'] = '0';
         $params['totcon'] = '0';
@@ -94,7 +97,7 @@ class ApruebaEmpresa
         $params['feccor'] = null;
         $params['valmor'] = null;
         $params['permor'] = null;
-        $params['giass']  = null;
+        $params['giass'] = null;
         $params['actugp'] = null;
         $params['correo'] = 'N';
         $params['traapo'] = '0';
@@ -109,42 +112,42 @@ class ApruebaEmpresa
         $params['codase'] = '09';
         $params['todmes'] = 'S';
 
-        $empresa = new EmpresaEntity();
+        $empresa = new EmpresaEntity;
         $empresa->create($params);
-        if (!$empresa->validate()) {
+        if (! $empresa->validate()) {
             throw new DebugException(
-                "Error, no se puede crear la empresa por validación previa.",
+                'Error, no se puede crear la empresa por validación previa.',
                 501,
-                array(
+                [
                     'errors' => $empresa->getValidationErrors(),
                     'attributes' => $empresa->getData(),
-                )
+                ]
             );
         }
 
-        $sucursal = new SucursalEntity();
+        $sucursal = new SucursalEntity;
         $sucursal->create($params);
-        if (!$sucursal->validate()) {
+        if (! $sucursal->validate()) {
             throw new DebugException(
-                "Error, no se puede crear la sucursal por validación previa.",
+                'Error, no se puede crear la sucursal por validación previa.',
                 501,
-                array(
+                [
                     'errors' => $sucursal->getValidationErrors(),
                     'attributes' => $sucursal->getData(),
-                )
+                ]
             );
         }
 
-        $listas = new ListasEntity();
+        $listas = new ListasEntity;
         $listas->create($params);
-        if (!$listas->validate()) {
+        if (! $listas->validate()) {
             throw new DebugException(
-                "Error, no se puede crear la lista por validación previa.",
+                'Error, no se puede crear la lista por validación previa.',
                 501,
-                array(
+                [
                     'errors' => $listas->getValidationErrors(),
                     'attributes' => $listas->getData(),
-                )
+                ]
             );
         }
 
@@ -153,23 +156,28 @@ class ApruebaEmpresa
          */
         $ps = Comman::Api();
         $ps->runCli(
-            array(
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "afilia_empresa",
-                "params" => array(
-                    'post' => array_merge($empresa->getData(), $sucursal->getData(), $listas->getData())
-                )
-            )
+            [
+                'servicio' => 'ComfacaAfilia',
+                'metodo' => 'afilia_empresa',
+                'params' => [
+                    'post' => array_merge($empresa->getData(), $sucursal->getData(), $listas->getData()),
+                ],
+            ]
         );
-        if ($ps->isJson() == false) throw new DebugException("Error, no hay respuesta del servidor para validación del resultado.", 1);
+        if ($ps->isJson() == false) {
+            throw new DebugException('Error, no hay respuesta del servidor para validación del resultado.', 1);
+        }
         $out = $ps->toArray();
 
-        if (is_null($out)) throw new DebugException("Error, no hay respuesta del servidor para validación del resultado.", 1);
+        if (is_null($out)) {
+            throw new DebugException('Error, no hay respuesta del servidor para validación del resultado.', 1);
+        }
 
-        if ($out['success'] == false) throw new DebugException($out['message'], 501);
+        if ($out['success'] == false) {
+            throw new DebugException($out['message'], 501);
+        }
 
-
-        $registroSeguimiento = new RegistroSeguimiento();
+        $registroSeguimiento = new RegistroSeguimiento;
         $registroSeguimiento->crearNota($this->tipopc, $this->solicitud->getId(), $postData['nota_aprobar'], 'A');
         /**
          * Crea de una vez e registro, permitiendo que el usuario entre con la misma password
@@ -182,19 +190,19 @@ class ApruebaEmpresa
 
         $crearUsuario = new CrearUsuario(
             new Srequest(
-                array(
-                    "tipo" => "E",
-                    "coddoc" => $this->solicitud->getTipdoc(),
-                    "documento" => $this->solicitud->getNit(),
-                    "nombre" => $this->solicitud->getRazsoc(),
-                    "email" => $this->solicitud->getEmail(),
-                    "codciu" => $this->solicitud->getCodciu(),
-                    "autoriza" => $this->solicitante->getAutoriza(),
-                    "clave" => $this->solicitante->getClave(),
-                    "fecreg" => $fecreg->getUsingFormatDefault(),
-                    "feccla" => $feccla->getUsingFormatDefault(),
-                    "fecapr" => $fecapr,
-                )
+                [
+                    'tipo' => 'E',
+                    'coddoc' => $this->solicitud->getTipdoc(),
+                    'documento' => $this->solicitud->getNit(),
+                    'nombre' => $this->solicitud->getRazsoc(),
+                    'email' => $this->solicitud->getEmail(),
+                    'codciu' => $this->solicitud->getCodciu(),
+                    'autoriza' => $this->solicitante->getAutoriza(),
+                    'clave' => $this->solicitante->getClave(),
+                    'fecreg' => $fecreg->getUsingFormatDefault(),
+                    'feccla' => $feccla->getUsingFormatDefault(),
+                    'fecapr' => $fecapr,
+                ]
             )
         );
 
@@ -208,7 +216,7 @@ class ApruebaEmpresa
          * Afiliación aceptada para el servicio sat, no disponible para independientes
          */
         $resultado_tramite = 1;
-        $satServices = new SatServices();
+        $satServices = new SatServices;
         $satServices->notificaSatEmpresas($this->solicitud, $resultado_tramite, $postData['fecafi'], '');
 
         /**
@@ -219,11 +227,13 @@ class ApruebaEmpresa
         $mercurio30->setFecest($hoy);
         $mercurio30->setTipper($tipper);
         $mercurio30->save();
+
         return true;
     }
 
     /**
      * enviarMail function
+     *
      * @param [type] $mercurio30
      * @param [type] $actapr
      * @param [type] $feccap
@@ -232,9 +242,9 @@ class ApruebaEmpresa
     public function enviarMail($actapr, $feccap)
     {
         $feccap = new DateTime($feccap);
-        $dia = $feccap->format("d");
-        $mes = get_mes_name($feccap->format("m"));
-        $anno = $feccap->format("Y");
+        $dia = $feccap->format('d');
+        $mes = get_mes_name($feccap->format('m'));
+        $anno = $feccap->format('Y');
 
         $data = $this->solicitud->getArray();
         $data['membrete'] = "{$this->dominio}Mercurio/public/img/membrete_aprueba.jpg";
@@ -247,16 +257,16 @@ class ApruebaEmpresa
         $emailCaja = (new Mercurio01)->findFirst();
         $sender = new SenderEmail(
             new Srequest(
-                array(
-                    "emisor_email" => $emailCaja->getEmail(),
-                    "emisor_clave" => $emailCaja->getClave(),
-                    "asunto" => "Afiliación de la empresa realizada con éxito, NIT {$this->solicitud->getNit()}"
-                )
+                [
+                    'emisor_email' => $emailCaja->getEmail(),
+                    'emisor_clave' => $emailCaja->getClave(),
+                    'asunto' => "Afiliación de la empresa realizada con éxito, NIT {$this->solicitud->getNit()}",
+                ]
             )
         );
         $sender->send(
             $this->solicitante->getEmail(),
-            view("layouts/aprobar", $data)->render()
+            view('layouts/aprobar', $data)->render()
         );
 
         return true;
@@ -265,12 +275,14 @@ class ApruebaEmpresa
     public function findSolicitud($idSolicitud)
     {
         $this->solicitud = (new Mercurio30)->findFirst("id='{$idSolicitud}'");
+
         return $this->solicitud;
     }
 
     public function findSolicitante()
     {
         $this->solicitante = (new Mercurio07)->findFirst("documento='{$this->solicitud->getDocumento()}' and coddoc='{$this->solicitud->getCoddoc()}' and tipo='{$this->solicitud->getTipo()}'");
+
         return $this->solicitante;
     }
 }

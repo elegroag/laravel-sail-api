@@ -9,11 +9,13 @@ use Thiagoprz\CompositeKey\HasCompositeKey;
 
 class Mercurio19 extends ModelBase
 {
-    use ValidateWithRules;
     use HasCompositeKey;
+    use ValidateWithRules;
 
     protected $table = 'mercurio19';
+
     public $timestamps = false;
+
     protected $primaryKey = ['documento', 'coddoc', 'tipo'];
 
     protected $fillable = [

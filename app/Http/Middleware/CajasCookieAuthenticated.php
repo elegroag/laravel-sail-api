@@ -11,32 +11,32 @@ class CajasCookieAuthenticated
     /**
      * Manejar una solicitud entrante.
      *
-     * @param Request $request
-     * @param Closure $next
      * @return mixed
      */
     public function handle(Request $request, Closure $next)
     {
-        if (!SessionCookies::check()) {
+        if (! SessionCookies::check()) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No autenticado.'
+                    'message' => 'No autenticado.',
                 ], 401);
             }
+
             return redirect('cajas/login');
         }
 
         $tipo = session()->has('tipo') ? session('tipo') : null;
         if ($tipo) {
-            //no es valido es usuario de mercurio no de cajas
+            // no es valido es usuario de mercurio no de cajas
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Usuario de mercurio no autorizado para acceso a Sistema de Caja.'
+                    'message' => 'Usuario de mercurio no autorizado para acceso a Sistema de Caja.',
                 ], 401);
             }
-            //redirigir a la pantalla de login de mercurio
+
+            // redirigir a la pantalla de login de mercurio
             return redirect('web/login');
         }
 
@@ -50,9 +50,10 @@ class CajasCookieAuthenticated
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No autenticado.'
+                    'message' => 'No autenticado.',
                 ], 401);
             }
+
             return redirect('cajas/login');
         }
 

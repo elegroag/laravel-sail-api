@@ -8,7 +8,9 @@ use Carbon\Carbon;
 class Mercusat02 extends ModelBase
 {
     protected $table = 'mercusat02';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -17,7 +19,7 @@ class Mercusat02 extends ModelBase
         'indeti',
         'numtrasat',
         'documento',
-        'coddoc'
+        'coddoc',
     ];
 
     public function setId($id)

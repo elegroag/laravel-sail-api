@@ -6,12 +6,15 @@ use App\Models\Adapter\ModelBase;
 
 class Mercurio01 extends ModelBase
 {
-
     protected $table = 'mercurio01';
+
     public $timestamps = false;
+
     // PK es CHAR(2) 'codapl' (no autoincremental)
     protected $primaryKey = 'codapl';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -27,7 +30,8 @@ class Mercurio01 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo codapl
-     * @param string $codapl
+     *
+     * @param  string  $codapl
      */
     public function setCodapl($codapl)
     {
@@ -36,7 +40,8 @@ class Mercurio01 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo email
-     * @param string $email
+     *
+     * @param  string  $email
      */
     public function setEmail($email)
     {
@@ -45,7 +50,8 @@ class Mercurio01 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo clave
-     * @param string $clave
+     *
+     * @param  string  $clave
      */
     public function setClave($clave)
     {
@@ -54,7 +60,8 @@ class Mercurio01 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo path
-     * @param string $path
+     *
+     * @param  string  $path
      */
     public function setPath($path)
     {
@@ -63,7 +70,8 @@ class Mercurio01 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo ftpserver
-     * @param string $ftpserver
+     *
+     * @param  string  $ftpserver
      */
     public function setFtpserver($ftpserver)
     {
@@ -72,7 +80,8 @@ class Mercurio01 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo pathserver
-     * @param string $pathserver
+     *
+     * @param  string  $pathserver
      */
     public function setPathserver($pathserver)
     {
@@ -81,7 +90,8 @@ class Mercurio01 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo userserver
-     * @param string $userserver
+     *
+     * @param  string  $userserver
      */
     public function setUserserver($userserver)
     {
@@ -90,16 +100,17 @@ class Mercurio01 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo passserver
-     * @param string $passserver
+     *
+     * @param  string  $passserver
      */
     public function setPassserver($passserver)
     {
         $this->passserver = $passserver;
     }
 
-
     /**
      * Devuelve el valor del campo codapl
+     *
      * @return string
      */
     public function getCodapl()
@@ -109,6 +120,7 @@ class Mercurio01 extends ModelBase
 
     /**
      * Devuelve el valor del campo email
+     *
      * @return string
      */
     public function getEmail()
@@ -118,6 +130,7 @@ class Mercurio01 extends ModelBase
 
     /**
      * Devuelve el valor del campo clave
+     *
      * @return string
      */
     public function getClave()
@@ -127,6 +140,7 @@ class Mercurio01 extends ModelBase
 
     /**
      * Devuelve el valor del campo path
+     *
      * @return string
      */
     public function getPath()
@@ -136,6 +150,7 @@ class Mercurio01 extends ModelBase
 
     /**
      * Devuelve el valor del campo ftpserver
+     *
      * @return string
      */
     public function getFtpserver()
@@ -145,6 +160,7 @@ class Mercurio01 extends ModelBase
 
     /**
      * Devuelve el valor del campo pathserver
+     *
      * @return string
      */
     public function getPathserver()
@@ -154,6 +170,7 @@ class Mercurio01 extends ModelBase
 
     /**
      * Devuelve el valor del campo userserver
+     *
      * @return string
      */
     public function getUserserver()
@@ -163,6 +180,7 @@ class Mercurio01 extends ModelBase
 
     /**
      * Devuelve el valor del campo passserver
+     *
      * @return string
      */
     public function getPassserver()

@@ -12,9 +12,9 @@ use App\Services\Entities\SucursalEntity;
 use App\Services\Entities\TrabajadorEntity;
 use App\Services\Srequest;
 use App\Services\Utils\Comman;
+use App\Services\Utils\CrearUsuario;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
-use App\Services\Utils\CrearUsuario;
 use Carbon\Carbon;
 use DateTime;
 use Exception;
@@ -22,10 +22,15 @@ use Exception;
 class ApruebaFacultativo
 {
     private $today;
+
     private $tipopc = 10;
+
     private $procesadorComando;
+
     private $solicitante;
+
     private $solicitud;
+
     private $dominio;
 
     public function __construct()
@@ -37,6 +42,7 @@ class ApruebaFacultativo
 
     /**
      * procesar function
+     *
      * @param [type] $solicitante
      * @param [type] $postData
      * @return bool
@@ -49,21 +55,21 @@ class ApruebaFacultativo
         /**
          * buscar registro de la empresa
          */
-        $tipper = "N";
+        $tipper = 'N';
         $params = array_merge($this->solicitud->getArray(), $postData);
         if ($params['codind'] != '46') {
-            throw new Exception("Error, el indice de aportes no es valido para facultativos", 501);
+            throw new Exception('Error, el indice de aportes no es valido para facultativos', 501);
         }
 
         if ($this->solicitud->getTipdoc() == 3) {
-            throw new Exception("Error, el tipo documento para facultativos no puede ser tipo NIT.", 501);
+            throw new Exception('Error, el tipo documento para facultativos no puede ser tipo NIT.', 501);
         }
 
-        $fullname = $this->solicitud->getPriape() . ' ' . $this->solicitud->getSegape() . ' ' . $this->solicitud->getPrinom() . ' ' . $this->solicitud->getSegnom();
+        $fullname = $this->solicitud->getPriape().' '.$this->solicitud->getSegape().' '.$this->solicitud->getPrinom().' '.$this->solicitud->getSegnom();
         $tipcot = 63;
 
         $params['tipsoc'] = '06';
-        $params["digver"] =  "0";
+        $params['digver'] = '0';
         $params['nit'] = $this->solicitud->getCedtra();
         $params['coddoc'] = $this->solicitud->getTipdoc();
         $params['calsuc'] = $this->solicitud->getCalemp();
@@ -71,28 +77,34 @@ class ApruebaFacultativo
         $params['fecest'] = null;
         $params['codest'] = null;
         $params['tipper'] = $tipper;
-        $params["celpri"] = $this->solicitud->getCelular();
-        $params["emailpri"] = $this->solicitud->getEmail();
-        $params["repleg"] = $fullname;
-        $params["razsoc"] =  $fullname;
-        $params["fax"] =  "0";
-        $params["ofiafi"] = "13";
-        $params["horas"]  = "240";
+        $params['celpri'] = $this->solicitud->getCelular();
+        $params['emailpri'] = $this->solicitud->getEmail();
+        $params['repleg'] = $fullname;
+        $params['razsoc'] = $fullname;
+        $params['fax'] = '0';
+        $params['ofiafi'] = '13';
+        $params['horas'] = '240';
         $params['calemp'] = 'F';
         $params['tipapo'] = 'F';
 
-        if (!$params['codsuc']) $params["codsuc"] = "030";
-        if (!$params['codsuc']) $params["codlis"] = "030";
-        if ($params['codsuc']) $params["codlis"] = $params["codsuc"];
+        if (! $params['codsuc']) {
+            $params['codsuc'] = '030';
+        }
+        if (! $params['codsuc']) {
+            $params['codlis'] = '030';
+        }
+        if ($params['codsuc']) {
+            $params['codlis'] = $params['codsuc'];
+        }
         $params['subpla'] = $postData['codsuc'];
-        $params['nomcon'] = substr($this->solicitud->getPriape() . ' ' . $this->solicitud->getSegape(), 0, 39);
+        $params['nomcon'] = substr($this->solicitud->getPriape().' '.$this->solicitud->getSegape(), 0, 39);
         $params['codase'] = '1';
         $params['resest'] = null;
         $params['fecmer'] = null;
         $params['feccor'] = null;
         $params['valmor'] = null;
         $params['permor'] = null;
-        $params['giass']  = null;
+        $params['giass'] = null;
         $params['actugp'] = null;
         $params['jefper'] = null;
         $params['cedpro'] = null;
@@ -117,7 +129,7 @@ class ApruebaFacultativo
 
         $params['ruaf'] = 'N';
         $params['tipcon'] = 'F';
-        $params['tipcot'] =  "{$tipcot}";
+        $params['tipcot'] = "{$tipcot}";
         $params['vendedor'] = 'N';
         $params['fecsis'] = $hoy;
         $params['horas'] = '240';
@@ -132,62 +144,62 @@ class ApruebaFacultativo
         $params['tratot'] = '0';
         $params['coddiv'] = $params['codciu'];
 
-        if (!$params['tippag'] || $params['tippag'] == 'T') {
+        if (! $params['tippag'] || $params['tippag'] == 'T') {
             $params['numcue'] = '0';
             $params['tippag'] = 'T';
             $params['codban'] = null;
             $params['tipcue'] = null;
         }
 
-        $entity = new IndependienteEntity();
+        $entity = new IndependienteEntity;
         $entity->create($params);
-        if (!$entity->validate()) {
+        if (! $entity->validate()) {
             throw new DebugException(
-                "Error, no se puede crear el trabajador facultativo por validación previa.",
+                'Error, no se puede crear el trabajador facultativo por validación previa.',
                 501,
-                array(
+                [
                     'errors' => $entity->getValidationErrors(),
                     'attributes' => $entity->getData(),
-                )
+                ]
             );
         }
 
-        $sucursal = new SucursalEntity();
+        $sucursal = new SucursalEntity;
         $sucursal->create($params);
-        if (!$sucursal->validate()) {
+        if (! $sucursal->validate()) {
             throw new DebugException(
-                "Error, no se puede crear la sucursal por validación previa.",
+                'Error, no se puede crear la sucursal por validación previa.',
                 501,
-                array(
+                [
                     'errors' => $sucursal->getValidationErrors(),
                     'attributes' => $sucursal->getData(),
-                )
+                ]
             );
         }
 
-        $listas = new ListasEntity();
+        $listas = new ListasEntity;
         $listas->create($params);
-        if (!$listas->validate()) {
+        if (! $listas->validate()) {
             throw new DebugException(
-                "Error, no se puede crear la lista por validación previa.",
+                'Error, no se puede crear la lista por validación previa.',
                 501,
-                array(
+                [
                     'errors' => $listas->getValidationErrors(),
                     'attributes' => $listas->getData(),
-                )
+                ]
             );
         }
 
-        $trabajador = new TrabajadorEntity();
+        $trabajador = new TrabajadorEntity;
         $trabajador->create($params);
-        if (!$trabajador->validate()) {
+        if (! $trabajador->validate()) {
             throw new DebugException(
-                "Error, no se puede crear el trabajador por validación previa.",
+                'Error, no se puede crear el trabajador por validación previa.',
                 501,
-                array(
+                [
                     'errors' => $trabajador->getValidationErrors(),
                     'attributes' => $trabajador->getData(),
-                )
+                ]
             );
         }
         /**
@@ -195,25 +207,30 @@ class ApruebaFacultativo
          */
         $ps = Comman::Api();
         $ps->runCli(
-            array(
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "afilia_facultativo",
-                "params" => array(
-                    'post' => array_merge($entity->getData(), $sucursal->getData(), $listas->getData(), $trabajador->getData())
-                )
-            )
+            [
+                'servicio' => 'ComfacaAfilia',
+                'metodo' => 'afilia_facultativo',
+                'params' => [
+                    'post' => array_merge($entity->getData(), $sucursal->getData(), $listas->getData(), $trabajador->getData()),
+                ],
+            ]
         );
 
-        if ($ps->isJson() == false) throw new DebugException("Error, no hay respuesta del servidor para validación del resultado.", 501);
+        if ($ps->isJson() == false) {
+            throw new DebugException('Error, no hay respuesta del servidor para validación del resultado.', 501);
+        }
         $out = $ps->toArray();
 
-        if (is_null($out) || $out == false) throw new DebugException("Error, no hay respuesta del servidor para validación del resultado.", 501);
+        if (is_null($out) || $out == false) {
+            throw new DebugException('Error, no hay respuesta del servidor para validación del resultado.', 501);
+        }
 
-        if ($out['success'] == false) throw new DebugException($out['message'], 501);
+        if ($out['success'] == false) {
+            throw new DebugException($out['message'], 501);
+        }
 
-        $registroSeguimiento = new RegistroSeguimiento();
+        $registroSeguimiento = new RegistroSeguimiento;
         $registroSeguimiento->crearNota($this->tipopc, $this->solicitud->getId(), $postData['nota_aprobar'], 'A');
-
 
         /**
          * Crea de una vez e registro, permitiendo que el usuario entre con la misma password
@@ -226,19 +243,19 @@ class ApruebaFacultativo
 
         $crearUsuario = new CrearUsuario(
             new Srequest(
-                array(
-                    "tipo" => "F",
-                    "coddoc" => $this->solicitud->getTipdoc(),
-                    "documento" => $this->solicitud->getCedtra(),
-                    "nombre" => $fullname,
-                    "email" => $this->solicitud->getEmail(),
-                    "codciu" => $this->solicitud->getCodciu(),
-                    "autoriza" => $this->solicitante->getAutoriza(),
-                    "clave" => $this->solicitante->getClave(),
-                    "fecreg" => $fecreg->getUsingFormatDefault(),
-                    "feccla" => $feccla->getUsingFormatDefault(),
-                    "fecapr" => $fecapr
-                )
+                [
+                    'tipo' => 'F',
+                    'coddoc' => $this->solicitud->getTipdoc(),
+                    'documento' => $this->solicitud->getCedtra(),
+                    'nombre' => $fullname,
+                    'email' => $this->solicitud->getEmail(),
+                    'codciu' => $this->solicitud->getCodciu(),
+                    'autoriza' => $this->solicitante->getAutoriza(),
+                    'clave' => $this->solicitante->getClave(),
+                    'fecreg' => $fecreg->getUsingFormatDefault(),
+                    'feccla' => $feccla->getUsingFormatDefault(),
+                    'fecapr' => $fecapr,
+                ]
             )
         );
 
@@ -255,11 +272,13 @@ class ApruebaFacultativo
         $mercurio36->setFecest($hoy);
         $mercurio36->setFecapr($postData['fecapr']);
         $mercurio36->save();
+
         return true;
     }
 
     /**
      * enviarMail function
+     *
      * @param [type] $this->solicitud
      * @param [type] $actapr
      * @param [type] $feccap
@@ -268,9 +287,9 @@ class ApruebaFacultativo
     public function enviarMail($actapr, $feccap)
     {
         $feccap = new DateTime($feccap);
-        $dia = $feccap->format("d");
-        $mes = get_mes_name($feccap->format("m"));
-        $anno = $feccap->format("Y");
+        $dia = $feccap->format('d');
+        $mes = get_mes_name($feccap->format('m'));
+        $anno = $feccap->format('Y');
 
         $data = $this->solicitud->getArray();
         $data['membrete'] = "{$this->dominio}public/img/membrete_aprueba.jpg";
@@ -282,38 +301,40 @@ class ApruebaFacultativo
         $data['repleg'] = $this->solicitante->getNombre();
         $data['razsoc'] = $this->solicitante->getNombre();
 
-        $html = view("layouts/aprobar", $data)->render();
+        $html = view('layouts/aprobar', $data)->render();
         $asunto = "Afiliación de facultativo realizada con éxito, identificación {$this->solicitud->getCedtra()}";
         $emailCaja = (new Mercurio01)->findFirst();
         $senderEmail = new SenderEmail(
             new Srequest(
-                array(
-                    "emisor_email" => $emailCaja->getEmail(),
-                    "emisor_clave" => $emailCaja->getClave(),
-                    "asunto" => $asunto
-                )
+                [
+                    'emisor_email' => $emailCaja->getEmail(),
+                    'emisor_clave' => $emailCaja->getClave(),
+                    'asunto' => $asunto,
+                ]
             )
         );
 
-        $senderEmail->send(array(
-            array(
-                "email" => $this->solicitante->getEmail(),
-                "nombre" => $this->solicitante->getNombre(),
-            )
-        ), $html);
+        $senderEmail->send([
+            [
+                'email' => $this->solicitante->getEmail(),
+                'nombre' => $this->solicitante->getNombre(),
+            ],
+        ], $html);
 
-        return  true;
+        return true;
     }
 
     public function findSolicitud($idSolicitud)
     {
         $this->solicitud = (new Mercurio36)->findFirst("id='{$idSolicitud}'");
+
         return $this->solicitud;
     }
 
     public function findSolicitante()
     {
         $this->solicitante = (new Mercurio07)->findFirst("documento='{$this->solicitud->getDocumento()}' and coddoc='{$this->solicitud->getCoddoc()}' and tipo='{$this->solicitud->getTipo()}'");
+
         return $this->solicitante;
     }
 }

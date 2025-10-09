@@ -7,7 +7,9 @@ use App\Models\Adapter\ModelBase;
 class Sat14 extends ModelBase
 {
     protected $table = 'sat14';
+
     public $timestamps = false;
+
     protected $primaryKey = 'numtraccf';
 
     protected $fillable = [

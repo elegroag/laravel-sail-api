@@ -7,8 +7,11 @@ use App\Models\Adapter\ModelBase;
 class Mercurio51 extends ModelBase
 {
     protected $table = 'mercurio51';
+
     public $timestamps = false;
+
     protected $primaryKey = 'codcat';
+
     public $incrementing = false;
 
     protected $fillable = [
@@ -48,10 +51,11 @@ class Mercurio51 extends ModelBase
     public function getCodcatDetalle()
     {
         $foreing = $this->find($this->codcat);
-        if($foreing){
+        if ($foreing) {
             return $foreing->getDetalle();
         }
-        return "";
+
+        return '';
     }
 
     public function getDetalle()
@@ -66,13 +70,14 @@ class Mercurio51 extends ModelBase
 
     public function getTipoArray()
     {
-        return ["T"=>"TRABAJADOR","E"=>"EMPRESA","C"=>"CONYUGE","B"=>"BENEFICIARIO"];
+        return ['T' => 'TRABAJADOR', 'E' => 'EMPRESA', 'C' => 'CONYUGE', 'B' => 'BENEFICIARIO'];
     }
 
     public function getTipoDetalle()
     {
         $tipos = $this->getTipoArray();
-        return $tipos[$this->tipo] ?? "";
+
+        return $tipos[$this->tipo] ?? '';
     }
 
     public function getEstado()
@@ -82,12 +87,13 @@ class Mercurio51 extends ModelBase
 
     public function getEstadoArray()
     {
-        return ["A"=>"ACTIVO","I"=>"INACTIVO"];
+        return ['A' => 'ACTIVO', 'I' => 'INACTIVO'];
     }
 
     public function getEstadoDetalle()
     {
         $estados = $this->getEstadoArray();
-        return $estados[$this->estado] ?? "";
+
+        return $estados[$this->estado] ?? '';
     }
 }

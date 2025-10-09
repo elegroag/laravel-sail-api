@@ -14,11 +14,14 @@ use Illuminate\Http\Request;
 
 class Mercurio13Controller extends ApplicationController
 {
-
     protected $db;
+
     protected $user;
+
     protected $tipo;
-    protected $query = "1=1";
+
+    protected $query = '1=1';
+
     protected $cantidad_pagina = 10;
 
     public function __construct()
@@ -29,7 +32,6 @@ class Mercurio13Controller extends ApplicationController
         $this->cantidad_pagina = $this->numpaginate ?? 10;
     }
 
-
     public function indexAction()
     {
         $tipopc = ['' => 'Selecciona aquí...'] + Mercurio09::pluck('detalle', 'tipopc')->toArray();
@@ -38,8 +40,8 @@ class Mercurio13Controller extends ApplicationController
         return view('cajas.mercurio13.index', [
             'title' => 'Documentos requeridos trabajadores',
             'campo_filtro' => [
-                "tipopc" => "Tipo servicio afiliación",
-                "coddoc" => "Tipo documento"
+                'tipopc' => 'Tipo servicio afiliación',
+                'coddoc' => 'Tipo documento',
             ],
             'tipopc' => $tipopc,
             'coddoc' => $coddoc,
@@ -48,14 +50,16 @@ class Mercurio13Controller extends ApplicationController
 
     public function aplicarFiltroAction(Request $request)
     {
-        $consultasOldServices = new GeneralService();
+        $consultasOldServices = new GeneralService;
         $this->query = $consultasOldServices->converQuery($request);
+
         return $this->buscarAction($request);
     }
 
     public function changeCantidadPaginaAction(Request $request)
     {
-        $this->cantidad_pagina = $request->input("numero");
+        $this->cantidad_pagina = $request->input('numero');
+
         return $this->buscarAction($request);
     }
 
@@ -63,17 +67,17 @@ class Mercurio13Controller extends ApplicationController
     {
         $html = '<table border="0" cellpadding="0" cellspacing="0" class="table table-bordered">';
         $html .= "<thead class='thead-light'>";
-        $html .= "<tr>";
+        $html .= '<tr>';
         $html .= "<th scope='col'>Tipo Servicio</th>";
         $html .= "<th scope='col'>Documento</th>";
         $html .= "<th scope='col'>Obligatorio</th>";
         $html .= "<th scope='col'>Auto Generado</th>";
         $html .= "<th scope='col'></th>";
-        $html .= "</tr>";
-        $html .= "</thead>";
+        $html .= '</tr>';
+        $html .= '</thead>';
         $html .= "<tbody class='list'>";
         foreach ($paginate->items as $mtable) {
-            $html .= "<tr>";
+            $html .= '<tr>';
             $html .= "<td>{$mtable->mercurio09->detalle}</td>";
             $html .= "<td>{$mtable->mercurio12->detalle}</td>";
             $html .= "<td>{$mtable->obliga}</td>";
@@ -81,21 +85,22 @@ class Mercurio13Controller extends ApplicationController
             $html .= "<td class='table-actions'>";
             $html .= "<a href='#!' class='table-action btn btn-primary btn-xs' title='Editar' data-tipopc='{$mtable->tipopc}' data-coddoc='{$mtable->coddoc}' data-toggle='editar'>";
             $html .= "<i class='fas fa-user-edit text-white'></i>";
-            $html .= "</a>";
+            $html .= '</a>';
             $html .= "<a href='#!' class='table-action table-action-delete btn btn-danger btn-xs' title='Borrar' data-tipopc='{$mtable->tipopc}' data-coddoc='{$mtable->coddoc}' data-toggle='borrar'>";
             $html .= "<i class='fas fa-trash text-white'></i>";
-            $html .= "</a>";
-            $html .= "</td>";
-            $html .= "</tr>";
+            $html .= '</a>';
+            $html .= '</td>';
+            $html .= '</tr>';
         }
-        $html .= "</tbody>";
-        $html .= "</table>";
+        $html .= '</tbody>';
+        $html .= '</table>';
+
         return $html;
     }
 
     public function buscarAction(Request $request)
     {
-        $pagina = ($request->input('pagina') == "") ? 1 : $request->input('pagina');
+        $pagina = ($request->input('pagina') == '') ? 1 : $request->input('pagina');
 
         $paginate = Paginate::execute(
             Mercurio13::with(['mercurio09', 'mercurio12'])->whereRaw("{$this->query}")->get(),
@@ -104,30 +109,32 @@ class Mercurio13Controller extends ApplicationController
         );
 
         $html = $this->showTabla($paginate);
-        $consultasOldServices = new GeneralService();
+        $consultasOldServices = new GeneralService;
         $html_paginate = $consultasOldServices->showPaginate($paginate);
 
         $response['consulta'] = $html;
         $response['paginate'] = $html_paginate;
+
         return $this->renderObject($response, false);
     }
 
     public function editarAction(Request $request)
     {
         try {
-            $this->setResponse("ajax");
+            $this->setResponse('ajax');
             $tipopc = $request->input('tipopc');
             $coddoc = $request->input('coddoc');
 
             $mercurio13 = Mercurio13::where('tipopc', $tipopc)->where('coddoc', $coddoc)->first();
 
-            if (!$mercurio13) {
-                $mercurio13 = new Mercurio13();
+            if (! $mercurio13) {
+                $mercurio13 = new Mercurio13;
             }
 
             return $this->renderObject($mercurio13->toArray(), false);
         } catch (DebugException $e) {
-            $response = parent::errorFunc("Error al obtener el registro");
+            $response = parent::errorFunc('Error al obtener el registro');
+
             return $this->renderObject($response, false);
         }
     }
@@ -135,7 +142,7 @@ class Mercurio13Controller extends ApplicationController
     public function guardarAction(Request $request)
     {
         try {
-            $this->setResponse("ajax");
+            $this->setResponse('ajax');
             $tipopc = $request->input('tipopc');
             $coddoc = $request->input('coddoc');
             $obliga = $request->input('obliga');
@@ -149,18 +156,20 @@ class Mercurio13Controller extends ApplicationController
             $mercurio13->auto_generado = $auto_generado;
             $mercurio13->nota = $nota;
 
-            if (!$mercurio13->save()) {
+            if (! $mercurio13->save()) {
                 parent::setLogger($mercurio13->getMessages());
                 $this->db->rollback();
-                throw new DebugException("Error no se puede guardar el registro");
+                throw new DebugException('Error no se puede guardar el registro');
             }
 
             $this->db->commit();
             $response = parent::successFunc('El registro se completo con éxito.');
+
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $this->db->rollback();
             $response = parent::errorFunc($e->getMessage());
+
             return $this->renderObject($response, false);
         }
     }
@@ -168,7 +177,7 @@ class Mercurio13Controller extends ApplicationController
     public function borrarAction(Request $request)
     {
         try {
-            $this->setResponse("ajax");
+            $this->setResponse('ajax');
             $tipopc = $request->input('tipopc');
             $coddoc = $request->input('coddoc');
 
@@ -176,15 +185,17 @@ class Mercurio13Controller extends ApplicationController
             $deleted = Mercurio13::where('tipopc', $tipopc)->where('coddoc', $coddoc)->delete();
 
             if ($deleted == 0) {
-                throw new DebugException("Error no se puede borrar el registro, no está disponible.");
+                throw new DebugException('Error no se puede borrar el registro, no está disponible.');
             }
 
             $this->db->commit();
             $response = parent::successFunc('El registro se borro con éxito.');
+
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $this->db->rollback();
             $response = parent::errorFunc($e->getMessage());
+
             return $this->renderObject($response, false);
         }
     }

@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
-use Carbon\Carbon;
 use App\Models\Adapter\ValidateWithRules;
+use Carbon\Carbon;
 use Illuminate\Validation\Rule;
 use Thiagoprz\CompositeKey\HasCompositeKey;
 
@@ -14,8 +14,11 @@ class Mercurio07 extends ModelBase
     use ValidateWithRules;
 
     protected $table = 'mercurio07';
+
     public $timestamps = false;
+
     public $incrementing = false;
+
     protected $primaryKey = ['documento', 'coddoc', 'tipo'];
 
     protected $fillable = [
@@ -173,10 +176,10 @@ class Mercurio07 extends ModelBase
 
     public function getArrayEstados()
     {
-        return array(
+        return [
             'A' => 'ACTIVO',
-            'I' => 'INACTIVO'
-        );
+            'I' => 'INACTIVO',
+        ];
     }
 
     public function getEstadoDetalle($estado = '')
@@ -192,20 +195,21 @@ class Mercurio07 extends ModelBase
                 return 'INACTIVO';
                 break;
         }
+
         return false;
     }
 
     public function getArrayTipos()
     {
-        return array(
+        return [
             'P' => 'Particular',
             'T' => 'Trabajador',
             'E' => 'Empresa aportante',
             'I' => 'Independiente aportante',
             'O' => 'Pensionado',
             'F' => 'Facultativo',
-            'S' => 'Servicio domestico'
-        );
+            'S' => 'Servicio domestico',
+        ];
     }
 
     public function getTipoDetalle($tipo = '')
@@ -236,6 +240,7 @@ class Mercurio07 extends ModelBase
                 return 'Servicio domestico';
                 break;
         }
+
         return false;
     }
 

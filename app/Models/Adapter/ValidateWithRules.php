@@ -33,6 +33,7 @@ trait ValidateWithRules
      * Perform the validation.
      *
      * @return void
+     *
      * @throws \Illuminate\Validation\ValidationException
      */
     protected function validateRules()

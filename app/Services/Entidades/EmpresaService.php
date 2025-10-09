@@ -21,16 +21,19 @@ use App\Services\Utils\Comman;
 
 class EmpresaService
 {
+    private $tipopc = '2';  // tipo de solicitud
 
-    private $tipopc = "2";  // tipo de solicitud
     private $user;
+
     private $tipo;
+
     private $db;
 
     /**
      * __construct function
-     * @param bool $init
-     * @param Services $servicios
+     *
+     * @param  bool  $init
+     * @param  Services  $servicios
      */
     public function __construct()
     {
@@ -41,12 +44,13 @@ class EmpresaService
 
     /**
      * findAllByEstado function
-     * @param string $estado
+     *
+     * @param  string  $estado
      * @return array
      */
     public function findAllByEstado($estado = '')
     {
-        //usuario empresa, unica solicitud de afiliación
+        // usuario empresa, unica solicitud de afiliación
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
 
@@ -75,12 +79,14 @@ class EmpresaService
             ORDER BY solis.fecini ASC;";
 
         $solicitudes = $this->db->inQueryAssoc($sql);
+
         return $solicitudes;
     }
 
     /**
      * buscarEmpresaSubsidio function
      * buscar empresa en subsidio sin importar el estado
+     *
      * @param [type] $nit
      * @return void
      */
@@ -89,15 +95,15 @@ class EmpresaService
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaEmpresas",
-                "metodo" => "informacion_empresa",
-                "params" => array(
-                    "nit" => $nit
-                )
-            )
+            [
+                'servicio' => 'ComfacaEmpresas',
+                'metodo' => 'informacion_empresa',
+                'params' => [
+                    'nit' => $nit,
+                ],
+            ]
         );
-        $salida =  $procesadorComando->toArray();
+        $salida = $procesadorComando->toArray();
         if ($salida['success']) {
             return $salida;
         } else {
@@ -107,8 +113,10 @@ class EmpresaService
 
     public function archivosRequeridos($solicitud)
     {
-        if ($solicitud == false) return false;
-        $archivos = array();
+        if ($solicitud == false) {
+            return false;
+        }
+        $archivos = [];
 
         $mercurio10 = Mercurio10::where('numero', $solicitud->getId())
             ->where('tipopc', $this->tipopc)
@@ -118,7 +126,7 @@ class EmpresaService
         $corregir = false;
         if ($mercurio10 && $mercurio10->estado == 'D') {
             $campos = $mercurio10->campos_corregir;
-            $corregir = explode(";", $campos);
+            $corregir = explode(';', $campos);
         }
 
         $mercurio14 = Mercurio14::where('tipopc', $this->tipopc)
@@ -139,7 +147,7 @@ class EmpresaService
                     $corrige = true;
                 }
             }
-            $obliga = ($m14->getObliga() == "S") ? "<br><small class='text-danger'>Obligatorio</small>" : "";
+            $obliga = ($m14->getObliga() == 'S') ? "<br><small class='text-danger'>Obligatorio</small>" : '';
             $archivo = new \stdClass;
             $archivo->obliga = $obliga;
             $archivo->id = $solicitud->getId();
@@ -151,23 +159,27 @@ class EmpresaService
         }
 
         $mercurio01 = Mercurio01::first();
-        $html = view("empresa/tmp/archivos_requeridos", [
-            "load_archivos" => $archivos,
-            "path" => $mercurio01->getPath(),
-            "puede_borrar" => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true
+        $html = view('empresa/tmp/archivos_requeridos', [
+            'load_archivos' => $archivos,
+            'path' => $mercurio01->getPath(),
+            'puede_borrar' => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true,
         ])->render();
+
         return $html;
     }
 
     /**
      * dataArchivosRequeridos function
-     * @param Mercurio30 $solicitud
+     *
+     * @param  Mercurio30  $solicitud
      * @return array
      */
     public function dataArchivosRequeridos($solicitud)
     {
-        if ($solicitud == false || is_null($solicitud)) return false;
-        $archivos = array();
+        if ($solicitud == false || is_null($solicitud)) {
+            return false;
+        }
+        $archivos = [];
 
         $mercurio10 = Mercurio10::where('numero', $solicitud->getId())
             ->where('tipopc', $this->tipopc)
@@ -177,7 +189,7 @@ class EmpresaService
         $corregir = false;
         if ($mercurio10 && $mercurio10->estado == 'D') {
             $campos = $mercurio10->campos_corregir;
-            $corregir = explode(";", $campos);
+            $corregir = explode(';', $campos);
         }
 
         $mercurio14 = Mercurio14::where('tipopc', $this->tipopc)
@@ -194,11 +206,13 @@ class EmpresaService
 
             $corrige = false;
             if ($corregir) {
-                if (in_array($m12->coddoc, $corregir)) $corrige = true;
+                if (in_array($m12->coddoc, $corregir)) {
+                    $corrige = true;
+                }
             }
 
             $archivo = $m14->getArray();
-            $archivo['obliga'] = ($m14->obliga == "S") ? "<br><small class='text-danger'>Obligatorio</small>" : "";
+            $archivo['obliga'] = ($m14->obliga == 'S') ? "<br><small class='text-danger'>Obligatorio</small>" : '';
             $archivo['id'] = $solicitud->getId();
             $archivo['detalle'] = capitalize($m12->detalle);
             $archivo['diponible'] = ($mercurio37) ? $mercurio37->archivo : false;
@@ -207,18 +221,20 @@ class EmpresaService
         }
 
         $mercurio01 = Mercurio01::first();
-        return array(
-            "disponibles" => false,
-            "archivos" => $archivos,
-            "path" => $mercurio01->getPath(),
-            "puede_borrar" => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true
-        );
+
+        return [
+            'disponibles' => false,
+            'archivos' => $archivos,
+            'path' => $mercurio01->getPath(),
+            'puede_borrar' => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true,
+        ];
     }
 
     /**
      * update function
-     * @param integer $id
-     * @param array $data
+     *
+     * @param  int  $id
+     * @param  array  $data
      * @return Mercurio30
      */
     public function update($id, $data)
@@ -226,15 +242,18 @@ class EmpresaService
         $empresa = $this->findById($id);
         if ($empresa != false) {
             $empresa->fill($data);
+
             return $empresa->save();
         }
+
         return false;
     }
 
     /**
      * updateByFormData function
-     * @param int $id
-     * @param array $data
+     *
+     * @param  int  $id
+     * @param  array  $data
      * @return bool
      */
     public function updateByFormData($id, $data)
@@ -245,17 +264,17 @@ class EmpresaService
             $empresa->fill($data);
 
             // Establecer el representante legal
-            $empresa->setRepleg($data['priape'] . ' ' . $data['segape'] . ' ' . $data['prinom'] . ' ' . $data['segnom']);
+            $empresa->setRepleg($data['priape'].' '.$data['segape'].' '.$data['prinom'].' '.$data['segnom']);
 
             // Asignar funcionario
-            $empresa->setUsuario((new AsignarFuncionario())->asignar($this->tipopc, $this->user['codciu']));
+            $empresa->setUsuario((new AsignarFuncionario)->asignar($this->tipopc, $this->user['codciu']));
 
             $empresa->setTipo(session('tipo'));
             $empresa->setCoddoc($this->user['coddoc']);
             $empresa->setDocumento($this->user['documento']);
 
             // Establecer estado y fecha de solicitud
-            $empresa->setEstado("T");
+            $empresa->setEstado('T');
             $empresa->setFecsol(date('Y-m-d'));
 
             return $empresa->save();
@@ -266,15 +285,16 @@ class EmpresaService
 
     /**
      * create function
-     * @param array $data
+     *
+     * @param  array  $data
      * @return Mercurio30
      */
     public function create($data)
     {
         $empresa = new Mercurio30($data);
-        $empresa->setRepleg($data['priape'] . ' ' . $data['segape'] . ' ' . $data['prinom'] . ' ' . $data['segnom']);
+        $empresa->setRepleg($data['priape'].' '.$data['segape'].' '.$data['prinom'].' '.$data['segnom']);
 
-        $empresa->setUsuario((new AsignarFuncionario())->asignar($this->tipopc, $this->user['codciu']));
+        $empresa->setUsuario((new AsignarFuncionario)->asignar($this->tipopc, $this->user['codciu']));
 
         $empresa->setTipo(session('tipo'));
 
@@ -289,39 +309,44 @@ class EmpresaService
         Mercurio37::where('tipopc', $this->tipopc)->where('numero', $empresa->id)->delete();
         Mercurio10::where('tipopc', $this->tipopc)->where('numero', $empresa->id)->delete();
         Tranoms::where('request', $empresa->id)->delete();
+
         return $empresa;
     }
 
     /**
      * create function
-     * @param array $data
+     *
+     * @param  array  $data
      * @return Mercurio30
      */
     public function createByFormData($data)
     {
         $empresa = $this->create($data);
-        $empresa->setEstado("T");
-        $empresa->setLog("0");
+        $empresa->setEstado('T');
+        $empresa->setLog('0');
         $empresa->save();
+
         return $empresa;
     }
 
     /**
      * findById function
-     * @param integer $id
+     *
+     * @param  int  $id
      * @return Mercurio30
      */
     public function findById($id)
     {
-        return Mercurio30::where("id", $id)->first();
+        return Mercurio30::where('id', $id)->first();
     }
 
     /**
      * enviarCaja function
-     * @param SenderValidationCaja $senderValidationCaja
-     * @param integer $id
-     * @param integer $documento
-     * @param integer $coddoc
+     *
+     * @param  SenderValidationCaja  $senderValidationCaja
+     * @param  int  $id
+     * @param  int  $documento
+     * @param  int  $coddoc
      * @return void
      */
     public function enviarCaja($senderValidationCaja, $id, $usuario)
@@ -329,15 +354,15 @@ class EmpresaService
         $solicitud = $this->findById($id);
 
         $cm37 = (new Mercurio37)->getCount(
-            "*",
-            "conditions: tipopc='{$this->tipopc}' AND " .
-                "numero='{$id}' AND " .
+            '*',
+            "conditions: tipopc='{$this->tipopc}' AND ".
+                "numero='{$id}' AND ".
                 "coddoc IN(SELECT coddoc FROM mercurio14 WHERE tipopc='{$this->tipopc}' AND tipsoc='{$solicitud->getTipsoc()}' AND obliga='S')"
         );
 
-        $cm14 = (new Mercurio14)->getCount("*", "conditions: tipopc='{$this->tipopc}' and tipsoc='{$solicitud->getTipsoc()}' and obliga='S'");
+        $cm14 = (new Mercurio14)->getCount('*', "conditions: tipopc='{$this->tipopc}' and tipsoc='{$solicitud->getTipsoc()}' and obliga='S'");
         if ($cm37 < $cm14) {
-            throw new DebugException("Adjunte los archivos obligatorios", 500);
+            throw new DebugException('Adjunte los archivos obligatorios', 500);
         }
 
         Mercurio30::where('id', $id)->update([
@@ -353,7 +378,6 @@ class EmpresaService
         $senderValidationCaja->send($this->tipopc, $solicitud);
     }
 
-
     public function consultaSeguimiento($id)
     {
         $seguimientos = Mercurio10::where('numero', $id)
@@ -363,37 +387,40 @@ class EmpresaService
             ->map(function ($row) {
                 $campos = explode(';', $row->campos_corregir);
                 $row->corregir = $campos;
+
                 return $row;
             })
             ->toArray();
 
-        return array(
+        return [
             'seguimientos' => $seguimientos,
             'campos_disponibles' => (new Mercurio30)->CamposDisponibles(),
-            'estados_detalles' => (new Mercurio10)->getArrayEstados()
-        );
+            'estados_detalles' => (new Mercurio10)->getArrayEstados(),
+        ];
     }
 
     public function digver($mnit)
     {
-        $arreglo = array(71, 67, 59, 53, 47, 43, 41, 37, 29, 23, 19, 17, 13, 7, 3);
-        $nit = sprintf("%015s", $mnit);
+        $arreglo = [71, 67, 59, 53, 47, 43, 41, 37, 29, 23, 19, 17, 13, 7, 3];
+        $nit = sprintf('%015s', $mnit);
         $suma = 0;
         for ($i = 1; $i <= count($arreglo); $i++) {
-            $suma += (int)(substr($nit, $i - 1, 1)) * $arreglo[$i - 1];
+            $suma += (int) (substr($nit, $i - 1, 1)) * $arreglo[$i - 1];
         }
         $retorno = $suma % 11;
-        if ($retorno >= 2) $retorno = 11 - $retorno;
+        if ($retorno >= 2) {
+            $retorno = 11 - $retorno;
+        }
+
         return $retorno;
     }
 
-
     public function addTrabajadoresNomina($tranoms, $id)
     {
-        if (!$tranoms) {
-            throw new DebugException("Error no hay trabajadores en nomina", 301);
+        if (! $tranoms) {
+            throw new DebugException('Error no hay trabajadores en nomina', 301);
         }
-        $cedtras = array();
+        $cedtras = [];
         foreach ($tranoms as $row) {
             $cedtras[] = $row['cedtra'];
 
@@ -401,15 +428,15 @@ class EmpresaService
                 ->where('cedtra', $row['cedtra'])
                 ->first();
 
-            if (!$tranom) {
-                $tranom =  new Tranoms([
+            if (! $tranom) {
+                $tranom = new Tranoms([
                     'cedtra' => sanetizar($row['cedtra']),
                     'nomtra' => sanetizar_input($row['nomtra']),
                     'apetra' => sanetizar_input($row['apetra']),
                     'saltra' => sanetizar($row['saltra']),
                     'fectra' => sanetizar_date($row['fectra']),
                     'cartra' => sanetizar_input($row['cartra']),
-                    'request' => $id
+                    'request' => $id,
                 ]);
                 $tranom->save();
             } else {
@@ -420,7 +447,7 @@ class EmpresaService
                         'apetra' => sanetizar_input($row['apetra']),
                         'saltra' => sanetizar($row['saltra']),
                         'fectra' => sanetizar_date($row['fectra']),
-                        'cartra' => sanetizar_input($row['cartra'])
+                        'cartra' => sanetizar_input($row['cartra']),
                     ]
                 );
                 $tranom->save();
@@ -436,13 +463,13 @@ class EmpresaService
     {
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "parametros_empresa"
-            )
+            [
+                'servicio' => 'ComfacaAfilia',
+                'metodo' => 'parametros_empresa',
+            ]
         );
 
-        $paramsEmpresa = new ParamsEmpresa();
+        $paramsEmpresa = new ParamsEmpresa;
         $paramsEmpresa->setDatosCaptura($procesadorComando->toArray());
     }
 
@@ -456,56 +483,56 @@ class EmpresaService
             'afiliacion' => [
                 [
                     'name' => 'Solicitudes Trabajadores',
-                    'cantidad' => array(
-                        'pendientes' => Mercurio31::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'aprobados' => Mercurio31::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'rechazados' => Mercurio31::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'devueltos' => Mercurio31::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'temporales' => Mercurio31::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
-                    ),
+                    'cantidad' => [
+                        'pendientes' => Mercurio31::where(['estado' => 'P', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'aprobados' => Mercurio31::where(['estado' => 'A', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'rechazados' => Mercurio31::where(['estado' => 'R', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'devueltos' => Mercurio31::where(['estado' => 'D', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'temporales' => Mercurio31::where(['estado' => 'T', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                    ],
                     'icon' => 'T',
                     'url' => 'trabajador/index',
                     'imagen' => 'trabajadores.jpg',
                 ],
                 [
                     'name' => 'Solicitudes Cónyuges',
-                    'cantidad' => array(
-                        'pendientes' => Mercurio32::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'aprobados' => Mercurio32::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'rechazados' => Mercurio32::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'devueltos' => Mercurio32::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'temporales' => Mercurio32::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
-                    ),
+                    'cantidad' => [
+                        'pendientes' => Mercurio32::where(['estado' => 'P', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'aprobados' => Mercurio32::where(['estado' => 'A', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'rechazados' => Mercurio32::where(['estado' => 'R', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'devueltos' => Mercurio32::where(['estado' => 'D', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'temporales' => Mercurio32::where(['estado' => 'T', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                    ],
                     'icon' => 'C',
                     'url' => 'conyuge/index',
                     'imagen' => 'conyuges.jpg',
                 ],
                 [
                     'name' => 'Solicitudes Beneficiarios',
-                    'cantidad' => array(
-                        'pendientes' => Mercurio34::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'aprobados' => Mercurio34::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'rechazados' => Mercurio34::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'devueltos' => Mercurio34::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'temporales' => Mercurio34::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
-                    ),
+                    'cantidad' => [
+                        'pendientes' => Mercurio34::where(['estado' => 'P', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'aprobados' => Mercurio34::where(['estado' => 'A', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'rechazados' => Mercurio34::where(['estado' => 'R', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'devueltos' => Mercurio34::where(['estado' => 'D', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'temporales' => Mercurio34::where(['estado' => 'T', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                    ],
                     'icon' => 'B',
                     'url' => 'beneficiario/index',
                     'imagen' => 'beneficiarios.jpg',
                 ],
                 [
                     'name' => 'Solicitud Actualiza Datos',
-                    'cantidad' => array(
-                        'pendientes' => Mercurio47::where(["estado" => 'P', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'aprobados' => Mercurio47::where(["estado" => 'A', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'rechazados' => Mercurio47::where(["estado" => 'R', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'devueltos' => Mercurio47::where(["estado" => 'D', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count(),
-                        'temporales' => Mercurio47::where(["estado" => 'T', "coddoc" => $coddoc, "tipo" => $tipo, "documento" => $documento])->count()
-                    ),
+                    'cantidad' => [
+                        'pendientes' => Mercurio47::where(['estado' => 'P', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'aprobados' => Mercurio47::where(['estado' => 'A', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'rechazados' => Mercurio47::where(['estado' => 'R', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'devueltos' => Mercurio47::where(['estado' => 'D', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                        'temporales' => Mercurio47::where(['estado' => 'T', 'coddoc' => $coddoc, 'tipo' => $tipo, 'documento' => $documento])->count(),
+                    ],
                     'icon' => 'B',
                     'url' => 'actualizadatos/index',
                     'imagen' => 'datos_basicos.jpg',
-                ]
+                ],
             ],
             'productos' => false,
             'consultas' => [
@@ -528,8 +555,8 @@ class EmpresaService
                     'name' => 'Consulta de nominas',
                     'url' => 'subsidioemp/consulta_nomina_view',
                     'imagen' => 'consulta_aportes.jpg',
-                ]
-            ]
+                ],
+            ],
         ];
     }
 }

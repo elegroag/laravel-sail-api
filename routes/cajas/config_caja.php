@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Cajas\Mercurio02Controller;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('/cajas')->group(function () {
     Route::get('/mercurio02/index', [Mercurio02Controller::class, 'indexAction']);

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Mercurio;
 
-use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use App\Models\Mercurio30;
@@ -14,9 +13,10 @@ use App\Models\Mercurio41;
 
 class ParticularController extends ApplicationController
 {
-
     protected $db;
+
     protected $user;
+
     protected $tipo;
 
     public function __construct()
@@ -28,8 +28,8 @@ class ParticularController extends ApplicationController
 
     public function indexAction()
     {
-        return view("mercurio/particular/index", [
-            "title" => "Subsidio Empresa"
+        return view('mercurio/particular/index', [
+            'title' => 'Subsidio Empresa',
         ]);
     }
 
@@ -44,13 +44,13 @@ class ParticularController extends ApplicationController
         $mercurio40 = Mercurio40::where('cedtra', $documento)->where('coddoc', $coddoc)->orderBy('id', 'desc');
         $mercurio41 = Mercurio41::where('cedtra', $documento)->where('coddoc', $coddoc)->orderBy('id', 'desc');
 
-        return view("mercurio/particular/historial", [
-            "mercurio30" => $mercurio30,
-            "mercurio36" => $mercurio36,
-            "mercurio38" => $mercurio38,
-            "mercurio39" => $mercurio39,
-            "mercurio40" => $mercurio40,
-            "mercurio41" => $mercurio41
+        return view('mercurio/particular/historial', [
+            'mercurio30' => $mercurio30,
+            'mercurio36' => $mercurio36,
+            'mercurio38' => $mercurio38,
+            'mercurio39' => $mercurio39,
+            'mercurio40' => $mercurio40,
+            'mercurio41' => $mercurio41,
         ]);
     }
 }

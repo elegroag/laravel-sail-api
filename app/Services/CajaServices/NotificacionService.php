@@ -2,9 +2,8 @@
 
 namespace App\Services\CajaServices;
 
-use App\Models\Notificaciones;
-use App\Services\Srequest;
 use App\Models\Adapter\DbBase;
+use App\Models\Notificaciones;
 
 class NotificacionService
 {
@@ -26,18 +25,19 @@ class NotificacionService
             [
                 'titulo' => $data['titulo'],
                 'descri' => $data['descripcion'],
-                'user'   => $data['user'],
+                'user' => $data['user'],
                 'estado' => 'P',
                 'result' => '',
                 'dia' => date('Y-m-d'),
                 'hora' => date('H:i:s'),
-                'progre' => 0
+                'progre' => 0,
             ]
 
         );
-        if (!$notificacion->save()) {
+        if (! $notificacion->save()) {
             dd($notificacion->getMessages());
         }
+
         return $notificacion;
     }
 
@@ -45,13 +45,14 @@ class NotificacionService
     {
         $offset = ($pagina - 1) * $limit;
         $notificaciones = $this->db->inQueryAssoc("SELECT * FROM notificaciones WHERE user='{$user}' order by dia DESC, hora DESC limit {$limit} offset {$offset}");
-        $total_registros = (new Notificaciones())->count("*", "conditions: user='{$user}'");
+        $total_registros = (new Notificaciones)->count('*', "conditions: user='{$user}'");
         $total_pages = ceil($total_registros / $limit);
-        return array(
+
+        return [
             'total_pages' => $total_pages,
             'total_registros' => $total_registros,
             'page' => $pagina,
-            'data' => $notificaciones
-        );
+            'data' => $notificaciones,
+        ];
     }
 }

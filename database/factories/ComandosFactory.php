@@ -30,7 +30,7 @@ class ComandosFactory extends Factory
                 'php artisan queue:work --timeout=120',
                 'php artisan schedule:run',
                 'python3 script.py --env=prod',
-                'node build.js --target=prod'
+                'node build.js --target=prod',
             ]),
             // FK a comando_estructuras
             'estructura' => ComandoEstructuras::factory(),
@@ -38,7 +38,7 @@ class ComandosFactory extends Factory
                 'ENV=prod;RETRIES=3',
                 'ENV=dev;RETRIES=1',
                 'force=true;dryRun=false',
-                'plan=nightly;zone=us-east-1'
+                'plan=nightly;zone=us-east-1',
             ]),
             'resultado' => fake()->optional(0.4)->paragraph(),
         ];

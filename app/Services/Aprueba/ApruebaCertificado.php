@@ -14,11 +14,14 @@ use Carbon\Carbon;
 
 class ApruebaCertificado
 {
-
     private $today;
+
     private $tipopc = 8;
+
     private $solicitante;
+
     private $solicitud;
+
     private $dominio;
 
     public function __construct()
@@ -29,28 +32,34 @@ class ApruebaCertificado
 
     public function procesar($postData)
     {
-        $certificado = Mercurio45::where("id", $this->solicitud->getId())->first();
+        $certificado = Mercurio45::where('id', $this->solicitud->getId())->first();
         $params = array_merge($certificado->getArray(), $_POST);
 
         $ps = Comman::Api();
         $ps->runCli(
-            array(
-                "servicio" => "Certificados",
-                "metodo" => "presentaCertificado",
-                "params" => array(
-                    'post' => $params
-                )
-            )
+            [
+                'servicio' => 'Certificados',
+                'metodo' => 'presentaCertificado',
+                'params' => [
+                    'post' => $params,
+                ],
+            ]
         );
 
-        if ($ps->isJson() == false) throw new DebugException("Error, no hay respuesta del servidor para validación del resultado.", 501);
+        if ($ps->isJson() == false) {
+            throw new DebugException('Error, no hay respuesta del servidor para validación del resultado.', 501);
+        }
         $out = $ps->toArray();
 
-        if (is_null($out) || $out == false) throw new DebugException("Error, no hay respuesta del servidor para validación del resultado.", 501);
+        if (is_null($out) || $out == false) {
+            throw new DebugException('Error, no hay respuesta del servidor para validación del resultado.', 501);
+        }
 
-        if ($out['success'] == false) throw new DebugException($out['message'], 501);
+        if ($out['success'] == false) {
+            throw new DebugException($out['message'], 501);
+        }
 
-        $registroSeguimiento = new RegistroSeguimiento();
+        $registroSeguimiento = new RegistroSeguimiento;
         $registroSeguimiento->crearNota($this->tipopc, $this->solicitud->getId(), $postData['nota_aprobar'], 'A');
         /**
          * actualiza la ficha de registro
@@ -59,11 +68,13 @@ class ApruebaCertificado
         $certificado->setEstado('A');
         $certificado->setFecest($this->today->getUsingFormatDefault());
         $certificado->save();
+
         return true;
     }
 
     /**
      * enviarMail function
+     *
      * @param [type] $Mercurio34
      * @param [type] $actapr
      * @param [type] $feccap
@@ -71,64 +82,68 @@ class ApruebaCertificado
      */
     public function enviarMail($actapr)
     {
-        $data = array();
+        $data = [];
         $data['razsoc'] = $this->solicitante->getNombre();
         $data['email'] = $this->solicitante->getEmail();
         $data['membrete'] = "{$this->dominio}/public/img/header_reporte_ugpp.png";
         $data['ruta_firma'] = "{$this->dominio}Mercurio/public/img/Mercurio/firma_jefe_yenny.jpg";
         $data['actapr'] = $actapr;
-        $data['url_activa'] = "";
+        $data['url_activa'] = '';
         $data['msj'] = "Se informa que el certificado \"{$this->solicitud->getNomcer()}\" fue presentado con éxito.";
-        $data['titulo'] = "Presentación de Certificado para Aprobación";
+        $data['titulo'] = 'Presentación de Certificado para Aprobación';
 
-        $html = view("layouts/mail_aprobar", $data)->render();
+        $html = view('layouts/mail_aprobar', $data)->render();
         $asunto = "Presentación certificado realizada con éxito, identificación {$this->solicitud->getDocumento()}";
 
-        $emailCaja = (new Mercurio01())->findFirst();
+        $emailCaja = (new Mercurio01)->findFirst();
         $senderEmail = new SenderEmail(
             new Srequest(
-                array(
-                    "emisor_email" => $emailCaja->getEmail(),
-                    "emisor_clave" => $emailCaja->getClave(),
-                    "asunto" => $asunto,
-                )
+                [
+                    'emisor_email' => $emailCaja->getEmail(),
+                    'emisor_clave' => $emailCaja->getClave(),
+                    'asunto' => $asunto,
+                ]
             )
         );
 
-        $senderEmail->send(array(
-            array(
-                "email" => $this->solicitante->getEmail(),
-                "nombre" => $this->solicitante->getNombre(),
-            )
-        ), $html);
+        $senderEmail->send([
+            [
+                'email' => $this->solicitante->getEmail(),
+                'nombre' => $this->solicitante->getNombre(),
+            ],
+        ], $html);
 
-        return  true;
+        return true;
     }
 
     public function findSolicitud($idSolicitud)
     {
         $this->solicitud = (new Mercurio45)->findFirst("id='{$idSolicitud}'");
+
         return $this->solicitud;
     }
 
     public function findSolicitante()
     {
-        $this->solicitante = (new Mercurio07())->findFirst(
+        $this->solicitante = (new Mercurio07)->findFirst(
             "documento='{$this->solicitud->getDocumento()}' and coddoc='{$this->solicitud->getCoddoc()}' and tipo='{$this->solicitud->getTipo()}'"
         );
+
         return $this->solicitante;
     }
 
     /**
      * deshacerAprobacion function
+     *
      * @changed [2023-12-19]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     * @param int $id
-     * @param string $action
-     * @param string $nota
-     * @param string $codest
-     * @param string $sendEmail
+     *
+     * @param  int  $id
+     * @param  string  $action
+     * @param  string  $nota
+     * @param  string  $codest
+     * @param  string  $sendEmail
      * @return bool
      */
     public function deshacerAprobacion($id, $action, $nota, $codest, $sendEmail) {}

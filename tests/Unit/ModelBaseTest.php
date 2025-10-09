@@ -2,9 +2,9 @@
 
 namespace Tests\Unit;
 
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\Empresa;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class ModelBaseTest extends TestCase
 {
@@ -32,7 +32,7 @@ class ModelBaseTest extends TestCase
             'numero_empleados' => 3,
         ]);
 
-        $empresa = new Empresa();
+        $empresa = new Empresa;
 
         $max = $empresa->maximum('numero_empleados');
         $min = $empresa->minimum('numero_empleados');
@@ -73,7 +73,7 @@ class ModelBaseTest extends TestCase
             'numero_empleados' => 9,
         ]);
 
-        $empresa = new Empresa();
+        $empresa = new Empresa;
 
         $groupedMax = $empresa->maximum('numero_empleados', 'group:sector_economico');
         $groupedMin = $empresa->minimum('numero_empleados', 'group:sector_economico');
@@ -85,11 +85,11 @@ class ModelBaseTest extends TestCase
         // convert to associative maps by sector
         $mapMax = [];
         foreach ($groupedMax as $row) {
-            $mapMax[$row->sector_economico] = (int)$row->maximum;
+            $mapMax[$row->sector_economico] = (int) $row->maximum;
         }
         $mapMin = [];
         foreach ($groupedMin as $row) {
-            $mapMin[$row->sector_economico] = (int)$row->minimum;
+            $mapMin[$row->sector_economico] = (int) $row->minimum;
         }
 
         $this->assertEquals(7, $mapMax['A']);
@@ -98,7 +98,7 @@ class ModelBaseTest extends TestCase
         $this->assertEquals(2, $mapMin['B']);
     }
 
-    public function test_find_and_findFirst()
+    public function test_find_and_find_first()
     {
         // create sample empresas
         Empresa::create([
@@ -120,7 +120,7 @@ class ModelBaseTest extends TestCase
             'numero_empleados' => 8,
         ]);
 
-        $empresa = new Empresa();
+        $empresa = new Empresa;
 
         // find those with numero_empleados > 4, ordered asc
         $results = $empresa->find('conditions:numero_empleados > 4', 'order:numero_empleados ASC');
@@ -134,7 +134,7 @@ class ModelBaseTest extends TestCase
         $this->assertEquals('F2', $first->nombre);
     }
 
-    public function test_findAllBySql_and_findBySql()
+    public function test_find_all_by_sql_and_find_by_sql()
     {
         Empresa::create([
             'nombre' => 'S1',
@@ -149,7 +149,7 @@ class ModelBaseTest extends TestCase
             'numero_empleados' => 4,
         ]);
 
-        $empresa = new Empresa();
+        $empresa = new Empresa;
 
         $all = $empresa->findAllBySql('SELECT nombre, numero_empleados FROM empresas WHERE numero_empleados >= 5');
         $this->assertGreaterThanOrEqual(1, $all->count());
@@ -160,7 +160,7 @@ class ModelBaseTest extends TestCase
         $this->assertEquals('S2', $one->nombre);
     }
 
-    public function test_updateAll_updates_records()
+    public function test_update_all_updates_records()
     {
         // create empresas
         Empresa::create([
@@ -176,7 +176,7 @@ class ModelBaseTest extends TestCase
             'numero_empleados' => 10,
         ]);
 
-        $empresa = new Empresa();
+        $empresa = new Empresa;
 
         // update a single record using set: and conditions:
         $affected = $empresa->updateAll('set:numero_empleados=42', "conditions:rut='20000000-1'");
@@ -186,12 +186,12 @@ class ModelBaseTest extends TestCase
         $this->assertEquals(42, $fresh->numero_empleados);
 
         // update multiple rows using array form
-        $affected2 = $empresa->updateAll('set:numero_empleados=99', "conditions:numero_empleados>=10");
+        $affected2 = $empresa->updateAll('set:numero_empleados=99', 'conditions:numero_empleados>=10');
         $this->assertGreaterThanOrEqual(1, $affected2);
         $this->assertEquals(99, Empresa::where('rut', '20000000-2')->first()->numero_empleados);
     }
 
-    public function test_deleteAll_deletes_records()
+    public function test_delete_all_deletes_records()
     {
         Empresa::create([
             'nombre' => 'D1',
@@ -206,8 +206,8 @@ class ModelBaseTest extends TestCase
             'numero_empleados' => 2,
         ]);
 
-        $empresa = new Empresa();
-        $deleted = $empresa->deleteAll("conditions:numero_empleados=1");
+        $empresa = new Empresa;
+        $deleted = $empresa->deleteAll('conditions:numero_empleados=1');
         $this->assertEquals(1, $deleted);
         $this->assertNull(Empresa::where('rut', '30000000-1')->first());
 

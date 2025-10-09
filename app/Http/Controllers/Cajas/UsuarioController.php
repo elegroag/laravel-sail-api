@@ -22,67 +22,69 @@ use App\Services\Utils\Generales;
 use App\Services\Utils\Pagination;
 use App\Services\Utils\SenderEmail;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 
 class UsuarioController extends ApplicationController
 {
-
     protected $db;
+
     protected $user;
+
     protected $tipo;
 
     /**
      * services variable
+     *
      * @var Services
      */
     protected $services;
 
     /**
      * pagination variable
+     *
      * @var Pagination
      */
     protected $pagination;
 
     public function __construct()
     {
-        $this->pagination = new Pagination();
+        $this->pagination = new Pagination;
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-
     public function indexAction()
     {
-        $campo_field = array(
-            "documento" => "Identificación",
-            "nombre" => "Nombre usuario",
-            "tipo" => "Tipo usuario",
-            "email" => "Email",
-        );
-        return view("cajas.usuario.index", [
-            "campo_filtro" => $campo_field,
-            "filters" => get_flashdata_item("filter_params"),
-            "title" => "Perfil usuario"
+        $campo_field = [
+            'documento' => 'Identificación',
+            'nombre' => 'Nombre usuario',
+            'tipo' => 'Tipo usuario',
+            'email' => 'Email',
+        ];
+
+        return view('cajas.usuario.index', [
+            'campo_filtro' => $campo_field,
+            'filters' => get_flashdata_item('filter_params'),
+            'title' => 'Perfil usuario',
         ]);
     }
 
     /**
      * Obtiene los parámetros necesarios para el formulario de usuarios
-     * 
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function paramsAction()
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
 
         try {
             // Obtener tipos de documento usando Eloquent
             $coddoc = Gener18::pluck('detdoc', 'coddoc')->toArray();
 
             // Obtener tipos de usuario
-            $tipo = (new Mercurio07())->getArrayTipos();
+            $tipo = (new Mercurio07)->getArrayTipos();
 
             // Obtener ciudades usando Eloquent con whereBetween
             $codciu = Gener09::whereBetween('codzon', ['18000', '19000'])
@@ -90,20 +92,20 @@ class UsuarioController extends ApplicationController
                 ->toArray();
 
             $response = [
-                "success" => true,
-                "data" => [
+                'success' => true,
+                'data' => [
                     'coddoc' => $coddoc,
                     'tipo' => $tipo,
                     'codciu' => $codciu,
-                    'estado' => (new Mercurio07)->getArrayEstados()
+                    'estado' => (new Mercurio07)->getArrayEstados(),
                 ],
-                "msj" => 'Parámetros obtenidos correctamente'
+                'msj' => 'Parámetros obtenidos correctamente',
             ];
         } catch (\Exception $e) {
             $response = [
-                "success" => false,
-                "msj" => 'Error al obtener los parámetros: ' . $e->getMessage(),
-                "trace" => config('app.debug') ? $e->getTraceAsString() : null
+                'success' => false,
+                'msj' => 'Error al obtener los parámetros: '.$e->getMessage(),
+                'trace' => config('app.debug') ? $e->getTraceAsString() : null,
             ];
         }
 
@@ -112,7 +114,7 @@ class UsuarioController extends ApplicationController
 
     public function guardarAction(Request $request)
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         try {
             $tipo = $request->input('tipo');
             $coddoc = $request->input('coddoc');
@@ -125,18 +127,18 @@ class UsuarioController extends ApplicationController
             $estado = $request->input('estado');
 
             $hasUsuario = (new Mercurio07)->count(
-                "*",
+                '*',
                 "conditions: documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$old_coddoc}'"
             );
 
             if ($hasUsuario == 0) {
-                throw new DebugException("Error el registro de usuario no existe registrado", 501);
+                throw new DebugException('Error el registro de usuario no existe registrado', 501);
             }
 
             $mercurio07 = (new Mercurio07)->findFirst("documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$old_coddoc}'");
             $clave = $mercurio07->getClave();
 
-            $setclave = "";
+            $setclave = '';
             if (strlen($newclave) > 5 && strlen($newclave) < 80) {
                 $hash = Generales::GeneraHashByClave($newclave);
                 $clave = $hash;
@@ -145,7 +147,7 @@ class UsuarioController extends ApplicationController
 
             if ($old_coddoc != $coddoc) {
                 $hasUsuario = (new Mercurio07)->count(
-                    "*",
+                    '*',
                     "conditions: documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'"
                 );
                 if ($hasUsuario == 0) {
@@ -163,7 +165,9 @@ class UsuarioController extends ApplicationController
                     $mercurio07->setClave($clave);
                     if ($mercurio07->save() == false) {
                         $msj = '';
-                        foreach ($mercurio07->getMessages() as $message) $msj .= $message->getMessage() . "\n";
+                        foreach ($mercurio07->getMessages() as $message) {
+                            $msj .= $message->getMessage()."\n";
+                        }
                         throw new DebugException($msj, 501);
                     }
                 }
@@ -177,46 +181,47 @@ class UsuarioController extends ApplicationController
             }
 
             $entity = (new Mercurio07)->findFirst("documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'");
-            $response = array(
-                "msj" => "Proceso se ha completado con éxito",
-                "success" => true,
-                "data" => $entity->getArray()
-            );
+            $response = [
+                'msj' => 'Proceso se ha completado con éxito',
+                'success' => true,
+                'data' => $entity->getArray(),
+            ];
         } catch (DebugException $err) {
-            $response = array(
+            $response = [
                 'success' => false,
-                'msj' => $err->getMessage()
-            );
+                'msj' => $err->getMessage(),
+            ];
         }
+
         return $this->renderObject($response, false);
     }
 
     public function cambiarClave($clave, $usuario_externo)
     {
         $nombre = capitalize($usuario_externo->getNombre());
-        $asunto = "Cambio de clave - Comfaca En Linea";
-        $msj = "En respuesta a la solicitud de recuperación de cuenta, se ha realiza el cambio automatico de la clave para el inicio de sesión. " .
+        $asunto = 'Cambio de clave - Comfaca En Linea';
+        $msj = 'En respuesta a la solicitud de recuperación de cuenta, se ha realiza el cambio automatico de la clave para el inicio de sesión. '.
             "A continuación enviamos las credenciales de acceso.<br/><br/>
             Credenciales:<br/>
             <b>USUARIO {$usuario_externo->getDocumento()}</b><br/>
             <b>CLAVE {$clave}</b><br/>";
 
         $html = view(
-            "templates/cambio_clave",
-            array(
-                "titulo" => "Cordial saludo, señor@ {$nombre}",
-                "msj" => $msj,
-                "url_activa" => "https://comfacaenlinea.com.co/Mercurio/Mercurio/login",
-                "fecha" => date('Y-m-d'),
-                "nombre" => $nombre,
-                "razon" => $nombre,
-                "tipo" => "",
-                "asunto" => $asunto
-            )
+            'templates/cambio_clave',
+            [
+                'titulo' => "Cordial saludo, señor@ {$nombre}",
+                'msj' => $msj,
+                'url_activa' => 'https://comfacaenlinea.com.co/Mercurio/Mercurio/login',
+                'fecha' => date('Y-m-d'),
+                'nombre' => $nombre,
+                'razon' => $nombre,
+                'tipo' => '',
+                'asunto' => $asunto,
+            ]
         )->render();
 
-        $emailCaja = (new Mercurio01())->findFirst();
-        $senderEmail = new SenderEmail();
+        $emailCaja = (new Mercurio01)->findFirst();
+        $senderEmail = new SenderEmail;
         $senderEmail->setters(
             "emisor_email: {$emailCaja->getEmail()}",
             "emisor_clave: {$emailCaja->getClave()}",
@@ -224,40 +229,44 @@ class UsuarioController extends ApplicationController
         );
 
         $senderEmail->send(
-            array(array(
-                "email" => $usuario_externo->getEmail(),
-                "nombre" => $nombre
-            )),
+            [[
+                'email' => $usuario_externo->getEmail(),
+                'nombre' => $nombre,
+            ]],
             $html
         );
+
         return true;
     }
 
     /**
      * @name function Aplicar Filtro Usuarios
+     *
      * @description []
      * ? requeriments:
      * * *
      * @date update 2025/04/02
+     *
      * @author edwin <soportesistemas.comfaca@gmail.com>
-     * @param string $estado
+     *
+     * @param  string  $estado
      * @return void
      */
     public function aplicarFiltroAction(Request $request, string $tipo = '')
     {
-        $cantidad_pagina = ($request->input("numero")) ? $request->input("numero") : 10;
+        $cantidad_pagina = ($request->input('numero')) ? $request->input('numero') : 10;
         if ($tipo == '') {
-            $query_str = ($request->input("tipo") == '') ? "1=1" : "tipo='{$request->input("tipo")}'";
+            $query_str = ($request->input('tipo') == '') ? '1=1' : "tipo='{$request->input('tipo')}'";
         } else {
-            $query_str = ($tipo == '') ? "1=1" : "tipo='{$tipo}'";
+            $query_str = ($tipo == '') ? '1=1' : "tipo='{$tipo}'";
         }
 
         $this->pagination->setters(
             new Srequest(
                 [
-                    "cantidadPaginas" => $cantidad_pagina,
-                    "query" => $query_str,
-                    "estado" => "A"
+                    'cantidadPaginas' => $cantidad_pagina,
+                    'query' => $query_str,
+                    'estado' => 'A',
                 ]
             )
         );
@@ -268,76 +277,84 @@ class UsuarioController extends ApplicationController
             $request->input('value')
         );
 
-        set_flashdata("filter_usuarios", $query, true);
-        set_flashdata("filter_params", $this->pagination->filters, true);
+        set_flashdata('filter_usuarios', $query, true);
+        set_flashdata('filter_params', $this->pagination->filters, true);
 
-        $response = $this->pagination->render(new UsuarioServices());
+        $response = $this->pagination->render(new UsuarioServices);
+
         return $this->renderObject($response, false);
     }
 
     public function changeCantidadPaginaAction(Request $request)
     {
-        $this->buscarAction($request->input("tipo"), $request->input("estado"));
+        $this->buscarAction($request->input('tipo'), $request->input('estado'));
     }
 
     /**
      * @name function Buscar Lista Usuarios
+     *
      * @description []
      * ? requeriments:
      * * *
      * @date update 2025/04/02
+     *
      * @author edwin <soportesistemas.comfaca@gmail.com>
-     * @param string $estado
+     *
      * @return void
      */
     public function buscarAction(Request $request, string $estado = '')
     {
         $pagina = ($request->input('pagina')) ? $request->input('pagina') : 1;
-        $cantidad_pagina = ($request->input("numero")) ? $request->input("numero") : 10;
-        $ftipo = ($request->input("tipo") == '') ? " 1=1 " : " tipo='{$request->input("tipo")}'";
-        $festado = ($request->input("estado") == '') ? " 1=1 " : " estado='{$request->input("estado")}'";
+        $cantidad_pagina = ($request->input('numero')) ? $request->input('numero') : 10;
+        $ftipo = ($request->input('tipo') == '') ? ' 1=1 ' : " tipo='{$request->input('tipo')}'";
+        $festado = ($request->input('estado') == '') ? ' 1=1 ' : " estado='{$request->input('estado')}'";
 
         $this->pagination->setters(
             new Srequest(
                 [
-                    "cantidadPaginas" => $cantidad_pagina,
-                    "pagina" => $pagina,
-                    "query" => $ftipo,
-                    "estado" => $festado
+                    'cantidadPaginas' => $cantidad_pagina,
+                    'pagina' => $pagina,
+                    'query' => $ftipo,
+                    'estado' => $festado,
                 ]
             )
         );
         if (
-            get_flashdata_item("filter_usuarios") != false
+            get_flashdata_item('filter_usuarios') != false
         ) {
-            $query = $this->pagination->persistencia(get_flashdata_item("filter_params"));
+            $query = $this->pagination->persistencia(get_flashdata_item('filter_params'));
         }
-        set_flashdata("filter_usuarios", $query, true);
-        set_flashdata("filter_params", $this->pagination->filters, true);
+        set_flashdata('filter_usuarios', $query, true);
+        set_flashdata('filter_params', $this->pagination->filters, true);
 
-        $response = $this->pagination->render(new UsuarioServices());
+        $response = $this->pagination->render(new UsuarioServices);
+
         return $this->renderObject($response, false);
     }
 
     public function borrarFiltroAction()
     {
-        $this->setResponse("ajax");
-        set_flashdata("filter_usuarios", false, true);
-        set_flashdata("filter_params", false, true);
+        $this->setResponse('ajax');
+        set_flashdata('filter_usuarios', false, true);
+        set_flashdata('filter_params', false, true);
 
-        return $this->renderObject(array(
+        return $this->renderObject([
             'success' => true,
-            'query' => get_flashdata_item("filter_usuarios"),
-            'filter' => get_flashdata_item("filter_params"),
-        ));
+            'query' => get_flashdata_item('filter_usuarios'),
+            'filter' => get_flashdata_item('filter_params'),
+        ]);
     }
 
     /**
      * @name function Show User
+     *
      * @description []
      * ? requeriments:
+     *
      * @date update 2025/04/11
+     *
      * @author edwin <soportesistemas.comfaca@gmail.com>
+     *
      * @return void
      */
     public function showUserAction(Request $request)
@@ -353,24 +370,27 @@ class UsuarioController extends ApplicationController
         $data['coddoc_detalle'] = $coddoc_array[$user->getCoddoc()];
         $data['tipo_detalle'] = $user->getTipoDetalle();
 
-        return $this->renderObject(array(
-            "success" => true,
-            "data" => $data
-        ), false);
+        return $this->renderObject([
+            'success' => true,
+            'data' => $data,
+        ], false);
     }
-
 
     /**
      * @name function Borrar Usuario
+     *
      * @description []
      * ? requeriments:
+     *
      * @date update 2025/04/11
+     *
      * @author edwin <soportesistemas.comfaca@gmail.com>
+     *
      * @return void
      */
     public function borrarUsuarioAction(Request $request)
     {
-        $this->setResponse("ajax");
+        $this->setResponse('ajax');
         try {
             $documento = $request->input('documento');
             $tipo = $request->input('tipo');
@@ -381,8 +401,8 @@ class UsuarioController extends ApplicationController
                 ->where('coddoc', $coddoc)
                 ->first();
 
-            if (!$user) {
-                throw new DebugException("El usuario no existe.", 404);
+            if (! $user) {
+                throw new DebugException('El usuario no existe.', 404);
             }
 
             DB::transaction(function () use ($documento, $tipo, $coddoc, $user) {
@@ -404,24 +424,24 @@ class UsuarioController extends ApplicationController
                 $user->delete();
             });
 
-
-            $response = array(
-                "success" => true,
-                "msj" => "El usuario se ha eliminado exitosamente."
-            );
+            $response = [
+                'success' => true,
+                'msj' => 'El usuario se ha eliminado exitosamente.',
+            ];
         } catch (DebugException $err) {
-            $response = array(
+            $response = [
                 'success' => false,
-                'msj' => $err->getMessage()
-            );
+                'msj' => $err->getMessage(),
+            ];
         } catch (\Exception $e) {
             // Catch potential transaction failures
-            $response = array(
+            $response = [
                 'success' => false,
                 'msj' => 'Ocurrió un error al eliminar el usuario.',
                 'error' => config('app.debug') ? $e->getMessage() : null,
-            );
+            ];
         }
+
         return $this->renderObject($response, false);
     }
 }

@@ -6,20 +6,20 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
-use App\Services\Tag;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Paginate;
-use App\Services\Utils\Pagination;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class Mercurio01Controller extends ApplicationController
 {
+    protected $query = '1=1';
 
-    protected $query = "1=1";
     protected $cantidad_pagina = 10;
+
     protected $db;
+
     protected $user;
+
     protected $tipo;
 
     public function __construct()
@@ -32,28 +32,28 @@ class Mercurio01Controller extends ApplicationController
     public function indexAction()
     {
         return view('cajas.mercurio01.index', [
-            'title' => "Configuración basica",
+            'title' => 'Configuración basica',
             'campo_filtro' => [
-                "codapl" => "Aplicativo",
-            ]
+                'codapl' => 'Aplicativo',
+            ],
         ]);
     }
 
     public function showTabla($paginate)
     {
-        $html  = '<table border="0" cellpadding="0" cellspacing="0" class="table table-bordered">';
+        $html = '<table border="0" cellpadding="0" cellspacing="0" class="table table-bordered">';
         $html .= "<thead class='thead-light'>";
-        $html .= "<tr>";
+        $html .= '<tr>';
         $html .= "<th scope='col'>Aplicativo</th>";
         $html .= "<th scope='col'>Email</th>";
         $html .= "<th scope='col'>Path</th>";
         $html .= "<th scope='col'>Server</th>";
         $html .= "<th scope='col'>Option</th>";
-        $html .= "</tr>";
-        $html .= "</thead>";
+        $html .= '</tr>';
+        $html .= '</thead>';
         $html .= "<tbody class='list'>";
         foreach ($paginate->items as $mtable) {
-            $html .= "<tr>";
+            $html .= '<tr>';
             $html .= "<td>{$mtable->getCodapl()}</td>";
             $html .= "<td>{$mtable->getEmail()}</td>";
             $html .= "<td>{$mtable->getPath()}</td>";
@@ -61,31 +61,34 @@ class Mercurio01Controller extends ApplicationController
             $html .= "<td class='table-actions'>";
             $html .= "<a href='#!' class='table-action btn btn-xs btn-primary' title='editar' data-cid='{$mtable->getCodapl()}' data-toggle='editar'>";
             $html .= "<i class='fas fa-user-edit text-white'></i>";
-            $html .= "</a>";
-            $html .= "</td>";
-            $html .= "</tr>";
+            $html .= '</a>';
+            $html .= '</td>';
+            $html .= '</tr>';
         }
-        $html .= "</tbody>";
-        $html .= "</table>";
+        $html .= '</tbody>';
+        $html .= '</table>';
+
         return $html;
     }
 
     public function aplicarFiltroAction(Request $request)
     {
-        $consultasOldServices = new GeneralService();
+        $consultasOldServices = new GeneralService;
         $this->query = $consultasOldServices->converQuery($request);
+
         return $this->buscarAction($request);
     }
 
     public function changeCantidadPagina(Request $request)
     {
-        $this->cantidad_pagina = $request->input("numero");
+        $this->cantidad_pagina = $request->input('numero');
+
         return $this->buscarAction($request);
     }
 
     public function buscarAction(Request $request)
     {
-        $pagina = ($request->input('pagina') == "") ? 1 : $request->input('pagina');
+        $pagina = ($request->input('pagina') == '') ? 1 : $request->input('pagina');
         $paginate = Paginate::execute(
             Mercurio01::whereRaw("{$this->query}")->get(),
             $pagina,
@@ -93,29 +96,33 @@ class Mercurio01Controller extends ApplicationController
         );
         $html = $this->showTabla($paginate);
 
-        $consultasOldServices = new GeneralService();
+        $consultasOldServices = new GeneralService;
         $html_paginate = $consultasOldServices->showPaginate($paginate);
         $response = [
             'consulta' => $html,
-            'paginate' => $html_paginate
+            'paginate' => $html_paginate,
         ];
+
         return $this->renderObject($response, false);
     }
 
     public function editarAction()
     {
         $mercurio01 = Mercurio01::first();
-        if ($mercurio01 == false) $mercurio01 = new Mercurio01();
+        if ($mercurio01 == false) {
+            $mercurio01 = new Mercurio01;
+        }
+
         return $this->renderObject([
             'success' => true,
-            'data' => $mercurio01->toArray()
+            'data' => $mercurio01->toArray(),
         ], false);
     }
 
     public function guardarAction(Request $request)
     {
         try {
-            $this->setResponse("ajax");
+            $this->setResponse('ajax');
             $codapl = $request->input('codapl');
             $email = $request->input('email');
             $clave = $request->input('clave');
@@ -125,9 +132,8 @@ class Mercurio01Controller extends ApplicationController
             $userserver = $request->input('userserver');
             $passserver = $request->input('passserver');
 
-
             $response = $this->db->begin();
-            $mercurio01 = new Mercurio01();
+            $mercurio01 = new Mercurio01;
 
             $mercurio01->setCodapl($codapl);
             $mercurio01->setEmail($email);
@@ -137,28 +143,30 @@ class Mercurio01Controller extends ApplicationController
             $mercurio01->setPathserver($pathserver);
             $mercurio01->setUserserver($userserver);
             $mercurio01->setPassserver($passserver);
-            if (!$mercurio01->save()) {
+            if (! $mercurio01->save()) {
                 parent::setLogger($mercurio01->getMessages());
                 $this->db->rollback();
             }
             $this->db->commit();
-            $response = parent::successFunc("Creacion Con Exito");
+            $response = parent::successFunc('Creacion Con Exito');
+
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $response = parent::errorFunc("No se puede guardar/editar el Registro");
+            $response = parent::errorFunc('No se puede guardar/editar el Registro');
+
             return $this->renderObject($response, false);
         }
     }
 
     public function borrarFiltroAction()
     {
-        set_flashdata("filter_mercurio01", false, true);
-        set_flashdata("filter_params", false, true);
+        set_flashdata('filter_mercurio01', false, true);
+        set_flashdata('filter_params', false, true);
 
         return $this->renderObject([
             'success' => true,
-            'query' => get_flashdata_item("filter_mercurio01"),
-            'filter' => get_flashdata_item("filter_params"),
+            'query' => get_flashdata_item('filter_mercurio01'),
+            'filter' => get_flashdata_item('filter_params'),
         ]);
     }
 }

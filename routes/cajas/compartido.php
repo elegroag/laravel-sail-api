@@ -1,8 +1,8 @@
 <?php
 
 // Importar facades y controlador necesarios
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Cajas\Mercurio50Controller;
+use Illuminate\Support\Facades\Route;
 
 // Rutas para Mercurio50Controller - Compartido
 Route::get('/mercurio50/index', [Mercurio50Controller::class, 'indexAction'])->name('mercurio50.index')->middleware('auth');

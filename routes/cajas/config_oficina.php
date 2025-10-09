@@ -1,8 +1,8 @@
 <?php
 
 // Importar facades y controlador necesarios
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Cajas\Mercurio04Controller;
+use Illuminate\Support\Facades\Route;
 
 // Ruta GET para mostrar la página principal de oficinas
 Route::get('/oficina', [Mercurio04Controller::class, 'indexAction']);

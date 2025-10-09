@@ -6,9 +6,10 @@ use App\Models\Adapter\ModelBase;
 
 class Gener09 extends ModelBase
 {
-
     protected $table = 'gener09';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [

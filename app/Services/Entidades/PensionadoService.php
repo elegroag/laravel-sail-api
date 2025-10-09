@@ -18,8 +18,11 @@ use App\Services\Utils\Comman;
 class PensionadoService
 {
     private $tipopc = 9;
+
     private $tipsoc = '08';
+
     private $user;
+
     private $db;
 
     public function __construct()
@@ -30,13 +33,14 @@ class PensionadoService
 
     /**
      * findAllByEstado function
-     * @param string $estado
+     *
+     * @param  string  $estado
      * @return array
      */
     public function findAllByEstado($estado = '')
     {
 
-        //usuario empresa, unica solicitud de afiliación
+        // usuario empresa, unica solicitud de afiliación
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
 
@@ -66,12 +70,14 @@ class PensionadoService
             ORDER BY solis.fecini ASC;";
 
         $solicitudes = $this->db->inQueryAssoc($sql);
+
         return $solicitudes;
     }
 
     /**
      * buscarEmpresaSubsidio function
      * buscar empresa en subsidio sin importar el estado
+     *
      * @param [type] $nit
      * @return void
      */
@@ -80,15 +86,15 @@ class PensionadoService
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaEmpresas",
-                "metodo" => "informacion_empresa",
-                "params" => array(
-                    "nit" => $nit
-                )
-            )
+            [
+                'servicio' => 'ComfacaEmpresas',
+                'metodo' => 'informacion_empresa',
+                'params' => [
+                    'nit' => $nit,
+                ],
+            ]
         );
-        $salida =  $procesadorComando->toArray();
+        $salida = $procesadorComando->toArray();
         if ($salida['success']) {
             return $salida;
         } else {
@@ -98,19 +104,20 @@ class PensionadoService
 
     public function archivosRequeridos($solicitud)
     {
-        if ($solicitud == false) return false;
-        $archivos = array();
-
+        if ($solicitud == false) {
+            return false;
+        }
+        $archivos = [];
 
         $mercurio10 = (new Mercurio10)->where([
             ['numero', '=', $solicitud->getId()],
-            ['tipopc', '=', $this->tipopc]
+            ['tipopc', '=', $this->tipopc],
         ])->orderBy('item', 'desc')->first();
 
         $corregir = false;
         if ($mercurio10 && $mercurio10->estado == 'D') {
             $campos = $mercurio10->campos_corregir;
-            $corregir = explode(";", $campos);
+            $corregir = explode(';', $campos);
         }
 
         $mercurio14 = Mercurio14::where('tipopc', $this->tipopc)->get();
@@ -119,7 +126,7 @@ class PensionadoService
             $m12 = Mercurio12::where('coddoc', $m14->getCoddoc())->first();
 
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)
-                ->where('numero',  $solicitud->getId())
+                ->where('numero', $solicitud->getId())
                 ->where('coddoc', $m14->getCoddoc())
                 ->first();
 
@@ -129,7 +136,7 @@ class PensionadoService
                     $corrige = true;
                 }
             }
-            $obliga = ($m14->getObliga() == "S") ? "<br><small class='text-danger'>Obligatorio</small>" : "";
+            $obliga = ($m14->getObliga() == 'S') ? "<br><small class='text-danger'>Obligatorio</small>" : '';
             $archivo = new \stdClass;
             $archivo->obliga = $obliga;
             $archivo->id = $solicitud->getId();
@@ -141,18 +148,20 @@ class PensionadoService
         }
 
         $mercurio01 = Mercurio01::first();
-        $html = view("pensionado/tmp/archivos_requeridos",  array(
-            "load_archivos" => $archivos,
-            "path" => $mercurio01->getPath(),
-            "puede_borrar" => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true
-        ))->render();
+        $html = view('pensionado/tmp/archivos_requeridos', [
+            'load_archivos' => $archivos,
+            'path' => $mercurio01->getPath(),
+            'puede_borrar' => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true,
+        ])->render();
+
         return $html;
     }
 
     /**
      * update function
-     * @param integer $id
-     * @param array $data
+     *
+     * @param  int  $id
+     * @param  array  $data
      * @return Mercurio38
      */
     public function update($id, $data)
@@ -161,15 +170,18 @@ class PensionadoService
         if ($empresa != false) {
             $empresa->fill($data);
             $empresa->save();
+
             return $empresa;
         }
+
         return false;
     }
 
     /**
      * updateByFormData function
-     * @param int $id
-     * @param array $data
+     *
+     * @param  int  $id
+     * @param  array  $data
      * @return bool
      */
     public function updateByFormData($id, $data)
@@ -178,6 +190,7 @@ class PensionadoService
         if ($solicitud) {
             $solicitud->fill($data);
             $solicitud->save();
+
             return $solicitud;
         } else {
             return false;
@@ -186,7 +199,8 @@ class PensionadoService
 
     /**
      * create function
-     * @param array $data
+     *
+     * @param  array  $data
      * @return Mercurio38
      */
     public function create($data)
@@ -197,12 +211,14 @@ class PensionadoService
 
         Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
         Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
+
         return $pensionado;
     }
 
     /**
      * create function
-     * @param array $data
+     *
+     * @param  array  $data
      * @return Mercurio38
      */
     public function createByFormData($data)
@@ -211,12 +227,14 @@ class PensionadoService
         $data['log'] = '0';
         $data['id'] = null;
         $pensionado = $this->create($data);
+
         return $pensionado;
     }
 
     /**
      * findById function
-     * @param integer $id
+     *
+     * @param  int  $id
      * @return Mercurio38
      */
     public function findById($id)
@@ -226,10 +244,11 @@ class PensionadoService
 
     /**
      * enviarCaja function
-     * @param SenderValidationCaja $senderValidationCaja
-     * @param integer $id
-     * @param integer $documento
-     * @param integer $coddoc
+     *
+     * @param  SenderValidationCaja  $senderValidationCaja
+     * @param  int  $id
+     * @param  int  $documento
+     * @param  int  $coddoc
      * @return void
      */
     public function enviarCaja($senderValidationCaja, $id, $usuario)
@@ -237,23 +256,23 @@ class PensionadoService
         $solicitud = $this->findById($id);
 
         $cm37 = (new Mercurio37)->getCount(
-            "*",
-            "conditions: tipopc='{$this->tipopc}' AND " .
-                "numero='{$id}' AND " .
+            '*',
+            "conditions: tipopc='{$this->tipopc}' AND ".
+                "numero='{$id}' AND ".
                 "coddoc IN(SELECT coddoc FROM mercurio14 WHERE tipopc='{$this->tipopc}' AND tipsoc='{$this->tipsoc}' AND obliga='S')"
         );
 
         $cm14 = (new Mercurio14)->getCount(
-            "*",
+            '*',
             "conditions: tipopc='{$this->tipopc}' and tipsoc='{$this->tipsoc}' and obliga='S'"
         );
         if ($cm37 < $cm14) {
-            throw new DebugException("Adjunte los archivos obligatorios", 500);
+            throw new DebugException('Adjunte los archivos obligatorios', 500);
         }
 
         Mercurio38::where('id', $id)->update([
             'usuario' => $usuario,
-            'estado' => 'P'
+            'estado' => 'P',
         ]);
 
         $ai = Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->max('item') + 1;
@@ -262,7 +281,7 @@ class PensionadoService
         $solicitante = Mercurio07::where([
             ['documento', '=', $solicitud->getDocumento()],
             ['coddoc', '=', $solicitud->getCoddoc()],
-            ['tipo', '=', $solicitud->getTipo()]
+            ['tipo', '=', $solicitud->getTipo()],
         ])->first();
 
         $solicitud->repleg = $solicitante->getNombre();
@@ -273,7 +292,6 @@ class PensionadoService
         $senderValidationCaja->send($this->tipopc, $solicitud);
     }
 
-
     public function consultaSeguimiento($id)
     {
         $seguimientos = Mercurio10::where('numero', $id)
@@ -283,32 +301,34 @@ class PensionadoService
             ->map(function ($row) {
                 $campos = explode(';', $row->campos_corregir);
                 $row->corregir = $campos;
+
                 return $row;
             })
             ->toArray();
 
-        return array(
+        return [
             'seguimientos' => $seguimientos,
             'campos_disponibles' => (new Mercurio38)->CamposDisponibles(),
-            'estados_detalles' => (new Mercurio10)->getArrayEstados()
-        );
+            'estados_detalles' => (new Mercurio10)->getArrayEstados(),
+        ];
     }
 
     public function dataArchivosRequeridos($solicitud)
     {
-        if ($solicitud == false) return false;
-        $archivos = array();
-
+        if ($solicitud == false) {
+            return false;
+        }
+        $archivos = [];
 
         $mercurio10 = Mercurio10::where([
             ['numero', '=', $solicitud->getId()],
-            ['tipopc', '=', $this->tipopc]
+            ['tipopc', '=', $this->tipopc],
         ])->orderBy('item', 'desc')->first();
 
         $corregir = false;
         if ($mercurio10 && $mercurio10->estado == 'D') {
             $campos = $mercurio10->campos_corregir;
-            $corregir = explode(";", $campos);
+            $corregir = explode(';', $campos);
         }
 
         $mercurio14 = Mercurio14::where('tipopc', $this->tipopc)->orderBy('auto_generado', 'desc')->get();
@@ -320,7 +340,7 @@ class PensionadoService
             $mercurio37 = Mercurio37::where([
                 ['tipopc', '=', $this->tipopc],
                 ['numero', '=', $solicitud->getId()],
-                ['coddoc', '=', $m14->getCoddoc()]
+                ['coddoc', '=', $m14->getCoddoc()],
             ])->first();
 
             $corrige = false;
@@ -331,7 +351,7 @@ class PensionadoService
             }
 
             $archivo = $m14->toArray();
-            $archivo['obliga'] = ($m14->getObliga() == "S") ? "<br><small class='text-danger'>Obligatorio</small>" : "";
+            $archivo['obliga'] = ($m14->getObliga() == 'S') ? "<br><small class='text-danger'>Obligatorio</small>" : '';
             $archivo['id'] = $solicitud->getId();
             $archivo['detalle'] = capitalize($m12->getDetalle());
             $archivo['diponible'] = ($mercurio37) ? $mercurio37->getArchivo() : false;
@@ -341,36 +361,37 @@ class PensionadoService
 
         $mercurio01 = Mercurio01::first();
         $archivos_descargar = oficios_requeridos('O');
-        return array(
-            "disponibles" => $archivos_descargar,
-            "archivos" => $archivos,
-            "path" => $mercurio01->getPath(),
-            "puede_borrar" => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true
-        );
+
+        return [
+            'disponibles' => $archivos_descargar,
+            'archivos' => $archivos,
+            'path' => $mercurio01->getPath(),
+            'puede_borrar' => ($solicitud->getEstado() == 'P' || $solicitud->getEstado() == 'A') ? false : true,
+        ];
     }
 
     public function paramsApi()
     {
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "parametros_empresa"
-            )
+            [
+                'servicio' => 'ComfacaAfilia',
+                'metodo' => 'parametros_empresa',
+            ]
         );
 
-        $paramsPensionado = new ParamsPensionado();
+        $paramsPensionado = new ParamsPensionado;
         $paramsPensionado->setDatosCaptura($procesadorComando->toArray());
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "parametros_trabajadores"
-            )
+            [
+                'servicio' => 'ComfacaAfilia',
+                'metodo' => 'parametros_trabajadores',
+            ]
         );
 
-        $paramsTrabajador = new ParamsTrabajador();
+        $paramsTrabajador = new ParamsTrabajador;
         $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
     }
 }

@@ -4,8 +4,7 @@ use App\Http\Controllers\Mercurio\ConsultasEmpresaController;
 use App\Http\Middleware\EnsureCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
-
-//Consultas de empresas
+// Consultas de empresas
 Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
     Route::prefix('/mercurio/subsidioemp')->group(function () {
         Route::get('/consulta_trabajadores_view', [ConsultasEmpresaController::class, 'consultaTrabajadoresViewAction']);

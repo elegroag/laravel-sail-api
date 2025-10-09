@@ -7,8 +7,11 @@ use App\Models\Adapter\ModelBase;
 class ServiciosCupos extends ModelBase
 {
     protected $table = 'servicios_cupos';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
+
     public $incrementing = true;
 
     protected $fillable = [
@@ -85,23 +88,25 @@ class ServiciosCupos extends ModelBase
     // Métodos auxiliares
     public function getEstadoArray()
     {
-        return ["1" => "ACTIVO", "0" => "INACTIVO"];
+        return ['1' => 'ACTIVO', '0' => 'INACTIVO'];
     }
 
     public function getEstadoDetalle()
     {
         $estados = $this->getEstadoArray();
-        return $estados[$this->estado] ?? "";
+
+        return $estados[$this->estado] ?? '';
     }
 
     public function getCodserArray()
     {
-        return ["F" => "FIJO", "A" => "VARIABLE"];
+        return ['F' => 'FIJO', 'A' => 'VARIABLE'];
     }
 
     public function getCodserDetalle()
     {
         $tipos = $this->getCodserArray();
-        return $tipos[$this->codser] ?? "";
+
+        return $tipos[$this->codser] ?? '';
     }
 }

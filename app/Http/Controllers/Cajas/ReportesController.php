@@ -5,13 +5,13 @@ namespace App\Http\Controllers\Cajas;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class ReportesController extends ApplicationController
 {
-
     protected $db;
+
     protected $user;
+
     protected $tipo;
 
     public function __construct()
@@ -27,407 +27,407 @@ class ReportesController extends ApplicationController
 
     public function novedades_SubsidioAction(Request $request)
     {
-        $this->setParamToView("titulo", "Reporte de Novedades de Subsidio");
-        $mfecini = $request->input("fecini");
-        $mfecfin = $request->input("fecfin");
-        $mtipnov = $request->input("tipnov");
-        $mdocumento = $request->input("documento");
+        $this->setParamToView('titulo', 'Reporte de Novedades de Subsidio');
+        $mfecini = $request->input('fecini');
+        $mfecfin = $request->input('fecfin');
+        $mtipnov = $request->input('tipnov');
+        $mdocumento = $request->input('documento');
         $fecini = new \DateTime($mfecini);
         $fecfin = new \DateTime($mfecfin);
-        $mwhere_tipnov = "";
-        $mwhere_documento = "";
-        if (!empty($mtipnov)) {
-            $detalle = "";
-            if ($mtipnov == "1") {
-                $detalle = "EMPLEADORES PRIMERA VEZ";
-                if (!empty($mdocumento)) {
+        $mwhere_tipnov = '';
+        $mwhere_documento = '';
+        if (! empty($mtipnov)) {
+            $detalle = '';
+            if ($mtipnov == '1') {
+                $detalle = 'EMPLEADORES PRIMERA VEZ';
+                if (! empty($mdocumento)) {
                     $mwhere_documento = " AND numdocemp = '$mdocumento'";
                 }
             }
-            if ($mtipnov == "2") {
-                $detalle = "EMPLEADORES SEGUNDA VEZ";
-                if (!empty($mdocumento)) {
+            if ($mtipnov == '2') {
+                $detalle = 'EMPLEADORES SEGUNDA VEZ';
+                if (! empty($mdocumento)) {
                     $mwhere_documento = " AND numdocemp = '$mdocumento'";
                 }
-                $title2 = array(
-                    "REPORTE NOVEDADES " . $detalle,
-                    "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
-                );
+                $title2 = [
+                    'REPORTE NOVEDADES '.$detalle,
+                    'RANGO DE FECHAS: '.$fecini->format('Y-m-d').' AL '.$fecfin->format('Y-m-d'),
+                ];
             }
-            if ($mtipnov == "5") {
-                $detalle = "DESAFILIACIONES EMPLEADORES";
-                if (!empty($mdocumento)) {
+            if ($mtipnov == '5') {
+                $detalle = 'DESAFILIACIONES EMPLEADORES';
+                if (! empty($mdocumento)) {
                     $mwhere_documento = " AND numdocemp = '$mdocumento'";
                 }
-                $title3 = array(
-                    "REPORTE NOVEDADES " . $detalle,
-                    "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
-                );
+                $title3 = [
+                    'REPORTE NOVEDADES '.$detalle,
+                    'RANGO DE FECHAS: '.$fecini->format('Y-m-d').' AL '.$fecfin->format('Y-m-d'),
+                ];
             }
-            if ($mtipnov == "7") {
-                $detalle = "CAUSA GRAVE";
-                if (!empty($mdocumento)) {
+            if ($mtipnov == '7') {
+                $detalle = 'CAUSA GRAVE';
+                if (! empty($mdocumento)) {
                     $mwhere_documento = " AND numdocemp = '$mdocumento'";
                 }
-                $title4 = array(
-                    "REPORTE NOVEDADES " . $detalle,
-                    "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
-                );
+                $title4 = [
+                    'REPORTE NOVEDADES '.$detalle,
+                    'RANGO DE FECHAS: '.$fecini->format('Y-m-d').' AL '.$fecfin->format('Y-m-d'),
+                ];
             }
-            if ($mtipnov == "8") {
-                $detalle = "NICIO LABORAL TRABAJADORES  ";
+            if ($mtipnov == '8') {
+                $detalle = 'NICIO LABORAL TRABAJADORES  ';
                 $mwhere_tipnov = " AND tiptra = '$mtipnov'";
-                if (!empty($mdocumento)) {
+                if (! empty($mdocumento)) {
                     $mwhere_documento = " AND numdocemp = '$mdocumento'";
                 }
                 $mtit = '5';
-                $title5 = array(
-                    "REPORTE NOVEDADES " . $detalle,
-                    "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
-                );
+                $title5 = [
+                    'REPORTE NOVEDADES '.$detalle,
+                    'RANGO DE FECHAS: '.$fecini->format('Y-m-d').' AL '.$fecfin->format('Y-m-d'),
+                ];
             }
-            if ($mtipnov == "9") {
-                $detalle = "TERMINACION LABORAL TRABAJADORES  ";
-                if (!empty($mdocumento)) {
+            if ($mtipnov == '9') {
+                $detalle = 'TERMINACION LABORAL TRABAJADORES  ';
+                if (! empty($mdocumento)) {
                     $mwhere_documento = " AND numdocemp = '$mdocumento'";
                 }
-                $title6 = array(
-                    "REPORTE NOVEDADES " . $detalle,
-                    "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
-                );
+                $title6 = [
+                    'REPORTE NOVEDADES '.$detalle,
+                    'RANGO DE FECHAS: '.$fecini->format('Y-m-d').' AL '.$fecfin->format('Y-m-d'),
+                ];
             }
-            if ($mtipnov == "10") {
-                $detalle = "SUSPENCION TEMPORAL";
-                if (!empty($mdocumento)) {
+            if ($mtipnov == '10') {
+                $detalle = 'SUSPENCION TEMPORAL';
+                if (! empty($mdocumento)) {
                     $mwhere_documento = " AND numdocemp = '$mdocumento'";
                 }
-                $title7 = array(
-                    "REPORTE NOVEDADES " . $detalle,
-                    "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
-                );
+                $title7 = [
+                    'REPORTE NOVEDADES '.$detalle,
+                    'RANGO DE FECHAS: '.$fecini->format('Y-m-d').' AL '.$fecfin->format('Y-m-d'),
+                ];
             }
-            if ($mtipnov == "11") {
-                $detalle = "LICENCIAS";
+            if ($mtipnov == '11') {
+                $detalle = 'LICENCIAS';
                 $mwhere_tipnov = " AND tiptra = '$mtipnov'";
-                if (!empty($mdocumento)) {
+                if (! empty($mdocumento)) {
                     $mwhere_documento = " AND numdocemp = '$mdocumento'";
                 }
                 $mtit = '8';
-                $title8 = array(
-                    "REPORTE NOVEDADES " . $detalle,
-                    "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
-                );
+                $title8 = [
+                    'REPORTE NOVEDADES '.$detalle,
+                    'RANGO DE FECHAS: '.$fecini->format('Y-m-d').' AL '.$fecfin->format('Y-m-d'),
+                ];
             }
-            if ($mtipnov == "12") {
-                $detalle = "MODIFICACION SALARIO";
+            if ($mtipnov == '12') {
+                $detalle = 'MODIFICACION SALARIO';
                 $mwhere_tipnov = " AND tiptra = '$mtipnov'";
-                if (!empty($mdocumento)) {
+                if (! empty($mdocumento)) {
                     $mwhere_documento = " AND numdocemp = '$mdocumento'";
                 }
                 $mtit = '9';
-                $title9 = array(
-                    "REPORTE NOVEDADES " . $detalle,
-                    "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
-                );
+                $title9 = [
+                    'REPORTE NOVEDADES '.$detalle,
+                    'RANGO DE FECHAS: '.$fecini->format('Y-m-d').' AL '.$fecfin->format('Y-m-d'),
+                ];
             }
-            if ($mtipnov == "13") {
-                $detalle = "RETIRO EMPLEADOR";
+            if ($mtipnov == '13') {
+                $detalle = 'RETIRO EMPLEADOR';
                 $mwhere_tipnov = " AND tiptra = '$mtipnov'";
-                if (!empty($mdocumento)) {
+                if (! empty($mdocumento)) {
                     $mwhere_documento = " AND numdocemp = '$mdocumento'";
                 }
                 $mtit = '10';
-                $title10 = array(
-                    "REPORTE NOVEDADES " . $detalle,
-                    "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
-                );
+                $title10 = [
+                    'REPORTE NOVEDADES '.$detalle,
+                    'RANGO DE FECHAS: '.$fecini->format('Y-m-d').' AL '.$fecfin->format('Y-m-d'),
+                ];
             }
             $title = 'title';
-            $title1 = array(
-                "REPORTE NOVEDADES 3.2.1  AFILIACIONES EMPLEADORES PRIMERA VEZ",
-                "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
-            );
+            $title1 = [
+                'REPORTE NOVEDADES 3.2.1  AFILIACIONES EMPLEADORES PRIMERA VEZ',
+                'RANGO DE FECHAS: '.$fecini->format('Y-m-d').' AL '.$fecfin->format('Y-m-d'),
+            ];
         } else {
-            $title1 = array(
-                "REPORTE NOVEDADES 3.2.1  AFILIACIONES EMPLEADORES PRIMERA VEZ",
-                "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
-            );
-            $title2 = array(
-                "REPORTE NOVEDADES 3.2.2  AFILIACIONES EMPLEADORES SEGUNDA VEZ",
-                "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
-            );
-            $title3 = array(
-                "REPORTE NOVEDADES 3.2.5  DESAFILIACIONES EMPLEADORES",
-                "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
-            );
-            $title4 = array(
-                "REPORTE NOVEDADES 3.2.7  PERDIDA DE AFILIACION EMPLEADORES POR CAUSA GRAVE",
-                "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
-            );
-            $title5 = array(
-                "REPORTE NOVEDADES 3.2.8 INICIO LABORAL TRABAJADORES ",
-                "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
-            );
-            $title6 = array(
-                "REPORTE NOVEDADES 3.2.9 TERMINACION LABORAL TRABAJADORES  ",
-                "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
-            );
-            $title7 = array(
-                "REPORTE NOVEDADES 3.2.10 SUSPENCION TEMPORAL DEL CONTRATO DE TRABAJO",
-                "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
-            );
-            $title8 = array(
-                "REPORTE NOVEDADES 3.2.11 LICENCIAS REMUNERADAS Y NO REMUNERADAS",
-                "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
-            );
-            $title9 = array(
-                "REPORTE NOVEDADES 3.2.12 MODIFICACION DEL SALARIO",
-                "RANGO DE FECHAS: " . $fecini->format('Y-m-d') . " AL " . $fecfin->format('Y-m-d'),
-            );
+            $title1 = [
+                'REPORTE NOVEDADES 3.2.1  AFILIACIONES EMPLEADORES PRIMERA VEZ',
+                'RANGO DE FECHAS: '.$fecini->format('Y-m-d').' AL '.$fecfin->format('Y-m-d'),
+            ];
+            $title2 = [
+                'REPORTE NOVEDADES 3.2.2  AFILIACIONES EMPLEADORES SEGUNDA VEZ',
+                'RANGO DE FECHAS: '.$fecini->format('Y-m-d').' AL '.$fecfin->format('Y-m-d'),
+            ];
+            $title3 = [
+                'REPORTE NOVEDADES 3.2.5  DESAFILIACIONES EMPLEADORES',
+                'RANGO DE FECHAS: '.$fecini->format('Y-m-d').' AL '.$fecfin->format('Y-m-d'),
+            ];
+            $title4 = [
+                'REPORTE NOVEDADES 3.2.7  PERDIDA DE AFILIACION EMPLEADORES POR CAUSA GRAVE',
+                'RANGO DE FECHAS: '.$fecini->format('Y-m-d').' AL '.$fecfin->format('Y-m-d'),
+            ];
+            $title5 = [
+                'REPORTE NOVEDADES 3.2.8 INICIO LABORAL TRABAJADORES ',
+                'RANGO DE FECHAS: '.$fecini->format('Y-m-d').' AL '.$fecfin->format('Y-m-d'),
+            ];
+            $title6 = [
+                'REPORTE NOVEDADES 3.2.9 TERMINACION LABORAL TRABAJADORES  ',
+                'RANGO DE FECHAS: '.$fecini->format('Y-m-d').' AL '.$fecfin->format('Y-m-d'),
+            ];
+            $title7 = [
+                'REPORTE NOVEDADES 3.2.10 SUSPENCION TEMPORAL DEL CONTRATO DE TRABAJO',
+                'RANGO DE FECHAS: '.$fecini->format('Y-m-d').' AL '.$fecfin->format('Y-m-d'),
+            ];
+            $title8 = [
+                'REPORTE NOVEDADES 3.2.11 LICENCIAS REMUNERADAS Y NO REMUNERADAS',
+                'RANGO DE FECHAS: '.$fecini->format('Y-m-d').' AL '.$fecfin->format('Y-m-d'),
+            ];
+            $title9 = [
+                'REPORTE NOVEDADES 3.2.12 MODIFICACION DEL SALARIO',
+                'RANGO DE FECHAS: '.$fecini->format('Y-m-d').' AL '.$fecfin->format('Y-m-d'),
+            ];
         }
-        $_fields['fecha'] = array('header' => 'FECHA', 'size' => 15, 'align' => 'C');
-        $_fields['hora'] = array('header' => 'HORA', 'size' => 15, 'align' => 'C');
-        $_fields['usuario'] = array('header' => 'USUARIO', 'size' => 15, 'align' => 'C');
-        $_fields['numtraccf'] = array('header' => 'NUMERO_TRANSACCION', 'size' => 10, 'align' => 'C');
-        $_fields['numtrasat'] = array('header' => 'NUMERO_TRANSACCION_SAT', 'size' => 15, 'align' => 'C');
-        $_fields['tipper'] = array('header' => 'TIPO_PERSONA', 'size' => 15, 'align' => 'C');
-        $_fields['tipemp'] = array('header' => 'TIPO_EMPRESA', 'size' => 15, 'align' => 'C');
-        $_fields['tipdoc'] = array('header' => 'TIPO_DOCUMENTO', 'size' => 15, 'align' => 'C');
-        $_fields['numdocemp'] = array('header' => 'NUMERO_DOCUMENTO', 'size' => 10, 'align' => 'C');
-        $_fields['serialsat'] = array('header' => 'SERIALSAT', 'size' => 10, 'align' => 'C');
-        $_fields['priape'] = array('header' => 'PRIMER_APELLIDO', 'size' => 20, 'align' => 'C');
-        $_fields['segape'] = array('header' => 'SEGUNDO_APELLIDO', 'size' => 20, 'align' => 'C');
-        $_fields['prinom'] = array('header' => 'PRIMER_NOMBRE', 'size' => 20, 'align' => 'C');
-        $_fields['segnom'] = array('header' => 'SEGUNDO_NOMBRE', 'size' => 20, 'align' => 'C');
-        $_fields['fecsol'] = array('header' => 'FECHA_SOLICITUD', 'size' => 15, 'align' => 'C');
-        $_fields['fecafi'] = array('header' => 'FEC._AFILIACION', 'size' => 15, 'align' => 'C');
-        $_fields['razsoc'] = array('header' => 'RAZON_SOCIAL', 'size' => 40, 'align' => 'C');
-        $_fields['matmer'] = array('header' => 'MATRICULA_MERCANTIL', 'size' => 40, 'align' => 'C');
-        $_fields['coddep'] = array('header' => 'COD_DEPARTAMENTO', 'size' => 15, 'align' => 'C');
-        $_fields['codmun'] = array('header' => 'COD_MUNICIPIO', 'size' => 10, 'align' => 'C');
-        $_fields['direccion'] = array('header' => 'DIRECCION', 'size' => 10, 'align' => 'C');
-        $_fields['email'] = array('header' => 'EMAIL', 'size' => 20, 'align' => 'C');
-        $_fields['tipdocrep'] = array('header' => 'TIPO_DOCUMENTO_REPRESENTANTE_LEG', 'size' => 15, 'align' => 'C');
-        $_fields['numdocrep'] = array('header' => 'NUMERO_DOCUMENTO_REPRESENTANTE_LEG', 'size' => 10, 'align' => 'C');
-        $_fields['prinom2'] = array('header' => 'PRIMER_NOMBRE_REPRESENTANTE_LEG', 'size' => 20, 'align' => 'C');
-        $_fields['segnom2'] = array('header' => 'SEGUNDO_NOMBRE SAT_REPRESENTANTE_LEG', 'size' => 20, 'align' => 'C');
-        $_fields['priape2'] = array('header' => 'PRIMER_APELLIDO_REPRESENTANTE_LEG', 'size' => 20, 'align' => 'C');
-        $_fields['segape2'] = array('header' => 'PRIMER_APELLIDO_REPRESENTANTE_LEG', 'size' => 20, 'align' => 'C');
-        $_fields['autmandat'] = array('header' => 'AUTORIZACION_DATOS', 'size' => 15, 'align' => 'C');
-        $_fields['autenvnot'] = array('header' => 'AUTORIZACION_ENVIO_NOTIFICACIONES', 'size' => 15, 'align' => 'C');
-        $_fields['noafissfant'] = array('header' => 'MANIFESTACION_NO_AFILIACION_OTRA_CAJA', 'size' => 15, 'align' => 'C');
-        $_fields['rsultado'] = array('header' => 'RESULTADO', 'size' => 25, 'align' => 'C');
-        $_fields['mensaje'] = array('header' => 'MENSAJE', 'size' => 30, 'align' => 'C');
-        $_fields['codigo'] = array('header' => 'CODIGO', 'size' => 10, 'align' => 'C');
-        ///////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////
+        $_fields['fecha'] = ['header' => 'FECHA', 'size' => 15, 'align' => 'C'];
+        $_fields['hora'] = ['header' => 'HORA', 'size' => 15, 'align' => 'C'];
+        $_fields['usuario'] = ['header' => 'USUARIO', 'size' => 15, 'align' => 'C'];
+        $_fields['numtraccf'] = ['header' => 'NUMERO_TRANSACCION', 'size' => 10, 'align' => 'C'];
+        $_fields['numtrasat'] = ['header' => 'NUMERO_TRANSACCION_SAT', 'size' => 15, 'align' => 'C'];
+        $_fields['tipper'] = ['header' => 'TIPO_PERSONA', 'size' => 15, 'align' => 'C'];
+        $_fields['tipemp'] = ['header' => 'TIPO_EMPRESA', 'size' => 15, 'align' => 'C'];
+        $_fields['tipdoc'] = ['header' => 'TIPO_DOCUMENTO', 'size' => 15, 'align' => 'C'];
+        $_fields['numdocemp'] = ['header' => 'NUMERO_DOCUMENTO', 'size' => 10, 'align' => 'C'];
+        $_fields['serialsat'] = ['header' => 'SERIALSAT', 'size' => 10, 'align' => 'C'];
+        $_fields['priape'] = ['header' => 'PRIMER_APELLIDO', 'size' => 20, 'align' => 'C'];
+        $_fields['segape'] = ['header' => 'SEGUNDO_APELLIDO', 'size' => 20, 'align' => 'C'];
+        $_fields['prinom'] = ['header' => 'PRIMER_NOMBRE', 'size' => 20, 'align' => 'C'];
+        $_fields['segnom'] = ['header' => 'SEGUNDO_NOMBRE', 'size' => 20, 'align' => 'C'];
+        $_fields['fecsol'] = ['header' => 'FECHA_SOLICITUD', 'size' => 15, 'align' => 'C'];
+        $_fields['fecafi'] = ['header' => 'FEC._AFILIACION', 'size' => 15, 'align' => 'C'];
+        $_fields['razsoc'] = ['header' => 'RAZON_SOCIAL', 'size' => 40, 'align' => 'C'];
+        $_fields['matmer'] = ['header' => 'MATRICULA_MERCANTIL', 'size' => 40, 'align' => 'C'];
+        $_fields['coddep'] = ['header' => 'COD_DEPARTAMENTO', 'size' => 15, 'align' => 'C'];
+        $_fields['codmun'] = ['header' => 'COD_MUNICIPIO', 'size' => 10, 'align' => 'C'];
+        $_fields['direccion'] = ['header' => 'DIRECCION', 'size' => 10, 'align' => 'C'];
+        $_fields['email'] = ['header' => 'EMAIL', 'size' => 20, 'align' => 'C'];
+        $_fields['tipdocrep'] = ['header' => 'TIPO_DOCUMENTO_REPRESENTANTE_LEG', 'size' => 15, 'align' => 'C'];
+        $_fields['numdocrep'] = ['header' => 'NUMERO_DOCUMENTO_REPRESENTANTE_LEG', 'size' => 10, 'align' => 'C'];
+        $_fields['prinom2'] = ['header' => 'PRIMER_NOMBRE_REPRESENTANTE_LEG', 'size' => 20, 'align' => 'C'];
+        $_fields['segnom2'] = ['header' => 'SEGUNDO_NOMBRE SAT_REPRESENTANTE_LEG', 'size' => 20, 'align' => 'C'];
+        $_fields['priape2'] = ['header' => 'PRIMER_APELLIDO_REPRESENTANTE_LEG', 'size' => 20, 'align' => 'C'];
+        $_fields['segape2'] = ['header' => 'PRIMER_APELLIDO_REPRESENTANTE_LEG', 'size' => 20, 'align' => 'C'];
+        $_fields['autmandat'] = ['header' => 'AUTORIZACION_DATOS', 'size' => 15, 'align' => 'C'];
+        $_fields['autenvnot'] = ['header' => 'AUTORIZACION_ENVIO_NOTIFICACIONES', 'size' => 15, 'align' => 'C'];
+        $_fields['noafissfant'] = ['header' => 'MANIFESTACION_NO_AFILIACION_OTRA_CAJA', 'size' => 15, 'align' => 'C'];
+        $_fields['rsultado'] = ['header' => 'RESULTADO', 'size' => 25, 'align' => 'C'];
+        $_fields['mensaje'] = ['header' => 'MENSAJE', 'size' => 30, 'align' => 'C'];
+        $_fields['codigo'] = ['header' => 'CODIGO', 'size' => 10, 'align' => 'C'];
+        // /////////////////////////////////////////////////////////////////////////////
+        // /////////////////////////////////////////////////////////////////////////////
         if ($mtipnov == '2' || $mtipnov == '') {
-            $_fields2['fecha'] = array('header' => 'FECHA', 'size' => 15, 'align' => 'C');
-            $_fields2['hora'] = array('header' => 'HORA', 'size' => 15, 'align' => 'C');
-            $_fields2['usuario'] = array('header' => 'USUARIO', 'size' => 15, 'align' => 'C');
-            $_fields2['numtraccf'] = array('header' => 'NUMERO_TRANSACCION', 'size' => 10, 'align' => 'C');
-            $_fields2['numtrasat'] = array('header' => 'NUMERO_TRANSACCION_SAT', 'size' => 15, 'align' => 'C');
-            $_fields2['tipper'] = array('header' => 'TIPO_PERSONA', 'size' => 15, 'align' => 'C');
-            $_fields2['tipemp'] = array('header' => 'TIPO_EMPRESA', 'size' => 15, 'align' => 'C');
-            $_fields2['tipdoc'] = array('header' => 'TIPO_DOCUMENTO', 'size' => 15, 'align' => 'C');
-            $_fields2['numdocemp'] = array('header' => 'NUMERO_DOCUMENTO', 'size' => 10, 'align' => 'C');
-            $_fields2['serialsat'] = array('header' => 'SERIALSAT', 'size' => 10, 'align' => 'C');
-            $_fields2['priape'] = array('header' => 'PRIMER_APELLIDO', 'size' => 20, 'align' => 'C');
-            $_fields2['segape'] = array('header' => 'SEGUNDO_APELLIDO', 'size' => 20, 'align' => 'C');
-            $_fields2['prinom'] = array('header' => 'PRIMER_NOMBRE', 'size' => 20, 'align' => 'C');
-            $_fields2['segnom'] = array('header' => 'SEGUNDO_NOMBRE', 'size' => 20, 'align' => 'C');
-            $_fields2['fecsol'] = array('header' => 'FECHA_SOLICITUD', 'size' => 15, 'align' => 'C');
-            $_fields2['fecafi'] = array('header' => 'FEC._AFILIACION', 'size' => 15, 'align' => 'C');
-            $_fields2['razsoc'] = array('header' => 'RAZON_SOCIAL', 'size' => 40, 'align' => 'C');
-            $_fields2['matmer'] = array('header' => 'MATRICULA_MERCANTIL', 'size' => 40, 'align' => 'C');
-            $_fields2['coddep'] = array('header' => 'COD_DEPARTAMENTO', 'size' => 15, 'align' => 'C');
-            $_fields2['codmun'] = array('header' => 'COD_MUNICIPIO', 'size' => 10, 'align' => 'C');
-            $_fields2['direccion'] = array('header' => 'DIRECCION', 'size' => 10, 'align' => 'C');
-            $_fields2['email'] = array('header' => 'EMAIL', 'size' => 20, 'align' => 'C');
-            $_fields2['tipdocrep'] = array('header' => 'TIPO_DOCUMENTO_REPRESENTANTE_LEG', 'size' => 15, 'align' => 'C');
-            $_fields2['tipdocrep'] = array('header' => 'TIPO_DOCUMENTO_REPRESENTANTE_LEG', 'size' => 15, 'align' => 'C');
-            $_fields2['numdocrep'] = array('header' => 'NUMERO_DOCUMENTO_REPRESENTANTE_LEG', 'size' => 10, 'align' => 'C');
-            $_fields2['prinom2'] = array('header' => 'PRIMER_NOMBRE_REPRESENTANTE_LEG', 'size' => 20, 'align' => 'C');
-            $_fields2['segnom2'] = array('header' => 'SEGUNDO_NOMBRE SAT_REPRESENTANTE_LEG', 'size' => 20, 'align' => 'C');
-            $_fields2['priape2'] = array('header' => 'PRIMER_APELLIDO_REPRESENTANTE_LEG', 'size' => 20, 'align' => 'C');
-            $_fields2['segape2'] = array('header' => 'PRIMER_APELLIDO_REPRESENTANTE_LEG', 'size' => 20, 'align' => 'C');
-            $_fields2['codcaj'] = array('header' => 'CODIGO_CAJA', 'size' => 20, 'align' => 'C');
-            $_fields2['pazsal'] = array('header' => 'PAZ_Y_SALVO', 'size' => 20, 'align' => 'C');
-            $_fields2['fecpazsal'] = array('header' => 'FECHA_PAZ_Y_SALVO', 'size' => 20, 'align' => 'C');
-            $_fields2['autmandat'] = array('header' => 'AUTORIZACION_DATOS', 'size' => 15, 'align' => 'C');
-            $_fields2['autenvnot'] = array('header' => 'AUTORIZACION_ENVIO_NOTIFICACIONES', 'size' => 15, 'align' => 'C');
-            $_fields2['rsultado'] = array('header' => 'RESULTADO', 'size' => 25, 'align' => 'C');
-            $_fields2['mensaje'] = array('header' => 'MENSAJE', 'size' => 30, 'align' => 'C');
-            $_fields2['codigo'] = array('header' => 'CODIGO', 'size' => 10, 'align' => 'C');
+            $_fields2['fecha'] = ['header' => 'FECHA', 'size' => 15, 'align' => 'C'];
+            $_fields2['hora'] = ['header' => 'HORA', 'size' => 15, 'align' => 'C'];
+            $_fields2['usuario'] = ['header' => 'USUARIO', 'size' => 15, 'align' => 'C'];
+            $_fields2['numtraccf'] = ['header' => 'NUMERO_TRANSACCION', 'size' => 10, 'align' => 'C'];
+            $_fields2['numtrasat'] = ['header' => 'NUMERO_TRANSACCION_SAT', 'size' => 15, 'align' => 'C'];
+            $_fields2['tipper'] = ['header' => 'TIPO_PERSONA', 'size' => 15, 'align' => 'C'];
+            $_fields2['tipemp'] = ['header' => 'TIPO_EMPRESA', 'size' => 15, 'align' => 'C'];
+            $_fields2['tipdoc'] = ['header' => 'TIPO_DOCUMENTO', 'size' => 15, 'align' => 'C'];
+            $_fields2['numdocemp'] = ['header' => 'NUMERO_DOCUMENTO', 'size' => 10, 'align' => 'C'];
+            $_fields2['serialsat'] = ['header' => 'SERIALSAT', 'size' => 10, 'align' => 'C'];
+            $_fields2['priape'] = ['header' => 'PRIMER_APELLIDO', 'size' => 20, 'align' => 'C'];
+            $_fields2['segape'] = ['header' => 'SEGUNDO_APELLIDO', 'size' => 20, 'align' => 'C'];
+            $_fields2['prinom'] = ['header' => 'PRIMER_NOMBRE', 'size' => 20, 'align' => 'C'];
+            $_fields2['segnom'] = ['header' => 'SEGUNDO_NOMBRE', 'size' => 20, 'align' => 'C'];
+            $_fields2['fecsol'] = ['header' => 'FECHA_SOLICITUD', 'size' => 15, 'align' => 'C'];
+            $_fields2['fecafi'] = ['header' => 'FEC._AFILIACION', 'size' => 15, 'align' => 'C'];
+            $_fields2['razsoc'] = ['header' => 'RAZON_SOCIAL', 'size' => 40, 'align' => 'C'];
+            $_fields2['matmer'] = ['header' => 'MATRICULA_MERCANTIL', 'size' => 40, 'align' => 'C'];
+            $_fields2['coddep'] = ['header' => 'COD_DEPARTAMENTO', 'size' => 15, 'align' => 'C'];
+            $_fields2['codmun'] = ['header' => 'COD_MUNICIPIO', 'size' => 10, 'align' => 'C'];
+            $_fields2['direccion'] = ['header' => 'DIRECCION', 'size' => 10, 'align' => 'C'];
+            $_fields2['email'] = ['header' => 'EMAIL', 'size' => 20, 'align' => 'C'];
+            $_fields2['tipdocrep'] = ['header' => 'TIPO_DOCUMENTO_REPRESENTANTE_LEG', 'size' => 15, 'align' => 'C'];
+            $_fields2['tipdocrep'] = ['header' => 'TIPO_DOCUMENTO_REPRESENTANTE_LEG', 'size' => 15, 'align' => 'C'];
+            $_fields2['numdocrep'] = ['header' => 'NUMERO_DOCUMENTO_REPRESENTANTE_LEG', 'size' => 10, 'align' => 'C'];
+            $_fields2['prinom2'] = ['header' => 'PRIMER_NOMBRE_REPRESENTANTE_LEG', 'size' => 20, 'align' => 'C'];
+            $_fields2['segnom2'] = ['header' => 'SEGUNDO_NOMBRE SAT_REPRESENTANTE_LEG', 'size' => 20, 'align' => 'C'];
+            $_fields2['priape2'] = ['header' => 'PRIMER_APELLIDO_REPRESENTANTE_LEG', 'size' => 20, 'align' => 'C'];
+            $_fields2['segape2'] = ['header' => 'PRIMER_APELLIDO_REPRESENTANTE_LEG', 'size' => 20, 'align' => 'C'];
+            $_fields2['codcaj'] = ['header' => 'CODIGO_CAJA', 'size' => 20, 'align' => 'C'];
+            $_fields2['pazsal'] = ['header' => 'PAZ_Y_SALVO', 'size' => 20, 'align' => 'C'];
+            $_fields2['fecpazsal'] = ['header' => 'FECHA_PAZ_Y_SALVO', 'size' => 20, 'align' => 'C'];
+            $_fields2['autmandat'] = ['header' => 'AUTORIZACION_DATOS', 'size' => 15, 'align' => 'C'];
+            $_fields2['autenvnot'] = ['header' => 'AUTORIZACION_ENVIO_NOTIFICACIONES', 'size' => 15, 'align' => 'C'];
+            $_fields2['rsultado'] = ['header' => 'RESULTADO', 'size' => 25, 'align' => 'C'];
+            $_fields2['mensaje'] = ['header' => 'MENSAJE', 'size' => 30, 'align' => 'C'];
+            $_fields2['codigo'] = ['header' => 'CODIGO', 'size' => 10, 'align' => 'C'];
         }
         if ($mtipnov == '5' || $mtipnov == '') {
-            $_fields3['fecha'] = array('header' => 'FECHA', 'size' => 15, 'align' => 'C');
-            $_fields3['hora'] = array('header' => 'HORA', 'size' => 15, 'align' => 'C');
-            $_fields3['usuario'] = array('header' => 'USUARIO', 'size' => 15, 'align' => 'C');
-            $_fields3['numtraccf'] = array('header' => 'NUMERO_TRANSACCION', 'size' => 10, 'align' => 'C');
-            $_fields3['numtrasat'] = array('header' => 'NUMERO_TRANSACCION_SAT', 'size' => 15, 'align' => 'C');
-            $_fields3['tipdoc'] = array('header' => 'TIPO_DOCUMENTO', 'size' => 15, 'align' => 'C');
-            $_fields3['numdocemp'] = array('header' => 'NUMERO_DOCUMENTO', 'size' => 10, 'align' => 'C');
-            $_fields3['serialsat'] = array('header' => 'SERIALSAT', 'size' => 10, 'align' => 'C');
-            $_fields3['fecsol'] = array('header' => 'FECHA_SOLICITUD', 'size' => 15, 'align' => 'C');
-            $_fields3['fecdes'] = array('header' => 'FECHA_DESAFILIACION', 'size' => 15, 'align' => 'C');
-            $_fields3['coddep'] = array('header' => 'COD_DEPARTAMENTO', 'size' => 15, 'align' => 'C');
-            $_fields3['pazsal'] = array('header' => 'PAZ_Y_SALVO', 'size' => 20, 'align' => 'C');
-            $_fields3['autmandat'] = array('header' => 'AUTORIZACION_DATOS', 'size' => 15, 'align' => 'C');
-            $_fields3['autenvnot'] = array('header' => 'AUTORIZACION_ENVIO_NOTIFICACIONES', 'size' => 15, 'align' => 'C');
-            $_fields3['rsultado'] = array('header' => 'RESULTADO', 'size' => 25, 'align' => 'C');
-            $_fields3['mensaje'] = array('header' => 'MENSAJE', 'size' => 30, 'align' => 'C');
-            $_fields3['codigo'] = array('header' => 'CODIGO', 'size' => 10, 'align' => 'C');
+            $_fields3['fecha'] = ['header' => 'FECHA', 'size' => 15, 'align' => 'C'];
+            $_fields3['hora'] = ['header' => 'HORA', 'size' => 15, 'align' => 'C'];
+            $_fields3['usuario'] = ['header' => 'USUARIO', 'size' => 15, 'align' => 'C'];
+            $_fields3['numtraccf'] = ['header' => 'NUMERO_TRANSACCION', 'size' => 10, 'align' => 'C'];
+            $_fields3['numtrasat'] = ['header' => 'NUMERO_TRANSACCION_SAT', 'size' => 15, 'align' => 'C'];
+            $_fields3['tipdoc'] = ['header' => 'TIPO_DOCUMENTO', 'size' => 15, 'align' => 'C'];
+            $_fields3['numdocemp'] = ['header' => 'NUMERO_DOCUMENTO', 'size' => 10, 'align' => 'C'];
+            $_fields3['serialsat'] = ['header' => 'SERIALSAT', 'size' => 10, 'align' => 'C'];
+            $_fields3['fecsol'] = ['header' => 'FECHA_SOLICITUD', 'size' => 15, 'align' => 'C'];
+            $_fields3['fecdes'] = ['header' => 'FECHA_DESAFILIACION', 'size' => 15, 'align' => 'C'];
+            $_fields3['coddep'] = ['header' => 'COD_DEPARTAMENTO', 'size' => 15, 'align' => 'C'];
+            $_fields3['pazsal'] = ['header' => 'PAZ_Y_SALVO', 'size' => 20, 'align' => 'C'];
+            $_fields3['autmandat'] = ['header' => 'AUTORIZACION_DATOS', 'size' => 15, 'align' => 'C'];
+            $_fields3['autenvnot'] = ['header' => 'AUTORIZACION_ENVIO_NOTIFICACIONES', 'size' => 15, 'align' => 'C'];
+            $_fields3['rsultado'] = ['header' => 'RESULTADO', 'size' => 25, 'align' => 'C'];
+            $_fields3['mensaje'] = ['header' => 'MENSAJE', 'size' => 30, 'align' => 'C'];
+            $_fields3['codigo'] = ['header' => 'CODIGO', 'size' => 10, 'align' => 'C'];
         }
         if ($mtipnov == '7' || $mtipnov == '') {
-            $_fields4['fecha'] = array('header' => 'FECHA', 'size' => 15, 'align' => 'C');
-            $_fields4['hora'] = array('header' => 'HORA', 'size' => 15, 'align' => 'C');
-            $_fields4['usuario'] = array('header' => 'USUARIO', 'size' => 15, 'align' => 'C');
-            $_fields4['numtraccf'] = array('header' => 'NUMERO_TRANSACCION', 'size' => 10, 'align' => 'C');
-            $_fields4['tipdoc'] = array('header' => 'TIPO_DOCUMENTO', 'size' => 15, 'align' => 'C');
-            $_fields4['numdocemp'] = array('header' => 'NUMERO_DOCUMENTO', 'size' => 10, 'align' => 'C');
-            $_fields4['serialsat'] = array('header' => 'SERIALSAT', 'size' => 10, 'align' => 'C');
-            $_fields4['fecper'] = array('header' => 'FECHA_PERDIDA_AFILIACION', 'size' => 15, 'align' => 'C');
-            $_fields4['razsoc'] = array('header' => 'RAZON_SOCIAL', 'size' => 40, 'align' => 'C');
-            $_fields4['coddep'] = array('header' => 'COD_DEPARTAMENTO', 'size' => 15, 'align' => 'C');
-            $_fields4['causa'] = array('header' => 'CAUSAL_DE_RETIRO', 'size' => 15, 'align' => 'C');
-            $_fields4['estado'] = array('header' => 'ESTADO_DEL_REPORTE', 'size' => 15, 'align' => 'C');
-            $_fields4['rsultado'] = array('header' => 'RESULTADO', 'size' => 25, 'align' => 'C');
-            $_fields4['mensaje'] = array('header' => 'MENSAJE', 'size' => 30, 'align' => 'C');
-            $_fields4['codigo'] = array('header' => 'CODIGO', 'size' => 10, 'align' => 'C');
+            $_fields4['fecha'] = ['header' => 'FECHA', 'size' => 15, 'align' => 'C'];
+            $_fields4['hora'] = ['header' => 'HORA', 'size' => 15, 'align' => 'C'];
+            $_fields4['usuario'] = ['header' => 'USUARIO', 'size' => 15, 'align' => 'C'];
+            $_fields4['numtraccf'] = ['header' => 'NUMERO_TRANSACCION', 'size' => 10, 'align' => 'C'];
+            $_fields4['tipdoc'] = ['header' => 'TIPO_DOCUMENTO', 'size' => 15, 'align' => 'C'];
+            $_fields4['numdocemp'] = ['header' => 'NUMERO_DOCUMENTO', 'size' => 10, 'align' => 'C'];
+            $_fields4['serialsat'] = ['header' => 'SERIALSAT', 'size' => 10, 'align' => 'C'];
+            $_fields4['fecper'] = ['header' => 'FECHA_PERDIDA_AFILIACION', 'size' => 15, 'align' => 'C'];
+            $_fields4['razsoc'] = ['header' => 'RAZON_SOCIAL', 'size' => 40, 'align' => 'C'];
+            $_fields4['coddep'] = ['header' => 'COD_DEPARTAMENTO', 'size' => 15, 'align' => 'C'];
+            $_fields4['causa'] = ['header' => 'CAUSAL_DE_RETIRO', 'size' => 15, 'align' => 'C'];
+            $_fields4['estado'] = ['header' => 'ESTADO_DEL_REPORTE', 'size' => 15, 'align' => 'C'];
+            $_fields4['rsultado'] = ['header' => 'RESULTADO', 'size' => 25, 'align' => 'C'];
+            $_fields4['mensaje'] = ['header' => 'MENSAJE', 'size' => 30, 'align' => 'C'];
+            $_fields4['codigo'] = ['header' => 'CODIGO', 'size' => 10, 'align' => 'C'];
         }
         if ($mtipnov == '8' || $mtipnov == '') {
-            $_fields5['fecha'] = array('header' => 'FECHA', 'size' => 15, 'align' => 'C');
-            $_fields5['hora'] = array('header' => 'HORA', 'size' => 15, 'align' => 'C');
-            $_fields5['usuario'] = array('header' => 'USUARIO', 'size' => 15, 'align' => 'C');
-            $_fields5['numtraccf'] = array('header' => 'NUMERO_TRANSACCION', 'size' => 10, 'align' => 'C');
-            $_fields5['numtrasat'] = array('header' => 'NUMERO_TRANSACCION_SAT', 'size' => 15, 'align' => 'C');
-            $_fields5['tipdoc'] = array('header' => 'TIPO_DOCUMENTO_EMPLEADOR', 'size' => 15, 'align' => 'C');
-            $_fields5['numdocemp'] = array('header' => 'NUMERO_DOCUMENTO_EMPLEADOR', 'size' => 10, 'align' => 'C');
-            $_fields5['serialsat'] = array('header' => 'SERIALSAT', 'size' => 10, 'align' => 'C');
-            $_fields5['tipini'] = array('header' => 'TIPO', 'size' => 15, 'align' => 'C');
-            $_fields5['fecini'] = array('header' => 'FECHA_INICIO_LABORAL', 'size' => 15, 'align' => 'C');
-            $_fields5['tipdoctra'] = array('header' => 'TIPO_DOCUMENTO_TRABAJADOR', 'size' => 15, 'align' => 'C');
-            $_fields5['numdoctra'] = array('header' => 'NUMERO_DOCUMENTO_TRABAJADOR', 'size' => 15, 'align' => 'C');
-            $_fields5['prinom'] = array('header' => 'PRIMER_NOMBRE', 'size' => 20, 'align' => 'C');
-            $_fields5['segnom'] = array('header' => 'SEGUNDO_NOMBRE', 'size' => 20, 'align' => 'C');
-            $_fields5['priape'] = array('header' => 'PRIMER_APELLIDO', 'size' => 20, 'align' => 'C');
-            $_fields5['segape'] = array('header' => 'SEGUNDO_APELLIDO', 'size' => 20, 'align' => 'C');
-            $_fields5['sexo'] = array('header' => 'SEXO', 'size' => 40, 'align' => 'C');
-            $_fields5['fecnac'] = array('header' => 'FEC_NACIMIENTO', 'size' => 15, 'align' => 'C');
-            $_fields5['coddep'] = array('header' => 'COD_DEPARTAMENTO', 'size' => 15, 'align' => 'C');
-            $_fields5['codmun'] = array('header' => 'COD_MUNICIPIO', 'size' => 10, 'align' => 'C');
-            $_fields5['direccion'] = array('header' => 'DIRECCION', 'size' => 10, 'align' => 'C');
-            $_fields5['telefono'] = array('header' => 'TELEFONO', 'size' => 40, 'align' => 'C');
-            $_fields5['email'] = array('header' => 'EMAIL', 'size' => 20, 'align' => 'C');
-            $_fields5['salario'] = array('header' => 'SALARIO', 'size' => 20, 'align' => 'C');
-            $_fields5['tipsal'] = array('header' => 'TIPO_SALARIO', 'size' => 20, 'align' => 'C');
-            $_fields5['hortra'] = array('header' => 'HORAS_DE_TRABAJO', 'size' => 20, 'align' => 'C');
-            $_fields5['autmandat'] = array('header' => 'AUTORIZACION_DATOS', 'size' => 15, 'align' => 'C');
-            $_fields5['autenvnot'] = array('header' => 'AUTORIZACION_ENVIO_NOTIFICACIONES', 'size' => 15, 'align' => 'C');
-            $_fields5['rsultado'] = array('header' => 'RESULTADO', 'size' => 25, 'align' => 'C');
-            $_fields5['mensaje'] = array('header' => 'MENSAJE', 'size' => 30, 'align' => 'C');
-            $_fields5['codigo'] = array('header' => 'CODIGO', 'size' => 10, 'align' => 'C');
+            $_fields5['fecha'] = ['header' => 'FECHA', 'size' => 15, 'align' => 'C'];
+            $_fields5['hora'] = ['header' => 'HORA', 'size' => 15, 'align' => 'C'];
+            $_fields5['usuario'] = ['header' => 'USUARIO', 'size' => 15, 'align' => 'C'];
+            $_fields5['numtraccf'] = ['header' => 'NUMERO_TRANSACCION', 'size' => 10, 'align' => 'C'];
+            $_fields5['numtrasat'] = ['header' => 'NUMERO_TRANSACCION_SAT', 'size' => 15, 'align' => 'C'];
+            $_fields5['tipdoc'] = ['header' => 'TIPO_DOCUMENTO_EMPLEADOR', 'size' => 15, 'align' => 'C'];
+            $_fields5['numdocemp'] = ['header' => 'NUMERO_DOCUMENTO_EMPLEADOR', 'size' => 10, 'align' => 'C'];
+            $_fields5['serialsat'] = ['header' => 'SERIALSAT', 'size' => 10, 'align' => 'C'];
+            $_fields5['tipini'] = ['header' => 'TIPO', 'size' => 15, 'align' => 'C'];
+            $_fields5['fecini'] = ['header' => 'FECHA_INICIO_LABORAL', 'size' => 15, 'align' => 'C'];
+            $_fields5['tipdoctra'] = ['header' => 'TIPO_DOCUMENTO_TRABAJADOR', 'size' => 15, 'align' => 'C'];
+            $_fields5['numdoctra'] = ['header' => 'NUMERO_DOCUMENTO_TRABAJADOR', 'size' => 15, 'align' => 'C'];
+            $_fields5['prinom'] = ['header' => 'PRIMER_NOMBRE', 'size' => 20, 'align' => 'C'];
+            $_fields5['segnom'] = ['header' => 'SEGUNDO_NOMBRE', 'size' => 20, 'align' => 'C'];
+            $_fields5['priape'] = ['header' => 'PRIMER_APELLIDO', 'size' => 20, 'align' => 'C'];
+            $_fields5['segape'] = ['header' => 'SEGUNDO_APELLIDO', 'size' => 20, 'align' => 'C'];
+            $_fields5['sexo'] = ['header' => 'SEXO', 'size' => 40, 'align' => 'C'];
+            $_fields5['fecnac'] = ['header' => 'FEC_NACIMIENTO', 'size' => 15, 'align' => 'C'];
+            $_fields5['coddep'] = ['header' => 'COD_DEPARTAMENTO', 'size' => 15, 'align' => 'C'];
+            $_fields5['codmun'] = ['header' => 'COD_MUNICIPIO', 'size' => 10, 'align' => 'C'];
+            $_fields5['direccion'] = ['header' => 'DIRECCION', 'size' => 10, 'align' => 'C'];
+            $_fields5['telefono'] = ['header' => 'TELEFONO', 'size' => 40, 'align' => 'C'];
+            $_fields5['email'] = ['header' => 'EMAIL', 'size' => 20, 'align' => 'C'];
+            $_fields5['salario'] = ['header' => 'SALARIO', 'size' => 20, 'align' => 'C'];
+            $_fields5['tipsal'] = ['header' => 'TIPO_SALARIO', 'size' => 20, 'align' => 'C'];
+            $_fields5['hortra'] = ['header' => 'HORAS_DE_TRABAJO', 'size' => 20, 'align' => 'C'];
+            $_fields5['autmandat'] = ['header' => 'AUTORIZACION_DATOS', 'size' => 15, 'align' => 'C'];
+            $_fields5['autenvnot'] = ['header' => 'AUTORIZACION_ENVIO_NOTIFICACIONES', 'size' => 15, 'align' => 'C'];
+            $_fields5['rsultado'] = ['header' => 'RESULTADO', 'size' => 25, 'align' => 'C'];
+            $_fields5['mensaje'] = ['header' => 'MENSAJE', 'size' => 30, 'align' => 'C'];
+            $_fields5['codigo'] = ['header' => 'CODIGO', 'size' => 10, 'align' => 'C'];
         }
         if ($mtipnov == '9' || $mtipnov == '') {
-            $_fields6['fecha'] = array('header' => 'FECHA', 'size' => 15, 'align' => 'C');
-            $_fields6['hora'] = array('header' => 'HORA', 'size' => 15, 'align' => 'C');
-            $_fields6['usuario'] = array('header' => 'USUARIO', 'size' => 15, 'align' => 'C');
-            $_fields6['numtraccf'] = array('header' => 'NUMERO_TRANSACCION', 'size' => 10, 'align' => 'C');
-            $_fields6['numtrasat'] = array('header' => 'NUMERO_TRANSACCION_SAT', 'size' => 15, 'align' => 'C');
-            $_fields6['tipdoc'] = array('header' => 'TIPO_DOCUMENTO_EMPLEADOR', 'size' => 15, 'align' => 'C');
-            $_fields6['numdocemp'] = array('header' => 'NUMERO_DOCUMENTO_EMPLEADOR', 'size' => 10, 'align' => 'C');
-            $_fields6['serialsat'] = array('header' => 'SERIALSAT', 'size' => 10, 'align' => 'C');
-            $_fields6['tipter'] = array('header' => 'TIPO_TERMINACION', 'size' => 15, 'align' => 'C');
-            $_fields6['fecter'] = array('header' => 'FECHA_TERMINACION_LABORAL', 'size' => 15, 'align' => 'C');
-            $_fields6['tipdoctra'] = array('header' => 'TIPO_DOCUMENTO_TRABAJADOR', 'size' => 15, 'align' => 'C');
-            $_fields6['numdoctra'] = array('header' => 'NUMERO_DOCUMENTO_TRABAJADOR', 'size' => 15, 'align' => 'C');
-            $_fields6['prinom'] = array('header' => 'PRIMER_NOMBRE', 'size' => 20, 'align' => 'C');
-            $_fields6['priape'] = array('header' => 'PRIMER_APELLIDO', 'size' => 20, 'align' => 'C');
-            $_fields6['autmandat'] = array('header' => 'AUTORIZACION_DATOS', 'size' => 15, 'align' => 'C');
-            $_fields6['autenvnot'] = array('header' => 'AUTORIZACION_ENVIO_NOTIFICACIONES', 'size' => 15, 'align' => 'C');
-            $_fields6['rsultado'] = array('header' => 'RESULTADO', 'size' => 25, 'align' => 'C');
-            $_fields6['mensaje'] = array('header' => 'MENSAJE', 'size' => 30, 'align' => 'C');
-            $_fields6['codigo'] = array('header' => 'CODIGO', 'size' => 10, 'align' => 'C');
+            $_fields6['fecha'] = ['header' => 'FECHA', 'size' => 15, 'align' => 'C'];
+            $_fields6['hora'] = ['header' => 'HORA', 'size' => 15, 'align' => 'C'];
+            $_fields6['usuario'] = ['header' => 'USUARIO', 'size' => 15, 'align' => 'C'];
+            $_fields6['numtraccf'] = ['header' => 'NUMERO_TRANSACCION', 'size' => 10, 'align' => 'C'];
+            $_fields6['numtrasat'] = ['header' => 'NUMERO_TRANSACCION_SAT', 'size' => 15, 'align' => 'C'];
+            $_fields6['tipdoc'] = ['header' => 'TIPO_DOCUMENTO_EMPLEADOR', 'size' => 15, 'align' => 'C'];
+            $_fields6['numdocemp'] = ['header' => 'NUMERO_DOCUMENTO_EMPLEADOR', 'size' => 10, 'align' => 'C'];
+            $_fields6['serialsat'] = ['header' => 'SERIALSAT', 'size' => 10, 'align' => 'C'];
+            $_fields6['tipter'] = ['header' => 'TIPO_TERMINACION', 'size' => 15, 'align' => 'C'];
+            $_fields6['fecter'] = ['header' => 'FECHA_TERMINACION_LABORAL', 'size' => 15, 'align' => 'C'];
+            $_fields6['tipdoctra'] = ['header' => 'TIPO_DOCUMENTO_TRABAJADOR', 'size' => 15, 'align' => 'C'];
+            $_fields6['numdoctra'] = ['header' => 'NUMERO_DOCUMENTO_TRABAJADOR', 'size' => 15, 'align' => 'C'];
+            $_fields6['prinom'] = ['header' => 'PRIMER_NOMBRE', 'size' => 20, 'align' => 'C'];
+            $_fields6['priape'] = ['header' => 'PRIMER_APELLIDO', 'size' => 20, 'align' => 'C'];
+            $_fields6['autmandat'] = ['header' => 'AUTORIZACION_DATOS', 'size' => 15, 'align' => 'C'];
+            $_fields6['autenvnot'] = ['header' => 'AUTORIZACION_ENVIO_NOTIFICACIONES', 'size' => 15, 'align' => 'C'];
+            $_fields6['rsultado'] = ['header' => 'RESULTADO', 'size' => 25, 'align' => 'C'];
+            $_fields6['mensaje'] = ['header' => 'MENSAJE', 'size' => 30, 'align' => 'C'];
+            $_fields6['codigo'] = ['header' => 'CODIGO', 'size' => 10, 'align' => 'C'];
         }
         if ($mtipnov == '10' || $mtipnov == '') {
-            $_fields7['fecha'] = array('header' => 'FECHA', 'size' => 15, 'align' => 'C');
-            $_fields7['hora'] = array('header' => 'HORA', 'size' => 15, 'align' => 'C');
-            $_fields7['usuario'] = array('header' => 'USUARIO', 'size' => 15, 'align' => 'C');
-            $_fields7['numtraccf'] = array('header' => 'NUMERO_TRANSACCION', 'size' => 10, 'align' => 'C');
-            $_fields7['numtrasat'] = array('header' => 'NUMERO_TRANSACCION_SAT', 'size' => 15, 'align' => 'C');
-            $_fields7['tipdoc'] = array('header' => 'TIPO_DOCUMENTO_EMPLEADOR', 'size' => 15, 'align' => 'C');
-            $_fields7['numdocemp'] = array('header' => 'NUMERO_DOCUMENTO_EMPLEADOR', 'size' => 10, 'align' => 'C');
-            $_fields7['serialsat'] = array('header' => 'SERIALSAT', 'size' => 10, 'align' => 'C');
-            $_fields7['fecini'] = array('header' => 'FECHA_INICIO_SUSPENCION', 'size' => 15, 'align' => 'C');
-            $_fields7['tipdoctra'] = array('header' => 'TIPO_DOCUMENTO_TRABAJADOR', 'size' => 15, 'align' => 'C');
-            $_fields7['numdoctra'] = array('header' => 'NUMERO_DOCUMENTO_TRABAJADOR', 'size' => 15, 'align' => 'C');
-            $_fields7['prinom'] = array('header' => 'PRIMER_NOMBRE', 'size' => 20, 'align' => 'C');
-            $_fields7['priape'] = array('header' => 'PRIMER_APELLIDO', 'size' => 20, 'align' => 'C');
-            $_fields7['fecfin'] = array('header' => 'FECHA_FIN_SUSPENCION', 'size' => 15, 'align' => 'C');
-            $_fields7['indnov'] = array('header' => 'INDICADOR_DE_LA_NOVEDAD', 'size' => 15, 'align' => 'C');
-            $_fields7['autmandat'] = array('header' => 'AUTORIZACION_DATOS', 'size' => 15, 'align' => 'C');
-            $_fields7['autenvnot'] = array('header' => 'AUTORIZACION_ENVIO_NOTIFICACIONES', 'size' => 15, 'align' => 'C');
-            $_fields7['rsultado'] = array('header' => 'RESULTADO', 'size' => 25, 'align' => 'C');
-            $_fields7['mensaje'] = array('header' => 'MENSAJE', 'size' => 30, 'align' => 'C');
-            $_fields7['codigo'] = array('header' => 'CODIGO', 'size' => 10, 'align' => 'C');
+            $_fields7['fecha'] = ['header' => 'FECHA', 'size' => 15, 'align' => 'C'];
+            $_fields7['hora'] = ['header' => 'HORA', 'size' => 15, 'align' => 'C'];
+            $_fields7['usuario'] = ['header' => 'USUARIO', 'size' => 15, 'align' => 'C'];
+            $_fields7['numtraccf'] = ['header' => 'NUMERO_TRANSACCION', 'size' => 10, 'align' => 'C'];
+            $_fields7['numtrasat'] = ['header' => 'NUMERO_TRANSACCION_SAT', 'size' => 15, 'align' => 'C'];
+            $_fields7['tipdoc'] = ['header' => 'TIPO_DOCUMENTO_EMPLEADOR', 'size' => 15, 'align' => 'C'];
+            $_fields7['numdocemp'] = ['header' => 'NUMERO_DOCUMENTO_EMPLEADOR', 'size' => 10, 'align' => 'C'];
+            $_fields7['serialsat'] = ['header' => 'SERIALSAT', 'size' => 10, 'align' => 'C'];
+            $_fields7['fecini'] = ['header' => 'FECHA_INICIO_SUSPENCION', 'size' => 15, 'align' => 'C'];
+            $_fields7['tipdoctra'] = ['header' => 'TIPO_DOCUMENTO_TRABAJADOR', 'size' => 15, 'align' => 'C'];
+            $_fields7['numdoctra'] = ['header' => 'NUMERO_DOCUMENTO_TRABAJADOR', 'size' => 15, 'align' => 'C'];
+            $_fields7['prinom'] = ['header' => 'PRIMER_NOMBRE', 'size' => 20, 'align' => 'C'];
+            $_fields7['priape'] = ['header' => 'PRIMER_APELLIDO', 'size' => 20, 'align' => 'C'];
+            $_fields7['fecfin'] = ['header' => 'FECHA_FIN_SUSPENCION', 'size' => 15, 'align' => 'C'];
+            $_fields7['indnov'] = ['header' => 'INDICADOR_DE_LA_NOVEDAD', 'size' => 15, 'align' => 'C'];
+            $_fields7['autmandat'] = ['header' => 'AUTORIZACION_DATOS', 'size' => 15, 'align' => 'C'];
+            $_fields7['autenvnot'] = ['header' => 'AUTORIZACION_ENVIO_NOTIFICACIONES', 'size' => 15, 'align' => 'C'];
+            $_fields7['rsultado'] = ['header' => 'RESULTADO', 'size' => 25, 'align' => 'C'];
+            $_fields7['mensaje'] = ['header' => 'MENSAJE', 'size' => 30, 'align' => 'C'];
+            $_fields7['codigo'] = ['header' => 'CODIGO', 'size' => 10, 'align' => 'C'];
         }
         if ($mtipnov == '11' || $mtipnov == '') {
-            $_fields8['fecha'] = array('header' => 'FECHA', 'size' => 15, 'align' => 'C');
-            $_fields8['hora'] = array('header' => 'HORA', 'size' => 15, 'align' => 'C');
-            $_fields8['usuario'] = array('header' => 'USUARIO', 'size' => 15, 'align' => 'C');
-            $_fields8['numtraccf'] = array('header' => 'NUMERO_TRANSACCION', 'size' => 10, 'align' => 'C');
-            $_fields8['numtrasat'] = array('header' => 'NUMERO_TRANSACCION_SAT', 'size' => 15, 'align' => 'C');
-            $_fields8['tipdoc'] = array('header' => 'TIPO_DOCUMENTO_EMPLEADOR', 'size' => 15, 'align' => 'C');
-            $_fields8['numdocemp'] = array('header' => 'NUMERO_DOCUMENTO_EMPLEADOR', 'size' => 10, 'align' => 'C');
-            $_fields8['serialsat'] = array('header' => 'SERIALSAT', 'size' => 10, 'align' => 'C');
-            $_fields8['tiplin'] = array('header' => 'TIPO_LICENCIA', 'size' => 15, 'align' => 'C');
-            $_fields8['fecini'] = array('header' => 'FECHA_INICIO_LICENCIA', 'size' => 15, 'align' => 'C');
-            $_fields8['fecfin'] = array('header' => 'FECHA_FIN_LICENCIA', 'size' => 15, 'align' => 'C');
-            $_fields8['tipdoctra'] = array('header' => 'TIPO_DOCUMENTO_TRABAJADOR', 'size' => 15, 'align' => 'C');
-            $_fields8['numdoctra'] = array('header' => 'NUMERO_DOCUMENTO_TRABAJADOR', 'size' => 15, 'align' => 'C');
-            $_fields8['prinom'] = array('header' => 'PRIMER_NOMBRE', 'size' => 20, 'align' => 'C');
-            $_fields8['priape'] = array('header' => 'PRIMER_APELLIDO', 'size' => 20, 'align' => 'C');
-            $_fields8['indnov'] = array('header' => 'INDICADOR_DE_LA_NOVEDAD', 'size' => 15, 'align' => 'C');
-            $_fields8['autmandat'] = array('header' => 'AUTORIZACION_DATOS', 'size' => 15, 'align' => 'C');
-            $_fields8['autenvnot'] = array('header' => 'AUTORIZACION_ENVIO_NOTIFICACIONES', 'size' => 15, 'align' => 'C');
-            $_fields8['rsultado'] = array('header' => 'RESULTADO', 'size' => 25, 'align' => 'C');
-            $_fields8['mensaje'] = array('header' => 'MENSAJE', 'size' => 30, 'align' => 'C');
-            $_fields8['codigo'] = array('header' => 'CODIGO', 'size' => 10, 'align' => 'C');
+            $_fields8['fecha'] = ['header' => 'FECHA', 'size' => 15, 'align' => 'C'];
+            $_fields8['hora'] = ['header' => 'HORA', 'size' => 15, 'align' => 'C'];
+            $_fields8['usuario'] = ['header' => 'USUARIO', 'size' => 15, 'align' => 'C'];
+            $_fields8['numtraccf'] = ['header' => 'NUMERO_TRANSACCION', 'size' => 10, 'align' => 'C'];
+            $_fields8['numtrasat'] = ['header' => 'NUMERO_TRANSACCION_SAT', 'size' => 15, 'align' => 'C'];
+            $_fields8['tipdoc'] = ['header' => 'TIPO_DOCUMENTO_EMPLEADOR', 'size' => 15, 'align' => 'C'];
+            $_fields8['numdocemp'] = ['header' => 'NUMERO_DOCUMENTO_EMPLEADOR', 'size' => 10, 'align' => 'C'];
+            $_fields8['serialsat'] = ['header' => 'SERIALSAT', 'size' => 10, 'align' => 'C'];
+            $_fields8['tiplin'] = ['header' => 'TIPO_LICENCIA', 'size' => 15, 'align' => 'C'];
+            $_fields8['fecini'] = ['header' => 'FECHA_INICIO_LICENCIA', 'size' => 15, 'align' => 'C'];
+            $_fields8['fecfin'] = ['header' => 'FECHA_FIN_LICENCIA', 'size' => 15, 'align' => 'C'];
+            $_fields8['tipdoctra'] = ['header' => 'TIPO_DOCUMENTO_TRABAJADOR', 'size' => 15, 'align' => 'C'];
+            $_fields8['numdoctra'] = ['header' => 'NUMERO_DOCUMENTO_TRABAJADOR', 'size' => 15, 'align' => 'C'];
+            $_fields8['prinom'] = ['header' => 'PRIMER_NOMBRE', 'size' => 20, 'align' => 'C'];
+            $_fields8['priape'] = ['header' => 'PRIMER_APELLIDO', 'size' => 20, 'align' => 'C'];
+            $_fields8['indnov'] = ['header' => 'INDICADOR_DE_LA_NOVEDAD', 'size' => 15, 'align' => 'C'];
+            $_fields8['autmandat'] = ['header' => 'AUTORIZACION_DATOS', 'size' => 15, 'align' => 'C'];
+            $_fields8['autenvnot'] = ['header' => 'AUTORIZACION_ENVIO_NOTIFICACIONES', 'size' => 15, 'align' => 'C'];
+            $_fields8['rsultado'] = ['header' => 'RESULTADO', 'size' => 25, 'align' => 'C'];
+            $_fields8['mensaje'] = ['header' => 'MENSAJE', 'size' => 30, 'align' => 'C'];
+            $_fields8['codigo'] = ['header' => 'CODIGO', 'size' => 10, 'align' => 'C'];
         }
         if ($mtipnov == '12' || $mtipnov == '') {
-            $_fields9['fecha'] = array('header' => 'FECHA', 'size' => 15, 'align' => 'C');
-            $_fields9['hora'] = array('header' => 'HORA', 'size' => 15, 'align' => 'C');
-            $_fields9['usuario'] = array('header' => 'USUARIO', 'size' => 15, 'align' => 'C');
-            $_fields9['numtraccf'] = array('header' => 'NUMERO_TRANSACCION', 'size' => 10, 'align' => 'C');
-            $_fields9['numtrasat'] = array('header' => 'NUMERO_TRANSACCION_SAT', 'size' => 15, 'align' => 'C');
-            $_fields9['tipper'] = array('header' => 'TIPO_PERSONA', 'size' => 15, 'align' => 'C');
-            $_fields9['tipdoc'] = array('header' => 'TIPO_DOCUMENTO_EMPLEADOR', 'size' => 15, 'align' => 'C');
-            $_fields9['numdocemp'] = array('header' => 'NUMERO_DOCUMENTO_EMPLEADOR', 'size' => 10, 'align' => 'C');
-            $_fields9['serialsat'] = array('header' => 'SERIALSAT', 'size' => 10, 'align' => 'C');
-            $_fields9['fecmod'] = array('header' => 'FECHA_MODIFICACION_SALARIO', 'size' => 15, 'align' => 'C');
-            $_fields9['tipdoctra'] = array('header' => 'TIPO_DOCUMENTO_TRABAJADOR', 'size' => 15, 'align' => 'C');
-            $_fields9['numdoctra'] = array('header' => 'NUMERO_DOCUMENTO_TRABAJADOR', 'size' => 15, 'align' => 'C');
-            $_fields9['prinom'] = array('header' => 'PRIMER_NOMBRE', 'size' => 20, 'align' => 'C');
-            $_fields9['priape'] = array('header' => 'PRIMER_APELLIDO', 'size' => 20, 'align' => 'C');
-            $_fields9['salario'] = array('header' => 'SALARIO', 'size' => 15, 'align' => 'C');
-            $_fields9['tipsal'] = array('header' => 'TIPO_SALARIO', 'size' => 15, 'align' => 'C');
-            $_fields9['autmandat'] = array('header' => 'AUTORIZACION_DATOS', 'size' => 15, 'align' => 'C');
-            $_fields9['autenvnot'] = array('header' => 'AUTORIZACION_ENVIO_NOTIFICACIONES', 'size' => 15, 'align' => 'C');
-            $_fields9['rsultado'] = array('header' => 'RESULTADO', 'size' => 25, 'align' => 'C');
-            $_fields9['mensaje'] = array('header' => 'MENSAJE', 'size' => 30, 'align' => 'C');
-            $_fields9['codigo'] = array('header' => 'CODIGO', 'size' => 10, 'align' => 'C');
+            $_fields9['fecha'] = ['header' => 'FECHA', 'size' => 15, 'align' => 'C'];
+            $_fields9['hora'] = ['header' => 'HORA', 'size' => 15, 'align' => 'C'];
+            $_fields9['usuario'] = ['header' => 'USUARIO', 'size' => 15, 'align' => 'C'];
+            $_fields9['numtraccf'] = ['header' => 'NUMERO_TRANSACCION', 'size' => 10, 'align' => 'C'];
+            $_fields9['numtrasat'] = ['header' => 'NUMERO_TRANSACCION_SAT', 'size' => 15, 'align' => 'C'];
+            $_fields9['tipper'] = ['header' => 'TIPO_PERSONA', 'size' => 15, 'align' => 'C'];
+            $_fields9['tipdoc'] = ['header' => 'TIPO_DOCUMENTO_EMPLEADOR', 'size' => 15, 'align' => 'C'];
+            $_fields9['numdocemp'] = ['header' => 'NUMERO_DOCUMENTO_EMPLEADOR', 'size' => 10, 'align' => 'C'];
+            $_fields9['serialsat'] = ['header' => 'SERIALSAT', 'size' => 10, 'align' => 'C'];
+            $_fields9['fecmod'] = ['header' => 'FECHA_MODIFICACION_SALARIO', 'size' => 15, 'align' => 'C'];
+            $_fields9['tipdoctra'] = ['header' => 'TIPO_DOCUMENTO_TRABAJADOR', 'size' => 15, 'align' => 'C'];
+            $_fields9['numdoctra'] = ['header' => 'NUMERO_DOCUMENTO_TRABAJADOR', 'size' => 15, 'align' => 'C'];
+            $_fields9['prinom'] = ['header' => 'PRIMER_NOMBRE', 'size' => 20, 'align' => 'C'];
+            $_fields9['priape'] = ['header' => 'PRIMER_APELLIDO', 'size' => 20, 'align' => 'C'];
+            $_fields9['salario'] = ['header' => 'SALARIO', 'size' => 15, 'align' => 'C'];
+            $_fields9['tipsal'] = ['header' => 'TIPO_SALARIO', 'size' => 15, 'align' => 'C'];
+            $_fields9['autmandat'] = ['header' => 'AUTORIZACION_DATOS', 'size' => 15, 'align' => 'C'];
+            $_fields9['autenvnot'] = ['header' => 'AUTORIZACION_ENVIO_NOTIFICACIONES', 'size' => 15, 'align' => 'C'];
+            $_fields9['rsultado'] = ['header' => 'RESULTADO', 'size' => 25, 'align' => 'C'];
+            $_fields9['mensaje'] = ['header' => 'MENSAJE', 'size' => 30, 'align' => 'C'];
+            $_fields9['codigo'] = ['header' => 'CODIGO', 'size' => 10, 'align' => 'C'];
         }
         $report = new UserReportExcel($title1, $_fields);
-        $report->startReport("EMPLEADOR PRIMERA VEZ");
-        $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
-        $msat02 = $this->Sat02->find("numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '1'  )", "order: numtraccf  ASC ");
+        $report->startReport('EMPLEADOR PRIMERA VEZ');
+        $conditions = "fecha >= '".$fecini->format('Y-m-d')."' AND fecha <= '".$fecfin->format('Y-m-d')."'";
+        $msat02 = $this->Sat02->find("numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '1'  )", 'order: numtraccf  ASC ');
         foreach ($msat02 as $sat02) {
             $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat02->getNumtraccf()}'   ");
             $mgener02 = $this->Gener02->findFirst(" usuario = '{$sat20->getUsuario()}' ");
             $report->put('fecha', trim($sat20->getFecha()));
             $report->put('hora', trim($sat20->getHora()));
-            $report->put('usuario', $sat20->getUsuario() . " " . trim($mgener02->getNombre()));
+            $report->put('usuario', $sat20->getUsuario().' '.trim($mgener02->getNombre()));
             $report->put('numtraccf', trim($sat20->getNumtraccf()));
             $report->put('numtrasat', trim($sat02->getNumtrasat()));
             $report->put('tipper', trim($sat02->getTipper()));
@@ -462,15 +462,15 @@ class ReportesController extends ApplicationController
             $report->outPutToReport();
         }
         if ($mtipnov == '2' || $mtipnov == '') {
-            $report->startReport("EMPLEADOR SEGUNDA VEZ", $title2, $_fields2);
-            $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
-            $msat03 = $this->Sat03->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '2'  )", "order: numtraccf  ASC ");
+            $report->startReport('EMPLEADOR SEGUNDA VEZ', $title2, $_fields2);
+            $conditions = "fecha >= '".$fecini->format('Y-m-d')."' AND fecha <= '".$fecfin->format('Y-m-d')."'";
+            $msat03 = $this->Sat03->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '2'  )", 'order: numtraccf  ASC ');
             foreach ($msat03 as $sat03) {
                 $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat03->getNumtraccf()}' ");
                 $mgener02 = $this->Gener02->findFirst(" usuario = '{$sat20->getUsuario()}' ");
                 $report->put('fecha', trim($sat20->getFecha()));
                 $report->put('hora', trim($sat20->getHora()));
-                $report->put('usuario', trim($sat20->getUsuario() . " " . $mgener02->getNombre()));
+                $report->put('usuario', trim($sat20->getUsuario().' '.$mgener02->getNombre()));
                 $report->put('numtraccf', trim($sat20->getNumtraccf()));
                 $report->put('numtrasat', trim($sat03->getNumtrasat()));
                 $report->put('tipper', trim($sat03->getTipper()));
@@ -508,15 +508,15 @@ class ReportesController extends ApplicationController
             }
         }
         if ($mtipnov == '5' || $mtipnov == '') {
-            $report->startReport("DESAFILIACION EMPLEADOR", $title3, $_fields3);
-            $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
-            $msat06 = $this->Sat06->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '3'  )", "order: numtraccf  ASC  ");
+            $report->startReport('DESAFILIACION EMPLEADOR', $title3, $_fields3);
+            $conditions = "fecha >= '".$fecini->format('Y-m-d')."' AND fecha <= '".$fecfin->format('Y-m-d')."'";
+            $msat06 = $this->Sat06->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '3'  )", 'order: numtraccf  ASC  ');
             foreach ($msat06 as $sat06) {
                 $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat06->getNumtraccf()}' ");
                 $mgener02 = $this->Gener02->findFirst(" usuario = '{$sat20->getUsuario()}' ");
                 $report->put('fecha', trim($sat20->getFecha()));
                 $report->put('hora', trim($sat20->getHora()));
-                $report->put('usuario', trim($sat20->getUsuario() . " " . $mgener02->getNombre()));
+                $report->put('usuario', trim($sat20->getUsuario().' '.$mgener02->getNombre()));
                 $report->put('numtraccf', trim($sat20->getNumtraccf()));
                 $report->put('numtrasat', trim($sat06->getNumtrasat()));
                 $report->put('tipdoc', trim($sat06->getTipdocemp()));
@@ -535,15 +535,15 @@ class ReportesController extends ApplicationController
             }
         }
         if ($mtipnov == '7' || $mtipnov == '') {
-            $report->startReport("CAUSA GRAVE", $title4, $_fields4);
-            $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
-            $msat08 = $this->Sat08->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '4'  )", "order: numtraccf  ASC  ");
+            $report->startReport('CAUSA GRAVE', $title4, $_fields4);
+            $conditions = "fecha >= '".$fecini->format('Y-m-d')."' AND fecha <= '".$fecfin->format('Y-m-d')."'";
+            $msat08 = $this->Sat08->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '4'  )", 'order: numtraccf  ASC  ');
             foreach ($msat08 as $sat08) {
                 $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat08->getNumtraccf()}' ");
                 $mgener02 = $this->Gener02->findFirst(" usuario = '{$sat20->getUsuario()}' ");
                 $report->put('fecha', trim($sat20->getFecha()));
                 $report->put('hora', trim($sat20->getHora()));
-                $report->put('usuario', trim($sat20->getUsuario() . " " . $mgener02->getNombre()));
+                $report->put('usuario', trim($sat20->getUsuario().' '.$mgener02->getNombre()));
                 $report->put('numtraccf', trim($sat20->getNumtraccf()));
                 $report->put('tipdoc', trim($sat08->getTipdocemp()));
                 $report->put('numdocemp', trim($sat08->getNumdocemp()));
@@ -560,15 +560,15 @@ class ReportesController extends ApplicationController
             }
         }
         if ($mtipnov == '8' || $mtipnov == '') {
-            $report->startReport("INICIO LABORAL", $title5, $_fields5);
-            $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
-            $msat09 = $this->Sat09->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '5'  )", "order: numtraccf  ASC ");
+            $report->startReport('INICIO LABORAL', $title5, $_fields5);
+            $conditions = "fecha >= '".$fecini->format('Y-m-d')."' AND fecha <= '".$fecfin->format('Y-m-d')."'";
+            $msat09 = $this->Sat09->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '5'  )", 'order: numtraccf  ASC ');
             foreach ($msat09 as $sat09) {
                 $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat09->getNumtraccf()}' ");
                 $mgener02 = $this->Gener02->findFirst(" usuario = '{$sat20->getUsuario()}' ");
                 $report->put('fecha', trim($sat20->getFecha()));
                 $report->put('hora', trim($sat20->getHora()));
-                $report->put('usuario', trim($sat20->getUsuario() . " " . $mgener02->getNombre()));
+                $report->put('usuario', trim($sat20->getUsuario().' '.$mgener02->getNombre()));
                 $report->put('numtraccf', trim($sat20->getNumtraccf()));
                 $report->put('numtrasat', trim($sat09->getNumtrasat()));
                 $report->put('tipdoc', trim($sat09->getTipdocemp()));
@@ -601,15 +601,15 @@ class ReportesController extends ApplicationController
             }
         }
         if ($mtipnov == '9' || $mtipnov == '') {
-            $report->startReport("TERMINACION LABORAL", $title6, $_fields6);
-            $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
-            $msat10 = $this->Sat10->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '6'  )", "order: numtraccf  ASC ");
+            $report->startReport('TERMINACION LABORAL', $title6, $_fields6);
+            $conditions = "fecha >= '".$fecini->format('Y-m-d')."' AND fecha <= '".$fecfin->format('Y-m-d')."'";
+            $msat10 = $this->Sat10->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '6'  )", 'order: numtraccf  ASC ');
             foreach ($msat10 as $sat10) {
                 $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat10->getNumtraccf()}' ");
                 $mgener02 = $this->Gener02->findFirst(" usuario = '{$sat20->getUsuario()}' ");
                 $report->put('fecha', trim($sat20->getFecha()));
                 $report->put('hora', trim($sat20->getHora()));
-                $report->put('usuario', trim($sat20->getUsuario() . " " . $mgener02->getNombre()));
+                $report->put('usuario', trim($sat20->getUsuario().' '.$mgener02->getNombre()));
                 $report->put('numtraccf', trim($sat20->getNumtraccf()));
                 $report->put('numtrasat', trim($sat10->getNumtrasat()));
                 $report->put('tipdoc', trim($sat10->getTipdocemp()));
@@ -630,15 +630,15 @@ class ReportesController extends ApplicationController
             }
         }
         if ($mtipnov == '10' || $mtipnov == '') {
-            $report->startReport("SUSPENCION TEMPORAL CT", $title7, $_fields7);
-            $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
-            $msat11 = $this->Sat11->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '7'  )", "order: numtraccf  ASC ");
+            $report->startReport('SUSPENCION TEMPORAL CT', $title7, $_fields7);
+            $conditions = "fecha >= '".$fecini->format('Y-m-d')."' AND fecha <= '".$fecfin->format('Y-m-d')."'";
+            $msat11 = $this->Sat11->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '7'  )", 'order: numtraccf  ASC ');
             foreach ($msat11 as $sat11) {
                 $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat11->getNumtraccf()}' ");
                 $mgener02 = $this->Gener02->findFirst(" usuario = '{$sat20->getUsuario()}' ");
                 $report->put('fecha', trim($sat20->getFecha()));
                 $report->put('hora', trim($sat20->getHora()));
-                $report->put('usuario', trim($sat20->getUsuario() . " " . $mgener02->getNombre()));
+                $report->put('usuario', trim($sat20->getUsuario().' '.$mgener02->getNombre()));
                 $report->put('numtraccf', trim($sat20->getNumtraccf()));
                 $report->put('numtrasat', trim($sat11->getNumtrasat()));
                 $report->put('tipdoc', trim($sat11->getTipdocemp()));
@@ -660,15 +660,15 @@ class ReportesController extends ApplicationController
             }
         }
         if ($mtipnov == '11' || $mtipnov == '') {
-            $report->startReport("LICENCIAS", $title8, $_fields8);
-            $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
-            $msat12 = $this->Sat12->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '8'  )", "order: numtraccf  ASC ");
+            $report->startReport('LICENCIAS', $title8, $_fields8);
+            $conditions = "fecha >= '".$fecini->format('Y-m-d')."' AND fecha <= '".$fecfin->format('Y-m-d')."'";
+            $msat12 = $this->Sat12->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '8'  )", 'order: numtraccf  ASC ');
             foreach ($msat12 as $sat12) {
                 $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat12->getNumtraccf()}' ");
                 $mgener02 = $this->Gener02->findFirst(" usuario = '{$sat20->getUsuario()}' ");
                 $report->put('fecha', trim($sat20->getFecha()));
                 $report->put('hora', trim($sat20->getHora()));
-                $report->put('usuario', trim($sat20->getUsuario() . " " . $mgener02->getNombre()));
+                $report->put('usuario', trim($sat20->getUsuario().' '.$mgener02->getNombre()));
                 $report->put('numtraccf', trim($sat20->getNumtraccf()));
                 $report->put('numtrasat', trim($sat12->getNumtrasat()));
                 $report->put('tipdoc', trim($sat12->getTipdocemp()));
@@ -691,15 +691,15 @@ class ReportesController extends ApplicationController
             }
         }
         if ($mtipnov == '12' || $mtipnov == '') {
-            $report->startReport("MODIFICACION SALARIO", $title9, $_fields9);
-            $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
-            $msat13 = $this->Sat13->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '9'  )", "order: numtraccf  ASC ");
+            $report->startReport('MODIFICACION SALARIO', $title9, $_fields9);
+            $conditions = "fecha >= '".$fecini->format('Y-m-d')."' AND fecha <= '".$fecfin->format('Y-m-d')."'";
+            $msat13 = $this->Sat13->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '9'  )", 'order: numtraccf  ASC ');
             foreach ($msat13 as $sat13) {
                 $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat13->getNumtraccf()}' ");
                 $mgener02 = $this->Gener02->findFirst(" usuario = '{$sat20->getUsuario()}' ");
                 $report->put('fecha', trim($sat20->getFecha()));
                 $report->put('hora', trim($sat20->getHora()));
-                $report->put('usuario', trim($sat20->getUsuario() . " " . $mgener02->getNombre()));
+                $report->put('usuario', trim($sat20->getUsuario().' '.$mgener02->getNombre()));
                 $report->put('numtraccf', trim($sat20->getNumtraccf()));
                 $report->put('numtrasat', trim($sat13->getNumtrasat()));
                 $report->put('tipdoc', trim($sat13->getTipdocemp()));
@@ -722,6 +722,6 @@ class ReportesController extends ApplicationController
         }
 
         ob_end_clean();
-        $report->finishReport("novedades_SAT_{$fecfin->format('Y-m-d')}", "D");
+        $report->finishReport("novedades_SAT_{$fecfin->format('Y-m-d')}", 'D');
     }
 }

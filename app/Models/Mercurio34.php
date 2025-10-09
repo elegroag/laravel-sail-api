@@ -4,14 +4,15 @@ namespace App\Models;
 
 use App\Models\Adapter\DbBase;
 use App\Models\Adapter\ModelBase;
-use App\Models\Mercurio07; // Agregado
+// Agregado
 use Carbon\Carbon;
 
 class Mercurio34 extends ModelBase
 {
-
     protected $table = 'mercurio34';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -475,6 +476,7 @@ class Mercurio34 extends ModelBase
 
     /**
      * Devuelve el valor del campo prinom
+     *
      * @return string
      */
     public function getPrinom()
@@ -484,6 +486,7 @@ class Mercurio34 extends ModelBase
 
     /**
      * Devuelve el valor del campo segnom
+     *
      * @return string
      */
     public function getSegnom()
@@ -493,7 +496,6 @@ class Mercurio34 extends ModelBase
 
     /**
      * Devuelve el valor del campo fecnac
-
      */
     public function getFecnac()
     {
@@ -502,6 +504,7 @@ class Mercurio34 extends ModelBase
 
     /**
      * Devuelve el valor del campo ciunac
+     *
      * @return string
      */
     public function getCiunac()
@@ -511,6 +514,7 @@ class Mercurio34 extends ModelBase
 
     /**
      * Devuelve el valor del campo sexo
+     *
      * @return string
      */
     public function getSexo()
@@ -520,6 +524,7 @@ class Mercurio34 extends ModelBase
 
     /**
      * Devuelve el valor del campo parent
+     *
      * @return string
      */
     public function getParent()
@@ -529,6 +534,7 @@ class Mercurio34 extends ModelBase
 
     /**
      * Devuelve el valor del campo huerfano
+     *
      * @return string
      */
     public function getHuerfano()
@@ -538,6 +544,7 @@ class Mercurio34 extends ModelBase
 
     /**
      * Devuelve el valor del campo tiphij
+     *
      * @return string
      */
     public function getTiphij()
@@ -547,6 +554,7 @@ class Mercurio34 extends ModelBase
 
     /**
      * Devuelve el valor del campo nivedu
+     *
      * @return string
      */
     public function getNivedu()
@@ -556,6 +564,7 @@ class Mercurio34 extends ModelBase
 
     /**
      * Devuelve el valor del campo captra
+     *
      * @return string
      */
     public function getCaptra()
@@ -565,6 +574,7 @@ class Mercurio34 extends ModelBase
 
     /**
      * Devuelve el valor del campo tipdis
+     *
      * @return string
      */
     public function getTipdis()
@@ -574,6 +584,7 @@ class Mercurio34 extends ModelBase
 
     /**
      * Devuelve el valor del campo calendario
+     *
      * @return string
      */
     public function getCalendario()
@@ -583,7 +594,8 @@ class Mercurio34 extends ModelBase
 
     /**
      * Devuelve el valor del campo usuario
-     * @return integer
+     *
+     * @return int
      */
     public function getUsuario()
     {
@@ -592,6 +604,7 @@ class Mercurio34 extends ModelBase
 
     /**
      * Devuelve el valor del campo estado
+     *
      * @return string
      */
     public function getEstado()
@@ -601,17 +614,29 @@ class Mercurio34 extends ModelBase
 
     public function getEstadoDetalle()
     {
-        $return = "";
-        if ($this->estado == "T") $return = "TEMPORAL";
-        if ($this->estado == "D") $return = "DEVUELTO";
-        if ($this->estado == "A") $return = "APROBADO";
-        if ($this->estado == "X") $return = "RECHAZADO";
-        if ($this->estado == "P") $return = "PENDIENTE";
+        $return = '';
+        if ($this->estado == 'T') {
+            $return = 'TEMPORAL';
+        }
+        if ($this->estado == 'D') {
+            $return = 'DEVUELTO';
+        }
+        if ($this->estado == 'A') {
+            $return = 'APROBADO';
+        }
+        if ($this->estado == 'X') {
+            $return = 'RECHAZADO';
+        }
+        if ($this->estado == 'P') {
+            $return = 'PENDIENTE';
+        }
+
         return $return;
     }
 
     /**
      * Devuelve el valor del campo codest
+     *
      * @return string
      */
     public function getCodest()
@@ -621,6 +646,7 @@ class Mercurio34 extends ModelBase
 
     /**
      * Devuelve el valor del campo motivo
+     *
      * @return string
      */
     public function getMotivo()
@@ -630,7 +656,6 @@ class Mercurio34 extends ModelBase
 
     /**
      * Devuelve el valor del campo fecest
-
      */
     public function getFecest()
     {
@@ -639,7 +664,8 @@ class Mercurio34 extends ModelBase
 
     /**
      * Devuelve el valor del campo codben
-     * @return integer
+     *
+     * @return int
      */
     public function getCodben()
     {
@@ -648,6 +674,7 @@ class Mercurio34 extends ModelBase
 
     /**
      * Devuelve el valor del campo tipo
+     *
      * @return string
      */
     public function getTipo()
@@ -657,6 +684,7 @@ class Mercurio34 extends ModelBase
 
     /**
      * Devuelve el valor del campo coddoc
+     *
      * @return string
      */
     public function getCoddoc()
@@ -666,6 +694,7 @@ class Mercurio34 extends ModelBase
 
     /**
      * Devuelve el valor del campo documento
+     *
      * @return string
      */
     public function getDocumento()
@@ -685,26 +714,30 @@ class Mercurio34 extends ModelBase
 
     public function getConvive()
     {
-        return array(
-            "1" => "Conyuge",
-            "2" => "Trabajador",
-            "3" => "No aplica",
-            "4" => "Otras personas"
-        );
+        return [
+            '1' => 'Conyuge',
+            '2' => 'Trabajador',
+            '3' => 'No aplica',
+            '4' => 'Otras personas',
+        ];
     }
 
     public function CamposDisponibles()
     {
         $db = DbBase::rawConnect();
-        $rqs = $db->inQueryAssoc("SELECT * FROM mercurio12");
-        $data = array();
-        foreach ($rqs as $ai => $row) $data[$row['coddoc']] = $row['detalle'];
+        $rqs = $db->inQueryAssoc('SELECT * FROM mercurio12');
+        $data = [];
+        foreach ($rqs as $ai => $row) {
+            $data[$row['coddoc']] = $row['detalle'];
+        }
+
         return $data;
     }
 
     public function CamposDisponibleDetalle($campo)
     {
         $data = $this->CamposDisponibles();
+
         return $data["{$campo}"];
     }
 

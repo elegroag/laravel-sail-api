@@ -1,12 +1,12 @@
 <?php
 
 use App\Http\Controllers\Mercurio\CertificadosController;
-use App\Http\Controllers\Mercurio\PrincipalController;
 use App\Http\Controllers\Mercurio\MovimientosController;
+use App\Http\Controllers\Mercurio\PrincipalController;
 use App\Http\Middleware\EnsureCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
-# Principal
+// Principal
 Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
     Route::prefix('/mercurio/principal')->group(function () {
         Route::get('/index', [PrincipalController::class, 'indexAction'])->name('principal.index');

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class RefreshToken extends Model
 {
     protected $table = 'refresh_tokens';
+
     protected $primaryKey = 'documento';
 
     protected $fillable = [
@@ -15,7 +16,7 @@ class RefreshToken extends Model
         'token',
         'expires_at',
         'ip_address',
-        'user_agent'
+        'user_agent',
     ];
 
     protected $casts = [

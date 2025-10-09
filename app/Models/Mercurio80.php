@@ -3,12 +3,13 @@
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
-use Carbon\Carbon;
 
 class Mercurio80 extends ModelBase
 {
     protected $table = 'mercurio80';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -20,7 +21,7 @@ class Mercurio80 extends ModelBase
         'fecha',
         'estado',
         'sede',
-        'fecfin'
+        'fecfin',
     ];
 
     public function setId($id)
@@ -121,16 +122,21 @@ class Mercurio80 extends ModelBase
     public function getEstadoArray()
     {
         return [
-            "A" => "ACTIVO",
-            "I" => "INACTIVO"
+            'A' => 'ACTIVO',
+            'I' => 'INACTIVO',
         ];
     }
 
     public function getEstadoDetalle()
     {
-        $return = "";
-        if($this->estado == "A") $return = "ACTIVO";
-        if($this->estado == "I") $return = "INACTIVO";
+        $return = '';
+        if ($this->estado == 'A') {
+            $return = 'ACTIVO';
+        }
+        if ($this->estado == 'I') {
+            $return = 'INACTIVO';
+        }
+
         return $return;
     }
 

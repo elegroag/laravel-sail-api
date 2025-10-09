@@ -9,10 +9,12 @@ use App\Services\Srequest;
 abstract class Documento
 {
     protected $contenido;
+
     protected $filename;
 
     /**
      * pdf variable
+     *
      * @var KumbiaPDF
      */
     protected $pdf;
@@ -24,15 +26,15 @@ abstract class Documento
      */
     protected $request;
 
-
     public function outPut()
     {
-        $file = storage_path('temp/' . $this->filename);
-        $this->pdf->Output($file, "F");
-        if (!file_exists($file)) {
-            throw new DebugException("Error el documento no se genero de forma correcta", 501);
+        $file = storage_path('temp/'.$this->filename);
+        $this->pdf->Output($file, 'F');
+        if (! file_exists($file)) {
+            throw new DebugException('Error el documento no se genero de forma correcta', 501);
         }
         $this->pdf = null;
+
         return $file;
     }
 
@@ -49,28 +51,29 @@ abstract class Documento
         $rfirma = $this->request->getParam('rfirma');
         if ($rfirma) {
             $mfirma = $this->request->getParam('firma');
-            KumbiaPDF::setFooterImage(public_path('img/firmas/' . $mfirma->getFirma()));
+            KumbiaPDF::setFooterImage(public_path('img/firmas/'.$mfirma->getFirma()));
         }
 
-        $this->pdf = new KumbiaPDF(null, "P");
+        $this->pdf = new KumbiaPDF(null, 'P');
         $this->pdf->AddPage();
         $this->pdf->SetTextColor(1);
         $this->pdf->SetFont('helvetica', '', 9);
         $this->pdf->SetMargins(10, 10, 10);
+
         return $this;
     }
 
     public function outFile()
     {
         header('Content-Description: File Transfer');
-        header("Content-Type: application/pdf");
-        header("Content-Disposition: attachment; filename=" . $this->filename . "");
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: attachment; filename='.$this->filename.'');
         header('Cache-Control: must-revalidate');
         header('Expires: 0');
         header('Pragma: public');
-        header('Content-Length: ' . filesize(storage_path('temp/' . $this->filename)));
+        header('Content-Length: '.filesize(storage_path('temp/'.$this->filename)));
         ob_clean();
-        readfile(storage_path('temp/' . $this->filename));
+        readfile(storage_path('temp/'.$this->filename));
         exit;
     }
 
@@ -84,9 +87,11 @@ abstract class Documento
 
     /**
      * addBackground function
+     *
      * @changed [2023-12-00]
      *
      * @author elegroag <elegroag@ibero.edu.co>
+     *
      * @param [type] $imagen
      * @return void
      */
@@ -100,9 +105,11 @@ abstract class Documento
 
     /**
      * main function
+     *
      * @changed [2023-12-00]
      *
      * @author elegroag <elegroag@ibero.edu.co>
+     *
      * @return void
      */
     abstract public function main();

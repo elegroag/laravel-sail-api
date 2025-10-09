@@ -7,7 +7,9 @@ use App\Models\Adapter\ModelBase;
 class Mercurio82 extends ModelBase
 {
     protected $table = 'mercurio82';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -16,7 +18,7 @@ class Mercurio82 extends ModelBase
         'direccion',
         'telefono',
         'email',
-        'estado'
+        'estado',
     ];
 
     public function setId($id)
@@ -92,16 +94,21 @@ class Mercurio82 extends ModelBase
     public function getEstadoArray()
     {
         return [
-            "A" => "ACTIVO",
-            "I" => "INACTIVO"
+            'A' => 'ACTIVO',
+            'I' => 'INACTIVO',
         ];
     }
 
     public function getEstadoDetalle()
     {
-        $return = "";
-        if($this->estado == "A") $return = "ACTIVO";
-        if($this->estado == "I") $return = "INACTIVO";
+        $return = '';
+        if ($this->estado == 'A') {
+            $return = 'ACTIVO';
+        }
+        if ($this->estado == 'I') {
+            $return = 'INACTIVO';
+        }
+
         return $return;
     }
 }

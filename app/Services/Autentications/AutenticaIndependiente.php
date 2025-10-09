@@ -7,7 +7,6 @@ use App\Models\Mercurio30;
 use App\Models\Mercurio31;
 use App\Models\Mercurio32;
 use App\Models\Mercurio34;
-use App\Services\Utils\Generales;
 use App\Services\Utils\CrearUsuario;
 
 class AutenticaIndependiente extends AutenticaGeneral
@@ -25,26 +24,25 @@ class AutenticaIndependiente extends AutenticaGeneral
          * buscar empresa en sisu
          */
         $this->procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaEmpresas",
-                "metodo" => "informacion_empresa",
-                "params" =>  array(
-                    "nit" => $documento
-                )
-            )
+            [
+                'servicio' => 'ComfacaEmpresas',
+                'metodo' => 'informacion_empresa',
+                'params' => [
+                    'nit' => $documento,
+                ],
+            ]
         );
 
-        if ($this->procesadorComando->isJson() == False) {
-            $this->message = "Se genero un error al buscar al afiliado independiente usando el servicio CLI-Comando.";
+        if ($this->procesadorComando->isJson() == false) {
+            $this->message = 'Se genero un error al buscar al afiliado independiente usando el servicio CLI-Comando.';
+
             return false;
         }
 
         $out = $this->procesadorComando->toArray();
         $afiliado = ($out['success'] == true) ? $out['data'] : null;
 
-
-
-        $sucurIndepe = False;
+        $sucurIndepe = false;
         $sucursales = $out['sucursales'];
         if ($sucursales) {
             foreach ($sucursales as $ai => $sucursal) {
@@ -55,17 +53,19 @@ class AutenticaIndependiente extends AutenticaGeneral
             }
         }
 
-        if ($sucurIndepe == False) {
-            $this->message = "Error acceso incorrecto. El afiliado independiente tiene un error de registro en su afiliación, " .
-                "se debe comunicar a la dirección de correo: <b>afiliacionyregistro@comfaca.com</b> indicando la comprobación del estado afiliado independiente. " .
-                "No olvidar el compartir la dirección email, el número de cedula y el nombre del afiliado, para poder identificar al afiliado.";
+        if ($sucurIndepe == false) {
+            $this->message = 'Error acceso incorrecto. El afiliado independiente tiene un error de registro en su afiliación, '.
+                'se debe comunicar a la dirección de correo: <b>afiliacionyregistro@comfaca.com</b> indicando la comprobación del estado afiliado independiente. '.
+                'No olvidar el compartir la dirección email, el número de cedula y el nombre del afiliado, para poder identificar al afiliado.';
+
             return false;
         }
 
         if ($coddoc == 3 || $coddoc == 7 || $coddoc == 2) {
-            $this->message = "El tipo documento de los afiliados independientes no es valido, debe solicitar el cambio en tipo documento a la dirección: " .
-                "<b>afiliacionyregistro@comfaca.com</b> indicando la comprobación del estado afiliado independiente con tipo documento errado." .
-                "No olvidar el compartir la dirección email, el número de cedula y el nombre del afiliado, para poder identificar al afiliado.";
+            $this->message = 'El tipo documento de los afiliados independientes no es valido, debe solicitar el cambio en tipo documento a la dirección: '.
+                '<b>afiliacionyregistro@comfaca.com</b> indicando la comprobación del estado afiliado independiente con tipo documento errado.'.
+                'No olvidar el compartir la dirección email, el número de cedula y el nombre del afiliado, para poder identificar al afiliado.';
+
             return false;
         }
 
@@ -77,12 +77,14 @@ class AutenticaIndependiente extends AutenticaGeneral
         $usuarioIndependiente = (new Mercurio07)->findFirst("tipo='{$this->tipo}' AND documento='{$documento}' AND coddoc='{$coddoc}'");
 
         if (is_null($afiliado) || $afiliado == false) {
-            //ya no está registrado el afiliado empresa
+            // ya no está registrado el afiliado empresa
             if ($usuarioIndependiente) {
                 $this->estadoAfiliado = 'I';
+
                 return true;
             } else {
-                $this->message = "El independiente no se encuentra registrado en el sistema principal de Subsidio, no dispone de acceso a la plataforma.";
+                $this->message = 'El independiente no se encuentra registrado en el sistema principal de Subsidio, no dispone de acceso a la plataforma.';
+
                 return false;
             }
         }
@@ -99,9 +101,10 @@ class AutenticaIndependiente extends AutenticaGeneral
             if ($usuarioParticular == false) {
 
                 if (strlen($afiliado['email']) == 0) {
-                    $this->message = "La dirección email no es valida para realizar el registro. " .
-                        "Debe solicitar cambio del correo personal a la dirección <b>afiliacionyregistro@comfaca.com</b> indicando la necesidad. " .
-                        "No olvidar el compartir la dirección email, el número de cedula y el nombre del afiliado, para realizar la comprobación y los cambios solicitados.";
+                    $this->message = 'La dirección email no es valida para realizar el registro. '.
+                        'Debe solicitar cambio del correo personal a la dirección <b>afiliacionyregistro@comfaca.com</b> indicando la necesidad. '.
+                        'No olvidar el compartir la dirección email, el número de cedula y el nombre del afiliado, para realizar la comprobación y los cambios solicitados.';
+
                     return false;
                 }
 
@@ -110,9 +113,9 @@ class AutenticaIndependiente extends AutenticaGeneral
                  */
                 $clave = genera_clave(8);
                 $hash = clave_hash($clave);
-                $crearUsuario = new CrearUsuario();
+                $crearUsuario = new CrearUsuario;
                 $crearUsuario->setters(
-                    "tipo: P",
+                    'tipo: P',
                     "coddoc: {$coddoc}",
                     "documento: {$documento}",
                     "nombre: {$afiliado['razsoc']}",
@@ -125,12 +128,12 @@ class AutenticaIndependiente extends AutenticaGeneral
                 $key = $this->generaCode();
                 $crearUsuario->crearOpcionesRecuperacion($key);
 
-                $this->prepareMail($usuarioParticular, $clave, "Particular");
+                $this->prepareMail($usuarioParticular, $clave, 'Particular');
 
-                $this->message = "El afiliado independiente no está activo en el \"SISU\", debe realizar el proceso de afiliación, para acceder a los servicios de comfaca en línea. " .
-                    "Es necesario readicar una nueva solicitud de afiliación ya que el independiente se encuentra <b>Inactivo</b>. " .
-                    "Las credenciales de acceso le serán enviadas al respectivo correo registrado. " .
-                    "Ingresa a la opción 2 de \"Afiliación Pendiente\"";
+                $this->message = 'El afiliado independiente no está activo en el "SISU", debe realizar el proceso de afiliación, para acceder a los servicios de comfaca en línea. '.
+                    'Es necesario readicar una nueva solicitud de afiliación ya que el independiente se encuentra <b>Inactivo</b>. '.
+                    'Las credenciales de acceso le serán enviadas al respectivo correo registrado. '.
+                    'Ingresa a la opción 2 de "Afiliación Pendiente"';
             } else {
                 /**
                  * Si existe el usuario de mercurio, dado que la empresa está inactiva en sisu.
@@ -175,9 +178,9 @@ class AutenticaIndependiente extends AutenticaGeneral
                     $usuarioParticular->save();
                 }
 
-                $this->message = "El afiliado no está activo en el \"SISU\", debe realizar el proceso de afiliación, para acceder a los servicios de comfaca en línea. " .
-                    "Es necesario readicar una nueva solicitud de afiliación ya que el afiliado se encuentra <b>Inactivo</b>. " .
-                    "Ingresa a la opción 2 de \"Afiliación Pendiente\"";
+                $this->message = 'El afiliado no está activo en el "SISU", debe realizar el proceso de afiliación, para acceder a los servicios de comfaca en línea. '.
+                    'Es necesario readicar una nueva solicitud de afiliación ya que el afiliado se encuentra <b>Inactivo</b>. '.
+                    'Ingresa a la opción 2 de "Afiliación Pendiente"';
             }
 
             /**
@@ -188,6 +191,7 @@ class AutenticaIndependiente extends AutenticaGeneral
                 $usuarioIndependiente->setEstado('I');
                 $usuarioIndependiente->save();
             }
+
             return false;
         } else {
             /**
@@ -207,7 +211,7 @@ class AutenticaIndependiente extends AutenticaGeneral
 
                 $clave = genera_clave(8);
                 $hash = clave_hash($clave);
-                $crearUsuario = new CrearUsuario();
+                $crearUsuario = new CrearUsuario;
                 $crearUsuario->setters(
                     "tipo: {$this->tipo}",
                     "coddoc: {$coddoc}",
@@ -224,13 +228,14 @@ class AutenticaIndependiente extends AutenticaGeneral
                 $crearUsuario->crearOpcionesRecuperacion($key);
                 $this->prepareMail($usuarioIndependiente, $clave);
 
-                $this->message = "El afiliado está activo y se ha creado de forma automatica la cuenta de Indipendiente, " .
-                    "las credenciales de acceso le serán enviadas al respectivo correo registrado, y debe usar la nueva clave generada.";
+                $this->message = 'El afiliado está activo y se ha creado de forma automatica la cuenta de Indipendiente, '.
+                    'las credenciales de acceso le serán enviadas al respectivo correo registrado, y debe usar la nueva clave generada.';
 
                 return false;
             }
 
             $this->afiliado = $usuarioIndependiente;
+
             return true;
         }
     }

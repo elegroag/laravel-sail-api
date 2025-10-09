@@ -20,16 +20,22 @@ class ConyugeAdjuntoService
 {
     /**
      * request variable
+     *
      * @var Mercurio32
      */
     private $request;
+
     private $filename;
+
     private $outPdf;
+
     private $fhash;
+
     private $claveCertificado;
 
     /**
      * lfirma variable
+     *
      * @var Mercurio16
      */
     private $lfirma;
@@ -46,43 +52,44 @@ class ConyugeAdjuntoService
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "parametros_conyuges"
-            )
+            [
+                'servicio' => 'ComfacaAfilia',
+                'metodo' => 'parametros_conyuges',
+            ]
         );
 
-        $datos_captura =  $procesadorComando->toArray();
-        $paramsConyuge = new ParamsConyuge();
+        $datos_captura = $procesadorComando->toArray();
+        $paramsConyuge = new ParamsConyuge;
         $paramsConyuge->setDatosCaptura($datos_captura);
     }
 
     public function formulario()
     {
         $solicitante = (new Mercurio07)->findFirst(
-            "documento='{$this->request->getDocumento()}' and " .
-                "coddoc='{$this->request->getCoddoc()}' and " .
+            "documento='{$this->request->getDocumento()}' and ".
+                "coddoc='{$this->request->getCoddoc()}' and ".
                 "tipo='{$this->request->getTipo()}'"
         );
 
-        $this->filename = strtotime('now') . "_{$this->request->getCedcon()}.pdf";
+        $this->filename = strtotime('now')."_{$this->request->getCedcon()}.pdf";
         KumbiaPDF::setBackgroundImage(public_path('img/form/conyuge/formulario_adicion_conyuge.png'));
 
-        $fabrica = new FactoryDocuments();
+        $fabrica = new FactoryDocuments;
         $documento = $fabrica->crearFormulario('conyuge');
         $documento->setParamsInit(
-            array(
+            [
                 'conyuge' => $this->request,
                 'trabajador' => $this->getTrabajador(),
                 'solicitante' => $solicitante,
                 'firma' => $this->lfirma,
-                'filename' => $this->filename
-            )
+                'filename' => $this->filename,
+            ]
         );
 
         $documento->main();
         $documento->outPut();
         $this->cifrarDocumento();
+
         return $this;
     }
 
@@ -92,36 +99,36 @@ class ConyugeAdjuntoService
         $mtrabajador = false;
         switch (trim($this->request->getTipo())) {
             case 'I':
-                $mtrabajador = new Mercurio41();
+                $mtrabajador = new Mercurio41;
                 break;
             case 'O':
-                $mtrabajador = new Mercurio38();
+                $mtrabajador = new Mercurio38;
                 break;
             case 'F':
-                $mtrabajador = new Mercurio36();
+                $mtrabajador = new Mercurio36;
                 break;
             case 'T':
             case 'E':
-                $mtrabajador = new Mercurio31();
+                $mtrabajador = new Mercurio31;
                 break;
             default:
-                $trabajador = (new Mercurio31())->findFirst(
-                    " documento='{$this->request->getDocumento()}' and " .
-                        " coddoc='{$this->request->getCoddoc()}' and " .
-                        " cedtra='{$this->request->getCedtra()}' and " .
+                $trabajador = (new Mercurio31)->findFirst(
+                    " documento='{$this->request->getDocumento()}' and ".
+                        " coddoc='{$this->request->getCoddoc()}' and ".
+                        " cedtra='{$this->request->getCedtra()}' and ".
                         " estado NOT IN('X','I')"
                 );
                 break;
         }
 
-        if (!$trabajador && $mtrabajador) {
+        if (! $trabajador && $mtrabajador) {
             $trabajador = $mtrabajador->findFirst(
                 " cedtra='{$this->request->getCedtra()}' AND  documento='{$this->request->getDocumento()}' AND coddoc='{$this->request->getCoddoc()}'"
             );
         }
 
-        if (!$trabajador && $mtrabajador) {
-            $trabajadorService = new TrabajadorService();
+        if (! $trabajador && $mtrabajador) {
+            $trabajadorService = new TrabajadorService;
             $out = $trabajadorService->buscarTrabajadorSubsidio($this->request->getCedtra());
             if ($out) {
                 $trabajador = clone $mtrabajador;
@@ -129,8 +136,8 @@ class ConyugeAdjuntoService
             }
         }
 
-        if (!$trabajador) {
-            throw new DebugException("Error el trabajador no está registrado previamente", 501);
+        if (! $trabajador) {
+            throw new DebugException('Error el trabajador no está registrado previamente', 501);
         }
 
         return $trabajador;
@@ -138,41 +145,42 @@ class ConyugeAdjuntoService
 
     public function declaraJurament()
     {
-        $this->filename = strtotime('now') . "_{$this->request->getCedcon()}.pdf";
+        $this->filename = strtotime('now')."_{$this->request->getCedcon()}.pdf";
         KumbiaPDF::setBackgroundImage(public_path('img/form/declaraciones/declaracion_jura_conyuge.png'));
-        $fabrica = new FactoryDocuments();
+        $fabrica = new FactoryDocuments;
         $documento = $fabrica->crearDeclaracion('conyuge');
 
         $documento->setParamsInit(
-            array(
+            [
                 'conyuge' => $this->request,
                 'trabajador' => $this->getTrabajador(),
                 'firma' => $this->lfirma,
-                'filename' => $this->filename
-            )
+                'filename' => $this->filename,
+            ]
         );
 
         $documento->main();
         $documento->outPut();
         $this->cifrarDocumento();
+
         return $this;
     }
 
-    function cifrarDocumento()
+    public function cifrarDocumento()
     {
-        $cifrarDocumento = new CifrarDocumento();
+        $cifrarDocumento = new CifrarDocumento;
         $this->outPdf = $cifrarDocumento->cifrar($this->filename, $this->lfirma->getKeyprivate(), $this->claveCertificado);
         $this->fhash = $cifrarDocumento->getFhash();
     }
 
     public function getResult()
     {
-        return array(
-            "name" => $this->filename,
-            "file" => basename($this->outPdf),
+        return [
+            'name' => $this->filename,
+            'file' => basename($this->outPdf),
             'out' => $this->outPdf,
-            'fhash' => $this->fhash
-        );
+            'fhash' => $this->fhash,
+        ];
     }
 
     public function setClaveCertificado($clave)

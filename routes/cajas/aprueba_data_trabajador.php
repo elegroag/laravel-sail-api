@@ -4,7 +4,6 @@ use App\Http\Controllers\Cajas\ApruebaUpTrabajadorController;
 use App\Http\Middleware\CajasCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
-
 Route::middleware([CajasCookieAuthenticated::class])->group(function () {
     Route::prefix('/cajas/actualizatra')->group(function () {
         Route::get('/index', [ApruebaUpTrabajadorController::class, 'indexAction'])->name('aprueba_up_trabajador.index');

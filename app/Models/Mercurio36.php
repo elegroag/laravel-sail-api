@@ -8,9 +8,10 @@ use Carbon\Carbon;
 
 class Mercurio36 extends ModelBase
 {
-
     protected $table = 'mercurio36';
+
     public $timestamps = false;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -78,7 +79,6 @@ class Mercurio36 extends ModelBase
         $this->fecapr = $fecapr;
     }
 
-
     public function getTipsoc()
     {
         return '08';
@@ -113,6 +113,7 @@ class Mercurio36 extends ModelBase
     {
         return $this->numcue;
     }
+
     public function setTippag($tippag)
     {
         $this->tippag = $tippag;
@@ -215,7 +216,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * setCoddocrepleg function
-     * @param string $coddocrepleg
+     *
+     * @param  string  $coddocrepleg
      * @return void
      */
     public function setCoddocrepleg($coddocrepleg)
@@ -225,6 +227,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * getCoddocrepleg function
+     *
      * @return string
      */
     public function getCoddocrepleg()
@@ -234,7 +237,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo id
-     * @param integer $id
+     *
+     * @param  int  $id
      */
     public function setId($id)
     {
@@ -243,7 +247,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo log
-     * @param integer $log
+     *
+     * @param  int  $log
      */
     public function setLog($log)
     {
@@ -252,7 +257,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo cedtra
-     * @param string $cedtra
+     *
+     * @param  string  $cedtra
      */
     public function setCedtra($cedtra)
     {
@@ -261,7 +267,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo tipdoc
-     * @param string $tipdoc
+     *
+     * @param  string  $tipdoc
      */
     public function setTipdoc($tipdoc)
     {
@@ -270,7 +277,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo priape
-     * @param string $priape
+     *
+     * @param  string  $priape
      */
     public function setPriape($priape)
     {
@@ -279,7 +287,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo segape
-     * @param string $segape
+     *
+     * @param  string  $segape
      */
     public function setSegape($segape)
     {
@@ -288,7 +297,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo prinom
-     * @param string $prinom
+     *
+     * @param  string  $prinom
      */
     public function setPrinom($prinom)
     {
@@ -297,7 +307,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo segnom
-     * @param string $segnom
+     *
+     * @param  string  $segnom
      */
     public function setSegnom($segnom)
     {
@@ -306,7 +317,6 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo fecnac
-
      */
     public function setFecnac($fecnac)
     {
@@ -325,7 +335,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo ciunac
-     * @param string $ciunac
+     *
+     * @param  string  $ciunac
      */
     public function setCiunac($ciunac)
     {
@@ -334,7 +345,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo sexo
-     * @param string $sexo
+     *
+     * @param  string  $sexo
      */
     public function setSexo($sexo)
     {
@@ -343,7 +355,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo estciv
-     * @param string $estciv
+     *
+     * @param  string  $estciv
      */
     public function setEstciv($estciv)
     {
@@ -352,7 +365,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo cabhog
-     * @param string $cabhog
+     *
+     * @param  string  $cabhog
      */
     public function setCabhog($cabhog)
     {
@@ -361,7 +375,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo codciu
-     * @param string $codciu
+     *
+     * @param  string  $codciu
      */
     public function setCodciu($codciu)
     {
@@ -370,7 +385,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo codzon
-     * @param string $codzon
+     *
+     * @param  string  $codzon
      */
     public function setCodzon($codzon)
     {
@@ -379,7 +395,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo direccion
-     * @param string $direccion
+     *
+     * @param  string  $direccion
      */
     public function setDireccion($direccion)
     {
@@ -388,7 +405,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo barrio
-     * @param string $barrio
+     *
+     * @param  string  $barrio
      */
     public function setBarrio($barrio)
     {
@@ -397,7 +415,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo telefono
-     * @param string $telefono
+     *
+     * @param  string  $telefono
      */
     public function setTelefono($telefono)
     {
@@ -406,7 +425,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo celular
-     * @param string $celular
+     *
+     * @param  string  $celular
      */
     public function setCelular($celular)
     {
@@ -415,7 +435,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo fax
-     * @param string $fax
+     *
+     * @param  string  $fax
      */
     public function setFax($fax)
     {
@@ -424,7 +445,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo email
-     * @param string $email
+     *
+     * @param  string  $email
      */
     public function setEmail($email)
     {
@@ -433,7 +455,6 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo fecing
-
      */
     public function setFecini($fecini)
     {
@@ -442,7 +463,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo salario
-     * @param integer $salario
+     *
+     * @param  int  $salario
      */
     public function setSalario($salario)
     {
@@ -451,7 +473,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo captra
-     * @param string $captra
+     *
+     * @param  string  $captra
      */
     public function setCaptra($captra)
     {
@@ -460,7 +483,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo tipdis
-     * @param string $tipdis
+     *
+     * @param  string  $tipdis
      */
     public function setTipdis($tipdis)
     {
@@ -469,7 +493,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo nivedu
-     * @param string $nivedu
+     *
+     * @param  string  $nivedu
      */
     public function setNivedu($nivedu)
     {
@@ -478,7 +503,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo rural
-     * @param string $rural
+     *
+     * @param  string  $rural
      */
     public function setRural($rural)
     {
@@ -487,7 +513,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo vivienda
-     * @param string $vivienda
+     *
+     * @param  string  $vivienda
      */
     public function setVivienda($vivienda)
     {
@@ -496,7 +523,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo tipafi
-     * @param string $tipafi
+     *
+     * @param  string  $tipafi
      */
     public function setTipafi($tipafi)
     {
@@ -505,7 +533,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo autoriza
-     * @param string $autoriza
+     *
+     * @param  string  $autoriza
      */
     public function setAutoriza($autoriza)
     {
@@ -514,7 +543,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo codact
-     * @param string $codact
+     *
+     * @param  string  $codact
      */
     public function setCodact($codact)
     {
@@ -523,7 +553,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo calemp
-     * @param string $calemp
+     *
+     * @param  string  $calemp
      */
     public function setCalemp($calemp)
     {
@@ -532,7 +563,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo usuario
-     * @param integer $usuario
+     *
+     * @param  int  $usuario
      */
     public function setUsuario($usuario)
     {
@@ -541,7 +573,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo estado
-     * @param string $estado
+     *
+     * @param  string  $estado
      */
     public function setEstado($estado)
     {
@@ -550,7 +583,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo codest
-     * @param string $codest
+     *
+     * @param  string  $codest
      */
     public function setCodest($codest)
     {
@@ -559,7 +593,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo motivo
-     * @param string $motivo
+     *
+     * @param  string  $motivo
      */
     public function setMotivo($motivo)
     {
@@ -568,7 +603,6 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo fecest
-
      */
     public function setFecest($fecest)
     {
@@ -577,7 +611,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo tipo
-     * @param string $tipo
+     *
+     * @param  string  $tipo
      */
     public function setTipo($tipo)
     {
@@ -586,7 +621,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo coddoc
-     * @param string $coddoc
+     *
+     * @param  string  $coddoc
      */
     public function setCoddoc($coddoc)
     {
@@ -595,17 +631,18 @@ class Mercurio36 extends ModelBase
 
     /**
      * Metodo para establecer el valor del campo documento
-     * @param string $documento
+     *
+     * @param  string  $documento
      */
     public function setDocumento($documento)
     {
         $this->documento = $documento;
     }
 
-
     /**
      * Devuelve el valor del campo id
-     * @return integer
+     *
+     * @return int
      */
     public function getId()
     {
@@ -614,7 +651,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo log
-     * @return integer
+     *
+     * @return int
      */
     public function getLog()
     {
@@ -623,6 +661,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo cedtra
+     *
      * @return string
      */
     public function getCedtra()
@@ -632,6 +671,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo tipdoc
+     *
      * @return string
      */
     public function getTipdoc()
@@ -641,6 +681,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo priape
+     *
      * @return string
      */
     public function getPriape()
@@ -650,6 +691,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo segape
+     *
      * @return string
      */
     public function getSegape()
@@ -659,6 +701,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo prinom
+     *
      * @return string
      */
     public function getPrinom()
@@ -668,6 +711,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo segnom
+     *
      * @return string
      */
     public function getSegnom()
@@ -677,7 +721,6 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo fecnac
-
      */
     public function getFecnac()
     {
@@ -686,6 +729,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo ciunac
+     *
      * @return string
      */
     public function getCiunac()
@@ -695,6 +739,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo sexo
+     *
      * @return string
      */
     public function getSexo()
@@ -704,6 +749,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo estciv
+     *
      * @return string
      */
     public function getEstciv()
@@ -713,6 +759,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo cabhog
+     *
      * @return string
      */
     public function getCabhog()
@@ -722,6 +769,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo codciu
+     *
      * @return string
      */
     public function getCodciu()
@@ -731,6 +779,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo codzon
+     *
      * @return string
      */
     public function getCodzon()
@@ -740,6 +789,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo direccion
+     *
      * @return string
      */
     public function getDireccion()
@@ -749,6 +799,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo barrio
+     *
      * @return string
      */
     public function getBarrio()
@@ -758,6 +809,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo telefono
+     *
      * @return string
      */
     public function getTelefono()
@@ -767,6 +819,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo celular
+     *
      * @return string
      */
     public function getCelular()
@@ -776,6 +829,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo fax
+     *
      * @return string
      */
     public function getFax()
@@ -785,6 +839,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo email
+     *
      * @return string
      */
     public function getEmail()
@@ -799,7 +854,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo salario
-     * @return integer
+     *
+     * @return int
      */
     public function getSalario()
     {
@@ -808,6 +864,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo captra
+     *
      * @return string
      */
     public function getCaptra()
@@ -817,6 +874,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo tipdis
+     *
      * @return string
      */
     public function getTipdis()
@@ -826,6 +884,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo nivedu
+     *
      * @return string
      */
     public function getNivedu()
@@ -835,6 +894,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo rural
+     *
      * @return string
      */
     public function getRural()
@@ -844,6 +904,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo vivienda
+     *
      * @return string
      */
     public function getVivienda()
@@ -853,6 +914,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo tipafi
+     *
      * @return string
      */
     public function getTipafi()
@@ -862,6 +924,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo autoriza
+     *
      * @return string
      */
     public function getAutoriza()
@@ -871,6 +934,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo codact
+     *
      * @return string
      */
     public function getCodact()
@@ -880,6 +944,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo calemp
+     *
      * @return string
      */
     public function getCalemp()
@@ -889,7 +954,8 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo usuario
-     * @return integer
+     *
+     * @return int
      */
     public function getUsuario()
     {
@@ -898,6 +964,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo estado
+     *
      * @return string
      */
     public function getEstado()
@@ -907,17 +974,29 @@ class Mercurio36 extends ModelBase
 
     public function getEstadoDetalle()
     {
-        $return = "";
-        if ($this->estado == "T") $return = "TEMPORAL";
-        if ($this->estado == "D") $return = "DEVUELTO";
-        if ($this->estado == "A") $return = "APROBADO";
-        if ($this->estado == "X") $return = "RECHAZADO";
-        if ($this->estado == "P") $return = "PENDIENTE";
+        $return = '';
+        if ($this->estado == 'T') {
+            $return = 'TEMPORAL';
+        }
+        if ($this->estado == 'D') {
+            $return = 'DEVUELTO';
+        }
+        if ($this->estado == 'A') {
+            $return = 'APROBADO';
+        }
+        if ($this->estado == 'X') {
+            $return = 'RECHAZADO';
+        }
+        if ($this->estado == 'P') {
+            $return = 'PENDIENTE';
+        }
+
         return $return;
     }
 
     /**
      * Devuelve el valor del campo codest
+     *
      * @return string
      */
     public function getCodest()
@@ -927,6 +1006,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo motivo
+     *
      * @return string
      */
     public function getMotivo()
@@ -936,7 +1016,6 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo fecest
-
      */
     public function getFecest()
     {
@@ -945,6 +1024,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo tipo
+     *
      * @return string
      */
     public function getTipo()
@@ -954,6 +1034,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo coddoc
+     *
      * @return string
      */
     public function getCoddoc()
@@ -963,6 +1044,7 @@ class Mercurio36 extends ModelBase
 
     /**
      * Devuelve el valor del campo documento
+     *
      * @return string
      */
     public function getDocumento()
@@ -973,21 +1055,25 @@ class Mercurio36 extends ModelBase
     public function CamposDisponibles()
     {
         $db = DbBase::rawConnect();
-        $rqs = $db->inQueryAssoc("SELECT * FROM mercurio12");
-        $data = array();
-        foreach ($rqs as $ai => $row) $data[$row['coddoc']] = $row['detalle'];
+        $rqs = $db->inQueryAssoc('SELECT * FROM mercurio12');
+        $data = [];
+        foreach ($rqs as $ai => $row) {
+            $data[$row['coddoc']] = $row['detalle'];
+        }
+
         return $data;
     }
 
     public function CamposDisponibleDetalle($campo)
     {
         $data = $this->CamposDisponibles();
+
         return $data["{$campo}"];
     }
 
     public function getCoddocreplegArray()
     {
-        return array(
+        return [
             1 => 'CC',
             10 => 'TMF',
             11 => 'CD',
@@ -1001,8 +1087,8 @@ class Mercurio36 extends ModelBase
             6 => 'PA',
             7 => 'RC',
             8 => 'PEP',
-            9 => 'CB'
-        );
+            9 => 'CB',
+        ];
     }
 
     public function getCalempDetalle()
@@ -1031,6 +1117,6 @@ class Mercurio36 extends ModelBase
 
     public function getNombreCompleto()
     {
-        return $this->priape . " " . $this->segape . " " . $this->prinom . " " . $this->segnom;
+        return $this->priape.' '.$this->segape.' '.$this->prinom.' '.$this->segnom;
     }
 }

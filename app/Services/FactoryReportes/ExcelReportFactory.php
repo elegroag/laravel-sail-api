@@ -6,6 +6,6 @@ class ExcelReportFactory implements ReportFactory
 {
     public function createReportGenerator()
     {
-        return new ExcelReportGenerator();
+        return new ExcelReportGenerator;
     }
 }

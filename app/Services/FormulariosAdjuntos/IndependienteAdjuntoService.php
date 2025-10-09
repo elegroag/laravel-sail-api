@@ -13,10 +13,15 @@ use App\Services\Utils\Comman;
 class IndependienteAdjuntoService
 {
     private $request;
+
     private $lfirma;
+
     private $filename;
+
     private $outPdf;
+
     private $fhash;
+
     private $claveCertificado;
 
     public function __construct($request)
@@ -29,19 +34,19 @@ class IndependienteAdjuntoService
     {
         $this->lfirma = Mercurio16::where([
             'documento' => $this->request->getDocumento(),
-            'coddoc' => $this->request->getCoddoc()
+            'coddoc' => $this->request->getCoddoc(),
         ])->first();
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaAfilia",
-                "metodo" => "parametros_empresa"
-            )
+            [
+                'servicio' => 'ComfacaAfilia',
+                'metodo' => 'parametros_empresa',
+            ]
         );
 
-        $datos_captura =  $procesadorComando->toArray();
-        $paramsEmpresa = new ParamsEmpresa();
+        $datos_captura = $procesadorComando->toArray();
+        $paramsEmpresa = new ParamsEmpresa;
         $paramsEmpresa->setDatosCaptura($datos_captura);
     }
 
@@ -51,7 +56,7 @@ class IndependienteAdjuntoService
         KumbiaPDF::setFooterImage(false);
         KumbiaPDF::setBackgroundImage(false);
 
-        $fabrica = new FactoryDocuments();
+        $fabrica = new FactoryDocuments;
         $documento = $fabrica->crearPolitica('independiente');
 
         $documento->setParamsInit([
@@ -59,11 +64,12 @@ class IndependienteAdjuntoService
             'firma' => $this->lfirma,
             'filename' => $this->filename,
             'background' => false,
-            'rfirma' => false
+            'rfirma' => false,
         ]);
         $documento->main();
         $documento->outPut();
         $this->cifrarDocumento();
+
         return $this;
     }
 
@@ -71,35 +77,36 @@ class IndependienteAdjuntoService
     {
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
-            array(
-                "servicio" => "ComfacaEmpresas",
-                "metodo" => "informacion_trabajador",
-                "params" => array('cedtra' => $this->request->getCedtra())
-            )
+            [
+                'servicio' => 'ComfacaEmpresas',
+                'metodo' => 'informacion_trabajador',
+                'params' => ['cedtra' => $this->request->getCedtra()],
+            ]
         );
 
-        if ($procesadorComando->isJson() == False) {
-            d("Se genero un error al buscar al trabajador usando el servicio CLI-Comando. ");
+        if ($procesadorComando->isJson() == false) {
+            d('Se genero un error al buscar al trabajador usando el servicio CLI-Comando. ');
         }
 
         $out = $procesadorComando->toArray();
         $this->filename = "carta_solicitud_independiente_{$this->request->getCedtra()}.pdf";
         $background = 'img/form/oficios/oficio_solicitud_afiliacion.jpg';
 
-        $fabrica = new FactoryDocuments();
+        $fabrica = new FactoryDocuments;
         $documento = $fabrica->crearOficio('independiente');
         $documento->setParamsInit([
             'background' => $background,
             'independiente' => $this->request,
             'firma' => $this->lfirma,
             'filename' => $this->filename,
-            'previus' => $out['success'] ? $out['data'] : null
+            'previus' => $out['success'] ? $out['data'] : null,
         ]);
 
         $documento->main();
         $documento->outPut();
 
         $this->cifrarDocumento();
+
         return $this;
     }
 
@@ -109,31 +116,32 @@ class IndependienteAdjuntoService
             'documento' => $this->request->getDocumento(),
             'coddoc' => $this->request->getCoddoc(),
             'cedtra' => $this->request->getCedtra(),
-            'comper' => 'S'
+            'comper' => 'S',
         ])->first();
 
         $this->filename = "formulario_independiente_{$this->request->getCedtra()}.pdf";
         $background = 'img/form/trabajador/form-001-tra-p01.png';
 
-        $fabrica = new FactoryDocuments();
+        $fabrica = new FactoryDocuments;
         $documento = $fabrica->crearFormulario('independiente');
         $documento->setParamsInit([
             'background' => $background,
             'independiente' => $this->request,
             'conyuge' => $conyuge,
             'firma' => $this->lfirma,
-            'filename' => $this->filename
+            'filename' => $this->filename,
         ]);
 
         $documento->main();
         $documento->outPut();
         $this->cifrarDocumento();
+
         return $this;
     }
 
-    function cifrarDocumento()
+    public function cifrarDocumento()
     {
-        $cifrarDocumento = new CifrarDocumento();
+        $cifrarDocumento = new CifrarDocumento;
         $this->outPdf = $cifrarDocumento->cifrar(
             $this->filename,
             $this->lfirma->getKeyprivate(),
@@ -145,10 +153,10 @@ class IndependienteAdjuntoService
     public function getResult()
     {
         return [
-            "name" => $this->filename,
-            "file" => basename($this->outPdf),
+            'name' => $this->filename,
+            'file' => basename($this->outPdf),
             'out' => $this->outPdf,
-            'fhash' => $this->fhash
+            'fhash' => $this->fhash,
         ];
     }
 

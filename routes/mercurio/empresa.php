@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Mercurio\EmpresaController;
 use App\Http\Middleware\EnsureCookieAuthenticated;
+use Illuminate\Support\Facades\Route;
 
 // Empresa (migrado desde Kumbia)
 Route::middleware([EnsureCookieAuthenticated::class])->group(function () {

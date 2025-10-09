@@ -4,7 +4,6 @@ use App\Http\Controllers\Mercurio\IndependienteController;
 use App\Http\Middleware\EnsureCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
-
 // Independiente (migrado desde Kumbia)
 Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
     Route::get('/mercurio/independiente/index', [IndependienteController::class, 'indexAction']);

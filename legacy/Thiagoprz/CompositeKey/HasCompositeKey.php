@@ -6,11 +6,9 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 /**
  * Trait HasCompositeKey
- * @package Thiagoprz\CompositeKey
  */
 trait HasCompositeKey
 {
-
     public function getIncrementing()
     {
         return false;
@@ -21,6 +19,7 @@ trait HasCompositeKey
         if ($this->getIncrementing()) {
             return array_merge([$this->getKeyName() => $this->getKeyType()], $this->casts);
         }
+
         return $this->casts;
     }
 
@@ -36,6 +35,7 @@ trait HasCompositeKey
         array_map(function ($key) use (&$keys) {
             $keys[] = $this->getAttribute($key);
         }, $fields);
+
         return $keys;
     }
 
@@ -44,13 +44,15 @@ trait HasCompositeKey
         foreach ($this->primaryKey as $key) {
             $query->where($key, '=', $this->getAttribute($key));
         }
+
         return $query;
     }
 
     protected function setKeysForSaveQuery($query)
     {
         $keys = $this->getKeyName();
-        return !is_array($keys) ? parent::setKeysForSaveQuery($query) : $query->where(function ($q) use ($keys) {
+
+        return ! is_array($keys) ? parent::setKeysForSaveQuery($query) : $query->where(function ($q) use ($keys) {
             foreach ($keys as $key) {
                 $q->where($key, '=', $this->getAttribute($key));
             }
@@ -59,9 +61,8 @@ trait HasCompositeKey
 
     public function getQueueableId()
     {
-        return implode(':', array_map(fn($key) => $this->getAttribute($key), $this->getKeyName()));
+        return implode(':', array_map(fn ($key) => $this->getAttribute($key), $this->getKeyName()));
     }
-
 
     public static function find(string|array $ids)
     {
@@ -69,10 +70,10 @@ trait HasCompositeKey
             $ids = explode(':', $ids);
         }
 
-        $model = new static();
+        $model = new static;
         $keyNames = $model->getKeyName();
 
-        if (!is_array($ids) || count($ids) !== count($keyNames)) {
+        if (! is_array($ids) || count($ids) !== count($keyNames)) {
             return null;
         }
 
@@ -83,21 +84,20 @@ trait HasCompositeKey
         })->first();
     }
 
-
     /**
      * Find model by primary key or throws ModelNotFoundException
      *
-     * @param array $ids
      * @return mixed
      */
     public static function findOrFail(array $ids)
     {
         $modelClass = get_called_class();
-        $model = new $modelClass();
+        $model = new $modelClass;
         $record = $model->find($ids);
-        if (!$record) {
+        if (! $record) {
             throw new ModelNotFoundException;
         }
+
         return $record;
     }
 

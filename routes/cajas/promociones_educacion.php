@@ -1,8 +1,8 @@
 <?php
 
 // Importar facades y controlador necesarios
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Cajas\Mercurio73Controller;
+use Illuminate\Support\Facades\Route;
 
 // Rutas para Mercurio73Controller - Promociones Educación
 Route::get('/promociones-educacion/index', [Mercurio73Controller::class, 'indexAction'])->name('mercurio73.index')->middleware('auth');
