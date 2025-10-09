@@ -22,7 +22,7 @@
                         @php echo $contenido @endphp
                     </div>
                     <div class="card-footer text-right">
-                        <button type="button" class="btn btn-primary" {{ $evento }}>Guardar</button>
+                        <button type="button" class="btn btn-primary" @php echo $evento @endphp>Guardar</button>
                         <button type="button" 
                             class="btn btn-danger" 
                             data-bs-dismiss="modal" 

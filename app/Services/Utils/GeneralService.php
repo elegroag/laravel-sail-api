@@ -140,51 +140,9 @@ class GeneralService
 
     public function showPaginate($paginate)
     {
-        $html = "<div class='row'>";
-        $html .= "<div class='col-sm-12 col-md-auto mr-auto pr-0 d-none d-md-inline'>";
-        $html .= "<label class='text-nowrap mb-0'>";
-        $html .= "Mostrar ";
-        $html .= "<select id='cantidad_paginate' name='cantidad_paginate' class='form-control form-control-sm d-sm-inline-block w-auto' onchange='changeCantidadPagina()'>";
-        $html .= "<option value='5'>5</option>";
-        $html .= "<option value='10'>10</option>";
-        $html .= "<option value='30'>30</option>";
-        $html .= "<option value='50'>50</option>";
-        $html .= "<option value='100'>100</option>";
-        $html .= "</select>";
-        $html .= " registros";
-        $html .= "</label>";
-        $html .= "</div>";
-        $html .= "<div class='col-sm-12 col-md-auto pl-0 pr-0 pr-sm-3'>";
-        $html .= "<nav aria-label='...'>";
-        $html .= "<ul class='pagination justify-content-center justify-content-md-end mb-0'> ";
-        $html .= "<li class='page-item' onclick=\"buscar(this);\" pagina='{$paginate->first}'>";
-        $html .= "<a class='page-link'><i class='fas fa-angle-double-left'></i></a>";
-        $html .= "</li>";
-        $html .= "<li class='page-item' onclick=\"buscar(this);\" pagina='{$paginate->before}'>";
-        $html .= "<a class='page-link'><i class='fas fa-angle-left'></i></a>";
-        $html .= "</li>";
-        for ($i = $paginate->current - 5; $i < $paginate->current; $i++) {
-            if ($i < $paginate->first) continue;
-            $html .= "<li class='page-item' onclick=\"buscar(this);\"><a class='page-link'>" . $i . "</a></li>";
-        }
-        for ($i = $paginate->current; $i <= ($paginate->current + 5); $i++) {
-            $class = "";
-            if ($i == $paginate->current) $class = "active";
-            if ($i > $paginate->last) continue;
-            $html .= "<li class='page-item $class' onclick=\"buscar(this);\"><a class='page-link'>" . $i . "</a></li>";
-        }
-        $html .= "<li class='page-item' onclick=\"buscar(this);\" pagina='{$paginate->next}'>";
-        $html .= "<a class='page-link'><i class='fas fa-angle-right'></i></a>";
-        $html .= "</li>";
-        $html .= "<li class='page-item' onclick=\"buscar(this);\" pagina='{$paginate->last}'>";
-        $html .= "<a class='page-link'><i class='fas fa-angle-double-right'></i></a>";
-        $html .= "</li>";
-        $html .= "</ul>";
-        $html .= "</nav>";
-        $html .= "</div>";
-
-        $html .= "</div>";
-        return $html;
+        return view("templates/paginate_traditional", [
+            'paginate' => $paginate
+        ])->render();
     }
 
     public function createReport($model, $_fields, $query = '1=1', $title = 'Reporte', $format = 'P') {}

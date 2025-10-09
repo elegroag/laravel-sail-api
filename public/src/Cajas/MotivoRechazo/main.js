@@ -17,12 +17,10 @@ const validatorInit = () => {
 $(() => {
 	window.App.initialize();
 	EventsPagination();
-	
+
 	const modalCapture = new bootstrap.Modal(document.getElementById('captureModal'));
 
-	$(document).on('blur', '#codest', function () {
-		validePk('#codest');
-	});
+	$(document).on('blur', '#codest', validePk);
 
 	$('#captureModal').on('hide.bs.modal', function (e) {
 		$('.select2-selection')
@@ -38,20 +36,18 @@ $(() => {
 			data: {
 				codest: codest,
 			},
-			callback: function (response) {
+			callback: (response) => {
 				if(response.success){
-
 					$.each(response, function (key, value) {
 						$('#' + key.toString()).val(value);
 					});
 					$('#codest').attr('disabled', 'true');
-					
 					const tpl = _.template(document.getElementById('tmp_form').innerHTML);
                     $('#captureModalbody').html(tpl(response.data));
 					modalCapture.show();
 					validatorInit();
 				} else {
-					Messages.display(response.msg, 'error');
+					Messages.display(response, 'error');
 				}
 			}
 		});
@@ -68,13 +64,13 @@ $(() => {
 		window.App.trigger('syncro', {
 			url: window.App.url(window.ServerController + '/guardar'),
 			data: $('#form').serialize(),
-			callback: function (response) {
+			callback: (response) => {
 				if (response.success) {
 					buscar();
-					Messages.display(response.msg, 'success');
+					Messages.display(response.msj, 'success');
 					modalCapture.hide();
 				} else {
-					Messages.display(response.msg, 'error');
+					Messages.display(response.msj, 'error');
 				}
 			}
 		});
@@ -99,14 +95,14 @@ $(() => {
 					data: {
 						codest: codest,
 					},
-					callback: function (response) {
+					callback: (response) => {
 						if (response) {
 							if(response.success){
 								buscar();
-								Messages.display(response.msg, 'success');
+								Messages.display(response.msj, 'success');
 							}
 						} else {
-							Messages.display(response.msg, 'error');
+							Messages.display(response.msj, 'error');
 						}
 					},
 				});
@@ -114,12 +110,13 @@ $(() => {
 		});
 	});
 
-	$(document).on('click', "[data-toggle='nuevo']", (e) => {
+	$(document).on('click', "[data-toggle='header-nuevo']", (e) => {
 		e.preventDefault();
 		$('#form :input').each(function (elem) {
 			$(this).val('');
 			$(this).removeAttr('disabled');
 		});
+
 		const tpl = _.template(document.getElementById('tmp_form').innerHTML);
 		$('#captureModalbody').html(tpl({
 			codest: '',

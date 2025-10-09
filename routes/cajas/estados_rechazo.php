@@ -14,4 +14,5 @@ Route::prefix('/cajas/mercurio11')->group(function () {
 
     Route::post('/aplicar_filtro', [Mercurio11Controller::class, 'aplicarFiltroAction']);
     Route::post('/change_cantidad_pagina', [Mercurio11Controller::class, 'changeCantidadPagina']);
+    Route::post('/borrar_filtro', [Mercurio11Controller::class, 'borrarFiltroAction']);
 });

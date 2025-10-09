@@ -35,10 +35,10 @@
                         </div>
                     </div>
                     <div class="form-group" style="padding:5px;">
-                        <button class='btn btn-success btn-sm' toggle-event='add_filtro'>
+                        <button class='btn btn-success btn-sm' data-toggle='filter-add'>
                             Adicionar
                         </button>
-                        <button class='btn btn-danger btn-sm' toggle-event='borrar_filtro'>
+                        <button class='btn btn-danger btn-sm' data-toggle='filter-remove'>
                             Borrar
                         </button>
                     </div>
@@ -71,7 +71,7 @@
                                             <input id='mvalue-filtro[]' name='mvalue-filtro[]' type='hidden' value='{{ $filters['value'][$xk]['mvalue'] }}' />
                                         </td>
                                         <td>
-                                            <button class='btn btn-outline-danger btn-sm' toggle-event='remove' data-key='{{ $xk }}'>
+                                            <button class='btn btn-outline-danger btn-sm' data-toggle='filter-item-remove' data-key='{{ $xk }}'>
                                                 <span class='btn-inner--icon'><i class='fas fa-trash'></i></span>
                                             </button>
                                         </td>
@@ -83,10 +83,17 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class='btn btn-primary' toggle-event='aplicar_filtro'>
+                <button class='btn btn-primary' data-toggle='filter-aplicate'>
                     Aplicar
                 </button>
-                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" aria-label="Close">Cerrar</button>
+                <button 
+                    type="button" 
+                    class="btn btn-danger" 
+                    data-bs-dismiss="modal" 
+                    data-toggle='filter-close' 
+                    aria-label="Close">
+                        Cerrar
+                </button>
             </div>
         </div>
     </div>

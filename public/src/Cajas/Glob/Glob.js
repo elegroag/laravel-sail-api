@@ -1,4 +1,4 @@
-import { $Kumbia, Messages, Utils } from '@/Utils';
+import { Messages } from '@/Utils';
 
 const _win = window;
 _win.Collection = { Adress: [] };
@@ -30,18 +30,6 @@ const validaCaracteres = function (element = {}) {
 	}
 };
 
-const download_manual = function (option = '') {
-	window.open(Utils.getKumbiaURL('../public/docs/manual_' + option + '.pdf'), 'manuales');
-};
-
-const openManuales = () => {
-	$('#manuales-dentro-modal').modal();
-};
-
-const openHelp = () => {
-	$('#help-modal').modal();
-};
-
 const actualizar_select = function (name = '') {
 	if (name !== undefined && name !== '') {
 		$('#' + name).trigger('change');
@@ -53,7 +41,8 @@ const actualizar_select = function (name = '') {
 };
 
 const filtrar = () => {
-	$('#filtrar-modal').modal();
+	const modalFilter = new bootstrap.Modal(document.getElementById('filtrar-modal'));
+	modalFilter.show();
 };
 
 const __readFiltro = () => {
@@ -65,12 +54,11 @@ const __readFiltro = () => {
 };
 
 const addFiltro = () => {
-	let campo = $('#campo-filtro option:selected').text();
-	let condi = $('#condi-filtro option:selected').text();
-	let value = $('#value-filtro').val();
-
-	let vcampo = $('#campo-filtro').val();
-	let vcondi = $('#condi-filtro').val();
+	const campo = $('#campo-filtro option:selected').text();
+	const condi = $('#condi-filtro option:selected').text();
+	const value = $('#value-filtro').val();
+	const vcampo = $('#campo-filtro').val();
+	const vcondi = $('#condi-filtro').val();
 
 	if ($('#value-filtro').val() == '') return false;
 	let _template = _.template(`
@@ -88,14 +76,14 @@ const addFiltro = () => {
 				<input id='mvalue-filtro[]' name='mvalue-filtro[]' type='hidden' value='<%=value%>' />
 			</td>
 			<td>
-				<button class='btn btn-outline-danger btn-sm' toggle-event='remove'>
+				<button class='btn btn-outline-danger btn-sm' data-toggle='filter-item-remove'>
 					<span class='btn-inner--icon'><i class='fas fa-trash'></i></span>
 				</button>
 			</td>
 		</tr>
 		`);
 
-	let html = $('#filtro_add').find('tbody');
+	const html = $('#filtro_add').find('tbody');
 	html.append(
 		_template({
 			campo,
@@ -107,48 +95,48 @@ const addFiltro = () => {
 	);
 };
 
-const buscar = function (elem = undefined) {
-	let numero = $('#cantidad_paginate').val();
-	let pagina;
+const buscar = (elem = undefined) => {
+	const numero = $('#cantidad_paginate').val();
+	let pagina = 1;
 	if (elem) {
 		pagina = parseInt($(elem).find('a').html());
-		if (_.isNaN(pagina) == true) {
-			pagina = parseInt($(elem).attr('pagina'));
-		}
-	} else {
-		pagina = 1;
+		if (_.isNaN(pagina) == true) pagina = parseInt($(elem).attr('pagina'));
 	}
-
 	if (pagina === 0) return;
-	$.ajax({
-		type: 'POST',
+	window.App.trigger('syncro', {
 		url: window.App.url(window.ServerController + '/buscar'),
 		data: {
 			...__readFiltro(),
 			pagina: pagina,
 			numero: numero,
 		},
-	})
-		.done((response) => {
-			$('#consulta').html(response.consulta);
-			$('#paginate').html(response.paginate);
-		})
-		.fail((jqXHR, textStatus) => {
-			alert('Request failed: ' + textStatus);
-		});
-};
-
-const borrarFiltro = (e = '') => {
-	$.ajax({
-		method: 'GET',
-		dataType: 'JSON',
-		url: window.App.url(window.ServerController + '/borrar_filtro'),
-	}).done(function (response) {
-		aplicarFiltro();
+		callback: (response) =>  {
+			if (response){
+				$('#consulta').html(response.consulta);
+				$('#paginate').html(response.paginate);
+			}else{
+				Messages.display(response, 'error');
+			}
+		}
 	});
 };
 
-const aplicarFiltro = (e = '') => {
+const borrarFiltro = (e) => {
+	window.App.trigger('syncro', {
+		url: window.App.url(window.ServerController + '/borrar_filtro'),
+		data: {},
+		silent: false,
+		callback: (response) => {
+			if(response){
+				const body = $('#filtro_add').find('tbody');
+				body.html("");
+				return aplicarFiltro();
+			}
+		}
+	});
+};
+
+const aplicarFiltro = () => {
 	let cantidad = $('#cantidad_paginate').val();
 	if (cantidad === null || cantidad === '') cantidad = 15;
 
@@ -174,84 +162,65 @@ const delFiltro = function (elem) {
 	aplicarFiltro();
 };
 
-const changeCantidadPagina = (e = '') => {
-	let cantidad = $('#cantidad_paginate').val();
-	$.ajax({
-		type: 'POST',
-		url: window.App.url(window.ServerController + '/change_cantidad_pagina'),
-		data: {
-			...__readFiltro(),
-			numero: cantidad,
-		},
-	})
-		.done(function (response) {
-			$('#consulta').html(response['consulta']);
-			$('#paginate').html(response['paginate']);
-		})
-		.fail(function (jqXHR, textStatus) {
-			alert('Request failed: ' + textStatus);
-		});
-};
-
-const ver_archivo = function (path, nomarc) {
-	let url = ('../' + path + nomarc).replace('//', '/');
-	window.open(
-		Utils.getKumbiaURL(url),
-		nomarc,
-		'width=800, height=750,toobal=no,statusbar=no,scrollbars=yes menuvar=yes',
-	);
+const changeCantidadPagina = () => {
+	const cantidad = $('#cantidad_paginate').val();
+	if(cantidad == '' || !cantidad) return false;
+	aplicarFiltro();
 };
 
 const verArchivo = function (path = void 0, nomarc = void 0) {
-	let _filepath;
+	let filename;
 	if (path != void 0 && nomarc != void 0) {
-		_filepath = btoa(path + '' + nomarc);
+		filename = btoa(path + '' + nomarc);
 	} else if (path != void 0 && nomarc == void 0) {
-		_filepath = btoa(path);
+		filename = btoa(path);
 	} else {
 		return;
 	}
-	let _data = {
-		url: Utils.getKumbiaURL('principal/download_global/' + _filepath),
-		filename: _filepath,
-	};
 	$.ajax({
-		type: 'POST',
-		url: Utils.getKumbiaURL('principal/file_existe_global/' + _filepath),
-		dataType: 'JSON',
-	}).done(function (resultado) {
-		if (resultado.success) {
-			ver_archivo(path, nomarc);
-		} else {
-			Swal.fire({
-				title: 'Notificación',
-				text: 'El archivo no se logra localizar en el servidor',
-				icon: 'warning',
-				showConfirmButton: false,
-				timer: 10000,
-			});
-		}
+		url: $App.url(window.ServerController + '/principal/download_global'),
+		method: 'POST',
+		data: {  
+			filename 
+		},
+		xhrFields: {
+			responseType: 'blob',
+		},
+		beforeSend: (xhr) => {
+			const csrf = document.querySelector("[name='csrf-token']").getAttribute('content');
+			xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+			xhr.setRequestHeader('X-CSRF-TOKEN', csrf);
+			xhr.setRequestHeader('Authorization', 'Bearer ' + csrf);
+		},
+		success: (data) => {
+			const url = URL.createObjectURL(data);
+			window.open(url, filename, 'width=900,height=750,toolbar=no,location=no,status=no,menubar=no,scrollbars=yes');
+		},
+		error: () => {
+			window.App.trigger('alert:error', { message: 'No se pudo cargar el documento' });
+		},
 	});
 };
 
 const openAddress = function (name) {
 	if (_.size(_win.Collection.Adress) == 0) {
-		$.get(Utils.getKumbiaURL('principal/listaAdress'), function (res) {
-			let response = JSON.parse(res);
-			_win.Collection.Adress = response.data;
-			let template = _.template($('#tmp_super_direction').html());
-			$('#show_modal_generic').html(
-				template({
-					adress: _win.Collection.Adress,
-				}),
-			);
-			$('#modal_generic').modal();
-			$('#size_modal_generic').addClass('modal-lg');
-			$('#tagname').val(name);
-			$('#button_address_modal').unbind('click');
-			$('#form_address_modal :input').each(function (elem) {
-				$(this).val('');
-			});
+		$.get(window.App.url('cajas/principal/listaAdress'), 
+			function (res) {
+				let response = JSON.parse(res);
+				_win.Collection.Adress = response.data;
+				let template = _.template($('#tmp_super_direction').html());
+				$('#show_modal_generic').html(
+					template({
+						adress: _win.Collection.Adress,
+					}),
+				);
+				$('#modal_generic').modal();
+				$('#size_modal_generic').addClass('modal-lg');
+				$('#tagname').val(name);
+				$('#button_address_modal').unbind('click');
+				$('#form_address_modal :input').each(function (elem) {
+					$(this).val('');
+				});
 		});
 	} else {
 		$('#modal_generic').modal();
@@ -264,27 +233,25 @@ const openAddress = function (name) {
 	}
 };
 
-const validePk = (el = '') => {
-	if (el === undefined || el === '') el = '#codigo';
-	if ($(el).val() == '') return;
-	$.ajax({
-		type: 'POST',
-		url: Utils.getKumbiaURL($Kumbia.controller + '/validePk'),
+const validePk = (e) => {
+	const target = $(e.currentTarget);
+	if (target.val() == '') return;
+	window.App.trigger('syncro', {
+		url: window.App.url(window.ServerController+ '/valide-pk'),
 		data: {
-			codigo: $('#codigo').val(),
+			codigo: target.val(),
 		},
-	})
-		.done((response = {}) => {
+		silent: true,
+		callback: (response) => {
+			if(!response) return Messages.display(response, 'error');
 			if (response.flag == false) {
-				$(el).val('');
-				$(el).trigger('change');
-				$(el).trigger('focus');
-				Messages.display(response.msg, 'warning');
+				target.val('');
+				target.trigger('change');
+				target.trigger('focus');
+				Messages.display(response.msj, 'warning');
 			}
-		})
-		.fail((jqXHR, textStatus) => {
-			Messages.display(jqXHR.statusText, 'error');
-		});
+		}
+	});
 };
 
 const EventsPagination = () => {
@@ -292,47 +259,47 @@ const EventsPagination = () => {
 
 	const modalFilter = new bootstrap.Modal(document.getElementById('filtrar-modal'));
 
+	//Events DOM Filter
 	$(document).on('click', "[data-toggle='reporte']", (e) => {
 		e.preventDefault();
 		const tipo = $(e.currentTarget).attr('data-type');
 		window.location.href = window.App.url(window.ServerController + '/reporte/' + tipo);
 	});
 
-	$(document).on('click', "[data-toggle='filtrar']", (e) => {
-		e.preventDefault();
-		modalFilter.show();
-	});
-
-	$(document).on('click', "[data-toggle='page-buscar']", (e) => {
+	$(document).on('click', "[data-toggle='paginate-buscar']", (e) => {
 		e.preventDefault();
 		buscar($(e.currentTarget));
 	});
 
-	$(document).on('change', "[data-toggle='page-change']", (e) => {
-		changeCantidadPagina();
-	});
+	$(document).on('change', "[data-toggle='paginate-change']", changeCantidadPagina);
 
-	$(document).on('click', "[toggle-event='aplicar_filtro']", aplicarFiltro);
-    $(document).on('click', "[toggle-event='add_filtro']", addFiltro);
-    $(document).on('click', "[toggle-event='remove']", (e) => delFiltro($(e.currentTarget)));
+	//Events DOM Filtros
+	$(document).on('click', "[data-toggle='header-filtrar']", (e) => {
+		e.preventDefault();
+		modalFilter.show();
+	});
+	$(document).on('click', "[data-toggle='filter-aplicate']", aplicarFiltro);
+    $(document).on('click', "[data-toggle='filter-add']", addFiltro);
+    $(document).on('click', "[data-toggle='filter-item-remove']", (e) => delFiltro($(e.currentTarget)));
+	$(document).on('click', "[data-toggle='filter-remove']", (e) => {
+		e.preventDefault();
+		borrarFiltro();
+	});
 };
 
 export {
 	EventsPagination,
 	buscar,
 	openAddress,
-	openHelp,
-	download_manual,
 	aplicarFiltro,
 	borrarFiltro,
 	delFiltro,
 	changeCantidadPagina,
-	verArchivo,
 	addFiltro,
 	filtrar,
 	actualizar_select,
-	openManuales,
 	validaCaracteres,
 	validar,
 	validePk,
+	verArchivo
 };

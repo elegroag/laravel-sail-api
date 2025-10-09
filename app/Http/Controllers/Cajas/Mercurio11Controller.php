@@ -129,26 +129,28 @@ class Mercurio11Controller extends ApplicationController
     public function borrarAction(Request $request)
     {
         try {
-            $this->setResponse("ajax");
             $codest = $request->input('codest');
-
             $this->db->begin();
             Mercurio11::where('codest', $codest)->delete();
             $this->db->commit();
 
-            $response = parent::successFunc("Borrado Con Exito");
-            return $this->renderObject($response, false);
+            $response = [
+                'success' => true,
+                'msj' => 'Proceso completado con éxito.'
+            ];
         } catch (DebugException $e) {
             $this->db->rollback();
-            $response = parent::errorFunc("No se puede Borrar el Registro");
-            return $this->renderObject($response, false);
+            $response = [
+                'success' => false,
+                'msj' => $e->getMessage()
+            ];
         }
+        return $this->renderObject($response, false);
     }
 
     public function guardarAction(Request $request)
     {
         try {
-            $this->setResponse("ajax");
             $codest = $request->input('codest');
             $detalle = $request->input('detalle');
 
@@ -158,24 +160,25 @@ class Mercurio11Controller extends ApplicationController
             if (!$mercurio11) {
                 $mercurio11 = new Mercurio11();
                 $mercurio11->setCodest($codest);
+                $mercurio11->setDetalle($detalle);
+            } else {
+                $mercurio11->setDetalle($detalle);
             }
-
-            $mercurio11->setDetalle($detalle);
-
-            if (!$mercurio11->save()) {
-                parent::setLogger($mercurio11->getMessages());
-                $this->db->rollback();
-                throw new DebugException("Error al guardar el registro");
-            }
-
+            $mercurio11->save();
             $this->db->commit();
-            $response = parent::successFunc("Creacion Con Exito");
-            return $this->renderObject($response, false);
-        } catch (DebugException $e) {
+
+            $response = [
+                'success' => true,
+                'msj' => 'Proceso completado con éxito.'
+            ];
+        } catch (\Exception $e) {
             $this->db->rollback();
-            $response = parent::errorFunc("No se puede guardar/editar el Registro: " . $e->getMessage());
-            return $this->renderObject($response, false);
+            $response = [
+                'success' => false,
+                'msj' => $e->getMessage()
+            ];
         }
+        return $this->renderObject($response, false);
     }
 
     public function validePkAction(Request $request)
@@ -204,5 +207,16 @@ class Mercurio11Controller extends ApplicationController
         $consultasOldServices = new GeneralService();
         $file = $consultasOldServices->createReport("mercurio11", $_fields, $this->query, "Motivos Rechazo", $format);
         return $this->renderObject($file, false);
+    }
+
+    public function borrarFiltroAction()
+    {
+        set_flashdata("filter_mercurio11", false, true);
+        set_flashdata("filter_params", false, true);
+        return $this->renderObject([
+            'success' => true,
+            'query' => get_flashdata_item("filter_mercurio11"),
+            'filter' => get_flashdata_item("filter_params"),
+        ]);
     }
 }

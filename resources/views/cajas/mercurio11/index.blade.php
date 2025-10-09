@@ -34,17 +34,17 @@
     )
 
     <script id='tmp_form' type="text/template">
-        <form id="form" class="validation_form" autocomplete="off" novalidate >
-           <div class="row justify-content-between">
-            <div class="form-group col-4">
-                <label for="codest" class="form-control-label">Codigo</label>
-                <input type="text" id="codest" name="codest" class="form-control" placeholder="Codigo" required value="<%= codest %>">
+        <form id="form" method="#" class="validation_form" autocomplete="off" novalidate >
+            <div class="row justify-content-between">
+                <div class="form-group col-4">
+                    <label for="codest" class="form-control-label">Codigo</label>
+                    <input type="text" id="codest" name="codest" class="form-control" placeholder="Codigo" required value="<%= codest %>">
+                </div>
+                <div class="form-group col-8">
+                    <label for="detalle" class="form-control-label">Detalle</label>
+                    <input type="text" id="detalle" name="detalle" class="form-control" placeholder="Detalle" required value="<%= detalle %>">
+                </div>
             </div>
-            <div class="form-group col-8">
-                <label for="detalle" class="form-control-label">Detalle</label>
-                <input type="text" id="detalle" name="detalle" class="form-control" placeholder="Detalle" required value="<%= detalle %>">
-            </div>
-           </div>
         </form>
     </script>
 
