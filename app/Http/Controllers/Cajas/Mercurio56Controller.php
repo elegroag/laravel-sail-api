@@ -29,7 +29,6 @@ class Mercurio56Controller extends ApplicationController
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
-        $this->cantidad_pagina = $this->numpaginate ?? 10;
     }
 
     public function showTabla($paginate)
@@ -163,7 +162,7 @@ class Mercurio56Controller extends ApplicationController
                 $archivo = $mercurio56->archivo;
                 $mercurio01 = Mercurio01::first();
                 if ($mercurio01 && ! empty($archivo)) {
-                    $filePath = public_path($mercurio01->getPath().'galeria/'.$archivo);
+                    $filePath = public_path($mercurio01->getPath() . 'galeria/' . $archivo);
                     if (File::exists($filePath)) {
                         File::delete($filePath);
                     }
@@ -179,7 +178,7 @@ class Mercurio56Controller extends ApplicationController
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $this->db->rollback();
-            $response = parent::errorFunc('No se puede Borrar el Registro: '.$e->getMessage());
+            $response = parent::errorFunc('No se puede Borrar el Registro: ' . $e->getMessage());
 
             return $this->renderObject($response, false);
         }
@@ -211,12 +210,12 @@ class Mercurio56Controller extends ApplicationController
             if ($request->hasFile('archivo') && $request->file('archivo')->isValid()) {
                 $file = $request->file('archivo');
                 $extension = $file->getClientOriginalExtension();
-                $fileName = $codinf.'_infracestructura.'.$extension;
-                $destinationPath = public_path($mercurio01->getPath().'galeria');
+                $fileName = $codinf . '_infracestructura.' . $extension;
+                $destinationPath = public_path($mercurio01->getPath() . 'galeria');
 
                 // Delete old file if it exists
                 if ($mercurio56->exists && ! empty($mercurio56->archivo)) {
-                    $oldFilePath = $destinationPath.'/'.$mercurio56->archivo;
+                    $oldFilePath = $destinationPath . '/' . $mercurio56->archivo;
                     if (File::exists($oldFilePath)) {
                         File::delete($oldFilePath);
                     }
@@ -238,7 +237,7 @@ class Mercurio56Controller extends ApplicationController
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $this->db->rollback();
-            $response = parent::errorFunc('No se puede guardar/editar el Registro: '.$e->getMessage());
+            $response = parent::errorFunc('No se puede guardar/editar el Registro: ' . $e->getMessage());
 
             return $this->renderObject($response, false);
         }

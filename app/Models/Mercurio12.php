@@ -10,7 +10,7 @@ class Mercurio12 extends ModelBase
 
     public $timestamps = false;
 
-    protected $primaryKey = 'id';
+    protected $primaryKey = 'coddoc';
 
     protected $fillable = [
         'coddoc',

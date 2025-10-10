@@ -2,25 +2,20 @@
 
 // Importar facades y controlador necesarios
 use App\Http\Controllers\Cajas\Mercurio12Controller;
+use App\Http\Middleware\CajasCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
-// Ruta GET para mostrar la página principal de documentos
-Route::get('/documentos', [Mercurio12Controller::class, 'indexAction']);
+Route::middleware([CajasCookieAuthenticated::class])->group(function () {
+    Route::prefix('/cajas/mercurio12')->group(function () {
+        Route::get('/index', [Mercurio12Controller::class, 'indexAction']);
+        Route::post('/buscar', [Mercurio12Controller::class, 'buscarAction']);
+        Route::post('/editar/{coddoc?}', [Mercurio12Controller::class, 'editarAction']);
+        Route::post('/borrar', [Mercurio12Controller::class, 'borrarAction']);
+        Route::post('/guardar', [Mercurio12Controller::class, 'guardarAction']);
+        Route::post('/valide-pk', [Mercurio12Controller::class, 'validePkAction']);
+        Route::post('/reporte/{format?}', [Mercurio12Controller::class, 'reporteAction']);
 
-// Ruta POST para buscar documentos (método AJAX)
-Route::post('/documentos/buscar', [Mercurio12Controller::class, 'buscarAction']);
-
-// Ruta GET para editar documentos (método AJAX, con parámetro opcional)
-Route::get('/documentos/editar/{coddoc?}', [Mercurio12Controller::class, 'editarAction']);
-
-// Ruta POST para borrar documentos (método AJAX)
-Route::post('/documentos/borrar', [Mercurio12Controller::class, 'borrarAction']);
-
-// Ruta POST para guardar documentos (método AJAX)
-Route::post('/documentos/guardar', [Mercurio12Controller::class, 'guardarAction']);
-
-// Ruta POST para validar clave primaria (método AJAX)
-Route::post('/documentos/valide-pk', [Mercurio12Controller::class, 'validePkAction']);
-
-// Ruta GET para generar reportes de documentos (con parámetro de formato)
-Route::get('/documentos/reporte/{format?}', [Mercurio12Controller::class, 'reporteAction']);
+        Route::post('/aplicar_filtro', [Mercurio12Controller::class, 'aplicarFiltroAction']);
+        Route::post('/change_cantidad_pagina', [Mercurio12Controller::class, 'changeCantidadPaginaAction']);
+    });
+});

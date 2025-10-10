@@ -2,11 +2,19 @@
 
 // Importar facades y controlador necesarios
 use App\Http\Controllers\Cajas\Mercurio14Controller;
+use App\Http\Middleware\CajasCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
-// Rutas corregidas para Mercurio14Controller - Documentos y Empleador
-Route::get('/documentos-empleador/index', [Mercurio14Controller::class, 'indexAction'])->name('mercurio14.index')->middleware('auth');
-Route::get('/documentos-empleador/buscar', [Mercurio14Controller::class, 'buscarAction'])->name('mercurio14.buscar')->middleware('auth');
-Route::get('/documentos-empleador/infor', [Mercurio14Controller::class, 'inforAction'])->name('mercurio14.infor')->middleware('auth');
-Route::post('/documentos-empleador/guardar', [Mercurio14Controller::class, 'guardarAction'])->name('mercurio14.guardar')->middleware('auth');
-Route::delete('/documentos-empleador/borrar', [Mercurio14Controller::class, 'borrarAction'])->name('mercurio14.borrar')->middleware('auth');
+Route::middleware([CajasCookieAuthenticated::class])->group(function () {
+    Route::prefix('/cajas/mercurio14')->group(function () {
+
+        Route::get('/index', [Mercurio14Controller::class, 'indexAction']);
+        Route::post('/guardar', [Mercurio14Controller::class, 'guardarAction']);
+        Route::post('/borrar', [Mercurio14Controller::class, 'borrarAction']);
+        Route::post('/aplicar_filtro', [Mercurio14Controller::class, 'aplicarFiltroAction']);
+        Route::post('/valide-pk', [Mercurio14Controller::class, 'validePkAction']);
+        Route::post('/buscar', [Mercurio14Controller::class, 'buscarAction']);
+        Route::post('/editar/{tipo?}', [Mercurio14Controller::class, 'editarAction']);
+        Route::post('/change_cantidad_pagina', [Mercurio14Controller::class, 'changeCantidadPaginaAction']);
+    });
+});

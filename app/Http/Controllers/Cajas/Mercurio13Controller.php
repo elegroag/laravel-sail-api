@@ -29,7 +29,6 @@ class Mercurio13Controller extends ApplicationController
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
-        $this->cantidad_pagina = $this->numpaginate ?? 10;
     }
 
     public function indexAction()
@@ -65,37 +64,7 @@ class Mercurio13Controller extends ApplicationController
 
     public function showTabla($paginate)
     {
-        $html = '<table border="0" cellpadding="0" cellspacing="0" class="table table-bordered">';
-        $html .= "<thead class='thead-light'>";
-        $html .= '<tr>';
-        $html .= "<th scope='col'>Tipo Servicio</th>";
-        $html .= "<th scope='col'>Documento</th>";
-        $html .= "<th scope='col'>Obligatorio</th>";
-        $html .= "<th scope='col'>Auto Generado</th>";
-        $html .= "<th scope='col'></th>";
-        $html .= '</tr>';
-        $html .= '</thead>';
-        $html .= "<tbody class='list'>";
-        foreach ($paginate->items as $mtable) {
-            $html .= '<tr>';
-            $html .= "<td>{$mtable->mercurio09->detalle}</td>";
-            $html .= "<td>{$mtable->mercurio12->detalle}</td>";
-            $html .= "<td>{$mtable->obliga}</td>";
-            $html .= "<td>{$mtable->auto_generado}</td>";
-            $html .= "<td class='table-actions'>";
-            $html .= "<a href='#!' class='table-action btn btn-primary btn-xs' title='Editar' data-tipopc='{$mtable->tipopc}' data-coddoc='{$mtable->coddoc}' data-toggle='editar'>";
-            $html .= "<i class='fas fa-user-edit text-white'></i>";
-            $html .= '</a>';
-            $html .= "<a href='#!' class='table-action table-action-delete btn btn-danger btn-xs' title='Borrar' data-tipopc='{$mtable->tipopc}' data-coddoc='{$mtable->coddoc}' data-toggle='borrar'>";
-            $html .= "<i class='fas fa-trash text-white'></i>";
-            $html .= '</a>';
-            $html .= '</td>';
-            $html .= '</tr>';
-        }
-        $html .= '</tbody>';
-        $html .= '</table>';
-
-        return $html;
+        return view('cajas.mercurio13._table', compact('paginate'))->render();
     }
 
     public function buscarAction(Request $request)
@@ -103,7 +72,7 @@ class Mercurio13Controller extends ApplicationController
         $pagina = ($request->input('pagina') == '') ? 1 : $request->input('pagina');
 
         $paginate = Paginate::execute(
-            Mercurio13::with(['mercurio09', 'mercurio12'])->whereRaw("{$this->query}")->get(),
+            Mercurio13::whereRaw("{$this->query}")->get(),
             $pagina,
             $this->cantidad_pagina
         );
@@ -121,22 +90,23 @@ class Mercurio13Controller extends ApplicationController
     public function editarAction(Request $request)
     {
         try {
-            $this->setResponse('ajax');
             $tipopc = $request->input('tipopc');
             $coddoc = $request->input('coddoc');
-
             $mercurio13 = Mercurio13::where('tipopc', $tipopc)->where('coddoc', $coddoc)->first();
-
             if (! $mercurio13) {
                 $mercurio13 = new Mercurio13;
             }
-
-            return $this->renderObject($mercurio13->toArray(), false);
+            $response = [
+                'success' => true,
+                'data' => $mercurio13->toArray()
+            ];
         } catch (DebugException $e) {
-            $response = parent::errorFunc('Error al obtener el registro');
-
-            return $this->renderObject($response, false);
+            $response = [
+                'success' => false,
+                'msg' => $e->getMessage()
+            ];
         }
+        return $this->renderObject($response, false);
     }
 
     public function guardarAction(Request $request)

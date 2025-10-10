@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Cajas;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Models\Gener02;
 use App\Models\Gener40;
 use App\Models\Gener42;
 use Illuminate\Http\Request;
@@ -29,14 +30,13 @@ class Gener42Controller extends ApplicationController
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    public function table($table, $tipo)
+    public function tablePermisos($table, $tipo)
     {
-        return view('gener42/asigna_permisos', ['table' => $table, 'tipo' => $tipo])->render();
+        return view('cajas/gener42/asigna_permisos', ['table' => $table, 'tipo' => $tipo])->render();
     }
 
     public function buscarAction(Request $request)
     {
-        $this->setResponse('ajax');
         $usuario = $request->input('usuario');
         $buscar = $request->input('buscar');
         $tipo = $request->input('tipo');
@@ -46,76 +46,70 @@ class Gener42Controller extends ApplicationController
         if ($tipo == 'S') {
             $likes = " and detalle like '%{$buscar}%'";
         }
-        $table = (new Gener40)->find(
-            "codigo IN(select permiso from gener42 where usuario={$usuario}) {$likes}",
-            'order: orden'
-        );
-        $response['permite'] = $this->table($table, 'S');
+        $table = Gener40::whereRaw("codigo IN(select permiso from gener42 where usuario={$usuario}) {$likes}")->orderBy('orden', 'ASC')->get();
+        $response['permite'] = $this->tablePermisos($table, 'S');
 
         $liken = '';
         if ($tipo == 'N') {
             $liken = " and detalle like '%{$buscar}%'";
         }
-        $table = (new Gener40)->find(
-            "codigo NOT IN(select permiso from gener42 where usuario={$usuario}) {$liken}",
-            'order: orden'
-        );
-        $response['nopermite'] = $this->table($table, 'N');
+        $table = Gener40::whereRaw("codigo NOT IN(select permiso from gener42 where usuario={$usuario}) {$liken}")->orderBy('orden', 'ASC')->get();
+        $response['nopermite'] = $this->tablePermisos($table, 'N');
         $this->renderObject($response, false);
     }
 
     public function indexAction()
     {
-        $help = 'Esta opcion permite manejar los ';
-        $this->setParamToView('help', $help);
         $this->setParamToView('title', 'Permisos por usuario');
-        // $this->setParamToView("buttons",array("N"));
-        // Tag::setDocumentTitle('Permisos por usuario');
+        return view('cajas.gener42.index', [
+            'title' => 'Permisos por usuario',
+            'gener02' => Gener02::all(),
+            'campo_filtro' => [
+                'usuario' => 'Usuario',
+                'tipfun' => 'Tipo funcionario',
+            ]
+        ]);
     }
 
     public function guardarAction(Request $request)
     {
         try {
-
-            $this->setResponse('ajax');
-            $tipo = $request->input('tipo', 'addslaches', 'extraspaces', 'striptags');
-            $usuario = $request->input('usuario', 'addslaches', 'extraspaces', 'striptags');
-            $permisos = $request->input('permisos', 'addslaches', 'extraspaces', 'striptags');
+            $tipo = $request->input('tipo');
+            $usuario = $request->input('usuario');
+            $permisos = $request->input('permisos');
             $permisos = explode(';', $permisos);
-            $modelos = ['gener42'];
 
             $response = $this->db->begin();
             if ($tipo == 'A') {
                 foreach ($permisos as $permiso) {
-                    if (empty($permiso)) {
-                        continue;
-                    }
-                    $table = new Gener42;
+                    if (empty($permiso)) continue;
 
+                    $table = new Gener42;
                     $table->setUsuario($usuario);
                     $table->setPermiso($permiso);
                     if (! $table->save()) {
-                        parent::setLogger($table->getMessages());
                         $this->db->rollback();
                     }
                 }
             }
             if ($tipo == 'E') {
                 foreach ($permisos as $permiso) {
-                    if (empty($permiso)) {
-                        continue;
-                    }
-                    $this->Gener42->deleteAll("usuario='$usuario' and permiso='$permiso'");
+                    if (empty($permiso)) continue;
+                    Gener42::whereRaw("usuario='{$usuario}' and permiso='{$permiso}'")->delete();
                 }
             }
             $this->db->commit();
-            $response = parent::successFunc('Creacion Con Exito');
-
-            return $this->renderObject($response, false);
+            $response = [
+                'flag' => true,
+                'msg' => 'Operación realizada correctamente'
+            ];
         } catch (DebugException $e) {
-            $response = parent::errorFunc('No se puede guardar/editar el Registro');
-
-            return $this->renderObject($response, false);
+            $this->db->rollback();
+            $response = [
+                'flag' => false,
+                'msg' => $e->getMessage()
+            ];
         }
+        return $this->renderObject($response, false);
     }
 }

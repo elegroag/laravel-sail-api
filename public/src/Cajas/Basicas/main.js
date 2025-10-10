@@ -25,12 +25,6 @@ $(() => {
 		validePk('#codapl');
 	});
 
-	$('#captureModal').on('hide.bs.modal', (e) => {
-		$('.select2-selection')
-			.removeClass(validator.settings.errorClass)
-			.removeClass(validator.settings.validClass);
-	});
-
 	$(document).on('click', "[data-toggle='editar']", (e) => {
 		e.preventDefault();
 		const codapl = $(e.currentTarget).attr('data-cid');

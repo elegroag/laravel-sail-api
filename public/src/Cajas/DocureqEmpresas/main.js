@@ -1,18 +1,16 @@
+import { $App } from '@/App';
 import { LayoutGeneral } from '@/Cajas/LayoutGeneral';
 import { Region } from '@/Common/Region';
 import loading from '@/Componentes/Views/Loading';
-import { $Kumbia, Messages, Utils } from '@/Utils';
-import { addFiltro, aplicarFiltro, buscar, changeCantidadPagina, delFiltro } from '../Glob/Glob';
+import {  Messages } from '@/Utils';
+import {  aplicarFiltro, EventsPagination } from '../Glob/Glob';
 
-$(() => {
-    const modalForm = new bootstrap.Modal(document.getElementById('modal_capturar_campo'));
-    const region = new Region({ el: '#boneLayout' });
-    const layout = new LayoutGeneral();
-    region.show(layout);
-    aplicarFiltro();
+window.App = $App;
+let validator;
 
-    const validator = $('#form').validate({
-        rules: {
+const validatorInit = () => {
+    validator = $('#form').validate({
+    rules: {
             coddoc: { required: true },
             tipopc: { required: true },
             tipsoc: { required: true },
@@ -21,39 +19,50 @@ $(() => {
             auto_generado: { required: true },
         },
     });
+};
 
-    $(document).on('click', "[data-toggle='info']", (e) => {
+$(() => {
+    window.App.initialize();
+    EventsPagination();
+
+    const modalCapture = new bootstrap.Modal(document.getElementById('captureModal'));
+    const region = new Region({ el: '#boneLayout' });
+    const layout = new LayoutGeneral();
+    region.show(layout);
+    
+ 
+    $(document).on('click', "[data-toggle='editar']", (e) => {
         e.preventDefault();
         const coddoc = $(e.currentTarget).attr('data-coddoc');
         const tipopc = $(e.currentTarget).attr('data-tipopc');
         const tipsoc = $(e.currentTarget).attr('data-tipsoc');
         loading.show();
-        $.ajax({
-            type: 'POST',
-            url: Utils.getKumbiaURL($Kumbia.controller + '/infor'),
+        window.App.trigger('syncro', {
+            url: window.App.url(window.ServerController + '/editar'),
             data: {
                 coddoc: coddoc,
                 tipopc: tipopc,
                 tipsoc: tipsoc,
             },
-        })
-            .done((response) => {
+            callback: (response) => {
                 loading.hide();
                 if (response.success == true) {
                     const data = response.data;
+                    modalCapture.show();
+                    const tpl = _.template(document.getElementById('tmp_form').innerHTML);
+                    $('#captureModalbody').html(tpl(data));
+                    validatorInit();
                     $.each(data, (key, value) => {
                         $('#' + key.toString()).val(value);
                     });
-
+                    
                     $('#coddoc').attr('disabled', 'true');
                     $('#tipopc').attr('disabled', 'true');
                     $('#tipsoc').attr('disabled', 'true');
-                    modalForm.show();
+
                 }
-            })
-            .fail((jqXHR, textStatus) => {
-                Messages.display(jqXHR.statusText, 'error');
-            });
+            }
+        });
     });
 
     $(document).on('click', "[data-toggle='guardar']", (e) => {
@@ -65,9 +74,8 @@ $(() => {
         if (!validator.valid()) return;
 
         loading.show();
-        $.ajax({
-            type: 'POST',
-            url: Utils.getKumbiaURL($Kumbia.controller + '/guardar'),
+        window.App.trigger('syncro', {
+            url: window.App.url(window.ServerController + '/guardar'),
             data: {
                 coddoc: $('#coddoc').val(),
                 tipopc: $('#tipopc').val(),
@@ -76,21 +84,17 @@ $(() => {
                 nota: $('#nota').val(),
                 auto_generado: $('#auto_generado').val(),
             },
-            dataType: 'json',
-        })
-            .done((response) => {
+            callback: (response) => {
                 loading.hide();
                 if (response.success == true) {
                     Messages.display(response.msj, 'success');
-                    modalForm.hide();
+                    modalCapture.hide();
                     aplicarFiltro();
                 } else {
                     Messages.display(response.msj, 'error');
                 }
-            })
-            .fail((jqXHR, textStatus) => {
-                Messages.display(jqXHR.statusText, 'error');
-            });
+            }
+        });
     });
 
     $(document).on('click', "[data-toggle='borrar']", (e) => {
@@ -109,61 +113,44 @@ $(() => {
             cancelButtonText: 'NO',
         }).then((result) => {
             if (result.isConfirmed) {
-                $.ajax({
-                    type: 'POST',
-                    url: Utils.getKumbiaURL($Kumbia.controller + '/borrar'),
-                    dataType: 'json',
+                window.App.trigger('syncro', {
+                    url: window.App.url(window.ServerController + '/borrar'),
                     data: {
                         coddoc: coddoc,
                         tipopc: tipopc,
                         tipsoc: tipsoc,
                     },
-                })
-                    .done(function (response) {
+                    callback: (response) => {
                         if (response.success == true) {
                             Messages.display(response.msj, 'success');
                             aplicarFiltro();
                         } else {
                             Messages.display(response.msj, 'error');
                         }
-                    })
-                    .fail(function (jqXHR, textStatus) {
-                        Messages.display(jqXHR.statusText, 'error');
-                    });
+                    }
+                });
             }
         });
     });
 
-    $(document).on('click', "[data-toggle='nuevo']", (e) => {
-        e.preventDefault();
-        $('#coddoc').removeAttr('disabled');
-        $('#tipopc').removeAttr('disabled');
-        $('#tipsoc').removeAttr('disabled');
-        $('#coddoc').val('');
-        $('#tipopc').val('');
-        $('#tipsoc').val('');
-        $('#nota').val('');
-        $('#obliga').val('');
-        $('#auto_generado').val('');
-        modalForm.show();
-    });
+    $(document).on('click', "[data-toggle='header-nuevo']", (e) => {
+		e.preventDefault();
+		$('#form :input').each(function (elem) {
+			$(this).val('');
+			$(this).removeAttr('disabled');
+		});
 
-    $(document).on('click', "[data-toggle='filtrar']", (e) => {
-        e.preventDefault();
-        const Modal = new bootstrap.Modal(document.getElementById('filtrar-modal'), {});
-        Modal.show();
-    });
+		const tpl = _.template(document.getElementById('tmp_form').innerHTML);
+		$('#captureModalbody').html(tpl({
+            coddoc: '',
+            tipopc: '',
+            tipsoc: '',
+            obliga: '',
+            nota: '',
+            auto_generado: '',
+		}));
+		modalCapture.show();
+		validatorInit();
+	});
 
-    $(document).on('click', "[toggle-event='buscar']", (e) => {
-        e.preventDefault();
-        buscar($(e.currentTarget));
-    });
-
-    $(document).on('click', "[toggle-event='aplicar_filtro']", (e) => aplicarFiltro(e));
-
-    $(document).on('click', "[toggle-event='add_filtro']", (e) => addFiltro(e));
-
-    $(document).on('click', "[toggle-event='remove']", (e) => delFiltro($(e.currentTarget)));
-
-    $(document).on('change', '#cantidad_paginate', (e) => changeCantidadPagina(e));
 });

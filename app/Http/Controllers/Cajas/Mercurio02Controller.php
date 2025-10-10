@@ -56,6 +56,11 @@ class Mercurio02Controller extends ApplicationController
         return view('cajas.mercurio02.index', [
             'title' => 'Datos Caja',
             'ciudades' => $_codciu,
+            'campo_filtro' => [
+                'codcaj' => 'Caja',
+                'nit' => 'Nit',
+                'razsoc' => 'Razon Social',
+            ]
         ]);
     }
 
@@ -181,7 +186,7 @@ class Mercurio02Controller extends ApplicationController
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $this->db->rollback();
-            $response = parent::errorFunc('No se pudo guardar/editar el registro: '.$e->getMessage());
+            $response = parent::errorFunc('No se pudo guardar/editar el registro: ' . $e->getMessage());
 
             return $this->renderObject($response, false);
         }

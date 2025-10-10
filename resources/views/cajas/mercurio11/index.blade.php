@@ -53,4 +53,4 @@
     </script>
 
     <script src="{{ asset('cajas/build/MotivoRechazo.js') }}"></script>
-@endpush    
+@endpush

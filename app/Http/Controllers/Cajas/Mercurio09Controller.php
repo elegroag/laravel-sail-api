@@ -31,7 +31,6 @@ class Mercurio09Controller extends ApplicationController
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
-        $this->cantidad_pagina = $this->numpaginate ?? 10;
     }
 
     public function showTabla($paginate)
@@ -208,7 +207,7 @@ class Mercurio09Controller extends ApplicationController
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $this->db->rollback();
-            $response = parent::errorFunc('No se puede guardar/editar el Registro: '.$e->getMessage());
+            $response = parent::errorFunc('No se puede guardar/editar el Registro: ' . $e->getMessage());
 
             return $this->renderObject($response, false);
         }
@@ -279,7 +278,7 @@ class Mercurio09Controller extends ApplicationController
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $this->db->rollback();
-            $response = parent::errorFunc('No se pudo realizar el movimiento: '.$e->getMessage());
+            $response = parent::errorFunc('No se pudo realizar el movimiento: ' . $e->getMessage());
 
             return $this->renderObject($response, false);
         }
@@ -357,7 +356,7 @@ class Mercurio09Controller extends ApplicationController
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $this->db->rollback();
-            $response = parent::errorFunc('No se pudo realizar el movimiento: '.$e->getMessage());
+            $response = parent::errorFunc('No se pudo realizar el movimiento: ' . $e->getMessage());
 
             return $this->renderObject($response, false);
         }

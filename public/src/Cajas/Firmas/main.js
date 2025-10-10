@@ -1,6 +1,6 @@
 import { $App } from '@/App';
 import { Messages } from '@/Utils';
-import { actualizar_select, aplicarFiltro, buscar, validePk } from '../Glob/Glob';
+import { buscar, EventsPagination, validePk } from '../Glob/Glob';
 
 let validator = undefined;
 
@@ -26,29 +26,15 @@ const validatorInit = () => {
     });
 };
 
+
 window.App = $App;
 $(() => {
     window.App.initialize();
-    aplicarFiltro();
-    validator = validatorInit();
+    const modalCapture = new bootstrap.Modal(document.getElementById('captureModal'));
+    EventsPagination();
 
     $(document).on('blur', '#codfir', (e) => {
         validePk('#codfir');
-    });
-
-    $('#capture-modal').on('hide.bs.modal', function (e) {
-        if (validator) {
-            validator.resetForm();
-            $('.select2-selection')
-                .removeClass(validator.settings.errorClass)
-                .removeClass(validator.settings.validClass);
-            
-            // Limpiar el formulario al cerrar
-            if ($('#form').length) {
-                $('#form')[0].reset();
-                $('#codfir').removeAttr('disabled');
-            }
-        }
     });
 
     $(document).on('click', "[data-toggle='editar']", (e) => {
@@ -60,22 +46,20 @@ $(() => {
             data: { codfir: codfir },
             callback: (response) => {
                 if (response) {
-                    // Llenar el formulario con los datos
                     Object.keys(response).forEach(key => {
                         if (key !== 'archivo') {
                             $(`#${key}`).val(response[key]);
                         }
                     });
+                            
+                    modalCapture.show();
+                    const tpl = _.template(document.getElementById('tmp_form').innerHTML);
+                    $('#captureModalbody').html(tpl(response));
+                    validatorInit();
                     
-                    // Deshabilitar el campo código
-                    $('#codfir').attr('disabled', 'true');
-                    
-                    // Mostrar el modal
-                    const modal = new bootstrap.Modal(document.getElementById('capture-modal'));
-                    modal.show();
-                    
-                    // Enfocar el primer campo
+                    $('[data-bs-toggle="tooltip"]').tooltip();                    
                     setTimeout(() => $('#codfir').trigger('focus'), 500);
+                    $('#codfir').attr('disabled', 'true');
                 } else {
                     Messages.display('Error al cargar los datos', 'error');
                 }
@@ -87,39 +71,25 @@ $(() => {
         e.preventDefault();
         if (!$('#form').valid()) return;
 
-        // Crear FormData para manejar archivos
         const formData = new FormData($('#form')[0]);
-        
-        // Si hay un archivo, agregarlo al formData
         const fileInput = $('#archivo')[0];
         if (fileInput.files.length > 0) {
             formData.append('archivo', fileInput.files[0]);
         }
-
-        // Habilitar campos deshabilitados antes de enviar
         $('#form :input').prop('disabled', false);
 
-        window.App.trigger('syncro', {
+        window.App.trigger('upload', {
             url: window.App.url(window.ServerController + '/guardar'),
             data: formData,
             processData: false,
             contentType: false,
             callback: (response) => {
                 if (response && response.flag) {
-                    // Cerrar el modal
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('capture-modal'));
-                    if (modal) modal.hide();
-                    
-                    // Mostrar mensaje de éxito
+                    modalCapture.hide();
                     Messages.display(response.msg || 'Operación realizada con éxito', 'success');
-                    
-                    // Actualizar la tabla
                     buscar();
-                    
-                    // Limpiar el formulario
                     $('#form')[0].reset();
                 } else {
-                    // Mostrar mensaje de error
                     Messages.display(response?.msg || 'Error al guardar los datos', 'error');
                 }
             }
@@ -157,14 +127,26 @@ $(() => {
         });
     });
 
-    $(document).on('click', "[data-toggle='nuevo']", (e) => {
-        e.preventDefault();
-        $('#form')[0].reset();
-        $('#codfir').removeAttr('disabled');
-        const modal = new bootstrap.Modal(document.getElementById('capture-modal'));
-        modal.show();
-        actualizar_select();
-    });
+   
+    $(document).on('click', "[data-toggle='header-nuevo']", (e) => {
+		e.preventDefault();
+		$('#form :input').each(function (elem) {
+			$(this).val('');
+			$(this).removeAttr('disabled');
+		});
+
+		const tpl = _.template(document.getElementById('tmp_form').innerHTML);
+		$('#captureModalbody').html(tpl({
+            codfir: '',
+            nombre: '',
+            cargo: '',
+            archivo: '',
+            email: ''            
+		}));
+		modalCapture.show();
+		validatorInit();
+        $('[data-bs-toggle="tooltip"]').tooltip();
+	});
 
     $(document).on('click', "[data-toggle='reporte']", (e) => {
         e.preventDefault();
@@ -172,12 +154,5 @@ $(() => {
         window.location.href = window.App.url(window.ServerController + '/reporte/' + tipo);
     });
 
-    $(document).on('click', "[data-toggle='filtrar']", (e) => {
-        e.preventDefault();
-        const modal = new bootstrap.Modal(document.getElementById('filtrar-modal'));
-        modal.show();
-    });
-
-    // Inicializar tooltips
-    $('[data-bs-toggle="tooltip"]').tooltip();
+    
 });

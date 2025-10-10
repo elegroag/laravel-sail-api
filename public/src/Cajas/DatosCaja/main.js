@@ -1,6 +1,6 @@
 import { $App } from '@/App';
 import { Messages } from '@/Utils';
-import { aplicarFiltro, buscar, validePk } from '../Glob/Glob';
+import { buscar, EventsPagination, validePk } from '../Glob/Glob';
 
 let validator = undefined;
 
@@ -26,19 +26,11 @@ const validatorInit = () => {
 window.App = $App;
 $(() => {
     window.App.initialize();
-    aplicarFiltro();
+    EventsPagination();
+	const modalCapture = new bootstrap.Modal(document.getElementById('captureModal'));
    
     $(document).on('blur', '#codcaj', (e) => {
         validePk('#codcaj');
-    });
-
-    $('#captureModal').on('hide.bs.modal', (e) => {
-        if (validator !== undefined) {
-            validator.resetForm();
-            $('.select2-selection')
-                .removeClass(validator.settings.errorClass)
-                .removeClass(validator.settings.validClass);
-        }
     });
 
     $(document).on('click', "[data-toggle='editar']", (e) => {
@@ -53,8 +45,7 @@ $(() => {
             callback: (response) => {
                 if (response) {
                     $('#codcaj').attr('disabled', 'true');
-                    const instance = new bootstrap.Modal(document.getElementById('captureModal'));
-                    instance.show();
+                    modalCapture.show();
                     const tpl = _.template(document.getElementById('tmp_form').innerHTML);
                     $('#captureModalbody').html(tpl(response));
                     validatorInit();
@@ -83,9 +74,7 @@ $(() => {
                 if (response) {
                     buscar();
                     Messages.display(response.msg, 'success');
-                    const instance = new bootstrap.Modal(document.getElementById('captureModal'));
-                    instance.hide();
-                    
+                    modalCapture.hide();
                     // Resetear el formulario
                     const tpl = _.template(document.getElementById('tmp_form').innerHTML);
                     $('#captureModalbody').html(tpl({
@@ -109,4 +98,30 @@ $(() => {
             },
         });
     });
+
+    $(document).on('click', "[data-toggle='header-nuevo']", (e) => {
+		e.preventDefault();
+		$('#form :input').each(function (elem) {
+			$(this).val('');
+			$(this).removeAttr('disabled');
+		});
+
+		const tpl = _.template(document.getElementById('tmp_form').innerHTML);
+		$('#captureModalbody').html(tpl({
+            codcaj: '',
+            nit: '',
+            razsoc: '',
+            sigla: '',
+            email: '',
+            direccion: '',
+            telefono: '',
+            codciu: '',
+            pagweb: '',
+            pagfac: '',
+            pagtwi: '',
+            pagyou: '',
+		}));
+		modalCapture.show();
+		validatorInit();
+	});
 });

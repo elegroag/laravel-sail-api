@@ -1,61 +1,50 @@
-import { Utils, $Kumbia, Messages } from '@/Utils';
-import {
-	actualizar_select,
-	aplicarFiltro,
-	buscar,
-	changeCantidadPagina,
-	validePk,
-} from '../Glob/Glob';
+import { $App } from '@/App';
+import { Messages } from '@/Utils';
+import { buscar, EventsPagination, validePk } from '../Glob/Glob';
 
-var validator;
+let validator = undefined;
+window.App = $App;
 
-function reporte(coddoc) {
-	window.location.href = Utils.getKumbiaURL($Kumbia.controller + '/reporte/' + coddoc);
-}
-
-$(function () {
-	aplicarFiltro();
-
-	validator = $('#form').validate({
-		rules: {
+const validatorInit = () => {
+    validator = $('#form').validate({
+        rules: {
 			coddoc: { required: true },
 			detalle: { required: true },
-		},
-	});
+        },
+    });
+};
+
+
+$(() => {
+	window.App.initialize();
+	const modalCapture = new bootstrap.Modal(document.getElementById('captureModal'));
+	EventsPagination();
 
 	$(document).on('blur', '#coddoc', function () {
 		validePk('#coddoc');
 	});
 
-	$('#capture-modal').on('hide.bs.modal', function (e) {
-		validator.resetForm();
-		$('.select2-selection')
-			.removeClass(validator.settings.errorClass)
-			.removeClass(validator.settings.validClass);
-	});
-
 	$(document).on('click', "[data-toggle='editar']", (e) => {
 		e.preventDefault();
 		const coddoc = $(e.currentTarget).attr('data-cid');
-		$.ajax({
-			type: 'POST',
-			url: Utils.getKumbiaURL($Kumbia.controller + '/editar'),
+		window.App.trigger('syncro', {
+			url: window.App.url(window.ServerController + '/editar'),
 			data: {
-				coddoc: coddoc,
+				coddoc
 			},
-		})
-			.done(function (transport) {
-				var response = transport;
+			callback: (response) => {
 				$.each(response, function (key, value) {
 					$('#' + key.toString()).val(value);
 				});
 
+				modalCapture.show();
+				const tpl = _.template(document.getElementById('tmp_form').innerHTML);
+				$('#captureModalbody').html(tpl(response));
+
 				$('#coddoc').attr('disabled', 'true');
-				document.getElementById('btCaptureModal').click();
-			})
-			.fail(function (jqXHR, textStatus) {
-				Messages.display(jqXHR.statusText, 'error');
-			});
+				validatorInit();
+			}
+		});
 	});
 
 	$(document).on('click', "[data-toggle='guardar']", (e) => {
@@ -65,96 +54,73 @@ $(function () {
 		$('#form :input').each(function (elem) {
 			$(this).removeAttr('disabled');
 		});
-		$.ajax({
-			type: 'POST',
-			url: Utils.getKumbiaURL($Kumbia.controller + '/guardar'),
+		window.App.trigger('syncro', {
+			url: window.App.url(window.ServerController + '/guardar'),
 			data: $('#form').serialize(),
-		})
-			.done(function (transport) {
-				var response = transport;
-				if (response['flag'] == true) {
+			callback: (response) => {
+				if (response.flag == true) {
 					buscar();
-					Messages.display(response['msg'], 'success');
-					$('#capture-modal').modal('hide');
+					Messages.display(response.msg, 'success');
+					modalCapture.hide();
 				} else {
-					Messages.display(response['msg'], 'error');
+					Messages.display(response.msg, 'error');
 				}
-			})
-			.fail(function (jqXHR, textStatus) {
-				Messages.display(jqXHR.statusText, 'error');
-			});
+			}
+		});
 	});
 
 	$(document).on('click', "[data-toggle='borrar']", (e) => {
 		e.preventDefault();
 		const coddoc = $(e.currentTarget).attr('data-cid');
 		Swal.fire({
-			title: 'Esta seguro de borrar?',
-			text: '',
+			title: '¡Confirmar la acción!',
+			text: 'Esta seguro de borrar?',
 			type: 'warning',
 			showCancelButton: true,
-			confirmButtonClass: 'btn btn-success btn-fill',
-			cancelButtonClass: 'btn btn-danger btn-fill',
+			confirmButtonClass: 'btn btn-success',
+			cancelButtonClass: 'btn btn-danger',
 			confirmButtonText: 'SI',
 			cancelButtonText: 'NO',
 		}).then((result) => {
 			if (result.isConfirmed) {
-				$.ajax({
-					type: 'POST',
-					url: Utils.getKumbiaURL($Kumbia.controller + '/borrar'),
+				window.App.trigger('syncro', {
+					url: window.App.url(window.ServerController + '/borrar'),
 					data: {
 						coddoc: coddoc,
 					},
-				})
-					.done(function (response) {
-						if (response['flag'] == true) {
+					callback: (response) => {
+						if (response.flag == true) {
 							buscar();
-							Messages.display(response['msg'], 'success');
+							Messages.display(response.msg, 'success');
 						} else {
-							Messages.display(response['msg'], 'error');
+							Messages.display(response.msg, 'error');
 						}
-					})
-					.fail(function (jqXHR, textStatus) {
-						Messages.display(jqXHR.statusText, 'error');
-					});
+					}
+				});
 			}
 		});
 	});
 
-	$(document).on('click', "[data-toggle='nuevo']", (e) => {
+
+	$(document).on('click', "[data-toggle='reporte']", (e) => {
+		e.preventDefault();
+		const tipo = $(e.currentTarget).attr('data-type');
+		window.location.href = window.App.url(window.ServerController + '/reporte/' + tipo);
+	});
+
+	$(document).on('click', "[data-toggle='header-nuevo']", (e) => {
 		e.preventDefault();
 		$('#form :input').each(function (elem) {
 			$(this).val('');
 			$(this).removeAttr('disabled');
 		});
-		actualizar_select();
-		document.getElementById('btCaptureModal').click();
+
+		const tpl = _.template(document.getElementById('tmp_form').innerHTML);
+		$('#captureModalbody').html(tpl({
+			coddoc: '',
+			detalle: '',
+		}));
+		modalCapture.show();
+		validatorInit();
 	});
-
-	$(document).on('click', "[data-toggle='reporte']", (e) => {
-		e.preventDefault();
-		const tipo = $(e.currentTarget).attr('data-type');
-		window.location.href = Utils.getKumbiaURL($Kumbia.controller + '/reporte/' + tipo);
-	});
-
-	$(document).on('click', "[data-toggle='filtrar']", (e) => {
-		e.preventDefault();
-		const Modal = new bootstrap.Modal(document.getElementById('filtrar-modal'), {});
-		Modal.show();
-	});
-
-	$(document).on('click', "[data-toggle='page-buscar']", (e) => {
-		e.preventDefault();
-		buscar($(e.currentTarget));
-	});
-
-	$(document).on('click', "[toggle-event='aplicar_filtro']", (e) => aplicarFiltro(e));
-
-	$(document).on('click', "[toggle-event='add_filtro']", (e) => addFiltro(e));
-
-	$(document).on('click', "[toggle-event='remove']", (e) =>
-		delFiltro($(e.currentTarget)),
-	);
-
-	$(document).on('change', '#cantidad_paginate', (e) => changeCantidadPagina(e));
 });

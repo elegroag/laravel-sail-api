@@ -117,4 +117,19 @@ class Mercurio14 extends ModelBase
     {
         return $this->obliga;
     }
+
+    public function mercurio09()
+    {
+        return $this->belongsTo(Mercurio09::class, 'tipopc');
+    }
+
+    public function mercurio12()
+    {
+        return $this->belongsTo(Mercurio12::class, 'coddoc');
+    }
+
+    public function subsi54()
+    {
+        return $this->belongsTo(Subsi54::class, 'tipsoc',  'tipsoc');
+    }
 }

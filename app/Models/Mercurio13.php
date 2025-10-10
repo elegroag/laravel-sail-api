@@ -90,4 +90,14 @@ class Mercurio13 extends ModelBase
     {
         return $this->auto_generado;
     }
+
+    public function mercurio09()
+    {
+        return $this->belongsTo(Mercurio09::class, 'tipopc');
+    }
+
+    public function mercurio12()
+    {
+        return $this->belongsTo(Mercurio12::class, 'coddoc');
+    }
 }

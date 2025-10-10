@@ -3,14 +3,20 @@
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
+use Thiagoprz\CompositeKey\HasCompositeKey;
+use App\Models\Adapter\ValidateWithRules;
+use Illuminate\Validation\Rule;
 
 class Mercurio28 extends ModelBase
 {
+    use HasCompositeKey;
+    use ValidateWithRules;
+
     protected $table = 'mercurio28';
 
     public $timestamps = false;
 
-    protected $primaryKey = 'id';
+    protected $primaryKey = ['tipo', 'campo'];
 
     protected $fillable = [
         'tipo',
@@ -18,6 +24,22 @@ class Mercurio28 extends ModelBase
         'detalle',
         'orden',
     ];
+
+    protected function rules()
+    {
+        return [
+            'tipo' => 'required|string|min:0',
+            'campo' => 'required|string|min:0',
+            '_id' => [
+                'required|string',
+                Rule::unique('mercurio28')->where(function ($query) {
+                    return $query->where('tipo', $this->tipo)
+                        ->where('campo', $this->campo);
+                }),
+            ],
+        ];
+    }
+
 
     /**
      * Metodo para establecer el valor del campo tipo

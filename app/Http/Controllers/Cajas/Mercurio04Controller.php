@@ -27,7 +27,6 @@ class Mercurio04Controller extends ApplicationController
 
     public function __construct()
     {
-        $this->cantidad_pagina = $this->numpaginate;
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
@@ -280,7 +279,7 @@ class Mercurio04Controller extends ApplicationController
             foreach ($mercurio05 as $mmercurio05) {
                 $value = '';
                 $response .= '<tr>';
-                $response .= '<td>'.$mmercurio05->getCodciu().'</td>';
+                $response .= '<td>' . $mmercurio05->getCodciu() . '</td>';
                 $response .= "<td class='table-actions'>";
                 $response .= "<a href='#!' class='table-action btn btn-xs btn-primary' data-toggle='ciudad-borrar' data-codofi='{$codofi}' data-codciu='{$mmercurio05->getCodciu()}'>";
                 $response .= "<i class='fas fa-trash text-white'></i>";
@@ -420,10 +419,10 @@ class Mercurio04Controller extends ApplicationController
             foreach ($mercurio08 as $mmercurio08) {
                 $value = '';
                 $response .= '<tr>';
-                $response .= '<td>'.$mmercurio08->getTipopcDetalle().'</td>';
-                $response .= '<td>'.$mmercurio08->getUsuarioDetalle().'</td>';
+                $response .= '<td>' . $mmercurio08->getTipopcDetalle() . '</td>';
+                $response .= '<td>' . $mmercurio08->getUsuarioDetalle() . '</td>';
                 $response .= "<td class='table-actions'>";
-                $response .= "<a href='#!' class='table-action btn btn-xs btn-primary' ".
+                $response .= "<a href='#!' class='table-action btn btn-xs btn-primary' " .
                     " data-toggle='opcion-borrar' data-codofi='{$codofi}' data-tipopc='{$mmercurio08->getTipopc()}' data-usuario='{$mmercurio08->getUsuario()}'>";
                 $response .= "<i class='fas fa-trash text-white'></i>";
                 $response .= '</a>';

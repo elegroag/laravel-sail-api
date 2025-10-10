@@ -6,6 +6,8 @@
 @endpush
 
 @push('scripts')
+@include('cajas/templates/tmp_filtro', ['campo_filtro' => $campo_filtro])
+
 <script type="text/template" id='tmp_form'>
     <form id="form" class="validation_form" autocomplete="off" novalidate>
         <div class="row">
@@ -134,11 +136,18 @@
 @endpush
 
 @section('content')
-<div class="card border-0 m-2">
-    <div class="card-header">
-        <h4 class="font-weight-bold">{{ $title }}</h4>
+@include('cajas/templates/tmp_header_adapter', ['sub_title' => $title, 'filtrar' => true, 'listar' => false, 'salir' => false, 'add' => true])
+<div class="container-fluid mt--9 pb-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-green-blue p-1"></div>
+                <div class="card-body p-0 m-3">
+                    <div id='consulta' class='table-responsive'></div>
+                    <div id='paginate' class='card-footer py-4'></div>            
+                </div>
+            </div>
+        </div>
     </div>
-    <div id='consulta' class='table-responsive'></div>
-    <div id='paginate' class='card-footer py-4'></div>
 </div>
 @endsection

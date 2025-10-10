@@ -1,28 +1,26 @@
 import { $App } from '@/App';
 import { Messages } from '@/Utils';
+import Choices from 'choices.js';
+window.App = $App;
 
 const buscarPermisos = function (tipo = '', buscar = '') {
 	const _user = $("[name='usuario']").val();
-	$.ajax({
-		type: 'POST',
-		url: $App.url('buscar'),
+	window.App.trigger('syncro', {
+		url: window.App.url(window.ServerController + '/buscar'),
 		data: {
 			usuario: _user,
 			tipo: tipo,
 			buscar: buscar,
 		},
-	})
-		.done(function (response) {
+		callback: (response) => {
 			if (response.flag == true) {
 				$('#permite').html(response.permite);
 				$('#nopermite').html(response.nopermite);
 			} else {
 				Messages.display(response.msg, 'error');
 			}
-		})
-		.fail(function (jqXHR, textStatus) {
-			Messages.display(jqXHR.statusText, 'error');
-		});
+		}
+	});
 };
 
 const guardar = function () {
@@ -32,24 +30,19 @@ const guardar = function () {
 	$('#form :input').each(function (elem) {
 		$(this).attr('disabled', false);
 	});
-	$.ajax({
-		type: 'POST',
-		url: $App.url('guardar'),
+	window.App.trigger('syncro', {
+		url: window.App.url(window.ServerController + '/guardar'),
 		data: $('#form').serialize(),
-	})
-		.done(function (transport) {
-			var response = transport;
-			if (response['flag'] == true) {
+		callback: (response) => {
+			if (response.flag == true) {
 				buscarPermisos();
-				Messages.display(response['msg'], 'success');
+				Messages.display(response.msg, 'success');
 				$('#capture-modal').modal('hide');
 			} else {
-				Messages.display(response['msg'], 'error');
+				Messages.display(response.msg, 'error');
 			}
-		})
-		.fail(function (jqXHR, textStatus) {
-			Messages.display(jqXHR.statusText, 'error');
-		});
+		}
+	});
 };
 
 const eventCheckBox = function (tipo) {
@@ -75,27 +68,22 @@ const agregar = function () {
 			permisos += checkboxs[i].id + ';';
 		}
 	}
-	$.ajax({
-		type: 'POST',
-		url: $App.url('guardar'),
+	window.App.trigger('syncro', {
+		url: window.App.url(window.ServerController + '/guardar'),
 		data: {
 			tipo: 'A',
 			usuario: $('#usuario').val(),
 			permisos: permisos,
 		},
-	})
-		.done(function (transport) {
-			var response = transport;
-			if (response['flag'] == true) {
+		callback: (response) => {
+			if (response.flag == true) {
 				buscarPermisos();
-				Messages.display(response['msg'], 'success');
+				Messages.display(response.msg, 'success');
 			} else {
-				Messages.display(response['msg'], 'error');
+				Messages.display(response.msg, 'error');
 			}
-		})
-		.fail(function (jqXHR, textStatus) {
-			Messages.display(jqXHR.statusText, 'error');
-		});
+		}
+	});
 };
 
 const quitar = function () {
@@ -106,33 +94,29 @@ const quitar = function () {
 			permisos += checkboxs[i].id + ';';
 		}
 	}
-	$.ajax({
-		type: 'POST',
-		url: $App.url('guardar'),
+	window.App.trigger('syncro', {
+		url: window.App.url(window.ServerController + '/guardar'),
 		data: {
 			tipo: 'E',
 			usuario: $('#usuario').val(),
 			permisos: permisos,
 		},
-	})
-		.done(function (transport) {
-			var response = transport;
-			if (response['flag'] == true) {
+		callback: (response) => {
+			if (response.flag == true) {
 				buscarPermisos();
-				Messages.display(response['msg'], 'success');
+				Messages.display(response.msg, 'success');
 			} else {
-				Messages.display(response['msg'], 'error');
+				Messages.display(response.msg, 'error');
 			}
-		})
-		.fail(function (jqXHR, textStatus) {
-			Messages.display(jqXHR.statusText, 'error');
-		});
+		}
+	});
 };
 
 $(() => {
-
-	$('#usuario').select2();
-
+	window.App.initialize();
+	
+	const choicesUser = new Choices(document.querySelector('#usuario'));
+	
 	$(document).on('change', '#usuario', function (e) {
 		e.preventDefault();
 		buscarPermisos();
