@@ -41,7 +41,7 @@ class ApruebaDatosEmpresa
      */
     public function procesar($postData)
     {
-        $mercurio47 = (new Mercurio47)->findFirst("id='{$this->solicitud->getId()}'");
+        $mercurio47 = Mercurio47::whereRaw("id='{$this->solicitud->getId()}'")->first();
 
         $ps = Comman::Api();
         $ps->runCli(
@@ -59,11 +59,11 @@ class ApruebaDatosEmpresa
             throw new DebugException('Error, no hay respuesta del servidor para validación del resultado.', 1);
         }
         if (! $out['success']) {
-            throw new DebugException('Error, '.$out['msj'], 1);
+            throw new DebugException('Error, ' . $out['msj'], 1);
         }
         $empresa = $out['data'];
 
-        $mercurio33 = (new Mercurio33)->find("actualizacion='{$this->solicitud->getId()}'");
+        $mercurio33 = Mercurio33::whereRaw("actualizacion='{$this->solicitud->getId()}'")->get();
         $dataItems = [];
         foreach ($mercurio33 as $row) {
             $dataItems[$row->getCampo()] = $row->getValor();
@@ -100,7 +100,10 @@ class ApruebaDatosEmpresa
         $registroSeguimiento->crearNota($this->tipopc, $this->solicitud->getId(), $postData['nota_aprobar'], 'A');
 
         $fechaEstado = $this->today->format('Y-m-d');
-        (new Mercurio47)->updateAll("estado='A', fecha_estado='{$fechaEstado}'", "conditions: id='{$this->solicitud->getId()}' ");
+        Mercurio47::whereRaw("id='{$this->solicitud->getId()}'")->update([
+            "estado" => 'A',
+            "fecha_estado" => $fechaEstado,
+        ]);
 
         return true;
     }
@@ -129,7 +132,7 @@ class ApruebaDatosEmpresa
         $data['anno'] = $anno;
         $data['msj'] = 'Se informa que los datos de la empresa fueron actualizados con éxito.';
 
-        $emailCaja = (new Mercurio01)->findFirst();
+        $emailCaja = Mercurio01::first();
         $sender = new SenderEmail(
             new Srequest(
                 [
@@ -156,14 +159,16 @@ class ApruebaDatosEmpresa
 
     public function findSolicitud($idSolicitud)
     {
-        $this->solicitud = (new Mercurio30)->findFirst("id='{$idSolicitud}'");
+        $this->solicitud = Mercurio30::whereRaw("id='{$idSolicitud}'")->first();
 
         return $this->solicitud;
     }
 
     public function findSolicitante()
     {
-        $this->solicitante = (new Mercurio07)->findFirst("documento='{$this->solicitud->getDocumento()}' and coddoc='{$this->solicitud->getCoddoc()}' and tipo='{$this->solicitud->getTipo()}'");
+        $this->solicitante = Mercurio07::whereRaw("documento='{$this->solicitud->getDocumento()}' and " .
+            "coddoc='{$this->solicitud->getCoddoc()}' and " .
+            "tipo='{$this->solicitud->getTipo()}'")->first();
 
         return $this->solicitante;
     }

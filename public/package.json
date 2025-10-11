@@ -6,7 +6,7 @@
     "packageManager": "pnpm@10.15.0",
     "scripts": {
         "start": "vite --watch",
-        "build:mercurio": " npm-run-all --parallel build:login build:principal build:trabajadores build:conyuges build:empresas build:beneficiarios build:independientes build:facultativos build:datosTrabajador build:dashboard build:actualizadatos build:certificados build:pensionados build:servicioDomestico build:usuario build:notificaciones build:consultasEmpresa build:consultasTrabajador build:coberturaServicios build:firma build:consultaNucleo build:moraPresunta build:trabajadoresEmpresa build:aportesEmpresa build:nominasEmpresa",
+        "build:mercurio": " npm-run-all --parallel build:login build:principal build:trabajadores build:conyuges build:empresas build:beneficiarios build:independientes build:facultativos build:datosTrabajador build:dashboard build:actualizadatos build:certificados build:pensionados build:servicioDomestico build:usuario build:notificaciones build:consultasEmpresa build:consultasTrabajador build:coberturaServicios build:firma build:consultaNucleo build:moraPresunta build:trabajadoresEmpresa build:aportesEmpresa build:nominasEmpresa build:cajas-auditoria",
         "dev:login": "cross-env APP='mercurio' MODULE='Login' vite build --watch",
         "dev:principal": "cross-env APP='mercurio' MODULE='Principal' vite build --watch",
         "dev:trabajadores": "cross-env APP='mercurio' MODULE='Trabajadores' vite build --watch",
@@ -89,6 +89,7 @@
         "dev:cajas-docu_req_empresas": "cross-env APP='cajas' MODULE='DocureqEmpresas' vite build --watch",
         "dev:cajas-docu_req_trabajadores": "cross-env APP='cajas' MODULE='DocureqTrabajadores' vite build --watch",
         "dev:cajas-notificaciones": "cross-env APP='cajas' MODULE='Notificaciones' vite build --watch",
+        "dev:cajas-auditoria": "cross-env APP='cajas' MODULE='Auditoria' vite build --watch",
         "build:cajas-login": "cross-env APP='cajas' MODULE='Login' vite build",
         "build:cajas-dashboard": "cross-env APP='cajas' MODULE='DashBoard' vite build",
         "build:cajas-basicas": "cross-env APP='cajas' MODULE='Basicas' vite build",
@@ -118,7 +119,8 @@
         "build:cajas-usuario": "cross-env APP='cajas' MODULE='Usuario' vite build",
         "build:cajas-docu_req_empresas": "cross-env APP='cajas' MODULE='DocureqEmpresas' vite build",
         "build:cajas-docu_req_trabajadores": "cross-env APP='cajas' MODULE='DocureqTrabajadores' vite build",
-        "build:cajas-notificaciones": "cross-env APP='cajas' MODULE='Notificaciones' vite build"
+        "build:cajas-notificaciones": "cross-env APP='cajas' MODULE='Notificaciones' vite build",
+        "build:cajas-auditoria": "cross-env APP='cajas' MODULE='Auditoria' vite build"
     },
     "author": "edwin andres legro agudelo",
     "license": "ISC",

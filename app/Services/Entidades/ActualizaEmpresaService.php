@@ -11,6 +11,7 @@ use App\Models\Mercurio12;
 use App\Models\Mercurio14;
 use App\Models\Mercurio37;
 use App\Models\Mercurio47;
+use App\Services\Srequest;
 use App\Services\Utils\Comman;
 
 class ActualizaEmpresaService
@@ -245,72 +246,9 @@ class ActualizaEmpresaService
      * @param  Mercurio47  $solicitud
      * @return void
      */
-    public function loadDisplay($solicitud)
-    {
-        /* Tag::displayTo("nit", $solicitud->getNit());
-        Tag::displayTo("tipdoc", $solicitud->getTipdoc());
-        Tag::displayTo("digver", $this->digver($solicitud->getNit()));
-        Tag::displayTo("id", $solicitud->getId());
-        Tag::displayTo("sigla", $solicitud->getSigla());
-        Tag::displayTo("calemp", $solicitud->getCalemp());
-        Tag::displayTo("cedrep", $solicitud->getCedrep());
-        Tag::displayTo("repleg", $solicitud->getRepleg());
-        Tag::displayTo("telefono", $solicitud->getTelefono());
-        Tag::displayTo("celular", $solicitud->getCelular());
-        Tag::displayTo("email", $solicitud->getEmail());
-        Tag::displayTo("fecini", $solicitud->getFeciniString());
-        Tag::displayTo("tottra", $solicitud->getTottra());
-        Tag::displayTo("valnom", $solicitud->getValnom());
-        Tag::displayTo("dirpri", $solicitud->getDirpri());
-        Tag::displayTo("ciupri", $solicitud->getCiupri());
-        Tag::displayTo("celpri", $solicitud->getCelpri());
-        Tag::displayTo("emailpri", $solicitud->getEmailpri());
-        Tag::displayTo("prinom", $solicitud->getPrinom());
-        Tag::displayTo("segnom", $solicitud->getSegnom());
-        Tag::displayTo("priape", $solicitud->getPriape());
-        Tag::displayTo("segape", $solicitud->getSegape());
-        Tag::displayTo("razsoc", $solicitud->getRazsoc());
-        Tag::displayTo("tipper", $solicitud->getTipper());
-        Tag::displayTo("matmer", $solicitud->getMatmer());
-        Tag::displayTo("direccion", $solicitud->getDireccion());
-        Tag::displayTo("tipsoc", $solicitud->getTipsoc());
-        Tag::displayTo("codact", $solicitud->getCodact());
-        Tag::displayTo("tipemp", $solicitud->getTipemp());
-        Tag::displayTo("codcaj", $solicitud->getCodcaj());
-        Tag::displayTo("coddocrepleg", $solicitud->getCoddocrepleg()); */
-    }
+    public function loadDisplay($solicitud) {}
 
-    public function loadDisplaySubsidio($empresa)
-    {
-        /* Tag::displayTo("tipdoc", $empresa['coddoc']);
-        Tag::displayTo("digver", $empresa['digver']);
-        Tag::displayTo("nit", $empresa['nit']);
-        Tag::displayTo("sigla", $empresa['sigla']);
-        Tag::displayTo("calemp", $empresa['calemp']);
-        Tag::displayTo("cedrep", $empresa['cedrep']);
-        Tag::displayTo("repleg", $empresa['repleg']);
-        Tag::displayTo("telefono", $empresa['telefono']);
-        Tag::displayTo("email", $empresa['email']);
-        Tag::displayTo("tottra", $empresa['tottra']);
-        Tag::displayTo("ciupri", $empresa['ciupri']);
-        Tag::displayTo("prinom", $empresa['prinom']);
-        Tag::displayTo("segnom", $empresa['segnom']);
-        Tag::displayTo("priape", $empresa['priape']);
-        Tag::displayTo("segape", $empresa['segape']);
-        Tag::displayTo("razsoc", $empresa['razsoc']);
-        Tag::displayTo("tipper", $empresa['tipper']);
-        Tag::displayTo("matmer", $empresa['matmer']);
-        Tag::displayTo("direccion", $empresa['direccion']);
-        Tag::displayTo("tipsoc", $empresa['tipsoc']);
-        Tag::displayTo("codact", $empresa['codact']);
-        Tag::displayTo("tipemp", $empresa['tipemp']);
-        Tag::displayTo("codcaj", $empresa['codcaj']);
-        Tag::displayTo("coddocrepleg", $empresa['coddocrepleg']);
-        Tag::displayTo("celular", $empresa['telr']);
-        Tag::displayTo("celpri", $empresa['telt']);
-        Tag::displayTo("dirpri", $empresa['dirpri']);
-        Tag::displayTo("emailpri", $empresa['mailr']); */
-    }
+    public function loadDisplaySubsidio($empresa) {}
 
     /**
      * update function
@@ -393,8 +331,8 @@ class ActualizaEmpresaService
 
         $cm37 = (new Mercurio37)->getCount(
             '*',
-            "conditions: tipopc='{$this->tipopc}' AND ".
-                "numero='{$id}' AND ".
+            "conditions: tipopc='{$this->tipopc}' AND " .
+                "numero='{$id}' AND " .
                 "coddoc IN(SELECT coddoc FROM mercurio14 WHERE tipopc='{$this->tipopc}' and obliga='S')"
         );
 
@@ -461,5 +399,58 @@ class ActualizaEmpresaService
         }
 
         return $retorno;
+    }
+
+    public function consultaTipopc(Srequest $request): array|bool
+    {
+        $tipo_consulta = $request->getParam('tipo_consulta');
+        $tipopc = $request->getParam('tipopc');
+        $condi_extra = $request->getParam('condi_extra');
+        $usuario = $request->getParam('usuario');
+        $numero = $request->getParam('numero');
+        $tipo_actualizacion = 'E';
+
+        switch ($tipo_consulta) {
+            case 'all':
+                $response["datos"] = Mercurio47::query()
+                    ->join('mercurio10', function ($join) use ($tipopc) {
+                        $join->on('mercurio47.id', '=', 'mercurio10.numero')
+                            ->where('mercurio10.tipopc', '=', $tipopc);
+                    })
+                    ->select([
+                        'mercurio47.*',
+                        'mercurio10.estado as estado',
+                        'mercurio10.fecsis as fecest',
+                    ])
+                    ->where('mercurio47.tipo_actualizacion', $tipo_actualizacion)
+                    ->when($condi_extra, function ($q) use ($condi_extra) {
+                        $q->whereRaw($condi_extra);
+                    })
+                    ->get();
+                break;
+            case 'alluser':
+                $response["datos"] = Mercurio47::where("usuario='{$usuario}' and estado='P' and tipo_actualizacion='$tipo_actualizacion'")->get();
+                break;
+            case 'count':
+                $response["count"] = Mercurio47::whereRaw("mercurio47.usuario='$usuario' and mercurio47.tipo_actualizacion='$tipo_actualizacion'  $condi_extra ")
+                    ->join('mercurio20', 'mercurio47.log', 'mercurio20.log')
+                    ->getId();
+
+                $response["all"] = Mercurio47::whereRaw("mercurio47.usuario='$usuario' and mercurio47.tipo_actualizacion='$tipo_actualizacion'  $condi_extra")
+                    ->join('mercurio20', 'mercurio47.log', 'mercurio20.log')
+                    ->get();
+                break;
+            case 'one':
+                $response["datos"] = Mercurio47::where("id='$numero' and estado='P' and tipo_actualizacion='$tipo_actualizacion'")->get();
+                break;
+            case 'info':
+                $mercurio = Mercurio47::where("id='$numero' ")->get();
+                $response["consulta"] = $this->buscarEmpresaSubsidio($mercurio->getNit());
+                break;
+            default:
+                $response = false;
+                break;
+        }
+        return $response;
     }
 }

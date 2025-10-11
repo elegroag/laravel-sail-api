@@ -6,8 +6,13 @@
 @endpush
 
 @push('scripts')
-    @include('cajas/templates/tmp_filtro', ['campo_filtro' => $campo_filtro])
+
     <script type="text/template" id='tmp_form'>
+        <div class="card mb-0">
+            <div class="card-body">
+
+            </div>
+        </div>
     </script>
 
     <script>
@@ -30,10 +35,39 @@
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <div class="card-header bg-green-blue p-1"></div>
                 <div class="card-body p-0 m-3">
+                    <form id="form" action="{{route('auditoria.reporte')}}" class="validation_form" autocomplete="off" novalidate>
+                        <div class="row justify-content-between">
+                            <div class="col-md-3 ml-auto">
+                                <div class="form-group">
+                                    <label for="tipopc" class="form-control-label">Tipo Opci&oacute;n</label>
+                                    <select id="tipopc" name="tipopc" class="form-control">
+                                        <option value="">Seleccione</option>
+                                        @foreach ($mercurio09 as $item)
+                                            <option value="{{ $item->tipopc }}">{{ $item->detalle }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3 ml-auto">
+                                <div class="form-group">
+                                    <label for="fecini" class="form-control-label">Fecha Inicial</label>
+                                    <input type="date" id="fecini" name="fecini" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="fecfin" class="form-control-label">Fecha Final</label>
+                                    <input type="date" id="fecfin" name="fecfin" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            <button type="button" class="btn btn-primary align-self-center" data-toggle="consulta">Consultar</button>
+                            <button type="button" class="btn btn-danger align-self-center" data-toggle="reporte">Reporte</button>
+                        </div>
+                    </form>
                     <div id='consulta' class='table-responsive'></div>
-                    <div id='paginate' class='card-footer py-4'></div>
                 </div>
             </div>
         </div>

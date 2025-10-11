@@ -16,6 +16,7 @@ use App\Models\Mercurio34;
 use App\Models\Mercurio37;
 use App\Models\Mercurio47;
 use App\Models\Tranoms;
+use App\Services\Srequest;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
 
@@ -264,7 +265,7 @@ class EmpresaService
             $empresa->fill($data);
 
             // Establecer el representante legal
-            $empresa->setRepleg($data['priape'].' '.$data['segape'].' '.$data['prinom'].' '.$data['segnom']);
+            $empresa->setRepleg($data['priape'] . ' ' . $data['segape'] . ' ' . $data['prinom'] . ' ' . $data['segnom']);
 
             // Asignar funcionario
             $empresa->setUsuario((new AsignarFuncionario)->asignar($this->tipopc, $this->user['codciu']));
@@ -292,7 +293,7 @@ class EmpresaService
     public function create($data)
     {
         $empresa = new Mercurio30($data);
-        $empresa->setRepleg($data['priape'].' '.$data['segape'].' '.$data['prinom'].' '.$data['segnom']);
+        $empresa->setRepleg($data['priape'] . ' ' . $data['segape'] . ' ' . $data['prinom'] . ' ' . $data['segnom']);
 
         $empresa->setUsuario((new AsignarFuncionario)->asignar($this->tipopc, $this->user['codciu']));
 
@@ -355,8 +356,8 @@ class EmpresaService
 
         $cm37 = (new Mercurio37)->getCount(
             '*',
-            "conditions: tipopc='{$this->tipopc}' AND ".
-                "numero='{$id}' AND ".
+            "conditions: tipopc='{$this->tipopc}' AND " .
+                "numero='{$id}' AND " .
                 "coddoc IN(SELECT coddoc FROM mercurio14 WHERE tipopc='{$this->tipopc}' AND tipsoc='{$solicitud->getTipsoc()}' AND obliga='S')"
         );
 
@@ -558,5 +559,56 @@ class EmpresaService
                 ],
             ],
         ];
+    }
+
+    public function consultaTipopc(Srequest $request): array|bool
+    {
+        $tipo_consulta = $request->getParam('tipo_consulta');
+        $tipopc = $request->getParam('tipopc');
+        $condi_extra = $request->getParam('condi_extra');
+        $usuario = $request->getParam('usuario');
+        $numero = $request->getParam('numero');
+
+        switch ($tipo_consulta) {
+            case 'all':
+                $response["datos"] = Mercurio30::query()
+                    ->join('mercurio10', function ($join) use ($tipopc) {
+                        $join->on('mercurio30.id', '=', 'mercurio10.numero')
+                            ->where('mercurio10.tipopc', '=', $tipopc);
+                    })
+                    ->select([
+                        'mercurio30.*',
+                        'mercurio10.estado as estado',
+                        'mercurio10.fecsis as fecest',
+                    ])
+                    ->when($condi_extra, function ($q) use ($condi_extra) {
+                        $q->whereRaw($condi_extra);
+                    })
+                    ->get();
+                break;
+            case 'alluser':
+                $response["datos"] = Mercurio30::where("usuario='{$usuario}' and estado='P'")->get();
+                break;
+            case 'count':
+                $response["count"] = Mercurio30::whereRaw("mercurio30.usuario='$usuario' $condi_extra ")
+                    ->join('mercurio20', 'mercurio30.log', 'mercurio20.log')
+                    ->getId();
+
+                $response["all"] = Mercurio30::whereRaw("mercurio30.usuario='$usuario' $condi_extra")
+                    ->join('mercurio20', 'mercurio30.log', 'mercurio20.log')
+                    ->get();
+                break;
+            case 'one':
+                $response["datos"] = Mercurio30::where("id='$numero' and estado='P'")->get();
+                break;
+            case 'info':
+                $mercurio = Mercurio30::where("id='$numero' ")->get();
+                $response["consulta"] = $this->buscarEmpresaSubsidio($mercurio->getNit());
+                break;
+            default:
+                $response = false;
+                break;
+        }
+        return $response;
     }
 }

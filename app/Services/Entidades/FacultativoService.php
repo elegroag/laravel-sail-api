@@ -13,6 +13,7 @@ use App\Models\Mercurio12;
 use App\Models\Mercurio14;
 use App\Models\Mercurio36;
 use App\Models\Mercurio37;
+use App\Services\Srequest;
 use App\Services\Utils\Comman;
 
 class FacultativoService
@@ -257,8 +258,8 @@ class FacultativoService
 
         $cm37 = (new Mercurio37)->getCount(
             '*',
-            "conditions: tipopc='{$this->tipopc}' AND ".
-                "numero='{$id}' AND ".
+            "conditions: tipopc='{$this->tipopc}' AND " .
+                "numero='{$id}' AND " .
                 "coddoc IN(SELECT coddoc FROM mercurio14 WHERE tipopc='{$this->tipopc}' AND tipsoc='{$this->tipsoc}' AND obliga='S')"
         );
 
@@ -392,5 +393,56 @@ class FacultativoService
         );
         $paramsTrabajador = new ParamsTrabajador;
         $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
+    }
+
+    public function consultaTipopc(Srequest $request): array|bool
+    {
+        $tipo_consulta = $request->getParam('tipo_consulta');
+        $tipopc = $request->getParam('tipopc');
+        $condi_extra = $request->getParam('condi_extra');
+        $usuario = $request->getParam('usuario');
+        $numero = $request->getParam('numero');
+
+        switch ($tipo_consulta) {
+            case 'all':
+                $response["datos"] = Mercurio36::query()
+                    ->join('mercurio10', function ($join) use ($tipopc) {
+                        $join->on('mercurio36.id', '=', 'mercurio10.numero')
+                            ->where('mercurio10.tipopc', '=', $tipopc);
+                    })
+                    ->select([
+                        'mercurio36.*',
+                        'mercurio10.estado as estado',
+                        'mercurio10.fecsis as fecest',
+                    ])
+                    ->when($condi_extra, function ($q) use ($condi_extra) {
+                        $q->whereRaw($condi_extra);
+                    })
+                    ->get();
+                break;
+            case 'alluser':
+                $response["datos"] = Mercurio36::where("usuario='{$usuario}' and estado='P'")->get();
+                break;
+            case 'count':
+                $response["count"] = Mercurio36::whereRaw("mercurio36.usuario='$usuario' $condi_extra ")
+                    ->join('mercurio20', 'mercurio36.log', 'mercurio20.log')
+                    ->getId();
+
+                $response["all"] = Mercurio36::whereRaw("mercurio36.usuario='$usuario' $condi_extra")
+                    ->join('mercurio20', 'mercurio36.log', 'mercurio20.log')
+                    ->get();
+                break;
+            case 'one':
+                $response["datos"] = Mercurio36::where("id='$numero' and estado='P'")->get();
+                break;
+            case 'info':
+                $mercurio = Mercurio36::where("id='$numero' ")->get();
+                //$response["consulta"] = $this->buscarTrabajadorSubsidio($mercurio->getCedtra());
+                break;
+            default:
+                $response = false;
+                break;
+        }
+        return $response;
     }
 }

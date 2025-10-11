@@ -126,60 +126,9 @@ Tag::addJavascript('core/global');
             });
     }
 
-    function reporte_auditoria() {
-        var validator = $('#form').validate({
-            rules: {
-                tipopc: {
-                    required: true
-                },
-                fecini: {
-                    required: true
-                },
-                fecfin: {
-                    required: true
-                },
-            },
-        });
-        if (!$('#form').valid()) {
-            return;
-        }
-        $('#form').submit();
-    }
 
-    function consulta_auditoria() {
-        var validator = $('#form').validate({
-            rules: {
-                tipopc: {
-                    required: true
-                },
-                fecini: {
-                    required: true
-                },
-                fecfin: {
-                    required: true
-                },
-            },
-        });
-        if (!$('#form').valid()) {
-            return;
-        }
-        $.ajax({
-                type: 'POST',
-                url: Utils.getKumbiaURL($Kumbia.controller + '/consulta_auditoria'),
-                data: {
-                    tipopc: $('#tipopc').val(),
-                    fecini: $('#fecini').val(),
-                    fecfin: $('#fecfin').val(),
-                },
-            })
-            .done(function(transport) {
-                var response = transport;
-                $('#consulta').html(response);
-            })
-            .fail(function(jqXHR, textStatus) {
-                alert('Request failed: ' + textStatus);
-            });
-    }
+
+
 
     function info(tipopc, id) {
         $.ajax({

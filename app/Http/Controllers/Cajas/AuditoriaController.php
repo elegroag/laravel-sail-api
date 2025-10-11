@@ -8,8 +8,19 @@ use App\Models\Gener02;
 use App\Models\Mercurio09;
 use App\Models\Mercurio20;
 use App\Models\Mercurio31;
+use App\Services\Entidades\ActualizaEmpresaService;
+use App\Services\Entidades\BeneficiarioService;
+use App\Services\Entidades\CertificadoService;
+use App\Services\Entidades\ConyugeService;
+use App\Services\Entidades\DatosTrabajadorService;
+use App\Services\Entidades\EmpresaService;
+use App\Services\Entidades\FacultativoService;
+use App\Services\Entidades\PensionadoService;
+use App\Services\Entidades\RetiroService;
+use App\Services\Entidades\TrabajadorService;
 use App\Services\ReportGenerator\Factories\OptimizedReportFactory;
 use App\Services\ReportGenerator\ReportService;
+use App\Services\Srequest;
 use App\Services\Utils\CalculatorDias;
 use App\Services\Utils\GeneralService;
 use Illuminate\Http\Request;
@@ -33,6 +44,7 @@ class AuditoriaController extends ApplicationController
     {
         return view('cajas.auditoria.index', [
             'title' => 'Consulta Historica',
+            'mercurio09' => Mercurio09::all(),
         ]);
     }
 
@@ -42,7 +54,15 @@ class AuditoriaController extends ApplicationController
         $tipopc = $request->input('tipopc');
         $fecini = $request->input('fecini');
         $fecfin = $request->input('fecfin');
-        $html = view('cajas.consulta.tmp.consulta_auditoria', compact('tipopc', 'fecini', 'fecfin'))->render();
+        $condi = " mercurio10.fecsis>='$fecini' and mercurio10.fecsis<='$fecfin' ";
+        $mercurio = $this->consultaTipopc($tipopc, 'all', '', '', $condi);
+
+        $html = view('cajas.auditoria._consulta', [
+            'tipopc' => $tipopc,
+            'fecini' => $fecini,
+            'fecfin' => $fecfin,
+            'mercurio' => $mercurio,
+        ])->render();
         return $this->renderObject(['consulta' => $html], false);
     }
 
@@ -126,5 +146,70 @@ class AuditoriaController extends ApplicationController
         $ext = $format;
         $filename = 'reporte_auditoria_' . $fecha->format('Ymd') . '.' . $ext;
         return $service->generateAndStream($format, $generator, $filename);
+    }
+
+    public function consultaTipopc($tipopc, $tipo_consulta, $numero = "", $usuario = "", $condi = "")
+    {
+        $condi_extra = "";
+        if ($condi != "") $condi_extra = " and $condi";
+        $params = [
+            'tipopc' => $tipopc,
+            'tipo_consulta' => $tipo_consulta,
+            'numero' => $numero,
+            'usuario' => $usuario,
+            'condi_extra' => $condi_extra,
+        ];
+
+        if ($tipopc == "1") {
+            $entityService = new TrabajadorService();
+        }
+        if ($tipopc == "2") {
+            $entityService = new EmpresaService();
+        }
+        if ($tipopc == "3") {
+            $entityService = new ConyugeService();
+        }
+        if ($tipopc == "4") {
+            $entityService = new BeneficiarioService();
+        }
+        if ($tipopc == "5") {
+            $entityService = new ActualizaEmpresaService();
+        }
+        if ($tipopc == "6") {
+            $entityService = new DatosTrabajadorService();
+        }
+        if ($tipopc == "7") {
+            $entityService = new RetiroService();
+        }
+        if ($tipopc == "8") {
+            $entityService = new CertificadoService();
+        }
+        if ($tipopc == "10") {
+            $entityService = new FacultativoService();
+        }
+        if ($tipopc == "9") {
+            $entityService = new PensionadoService();
+        }
+        if ($tipopc == "11") {
+            $entityService = new EmpresaService();
+            //Mercurio39
+        }
+        if ($tipopc == "12") {
+            //Mercurio40
+            $entityService = new EmpresaService();
+        }
+
+        $out = $entityService->consultaTipopc(
+            new Srequest($params)
+        );
+
+        $response = [
+            'datos' => ($out['datos'] ?? []),
+            'consulta' => ($out['consulta'] ?? ''),
+            'campos' => ($out['campos'] ?? []),
+            'count' => ($out['count'] ?? 0),
+            'all' => ($out['all'] ?? []),
+        ];
+        return $response;
     }
 }
