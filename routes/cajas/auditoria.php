@@ -8,11 +8,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware([CajasCookieAuthenticated::class])->group(function () {
     Route::prefix('/cajas/auditoria')->group(function () {
         Route::get('/index', [AuditoriaController::class, 'indexAction']);
-        Route::post('/buscar', [AuditoriaController::class, 'buscarAction']);
-        Route::post('/editar/{codofi?}', [AuditoriaController::class, 'editarAction']);
-        Route::post('/borrar', [AuditoriaController::class, 'borrarAction']);
-        Route::post('/guardar', [AuditoriaController::class, 'guardarAction']);
-        Route::post('/aplicar_filtro', [AuditoriaController::class, 'aplicarFiltroAction']);
-        Route::post('/change_cantidad_pagina', [AuditoriaController::class, 'changeCantidadPaginaAction']);
+        Route::post('/consulta', [AuditoriaController::class, 'consultaAuditoriaAction']);
+        Route::post('/reporte', [AuditoriaController::class, 'reporteAuditoriaAction']);
     });
 });

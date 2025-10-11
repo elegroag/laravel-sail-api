@@ -6,6 +6,7 @@ use App\Services\ReportGenerator\Contracts\IReportFactory;
 use App\Services\ReportGenerator\Contracts\IReportProduct;
 use Generator;
 use InvalidArgumentException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportService
 {
@@ -25,9 +26,9 @@ class ReportService
      * @param string $format 'csv', 'xlsx', o 'pdf'.
      * @param Generator $data Fuente de datos eficiente.
      * @param string $filename Nombre del archivo de salida.
-     * @return void
+     * @return StreamedResponse
      */
-    public function generateAndStream(string $format, Generator $data, string $filename): void
+    public function generateAndStream(string $format, Generator $data, string $filename): StreamedResponse
     {
         // 1. Crear el Producto (solicitar el formato deseado)
         $report = $this->getReportProduct($format);
@@ -36,7 +37,7 @@ class ReportService
         $report->setData($data);
 
         // 3. Entregar el Reporte (forzar la descarga)
-        $report->streamOutput($filename);
+        return $report->streamOutput($filename);
     }
 
     private function getReportProduct(string $format): IReportProduct

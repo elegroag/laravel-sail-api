@@ -4,7 +4,6 @@ namespace App\Services\ReportGenerator\Products;
 
 use App\Services\ReportGenerator\Contracts\IReportProduct;
 use Generator;
-use Illuminate\Support\Facades\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CsvStreamingProduct implements IReportProduct
@@ -27,7 +26,7 @@ class CsvStreamingProduct implements IReportProduct
         throw new \BadMethodCallException("The CsvStreamingProduct is designed for streamOutput only.");
     }
 
-    public function streamOutput(string $filename): void
+    public function streamOutput(string $filename): StreamedResponse
     {
         $response = new StreamedResponse(function () {
             $output = fopen('php://output', 'w');
@@ -55,6 +54,6 @@ class CsvStreamingProduct implements IReportProduct
             'Expires' => '0',
         ]);
 
-        $response->send();
+        return $response;
     }
 }
