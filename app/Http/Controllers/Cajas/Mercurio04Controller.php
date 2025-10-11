@@ -8,16 +8,16 @@ use App\Models\Adapter\DbBase;
 use App\Models\Mercurio04;
 use App\Models\Mercurio05;
 use App\Models\Mercurio08;
-use App\Services\Tag;
 use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
+use App\Services\Utils\Paginate;
 use Illuminate\Http\Request;
 
 class Mercurio04Controller extends ApplicationController
 {
     protected $query = '1=1';
 
-    protected $cantidad_pagina = 0;
+    protected $cantidad_pagina = 10;
 
     protected $db;
 
@@ -34,43 +34,7 @@ class Mercurio04Controller extends ApplicationController
 
     public function showTabla($paginate)
     {
-        $html = '<table border="0" cellpadding="0" cellspacing="0" class="table table-bordered">';
-        $html .= "<thead class='thead-light'>";
-        $html .= '<tr>';
-        $html .= "<th scope='col'>Codigo</th>";
-        $html .= "<th scope='col'>Detalle</th>";
-        $html .= "<th scope='col'>Principal</th>";
-        $html .= "<th scope='col'>Estado</th>";
-        $html .= "<th scope='col'>Options</th>";
-        $html .= '</tr>';
-        $html .= '</thead>';
-        $html .= "<tbody class='list'>";
-        foreach ($paginate->items as $mtable) {
-            $html .= '<tr>';
-            $html .= "<td>{$mtable->getCodofi()}</td>";
-            $html .= "<td>{$mtable->getDetalle()}</td>";
-            $html .= "<td>{$mtable->getPrincipalDetalle()}</td>";
-            $html .= "<td>{$mtable->getEstadoDetalle()}</td>";
-            $html .= "<td class='table-actions'>";
-            $html .= "<a href='#!' class='btn btn-xs btn-primary' data-cid='{$mtable->getCodofi()}' data-toggle='ciudad-view'>";
-            $html .= "<i class='fas fa-city'></i>";
-            $html .= '</a>&nbsp;';
-            $html .= "<a href='#!' class='btn btn-xs btn-success' data-cid='{$mtable->getCodofi()}' data-toggle='opcion-view'>";
-            $html .= "<i class='fas fa-clipboard-list text-white'></i>";
-            $html .= '</a>&nbsp;';
-            $html .= "<a href='#!' class='btn btn-xs btn-warning' data-cid='{$mtable->getCodofi()}' data-toggle='editar'>";
-            $html .= "<i class='fas fa-user-edit text-white'></i>";
-            $html .= '</a>&nbsp;';
-            $html .= "<a href='#!' class='btn btn-xs btn-danger' data-cid='{$mtable->getCodofi()}' data-toggle='borrar'>";
-            $html .= "<i class='fas fa-trash text-white'></i>";
-            $html .= '</a>';
-            $html .= '</td>';
-            $html .= '</tr>';
-        }
-        $html .= '</tbody>';
-        $html .= '</table>';
-
-        return $html;
+        return view('cajas.mercurio04._table', compact('paginate'))->render();
     }
 
     public function aplicarFiltroAction(Request $request)
@@ -78,7 +42,6 @@ class Mercurio04Controller extends ApplicationController
         $this->setResponse('ajax');
         $consultasOldServices = new GeneralService;
         $this->query = $consultasOldServices->converQuery($request);
-
         return $this->buscarAction($request);
     }
 
@@ -86,7 +49,7 @@ class Mercurio04Controller extends ApplicationController
     {
         $this->setResponse('ajax');
         $this->cantidad_pagina = $request->input('numero');
-        // self::buscarAction();
+        return $this->buscarAction($request);
     }
 
     public function indexAction()
@@ -95,13 +58,6 @@ class Mercurio04Controller extends ApplicationController
             'codofi' => 'Codigo',
             'detalle' => 'Detalle',
         ];
-        $this->setParamToView('campo_filtro', $campo_field);
-        $help = 'Esta opcion permite manejar los ';
-        $this->setParamToView('help', $help);
-        $this->setParamToView('title', 'Oficinas');
-        $this->setParamToView('buttons', ['N', 'F', 'R']);
-        // Tag::setDocumentTitle('Motivos Oficinas');
-
         $ps = Comman::Api();
         $ps->runCli(
             [
@@ -115,24 +71,35 @@ class Mercurio04Controller extends ApplicationController
         foreach ($out['ciudades'] as $mcodciu) {
             $_codciu[$mcodciu['codciu']] = $mcodciu['detciu'];
         }
-        $this->setParamToView('ciudades', $_codciu);
+        return view('cajas.mercurio04.index', [
+            'campo_filtro' => $campo_field,
+            'title' => 'Oficinas',
+            'buttons' => ['N', 'F', 'R'],
+            'ciudades' => $_codciu,
+        ]);
     }
 
     public function buscarAction(Request $request)
     {
-        $this->setResponse('ajax');
-        $pagina = $request->input('pagina');
-        if ($pagina == '') {
-            $pagina = 1;
-        }
-        $paginate = Tag::paginate($this->Mercurio04->find("$this->query"), $pagina, $this->cantidad_pagina);
-        $html = self::showTabla($paginate);
+        $pagina = ($request->input('pagina') == '') ? 1 : $request->input('pagina');
 
+        $paginate = Paginate::execute(
+            Mercurio04::whereRaw("{$this->query}")->get(),
+            $pagina,
+            $this->cantidad_pagina
+        );
+
+        $html = $this->showTabla($paginate);
         $consultasOldServices = new GeneralService;
         $html_paginate = $consultasOldServices->showPaginate($paginate);
-        $response['consulta'] = $html;
-        $response['paginate'] = $html_paginate;
-        $this->renderObject($response, false);
+
+        $response = [
+            'consulta' => $html,
+            'query' => $this->query,
+            'paginate' => $html_paginate,
+        ];
+
+        return $this->renderObject($response, false);
     }
 
     public function editarAction(Request $request)
@@ -158,7 +125,6 @@ class Mercurio04Controller extends ApplicationController
             try {
                 $this->setResponse('ajax');
                 $codofi = $request->input('codofi');
-                $modelos = ['Mercurio04'];
 
                 $response = $this->db->begin();
                 $this->Mercurio04->deleteAll("codofi = '$codofi'");
@@ -182,11 +148,10 @@ class Mercurio04Controller extends ApplicationController
         try {
             try {
                 $this->setResponse('ajax');
-                $codofi = $request->input('codofi', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-                $detalle = $request->input('detalle', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-                $principal = $request->input('principal', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-                $estado = $request->input('estado', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-                $modelos = ['Mercurio04'];
+                $codofi = $request->input('codofi');
+                $detalle = $request->input('detalle');
+                $principal = $request->input('principal');
+                $estado = $request->input('estado');
 
                 $response = $this->db->begin();
                 $mercurio04 = new Mercurio04;
@@ -218,7 +183,7 @@ class Mercurio04Controller extends ApplicationController
     {
         try {
             $this->setResponse('ajax');
-            $codofi = $request->input('codofi', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $codofi = $request->input('codofi');
             $response = parent::successFunc('');
             $l = $this->Mercurio04->count('*', "conditions: codofi = '$codofi'");
             if ($l > 0) {
@@ -252,8 +217,8 @@ class Mercurio04Controller extends ApplicationController
     {
         try {
             $this->setResponse('ajax');
-            $codofi = $request->input('codofi', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $codciu = $request->input('codciu', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $codofi = $request->input('codofi');
+            $codciu = $request->input('codciu');
             $response = parent::successFunc('');
             $l = $this->Mercurio05->count('*', "conditions: codofi = '$codofi' and codciu='$codciu'");
             if ($l > 0) {
@@ -269,11 +234,11 @@ class Mercurio04Controller extends ApplicationController
         }
     }
 
-    public function ciudad_viewAction(Request $request)
+    public function ciudadViewAction(Request $request)
     {
         try {
             $this->setResponse('ajax');
-            $codofi = $request->input('codofi', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $codofi = $request->input('codofi');
             $response = '';
             $mercurio05 = $this->Mercurio05->find("codofi='$codofi'");
             foreach ($mercurio05 as $mmercurio05) {
@@ -302,8 +267,8 @@ class Mercurio04Controller extends ApplicationController
         try {
 
             $this->setResponse('ajax');
-            $codofi = $request->input('codofi', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $codciu = $request->input('codciu', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $codofi = $request->input('codofi');
+            $codciu = $request->input('codciu');
 
             $response = $this->db->begin();
             $mercurio05 = new Mercurio05;
@@ -330,9 +295,8 @@ class Mercurio04Controller extends ApplicationController
         try {
             try {
                 $this->setResponse('ajax');
-                $codofi = $request->input('codofi', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-                $codciu = $request->input('codciu', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-                $modelos = ['mercurio28'];
+                $codofi = $request->input('codofi');
+                $codciu = $request->input('codciu');
 
                 $response = $this->db->begin();
                 $mercurio05 = $this->Mercurio05->findFirst("codofi='$codofi' and codciu = '$codciu'");
@@ -357,9 +321,8 @@ class Mercurio04Controller extends ApplicationController
         try {
             try {
                 $this->setResponse('ajax');
-                $codofi = $request->input('codofi', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-                $codciu = $request->input('codciu', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-                $modelos = ['mercurio28'];
+                $codofi = $request->input('codofi');
+                $codciu = $request->input('codciu');
 
                 $response = $this->db->begin();
                 $this->Mercurio05->deleteAll("codofi='$codofi' and codciu='$codciu'");
@@ -382,9 +345,9 @@ class Mercurio04Controller extends ApplicationController
     {
         try {
             $this->setResponse('ajax');
-            $codofi = $request->input('codofi', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $tipopc = $request->input('tipopc', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $usuario = $request->input('usuario', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $codofi = $request->input('codofi');
+            $tipopc = $request->input('tipopc');
+            $usuario = $request->input('usuario');
 
             $l = (new Mercurio08)->count(
                 '*',
@@ -409,11 +372,11 @@ class Mercurio04Controller extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function opcion_viewAction(Request $request)
+    public function opcionViewAction(Request $request)
     {
         try {
             $this->setResponse('ajax');
-            $codofi = $request->input('codofi', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $codofi = $request->input('codofi');
             $response = '';
             $mercurio08 = $this->Mercurio08->find("codofi='$codofi'");
             foreach ($mercurio08 as $mmercurio08) {
@@ -444,10 +407,9 @@ class Mercurio04Controller extends ApplicationController
         try {
             try {
                 $this->setResponse('ajax');
-                $codofi = $request->input('codofi', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-                $tipopc = $request->input('tipopc', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-                $usuario = $request->input('usuario', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-                $modelos = ['mercurio08'];
+                $codofi = $request->input('codofi');
+                $tipopc = $request->input('tipopc');
+                $usuario = $request->input('usuario');
 
                 $response = $this->db->begin();
                 $mercurio08 = $this->Mercurio08->findFirst("codofi='$codofi' and tipopc='$tipopc' and usuario='$usuario'");
@@ -484,10 +446,9 @@ class Mercurio04Controller extends ApplicationController
         try {
             try {
                 $this->setResponse('ajax');
-                $codofi = $request->input('codofi', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-                $tipopc = $request->input('tipopc', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-                $usuario = $request->input('usuario', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-                $modelos = ['mercurio08'];
+                $codofi = $request->input('codofi');
+                $tipopc = $request->input('tipopc');
+                $usuario = $request->input('usuario');
 
                 $response = $this->db->begin();
                 $this->Mercurio08->deleteAll("codofi='$codofi' and tipopc='$tipopc' and usuario='$usuario'");

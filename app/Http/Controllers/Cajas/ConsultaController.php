@@ -29,18 +29,16 @@ class ConsultaController extends ApplicationController
 
     public function indexAction()
     {
-        $help = 'Esta opcion permite manejar los ';
-        $this->setParamToView('help', $help);
-        $this->setParamToView('title', 'Consulta');
-        // Tag::setDocumentTitle('Consulta');
+        return view('cajas.consulta.index', [
+            'title' => 'Consulta',
+        ]);
     }
 
     public function consulta_auditoria_viewAction()
     {
-        $help = 'Esta opcion permite manejar los ';
-        $this->setParamToView('help', $help);
-        $this->setParamToView('title', 'Consulta Historica');
-        // Tag::setDocumentTitle('Consulta Historica');
+        return view('cajas.consulta.consulta_auditoria_view', [
+            'title' => 'Consulta Historica',
+        ]);
     }
 
     public function consulta_auditoriaAction(Request $request)
@@ -49,95 +47,8 @@ class ConsultaController extends ApplicationController
         $tipopc = $request->input('tipopc');
         $fecini = $request->input('fecini');
         $fecfin = $request->input('fecfin');
-        $html = '';
-        $html = "<div class='table-responsive'> ";
-        $html .= "<table class='table'>";
-        $html .= '<tr>';
-        $html .= '<td>Documento</td>';
-        $html .= '<td>Nombre</td>';
-        $html .= '<td>Responsable</td>';
-        $html .= '<td>Fecha</td>';
-        $html .= '<td>Dias</td>';
-        if ($tipopc == '8' || $tipopc == '5') {
-            $html .= "<th scope='col'></th>";
-        }
-        $html .= '<td>Estado</td>';
-        $html .= '</tr>';
-        $condi = " estado<>'T' and mercurio20.fecha>='$fecini' and mercurio20.fecha<='$fecfin' ";
-        $condi = " mercurio10.fecsis>='$fecini' and mercurio10.fecsis<='$fecfin' ";
-
-        $consultasOldServices = new GeneralService;
-        $mercurio = $consultasOldServices->consultaTipopc($tipopc, 'all', '', '', $condi);
-
-        foreach ($mercurio['datos'] as $mmercurio) {
-            if ($tipopc == 1 || $tipopc == 9 || $tipopc == 10 || $tipopc == 11 || $tipopc == 12) { // trabajador
-                $documento = 'getCedtra';
-                $nombre = 'getNombre';
-            }
-            if ($tipopc == 2) { // empresa
-                $documento = 'getNit';
-                $nombre = 'getRazsoc';
-            }
-            if ($tipopc == 3) { // conyuge
-                $documento = 'getCedcon';
-                $nombre = 'getNombre';
-            }
-            if ($tipopc == 4) { // beneficiario
-                $documento = 'getNumdoc';
-                $nombre = 'getNombre';
-            }
-            if ($tipopc == 5) { // basicos
-                $documento = 'getDocumento';
-                $nombre = 'getDocumentoDetalle';
-                $extra = $mmercurio->getCampoDetalle().' - '.$mmercurio->getAntval().' - '.$mmercurio->getValor();
-            }
-            if ($tipopc == 7) { // retiro
-                $documento = 'getCedtra';
-                $nombre = 'getNomtra';
-            }
-            if ($tipopc == 8) { // certificiados
-                $documento = 'getCodben';
-                $nombre = 'getNombre';
-                $extra = $mmercurio->getNomcer();
-            }
-            $gener02 = $this->Gener02->findFirst("usuario = '{$mmercurio->getUsuario()}'");
-            if ($gener02 == false) {
-                $gener02 = new Gener02;
-            }
-            $mercurio20 = $this->Mercurio20->findFirst("log = '{$mmercurio->getLog()}'");
-            if ($mercurio20 == false) {
-                $mercurio20 = new Mercurio20;
-            }
-
-            // Debug::addVariable("d",print_r($mmercurio,true));
-            // throw new DebugException();
-            $dias_vencidos = CalculatorDias::calcular(
-                $tipopc,
-                $mmercurio->getId()
-            );
-
-            $html .= '<tr>';
-            $html .= '<tr>';
-            $html .= "<td>{$mmercurio->$documento()}</td>";
-            $html .= "<td>{$mmercurio->$nombre()}</td>";
-            $html .= "<td>{$gener02->getNombre()}</td>";
-            // $html .= "<td>{$mercurio20->getFecha()}</td>";
-            $html .= "<td>{$mmercurio->getFecest()->getUsingFormatDefault()}</td>";
-            $html .= "<td>{$dias_vencidos}</td>";
-            if ($tipopc == '8' || $tipopc == '5') {
-                $html .= "<td>$extra</td>";
-            }
-            $html .= "<td>{$mmercurio->getEstadoDetalle()}</td>";
-            $html .= "<td class='table-actions'>";
-            $html .= "<a href='#!' class='table-action btn btn-xs btn-primary' title='Info' onclick=\"info('$tipopc','{$mmercurio->getId()}')\">";
-            $html .= "<i class='fas fa-info'></i>";
-            $html .= '</a>';
-            $html .= '</td>';
-            $html .= '</tr>';
-            $html .= '</tr>';
-        }
-
-        return $this->renderText($html, false);
+        $html = view('cajas.consulta.tmp.consulta_auditoria', compact('tipopc', 'fecini', 'fecfin'))->render();
+        return $this->renderObject(['consulta' => $html], false);
     }
 
     public function reporte_auditoriaAction(Request $request)
@@ -147,7 +58,7 @@ class ConsultaController extends ApplicationController
         $fecini = $request->input('fecini');
         $fecfin = $request->input('fecfin');
         $fecha = new \DateTime;
-        $file = 'public/temp/'.'reporte_auditoria_'.$fecha->format('Ymd').'.xls';
+        $file = 'public/temp/' . 'reporte_auditoria_' . $fecha->format('Ymd') . '.xls';
 
         $excels = new Spreadsheet_Excel_Writer($file);
         $excel = $excels->addWorksheet();
@@ -213,7 +124,7 @@ class ConsultaController extends ApplicationController
             if ($tipopc == 5) { // basicos
                 $documento = 'getDocumento';
                 $nombre = 'getDocumentoDetalle';
-                $extra = $mmercurio->getCampoDetalle().' - '.$mmercurio->getAntval().' - '.$mmercurio->getValor();
+                $extra = $mmercurio->getCampoDetalle() . ' - ' . $mmercurio->getAntval() . ' - ' . $mmercurio->getValor();
             }
             if ($tipopc == 7) { // retiro
                 $documento = 'getCedtra';
@@ -251,7 +162,7 @@ class ConsultaController extends ApplicationController
             $j++;
         }
         $excels->close();
-        header('location: '.env('APP_URL')."/{$file}");
+        header('location: ' . env('APP_URL') . "/{$file}");
     }
 
     public function inforAction(Request $request, $id)
@@ -264,7 +175,7 @@ class ConsultaController extends ApplicationController
         $result = $consultasOldServices->consultaTipopc($tipopc, 'info', $id);
         $response = $result['consulta'];
 
-        return $this->renderText($response);
+        return $this->renderObject(['consulta' => $response], false);
     }
 
     public function carga_laboralAction()
@@ -298,7 +209,7 @@ class ConsultaController extends ApplicationController
                 $count = $result['count'];
 
                 $html .= "<li class='list-group-item d-flex justify-content-between align-items-center py-2'>";
-                $html .= '<small>'.ucwords(strtolower($mmercurio09->getDetalle())).'</small>';
+                $html .= '<small>' . ucwords(strtolower($mmercurio09->getDetalle())) . '</small>';
                 $html .= "<span class='badge badge-md badge-primary badge-pill'>$count</span>";
                 $html .= '</li>';
             }
@@ -353,7 +264,7 @@ class ConsultaController extends ApplicationController
     {
         $this->setResponse('view');
         $fecha = new \DateTime;
-        $file = 'public/temp/'.'reporte_carga_laboral'.$fecha->format('Ymd').'.xls';
+        $file = 'public/temp/' . 'reporte_carga_laboral' . $fecha->format('Ymd') . '.xls';
 
         $excels = new Spreadsheet_Excel_Writer($file);
         $excel = $excels->addWorksheet();
@@ -405,14 +316,14 @@ class ConsultaController extends ApplicationController
             $j++;
         }
         $excels->close();
-        header('location: '.env('APP_URL')."/{$file}");
+        header('location: ' . env('APP_URL') . "/{$file}");
     }
 
     public function reporte_excel_indicadoresAction($fecini, $fecfin)
     {
         $this->setResponse('view');
         $fecha = new \DateTime;
-        $file = 'public/temp/'.'reporte_indicadores'.$fecha->format('Ymd').'.xls';
+        $file = 'public/temp/' . 'reporte_indicadores' . $fecha->format('Ymd') . '.xls';
 
         $excels = new Spreadsheet_Excel_Writer($file);
         $excel = $excels->addWorksheet();
@@ -514,7 +425,7 @@ class ConsultaController extends ApplicationController
             $j++;
         }
         $excels->close();
-        header('location: '.env('APP_URL')."/{$file}");
+        header('location: ' . env('APP_URL') . "/{$file}");
     }
 
     public function indicadoresAction()
@@ -569,7 +480,7 @@ class ConsultaController extends ApplicationController
 
                 $html .= '<tr>';
                 if ($first) {
-                    $html .= "<th class='align-middle' rowspan='".$mercurio09->count()."'>{$mgener02->getUsuario()}-{$mgener02->getNombre()}</th>";
+                    $html .= "<th class='align-middle' rowspan='" . $mercurio09->count() . "'>{$mgener02->getUsuario()}-{$mgener02->getNombre()}</th>";
                 }
                 $first = false;
                 $html .= "<td>{$mmercurio09->getDetalle()}</td>";
@@ -643,17 +554,15 @@ class ConsultaController extends ApplicationController
         $mercurio = $this->Mercurio46->find($condi);
         foreach ($mercurio as $mmercurio) {
             $html .= '<tr>';
-            $html .= '<tr>';
             $html .= "<td>{$mmercurio->getId()}</td>";
             $html .= "<td>{$mmercurio->getNit()}</td>";
             $html .= "<td>{$mmercurio->getFecsis()}</td>";
             $html .= '<td>';
-            $html .= "<a href='#' onclick='descarga_activacion(this)'>".$mmercurio->getArchivo().'</a>';
+            $html .= "<a href='#' onclick='descarga_activacion(this)'>" . $mmercurio->getArchivo() . '</a>';
             $html .= '</td>';
-            $html .= '</tr>';
             $html .= '</tr>';
         }
 
-        return $this->renderText($html);
+        return $this->renderObject(['consulta' => $html], false);
     }
 }
