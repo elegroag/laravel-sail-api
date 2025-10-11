@@ -1,45 +1,64 @@
-@php
-use App\Services\Tag;
-@endphp
-@php echo Tag::filtro($campo_filtro); @endphp
+@extends('layouts.cajas')
 
-<!-- Modal Captura -->
-@php echo Tag::ModalGeneric(
-    $title,
-    View::render(
-        "mercurio04/tmp/form",
-        array('principal' => $Mercurio04->getPrincipalArray(), 'estados' => $Mercurio04->getEstadoArray())
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.css') }}" />
+@endpush
+
+@section('content')
+
+@include('cajas/templates/tmp_header_adapter', ['sub_title' => $title, 'filtrar' => true, 'listar' => false, 'salir' => false, 'add' => true])
+
+<div class="container-fluid mt--9 pb-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-green-blue p-1"></div>
+                    <div class="card-body p-0 m-3">
+                        <div id='consulta' class='table-responsive'></div>
+                        <div id='paginate' class='card-footer py-4'></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+
+@push('scripts')
+    @include('cajas/templates/tmp_filtro', ['campo_filtro' => $campo_filtro])
+
+    @include("partials.modal_generic", [
+        "titulo" => 'Capturar opciones',
+        "contenido" => '',
+        "evento" => 'data-toggle="guardar-opciones"',
+        "btnShowModal" => 'btCaptureOpciones',
+        "idModal" => 'captureOpciones']
     )
-); @endphp
 
-@php echo Tag::ModalCapture(
-    array(
-        'name' => 'ModalCapturarOpciones',
-        'titulo' => 'Capturar opciones',
-        'contenido' => View::render(
-            "mercurio04/tmp/capture_opciones",
-            array(
-                'mercurio09' => $Mercurio09->find(),
-                'gener02' => $Gener02->find()
-            )
-        )
+    @include("partials.modal_generic", [
+        "titulo" => 'Capturar ciudades',
+        "contenido" => '',
+        "evento" => 'data-toggle="guardar-ciudades"',
+        "btnShowModal" => 'btCaptureCiudades',
+        "idModal" => 'captureCiudades']
     )
-); @endphp
 
-@php echo Tag::ModalCapture(
-    array(
-        'name' => 'ModalCapturarCiudades',
-        'titulo' => 'Capturar ciudades',
-        'contenido' => View::render(
-            "mercurio04/tmp/capture_ciudades",
-            array('ciudades' => $ciudades)
-        )
-    )
-); @endphp
+    <script type="text/template" id="tmp_capture_opciones">
+        <div class="container-fluid">
+            <div class="row" id='div_opciones'></div>
+        </div>
+    </script>
 
+    <script type="text/template" id="tmp_capture_ciudades">
+        <div class="container-fluid">
+            <div class="row" id='div_ciudades'></div>
+        </div>
+    </script>
 
-<div id='consulta' class='table-responsive'></div>
-<div id='paginate' class='card-footer py-4'></div>
+    <script>
+        window.ServerController = 'mercurio04';
+    </script>
 
-
-@php echo Tag::javascriptInclude('Cajas/oficinas/build.oficinas'); @endphp
+    <script src="{{ asset('cajas/build/Oficinas.js') }}"></script>
+@endpush

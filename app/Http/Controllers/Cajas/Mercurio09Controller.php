@@ -35,40 +35,7 @@ class Mercurio09Controller extends ApplicationController
 
     public function showTabla($paginate)
     {
-        $html = '<table border="0" cellpadding="0" cellspacing="0" class="table table-bordered">';
-        $html .= "<thead class='thead-light'>";
-        $html .= '<tr>';
-        $html .= "<th scope='col'>Tipopc</th>";
-        $html .= "<th scope='col'>Detalle</th>";
-        $html .= "<th scope='col'>Dias</th>";
-        $html .= "<th scope='col'></th>";
-        $html .= '</tr>';
-        $html .= '</thead>';
-        $html .= "<tbody class='list'>";
-        foreach ($paginate->items as $mtable) {
-            $html .= '<tr>';
-            $html .= "<td>{$mtable->getTipopc()}</td>";
-            $html .= "<td>{$mtable->getDetalle()}</td>";
-            $html .= "<td>{$mtable->getDias()}</td>";
-            $html .= "<td class='table-actions'>";
-            $html .= "<a type='button' class='table-action btn btn-xs btn-warning' title='Documento' data-cid='{$mtable->getTipopc()}' data-toggle='archivos-view'>";
-            $html .= "<i class='fas fa-file-image text-white'></i>";
-            $html .= '</a>';
-            if (! in_array($mtable->getTipopc(), ['1', '3', '4', '7'])) {
-                $html .= "<a type='button' class='table-action btn btn-xs btn-success' title='Documento' data-cid='{$mtable->getTipopc()}' data-toggle='empresa-view'>";
-                $html .= "<i class='fas fa-eye text-white'></i>";
-                $html .= '</a>';
-            }
-            $html .= "<a href='#!' class='table-action btn btn-xs btn-primary' title='Editar' data-cid='{$mtable->getTipopc()}' data-toggle='editar'>";
-            $html .= "<i class='fas fa-user-edit text-white'></i>";
-            $html .= '</a>';
-            $html .= '</td>';
-            $html .= '</tr>';
-        }
-        $html .= '</tbody>';
-        $html .= '</table>';
-
-        return $html;
+        return view('cajas.mercurio09._table', compact('paginate'))->render();
     }
 
     public function aplicarFiltroAction(Request $request)
@@ -88,14 +55,6 @@ class Mercurio09Controller extends ApplicationController
 
     public function indexAction()
     {
-        $campo_field = [
-            'tipopc' => 'Codigo',
-            'detalle' => 'Detalle',
-        ];
-
-        $this->setParamToView('campo_filtro', $campo_field);
-        $this->setParamToView('title', 'Tipos Opciones');
-
         $apiRest = Comman::Api();
         $apiRest->runCli(
             [
@@ -108,11 +67,13 @@ class Mercurio09Controller extends ApplicationController
         foreach ($datos_captura['tipo_sociedades'] as $data) {
             $_tipsoc[$data['tipsoc']] = $data['detalle'];
         }
-        $this->setParamToView('_tipsoc', $_tipsoc);
 
         return view('cajas.mercurio09.index', [
             'title' => 'Tipos Opciones',
-            'campo_filtro' => $campo_field,
+            'campo_filtro' => [
+                'tipopc' => 'Codigo',
+                'detalle' => 'Detalle',
+            ],
             '_tipsoc' => $_tipsoc,
         ]);
     }
@@ -140,19 +101,23 @@ class Mercurio09Controller extends ApplicationController
     public function editarAction(Request $request)
     {
         try {
-            $this->setResponse('ajax');
             $tipopc = $request->input('tipopc');
             $mercurio09 = Mercurio09::where('tipopc', $tipopc)->first();
             if ($mercurio09 == false) {
                 $mercurio09 = new Mercurio09;
             }
 
-            return $this->renderObject($mercurio09->toArray(), false);
+            $response = [
+                'success' => true,
+                'data' => $mercurio09->toArray(),
+            ];
         } catch (DebugException $e) {
-            $response = parent::errorFunc('Error al obtener el registro');
-
-            return $this->renderObject($response, false);
+            $response = [
+                'success' => false,
+                'msj' => 'Error al obtener el registro ' . $e->getMessage(),
+            ];
         }
+        return $this->renderObject($response, false);
     }
 
     public function borrarAction(Request $request)
@@ -232,21 +197,23 @@ class Mercurio09Controller extends ApplicationController
         }
     }
 
-    public function archivos_viewAction(Request $request)
+    public function archivosViewAction(Request $request)
     {
         try {
+            $this->setResponse('view');
             $tipopc = $request->input('tipopc');
             $mercurio12 = Mercurio12::all();
 
             return view('cajas.mercurio09.tmp.archivos_view', [
                 'tipopc' => $tipopc,
                 'mercurio12' => $mercurio12,
-                'Mercurio13' => new Mercurio13,
+                'mercurio13' => Mercurio13::where('tipopc', $tipopc)->get(),
             ]);
         } catch (DebugException $e) {
-            $response = parent::errorFunc('No se pudo validar la informacion');
-
-            return $this->renderText($response);
+            return $this->renderObject([
+                'flag' => false,
+                'msg' => 'No se pudo validar la informacion',
+            ]);
         }
     }
 
@@ -279,7 +246,6 @@ class Mercurio09Controller extends ApplicationController
         } catch (DebugException $e) {
             $this->db->rollback();
             $response = parent::errorFunc('No se pudo realizar el movimiento: ' . $e->getMessage());
-
             return $this->renderObject($response, false);
         }
     }
@@ -306,7 +272,7 @@ class Mercurio09Controller extends ApplicationController
         }
     }
 
-    public function archivos_empresa_viewAction(Request $request)
+    public function archivosEmpresaViewAction(Request $request)
     {
         try {
             $tipopc = $request->input('tipopc');
@@ -317,12 +283,13 @@ class Mercurio09Controller extends ApplicationController
                 'tipopc' => $tipopc,
                 'tipsoc' => $tipsoc,
                 'mercurio12' => $mercurio12,
-                'Mercurio14' => new Mercurio14,
+                'mercurio14' => Mercurio14::all(),
             ]);
         } catch (DebugException $e) {
-            $response = parent::errorFunc('No se pudo validar la informacion');
-
-            return $this->renderText($response);
+            return $this->renderObject([
+                'flag' => false,
+                'msg' => 'No se pudo validar la informacion',
+            ]);
         }
     }
 

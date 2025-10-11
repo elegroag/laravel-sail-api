@@ -56,4 +56,9 @@ class Mercurio12 extends ModelBase
     {
         return $this->detalle;
     }
+
+    public function getMercurio13()
+    {
+        return $this->hasMany(Mercurio13::class, 'coddoc');
+    }
 }

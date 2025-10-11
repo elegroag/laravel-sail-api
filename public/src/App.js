@@ -1,3 +1,4 @@
+import qs from 'qs';
 import { Region } from '@/Common/Region';
 import loading from '@/Componentes/Views/Loading';
 import { $Kumbia } from '@/Utils';
@@ -194,18 +195,16 @@ const $App = {
     },
     ajaxKumbia(transfer = {}) {
         const { url, data = {}, callback, silent = false } = transfer;
-        // eslint-disable-next-line quotes
-        const csrf = document.querySelector("[name='csrf-token']").getAttribute('content');
-        console.log(data);
         $.ajax({
             type: 'POST',
-            data: data,
+            data: qs.stringify(data),
             url: this.url(url),
             processData: false,
             contentType: 'application/x-www-form-urlencoded',
             cache: false,
             beforeSend: (xhr) => {
                 if (silent == false) loading.show();
+                const csrf = document.querySelector("[name='csrf-token']").getAttribute('content');
                 xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
                 if (csrf.length > 0) {
                     xhr.setRequestHeader('X-CSRF-TOKEN', csrf);
@@ -214,6 +213,7 @@ const $App = {
             },
         })
             .done((response, textStatus, jqXHR) => {
+                console.log(response);
                 if (silent == false) loading.hide();
                 if (jqXHR.status >= 200 && jqXHR.status <= 210) {
                     return callback(response);
