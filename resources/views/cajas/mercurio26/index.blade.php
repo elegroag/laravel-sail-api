@@ -7,7 +7,7 @@
 
 @section('content')
 
-@include('cajas/templates/tmp_header_adapter', ['sub_title' => $title, 'filtrar' => false, 'listar' => false, 'salir' => false, 'add' => true])
+@include('cajas/templates/tmp_header_adapter', ['sub_title' => $title, 'filtrar' => false, 'listar' => false, 'salir' => false, 'add' => false])
 <div class="container-fluid mt--9 pb-4">
     <div class="row">
         <div class="col-12">

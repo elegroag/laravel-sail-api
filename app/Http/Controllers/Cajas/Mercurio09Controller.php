@@ -161,18 +161,17 @@ class Mercurio09Controller extends ApplicationController
             $mercurio09->setDias($dias);
 
             if (! $mercurio09->save()) {
-                parent::setLogger($mercurio09->getMessages());
                 $this->db->rollback();
                 throw new DebugException('Error al guardar el registro');
             }
 
             $this->db->commit();
-            $response = parent::successFunc('Creacion Con Exito');
+            $response = 'Creacion Con Exito';
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $this->db->rollback();
-            $response = parent::errorFunc('No se puede guardar/editar el Registro: ' . $e->getMessage());
+            $response = 'No se puede guardar/editar el Registro: ' . $e->getMessage();
 
             return $this->renderObject($response, false);
         }
@@ -183,15 +182,16 @@ class Mercurio09Controller extends ApplicationController
         try {
             $this->setResponse('ajax');
             $tipopc = $request->input('tipopc');
-            $response = parent::successFunc('');
+
+            $response = 'Validacion Exitosa';
             $l = Mercurio09::where('tipopc', $tipopc)->count();
             if ($l > 0) {
-                $response = parent::errorFunc('El Registro ya se encuentra Digitado');
+                $response = 'El Registro ya se encuentra Digitado';
             }
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $response = parent::errorFunc('No se pudo validar la informacion');
+            $response = 'No se pudo validar la informacion';
 
             return $this->renderObject($response, false);
         }
@@ -232,7 +232,6 @@ class Mercurio09Controller extends ApplicationController
                 $mercurio13->setCoddoc($coddoc);
                 $mercurio13->setObliga('N');
                 if (! $mercurio13->save()) {
-                    parent::setLogger($mercurio13->getMessages());
                     $this->db->rollback();
                     throw new DebugException('Error al guardar archivo');
                 }
@@ -240,12 +239,12 @@ class Mercurio09Controller extends ApplicationController
                 Mercurio13::where('tipopc', $tipopc)->where('coddoc', $coddoc)->delete();
             }
             $this->db->commit();
-            $response = parent::successFunc('Movimiento Realizado Con Exito');
+            $response = 'Movimiento Realizado Con Exito';
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $this->db->rollback();
-            $response = parent::errorFunc('No se pudo realizar el movimiento: ' . $e->getMessage());
+            $response = 'No se pudo realizar el movimiento: ' . $e->getMessage();
             return $this->renderObject($response, false);
         }
     }
@@ -261,12 +260,12 @@ class Mercurio09Controller extends ApplicationController
             $this->db->begin();
             Mercurio13::where('tipopc', $tipopc)->where('coddoc', $coddoc)->update(['obliga' => $obliga]);
             $this->db->commit();
-            $response = parent::successFunc('Movimiento Realizado Con Exito');
+            $response = 'Movimiento Realizado Con Exito';
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $this->db->rollback();
-            $response = parent::errorFunc('No se pudo realizar el movimiento');
+            $response = 'No se pudo realizar el movimiento: ' . $e->getMessage();
 
             return $this->renderObject($response, false);
         }
@@ -310,7 +309,6 @@ class Mercurio09Controller extends ApplicationController
                 $mercurio14->setCoddoc($coddoc);
                 $mercurio14->setObliga('N');
                 if (! $mercurio14->save()) {
-                    parent::setLogger($mercurio14->getMessages());
                     $this->db->rollback();
                     throw new DebugException('Error al guardar archivo de empresa');
                 }
@@ -318,12 +316,12 @@ class Mercurio09Controller extends ApplicationController
                 Mercurio14::where('tipopc', $tipopc)->where('tipsoc', $tipsoc)->where('coddoc', $coddoc)->delete();
             }
             $this->db->commit();
-            $response = parent::successFunc('Movimiento Realizado Con Exito');
+            $response = 'Movimiento Realizado Con Exito';
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $this->db->rollback();
-            $response = parent::errorFunc('No se pudo realizar el movimiento: ' . $e->getMessage());
+            $response = 'No se pudo realizar el movimiento: ' . $e->getMessage();
 
             return $this->renderObject($response, false);
         }
@@ -344,12 +342,12 @@ class Mercurio09Controller extends ApplicationController
                 ->where('coddoc', $coddoc)
                 ->update(['obliga' => $obliga]);
             $this->db->commit();
-            $response = parent::successFunc('Movimiento Realizado Con Exito');
+            $response = 'Movimiento Realizado Con Exito';
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $this->db->rollback();
-            $response = parent::errorFunc('No se pudo realizar el movimiento');
+            $response = 'No se pudo realizar el movimiento: ' . $e->getMessage();
 
             return $this->renderObject($response, false);
         }

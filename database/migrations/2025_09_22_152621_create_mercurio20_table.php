@@ -17,7 +17,6 @@ return new class extends Migration
 
             // PK bigint(20) firmado AUTO_INCREMENT
             $table->bigInteger('log')->autoIncrement();
-            $table->primary('log');
 
             // Columnas
             $table->char('tipo', 2)->nullable();

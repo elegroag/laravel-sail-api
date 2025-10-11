@@ -54,14 +54,18 @@ class Mercurio09 extends ModelBase
         return $this->dias;
     }
 
-    // Relaciones (equivalente Eloquent a hasMany)
-    public function mercurio14()
+    public function mercurio14s()
     {
-        return $this->hasMany(Mercurio14::class, 'coddoc', 'coddoc');
+        return $this->hasMany(Mercurio14::class);
     }
 
-    public function mercurio13()
+    public function mercurio13s()
     {
-        return $this->hasMany(Mercurio13::class, 'coddoc', 'coddoc');
+        return $this->hasMany(Mercurio13::class);
+    }
+
+    public function mercurio08s()
+    {
+        return $this->hasMany(Mercurio08::class);
     }
 }

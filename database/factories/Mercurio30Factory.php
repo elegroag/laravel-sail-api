@@ -42,7 +42,6 @@ class Mercurio30Factory extends Factory
             'telefono' => $this->faker->optional()->phoneNumber(),
             'celular' => $this->faker->optional()->phoneNumber(),
             'fax' => $this->faker->optional()->phoneNumber(),
-            'email' => $this->faker->email(),
             'codact' => $this->faker->numerify('######'),
             'fecini' => $this->faker->optional()->date(),
             'tottra' => $this->faker->numberBetween(1, 100),
@@ -71,6 +70,7 @@ class Mercurio30Factory extends Factory
             'codcaj' => $this->faker->optional()->numerify('##'),
             'fecsol' => $this->faker->optional()->date(),
             'fecapr' => $this->faker->optional()->date(),
+            'email' => $this->faker->unique()->safeEmail()
         ];
     }
 }

@@ -17,7 +17,6 @@ return new class extends Migration
 
             // PK bigint(15) AUTO_INCREMENT (firmado)
             $table->bigInteger('id')->autoIncrement();
-            $table->primary('id');
 
             // Columnas
             $table->char('documento', 15); // NOT NULL

@@ -4,32 +4,35 @@ import { Messages } from '@/Utils';
 let validator;
 window.App = $App;
 
-function galeria() {
-    window.App.trigger('ajax', {
-        url: window.App.url(window.ServerController + '/galeria'),
-        callback: (response) => {
-            let html = '';
-            const tmp = _.template(document.getElementById('tmp_galeria').innerHTML);
-            $.each(response, function (key, value) {
-                html += tmp({ value });
-            });
-            $('#galeria').html(html);
-        },
-        error: (xhr) => {
-            Messages.display('Error al cargar la galería: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
-        },
-    });
-}
-
-$(function () {
-    window.App.initialize();
-    const modalZoom = new bootstrap.Modal(document.getElementById('zoomModal'));
-
-    validator = $('#form').validate({
+const validatorInit = () => {
+     validator = $('#form').validate({
         rules: {
             archivo: { required: true },
         },
     });
+};
+
+$(() => {
+    window.App.initialize();
+    const modalZoom = new bootstrap.Modal(document.getElementById('zoomModal'));
+
+    const galeria = () => {
+        window.App.trigger('syncro', {
+            url: window.App.url(window.ServerController + '/galeria'),
+            callback: (response) => {
+                if(!response) return Messages.display('No se pudieron cargar los datos', 'error');
+                let html = '';
+                const tmp = _.template(document.getElementById('tmp_galeria').innerHTML);
+                $.each(response.data, function (key, value) {
+                    html += tmp({ value });
+                });
+                $('#galeria').html(html);
+            },
+            error: (xhr) => {
+                Messages.display('Error al cargar la galería: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
+            },
+        });
+    }
 
     $(document).on({
         mouseenter: function () {

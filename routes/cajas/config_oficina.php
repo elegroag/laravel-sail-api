@@ -15,12 +15,12 @@ Route::middleware([CajasCookieAuthenticated::class])->group(function () {
         Route::post('/valide_pk', [Mercurio04Controller::class, 'validePkAction']);
         Route::post('/reporte/{format?}', [Mercurio04Controller::class, 'reporteAction']);
         Route::post('/valide_pk_ciudad', [Mercurio04Controller::class, 'validePkCiudadAction']);
-        Route::post('/ciudad_view/{codofi?}', [Mercurio04Controller::class, 'ciudadViewAction']);
+        Route::post('/ciudad_view', [Mercurio04Controller::class, 'ciudadViewAction']);
         Route::post('/guardar_ciudad', [Mercurio04Controller::class, 'guardarCiudadAction']);
         Route::post('/editar_ciudad', [Mercurio04Controller::class, 'editarCiudadAction']);
         Route::post('/borrar_ciudad', [Mercurio04Controller::class, 'borrarCiudadAction']);
         Route::post('/valide_pk_opcion', [Mercurio04Controller::class, 'validePkOpcionAction']);
-        Route::post('/opcion_view/{codofi?}', [Mercurio04Controller::class, 'opcionViewAction']);
+        Route::post('/opcion_view', [Mercurio04Controller::class, 'opcionViewAction']);
         Route::post('/guardar_opcion', [Mercurio04Controller::class, 'guardarOpcionAction']);
         Route::post('/borrar_opcion', [Mercurio04Controller::class, 'borrarOpcionAction']);
 

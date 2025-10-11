@@ -26,8 +26,7 @@ $(function () {
         validePk('#codofi');
     });
 
-    const modalCaptureEl = document.getElementById('captureModal');
-    const modalCapture = modalCaptureEl ? new bootstrap.Modal(modalCaptureEl) : null;
+    const modalCapture = new bootstrap.Modal(document.getElementById('captureModal'));
     const modalOpciones = new bootstrap.Modal(document.getElementById('captureOpciones'));
     const modalCiudades = new bootstrap.Modal(document.getElementById('captureCiudades'));
 
@@ -140,13 +139,15 @@ $(function () {
     $(document).on('click', "[data-toggle='opcion-view']", (e) => {
         e.preventDefault();
         const codofi = $(e.currentTarget).attr('data-cid');
-        codofi_global = codofi;
-        window.App.trigger('ajax', {
+        window.App.trigger('syncro', {
             url: window.App.url(window.ServerController + '/opcion_view'),
             data: { codofi },
             callback: (response) => {
-                $('#captureOpcionesbody').html(response);
+
                 modalOpciones.show();
+                const tpl = _.template(document.getElementById('tmp_opciones').innerHTML);
+                $('#captureOpcionesbody').html(tpl({_collection: response.data}));
+
                 $('#form_opcion :input').each(function () {
                     if (this.type !== 'button') {
                         $(this).val('');
@@ -163,13 +164,16 @@ $(function () {
     $(document).on('click', "[data-toggle='ciudad-view']", (e) => {
         e.preventDefault();
         const codofi = $(e.currentTarget).attr('data-cid');
-        codofi_global = codofi;
-        window.App.trigger('ajax', {
+        window.App.trigger('syncro', {
             url: window.App.url(window.ServerController + '/ciudad_view'),
             data: { codofi },
             callback: (response) => {
-                $('#captureCiudadesbody').html(response);
+                if (response.success == false) return Messages.display('No se pudieron cargar los datos', 'error');
                 modalCiudades.show();
+
+                const tpl = _.template(document.getElementById('tmp_ciudades').innerHTML);
+                $('#captureCiudadesbody').html(tpl({_collection: response.data}));
+
                 $('#form_ciudad :input').each(function () {
                     if (this.type !== 'button') {
                         $(this).val('');

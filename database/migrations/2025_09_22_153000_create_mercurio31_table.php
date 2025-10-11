@@ -85,7 +85,6 @@ return new class extends Migration
             $table->date('fecapr')->nullable()->comment('Fecha de aprobación');
 
             // Índices
-            $table->unique('id', 'id');
             $table->index('log', 'log');
             $table->index('codest', 'fk_mercurio31_mercurio111_idx');
             $table->index(['tipo', 'coddoc', 'documento'], 'fk_mercurio31_mercurio071_idx');
@@ -116,7 +115,6 @@ return new class extends Migration
             $table->dropIndex('fk_mercurio31_mercurio071_idx');
             $table->dropIndex('fk_mercurio31_mercurio111_idx');
             $table->dropIndex('log');
-            $table->dropUnique('id');
         });
         Schema::dropIfExists('mercurio31');
     }

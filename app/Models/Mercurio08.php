@@ -3,14 +3,21 @@
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
+use Thiagoprz\CompositeKey\HasCompositeKey;
+use App\Models\Adapter\ValidateWithRules;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Validation\Rule;
 
 class Mercurio08 extends ModelBase
 {
+    use HasCompositeKey;
+    use ValidateWithRules;
+
     protected $table = 'mercurio08';
 
     public $timestamps = false;
 
-    protected $primaryKey = 'id';
+    protected $primaryKey = ['codofi', 'tipopc', 'usuario'];
 
     protected $fillable = [
         'codofi',
@@ -18,6 +25,23 @@ class Mercurio08 extends ModelBase
         'usuario',
         'orden',
     ];
+
+    protected function rules()
+    {
+        return [
+            'codofi' => 'required|numeric|min:5',
+            'tipopc' => 'required|numeric|min:1',
+            'usuario' => 'required|string|min:0',
+            '_id' => [
+                'required|string',
+                Rule::unique('mercurio08')->where(function ($query) {
+                    return $query->where('codofi', $this->codofi)
+                        ->where('tipopc', $this->tipopc)
+                        ->where('usuario', $this->usuario);
+                }),
+            ],
+        ];
+    }
 
     /**
      * Metodo para establecer el valor del campo codofi
@@ -79,16 +103,6 @@ class Mercurio08 extends ModelBase
         return $this->tipopc;
     }
 
-    public function getTipopcDetalle()
-    {
-        $foreing = $this->getMercurio09();
-        if ($foreing != false) {
-            return $foreing->getDetalle();
-        } else {
-            return '';
-        }
-    }
-
     /**
      * Devuelve el valor del campo usuario
      *
@@ -97,16 +111,6 @@ class Mercurio08 extends ModelBase
     public function getUsuario()
     {
         return $this->usuario;
-    }
-
-    public function getUsuarioDetalle()
-    {
-        $foreing = $this->getGener02();
-        if ($foreing != false) {
-            return $foreing->getNombre();
-        } else {
-            return '';
-        }
     }
 
     /**
@@ -119,10 +123,18 @@ class Mercurio08 extends ModelBase
         return $this->orden;
     }
 
-    public function initialize()
+    public function gener02(): BelongsTo
     {
-        $this->belongsTo('tipopc', 'mercurio09', 'tipopc');
-        $this->belongsTo('usuario', 'gener02', 'usuario');
-        $this->belongsTo('codofi', 'mercurio04', 'codofi');
+        return $this->belongsTo(Gener02::class);
+    }
+
+    public function mercurio04(): BelongsTo
+    {
+        return $this->belongsTo(Mercurio04::class);
+    }
+
+    public function mercurio09(): BelongsTo
+    {
+        return $this->belongsTo(Mercurio09::class);
     }
 }

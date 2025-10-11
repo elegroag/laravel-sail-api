@@ -17,7 +17,6 @@ return new class extends Migration
 
             // id int(2) NOT NULL AUTO_INCREMENT (firmado)
             $table->integer('id')->autoIncrement();
-            $table->primary('id');
 
             // Columnas
             $table->char('estado', 8)->nullable();

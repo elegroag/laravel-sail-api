@@ -14,10 +14,9 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header bg-green-blue p-1"></div>
-                    <div class="card-body p-0 m-3">
-                        <div id='consulta' class='table-responsive'></div>
-                        <div id='paginate' class='card-footer py-4'></div>
-                    </div>
+                <div class="card-body p-0 m-3">
+                    <div id='consulta' class='table-responsive'></div>
+                    <div id='paginate' class='card-footer py-4'></div>
                 </div>
             </div>
         </div>

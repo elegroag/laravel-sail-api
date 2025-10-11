@@ -16,8 +16,7 @@ return new class extends Migration
             $table->engine = 'InnoDB';
 
             // id int(5) NOT NULL AUTO_INCREMENT (firmado)
-            $table->integer('id')->autoIncrement(); // autoincremental, sin unsigned
-            $table->primary('id');
+            $table->integer('id')->autoIncrement(); // autoincremental, ya es clave primaria
 
             // Campos
             $table->char('codzon', 9); // NOT NULL

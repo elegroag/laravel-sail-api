@@ -17,7 +17,6 @@ return new class extends Migration
 
             // PK bigint(15) autoincremental (firmado)
             $table->bigInteger('id')->autoIncrement();
-            $table->primary('id');
 
             // Columnas (tipos y longitudes según SQL)
             $table->char('tipo', 2);
