@@ -27,8 +27,7 @@ class Mercurio26Controller extends ApplicationController
     public function indexAction()
     {
         return view('cajas.mercurio26.index', [
-            'title' => 'Galería',
-            'help' => 'Esta opcion permite manejar los ',
+            'title' => 'Galería'
         ]);
     }
 

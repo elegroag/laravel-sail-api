@@ -30,15 +30,14 @@ $(() => {
         if (!$('#form').valid()) {
             return;
         }
-        window.App.trigger('syncro', {
-            url: window.App.url(window.ServerController + '/consulta'),
+        window.App.trigger('ajax', {
+            url: window.ServerController + '/consulta',
             data: {
                 tipopc: $('#tipopc').val(),
                 fecini: $('#fecini').val(),
                 fecfin: $('#fecfin').val(),
             },
-            callback: (transport) => {
-                var response = transport;
+            callback: (response) => {
                 $('#consulta').html(response);
             },
             error: (jqXHR, textStatus) => {

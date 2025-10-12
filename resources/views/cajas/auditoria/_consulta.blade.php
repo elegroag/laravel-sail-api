@@ -1,5 +1,5 @@
-<div class='table-responsive'>
-    <table class='table'>
+<div class='table-responsive mt-2'>
+    <table class='table table-striped table-bordered'>
         <tr>
             <td>Documento</td>
             <td>Nombre</td>

@@ -182,7 +182,7 @@ class Mercurio04Controller extends ApplicationController
             $this->setResponse('ajax');
             $codofi = $request->input('codofi');
             $response = 'El Registro ya se encuentra Digitado';
-            $l = $this->Mercurio04->count('*', "conditions: codofi = '$codofi'");
+            $l = Mercurio04::whereRaw("codofi = '$codofi'")->count();
             if ($l > 0) {
                 $response = 'El Registro ya se encuentra Digitado';
             }

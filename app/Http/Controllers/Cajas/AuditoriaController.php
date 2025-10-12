@@ -50,7 +50,7 @@ class AuditoriaController extends ApplicationController
 
     public function consultaAuditoriaAction(Request $request)
     {
-        $this->setResponse('ajax');
+        $this->setResponse('view');
         $tipopc = $request->input('tipopc');
         $fecini = $request->input('fecini');
         $fecfin = $request->input('fecfin');
@@ -63,7 +63,8 @@ class AuditoriaController extends ApplicationController
             'fecfin' => $fecfin,
             'mercurio' => $mercurio,
         ])->render();
-        return $this->renderObject(['consulta' => $html], false);
+
+        return $this->renderText($html);
     }
 
     public function reporteAuditoriaAction(Request $request)
@@ -148,10 +149,19 @@ class AuditoriaController extends ApplicationController
         return $service->generateAndStream($format, $generator, $filename);
     }
 
+    public function inforAction(Request $request, $id)
+    {
+        $this->setResponse('ajax');
+        $tipopc = $request->input('tipopc');
+        $id = $request->input('id');
+        $response = $this->consultaTipopc($tipopc, 'info', $id);
+        return $this->renderObject($response);
+    }
+
     public function consultaTipopc($tipopc, $tipo_consulta, $numero = "", $usuario = "", $condi = "")
     {
         $condi_extra = "";
-        if ($condi != "") $condi_extra = " and $condi";
+        if ($condi != "") $condi_extra = " $condi";
         $params = [
             'tipopc' => $tipopc,
             'tipo_consulta' => $tipo_consulta,

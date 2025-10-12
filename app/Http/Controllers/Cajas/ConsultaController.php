@@ -10,6 +10,8 @@ use App\Models\Mercurio20;
 use App\Models\Mercurio31;
 use App\Services\Utils\CalculatorDias;
 use App\Services\Utils\GeneralService;
+use App\Services\ReportGenerator\ReportService;
+use Generator;
 use Illuminate\Http\Request;
 
 class ConsultaController extends ApplicationController
@@ -34,410 +36,122 @@ class ConsultaController extends ApplicationController
         ]);
     }
 
-    public function consulta_auditoria_viewAction()
+    public function cargaLaboralAction()
     {
-        return view('cajas.consulta.consulta_auditoria_view', [
-            'title' => 'Consulta Historica',
-        ]);
-    }
+        $gener02 = Gener02::select('gener02.usuario', 'gener02.nombre', 'gener02.login')
+            ->join('mercurio08', 'gener02.usuario', '=', 'mercurio08.usuario')
+            ->get();
 
-    public function consulta_auditoriaAction(Request $request)
-    {
-        $this->setResponse('ajax');
-        $tipopc = $request->input('tipopc');
-        $fecini = $request->input('fecini');
-        $fecfin = $request->input('fecfin');
-        $html = view('cajas.consulta.tmp.consulta_auditoria', compact('tipopc', 'fecini', 'fecfin'))->render();
-        return $this->renderObject(['consulta' => $html], false);
-    }
-
-    public function reporte_auditoriaAction(Request $request)
-    {
-        $this->setResponse('view');
-        $tipopc = $request->input('tipopc');
-        $fecini = $request->input('fecini');
-        $fecfin = $request->input('fecfin');
-        $fecha = new \DateTime;
-        $file = 'public/temp/' . 'reporte_auditoria_' . $fecha->format('Ymd') . '.xls';
-
-        $excels = new Spreadsheet_Excel_Writer($file);
-        $excel = $excels->addWorksheet();
-        $column_title = $excels->addFormat([
-            'fontfamily' => 'Verdana',
-            'size' => 12,
-            'fgcolor' => 12,
-            'border' => 1,
-            'bordercolor' => 'black',
-            'halign' => 'center',
-        ]);
-        $title = $excels->addFormat([
-            'fontfamily' => 'Verdana',
-            'size' => 13,
-            'border' => 0,
-            'bordercolor' => 'black',
-            'halign' => 'center',
-        ]);
-        $column_style = $excels->addFormat([
-            'fontfamily' => 'Verdana',
-            'size' => 11,
-            'border' => 1,
-            'bordercolor' => 'black',
-        ]);
-        $excel->setMerge(0, 1, 0, 6);
-        $excel->write(0, 1, 'Reporte De Consulta Laboral', $title);
-        $excel->setColumn(1, 20, 45);
-        $i = 0;
-        $j = 2;
-        $excel->write($j, $i++, 'Documento', $column_title);
-        $excel->write($j, $i++, 'Nombre', $column_title);
-        $excel->write($j, $i++, 'Responsable', $column_title);
-        $excel->write($j, $i++, 'Fecha', $column_title);
-        $excel->write($j, $i++, 'Dias', $column_title);
-        if ($tipopc == '8' || $tipopc == '5') {
-            $excel->write($j, $i++, 'Extra', $column_title);
-        }
-        $excel->write($j, $i++, 'Estado', $column_title);
-        $j++;
-        $condi = " estado<>'T' and mercurio20.fecha>='$fecini' and mercurio20.fecha<='$fecfin' ";
-        $condi = " mercurio10.fecsis>='$fecini' and mercurio10.fecsis<='$fecfin' ";
-
+        $mercurio09 = Mercurio09::all();
         $consultasOldServices = new GeneralService;
-        $mercurio = $consultasOldServices->consultaTipopc($tipopc, 'all', '', '', $condi);
-        foreach ($mercurio['datos'] as $mmercurio) {
-            $i = 0;
-            if ($tipopc == 1 || $tipopc == 9 || $tipopc == 10 || $tipopc == 11 || $tipopc == 12) { // trabajador
-                $documento = 'getCedtra';
-                $nombre = 'getNombre';
-            }
-            if ($tipopc == 2) { // empresa
-                $documento = 'getNit';
-                $nombre = 'getRazsoc';
-            }
-            if ($tipopc == 3) { // conyuge
-                $documento = 'getCedcon';
-                $nombre = 'getNombre';
-            }
-            if ($tipopc == 4) { // beneficiario
-                $documento = 'getDocumento';
-                $nombre = 'getNombre';
-            }
-            if ($tipopc == 5) { // basicos
-                $documento = 'getDocumento';
-                $nombre = 'getDocumentoDetalle';
-                $extra = $mmercurio->getCampoDetalle() . ' - ' . $mmercurio->getAntval() . ' - ' . $mmercurio->getValor();
-            }
-            if ($tipopc == 7) { // retiro
-                $documento = 'getCedtra';
-                $nombre = 'getNomtra';
-            }
-            if ($tipopc == 8) { // certificiados
-                $documento = 'getCodben';
-                $nombre = 'getNombre';
-                $extra = $mmercurio->getNomcer();
-            }
-            $gener02 = $this->Gener02->findFirst("usuario = '{$mmercurio->getUsuario()}'");
-            if ($gener02 == false) {
-                $gener02 = new Gener02;
-            }
-            $mercurio20 = $this->Mercurio20->findFirst("log = '{$mmercurio->getLog()}'");
-            if ($mercurio20 == false) {
-                $mercurio20 = new Mercurio20;
-            }
-
-            $dias_vencidos = CalculatorDias::calcular(
-                $tipopc,
-                $mmercurio->getId()
-            );
-
-            $excel->write($j, $i++, $mmercurio->$documento(), $column_style);
-            $excel->write($j, $i++, $mmercurio->$nombre(), $column_style);
-            $excel->write($j, $i++, $gener02->getNombre(), $column_style);
-            // $excel->write($j, $i++, $mercurio20->getFecha(), $column_style);
-            $excel->write($j, $i++, $mmercurio->getFecest()->getUsingFormatDefault(), $column_style);
-            $excel->write($j, $i++, $dias_vencidos, $column_style);
-            if ($tipopc == '8' || $tipopc == '5') {
-                $excel->write($j, $i++, $extra, $column_style);
-            }
-            $excel->write($j, $i++, $mmercurio->getEstadoDetalle(), $column_style);
-            $j++;
-        }
-        $excels->close();
-        header('location: ' . env('APP_URL') . "/{$file}");
+        return view('cajas.consulta.carga_laboral', [
+            'title' => 'Carga Laboral',
+            'gener02' => $gener02,
+            'mercurio09' => $mercurio09,
+            'consultasOldServices' => $consultasOldServices,
+        ]);
     }
 
-    public function inforAction(Request $request, $id)
+    public function reporteExcelCargaLaboralAction(ReportService $reportService)
     {
-        $this->setResponse('ajax');
-        $tipopc = $request->input('tipopc');
-        $id = $request->input('id');
-        $response = '';
-        $consultasOldServices = new GeneralService;
-        $result = $consultasOldServices->consultaTipopc($tipopc, 'info', $id);
-        $response = $result['consulta'];
-
-        return $this->renderObject(['consulta' => $response], false);
-    }
-
-    public function carga_laboralAction()
-    {
-        $help = 'Esta opcion permite manejar los ';
-        $this->setParamToView('help', $help);
-        $this->setParamToView('title', 'Carga Laboral');
-        // Tag::setDocumentTitle('Carga Laboral');
-        $this->setParamToView('buttons', ['P' => ['btyp' => 'btn-neutral', 'func' => 'reporte_excel_carga_laboral()', 'glyp' => 'fas fa-file-contract', 'valr' => 'Reporte']]);
-        $gener02 = $this->Gener02->findAllBySql('select distinct gener02.usuario,gener02.nombre,gener02.login from gener02,mercurio08 where gener02.usuario=mercurio08.usuario');
-        $mercurio09 = $this->Mercurio09->find();
-
-        $html = "<div class='card-body'>";
-        $html .= "<div class='card-columns'>";
-
-        foreach ($gener02 as $mgener02) {
-            $html .= "<div class='card'>";
-            $html .= "<div class='card-header bg-transparent text-center'>";
-            $html .= "<h5 class='h4 ls-1 py-0 mb-0'>{$mgener02->getNombre()}</h5>";
-            $html .= '</div>';
-            $html .= "<ul class='list-group list-group-flush'>";
-            foreach ($mercurio09 as $mmercurio09) {
-                if ($mmercurio09->getTipopc() == '2') {
-                    $condi = " estado IN('P','D') ";
-                } else {
-                    $condi = " estado='P' ";
-                }
-
-                $consultasOldServices = new GeneralService;
-                $result = $consultasOldServices->consultaTipopc($mmercurio09->getTipopc(), 'count', '', $mgener02->getUsuario(), $condi);
-                $count = $result['count'];
-
-                $html .= "<li class='list-group-item d-flex justify-content-between align-items-center py-2'>";
-                $html .= '<small>' . ucwords(strtolower($mmercurio09->getDetalle())) . '</small>';
-                $html .= "<span class='badge badge-md badge-primary badge-pill'>$count</span>";
-                $html .= '</li>';
-            }
-            $html .= '</ul>';
-            $html .= '</div>';
-        }
-
-        $html .= '</div>';
-        $html .= '</div>';
-
-        $this->setParamToView('html', $html);
-    }
-
-    public function bkp_carga_laboralAction()
-    {
-        $help = 'Esta opcion permite manejar los ';
-        $this->setParamToView('help', $help);
-        $this->setParamToView('title', 'Carga Laboral');
-        // Tag::setDocumentTitle('Carga Laboral');
-        $this->setParamToView('buttons', ['P' => ['btyp' => 'btn-neutral', 'func' => 'reporte_excel_carga_laboral()', 'glyp' => 'fas fa-file-contract', 'valr' => 'Reporte']]);
-
-        $html = "<div class='table-responsive'> ";
-        $html .= "<table class='table'>";
-        $html .= '<tr>';
-        $html .= '<td>Usuario/Movimiento</td>';
-        $mercurio09 = $this->Mercurio09->find();
-        foreach ($mercurio09 as $mmercurio09) {
-            $html .= "<td>{$mmercurio09->getDetalle()}</td>";
-        }
-        $html .= '</tr>';
-        $gener02 = $this->Gener02->findAllBySql('select distinct gener02.usuario,gener02.nombre,gener02.login from gener02,mercurio08 where gener02.usuario=mercurio08.usuario');
-        foreach ($gener02 as $mgener02) {
-            $html .= '<tr>';
-            $html .= "<td>{$mgener02->getNombre()}</td>";
-            foreach ($mercurio09 as $mmercurio09) {
-                $condi = "estado='P'";
-
-                $consultasOldServices = new GeneralService;
-                $result = $consultasOldServices->consultaTipopc($mmercurio09->getTipopc(), 'count', '', $mgener02->getUsuario(), $condi);
-
-                $count = $result['count'];
-                $html .= "<td>{$count}</td>";
-            }
-            $html .= '</tr>';
-        }
-        $html .= '</table>';
-        $html .= '</div>';
-        $this->setParamToView('html', $html);
-    }
-
-    public function reporte_excel_carga_laboralAction()
-    {
-        $this->setResponse('view');
         $fecha = new \DateTime;
-        $file = 'public/temp/' . 'reporte_carga_laboral' . $fecha->format('Ymd') . '.xls';
+        $filename = 'reporte_carga_laboral' . $fecha->format('Ymd') . '.xlsx';
 
-        $excels = new Spreadsheet_Excel_Writer($file);
-        $excel = $excels->addWorksheet();
-        $column_title = $excels->addFormat([
-            'fontfamily' => 'Verdana',
-            'size' => 12,
-            'fgcolor' => 12,
-            'border' => 1,
-            'bordercolor' => 'black',
-            'halign' => 'center',
-        ]);
-        $title = $excels->addFormat([
-            'fontfamily' => 'Verdana',
-            'size' => 13,
-            'border' => 0,
-            'bordercolor' => 'black',
-            'halign' => 'center',
-        ]);
-        $column_style = $excels->addFormat([
-            'fontfamily' => 'Verdana',
-            'size' => 11,
-            'border' => 1,
-            'bordercolor' => 'black',
-        ]);
-        $excel->setMerge(0, 1, 0, 6);
-        $excel->write(0, 1, 'Reporte De Carga Laboral', $title);
-        $excel->setColumn(1, 20, 45);
-        $i = 0;
-        $j = 2;
-        $excel->write($j, $i++, 'Usuario/Movimiento', $column_title);
         $mercurio09 = $this->Mercurio09->find();
-        foreach ($mercurio09 as $mmercurio09) {
-            $excel->write($j, $i++, $mmercurio09->getDetalle(), $column_title);
-        }
-        $j++;
         $gener02 = $this->Gener02->findAllBySql('select distinct gener02.usuario,gener02.nombre,gener02.login from gener02,mercurio08 where gener02.usuario=mercurio08.usuario');
-        foreach ($gener02 as $mgener02) {
-            $i = 0;
-            $excel->write($j, $i++, $mgener02->getNombre(), $column_style);
+
+        $dataGenerator = (function () use ($mercurio09, $gener02) {
+            $headers = ['Usuario/Movimiento'];
             foreach ($mercurio09 as $mmercurio09) {
-                $condi = "estado='P'";
-
-                $consultasOldServices = new GeneralService;
-                $result = $consultasOldServices->consultaTipopc($mmercurio09->getTipopc(), 'count', '', $mgener02->getUsuario(), $condi);
-
-                $count = $result['count'];
-                $excel->write($j, $i++, $count, $column_style);
+                $headers[] = $mmercurio09->getDetalle();
             }
-            $j++;
-        }
-        $excels->close();
-        header('location: ' . env('APP_URL') . "/{$file}");
-    }
+            yield $headers;
 
-    public function reporte_excel_indicadoresAction($fecini, $fecfin)
-    {
-        $this->setResponse('view');
-        $fecha = new \DateTime;
-        $file = 'public/temp/' . 'reporte_indicadores' . $fecha->format('Ymd') . '.xls';
-
-        $excels = new Spreadsheet_Excel_Writer($file);
-        $excel = $excels->addWorksheet();
-        $column_title = $excels->addFormat([
-            'fontfamily' => 'Verdana',
-            'size' => 12,
-            'fgcolor' => 12,
-            'border' => 1,
-            'bordercolor' => 'black',
-            'halign' => 'center',
-        ]);
-        $title = $excels->addFormat([
-            'fontfamily' => 'Verdana',
-            'size' => 13,
-            'border' => 0,
-            'bordercolor' => 'black',
-            'halign' => 'center',
-        ]);
-        $column_style = $excels->addFormat([
-            'fontfamily' => 'Verdana',
-            'size' => 11,
-            'border' => 1,
-            'bordercolor' => 'black',
-        ]);
-        $excel->setMerge(0, 1, 0, 6);
-        $excel->write(0, 1, 'Reporte De Indicadores', $title);
-        $excel->setColumn(0, 0, 45);
-        $estados = new Mercurio31;
-        $estados = $estados->getEstadoArray();
-        $i = 0;
-        $j = 2;
-        $excel->write($j, $i++, 'Usuario/Movimiento', $column_title);
-        $excel->setMerge(2, 1, 2, 6);
-        $excel->setMerge(2, 7, 2, 12);
-        $excel->setMerge(2, 13, 2, 18);
-        $excel->setMerge(2, 19, 2, 24);
-        $excel->setMerge(2, 25, 2, 30);
-        $excel->setMerge(2, 31, 2, 36);
-        $excel->setMerge(2, 37, 2, 42);
-        $excel->setMerge(2, 43, 2, 48);
-        $excel->setMerge(2, 49, 2, 54);
-        $excel->setMerge(2, 55, 2, 60);
-        $excel->setMerge(2, 61, 2, 66);
-        $excel->setMerge(2, 67, 2, 72);
-        $mercurio09 = $this->Mercurio09->find();
-        $i = 1;
-        foreach ($mercurio09 as $mmercurio09) {
-            $excel->write($j, $i, $mmercurio09->getDetalle(), $column_title);
-            $i += 6;
-        }
-        $i = 0;
-        $j++;
-        $excel->write($j, $i++, '', $column_style);
-        foreach ($mercurio09 as $mmercurio09) {
-            foreach ($estados as $mestados) {
-                $excel->write($j, $i++, $mestados, $column_style);
-            }
-            $excel->write($j, $i++, 'TOT', $column_style);
-            $excel->write($j, $i++, 'VEN', $column_style);
-        }
-        $j++;
-        $gener02 = $this->Gener02->findAllBySql('select distinct gener02.usuario,gener02.nombre,gener02.login from gener02,mercurio08 where gener02.usuario=mercurio08.usuario');
-        foreach ($gener02 as $mgener02) {
-            $i = 0;
-            $excel->write($j, $i++, $mgener02->getNombre(), $column_style);
-            foreach ($mercurio09 as $mmercurio09) {
-                $valores_estado = '';
-                $total_estado = 0;
-                foreach ($estados as $key => $mestados) {
-                    $condi = "estado='$key' and mercurio20.fecha>='$fecini' and mercurio20.fecha<='$fecfin'";
-
-                    $consultasOldServices = new GeneralService;
+            $consultasOldServices = new GeneralService;
+            foreach ($gener02 as $mgener02) {
+                $row = [$mgener02->getNombre()];
+                foreach ($mercurio09 as $mmercurio09) {
+                    $condi = "estado='P'";
                     $result = $consultasOldServices->consultaTipopc($mmercurio09->getTipopc(), 'count', '', $mgener02->getUsuario(), $condi);
-                    $count = $result['count'];
-                    $excel->write($j, $i++, $count, $column_style);
-                    $total_estado += $result['count'];
+                    $row[] = $result['count'];
                 }
-                $condi = "estado<>'T' and mercurio20.fecha>='$fecini' and mercurio20.fecha<='$fecfin'";
-
-                $consultasOldServices = new GeneralService;
-                $result = $consultasOldServices->consultaTipopc($mmercurio09->getTipopc(), 'count', '', $mgener02->getUsuario(), $condi);
-
-                $mercurio = $result['all'];
-                $total_vencido = 0;
-                foreach ($mercurio as $mmercurio) {
-
-                    $dias_vencidos = CalculatorDias::calcular(
-                        $mmercurio09->getTipopc(),
-                        $mmercurio09->getId()
-                    );
-
-                    if ($dias_vencidos > $mmercurio09->getDias()) {
-                        $total_vencido++;
-                    }
-                }
-                $excel->write($j, $i++, $total_estado, $column_style);
-                $excel->write($j, $i++, $total_vencido, $column_style);
+                yield $row;
             }
-            $j++;
-        }
-        $excels->close();
-        header('location: ' . env('APP_URL') . "/{$file}");
+        })();
+
+        return $reportService->generateAndStream('xlsx', $dataGenerator, $filename);
+    }
+
+    public function reporteExcelIndicadoresAction($fecini, $fecfin, ReportService $reportService)
+    {
+        $fecha = new \DateTime;
+        $filename = 'reporte_indicadores' . $fecha->format('Ymd') . '.xlsx';
+
+        $mercurio09 = $this->Mercurio09->find();
+        $estados = (new Mercurio31)->getEstadoArray();
+        $gener02 = $this->Gener02->findAllBySql('select distinct gener02.usuario,gener02.nombre,gener02.login from gener02,mercurio08 where gener02.usuario=mercurio08.usuario');
+
+        $dataGenerator = (function () use ($fecini, $fecfin, $mercurio09, $estados, $gener02) {
+            // Encabezados aplanados: Usuario/Movimiento + (por cada movimiento: estados..., TOT, VEN)
+            $headers = ['Usuario/Movimiento'];
+            foreach ($mercurio09 as $mmercurio09) {
+                foreach ($estados as $label) {
+                    $headers[] = $mmercurio09->getDetalle() . ' - ' . $label;
+                }
+                $headers[] = $mmercurio09->getDetalle() . ' - TOT';
+                $headers[] = $mmercurio09->getDetalle() . ' - VEN';
+            }
+            yield $headers;
+
+            $consultasOldServices = new GeneralService;
+            foreach ($gener02 as $mgener02) {
+                $row = [$mgener02->getNombre()];
+                foreach ($mercurio09 as $mmercurio09) {
+                    $total_estado = 0;
+                    // Conteo por estado
+                    foreach ($estados as $key => $label) {
+                        $condi = "estado='$key' and mercurio20.fecha>='$fecini' and mercurio20.fecha<='$fecfin'";
+                        $result = $consultasOldServices->consultaTipopc($mmercurio09->getTipopc(), 'count', '', $mgener02->getUsuario(), $condi);
+                        $count = $result['count'];
+                        $row[] = $count;
+                        $total_estado += $count;
+                    }
+
+                    // Total de estados (excluye 'T' en la consulta de vencidos original, pero aquí es suma de anteriores)
+                    $row[] = $total_estado;
+
+                    // Vencidos según lógica original de este método
+                    $condi = "estado<>'T' and mercurio20.fecha>='$fecini' and mercurio20.fecha<='$fecfin'";
+                    $result = $consultasOldServices->consultaTipopc($mmercurio09->getTipopc(), 'count', '', $mgener02->getUsuario(), $condi);
+                    $mercurio = $result['all'];
+                    $total_vencido = 0;
+                    foreach ($mercurio as $mmercurio) {
+                        $dias_vencidos = CalculatorDias::calcular(
+                            $mmercurio09->getTipopc(),
+                            $mmercurio->getId()
+                        );
+                        if ($dias_vencidos > $mmercurio09->getDias()) {
+                            $total_vencido++;
+                        }
+                    }
+                    $row[] = $total_vencido;
+                }
+
+                yield $row;
+            }
+        })();
+
+        return $reportService->generateAndStream('xlsx', $dataGenerator, $filename);
     }
 
     public function indicadoresAction()
     {
-        $help = 'Esta opcion permite manejar los ';
-        $this->setParamToView('help', $help);
-        $this->setParamToView('title', 'Indicadores');
-        // Tag::setDocumentTitle('Carga Laboral');
-        $this->setParamToView('buttons', ['P' => ['btyp' => 'btn-neutral', 'func' => 'reporte_excel_indicadores()', 'glyp' => 'fas fa-file-contract', 'valr' => 'Reporte']]);
+        return view('cajas.consulta.indicadores', [
+            'title' => 'Consulta Indicadores'
+        ]);
     }
 
-    public function consulta_indicadoresAction(Request $request)
+    public function consultaIndicadoresAction(Request $request)
     {
         $this->setResponse('ajax');
         $fecini = $request->input('fecini');
@@ -527,15 +241,14 @@ class ConsultaController extends ApplicationController
         return $this->renderText($html);
     }
 
-    public function consulta_activacion_masiva_viewAction()
+    public function consultaActivacionMasivaViewAction()
     {
-        $help = 'Esta opcion permite manejar los ';
-        $this->setParamToView('help', $help);
-        $this->setParamToView('title', 'Consulta Activacion Masiva');
-        // Tag::setDocumentTitle('Consulta Activacion Masiva');
+        return view('cajas.consulta.activacion_masiva', [
+            'title' => 'Consulta Activacion Masiva',
+        ]);
     }
 
-    public function consulta_activacion_masivaAction(Request $request)
+    public function consultaActivacionMasivaAction(Request $request)
     {
         $this->setResponse('ajax');
         // $nit = $request->input("nit");
@@ -564,5 +277,12 @@ class ConsultaController extends ApplicationController
         }
 
         return $this->renderObject(['consulta' => $html], false);
+    }
+
+    public function reasignaViewAction()
+    {
+        return view('cajas.consulta.reasigna', [
+            'title' => 'Consulta Reasigna',
+        ]);
     }
 }
