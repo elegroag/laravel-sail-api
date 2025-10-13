@@ -5,14 +5,6 @@
         @include('cajas/templates/tmp_filtro', ['campo_filtro' => $campo_filtro])
     </script>
 
-    <script type="text/template" id='tmp_info'>
-        @include('cajas/templates/tmp_information')
-    </script>
-
-    <script id='tmp_aportes' type='text/template'>
-        @include('cajas/templates/tmp_aportes')
-    </script>
-
     <script id='tmp_sisu' type='text/template'>
         @include('cajas/aprobacionemp/tmp/tmp_sisu')
     </script>
@@ -128,12 +120,6 @@
         <hr />
         <div class="col-md-7" id='show_sucursales'></div>
         <div class="col-md-5" id='show_listas'></div>
-    </script>
-
-    <script id='tmp_table' type="text/template">
-        <div id='consulta' class='table-responsive'></div>
-        <div id='paginate' class='card-footer py-4'></div>
-        <div id='filtro'></div>
     </script>
 
     <script src="{{ asset('cajas/build/Empresas.js') }}"></script>

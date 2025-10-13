@@ -54,6 +54,20 @@
     <script id='tmp_info_header' type="text/template">
         @include('cajas/templates/tmp_info_header')
     </script>
+
+    <script id='tmp_aportes' type='text/template'>
+        @include('cajas/templates/tmp_aportes')
+    </script>
+
+    <script id='tmp_table' type="text/template">
+        <div id='consulta' class='table-responsive'></div>
+        <div id='paginate' class='card-footer py-4'></div>
+        <div id='filtro'></div>
+    </script>
+
+    <script id='tmp_notificar' type='text/template'>
+        @include('cajas/templates/tmp_notificar')
+    </script>
 @endpush
 
 @section('content-main')

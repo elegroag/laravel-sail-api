@@ -5,10 +5,6 @@
         @include('cajas/templates/tmp_filtro', ['campo_filtro' => $campo_filtro])
     </script>
 
-    <script type='text/template' id='tmp_aportes'>
-        @include('cajas/templates/tmp_aportes')
-    </script>
-
     <script type='text/template' id='tmp_layout_trabajador'>
         <div class="row justify-content-between">
             <div class="col-md-12" id='show_trabajador'></div>
@@ -141,12 +137,6 @@
             <br/>
             <% _ai++ })} %>
         </div>
-    </script>
-
-    <script type="text/template" id='tmp_table'>
-        <div id='consulta' class='table-responsive'></div>
-        <div id='paginate' class='card-footer py-4'></div>
-        <div id='filtro'></div>
     </script>
 
     <script src="{{ asset('cajas/build/Trabajadores.js') }}"></script>
