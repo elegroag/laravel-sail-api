@@ -30,41 +30,9 @@ class Mercurio65Controller extends ApplicationController
 
     public function showTabla($paginate)
     {
-        $html = '<table border="0" cellpadding="0" cellspacing="0" class="table table-bordered">';
-        $html .= "<thead class='thead-light'>";
-        $html .= '<tr>';
-        $html .= "<th scope='col'>Nit</th>";
-        $html .= "<th scope='col'>Razon Social</th>";
-        $html .= "<th scope='col'>Direccion</th>";
-        $html .= "<th scope='col'>Email</th>";
-        $html .= "<th scope='col'>Clasificacion</th>";
-        $html .= "<th scope='col'>Estado</th>";
-        $html .= "<th scope='col'></th>";
-        $html .= '</tr>';
-        $html .= '</thead>';
-        $html .= "<tbody class='list'>";
-        foreach ($paginate->items as $mtable) {
-            $html .= '<tr>';
-            $html .= "<td>{$mtable->getNit()}</td>";
-            $html .= "<td>{$mtable->getRazsoc()}</td>";
-            $html .= "<td>{$mtable->getDireccion()}</td>";
-            $html .= "<td>{$mtable->getEmail()}</td>";
-            $html .= "<td>{$mtable->getCodclaDetalle()}</td>";
-            $html .= "<td>{$mtable->getEstadoDetalle()}</td>";
-            $html .= "<td class='table-actions'>";
-            $html .= "<a href='#!' class='table-action btn btn-xs btn-primary' title='Editar' onclick='editar(\"{$mtable->getCodsed()}\")'>";
-            $html .= "<i class='fas fa-user-edit text-white'></i>";
-            $html .= '</a>';
-            $html .= "<a href='#!' class='table-action table-action-delete btn btn-xs btn-danger' title='Borrar' onclick='borrar(\"{$mtable->getCodsed()}\")'>";
-            $html .= "<i class='fas fa-trash text-white'></i>";
-            $html .= '</a>';
-            $html .= '</td>';
-            $html .= '</tr>';
-        }
-        $html .= '</tbody>';
-        $html .= '</table>';
-
-        return $html;
+        return view('cajas.mercurio65._table', [
+            'paginate' => $paginate,
+        ]);
     }
 
     public function aplicarFiltroAction(Request $request)
@@ -183,7 +151,7 @@ class Mercurio65Controller extends ApplicationController
             if ($request->hasFile('archivo')) {
                 $file = $request->file('archivo');
                 $extension = $file->getClientOriginalExtension();
-                $fileName = $request->input('codsed').'_comercios.'.$extension;
+                $fileName = $request->input('codsed') . '_comercios.' . $extension;
 
                 // Guardar el archivo usando el almacenamiento de Laravel
                 $path = $file->storeAs('uploads', $fileName, 'public');
@@ -201,7 +169,7 @@ class Mercurio65Controller extends ApplicationController
 
             return $this->renderObject($response, false);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            $response = parent::errorFunc('Error de validación: '.$e->getMessage());
+            $response = parent::errorFunc('Error de validación: ' . $e->getMessage());
 
             return $this->renderObject($response, false);
         } catch (\Exception $e) {
@@ -209,7 +177,7 @@ class Mercurio65Controller extends ApplicationController
                 $this->db->rollback();
             }
             parent::setLogger($e->getMessage());
-            $response = parent::errorFunc('Error al procesar la solicitud: '.$e->getMessage());
+            $response = parent::errorFunc('Error al procesar la solicitud: ' . $e->getMessage());
 
             return $this->renderObject($response, false);
         }

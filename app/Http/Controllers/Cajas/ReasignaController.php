@@ -11,6 +11,7 @@ use App\Models\Mercurio32;
 use App\Models\Mercurio34;
 use App\Models\Mercurio35;
 use App\Services\Request as ServicesRequest;
+use App\Services\Srequest;
 use App\Services\Tag;
 use App\Services\Utils\GeneralService;
 use Exception;
@@ -33,10 +34,9 @@ class ReasignaController extends ApplicationController
 
     public function indexAction()
     {
-        $help = 'Esta opcion permite manejar los ';
-        $this->setParamToView('help', $help);
-        $this->setParamToView('title', 'Reasigna');
-        // Tag::setDocumentTitle('Reasigna');
+        return view('cajas.reasigna.index', [
+            'title' => 'Reasigna',
+        ]);
     }
 
     public function proceso_reasignar_masivoAction(Request $request)
@@ -136,7 +136,7 @@ class ReasignaController extends ApplicationController
             if ($tipopc == 5) { // basicos
                 $documento = 'getDocumento';
                 $nombre = 'getDocumentoDetalle';
-                $extra = $mmercurio->getCampoDetalle().' - '.$mmercurio->getAntval().' - '.$mmercurio->getValor();
+                $extra = $mmercurio->getCampoDetalle() . ' - ' . $mmercurio->getAntval() . ' - ' . $mmercurio->getValor();
             }
             if ($tipopc == 7) { // retiro
                 $documento = 'getCedtra';
@@ -183,14 +183,16 @@ class ReasignaController extends ApplicationController
         $response .= "<hr class='my-4'>";
         $response .= "<p class='lead'>";
         $response .= "<div class='form-group'>";
-        $response .= Tag::selectStatic(new ServicesRequest([
-            'name' => 'usuario_rea',
-            'options' => $this->Gener02->find("usuario in (select usuario from mercurio08 where tipopc='$tipopc')"),
-            'using' => 'usuario,nombre',
-            'use_dummy' => true,
-            'dummyValue' => '',
-            'class' => 'form-control',
-        ]));
+        $response .= Tag::selectStatic(
+            new Srequest([
+                'name' => 'usuario_rea',
+                'options' => $this->Gener02->find("usuario in (select usuario from mercurio08 where tipopc='$tipopc')"),
+                'using' => 'usuario,nombre',
+                'use_dummy' => true,
+                'dummyValue' => '',
+                'class' => 'form-control',
+            ])
+        );
         $response .= '</div>';
         $response .= "<button type='button' class='btn btn-warning btn-lg btn-block' onclick='cambiar_usuario($tipopc,$id)'>Cambiar Usuario Responsable</button>";
         $response .= '</p>';

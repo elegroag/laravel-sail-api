@@ -1,13 +1,44 @@
-<div class="card">
-    <div class="card-body">
-        <p class="m-2 text-center">Reportes de Solicitudes, por tipo de solicitud, en sus diferentes estados</p>
+@extends('layouts.cajas')
 
-        <form id="form_reportesol">
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.css') }}" />
+@endpush
+
+@section('content')
+
+@include('cajas/templates/tmp_header_adapter', ['sub_title' => $title ?? 'Reportes de Solicitudes', 'filtrar' => false, 'listar' => false, 'salir' => false, 'add' => false])
+<div class="container-fluid mt--9 pb-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-green-blue p-1"></div>
+                <div class="card-body p-0 m-3">
+                    <div id='consulta' class='table-responsive'></div>
+                    <div id='paginate' class='card-footer py-4'></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+
+@push('scripts')
+    @include('cajas/templates/tmp_filtro', ['campo_filtro' => $campo_filtro ?? []])
+
+    <script id='tmp_form' type="text/template">
+        <form id="form_reportesol" class="validation_form" autocomplete="off" novalidate>
+            <p class="m-2 text-center">Reportes de Solicitudes, por tipo de solicitud, en sus diferentes estados</p>
             <div class="row justify-content-center">
                 <div class="col-lg-4 col-md-6 col-12">
                     <div class="form-group">
                         <label for="tipo_solicitud">Tipo de Solicitud</label>
-                        @php echo Tag::selectStatic('tipo_solicitud', $tipo_solicitudes, 'class: form-control'); @endphp
+                        <select name="tipo_solicitud" id="tipo_solicitud" class="form-control">
+                            <option value="">Seleccione</option>
+                            @foreach ($tipo_solicitudes as $value => $text)
+                                <option value="{{ $value }}">{{ $text }}</option>
+                            @endforeach
+                        </select>
                     </div>
 
                     <div class='form-group'>
@@ -24,12 +55,12 @@
 
                     <div class='form-group'>
                         <label for="fecha_solicitud">Fecha de envío</label>
-                        @php echo Tag::calendar('fecha_solicitud', 'class: form-control', 'type: date'); @endphp
+                        <input type="date" id="fecha_solicitud" name="fecha_solicitud" class="form-control">
                     </div>
 
                     <div class='form-group'>
-                        <label for="fecha_solicitud">Fecha de aprobación</label>
-                        @php echo Tag::calendar('fecha_aprueba', 'class: form-control', 'type: date'); @endphp
+                        <label for="fecha_aprueba">Fecha de aprobación</label>
+                        <input type="date" id="fecha_aprueba" name="fecha_aprueba" class="form-control">
                     </div>
 
                     <div class='form-group text-center mt-2'>
@@ -38,8 +69,12 @@
                 </div>
             </div>
         </form>
-    </div>
-</div>
+    </script>
+
+    <script>
+        window.ServerController = 'reportesol';
+    </script>
+@endpush
 
 
 <script type="text/javascript">

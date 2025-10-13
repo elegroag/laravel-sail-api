@@ -33,45 +33,9 @@ class Mercurio56Controller extends ApplicationController
 
     public function showTabla($paginate)
     {
-        $html = '<table border="0" cellpadding="0" cellspacing="0" class="table table-bordered">';
-        $html .= "<thead class='thead-light'>";
-        $html .= '<tr>';
-        $html .= "<th scope='col'>Codigo</th>";
-        $html .= "<th scope='col'>Email</th>";
-        $html .= "<th scope='col'>Telefono</th>";
-        $html .= "<th scope='col'>Nota</th>";
-        $html .= "<th scope='col'>Estado</th>";
-        $html .= "<th scope='col'>Archivo</th>";
-        $html .= "<th scope='col'></th>";
-        $html .= '</tr>';
-        $html .= '</thead>';
-        $html .= "<tbody class='list'>";
-        foreach ($paginate->items as $mtable) {
-            $estadoDetalle = $mtable->estado == 'A' ? 'Activo' : 'Inactivo';
-            $html .= '<tr>';
-            $html .= "<td>{$mtable->codinf}</td>";
-            $html .= "<td>{$mtable->email}</td>";
-            $html .= "<td>{$mtable->telefono}</td>";
-            $html .= "<td>{$mtable->nota}</td>";
-            $html .= "<td>{$estadoDetalle}</td>";
-            $html .= "<td>{$mtable->archivo}</td>";
-            $html .= "<td class='table-actions'>";
-            $html .= "<a href='/mercurio57/index/{$mtable->codinf}' class='table-action btn btn-xs btn-primary' title='Servicios'>";
-            $html .= "<i class='fas fa-clipboard-list text-white'></i>";
-            $html .= '</a>';
-            $html .= "<a href='#!' class='table-action btn btn-xs btn-primary' title='Editar' data-cid='{$mtable->codinf}' data-toggle='editar'>";
-            $html .= "<i class='fas fa-user-edit text-white'></i>";
-            $html .= '</a>';
-            $html .= "<a href='#!' class='table-action table-action-delete btn btn-xs btn-danger' title='Borrar' data-cid='{$mtable->codinf}' data-toggle='borrar'>";
-            $html .= "<i class='fas fa-trash text-white'></i>";
-            $html .= '</a>';
-            $html .= '</td>';
-            $html .= '</tr>';
-        }
-        $html .= '</tbody>';
-        $html .= '</table>';
-
-        return $html;
+        return view('cajas.mercurio56._table', [
+            'paginate' => $paginate,
+        ]);
     }
 
     public function aplicarFiltroAction(Request $request)

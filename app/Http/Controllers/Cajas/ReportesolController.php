@@ -6,7 +6,7 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use App\Models\Mercurio09;
 use App\Services\Reportes\ReporteSolicitudes;
-use App\Services\Request as ServicesRequest;
+use App\Services\Srequest;
 use App\Services\Utils\Pagination;
 use Illuminate\Http\Request;
 
@@ -55,7 +55,7 @@ class ReportesolController extends ApplicationController
         $reporte = new ReporteSolicitudes;
 
         $file = $reporte->main(
-            new ServicesRequest(
+            new Srequest(
                 [
                     'estado' => $estado,
                     'fecha_solicitud' => $fecha_solicitud,

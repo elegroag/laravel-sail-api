@@ -33,49 +33,9 @@ class Mercurio59Controller extends ApplicationController
 
     public function showTabla($paginate)
     {
-        $html = '<table border="0" cellpadding="0" cellspacing="0" class="table table-bordered">';
-        $html .= "<thead class='thead-light'>";
-        $html .= '<tr>';
-        $html .= "<th scope='col'>Codigo</th>";
-        $html .= "<th scope='col'>Nota</th>";
-        $html .= "<th scope='col'>Email</th>";
-        $html .= "<th scope='col'>Pregunta cantidad</th>";
-        $html .= "<th scope='col'>Automatico Servicio</th>";
-        $html .= "<th scope='col'>Consumo</th>";
-        $html .= "<th scope='col'>Estado</th>";
-        $html .= "<th scope='col'>Imagen</th>";
-        $html .= "<th scope='col'></th>";
-        $html .= '</tr>';
-        $html .= '</thead>';
-        $html .= "<tbody class='list'>";
-        foreach ($paginate->items as $mtable) {
-            $precanDetalle = $mtable->precan == 'S' ? 'Si' : 'No';
-            $autserDetalle = $mtable->autser == 'S' ? 'Si' : 'No';
-            $estadoDetalle = $mtable->estado == 'A' ? 'Activo' : 'Inactivo';
-
-            $html .= '<tr>';
-            $html .= "<td>{$mtable->codser}</td>";
-            $html .= "<td>{$mtable->nota}</td>";
-            $html .= "<td>{$mtable->email}</td>";
-            $html .= "<td>{$precanDetalle}</td>";
-            $html .= "<td>{$autserDetalle}</td>";
-            $html .= "<td>{$mtable->consumo}</td>";
-            $html .= "<td>{$estadoDetalle}</td>";
-            $html .= "<td>{$mtable->archivo}</td>";
-            $html .= "<td class='table-actions'>";
-            $html .= "<a href='#!' class='table-action btn btn-xs btn-primary' title='Editar' data-codinf='{$mtable->codinf}' data-codser='{$mtable->codser}' data-numero='{$mtable->numero}' data-toggle='editar'>";
-            $html .= "<i class='fas fa-user-edit text-white'></i>";
-            $html .= '</a>';
-            $html .= "<a href='#!' class='table-action table-action-delete btn btn-xs btn-danger' title='Borrar' data-codinf='{$mtable->codinf}' data-codser='{$mtable->codser}' data-numero='{$mtable->numero}' data-toggle='borrar'>";
-            $html .= "<i class='fas fa-trash text-white'></i>";
-            $html .= '</a>';
-            $html .= '</td>';
-            $html .= '</tr>';
-        }
-        $html .= '</tbody>';
-        $html .= '</table>';
-
-        return $html;
+        return view('cajas.mercurio59._table', [
+            'paginate' => $paginate,
+        ]);
     }
 
     public function aplicarFiltroAction(Request $request)

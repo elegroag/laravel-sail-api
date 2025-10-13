@@ -1,69 +1,90 @@
-@php
-echo Tag::filtro($campo_filtro);
-@endphp
 
-<div id='consulta' class='table-responsive'></div>
-<div id='paginate' class='card-footer py-4'></div>
+@extends('layouts.cajas')
 
-<!-- Modal Captura -->
-<div class="modal fade" id="capture-modal" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-body p-0">
-                <div class="card mb-0">
-                    <div class="card-header bg-secondary">
-                        <div class="row align-items-center">
-                            <div class="col-10">
-                                <h3 class="mb-0">@php echo $title; @endphp</h3>
-                            </div>
-                            <div class="col-2 text-right">
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        @php echo Tag::form("", "id: form", "class: validation_form", "autocomplete: off", "novalidate"); @endphp
-                        <div class="form-group">
-                            <label for="codinf" class="form-control-label">Codigo</label>
-                            @php echo Tag::selectStatic("codinf", $_infraestructura, "use_dummy: true", "select2: true", "dummyValue: ", "class: form-control"); @endphp
-                        </div>
-                        <div class="form-group">
-                            <label for="email" class="form-control-label">Email</label>
-                            @php echo Tag::textUpperField("email", "class: form-control", "placeholder: Email"); @endphp
-                        </div>
-                        <div class="form-group">
-                            <label for="telefono" class="form-control-label">Telefono</label>
-                            @php echo Tag::numericField("telefono", "class: form-control", "placeholder: Telefono"); @endphp
-                        </div>
-                        <div class="form-group">
-                            <label for="nota" class="form-control-label">Nota</label>
-                            @php echo Tag::textUpperField("nota", "class: form-control", "placeholder: Nota"); @endphp
-                        </div>
-                        <div class="form-group">
-                            <label for="archivo" class="form-control-label">Archivo</label>
-                            <div class='custom-file'>
-                                <input type='file' class='custom-file-input' id='archivo' name='archivo'>
-                                <label class='custom-file-label' for='customFileLang'>Select file</label>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="estado" class="form-control-label">Estado</label>
-                            @php echo Tag::selectStatic("estado", $Mercurio56->getEstadoArray(), "use_dummy: true", "dummyValue: ", "class: form-control"); @endphp
-                        </div>
-                        @php echo Tag::endform(); @endphp
-                    </div>
-                    <div class="card-footer text-right">
-                        <button type="button" class="btn btn-primary" onclick="guardar();">Guardar</button>
-                        <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
-                    </div>
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.css') }}" />
+@endpush
+
+@section('content')
+
+@include('cajas/templates/tmp_header_adapter', ['sub_title' => $title, 'filtrar' => true, 'listar' => false, 'salir' => false, 'add' => true])
+<div class="container-fluid mt--9 pb-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-green-blue p-1"></div>
+                <div class="card-body p-0 m-3">
+                    <div id='consulta' class='table-responsive'></div>
+                    <div id='paginate' class='card-footer py-4'></div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+@endsection
 
-<script src="{{ asset('core/global.js') }}"></script>
-<script src="{{ asset('Cajas/movile/mercurio56.js') }}"></script>
-<script src="{{ asset('Cajas/movile/upload.js') }}"></script>
+@push('scripts')
+    @include('cajas/templates/tmp_filtro', ['campo_filtro' => $campo_filtro])
+    @include("partials.modal_generic", [
+        "titulo" => 'Configuración básica',
+        "contenido" => '',
+        "evento" => 'data-toggle="guardar"',
+        "btnShowModal" => 'btCaptureModal',
+        "idModal" => 'captureModal']
+    )
+
+    <script id='tmp_form' type="text/template">
+        <form id="form" method="#" class="validation_form" autocomplete="off" novalidate>
+            <div class="row">
+                <div class="form-group col-6">
+                    <label for="codinf" class="form-control-label">Codigo</label>
+                    <select name="codinf" id="codinf" class="form-control">
+                        <option value="">Seleccione</option>
+                        @foreach ($_infraestructura as $infraestructura)
+                            <option value="{{ $infraestructura->id }}">{{ $infraestructura->codigo }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="form-group col-6">
+                    <label for="email" class="form-control-label">Email</label>
+                    <input type="text" name="email" id="email" class="form-control">
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-6">
+                    <label for="telefono" class="form-control-label">Telefono</label>
+                    <input type="text" name="telefono" id="telefono" class="form-control">
+                </div>
+                <div class="form-group col-6">
+                    <label for="nota" class="form-control-label">Nota</label>
+                    <input type="text" name="nota" id="nota" class="form-control">
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-6">
+                    <label for="archivo" class="form-control-label">Archivo</label>
+                    <div class='custom-file'>
+                        <input type='file' class='custom-file-input' id='archivo' name='archivo'>
+                        <label class='custom-file-label' for='customFileLang'>Select file</label>
+                    </div>
+                </div>
+                <div class="form-group col-6">
+                    <label for="estado" class="form-control-label">Estado</label>
+                    <select name="estado" id="estado" class="form-control">
+                        <option value="">Seleccione</option>
+                        @foreach ($mercurio56->getEstadoArray() as $estado)
+                            <option value="{{ $estado }}">{{ $estado }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+        </form>
+    </script>
+
+    <script>
+        window.ServerController = 'mercurio56';
+    </script>
+
+    <script src="{{ asset('cajas/build/Mercurio56.js') }}"></script>
+@endpush

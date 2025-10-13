@@ -26,10 +26,9 @@ class Mercurio73Controller extends ApplicationController
 
     public function indexAction()
     {
-        $help = 'Esta opcion permite manejar los ';
-        $this->setParamToView('help', $help);
-        $this->setParamToView('title', 'Promociones de Educación');
-        // Tag::setDocumentTitle('Promociones de Educación');
+        return view('cajas.mercurio73.index', [
+            'title' => 'Promociones de Educación',
+        ]);
     }
 
     public function galeriaAction()
@@ -67,7 +66,7 @@ class Mercurio73Controller extends ApplicationController
             $mercurio01 = $this->Mercurio01->findFirst();
 
             if (isset($_FILES['archivo']['name']) && $_FILES['archivo']['name'] != '') {
-                $name = 'promo_educacion'.$numedu.'.'.substr($_FILES['archivo']['name'], -3);
+                $name = 'promo_educacion' . $numedu . '.' . substr($_FILES['archivo']['name'], -3);
                 $_FILES['archivo']['name'] = $name;
 
                 $uploadFile = new UploadFile;
@@ -85,7 +84,7 @@ class Mercurio73Controller extends ApplicationController
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $response = parent::errorFunc('No se puede guardar el Registro'.$e->getMessage());
+            $response = parent::errorFunc('No se puede guardar el Registro' . $e->getMessage());
 
             return $this->renderObject($response, false);
         }
@@ -158,8 +157,8 @@ class Mercurio73Controller extends ApplicationController
             $numpro = $request->input('numpro');
             $archivo = $this->Mercurio73->findFirst("numedu = '$numpro'")->getArchivo();
             $mercurio01 = $this->Mercurio01->findFirst();
-            if (! empty($archivo) && file_exists("{$mercurio01->getPath()}galeria/".$archivo)) {
-                unlink("{$mercurio01->getPath()}galeria/".$archivo);
+            if (! empty($archivo) && file_exists("{$mercurio01->getPath()}galeria/" . $archivo)) {
+                unlink("{$mercurio01->getPath()}galeria/" . $archivo);
             }
 
             $response = $this->db->begin();

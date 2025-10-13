@@ -12,6 +12,7 @@ use App\Models\Mercurio11;
 use App\Models\Mercurio31;
 use App\Services\Aprueba\ApruebaSolicitud;
 use App\Services\CajaServices\MadresComuniServices;
+use App\Services\Srequest;
 use App\Services\Utils\Comman;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
@@ -71,9 +72,13 @@ class ApruebaComunitariaController extends ApplicationController
         $usuario = $this->user['usuario'];
 
         $this->pagination->setters(
-            "cantidadPaginas: {$cantidad_pagina}",
-            "query: usuario='{$usuario}' and estado='{$estado}'",
-            "estado: {$estado}"
+            new Srequest(
+                [
+                    "cantidadPaginas: {$cantidad_pagina}",
+                    "query: usuario='{$usuario}' and estado='{$estado}'",
+                    "estado: {$estado}",
+                ]
+            )
         );
 
         $query = $this->pagination->filter(
@@ -129,10 +134,14 @@ class ApruebaComunitariaController extends ApplicationController
         $query = "usuario='{$usuario}' and estado='{$estado}'";
 
         $this->pagination->setters(
-            "cantidadPaginas: $cantidad_pagina",
-            "pagina: {$pagina}",
-            "query: {$query}",
-            "estado: {$estado}"
+            new Srequest(
+                [
+                    "cantidadPaginas: $cantidad_pagina",
+                    "pagina: {$pagina}",
+                    "query: {$query}",
+                    "estado: {$estado}",
+                ]
+            )
         );
 
         if (
@@ -355,7 +364,7 @@ class ApruebaComunitariaController extends ApplicationController
             }
 
             $today = Carbon::now();
-            $this->Mercurio39->updateAll("estado='D', motivo='{$nota}', codest='{$codest}', fecest='".$today->format('Y-m-d H:i:s')."'", "conditions: id='{$id}'");
+            $this->Mercurio39->updateAll("estado='D', motivo='{$nota}', codest='{$codest}', fecest='" . $today->format('Y-m-d H:i:s') . "'", "conditions: id='{$id}'");
 
             $item = $this->Mercurio10->maximum('item', "conditions: tipopc='{$this->tipopc}' and numero='{$id}'");
             $mercurio10 = new Mercurio10;

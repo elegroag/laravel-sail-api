@@ -166,7 +166,7 @@ class ApruebaConyugeController extends ApplicationController
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
-            new Request([
+            new Srequest([
                 'cantidadPaginas' => $cantidad_pagina,
                 'query' => $query_str,
                 'estado' => $estado,
@@ -679,7 +679,7 @@ class ApruebaConyugeController extends ApplicationController
         $this->setParamToView('hide_header', true);
         $this->setParamToView('title', 'Aprobación Conyuge');
 
-        $collection = $this->Mercurio32->find("estado='{$estado}' AND usuario=".parent::getActUser().' ORDER BY fecsol ASC');
+        $collection = $this->Mercurio32->find("estado='{$estado}' AND usuario=" . parent::getActUser() . ' ORDER BY fecsol ASC');
         $conyugeServices = new ConyugeServices;
         $data = $conyugeServices->dataOptional($collection, $estado);
 
@@ -696,7 +696,7 @@ class ApruebaConyugeController extends ApplicationController
         $today = Carbon::now();
 
         try {
-            $this->Mercurio32->updateAll("estado='A',fecest='".$today->format('Y-m-d H:i:s')."'", "conditions: id='{$id}' ");
+            $this->Mercurio32->updateAll("estado='A',fecest='" . $today->format('Y-m-d H:i:s') . "'", "conditions: id='{$id}' ");
 
             $item = $this->Mercurio10->maximum('item', "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
             $mercurio10 = new Mercurio10;
@@ -750,7 +750,7 @@ class ApruebaConyugeController extends ApplicationController
         } catch (DebugException $e) {
             $response = [
                 'success' => false,
-                'msj' => 'No se pudo realizar el movimiento '."\n".$e->getMessage()."\n ".$e->getLine(),
+                'msj' => 'No se pudo realizar el movimiento ' . "\n" . $e->getMessage() . "\n " . $e->getLine(),
             ];
         }
 
@@ -978,7 +978,7 @@ class ApruebaConyugeController extends ApplicationController
         } catch (DebugException $err) {
             $salida = [
                 'success' => false,
-                'msj' => 'Error no se pudo realizar el movimiento, '.$err->getMessage(),
+                'msj' => 'Error no se pudo realizar el movimiento, ' . $err->getMessage(),
                 'comando' => $comando,
                 'file' => $err->getFile(),
                 'line' => $err->getLine(),

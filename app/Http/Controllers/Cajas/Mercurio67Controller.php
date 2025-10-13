@@ -9,6 +9,7 @@ use App\Models\Mercurio67;
 use App\Services\Tag;
 use App\Services\Utils\GeneralService;
 use Illuminate\Http\Request;
+use App\Services\Utils\Paginate;
 
 class Mercurio67Controller extends ApplicationController
 {
@@ -31,33 +32,9 @@ class Mercurio67Controller extends ApplicationController
 
     public function showTabla($paginate)
     {
-        $html = '<table border="0" cellpadding="0" cellspacing="0" class="table table-bordered">';
-        $html .= "<thead class='thead-light'>";
-        $html .= '<tr>';
-        $html .= "<th scope='col'>Codigo</th>";
-        $html .= "<th scope='col'>Detalle</th>";
-        $html .= "<th scope='col'></th>";
-        $html .= '</tr>';
-        $html .= '</thead>';
-        $html .= "<tbody class='list'>";
-        foreach ($paginate->items as $mtable) {
-            $html .= '<tr>';
-            $html .= "<td>{$mtable->getCodcla()}</td>";
-            $html .= "<td>{$mtable->getDetalle()}</td>";
-            $html .= "<td class='table-actions'>";
-            $html .= "<a href='#!' class='table-action btn btn-xs btn-primary' title='Editar' onclick='editar(\"{$mtable->getCodcla()}\")'>";
-            $html .= "<i class='fas fa-user-edit text-white'></i>";
-            $html .= '</a>';
-            $html .= "<a href='#!' class='table-action table-action-delete btn btn-xs btn-danger' title='Borrar' onclick='borrar(\"{$mtable->getCodcla()}\")'>";
-            $html .= "<i class='fas fa-trash text-white'></i>";
-            $html .= '</a>';
-            $html .= '</td>';
-            $html .= '</tr>';
-        }
-        $html .= '</tbody>';
-        $html .= '</table>';
-
-        return $html;
+        return view('cajas.mercurio67._table', [
+            'paginate' => $paginate,
+        ]);
     }
 
     public function aplicarFiltroAction(Request $request)
@@ -65,7 +42,6 @@ class Mercurio67Controller extends ApplicationController
         $this->setResponse('ajax');
         $consultasOldServices = new GeneralService;
         $this->query = $consultasOldServices->converQuery($request);
-
         return $this->buscarAction($request);
     }
 
@@ -73,7 +49,7 @@ class Mercurio67Controller extends ApplicationController
     {
         $this->setResponse('ajax');
         $this->cantidad_pagina = $request->input('numero');
-        // self::buscarAction();
+        return $this->buscarAction($request);
     }
 
     public function indexAction()
@@ -82,12 +58,11 @@ class Mercurio67Controller extends ApplicationController
             'codcla' => 'Codigo',
             'detalle' => 'Detalle',
         ];
-        $this->setParamToView('campo_filtro', $campo_field);
-        $help = 'Esta opcion permite manejar los ';
-        $this->setParamToView('help', $help);
-        $this->setParamToView('title', 'Clasificaciones');
-        $this->setParamToView('buttons', ['N', 'F', 'R']);
-        // Tag::setDocumentTitle('Clasificaciones');
+
+        return view('cajas.mercurio67.index', [
+            'title' => 'Clasificaciones',
+            'campo_filtro' => $campo_field
+        ]);
     }
 
     public function nuevoAction()
@@ -105,7 +80,7 @@ class Mercurio67Controller extends ApplicationController
         if ($pagina == '') {
             $pagina = 1;
         }
-        $paginate = Tag::paginate($this->Mercurio67->find("$this->query"), $pagina, $this->cantidad_pagina);
+        $paginate = Paginate::execute($this->Mercurio67->find("$this->query"), $pagina, $this->cantidad_pagina);
         $html = self::showTabla($paginate);
         $consultasOldServices = new GeneralService;
         $html_paginate = $consultasOldServices->showPaginate($paginate);
