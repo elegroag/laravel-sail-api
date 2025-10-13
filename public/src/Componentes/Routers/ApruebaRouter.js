@@ -1,5 +1,3 @@
-import { $App } from '@/App';
-
 class ApruebaRouter extends Backbone.Router {
 	constructor(options) {
 		super({
@@ -18,6 +16,7 @@ class ApruebaRouter extends Backbone.Router {
 		});
 
 		this.currentApp = options.controller;
+        this.App = options.App || window.App;
 		this._bindRoutes();
 	}
 
@@ -29,7 +28,7 @@ class ApruebaRouter extends Backbone.Router {
 
 	editRute(id = undefined) {
 		if (_.isUndefined(id) == true || _.isNull(id) == true || id == '') {
-			$App.trigger('alert:error', {
+			this.App.trigger('alert:error', {
 				message: 'No hay una solicitud en proceso para continuar.',
 			});
 			this.navigate('list', { trigger: true });
@@ -40,7 +39,7 @@ class ApruebaRouter extends Backbone.Router {
 
 	infoRute(id) {
 		if (_.isUndefined(id) == true || _.isNull(id) == true || id == '') {
-			$App.trigger('alert:error', {
+			this.App.trigger('alert:error', {
 				message: 'No hay una solicitud en proceso para continuar.',
 			});
 			this.navigate('list', { trigger: true });
@@ -51,7 +50,7 @@ class ApruebaRouter extends Backbone.Router {
 
 	deshacerRute(id) {
 		if (_.isUndefined(id) == true || _.isNull(id) == true || id == '') {
-			$App.trigger('alert:error', {
+			this.App.trigger('alert:error', {
 				message: 'No hay una solicitud en proceso para continuar.',
 			});
 			this.navigate('list', { trigger: true });
@@ -62,7 +61,7 @@ class ApruebaRouter extends Backbone.Router {
 
 	reaprobarRute(id) {
 		if (_.isUndefined(id) == true || _.isNull(id) == true || id == '') {
-			$App.trigger('alert:error', {
+			this.App.trigger('alert:error', {
 				message: 'No hay una solicitud en proceso para continuar.',
 			});
 			this.navigate('list', { trigger: true });
@@ -73,7 +72,7 @@ class ApruebaRouter extends Backbone.Router {
 
 	aportesRute(id) {
 		if (_.isUndefined(id) == true || _.isNull(id) == true || id == '') {
-			$App.trigger('alert:error', {
+			this.App.trigger('alert:error', {
 				message: 'No hay una solicitud en proceso para continuar.',
 			});
 			this.navigate('list', { trigger: true });
@@ -84,7 +83,7 @@ class ApruebaRouter extends Backbone.Router {
 
 	notificarRute(id) {
 		if (_.isUndefined(id) == true || _.isNull(id) == true || id == '') {
-			$App.trigger('alert:error', {
+			this.App.trigger('alert:error', {
 				message: 'No hay una solicitud en proceso para continuar.',
 			});
 			this.navigate('list', { trigger: true });
@@ -95,7 +94,7 @@ class ApruebaRouter extends Backbone.Router {
 
 	trayectoriaRute(id) {
 		if (_.isUndefined(id) == true || _.isNull(id) == true || id == '') {
-			$App.trigger('alert:error', {
+			this.App.trigger('alert:error', {
 				message: 'No hay una solicitud en proceso para continuar.',
 			});
 			this.navigate('list', { trigger: true });

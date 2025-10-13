@@ -23,7 +23,9 @@ const $App = {
             this.el = '#contentView';
         }
         this.initialize();
-        this.router = new RouterModule();
+        this.router = new RouterModule({
+            App: this,
+        });
         if (!Backbone.history.start()) {
             this.router.navigate(ruta, { trigger: true });
         }
