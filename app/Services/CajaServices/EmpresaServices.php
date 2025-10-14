@@ -107,62 +107,6 @@ class EmpresaServices
     }
 
     /**
-     * loadDisplay function
-     *
-     * @param  Mercurio30  $mercurio30
-     * @return void
-     */
-    public function loadDisplay($mercurio30)
-    {
-        Tag::displayTo('tipdoc', $mercurio30->getTipdoc());
-        Tag::displayTo('nit', $mercurio30->getNit());
-        Tag::displayTo('id', $mercurio30->getId());
-        Tag::displayTo('sigla', $mercurio30->getSigla());
-        Tag::displayTo('calemp', $mercurio30->getCalemp());
-        Tag::displayTo('cedrep', $mercurio30->getCedrep());
-        Tag::displayTo('repleg', $mercurio30->getRepleg());
-        Tag::displayTo('telefono', $mercurio30->getTelefono());
-        Tag::displayTo('celular', $mercurio30->getCelular());
-        Tag::displayTo('fax', $mercurio30->getFax());
-        Tag::displayTo('email', $mercurio30->getEmail());
-        Tag::displayTo('tottra', $mercurio30->getTottra());
-        Tag::displayTo('valnom', $mercurio30->getValnom());
-        Tag::displayTo('dirpri', $mercurio30->getDirpri());
-        Tag::displayTo('ciupri', $mercurio30->getCiupri());
-        Tag::displayTo('celpri', $mercurio30->getCelpri());
-        Tag::displayTo('emailpri', $mercurio30->getEmailpri());
-        Tag::displayTo('prinom', $mercurio30->getPrinom());
-        Tag::displayTo('segnom', $mercurio30->getSegnom());
-        Tag::displayTo('priape', $mercurio30->getPriape());
-        Tag::displayTo('segape', $mercurio30->getSegape());
-        Tag::displayTo('priaperepleg', $mercurio30->getPriaperepleg());
-        Tag::displayTo('segnomrepleg', $mercurio30->getSegnomrepleg());
-        Tag::displayTo('prinomrepleg', $mercurio30->getPrinomrepleg());
-        Tag::displayTo('segaperepleg', $mercurio30->getSegaperepleg());
-        Tag::displayTo('razsoc', $mercurio30->getRazsoc());
-        Tag::displayTo('tipper', $mercurio30->getTipper());
-        Tag::displayTo('direccion', $mercurio30->getDireccion());
-        Tag::displayTo('tipsoc', $mercurio30->getTipsoc());
-        Tag::displayTo('codact', $mercurio30->getCodact());
-        Tag::displayTo('fecini', $mercurio30->getFeciniString());
-        Tag::displayTo('digver', $mercurio30->getDigver());
-        Tag::displayTo('codciu', $mercurio30->getCodciu());
-        Tag::displayTo('codzon', $mercurio30->getCodzon());
-        Tag::displayTo('coddocrepleg', $mercurio30->getCoddocrepleg());
-        Tag::displayTo('matmer', $mercurio30->getMatmer());
-        Tag::displayTo('telpri', $mercurio30->getTelpri());
-        Tag::displayTo('tipemp', $mercurio30->getTipemp());
-        Tag::displayTo('pymes', 'N');
-        Tag::displayTo('forpre', 'U');
-        Tag::displayTo('ofiafi', '01');
-        Tag::displayTo('subpla', '001');
-        Tag::displayTo('feccap', date('Y-m-d'));
-        Tag::displayTo('contratista', 'N');
-        Tag::displayTo('codind', '03');
-        Tag::displayTo('colegio', 'N');
-    }
-
-    /**
      * rechazar function
      *
      * @param  Mercurio30  $entity
@@ -193,9 +137,9 @@ class EmpresaServices
         if (! $mercurio10->save()) {
             $msj = '';
             foreach ($mercurio10->getMessages() as $key => $mess) {
-                $msj .= $mess->getMessage().'<br/>';
+                $msj .= $mess->getMessage() . '<br/>';
             }
-            throw new DebugException('Error '.$msj, 501);
+            throw new DebugException('Error ' . $msj, 501);
         }
 
         return true;
@@ -234,9 +178,9 @@ class EmpresaServices
         if (! $mercurio10->save()) {
             $msj = '';
             foreach ($mercurio10->getMessages() as $key => $message) {
-                $msj .= $message.'<br/>';
+                $msj .= $message . '<br/>';
             }
-            throw new Exception('Error '.$msj, 501);
+            throw new Exception('Error ' . $msj, 501);
         }
         (new Mercurio10)->updateAll("campos_corregir='{$campos_corregir}'", "conditions: item='{$item}' AND numero='{$id}' AND tipopc='{$this->tipopc}'");
 
@@ -256,10 +200,10 @@ class EmpresaServices
      */
     public function msjDevolver($mercurio30, $nota)
     {
-        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, '.
-            "emitida por la empresa: {$mercurio30->getRazsoc()} con NIT: {$mercurio30->getNit()}.<br/>".
-            "E informamos que su solicitud fue devuelta por el siguiente motivo:<br/> {$nota}".
-            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>'.
+        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, ' .
+            "emitida por la empresa: {$mercurio30->getRazsoc()} con NIT: {$mercurio30->getNit()}.<br/>" .
+            "E informamos que su solicitud fue devuelta por el siguiente motivo:<br/> {$nota}" .
+            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>' .
             '<br/>Gracias por preferirnos.';
     }
 
@@ -276,10 +220,10 @@ class EmpresaServices
      */
     public function msjRechazar($mercurio30, $nota)
     {
-        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, '.
-            "emitida por la empresa: {$mercurio30->getRazsoc()} con NIT: {$mercurio30->getNit()}.<br/>".
-            "E informamos que su solicitud fue rechazada por el siguiente motivo:<br/> {$nota}".
-            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>'.
+        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, ' .
+            "emitida por la empresa: {$mercurio30->getRazsoc()} con NIT: {$mercurio30->getNit()}.<br/>" .
+            "E informamos que su solicitud fue rechazada por el siguiente motivo:<br/> {$nota}" .
+            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>' .
             '<br/>Gracias por preferirnos.';
     }
 
@@ -338,9 +282,9 @@ class EmpresaServices
             }
 
             if ($mercurio->getEstado() == 'A') {
-                $url = env('APP_URL').'/cajas/'.$this->controller_name.'/infoAprobadoView/'.$mercurio->getId();
+                $url = env('APP_URL') . '/cajas/' . $this->controller_name . '/infoAprobadoView/' . $mercurio->getId();
             } else {
-                $url = env('APP_URL').'/cajas/'.$this->controller_name.'/info/'.$mercurio->getId();
+                $url = env('APP_URL') . '/cajas/' . $this->controller_name . '/info/' . $mercurio->getId();
             }
 
             $sat = 'NORMAL';
@@ -390,7 +334,7 @@ class EmpresaServices
                 $style = '#61b5ff';
             }
             $method = ($row->getEstado() == 'A') ? 'infoAprobadoView' : 'info';
-            $url = env('APP_URL').'/cajas/'.$this->controller_name.'/'.$method.'/'.$row->getId();
+            $url = env('APP_URL') . '/cajas/' . $this->controller_name . '/' . $method . '/' . $row->getId();
 
             $sat = ($row->getDocumentoRepresentanteSat() > 0) ? 'SAT' : 'NORMAL';
 

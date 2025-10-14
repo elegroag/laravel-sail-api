@@ -17,7 +17,6 @@ class Mercurio30 extends ModelBase
     public $timestamps = false;
 
     protected $fillable = [
-        'fecsol',
         'log',
         'nit',
         'tipdoc',
@@ -68,6 +67,8 @@ class Mercurio30 extends ModelBase
         'fecha_aprobacion_sat',
         'documento_representante_sat',
         'numero_transaccion',
+        'fecapr',
+        'fecsol'
     ];
 
     public function getFecsol()

@@ -33,19 +33,19 @@ class GestionFirmaNoImage
         }
     }
 
+    /**
+     * hasFirma function
+     *
+     * @return boolean
+     */
     public function hasFirma()
     {
-        $has = (Mercurio16::where('documento', $this->documento)
-            ->where('coddoc', $this->coddoc)
-            ->count() > 0) ? true : false;
-
-        if ($has) {
-            $this->lfirma = Mercurio16::where('documento', $this->documento)
-                ->where('coddoc', $this->coddoc)
-                ->first();
+        $mercurio16 = Mercurio16::where('documento', $this->documento)->where('coddoc', $this->coddoc);
+        if ($mercurio16->count() > 0) {
+            $this->lfirma = $mercurio16->first();
+            return true;
         }
-
-        return $has;
+        return false;
     }
 
     /**
@@ -67,7 +67,7 @@ class GestionFirmaNoImage
             ->first();
 
         if (! $this->lfirma) {
-            $this->lfirma = new Mercurio16(
+            $this->lfirma = Mercurio16::create(
                 [
                     'documento' => $this->documento,
                     'coddoc' => $this->coddoc,
@@ -78,7 +78,6 @@ class GestionFirmaNoImage
                     'keypublic' => null
                 ]
             );
-            $this->lfirma->save();
         }
 
         return true;
@@ -96,14 +95,14 @@ class GestionFirmaNoImage
     public function generarClaves()
     {
         if ($this->lfirma) {
-            if ($this->lfirma->getKeyprivate() && $this->lfirma->getKeypublic()) {
+            if ($this->lfirma->keyprivate && $this->lfirma->keypublic) {
                 return [
-                    'private' => $this->lfirma->getKeyprivate(),
-                    'public' => $this->lfirma->getKeypublic(),
+                    'private' => $this->lfirma->keyprivate,
+                    'public' => $this->lfirma->keypublic,
                 ];
             }
         } else {
-            $this->lfirma = new Mercurio16(
+            $this->lfirma = Mercurio16::create(
                 [
                     'documento' => $this->documento,
                     'coddoc' => $this->coddoc,
@@ -135,8 +134,8 @@ class GestionFirmaNoImage
         $informacionClave = openssl_pkey_get_details($claves);
         $clavePublica = $informacionClave['key'];
 
-        $this->lfirma->setKeyprivate($clavePrivada);
-        $this->lfirma->setKeypublic($clavePublica);
+        $this->lfirma->keyprivate = $clavePrivada;
+        $this->lfirma->keypublic = $clavePublica;
         $this->lfirma->save();
 
         return [

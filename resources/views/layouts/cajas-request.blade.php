@@ -16,7 +16,6 @@
     <script src="{{ asset('assets/datatables.net/js/dataTables.min.js') }}"></script>
     <script src="{{ asset('assets/datatables.net.bs5/js/dataTables.bootstrap5.min.js') }}"></script>
     <script src="{{ asset('assets/summernote/summernote-bs5.js') }}"></script>
-
     <script src="{{ asset('assets/summernote/lang/summernote-es-ES.js') }}"></script>
 
     <script id='tmp_list_header' type="text/template">
@@ -62,7 +61,6 @@
     <script id='tmp_table' type="text/template">
         <div id='consulta' class='table-responsive'></div>
         <div id='paginate' class='card-footer py-4'></div>
-        <div id='filtro'></div>
     </script>
 
     <script id='tmp_notificar' type='text/template'>

@@ -13,6 +13,8 @@ class SignupService
 {
     private $cedrep;
 
+    private $documento;
+
     private $coddoc;
 
     private $repleg;
@@ -51,6 +53,7 @@ class SignupService
         $this->tipsoc = $request->getParam('tipsoc');
         $this->razsoc = $request->getParam('razsoc');
         $this->password = $request->getParam('password');
+        $this->documento = $request->getParam('documento');
 
         $this->nit = $request->getParam('nit');
 
@@ -127,7 +130,7 @@ class SignupService
             $solicitud = $signupEntity->getSolicitud();
         }
 
-        $this->autoFirma($solicitud->getDocumento(), $solicitud->getCoddoc(), $this->password);
+        $this->autoFirma();
 
         return [
             'success' => true,
@@ -235,13 +238,13 @@ class SignupService
         return $out['data'];
     }
 
-    public function autoFirma($documento, $coddoc, $password)
+    public function autoFirma()
     {
         $gestionFirmas = new GestionFirmaNoImage(
             [
-                'documento' => $documento,
-                'coddoc' => $coddoc,
-                'password' => $password,
+                'documento' => $this->documento,
+                'coddoc' => $this->coddoc,
+                'password' => $this->password,
             ]
         );
         if ($gestionFirmas->hasFirma() == false) {

@@ -32,6 +32,8 @@
     <script type="text/javascript" src="{{ asset('assets/bootstrap/js/popper.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/noty/noty.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('assets/select2/js/select2.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('theme/js/select2.js') }}"></script>
     @stack('styles')
 </head>
 
@@ -46,11 +48,11 @@
     <script type="text/javascript" src="{{ asset('assets/bootstrap/js/bootstrap-datepicker.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/bootstrap/js/bootstrap-datepicker-es.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/validators/jquery.validate.min.js') }}"></script>
+    
 
     <script src="{{ asset('assets/validators/messages_es.min.js') }}"></script>
     <script src="{{ asset('theme/js/headroom.js') }}"></script>
     <script src="{{ asset('theme/js/sidenav.js') }}"></script>
-    <script src="{{ asset('theme/js/select2.js') }}"></script>
     <script src="{{ asset('theme/js/scrollbar.js') }}"></script>
     <script src="{{ asset('theme/js/scroll-to.js') }}"></script>
     @stack('scripts')

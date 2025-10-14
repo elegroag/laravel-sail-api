@@ -31,7 +31,7 @@ class HeaderCajasView extends ModelView {
 
 	procesoSalir(e) {
 		e.preventDefault();
-		window.location.href = $App.kumbiaURL('principal/index');
+		window.location.href = $App.url('principal/index');
 	}
 
 	remove() {

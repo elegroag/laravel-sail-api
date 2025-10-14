@@ -341,50 +341,41 @@ class FormInfoView extends Backbone.View {
 	verArchivo(e) {
 		e.preventDefault();
 		const target = $(e.currentTarget);
-		const path = target.attr('data-path');
 		const nomarc = target.attr('data-file');
-
-		let _filepath;
-		if (path != void 0 && nomarc != void 0) {
-			_filepath = btoa(path + '' + nomarc);
-		} else if (path != void 0 && nomarc == void 0) {
-			_filepath = btoa(path);
-		} else {
-			return;
-		}
-
-		const _data = {
-			url: Utils.getKumbiaURL('principal/download_global/' + _filepath),
-			filename: _filepath,
-		};
+		const id = target.attr('data-cid');
+		const coddoc = target.attr('data-coddoc');
+		const file = btoa(nomarc);
 
 		$.ajax({
-			type: 'POST',
-			url: Utils.getKumbiaURL('principal/file_existe_global/' + _filepath),
-			dataType: 'JSON',
-			data: _data,
-		}).done((resultado) => {
-			if (resultado.success == true) {
-				this.__winArchivo(path, nomarc);
-			} else {
-				Swal.fire({
-					title: 'Notificación',
-					text: 'El archivo no se logra localizar en el servidor',
-					icon: 'warning',
-					showConfirmButton: false,
-					timer: 10000,
-				});
-			}
-		});
-	}
+            url: $App.url('principal/file_existe_global'),
+            method: 'POST',
+            data: { 	
+				file,
+				id,
+				coddoc 
+			},
+            xhrFields: {
+                responseType: 'blob',
+            },
+            beforeSend: (xhr) => {
+                const csrf = document.querySelector("[name='csrf-token']").getAttribute('content');
+                xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                xhr.setRequestHeader('X-CSRF-TOKEN', csrf);
+                xhr.setRequestHeader('Authorization', 'Bearer ' + csrf);
+            },
+            success: (data) => {
+				if(data){
+					const url = URL.createObjectURL(data);
+					window.open(url, nomarc, 'width=900,height=750,toolbar=no,location=no,status=no,menubar=no,scrollbars=yes');
+				}else{
+					$App.trigger('alert:error', { message: 'No se pudo cargar el documento' });
+				}
+            },
+            error: () => {
+                $App.trigger('alert:error', { message: 'No se pudo cargar el documento' });
+            },
+        });
 
-	__winArchivo(path = '', nomarc = '') {
-		const url = ('../' + path + nomarc).replace('//', '/');
-		window.open(
-			Utils.getKumbiaURL(url),
-			nomarc,
-			'width=800, height=750,toobal=no,statusbar=no,scrollbars=yes menuvar=yes',
-		);
 	}
 
 	deshacerSolicitud(e) {

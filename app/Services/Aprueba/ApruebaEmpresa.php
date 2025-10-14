@@ -78,7 +78,7 @@ class ApruebaEmpresa
         $params['telr'] = $mercurio30->getTelefono();
         $params['mailr'] = $mercurio30->getEmailpri();
         $params['calsuc'] = $mercurio30->getCalemp();
-        $params['nomcon'] = $mercurio30->getPriape().' '.$mercurio30->getSegape();
+        $params['nomcon'] = $mercurio30->getPriape() . ' ' . $mercurio30->getSegape();
         $params['detalle'] = $mercurio30->getRazsoc();
         $params['nomemp'] = $mercurio30->getRazsoc();
         $params['fecapr'] = $postData['fecapr'];
@@ -254,7 +254,7 @@ class ApruebaEmpresa
         $data['mes'] = $mes;
         $data['anno'] = $anno;
 
-        $emailCaja = (new Mercurio01)->findFirst();
+        $emailCaja = Mercurio01::first();
         $sender = new SenderEmail(
             new Srequest(
                 [
@@ -274,15 +274,15 @@ class ApruebaEmpresa
 
     public function findSolicitud($idSolicitud)
     {
-        $this->solicitud = (new Mercurio30)->findFirst("id='{$idSolicitud}'");
-
+        $this->solicitud = Mercurio30::where("id", $idSolicitud)->first();
         return $this->solicitud;
     }
 
     public function findSolicitante()
     {
-        $this->solicitante = (new Mercurio07)->findFirst("documento='{$this->solicitud->getDocumento()}' and coddoc='{$this->solicitud->getCoddoc()}' and tipo='{$this->solicitud->getTipo()}'");
-
+        $this->solicitante = Mercurio07::whereRaw(
+            "documento='{$this->solicitud->getDocumento()}' and coddoc='{$this->solicitud->getCoddoc()}' and tipo='{$this->solicitud->getTipo()}'"
+        )->first();
         return $this->solicitante;
     }
 }

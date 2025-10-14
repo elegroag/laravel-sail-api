@@ -147,7 +147,7 @@ class AuthMercurioController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error al crear empresa: '.$e->getMessage(),
+                'message' => 'Error al crear empresa: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -264,7 +264,7 @@ class AuthMercurioController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error al crear empresa: '.$e->getMessage(),
+                'message' => 'Error al crear empresa: ' . $e->getMessage(),
             ], 500);
         }
     }

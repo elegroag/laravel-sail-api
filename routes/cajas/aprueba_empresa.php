@@ -12,9 +12,10 @@ Route::middleware([CajasCookieAuthenticated::class])->group(function () {
         Route::post('/devolver', [ApruebaEmpresaController::class, 'devolverAction']);
         Route::post('/rechazar', [ApruebaEmpresaController::class, 'rechazarAction']);
         Route::get('/opcional', [ApruebaEmpresaController::class, 'opcionalAction']);
-        Route::get('/info/{id}', [ApruebaEmpresaController::class, 'inforAction']);
+        Route::post('/infor/{id?}', [ApruebaEmpresaController::class, 'inforAction']);
         Route::get('/editar/{id}', [ApruebaEmpresaController::class, 'editarViewAction']);
         Route::post('/editar', [ApruebaEmpresaController::class, 'edita_empresaAction']);
+        Route::post('/aportes/{id?}', [ApruebaEmpresaController::class, 'aportesAction']);
 
         Route::post('/aplicar_filtro/{estado}', [ApruebaEmpresaController::class, 'aplicarFiltroAction']);
         Route::post('/change_cantidad_pagina/{estado}', [ApruebaEmpresaController::class, 'changeCantidadPagina']);

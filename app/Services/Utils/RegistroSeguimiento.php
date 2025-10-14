@@ -6,6 +6,7 @@ use App\Models\Mercurio01;
 use App\Models\Mercurio10;
 use App\Models\Mercurio12;
 use App\Models\Mercurio37;
+use Illuminate\Support\Facades\DB;
 
 class RegistroSeguimiento
 {
@@ -68,7 +69,7 @@ class RegistroSeguimiento
                 $nota = strip_tags(strtolower($mmercurio10->getNota()));
                 $table->add_row(
                     $nota,
-                    $mmercurio10->getEstadoDetalle(),
+                    $mmercurio10->getDetalleEstado(),
                     $mmercurio10->getFecsis()
                 );
             }
@@ -90,28 +91,19 @@ class RegistroSeguimiento
      */
     public function loadAdjuntos($tipopc, $mercurio30)
     {
-        $mercurio01 = Mercurio01::first();
-        $mercurio37 = Mercurio37::where([
-            'tipopc' => $tipopc,
-            'numero' => $mercurio30->getId(),
-        ])->get();
+        $id = $mercurio30->getId();
+        $mercurio37 = Mercurio37::select([
+            DB::raw('mercurio37.*'),
+            'mercurio12.detalle',
+        ])
+            ->where([
+                'tipopc' => $tipopc,
+                'numero' => $mercurio30->getId(),
+            ])
+            ->join('mercurio12', 'mercurio37.coddoc', '=', 'mercurio12.coddoc')
+            ->get();
 
-        $adjuntos = '';
-        foreach ($mercurio37 as $mmercurio37) {
-
-            $mercurio12 = Mercurio12::where([
-                'coddoc' => $mmercurio37->getCoddoc(),
-            ])->first();
-
-            $adjuntos .= "<div class='col-md-4 mb-2 shw-adjuntos'>";
-            $adjuntos .= "<button class='btn-icon btn-block btn-outline-default' type='button' data-toggle='adjunto' data-path='{$mercurio01->getPath()}' data-file='{$mmercurio37->getArchivo()}' >";
-            $adjuntos .= "<span class='btn-inner--icon'><i class='fas fa-file-download'></i></span>";
-            $adjuntos .= "<span class='btn-inner--text'>{$mercurio12->getDetalle()}</span>";
-            $adjuntos .= '</button>';
-            $adjuntos .= '</div>';
-        }
-
-        return $adjuntos;
+        return view('partials.adjuntos', compact('mercurio37', 'id'))->render();;
     }
 
     public function getTemplateTable()

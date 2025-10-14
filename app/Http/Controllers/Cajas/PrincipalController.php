@@ -275,48 +275,21 @@ class PrincipalController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function downloadGlobalAction($filepath = '')
-    {
-        $archivo = base64_decode($filepath);
-        if (preg_match('/(public)(\/)(temp)/i', $archivo) == false) {
-            $fichero = "public/temp/{$archivo}";
-        } else {
-            $fichero = $archivo;
-            $archivo = basename($archivo);
-        }
-        $ext = substr(strrchr($archivo, '.'), 1);
-        if (file_exists($fichero)) {
-            header('Content-Description: File Transfer');
-            header("Content-Type: application/{$ext}");
-            header("Content-Disposition: attachment; filename={$archivo}");
-            header('Cache-Control: must-revalidate');
-            header('Expires: 0');
-            header('Pragma: public');
-            header('Content-Length: ' . filesize($fichero));
-            ob_clean();
-            readfile($fichero);
-            exit();
-        } else {
-            exit();
-        }
-    }
-
     public function fileExisteGlobalAction(Request $request)
     {
-        $this->setResponse('ajax');
-        $filepath = $request->input('filepath');
-        $archivo = base64_decode($filepath);
-        if (preg_match('/(public)(\/)(temp)/i', $archivo) == false) {
-            $fichero = "public/temp/{$archivo}";
-        } else {
-            $fichero = $archivo;
-            $archivo = basename($archivo);
-        }
-        $ext = substr(strrchr($archivo, '.'), 1);
+        $file = $request->input('file');
+        $id = $request->input('id');
+        $coddoc = $request->input('coddoc');
+
+        $archivo = base64_decode($file);
+        $fichero = storage_path('temp/' . $archivo);
         if (file_exists($fichero)) {
-            echo '{"success":true}';
+            return response()->file($fichero, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="' . $file . '"',
+            ]);
         } else {
-            echo '{"success":false}';
+            return response()->json(null);
         }
     }
 }

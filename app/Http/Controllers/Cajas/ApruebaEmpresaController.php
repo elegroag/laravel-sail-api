@@ -7,6 +7,8 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsEmpresa;
 use App\Models\Adapter\DbBase;
 use App\Models\Gener42;
+use App\Models\Mercurio01;
+use App\Models\Mercurio06;
 use App\Models\Mercurio10;
 use App\Models\Mercurio11;
 use App\Models\Mercurio30;
@@ -186,7 +188,7 @@ class ApruebaEmpresaController extends ApplicationController
         $help = 'Esta opcion permite manejar los ';
         $this->setParamToView('help', $help);
         $this->setParamToView('title', 'Aprueba Empresa');
-        $collection = $this->Mercurio30->find("estado='{$estado}' AND usuario=".session()->get('user').' ORDER BY fecini ASC');
+        $collection = $this->Mercurio30->find("estado='{$estado}' AND usuario=" . session()->get('user') . ' ORDER BY fecini ASC');
 
         $empresaServices = new EmpresaServices;
         $data = $empresaServices->dataOptional($collection, $estado);
@@ -393,7 +395,7 @@ class ApruebaEmpresaController extends ApplicationController
                 throw new DebugException('Los datos de la empresa no está disponible en SISUWEB.', 503);
             }
 
-            $asunto = 'Afiliacion de la empresa realizada con Exito. Nit: '.$mercurio30->getNit();
+            $asunto = 'Afiliacion de la empresa realizada con Exito. Nit: ' . $mercurio30->getNit();
             $mercurio07 = $this->Mercurio07->findFirst("tipo='{$mercurio30->getTipo()}' and coddoc='{$mercurio30->getCoddoc()}' and documento='{$mercurio30->getDocumento()}'");
             if (! $mercurio07) {
                 throw new DebugException('Error no hay usuario empresa para el servicio de autogestión de comfaca en línea.', 504);
@@ -535,7 +537,7 @@ class ApruebaEmpresaController extends ApplicationController
                 exit;
             }
 
-            $mercurio30 = $this->Mercurio30->findFirst("id='{$id}'");
+            $mercurio30 = Mercurio30::where('id', $id)->first();
             $procesadorComando = Comman::Api();
             $procesadorComando->runCli(
                 [
@@ -551,20 +553,24 @@ class ApruebaEmpresaController extends ApplicationController
             $adjuntos = $empresaServices->adjuntos($mercurio30);
             $seguimiento = $empresaServices->seguimiento($mercurio30);
 
-            $htmlEmpresa = View::render(
-                'aprobacionemp/tmp/consulta',
+            $mercurio06 = Mercurio06::where("tipo", $mercurio30->getTipo())->first();
+            $_tipsoc = ParamsEmpresa::getTipoSociedades();
+            $tipsoc_detalle = $_tipsoc[$mercurio30->tipsoc];
+
+            $htmlEmpresa = view(
+                'cajas/aprobacionemp/tmp/consulta',
                 [
                     'mercurio30' => $mercurio30,
-                    'mercurio01' => $this->Mercurio01->findFirst(),
-                    'det_tipo' => $this->Mercurio06->findFirst("tipo = '{$mercurio30->getTipo()}'")->getDetalle(),
+                    'mercurio01' => Mercurio01::first(),
+                    'det_tipo' => $mercurio06->getDetalle(),
                     '_coddoc' => ParamsEmpresa::getTipoDocumentos(),
                     '_calemp' => ParamsEmpresa::getCalidadEmpresa(),
                     '_codciu' => ParamsEmpresa::getCiudades(),
                     '_codzon' => ParamsEmpresa::getZonas(),
                     '_codact' => ParamsEmpresa::getActividades(),
-                    '_tipsoc' => ParamsEmpresa::getTipoSociedades(),
+                    'tipsoc_detalle' => $tipsoc_detalle,
                 ]
-            );
+            )->render();
 
             $procesadorComando = Comman::Api();
             $procesadorComando->runCli(
@@ -585,7 +591,7 @@ class ApruebaEmpresaController extends ApplicationController
                 'success' => true,
                 'data' => $mercurio30->getArray(),
                 'empresa_sisuweb' => $empresa_sisuweb,
-                'mercurio11' => $this->Mercurio11->find(),
+                'mercurio11' => Mercurio11::all(),
                 'consulta_empresa' => $htmlEmpresa,
                 'adjuntos' => $adjuntos,
                 'seguimiento' => $seguimiento,
@@ -665,9 +671,9 @@ class ApruebaEmpresaController extends ApplicationController
         $this->setParamToView('idModel', $id);
         $this->setParamToView('det_tipo', $this->Mercurio06->findFirst("tipo = '{$mercurio30->getTipo()}'")->getDetalle());
         $this->loadParametrosView();
-        $this->empresaServices->loadDisplay($mercurio30);
+
         $this->setParamToView('mercurio30', $mercurio30);
-        $this->setParamToView('title', 'Editar Ficha Empresa '.$mercurio30->getNit());
+        $this->setParamToView('title', 'Editar Ficha Empresa ' . $mercurio30->getNit());
     }
 
     public function edita_empresaAction(Request $request)
@@ -943,7 +949,7 @@ class ApruebaEmpresaController extends ApplicationController
 
     public function aportesViewAction($id)
     {
-        $mercurio30 = $this->Mercurio30->findFirst(" id='{$id}'");
+        $mercurio30 = Mercurio30::where('id', $id)->first();
         if (! $mercurio30) {
             set_flashdata('error', [
                 'msj' => 'La empresa no se encuentra registrada.',
@@ -957,7 +963,7 @@ class ApruebaEmpresaController extends ApplicationController
         $this->setParamToView('hide_header', true);
         $this->setParamToView('idModel', $id);
         $this->setParamToView('nit', $mercurio30->getNit());
-        $this->setParamToView('title', 'Aportes de empresa '.$mercurio30->getNit());
+        $this->setParamToView('title', 'Aportes de empresa ' . $mercurio30->getNit());
     }
 
     public function aportesAction(Request $request, $id)
@@ -966,7 +972,7 @@ class ApruebaEmpresaController extends ApplicationController
         $comando = '';
         try {
             try {
-                $mercurio30 = (new Mercurio30)->findFirst(" id='{$id}'");
+                $mercurio30 = Mercurio30::where('id', $id)->first();
                 if (! $mercurio30) {
                     throw new DebugException('La empresa no se encuentra registrada.', 201);
                 }
@@ -992,7 +998,7 @@ class ApruebaEmpresaController extends ApplicationController
         } catch (DebugException $err) {
             $salida = [
                 'success' => false,
-                'msj' => 'No se pudo realizar el movimiento '."\n".$err->getMessage()."\n ".$err->getLine(),
+                'msj' => 'No se pudo realizar el movimiento ' . "\n" . $err->getMessage() . "\n " . $err->getLine(),
                 'comando' => $comando,
             ];
         }
@@ -1010,7 +1016,7 @@ class ApruebaEmpresaController extends ApplicationController
     public function infoAprobadoViewAction($id)
     {
         try {
-            $mercurio30 = $this->Mercurio30->findFirst(" id='{$id}' and estado='A' ");
+            $mercurio30 = Mercurio30::where('id', $id)->first();
             if (! $mercurio30) {
                 throw new DebugException('La empresa no se encuentra aprobada para consultar sus datos.', 501);
             }
@@ -1048,8 +1054,8 @@ class ApruebaEmpresaController extends ApplicationController
 
             $empresa = $out['data'];
 
-            $mercurio01 = $this->Mercurio01->findFirst();
-            $det_tipo = $this->Mercurio06->findFirst("tipo = '{$mercurio30->getTipo()}'")->getDetalle();
+            $mercurio01 = Mercurio01::first();
+            $det_tipo = Mercurio06::where("tipo = '{$mercurio30->getTipo()}'")->first()->getDetalle();
 
             $mercurio30 = new Mercurio30;
             $mercurio30->createAttributes($empresa);
@@ -1078,7 +1084,7 @@ class ApruebaEmpresaController extends ApplicationController
             $this->setParamToView('hide_header', true);
             $this->setParamToView('idModel', $id);
             $this->setParamToView('nit', $mercurio30->getNit());
-            $this->setParamToView('title', 'Empresa Aprobada '.$mercurio30->getNit());
+            $this->setParamToView('title', 'Empresa Aprobada ' . $mercurio30->getNit());
         } catch (DebugException $err) {
             set_flashdata('error', [
                 'msj' => $err->getMessage(),
@@ -1197,7 +1203,7 @@ class ApruebaEmpresaController extends ApplicationController
         } catch (DebugException $err) {
             $salida = [
                 'success' => false,
-                'msj' => 'Error no se pudo realizar el movimiento, '.$err->getMessage(),
+                'msj' => 'Error no se pudo realizar el movimiento, ' . $err->getMessage(),
                 'comando' => $comando,
                 'file' => $err->getFile(),
                 'line' => $err->getLine(),
@@ -1241,7 +1247,7 @@ class ApruebaEmpresaController extends ApplicationController
         } catch (DebugException $e) {
             $response = [
                 'success' => false,
-                'msj' => 'No se pudo realizar el movimiento '."\n".$e->getMessage()."\n ".$e->getLine(),
+                'msj' => 'No se pudo realizar el movimiento ' . "\n" . $e->getMessage() . "\n " . $e->getLine(),
             ];
         }
         $this->renderObject($response);

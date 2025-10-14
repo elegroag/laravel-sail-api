@@ -35,7 +35,7 @@ class CalculatorDias
                 }
             }
         }
-        $dias = $fecha_cerrado->diffDate($fecha_envio);
+        $dias = $fecha_cerrado->diffInDays($fecha_envio);
         $dias = count(self::getDiasHabiles(
             $fecha_envio->format('Y-m-d'),
             $fecha_cerrado->format('Y-m-d')

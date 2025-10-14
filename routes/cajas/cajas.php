@@ -22,6 +22,6 @@ Route::prefix('/cajas/principal')->group(function () {
     Route::post('/traer_opcion_mas_usada', [PrincipalController::class, 'traerOpcionMasUsuadaAction']);
     Route::post('/traer_motivo_mas_usada', [PrincipalController::class, 'traerMotivoMasUsuadaAction']);
     Route::post('/traer_carga_laboral', [PrincipalController::class, 'traerCargaLaboralAction']);
-    Route::post('/download_global', [PrincipalController::class, 'downloadGlobalAction']);
-    Route::post('/file_existe_global', [PrincipalController::class, 'fileExisteGlobalAction']);
+    Route::post('/download_global/{hash?}', [PrincipalController::class, 'downloadGlobalAction']);
+    Route::post('/file_existe_global/{hash?}', [PrincipalController::class, 'fileExisteGlobalAction']);
 });

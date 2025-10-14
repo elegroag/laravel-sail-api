@@ -51,8 +51,8 @@ export default class EmpresaInfoView extends FormInfoView {
 		});
 
 		this.actualizaForm();
-		this.$el.find('.js-basic-multiple, #codind, #tipsoc, #tipapo').select2();
-
+		this.$el.find('#codind, #tipsoc, #tipapo, .js-basic-multiple').select2();
+		
 		flatpickr(this.$el.find('#fecafi, #fecapr'), {
 			enableTime: false,
 			dateFormat: 'Y-m-d',
