@@ -8,16 +8,16 @@
     <link rel="stylesheet" href="{{ asset('theme/css/argon-content.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/summernote/summernote-bs5.css') }}" />
     <link rel="stylesheet" href="{{ asset('mercurio/css/mercurio.css') }}" />
-    <link rel="stylesheet" href="{{ asset('summernote/summernote-bs5.css') }}" />
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('datatables.net/js/dataTables.min.js') }}"></script>
-    <script src="{{ asset('datatables.net.bs5/js/dataTables.bootstrap5.min.js') }}"></script>
-    <script src="{{ asset('summernote/summernote-bs5.js') }}"></script>
+    <script src="{{ asset('assets/datatables.net/js/dataTables.min.js') }}"></script>
+    <script src="{{ asset('assets/datatables.net.bs5/js/dataTables.bootstrap5.min.js') }}"></script>
+    <script src="{{ asset('assets/summernote/summernote-bs5.js') }}"></script>
 
-    <script src="{{ asset('summernote/lang/summernote-es-ES.js') }}"></script>
+    <script src="{{ asset('assets/summernote/lang/summernote-es-ES.js') }}"></script>
 
     <script id='tmp_list_header' type="text/template">
         @include('cajas/templates/tmp_list_header')
@@ -71,6 +71,7 @@
 @endpush
 
 @section('content-main')
+    <div id='filtroData'></div>
     @include('partials.flash')
 
     @php

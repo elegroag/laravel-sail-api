@@ -6,6 +6,7 @@ import loading from '@/Componentes/Views/Loading';
 class ControllerValidation {
     validationService = null;
     App = null;
+    myModal = null;
 
     __estados = {
         '': 'Pendientes',
@@ -23,6 +24,7 @@ class ControllerValidation {
         _.extend(this, Backbone.Events);
         this.validationService = ValidationService;
         this.App = options.App || window.App;
+        this.myModal = null;
     }
 
     initialize() {
@@ -86,10 +88,14 @@ class ControllerValidation {
     }
 
     __showFiltro() {
-        const myModal = new bootstrap.Modal('#filtrar-modal', {
-            keyboard: false,
-        });
-        myModal.show();
+        if(this.myModal){
+            this.myModal.show();
+        }else{
+            this.myModal = new bootstrap.Modal('#filtrar-modal', {
+                keyboard: false,
+            });
+            this.myModal.show();
+        }
     }
 
     __showReporte() {

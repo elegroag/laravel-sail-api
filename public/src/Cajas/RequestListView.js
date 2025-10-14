@@ -70,7 +70,7 @@ class RequestListView extends Backbone.View {
             });
         });
 
-        this.$el.find('#filtro').html(this.filtro.render().$el);
+        $('#filtroData').html(this.filtro.render().$el);
 
         const cantidad = $('#cantidad_paginate').val();
         this.trigger('load:table', {
