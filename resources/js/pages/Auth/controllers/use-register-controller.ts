@@ -67,7 +67,7 @@ const useRegisterController = ({
     Tipsoc,
     Codciu,
     errors
-}:LoginProps):any  => {
+}:LoginProps)  => {
     const [state, dispatch] = useReducer(formReducer, initialState)
     const [step, setStep] = useState(1)
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
@@ -288,32 +288,36 @@ const useRegisterController = ({
 
     return {
         dispatch, 
-        handleUserTypeSelect,
         state,
-        documentTypeOptions,
-        cityOptions,
-        societyOptions,
-        companyCategoryOptions,
-        handleBack,
-        handleNextStep,
-        handlePrevStep,
-        firstNameRef,
-        lastNameRef,
-        emailRef,
-        phoneRef,
-        identificationRef,
-        passwordRef,
-        confirmPasswordRef,
-        companyNameRef,
-        companyNitRef,
-        addressRef,
-        handleRegister,
         toast,
         setToast,
         step,
-        setStep,
         validateStep,
-        errors
+        domRef:{
+          firstNameRef,
+          lastNameRef,
+          emailRef,
+          phoneRef,
+          identificationRef,
+          passwordRef,
+          confirmPasswordRef,
+          companyNameRef,
+          companyNitRef,
+          addressRef,
+        },
+        events: {
+          handleBack,
+          handleNextStep,
+          handlePrevStep,
+          handleRegister,
+          handleUserTypeSelect
+        },
+        collections:{
+          documentTypeOptions,
+          cityOptions,
+          societyOptions,
+          companyCategoryOptions,
+        }
     }
 }
 

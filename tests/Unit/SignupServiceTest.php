@@ -4,7 +4,7 @@ namespace Tests\Unit;
 
 use App\Models\Mercurio07;
 use App\Services\PreparaFormularios\GestionFirmaNoImage;
-use App\Services\Request;
+use App\Services\Srequest;
 use App\Services\Signup\SignupEmpresas;
 use App\Services\Signup\SignupParticular;
 use App\Services\Signup\SignupService;
@@ -50,7 +50,7 @@ class SignupServiceTest extends TestCase
             'calemp' => 'valor_calculado', // Asumiendo un valor calculado
         ];
 
-        $request = Mockery::mock(Request::class);
+        $request = Mockery::mock(Srequest::class);
         $request->shouldReceive('getParam')
             ->with('tipo')->andReturn('E');
         $request->shouldReceive('getParam')
@@ -120,7 +120,7 @@ class SignupServiceTest extends TestCase
      */
     public function test_execute_fails_with_invalid_type()
     {
-        $request = Mockery::mock(Request::class);
+        $request = Mockery::mock(Srequest::class);
         $request->shouldReceive('getParam')->with('tipo')->andReturn('X'); // Tipo inválido
 
         $service = new SignupService;
@@ -134,7 +134,7 @@ class SignupServiceTest extends TestCase
      */
     public function test_execute_fails_with_missing_params()
     {
-        $request = Mockery::mock(Request::class);
+        $request = Mockery::mock(Srequest::class);
         $request->shouldReceive('getParam')->andReturn(null); // Simular parámetros nulos
 
         $service = new SignupService;

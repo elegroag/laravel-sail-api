@@ -12,6 +12,8 @@ class GestionFirmaNoImage
 
     private $coddoc;
 
+    private $password;
+
     /**
      * lfirma variable
      *
@@ -23,8 +25,9 @@ class GestionFirmaNoImage
     {
         $this->documento = $param['documento'];
         $this->coddoc = $param['coddoc'];
+        $this->password = $param['password'];
 
-        $this->pathOut = storage_path('temp/'.$this->documento.'F'.$this->coddoc.'/');
+        $this->pathOut = storage_path('temp/' . $this->documento . 'F' . $this->coddoc . '/');
         if (! is_dir($this->pathOut)) {
             mkdir($this->pathOut, 0775, true);
         }
@@ -68,10 +71,11 @@ class GestionFirmaNoImage
                 [
                     'documento' => $this->documento,
                     'coddoc' => $this->coddoc,
+                    'password' => $this->password,
                     'fecha' => date('Y-m-d'),
                     'firma' => 'N/A',
                     'keyprivate' => null,
-                    'keypublic' => null,
+                    'keypublic' => null
                 ]
             );
             $this->lfirma->save();
@@ -89,7 +93,7 @@ class GestionFirmaNoImage
      *
      * @return array
      */
-    public function generarClaves($claveUsuario)
+    public function generarClaves()
     {
         if ($this->lfirma) {
             if ($this->lfirma->getKeyprivate() && $this->lfirma->getKeypublic()) {
@@ -103,6 +107,7 @@ class GestionFirmaNoImage
                 [
                     'documento' => $this->documento,
                     'coddoc' => $this->coddoc,
+                    'password' => $this->password,
                     'fecha' => date('Y-m-d'),
                     'firma' => 'N/A',
                     'keyprivate' => null,
@@ -124,7 +129,7 @@ class GestionFirmaNoImage
         $claves = openssl_pkey_new($config);
 
         // Extraer la clave privada
-        openssl_pkey_export($claves, $clavePrivada, $claveUsuario);
+        openssl_pkey_export($claves, $clavePrivada, $this->password);
 
         // Extraer la clave pública
         $informacionClave = openssl_pkey_get_details($claves);

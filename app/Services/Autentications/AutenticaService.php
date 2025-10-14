@@ -134,7 +134,7 @@ class AutenticaService
                     if (! $user19->save()) {
                         $msj = '';
                         foreach ($user19->getMessages() as $message) {
-                            $msj .= ' '.$message->getMessage();
+                            $msj .= ' ' . $message->getMessage();
                         }
                         throw new DebugException("Error al guardar Token Access, {$msj}", 501);
                     }
@@ -183,16 +183,17 @@ class AutenticaService
             [
                 'documento' => $documento,
                 'coddoc' => $coddoc,
+                'password' => $clave,
             ]
         );
         if ($gestionFirmas->hasFirma() == false) {
             $gestionFirmas->guardarFirma();
-            $gestionFirmas->generarClaves($clave);
+            $gestionFirmas->generarClaves();
         } else {
             $firma = $gestionFirmas->getFirma();
             if (is_null($firma->getKeypublic()) || is_null($firma->getKeyprivate())) {
                 $gestionFirmas->guardarFirma();
-                $gestionFirmas->generarClaves($clave);
+                $gestionFirmas->generarClaves();
             }
         }
     }

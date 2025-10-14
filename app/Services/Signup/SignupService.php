@@ -69,7 +69,7 @@ class SignupService
             if ($this->tipo == 'T') {
                 $res = $this->validaTrabajadorEmpresa();
                 if ($res == false) {
-                    throw new DebugException('Error al validar el trabajador no está afiliado a la empresa con nit: '.$this->nit, 501);
+                    throw new DebugException('Error al validar el trabajador no está afiliado a la empresa con nit: ' . $this->nit, 501);
                 }
             }
             $signupParticular = new SignupParticular(
@@ -127,12 +127,12 @@ class SignupService
             $solicitud = $signupEntity->getSolicitud();
         }
 
-        $this->autoFirma($solicitud->getDocumento(), $solicitud->getCoddoc());
+        $this->autoFirma($solicitud->getDocumento(), $solicitud->getCoddoc(), $this->password);
 
         return [
             'success' => true,
-            'msj' => 'El proceso de registro como persona particular, se ha completado con éxito, '.
-                'las credenciales de acceso le serán enviadas al respectivo correo registrado. '.
+            'msj' => 'El proceso de registro como persona particular, se ha completado con éxito, ' .
+                'las credenciales de acceso le serán enviadas al respectivo correo registrado. ' .
                 "Vamos a continuar.\n",
             'documento' => $solicitud->getDocumento(),
             'coddoc' => $solicitud->getCoddoc(),
@@ -235,22 +235,23 @@ class SignupService
         return $out['data'];
     }
 
-    public function autoFirma($documento, $coddoc)
+    public function autoFirma($documento, $coddoc, $password)
     {
         $gestionFirmas = new GestionFirmaNoImage(
             [
                 'documento' => $documento,
                 'coddoc' => $coddoc,
+                'password' => $password,
             ]
         );
         if ($gestionFirmas->hasFirma() == false) {
             $gestionFirmas->guardarFirma();
-            $gestionFirmas->generarClaves($this->password);
+            $gestionFirmas->generarClaves();
         } else {
             $firma = $gestionFirmas->getFirma();
             if (is_null($firma->getKeypublic()) || is_null($firma->getKeyprivate())) {
                 $gestionFirmas->guardarFirma();
-                $gestionFirmas->generarClaves($this->password);
+                $gestionFirmas->generarClaves();
             }
         }
     }

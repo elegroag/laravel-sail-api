@@ -3,7 +3,7 @@ import AuthWelcome from "@/pages/Auth/components/auth-welcome";
 import AuthUserTypeSelector from "@/pages/Auth/components/auth-user-type-selector";
 import CompanyRegisterForm from "@/pages/Auth/components/company-register-form";
 import PersonRegisterForm from "@/pages/Auth/components/person-register-form";
-import imageLogo from "../../assets/comfaca-logo.png";
+import imageLogo from "@/assets/comfaca-logo.png";
 import { userTypes } from "@/constants/auth";
 import type { FormState, LoginProps} from "@/types/auth";
 import AuthBackgroundShapes from "@/components/ui/auth-background-shapes";
@@ -14,26 +14,10 @@ export default function Register(props: LoginProps){
 
   const { 
     dispatch, 
-    handleUserTypeSelect,
     state,
-    documentTypeOptions,
-    cityOptions,
-    societyOptions,
-    companyCategoryOptions,
-    handleBack,
-    handleNextStep,
-    handlePrevStep,
-    firstNameRef,
-    lastNameRef,
-    emailRef,
-    phoneRef,
-    identificationRef,
-    passwordRef,
-    confirmPasswordRef,
-    companyNameRef,
-    companyNitRef,
-    addressRef,
-    handleRegister,
+    collections,
+    events,
+    domRef,
     toast,
     setToast,
     step
@@ -61,7 +45,7 @@ export default function Register(props: LoginProps){
               logoSrc={imageLogo}
               logoAlt="Comfaca Logo"
               userTypes={userTypes}
-              onSelect={(id) => handleUserTypeSelect(id)}
+              onSelect={(id) => events.handleUserTypeSelect(id)}
             />
           ) : (
             state.selectedUserType === 'empresa' ? (
@@ -94,28 +78,28 @@ export default function Register(props: LoginProps){
                 }}
                 errors={state.errors}
                 isSubmitting={state.isSubmitting}
-                documentTypes={documentTypeOptions}
-                cityOptions={cityOptions}
-                societyOptions={societyOptions}
-                categoryOptions={companyCategoryOptions}
-                onBack={handleBack}
+                documentTypes={collections.documentTypeOptions}
+                cityOptions={collections.cityOptions}
+                societyOptions={collections.societyOptions}
+                categoryOptions={collections.companyCategoryOptions}
+                onBack={events.handleBack}
                 onChange={(field, value) =>
                   dispatch({ type: "SET_FIELD", field: field as keyof FormState, value })
                 }
-                onSubmit={handleRegister}
+                onSubmit={events.handleRegister}
                 step={step}
-                onNextStep={handleNextStep}
-                onPrevStep={handlePrevStep}
-                firstNameRef={firstNameRef}
-                lastNameRef={lastNameRef}
-                emailRef={emailRef}
-                phoneRef={phoneRef}
-                identificationRef={identificationRef}
-                passwordRef={passwordRef}
-                confirmPasswordRef={confirmPasswordRef}
-                companyNameRef={companyNameRef}
-                companyNitRef={companyNitRef}
-                addressRef={addressRef}
+                onNextStep={events.handleNextStep}
+                onPrevStep={events.handlePrevStep}
+                firstNameRef={domRef.firstNameRef}
+                lastNameRef={domRef.lastNameRef}
+                emailRef={domRef.emailRef}
+                phoneRef={domRef.phoneRef}
+                identificationRef={domRef.identificationRef}
+                passwordRef={domRef.passwordRef}
+                confirmPasswordRef={domRef.confirmPasswordRef}
+                companyNameRef={domRef.companyNameRef}
+                companyNitRef={domRef.companyNitRef}
+                addressRef={domRef.addressRef}
               />
             ) : (
               <PersonRegisterForm
@@ -147,31 +131,31 @@ export default function Register(props: LoginProps){
                 }}
                 errors={state.errors}
                 isSubmitting={state.isSubmitting}
-                documentTypes={documentTypeOptions}
-                cityOptions={cityOptions}
-                societyOptions={societyOptions}
-                categoryOptions={companyCategoryOptions}
+                documentTypes={collections.documentTypeOptions}
+                cityOptions={collections.cityOptions}
+                societyOptions={collections.societyOptions}
+                categoryOptions={collections.companyCategoryOptions}
                 isWorkerType={state.selectedUserType === 'trabajador'}
                 isIndependentType={state.selectedUserType === 'independiente'}
                 isPensionerType={state.selectedUserType === 'pensionado'}
-                onBack={handleBack}
+                onBack={events.handleBack}
                 onChange={(field, value) =>
                   dispatch({ type: "SET_FIELD", field: field as keyof FormState, value })
                 }
-                onSubmit={handleRegister}
+                onSubmit={events.handleRegister}
                 step={step}
-                onNextStep={handleNextStep}
-                onPrevStep={handlePrevStep}
-                firstNameRef={firstNameRef}
-                lastNameRef={lastNameRef}
-                emailRef={emailRef}
-                phoneRef={phoneRef}
-                identificationRef={identificationRef}
-                passwordRef={passwordRef}
-                confirmPasswordRef={confirmPasswordRef}
-                companyNameRef={companyNameRef}
-                companyNitRef={companyNitRef}
-                addressRef={addressRef}
+                onNextStep={events.handleNextStep}
+                onPrevStep={events.handlePrevStep}
+                firstNameRef={domRef.firstNameRef}
+                lastNameRef={domRef.lastNameRef}
+                emailRef={domRef.emailRef}
+                phoneRef={domRef.phoneRef}
+                identificationRef={domRef.identificationRef}
+                passwordRef={domRef.passwordRef}
+                confirmPasswordRef={domRef.confirmPasswordRef}
+                companyNameRef={domRef.companyNameRef}
+                companyNitRef={domRef.companyNitRef}
+                addressRef={domRef.addressRef}
               />
             )
           )}

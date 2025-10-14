@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
+use App\Library\Auth\AuthJwt;
 use App\Models\Adapter\DbBase;
 use App\Models\Gener09;
 use App\Models\Gener18;
@@ -109,8 +110,8 @@ class LoginController extends ApplicationController
 
             $usuarioEmail = trim(strtolower($mercurio07->getEmail()));
             if ($usuarioEmail != $email) {
-                throw new DebugException('Error, la dirección de email no es igual a la que tenemos registrada. '.
-                    'Y por tal motivo, no se puede restablecer la clave de acceso.  El indicio de email que está registrado es: '.mask_email($mercurio07->getEmail()), 503);
+                throw new DebugException('Error, la dirección de email no es igual a la que tenemos registrada. ' .
+                    'Y por tal motivo, no se puede restablecer la clave de acceso.  El indicio de email que está registrado es: ' . mask_email($mercurio07->getEmail()), 503);
             }
 
             $res = $autentica->cambiarClave();
@@ -127,7 +128,7 @@ class LoginController extends ApplicationController
         } catch (DebugException $error) {
             $response = [
                 'success' => false,
-                'msj' => $error->getMessage().' '.$error->getLine(),
+                'msj' => $error->getMessage() . ' ' . $error->getLine(),
             ];
         }
 
@@ -152,7 +153,7 @@ class LoginController extends ApplicationController
                 "conditions: UPPER(email)='{$email}' AND documento NOT IN('{$documento}','{$nit}')"
             );
             if ($l > 0) {
-                throw new DebugException('Error, ya se encuentra un registro con el email ingresado: '.mask_email($email), 501);
+                throw new DebugException('Error, ya se encuentra un registro con el email ingresado: ' . mask_email($email), 501);
             }
             $response = [
                 'success' => true,
@@ -171,7 +172,7 @@ class LoginController extends ApplicationController
     public function downloadDocumentsAction(Request $request)
     {
         $archivo = $request->route('archivo');
-        $fichero = 'public/docs/formulario_mercurio/'.$archivo;
+        $fichero = 'public/docs/formulario_mercurio/' . $archivo;
         $ext = substr(strrchr($archivo, '.'), 1);
         if (file_exists($fichero)) {
             header('Content-Description: File Transfer');
@@ -180,7 +181,7 @@ class LoginController extends ApplicationController
             header('Cache-Control: must-revalidate');
             header('Expires: 0');
             header('Pragma: public');
-            header('Content-Length: '.filesize($fichero));
+            header('Content-Length: ' . filesize($fichero));
             ob_clean();
             readfile($fichero);
             exit;
@@ -313,7 +314,7 @@ class LoginController extends ApplicationController
             $tipafi = $request->input('tipafi');
             $id = $request->input('id');
 
-            $authJwt = new AuthJwt;
+            $authJwt = new AuthJwt(10);
             $authJwt->CheckSimpleToken($token);
 
             $code = [
@@ -421,7 +422,7 @@ class LoginController extends ApplicationController
 
                 $salida = [
                     'success' => true,
-                    'token' => base64_encode($tk[0].'|'.$tk[1]),
+                    'token' => base64_encode($tk[0] . '|' . $tk[1]),
                     'isValid' => true,
                     'location' => 'principal/index',
                     'msj' => "El proceso de registro como persona particular, se ha completado con éxito,
@@ -459,7 +460,7 @@ class LoginController extends ApplicationController
             $coddoc = sanetizar($request->input('coddoc'));
             $tipo = sanetizar($request->input('tipo'));
 
-            $authJwt = new AuthJwt;
+            $authJwt = new AuthJwt(10);
             $token = $authJwt->SimpleToken();
 
             $user19 = Mercurio19::where('documento', $documento)
@@ -560,7 +561,7 @@ class LoginController extends ApplicationController
 
             $salida = [
                 'success' => true,
-                'msj' => 'Se ha enviado la solicitud de cambio de correo, pronto se contactara con usted para confirmar el cambio. '.
+                'msj' => 'Se ha enviado la solicitud de cambio de correo, pronto se contactara con usted para confirmar el cambio. ' .
                     'Este proceso puede tardar ya que se requiere de la confirmación de la persona que solicita el cambio por seguridad de la informacion.',
             ];
         } catch (DebugException $e) {
@@ -579,16 +580,17 @@ class LoginController extends ApplicationController
             [
                 'documento' => $documento,
                 'coddoc' => $coddoc,
+                'password' => $clave,
             ]
         );
         if ($gestionFirmas->hasFirma() == false) {
             $gestionFirmas->guardarFirma();
-            $gestionFirmas->generarClaves($clave);
+            $gestionFirmas->generarClaves();
         } else {
             $firma = $gestionFirmas->getFirma();
             if (is_null($firma->getKeypublic()) || is_null($firma->getKeyprivate())) {
                 $gestionFirmas->guardarFirma();
-                $gestionFirmas->generarClaves($clave);
+                $gestionFirmas->generarClaves();
             }
         }
     }
@@ -596,7 +598,7 @@ class LoginController extends ApplicationController
     public function showPdfAction(Request $request)
     {
         $filename = $request->input('filename');
-        $path = storage_path('temp/'.$filename);
+        $path = storage_path('temp/' . $filename);
 
         if (! file_exists($path)) {
             return response()->json(['success' => false]);
@@ -604,7 +606,7 @@ class LoginController extends ApplicationController
 
         return response()->file($path, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="'.$filename.'"',
+            'Content-Disposition' => 'inline; filename="' . $filename . '"',
         ]);
     }
 }
