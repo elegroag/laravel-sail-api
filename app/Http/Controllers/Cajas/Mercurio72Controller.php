@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Cajas;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio01;
 use App\Models\Mercurio72;
 use App\Services\Utils\UploadFile;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class Mercurio72Controller extends ApplicationController
 {
@@ -36,9 +38,14 @@ class Mercurio72Controller extends ApplicationController
         try {
             $this->setResponse('ajax');
             $instancePath = env('APP_URL');
-            $mercurio01 = $this->Mercurio01->findFirst();
-            $con = DbBase::rawConnect();
-            $response = $con->inQueryAssoc("SELECT numtur,concat('$instancePath{$mercurio01->getPath()}galeria/',archivo) as archivo FROM mercurio72 ORDER BY orden ASC");
+            $mercurio01 = Mercurio01::first();
+            $response = Mercurio72::select('numtur', 'archivo')
+                ->addSelect(
+                    DB::raw("concat('{$instancePath}{$mercurio01->getPath()}galeria/', archivo) as archivo")
+                )
+                ->orderBy('orden', 'asc')
+                ->get();
+
             $this->renderObject($response, false);
         } catch (DebugException $e) {
             parent::setLogger($e->getMessage());

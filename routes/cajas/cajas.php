@@ -5,7 +5,6 @@ use App\Http\Controllers\Cajas\PrincipalController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('/cajas')->group(function () {
-    // Redirige la raíz de Cajas a la ruta canónica de login para evitar nombres duplicados
     Route::get('/', function () {
         return redirect()->route('cajas.login');
     });
@@ -18,10 +17,11 @@ Route::prefix('/cajas')->group(function () {
 Route::prefix('/cajas/principal')->group(function () {
     Route::get('/index', [PrincipalController::class, 'indexAction'])->name('cajas.principal');
     Route::get('/dashboard', [PrincipalController::class, 'dashboardAction'])->name('cajas.dashboard');
-    Route::get('/traer_usuarios_registrados', [PrincipalController::class, 'traerUsuariosRegistradosAction']);
-    Route::get('/traer_opcion_mas_usuada', [PrincipalController::class, 'traerOpcionMasUsuadaAction']);
-    Route::get('/traer_motivo_mas_usuada', [PrincipalController::class, 'traerMotivoMasUsuadaAction']);
-    Route::get('/traer_carga_laboral', [PrincipalController::class, 'traerCargaLaboralAction']);
-    Route::get('/download_global', [PrincipalController::class, 'downloadGlobalAction']);
-    Route::get('/file_existe_global', [PrincipalController::class, 'fileExisteGlobalAction']);
+
+    Route::post('/traer_usuarios_registrados', [PrincipalController::class, 'traerUsuariosRegistradosAction']);
+    Route::post('/traer_opcion_mas_usada', [PrincipalController::class, 'traerOpcionMasUsuadaAction']);
+    Route::post('/traer_motivo_mas_usada', [PrincipalController::class, 'traerMotivoMasUsuadaAction']);
+    Route::post('/traer_carga_laboral', [PrincipalController::class, 'traerCargaLaboralAction']);
+    Route::post('/download_global', [PrincipalController::class, 'downloadGlobalAction']);
+    Route::post('/file_existe_global', [PrincipalController::class, 'fileExisteGlobalAction']);
 });

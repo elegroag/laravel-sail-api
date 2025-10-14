@@ -2,12 +2,11 @@ import { $App } from '@/App';
 import { Messages } from '@/Utils';
 
 const traerUsuariosRegistrados = function () {
-	$.ajax({
+	$App.trigger('ajax',{
 		type: 'POST',
-		url: $App.url('traerUsuariosRegistrados'),
+		url: window.ServerController + '/traer_usuarios_registrados',
 		data: {},
-	})
-		.done((response) => {
+		callback: (response) => {
 			const ctx = document.getElementById('chart-usuarios').getContext('2d');
 			new Chart(ctx, {
 				type: 'pie',
@@ -26,19 +25,19 @@ const traerUsuariosRegistrados = function () {
 					],
 				},
 			});
-		})
-		.fail((jqXHR, textStatus) => {
+		},
+		error: (jqXHR) => {
 			Messages.display(jqXHR.statusText, 'error');
-		});
+		}
+	});
 };
 
 const traerOpcionMasUsuada = function () {
-	$.ajax({
+	$App.trigger('ajax', {
 		type: 'POST',
-		url: $App.url('traerOpcionMasUsuada'),
+		url: window.ServerController + '/traer_opcion_mas_usada',
 		data: {},
-	})
-		.done((response) => {
+		callback: (response) => {
 			const ctx = document.getElementById('chart-opcion').getContext('2d');
 			new Chart(ctx, {
 				type: 'pie',
@@ -56,19 +55,19 @@ const traerOpcionMasUsuada = function () {
 					],
 				},
 			});
-		})
-		.fail((jqXHR, textStatus) => {
+		},
+		error: (jqXHR) => {
 			Messages.display(jqXHR.statusText, 'error');
-		});
+		}
+	});
 };
 
 const traerMotivoMasUsuada = function () {
-	$.ajax({
+	$App.trigger('ajax', {
 		type: 'POST',
-		url: $App.url('traerMotivoMasUsuada'),
+		url: window.ServerController + '/traer_motivo_mas_usada',
 		data: {},
-	})
-		.done((response) => {
+		callback: (response) => {
 			const ctx = document.getElementById('chart-rechazo').getContext('2d');
 			new Chart(ctx, {
 				type: 'pie',
@@ -87,19 +86,19 @@ const traerMotivoMasUsuada = function () {
 					],
 				},
 			});
-		})
-		.fail(function (jqXHR, textStatus) {
+		},
+		error: (jqXHR) => {
 			Messages.display(jqXHR.statusText, 'error');
-		});
+		}
+	});
 };
 
 const traerCargaLaboral = function () {
-	$.ajax({
+	$App.trigger('ajax', {
 		type: 'POST',
-		url: $App.url('traerCargaLaboral'),
+		url: window.ServerController + '/traer_carga_laboral',
 		data: {},
-	})
-		.done((response) => {
+		callback: (response) => {
 			const ctx = document.getElementById('chart-laboral').getContext('2d');
 			new Chart(ctx, {
 				type: 'bar',
@@ -124,13 +123,15 @@ const traerCargaLaboral = function () {
 					},
 				},
 			});
-		})
-		.fail((jqXHR, textStatus) => {
+		},
+		error: (jqXHR) => {
 			Messages.display(jqXHR.statusText, 'error');
-		});
+		}
+	});
 };
 
 $(() => {
+	$App.initialize();
 	traerUsuariosRegistrados();
 	traerOpcionMasUsuada();
 	traerMotivoMasUsuada();

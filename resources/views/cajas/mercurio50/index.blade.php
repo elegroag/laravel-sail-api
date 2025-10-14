@@ -7,7 +7,7 @@
 
 @section('content')
 
-@include('cajas/templates/tmp_header_adapter', ['sub_title' => $title, 'filtrar' => true, 'listar' => false, 'salir' => false, 'add' => true])
+@include('cajas/templates/tmp_header_adapter', ['sub_title' => $title, 'filtrar' => false, 'listar' => false, 'salir' => false, 'add' => true])
 <div class="container-fluid mt--9 pb-4">
     <div class="row">
         <div class="col-12">
@@ -24,7 +24,6 @@
 @endsection
 
 @push('scripts')
-    @include('cajas/templates/tmp_filtro', ['campo_filtro' => $campo_filtro])
     @include("partials.modal_generic", [
         "titulo" => 'Configuración básica',
         "contenido" => '',
@@ -37,23 +36,23 @@
         <form id="form" class="validation_form" autocomplete="off" novalidate>
             <div class="form-group">
                 <label for="codapl" class="form-control-label">Aplicativo</label>
-                <input type="text" id="codapl" name="codapl" class="form-control" placeholder="Aplicativo">
+                <input type="text" id="codapl" name="codapl" class="form-control" placeholder="Aplicativo" value="<%= codapl %>">
             </div>
             <div class="form-group">
                 <label for="webser" class="form-control-label">WebService</label>
-                <input type="text" id="webser" name="webser" class="form-control" placeholder="WebService ">
+                <input type="text" id="webser" name="webser" class="form-control" placeholder="WebService " value="<%= webser %>">
             </div>
             <div class="form-group">
                 <label for="path" class="form-control-label">Path</label>
-                <input type="text" id="path" name="path" class="form-control" placeholder="Path">
+                <input type="text" id="path" name="path" class="form-control" placeholder="Path" value="<%= path %>">
             </div>
             <div class="form-group">
                 <label for="urlonl" class="form-control-label">Url Online</label>
-                <input type="text" id="urlonl" name="urlonl" class="form-control" placeholder="Url Online">
+                <input type="text" id="urlonl" name="urlonl" class="form-control" placeholder="Url Online" value="<%= urlonl %>">
             </div>
             <div class="form-group">
                 <label for="puncom" class="form-control-label">Puntos por Compartir</label>
-                <input type="number" id="puncom" name="puncom" class="form-control" placeholder="Puntos por Compartir">
+                <input type="number" id="puncom" name="puncom" class="form-control" placeholder="Puntos por Compartir" value="<%= puncom %>">
             </div>
         </form>
     </script>

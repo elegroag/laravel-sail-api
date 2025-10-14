@@ -36,7 +36,6 @@
 @endsection
 
 @push('scripts')
-    @include('cajas/templates/tmp_filtro', ['campo_filtro' => $campo_filtro])
     @include("partials.modal_generic", [
         "titulo" => 'Carga de archivo',
         "contenido" => '',

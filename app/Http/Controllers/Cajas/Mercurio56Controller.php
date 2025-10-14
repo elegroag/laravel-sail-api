@@ -72,6 +72,7 @@ class Mercurio56Controller extends ApplicationController
             'title' => 'Infraestructura',
             'campo_filtro' => $campo_field,
             '_infraestructura' => $_infraestructura,
+            'estados_array' => (new Mercurio56)->getEstadoArray()
         ]);
     }
 

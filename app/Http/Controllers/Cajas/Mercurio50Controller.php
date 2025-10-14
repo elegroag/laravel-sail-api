@@ -31,50 +31,19 @@ class Mercurio50Controller extends ApplicationController
 
     public function showTabla($paginate)
     {
-        $html = '<table border="0" cellpadding="0" cellspacing="0" class="table table-bordered">';
-        $html .= "<thead class='thead-light'>";
-        $html .= '<tr>';
-        $html .= "<th scope='col'>Codigo Aplicativo</th>";
-        $html .= "<th scope='col'>Url Webservice</th>";
-        $html .= "<th scope='col'>Path</th>";
-        $html .= "<th scope='col'>Url Online</th>";
-        $html .= "<th scope='col'>Puntos por Compartir</th>";
-        $html .= "<th scope='col'>Acciones</th>";
-        $html .= '</tr>';
-        $html .= '</thead>';
-        $html .= "<tbody class='list'>";
-        foreach ($paginate->items as $mtable) {
-            $html .= '<tr>';
-            $html .= "<td>{$mtable->getCodapl()}</td>";
-            $html .= "<td>{$mtable->getWebser()}</td>";
-            $html .= "<td>{$mtable->getPath()}</td>";
-            $html .= "<td>{$mtable->getUrlonl()}</td>";
-            $html .= "<td>{$mtable->getPuncom()}</td>";
-            $html .= "<td class='table-actions'>";
-            $html .= "<a href='#!' class='table-action btn btn-xs btn-primary' title='Editar' data-cid='{$mtable->getCodapl()}' data-toggle='editar'>";
-            $html .= "<i class='fas fa-user-edit text-white'></i>";
-            $html .= '</a>';
-            $html .= '</td>';
-            $html .= '</tr>';
-        }
-        $html .= '</tbody>';
-        $html .= '</table>';
-
-        return $html;
+        return view('cajas.mercurio50._tabla', compact('paginate'));
     }
 
     public function aplicarFiltroAction(Request $request)
     {
         $consultasOldServices = new GeneralService;
         $this->query = $consultasOldServices->converQuery($request);
-
         return $this->buscarAction($request);
     }
 
     public function changeCantidadPaginaAction(Request $request)
     {
         $this->cantidad_pagina = $request->input('numero');
-
         return $this->buscarAction($request);
     }
 

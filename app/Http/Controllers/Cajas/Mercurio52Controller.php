@@ -108,12 +108,14 @@ class Mercurio52Controller extends ApplicationController
             'codmen' => 'Codigo',
             'detalle' => 'Detalle',
         ];
-        $areas = ['' => 'Seleccione un área...'] + Gener02::where('codigo', '06')->pluck('detalle', 'cod_hijo')->toArray();
 
+        $areas = Mercurio52::where('codmen', '06')->get();
         return view('cajas.mercurio52.index', [
             'title' => 'Menu',
             'campo_filtro' => $campo_field,
             'areas' => $areas,
+            'tipo_array' => (new Mercurio52)->getTipoArray(),
+            'estado_array' => (new Mercurio52)->getEstadoArray(),
         ]);
     }
 

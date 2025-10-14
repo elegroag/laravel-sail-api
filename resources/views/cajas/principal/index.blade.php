@@ -4,6 +4,10 @@
 <link rel="stylesheet" href="{{ asset('mercurio/css/principal.css') }}">
 @endpush
 
+@push('scripts')
+<script src="{{ asset('cajas/build/Inicio.js') }}"></script>
+@endpush
+
 @section('content')
 <div class="card-body mt-0 pb-1 bt-1">
     <div class="mb-4">
@@ -102,5 +106,4 @@
         </div>
     </div>
 </div>
-<script src="{{ asset('cajas/build/Inicio.js') }}"></script>
 @endsection

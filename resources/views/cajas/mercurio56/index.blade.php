@@ -73,7 +73,7 @@
                     <label for="estado" class="form-control-label">Estado</label>
                     <select name="estado" id="estado" class="form-control">
                         <option value="">Seleccione</option>
-                        @foreach ($mercurio56->getEstadoArray() as $estado)
+                        @foreach ($estados_array as $estado)
                             <option value="{{ $estado }}">{{ $estado }}</option>
                         @endforeach
                     </select>

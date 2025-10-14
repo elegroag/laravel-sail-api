@@ -6,7 +6,7 @@ use App\Models\Adapter\ModelBase;
 
 class PinesAfiliado extends ModelBase
 {
-    protected $table = 'pines_afiliados';
+    protected $table = 'pines_afiliado';
 
     public $timestamps = false;
 

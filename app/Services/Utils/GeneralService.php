@@ -9,6 +9,17 @@ use App\Models\Mercurio05;
 use App\Models\Mercurio08;
 use App\Models\Mercurio10;
 use App\Services\Api\PortalMercurio;
+use App\Services\Entidades\ActualizaEmpresaService;
+use App\Services\Entidades\BeneficiarioService;
+use App\Services\Entidades\CertificadoService;
+use App\Services\Entidades\ConyugeService;
+use App\Services\Entidades\DatosTrabajadorService;
+use App\Services\Entidades\EmpresaService;
+use App\Services\Entidades\FacultativoService;
+use App\Services\Entidades\PensionadoService;
+use App\Services\Entidades\RetiroService;
+use App\Services\Entidades\TrabajadorService;
+use App\Services\Srequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -159,7 +170,7 @@ class GeneralService
             'host_portal_pro' => env('HOST_PORTAL_PRO'),
             'portal' => env('PORTAL'),
         ];
-        $portalMercurio = new PortalMercurio(json_decode(json_encode($app), true));
+        $portalMercurio = new PortalMercurio(json_decode(json_encode($app)));
         $portalMercurio->send(
             [
                 'servicio' => $funcion,
@@ -191,9 +202,9 @@ class GeneralService
         $mcontenido .= '<tbody>';
         $mcontenido .= '<tr>';
         $mcontenido .= "<td style='background: white;'>";
-        $rutaImg = getcwd().'/public/img/Mercurio/logob.png';
+        $rutaImg = getcwd() . '/public/img/Mercurio/logob.png';
         $rutaImg = 'http://186.119.116.228:8091/Mercurio/public/img/Mercurio/logob.png';
-        $mcontenido .= "<img style='display:block;border:none' src='".$rutaImg."' width='30%' height='' title='Sistemas Y Solucuiones Integradas' alt='Sistemas y Soluciones Integradas'>";
+        $mcontenido .= "<img style='display:block;border:none' src='" . $rutaImg . "' width='30%' height='' title='Sistemas Y Solucuiones Integradas' alt='Sistemas y Soluciones Integradas'>";
         $mcontenido .= '</td>';
         $mcontenido .= '</tr>';
         $mcontenido .= '<tr>';
@@ -207,7 +218,7 @@ class GeneralService
         $mcontenido .= " <table align='center' width='100%' border='0'>";
         $mcontenido .= '<tr>';
         $mcontenido .= "<td bgcolor='#FFFFFF' style='padding:15px 20px 25px;border: none;border-top:none;border-bottom:none'>";
-        $mcontenido .= "<div style='font-family:Helvetica,Arial;font-size:14px;font-style:italic;color:black;'>".$msj.'</div>';
+        $mcontenido .= "<div style='font-family:Helvetica,Arial;font-size:14px;font-style:italic;color:black;'>" . $msj . '</div>';
         $mcontenido .= '</td>';
         $mcontenido .= '</tr>';
         $mcontenido .= '</table>';
@@ -279,9 +290,9 @@ class GeneralService
         $mcontenido .= '<tbody>';
         $mcontenido .= '<tr>';
         $mcontenido .= "<td style='background: white;'>";
-        $rutaImg = getcwd().'/public/img/Mercurio/logob.png';
+        $rutaImg = getcwd() . '/public/img/Mercurio/logob.png';
         $rutaImg = 'http://186.119.116.228:8091/Mercurio/public/img/Mercurio/logob.png';
-        $mcontenido .= "<img style='display:block;border:none' src='".$rutaImg."' width='30%' height='' title='Sistemas Y Solucuiones Integradas' alt='Sistemas y Soluciones Integradas'>";
+        $mcontenido .= "<img style='display:block;border:none' src='" . $rutaImg . "' width='30%' height='' title='Sistemas Y Solucuiones Integradas' alt='Sistemas y Soluciones Integradas'>";
         $mcontenido .= '</td>';
         $mcontenido .= '</tr>';
         $mcontenido .= '<tr>';
@@ -295,7 +306,7 @@ class GeneralService
         $mcontenido .= " <table align='center' width='100%' border='0'>";
         $mcontenido .= '<tr>';
         $mcontenido .= "<td bgcolor='#FFFFFF' style='padding:15px 20px 25px;border: none;border-top:none;border-bottom:none'>";
-        $mcontenido .= "<div style='font-family:Helvetica,Arial;font-size:14px;font-style:italic;color:black;'>".$msj.'</div>';
+        $mcontenido .= "<div style='font-family:Helvetica,Arial;font-size:14px;font-style:italic;color:black;'>" . $msj . '</div>';
         $mcontenido .= '</td>';
         $mcontenido .= '</tr>';
         $mcontenido .= '</table>';
@@ -414,7 +425,7 @@ class GeneralService
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Calidad Empresa</label>";
-        $response .= "<p class='pl-2 description'>".$_calemp[$mercurio30->getCalemp()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_calemp[$mercurio30->getCalemp()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Cedula Representante</label>";
@@ -430,11 +441,11 @@ class GeneralService
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Ciudad de Notificacion</label>";
-        $response .= "<p class='pl-2 description'>".$_codciu[$mercurio30->getCodciu()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_codciu[$mercurio30->getCodciu()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Ciudad donde realizan labores</lab>";
-        $response .= "<p class='pl-2 description'>".$_codciu[$mercurio30->getCodzon()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_codciu[$mercurio30->getCodzon()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Telefono de Notificacion</label>";
@@ -454,7 +465,7 @@ class GeneralService
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Actividad</label>";
-        $response .= "<p class='pl-2 description'>".$_codact[$mercurio30->getCodact()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_codact[$mercurio30->getCodact()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Fecha Inicial</label>";
@@ -470,7 +481,7 @@ class GeneralService
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Tipo Sociedad</label>";
-        $response .= "<p class='pl-2 description'>".$_tipsoc[$mercurio30->getTipsoc()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_tipsoc[$mercurio30->getTipsoc()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Direccion Comercial</label>";
@@ -632,27 +643,27 @@ class GeneralService
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Ciudad Nacimiento</label>";
-        $response .= "<p class='pl-2 description'>".$_codciu[$mercurio38->getCodciu()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_codciu[$mercurio38->getCodciu()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Sexo</label>";
-        $response .= "<p class='pl-2 description'>".$_sexo[$mercurio38->getSexo()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_sexo[$mercurio38->getSexo()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Estado Civil</label>";
-        $response .= "<p class='pl-2 description'>".$_estciv[$mercurio38->getEstciv()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_estciv[$mercurio38->getEstciv()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Cabeza Hogar</label>";
-        $response .= "<p class='pl-2 description'>".$_cabhog[$mercurio38->getCabhog()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_cabhog[$mercurio38->getCabhog()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Ciudad</label>";
-        $response .= "<p class='pl-2 description'>".$_codciu[$mercurio38->getCodciu()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_codciu[$mercurio38->getCodciu()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Zona</label>";
-        $response .= "<p class='pl-2 description'>".$_codciu[$mercurio38->getCodzon()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_codciu[$mercurio38->getCodzon()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Direccion</label>";
@@ -688,27 +699,27 @@ class GeneralService
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Capcidad de trabajo</label>";
-        $response .= "<p class='pl-2 description'>".$_captra[$mercurio38->getCaptra()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_captra[$mercurio38->getCaptra()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Tipo Discapacidad</label>";
-        $response .= "<p class='pl-2 description'>".$_tipdis[$mercurio38->getTipdis()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_tipdis[$mercurio38->getTipdis()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Nivel Educacion</label>";
-        $response .= "<p class='pl-2 description'>".$_nivedu[$mercurio38->getNivedu()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_nivedu[$mercurio38->getNivedu()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Rural</label>";
-        $response .= "<p class='pl-2 description'>".$_rural[$mercurio38->getRural()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_rural[$mercurio38->getRural()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Vivienda</label>";
-        $response .= "<p class='pl-2 description'>".$_vivienda[$mercurio38->getVivienda()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_vivienda[$mercurio38->getVivienda()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Tipo Afiliado</label>";
-        $response .= "<p class='pl-2 description'>".$_tipafi[$mercurio38->getTipafi()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_tipafi[$mercurio38->getTipafi()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Autoriza</label>";
@@ -859,27 +870,27 @@ class GeneralService
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Ciudad Nacimiento</label>";
-        $response .= "<p class='pl-2 description'>".$_codciu[$mercurio36->getCodciu()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_codciu[$mercurio36->getCodciu()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Sexo</label>";
-        $response .= "<p class='pl-2 description'>".$_sexo[$mercurio36->getSexo()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_sexo[$mercurio36->getSexo()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Estado Civil</label>";
-        $response .= "<p class='pl-2 description'>".$_estciv[$mercurio36->getEstciv()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_estciv[$mercurio36->getEstciv()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Cabeza Hogar</label>";
-        $response .= "<p class='pl-2 description'>".$_cabhog[$mercurio36->getCabhog()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_cabhog[$mercurio36->getCabhog()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Ciudad</label>";
-        $response .= "<p class='pl-2 description'>".$_codciu[$mercurio36->getCodciu()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_codciu[$mercurio36->getCodciu()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Zona</label>";
-        $response .= "<p class='pl-2 description'>".$_codciu[$mercurio36->getCodzon()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_codciu[$mercurio36->getCodzon()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Direccion</label>";
@@ -915,27 +926,27 @@ class GeneralService
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Capcidad de trabajo</label>";
-        $response .= "<p class='pl-2 description'>".$_captra[$mercurio36->getCaptra()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_captra[$mercurio36->getCaptra()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Tipo Discapacidad</label>";
-        $response .= "<p class='pl-2 description'>".$_tipdis[$mercurio36->getTipdis()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_tipdis[$mercurio36->getTipdis()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Nivel Educacion</label>";
-        $response .= "<p class='pl-2 description'>".$_nivedu[$mercurio36->getNivedu()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_nivedu[$mercurio36->getNivedu()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Rural</label>";
-        $response .= "<p class='pl-2 description'>".$_rural[$mercurio36->getRural()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_rural[$mercurio36->getRural()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Vivienda</label>";
-        $response .= "<p class='pl-2 description'>".$_vivienda[$mercurio36->getVivienda()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_vivienda[$mercurio36->getVivienda()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Tipo Afiliado</label>";
-        $response .= "<p class='pl-2 description'>".$_tipafi[$mercurio36->getTipafi()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_tipafi[$mercurio36->getTipafi()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Autoriza</label>";
@@ -1084,27 +1095,27 @@ class GeneralService
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Ciudad Nacimiento</label>";
-        $response .= "<p class='pl-2 description'>".$_codciu[$mercurio39->getCodciu()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_codciu[$mercurio39->getCodciu()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Sexo</label>";
-        $response .= "<p class='pl-2 description'>".$_sexo[$mercurio39->getSexo()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_sexo[$mercurio39->getSexo()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Estado Civil</label>";
-        $response .= "<p class='pl-2 description'>".$_estciv[$mercurio39->getEstciv()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_estciv[$mercurio39->getEstciv()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Cabeza Hogar</label>";
-        $response .= "<p class='pl-2 description'>".$_cabhog[$mercurio39->getCabhog()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_cabhog[$mercurio39->getCabhog()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Ciudad</label>";
-        $response .= "<p class='pl-2 description'>".$_codciu[$mercurio39->getCodciu()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_codciu[$mercurio39->getCodciu()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Zona</label>";
-        $response .= "<p class='pl-2 description'>".$_codciu[$mercurio39->getCodzon()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_codciu[$mercurio39->getCodzon()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Direccion</label>";
@@ -1140,27 +1151,27 @@ class GeneralService
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Capcidad de trabajo</label>";
-        $response .= "<p class='pl-2 description'>".$_captra[$mercurio39->getCaptra()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_captra[$mercurio39->getCaptra()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Tipo Discapacidad</label>";
-        $response .= "<p class='pl-2 description'>".$_tipdis[$mercurio39->getTipdis()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_tipdis[$mercurio39->getTipdis()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Nivel Educacion</label>";
-        $response .= "<p class='pl-2 description'>".$_nivedu[$mercurio39->getNivedu()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_nivedu[$mercurio39->getNivedu()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Rural</label>";
-        $response .= "<p class='pl-2 description'>".$_rural[$mercurio39->getRural()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_rural[$mercurio39->getRural()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Vivienda</label>";
-        $response .= "<p class='pl-2 description'>".$_vivienda[$mercurio39->getVivienda()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_vivienda[$mercurio39->getVivienda()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Tipo Afiliado</label>";
-        $response .= "<p class='pl-2 description'>".$_tipafi[$mercurio39->getTipafi()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_tipafi[$mercurio39->getTipafi()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Autoriza</label>";
@@ -1309,27 +1320,27 @@ class GeneralService
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Ciudad Nacimiento</label>";
-        $response .= "<p class='pl-2 description'>".$_codciu[$mercurio40->getCodciu()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_codciu[$mercurio40->getCodciu()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Sexo</label>";
-        $response .= "<p class='pl-2 description'>".$_sexo[$mercurio40->getSexo()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_sexo[$mercurio40->getSexo()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Estado Civil</label>";
-        $response .= "<p class='pl-2 description'>".$_estciv[$mercurio40->getEstciv()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_estciv[$mercurio40->getEstciv()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Cabeza Hogar</label>";
-        $response .= "<p class='pl-2 description'>".$_cabhog[$mercurio40->getCabhog()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_cabhog[$mercurio40->getCabhog()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Ciudad</label>";
-        $response .= "<p class='pl-2 description'>".$_codciu[$mercurio40->getCodciu()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_codciu[$mercurio40->getCodciu()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Zona</label>";
-        $response .= "<p class='pl-2 description'>".$_codciu[$mercurio40->getCodzon()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_codciu[$mercurio40->getCodzon()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Direccion</label>";
@@ -1365,27 +1376,27 @@ class GeneralService
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Capcidad de trabajo</label>";
-        $response .= "<p class='pl-2 description'>".$_captra[$mercurio40->getCaptra()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_captra[$mercurio40->getCaptra()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Tipo Discapacidad</label>";
-        $response .= "<p class='pl-2 description'>".$_tipdis[$mercurio40->getTipdis()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_tipdis[$mercurio40->getTipdis()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Nivel Educacion</label>";
-        $response .= "<p class='pl-2 description'>".$_nivedu[$mercurio40->getNivedu()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_nivedu[$mercurio40->getNivedu()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Rural</label>";
-        $response .= "<p class='pl-2 description'>".$_rural[$mercurio40->getRural()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_rural[$mercurio40->getRural()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Vivienda</label>";
-        $response .= "<p class='pl-2 description'>".$_vivienda[$mercurio40->getVivienda()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_vivienda[$mercurio40->getVivienda()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Tipo Afiliado</label>";
-        $response .= "<p class='pl-2 description'>".$_tipafi[$mercurio40->getTipafi()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_tipafi[$mercurio40->getTipafi()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Autoriza</label>";
@@ -1547,27 +1558,27 @@ class GeneralService
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Ciudad Nacimiento</label>";
-        $response .= "<p class='pl-2 description'>".$_codciu[$mercurio31->getCodciu()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_codciu[$mercurio31->getCodciu()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Sexo</label>";
-        $response .= "<p class='pl-2 description'>".$_sexo[$mercurio31->getSexo()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_sexo[$mercurio31->getSexo()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Estado Civil</label>";
-        $response .= "<p class='pl-2 description'>".$_estciv[$mercurio31->getEstciv()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_estciv[$mercurio31->getEstciv()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Cabeza Hogar</label>";
-        $response .= "<p class='pl-2 description'>".$_cabhog[$mercurio31->getCabhog()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_cabhog[$mercurio31->getCabhog()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Ciudad</label>";
-        $response .= "<p class='pl-2 description'>".$_codciu[$mercurio31->getCodciu()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_codciu[$mercurio31->getCodciu()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Zona</label>";
-        $response .= "<p class='pl-2 description'>".$_codciu[$mercurio31->getCodzon()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_codciu[$mercurio31->getCodzon()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Direccion</label>";
@@ -1603,19 +1614,19 @@ class GeneralService
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Capcidad de trabajo</label>";
-        $response .= "<p class='pl-2 description'>".$_captra[$mercurio31->getCaptra()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_captra[$mercurio31->getCaptra()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Tipo Discapacidad</label>";
-        $response .= "<p class='pl-2 description'>".$_tipdis[$mercurio31->getTipdis()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_tipdis[$mercurio31->getTipdis()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Nivel Educacion</label>";
-        $response .= "<p class='pl-2 description'>".$_nivedu[$mercurio31->getNivedu()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_nivedu[$mercurio31->getNivedu()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Rural</label>";
-        $response .= "<p class='pl-2 description'>".$_rural[$mercurio31->getRural()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_rural[$mercurio31->getRural()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Horas</label>";
@@ -1623,15 +1634,15 @@ class GeneralService
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Tipo Contrato</label>";
-        $response .= "<p class='pl-2 description'>".$_tipcon[$mercurio31->getTipcon()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_tipcon[$mercurio31->getTipcon()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Vivienda</label>";
-        $response .= "<p class='pl-2 description'>".$_vivienda[$mercurio31->getVivienda()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_vivienda[$mercurio31->getVivienda()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Tipo Afiliado</label>";
-        $response .= "<p class='pl-2 description'>".$_tipafi[$mercurio31->getTipafi()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_tipafi[$mercurio31->getTipafi()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Profesion</label>";
@@ -1781,31 +1792,31 @@ class GeneralService
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Ciudad Nacimiento</label>";
-        $response .= "<p class='pl-2 description'>".$_codciu[$mercurio32->getCiunac()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_codciu[$mercurio32->getCiunac()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Sexo</label>";
-        $response .= "<p class='pl-2 description'>".$_sexo[$mercurio32->getSexo()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_sexo[$mercurio32->getSexo()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Estado Civil</label>";
-        $response .= "<p class='pl-2 description'>".$_estciv[$mercurio32->getEstciv()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_estciv[$mercurio32->getEstciv()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Companera permanente</label>";
-        $response .= "<p class='pl-2 description'>".$_comper[$mercurio32->getComper()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_comper[$mercurio32->getComper()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Ciudad Residencia</label>";
-        $response .= "<p class='pl-2 description'>".$_codciu[$mercurio32->getCiures()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_codciu[$mercurio32->getCiures()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Zona</label>";
-        $response .= "<p class='pl-2 description'>".$_codciu[$mercurio32->getCodzon()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_codciu[$mercurio32->getCodzon()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Tipo Vivienda</label>";
-        $response .= "<p class='pl-2 description'>".$_vivienda[$mercurio32->getTipviv()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_vivienda[$mercurio32->getTipviv()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Direccion</label>";
@@ -1829,7 +1840,7 @@ class GeneralService
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Nivel Educacion</label>";
-        $response .= "<p class='pl-2 description'>".$_nivedu[$mercurio32->getNivedu()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_nivedu[$mercurio32->getNivedu()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Fecha Ingreso</label>";
@@ -1837,7 +1848,7 @@ class GeneralService
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Ocupacion</label>";
-        $response .= "<p class='pl-2 description'>".$_codocu[$mercurio32->getCodocu()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_codocu[$mercurio32->getCodocu()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Salario</label>";
@@ -1984,39 +1995,39 @@ class GeneralService
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Ciudad Nacimiento</label>";
-        $response .= "<p class='pl-2 description'>".$_codciu[$mercurio34->getCiunac()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_codciu[$mercurio34->getCiunac()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Sexo</label>";
-        $response .= "<p class='pl-2 description'>".$_sexo[$mercurio34->getSexo()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_sexo[$mercurio34->getSexo()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Parent</label>";
-        $response .= "<p class='pl-2 description'>".$_parent[$mercurio34->getParent()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_parent[$mercurio34->getParent()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Huerfano</label>";
-        $response .= "<p class='pl-2 description'>".$_huerfano[$mercurio34->getHuerfano()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_huerfano[$mercurio34->getHuerfano()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Tipo Hijo</label>";
-        $response .= "<p class='pl-2 description'>".$_tiphij[$mercurio34->getTiphij()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_tiphij[$mercurio34->getTiphij()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Nivel Educacion</label>";
-        $response .= "<p class='pl-2 description'>".$_nivedu[$mercurio34->getNivedu()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_nivedu[$mercurio34->getNivedu()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Capacidad Trabajo</label>";
-        $response .= "<p class='pl-2 description'>".$_captra[$mercurio34->getCaptra()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_captra[$mercurio34->getCaptra()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Tipo Discapacidad</label>";
-        $response .= "<p class='pl-2 description'>".$_tipdis[$mercurio34->getTipdis()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_tipdis[$mercurio34->getTipdis()] . '</p>';
         $response .= '</div>';
         $response .= $col;
         $response .= "<label class='form-control-label'>Calendario</label>";
-        $response .= "<p class='pl-2 description'>".$_calendario[$mercurio34->getCalendario()].'</p>';
+        $response .= "<p class='pl-2 description'>" . $_calendario[$mercurio34->getCalendario()] . '</p>';
         $response .= '</div>';
         $response .= '</div>';
         $response .= "<hr class='my-3'>";
@@ -2107,5 +2118,68 @@ class GeneralService
 
     public function finishTrans() {}
 
-    public function consultaTipopc($tipopc, $estado, $documento, $nombre = null, $condi = null) {}
+    public function consultaTipopc($tipopc, $tipo_consulta, $numero = "", $usuario = "", $condi = "")
+    {
+        $condi_extra = "";
+        if ($condi != "") $condi_extra = " $condi";
+        $params = [
+            'tipopc' => $tipopc,
+            'tipo_consulta' => $tipo_consulta,
+            'numero' => $numero,
+            'usuario' => $usuario,
+            'condi_extra' => $condi_extra,
+        ];
+
+        if ($tipopc == "1") {
+            $entityService = new TrabajadorService();
+        }
+        if ($tipopc == "2") {
+            $entityService = new EmpresaService();
+        }
+        if ($tipopc == "3") {
+            $entityService = new ConyugeService();
+        }
+        if ($tipopc == "4") {
+            $entityService = new BeneficiarioService();
+        }
+        if ($tipopc == "5") {
+            $entityService = new ActualizaEmpresaService();
+        }
+        if ($tipopc == "6") {
+            $entityService = new DatosTrabajadorService();
+        }
+        if ($tipopc == "7") {
+            $entityService = new RetiroService();
+        }
+        if ($tipopc == "8") {
+            $entityService = new CertificadoService();
+        }
+        if ($tipopc == "10") {
+            $entityService = new FacultativoService();
+        }
+        if ($tipopc == "9") {
+            $entityService = new PensionadoService();
+        }
+        if ($tipopc == "11") {
+            $entityService = new EmpresaService();
+            //Mercurio39
+        }
+        if ($tipopc == "12") {
+            //Mercurio40
+            $entityService = new EmpresaService();
+        }
+
+        $out = $entityService->consultaTipopc(
+            new Srequest($params)
+        );
+
+        $response = [
+            'datos' => ($out['datos'] ?? []),
+            'consulta' => ($out['consulta'] ?? ''),
+            'campos' => ($out['campos'] ?? []),
+            'count' => ($out['count'] ?? 0),
+            'all' => ($out['all'] ?? []),
+        ];
+        return $response;
+    }
 }

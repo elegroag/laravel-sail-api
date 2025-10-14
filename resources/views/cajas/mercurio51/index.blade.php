@@ -24,7 +24,6 @@
 @endsection
 
 @push('scripts')
-    @include('cajas/templates/tmp_filtro', ['campo_filtro' => $campo_filtro])
     @include("partials.modal_generic", [
         "titulo" => 'Configuración básica',
         "contenido" => '',
@@ -47,7 +46,7 @@
                 <label for="tipo" class="form-control-label">Tipo</label>
                 <select id="tipo" name="tipo" class="form-control">
                     <option value="">Seleccione</option>
-                    @foreach ($Mercurio51->getTipoArray() as $value => $text)
+                    @foreach ($tipo_array as $value => $text)
                         <option value="{{ $value }}">{{ $text }}</option>
                     @endforeach
                 </select>
@@ -56,7 +55,7 @@
                 <label for="estado" class="form-control-label">Estado</label>
                 <select id="estado" name="estado" class="form-control">
                     <option value="">Seleccione</option>
-                    @foreach ($Mercurio51->getEstadoArray() as $value => $text)
+                    @foreach ($estado_array as $value => $text)
                         <option value="{{ $value }}">{{ $text }}</option>
                     @endforeach
                 </select>

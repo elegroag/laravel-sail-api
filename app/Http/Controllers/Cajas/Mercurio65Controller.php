@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Cajas;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Mercurio65;
+use App\Models\Mercurio67;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Paginate;
 use Illuminate\Http\Request;
@@ -23,7 +24,6 @@ class Mercurio65Controller extends ApplicationController
 
     public function __construct()
     {
-        parent::__construct();
         $this->user = session('user');
         $this->tipo = session('tipo');
     }
@@ -58,11 +58,12 @@ class Mercurio65Controller extends ApplicationController
             'estado' => 'Estado',
         ];
 
+
         return view('cajas.mercurio65.index', [
             'title' => 'Comercios',
             'campo_filtro' => $campo_field,
-            'help' => 'Esta opción permite gestionar los comercios',
-            'buttons' => ['N', 'F', 'R'],
+            'mercurio67' => Mercurio67::all(),
+            'estado_array' => (new Mercurio65)->getEstadoArray(),
         ]);
     }
 

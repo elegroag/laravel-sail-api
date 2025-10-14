@@ -5,6 +5,13 @@ namespace App\Http\Controllers\Cajas;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Models\Gener02;
+use App\Models\Mercurio06;
+use App\Models\Mercurio07;
+use App\Models\Mercurio09;
+use App\Models\Mercurio10;
+use App\Models\Mercurio11;
+use App\Models\Mercurio20;
 use App\Models\Mercurio30;
 use App\Models\Mercurio31;
 use App\Models\Mercurio32;
@@ -15,6 +22,7 @@ use App\Models\Mercurio41;
 use App\Models\Mercurio47;
 use App\Services\Utils\GeneralService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PrincipalController extends ApplicationController
 {
@@ -169,19 +177,19 @@ class PrincipalController extends ApplicationController
 
     public function dashboardAction()
     {
-        $this->setParamToView('hide_header', true);
-        $this->setParamToView('title', 'Estadística');
+        return view('cajas/principal/dashboard', [
+            'title' => 'Estadística',
+        ]);
     }
 
     public function traerUsuariosRegistradosAction()
     {
-        $this->setResponse('ajax');
         $data = [];
         $labels = [];
-        $params['nit'] = parent::getActUser('documento');
-        $mercurio07 = $this->Mercurio07->findAllBySql('select tipo,count(*) as documento from mercurio07 group by 1');
+
+        $mercurio07 = Mercurio07::select('tipo', DB::raw('count(*) as documento'))->groupBy('tipo')->get();
         foreach ($mercurio07 as $mmercurio07) {
-            $mercurio06 = $this->Mercurio06->findFirst("tipo='{$mmercurio07->getTipo()}'");
+            $mercurio06 = Mercurio06::where('tipo', $mmercurio07->getTipo())->first();
             $data[] = $mmercurio07->getDocumento();
             $labels[] = $mercurio06->getDetalle();
         }
@@ -193,10 +201,9 @@ class PrincipalController extends ApplicationController
 
     public function traerOpcionMasUsuadaAction()
     {
-        $this->setResponse('ajax');
         $data = [];
-        $params['nit'] = parent::getActUser('documento');
-        $mercurio20 = $this->Mercurio20->findAllBySql('select accion,count(*) as log from mercurio20 group by 1');
+        $labels = [];
+        $mercurio20 = Mercurio20::select('accion', DB::raw('count(*) as log'))->groupBy('accion')->get();
         foreach ($mercurio20 as $mmercurio20) {
             $data[] = $mmercurio20->getLog();
             $labels[] = $mmercurio20->getAccion();
@@ -209,13 +216,11 @@ class PrincipalController extends ApplicationController
 
     public function traerMotivoMasUsuadaAction()
     {
-        $this->setResponse('ajax');
         $labels = [];
         $data = [];
-        $params['nit'] = parent::getActUser('documento');
-        $mercurio10 = $this->Mercurio10->findAllBySql('select codest,count(*) as numero from mercurio10 WHERE codest is not null group by 1');
+        $mercurio10 = Mercurio10::select('codest', DB::raw('count(*) as numero'))->groupBy('codest')->get();
         foreach ($mercurio10 as $mmercurio10) {
-            $mercurio11 = $this->Mercurio11->findFirst("codest='{$mmercurio10->getCodest()}'");
+            $mercurio11 = Mercurio11::where('codest', $mmercurio10->getCodest())->first();
             $data[] = $mmercurio10->getNumero();
             $labels[] = $mercurio11->getDetalle();
         }
@@ -227,30 +232,34 @@ class PrincipalController extends ApplicationController
 
     public function traerCargaLaboralAction()
     {
-        $this->setResponse('ajax');
         try {
             $data = [];
-            $params['nit'] = parent::getActUser('documento');
-            $gener02 = $this->Gener02->findAllBySql(
-                'SELECT distinct gener02.usuario, gener02.nombre, gener02.login
-            FROM gener02,mercurio08
-            WHERE gener02.usuario = mercurio08.usuario'
-            );
+            $labels = [];
+            $gener02 = Gener02::select('gener02.usuario', 'gener02.nombre', 'gener02.login')
+                ->join('mercurio08', 'gener02.usuario', '=', 'mercurio08.usuario')
+                ->distinct()
+                ->get();
 
-            foreach ($gener02 as $mgener02) {
+            /* foreach ($gener02 as $mgener02) {
                 $count = 0;
-                $mercurio09 = $this->Mercurio09->find();
+                $mercurio09 = Mercurio09::all();
                 foreach ($mercurio09 as $mmercurio09) {
                     $condi = "estado='P'";
 
                     $generalService = new GeneralService;
-                    $result = $generalService->consultaTipopc($mmercurio09->getTipopc(), 'count', '', $mgener02->getUsuario(), $condi);
+                    $result = $generalService->consultaTipopc(
+                        $mmercurio09->getTipopc(),
+                        'count',
+                        '',
+                        $mgener02->getUsuario(),
+                        $condi
+                    );
                     $count += $result['count'];
                 }
                 $data[] = $count;
                 $labels[] = $mgener02->getNombre();
             }
-
+            */
             $response = [
                 'data' => $data,
                 'labels' => $labels,
@@ -283,7 +292,7 @@ class PrincipalController extends ApplicationController
             header('Cache-Control: must-revalidate');
             header('Expires: 0');
             header('Pragma: public');
-            header('Content-Length: '.filesize($fichero));
+            header('Content-Length: ' . filesize($fichero));
             ob_clean();
             readfile($fichero);
             exit();

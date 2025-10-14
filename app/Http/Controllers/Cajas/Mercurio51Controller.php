@@ -31,43 +31,7 @@ class Mercurio51Controller extends ApplicationController
 
     public function showTabla($paginate)
     {
-        $html = '<table border="0" cellpadding="0" cellspacing="0" class="table table-bordered">';
-        $html .= "<thead class='thead-light'>";
-        $html .= '<tr>';
-        $html .= "<th scope='col'>Codigo</th>";
-        $html .= "<th scope='col'>Detalle</th>";
-        $html .= "<th scope='col'>Categoria Padre</th>";
-        $html .= "<th scope='col'>Tipo</th>";
-        $html .= "<th scope='col'>Estado</th>";
-        $html .= "<th scope='col'></th>";
-        $html .= '</tr>';
-        $html .= '</thead>';
-        $html .= "<tbody class='list'>";
-        foreach ($paginate->items as $mtable) {
-            $tipoDetalle = $mtable->tipo == 'P' ? 'Producto' : ($mtable->tipo == 'S' ? 'Servicio' : 'N/A');
-            $estadoDetalle = $mtable->estado == 'A' ? 'Activo' : 'Inactivo';
-            $parentDetalle = $mtable->parent->detalle ?? 'Principal';
-
-            $html .= '<tr>';
-            $html .= "<td>{$mtable->codcat}</td>";
-            $html .= "<td>{$mtable->detalle}</td>";
-            $html .= "<td>{$parentDetalle}</td>";
-            $html .= "<td>{$tipoDetalle}</td>";
-            $html .= "<td>{$estadoDetalle}</td>";
-            $html .= "<td class='table-actions'>";
-            $html .= "<a href='#!' class='table-action btn btn-xs btn-primary' title='Editar' data-cid='{$mtable->codcat}' data-toggle='editar'>";
-            $html .= "<i class='fas fa-user-edit text-white'></i>";
-            $html .= '</a>';
-            $html .= "<a href='#!' class='table-action table-action-delete btn btn-xs btn-danger' title='Borrar' data-cid='{$mtable->codcat}' data-toggle='borrar'>";
-            $html .= "<i class='fas fa-trash text-white'></i>";
-            $html .= '</a>';
-            $html .= '</td>';
-            $html .= '</tr>';
-        }
-        $html .= '</tbody>';
-        $html .= '</table>';
-
-        return $html;
+        return view('cajas.mercurio51._tabla', compact('paginate'));
     }
 
     public function aplicarFiltroAction(Request $request)
@@ -97,6 +61,8 @@ class Mercurio51Controller extends ApplicationController
             'title' => 'Categorias',
             'campo_filtro' => $campo_field,
             'categorias' => $categorias,
+            'tipo_array' => (new Mercurio51)->getTipoArray(),
+            'estado_array' => (new Mercurio51)->getEstadoArray(),
         ]);
     }
 

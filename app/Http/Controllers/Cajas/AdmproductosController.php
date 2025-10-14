@@ -21,7 +21,6 @@ class AdmproductosController extends ApplicationController
 
     public function __construct()
     {
-        $this->setParamToView('instancePath', env('APP_URL').'Cajas/');
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
@@ -29,13 +28,18 @@ class AdmproductosController extends ApplicationController
 
     public function listaAction()
     {
-        $this->setParamToView('hide_header', true);
-        $this->setParamToView('title', 'Productos y Servicios');
+        return view('cajas.admproductos.lista', [
+            'title' => 'Productos y Servicios',
+            'campo_filtro' => [
+                'codser' => 'Código',
+                'servicio' => 'Servicio',
+                'estado' => 'Estado',
+            ],
+        ]);
     }
 
     public function buscarListaAction()
     {
-        $this->setResponse('ajax');
         $serviciosCupos = new ServiciosCupos;
         $todosServicios = [];
         $collect = $serviciosCupos->find();
@@ -61,8 +65,9 @@ class AdmproductosController extends ApplicationController
 
     public function nuevoAction()
     {
-        $this->setParamToView('hide_header', true);
-        $this->setParamToView('title', 'Productos y Servicios');
+        return view('cajas.admproductos.nuevo', [
+            'title' => 'Productos y Servicios',
+        ]);
     }
 
     public function guardarAction(Request $request, $id = '')
@@ -96,9 +101,9 @@ class AdmproductosController extends ApplicationController
             if (! $serviciosCupos->save()) {
                 $msj = '';
                 foreach ($serviciosCupos->getMessages() as $message) {
-                    $msj .= $message->getMessage()."\n";
+                    $msj .= $message->getMessage() . "\n";
                 }
-                throw new DebugException('Error al guardar el servicio.'.$msj, 501);
+                throw new DebugException('Error al guardar el servicio.' . $msj, 501);
             }
 
             $salida = [
@@ -158,9 +163,9 @@ class AdmproductosController extends ApplicationController
             if (! $serviciosCupo->save()) {
                 $msj = '';
                 foreach ($serviciosCupo->getMessages() as $message) {
-                    $msj .= $message->getMessage()."\n";
+                    $msj .= $message->getMessage() . "\n";
                 }
-                throw new DebugException('Error al guardar el servicio.'.$msj, 501);
+                throw new DebugException('Error al guardar el servicio.' . $msj, 501);
             }
 
             $salida = [
@@ -189,15 +194,15 @@ class AdmproductosController extends ApplicationController
             return redirect('admproductos/lista');
             exit;
         }
-        $servicioCupo = $this->ServiciosCupos->findFirst(" codser='{$codser}'");
-        $pinesAfiliado = new PinesAfiliado;
-        $collect = $pinesAfiliado->find(" codser='{$servicioCupo->getCodser()}'");
+        $servicioCupo = ServiciosCupos::where('codser', $codser)->first();
+        $pinesAfiliado = PinesAfiliado::where('codser', $codser)->get();
 
-        $this->setParamToView('hide_header', true);
-        $this->setParamToView('servicio', $servicioCupo);
-        $this->setParamToView('codser', $codser);
-        $this->setParamToView('aplicados', $collect);
-        $this->setParamToView('title', 'Productos y Servicios');
+        return view('cajas.admproductos.aplicados', [
+            'title' => 'Productos y Servicios',
+            'servicio' => $servicioCupo,
+            'codser' => $codser,
+            'aplicados' => $pinesAfiliado,
+        ]);
     }
 
     public function buscarAfiliadosAplicadosAction(Request $request, $codser = '')

@@ -361,7 +361,7 @@ class Mercurio04Controller extends ApplicationController
                 $gener02 = Gener02::where('usuario', $row->usuario)->first();
 
                 $arr['tipopc_detalle'] = ($mercurio09) ? $mercurio09->detalle : '';
-                $arr['usuario_nombre'] = ($gener02) ? $gener02->usuario : '';
+                $arr['usuario_nombre'] = ($gener02) ? $gener02->nombre : '';
                 return $arr;
             });
 

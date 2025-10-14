@@ -24,7 +24,6 @@
 @endsection
 
 @push('scripts')
-    @include('cajas/templates/tmp_filtro', ['campo_filtro' => $campo_filtro])
     @include("partials.modal_generic", [
         "titulo" => 'Configuración básica',
         "contenido" => '',
@@ -60,7 +59,7 @@
                 <label for="codcla" class="form-control-label">Clasificacion</label>
                 <select id="codcla" name="codcla" class="form-control">
                     <option value="">Seleccione</option>
-                    @foreach ($Mercurio67->find() as $row)
+                    @foreach ($mercurio67 as $row)
                         <option value="{{ $row->codcla }}">{{ $row->detalle }}</option>
                     @endforeach
                 </select>
@@ -88,7 +87,7 @@
                 <label for="estado" class="form-control-label">Estado</label>
                 <select id="estado" name="estado" class="form-control">
                     <option value="">Seleccione</option>
-                    @foreach ($Mercurio65->getEstadoArray() as $value => $text)
+                    @foreach ($estado_array as $value => $text)
                         <option value="{{ $value }}">{{ $text }}</option>
                     @endforeach
                 </select>
