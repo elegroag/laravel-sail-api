@@ -22,20 +22,22 @@ class PensionadoAdjuntoService
 
     private $fhash;
 
+    private $user;
+
     private $claveCertificado;
 
     public function __construct($request)
     {
+        $this->user = session()->has('user') ? session('user') : null;
         $this->request = $request;
-
         $this->initialize();
     }
 
     private function initialize()
     {
         $this->lfirma = Mercurio16::where([
-            'documento' => $this->request->getDocumento(),
-            'coddoc' => $this->request->getCoddoc(),
+            'documento' => $this->user['documento'],
+            'coddoc' => $this->user['coddoc'],
         ])->first();
 
         $procesadorComando = Comman::Api();

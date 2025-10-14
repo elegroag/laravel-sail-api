@@ -28,16 +28,19 @@ class DatosEmpresaService
 
     private $claveCertificado;
 
+    private $user;
+
     public function __construct($request)
     {
+        $this->user = session()->has('user') ? session('user') : null;
         $this->request = $request;
         $this->initialize();
     }
 
     private function initialize()
     {
-        $this->lfirma = Mercurio16::where('documento', $this->request['documento'])
-            ->where('coddoc', $this->request['coddoc'])
+        $this->lfirma = Mercurio16::where('documento', $this->user['documento'])
+            ->where('coddoc', $this->user['coddoc'])
             ->first();
 
         $procesadorComando = Comman::Api();
@@ -55,7 +58,7 @@ class DatosEmpresaService
 
     public function formulario()
     {
-        $this->filename = strtotime('now')."_{$this->request['nit']}.pdf";
+        $this->filename = strtotime('now') . "_{$this->request['nit']}.pdf";
         KumbiaPDF::setBackgroundImage(public_path('docs/form/empresa/form-empresa.jpg'));
 
         $fabrica = new FactoryDocuments;

@@ -21,6 +21,7 @@ class TrabajadorAdjuntoService
     private $fhash;
 
     private $claveCertificado;
+    private $user;
 
     /**
      * request variable
@@ -38,7 +39,7 @@ class TrabajadorAdjuntoService
 
     public function __construct($request)
     {
-
+        $this->user = session()->has('user') ? session('user') : null;
         $this->request = $request;
         $this->initialize();
     }
@@ -46,8 +47,8 @@ class TrabajadorAdjuntoService
     public function initialize()
     {
         $this->lfirma = Mercurio16::where([
-            'documento' => $this->request->getDocumento(),
-            'coddoc' => $this->request->getCoddoc(),
+            'documento' => $this->user['documento'],
+            'coddoc' => $this->user['coddoc'],
         ])->first();
 
         $procesadorComando = Comman::Api();
@@ -151,7 +152,7 @@ class TrabajadorAdjuntoService
         $out = $procesadorComando->toArray();
         $empresa = new Mercurio30($out['data']);
 
-        $this->filename = strtotime('now')."_{$this->request->getCedtra()}.pdf";
+        $this->filename = strtotime('now') . "_{$this->request->getCedtra()}.pdf";
         $fabrica = new FactoryDocuments;
         $documento = $fabrica->crearFormulario('trabajador');
         $documento->setParamsInit([

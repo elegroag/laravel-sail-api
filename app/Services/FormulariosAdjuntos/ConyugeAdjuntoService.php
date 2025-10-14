@@ -33,6 +33,8 @@ class ConyugeAdjuntoService
 
     private $claveCertificado;
 
+    private $user;
+
     /**
      * lfirma variable
      *
@@ -42,14 +44,14 @@ class ConyugeAdjuntoService
 
     public function __construct($request)
     {
+        $this->user = session()->has('user') ? session('user') : null;
         $this->request = $request;
         $this->initialize();
     }
 
     private function initialize()
     {
-        $this->lfirma = (new Mercurio16)->findFirst("documento='{$this->request->getDocumento()}' AND coddoc='{$this->request->getCoddoc()}'");
-
+        $this->lfirma = Mercurio16::whereRaw("documento='{$this->user['documento']}' AND coddoc='{$this->user['coddoc']}'")->first();
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
             [
@@ -66,12 +68,12 @@ class ConyugeAdjuntoService
     public function formulario()
     {
         $solicitante = (new Mercurio07)->findFirst(
-            "documento='{$this->request->getDocumento()}' and ".
-                "coddoc='{$this->request->getCoddoc()}' and ".
+            "documento='{$this->request->getDocumento()}' and " .
+                "coddoc='{$this->request->getCoddoc()}' and " .
                 "tipo='{$this->request->getTipo()}'"
         );
 
-        $this->filename = strtotime('now')."_{$this->request->getCedcon()}.pdf";
+        $this->filename = strtotime('now') . "_{$this->request->getCedcon()}.pdf";
         KumbiaPDF::setBackgroundImage(public_path('img/form/conyuge/formulario_adicion_conyuge.png'));
 
         $fabrica = new FactoryDocuments;
@@ -113,9 +115,9 @@ class ConyugeAdjuntoService
                 break;
             default:
                 $trabajador = (new Mercurio31)->findFirst(
-                    " documento='{$this->request->getDocumento()}' and ".
-                        " coddoc='{$this->request->getCoddoc()}' and ".
-                        " cedtra='{$this->request->getCedtra()}' and ".
+                    " documento='{$this->request->getDocumento()}' and " .
+                        " coddoc='{$this->request->getCoddoc()}' and " .
+                        " cedtra='{$this->request->getCedtra()}' and " .
                         " estado NOT IN('X','I')"
                 );
                 break;
@@ -145,7 +147,7 @@ class ConyugeAdjuntoService
 
     public function declaraJurament()
     {
-        $this->filename = strtotime('now')."_{$this->request->getCedcon()}.pdf";
+        $this->filename = strtotime('now') . "_{$this->request->getCedcon()}.pdf";
         KumbiaPDF::setBackgroundImage(public_path('img/form/declaraciones/declaracion_jura_conyuge.png'));
         $fabrica = new FactoryDocuments;
         $documento = $fabrica->crearDeclaracion('conyuge');

@@ -22,18 +22,21 @@ class EmpresaAdjuntoService
 
     private $fhash;
 
+    private $user;
+
     private $claveCertificado;
 
     public function __construct($request)
     {
+        $this->user = session()->has('user') ? session('user') : null;
         $this->request = $request;
         $this->initialize();
     }
 
     private function initialize()
     {
-        $this->lfirma = Mercurio16::where('documento', $this->request->getDocumento())
-            ->where('coddoc', $this->request->getCoddoc())
+        $this->lfirma = Mercurio16::where('documento', $this->user['documento'])
+            ->where('coddoc', $this->user['coddoc'])
             ->first();
 
         $procesadorComando = Comman::Api();
