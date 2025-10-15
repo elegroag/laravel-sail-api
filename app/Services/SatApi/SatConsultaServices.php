@@ -184,9 +184,6 @@ class SatConsultaServices
     public function consultaEmpresaSat2($sat03)
     {
         $tipopc = 2;
-        // $mercurio01 = $this->Mercurio01->findFirst();
-        // $mercurio37 = $this->Mercurio37->find("tipopc = '$tipopc' and numero = '{$mercurio30->getId()}'");
-
         $apiRest = Comman::Api();
         $apiRest->runCli(0, ['servicio' => 'captura_empresa', 'params' => []]);
         $datos_captura = $apiRest->toArray();
@@ -390,22 +387,6 @@ class SatConsultaServices
         $response .= '</div>';
 
         $response .= '</div>';
-        /*
-        $response .= "<hr class='my-3'>";
-        $response .= "<h6 class='heading-small text-muted mb-4'>Archivos</h6>";
-        $response .= "<div class='row pl-lg-4'>";
-
-
-        foreach($mercurio37 as $mmercurio37){
-            $mercurio12 = $this->Mercurio12->findFirst("coddoc='{$mmercurio37->getCoddoc()}'");
-            $response .= "<div class='col-md-4 mb-2'>";
-            $response .= "<button class='btn btn-icon btn-block btn-outline-default' type='button' onclick=\"verArchivo('{$mercurio01->getPath()}','{$mmercurio37->getArchivo()}')\">";
-            $response .= "<span class='btn-inner--icon'><i class='fas fa-file-download'></i></span>";
-            $response .= "<span class='btn-inner--text'>{$mercurio12->getDetalle()}</span>";
-            $response .= "</button>";
-            $response .= "</div>";
-        }
-        $response .= "</div>";	*/
         $response .= $this->consultaSeguimientoSat($tipopc, $sat08);
 
         return $response;
@@ -491,22 +472,6 @@ class SatConsultaServices
         $response .= '</div>';
 
         $response .= '</div>';
-        /*
-        $response .= "<hr class='my-3'>";
-        $response .= "<h6 class='heading-small text-muted mb-4'>Archivos</h6>";
-        $response .= "<div class='row pl-lg-4'>";
-
-
-        foreach($mercurio37 as $mmercurio37){
-            $mercurio12 = $this->Mercurio12->findFirst("coddoc='{$mmercurio37->getCoddoc()}'");
-            $response .= "<div class='col-md-4 mb-2'>";
-            $response .= "<button class='btn btn-icon btn-block btn-outline-default' type='button' onclick=\"verArchivo('{$mercurio01->getPath()}','{$mmercurio37->getArchivo()}')\">";
-            $response .= "<span class='btn-inner--icon'><i class='fas fa-file-download'></i></span>";
-            $response .= "<span class='btn-inner--text'>{$mercurio12->getDetalle()}</span>";
-            $response .= "</button>";
-            $response .= "</div>";
-        }
-        $response .= "</div>";	*/
         $response .= $this->consultaSeguimientoSat($tipopc, $sat05);
 
         return $response;
@@ -596,22 +561,6 @@ class SatConsultaServices
         $response .= '</div>';
 
         $response .= '</div>';
-        /*
-        $response .= "<hr class='my-3'>";
-        $response .= "<h6 class='heading-small text-muted mb-4'>Archivos</h6>";
-        $response .= "<div class='row pl-lg-4'>";
-
-
-        foreach($mercurio37 as $mmercurio37){
-            $mercurio12 = $this->Mercurio12->findFirst("coddoc='{$mmercurio37->getCoddoc()}'");
-            $response .= "<div class='col-md-4 mb-2'>";
-            $response .= "<button class='btn btn-icon btn-block btn-outline-default' type='button' onclick=\"verArchivo('{$mercurio01->getPath()}','{$mmercurio37->getArchivo()}')\">";
-            $response .= "<span class='btn-inner--icon'><i class='fas fa-file-download'></i></span>";
-            $response .= "<span class='btn-inner--text'>{$mercurio12->getDetalle()}</span>";
-            $response .= "</button>";
-            $response .= "</div>";
-        }
-        $response .= "</div>";	*/
         $response .= $this->consultaSeguimientoSat($tipopc, $sat06);
 
         return $response;
@@ -705,22 +654,6 @@ class SatConsultaServices
         $response .= '</div>';
 
         $response .= '</div>';
-        /*
-        $response .= "<hr class='my-3'>";
-        $response .= "<h6 class='heading-small text-muted mb-4'>Archivos</h6>";
-        $response .= "<div class='row pl-lg-4'>";
-
-
-        foreach($mercurio37 as $mmercurio37){
-            $mercurio12 = $this->Mercurio12->findFirst("coddoc='{$mmercurio37->getCoddoc()}'");
-            $response .= "<div class='col-md-4 mb-2'>";
-            $response .= "<button class='btn btn-icon btn-block btn-outline-default' type='button' onclick=\"verArchivo('{$mercurio01->getPath()}','{$mmercurio37->getArchivo()}')\">";
-            $response .= "<span class='btn-inner--icon'><i class='fas fa-file-download'></i></span>";
-            $response .= "<span class='btn-inner--text'>{$mercurio12->getDetalle()}</span>";
-            $response .= "</button>";
-            $response .= "</div>";
-        }
-        $response .= "</div>";	*/
         $response .= $this->consultaSeguimientoSat($tipopc, $sat07);
 
         return $response;
@@ -838,22 +771,6 @@ class SatConsultaServices
         $response .= '</div>';
 
         $response .= '</div>';
-        /*
-        $response .= "<hr class='my-3'>";
-        $response .= "<h6 class='heading-small text-muted mb-4'>Archivos</h6>";
-        $response .= "<div class='row pl-lg-4'>";
-
-
-        foreach($mercurio37 as $mmercurio37){
-            $mercurio12 = $this->Mercurio12->findFirst("coddoc='{$mmercurio37->getCoddoc()}'");
-            $response .= "<div class='col-md-4 mb-2'>";
-            $response .= "<button class='btn btn-icon btn-block btn-outline-default' type='button' onclick=\"verArchivo('{$mercurio01->getPath()}','{$mmercurio37->getArchivo()}')\">";
-            $response .= "<span class='btn-inner--icon'><i class='fas fa-file-download'></i></span>";
-            $response .= "<span class='btn-inner--text'>{$mercurio12->getDetalle()}</span>";
-            $response .= "</button>";
-            $response .= "</div>";
-        }
-        $response .= "</div>";	*/
         $response .= $this->consultaSeguimientoSat($tipopc, $sat09);
 
         return $response;
@@ -939,22 +856,6 @@ class SatConsultaServices
         $response .= '</div>';
 
         $response .= '</div>';
-        /*
-        $response .= "<hr class='my-3'>";
-        $response .= "<h6 class='heading-small text-muted mb-4'>Archivos</h6>";
-        $response .= "<div class='row pl-lg-4'>";
-
-
-        foreach($mercurio37 as $mmercurio37){
-            $mercurio12 = $this->Mercurio12->findFirst("coddoc='{$mmercurio37->getCoddoc()}'");
-            $response .= "<div class='col-md-4 mb-2'>";
-            $response .= "<button class='btn btn-icon btn-block btn-outline-default' type='button' onclick=\"verArchivo('{$mercurio01->getPath()}','{$mmercurio37->getArchivo()}')\">";
-            $response .= "<span class='btn-inner--icon'><i class='fas fa-file-download'></i></span>";
-            $response .= "<span class='btn-inner--text'>{$mercurio12->getDetalle()}</span>";
-            $response .= "</button>";
-            $response .= "</div>";
-        }
-        $response .= "</div>";	*/
         $response .= $this->consultaSeguimientoSat($tipopc, $sat10);
 
         return $response;
@@ -1048,22 +949,6 @@ class SatConsultaServices
         $response .= '</div>';
 
         $response .= '</div>';
-        /*
-        $response .= "<hr class='my-3'>";
-        $response .= "<h6 class='heading-small text-muted mb-4'>Archivos</h6>";
-        $response .= "<div class='row pl-lg-4'>";
-
-
-        foreach($mercurio37 as $mmercurio37){
-            $mercurio12 = $this->Mercurio12->findFirst("coddoc='{$mmercurio37->getCoddoc()}'");
-            $response .= "<div class='col-md-4 mb-2'>";
-            $response .= "<button class='btn btn-icon btn-block btn-outline-default' type='button' onclick=\"verArchivo('{$mercurio01->getPath()}','{$mmercurio37->getArchivo()}')\">";
-            $response .= "<span class='btn-inner--icon'><i class='fas fa-file-download'></i></span>";
-            $response .= "<span class='btn-inner--text'>{$mercurio12->getDetalle()}</span>";
-            $response .= "</button>";
-            $response .= "</div>";
-        }
-        $response .= "</div>";	*/
         $response .= $this->consultaSeguimientoSat($tipopc, $sat11);
 
         return $response;
@@ -1157,22 +1042,6 @@ class SatConsultaServices
         $response .= '</div>';
 
         $response .= '</div>';
-        /*
-        $response .= "<hr class='my-3'>";
-        $response .= "<h6 class='heading-small text-muted mb-4'>Archivos</h6>";
-        $response .= "<div class='row pl-lg-4'>";
-
-
-        foreach($mercurio37 as $mmercurio37){
-            $mercurio12 = $this->Mercurio12->findFirst("coddoc='{$mmercurio37->getCoddoc()}'");
-            $response .= "<div class='col-md-4 mb-2'>";
-            $response .= "<button class='btn btn-icon btn-block btn-outline-default' type='button' onclick=\"verArchivo('{$mercurio01->getPath()}','{$mmercurio37->getArchivo()}')\">";
-            $response .= "<span class='btn-inner--icon'><i class='fas fa-file-download'></i></span>";
-            $response .= "<span class='btn-inner--text'>{$mercurio12->getDetalle()}</span>";
-            $response .= "</button>";
-            $response .= "</div>";
-        }
-        $response .= "</div>";	*/
         $response .= $this->consultaSeguimientoSat($tipopc, $sat12);
 
         return $response;
@@ -1270,22 +1139,6 @@ class SatConsultaServices
         $response .= '</div>';
 
         $response .= '</div>';
-        /*
-        $response .= "<hr class='my-3'>";
-        $response .= "<h6 class='heading-small text-muted mb-4'>Archivos</h6>";
-        $response .= "<div class='row pl-lg-4'>";
-
-
-        foreach($mercurio37 as $mmercurio37){
-            $mercurio12 = $this->Mercurio12->findFirst("coddoc='{$mmercurio37->getCoddoc()}'");
-            $response .= "<div class='col-md-4 mb-2'>";
-            $response .= "<button class='btn btn-icon btn-block btn-outline-default' type='button' onclick=\"verArchivo('{$mercurio01->getPath()}','{$mmercurio37->getArchivo()}')\">";
-            $response .= "<span class='btn-inner--icon'><i class='fas fa-file-download'></i></span>";
-            $response .= "<span class='btn-inner--text'>{$mercurio12->getDetalle()}</span>";
-            $response .= "</button>";
-            $response .= "</div>";
-        }
-        $response .= "</div>";	*/
         $response .= $this->consultaSeguimientoSat($tipopc, $sat13);
 
         return $response;
@@ -1367,22 +1220,6 @@ class SatConsultaServices
         $response .= '</div>';
 
         $response .= '</div>';
-        /*
-        $response .= "<hr class='my-3'>";
-        $response .= "<h6 class='heading-small text-muted mb-4'>Archivos</h6>";
-        $response .= "<div class='row pl-lg-4'>";
-
-
-        foreach($mercurio37 as $mmercurio37){
-            $mercurio12 = $this->Mercurio12->findFirst("coddoc='{$mmercurio37->getCoddoc()}'");
-            $response .= "<div class='col-md-4 mb-2'>";
-            $response .= "<button class='btn btn-icon btn-block btn-outline-default' type='button' onclick=\"verArchivo('{$mercurio01->getPath()}','{$mmercurio37->getArchivo()}')\">";
-            $response .= "<span class='btn-inner--icon'><i class='fas fa-file-download'></i></span>";
-            $response .= "<span class='btn-inner--text'>{$mercurio12->getDetalle()}</span>";
-            $response .= "</button>";
-            $response .= "</div>";
-        }
-        $response .= "</div>";	*/
         $response .= $this->consultaSeguimientoSat($tipopc, $sat14);
 
         return $response;
@@ -1694,7 +1531,7 @@ class SatConsultaServices
             'client_id' => $client_id,
         ];
         $data = http_build_query($postData);
-        curl_setopt($ch, CURLOPT_URL, $path.'token');
+        curl_setopt($ch, CURLOPT_URL, $path . 'token');
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
@@ -1707,7 +1544,7 @@ class SatConsultaServices
         // Debug::addVariable("a",print_r($result,true));
         // Debug::addVariable("b",$statusCode);
         // throw new DebugException(0);
-        return $response['token_type'].' '.$response['access_token'];
+        return $response['token_type'] . ' ' . $response['access_token'];
     }
 
     public function convertirModeloTabla($nombre_tabla = '')

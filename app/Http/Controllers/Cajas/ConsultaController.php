@@ -8,6 +8,7 @@ use App\Models\Gener02;
 use App\Models\Mercurio09;
 use App\Models\Mercurio20;
 use App\Models\Mercurio31;
+use App\Models\Mercurio46;
 use App\Services\Utils\CalculatorDias;
 use App\Services\Utils\GeneralService;
 use App\Services\ReportGenerator\ReportService;
@@ -57,8 +58,10 @@ class ConsultaController extends ApplicationController
         $fecha = new \DateTime;
         $filename = 'reporte_carga_laboral' . $fecha->format('Ymd') . '.xlsx';
 
-        $mercurio09 = $this->Mercurio09->find();
-        $gener02 = $this->Gener02->findAllBySql('select distinct gener02.usuario,gener02.nombre,gener02.login from gener02,mercurio08 where gener02.usuario=mercurio08.usuario');
+        $mercurio09 = Mercurio09::all();
+        $gener02 = Gener02::select('gener02.usuario', 'gener02.nombre', 'gener02.login')
+            ->join('mercurio08', 'gener02.usuario', '=', 'mercurio08.usuario')
+            ->get();
 
         $dataGenerator = (function () use ($mercurio09, $gener02) {
             $headers = ['Usuario/Movimiento'];
@@ -87,9 +90,11 @@ class ConsultaController extends ApplicationController
         $fecha = new \DateTime;
         $filename = 'reporte_indicadores' . $fecha->format('Ymd') . '.xlsx';
 
-        $mercurio09 = $this->Mercurio09->find();
+        $mercurio09 = Mercurio09::all();
         $estados = (new Mercurio31)->getEstadoArray();
-        $gener02 = $this->Gener02->findAllBySql('select distinct gener02.usuario,gener02.nombre,gener02.login from gener02,mercurio08 where gener02.usuario=mercurio08.usuario');
+        $gener02 = Gener02::select('gener02.usuario', 'gener02.nombre', 'gener02.login')
+            ->join('mercurio08', 'gener02.usuario', '=', 'mercurio08.usuario')
+            ->get();
 
         $dataGenerator = (function () use ($fecini, $fecfin, $mercurio09, $estados, $gener02) {
             // Encabezados aplanados: Usuario/Movimiento + (por cada movimiento: estados..., TOT, VEN)
@@ -264,7 +269,8 @@ class ConsultaController extends ApplicationController
         $html .= '<td>Archivo</td>';
         $html .= '</tr>';
         $condi = " mercurio46.fecsis>='$fecini' and mercurio46.fecsis<='$fecfin' ";
-        $mercurio = $this->Mercurio46->find($condi);
+
+        $mercurio = Mercurio46::whereRaw($condi)->get();
         foreach ($mercurio as $mmercurio) {
             $html .= '<tr>';
             $html .= "<td>{$mmercurio->getId()}</td>";

@@ -860,7 +860,7 @@ class ApruebaEmpresaController extends ApplicationController
             $excel->write($j, $i++, $value, $column_title);
         }
         $usuario = session()->get('user');
-        $solicitudes = $this->Mercurio30->find(" estado='{$estado}' AND usuario='{$usuario}' ORDER BY fecini DESC");
+        $solicitudes = Mercurio30::where(" estado='{$estado}' AND usuario='{$usuario}' ORDER BY fecini DESC")->get();
         $j++;
         foreach ($solicitudes as $solicitud) {
             $i = 0;

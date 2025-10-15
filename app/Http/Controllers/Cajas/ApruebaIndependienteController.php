@@ -821,7 +821,7 @@ class ApruebaIndependienteController extends ApplicationController
             $excel->write($j, $i++, $value, $column_title);
         }
         $usuario = parent::getActUser();
-        $solicitudes = $this->Mercurio41->find(" estado='{$estado}' AND usuario='{$usuario}' ORDER BY fecini DESC");
+        $solicitudes = Mercurio41::where(" estado='{$estado}' AND usuario='{$usuario}' ORDER BY fecini DESC")->get();
         $j++;
         foreach ($solicitudes as $solicitud) {
             $i = 0;

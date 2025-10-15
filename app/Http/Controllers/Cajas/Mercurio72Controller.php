@@ -58,8 +58,8 @@ class Mercurio72Controller extends ApplicationController
         try {
 
             $this->setResponse('ajax');
-            $numtur = $this->Mercurio72->maximum('numtur') + 1;
-            $orden = $this->Mercurio72->maximum('orden') + 1;
+            $numtur = Mercurio72::max('numtur') + 1;
+            $orden = Mercurio72::max('orden') + 1;
             $url = $request->input('url');
 
             $response = $this->db->begin();
@@ -70,7 +70,7 @@ class Mercurio72Controller extends ApplicationController
             $mercurio72->setUrl($url);
             $mercurio72->setEstado('A');
 
-            $mercurio01 = $this->Mercurio01->findFirst();
+            $mercurio01 = Mercurio01::first();
 
             if (isset($_FILES['archivo']['name']) && $_FILES['archivo']['name'] != '') {
                 $name = 'promo_turismo' . $numtur . '.' . substr($_FILES['archivo']['name'], -3);
@@ -102,12 +102,12 @@ class Mercurio72Controller extends ApplicationController
         try {
             $this->setResponse('ajax');
             $numpro = $request->input('numpro');
-            $objetivo = $this->Mercurio72->findFirst("numtur = $numpro");
+            $objetivo = Mercurio72::where('numtur', $numpro)->first();
             $orden_obj = $objetivo->getOrden();
-            $minimo = $this->Mercurio72->minimum('orden');
+            $minimo = Mercurio72::min('orden');
 
             if ($orden_obj != $minimo) {
-                $superior = $this->Mercurio72->findFirst("conditions: orden < $orden_obj", 'order: orden desc');
+                $superior = Mercurio72::where('orden', '<', $orden_obj)->orderBy('orden', 'desc')->first();
                 $orden_sup = $superior->getOrden();
                 $objetivo->orden = $orden_sup;
                 $objetivo->update();
@@ -131,12 +131,12 @@ class Mercurio72Controller extends ApplicationController
         try {
             $this->setResponse('ajax');
             $numpro = $request->input('numpro');
-            $objetivo = $this->Mercurio72->findFirst("numtur = $numpro");
+            $objetivo = Mercurio72::where('numtur', $numpro)->first();
             $orden_obj = $objetivo->getOrden();
-            $maximo = $this->Mercurio72->maximum('orden');
+            $maximo = Mercurio72::max('orden');
 
             if ($orden_obj != $maximo) {
-                $inferior = $this->Mercurio72->findFirst("conditions: orden > $orden_obj", 'order: orden asc');
+                $inferior = Mercurio72::where('orden', '>', $orden_obj)->orderBy('orden', 'asc')->first();
                 $orden_inf = $inferior->getOrden();
 
                 $objetivo->orden = $orden_inf;
@@ -162,21 +162,20 @@ class Mercurio72Controller extends ApplicationController
         try {
             $this->setResponse('ajax');
             $numpro = $request->input('numpro');
-            $archivo = $this->Mercurio72->findFirst("numtur = '$numpro'")->getArchivo();
-            $mercurio01 = $this->Mercurio01->findFirst();
+            $archivo = Mercurio72::where('numtur', $numpro)->first()->getArchivo();
+            $mercurio01 = Mercurio01::first();
             if (! empty($archivo) && file_exists("{$mercurio01->getPath()}galeria/" . $archivo)) {
                 unlink("{$mercurio01->getPath()}galeria/" . $archivo);
             }
-            $modelos = ['mercurio72'];
 
             $response = $this->db->begin();
-            $this->Mercurio72->deleteAll("numtur = $numpro");
+            Mercurio72::where('numtur', $numpro)->delete();
             $this->db->commit();
-            $response = parent::successFunc('Inactivado Con Exito');
+            $response = 'Inactivado Con Exito';
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $response = parent::errorFunc('No se puede Borrar el Registro');
+            $response = 'No se puede Borrar el Registro';
 
             return $this->renderObject($response, false);
         }

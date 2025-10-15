@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Cajas;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio01;
 use App\Models\Mercurio74;
 use App\Services\Utils\UploadFile;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class Mercurio74Controller extends ApplicationController
 {
@@ -36,12 +38,16 @@ class Mercurio74Controller extends ApplicationController
         try {
             $this->setResponse('ajax');
             $instancePath = env('APP_URL');
-            $mercurio01 = $this->Mercurio01->findFirst();
-            $con = DbBase::rawConnect();
-            $response = $con->inQueryAssoc("SELECT numrec,concat('$instancePath{$mercurio01->getPath()}galeria/',archivo) as archivo FROM mercurio74 ORDER BY orden ASC");
+            $mercurio01 = Mercurio01::first();
+            $response = Mercurio74::select('numrec', 'archivo')
+                ->addSelect(
+                    DB::raw("concat('{$instancePath}{$mercurio01->getPath()}galeria/', archivo) as archivo")
+                )
+                ->orderBy('orden', 'asc')
+                ->get();
             $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $response = parent::errorFunc('No se puede Ordenar el Registro');
+            $response = 'No se puede Ordenar el Registro';
 
             return $this->renderObject($response, false);
         }
@@ -51,8 +57,8 @@ class Mercurio74Controller extends ApplicationController
     {
         try {
             $this->setResponse('ajax');
-            $numrec = $this->Mercurio74->maximum('numrec') + 1;
-            $orden = $this->Mercurio74->maximum('orden') + 1;
+            $numrec = Mercurio74::max('numrec') + 1;
+            $orden = Mercurio74::max('orden') + 1;
             $url = $request->input('url');
             $modelos = ['mercurio74'];
 
@@ -64,7 +70,7 @@ class Mercurio74Controller extends ApplicationController
             $mercurio74->setUrl($url);
             $mercurio74->setEstado('A');
 
-            $mercurio01 = $this->Mercurio01->findFirst();
+            $mercurio01 = Mercurio01::first();
 
             if (isset($_FILES['archivo']['name']) && $_FILES['archivo']['name'] != '') {
                 $name = 'promo_recreacion' . $numrec . '.' . substr($_FILES['archivo']['name'], -3);
@@ -97,12 +103,12 @@ class Mercurio74Controller extends ApplicationController
 
             $this->setResponse('ajax');
             $numpro = $request->input('numpro');
-            $objetivo = $this->Mercurio74->findFirst("numrec = $numpro");
+            $objetivo = Mercurio74::where("numrec", $numpro)->first();
             $orden_obj = $objetivo->getOrden();
-            $minimo = $this->Mercurio74->minimum('orden');
+            $minimo = Mercurio74::min('orden');
 
             if ($orden_obj != $minimo) {
-                $superior = $this->Mercurio74->findFirst("conditions: orden < $orden_obj", 'order: orden desc');
+                $superior = Mercurio74::whereRaw("orden < $orden_obj")->orderBy('orden', 'desc')->first();
                 $orden_sup = $superior->getOrden();
                 $objetivo->orden = $orden_sup;
                 $objetivo->update();
@@ -126,12 +132,12 @@ class Mercurio74Controller extends ApplicationController
         try {
             $this->setResponse('ajax');
             $numpro = $request->input('numpro');
-            $objetivo = $this->Mercurio74->findFirst("numrec = $numpro");
+            $objetivo = Mercurio74::where("numrec", $numpro)->first();
             $orden_obj = $objetivo->getOrden();
-            $maximo = $this->Mercurio74->maximum('orden');
+            $maximo = Mercurio74::max('orden');
 
             if ($orden_obj != $maximo) {
-                $inferior = $this->Mercurio74->findFirst("conditions: orden > $orden_obj", 'order: orden asc');
+                $inferior = Mercurio74::whereRaw("orden > $orden_obj")->orderBy('orden', 'asc')->first();
                 $orden_inf = $inferior->getOrden();
 
                 $objetivo->orden = $orden_inf;
@@ -157,21 +163,20 @@ class Mercurio74Controller extends ApplicationController
         try {
             $this->setResponse('ajax');
             $numpro = $request->input('numpro');
-            $archivo = $this->Mercurio74->findFirst("numrec = '$numpro'")->getArchivo();
-            $mercurio01 = $this->Mercurio01->findFirst();
+            $archivo = Mercurio74::where("numrec", $numpro)->first()->getArchivo();
+            $mercurio01 = Mercurio01::first();
             if (! empty($archivo) && file_exists("{$mercurio01->getPath()}galeria/" . $archivo)) {
                 unlink("{$mercurio01->getPath()}galeria/" . $archivo);
             }
 
             $response = $this->db->begin();
-            $this->Mercurio74->deleteAll("numrec = $numpro");
+            Mercurio74::where("numrec", $numpro)->delete();
             $this->db->commit();
-            $response = parent::successFunc('Inactivado Con Exito');
+            $response = 'Inactivado Con Exito';
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $response = parent::errorFunc('No se puede Borrar el Registro');
-
+            $response = 'No se puede Borrar el Registro';
             return $this->renderObject($response, false);
         }
     }

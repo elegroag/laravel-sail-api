@@ -187,19 +187,15 @@ class Mercurio65Controller extends ApplicationController
     public function validePkAction(Request $request)
     {
         try {
-            $this->setResponse('ajax');
-            $nit = $request->input('nit', 'addslaches', 'extraspaces', 'striptags');
-            $response = parent::successFunc('');
-            $l = $this->Mercurio65->count('*', "conditions: nit = '$nit'");
+            $nit = $request->input('nit');
+            $response = '';
+            $l = (new Mercurio65)->getCount('*', "conditions: nit = '$nit'");
             if ($l > 0) {
-                $response = parent::errorFunc('El Registro ya se encuentra Digitado');
+                $response = 'El Registro ya se encuentra Digitado';
             }
-
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            parent::setLogger($e->getMessage());
-            $response = parent::errorFunc('No se pudo validar la informacion');
-
+            $response = 'No se pudo validar la informacion';
             return $this->renderObject($response, false);
         }
     }
