@@ -1,5 +1,4 @@
 @php
-    use App\Services\Tag;
     $fecsol = date('Y-m-d');
 @endphp
 <div class="tab-content" id="pills-tabContent">
@@ -154,14 +153,26 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='direccion'>
                                         <label for="direccion" class="control-label ">Dirección de residencia</label>
-                                    @php echo Tag::addressField("direccion", "class: form-control", "placeholder: Dirección", "event: address"); @endphp
+                                        @component('components/address', [
+                                            'name' => 'direccion', 
+                                            'value' => '',
+                                            'placeholder' => 'Dirección notificación',
+                                            'event' => 'address',
+                                            'label' => 'Dirección notificación'
+                                        ])@endcomponent
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='dirlab'>
                                         <label for="dirlab" class="control-label ">Dirección de trabajo</label>
-                                        @php echo Tag::addressField("dirlab", "class: form-control", "placeholder: Direccion Labor", "event: address"); @endphp
+                                        @component('components/address', [
+                                            'name' => 'dirlab', 
+                                            'value' => '',
+                                            'placeholder' => 'Dirección laboral',
+                                            'event' => 'address',
+                                            'label' => 'Dirección laboral'
+                                        ])@endcomponent
                                     </div>
                                 </div>
 

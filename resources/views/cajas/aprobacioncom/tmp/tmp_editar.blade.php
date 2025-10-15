@@ -261,8 +261,13 @@
 
             <div class="col-md-4">
                 <div class="form-group">
-                    <label for="dirpri" class="form-control-label">Dirección comercial:</label>
-                    @php echo Tag::textUpperField("dirpri", "class: form-control", "placeholder: dirección comercial"); @endphp
+                    @component('components/address', [
+                        'name' => 'dirpri', 
+                        'value' => '',
+                        'placeholder' => 'Dirección comercial',
+                        'event' => 'address',
+                        'label' => 'Dirección comercial'
+                    ])@endcomponent
                     <label id="dirpri-error" class="error" for="dirpri"></label>
                 </div>
             </div>

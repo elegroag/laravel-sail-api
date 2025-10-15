@@ -1,7 +1,3 @@
-@php
-    use App\Services\Tag;
-@endphp
-
 <div class="tab-content" id="pills-tabContent">
     <div class="tab-pane fade show active" id="datos_solicitud" role="tabpanel" aria-labelledby="datos_solicitud-tab">
         <div class="card-body">
@@ -62,7 +58,13 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='dirpri'>
                                         <label for="dirpri" class="control-label">Dirección comercial:</label>
-                                        @php echo Tag::addressField("dirpri", "class: form-control", "placeholder: dirección comercial", "event: address"); @endphp
+                                         @component('components/address', [
+                                            'name' => 'dirpri', 
+                                            'value' => '',
+                                            'placeholder' => 'Dirección comercial',
+                                            'event' => 'address',
+                                            'label' => 'Dirección comercial'
+                                        ])@endcomponent
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -224,7 +226,13 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='direccion'>
                                         <label for="direccion" class="control-label">Dirección notificación:</label>
-                                        @php echo Tag::addressField("direccion", "class: form-control", "placeholder: dirección notificación", "event: address"); @endphp
+                                        @component('components/address', [
+                                            'name' => 'direccion', 
+                                            'value' => '',
+                                            'placeholder' => 'Dirección notificación',
+                                            'event' => 'address',
+                                            'label' => 'Dirección notificación'
+                                        ])@endcomponent
                                     </div>
                                 </div>
 

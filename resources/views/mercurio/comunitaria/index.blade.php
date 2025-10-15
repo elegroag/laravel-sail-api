@@ -121,8 +121,13 @@
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label for="direccion" class="form-control-label">Direccion</label>
-                                        {{ TagUser::addressField("direccion", "class: form-control", "placeholder: Direccion") }}
+                                        @component('components/address', [
+                                            'name' => 'direccion', 
+                                            'value' => '',
+                                            'placeholder' => 'Dirección',
+                                            'event' => 'address',
+                                            'label' => 'Dirección'
+                                        ])@endcomponent
                                     </div>
                                 </div>
                                 <div class="col-md-4">

@@ -1,7 +1,3 @@
-@php
-    use App\Services\Tag;
-@endphp
-
 <div class="tab-content" id="pills-tabContent">
     <div class="tab-pane fade show active" id="datos_solicitud" role="tabpanel" aria-labelledby="datos_solicitud-tab">
         <div class="card-body">
@@ -21,14 +17,27 @@
                                     <div class="col-md-3">
                                         <div class="form-group" group-for='cedtra'>
                                             <label for="cedtra" class="control-label">Cedula trabajador</label>
-                                            <input type="number" name="cedtra" class="form-control" placeholder="Cedula trabajador" maxlength="18" minlength="5" oninput="this.value=this.value.replace(/[^0-9]/g,'')" event="is_numeric">
+                                            <input type="number" 
+                                                name="cedtra" 
+                                                class="form-control" 
+                                                placeholder="Cedula trabajador" 
+                                                maxlength="18" 
+                                                minlength="5" 
+                                                oninput="this.value=this.value.replace(/[^0-9]/g,'')" 
+                                                event="is_numeric">
                                         </div>
                                     </div>
                                 @else
                                     <div class="col-md-4 col-lg-3">
                                         <div class="form-group" group-for='cedtra'>
                                             <label for="cedtra" class="control-label">Identificación del trabajador</label>
-                                            <input type="number" name="cedtra" class="form-control" readonly value="{{ $documento }}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" event="is_numeric">
+                                            <input type="number" 
+                                                name="cedtra" 
+                                                class="form-control" 
+                                                readonly 
+                                                value="{{ $documento }}" 
+                                                oninput="this.value=this.value.replace(/[^0-9]/g,'')" 
+                                                event="is_numeric">
                                         </div>
                                     </div>
                                 @endif
@@ -50,7 +59,6 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='tiecon'>
-                                        <label for="tiecon" class="control-label">Tiempo convivencia (Año)</label>
                                         <div class="form-group" group-for='tiecon'>
                                             <label for="tiecon" class="control-label">Tiempo convivencia (Año)</label>
                                             <input type="number" name="tiecon" class="form-control" placeholder="Tiempo de Convivencia" maxlength="3" minlength="1" type="number" event="is_numeric">
@@ -79,8 +87,13 @@
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='direccion'>
-                                        <label for="direccion" class="control-label ml-4">Dirección de residencia</label>
-                                        @php echo Tag::addressField("direccion", "class: form-control", "placeholder: dirección", "event: address"); @endphp
+                                        @component('components/address', [
+                                            'name' => 'direccion', 
+                                            'value' => '',
+                                            'placeholder' => 'Dirección de residencia',
+                                            'event' => 'address',
+                                            'label' => 'Dirección de residencia'
+                                        ])@endcomponent
                                     </div>
                                 </div>
                                 <div class="col-md-3">

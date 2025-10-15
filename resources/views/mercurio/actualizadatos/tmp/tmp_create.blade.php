@@ -68,8 +68,13 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
-                                        <label for="dirpri" class="control-label top ml-4">Dirección comercial:</label>
-                                        <input type="text" name="dirpri" class="form-control" placeholder="Dirección comercial">
+                                        @component('components/address', [
+                                            'name' => 'dirpri', 
+                                            'value' => '',
+                                            'placeholder' => 'Dirección comercial',
+                                            'event' => 'address',
+                                            'label' => 'Dirección comercial'
+                                        ])@endcomponent
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -166,8 +171,13 @@
                             <div class="row">
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
-                                        <label for="direccion" class="control-label top ml-4">Dirección notificación:</label>
-                                        <input type="text" name="direccion" class="form-control" placeholder="Direccion">
+                                        @component('components/address', [
+                                            'name' => 'direccion', 
+                                            'value' => '',
+                                            'placeholder' => 'Dirección de notificación',
+                                            'event' => 'address',
+                                            'label' => 'Dirección de notificación'
+                                        ])@endcomponent
                                         <label id="direccion-error" class="error" for="direccion"></label>
                                     </div>
                                 </div>

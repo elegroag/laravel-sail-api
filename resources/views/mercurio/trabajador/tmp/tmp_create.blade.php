@@ -94,8 +94,13 @@
 
                                 <div class="col-md-3">
                                     <div class='form-group' group-for='dirlab'>
-                                        <label for="dirlab" class="control-label ml-4">Dirección de trabajo</label>
-                                        <input type="text" name="dirlab" id="dirlab" class="form-control" placeholder="Dirección" />
+                                        @component('components/address', [
+                                            'name' => 'dirlab', 
+                                            'value' => '',
+                                            'placeholder' => 'Dirección de trabajo',
+                                            'event' => 'address',
+                                            'label' => 'Dirección de trabajo'
+                                        ])@endcomponent
                                     </div>
                                 </div>
 
@@ -352,8 +357,13 @@
 
                                 <div class="col-md-3">
                                     <div class='form-group' group-for='direccion'>
-                                        <label for="direccion" class="control-label ml-4">Dirección de residencia</label>
-                                        @php echo Tag::addressField("direccion", "class: form-control", "placeholder: dirección", "event: address"); @endphp
+                                        @component('components/address', [
+                                            'name' => 'direccion', 
+                                            'value' => '',
+                                            'placeholder' => 'Dirección de residencia',
+                                            'event' => 'address',
+                                            'label' => 'Dirección de residencia'
+                                        ])@endcomponent
                                     </div>
                                 </div>
 

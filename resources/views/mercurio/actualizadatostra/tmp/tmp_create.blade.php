@@ -65,8 +65,13 @@
 
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
-                                        <label for="direccion" class="control-label top ml-4">Dirección de residencia</label>
-                                        <input type="text" name="direccion" class="form-control" placeholder="Dirección">
+                                        @component('components/address', [
+                                            'name' => 'direccion', 
+                                            'value' => '',
+                                            'placeholder' => 'Dirección de residencia',
+                                            'event' => 'address',
+                                            'label' => 'Dirección de residencia'
+                                        ])@endcomponent
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -78,8 +83,13 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
-                                        <label for="dirlab" class="control-label top ml-4">Dirección de trabajo</label>
-                                        <input type="text" name="dirlab" class="form-control" placeholder="Direccion Labor">
+                                         @component('components/address', [
+                                            'name' => 'dirlab', 
+                                            'value' => '',
+                                            'placeholder' => 'Dirección laboral',
+                                            'event' => 'address',
+                                            'label' => 'Dirección laboral'
+                                        ])@endcomponent
                                     </div>
                                 </div>
 

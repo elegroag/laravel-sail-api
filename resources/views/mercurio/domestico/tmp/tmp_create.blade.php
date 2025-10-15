@@ -18,7 +18,7 @@
                                     @component('components.select', [
                                         'name' => 'coddoc',
                                         'options' => $tiposDocumento,
-                                        'class' => 'form-control'
+                                        'className' => 'form-control'
                                     ])@endcomponent
                                 </div>
                             </div>
@@ -63,8 +63,9 @@
                                     <label for="codact" class="control-label top">CIUU-DIAN Actividad economica:</label>
                                     @component('components.select', [
                                         'name' => 'codact', 
+                                        'id' => 'codact', 
                                         'options' => $actividadesEconomicas,
-                                        'class' => 'form-control'
+                                        'className' => 'form-control'
                                     ])@endcomponent
                                 </div>
                             </div>
@@ -386,7 +387,7 @@
     <div class="tab-pane fade" id="documentos_adjuntos" role="tabpanel" aria-labelledby="documentos_adjuntos-tab">...</div>
     <div class="tab-pane fade" id="firma" role="tabpanel" aria-labelledby="firma-tab">...</div>
     <div class="tab-pane fade" id="enviar_radicado" role="tabpanel" aria-labelledby="enviar_radicado-tab">
-        {{ View::renderView("templates/tmp_send_radicado") }}
+        @include('mercurio.domestico.tmp_send_radicado')
     </div>
 </div>
 

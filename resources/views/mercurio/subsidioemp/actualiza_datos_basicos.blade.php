@@ -172,9 +172,13 @@
                 <div class="row">
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label for="direccion" class="form-control-label">Direccion notificación:</label>
-                            <?= TagUser::addressField("direccion", "class: form-control", "placeholder: Direccion"); ?>
-                            <label id="direccion-error" class="error" for="direccion"></label>
+                            @component('components/address', [
+                                'name' => 'direccion', 
+                                'value' => '',
+                                'placeholder' => 'Dirección de notificación',
+                                'event' => 'address',
+                                'label' => 'Dirección de notificación'
+                            ])@endcomponent
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -263,8 +267,13 @@
                 <div class="row">
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label for="dirpri" class="form-control-label">Direccion comercial:</label>
-                            <?= TagUser::addressField("dirpri", "class: form-control", "placeholder: Direccion Principal"); ?>
+                            @component('components/address', [
+                                'name' => 'dirpri', 
+                                'value' => '',
+                                'placeholder' => 'Dirección comercial',
+                                'event' => 'address',
+                                'label' => 'Dirección comercial'
+                            ])@endcomponent
                         </div>
                     </div>
                     <div class="col-md-4">
