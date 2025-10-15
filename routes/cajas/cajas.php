@@ -8,9 +8,9 @@ Route::prefix('/cajas')->group(function () {
     Route::get('/', function () {
         return redirect()->route('cajas.login');
     });
+    Route::get('/salir', [AuthController::class, 'logoutAction'])->name('cajas.salir');
     Route::get('/login', [AuthController::class, 'indexAction'])->name('cajas.login');
     Route::post('/autenticar', [AuthController::class, 'authenticateAction'])->name('cajas.autenticar');
-    Route::post('/salir', [AuthController::class, 'logoutAction'])->name('cajas.salir');
     Route::post('/cambio_correo', [AuthController::class, 'cambioCorreoAction'])->name('cajas.cambio_correo');
 });
 

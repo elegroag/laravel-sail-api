@@ -14,7 +14,7 @@ if (! function_exists('capitalize')) {
         $parts = '';
         foreach ($exp as $row) {
             if (strlen(trim($row)) > 0) {
-                $parts .= ' '.ucfirst($row);
+                $parts .= ' ' . ucfirst($row);
             }
         }
 
@@ -22,86 +22,54 @@ if (! function_exists('capitalize')) {
     }
 }
 
-if (! function_exists('encode_utf8')) {
+if (!function_exists('encode_utf8')) {
     /**
-     * utf8 codificar
-     * dar formato a las palabras que estan en mayusculas
+     * Corrige errores de codificación y normaliza texto a UTF-8.
+     * Acepta cadenas, arreglos o colecciones.
      *
-     * @param  mixed  $string
-     * @return void
+     * @param  mixed  $data   Texto, arreglo o colección.
+     * @param  bool|null  $lower  Convierte a minúsculas si es true.
+     * @return mixed
      */
     function encode_utf8($data, $lower = null)
     {
-        if (is_array($data)) {
-            $dt = [];
-            // multiples filas
-            if (isset($data[0])) {
-                foreach ($data as $ai => $row) {
-                    foreach ($row as $key => $value) {
-                        if (is_numeric($value)) {
-                            $dt[$ai][$key] = $value;
-                        } else {
-                            $encode = mb_detect_encoding($value);
-                            switch ($encode) {
-                                case 'ASCII':
-                                    $value = mb_convert_encoding($value, 'ISO-8859-1', 'ASCII');
-                                    break;
-                                case 'ISO-8859-1':
-                                    $value = mb_convert_encoding($value, 'UTF-8', 'ISO-8859-1');
-                                    break;
-                                case 'UTF-7':
-                                    $value = mb_convert_encoding($value, 'UTF-8', 'UTF-7');
-                                    break;
-                            }
-                            $value = ($lower) ? strtolower($value) : $value;
-                            $dt[$ai][$key] = $value;
-                        }
-                    }
-                }
-            } else {
-                // 1 fila
-                foreach ($data as $key => $value) {
-                    if (is_numeric($value)) {
-                        $dt[$key] = $value;
-                    } else {
-                        $encode = mb_detect_encoding($value);
-                        switch ($encode) {
-                            case 'ASCII':
-                                $value = mb_convert_encoding($value, 'ISO-8859-1', 'ASCII');
-                                $value = utf8_decode($value);
-                                break;
-                            case 'ISO-8859-1':
-                                $value = mb_convert_encoding($value, 'UTF-8', 'ISO-8859-1');
-                                break;
-                            case 'UTF-7':
-                                $value = mb_convert_encoding($value, 'UTF-8', 'UTF-7');
-                                break;
-                        }
-                        $value = ($lower) ? strtolower($value) : $value;
-                        $dt[$key] = $value;
-                    }
-                }
-            }
-            $data = $dt;
-        } else {
-            $encode = mb_detect_encoding($data);
-            switch ($encode) {
-                case 'ASCII':
-                    $value = mb_convert_encoding($data, 'UTF-8', 'ASCII');
-                    break;
-                case 'ISO-8859-1':
-                    $value = mb_convert_encoding($data, 'UTF-8', 'ISO-8859-1');
-                    break;
-                case 'UTF-7':
-                    $value = mb_convert_encoding($data, 'UTF-8', 'UTF-7');
-                    break;
-            }
-            $data = ($lower) ? strtolower($data) : $data;
+        // 🔁 Si es una colección (Laravel o similar), la convertimos a arreglo
+        if (is_object($data) && method_exists($data, 'toArray')) {
+            $data = $data->toArray();
         }
+        // 🔁 Si es un arreglo, lo procesamos recursivamente
+        if (is_array($data)) {
+            return array_map(function ($value) use ($lower) {
+                return encode_utf8($value, $lower);
+            }, $data);
+        }
+        // ⚙️ Si no es string, lo retornamos tal cual (números, null, bool, etc.)
+        if (!is_string($data)) {
+            return $data;
+        }
+        // 🧩 Detectar codificación y convertir a UTF-8 si es necesario
+        $encoding = mb_detect_encoding($data, ['UTF-8', 'ISO-8859-1', 'ASCII', 'UTF-7'], true);
 
+        switch ($encoding) {
+            case 'ASCII':
+                $data = mb_convert_encoding($data, 'UTF-8', 'ASCII');
+                break;
+            case 'ISO-8859-1':
+                $data = mb_convert_encoding($data, 'UTF-8', 'ISO-8859-1');
+                break;
+            case 'UTF-7':
+                $data = mb_convert_encoding($data, 'UTF-8', 'UTF-7');
+                break;
+                // Si ya es UTF-8 o no detectado, se deja igual
+        }
+        // 🔡 Convertir a minúsculas si se solicita
+        if ($lower) {
+            $data = mb_strtolower($data, 'UTF-8');
+        }
         return $data;
     }
 }
+
 
 if (! function_exists('mask_email')) {
     function mask_email($email)
@@ -110,7 +78,7 @@ if (! function_exists('mask_email')) {
         $name = implode('@', array_slice($em, 0, count($em) - 1));
         $len = floor(strlen($name) / 2);
 
-        return substr($name, 0, $len).str_repeat('*', $len).'@'.end($em);
+        return substr($name, 0, $len) . str_repeat('*', $len) . '@' . end($em);
     }
 }
 
@@ -128,32 +96,37 @@ if (! function_exists('validar_clave')) {
     }
 }
 
-if (! function_exists('utf8n')) {
+if (!function_exists('utf8n')) {
+    /**
+     * Corrige problemas de codificación comunes en textos mal convertidos a UTF-8.
+     * Usa encode_utf8() como base.
+     *
+     * @param  mixed  $string
+     * @return mixed
+     */
     function utf8n($string)
     {
-        $encode = mb_detect_encoding($string);
-        switch (strtoupper($encode)) {
-            case 'ASCII':
-                $nstring = mb_convert_encoding($string, 'UTF-8', 'ASCII');
-                break;
-            case 'ISO-8859-1':
-                $nstring = mb_convert_encoding($string, 'UTF-8', 'ISO-8859-1');
-                break;
-            case 'UTF-7':
-                $nstring = mb_convert_encoding($string, 'UTF-8', 'UTF-7');
-                break;
-            case 'WINDOWS-1252':
-                $nstring = mb_convert_encoding($string, 'UTF-8', 'WINDOWS-1252');
-                break;
-            default:
-                $nstring = $string;
-                break;
+        // Reutiliza el método centralizado para la normalización UTF-8
+        $normalized = encode_utf8($string);
+        // 🔤 Corrige caracteres malformados comunes (doble codificación)
+        if (is_string($normalized)) {
+            $replacements = [
+                'Ã±' => 'ñ',
+                'Ã‘' => 'Ñ',
+                'Ã“' => 'Ó',
+                'Ã“' => 'Ó',
+                'Ã¡' => 'á',
+                'Ã©' => 'é',
+                'Ãí' => 'í',
+                'Ã³' => 'ó',
+                'Ãú' => 'ú',
+                'Ã¼' => 'ü',
+                'Ã'  => 'í', // casos ambiguos
+            ];
+
+            $normalized = str_replace(array_keys($replacements), array_values($replacements), $normalized);
         }
-
-        $nstring = str_replace(['Ã±', 'Ã`'], 'Ñ', $nstring);
-        $nstring = str_replace('Ã“', 'Ó', $nstring);
-
-        return $nstring;
+        return $normalized;
     }
 }
 
@@ -487,11 +460,11 @@ if (! function_exists('d')) {
     {
         $isCli = (php_sapi_name() == 'cli');
         if ($isCli) {
-            echo "\033[96m"."dump--------------------\n"."\033[0m"; // Cian
+            echo "\033[96m" . "dump--------------------\n" . "\033[0m"; // Cian
             echo "\033[97m";
             var_dump($vars);
             echo "\033[0m";
-            echo "\033[96m"."end--------------------\n"."\033[0m";
+            echo "\033[96m" . "end--------------------\n" . "\033[0m";
         } else {
             echo '<pre style="background-color: #e0f7fa; border: 1px solid #b2ebf2; padding: 10px; margin: 10px; border-radius: 4px; overflow-x: auto; font-family: monospace; font-size: 14px; line-height: 1.5;">';
             echo '<span style="color: #00BCD4;">dump--------------------</span><br>'; // Cian
@@ -524,9 +497,9 @@ if (! function_exists('public_url')) {
     function public_url($resource = '')
     {
         if ($resource == '') {
-            return env('APP_URL').'/public/';
+            return env('APP_URL') . '/public/';
         } else {
-            return env('APP_URL').'/public/'.trim($resource);
+            return env('APP_URL') . '/public/' . trim($resource);
         }
     }
 }

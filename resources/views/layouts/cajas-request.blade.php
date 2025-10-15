@@ -85,7 +85,7 @@
         ])
 
     <div class="main-content" id="panel">
-        @include('templates.navbar', [
+        @include('templates.navbar-cajas', [
             'user_name' => capitalize($user['nombre']),
             'breadcrumbs'=> $breadcrumbs,
             'pageTitle'=> $pageTitle

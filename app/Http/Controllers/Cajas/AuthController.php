@@ -7,6 +7,7 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Auth\AuthCajas;
 use App\Library\Auth\AuthJwt;
+use App\Library\Auth\SessionCookies;
 use App\Models\Adapter\DbBase;
 use App\Services\CajaServices\UsuarioServices;
 use App\Services\Utils\SenderEmail;
@@ -74,7 +75,7 @@ class AuthController extends ApplicationController
         } catch (Exception $err) {
 
             set_flashdata('error', [
-                'msj' => $err->getMessage().' '.$err->getFile().' '.$err->getLine(),
+                'msj' => $err->getMessage() . ' ' . $err->getFile() . ' ' . $err->getLine(),
                 'code' => $err->getCode(),
             ]);
 
@@ -168,7 +169,7 @@ class AuthController extends ApplicationController
             ]);
         } catch (DebugException $err) {
             session()->flash('error', [
-                'msj' => $err->getMessage().' '.$err->getFile().' '.$err->getLine(),
+                'msj' => $err->getMessage() . ' ' . $err->getFile() . ' ' . $err->getLine(),
                 'code' => $err->getCode(),
             ]);
         }
@@ -245,7 +246,7 @@ class AuthController extends ApplicationController
             ]);
         } catch (\Exception $err) {
             set_flashdata('error', [
-                'msj' => $err->getMessage().' '.$err->getFile().' '.$err->getLine(),
+                'msj' => $err->getMessage() . ' ' . $err->getFile() . ' ' . $err->getLine(),
                 'code' => $err->getCode(),
             ]);
         }
@@ -288,7 +289,7 @@ class AuthController extends ApplicationController
             ];
         } catch (Exception $err) {
             $salida = [
-                'message' => 'Error '.$err->getMessage().' '.basename($err->getFile()).' '.$err->getLine(),
+                'message' => 'Error ' . $err->getMessage() . ' ' . basename($err->getFile()) . ' ' . $err->getLine(),
                 'code' => 500,
             ];
             http_response_code(500);
@@ -304,5 +305,14 @@ class AuthController extends ApplicationController
         $this->setParamToView('hora_inicia', '7:30');
         $this->setParamToView('hora_finaliza', '11:30');
         $this->setParamToView('nota', $msj);
+    }
+
+    public function logoutAction()
+    {
+        SessionCookies::destroyIdentity();
+        session()->forget('user');
+        session()->forget('tipfun');
+        session()->forget('tipo');
+        return redirect('cajas/login');
     }
 }

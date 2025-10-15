@@ -29,9 +29,13 @@ list($menu, $breadcrumbs, $pageTitle) = App\Services\Menu\MenuCajas::showMenu('C
     ])
 
 <div class="main-content" id="panel">
-@include('templates.navbar', ['user_name' => capitalize($user['nombre']), 'breadcrumbs'=> $breadcrumbs, 'pageTitle'=> $pageTitle]) 
+    @include('templates.navbar-cajas', [
+        'user_name' => capitalize($user['nombre']), 
+        'breadcrumbs'=> $breadcrumbs, 
+        'pageTitle'=> $pageTitle
+    ]) 
     @yield('content')
-@include('templates.footer')
+    @include('templates.footer')
 </div>
 
 @include('templates.modal')
