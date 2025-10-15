@@ -170,8 +170,15 @@ class LoadDocumentsView extends Backbone.View {
                 xhr.setRequestHeader('Authorization', 'Bearer ' + csrf);
             },
             success: (data) => {
-                const url = URL.createObjectURL(data);
-                window.open(url, filename, 'width=900,height=750,toolbar=no,location=no,status=no,menubar=no,scrollbars=yes');
+                Utils.openFile({
+                    nomarc: filename,
+                    data,
+                    cb: (msj) => {
+                        if (msj) {
+                            $App.trigger('alert:error', { message: msj });
+                        }
+                    }
+                });
             },
             error: () => {
                 $App.trigger('alert:error', { message: 'No se pudo cargar el documento' });

@@ -77,6 +77,38 @@ class Utils {
             evt.stopped = true;
         }
     }
+
+    static openFile({nomarc, data, cb}) {
+        const ext = (nomarc && nomarc.includes('.')) ? nomarc.split('.').pop().toLowerCase() : '';
+        const mimeMap = {
+            jpg: 'image/jpeg',
+            jpeg: 'image/jpeg',
+            png: 'image/png',
+            gif: 'image/gif',
+            webp: 'image/webp',
+            bmp: 'image/bmp',
+            svg: 'image/svg+xml',
+            pdf: 'application/pdf'
+        };
+        const guessedType = mimeMap[ext] || data.type || 'application/octet-stream';
+        const blob = data.type ? data : new Blob([data], { type: guessedType });
+        const url = URL.createObjectURL(blob);
+
+        if (guessedType.startsWith('image/')) {
+            const win = window.open('', nomarc, 'width=900,height=750,toolbar=no,location=no,status=no,menubar=no,scrollbars=yes');
+            if (win) {
+                win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${nomarc}</title><style>html,body{margin:0;height:100%;}img{max-width:100%;max-height:100%;display:block;margin:auto;}#wrap{height:100%;display:flex;align-items:center;justify-content:center;background:#111}</style></head><body><div id="wrap"><img src="${url}" alt="${nomarc}"></div></body></html>`);
+                win.document.close();
+                win.addEventListener('beforeunload', () => URL.revokeObjectURL(url));
+            } else {
+                URL.revokeObjectURL(url);
+                return cb('El navegador bloqueó la ventana emergente');
+            }
+        } else {
+            window.open(url, nomarc, 'width=900,height=750,toolbar=no,location=no,status=no,menubar=no,scrollbars=yes');
+        }
+        return cb(null);
+    }
 }
 
 class Messages {

@@ -364,10 +364,17 @@ class FormInfoView extends Backbone.View {
                 xhr.setRequestHeader('Authorization', 'Bearer ' + csrf);
             },
             success: (data) => {
-				if(data){
-					const url = URL.createObjectURL(data);
-					window.open(url, nomarc, 'width=900,height=750,toolbar=no,location=no,status=no,menubar=no,scrollbars=yes');
-				}else{
+				if (data) {
+					Utils.openFile({
+						nomarc,
+						data,
+						cb: (msj) => {
+							if (msj) {
+								$App.trigger('alert:error', { message: msj });
+							}
+						}
+					});
+				} else {
 					$App.trigger('alert:error', { message: 'No se pudo cargar el documento' });
 				}
             },
@@ -375,7 +382,6 @@ class FormInfoView extends Backbone.View {
                 $App.trigger('alert:error', { message: 'No se pudo cargar el documento' });
             },
         });
-
 	}
 
 	deshacerSolicitud(e) {
