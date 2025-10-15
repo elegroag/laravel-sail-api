@@ -478,7 +478,7 @@ class ConsultasTrabajadorController extends ApplicationController
                 'servicio' => 'CuotaMonetaria',
                 'metodo' => 'saldo_pendiente_cobrar_trabajador',
                 'params' => [
-                    'cedtra' => parent::getActUser('documento'),
+                    'cedtra' => $this->user['documento'],
                 ],
             ]
         );
@@ -513,6 +513,6 @@ class ConsultasTrabajadorController extends ApplicationController
         $tipo = $request->input('tipo');
         $logger = new Logger;
         $logger->registrarLog(false, 'Certificado De Afiliacion', $tipo);
-        header("Location: https://comfacaenlinea.com.co/SYS/Subsidio/subflo/gene_certi_tra/$tipo/".parent::getActUser('documento'));
+        header("Location: https://comfacaenlinea.com.co/SYS/Subsidio/subflo/gene_certi_tra/$tipo/" . parent::getActUser('documento'));
     }
 }

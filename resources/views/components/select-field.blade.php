@@ -1,7 +1,7 @@
 @props([
     'name',
-    'id',
-    'label',
+    'id'=>'',
+    'label'=>'',
     'value' => '',
     'placeholder' => '',
     'maxlength' => null,
@@ -24,8 +24,8 @@
         {{ $disabled ? 'disabled' : '' }} 
         {{ $readonly ? 'readonly' : '' }} 
         {{ $attributes }}>
-        @foreach ($options as $option)
-            <option value="{{ $option['value'] }}">{{ $option['label'] }}</option>
+        @foreach ($options as $key => $value)
+            <option value="{{ $key }}">{{ $value }}</option>
         @endforeach
     </select>
 </div>

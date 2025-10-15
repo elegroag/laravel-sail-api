@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Route;
 // Empresa (migrado desde Kumbia)
 Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
     Route::prefix('/mercurio/empresa')->group(function () {
+        Route::get('/', function () {
+            return redirect()->route('empresa.index');
+        });
         Route::get('/index', [EmpresaController::class, 'indexAction'])->name('empresa.index');
         Route::get('/download_temp/{archivo}', [EmpresaController::class, 'downloadFileAction']);
         Route::get('/download_docs/{archivo}', [EmpresaController::class, 'downloadDocsAction']);

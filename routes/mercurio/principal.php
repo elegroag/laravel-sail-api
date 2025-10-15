@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\Route;
 // Principal
 Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
     Route::prefix('/mercurio/principal')->group(function () {
+        Route::get('/', function () {
+            return redirect()->route('principal.index');
+        });
+
         Route::get('/index', [PrincipalController::class, 'indexAction'])->name('principal.index');
         Route::get('/dashboard_trabajador', [PrincipalController::class, 'dashboardTrabajadorAction'])->name('principal.dashboard_trabajador');
         Route::get('/dashboard_empresa', [PrincipalController::class, 'dashboardEmpresaAction'])->name('principal.dashboard_empresa');
@@ -26,9 +30,12 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
         Route::post('/actualiza_estado_solicitudes', [PrincipalController::class, 'actualizaEstadoSolicitudesAction']);
     });
 
-    Route::get('mercurio/movimientos/historial', [MovimientosController::class, 'historialAction'])->name('movimientos.historial');
-    Route::get('mercurio/movimientos/cambio_email_view', [MovimientosController::class, 'cambioEmailViewAction'])->name('movimientos.cambio_email_view');
-    Route::get('mercurio/movimientos/cambio_clave_view', [MovimientosController::class, 'cambioClaveViewAction'])->name('movimientos.cambio_clave_view');
-    Route::get('mercurio/certificados/index', [CertificadosController::class, 'indexAction']);
-    Route::post('mercurio/certificados/guardar', [CertificadosController::class, 'guardarAction']);
+    Route::prefix('/mercurio/movimientos')->group(function () {
+        Route::get('/historial', [MovimientosController::class, 'historialAction'])->name('movimientos.historial');
+        Route::get('/cambio_email_view', [MovimientosController::class, 'cambioEmailViewAction'])->name('movimientos.cambio_email_view');
+        Route::get('/cambio_clave_view', [MovimientosController::class, 'cambioClaveViewAction'])->name('movimientos.cambio_clave_view');
+    });
+
+    Route::get('/mercurio/certificados/index', [CertificadosController::class, 'indexAction']);
+    Route::post('/mercurio/certificados/guardar', [CertificadosController::class, 'guardarAction']);
 });

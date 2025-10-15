@@ -29,7 +29,7 @@ $(() => {
 	region.show(layout);
 
 	$App.trigger('syncro', {
-		url: $App.url('consulta_nucleo'),
+		url: $App.url(window.ServerController + '/consulta_nucleo'),
 		data: {},
 		callback: (response) => {
 			if (response && response.success === true) {

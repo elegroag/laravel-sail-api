@@ -1,4 +1,3 @@
-import { $App } from '@/App';
 import { ControllerRequest } from '@/Mercurio/ControllerRequest';
 import DatosTrabajadorView from './views/DatosTrabajadorView';
 import DatosTrabajadorModel from './models/DatosTrabajadorModel';
@@ -17,7 +16,7 @@ class ControllerDatosTrabajador extends ControllerRequest {
 			headerOptions: {
 				estado: '',
 				tipo: 'T',
-				url_nueva: $App.url('nueva'),
+				url_nueva: window.App.url(window.ServerController + '/nueva'),
 				breadcrumb_menu: 'Crear solicitud',
 				titulo: 'Actualiza datos trabajador',
 				url_masivo: null,
@@ -30,7 +29,7 @@ class ControllerDatosTrabajador extends ControllerRequest {
 		this.on('form:cancel', this.destroy);
 		this.on('form:digit', this.afiService.digitVer);
 		this.on('params', this.afiService.paramsServer);
-		$App.Collections.formParams = null;
+		this.App.Collections.formParams = null;
 	}
 
 	createRequest() {
@@ -39,15 +38,15 @@ class ControllerDatosTrabajador extends ControllerRequest {
 			silent: true,
 			callback: (response) => {
 				if (response) {
-					$App.trigger('syncro', {
-						url: $App.url('infor'),
+					this.App.trigger('syncro', {
+						url: this.App.url(window.ServerController+ '/infor'),
 						silent: false,
 						callback: (response) => {
 							if (response) {
 								if (response.success) {
 									this.renderCreateRequest(response.data);
 								} else {
-									$App.trigger('alert:error', { message: response.msj });
+									this.App.trigger('alert:error', { message: response.msj });
 								}
 							}
 						},
@@ -72,7 +71,7 @@ class ControllerDatosTrabajador extends ControllerRequest {
 		this.listenTo(view, 'form:send', this.afiService.sendRadicado);
 		this.listenTo(view, 'form:find', this.afiService.validePk);
 
-		$App.layout.getRegion('body').show(view);
+		this.App.layout.getRegion('body').show(view);
 
 		this.afiService.initHeaderView({
 			...this.headerOptions,
@@ -84,7 +83,7 @@ class ControllerDatosTrabajador extends ControllerRequest {
 
 	procesoRute(id) {
 		this.solicitudModel = new DatosTrabajadorModel();
-		if (_.isNull($App.Collections.formParams)) {
+		if (_.isNull(this.App.Collections.formParams)) {
 			this.trigger('params', {
 				silent: true,
 				callback: (response) => {
@@ -97,7 +96,7 @@ class ControllerDatosTrabajador extends ControllerRequest {
 										this.solicitudModel.set(response.data);
 										this.renderCreateRequest({});
 									} else {
-										$App.trigger('alert:error', { message: response.msj });
+										this.App.trigger('alert:error', { message: response.msj });
 									}
 								}
 							},
@@ -114,7 +113,7 @@ class ControllerDatosTrabajador extends ControllerRequest {
 							this.solicitudModel.set(response.data);
 							this.renderCreateRequest({});
 						} else {
-							$App.trigger('alert:error', { message: response.msj });
+							this.App.trigger('alert:error', { message: response.msj });
 						}
 					}
 				},

@@ -1,7 +1,3 @@
-@php
-    use App\Services\Tag;
-    use App\Services\Request;
-@endphp
 @extends('layouts.bone')
 
 @section('content')
@@ -48,7 +44,7 @@
                                         <tr>
                                             <td>{{ $certPresentado->getCodben() }}</td>
                                             <td>
-                                                <p style="font-size: .92rem;">{{ Tag::capitalize($certPresentado->getNombre()) }}</p>
+                                                <p style="font-size: .92rem;">{{ capitalize($certPresentado->getNombre()) }}</p>
                                             </td>
                                             <td>{{ capitalize($certPresentado->getNomcer()) }}</td>
                                             <td>{{ $certPresentado->getFecha() }}</td>
@@ -98,18 +94,19 @@
                                     </div>
                                 </div>
                                 @if(count($certDisponibles) > 0)
-                                    <div class='row'>
-                                        <div class='col-md-5 ml-auto'>
-                                            @php echo Tag::selectStatic(new Request(
-                                                [
-                                                   "name"=> "codcer_" . $beneficiarioCerti['codben'], 
-                                                   "options"=> $certDisponibles, 
-                                                   "use_dummy"=> true,
-                                                   "class"=> "form-control"
-                                                ]
-                                            )); @endphp
+                                    <div class='row justify-content-between m-2'>
+                                        <div class='col-6'>
+                                            @component('components.select-field', [
+                                                'name' => "codcer_" . $beneficiarioCerti['codben'],
+                                                'options' => $certDisponibles,
+                                                'use_dummy' => true,
+                                                'class' => 'form-control',
+                                                'label' => 'Certificado beneficiario'
+                                            ])
+                                            @endcomponent
                                         </div>
-                                        <div class='col-md-4'>
+                                        <div class='col-6 pt-2'>
+                                            <label for="archivo_{{ $beneficiarioCerti['codben'] }}">Adjuntar archivo</label>
                                             <div class='custom-file'>
                                                 <input type='file' class='custom-file-input' 
                                                     id='archivo_{{ $beneficiarioCerti['codben'] }}' 
@@ -122,7 +119,7 @@
                                                     for='customFileLang'>Selecionar documento aquí...</label>
                                             </div>
                                         </div>
-                                        <div class='col-md-auto mr-auto'>
+                                        <div class='col-2 pt-4'>
                                             <button 
                                                 class='btn btn-icon btn-primary' 
                                                 type='button' 
@@ -134,7 +131,6 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <hr />
                                 @endif
                             @endforeach
                         </div>

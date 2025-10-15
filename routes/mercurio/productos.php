@@ -5,10 +5,15 @@ use App\Http\Middleware\EnsureCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
-    Route::get('/mercurio/productos/index', [ProductosController::class, 'indexAction']);
-    Route::get('/mercurio/productos/complemento_nutricional', [ProductosController::class, 'complementoNutricionalAction']);
-    Route::post('/mercurio/productos/aplicar_cupo', [ProductosController::class, 'aplicarCupoAction']);
-    Route::post('/mercurio/productos/numero_cupos_disponibles', [ProductosController::class, 'numeroCuposDisponiblesAction']);
-    Route::post('/mercurio/productos/servicios_aplicados', [ProductosController::class, 'serviciosAplicadosAction']);
-    Route::post('/mercurio/productos/buscar_cupo', [ProductosController::class, 'buscarCupoAction']);
+    Route::prefix('/mercurio/productos')->group(function () {
+        Route::get('/', function () {
+            return redirect()->route('productos.index');
+        });
+        Route::get('/index', [ProductosController::class, 'indexAction'])->name('productos.index');
+        Route::get('/complemento_nutricional', [ProductosController::class, 'complementoNutricionalAction']);
+        Route::post('/aplicar_cupo', [ProductosController::class, 'aplicarCupoAction']);
+        Route::post('/numero_cupos_disponibles', [ProductosController::class, 'numeroCuposDisponiblesAction']);
+        Route::post('/servicios_aplicados', [ProductosController::class, 'serviciosAplicadosAction']);
+        Route::post('/buscar_cupo', [ProductosController::class, 'buscarCupoAction']);
+    });
 });

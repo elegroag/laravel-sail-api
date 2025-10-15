@@ -22,19 +22,19 @@
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
                                         <label for="segnom" class="control-label">Segundo nombre</label>
-                                        <x-inputs.text name="segnom" placeholder="Segundo Nombre" oninput="this.value = this.value.toUpperCase()"/>
+                                        <input type="text" name="segnom" class="form-control" placeholder="Segundo Nombre" oninput="this.value = this.value.toUpperCase()"/>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
                                         <label for="priape" class="control-label">Primer apellido</label>
-                                        <x-inputs.text name="priape" placeholder="Primer Apellido" oninput="this.value = this.value.toUpperCase()"/>
+                                        <input type="text" name="priape" class="form-control" placeholder="Primer Apellido" oninput="this.value = this.value.toUpperCase()"/>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
                                         <label for="segape" class="control-label">Segundo apellido</label>
-                                        <x-inputs.text name="segape" placeholder="Segundo Apellido" oninput="this.value = this.value.toUpperCase()"/>
+                                        <input type="text" name="segape" class="form-control" placeholder="Segundo Apellido" oninput="this.value = this.value.toUpperCase()"/>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -46,13 +46,13 @@
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
                                         <label for="telefono" class="control-label">Teléfono</label>
-                                        <x-inputs.number name="telefono" placeholder="Telefono" maxlength="10" minlength="10" />
+                                        <input type="number" name="telefono" class="form-control" placeholder="Telefono" maxlength="10" minlength="10" />
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
                                         <label for="celular" class="control-label">Celular</label>
-                                        <x-inputs.number name="celular" placeholder="Celular" maxlength="10" minlength="10" />
+                                        <input type="number" name="celular" class="form-control" placeholder="Celular" maxlength="10" minlength="10" />
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -157,13 +157,13 @@
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
                                         <label for="respo_telefono" class="control-label">Teléfono</label>
-                                        <x-inputs.number name="respo_telefono" placeholder="Telefono" maxlength="10" minlength="10" />
+                                        <input type="number" name="respo_telefono" class="form-control" placeholder="Telefono" maxlength="10" minlength="10" />
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
                                         <label for="respo_celular" class="control-label">Celular</label>
-                                        <x-inputs.number name="respo_celular" placeholder="Celular" maxlength="10" minlength="10" />
+                                        <input type="number" name="respo_celular" class="form-control" placeholder="Celular" maxlength="10" minlength="10" />
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -200,7 +200,7 @@
                                 <div class="col-md-3" id="show_numcue">
                                     <div class="form-group form-item">
                                         <label for="numcue" class="control-label">Número de cuenta</label>
-                                        <x-inputs.number name="numcue" placeholder="Número de cuenta" />
+                                        <input type="number" name="numcue" class="form-control" placeholder="Número de cuenta" />
                                     </div>
                                 </div>
 

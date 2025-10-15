@@ -1,6 +1,7 @@
 import { $App } from '@/App';
 import { RouterDatosTrabajador } from './RouterDatosTrabajador';
+window.App = $App;
 
-$(function () {
-	$App.startApp(RouterDatosTrabajador, 'list', '#boneLayout');
+$(() => {
+	window.App.startApp(RouterDatosTrabajador, 'list', '#boneLayout');
 });

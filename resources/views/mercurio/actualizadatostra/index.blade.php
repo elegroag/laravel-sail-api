@@ -34,11 +34,11 @@
 </script>
 
 <script type="text/template" id='tmp_table'>
-    @include('mercurio.actualizadatostra.tmp.tmp_table')
+    @include('mercurio/actualizadatostra/tmp/tmp_table')
 </script>
 
 <script type="text/template" id='tmp_create'>
-    @include('mercurio.actualizadatostra.tmp.tmp_create')
+    @include('mercurio/actualizadatostra/tmp/tmp_create')
 </script>
 
 <script type="text/template" id="tmp_docurow">
@@ -50,6 +50,6 @@
     window.ServerController = 'actualizadatostra';
 </script>
 
-<script src="{{ asset('mercurio/build/ActualizaDatosTrabajador.js') }}"></script>
+<script src="{{ asset('mercurio/build/DatosTrabajador.js') }}"></script>
 @endpush
 

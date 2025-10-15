@@ -5,7 +5,6 @@ use App\Http\Controllers\Mercurio\LoginController;
 use App\Http\Controllers\Mercurio\NotificacionesController;
 use App\Http\Controllers\Mercurio\ParticularController;
 use App\Http\Controllers\Mercurio\PrincipalController;
-use App\Http\Controllers\Mercurio\UsuarioController;
 use App\Http\Middleware\EnsureCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
@@ -38,11 +37,7 @@ Route::post('mercurio/principal/ingreso_dirigido', [PrincipalController::class, 
 
 // Movimientos
 Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
-    Route::get('/mercurio/usuario/index', [UsuarioController::class, 'indexAction'])->name('usuario.index');
     Route::get('/mercurio/notificaciones/index', [NotificacionesController::class, 'indexAction'])->name('mercurio.notificaciones.index');
     Route::post('/mercurio/notificaciones/procesar_notificacion', [NotificacionesController::class, 'procesarNotificacionAction']);
-    Route::post('/mercurio/usuario/show_perfil', [UsuarioController::class, 'showPerfilAction']);
-    Route::post('/mercurio/usuario/params', [UsuarioController::class, 'paramsAction']);
-    Route::post('/mercurio/usuario/guardar', [UsuarioController::class, 'guardarAction']);
     Route::get('/mercurio/particular/historial', [ParticularController::class, 'historialAction'])->name('particular.historial');
 });
