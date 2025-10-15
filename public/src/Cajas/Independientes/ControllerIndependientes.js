@@ -1,4 +1,3 @@
-import { $App } from '@/App';
 import { Controller } from '@/Common/Controller';
 import { AportesCollection } from '@/Componentes/Collections/AportesCollection';
 
@@ -23,10 +22,10 @@ class ControllerIndependientes extends Controller {
 
 	infoRequest(id) {
 		const app = this.startController(IndependienteInformation);
-		$App.trigger('syncro', {
+		this.App.trigger('syncro', {
 			url: 'infor',
 			data: {
-				id: id,
+				id
 			},
 			callback: (response) => {
 				if (response) {
@@ -46,11 +45,11 @@ class ControllerIndependientes extends Controller {
 
 	aportesRequest(id = 0) {
 		const app = this.startController(IndependienteAportes);
-		const url = $App.kumbiaURL('aprobaindepen/aportes/' + id);
-		$App.trigger('syncro', {
+		const url = this.App.kumbiaURL('aprobaindepen/aportes/' + id);
+		this.App.trigger('syncro', {
 			url: url,
 			data: {
-				id,
+				id
 			},
 			callback: (response) => {
 				if (response) {
@@ -58,8 +57,8 @@ class ControllerIndependientes extends Controller {
 					const solicitud = new IndependienteModel(response.solicitud);
 					app.aportesRequest(solicitud, aportes);
 				} else {
-					$App.trigger('alert:error', { message: 'No se pudo cargar la solicitud' });
-					$App.router.navigate('list', { trigger: true });
+					this.App.trigger('alert:error', { message: 'No se pudo cargar la solicitud' });
+					this.App.router.navigate('list', { trigger: true });
 				}
 			},
 		});
@@ -67,10 +66,10 @@ class ControllerIndependientes extends Controller {
 
 	editarRequest(id = 0) {
 		const app = this.startController(IndependienteEditar);
-		$App.trigger('syncro', {
+		this.App.trigger('syncro', {
 			url: 'infor',
 			data: {
-				id,
+				id
 			},
 			callback: (response) => {
 				if (response) {
@@ -90,10 +89,10 @@ class ControllerIndependientes extends Controller {
 
 	notificarRequest(id) {
 		const app = this.startController(IndependienteNotificar);
-		$App.trigger('syncro', {
+		this.App.trigger('syncro', {
 			url: 'infor',
 			data: {
-				id: id,
+				id
 			},
 			callback: (response) => {
 				if (response) {

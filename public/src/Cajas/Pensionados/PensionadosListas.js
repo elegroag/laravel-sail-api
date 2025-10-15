@@ -1,8 +1,8 @@
 import { ControllerValidation } from '@/Cajas/ControllerValidation';
 import { LayoutCajasView } from '@/Componentes/Views/LayoutCajasView';
-import { PensionadosView } from './views/PensionadosView';
 import { HeaderListView } from '@/Cajas/HeaderListView';
 import { HeaderCajasView } from '@/Cajas/HeaderCajasView';
+import PensionadosView from './views/PensionadosView';
 
 export default class PensionadosListas extends ControllerValidation {
 	tipo = null;

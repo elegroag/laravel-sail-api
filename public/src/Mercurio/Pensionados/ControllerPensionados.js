@@ -10,10 +10,10 @@ class ControllerPensionados extends ControllerRequest {
 			EntityModel: PensionadoModel,
 			TableView: PensionadosView,
 			FormRequest: FormPensionadoView,
-			tipo: 'P',
+			tipo: 'O',
 			headerOptions: {
 				estado: '',
-				tipo: 'P',
+				tipo: 'O',
 				url_nueva: options.App.url('nueva'),
 				breadcrumb_menu: 'Crear solicitud',
 				titulo: 'Afiliación pensionado',
@@ -24,7 +24,6 @@ class ControllerPensionados extends ControllerRequest {
 		});
 
 		if (this.services) _.extend(this, this.services);
-
 		this.on('form:cancel', this.destroy);
 		this.on('form:find', this.afiService.validePk);
 		this.on('form:digit', this.afiService.digitVer);

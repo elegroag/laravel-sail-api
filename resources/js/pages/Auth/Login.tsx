@@ -39,7 +39,7 @@ export default function Login({
     
 
   return (
-    <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
+    <AuthLayout title="Inicio de sesión COMFACA EN LÍNEA" description="Bienvenido a Comfaca En Línea, el portal en línea de la Comfaca. Aquí podrás gestionar tus servicios y contratar nuevos servicios de manera segura y cómoda.">
       {/* Left Panel - Welcome Section */}
       <div id="welcome" className="lg:w-1/2 bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-700 text-white p-12 flex flex-col justify-center relative overflow-hidden">
       <AuthWelcome

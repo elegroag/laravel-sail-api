@@ -302,7 +302,7 @@ class PensionadoController extends ApplicationController
         } catch (DebugException $e) {
             $response = [
                 'success' => false,
-                'msj' => 'No se pudo validar la información: '.$e->getMessage(),
+                'msj' => 'No se pudo validar la información: ' . $e->getMessage(),
             ];
         }
 
@@ -322,7 +322,7 @@ class PensionadoController extends ApplicationController
             $coddoc = $this->clp($request, 'coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
+            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -380,7 +380,7 @@ class PensionadoController extends ApplicationController
         } catch (\Exception $e) {
             $response = [
                 'success' => false,
-                'msj' => 'Error al procesar el archivo: '.$e->getMessage(),
+                'msj' => 'Error al procesar el archivo: ' . $e->getMessage(),
             ];
         }
 
@@ -394,33 +394,29 @@ class PensionadoController extends ApplicationController
      */
     public function enviarCajaAction(Request $request)
     {
-        $this->setResponse('ajax');
-
+        $this->db->begin();
         try {
             $id = $request->input('id');
 
-            DB::beginTransaction();
-
-            $pensionadoService = new PensionadoService;
-            $usuario = $this->getCurrentUser();
-
+            $asignarFuncionario = new AsignarFuncionario;
+            $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
             if (! $usuario) {
                 throw new \Exception('No se pudo obtener la información del usuario actual');
             }
-
+            $pensionadoService = new PensionadoService;
             $pensionadoService->enviarCaja(new SenderValidationCaja, $id, $usuario);
 
-            DB::commit();
+            $this->db->commit();
 
             $response = [
                 'success' => true,
                 'msj' => 'El envío de la solicitud se ha completado con éxito',
             ];
         } catch (\Exception $e) {
-            DB::rollBack();
+            $this->db->rollBack();
             $response = [
                 'success' => false,
-                'msj' => 'Error al enviar a caja: '.$e->getMessage(),
+                'msj' => 'Error al enviar a caja: ' . $e->getMessage(),
             ];
         }
 
@@ -522,7 +518,7 @@ class PensionadoController extends ApplicationController
     public function downloadFileAction($archivo = '')
     {
         $this->setResponse('view');
-        $fichero = 'public/temp/'.$archivo;
+        $fichero = 'public/temp/' . $archivo;
 
         return $this->renderFile($fichero);
     }
@@ -782,7 +778,7 @@ class PensionadoController extends ApplicationController
         } catch (\Exception $e) {
             $response = [
                 'success' => false,
-                'msj' => 'Error al descargar el formulario: '.$e->getMessage(),
+                'msj' => 'Error al descargar el formulario: ' . $e->getMessage(),
             ];
         }
 
@@ -848,7 +844,7 @@ class PensionadoController extends ApplicationController
             redirect('empresa/index');
         } catch (\Exception $e) {
             set_flashdata('error', [
-                'msj' => 'Error al procesar la solicitud: '.$e->getMessage(),
+                'msj' => 'Error al procesar la solicitud: ' . $e->getMessage(),
                 'code' => 500,
             ]);
             redirect('principal/index');

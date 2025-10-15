@@ -1,4 +1,3 @@
-import { $App } from '@/App';
 import { ApruebaRouter } from '@/Componentes/Routers/ApruebaRouter';
 import { ControllerIndependientes } from './ControllerIndependientes';
 
@@ -10,7 +9,7 @@ class RouterIndependientes extends ApruebaRouter {
 				'aportes/:id': 'aportesRute',
 				'notificar/:id': 'notificarRute',
 			},
-			controller: $App.startSubApplication(ControllerIndependientes, '', {
+			controller: window.App.startSubApplication(ControllerIndependientes, '', {
 				content: '#boneLayout',
 			}),
 		});

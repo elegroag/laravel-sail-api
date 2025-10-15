@@ -1,8 +1,7 @@
-'use strict';
-
 import { $App } from '@/App';
 import { DocumentoModel } from '../Models/DocumentoModel';
 import { DocumentsCollectionView } from './DocumentsCollectionView';
+import { Utils } from '@/Utils';
 
 class DocumentoCollection extends Backbone.Collection {
     get model() {

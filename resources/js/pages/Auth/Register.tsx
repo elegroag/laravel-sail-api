@@ -25,7 +25,7 @@ export default function Register(props: LoginProps){
 
   return (
     <>
-    <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
+    <AuthLayout title="REGISTRO COMFACA EN LÍNEA" description="Crea tu cuenta para acceder a todos los servicios y beneficios que Comfaca tiene para ofrecerte. Un proceso simple y seguro para comenzar tu experiencia.">
       <div id="welcome" className="lg:w-1/2 bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-700 text-white p-12 flex flex-col justify-center relative overflow-hidden">
         <AuthWelcome
           title="REGISTRO"

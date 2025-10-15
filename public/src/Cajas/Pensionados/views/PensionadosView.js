@@ -1,6 +1,6 @@
 import { RequestListView } from '@/Cajas/RequestListView';
 
-class PensionadosView extends RequestListView {
+export default class PensionadosView extends RequestListView {
 	constructor(options = {}) {
 		super({
 			...options,
@@ -24,9 +24,6 @@ class PensionadosView extends RequestListView {
 		const template = _.template(document.getElementById('tmp_table').innerHTML);
 		this.$el.html(template());
 		this.__beforeRender();
-		this.__loadSubmenu();
 		return this;
 	}
 }
-
-export { PensionadosView };

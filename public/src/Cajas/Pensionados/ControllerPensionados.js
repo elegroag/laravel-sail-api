@@ -1,4 +1,3 @@
-import { $App } from '@/App';
 import { Controller } from '@/Common/Controller';
 import { AportesCollection } from '@/Componentes/Collections/AportesCollection';
 import { PensionadoModel } from './models/PensionadoModel';
@@ -7,6 +6,8 @@ import PensionadosListas from './PensionadosListas';
 import PensionadoInformation from './PensionadoInformation';
 import PensionadoNotificar from './PensionadoNotificar';
 import PensionadoAportes from './PensionadoAportes';
+import PensionadoDeshacer from './PensionadoDeshacer';
+import PensionadoReaprobar from './PensionadoReaprobar';
 
 class ControllerPensionados extends Controller {
 	constructor(options = {}) {
@@ -20,10 +21,10 @@ class ControllerPensionados extends Controller {
 
 	infoRequest(id = 0) {
 		const app = this.startController(PensionadoInformation);
-		$App.trigger('syncro', {
+		this.App.trigger('syncro', {
 			url: 'infor',
 			data: {
-				id,
+				id
 			},
 			callback: (response) => {
 				if (response) {
@@ -43,11 +44,11 @@ class ControllerPensionados extends Controller {
 
 	aportesRequest(id = 0) {
 		const app = this.startController(PensionadoAportes);
-		const url = $App.url('aportes/' + id);
-		$App.trigger('syncro', {
+		const url = this.App.url('aportes/' + id);
+		this.App.trigger('syncro', {
 			url: url,
 			data: {
-				id,
+				id
 			},
 			callback: (response) => {
 				if (response) {
@@ -55,8 +56,8 @@ class ControllerPensionados extends Controller {
 					const solicitud = new PensionadoModel(response.solicitud);
 					app.aportesRequest(solicitud, aportes);
 				} else {
-					$App.trigger('alert:error', { message: 'No se pudo cargar la solicitud' });
-					$App.router.navigate('list', { trigger: true });
+					this.App.trigger('alert:error', { message: 'No se pudo cargar la solicitud' });
+					this.App.router.navigate('list', { trigger: true });
 				}
 			},
 		});
@@ -64,10 +65,10 @@ class ControllerPensionados extends Controller {
 
 	notificarRequest(id) {
 		const app = this.startController(PensionadoNotificar);
-		$App.trigger('syncro', {
+		this.App.trigger('syncro', {
 			url: 'infor',
 			data: {
-				id: id,
+				id
 			},
 			callback: (response) => {
 				if (response) {
@@ -79,6 +80,16 @@ class ControllerPensionados extends Controller {
 	}
 
 	editarRequest(id) {}
+
+	deshacerRequest(_id) {
+		const app = this.startController(PensionadoDeshacer);
+		app.deshacerRequest(_id);
+	}
+	
+	reaprobarRequest(_id) {
+		const app = this.startController(PensionadoReaprobar);
+		app.reaprobarRequest(_id);
+	}
 }
 
 export { ControllerPensionados };

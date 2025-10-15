@@ -1,8 +1,7 @@
-
 import { langDataTable } from '@/Core';
 
 class PensionadosView extends Backbone.View {
-    constructor(options = {}) {
+    constructor(options) {
         super(options);
         this.App = options.App || window.App;
     }
@@ -20,7 +19,7 @@ class PensionadosView extends Backbone.View {
         const template = _.template(this.template);
         this.$el.html(template());
 
-        this.App.trigger('load:table', {
+        this.trigger('load:table', {
             url: this.model.tipo ? 'pensionado/render_table/' + this.model.tipo : 'pensionado/render_table',
             callback: (html) => {
                 this.$el.find('#consulta').html(html);
