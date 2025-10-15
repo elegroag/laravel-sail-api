@@ -12,6 +12,8 @@ use App\Models\Mercurio01;
 use App\Models\Mercurio06;
 use App\Models\Mercurio11;
 use App\Models\Mercurio36;
+use App\Models\Mercurio37;
+use App\Models\Mercurio41;
 use App\Services\Aprueba\ApruebaSolicitud;
 use App\Services\CajaServices\FacultativoServices;
 use App\Services\Srequest;
@@ -175,14 +177,13 @@ class ApruebaFacultativoController extends ApplicationController
      */
     public function inforAction(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $id = $request->input('id');
             if (! $id) {
                 throw new DebugException('Error se requiere del id independiente', 501);
             }
             $facultativoServices = new FacultativoServices;
-            $mercurio36 = (new Mercurio36)->findFirst("id='{$id}'");
+            $mercurio36 = Mercurio36::where("id", $id)->first();
             $ps = Comman::Api();
             $ps->runCli(
                 [
@@ -195,10 +196,10 @@ class ApruebaFacultativoController extends ApplicationController
             $paramsfac = new ParamsFacultativo;
             $paramsfac->setDatosCaptura($datos_captura);
 
-            $htmlEmpresa = View::render('aprobacionfac/tmp/consulta', [
+            $htmlEmpresa = view('cajas/aprobacionfac/tmp/consulta', [
                 'mercurio36' => $mercurio36,
-                'mercurio01' => (new Mercurio01)->findFirst(),
-                'det_tipo' => (new Mercurio06)->findFirst("tipo = '{$mercurio36->getTipo()}'")->getDetalle(),
+                'mercurio01' => Mercurio01::first(),
+                'det_tipo' => Mercurio06::where("tipo = '{$mercurio36->getTipo()}'")->first()->getDetalle(),
                 '_coddoc' => ParamsFacultativo::getTipoDocumentos(),
                 '_calemp' => ParamsFacultativo::getCalidadEmpresa(),
                 '_codciu' => ParamsFacultativo::getCiudades(),
@@ -213,7 +214,7 @@ class ApruebaFacultativoController extends ApplicationController
                 '_tipcue' => ParamsFacultativo::getTipoCuenta(),
                 '_giro' => ParamsFacultativo::getGiro(),
                 '_codgir' => ParamsFacultativo::getCodigoGiro(),
-            ]);
+            ])->render();
 
             $ps = Comman::Api();
             $ps->runCli(
@@ -228,16 +229,19 @@ class ApruebaFacultativoController extends ApplicationController
             $out = $ps->toArray();
 
             if ($out['success']) {
-                $this->setParamToView('empresa_sisuweb', $out['data']);
+                $empresa_sisuweb = $out['data'];
+            } else {
+                $empresa_sisuweb = false;
             }
             $response = [
                 'success' => true,
                 'data' => $mercurio36->getArray(),
-                'mercurio11' => $this->Mercurio11->find(),
+                'mercurio11' => Mercurio11::all(),
                 'consulta_empresa' => $htmlEmpresa,
                 'adjuntos' => $facultativoServices->adjuntos($mercurio36),
                 'seguimiento' => $facultativoServices->seguimiento($mercurio36),
                 'campos_disponibles' => $mercurio36->CamposDisponibles(),
+                'empresa_sisuweb' => $empresa_sisuweb,
             ];
         } catch (Exception $err) {
             $response = [
@@ -334,12 +338,12 @@ class ApruebaFacultativoController extends ApplicationController
         $this->setParamToView('tipopc', 2);
         $this->setParamToView('seguimiento', $facultativoServices->seguimiento($mercurio36));
 
-        $mercurio01 = $this->Mercurio01->findFirst();
+        $mercurio01 = Mercurio01::first();
         $this->setParamToView('mercurio01', $mercurio01);
-        $mercurio37 = $this->Mercurio37->find(" tipopc=2 AND numero='{$mercurio36->getId()}'");
+        $mercurio37 = Mercurio37::where(" tipopc=2 AND numero='{$mercurio36->getId()}'")->first();
         $this->setParamToView('mercurio37', $mercurio37);
         $this->setParamToView('idModel', $id);
-        $this->setParamToView('det_tipo', $this->Mercurio06->findFirst("tipo = '{$mercurio36->getTipo()}'")->getDetalle());
+        $this->setParamToView('det_tipo', Mercurio06::where("tipo = '{$mercurio36->getTipo()}'")->first()->getDetalle());
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
@@ -355,7 +359,7 @@ class ApruebaFacultativoController extends ApplicationController
 
         $this->loadParametrosView();
         $facultativoServices->loadDisplay($mercurio36);
-        $this->setParamToView('title', 'Editar Ficha Pensionado '.$mercurio36->getCedtra());
+        $this->setParamToView('title', 'Editar Ficha Pensionado ' . $mercurio36->getCedtra());
     }
 
     public function edita_empresaAction(Request $request)
@@ -364,7 +368,7 @@ class ApruebaFacultativoController extends ApplicationController
         $nit = $request->input('nit');
         $id = $request->input('id');
         try {
-            $mercurio36 = $this->Mercurio36->findFirst("nit='{$nit}' AND id='{$id}'");
+            $mercurio36 = Mercurio36::where("nit='{$nit}' AND id='{$id}'")->first();
             if (! $mercurio36) {
                 throw new DebugException('La empresa no está disponible para notificar por email', 501);
             } else {
@@ -414,7 +418,7 @@ class ApruebaFacultativoController extends ApplicationController
                     $setters .= " $ai='{$row}',";
                 }
                 $setters = trim($setters, ',');
-                $this->Mercurio36->updateAll($setters, "conditions: id='{$id}' AND nit='{$nit}'");
+                Mercurio36::whereRaw("id='{$id}' AND nit='{$nit}'")->update($setters);
                 $salida = [
                     'msj' => 'Proceso se ha completado con éxito',
                     'success' => true,
@@ -487,7 +491,7 @@ class ApruebaFacultativoController extends ApplicationController
             $nota = sanetizar($request->input('nota'));
             $codest = $request->input('codest', 'addslaches', 'alpha', 'extraspaces', 'striptags');
 
-            $mercurio41 = $this->Mercurio41->findFirst(" id='{$id}'");
+            $mercurio41 = Mercurio41::whereRaw(" id='{$id}'")->first();
 
             if ($mercurio41->getEstado() == 'X') {
                 throw new DebugException('El registro ya se encuentra rechazado, no se requiere de repetir la acción.', 201);
@@ -524,7 +528,7 @@ class ApruebaFacultativoController extends ApplicationController
             $array_corregir = $request->input('campos_corregir');
             $campos_corregir = implode(';', $array_corregir);
 
-            $mercurio41 = $this->Mercurio41->findFirst("id='{$id}'");
+            $mercurio41 = Mercurio41::whereRaw("id='{$id}'")->first();
             if ($mercurio41->getEstado() == 'D') {
                 throw new DebugException('El registro ya se encuentra devuelto, no se requiere de repetir la acción.', 201);
             }

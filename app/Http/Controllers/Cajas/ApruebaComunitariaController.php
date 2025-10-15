@@ -7,9 +7,12 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsEmpresa;
 use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio01;
+use App\Models\Mercurio06;
 use App\Models\Mercurio10;
 use App\Models\Mercurio11;
 use App\Models\Mercurio31;
+use App\Models\Mercurio39;
 use App\Services\Aprueba\ApruebaSolicitud;
 use App\Services\CajaServices\MadresComuniServices;
 use App\Services\Srequest;
@@ -173,9 +176,8 @@ class ApruebaComunitariaController extends ApplicationController
             return redirect('aprobacioncom/index');
             exit;
         }
-        $this->setParamToView('hide_header', true);
 
-        $mercurio39 = $this->Mercurio39->findFirst("id='{$id}'");
+        $mercurio39 = Mercurio39::where("id", $id)->first();
         if ($mercurio39->getEstado() == 'A') {
             set_flashdata('success', [
                 'msj' => "La empresa {$mercurio39->getNit()}, ya se encuentra aprobada su afiliación. Y no requiere de más acciones.",
@@ -185,7 +187,6 @@ class ApruebaComunitariaController extends ApplicationController
             return redirect('aprobacioncom/index');
             exit;
         }
-        $this->setParamToView('mercurio39', $mercurio39);
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
@@ -199,8 +200,8 @@ class ApruebaComunitariaController extends ApplicationController
         $paramsEmpresa = new ParamsEmpresa;
         $paramsEmpresa->setDatosCaptura($datos_captura);
 
-        $mercurio01 = $this->Mercurio01->findFirst();
-        $det_tipo = $this->Mercurio06->findFirst("tipo = '{$mercurio39->getTipo()}'")->getDetalle();
+        $mercurio01 = Mercurio01::first();
+        $det_tipo = Mercurio06::where("tipo", $mercurio39->getTipo())->first()->getDetalle();
 
         $this->setParamToView('adjuntos', $madreComuniServices->adjuntos($mercurio39));
         $this->setParamToView('seguimiento', $madreComuniServices->seguimiento($mercurio39));
@@ -217,9 +218,6 @@ class ApruebaComunitariaController extends ApplicationController
             '_tipsoc' => ParamsEmpresa::getTipoSociedades(),
         ])->render();
 
-        $this->setParamToView('consulta_empresa', $htmlEmpresa);
-        $this->setParamToView('mercurio11', $this->Mercurio11->find());
-
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
             [
@@ -233,13 +231,21 @@ class ApruebaComunitariaController extends ApplicationController
         $out = $procesadorComando->toArray();
 
         if ($out['success']) {
-            $this->setParamToView('empresa_sisuweb', $out['data']);
+            $empresa_sisuweb = $out['data'];
+        } else {
+            $empresa_sisuweb = false;
         }
 
-        $this->loadParametrosView($datos_captura);
-        $madreComuniServices->loadDisplay($mercurio39);
-        $this->setParamToView('mercurio39', $mercurio39);
-        $this->setParamToView('title', "Solicitud Madre Comunitaria - {$mercurio39->getCedtra()} - {$mercurio39->getEstadoDetalle()}");
+        $params = $this->loadParametrosView($datos_captura);
+        $response = [
+            'empresa_sisuweb' => $empresa_sisuweb,
+            'consulta_empresa' => $htmlEmpresa,
+            'mercurio11' => Mercurio11::all(),
+            'params' => $params,
+            'mercurio39' => $mercurio39,
+            'title' => "Solicitud Madre Comunitaria - {$mercurio39->getCedtra()} - {$mercurio39->getEstadoDetalle()}",
+        ];
+        return $this->renderObject($response, false);
     }
 
     public function loadParametrosView()
@@ -358,15 +364,20 @@ class ApruebaComunitariaController extends ApplicationController
             $array_corregir = $request->input('campos_corregir');
             $campos_corregir = implode(';', $array_corregir);
 
-            $mercurio39 = $this->Mercurio39->findFirst("id='{$id}'");
+            $mercurio39 = Mercurio39::where("id", $id)->first();
             if ($mercurio39->getEstado() == 'D') {
                 throw new DebugException('El registro ya se encuentra devuelto, no se requiere de repetir la acción.', 201);
             }
 
             $today = Carbon::now();
-            $this->Mercurio39->updateAll("estado='D', motivo='{$nota}', codest='{$codest}', fecest='" . $today->format('Y-m-d H:i:s') . "'", "conditions: id='{$id}'");
+            Mercurio39::where("id", $id)->update([
+                "estado" => "D",
+                "motivo" => $nota,
+                "codest" => $codest,
+                "fecest" => $today->format('Y-m-d H:i:s'),
+            ]);
 
-            $item = $this->Mercurio10->maximum('item', "conditions: tipopc='{$this->tipopc}' and numero='{$id}'");
+            $item = Mercurio10::whereRaw("tipopc='{$this->tipopc}' and numero='{$id}'")->max('item');
             $mercurio10 = new Mercurio10;
 
             $notifyEmailServices->emailDevolver(
@@ -404,7 +415,7 @@ class ApruebaComunitariaController extends ApplicationController
             $nota = sanetizar($request->input('nota'));
             $codest = $request->input('codest', 'addslaches', 'alpha', 'extraspaces', 'striptags');
 
-            $mercurio39 = $this->Mercurio39->findFirst(" id='{$id}'");
+            $mercurio39 = Mercurio39::where("id", $id)->first();
 
             if ($mercurio39->getEstado() == 'X') {
                 throw new DebugException('El registro ya se encuentra rechazado, no se requiere de repetir la acción.', 201);

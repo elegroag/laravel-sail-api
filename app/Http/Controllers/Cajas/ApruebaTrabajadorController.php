@@ -6,8 +6,12 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio01;
+use App\Models\Mercurio02;
+use App\Models\Mercurio07;
 use App\Models\Mercurio10;
 use App\Models\Mercurio11;
+use App\Models\Mercurio30;
 use App\Models\Mercurio31;
 use App\Services\Aprueba\ApruebaTrabajador;
 use App\Services\CajaServices\TrabajadorServices;
@@ -182,7 +186,6 @@ class ApruebaTrabajadorController extends ApplicationController
      */
     public function inforAction(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $id = $request->input('id');
             if (! $id) {
@@ -190,7 +193,7 @@ class ApruebaTrabajadorController extends ApplicationController
             }
 
             $this->trabajadorServices = new TrabajadorServices;
-            $mercurio31 = (new Mercurio31)->findFirst("id='{$id}'");
+            $mercurio31 = Mercurio31::where("id", $id)->first();
 
             $procesadorComando = Comman::Api();
             $procesadorComando->runCli(
@@ -237,10 +240,10 @@ class ApruebaTrabajadorController extends ApplicationController
                 }
             }
 
-            $html = View::render(
-                'aprobaciontra/tmp/consulta',
+            $html = view(
+                'cajas/aprobaciontra/tmp/consulta',
                 [
-                    'mercurio01' => $this->Mercurio01->findFirst(),
+                    'mercurio01' => Mercurio01::first(),
                     'trabajador' => $mercurio31,
                     '_coddoc' => ParamsTrabajador::getTiposDocumentos(),
                     '_codciu' => ParamsTrabajador::getCiudades(),
@@ -258,7 +261,7 @@ class ApruebaTrabajadorController extends ApplicationController
                     '_trasin' => ParamsTrabajador::getSindicalizado(),
                     '_bancos' => ParamsTrabajador::getBancos(),
                 ]
-            );
+            )->render();
 
             $adjuntos = $this->trabajadorServices->adjuntos($mercurio31);
             $seguimiento = $this->trabajadorServices->seguimiento($mercurio31);
@@ -276,7 +279,7 @@ class ApruebaTrabajadorController extends ApplicationController
             $_codsuc = [];
             if ($sucursales['success']) {
                 foreach ($sucursales['data'] as $data) {
-                    $_codsuc["{$data['codsuc']}"] = $data['codsuc'].' '.$data['detalle'];
+                    $_codsuc["{$data['codsuc']}"] = $data['codsuc'] . ' ' . $data['detalle'];
                 }
             }
 
@@ -297,25 +300,30 @@ class ApruebaTrabajadorController extends ApplicationController
                 }
             }
 
-            $componente_codsuc = Tag::selectStatic(new ServicesRequest([
-                'name' => 'codsuc',
-                'options' => $_codsuc,
-                'use_dummy' => true,
-                'dummyValue' => '',
-                'class' => 'form-control',
-            ]));
-            $componente_codlis = Tag::selectStatic(new ServicesRequest([
-                'name' => 'codlis',
-                'options' => $_codlis,
-                'class' => 'form-control',
-            ]));
+            $componente_codsuc = Tag::selectStatic(
+                new Srequest([
+                    'name' => 'codsuc',
+                    'options' => $_codsuc,
+                    'use_dummy' => true,
+                    'dummyValue' => '',
+                    'class' => 'form-control',
+                ])
+            );
+
+            $componente_codlis = Tag::selectStatic(
+                new Srequest([
+                    'name' => 'codlis',
+                    'options' => $_codlis,
+                    'class' => 'form-control',
+                ])
+            );
 
             $campos_disponibles = $mercurio31->CamposDisponibles();
             $response = [
                 'success' => true,
                 'data' => $mercurio31->getArray(),
                 'trabajador_sisu' => $trabajador_sisuweb,
-                'mercurio11' => (new Mercurio11)->find(),
+                'mercurio11' => Mercurio11::all(),
                 'consulta' => $html,
                 'adjuntos' => $adjuntos,
                 'seguimiento' => $seguimiento,
@@ -409,7 +417,7 @@ class ApruebaTrabajadorController extends ApplicationController
             $array_corregir = $request->input('campos_corregir');
             $campos_corregir = implode(';', $array_corregir);
 
-            $mercurio31 = $this->Mercurio31->findFirst("id='{$id}'");
+            $mercurio31 = Mercurio31::where("id", $id)->first();
             $this->trabajadorServices->devolver($mercurio31, $nota, $codest, $campos_corregir);
 
             $notifyEmailServices->emailDevolver(
@@ -452,7 +460,7 @@ class ApruebaTrabajadorController extends ApplicationController
             $nota = $request->input('nota');
             $codest = $request->input('codest', 'addslaches', 'alpha', 'extraspaces', 'striptags');
 
-            $mercurio31 = $this->Mercurio31->findFirst("id='{$id}'");
+            $mercurio31 = Mercurio31::where("id", $id)->first();
 
             $this->trabajadorServices->rechazar($mercurio31, $nota, $codest);
 
@@ -480,7 +488,7 @@ class ApruebaTrabajadorController extends ApplicationController
     {
         $this->setResponse('ajax');
         $id = $request->input('id');
-        $mercurio31 = $this->Mercurio31->findFirst("id=$id");
+        $mercurio31 = Mercurio31::where("id", $id)->first();
         $nit = $mercurio31->getNit();
         $cedtra = $mercurio31->getCedtra();
 
@@ -530,10 +538,10 @@ class ApruebaTrabajadorController extends ApplicationController
         $anexo_inicial = $request->input('anexo_inicial');
 
         $asunto = 'Afiliacion con Exito - Comfaca En Linea';
-        $mercurio31 = $this->Mercurio31->findFirst("documento='{$cedtra}'");
-        $mercurio07 = $this->Mercurio07->findFirst("tipo='{$mercurio31->getTipo()}' and coddoc='{$mercurio31->getCoddoc()}' and documento = '{$mercurio31->getDocumento()}'");
-        $mercurio01 = $this->Mercurio01->findFirst();
-        $mercurio02 = $this->Mercurio02->findFirst();
+        $mercurio31 = Mercurio31::where("documento", $cedtra)->first();
+        $mercurio07 = Mercurio07::whereRaw("tipo='{$mercurio31->getTipo()}' and coddoc='{$mercurio31->getCoddoc()}' and documento = '{$mercurio31->getDocumento()}'")->first();
+        $mercurio01 = Mercurio01::first();
+        $mercurio02 = Mercurio02::first();
 
         $_email = trim($mercurio01->getEmail());
         $_clave = trim($mercurio01->getClave());
@@ -641,8 +649,8 @@ class ApruebaTrabajadorController extends ApplicationController
             return redirect('aprobaciontra/index');
             exit;
         }
-        $trabajador = $this->Mercurio31->findFirst("id='{$id}'");
-        $empresa = $this->Mercurio30->findFirst("nit='{$trabajador->getNit()}'");
+        $trabajador = Mercurio31::where("id", $id)->first();
+        $empresa = Mercurio30::where("nit", $trabajador->getNit())->first();
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
@@ -660,7 +668,7 @@ class ApruebaTrabajadorController extends ApplicationController
         $this->setParamToView('mercurio31', $trabajador);
         $this->setParamToView('idModel', $trabajador->getId());
         $this->setParamToView('mercurio30', $empresa);
-        $this->setParamToView('mercurio11', $this->Mercurio11->find());
+        $this->setParamToView('mercurio11', Mercurio11::all());
         $this->setParamToView('title', "Solicitud Trabajador - {$trabajador->getCedtra()}");
     }
 
@@ -670,7 +678,7 @@ class ApruebaTrabajadorController extends ApplicationController
         try {
             $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
             $cedtra = $request->input('cedtra', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $mercurio31 = $this->Mercurio31->findFirst(" id='{$id}' and cedtra='{$cedtra}'");
+            $mercurio31 = Mercurio31::whereRaw(" id='{$id}' and cedtra='{$cedtra}'")->first();
             if (! $mercurio31) {
                 throw new DebugException('El trabajador no está disponible para notificar por email', 501);
             } else {
@@ -723,7 +731,7 @@ class ApruebaTrabajadorController extends ApplicationController
                     }
                 }
                 $setters = trim($setters, ',');
-                $this->Mercurio31->updateAll($setters, "conditions: id='{$id}' AND cedtra='{$cedtra}'");
+                Mercurio31::whereRaw("id='{$id}' AND cedtra='{$cedtra}'")->update($setters);
 
                 $db = DbBase::rawConnect();
 
@@ -757,7 +765,7 @@ class ApruebaTrabajadorController extends ApplicationController
             $this->setResponse('ajax');
             $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
 
-            $mercurio31 = (new Mercurio31)->findFirst("id='{$id}'");
+            $mercurio31 = Mercurio31::whereRaw("id='{$id}'")->first();
             if (! $mercurio31) {
                 throw new DebugException('Error el trabajador no se encuentra registrado', 501);
             }
@@ -784,7 +792,7 @@ class ApruebaTrabajadorController extends ApplicationController
                         'solicitud' => $mercurio31->getArray(),
                         'trayectorias' => $out['data']['trayectoria'],
                         'salarios' => $out['data']['salarios'],
-                        'title' => 'Trabajador SisuWeb '.$mercurio31->getCedtra(),
+                        'title' => 'Trabajador SisuWeb ' . $mercurio31->getCedtra(),
                     ],
                 ],
                 false
@@ -803,7 +811,7 @@ class ApruebaTrabajadorController extends ApplicationController
     {
         $this->setParamToView('hide_header', true);
         $this->setParamToView('title', 'Aprobación Trabajadores');
-        $mercurio31 = $this->Mercurio31->find("estado='{$estado}' AND usuario=".parent::getActUser().' ORDER BY fecsol ASC');
+        $mercurio31 = Mercurio31::whereRaw("estado='{$estado}' AND usuario=" . parent::getActUser() . ' ORDER BY fecsol ASC')->get();
         $trabajadores = [];
         foreach ($mercurio31 as $ai => $mercurio) {
             $background = '';
@@ -816,7 +824,7 @@ class ApruebaTrabajadorController extends ApplicationController
                     $background = '#f5b2b2';
                 }
             }
-            $url = env('APP_URL').'Cajas/aprobaciontra/info_trabajador/'.$mercurio->getNit().'/'.$mercurio->getCedtra().'/'.$mercurio->getId();
+            $url = env('APP_URL') . 'Cajas/aprobaciontra/info_trabajador/' . $mercurio->getNit() . '/' . $mercurio->getCedtra() . '/' . $mercurio->getId();
             $sat = 'NORMAL';
             $trabajadores[] = [
                 'estado' => $mercurio->getEstadoDetalle(),
@@ -848,7 +856,10 @@ class ApruebaTrabajadorController extends ApplicationController
         $nota = sanetizar($request->input('nota'));
         $today = new \DateTime;
         try {
-            (new Mercurio31)->updateAll("estado='A',fecest='{$today->format('Y-m-d')}'", "conditions: id='$id' ");
+            Mercurio31::whereRaw("id='$id'")->update([
+                'estado' => 'A',
+                'fecest' => $today->format('Y-m-d'),
+            ]);
 
             $item = (new Mercurio10)->maximum('item', "conditions: tipopc='$this->tipopc' and numero='$id'") + 1;
             $mercurio10 = new Mercurio10;
@@ -867,7 +878,7 @@ class ApruebaTrabajadorController extends ApplicationController
         } catch (DebugException $e) {
             $response = [
                 'success' => false,
-                'msj' => 'No se pudo realizar el movimiento '."\n".$e->getMessage()."\n ".$e->getLine(),
+                'msj' => 'No se pudo realizar el movimiento ' . "\n" . $e->getMessage() . "\n " . $e->getLine(),
             ];
         }
         $this->renderObject($response);
@@ -890,7 +901,7 @@ class ApruebaTrabajadorController extends ApplicationController
     {
         $this->tipopc = '1';
         try {
-            $mercurio31 = $this->Mercurio31->findFirst(" id='{$id}' and estado='A'");
+            $mercurio31 = Mercurio31::whereRaw(" id='{$id}' and estado='A'")->first();
             if (! $mercurio31) {
                 throw new DebugException('El trabajador no se encuentra aprobado para consultar sus datos.', 501);
             }
@@ -926,7 +937,7 @@ class ApruebaTrabajadorController extends ApplicationController
             $out = $procesadorComando->toArray();
             $trabajador = $out['data'];
 
-            $mercurio01 = $this->Mercurio01->findFirst();
+            $mercurio01 = Mercurio01::first();
             $mercurio31 = new Mercurio31;
             $mercurio31->createAttributes($trabajador);
             $mercurio31->setTipo('E');
@@ -952,7 +963,7 @@ class ApruebaTrabajadorController extends ApplicationController
             ]);
 
             $code_estados = [];
-            $query = $this->Mercurio11->find();
+            $query = Mercurio11::all();
             foreach ($query as $row) {
                 $code_estados[$row->getCodest()] = $row->getDetalle();
             }
@@ -963,7 +974,7 @@ class ApruebaTrabajadorController extends ApplicationController
             $this->setParamToView('hide_header', true);
             $this->setParamToView('idModel', $id);
             $this->setParamToView('cedtra', $mercurio31->getCedtra());
-            $this->setParamToView('title', 'Trabajador Aprobada '.$mercurio31->getCedtra());
+            $this->setParamToView('title', 'Trabajador Aprobada ' . $mercurio31->getCedtra());
         } catch (DebugException $err) {
             set_flashdata('error', [
                 'msj' => $err->getMessage(),
@@ -996,7 +1007,7 @@ class ApruebaTrabajadorController extends ApplicationController
 
             $id = $request->input('id');
 
-            $mercurio31 = (new Mercurio31)->findFirst(" id='{$id}' and estado='A' ");
+            $mercurio31 = Mercurio31::whereRaw(" id='{$id}' and estado='A' ")->first();
             if (! $mercurio31) {
                 throw new DebugException('Los datos del trabajador no son validos para procesar.', 501);
             }
@@ -1082,7 +1093,7 @@ class ApruebaTrabajadorController extends ApplicationController
         } catch (DebugException $err) {
             $salida = [
                 'success' => false,
-                'msj' => 'Error no se pudo realizar el movimiento, '.$err->getMessage(),
+                'msj' => 'Error no se pudo realizar el movimiento, ' . $err->getMessage(),
                 'comando' => $comando,
                 'file' => $err->getFile(),
                 'line' => $err->getLine(),
@@ -1132,7 +1143,7 @@ class ApruebaTrabajadorController extends ApplicationController
         } catch (DebugException $err) {
             $salida = [
                 'success' => false,
-                'msj' => 'No se pudo realizar el movimiento '."\n".$err->getMessage()."\n ".$err->getLine(),
+                'msj' => 'No se pudo realizar el movimiento ' . "\n" . $err->getMessage() . "\n " . $err->getLine(),
             ];
         }
 

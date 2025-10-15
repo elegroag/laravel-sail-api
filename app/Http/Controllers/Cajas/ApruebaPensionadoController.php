@@ -8,8 +8,11 @@ use App\Library\Collections\ParamsIndependiente;
 use App\Library\Collections\ParamsPensionado;
 use App\Models\Adapter\DbBase;
 use App\Models\Gener42;
+use App\Models\Mercurio01;
+use App\Models\Mercurio06;
 use App\Models\Mercurio11;
 use App\Models\Mercurio31;
+use App\Models\Mercurio37;
 use App\Models\Mercurio38;
 use App\Services\Aprueba\ApruebaSolicitud;
 use App\Services\CajaServices\PensionadoServices;
@@ -200,7 +203,6 @@ class ApruebaPensionadoController extends ApplicationController
 
     public function inforAction(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $id = $request->input('id');
             if (! $id) {
@@ -208,7 +210,7 @@ class ApruebaPensionadoController extends ApplicationController
             }
 
             $pensionadoServices = new PensionadoServices;
-            $mercurio38 = $this->Mercurio38->findFirst("id='{$id}'");
+            $mercurio38 = Mercurio38::where("id", $id)->first();
 
             $ps = Comman::Api();
             $ps->runCli(
@@ -220,15 +222,15 @@ class ApruebaPensionadoController extends ApplicationController
             $paramsPensionado = new ParamsPensionado;
             $paramsPensionado->setDatosCaptura($ps->toArray());
 
-            $det_tipo = $this->Mercurio06->findFirst("tipo = '{$mercurio38->getTipo()}'")->getDetalle();
+            $det_tipo = Mercurio06::where("tipo", $mercurio38->getTipo())->first()->getDetalle();
 
             $this->setParamToView('adjuntos', $pensionadoServices->adjuntos($mercurio38));
 
             $this->setParamToView('seguimiento', $pensionadoServices->seguimiento($mercurio38));
 
-            $htmlEmpresa = View::render('aprobacionpen/tmp/consulta', [
+            $htmlEmpresa = view('cajas/aprobacionpen/tmp/consulta', [
                 'mercurio38' => $mercurio38,
-                'mercurio01' => $this->Mercurio01->findFirst(),
+                'mercurio01' => Mercurio01::first(),
                 'det_tipo' => $det_tipo,
                 '_coddoc' => ParamsPensionado::getTipoDocumentos(),
                 '_calemp' => ParamsPensionado::getCalidadEmpresa(),
@@ -244,10 +246,7 @@ class ApruebaPensionadoController extends ApplicationController
                 '_tipcue' => ParamsPensionado::getTipoCuenta(),
                 '_giro' => ParamsPensionado::getGiro(),
                 '_codgir' => ParamsPensionado::getCodigoGiro(),
-            ]);
-
-            $this->setParamToView('consulta_empresa', $htmlEmpresa);
-            $this->setParamToView('mercurio11', $this->Mercurio11->find());
+            ])->render();
 
             $ps = Comman::Api();
             $ps->runCli(
@@ -262,17 +261,20 @@ class ApruebaPensionadoController extends ApplicationController
 
             $out = $ps->toArray();
             if ($out['success']) {
-                $this->setParamToView('empresa_sisuweb', $out['data']);
+                $empresa_sisuweb = $out['data'];
+            } else {
+                $empresa_sisuweb = false;
             }
 
             $response = [
                 'success' => true,
                 'data' => $mercurio38->getArray(),
-                'mercurio11' => $this->Mercurio11->find(),
+                'mercurio11' => Mercurio11::all(),
                 'consulta_empresa' => $htmlEmpresa,
                 'adjuntos' => $pensionadoServices->adjuntos($mercurio38),
                 'seguimiento' => $pensionadoServices->seguimiento($mercurio38),
                 'campos_disponibles' => $mercurio38->CamposDisponibles(),
+                'empresa_sisuweb' => $empresa_sisuweb,
             ];
         } catch (DebugException $err) {
             $response = [
@@ -324,7 +326,7 @@ class ApruebaPensionadoController extends ApplicationController
         } catch (DebugException $err) {
             $salida = [
                 'success' => false,
-                'msj' => 'No se pudo realizar el movimiento '."\n".$err->getMessage()."\n ".$err->getLine(),
+                'msj' => 'No se pudo realizar el movimiento ' . "\n" . $err->getMessage() . "\n " . $err->getLine(),
             ];
         }
 
@@ -467,17 +469,17 @@ class ApruebaPensionadoController extends ApplicationController
         }
         $this->pensionadoServices = new PensionadoServices;
         $this->setParamToView('hide_header', true);
-        $mercurio38 = $this->Mercurio38->findFirst("id='{$id}'");
+        $mercurio38 = Mercurio38::whereRaw("id='{$id}'")->first();
         $this->setParamToView('mercurio38', $mercurio38);
         $this->setParamToView('tipopc', 2);
         $this->setParamToView('seguimiento', $this->pensionadoServices->seguimiento($mercurio38));
 
-        $mercurio01 = $this->Mercurio01->findFirst();
+        $mercurio01 = Mercurio01::first();
         $this->setParamToView('mercurio01', $mercurio01);
-        $mercurio37 = $this->Mercurio37->find(" tipopc=2 AND numero='{$mercurio38->getId()}'");
+        $mercurio37 = Mercurio37::whereRaw(" tipopc=2 AND numero='{$mercurio38->getId()}'")->first();
         $this->setParamToView('mercurio37', $mercurio37);
         $this->setParamToView('idModel', $id);
-        $this->setParamToView('det_tipo', $this->Mercurio06->findFirst("tipo = '{$mercurio38->getTipo()}'")->getDetalle());
+        $this->setParamToView('det_tipo', Mercurio06::whereRaw("tipo = '{$mercurio38->getTipo()}'")->first()->getDetalle());
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
@@ -493,7 +495,7 @@ class ApruebaPensionadoController extends ApplicationController
 
         // $this->loadParametrosView();
         $this->pensionadoServices->loadDisplay($mercurio38);
-        $this->setParamToView('title', 'Editar Ficha Pensionado '.$mercurio38->getCedtra());
+        $this->setParamToView('title', 'Editar Ficha Pensionado ' . $mercurio38->getCedtra());
     }
 
     public function edita_empresaAction(Request $request)
@@ -502,7 +504,7 @@ class ApruebaPensionadoController extends ApplicationController
         $nit = $request->input('nit');
         $id = $request->input('id');
         try {
-            $mercurio38 = $this->Mercurio38->findFirst("nit='{$nit}' AND id='{$id}'");
+            $mercurio38 = Mercurio38::whereRaw("nit='{$nit}' AND id='{$id}'")->first();
             if (! $mercurio38) {
                 throw new DebugException('La empresa no está disponible para notificar por email', 501);
             } else {
@@ -551,7 +553,7 @@ class ApruebaPensionadoController extends ApplicationController
                     $setters .= " $ai='{$row}',";
                 }
                 $setters = trim($setters, ',');
-                $this->Mercurio38->updateAll($setters, "conditions: id='{$id}' AND nit='{$nit}'");
+                Mercurio38::whereRaw("id='{$id}' AND nit='{$nit}'")->update($setters);
                 $salida = [
                     'msj' => 'Proceso se ha completado con éxito',
                     'success' => true,
@@ -635,7 +637,7 @@ class ApruebaPensionadoController extends ApplicationController
         } catch (DebugException $err) {
             $salida = [
                 'success' => false,
-                'msj' => 'No se pudo realizar el movimiento '."\n".$err->getMessage()."\n ".$err->getLine(),
+                'msj' => 'No se pudo realizar el movimiento ' . "\n" . $err->getMessage() . "\n " . $err->getLine(),
             ];
         }
 
@@ -742,7 +744,7 @@ class ApruebaPensionadoController extends ApplicationController
         } catch (DebugException $err) {
             $salida = [
                 'success' => false,
-                'msj' => 'Error no se pudo realizar el movimiento, '.$err->getMessage(),
+                'msj' => 'Error no se pudo realizar el movimiento, ' . $err->getMessage(),
                 'comando' => $comando,
                 'file' => $err->getFile(),
                 'line' => $err->getLine(),

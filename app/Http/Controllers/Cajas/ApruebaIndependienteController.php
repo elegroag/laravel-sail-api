@@ -7,7 +7,12 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsIndependiente;
 use App\Models\Adapter\DbBase;
 use App\Models\Gener42;
+use App\Models\Mercurio01;
+use App\Models\Mercurio02;
+use App\Models\Mercurio06;
+use App\Models\Mercurio07;
 use App\Models\Mercurio11;
+use App\Models\Mercurio37;
 use App\Models\Mercurio41;
 use App\Services\Aprueba\ApruebaSolicitud;
 use App\Services\CajaServices\IndependienteServices;
@@ -124,7 +129,7 @@ class ApruebaIndependienteController extends ApplicationController
         $help = 'Esta opcion permite manejar los ';
         $this->setParamToView('help', $help);
         $this->setParamToView('title', 'Aprobacion Empresa');
-        $mercurio41 = $this->Mercurio41->find("estado='{$estado}' AND usuario=".parent::getActUser().' ORDER BY fecini ASC');
+        $mercurio41 = Mercurio41::whereRaw("estado='{$estado}' AND usuario=" . $this->user['usuario'])->orderBy('fecini', 'ASC')->get();
         $empresas = [];
         foreach ($mercurio41 as $ai => $mercurio) {
             $background = '';
@@ -139,9 +144,9 @@ class ApruebaIndependienteController extends ApplicationController
             }
 
             if ($mercurio->getEstado() == 'A') {
-                $url = env('APP_URL').'Cajas/aprobaindepen/infoAprobadoView/'.$mercurio->getId();
+                $url = env('APP_URL') . 'Cajas/aprobaindepen/infoAprobadoView/' . $mercurio->getId();
             } else {
-                $url = env('APP_URL').'Cajas/aprobaindepen/info_empresa/'.$mercurio->getId();
+                $url = env('APP_URL') . 'Cajas/aprobaindepen/info_empresa/' . $mercurio->getId();
             }
 
             $sat = 'NORMAL';
@@ -323,7 +328,7 @@ class ApruebaIndependienteController extends ApplicationController
         $feccap = new \DateTime($feccap);
 
         try {
-            $mercurio41 = $this->Mercurio41->findFirst("nit='{$nit}' AND estado='A'");
+            $mercurio41 = Mercurio41::whereRaw("nit='{$nit}' AND estado='A'")->first();
             if (! $mercurio41) {
                 throw new DebugException('Error la empresa no es valida para envio de correo.', 501);
             }
@@ -336,15 +341,15 @@ class ApruebaIndependienteController extends ApplicationController
                 throw new DebugException('Los datos de la empresa no está disponible en SISUWEB.', 503);
             }
 
-            $asunto = 'Afiliacion de la empresa realizada con Exito. Nit: '.$mercurio41->getCedtra();
-            $mercurio07 = $this->Mercurio07->findFirst("tipo='{$mercurio41->getTipo()}' and coddoc='{$mercurio41->getCoddoc()}' and documento='{$mercurio41->getDocumento()}'");
+            $asunto = 'Afiliacion de la empresa realizada con Exito. Nit: ' . $mercurio41->getCedtra();
+            $mercurio07 = Mercurio07::whereRaw("tipo='{$mercurio41->getTipo()}' and coddoc='{$mercurio41->getCoddoc()}' and documento='{$mercurio41->getDocumento()}'")->first();
             if (! $mercurio07) {
                 throw new DebugException('Error no hay usuario empresa para el servicio de autogestión de comfaca en línea.', 504);
             }
             $mercurio07->setTipo('E');
             $mercurio07->save();
-            $mercurio01 = $this->Mercurio01->findFirst();
-            $mercurio02 = $this->Mercurio02->findFirst();
+            $mercurio01 = Mercurio01::first();
+            $mercurio02 = Mercurio02::first();
             $_email = trim($mercurio01->getEmail());
             $_clave = trim($mercurio01->getClave());
 
@@ -412,11 +417,11 @@ class ApruebaIndependienteController extends ApplicationController
         $request = request();
         $nit = $request->input('nit');
         try {
-            $mercurio41 = $this->Mercurio41->findFirst("nit='{$nit}' AND estado='A'");
+            $mercurio41 = Mercurio41::whereRaw("nit='{$nit}' AND estado='A'")->first();
             if (! $mercurio41) {
                 throw new DebugException('La empresa no está disponible para notificar por email', 501);
             } else {
-                $data07 = $this->Mercurio07->find("conditions: documento='{$mercurio41->getDocumento()}'");
+                $data07 = Mercurio07::whereRaw("documento='{$mercurio41->getDocumento()}'")->get();
                 $consultasOldServices = new GeneralService;
                 $servicio = $consultasOldServices->webService('datosEmpresa', $_POST);
                 if ($servicio['flag'] == false) {
@@ -468,10 +473,8 @@ class ApruebaIndependienteController extends ApplicationController
      *
      * @return void
      */
-    public function inforAction()
+    public function inforAction(Request $request)
     {
-        $this->setResponse('ajax');
-        $request = request();
         try {
             $independienteServices = new IndependienteServices;
             $id = $request->input('id');
@@ -479,7 +482,7 @@ class ApruebaIndependienteController extends ApplicationController
                 throw new DebugException('Error se requiere del id independiente', 501);
             }
 
-            $mercurio41 = $this->Mercurio41->findFirst("id='{$id}'");
+            $mercurio41 = Mercurio41::where("id", $id)->first();
             $procesadorComando = Comman::Api();
             $procesadorComando->runCli(
                 [
@@ -492,10 +495,10 @@ class ApruebaIndependienteController extends ApplicationController
             $paramsIndependiente = new ParamsIndependiente;
             $paramsIndependiente->setDatosCaptura($datos_captura);
 
-            $htmlEmpresa = view('aprobaindepen/tmp/consulta', [
+            $htmlEmpresa = view('cajas/aprobaindepen/tmp/consulta', [
                 'mercurio41' => $mercurio41,
-                'mercurio01' => $this->Mercurio01->findFirst(),
-                'det_tipo' => $this->Mercurio06->findFirst("tipo = '{$mercurio41->getTipo()}'")->getDetalle(),
+                'mercurio01' => Mercurio01::first(),
+                'det_tipo' => Mercurio06::whereRaw("tipo = '{$mercurio41->getTipo()}'")->first()->getDetalle(),
                 '_coddoc' => ParamsIndependiente::getTipoDocumentos(),
                 '_calemp' => ParamsIndependiente::getCalidadEmpresa(),
                 '_codciu' => ParamsIndependiente::getCiudades(),
@@ -529,7 +532,7 @@ class ApruebaIndependienteController extends ApplicationController
             $response = [
                 'success' => true,
                 'data' => $mercurio41->getArray(),
-                'mercurio11' => $this->Mercurio11->find(),
+                'mercurio11' => Mercurio11::all(),
                 'consulta_empresa' => $htmlEmpresa,
                 'adjuntos' => $independienteServices->adjuntos($mercurio41),
                 'seguimiento' => $independienteServices->seguimiento($mercurio41),
@@ -612,12 +615,12 @@ class ApruebaIndependienteController extends ApplicationController
         }
         $this->independienteServices = new IndependienteServices;
         $this->setParamToView('hide_header', true);
-        $mercurio41 = $this->Mercurio41->findFirst("id='{$id}'");
+        $mercurio41 = Mercurio41::whereRaw("id='{$id}'")->first();
         $this->setParamToView('mercurio41', $mercurio41);
         $this->setParamToView('tipopc', $this->tipopc);
         $this->setParamToView('seguimiento', $this->independienteServices->seguimiento($mercurio41));
 
-        $mercurio01 = $this->Mercurio01->findFirst();
+        $mercurio01 = Mercurio01::first();
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
             [
@@ -630,13 +633,13 @@ class ApruebaIndependienteController extends ApplicationController
         $paramsEmpresa->setDatosCaptura($procesadorComando->toArray());
 
         $this->loadParametrosView();
-        $mercurio37 = $this->Mercurio37->find(" tipopc=2 AND numero='{$mercurio41->getId()}'");
+        $mercurio37 = Mercurio37::whereRaw(" tipopc=2 AND numero='{$mercurio41->getId()}'")->first();
         $this->independienteServices->loadDisplay($mercurio41);
         $this->setParamToView('mercurio37', $mercurio37);
         $this->setParamToView('idModel', $id);
-        $this->setParamToView('det_tipo', $this->Mercurio06->findFirst("tipo = '{$mercurio41->getTipo()}'")->getDetalle());
+        $this->setParamToView('det_tipo', Mercurio06::whereRaw("tipo = '{$mercurio41->getTipo()}'")->first()->getDetalle());
         $this->setParamToView('mercurio01', $mercurio01);
-        $this->setParamToView('title', 'Editar Ficha Independiente '.$mercurio41->getCedtra());
+        $this->setParamToView('title', 'Editar Ficha Independiente ' . $mercurio41->getCedtra());
     }
 
     public function edita_empresaAction()
@@ -646,7 +649,7 @@ class ApruebaIndependienteController extends ApplicationController
         $nit = $request->input('nit');
         $id = $request->input('id');
         try {
-            $mercurio41 = $this->Mercurio41->findFirst("nit='{$nit}' AND id='{$id}'");
+            $mercurio41 = Mercurio41::whereRaw("nit='{$nit}' AND id='{$id}'")->first();
             if (! $mercurio41) {
                 throw new DebugException('La empresa no está disponible para notificar por email', 501);
             } else {
@@ -695,7 +698,7 @@ class ApruebaIndependienteController extends ApplicationController
                     $setters .= " $ai='{$row}',";
                 }
                 $setters = trim($setters, ',');
-                $this->Mercurio41->updateAll($setters, "conditions: id='{$id}' AND nit='{$nit}'");
+                Mercurio41::whereRaw("id='{$id}' AND nit='{$nit}'")->update($setters);
                 $salida = [
                     'msj' => 'Proceso se ha completado con éxito',
                     'success' => true,
@@ -721,7 +724,7 @@ class ApruebaIndependienteController extends ApplicationController
     public function buscarEnSisuViewAction($id)
     {
 
-        $mercurio41 = $this->Mercurio41->findFirst("id='{$id}'");
+        $mercurio41 = Mercurio41::whereRaw("id='{$id}'")->first();
         if (! $mercurio41) {
             set_flashdata('error', [
                 'msj' => 'La empresa no se encuentra registrada.',
@@ -920,21 +923,21 @@ class ApruebaIndependienteController extends ApplicationController
      */
     public function aportesViewAction($id)
     {
-        $mercurio41 = $this->Mercurio41->findFirst(" id='{$id}'");
+        $mercurio41 = Mercurio41::whereRaw(" id='{$id}'")->first();
         if (! $mercurio41) {
             set_flashdata('error', [
                 'msj' => 'La empresa no se encuentra registrada.',
                 'code' => 201,
             ]);
 
-            return redirect('aprobaindepen/info/'.$id);
+            return redirect('aprobaindepen/info/' . $id);
             exit();
         }
 
         $this->setParamToView('hide_header', true);
         $this->setParamToView('idModel', $id);
         $this->setParamToView('cedtra', $mercurio41->getCedtra());
-        $this->setParamToView('title', 'Aportes de empresa '.$mercurio41->getCedtra());
+        $this->setParamToView('title', 'Aportes de empresa ' . $mercurio41->getCedtra());
     }
 
     /**
@@ -975,7 +978,7 @@ class ApruebaIndependienteController extends ApplicationController
         } catch (DebugException $err) {
             $salida = [
                 'success' => false,
-                'msj' => 'No se pudo realizar el movimiento '."\n".$err->getMessage()."\n ".$err->getLine(),
+                'msj' => 'No se pudo realizar el movimiento ' . "\n" . $err->getMessage() . "\n " . $err->getLine(),
             ];
         }
 
@@ -1026,8 +1029,8 @@ class ApruebaIndependienteController extends ApplicationController
             $out = $procesadorComando->toArray();
             $empresa = $out['data'];
 
-            $mercurio01 = $this->Mercurio01->findFirst();
-            $det_tipo = $this->Mercurio06->findFirst("tipo = '{$mercurio41->getTipo()}'")->getDetalle();
+            $mercurio01 = Mercurio01::first();
+            $det_tipo = Mercurio06::whereRaw("tipo = '{$mercurio41->getTipo()}'")->first()->getDetalle();
 
             $mercurio41 = new Mercurio41;
             $mercurio41->createAttributes($empresa);
@@ -1045,7 +1048,7 @@ class ApruebaIndependienteController extends ApplicationController
             ])->render();
 
             $code_estados = [];
-            $query = $this->Mercurio11->find();
+            $query = Mercurio11::all();
             foreach ($query as $row) {
                 $code_estados[$row->getCodest()] = $row->getDetalle();
             }
@@ -1056,7 +1059,7 @@ class ApruebaIndependienteController extends ApplicationController
             $this->setParamToView('hide_header', true);
             $this->setParamToView('idModel', $id);
             $this->setParamToView('nit', $mercurio41->getCedtra());
-            $this->setParamToView('title', 'Empresa Aprobada '.$mercurio41->getCedtra());
+            $this->setParamToView('title', 'Empresa Aprobada ' . $mercurio41->getCedtra());
         } catch (DebugException $err) {
             set_flashdata('error', [
                 'msj' => $err->getMessage(),
@@ -1171,7 +1174,7 @@ class ApruebaIndependienteController extends ApplicationController
         } catch (DebugException $err) {
             $salida = [
                 'success' => false,
-                'msj' => 'Error no se pudo realizar el movimiento, '.$err->getMessage(),
+                'msj' => 'Error no se pudo realizar el movimiento, ' . $err->getMessage(),
                 'file' => $err->getFile(),
                 'line' => $err->getLine(),
                 'isDeleteTrayecto' => false,

@@ -8,10 +8,13 @@ use App\Library\Collections\ParamsEmpresa;
 use App\Models\Adapter\DbBase;
 use App\Models\Gener42;
 use App\Models\Mercurio01;
+use App\Models\Mercurio02;
 use App\Models\Mercurio06;
+use App\Models\Mercurio07;
 use App\Models\Mercurio10;
 use App\Models\Mercurio11;
 use App\Models\Mercurio30;
+use App\Models\Mercurio37;
 use App\Services\Aprueba\ApruebaSolicitud;
 use App\Services\CajaServices\EmpresaServices;
 use App\Services\Srequest;
@@ -188,7 +191,10 @@ class ApruebaEmpresaController extends ApplicationController
         $help = 'Esta opcion permite manejar los ';
         $this->setParamToView('help', $help);
         $this->setParamToView('title', 'Aprueba Empresa');
-        $collection = $this->Mercurio30->find("estado='{$estado}' AND usuario=" . session()->get('user') . ' ORDER BY fecini ASC');
+
+        $collection = Mercurio30::whereRaw("estado='{$estado}' AND usuario=" . $this->user['usuario'])
+            ->orderBy('fecini', 'ASC')
+            ->get();
 
         $empresaServices = new EmpresaServices;
         $data = $empresaServices->dataOptional($collection, $estado);
@@ -382,7 +388,7 @@ class ApruebaEmpresaController extends ApplicationController
         $feccap = new \DateTime($feccap);
 
         try {
-            $mercurio30 = $this->Mercurio30->findFirst("nit='{$nit}' AND estado='A'");
+            $mercurio30 = Mercurio30::whereRaw("nit='{$nit}' AND estado='A'")->first();
             if (! $mercurio30) {
                 throw new DebugException('Error la empresa no es valida para envio de correo.', 501);
             }
@@ -396,14 +402,14 @@ class ApruebaEmpresaController extends ApplicationController
             }
 
             $asunto = 'Afiliacion de la empresa realizada con Exito. Nit: ' . $mercurio30->getNit();
-            $mercurio07 = $this->Mercurio07->findFirst("tipo='{$mercurio30->getTipo()}' and coddoc='{$mercurio30->getCoddoc()}' and documento='{$mercurio30->getDocumento()}'");
+            $mercurio07 = Mercurio07::whereRaw("tipo='{$mercurio30->getTipo()}' and coddoc='{$mercurio30->getCoddoc()}' and documento='{$mercurio30->getDocumento()}'")->first();
             if (! $mercurio07) {
                 throw new DebugException('Error no hay usuario empresa para el servicio de autogestión de comfaca en línea.', 504);
             }
             $mercurio07->setTipo('E');
             $mercurio07->save();
-            $mercurio01 = $this->Mercurio01->findFirst();
-            $mercurio02 = $this->Mercurio02->findFirst();
+            $mercurio01 = Mercurio01::first();
+            $mercurio02 = Mercurio02::first();
             $_email = trim($mercurio01->getEmail());
             $_clave = trim($mercurio01->getClave());
 
@@ -470,11 +476,11 @@ class ApruebaEmpresaController extends ApplicationController
         $this->setResponse('ajax');
         $nit = $request->input('nit');
         try {
-            $mercurio30 = $this->Mercurio30->findFirst("nit='{$nit}' AND estado='A'");
+            $mercurio30 = Mercurio30::whereRaw("nit='{$nit}' AND estado='A'")->first();
             if (! $mercurio30) {
                 throw new DebugException('La empresa no está disponible para notificar por email', 501);
             } else {
-                $data07 = $this->Mercurio07->find("conditions: documento='{$mercurio30->getDocumento()}'");
+                $data07 = Mercurio07::whereRaw("documento='{$mercurio30->getDocumento()}'")->get();
                 $consultasOldServices = new GeneralService;
                 $servicio = $consultasOldServices->webService('datosEmpresa', $_POST);
                 if ($servicio['flag'] == false) {
@@ -660,16 +666,16 @@ class ApruebaEmpresaController extends ApplicationController
             exit;
         }
         $this->setParamToView('hide_header', true);
-        $mercurio30 = $this->Mercurio30->findFirst("id='{$id}'");
+        $mercurio30 = Mercurio30::where("id='{$id}'")->first();
         $this->setParamToView('tipopc', 2);
         $this->setParamToView('seguimiento', $this->empresaServices->seguimiento($mercurio30));
 
-        $mercurio01 = $this->Mercurio01->findFirst();
+        $mercurio01 = Mercurio01::first();
         $this->setParamToView('mercurio01', $mercurio01);
-        $mercurio37 = $this->Mercurio37->find(" tipopc=2 AND numero='{$mercurio30->getId()}'");
+        $mercurio37 = Mercurio37::where(" tipopc=2 AND numero='{$mercurio30->getId()}'")->get();
         $this->setParamToView('mercurio37', $mercurio37);
         $this->setParamToView('idModel', $id);
-        $this->setParamToView('det_tipo', $this->Mercurio06->findFirst("tipo = '{$mercurio30->getTipo()}'")->getDetalle());
+        $this->setParamToView('det_tipo', Mercurio06::where("tipo = '{$mercurio30->getTipo()}'")->getDetalle());
         $this->loadParametrosView();
 
         $this->setParamToView('mercurio30', $mercurio30);
@@ -682,7 +688,7 @@ class ApruebaEmpresaController extends ApplicationController
         $nit = $request->input('nit');
         $id = $request->input('id');
         try {
-            $mercurio30 = $this->Mercurio30->findFirst("nit='{$nit}' AND id='{$id}'");
+            $mercurio30 = Mercurio30::where("nit='{$nit}' AND id='{$id}'")->first();
             if (! $mercurio30) {
                 throw new DebugException('La empresa no está disponible para notificar por email', 501);
             } else {
@@ -732,7 +738,7 @@ class ApruebaEmpresaController extends ApplicationController
                     $setters .= " $ai='{$row}',";
                 }
                 $setters = trim($setters, ',');
-                $this->Mercurio30->updateAll($setters, "conditions: id='{$id}' AND nit='{$nit}'");
+                Mercurio30::whereRaw("id='{$id}' AND nit='{$nit}'")->update($setters);
                 $salida = [
                     'msj' => 'Proceso se ha completado con éxito',
                     'success' => true,
@@ -757,7 +763,7 @@ class ApruebaEmpresaController extends ApplicationController
      */
     public function buscarEnSisuViewAction($id, $nit)
     {
-        $mercurio30 = $this->Mercurio30->findFirst("nit='{$nit}'");
+        $mercurio30 = Mercurio30::where("nit", $nit)->first();
         if (! $mercurio30) {
             set_flashdata('error', [
                 'msj' => 'La empresa no se encuentra registrada.',
@@ -1073,7 +1079,7 @@ class ApruebaEmpresaController extends ApplicationController
             ]);
 
             $code_estados = [];
-            $query = $this->Mercurio11->find();
+            $query = Mercurio11::all();
             foreach ($query as $row) {
                 $code_estados[$row->getCodest()] = $row->getDetalle();
             }

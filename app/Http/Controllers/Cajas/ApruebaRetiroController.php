@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Cajas;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio07;
 use App\Models\Mercurio10;
 use App\Models\Mercurio11;
+use App\Models\Mercurio35;
 use App\Services\Tag;
 use App\Services\Utils\CalculatorDias;
 use App\Services\Utils\GeneralService;
@@ -36,47 +38,16 @@ class ApruebaRetiroController extends ApplicationController
 
     public function showTabla($paginate)
     {
-        $html = '<table border="0" cellpadding="0" cellspacing="0" class="table table-bordered">';
-        $html .= "<thead class='thead-light'>";
-        $html .= '<tr>';
-        $html .= "<th scope='col'>Cedula</th>";
-        $html .= "<th scope='col'>Nombre</th>";
-        $html .= "<th scope='col'>Dias</th>";
-        $html .= "<th scope='col'></th>";
-        $html .= '</tr>';
-        $html .= '</thead>';
-        $html .= "<tbody class='list'>";
-        foreach ($paginate->items as $mtable) {
-
-            $dias_vencidos = CalculatorDias::calcular($this->tipopc, $mtable->getId(), $mtable->getFecret());
-            if ($dias_vencidos == 3) {
-                $html .= "<tr style='background: #f1f1ad'>";
-            } elseif ($dias_vencidos > 3) {
-                $html .= "<tr style='background: #f5b2b2'>";
-            } else {
-                $html .= '<tr>';
-            }
-            $html .= "<td>{$mtable->getCedtra()}</td>";
-            $html .= "<td>{$mtable->getNomtra()}</td>";
-            $html .= "<td>$dias_vencidos</td>";
-            $html .= "<td class='table-actions'>";
-            $html .= "<a href='#!' class='table-action btn btn-xs btn-primary' title='Info' onclick=\"info('{$mtable->getId()}')\">";
-            $html .= "<i class='fas fa-folder-open text-white'></i>";
-            $html .= '</a>';
-            $html .= '</td>';
-            $html .= '</tr>';
-        }
-        $html .= '</tbody>';
-        $html .= '</table>';
-
-        return $html;
+        return view('cajas.aprobacionretiro.tmp.tabla', [
+            'paginate' => $paginate,
+        ])->render();
     }
 
     public function aplicarFiltroAction(Request $request)
     {
         $this->setResponse('ajax');
         $consultasOldServices = new GeneralService;
-        $this->query = $consultasOldServices->converQuery();
+        $this->query = $consultasOldServices->converQuery($request);
         $this->buscarAction($request);
     }
 
@@ -94,19 +65,18 @@ class ApruebaRetiroController extends ApplicationController
             'cedtra' => 'Cedula',
             'nomtra' => 'Nombre',
         ];
-        $this->setParamToView('campo_filtro', $campo_field);
-        $help = 'Esta opcion permite manejar los ';
-        $this->setParamToView('help', $help);
-        $this->setParamToView('title', 'Aprobacion Retiro Trabajadores');
-        $this->setParamToView('buttons', ['F']);
-        // Tag::setDocumentTitle('Aprobacion Retiro Trabajadores');
+        return view('cajas.aprobacionretiro.index', [
+            'campo_filtro' => $campo_field,
+            'title' => 'Aprobacion Retiro Trabajadores',
+        ]);
     }
 
     public function buscarAction(Request $request)
     {
         $this->setResponse('ajax');
         $pagina = $request->input('pagina', 1);
-        $paginate = $this->Mercurio35->find("$this->query and estado='P' AND usuario = ".parent::getActUser())->paginate($this->cantidad_pagina, ['*'], 'page', $pagina);
+        $paginate = Mercurio35::whereRaw("$this->query and estado='P' AND usuario = " . parent::getActUser())
+            ->paginate($this->cantidad_pagina, ['*'], 'page', $pagina);
 
         $html = $this->showTabla($paginate);
         $consultasOldServices = new GeneralService;
@@ -122,7 +92,7 @@ class ApruebaRetiroController extends ApplicationController
     {
         $this->setResponse('ajax');
         $id = $request->input('id');
-        $mercurio35 = $this->Mercurio35->findFirst("id='$id'");
+        $mercurio35 = Mercurio35::where("id", $id)->first();
         $response = '';
 
         $consultasOldServices = new GeneralService;
@@ -179,7 +149,7 @@ class ApruebaRetiroController extends ApplicationController
         $response .= "<hr class='my-3'>";
         $response .= "<p class='lead'>";
         $response .= "<div class='form-group'>";
-        // $response .= Tag::selectStatic("codest", $this->Mercurio11->find(), "using: codest,detalle", "use_dummy: true", "dummyValue: ", "class: form-control");
+
         $response .= '</div>';
         $response .= "<div class='form-group'>";
         $response .= "<textarea class='form-control' id='nota_rechazar' nota='nota_rechazar' rows='3'></textarea>";
@@ -201,22 +171,21 @@ class ApruebaRetiroController extends ApplicationController
     public function aprobarAction(Request $request)
     {
         try {
-
-            $this->setResponse('ajax');
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $nota = $request->input('nota', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $fecest = $request->input('fecest', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-
-            $modelos = ['mercurio10', 'mercurio35'];
+            $id = $request->input('id');
+            $nota = $request->input('nota');
+            $fecest = $request->input('fecest');
 
             $response = $this->db->begin();
             $today = new \DateTime;
-            $mercurio35 = $this->Mercurio35->findFirst("id='$id'");
+            $mercurio35 = Mercurio35::where("id", $id)->first();
             if (! $fecest) {
                 $fecest = $today->format('Y-m-d');
             }
-            $this->Mercurio35->updateAll("estado='A',fecest='{$fecest}'", "conditions: id='$id' ");
-            $item = $this->Mercurio10->maximum('item', "conditions: tipopc='$this->tipopc' and numero='$id'") + 1;
+            $mercurio35->update([
+                'estado' => 'A',
+                'fecest' => $fecest,
+            ]);
+            $item = Mercurio10::whereRaw("tipopc='$this->tipopc' and numero='$id'")->max('item') + 1;
             $mercurio10 = new Mercurio10;
 
             $mercurio10->setTipopc($this->tipopc);
@@ -246,7 +215,7 @@ class ApruebaRetiroController extends ApplicationController
 
                 return $this->renderObject($response, false);
             }
-            $mercurio07 = $this->Mercurio07->findFirst("tipo='{$mercurio35->getTipo()}' and coddoc='{$mercurio35->getCoddoc()}' and documento = '{$mercurio35->getDocumento()}'");
+            $mercurio07 = Mercurio07::whereRaw("tipo='{$mercurio35->getTipo()}' and coddoc='{$mercurio35->getCoddoc()}' and documento = '{$mercurio35->getDocumento()}'")->first();
             $asunto = 'Retiro Trabajador';
             $msj = "se informa que el trabajador {$mercurio35->getCedtra()} fue retirado exitsomante";
             $senderEmail = new SenderEmail;
@@ -274,12 +243,14 @@ class ApruebaRetiroController extends ApplicationController
 
             $response = $this->db->begin();
             $today = new \DateTime;
-            $mercurio35 = $this->Mercurio35->findFirst("id='$id'");
-            $this->Mercurio35->updateAll(
-                "estado='X',motivo='$nota',motrec='$codest',fecest='{$today->format('Y-m-d')}'",
-                "conditions: id='$id' "
-            );
-            $item = $this->Mercurio10->maximum('item', "conditions: tipopc='$this->tipopc' and numero='$id'") + 1;
+            $mercurio35 = Mercurio35::whereRaw("id='$id'")->first();
+            $mercurio35->update([
+                'estado' => 'X',
+                'motivo' => $nota,
+                'motrec' => $codest,
+                'fecest' => $today->format('Y-m-d'),
+            ]);
+            $item = Mercurio10::whereRaw("tipopc='$this->tipopc' and numero='$id'")->max('item') + 1;
             $mercurio10 = new Mercurio10;
 
             $mercurio10->setTipopc($this->tipopc);
@@ -293,7 +264,7 @@ class ApruebaRetiroController extends ApplicationController
 
                 $this->db->rollback();
             }
-            $mercurio07 = $this->Mercurio07->findFirst("tipo='{$mercurio35->getTipo()}' and coddoc='{$mercurio35->getCoddoc()}' and documento = '{$mercurio35->getDocumento()}'");
+            $mercurio07 = Mercurio07::whereRaw("tipo='{$mercurio35->getTipo()}' and coddoc='{$mercurio35->getCoddoc()}' and documento = '{$mercurio35->getDocumento()}'")->first();
             $asunto = 'Retiro Trabajador';
             $msj = 'acabas de utilizar';
             $senderEmail = new SenderEmail;

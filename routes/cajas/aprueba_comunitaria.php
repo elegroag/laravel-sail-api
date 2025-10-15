@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware([CajasCookieAuthenticated::class])->group(function () {
     Route::prefix('/cajas/aprobacioncom')->group(function () {
         Route::get('/index', [ApruebaComunitariaController::class, 'indexAction']);
-        Route::post('/info', [ApruebaComunitariaController::class, 'inforAction']);
+        Route::post('/infor', [ApruebaComunitariaController::class, 'inforAction']);
         Route::post('/aprobar', [ApruebaComunitariaController::class, 'aprobarAction']);
         Route::post('/devolver', [ApruebaComunitariaController::class, 'devolverAction']);
         Route::post('/rechazar', [ApruebaComunitariaController::class, 'rechazarAction']);

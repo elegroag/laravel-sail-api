@@ -7,9 +7,11 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsBeneficiario;
 use App\Models\Adapter\DbBase;
 use App\Models\Gener42;
+use App\Models\Mercurio06;
 use App\Models\Mercurio07;
 use App\Models\Mercurio10;
 use App\Models\Mercurio11;
+use App\Models\Mercurio31;
 use App\Models\Mercurio34;
 use App\Services\Aprueba\ApruebaBeneficiario;
 use App\Services\CajaServices\BeneficiarioServices;
@@ -242,7 +244,7 @@ class ApruebaBeneficiarioController extends ApplicationController
 
         try {
             $campos_corregir = implode(';', $array_corregir);
-            $mercurio34 = $this->Mercurio34->findFirst("id='{$id}'");
+            $mercurio34 = Mercurio34::where("id", $id)->first();
 
             $this->beneficiarioServices->devolver($mercurio34, $nota, $codest, $campos_corregir);
             $notifyEmailServices->emailDevolver(
@@ -265,9 +267,9 @@ class ApruebaBeneficiarioController extends ApplicationController
         $today = Carbon::now();
         $id = $mercurio34->getId();
         $mercurio34 = new Mercurio34;
-        $mercurio34->updateAll(" estado='D', motivo='{$nota}', codest='{$codest}', fecest='".$today->format('Y-m-d H:i:s')."'", "conditions: id='{$id}'");
+        $mercurio34->updateAll(" estado='D', motivo='{$nota}', codest='{$codest}', fecest='" . $today->format('Y-m-d H:i:s') . "'", "conditions: id='{$id}'");
 
-        $item = $this->Mercurio10->maximum('item', "conditions: tipopc='{$this->tipopc}' and numero='{$id}'");
+        $item = Mercurio10::whereRaw("tipopc='{$this->tipopc}' and numero='{$id}'")->max('item') + 1;
         $mercurio10 = new Mercurio10;
         $mercurio10->setTipopc($this->tipopc);
         $mercurio10->setNumero($id);
@@ -280,12 +282,12 @@ class ApruebaBeneficiarioController extends ApplicationController
         if (! $mercurio10->save()) {
             $msj = '';
             foreach ($mercurio10->getMessages() as $key => $message) {
-                $msj .= $message.'<br/>';
+                $msj .= $message . '<br/>';
             }
-            throw new DebugException('Error '.$msj, 501);
+            throw new DebugException('Error ' . $msj, 501);
         }
 
-        $this->Mercurio10->updateAll("campos_corregir='{$campos_corregir}'", "conditions: item='{$item}' AND numero='{$id}' AND tipopc='{$this->tipopc}'");
+        Mercurio10::whereRaw("item='{$item}' AND numero='{$id}' AND tipopc='{$this->tipopc}'")->update("campos_corregir='{$campos_corregir}'");
     }
 
     public function rechazarAction(Request $request)
@@ -297,7 +299,7 @@ class ApruebaBeneficiarioController extends ApplicationController
         $nota = sanetizar($request->input('nota'));
         $codest = $request->input('codest', 'addslaches', 'alpha', 'extraspaces', 'striptags');
         try {
-            $mercurio34 = $this->Mercurio34->findFirst("id='{$id}'");
+            $mercurio34 = Mercurio34::where("id", $id)->first();
             $this->beneficiarioServices->rechazar($mercurio34, $nota, $codest);
             $notifyEmailServices->emailRechazar(
                 $mercurio34,
@@ -322,9 +324,14 @@ class ApruebaBeneficiarioController extends ApplicationController
     {
         $today = Carbon::now();
         $id = $mercurio34->getId();
-        $this->Mercurio34->updateAll("estado='X', motivo='{$nota}', codest='{$codest}', fecest='".$today->format('Y-m-d H:i:s')."'", "conditions: id='{$id}' ");
+        Mercurio34::where("id", $id)->update([
+            "estado" => "X",
+            "motivo" => $nota,
+            "codest" => $codest,
+            "fecest" => $today->format('Y-m-d H:i:s'),
+        ]);
 
-        $item = $this->Mercurio10->maximum('item', "conditions: tipopc='{$this->tipopc}' and numero='{$id}'");
+        $item = Mercurio10::whereRaw("tipopc='{$this->tipopc}' and numero='{$id}'")->max('item');
         $mercurio10 = new Mercurio10;
         $mercurio10->setTipopc($this->tipopc);
         $mercurio10->setNumero($id);
@@ -340,11 +347,8 @@ class ApruebaBeneficiarioController extends ApplicationController
 
     /**
      * inforAction function
-     *
      * @changed [2023-12-20]
-     *
-     * @author elegroag <elegroag@ibero.edu.co>
-     *
+     * @author elegroag <elegroag@ibero.edu.co
      * @return void
      */
     public function inforAction(Request $request)
@@ -358,8 +362,7 @@ class ApruebaBeneficiarioController extends ApplicationController
             }
 
             $beneficiarioServices = new BeneficiarioServices;
-            $this->setParamToView('hide_header', true);
-            $solicitud = $this->Mercurio34->findFirst("id='{$id}'");
+            $solicitud = Mercurio34::where("id", $id)->first();
             if ($solicitud == false) {
                 throw new DebugException('La solicitud de afiliación de beneficiario no es valida.', 501);
             }
@@ -381,7 +384,7 @@ class ApruebaBeneficiarioController extends ApplicationController
 
             $trabajador = new \stdClass;
             if (! $trabajador_sisu) {
-                $tr = $this->Mercurio31->findFirst("cedtra='{$solicitud->getCedtra()}' and estado='A'");
+                $tr = Mercurio31::whereRaw("cedtra='{$solicitud->getCedtra()}' and estado='A'")->first();
                 $trabajador->estado = ($tr) ? $tr->getEstado() : 'I';
             } else {
                 $trabajador->estado = $trabajador_sisu['estado'];
@@ -435,7 +438,7 @@ class ApruebaBeneficiarioController extends ApplicationController
                 'cajas/aprobacionben/tmp/consulta',
                 [
                     'beneficiario' => $solicitud,
-                    'detTipo' => $this->Mercurio06->findFirst("tipo='{$solicitud->getTipo()}'")->getDetalle(),
+                    'detTipo' => Mercurio06::where("tipo", $solicitud->getTipo())->first()->getDetalle(),
                     '_coddoc' => ParamsBeneficiario::getTiposDocumentos(),
                     '_codciu' => ParamsBeneficiario::getCiudades(),
                     '_sexo' => ParamsBeneficiario::getSexos(),
@@ -451,19 +454,18 @@ class ApruebaBeneficiarioController extends ApplicationController
                     '_tiphij' => ParamsBeneficiario::getTipoHijo(),
                     '_nivedu' => ParamsBeneficiario::getNivelEducativo(),
                     '_calendario' => ParamsBeneficiario::getCalendario(),
-                    '_codgir',
-                    ParamsBeneficiario::getCodigoGiro(),
+                    '_codgir' => ParamsBeneficiario::getCodigoGiro(),
                 ]
             )->render();
 
             $response = [
                 'success' => true,
                 'data' => $solicitud->getArray(),
-                'mercurio11' => $this->Mercurio11->find(),
+                'mercurio11' => Mercurio11::all(),
                 'consulta' => $html,
                 'adjuntos' => $beneficiarioServices->adjuntos($solicitud),
                 'seguimiento' => $beneficiarioServices->seguimiento($solicitud),
-                'campos_disponibles' => $this->Mercurio34->CamposDisponibles(),
+                'campos_disponibles' => (new Mercurio34)->CamposDisponibles(),
                 'relacion_multiple' => $relacion_multiple,
                 'trabajador' => $trabajador,
             ];
@@ -557,7 +559,7 @@ class ApruebaBeneficiarioController extends ApplicationController
                     }
                 }
                 $setters = trim($setters, ',');
-                $this->Mercurio34->updateAll($setters, "conditions: id='{$id}' AND numdoc='{$numdoc}'");
+                Mercurio34::whereRaw("id='{$id}' AND numdoc='{$numdoc}'")->update($setters);
 
                 $db = DbBase::rawConnect();
 
@@ -593,7 +595,7 @@ class ApruebaBeneficiarioController extends ApplicationController
             exit;
         }
 
-        $mercurio34 = $this->Mercurio34->findFirst("id='{$id}'");
+        $mercurio34 = Mercurio34::where("id", $id)->first();
 
         if (! $mercurio34) {
             set_flashdata('error', [
@@ -644,7 +646,7 @@ class ApruebaBeneficiarioController extends ApplicationController
         $this->setParamToView('hide_header', true);
         $this->setParamToView('title', 'Aprobación Beneficiario');
 
-        $collection = $this->Mercurio34->find("estado='{$estado}' AND usuario=".parent::getActUser().' ORDER BY fecsol ASC');
+        $collection = Mercurio34::where("estado", $estado)->where("usuario", parent::getActUser())->orderBy("fecsol", 'ASC')->get();
         $beneficiarioServices = new BeneficiarioServices;
         $data = $beneficiarioServices->dataOptional($collection, $estado);
 
@@ -655,22 +657,18 @@ class ApruebaBeneficiarioController extends ApplicationController
 
     public function reaprobarAction(Request $request)
     {
-
-        $this->setResponse('ajax');
-        $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-        $giro = $request->input('giro', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-        $codgir = $request->input('codgir', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-        $nota = sanetizar($request->input('nota'));
+        $id = $request->input('id');
+        $giro = $request->input('giro');
+        $codgir = $request->input('codgir');
+        $nota = $request->input('nota');
         $today = Carbon::now();
         $comando = '';
         try {
             try {
-                $modelos = ['mercurio10', 'mercurio34'];
-
                 $this->db->begin();
 
-                $this->Mercurio34->updateAll("estado='A',fecest='".$today->format('Y-m-d H:i:s')."'", "conditions: id='{$id}' ");
-                $item = $this->Mercurio10->maximum('item', "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
+                Mercurio34::where("id", $id)->update("estado='A',fecest='" . $today->format('Y-m-d H:i:s') . "'");
+                $item = Mercurio10::whereRaw("tipopc='{$this->tipopc}' and numero='{$id}'")->max('item') + 1;
 
                 $mercurio10 = new Mercurio10;
 
@@ -682,7 +680,7 @@ class ApruebaBeneficiarioController extends ApplicationController
                 $mercurio10->setFecsis($today->format('Y-m-d H:i:s'));
                 $mercurio10->save();
 
-                $beneficiario = $this->Mercurio34->findFirst(" id='{$id}'");
+                $beneficiario = Mercurio34::where("id", $id)->first();
 
                 $procesadorComando = Comman::Api();
                 $procesadorComando->runCli(
@@ -722,7 +720,7 @@ class ApruebaBeneficiarioController extends ApplicationController
         } catch (DebugException $e) {
             $response = [
                 'success' => false,
-                'msj' => 'No se pudo realizar el movimiento '."\n".$e->getMessage()."\n ".$e->getLine(),
+                'msj' => 'No se pudo realizar el movimiento ' . "\n" . $e->getMessage() . "\n " . $e->getLine(),
                 'comando' => $comando,
             ];
         }
@@ -753,7 +751,7 @@ class ApruebaBeneficiarioController extends ApplicationController
     {
         $this->tipopc = '1';
         try {
-            $mercurio34 = $this->Mercurio34->findFirst(" id='{$id}' and estado='A' ");
+            $mercurio34 = Mercurio34::where("id", $id)->where("estado", 'A')->first();
             if (! $mercurio34) {
                 throw new DebugException('Error al buscar la beneficiario', 501);
             }
@@ -795,7 +793,7 @@ class ApruebaBeneficiarioController extends ApplicationController
                 'cajas/aprobacionben/tmp/consulta',
                 [
                     'beneficiario' => $beneficiario,
-                    'detTipo' => $this->Mercurio06->findFirst("tipo='{$beneficiario->getTipo()}'")->getDetalle(),
+                    'detTipo' => Mercurio06::where("tipo", $beneficiario->getTipo())->first()->getDetalle(),
                     '_coddoc' => ParamsBeneficiario::getTiposDocumentos(),
                     '_codciu' => ParamsBeneficiario::getCiudades(),
                     '_sexo' => ParamsBeneficiario::getSexos(),
@@ -816,7 +814,7 @@ class ApruebaBeneficiarioController extends ApplicationController
             )->render();
 
             $code_estados = [];
-            $query = $this->Mercurio11->find();
+            $query = Mercurio11::all();
             foreach ($query as $row) {
                 $code_estados[$row->getCodest()] = $row->getDetalle();
             }
@@ -947,7 +945,7 @@ class ApruebaBeneficiarioController extends ApplicationController
         } catch (DebugException $err) {
             $salida = [
                 'success' => false,
-                'msj' => 'Error no se pudo realizar el movimiento, '.$err->getMessage(),
+                'msj' => 'Error no se pudo realizar el movimiento, ' . $err->getMessage(),
                 'comando' => $comando,
                 'file' => $err->getFile(),
                 'line' => $err->getLine(),

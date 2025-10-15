@@ -6,6 +6,8 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use App\Models\Gener42;
+use App\Models\Mercurio01;
+use App\Models\Mercurio07;
 use App\Models\Mercurio10;
 use App\Models\Mercurio11;
 use App\Models\Mercurio45;
@@ -126,20 +128,19 @@ class ApruebaCertificadoController extends ApplicationController
 
     public function inforAction(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $id = $request->input('id');
             if (! $id) {
                 throw new DebugException('Error no se puede identificar el identificador de la solicitud.', 501);
             }
-            $mercurio45 = (new Mercurio45)->findFirst("id='{$id}'");
-            $html = View::render(
-                'aprobacioncer/tmp/consulta',
+            $mercurio45 = Mercurio45::where("id", $id)->first();
+            $html = view(
+                'cajas/aprobacioncer/tmp/consulta',
                 [
-                    'mercurio01' => $this->Mercurio01->findFirst(),
+                    'mercurio01' => Mercurio01::first(),
                     'mercurio45' => $mercurio45,
                 ]
-            );
+            )->render();
 
             $certificadoServices = new CertificadosServices;
             $adjuntos = $certificadoServices->adjuntos($mercurio45);
@@ -149,7 +150,7 @@ class ApruebaCertificadoController extends ApplicationController
             $response = [
                 'success' => true,
                 'data' => $mercurio45->getArray(),
-                'mercurio11' => $this->Mercurio11->find(),
+                'mercurio11' => Mercurio11::all(),
                 'consulta' => $html,
                 'adjuntos' => $adjuntos,
                 'seguimiento' => $seguimiento,
@@ -231,9 +232,14 @@ class ApruebaCertificadoController extends ApplicationController
 
             $response = $this->db->begin();
             $today = Carbon::now();
-            $mercurio45 = $this->Mercurio45->findFirst("id='$id'");
-            $this->Mercurio45->updateAll("estado='X',motivo='$nota',codest='$codest',fecest='".$today->format('Y-m-d H:i:s')."'", "conditions: id='$id' ");
-            $item = $this->Mercurio10->maximum('item', "conditions: tipopc='$this->tipopc' and numero='$id'") + 1;
+            $mercurio45 = Mercurio45::where("id", $id)->first();
+            $mercurio45->update([
+                "estado" => "X",
+                "motivo" => $nota,
+                "codest" => $codest,
+                "fecest" => $today->format('Y-m-d H:i:s'),
+            ]);
+            $item = Mercurio10::whereRaw("tipopc='{$this->tipopc}' and numero='{$id}'")->max('item') + 1;
             $mercurio10 = new Mercurio10;
 
             $mercurio10->setTipopc($this->tipopc);
@@ -247,7 +253,7 @@ class ApruebaCertificadoController extends ApplicationController
 
                 $this->db->rollback();
             }
-            $mercurio07 = $this->Mercurio07->findFirst("tipo='{$mercurio45->getTipo()}' and coddoc='{$mercurio45->getCoddoc()}' and documento = '{$mercurio45->getDocumento()}'");
+            $mercurio07 = Mercurio07::whereRaw("tipo='{$mercurio45->getTipo()}' and coddoc='{$mercurio45->getCoddoc()}' and documento = '{$mercurio45->getDocumento()}'")->first();
             $asunto = 'Certificado';
             $msj = 'acabas de utilizar';
             $senderEmail = new SenderEmail(

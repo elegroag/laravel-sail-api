@@ -9,7 +9,7 @@ Route::middleware([CajasCookieAuthenticated::class])->group(function () {
         Route::get('/index', [ApruebaFacultativoController::class, 'indexAction']);
         Route::post('/aplicar_filtro/{estado?}', [ApruebaFacultativoController::class, 'aplicarFiltroAction']);
         Route::post('/buscar/{estado?}', [ApruebaFacultativoController::class, 'buscarAction']);
-        Route::post('/info', [ApruebaFacultativoController::class, 'inforAction']);
+        Route::post('/infor', [ApruebaFacultativoController::class, 'inforAction']);
         Route::post('/aprobar', [ApruebaFacultativoController::class, 'apruebaAction']);
         Route::post('/devolver', [ApruebaFacultativoController::class, 'devolverAction']);
         Route::post('/rechazar', [ApruebaFacultativoController::class, 'rechazarAction']);

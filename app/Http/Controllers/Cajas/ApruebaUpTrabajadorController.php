@@ -7,6 +7,9 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
 use App\Models\Gener42;
+use App\Models\Mercurio01;
+use App\Models\Mercurio06;
+use App\Models\Mercurio07;
 use App\Models\Mercurio11;
 use App\Models\Mercurio31;
 use App\Models\Mercurio33;
@@ -196,7 +199,6 @@ class ApruebaUpTrabajadorController extends ApplicationController
      */
     public function inforAction(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $upServices = new UpDatosTrabajadorService;
             $id = $request->input('id');
@@ -204,8 +206,8 @@ class ApruebaUpTrabajadorController extends ApplicationController
                 throw new DebugException('Error se requiere del id independiente', 501);
             }
 
-            $mercurio47 = (new Mercurio47)->findFirst("id='{$id}' AND tipo_actualizacion='T'");
-            $mercurio33 = (new Mercurio33)->find("actualizacion='{$id}'");
+            $mercurio47 = Mercurio47::where("id", $id)->where("tipo_actualizacion", 'T')->first();
+            $mercurio33 = Mercurio33::where("actualizacion", $id)->get();
             $dataItems = [];
 
             foreach ($mercurio33 as $row) {
@@ -238,11 +240,11 @@ class ApruebaUpTrabajadorController extends ApplicationController
 
             $datostra = array_merge($datosTraSisu, $mercurio47->getArray(), $dataItems);
 
-            $htmlEmpresa = View::render('cajas/actualizatra/tmp/consulta', [
+            $htmlEmpresa = view('cajas/actualizatra/tmp/consulta', [
                 'datostra' => $datostra,
                 'dataItems' => $dataItems,
-                'mercurio01' => $this->Mercurio01->findFirst(),
-                'det_tipo' => $this->Mercurio06->findFirst("tipo = '{$mercurio47->getTipo()}'")->getDetalle(),
+                'mercurio01' => Mercurio01::first(),
+                'det_tipo' => Mercurio06::where("tipo", $mercurio47->getTipo())->first()->getDetalle(),
                 '_coddoc' => ParamsTrabajador::getTiposDocumentos(),
                 '_codciu' => ParamsTrabajador::getCiudades(),
                 '_codzon' => ParamsTrabajador::getZonas(),
@@ -258,7 +260,7 @@ class ApruebaUpTrabajadorController extends ApplicationController
                 '_tipafi' => ParamsTrabajador::getTipoAfiliado(),
                 '_trasin' => ParamsTrabajador::getSindicalizado(),
                 '_bancos' => ParamsTrabajador::getBancos(),
-            ]);
+            ])->render();
 
             $ps = Comman::Api();
             $ps->runCli(
@@ -273,16 +275,19 @@ class ApruebaUpTrabajadorController extends ApplicationController
             $out = $ps->toArray();
 
             if ($out['success']) {
-                $this->setParamToView('empresa_sisuweb', $out['data']);
+                $empresa_sisuweb = $out['data'];
+            } else {
+                $empresa_sisuweb = false;
             }
             $response = [
                 'success' => true,
                 'data' => $mercurio47->getArray(),
-                'mercurio11' => $this->Mercurio11->find(),
+                'mercurio11' => Mercurio11::all(),
                 'consulta' => $htmlEmpresa,
                 'adjuntos' => $upServices->adjuntos($mercurio47),
                 'seguimiento' => $upServices->seguimiento($mercurio47),
                 'campos_disponibles' => $mercurio47->CamposDisponibles(),
+                'empresa_sisuweb' => $empresa_sisuweb,
             ];
         } catch (DebugException $err) {
             $response = [
@@ -305,7 +310,7 @@ class ApruebaUpTrabajadorController extends ApplicationController
                 if ($acceso == 0) {
                     return $this->renderObject(['success' => false, 'msj' => 'El usuario no dispone de permisos de aprobación'], false);
                 }
-                $idSolicitud = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+                $idSolicitud = $request->input('id');
                 $apruebaSolicitud = new ApruebaDatosTrabajador;
                 $this->db->begin();
                 $apruebaSolicitud->findSolicitud($idSolicitud);
@@ -342,18 +347,21 @@ class ApruebaUpTrabajadorController extends ApplicationController
     public function rechazarAction(Request $request)
     {
         try {
-            $this->setResponse('ajax');
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $nota = $request->input('nota', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $codest = $request->input('codest', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $modelos = ['mercurio10', 'mercurio33'];
+            $id = $request->input('id');
+            $nota = $request->input('nota');
+            $codest = $request->input('codest');
 
             $response = $this->db->begin();
             $today = Carbon::now();
-            $mercurio33 = $this->Mercurio33->findFirst("id='$id'");
-            $this->Mercurio33->updateAll("estado='X',motivo='$nota',codest='$codest',fecest='".$today->format('Y-m-d H:i:s')."'", "conditions: id='$id' ");
+            $mercurio33 = Mercurio33::where("id", $id)->first();
+            $mercurio33->update([
+                'estado' => 'X',
+                'motivo' => $nota,
+                'codest' => $codest,
+                'fecest' => $today->format('Y-m-d H:i:s'),
+            ]);
 
-            $mercurio07 = $this->Mercurio07->findFirst("tipo='{$mercurio33->getTipo()}' and documento = '{$mercurio33->getDocumento()}'");
+            $mercurio07 = Mercurio07::whereRaw("tipo='{$mercurio33->getTipo()}' and documento = '{$mercurio33->getDocumento()}'")->first();
             $asunto = 'Actualizacion de datos';
             $msj = 'Se rechazo la actualizacion de datos';
             $senderEmail = new SenderEmail(
@@ -366,14 +374,11 @@ class ApruebaUpTrabajadorController extends ApplicationController
             $senderEmail->send($mercurio07->getEmail(), $msj);
 
             $this->db->commit();
-            $response = parent::successFunc('Movimiento Realizado Con Exito');
-
-            return $this->renderObject($response, false);
+            $response = 'Movimiento Realizado Con Exito';
         } catch (DebugException $e) {
             $this->db->rollback();
-            $response = parent::errorFunc('No se pudo realizar el movimiento');
-
-            return $this->renderObject($response, false);
+            $response = 'No se pudo realizar el movimiento';
         }
+        return $this->renderObject($response, false);
     }
 }

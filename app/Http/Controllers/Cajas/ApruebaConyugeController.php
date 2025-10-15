@@ -6,8 +6,10 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsConyuge;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio06;
 use App\Models\Mercurio10;
 use App\Models\Mercurio11;
+use App\Models\Mercurio31;
 use App\Models\Mercurio32;
 use App\Services\Aprueba\ApruebaConyuge;
 use App\Services\CajaServices\ConyugeServices;
@@ -272,7 +274,7 @@ class ApruebaConyugeController extends ApplicationController
         try {
             $campos_corregir = implode(';', $array_corregir);
 
-            $mercurio32 = $this->Mercurio32->findFirst("id='{$id}'");
+            $mercurio32 = Mercurio32::where("id", $id)->first();
 
             $this->conyugeServices->devolver($mercurio32, $nota, $codest, $campos_corregir);
 
@@ -301,7 +303,7 @@ class ApruebaConyugeController extends ApplicationController
         $nota = sanetizar($request->input('nota'));
         $codest = $request->input('codest', 'addslaches', 'alpha', 'extraspaces', 'striptags');
         try {
-            $mercurio32 = $this->Mercurio32->findFirst("id='{$id}'");
+            $mercurio32 = Mercurio32::where("id", $id)->first();
             $this->conyugeServices->rechazar($mercurio32, $nota, $codest);
             $notifyEmailServices->emailRechazar(
                 $mercurio32,
@@ -324,7 +326,6 @@ class ApruebaConyugeController extends ApplicationController
 
     public function inforAction(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $id = $request->input('id');
             if (! $id) {
@@ -333,7 +334,7 @@ class ApruebaConyugeController extends ApplicationController
             }
             $this->conyugeServices = new ConyugeServices;
 
-            $solicitud = $this->Mercurio32->findFirst("id='{$id}'");
+            $solicitud = Mercurio32::where("id", $id)->first();
             if ($solicitud == false) {
                 set_flashdata('error', [
                     'msj' => 'La solicitud de afiliación de conyugue no es valida.',
@@ -361,7 +362,7 @@ class ApruebaConyugeController extends ApplicationController
                     $trabajador_sisu = ($rqs['success']) ? $rqs['data'] : false;
                 }
                 if (! $trabajador_sisu) {
-                    $tr = $this->Mercurio31->findFirst("cedtra='{$solicitud->getCedtra()}' and estado='A'");
+                    $tr = Mercurio31::whereRaw("cedtra='{$solicitud->getCedtra()}' and estado='A'")->first();
                     $trabajador->estado = ($tr) ? $tr->getEstado() : 'I';
                 } else {
                     $trabajador->estado = $trabajador_sisu['estado'];
@@ -418,11 +419,11 @@ class ApruebaConyugeController extends ApplicationController
             $paramsConyuge = new ParamsConyuge;
             $paramsConyuge->setDatosCaptura($procesadorComando->toArray());
 
-            $html = View::render(
-                'aprobacioncon/tmp/consulta',
+            $html = view(
+                'cajas/aprobacioncon/tmp/consulta',
                 [
                     'conyuge' => $solicitud,
-                    'detTipo' => $this->Mercurio06->findFirst("tipo='{$solicitud->getTipo()}'")->getDetalle(),
+                    'detTipo' => Mercurio06::where("tipo", $solicitud->getTipo())->first()->getDetalle(),
                     '_coddoc' => ParamsConyuge::getTiposDocumentos(),
                     '_codciu' => ParamsConyuge::getCiudades(),
                     '_sexo' => ParamsConyuge::getSexos(),
@@ -440,7 +441,7 @@ class ApruebaConyugeController extends ApplicationController
                     '_codocu' => ParamsConyuge::getOcupaciones(),
                     '_tipsal' => ['', 'NINGUNO'],
                 ]
-            );
+            )->render();
 
             $this->setParamToView('consulta_detalle', $html);
 
@@ -451,7 +452,7 @@ class ApruebaConyugeController extends ApplicationController
             $response = [
                 'success' => true,
                 'data' => $solicitud->getArray(),
-                'mercurio11' => $this->Mercurio11->find(),
+                'mercurio11' => Mercurio11::all(),
                 'consulta' => $html,
                 'adjuntos' => $adjuntos,
                 'seguimiento' => $seguimiento,
@@ -531,7 +532,7 @@ class ApruebaConyugeController extends ApplicationController
      */
     public function buscarEnSisuViewAction($id)
     {
-        $mercurio32 = $this->Mercurio32->findFirst("id='{$id}'");
+        $mercurio32 = Mercurio32::where("id", $id)->first();
         if (! $mercurio32) {
             set_flashdata('error', [
                 'msj' => 'El conyuge no se encuentra registrado.',
@@ -584,7 +585,7 @@ class ApruebaConyugeController extends ApplicationController
             $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
             $cedcon = $request->input('cedcon', 'addslaches', 'alpha', 'extraspaces', 'striptags');
 
-            $mercurio32 = $this->Mercurio32->findFirst(" id='{$id}' and cedcon='{$cedcon}'");
+            $mercurio32 = Mercurio32::where("id", $id)->where("cedcon", $cedcon)->first();
             if (! $mercurio32) {
                 throw new DebugException('La cónyuge no está disponible para editar', 501);
             } else {
@@ -624,7 +625,7 @@ class ApruebaConyugeController extends ApplicationController
                     }
                 }
                 $setters = trim($setters, ',');
-                $this->Mercurio32->updateAll($setters, "conditions: id='{$id}' AND cedcon='{$cedcon}'");
+                Mercurio32::where("id", $id)->where("cedcon", $cedcon)->update($data);
 
                 $db = DbBase::rawConnect();
 
@@ -653,8 +654,8 @@ class ApruebaConyugeController extends ApplicationController
             return redirect('aprobacioncon/index');
             exit;
         }
-        $conyuge = $this->Mercurio32->findFirst("id='{$id}'");
-        $trabajador = $this->Mercurio31->findFirst("cedtra='{$conyuge->getCedtra()}'");
+        $conyuge = Mercurio32::where("id", $id)->first();
+        $trabajador = Mercurio31::where("cedtra", $conyuge->getCedtra())->first();
 
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
@@ -670,7 +671,7 @@ class ApruebaConyugeController extends ApplicationController
         $this->loadParametrosView();
         $this->setParamToView('mercurio32', $conyuge);
         $this->setParamToView('mercurio31', $trabajador);
-        $this->setParamToView('mercurio11', $this->Mercurio11->find());
+        $this->setParamToView('mercurio11', Mercurio11::all());
         $this->setParamToView('title', "Solicitud Cónyuge - {$conyuge->getCedcon()}");
     }
 
@@ -679,7 +680,7 @@ class ApruebaConyugeController extends ApplicationController
         $this->setParamToView('hide_header', true);
         $this->setParamToView('title', 'Aprobación Conyuge');
 
-        $collection = $this->Mercurio32->find("estado='{$estado}' AND usuario=" . parent::getActUser() . ' ORDER BY fecsol ASC');
+        $collection = Mercurio32::where("estado", $estado)->where("usuario", $this->user['usuario'])->orderBy("fecsol", "ASC")->get();
         $conyugeServices = new ConyugeServices;
         $data = $conyugeServices->dataOptional($collection, $estado);
 
@@ -696,9 +697,12 @@ class ApruebaConyugeController extends ApplicationController
         $today = Carbon::now();
 
         try {
-            $this->Mercurio32->updateAll("estado='A',fecest='" . $today->format('Y-m-d H:i:s') . "'", "conditions: id='{$id}' ");
+            Mercurio32::where("id", $id)->update([
+                "estado" => "A",
+                "fecest" => $today->format('Y-m-d H:i:s'),
+            ]);
 
-            $item = $this->Mercurio10->maximum('item', "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
+            $item = Mercurio10::whereRaw("tipopc='{$this->tipopc}' and numero='{$id}'")->max('item');
             $mercurio10 = new Mercurio10;
 
             $mercurio10->setTipopc($this->tipopc);
@@ -708,7 +712,7 @@ class ApruebaConyugeController extends ApplicationController
             $mercurio10->setNota($nota);
             $mercurio10->setFecsis($today->format('Y-m-d H:i:s'));
             $mercurio10->save();
-            $mercurio32 = $this->Mercurio32->findFirst("id='{$id}'");
+            $mercurio32 = Mercurio32::where("id", $id)->first();
 
             $procesadorComando = Comman::Api();
             $procesadorComando->runCli(
@@ -723,7 +727,7 @@ class ApruebaConyugeController extends ApplicationController
             $out = $procesadorComando->toArray();
 
             $fecsol = $mercurio32->getFecsol();
-            $fecafi = $this->Mercurio10->maximum('fecsis', "conditions: tipopc='{$this->tipopc}' and numero='{$id}' and estado='P'");
+            $fecafi = Mercurio10::whereRaw("tipopc='{$this->tipopc}' and numero='{$id}' and estado='P'")->max('fecsis');
             $params = array_merge($mercurio32->getArray(), $out['data']);
             $params['fecafi'] = ($fecsol) ? $fecsol : $fecafi;
             $params['recsub'] = 'N';
@@ -781,7 +785,7 @@ class ApruebaConyugeController extends ApplicationController
     {
         $this->tipopc = '3';
         try {
-            $mercurio32 = $this->Mercurio32->findFirst(" id='{$id}' and estado='A' ");
+            $mercurio32 = Mercurio32::where("id", $id)->where("estado", 'A')->first();
             if (! $mercurio32) {
                 throw new DebugException('Error al buscar la beneficiario', 501);
             }
@@ -826,7 +830,7 @@ class ApruebaConyugeController extends ApplicationController
                 'aprobacioncon/tmp/consulta',
                 [
                     'conyuge' => $conyuge,
-                    'detTipo' => $this->Mercurio06->findFirst("tipo='{$conyuge->getTipo()}'")->getDetalle(),
+                    'detTipo' => Mercurio06::where("tipo", $conyuge->getTipo())->first()->getDetalle(),
                     '_coddoc' => ParamsConyuge::getTiposDocumentos(),
                     '_codciu' => ParamsConyuge::getCiudades(),
                     '_sexo' => ParamsConyuge::getSexos(),
@@ -847,7 +851,7 @@ class ApruebaConyugeController extends ApplicationController
             );
 
             $code_estados = [];
-            $query = $this->Mercurio11->find();
+            $query = Mercurio11::all();
             foreach ($query as $row) {
                 $code_estados[$row->getCodest()] = $row->getDetalle();
             }
