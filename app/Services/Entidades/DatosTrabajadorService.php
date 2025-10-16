@@ -10,6 +10,7 @@ use App\Models\Mercurio07;
 use App\Models\Mercurio10;
 use App\Models\Mercurio12;
 use App\Models\Mercurio13;
+use App\Models\Mercurio33;
 use App\Models\Mercurio37;
 use App\Models\Mercurio47;
 use App\Services\Srequest;
@@ -63,23 +64,24 @@ class DatosTrabajadorService
         ");
 
         foreach ($mercurio47 as $ai => $row) {
-            $rqs = $this->db->fetchOne("SELECT count(mercurio10.numero) as cantidad
-                FROM mercurio10
-                LEFT JOIN mercurio47 ON mercurio47.id = mercurio10.numero
-                WHERE mercurio10.tipopc='{$this->tipopc}' AND
-                mercurio47.id ='{$row['id']}'
-            ");
+            $cantidad_eventos = Mercurio10::join("mercurio47", "mercurio47.id", "mercurio10.numero")
+                ->where("tipopc", $this->tipopc)
+                ->where("mercurio47.id", $row['id'])
+                ->count();
 
-            $trayecto = $this->db->fetchOne("SELECT max(mercurio10.item), mercurio10.*
-                FROM mercurio10
-                LEFT JOIN mercurio47 ON mercurio47.id=mercurio10.numero
-                WHERE mercurio10.tipopc='{$this->tipopc}' AND
-                mercurio47.id ='{$row['id']}' LIMIT 1
-            ");
+            $trayecto = Mercurio10::join("mercurio47", "mercurio47.id", "mercurio10.numero")
+                ->where("tipopc", $this->tipopc)
+                ->orderBy("item", "desc")
+                ->first();
 
             $mercurio47[$ai] = $row;
-            $mercurio47[$ai]['cantidad_eventos'] = $rqs['cantidad'];
-            $mercurio47[$ai]['fecha_ultima_solicitud'] = $trayecto['fecsis'];
+            $actualizacion = Mercurio33::where("actualizacion", $row['id'])->get();
+            foreach ($actualizacion as $item) {
+                $mercurio47[$ai][$item->campo] = $item->valor;
+            }
+
+            $mercurio47[$ai]['cantidad_eventos'] = $cantidad_eventos;
+            $mercurio47[$ai]['fecha_ultima_solicitud'] = $trayecto->fecsis;
             $mercurio47[$ai]['estado_detalle'] = (new Mercurio47)->getEstadoInArray($row['estado']);
             $mercurio47[$ai]['tipo_actualizacion_detalle'] = (new Mercurio47)->getTipoActualizacionInArray($row['tipo_actualizacion']);
         }
@@ -261,8 +263,7 @@ class DatosTrabajadorService
      */
     public function create($data)
     {
-        $trabajador = new Mercurio47($data);
-        $trabajador->save();
+        $trabajador = Mercurio47::create($data);
         $id = $trabajador->getId();
 
         Mercurio37::where('tipopc', $this->tipopc)
@@ -314,17 +315,20 @@ class DatosTrabajadorService
     {
         $solicitud = $this->findById($id);
 
-        $cm37 = (new Mercurio37)->getCount(
-            '*',
-            "conditions: tipopc='{$this->tipopc}' AND " .
-                "numero='{$id}' AND " .
-                "coddoc IN(SELECT coddoc FROM mercurio13 WHERE tipopc='{$this->tipopc}' AND obliga='S')"
-        );
+        $cm37 = Mercurio37::where('tipopc', $this->tipopc)
+            ->where('numero', $id)
+            ->whereIn('coddoc', function ($q) {
+                $q->from('mercurio13')
+                    ->select('coddoc')
+                    ->where('tipopc', $this->tipopc)
+                    ->where('obliga', 'S');
+            })
+            ->count();
 
-        $cm13 = (new Mercurio13)->getCount(
-            '*',
-            "conditions: tipopc='{$this->tipopc}' and obliga='S'"
-        );
+        $cm13 = Mercurio13::where('tipopc', $this->tipopc)
+            ->where('obliga', 'S')
+            ->count();
+
         if ($cm37 < $cm13) {
             throw new DebugException('Adjunte los archivos obligatorios', 500);
         }

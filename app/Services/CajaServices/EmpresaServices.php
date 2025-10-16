@@ -124,7 +124,7 @@ class EmpresaServices
         $entity->setFecest($today->format('Y-m-d'));
         $entity->save();
 
-        $item = (new Mercurio10)->maximum('item', "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
+        $item = Mercurio10::whereRaw("tipopc='{$this->tipopc}' and numero='{$id}'")->max('item') + 1;
         $mercurio10 = new Mercurio10;
         $mercurio10->setTipopc($this->tipopc);
         $mercurio10->setNumero($id);
@@ -165,7 +165,7 @@ class EmpresaServices
         $entity->setFecest($fecest);
         $entity->save();
 
-        $item = (new Mercurio10)->maximum('item', "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
+        $item = Mercurio10::whereRaw("tipopc='{$this->tipopc}' and numero='{$id}'")->max('item') + 1;
         $mercurio10 = new Mercurio10;
         $mercurio10->setTipopc($this->tipopc);
         $mercurio10->setNumero($id);
@@ -182,7 +182,7 @@ class EmpresaServices
             }
             throw new Exception('Error ' . $msj, 501);
         }
-        (new Mercurio10)->updateAll("campos_corregir='{$campos_corregir}'", "conditions: item='{$item}' AND numero='{$id}' AND tipopc='{$this->tipopc}'");
+        Mercurio10::whereRaw("item='{$item}' AND numero='{$id}' AND tipopc='{$this->tipopc}'")->update(['campos_corregir' => $campos_corregir]);
 
         return true;
     }

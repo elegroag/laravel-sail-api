@@ -110,13 +110,8 @@ class GeneralService
 
     public function calculaDias($tipopc, $numero, $fecsol = '')
     {
-        $mercurio10 = new Mercurio10;
-        $fecsis = $mercurio10->maximum(
-            'fecsis',
-            "conditions: tipopc='{$tipopc}' and numero='{$numero}'"
-        );
-        $mercurio10 = new Mercurio10;
-        $fecha_ultimo_evento = $mercurio10->findFirst(" tipopc='{$tipopc}' and numero='{$numero}' and fecsis='{$fecsis}'");
+        $fecsis = Mercurio10::whereRaw("tipopc='{$tipopc}' and numero='{$numero}'")->max('fecsis');
+        $fecha_ultimo_evento = Mercurio10::whereRaw(" tipopc='{$tipopc}' and numero='{$numero}' and fecsis='{$fecsis}'")->first();
 
         if ($fecsol != '') {
             if ($fecha_ultimo_evento->getEstado() == 'A' || $fecha_ultimo_evento->getEstado() == 'X') {
@@ -2093,14 +2088,14 @@ class GeneralService
         }
         $mercurio08 = (new Mercurio08)->findFirst("codofi = '$codofi' and tipopc='{$tipopc}' and orden='1'");
         if ($mercurio08 == false) {
-            $usuario = (new Mercurio08)->minimum('usuario', "conditions: codofi = '{$codofi}' and tipopc='{$tipopc}' ");
+            $usuario = Mercurio08::whereRaw("codofi = '{$codofi}' and tipopc='{$tipopc}' ")->min('usuario');
         } else {
             $usuario = $mercurio08->getUsuario();
         }
         if ($usuario == '') {
             return '';
         }
-        $usuario_orden = (new Mercurio08)->minimum('usuario', "conditions: codofi = '{$codofi}' and tipopc='{$tipopc}' and usuario > {$usuario}");
+        $usuario_orden = Mercurio08::whereRaw("codofi = '{$codofi}' and tipopc='{$tipopc}' and usuario > {$usuario}")->min('usuario');
         Mercurio08::where('codofi', $codofi)
             ->where('tipopc', $tipopc)
             ->update(['orden' => '0']);

@@ -353,15 +353,24 @@ class EmpresaService
     public function enviarCaja($senderValidationCaja, $id, $usuario)
     {
         $solicitud = $this->findById($id);
+        $tipsoc = $solicitud->getTipsoc();
 
-        $cm37 = (new Mercurio37)->getCount(
-            '*',
-            "conditions: tipopc='{$this->tipopc}' AND " .
-                "numero='{$id}' AND " .
-                "coddoc IN(SELECT coddoc FROM mercurio14 WHERE tipopc='{$this->tipopc}' AND tipsoc='{$solicitud->getTipsoc()}' AND obliga='S')"
-        );
+        $cm37 = Mercurio37::where('tipopc', $this->tipopc)
+            ->where('numero', $id)
+            ->whereIn('coddoc', function ($q) use ($tipsoc) {
+                $q->from('mercurio14')
+                    ->select('coddoc')
+                    ->where('tipopc', $this->tipopc)
+                    ->where('tipsoc', $tipsoc)
+                    ->where('obliga', 'S');
+            })
+            ->count();
 
-        $cm14 = (new Mercurio14)->getCount('*', "conditions: tipopc='{$this->tipopc}' and tipsoc='{$solicitud->getTipsoc()}' and obliga='S'");
+        $cm14 = Mercurio14::where('tipopc', $this->tipopc)
+            ->where('tipsoc', $tipsoc)
+            ->where('obliga', 'S')
+            ->count();
+
         if ($cm37 < $cm14) {
             throw new DebugException('Adjunte los archivos obligatorios', 500);
         }

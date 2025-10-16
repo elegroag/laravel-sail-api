@@ -45,7 +45,7 @@ class NotificacionService
     {
         $offset = ($pagina - 1) * $limit;
         $notificaciones = $this->db->inQueryAssoc("SELECT * FROM notificaciones WHERE user='{$user}' order by dia DESC, hora DESC limit {$limit} offset {$offset}");
-        $total_registros = (new Notificaciones)->count('*', "conditions: user='{$user}'");
+        $total_registros = Notificaciones::where('user', $user)->count();
         $total_pages = ceil($total_registros / $limit);
 
         return [

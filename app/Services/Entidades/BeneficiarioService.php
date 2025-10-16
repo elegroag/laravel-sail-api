@@ -253,17 +253,20 @@ class BeneficiarioService
     {
         $solicitud = $this->findById($id);
 
-        $cm37 = (new Mercurio37)->getCount(
-            '*',
-            "conditions: tipopc='{$this->tipopc}' AND " .
-                "numero='{$id}' AND " .
-                "coddoc IN(SELECT coddoc FROM mercurio13 WHERE tipopc='{$this->tipopc}' AND obliga='S')"
-        );
+        $cm37 = Mercurio37::where('tipopc', $this->tipopc)
+            ->where('numero', $id)
+            ->whereIn('coddoc', function ($q) {
+                $q->from('mercurio13')
+                    ->select('coddoc')
+                    ->where('tipopc', $this->tipopc)
+                    ->where('obliga', 'S');
+            })
+            ->count();
 
-        $cm13 = (new Mercurio13)->getCount(
-            '*',
-            "conditions: tipopc='{$this->tipopc}' AND obliga='S'"
-        );
+        $cm13 = Mercurio13::where('tipopc', $this->tipopc)
+            ->where('obliga', 'S')
+            ->count();
+
         if ($cm37 < $cm13) {
             throw new DebugException('Adjunte los archivos obligatorios', 500);
         }

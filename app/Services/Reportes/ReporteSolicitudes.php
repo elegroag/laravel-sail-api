@@ -35,23 +35,19 @@ class ReporteSolicitudes
         }
         switch ($request->getParam('tipo')) {
             case '1':
-                $models = (new Mercurio31)->find("conditions: {$query}");
-
+                $models = Mercurio31::whereRaw("{$query}")->get();
                 return $this->tableMercurio31($models);
                 break;
             case '2':
-                $models = (new Mercurio30)->find("conditions: {$query}");
-
+                $models = Mercurio30::whereRaw("{$query}")->get();
                 return $this->tableMercurio30($models);
                 break;
             case '3':
-                $models = (new Mercurio32)->find("conditions: {$query}");
-
+                $models = Mercurio32::whereRaw("{$query}")->get();
                 return $this->tableMercurio32($models);
                 break;
             case '4':
-                $models = (new Mercurio34)->find("conditions: {$query}");
-
+                $models = Mercurio34::whereRaw("{$query}")->get();
                 return $this->tableMercurio34($models);
                 break;
         }

@@ -13,6 +13,7 @@ use App\Models\Mercurio07;
 use App\Models\Mercurio10;
 use App\Models\Mercurio12;
 use App\Models\Mercurio13;
+use App\Models\Mercurio28;
 use App\Models\Mercurio30;
 use App\Models\Mercurio31;
 use App\Models\Mercurio33;
@@ -191,7 +192,7 @@ class ActualizaTrabajadorController extends ApplicationController
 
     public function buscarSolicitudes($estado = '')
     {
-        $documento = parent::getActUser('documento');
+        $documento = $this->user['documento'];
         if (empty($estado)) {
             $mercurio47 = $this->db->inQueryAssoc("SELECT * FROM mercurio47 WHERE documento='{$documento}' AND estado IN('T','D','P','A','X') ORDER BY id, estado DESC");
         } else {
@@ -290,11 +291,12 @@ class ActualizaTrabajadorController extends ApplicationController
     public function guardarAction(Request $request)
     {
         $this->setResponse('ajax');
+        $this->db->begin();
         $datosTrabajadorService = new DatosTrabajadorService;
         try {
             $asignarFuncionario = new AsignarFuncionario;
             $id = $request->input('id');
-            $tipo_actualizacion = $request->input('tipo_actualizacion');
+            $tipo_actualizacion = 'T';
             $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
             $params = [
                 'documento' => $this->user['documento'],
@@ -305,6 +307,13 @@ class ActualizaTrabajadorController extends ApplicationController
                 'fecha_estado' => date('Y-m-d'),
                 'tipo_actualizacion' => $tipo_actualizacion,
             ];
+
+            $logger = new Logger;
+            $log = $logger->registrarLog(
+                false,
+                'Guarda actualizacion datos trabajador',
+                json_encode($request->all())
+            );
 
             $solicitud = null;
             if (is_null($id) || $id == '') {
@@ -320,25 +329,25 @@ class ActualizaTrabajadorController extends ApplicationController
                 }
             }
 
-            $campos = $this->db->inQueryAssoc("SELECT * FROM mercurio28 WHERE tipo='" . parent::getActUser('tipo') . "'");
+            $campos = Mercurio28::where('tipo', $this->tipo)->get();
             foreach ($campos as $mercurio28) {
-                $valor = $request->input($mercurio28['campo']);
-                $mercurio33 = new Mercurio33;
-                $mercurio33->id = 0;
-                $mercurio33->log = $id;
-                $mercurio33->tipo = parent::getActUser('tipo');
-                $mercurio33->coddoc = parent::getActUser('coddoc');
-                $mercurio33->documento = parent::getActUser('documento');
-                $mercurio33->campo = $mercurio28['campo'];
-                $mercurio33->antval = $valor;
-                $mercurio33->valor = $valor;
-                $mercurio33->estado = 'P';
-                $mercurio33->usuario = $usuario;
-                $mercurio33->actualizacion = $id;
-                $mercurio33->save();
+                $valor = $request->input($mercurio28->campo);
+                Mercurio33::create(
+                    [
+                        'log' => $log,
+                        'tipo' => $this->tipo,
+                        'coddoc' => $this->user['coddoc'],
+                        'documento' => $this->user['documento'],
+                        'campo' => $mercurio28->campo,
+                        'antval' => ($valor) ? $valor : '@',
+                        'valor' => $valor,
+                        'estado' => 'P',
+                        'usuario' => $usuario,
+                        'actualizacion' => $id,
+                    ]
+                );
             }
 
-            // $datosTrabajadorService->endTransa();
             $solicitud = $datosTrabajadorService->findById($id);
 
             ob_end_clean();
@@ -347,7 +356,9 @@ class ActualizaTrabajadorController extends ApplicationController
                 'success' => true,
                 'data' => $solicitud->getArray(),
             ];
+            $this->db->commit();
         } catch (DebugException $e) {
+            $this->db->rollback();
             $response = [
                 'success' => false,
                 'msj' => $e->getMessage(),

@@ -84,7 +84,7 @@ class FacultativoServices
                     "<a data-cid='{$id}' data-toggle='info' class='btn btn-xs btn-primary text-white' title='Info'> <i class='fas fa-hand-point-up text-white'></i></a>",
                     " <i class='fas fa-bell' style='color:{$style}'></i> <span class='text-nowrap'>{$dias_vencidos}</span>",
                     $entity->getCedtra(),
-                    $entity->getPrinom().' '.$entity->getSegnom().' '.$entity->getPriape().' '.$entity->getSegape(),
+                    $entity->getPrinom() . ' ' . $entity->getSegnom() . ' ' . $entity->getPriape() . ' ' . $entity->getSegape(),
                     $entity->getEstadoDetalle(),
                     $entity->getFecsol()
                 );
@@ -151,7 +151,7 @@ class FacultativoServices
         $mercurio36->setFecest($today->format('Y-m-d'));
         $mercurio36->save();
 
-        $item = (new Mercurio10)->maximum('item', "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
+        $item = Mercurio10::whereRaw("tipopc='{$this->tipopc}' and numero='{$id}'")->max('item') + 1;
         $mercurio10 = new Mercurio10;
         $mercurio10->setTipopc($this->tipopc);
         $mercurio10->setNumero($id);
@@ -164,9 +164,9 @@ class FacultativoServices
         if (! $mercurio10->save()) {
             $msj = '';
             foreach ($mercurio10->getMessages() as $key => $mess) {
-                $msj .= $mess->getMessage().'<br/>';
+                $msj .= $mess->getMessage() . '<br/>';
             }
-            throw new DebugException('Error '.$msj, 501);
+            throw new DebugException('Error ' . $msj, 501);
         }
 
         return true;
@@ -196,7 +196,7 @@ class FacultativoServices
         $mercurio36->setFecest($fecest);
         $mercurio36->save();
 
-        $item = (new Mercurio10)->maximum('item', "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
+        $item = Mercurio10::whereRaw("tipopc='{$this->tipopc}' and numero='{$id}'")->max('item') + 1;
         $mercurio10 = new Mercurio10;
         $mercurio10->setTipopc($this->tipopc);
         $mercurio10->setNumero($id);
@@ -209,11 +209,11 @@ class FacultativoServices
         if (! $mercurio10->save()) {
             $msj = '';
             foreach ($mercurio10->getMessages() as $key => $message) {
-                $msj .= $message.'<br/>';
+                $msj .= $message . '<br/>';
             }
-            throw new Exception('Error '.$msj, 501);
+            throw new Exception('Error ' . $msj, 501);
         }
-        (new Mercurio10)->updateAll("campos_corregir='{$campos_corregir}'", "conditions: item='{$item}' AND numero='{$id}' AND tipopc='{$this->tipopc}'");
+        Mercurio10::whereRaw("item='{$item}' AND numero='{$id}' AND tipopc='{$this->tipopc}'")->update(['campos_corregir' => $campos_corregir]);
 
         return true;
     }
@@ -231,10 +231,10 @@ class FacultativoServices
      */
     public function msjDevolver($mercurio36, $nota)
     {
-        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, '.
-            "emitida por la persona: {$mercurio36->getPrinom()} {$mercurio36->getSegnom()} {$mercurio36->getPriape()} {$mercurio36->getSegape()} con identificación: {$mercurio36->getCedtra()}.<br/>".
-            "E informamos que su solicitud fue devuelta por el siguiente motivo:<br/> {$nota}".
-            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>'.
+        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, ' .
+            "emitida por la persona: {$mercurio36->getPrinom()} {$mercurio36->getSegnom()} {$mercurio36->getPriape()} {$mercurio36->getSegape()} con identificación: {$mercurio36->getCedtra()}.<br/>" .
+            "E informamos que su solicitud fue devuelta por el siguiente motivo:<br/> {$nota}" .
+            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>' .
             '<br/>Gracias por preferirnos.';
     }
 
@@ -251,10 +251,10 @@ class FacultativoServices
      */
     public function msjRechazar($mercurio36, $nota)
     {
-        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, '.
-            "emitida por la persona:  {$mercurio36->getPrinom()} {$mercurio36->getSegnom()} {$mercurio36->getPriape()} {$mercurio36->getSegape()} con identificación: {$mercurio36->getCedtra()}.<br/>".
-            "E informamos que su solicitud fue rechazada por el siguiente motivo:<br/> {$nota}".
-            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>'.
+        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, ' .
+            "emitida por la persona:  {$mercurio36->getPrinom()} {$mercurio36->getSegnom()} {$mercurio36->getPriape()} {$mercurio36->getSegape()} con identificación: {$mercurio36->getCedtra()}.<br/>" .
+            "E informamos que su solicitud fue rechazada por el siguiente motivo:<br/> {$nota}" .
+            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>' .
             '<br/>Gracias por preferirnos.';
     }
 

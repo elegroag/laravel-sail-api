@@ -134,7 +134,11 @@ class ApruebaMadreComuni
         /**
          * actualiza la ficha de registro
          */
-        (new Mercurio39)->updateAll("estado='A', fecest='{$hoy}', tipper='{$tipper}'", "conditions: id='{$this->solicitud->getId()}'");
+        Mercurio39::where('id', $this->solicitud->getId())->update([
+            'estado' => 'A',
+            'fecest' => $hoy,
+            'tipper' => $tipper,
+        ]);
 
         return true;
     }

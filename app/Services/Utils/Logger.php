@@ -15,18 +15,17 @@ class Logger
         $documento = $user['documento'];
 
         $today = Carbon::now();
-        $mercurio20 = new Mercurio20;
-        $mercurio20->setTipo($tipo);
-        $mercurio20->setCoddoc($coddoc);
-        $mercurio20->setDocumento($documento);
-        $mercurio20->setIp($_SERVER['REMOTE_ADDR']);
-        $mercurio20->setFecha($today->format('Y-m-d'));
-        $mercurio20->setHora(date('H:i'));
-        $mercurio20->setAccion($accion);
-        $mercurio20->setNota($nota);
-        $mercurio20->save();
-
-        return $mercurio20->getLog();
+        $mercurio20 = Mercurio20::create([
+            'tipo' => $tipo,
+            'coddoc' => $coddoc,
+            'documento' => $documento,
+            'ip' => $_SERVER['REMOTE_ADDR'],
+            'fecha' => $today->format('Y-m-d'),
+            'hora' => date('H:i'),
+            'accion' => $accion,
+            'nota' => $nota,
+        ]);
+        return $mercurio20->log;
     }
 
     public function getLog($log)

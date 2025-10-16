@@ -57,7 +57,7 @@ return new class extends Migration
             $table->char('documento', 15);
             $table->date('fecsol')->nullable();
             $table->char('tippag', 1)->default('T');
-            $table->unsignedBigInteger('numcue')->default(0);
+            $table->bigInteger('numcue')->default(0);
             $table->string('empresalab', 100)->nullable();
             $table->char('codban', 4)->nullable();
             $table->char('resguardo_id', 5)->nullable();
@@ -66,6 +66,7 @@ return new class extends Migration
             $table->char('tipdis', 2)->nullable();
             $table->char('peretn', 2)->default('7');
             $table->date('fecapr')->nullable()->comment('Fecha de aprobación');
+
 
             // Índices
             $table->unique('id', 'id');

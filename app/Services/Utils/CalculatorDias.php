@@ -9,10 +9,9 @@ class CalculatorDias
 {
     public static function calcular($tipopc, $numero, $fecsol = '')
     {
-        $mercurio10 = new Mercurio10;
-        $fecsis = $mercurio10->maximum('fecsis', "conditions: tipopc='{$tipopc}' and numero='{$numero}'");
-        $mercurio10 = new Mercurio10;
-        $eventoSeguimiento = $mercurio10->findFirst("tipopc='{$tipopc}' and numero='{$numero}' and fecsis='{$fecsis}'");
+        $fecsis = Mercurio10::whereRaw("tipopc='{$tipopc}' and numero='{$numero}'")->max('fecsis');
+
+        $eventoSeguimiento = Mercurio10::whereRaw("tipopc='{$tipopc}' and numero='{$numero}' and fecsis='{$fecsis}'")->first();
         if ($eventoSeguimiento == false) {
             $fecha_envio = ($fecsol instanceof Carbon) ? $fecsol : Carbon::parse($fecsol);
             $fecha_cerrado = Carbon::now();

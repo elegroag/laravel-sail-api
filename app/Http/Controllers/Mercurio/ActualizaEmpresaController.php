@@ -67,11 +67,12 @@ class ActualizaEmpresaController extends ApplicationController
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
             $tipo = $this->tipo;
+            $tipo_actualizacion = 'E';
 
             $logger = new Logger;
             $log = $logger->registrarLog(
                 false,
-                'Guarda actualizacion datos trabajador',
+                'Guarda actualizacion datos empresa',
                 json_encode($request->all())
             );
 
@@ -83,7 +84,7 @@ class ActualizaEmpresaController extends ApplicationController
                 'fecha_solicitud' => date('Y-m-d'),
                 'fecha_estado' => date('Y-m-d'),
                 'estado' => 'T',
-                'tipo_actualizacion' => 'E',
+                'tipo_actualizacion' => $tipo_actualizacion,
                 'tipo' => $tipo,
                 'coddoc' => $coddoc,
                 'documento' => $documento,
@@ -122,20 +123,22 @@ class ActualizaEmpresaController extends ApplicationController
                         $mercurio33->valor = $valor;
                         $mercurio33->save();
                     } else {
-                        $mercurio33 = new Mercurio33;
-                        $mercurio33->tipo = $mercurio28->getTipo();
-                        $mercurio33->coddoc = $coddoc;
-                        $mercurio33->documento = $documento;
-                        $mercurio33->campo = $mercurio28->getCampo();
-                        $mercurio33->antval = $valor;
-                        $mercurio33->valor = $valor;
-                        $mercurio33->estado = 'P';
-                        $mercurio33->motivo = '';
-                        $mercurio33->fecest = date('Y-m-d');
-                        $mercurio33->usuario = $solicitud->getUsuario();
-                        $mercurio33->actualizacion = $solicitud->getId();
-                        $mercurio33->log = $log;
-                        $mercurio33->save();
+                        Mercurio33::create(
+                            [
+                                'tipo' => $mercurio28->getTipo(),
+                                'coddoc' => $coddoc,
+                                'documento' => $documento,
+                                'campo' => $mercurio28->getCampo(),
+                                'antval' => $valor,
+                                'valor' => $valor,
+                                'estado' => 'P',
+                                'motivo' => '',
+                                'fecest' => date('Y-m-d'),
+                                'usuario' => $solicitud->getUsuario(),
+                                'actualizacion' => $solicitud->getId(),
+                                'log' => $log
+                            ]
+                        );
                     }
                 }
             }
@@ -259,7 +262,7 @@ class ActualizaEmpresaController extends ApplicationController
                 if ($sucursales) {
                     foreach ($sucursales as $sucursal) {
                         if ($sucursal['estado'] != 'I') {
-                            $list_sucursales[$sucursal['codsuc']] = $sucursal['detalle'].' - '.$ciudades[$sucursal['codzon']];
+                            $list_sucursales[$sucursal['codsuc']] = $sucursal['detalle'] . ' - ' . $ciudades[$sucursal['codzon']];
                         }
                     }
                 }
@@ -384,7 +387,7 @@ class ActualizaEmpresaController extends ApplicationController
             $coddoc = $this->clp($request, 'coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
+            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -531,7 +534,7 @@ class ActualizaEmpresaController extends ApplicationController
                 if ($sucursales) {
                     foreach ($sucursales as $sucursal) {
                         if ($sucursal['estado'] != 'I') {
-                            $list_sucursales[$sucursal['codsuc']] = $sucursal['detalle'].' '.$sucursal['codzon'];
+                            $list_sucursales[$sucursal['codsuc']] = $sucursal['detalle'] . ' ' . $sucursal['codzon'];
                         }
                     }
                 }

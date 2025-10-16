@@ -9,6 +9,7 @@ use App\Models\Mercurio07;
 use App\Models\Mercurio10;
 use App\Models\Mercurio12;
 use App\Models\Mercurio14;
+use App\Models\Mercurio33;
 use App\Models\Mercurio37;
 use App\Models\Mercurio47;
 use App\Services\Srequest;
@@ -82,6 +83,10 @@ class ActualizaEmpresaService
             ");
 
             $mercurio47[$ai] = $row;
+            $actualizacion = Mercurio33::where("actualizacion", $row['id'])->get();
+            foreach ($actualizacion as $item) {
+                $mercurio47[$ai][$item->campo] = $item->valor;
+            }
             $mercurio47[$ai]['cantidad_eventos'] = $rqs['cantidad'];
             $mercurio47[$ai]['fecha_ultima_solicitud'] = $trayecto['fecsis'];
             $mercurio47[$ai]['estado_detalle'] = (new Mercurio47)->getEstadoInArray($row['estado']);
@@ -329,17 +334,20 @@ class ActualizaEmpresaService
     {
         $solicitud = $this->findById($id);
 
-        $cm37 = (new Mercurio37)->getCount(
-            '*',
-            "conditions: tipopc='{$this->tipopc}' AND " .
-                "numero='{$id}' AND " .
-                "coddoc IN(SELECT coddoc FROM mercurio14 WHERE tipopc='{$this->tipopc}' and obliga='S')"
-        );
+        $cm37 = Mercurio37::where('tipopc', $this->tipopc)
+            ->where('numero', $id)
+            ->whereIn('coddoc', function ($q) {
+                $q->from('mercurio14')
+                    ->select('coddoc')
+                    ->where('tipopc', $this->tipopc)
+                    ->where('obliga', 'S');
+            })
+            ->count();
 
-        $cm14 = (new Mercurio14)->getCount(
-            '*',
-            "conditions: tipopc='{$this->tipopc}' and obliga='S'"
-        );
+        $cm14 = Mercurio14::where('tipopc', $this->tipopc)
+            ->where('obliga', 'S')
+            ->count();
+
         if ($cm37 < $cm14) {
             throw new DebugException('Adjunte los archivos obligatorios', 500);
         }

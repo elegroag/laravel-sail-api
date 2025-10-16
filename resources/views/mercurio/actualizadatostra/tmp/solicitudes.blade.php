@@ -53,9 +53,7 @@
         </td>
         <td>
             <p class="text-sm  mb-0">
-                Identificación {{ $solicitud['nit'] }}
-                {{ ucfirst($solicitud['razsoc']) }}
-                Empresa {{ $solicitud['tipo_persona'] }} De {{ $solicitud['detalle_zona'] }}
+                Identificación {{ $solicitud['cedtra'] }} }}
             </p>
         </td>
         <td>
