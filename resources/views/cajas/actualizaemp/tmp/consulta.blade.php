@@ -1,96 +1,147 @@
-<div class='row pl-lg-4'>
-	<div class='col-md-3 border-top border-right border-left'>
-		<label class='form-control-label'>Nit:</label>
-		<p class='pl-2 description'>{{ $dataItems['nit'] }}</p>
+<div class="mb-2 request-info-card">
+	<div class="card-header bg-light">
+		<h5 class="mb-0">Datos de la Empresa</h5>
 	</div>
-	<div class='col-md-3 border-top border-right'>
-		<label class='form-control-label'>Razsoc</label>
-		<p class='pl-2 description'>{{ $dataItems['razsoc'] }}</p>
-	</div>
-	<div class='col-md-3 border-top border-right'>
-		<label class='form-control-label'>Código Actividad</label>
-		<p class='pl-2 description'>{{ $dataItems['codact'] }}</p>
-	</div>
-	<div class='col-md-3 border-top border-right'>
-		<label class='form-control-label'>Sucursal</label>
-		<p class='pl-2 description'>{{ $dataItems['codsuc'] }}</p>
-	</div>
-	<div class='col-md-3 border-top border-right border-left'>
-		<label class='form-control-label'>Dirección de Notificación</label>
-		<p class='pl-2 description'>{{ $dataItems['direccion'] }}</p>
-	</div>
-	<div class='col-md-3 border-top border-right'>
-		<label class='form-control-label'>Barrio notificación</label>
-		<p class='pl-2 description'>{{ $dataItems['barrio_notificacion'] }}</p>
-	</div>
-	<div class='col-md-3 border-top border-right'>
-		<label class='form-control-label'>Cedula Representante</label>
-		<p class='pl-2 description'>{{ $dataItems['cedrep'] }}</p>
-	</div>
-	<div class='col-md-3 border-top border-right border-left'>
-		<label class='form-control-label'>Primer apellido</label>
-		<p class='pl-2 description'>{{ $dataItems['priape'] }}</p>
-	</div>
-	<div class='col-md-3 border-top border-right border-left'>
-		<label class='form-control-label'>Segundo apellido</label>
-		<p class='pl-2 description'>{{ $dataItems['segape'] }}</p>
-	</div>
-	<div class='col-md-3 border-top border-right'>
-		<label class='form-control-label'>Primer nombre</label>
-		<p class='pl-2 description'>{{ $dataItems['prinom'] }}</p>
-	</div>
-	<div class='col-md-3 border-top border-right'>
-		<label class='form-control-label'>Segundo nombre</label>
-		<p class='pl-2 description'>{{ $dataItems['segnom'] }}</p>
-	</div>
-
-	<div class='col-md-3 border-top border-right border-left'>
-		<label class='form-control-label'>Email</label>
-		<p class='pl-2 description'>{{ $dataItems['email'] }}</p>
-	</div>
-	<div class='col-md-3 border-top border-right border-left'>
-		<label class='form-control-label'>Matricula mercantil</label>
-		<p class='pl-2 description'>{{ $dataItems['matmer'] }}</p>
-	</div>
-	<div class='col-md-3 border-top border-right'>
-		<label class='form-control-label'>Siglas</label>
-		<p class='pl-2 description'>{{ $dataItems['sigla'] }}</p>
-	</div>
-	<div class='col-md-3 border-top border-right'>
-		<label class='form-control-label'>Teléfono</label>
-		<p class='pl-2 description'>{{ $dataItems['telefono'] }}</p>
-	</div>
-	<div class='col-md-3 border-top border-right border-left'>
-		<label class='form-control-label'>Celular</label>
-		<p class='pl-2 description'>{{ $dataItems['celular'] }}</p>
-	</div>
-	<div class='col-md-3 border-top border-right border-left'>
-		<label class='form-control-label'>Zonas</label>
-		<p class='pl-2 description'>{{ $dataItems['codzon'] }}</p>
-	</div>
-	<div class='col-md-3 border-top border-right border-left'>
-		<label class='form-control-label'>Celular comercial</label>
-		<p class='pl-2 description'>{{ $dataItems['celpri'] }}</p>
-	</div>
-	<div class='col-md-3 border-top border-right'>
-		<label class='form-control-label'>Teléfono comercial</label>
-		<p class='pl-2 description'>{{ $dataItems['telpri'] }}</p>
-	</div>
-	<div class='col-md-3 border-top border-right border-bottom'>
-		<label class='form-control-label'>Ciudad notificaciones</label>
-		<p class='pl-2 description'>{{ $dataItems['codciu'] }}</p>
-	</div>
-	<div class='col-md-3 border-top border-right border-bottom border-left'>
-		<label class='form-control-label'>Ciudad comercial</label>
-		<p class='pl-2 description'>{{ $dataItems['ciupri'] }}</p>
-	</div>
-
-	<div class='col-md-3 border-top border-left border-right border-bottom'>
-		<label class='form-control-label'>Dirección comercial</label>
-		<p class='pl-2 description'>{{ $dataItems['dirpri'] }}</p>
-	</div>
-	<div class='col-md-3 border-top border-right border-bottom'>
-		<label class='form-control-label'>Tipo Documento Representante</label>
-		<p class='pl-2 description'>{{ $dataItems['coddocrepleg'] }}</p>
+	<div class="card-body">
+		<div class="row justify-content-around">
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">NIT</label>
+					<div class="form-control bg-light">{{ $dataItems['nit'] }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Razón Social</label>
+					<div class="form-control bg-light">{{ $dataItems['razsoc'] }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Código Actividad</label>
+					<div class="form-control bg-light">{{ $dataItems['codact'] }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Sucursal</label>
+					<div class="form-control bg-light">{{ $dataItems['codsuc'] }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Dirección de Notificación</label>
+					<div class="form-control bg-light">{{ $dataItems['direccion'] }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Barrio Notificación</label>
+					<div class="form-control bg-light">{{ $dataItems['barrio_notificacion'] }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Cédula Representante</label>
+					<div class="form-control bg-light">{{ $dataItems['cedrep'] }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Primer Apellido</label>
+					<div class="form-control bg-light">{{ $dataItems['priape'] }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Segundo Apellido</label>
+					<div class="form-control bg-light">{{ $dataItems['segape'] }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Primer Nombre</label>
+					<div class="form-control bg-light">{{ $dataItems['prinom'] }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Segundo Nombre</label>
+					<div class="form-control bg-light">{{ $dataItems['segnom'] }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Email</label>
+					<div class="form-control bg-light">{{ $dataItems['email'] }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Matrícula Mercantil</label>
+					<div class="form-control bg-light">{{ $dataItems['matmer'] }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Siglas</label>
+					<div class="form-control bg-light">{{ $dataItems['sigla'] }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Teléfono</label>
+					<div class="form-control bg-light">{{ $dataItems['telefono'] }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Celular</label>
+					<div class="form-control bg-light">{{ $dataItems['celular'] }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Zonas</label>
+					<div class="form-control bg-light">{{ $dataItems['codzon'] }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Celular Comercial</label>
+					<div class="form-control bg-light">{{ $dataItems['celpri'] }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Teléfono Comercial</label>
+					<div class="form-control bg-light">{{ $dataItems['telpri'] }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Ciudad Notificaciones</label>
+					<div class="form-control bg-light">{{ $dataItems['codciu'] }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Ciudad Comercial</label>
+					<div class="form-control bg-light">{{ $dataItems['ciupri'] }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Dirección Comercial</label>
+					<div class="form-control bg-light">{{ $dataItems['dirpri'] }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Tipo Documento Representante</label>
+					<div class="form-control bg-light">{{ $dataItems['coddocrepleg'] }}</div>
+				</div>
+			</div>
+		</div>
 	</div>
 </div>

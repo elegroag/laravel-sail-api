@@ -1,49 +1,75 @@
-<h6 class='heading-small text-muted mb-3'>Solicitud desde {{$det_tipo}} | Datos Empresa</h6>
-<div class='row pl-lg-4 pb-3'>
-    <div class='col-md-3 border-top border-right border-left border-bottom'>
-        <label class='form-control-label'>Nit</label>
-        <p class='pl-2 description'>{{$mercurio36->getCedtra()}}</p>
-    </div>
-    <div class='col-md-3 border-top border-right border-left border-bottom'>
-        <label class='form-control-label'>Estado</label>
-        <p class='pl-2 description'>{{$mercurio36->getEstadoDetalle()}}</p>
-    </div>
-
-    <div class='col-md-3 border-top border-right border-left border-bottom'>
-        <label class='form-control-label'>Calidad Empresa</label>
-        <p class='pl-2 description'>{{@$_calemp[$mercurio36->getCalemp()]}}</p>
-    </div>
-
-    <div class='col-md-3 border-top border-right border-left border-bottom'>
-        <label class='form-control-label'>Direccion de Notificacion</label>
-        <p class='pl-2 description'>{{$mercurio36->getDireccion()}}</p>
-    </div>
-    <div class='col-md-3 border-top border-right border-left border-bottom'>
-        <label class='form-control-label'>Ciudad Notificacion</label>
-        <p class='pl-2 description'>{{@$_codciu[$mercurio36->getCodciu()]}}</p>
-    </div>
-    <div class='col-md-3 border-top border-right border-left border-bottom'>
-        <label class='form-control-label'>Ciudad de Labor de Trajadores</label>
-        <p class='pl-2 description'>{{@$_codzon[$mercurio36->getCodzon()]}}</p>
-    </div>
-    <div class='col-md-3 border-top border-right border-left border-bottom'>
-        <label class='form-control-label'>Telefono de Notificacion</label>
-        <p class='pl-2 description'>{{$mercurio36->getTelefono()}}</p>
-    </div>
-    <div class='col-md-3 border-top border-right border-left border-bottom'>
-        <label class='form-control-label'>Celular de Notificacion</label>
-        <p class='pl-2 description'>{{$mercurio36->getCelular()}}</p>
-    </div>
-    <div class='col-md-3 border-top border-right border-left border-bottom'>
-        <label class='form-control-label'>Email de Notificacion</label>
-        <p class='pl-2 description'>{{$mercurio36->getEmail()}}</p>
-    </div>
-    <div class='col-md-3 border-top border-right border-left border-bottom'>
-        <label class='form-control-label'>Actividad</label>
-        <p class='pl-2 description'>{{ (isset($_codact[$mercurio36->getCodact()]) ? $_codact[$mercurio36->getCodact()] : '') }}</p>
-    </div>
-    <div class='col-md-3 border-top border-right border-left border-bottom'>
-        <label class='form-control-label'>Fecha solicitud</label>
-        <p class='pl-2 description'>{{$mercurio36->getFecsol()}}</p>
-    </div>
+<div class="mb-2 request-info-card">
+	<div class="card-header bg-light">
+		<h5 class="mb-0">Solicitud desde {{ $det_tipo }} | Datos Empresa</h5>
+	</div>
+	<div class="card-body">
+		<div class="row justify-content-around">
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">NIT</label>
+					<div class="form-control bg-light">{{ $mercurio36->getCedtra() }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Estado</label>
+					<div class="form-control bg-light">{{ $mercurio36->getEstadoDetalle() }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Calidad Empresa</label>
+					<div class="form-control bg-light">{{ isset($_calemp[$mercurio36->getCalemp()]) ? $_calemp[$mercurio36->getCalemp()] : '' }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Dirección de Notificación</label>
+					<div class="form-control bg-light">{{ $mercurio36->getDireccion() }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Ciudad de Notificación</label>
+					<div class="form-control bg-light">{{ isset($_codciu[$mercurio36->getCodciu()]) ? $_codciu[$mercurio36->getCodciu()] : '' }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Ciudad de Labor de Trabajadores</label>
+					<div class="form-control bg-light">{{ isset($_codzon[$mercurio36->getCodzon()]) ? $_codzon[$mercurio36->getCodzon()] : '' }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Teléfono de Notificación</label>
+					<div class="form-control bg-light">{{ $mercurio36->getTelefono() }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Celular de Notificación</label>
+					<div class="form-control bg-light">{{ $mercurio36->getCelular() }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Email de Notificación</label>
+					<div class="form-control bg-light">{{ $mercurio36->getEmail() }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Actividad</label>
+					<div class="form-control bg-light">{{ isset($_codact[$mercurio36->getCodact()]) ? $_codact[$mercurio36->getCodact()] : '' }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
+					<label class="form-label text-muted small mb-1">Fecha Solicitud</label>
+					<div class="form-control bg-light">{{ $mercurio36->getFecsol() }}</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
