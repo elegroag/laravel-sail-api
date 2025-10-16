@@ -305,8 +305,16 @@ class ConsultaController extends ApplicationController
 
     public function reasignaViewAction()
     {
+        $gener02 = Gener02::where('estado', 'A')->join('mercurio08', 'gener02.usuario', '=', 'mercurio08.usuario')->get();
+        $data_usuarios = $gener02->pluck('nombre', 'usuario');
+        $data_mercurio09 = Mercurio09::all()->pluck('detalle', 'tipopc');
+        $accion = array('C' => 'CONSULTA', 'P' => 'PROCESO');
+
         return view('cajas.consulta.reasigna', [
             'title' => 'Consulta Reasigna',
+            'data_usuarios' => $data_usuarios->toArray(),
+            'data_mercurio09' => $data_mercurio09->toArray(),
+            'accion' => $accion
         ]);
     }
 }

@@ -1,3 +1,8 @@
+import { $App } from '@/App';
+import { Messages } from '@/Utils';
+
+window.App = $App;
+
 function traerDatos() {
 	if ($('#tipopc').val() == '') return;
 	if ($('#usuario').val() == '') return;
@@ -76,9 +81,12 @@ function cambiarAccion() {
 	}
 }
 
-$(function () {
+$(() =>{
+	window.App.initialize();
+
 	$('#consultar_form').hide();
 	$('#procesar_form').hide();
+	
 	$('#capture-modal').on('hide.bs.modal', function (e) {
 		validator.resetForm();
 		$('.select2-selection')
@@ -107,19 +115,13 @@ $(function () {
 		})
 			.done(function (response) {
 				if (response && response.success === true) {
-					_alert('success', {
-						message: response['msj'],
-					});
+					Messages.display(response.msj, 'success');
 				} else {
-					_alert('error', {
-						message: response['msj'],
-					});
+					Messages.display(response.msj, 'error');
 				}
 			})
 			.fail(function (jqXHR, textStatus) {
-				_alert('error', {
-					message: 'Request failed: ' + textStatus,
-				});
+				Messages.display('Request failed: ' + textStatus, 'error');
 			});
 	});
 
