@@ -2,12 +2,17 @@
 
 // Importar facades y controlador necesarios
 use App\Http\Controllers\Cajas\Mercurio58Controller;
+use App\Http\Middleware\CajasCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
-// Rutas para Mercurio58Controller - Archivos Áreas
-Route::get('/archivo-areas/index', [Mercurio58Controller::class, 'indexAction'])->name('mercurio58.index')->middleware('auth');
-Route::get('/archivo-areas/galeria', [Mercurio58Controller::class, 'galeriaAction'])->name('mercurio58.galeria')->middleware('auth');
-Route::post('/archivo-areas/guardar', [Mercurio58Controller::class, 'guardarAction'])->name('mercurio58.guardar')->middleware('auth');
-Route::post('/archivo-areas/arriba', [Mercurio58Controller::class, 'arribaAction'])->name('mercurio58.arriba')->middleware('auth');
-Route::post('/archivo-areas/abajo', [Mercurio58Controller::class, 'abajoAction'])->name('mercurio58.abajo')->middleware('auth');
-Route::delete('/archivo-areas/borrar', [Mercurio58Controller::class, 'borrarAction'])->name('mercurio58.borrar')->middleware('auth');
+Route::middleware([CajasCookieAuthenticated::class])->group(function () {
+
+    Route::prefix('/cajas/mercurio58')->group(function () {
+        Route::get('/index', [Mercurio58Controller::class, 'indexAction'])->name('mercurio58.index');
+        Route::get('/galeria', [Mercurio58Controller::class, 'galeriaAction'])->name('mercurio58.galeria');
+        Route::post('/guardar', [Mercurio58Controller::class, 'guardarAction'])->name('mercurio58.guardar');
+        Route::post('/arriba', [Mercurio58Controller::class, 'arribaAction'])->name('mercurio58.arriba');
+        Route::post('/abajo', [Mercurio58Controller::class, 'abajoAction'])->name('mercurio58.abajo');
+        Route::delete('/borrar', [Mercurio58Controller::class, 'borrarAction'])->name('mercurio58.borrar');
+    });
+});

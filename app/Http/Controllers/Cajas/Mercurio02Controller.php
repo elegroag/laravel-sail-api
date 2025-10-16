@@ -30,9 +30,9 @@ class Mercurio02Controller extends ApplicationController
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    public function indexAction()
+    public function index()
     {
-        if ((new Mercurio02)->count() == 0) {
+        if (Mercurio02::count() == 0) {
             $this->setParamToView('buttons', ['N']);
         }
 
@@ -66,52 +66,27 @@ class Mercurio02Controller extends ApplicationController
 
     public function showTabla($paginate)
     {
-        $html = '<table border="0" cellpadding="0" cellspacing="0" class="table table-bordered">';
-        $html .= "<thead class='thead-light'>";
-        $html .= '<tr>';
-        $html .= "<th scope='col'>Caja</th>";
-        $html .= "<th scope='col'>Nit</th>";
-        $html .= "<th scope='col'>Razon Social</th>";
-        $html .= "<th scope='col'></th>";
-        $html .= '</tr>';
-        $html .= '</thead>';
-        $html .= "<tbody class='list'>";
-
-        foreach ($paginate->items as $mtable) {
-            $html .= '<tr>';
-            $html .= "<td>{$mtable->getCodcaj()}</td>";
-            $html .= "<td>{$mtable->getNit()}</td>";
-            $html .= "<td>{$mtable->getRazsoc()}</td>";
-            $html .= "<td class='table-actions'>";
-            $html .= "<a href='#!' class='table-action btn btn-xs btn-primary' title='Editar' data-cid='{$mtable->getCodcaj()}' data-toggle='editar'>";
-            $html .= "<i class='fas fa-user-edit text-white'></i>";
-            $html .= '</a>';
-            $html .= '</td>';
-            $html .= '</tr>';
-        }
-
-        $html .= '</tbody>';
-        $html .= '</table>';
-
-        return $html;
+        return view('cajas.mercurio02._tabla', [
+            'paginate' => $paginate,
+        ])->render();
     }
 
-    public function aplicarFiltroAction(Request $request)
+    public function aplicarFiltro(Request $request)
     {
         $consultasOldServices = new GeneralService;
         $this->query = $consultasOldServices->converQuery($request);
 
-        return $this->buscarAction($request);
+        return $this->buscar($request);
     }
 
     public function changeCantidadPagina(Request $request)
     {
         $this->cantidad_pagina = $request->input('numero');
 
-        return $this->buscarAction($request);
+        return $this->buscar($request);
     }
 
-    public function buscarAction(Request $request)
+    public function buscar(Request $request)
     {
         $pagina = $request->input('pagina', 1);
         $query = Mercurio02::whereRaw("{$this->query}");
@@ -130,7 +105,7 @@ class Mercurio02Controller extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function editarAction()
+    public function editar(Request $request)
     {
         $mercurio02 = Mercurio02::first();
         if ($mercurio02 == false) {
@@ -140,7 +115,7 @@ class Mercurio02Controller extends ApplicationController
         return $this->renderObject($mercurio02->toArray(), false);
     }
 
-    public function guardarAction(Request $request)
+    public function guardar(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -175,18 +150,17 @@ class Mercurio02Controller extends ApplicationController
             $mercurio02->setPagyou($pagyou);
 
             if (! $mercurio02->save()) {
-                parent::setLogger($mercurio02->getMessages());
                 $this->db->rollback();
                 throw new DebugException('Error al guardar el registro');
             }
 
             $this->db->commit();
-            $response = parent::successFunc('Operación realizada con éxito');
+            $response = 'Operación realizada con éxito';
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $this->db->rollback();
-            $response = parent::errorFunc('No se pudo guardar/editar el registro: ' . $e->getMessage());
+            $response = 'No se pudo guardar/editar el registro: ' . $e->getMessage();
 
             return $this->renderObject($response, false);
         }

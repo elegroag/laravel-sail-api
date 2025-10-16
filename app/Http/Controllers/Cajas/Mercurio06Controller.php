@@ -35,29 +35,27 @@ class Mercurio06Controller extends ApplicationController
         return view('cajas.mercurio06._table', compact('paginate'))->render();
     }
 
-    public function aplicarFiltroAction(Request $request)
+    public function aplicarFiltro(Request $request)
     {
         $consultasOldServices = new GeneralService;
         $this->query = $consultasOldServices->converQuery($request);
 
-        return $this->buscarAction($request);
+        return $this->buscar($request);
     }
 
     public function changeCantidadPagina(Request $request)
     {
         $this->cantidad_pagina = $request->input('numero');
 
-        return $this->buscarAction($request);
+        return $this->buscar($request);
     }
 
-    public function indexAction()
+    public function index()
     {
         $campo_field = [
             'tipo' => 'Codigo',
             'detalle' => 'Detalle',
         ];
-
-        $this->setParamToView('campo_filtro', $campo_field);
 
         return view('cajas.mercurio06.index', [
             'title' => 'Gestión de Tipos Acceso',
@@ -65,7 +63,7 @@ class Mercurio06Controller extends ApplicationController
         ]);
     }
 
-    public function buscarAction(Request $request)
+    public function buscar(Request $request)
     {
         $pagina = ($request->input('pagina') == '') ? 1 : $request->input('pagina');
 
@@ -86,7 +84,7 @@ class Mercurio06Controller extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function editarAction(Request $request)
+    public function editar(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -105,7 +103,7 @@ class Mercurio06Controller extends ApplicationController
         }
     }
 
-    public function borrarAction(Request $request)
+    public function borrar(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -126,7 +124,7 @@ class Mercurio06Controller extends ApplicationController
         }
     }
 
-    public function guardarAction(Request $request)
+    public function guardar(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -163,7 +161,7 @@ class Mercurio06Controller extends ApplicationController
         }
     }
 
-    public function validePkAction(Request $request)
+    public function validePk(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -182,7 +180,7 @@ class Mercurio06Controller extends ApplicationController
         }
     }
 
-    public function validePkCampoAction(Request $request)
+    public function validePkCampo(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -202,7 +200,7 @@ class Mercurio06Controller extends ApplicationController
         }
     }
 
-    public function campoViewAction(Request $request)
+    public function campoView(Request $request)
     {
         try {
             $tipo = $request->input('tipo');
@@ -221,7 +219,7 @@ class Mercurio06Controller extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function guardarCampoAction(Request $request)
+    public function guardarCampo(Request $request)
     {
         try {
             $this->db->begin();
@@ -262,7 +260,7 @@ class Mercurio06Controller extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function editarCampoAction(Request $request)
+    public function editarCampo(Request $request)
     {
         try {
             $tipo = $request->input('tipo');
@@ -285,7 +283,7 @@ class Mercurio06Controller extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function borrarCampoAction(Request $request)
+    public function borrarCampo(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -306,7 +304,7 @@ class Mercurio06Controller extends ApplicationController
         }
     }
 
-    public function reporteAction($format = 'P')
+    public function reporte($format = 'P')
     {
         $this->setResponse('ajax');
         $_fields = [];

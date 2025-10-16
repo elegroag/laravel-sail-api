@@ -30,7 +30,7 @@
 					<div class="form-control bg-light">{{ isset($_tipdoc[$mercurio41->getTipdoc()]) ? $_tipdoc[$mercurio41->getTipdoc()] : '' }}</div>
 				</div>
 			</div>
-			<div class="col-md-4 col-lg-3">
+			<div class="col-md-8 col-lg-6">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Cargo</label>
 					<div class="form-control bg-light">{{ isset($_cargos[$mercurio41->getCargo()]) ? $_cargos[$mercurio41->getCargo()] : '' }}</div>

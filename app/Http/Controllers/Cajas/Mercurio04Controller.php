@@ -39,22 +39,22 @@ class Mercurio04Controller extends ApplicationController
         return view('cajas.mercurio04._table', compact('paginate'))->render();
     }
 
-    public function aplicarFiltroAction(Request $request)
+    public function aplicarFiltro(Request $request)
     {
         $this->setResponse('ajax');
         $consultasOldServices = new GeneralService;
         $this->query = $consultasOldServices->converQuery($request);
-        return $this->buscarAction($request);
+        return $this->buscar($request);
     }
 
-    public function changeCantidadPaginaAction(Request $request)
+    public function changeCantidadPagina(Request $request)
     {
         $this->setResponse('ajax');
         $this->cantidad_pagina = $request->input('numero');
-        return $this->buscarAction($request);
+        return $this->buscar($request);
     }
 
-    public function indexAction()
+    public function index()
     {
         $campo_field = [
             'codofi' => 'Codigo',
@@ -82,7 +82,7 @@ class Mercurio04Controller extends ApplicationController
         ]);
     }
 
-    public function buscarAction(Request $request)
+    public function buscar(Request $request)
     {
         $pagina = ($request->input('pagina') == '') ? 1 : $request->input('pagina');
 
@@ -105,7 +105,7 @@ class Mercurio04Controller extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function editarAction(Request $request)
+    public function editar(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -121,7 +121,7 @@ class Mercurio04Controller extends ApplicationController
         }
     }
 
-    public function borrarAction(Request $request)
+    public function borrar(Request $request)
     {
         try {
             try {
@@ -143,7 +143,7 @@ class Mercurio04Controller extends ApplicationController
         }
     }
 
-    public function guardarAction(Request $request)
+    public function guardar(Request $request)
     {
         try {
             try {
@@ -176,7 +176,7 @@ class Mercurio04Controller extends ApplicationController
         }
     }
 
-    public function validePkAction(Request $request)
+    public function validePk(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -195,7 +195,7 @@ class Mercurio04Controller extends ApplicationController
         }
     }
 
-    public function reporteAction(Request $request, $format = 'P')
+    public function reporte(Request $request, $format = 'P')
     {
         $this->setResponse('ajax');
         $_fields = [];
@@ -209,7 +209,7 @@ class Mercurio04Controller extends ApplicationController
         return $this->renderObject($file, false);
     }
 
-    public function validePkCiudadAction(Request $request)
+    public function validePkCiudad(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -228,7 +228,7 @@ class Mercurio04Controller extends ApplicationController
         }
     }
 
-    public function ciudadViewAction(Request $request)
+    public function ciudadView(Request $request)
     {
         try {
             $codofi = $request->input('codofi');
@@ -246,7 +246,7 @@ class Mercurio04Controller extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function guardarCiudadAction(Request $request)
+    public function guardarCiudad(Request $request)
     {
         try {
 
@@ -273,7 +273,7 @@ class Mercurio04Controller extends ApplicationController
         }
     }
 
-    public function editarCiudadAction(Request $request)
+    public function editarCiudad(Request $request)
     {
         try {
             try {
@@ -298,7 +298,7 @@ class Mercurio04Controller extends ApplicationController
         }
     }
 
-    public function borrarCiudadAction(Request $request)
+    public function borrarCiudad(Request $request)
     {
         try {
             try {
@@ -322,7 +322,7 @@ class Mercurio04Controller extends ApplicationController
         }
     }
 
-    public function validePkOpcionAction(Request $request)
+    public function validePkOpcion(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -350,7 +350,7 @@ class Mercurio04Controller extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function opcionViewAction(Request $request)
+    public function opcionView(Request $request)
     {
         try {
             $codofi = $request->input('codofi');
@@ -379,7 +379,7 @@ class Mercurio04Controller extends ApplicationController
         }
     }
 
-    public function guardarOpcionAction(Request $request)
+    public function guardarOpcion(Request $request)
     {
         try {
             try {
@@ -415,7 +415,7 @@ class Mercurio04Controller extends ApplicationController
         }
     }
 
-    public function borrarOpcionAction(Request $request)
+    public function borrarOpcion(Request $request)
     {
         try {
             try {

@@ -103,7 +103,7 @@ $msexo = ($trabajador->getSexo() != 'N') ? $_sexos[$trabajador->getSexo()] : '';
 					<div class="form-control bg-light">{{ $trabajador->getCelular() }}</div>
 				</div>
 			</div>
-            <div class='col-md-4 col-lg-3'>
+            <div class="col-md-8 col-lg-6">
                 <div class="form-group">
                     <label class="form-label text-muted small mb-1">Cargo</label>
                     <div class="form-control bg-light">{{ @$_ocupaciones[$trabajador->getCargo()] }}</div>

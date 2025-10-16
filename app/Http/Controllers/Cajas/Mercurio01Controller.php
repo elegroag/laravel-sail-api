@@ -29,7 +29,7 @@ class Mercurio01Controller extends ApplicationController
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    public function indexAction()
+    public function index()
     {
         return view('cajas.mercurio01.index', [
             'title' => 'Configuración basica',
@@ -41,52 +41,27 @@ class Mercurio01Controller extends ApplicationController
 
     public function showTabla($paginate)
     {
-        $html = '<table border="0" cellpadding="0" cellspacing="0" class="table table-bordered">';
-        $html .= "<thead class='thead-light'>";
-        $html .= '<tr>';
-        $html .= "<th scope='col'>Aplicativo</th>";
-        $html .= "<th scope='col'>Email</th>";
-        $html .= "<th scope='col'>Path</th>";
-        $html .= "<th scope='col'>Server</th>";
-        $html .= "<th scope='col'>Option</th>";
-        $html .= '</tr>';
-        $html .= '</thead>';
-        $html .= "<tbody class='list'>";
-        foreach ($paginate->items as $mtable) {
-            $html .= '<tr>';
-            $html .= "<td>{$mtable->getCodapl()}</td>";
-            $html .= "<td>{$mtable->getEmail()}</td>";
-            $html .= "<td>{$mtable->getPath()}</td>";
-            $html .= "<td>{$mtable->getFtpserver()}</td>";
-            $html .= "<td class='table-actions'>";
-            $html .= "<a href='#!' class='table-action btn btn-xs btn-primary' title='editar' data-cid='{$mtable->getCodapl()}' data-toggle='editar'>";
-            $html .= "<i class='fas fa-user-edit text-white'></i>";
-            $html .= '</a>';
-            $html .= '</td>';
-            $html .= '</tr>';
-        }
-        $html .= '</tbody>';
-        $html .= '</table>';
-
-        return $html;
+        return view('cajas.mercurio01._tabla', [
+            'paginate' => $paginate,
+        ])->render();
     }
 
-    public function aplicarFiltroAction(Request $request)
+    public function aplicarFiltro(Request $request)
     {
         $consultasOldServices = new GeneralService;
         $this->query = $consultasOldServices->converQuery($request);
 
-        return $this->buscarAction($request);
+        return $this->buscar($request);
     }
 
     public function changeCantidadPagina(Request $request)
     {
         $this->cantidad_pagina = $request->input('numero');
 
-        return $this->buscarAction($request);
+        return $this->buscar($request);
     }
 
-    public function buscarAction(Request $request)
+    public function buscar(Request $request)
     {
         $pagina = ($request->input('pagina') == '') ? 1 : $request->input('pagina');
         $paginate = Paginate::execute(
@@ -106,7 +81,7 @@ class Mercurio01Controller extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function editarAction()
+    public function editar(Request $request)
     {
         $mercurio01 = Mercurio01::first();
         if ($mercurio01 == false) {
@@ -119,7 +94,7 @@ class Mercurio01Controller extends ApplicationController
         ], false);
     }
 
-    public function guardarAction(Request $request)
+    public function guardar(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -143,22 +118,21 @@ class Mercurio01Controller extends ApplicationController
             $mercurio01->setPathserver($pathserver);
             $mercurio01->setUserserver($userserver);
             $mercurio01->setPassserver($passserver);
+
             if (! $mercurio01->save()) {
-                parent::setLogger($mercurio01->getMessages());
                 $this->db->rollback();
             }
             $this->db->commit();
-            $response = parent::successFunc('Creacion Con Exito');
+            $response = 'Creacion Con Exito';
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $response = parent::errorFunc('No se puede guardar/editar el Registro');
-
+            $response = 'No se puede guardar/editar el Registro';
             return $this->renderObject($response, false);
         }
     }
 
-    public function borrarFiltroAction()
+    public function borrarFiltro(Request $request)
     {
         set_flashdata('filter_mercurio01', false, true);
         set_flashdata('filter_params', false, true);

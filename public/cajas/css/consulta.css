@@ -29,6 +29,7 @@
     letter-spacing: 0.025em;
     margin-bottom: 0.375rem;
     display: block;
+    margin-left: .6rem;
 }
 
 .request-info-card .form-control {

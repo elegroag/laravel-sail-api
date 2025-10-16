@@ -147,7 +147,9 @@ const listarCampos= (tipo) => {
                     detalle: response.detalle,
                 }));
                 // Inicializar DataTable sobre la tabla renderizada
-                initDataTableCampo();
+                if(response.collection.length > 0){
+                    initDataTableCampo();
+                }
             } else {
                 Messages.display('No se pudieron cargar los datos', 'error');
             }
@@ -169,15 +171,15 @@ $(() => {
         validarClaveUnica('campo_28');
     });
 
-    $(document).on('click', "[data-toggle='editar']", function () {
-        const tipo = $(this).data('tipo');
-        const campo = $(this).data('campo');
-
+    $(document).on('click', "[data-toggle='editar']", function (e) {
+        e.preventDefault();
+        const tipo = $(this).data('cid');
         if (!tipo) return;
-
         window.App.trigger('syncro', {
             url: window.App.url(`${window.ServerController}/editar`),
-            data: { tipo, campo },
+            data: { 
+                tipo
+            },
             callback: (response) => {
                 if (response) {
                     modalCapture.show();
