@@ -6,7 +6,7 @@ use App\Models\Adapter\ModelBase;
 
 class Empresa extends ModelBase
 {
-    protected $table = 'empresas';
+    protected $table = 'subsi02';
 
     public $timestamps = false;
 

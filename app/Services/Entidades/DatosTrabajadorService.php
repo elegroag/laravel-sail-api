@@ -473,27 +473,37 @@ class DatosTrabajadorService
                     ])
                     ->where('mercurio47.tipo_actualizacion', $tipo_actualizacion)
                     ->when($condi_extra, function ($q) use ($condi_extra) {
-                        $q->whereRaw($condi_extra);
+                        if (is_array($condi_extra)) $q->where($condi_extra);
+                        if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
                     })
                     ->get();
                 break;
             case 'alluser':
-                $response["datos"] = Mercurio47::where("usuario='{$usuario}' and estado='P' and tipo_actualizacion='$tipo_actualizacion'")->get();
+                $response["datos"] = Mercurio47::whereRaw("usuario='{$usuario}' and estado='P' and tipo_actualizacion='$tipo_actualizacion'")->get();
                 break;
             case 'count':
-                $response["count"] = Mercurio47::whereRaw("mercurio47.usuario='$usuario' and mercurio47.tipo_actualizacion='$tipo_actualizacion'  $condi_extra ")
-                    ->join('mercurio20', 'mercurio47.log', 'mercurio20.log')
-                    ->getId();
-
-                $response["all"] = Mercurio47::whereRaw("mercurio47.usuario='$usuario' and mercurio47.tipo_actualizacion='$tipo_actualizacion'  $condi_extra")
-                    ->join('mercurio20', 'mercurio47.log', 'mercurio20.log')
+                $res = Mercurio47::where("mercurio47.usuario", $usuario)
+                    ->where("mercurio47.tipo_actualizacion", $tipo_actualizacion)
+                    ->when($condi_extra, function ($q) use ($condi_extra) {
+                        if (is_array($condi_extra)) $q->where($condi_extra);
+                        if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
+                    })
                     ->get();
+
+                $response["count"] = $res->count();
+                $response["all"] = $res;
                 break;
             case 'one':
-                $response["datos"] = Mercurio47::where("id='$numero' and estado='P' and tipo_actualizacion='$tipo_actualizacion'")->get();
+                $response["datos"] = Mercurio47::whereRaw("id='$numero' and estado='P' and tipo_actualizacion='$tipo_actualizacion'")->first();
                 break;
             case 'info':
-                $mercurio = Mercurio47::where("id='$numero' ")->get();
+                $mercurio = Mercurio47::where("id", $numero)->first();
+                break;
+            case 'one':
+                $response["datos"] = Mercurio47::whereRaw("id='$numero' and estado='P' and tipo_actualizacion='$tipo_actualizacion'")->first();
+                break;
+            case 'info':
+                $mercurio = Mercurio47::where("id", $numero)->first();
                 $response["consulta"] = $this->buscarEmpresaSubsidio($mercurio->getNit());
                 break;
             default:

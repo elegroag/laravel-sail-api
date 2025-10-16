@@ -6,37 +6,34 @@
 @endpush
 
 @section('content')
-@include('cajas/templates/tmp_header_adapter', ['sub_title' => $title, 'filtrar' => true, 'listar' => false, 'salir' => false, 'add' => false])
+@include('cajas/templates/tmp_header_adapter', ['sub_title' => $title, 'filtrar' => false, 'listar' => false, 'salir' => false, 'add' => false])
 <div class="container-fluid mt--9 pb-4">
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-body p-0 m-3">
-                    <div class='card-columns'>
+                    <div class='row justify-content-between'>
                         @foreach ($gener02 as $mgener02)
-                        <div class='card'>
-                            <div class='card-header bg-transparent text-center'>
-                                <h5 class='h4 ls-1 py-0 mb-0'>{{ $mgener02->getNombre() }}</h5>
+                        <div class='col-md-6 col-lg-4 mb-2'>
+                            <div class="card" 
+                                style="border: 1px solid #ebebeb; box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.15);">
+                                <div class='card-header bg-transparent text-center'>
+                                    <h6 class='text-muted ls-1 py-0 mb-0'>{{ $mgener02->getNombre() }}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <ul class='list-group list-group-flush'>
+                                        @foreach ($mercurio09 as $m09)
+                                        @if ($m09['usuario'] == $mgener02->usuario)
+                                            @continue;
+                                        @endif
+                                        <li class='list-group-item d-flex justify-content-between align-items-center py-2'>
+                                            <small>{{ $m09['detalle'] }}</small>
+                                            <span class='badge badge-md badge-primary badge-pill'>{{ $m09['cantidad'] }}</span>
+                                        </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
                             </div>
-                            <ul class='list-group list-group-flush'>
-                           {{--  @foreach ($mercurio09 as $mmercurio09)
-                                @php
-                                    if ($mmercurio09->getTipopc() == '2'){
-                                        $condi = " estado IN('P','D') ";
-                                    } else {
-                                        $condi = " estado='P' ";
-                                    }
-
-                                    $result = $consultasOldServices->consultaTipopc($mmercurio09->getTipopc(), 'count', '', $mgener02->getUsuario(), $condi);
-                                    $count = $result['count'];
-                                @endphp
-
-                                <li class='list-group-item d-flex justify-content-between align-items-center py-2'>
-                                    <small>{{ ucwords(strtolower($mmercurio09->getDetalle())) }}</small>
-                                    <span class='badge badge-md badge-primary badge-pill'>{{ $count }}</span>
-                                </li>
-                            @endforeach --}}
-                            </ul>
                         </div>
                         @endforeach
                     </div>

@@ -176,10 +176,7 @@ class Mercurio07 extends ModelBase
 
     public function getArrayEstados()
     {
-        return [
-            'A' => 'ACTIVO',
-            'I' => 'INACTIVO',
-        ];
+        return get_user_estados();
     }
 
     public function getEstadoDetalle($estado = '')
@@ -187,29 +184,12 @@ class Mercurio07 extends ModelBase
         if ($estado != '') {
             $this->estado = $estado;
         }
-        switch ($this->estado) {
-            case 'A':
-                return 'ACTIVO';
-                break;
-            case 'I':
-                return 'INACTIVO';
-                break;
-        }
-
-        return false;
+        return get_user_estado_detalle($this->estado);
     }
 
     public function getArrayTipos()
     {
-        return [
-            'P' => 'Particular',
-            'T' => 'Trabajador',
-            'E' => 'Empresa aportante',
-            'I' => 'Independiente aportante',
-            'O' => 'Pensionado',
-            'F' => 'Facultativo',
-            'S' => 'Servicio domestico',
-        ];
+        return get_array_tipos();
     }
 
     public function getTipoDetalle($tipo = '')
@@ -217,31 +197,7 @@ class Mercurio07 extends ModelBase
         if ($tipo != '') {
             $this->tipo = $tipo;
         }
-        switch ($this->tipo) {
-            case 'P':
-                return 'Particular';
-                break;
-            case 'T':
-                return 'Trabajador';
-                break;
-            case 'E':
-                return 'Empresa aportante';
-                break;
-            case 'I':
-                return 'Independiente aportante';
-                break;
-            case 'O':
-                return 'Pensionado aportante';
-                break;
-            case 'F':
-                return 'Facultativo';
-                break;
-            case 'S':
-                return 'Servicio domestico';
-                break;
-        }
-
-        return false;
+        return get_tipo_detalle($this->tipo);
     }
 
     public function getWhatsapp()

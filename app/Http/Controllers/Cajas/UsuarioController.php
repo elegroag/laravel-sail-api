@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
-use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
+use App\Http\Controllers\Controller;
 use App\Models\Gener09;
 use App\Models\Gener18;
 use App\Models\Mercurio01;
@@ -24,13 +23,11 @@ use App\Services\Utils\SenderEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class UsuarioController extends ApplicationController
+class UsuarioController extends Controller
 {
-    protected $db;
-
     protected $user;
 
-    protected $tipo;
+    protected $tipfun;
 
     /**
      * services variable
@@ -49,9 +46,8 @@ class UsuarioController extends ApplicationController
     public function __construct()
     {
         $this->pagination = new Pagination;
-        $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user');
+        $this->tipfun = session('tipfun');
     }
 
     public function indexAction()
@@ -77,14 +73,14 @@ class UsuarioController extends ApplicationController
      */
     public function paramsAction()
     {
-        $this->setResponse('ajax');
+
 
         try {
             // Obtener tipos de documento usando Eloquent
             $coddoc = Gener18::pluck('detdoc', 'coddoc')->toArray();
 
             // Obtener tipos de usuario
-            $tipo = (new Mercurio07)->getArrayTipos();
+            $tipo = get_array_tipos();
 
             // Obtener ciudades usando Eloquent con whereBetween
             $codciu = Gener09::whereBetween('codzon', ['18000', '19000'])
@@ -97,24 +93,24 @@ class UsuarioController extends ApplicationController
                     'coddoc' => $coddoc,
                     'tipo' => $tipo,
                     'codciu' => $codciu,
-                    'estado' => (new Mercurio07)->getArrayEstados(),
+                    'estado' => get_user_estados(),
                 ],
                 'msj' => 'Parámetros obtenidos correctamente',
             ];
         } catch (\Exception $e) {
             $response = [
                 'success' => false,
-                'msj' => 'Error al obtener los parámetros: '.$e->getMessage(),
+                'msj' => 'Error al obtener los parámetros: ' . $e->getMessage(),
                 'trace' => config('app.debug') ? $e->getTraceAsString() : null,
             ];
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function guardarAction(Request $request)
     {
-        $this->setResponse('ajax');
+
         try {
             $tipo = $request->input('tipo');
             $coddoc = $request->input('coddoc');
@@ -126,65 +122,68 @@ class UsuarioController extends ApplicationController
             $old_coddoc = $request->input('old_coddoc');
             $estado = $request->input('estado');
 
-            $hasUsuario = (new Mercurio07)->count(
-                '*',
-                "conditions: documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$old_coddoc}'"
-            );
+            // Verificar si existe el usuario con las condiciones anteriores
+            $hasUsuario = Mercurio07::where('documento', $documento)
+                ->where('tipo', $tipo)
+                ->where('coddoc', $old_coddoc)
+                ->exists();
 
-            if ($hasUsuario == 0) {
+            if (!$hasUsuario) {
                 throw new DebugException('Error el registro de usuario no existe registrado', 501);
             }
 
-            $mercurio07 = (new Mercurio07)->findFirst("documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$old_coddoc}'");
+            $mercurio07 = Mercurio07::whereRaw("documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$old_coddoc}'")->first();
             $clave = $mercurio07->getClave();
 
-            $setclave = '';
             if (strlen($newclave) > 5 && strlen($newclave) < 80) {
                 $hash = Generales::GeneraHashByClave($newclave);
                 $clave = $hash;
-                $setclave = ", clave='{$hash}'";
             }
 
             if ($old_coddoc != $coddoc) {
-                $hasUsuario = (new Mercurio07)->count(
-                    '*',
-                    "conditions: documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'"
-                );
-                if ($hasUsuario == 0) {
-                    $mercurio07 = new Mercurio07;
-                    $mercurio07->setDocumento($documento);
-                    $mercurio07->setTipo($tipo);
-                    $mercurio07->setCoddoc($coddoc);
-                    $mercurio07->setNombre($nombre);
-                    $mercurio07->setEmail($email);
-                    $mercurio07->setCodciu($codciu);
-                    $mercurio07->setEstado($estado);
-                    $mercurio07->setFecreg(date('Y-m-d'));
-                    $mercurio07->setFeccla(date('Y-m-d'));
-                    $mercurio07->setAutoriza('S');
-                    $mercurio07->setClave($clave);
-                    if ($mercurio07->save() == false) {
-                        $msj = '';
-                        foreach ($mercurio07->getMessages() as $message) {
-                            $msj .= $message->getMessage()."\n";
-                        }
-                        throw new DebugException($msj, 501);
-                    }
+                $hasUsuario = Mercurio07::where('documento', $documento)
+                    ->where('tipo', $tipo)
+                    ->where('coddoc', $coddoc)
+                    ->exists();
+
+                if (!$hasUsuario) {
+                    Mercurio07::create(
+                        [
+                            'documento' => $documento,
+                            'tipo' => $tipo,
+                            'coddoc' => $coddoc,
+                            'nombre' => $nombre,
+                            'email' => $email,
+                            'codciu' => $codciu,
+                            'estado' => $estado,
+                            'fecreg' => date('Y-m-d'),
+                            'feccla' => date('Y-m-d'),
+                            'autoriza' => 'S',
+                            'clave' => $clave,
+                        ]
+                    );
                 }
             } else {
-                (new Mercurio07)
-                    ->updateAll(
-                        "tipo='{$tipo}', email='{$email}', codciu='{$codciu}', nombre='{$nombre}', coddoc='{$coddoc}' {$setclave}",
-                        "conditions: documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'"
-                    );
+                // Actualizar usuario existente con las nuevas condiciones
+                Mercurio07::where('documento', $documento)
+                    ->where('tipo', $tipo)
+                    ->where('coddoc', $coddoc)
+                    ->update([
+                        'tipo' => $tipo,
+                        'email' => $email,
+                        'codciu' => $codciu,
+                        'nombre' => $nombre,
+                        'coddoc' => $coddoc,
+                        'clave' => $clave,
+                    ]);
                 $this->cambiarClave($newclave, $mercurio07);
             }
 
-            $entity = (new Mercurio07)->findFirst("documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'");
+            $entity = Mercurio07::whereRaw("documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'")->first();
             $response = [
                 'msj' => 'Proceso se ha completado con éxito',
                 'success' => true,
-                'data' => $entity->getArray(),
+                'data' => $entity->toArray(),
             ];
         } catch (DebugException $err) {
             $response = [
@@ -193,17 +192,17 @@ class UsuarioController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
-    public function cambiarClave($clave, $usuario_externo)
+    public function cambiarClave(string $clave = '', Mercurio07 $usuario_externo)
     {
-        $nombre = capitalize($usuario_externo->getNombre());
+        $nombre = capitalize($usuario_externo->nombre);
         $asunto = 'Cambio de clave - Comfaca En Linea';
-        $msj = 'En respuesta a la solicitud de recuperación de cuenta, se ha realiza el cambio automatico de la clave para el inicio de sesión. '.
+        $msj = 'En respuesta a la solicitud de recuperación de cuenta, se ha realiza el cambio automatico de la clave para el inicio de sesión. ' .
             "A continuación enviamos las credenciales de acceso.<br/><br/>
             Credenciales:<br/>
-            <b>USUARIO {$usuario_externo->getDocumento()}</b><br/>
+            <b>USUARIO {$usuario_externo->documento}</b><br/>
             <b>CLAVE {$clave}</b><br/>";
 
         $html = view(
@@ -220,17 +219,17 @@ class UsuarioController extends ApplicationController
             ]
         )->render();
 
-        $emailCaja = (new Mercurio01)->findFirst();
+        $emailCaja = Mercurio01::first();
         $senderEmail = new SenderEmail;
         $senderEmail->setters(
-            "emisor_email: {$emailCaja->getEmail()}",
-            "emisor_clave: {$emailCaja->getClave()}",
+            "emisor_email: {$emailCaja->email}",
+            "emisor_clave: {$emailCaja->clave}",
             "asunto: {$asunto}"
         );
 
         $senderEmail->send(
             [[
-                'email' => $usuario_externo->getEmail(),
+                'email' => $usuario_externo->email,
                 'nombre' => $nombre,
             ]],
             $html
@@ -282,7 +281,7 @@ class UsuarioController extends ApplicationController
 
         $response = $this->pagination->render(new UsuarioServices);
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function changeCantidadPaginaAction(Request $request)
@@ -329,16 +328,15 @@ class UsuarioController extends ApplicationController
 
         $response = $this->pagination->render(new UsuarioServices);
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function borrarFiltroAction()
     {
-        $this->setResponse('ajax');
         set_flashdata('filter_usuarios', false, true);
         set_flashdata('filter_params', false, true);
 
-        return $this->renderObject([
+        return response()->json([
             'success' => true,
             'query' => get_flashdata_item('filter_usuarios'),
             'filter' => get_flashdata_item('filter_params'),
@@ -363,17 +361,20 @@ class UsuarioController extends ApplicationController
         $tipo = $request->input('tipo');
         $coddoc = $request->input('coddoc');
 
-        $user = Mercurio07::whereRaw("documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'")->first();
-        $data = $user->getArray();
-        $coddoc_array = coddoc_repleg_array();
-        $data['estado_detalle'] = $user->getEstadoDetalle();
-        $data['coddoc_detalle'] = $coddoc_array[$user->getCoddoc()];
-        $data['tipo_detalle'] = $user->getTipoDetalle();
+        $user = Mercurio07::where('documento', $documento)
+            ->where('tipo', $tipo)
+            ->where('coddoc', $coddoc)
+            ->first();
 
-        return $this->renderObject([
+        $data = $user->toArray();
+        $data['estado_detalle'] = get_user_estado_detalle($user->estado);
+        $data['coddoc_detalle'] = coddoc_repleg_detalle($user->coddoc);
+        $data['tipo_detalle'] = get_tipo_detalle($user->tipo);
+
+        return response()->json([
             'success' => true,
             'data' => $data,
-        ], false);
+        ]);
     }
 
     /**
@@ -390,7 +391,6 @@ class UsuarioController extends ApplicationController
      */
     public function borrarUsuarioAction(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $documento = $request->input('documento');
             $tipo = $request->input('tipo');
@@ -442,6 +442,6 @@ class UsuarioController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 }

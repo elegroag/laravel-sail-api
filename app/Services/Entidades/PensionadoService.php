@@ -401,6 +401,23 @@ class PensionadoService
         $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
     }
 
+    public function buscarTrabajadorSubsidio($cedtra)
+    {
+        $procesadorComando = Comman::Api();
+        $procesadorComando->runCli(
+            [
+                'servicio' => 'ComfacaEmpresas',
+                'metodo' => 'informacion_trabajador',
+                'params' => [
+                    'cedtra' => $cedtra,
+                ],
+            ]
+        );
+        $out = $procesadorComando->toArray();
+
+        return ($out['success'] == true) ? $out['data'] : false;
+    }
+
     public function consultaTipopc(Srequest $request): array|bool
     {
         $tipo_consulta = $request->getParam('tipo_consulta');
@@ -422,28 +439,31 @@ class PensionadoService
                         'mercurio10.fecsis as fecest',
                     ])
                     ->when($condi_extra, function ($q) use ($condi_extra) {
-                        $q->whereRaw($condi_extra);
+                        if (is_array($condi_extra)) $q->where($condi_extra);
+                        if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
                     })
                     ->get();
                 break;
             case 'alluser':
-                $response["datos"] = Mercurio38::where("usuario='{$usuario}' and estado='P'")->get();
+                $response["datos"] = Mercurio38::whereRaw("usuario='{$usuario}' and estado='P'")->get();
                 break;
             case 'count':
-                $response["count"] = Mercurio38::whereRaw("mercurio38.usuario='$usuario' $condi_extra ")
-                    ->join('mercurio20', 'mercurio38.log', 'mercurio20.log')
-                    ->getId();
-
-                $response["all"] = Mercurio38::whereRaw("mercurio38.usuario='$usuario' $condi_extra")
-                    ->join('mercurio20', 'mercurio38.log', 'mercurio20.log')
+                $res = Mercurio38::where("mercurio38.usuario", $usuario)
+                    ->when($condi_extra, function ($q) use ($condi_extra) {
+                        if (is_array($condi_extra)) $q->where($condi_extra);
+                        if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
+                    })
                     ->get();
+
+                $response["all"] = $res;
+                $response["count"] = $res->count();
                 break;
             case 'one':
-                $response["datos"] = Mercurio38::where("id='$numero' and estado='P'")->get();
+                $response["datos"] = Mercurio38::whereRaw("id='$numero' and estado='P'")->first();
                 break;
             case 'info':
-                $mercurio = Mercurio38::where("id='$numero' ")->get();
-                //$response["consulta"] = $this->buscarTrabajadorSubsidio($mercurio->getCedtra());
+                $mercurio = Mercurio38::where("id", $numero)->first();
+                $response["consulta"] = $this->buscarTrabajadorSubsidio($mercurio->getCedtra());
                 break;
             default:
                 $response = false;

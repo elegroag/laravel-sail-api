@@ -439,27 +439,30 @@ class ConyugeService
                         'mercurio10.fecsis as fecest',
                     ])
                     ->when($condi_extra, function ($q) use ($condi_extra) {
-                        $q->whereRaw($condi_extra);
+                        if (is_array($condi_extra)) $q->where($condi_extra);
+                        if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
                     })
                     ->get();
                 break;
             case 'alluser':
-                $response["datos"] = Mercurio32::where("usuario='{$usuario}' and estado='P'")->get();
+                $response["datos"] = Mercurio32::whereRaw("usuario='{$usuario}' and estado='P'")->get();
                 break;
             case 'count':
-                $response["count"] = Mercurio32::whereRaw("mercurio32.usuario='$usuario' $condi_extra ")
-                    ->join('mercurio20', 'mercurio32.log', 'mercurio20.log')
-                    ->getId();
-
-                $response["all"] = Mercurio32::whereRaw("mercurio32.usuario='$usuario' $condi_extra")
-                    ->join('mercurio20', 'mercurio32.log', 'mercurio20.log')
+                $res = Mercurio32::where("mercurio32.usuario", $usuario)
+                    ->when($condi_extra, function ($q) use ($condi_extra) {
+                        if (is_array($condi_extra)) $q->where($condi_extra);
+                        if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
+                    })
                     ->get();
+
+                $response["count"] = $res->count();
+                $response["all"] = $res;
                 break;
             case 'one':
-                $response["datos"] = Mercurio32::where("id='$numero' and estado='P'")->get();
+                $response["datos"] = Mercurio32::whereRaw("id='$numero' and estado='P'")->first();
                 break;
             case 'info':
-                $mercurio = Mercurio32::where("id='$numero' ")->get();
+                $mercurio = Mercurio32::where("id", $numero)->first();
                 $response["consulta"] = $this->buscarConyugeSubsidio($mercurio->getCedcon());
                 break;
             default:

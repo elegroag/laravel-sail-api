@@ -2,6 +2,7 @@
 
 namespace App\Services\Utils;
 
+use App\Exceptions\DebugException;
 use App\Models\Mercurio01;
 use App\Models\Mercurio02;
 use App\Models\Mercurio04;
@@ -2113,10 +2114,13 @@ class GeneralService
 
     public function finishTrans() {}
 
-    public function consultaTipopc($tipopc, $tipo_consulta, $numero = "", $usuario = "", $condi = "")
-    {
-        $condi_extra = "";
-        if ($condi != "") $condi_extra = " $condi";
+    public function consultaTipopc(
+        $tipopc,
+        string $tipo_consulta = '',
+        $numero,
+        $usuario,
+        array|string|null $condi_extra = null
+    ): array {
         $params = [
             'tipopc' => $tipopc,
             'tipo_consulta' => $tipo_consulta,
@@ -2125,43 +2129,44 @@ class GeneralService
             'condi_extra' => $condi_extra,
         ];
 
-        if ($tipopc == "1") {
-            $entityService = new TrabajadorService();
-        }
-        if ($tipopc == "2") {
-            $entityService = new EmpresaService();
-        }
-        if ($tipopc == "3") {
-            $entityService = new ConyugeService();
-        }
-        if ($tipopc == "4") {
-            $entityService = new BeneficiarioService();
-        }
-        if ($tipopc == "5") {
-            $entityService = new ActualizaEmpresaService();
-        }
-        if ($tipopc == "6") {
-            $entityService = new DatosTrabajadorService();
-        }
-        if ($tipopc == "7") {
-            $entityService = new RetiroService();
-        }
-        if ($tipopc == "8") {
-            $entityService = new CertificadoService();
-        }
-        if ($tipopc == "10") {
-            $entityService = new FacultativoService();
-        }
-        if ($tipopc == "9") {
-            $entityService = new PensionadoService();
-        }
-        if ($tipopc == "11") {
-            $entityService = new EmpresaService();
-            //Mercurio39
-        }
-        if ($tipopc == "12") {
-            //Mercurio40
-            $entityService = new EmpresaService();
+        switch ($tipopc) {
+            case '1':
+                $entityService = new TrabajadorService();
+                break;
+            case '2':
+                $entityService = new EmpresaService();
+                break;
+            case '3':
+                $entityService = new ConyugeService();
+                break;
+            case '4':
+                $entityService = new BeneficiarioService();
+                break;
+            case '5':
+                $entityService = new ActualizaEmpresaService();
+                break;
+            case '6':
+                $entityService = new DatosTrabajadorService();
+                break;
+            case '7':
+                $entityService = new RetiroService();
+                break;
+            case '8':
+                $entityService = new CertificadoService();
+                break;
+            case '9':
+                $entityService = new PensionadoService();
+                break;
+            case '10':
+                $entityService = new FacultativoService();
+                break;
+            case '11':
+            case '12':
+            case '13':
+                $entityService = new EmpresaService();
+                break;
+            default:
+                throw new DebugException("Tipo de operación no válido: {$tipopc}");
         }
 
         $out = $entityService->consultaTipopc(

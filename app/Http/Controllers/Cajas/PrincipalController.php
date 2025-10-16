@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
-use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
+use App\Http\Controllers\Controller;
 use App\Models\Gener02;
 use App\Models\Mercurio06;
 use App\Models\Mercurio07;
@@ -24,19 +23,17 @@ use App\Services\Utils\GeneralService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class PrincipalController extends ApplicationController
+class PrincipalController extends Controller
 {
-    protected $db;
-
     protected $user;
 
     protected $tipfun;
 
+
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipfun = session()->has('tipfun') ? session('tipfun') : null;
+        $this->user = session('user');
+        $this->tipfun = session('tipfun');
     }
 
     public function indexAction()
@@ -169,8 +166,8 @@ class PrincipalController extends ApplicationController
 
         return view('cajas/principal/index', [
             'tipfun' => $this->tipfun,
-            'usuario' => $this->user['usuario'],
-            'nombre' => $this->user['nombre'],
+            'usuario' => $this->user['usuario'] ?? '',
+            'nombre' => $this->user['nombre'] ?? '',
             'servicios' => $servicios,
         ]);
     }
@@ -189,14 +186,14 @@ class PrincipalController extends ApplicationController
 
         $mercurio07 = Mercurio07::select('tipo', DB::raw('count(*) as documento'))->groupBy('tipo')->get();
         foreach ($mercurio07 as $mmercurio07) {
-            $mercurio06 = Mercurio06::where('tipo', $mmercurio07->getTipo())->first();
-            $data[] = $mmercurio07->getDocumento();
-            $labels[] = $mercurio06->getDetalle();
+            $mercurio06 = Mercurio06::where('tipo', $mmercurio07->tipo)->first();
+            $data[] = $mmercurio07->documento;
+            $labels[] = $mercurio06->detalle;
         }
         $response['data'] = $data;
         $response['labels'] = $labels;
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function traerOpcionMasUsuadaAction()
@@ -205,13 +202,13 @@ class PrincipalController extends ApplicationController
         $labels = [];
         $mercurio20 = Mercurio20::select('accion', DB::raw('count(*) as log'))->groupBy('accion')->get();
         foreach ($mercurio20 as $mmercurio20) {
-            $data[] = $mmercurio20->getLog();
-            $labels[] = $mmercurio20->getAccion();
+            $data[] = $mmercurio20->log;
+            $labels[] = $mmercurio20->accion;
         }
         $response['data'] = $data;
         $response['labels'] = $labels;
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function traerMotivoMasUsuadaAction()
@@ -220,14 +217,14 @@ class PrincipalController extends ApplicationController
         $data = [];
         $mercurio10 = Mercurio10::select('codest', DB::raw('count(*) as numero'))->groupBy('codest')->get();
         foreach ($mercurio10 as $mmercurio10) {
-            $mercurio11 = Mercurio11::where('codest', $mmercurio10->getCodest())->first();
-            $data[] = $mmercurio10->getNumero();
-            $labels[] = $mercurio11->getDetalle();
+            $mercurio11 = Mercurio11::where('codest', $mmercurio10->codest)->first();
+            $data[] = $mmercurio10->numero;
+            $labels[] = $mercurio11->detalle;
         }
         $response['data'] = $data;
         $response['labels'] = $labels;
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function traerCargaLaboralAction()
@@ -240,26 +237,19 @@ class PrincipalController extends ApplicationController
                 ->distinct()
                 ->get();
 
-            /* foreach ($gener02 as $mgener02) {
+            $mercurio09 = Mercurio09::all();
+            foreach ($gener02 as $mgener02) {
                 $count = 0;
-                $mercurio09 = Mercurio09::all();
-                foreach ($mercurio09 as $mmercurio09) {
-                    $condi = "estado='P'";
-
-                    $generalService = new GeneralService;
-                    $result = $generalService->consultaTipopc(
-                        $mmercurio09->getTipopc(),
-                        'count',
-                        '',
-                        $mgener02->getUsuario(),
-                        $condi
-                    );
-                    $count += $result['count'];
+                foreach ($mercurio09 as $_mercurio09) {
+                    $count += Mercurio09::where('tipopc', $_mercurio09->tipopc)
+                        ->where('usuario', $mgener02->usuario)
+                        ->where('estado', 'P')
+                        ->count();
                 }
                 $data[] = $count;
-                $labels[] = $mgener02->getNombre();
+                $labels[] = $mgener02->nombre;
             }
-            */
+
             $response = [
                 'data' => $data,
                 'labels' => $labels,
@@ -272,7 +262,7 @@ class PrincipalController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function fileExisteGlobalAction(Request $request)

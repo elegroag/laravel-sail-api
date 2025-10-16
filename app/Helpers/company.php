@@ -138,3 +138,92 @@ if (! function_exists('estado_detalle_value')) {
         return $return;
     }
 }
+
+if (! function_exists('get_array_tipos')) {
+    function get_array_tipos()
+    {
+        return [
+            'P' => 'Particular',
+            'T' => 'Trabajador',
+            'E' => 'Empresa aportante',
+            'I' => 'Independiente aportante',
+            'O' => 'Pensionado',
+            'F' => 'Facultativo',
+            'S' => 'Servicio domestico',
+        ];
+    }
+}
+
+if (! function_exists('get_tipo_detalle')) {
+    function get_tipo_detalle($tipo)
+    {
+        switch ($tipo) {
+            case 'P':
+                return 'Particular';
+                break;
+            case 'T':
+                return 'Trabajador';
+                break;
+            case 'E':
+                return 'Empresa aportante';
+                break;
+            case 'I':
+                return 'Independiente aportante';
+                break;
+            case 'O':
+                return 'Pensionado aportante';
+                break;
+            case 'F':
+                return 'Facultativo';
+                break;
+            case 'S':
+                return 'Servicio domestico';
+                break;
+        }
+        return false;
+    }
+}
+
+if (! function_exists('get_user_estados')) {
+    function get_user_estados()
+    {
+        return [
+            'A' => 'ACTIVO',
+            'I' => 'INACTIVO',
+            'M' => 'MUERTO',
+            'B' => 'BLOQUEADO',
+        ];
+    }
+}
+
+if (! function_exists('get_user_estado_detalle')) {
+    function get_user_estado_detalle($estado)
+    {
+        switch ($estado) {
+            case 'A':
+                return 'ACTIVO';
+                break;
+            case 'I':
+                return 'INACTIVO';
+                break;
+            case 'M':
+                return 'MUERTO';
+                break;
+            case 'B':
+                return 'BLOQUEADO';
+                break;
+        }
+        return false;
+    }
+}
+
+
+if (! function_exists('coddoc_repleg_detalle')) {
+    /**
+     * @return array
+     */
+    function coddoc_repleg_detalle($coddoc)
+    {
+        return coddoc_repleg_array()[$coddoc] ?? false;
+    }
+}

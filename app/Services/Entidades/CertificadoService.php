@@ -410,27 +410,30 @@ class CertificadoService
                         'mercurio10.fecsis as fecest',
                     ])
                     ->when($condi_extra, function ($q) use ($condi_extra) {
-                        $q->whereRaw($condi_extra);
+                        if (is_array($condi_extra)) $q->where($condi_extra);
+                        if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
                     })
                     ->get();
                 break;
             case 'alluser':
-                $response["datos"] = Mercurio45::where("usuario='{$usuario}' and estado='P'")->get();
+                $response["datos"] = Mercurio45::whereRaw("usuario='{$usuario}' and estado='P'")->get();
                 break;
             case 'count':
-                $response["count"] = Mercurio45::whereRaw("Mercurio45.usuario='$usuario' $condi_extra ")
-                    ->join('mercurio20', 'Mercurio45.log', 'mercurio20.log')
-                    ->getId();
-
-                $response["all"] = Mercurio45::whereRaw("Mercurio45.usuario='$usuario' $condi_extra")
-                    ->join('mercurio20', 'Mercurio45.log', 'mercurio20.log')
+                $res = Mercurio45::where("mercurio45.usuario", $usuario)
+                    ->when($condi_extra, function ($q) use ($condi_extra) {
+                        if (is_array($condi_extra)) $q->where($condi_extra);
+                        if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
+                    })
                     ->get();
+
+                $response["all"] = $res;
+                $response["count"] = $res->count();
                 break;
             case 'one':
-                $response["datos"] = Mercurio45::where("id='$numero' and estado='P'")->get();
+                $response["datos"] = Mercurio45::whereRaw("id='$numero' and estado='P'")->first();
                 break;
             case 'info':
-                $mercurio = Mercurio45::where("id='$numero' ")->get();
+                $mercurio = Mercurio45::where("id", $numero)->first();
                 $response["consulta"] = $this->buscarTrabajadorSubsidio($mercurio->getCedtra());
                 break;
             default:

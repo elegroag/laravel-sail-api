@@ -9,7 +9,7 @@ class Trabajador extends Model
 {
     use HasFactory;
 
-    protected $table = 'trabajadores';
+    protected $table = 'subsi15';
 
     protected $fillable = [
         'nombres',

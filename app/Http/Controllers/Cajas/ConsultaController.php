@@ -14,6 +14,7 @@ use App\Services\Utils\GeneralService;
 use App\Services\ReportGenerator\ReportService;
 use Generator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ConsultaController extends ApplicationController
 {
@@ -43,13 +44,30 @@ class ConsultaController extends ApplicationController
             ->join('mercurio08', 'gener02.usuario', '=', 'mercurio08.usuario')
             ->get();
 
-        $mercurio09 = Mercurio09::all();
-        $consultasOldServices = new GeneralService;
+        $generalService = new GeneralService;
+        $mercurio09 = Mercurio09::select(
+            'gener02.usuario',
+            'gener02.nombre',
+            'mercurio09.detalle',
+            'mercurio09.tipopc',
+            'mercurio09.dias'
+        )
+            ->join('mercurio08', 'mercurio09.tipopc', '=', 'mercurio08.tipopc')
+            ->join('gener02', 'gener02.usuario', '=', 'mercurio08.usuario')
+            ->where('gener02.estado', 'A')
+            ->where('mercurio08.codofi', '01')
+            ->get()
+            ->map(function ($item) use ($generalService) {
+                $item = $item->toArray();
+                $out =  $generalService->consultaTipopc($item['tipopc'], 'count', '', $item['usuario']);
+                $item['cantidad'] = $out['count'];
+                return $item;
+            });
+
         return view('cajas.consulta.carga_laboral', [
             'title' => 'Carga Laboral',
             'gener02' => $gener02,
-            'mercurio09' => $mercurio09,
-            'consultasOldServices' => $consultasOldServices,
+            'mercurio09' => $mercurio09
         ]);
     }
 
@@ -70,12 +88,12 @@ class ConsultaController extends ApplicationController
             }
             yield $headers;
 
-            $consultasOldServices = new GeneralService;
+            $generalService = new GeneralService;
             foreach ($gener02 as $mgener02) {
                 $row = [$mgener02->getNombre()];
                 foreach ($mercurio09 as $mmercurio09) {
-                    $condi = "estado='P'";
-                    $result = $consultasOldServices->consultaTipopc($mmercurio09->getTipopc(), 'count', '', $mgener02->getUsuario(), $condi);
+                    $condi = ["estado" => 'P'];
+                    $result = $generalService->consultaTipopc($mmercurio09->getTipopc(), 'count', null, $mgener02->getUsuario(), $condi);
                     $row[] = $result['count'];
                 }
                 yield $row;
@@ -116,7 +134,7 @@ class ConsultaController extends ApplicationController
                     // Conteo por estado
                     foreach ($estados as $key => $label) {
                         $condi = "estado='$key' and mercurio20.fecha>='$fecini' and mercurio20.fecha<='$fecfin'";
-                        $result = $consultasOldServices->consultaTipopc($mmercurio09->getTipopc(), 'count', '', $mgener02->getUsuario(), $condi);
+                        $result = $consultasOldServices->consultaTipopc($mmercurio09->getTipopc(), 'count', null, $mgener02->getUsuario(), $condi);
                         $count = $result['count'];
                         $row[] = $count;
                         $total_estado += $count;
@@ -127,7 +145,7 @@ class ConsultaController extends ApplicationController
 
                     // Vencidos según lógica original de este método
                     $condi = "estado<>'T' and mercurio20.fecha>='$fecini' and mercurio20.fecha<='$fecfin'";
-                    $result = $consultasOldServices->consultaTipopc($mmercurio09->getTipopc(), 'count', '', $mgener02->getUsuario(), $condi);
+                    $result = $consultasOldServices->consultaTipopc($mmercurio09->getTipopc(), 'count', null, $mgener02->getUsuario(), $condi);
                     $mercurio = $result['all'];
                     $total_vencido = 0;
                     foreach ($mercurio as $mmercurio) {
@@ -210,7 +228,7 @@ class ConsultaController extends ApplicationController
                     $condi = "estado='$key' and mercurio20.fecha>='$fecini' and mercurio20.fecha<='$fecfin'";
 
                     $consultasOldServices = new GeneralService;
-                    $result = $consultasOldServices->consultaTipopc($mmercurio09->getTipopc(), 'count', '', $mgener02->getUsuario(), $condi);
+                    $result = $consultasOldServices->consultaTipopc($mmercurio09->getTipopc(), 'count', null, $mgener02->getUsuario(), $condi);
                     $html .= "<td align='center'>";
                     $html .= "{$result['count']}";
                     $html .= '</td>';
@@ -219,7 +237,7 @@ class ConsultaController extends ApplicationController
                 $condi = "estado<>'T' and mercurio20.fecha>='$fecini' and mercurio20.fecha<='$fecfin'";
 
                 $consultasOldServices = new GeneralService;
-                $result = $consultasOldServices->consultaTipopc($mmercurio09->getTipopc(), 'count', '', $mgener02->getUsuario(), $condi);
+                $result = $consultasOldServices->consultaTipopc($mmercurio09->getTipopc(), 'count', null, $mgener02->getUsuario(), $condi);
                 $mercurio = $result['all'];
                 $total_vencido = 0;
 
