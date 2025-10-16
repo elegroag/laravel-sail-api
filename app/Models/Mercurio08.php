@@ -29,9 +29,9 @@ class Mercurio08 extends ModelBase
     protected function rules()
     {
         return [
-            'codofi' => 'required|numeric|min:5',
+            'codofi' => 'required|string|min:2',
             'tipopc' => 'required|numeric|min:1',
-            'usuario' => 'required|string|min:0',
+            'usuario' => 'required|numeric|min:1',
             '_id' => [
                 'required|string',
                 Rule::unique('mercurio08')->where(function ($query) {

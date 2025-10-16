@@ -11,7 +11,8 @@
     'disabled' => false,
     'className' => 'form-control',
     'attributes' => '',
-    'options' => []
+    'options' => [],
+    'dummy' => false,
 ])
 
 <div class="form-group" group-for="{{ $name }}">
@@ -24,6 +25,9 @@
         {{ $disabled ? 'disabled' : '' }} 
         {{ $readonly ? 'readonly' : '' }} 
         {{ $attributes }}>
+         @if ($dummy)
+            <option value="">{{ $dummy }}</option>
+        @endif
         @foreach ($options as $key => $value)
             <option value="{{ $key }}">{{ $value }}</option>
         @endforeach

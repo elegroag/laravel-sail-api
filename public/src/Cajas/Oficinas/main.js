@@ -2,13 +2,20 @@ import { $App } from '@/App';
 import { Messages } from '@/Utils';
 import { buscar, EventsPagination, validePk } from '../Glob/Glob';
 
-let validator = undefined;
-let codofi_global = undefined;
 window.App = $App;
 
+const validatorOpcion = () => {
+    $('#form_opcion').validate({
+        rules: {
+            tipopc: { required: true },
+            usuario: { required: true },
+            codofi: { required: true },
+        },
+    });
+};
 
 const validatorInit = () => {
-    validator = $('#form').validate({
+    $('#form').validate({
         rules: {
             codofi: { required: true },
             detalle: { required: true },
@@ -17,6 +24,32 @@ const validatorInit = () => {
         },
     });
 };
+
+const validaPkOpcion = (e) => {
+    e.stopPropagation();
+    
+    if ($('#tipopc_opt').val() == '') return;
+    if ($('#usuario_opt').val() == '') return;
+    
+    window.App.trigger('syncro', {
+        url: window.App.url(window.ServerController + '/valide_pk_opcion'),
+        data: {
+            codofi: $('#codofi_opt').val(),
+            tipopc: $('#tipopc_opt').val(),
+            usuario: $('#usuario_opt').val(),
+        },
+        silent: true,
+        callback: (response) => {
+            if (response.flag == false) {
+                Messages.display(response.msg, 'warning');
+                $('#usuario_opt').val('');
+            }
+        },
+        error: (xhr) => {
+            Messages.display('Error al validar: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
+        }
+    });   
+}
 
 $(function () {
     window.App.initialize();
@@ -138,22 +171,32 @@ $(function () {
 
     $(document).on('click', "[data-toggle='opcion-view']", (e) => {
         e.preventDefault();
-        const codofi = $(e.currentTarget).attr('data-cid');
+        const codofi = $(e.currentTarget).data('cid');
         window.App.trigger('syncro', {
             url: window.App.url(window.ServerController + '/opcion_view'),
-            data: { codofi },
+            data: { 
+                codofi
+            },
             callback: (response) => {
+                if(response) {
+                    modalOpciones.show();
+                    const tpl = _.template(document.getElementById('tmp_opciones').innerHTML);
+                    $('#captureOpcionesbody').html(tpl({
+                        _collection: response.data,
+                        codofi: codofi 
+                    }));
 
-                modalOpciones.show();
-                const tpl = _.template(document.getElementById('tmp_opciones').innerHTML);
-                $('#captureOpcionesbody').html(tpl({_collection: response.data}));
-
-                $('#form_opcion :input').each(function () {
-                    if (this.type !== 'button') {
-                        $(this).val('');
-                        $(this).attr('disabled', false);
-                    }
-                });
+                    $('#form_opcion :input').each(function () {
+                        if (this.type !== 'button') {
+                            $(this).val('');
+                            $(this).attr('disabled', false);
+                        }
+                    });
+                    $('#usuario_opt, #tipopc_opt').select2({
+                        dropdownParent: $("#captureOpciones")
+                    });
+                    validatorOpcion();
+                }
             },
             error: (xhr) => {
                 Messages.display('Error al cargar opciones: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
@@ -187,30 +230,6 @@ $(function () {
         });
     });
 
-    $(document).on('click', "[data-toggle='opcion-guardar']", (e) => {
-        e.preventDefault();
-        if (!$('#form_opcion').valid()) return;
-        window.App.trigger('syncro', {
-            url: window.App.url(window.ServerController + '/guardarOpcion'),
-            data: {
-                codofi: codofi_global,
-                tipopc: $('#tipopc_08').val(),
-                usuario: $('#usuario_08').val(),
-            },
-            callback: (response) => {
-                if (response['flag'] == true) {
-                    Messages.display(response['msg'], 'success');
-                    $(document).find("[data-toggle='opcion-view'][data-cid='" + codofi_global + "']").trigger('click');
-                } else {
-                    Messages.display(response['msg'], 'error');
-                }
-            },
-            error: (xhr) => {
-                Messages.display('Error al guardar opción: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
-            }
-        });
-    });
-
     $(document).on('click', "[data-toggle='opcion-borrar']", (e) => {
         e.preventDefault();
         const codofi = $(e.currentTarget).attr('data-codofi');
@@ -235,17 +254,20 @@ $(function () {
 
     $(document).on('click', "[data-toggle='ciudad-borrar']", (e) => {
         e.preventDefault();
-        const codofi = $(e.currentTarget).attr('data-codofi');
-        const codciu = $(e.currentTarget).attr('data-codciu');
+        const codofi = $(e.currentTarget).data('codofi');
+        const codciu = $(e.currentTarget).data('codciu');
         window.App.trigger('syncro', {
-            url: window.App.url(window.ServerController + '/borrarCiudad'),
-            data: { codofi, codciu },
+            url: window.App.url(window.ServerController + '/borrar_ciudad'),
+            data: { 
+                codofi, 
+                codciu 
+            },
             callback: (response) => {
-                if (response['flag'] == true) {
-                    Messages.display(response['msg'], 'success');
+                if (response.flag) {
+                    Messages.display(response.msj, 'success');
                     modalCiudades.hide();
                 } else {
-                    Messages.display(response['msg'], 'error');
+                    Messages.display(response.msj, 'error');
                 }
             },
             error: (xhr) => {
@@ -257,17 +279,20 @@ $(function () {
     $(document).on('click', "[data-toggle='ciudad-guardar']", (e) => {
         e.preventDefault();
         if (!$('#form_ciudad').valid()) return;
+        const codofi = $(e.currentTarget).data('codofi');
+        const codciu = $('#codciu').val();
+
         window.App.trigger('syncro', {
-            url: window.App.url(window.ServerController + '/guardarCiudad'),
+            url: window.App.url(window.ServerController + '/guardar_ciudad'),
             data: {
-                codofi: codofi_global,
-                codciu: $('#codciu_05').val(),
+                codofi,
+                codciu
             },
             callback: (response) => {
-                if (response['flag'] == true) {
-                    Messages.display(response['msg'], 'success');
+                if (response.success) {
+                    Messages.display(response.msj, 'success');
                 } else {
-                    Messages.display(response['msg'], 'error');
+                    Messages.display(response.msj, 'error');
                 }
             },
             error: (xhr) => {
@@ -276,40 +301,20 @@ $(function () {
         });
     });
 
-    $(document).on('blur', '#tipopc_08, #usuario_08', function () {
-        if ($('#tipopc_08').val() == '') return;
-        if ($('#usuario_08').val() == '') return;
-        window.App.trigger('syncro', {
-            url: window.App.url(window.ServerController + '/validePkOpcion'),
-            data: {
-                codofi: codofi_global,
-                tipopc: $('#tipopc_08').val(),
-                usuario: $('#usuario_08').val(),
-            },
-            callback: (response) => {
-                if (response['flag'] == false) {
-                    Messages.display(response['msg'], 'warning');
-                    $('#usuario_08').val('');
-                    actualizar_select();
-                }
-            },
-            error: (xhr) => {
-                Messages.display('Error al validar: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
-            }
-        });
-    });
-
     $(document).on('blur', '#codciu_05', function () {
         if ($('#codciu_05').val() == '') return;
+        const codofi = $(e.currentTarget).data('codofi');
+        const codciu = $('#codciu_05').val();
+
         window.App.trigger('syncro', {
             url: window.App.url(window.ServerController + '/validePkCiudad'),
             data: {
-                codofi: codofi_global,
-                codciu: $('#codciu_05').val(),
+                codofi,
+                codciu,
             },
             callback: (response) => {
-                if (response['flag'] == false) {
-                    Messages.display(response['msg'], 'warning');
+                if (!response.success) {
+                    Messages.display(response.msj, 'warning');
                     $('#codciu_05').val('');
                     $('#codciu_05').focus().select();
                 }
@@ -319,4 +324,33 @@ $(function () {
             }
         });
     });
+
+    $(document).on('click', "[data-toggle='guardar-opcion']", (e) => {
+        e.preventDefault();
+        if (!$('#form_opcion').valid()) return;
+        const codofi = $(e.currentTarget).data('codofi');
+        const tipopc = $("[name='tipopc_opt']").val();
+        const usuario = $("[name='usuario_opt']").val();
+
+        window.App.trigger('syncro', {
+            url: window.App.url(window.ServerController + '/guardar_opcion'),
+            data: {
+                codofi,
+                tipopc,
+                usuario,
+            },
+            callback: (response) => {
+                if (response.success) {
+                    Messages.display(response.msj, 'success');
+                } else {
+                    Messages.display(response.msj, 'error');
+                }
+            },
+            error: (xhr) => {
+                Messages.display('Error al guardar opcion: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
+            }
+        });
+    });
+
+    $(document).on('blur', '#tipopc_opt, #usuario_opt', validaPkOpcion);
 });

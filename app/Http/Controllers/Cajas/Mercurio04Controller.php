@@ -13,6 +13,7 @@ use App\Models\Mercurio09;
 use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Paginate;
+use Exception;
 use Illuminate\Http\Request;
 
 class Mercurio04Controller extends ApplicationController
@@ -73,12 +74,25 @@ class Mercurio04Controller extends ApplicationController
         foreach ($out['ciudades'] as $mcodciu) {
             $_codciu[$mcodciu['codciu']] = $mcodciu['detciu'];
         }
+
+        $out = Gener02::where('estado', 'A')->get();
+        foreach ($out as $usuario) {
+            $usuarios[$usuario->usuario] = $usuario->nombre;
+        }
+
+        $out = Mercurio09::all();
+        foreach ($out as $tipopc) {
+            $tipopcs[$tipopc->tipopc] = $tipopc->detalle;
+        }
+
         return view('cajas.mercurio04.index', [
             'campo_filtro' => $campo_field,
             'title' => 'Oficinas',
             'ciudades' => $_codciu,
             'principal' => ['S' => 'Sí', 'N' => 'No'],
             'estados' => ['A' => 'Activo', 'I' => 'Inactivo'],
+            'usuarios' => $usuarios,
+            'tipopcs' => $tipopcs,
         ]);
     }
 
@@ -108,9 +122,8 @@ class Mercurio04Controller extends ApplicationController
     public function editar(Request $request)
     {
         try {
-            $this->setResponse('ajax');
             $codofi = $request->input('codofi');
-            $mercurio04 = Mercurio04::whereRaw("codofi = '$codofi'")->first();
+            $mercurio04 = Mercurio04::where("codofi", $codofi)->first();
             if ($mercurio04 == false) {
                 $mercurio04 = new Mercurio04;
             }
@@ -354,7 +367,7 @@ class Mercurio04Controller extends ApplicationController
     {
         try {
             $codofi = $request->input('codofi');
-            $mercurio08 = Mercurio08::whereRaw("codofi='{$codofi}'")->get();
+            $mercurio08 = Mercurio08::where("codofi", $codofi)->get();
             $data = $mercurio08->map(function ($row) {
                 $arr = $row->toArray();
                 $mercurio09 = Mercurio09::where('tipopc', $row->tipopc)->first();
@@ -382,37 +395,45 @@ class Mercurio04Controller extends ApplicationController
     public function guardarOpcion(Request $request)
     {
         try {
-            try {
-                $this->setResponse('ajax');
-                $codofi = $request->input('codofi');
-                $tipopc = $request->input('tipopc');
-                $usuario = $request->input('usuario');
+            $codofi = $request->input('codofi');
+            $tipopc = $request->input('tipopc');
+            $usuario = $request->input('usuario');
+            $response = $this->db->begin();
 
-                $response = $this->db->begin();
-                $mercurio08 = Mercurio08::whereRaw("codofi='{$codofi}' and tipopc='{$tipopc}' and usuario='{$usuario}'")->first();
-                if ($mercurio08 == false) {
-                    $mercurio08 = new Mercurio08;
-                    $orden = Mercurio08::max('orden')->whereRaw(" codofi='$codofi' and tipopc='$tipopc'") + 1;
-                    $mercurio08->setOrden($orden);
-                }
-
-                $mercurio08->setCodofi($codofi);
-                $mercurio08->setTipopc($tipopc);
-                $mercurio08->setUsuario($usuario);
-                if (! $mercurio08->save()) {
-                    $this->db->rollback();
-                }
-                $this->db->commit();
-                $response = 'Movimiento Realizado Con Exito';
-
-                return $this->renderObject($response, false);
-            } catch (DebugException $e) {
-                $this->db->rollback();
+            $mercurio08 = Mercurio08::whereRaw("codofi='{$codofi}' and tipopc='{$tipopc}' and usuario='{$usuario}'")->first();
+            if ($mercurio08 == false) {
+                $orden = Mercurio08::whereRaw(" codofi='{$codofi}' and tipopc='{$tipopc}'")->max('orden') + 1;
+                $mercurio08 = Mercurio08::create(
+                    [
+                        'order' => $orden,
+                        'codofi' => $codofi,
+                        'tipopc' => $tipopc,
+                        'usuario' => $usuario,
+                    ]
+                );
+            } else {
+                $mercurio08->update([
+                    'orden' => $mercurio08->orden + 1
+                ]);
             }
+            $this->db->commit();
+            $response = [
+                'success' => true,
+                'msj' => 'Movimiento Realizado Con Exito'
+            ];
         } catch (DebugException $e) {
-            $response = 'No se pudo realizar el movimiento ' . $e->getMessage();
-            return $this->renderObject($response, false);
+            $this->db->rollback();
+            $response = [
+                'success' => false,
+                'msj' => 'No se pudo realizar el movimiento ' . $e->getMessage()
+            ];
+        } catch (Exception $e) {
+            $response = [
+                'success' => false,
+                'msj' => 'No se pudo realizar el movimiento ' . $e->getMessage()
+            ];
         }
+        return $this->renderObject($response, false);
     }
 
     public function borrarOpcion(Request $request)

@@ -116,7 +116,51 @@
     </script>
 
     <script type="text/template" id="tmp_opciones">
-       <table class='table table-bordered'>
+        <form id="form_opcion" method="POST" action="#!" class="validation_form" autocomplete="off" novalidate>
+            <div class="row justify-content-between mb-4">
+                <div class="col-md-5">
+                    <div class="form-group">
+                        @component('components.select-field', [
+                            'id' => 'tipopc_opt', 
+                            'name' => 'tipopc_opt', 
+                            'dummy' => 'seleccione aquí', 
+                            'className' => 'form-control',
+                            'options' => $tipopcs,
+                            'label' => 'Tipo de opción'
+                        ])
+                        @endcomponent
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="form-group">
+                        @component('components.select-field', [
+                            'id' => 'usuario_opt', 
+                            'name' => 'usuario_opt', 
+                            'dummy' => 'seleccione aquí', 
+                            'className' => 'form-control',
+                            'options' => $usuarios,
+                            'label' => 'Usuario'
+                        ])    
+                        @endcomponent
+                    </div>
+                </div>
+                <div class="col-auto pt-4">
+                    <button id="btnAddOpcion" type="button" class="btn btn-success mt-3" data-codofi="<%=codofi %>" data-toggle="guardar-opcion" >
+                        Adiciona
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <h5>Lista de opciones por funcionario</h5>
+        <table class='table table-bordered'>
+            <thead>
+                <tr>
+                    <th>Tipo de opción</th>
+                    <th>Usuario</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
             <tbody>
                 <% _.each(_collection, function(item){ %>
                 <tr>
@@ -135,7 +179,7 @@
                 </tr>
                 <% })%>
             </tbody>
-       </table>
+        </table>
     </script>
 
     <script>
