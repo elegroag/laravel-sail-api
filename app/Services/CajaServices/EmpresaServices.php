@@ -65,8 +65,8 @@ class EmpresaServices
         if ($paginate->items) {
             foreach ($paginate->items as $entity) {
                 $style = '#61b5ff';
-                $dias_vencidos = CalculatorDias::calcular($this->tipopc, $entity->getId(), $entity->getFecini());
-                if ($entity->getEstado() == 'P') {
+                $dias_vencidos = CalculatorDias::calcular($this->tipopc, $entity->id, $entity->fecsol);
+                if ($entity->estado == 'P') {
                     if ($dias_vencidos == 3) {
                         $style = '#d3a246; font-size:1.5em';
                     }
@@ -76,16 +76,15 @@ class EmpresaServices
                 } else {
                     $style = '#61b5ff';
                 }
-                $id = $entity->getId();
-                // $sat = ($entity->getDocumentoRepresentanteSat() > 0) ? "SAT" : "NORMAL";
+                $id = $entity->id;
                 $this->table->add_row(
                     "<a data-cid='{$id}' data-toggle='info' class='btn btn-xs btn-primary text-white' title='Info'> <i class='fas fa-hand-point-up text-white'></i></a>",
                     " <i class='fas fa-bell' style='color:{$style}'></i> <span class='text-nowrap'>{$dias_vencidos}</span> ",
                     'NORMAL',
-                    $entity->getNit(),
-                    $entity->getRazsoc(),
-                    $entity->getEstadoDetalle(),
-                    $entity->getFeciniString()
+                    $entity->nit,
+                    $entity->razsoc,
+                    estado_detalle_value($entity->estado),
+                    $entity->fecsol
                 );
             }
         } else {

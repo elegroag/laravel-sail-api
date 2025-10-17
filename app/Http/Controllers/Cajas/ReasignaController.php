@@ -5,12 +5,13 @@ namespace App\Http\Controllers\Cajas;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Models\Gener02;
+use App\Models\Mercurio09;
 use App\Models\Mercurio30;
 use App\Models\Mercurio31;
 use App\Models\Mercurio32;
 use App\Models\Mercurio34;
 use App\Models\Mercurio35;
-use App\Services\Request as ServicesRequest;
 use App\Services\Srequest;
 use App\Services\Tag;
 use App\Services\Utils\GeneralService;
@@ -23,23 +24,31 @@ class ReasignaController extends ApplicationController
 
     protected $user;
 
-    protected $tipo;
+    protected $tipfun;
 
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user') ?? null;
+        $this->tipfun = session('tipfun') ?? null;
     }
 
-    public function indexAction()
+    public function index()
     {
+        $gener02 = Gener02::where('estado', 'A')->join('mercurio08', 'gener02.usuario', '=', 'mercurio08.usuario')->get();
+        $data_usuarios = $gener02->pluck('nombre', 'usuario');
+        $data_mercurio09 = Mercurio09::all()->pluck('detalle', 'tipopc');
+        $accion = array('C' => 'CONSULTA', 'P' => 'PROCESO');
+
         return view('cajas.reasigna.index', [
-            'title' => 'Reasigna',
+            'title' => 'Consulta Reasigna',
+            'data_usuarios' => $data_usuarios->toArray(),
+            'data_mercurio09' => $data_mercurio09->toArray(),
+            'accion' => $accion
         ]);
     }
 
-    public function proceso_reasignar_masivoAction(Request $request)
+    public function procesoReasignarMasivo(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -64,7 +73,7 @@ class ReasignaController extends ApplicationController
             if ($tipopc == 7) {
                 $model = new Mercurio35;
             }
-            $this->reasigna_proceso($model, $usuori, $usudes, $fecini, $fecfin);
+            $this->reasignaProceso($model, $usuori, $usudes, $fecini, $fecfin);
 
             $response = [
                 'success' => true,
@@ -82,7 +91,7 @@ class ReasignaController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function reasigna_proceso($model, $usuori, $usudes, $fecini, $fecfin)
+    function reasignaProceso($model, $usuori, $usudes, $fecini, $fecfin)
     {
         if (! $model) {
             return;
@@ -94,87 +103,72 @@ class ReasignaController extends ApplicationController
         }
     }
 
-    public function traerDatosAction(Request $request)
+    public function traerDatos(Request $request)
     {
-        $this->setResponse('ajax');
         $tipopc = $request->input('tipopc');
         $usuario = $request->input('usuario');
-        $response = "<table class='table table-hover align-items-center table-bordered'>";
-        $response .= "<thead class='thead-dark'>";
-        $response .= '<tr>';
-        $response .= "<th scope='col'>Id</th>";
-        $response .= "<th scope='col'>Documento</th>";
-        $response .= "<th scope='col'>Nombre</th>";
-        if ($tipopc == '8' || $tipopc == '5') {
-            $response .= "<th scope='col'></th>";
-        }
-        $response .= "<th scope='col'></th>";
-        $response .= '</tr>';
-        $response .= '</thead>';
-        $response .= "<tbody class='list'>";
 
-        $consultasOldServices = new GeneralService;
-        $mercurio = $consultasOldServices->consultaTipopc($tipopc, 'alluser', '', $usuario);
-
-        foreach ($mercurio['datos'] as $mmercurio) {
-            if ($tipopc == 1 || $tipopc == 9 || $tipopc == 10 || $tipopc == 11 || $tipopc == 12) { // trabajador
-                $documento = 'getCedtra';
-                $nombre = 'getNombre';
+        $generalService = new GeneralService;
+        $mercurio = $generalService->consultaTipopc($tipopc, 'alluser', '', $usuario);
+        $entidad = $mercurio['datos'];
+        $solicitudes = $entidad->map(function ($item) use ($tipopc) {
+            $data = $item->toArray();
+            switch ($tipopc) {
+                case '1':
+                case '9':
+                case '10':
+                case '11':
+                case '12':
+                    $documento = $item->cedtra;
+                    $nombre = $item->nombre;
+                    break;
+                case '2':
+                    $documento = $item->nit;
+                    $nombre = $item->razsoc;
+                    break;
+                case '3':
+                    $documento = $item->cedcon;
+                    $nombre = $item->nombre;
+                    break;
+                case '4':
+                    $documento = $item->numdoc;
+                    $nombre = $item->nombre;
+                    break;
+                case '5':
+                    $documento = $item->documento;
+                    $nombre = $item->nombre;
+                    break;
+                case '7':
+                    $documento = $item->cedtra;
+                    $nombre = $item->nomtra;
+                    break;
+                case '8':
+                    $documento = $item->codben;
+                    $nombre = $item->nombre;
+                    break;
+                default:
+                    $documento = $item->documento;
+                    $nombre = $item->nombre;
+                    break;
             }
-            if ($tipopc == 2) { // empresa
-                $documento = 'getNit';
-                $nombre = 'getRazsoc';
-            }
-            if ($tipopc == 3) { // conyuge
-                $documento = 'getCedcon';
-                $nombre = 'getNombre';
-            }
-            if ($tipopc == 4) { // beneficiario
-                $documento = 'getDocumento';
-                $nombre = 'getNombre';
-            }
-            if ($tipopc == 5) { // basicos
-                $documento = 'getDocumento';
-                $nombre = 'getDocumentoDetalle';
-                $extra = $mmercurio->getCampoDetalle() . ' - ' . $mmercurio->getAntval() . ' - ' . $mmercurio->getValor();
-            }
-            if ($tipopc == 7) { // retiro
-                $documento = 'getCedtra';
-                $nombre = 'getNomtra';
-            }
-            if ($tipopc == 8) { // certificiados
-                $documento = 'getCodben';
-                $nombre = 'getNombre';
-                $extra = $mmercurio->getNomcer();
-            }
-            $response .= '<tr>';
-            $response .= "<td>{$mmercurio->getId()}</td>";
-            $response .= "<td>{$mmercurio->$documento()}</td>";
-            $response .= "<td>{$mmercurio->$nombre()}</td>";
-            if ($tipopc == '8' || $tipopc == '5') {
-                $response .= "<td>$extra</td>";
-            }
-            $response .= "<td class='table-actions'>";
-            $response .= "<a href='#!' class='table-action btn btn-xs btn-primary' title='Info' onclick=\"info('$tipopc','{$mmercurio->getId()}')\">";
-            $response .= "<i class='fas fa-info'></i>";
-            $response .= '</a>';
-            $response .= '</td>';
-            $response .= '</tr>';
-        }
-        $response .= '</tbody>';
-        $response .= '</table>';
-
-        return $this->renderObject($response, false);
+            $data['documento'] = $documento;
+            $data['nombre'] = $nombre;
+            return $data;
+        });
+        return view('cajas.reasigna._tabla', [
+            'tipopc' => $tipopc,
+            'solicitudes' => $solicitudes,
+        ]);
     }
 
-    public function inforAction(Request $request)
+    public function infor(Request $request)
     {
         $this->setResponse('ajax');
         $tipopc = $request->input('tipopc');
         $id = $request->input('id');
         $response = '';
-        $consultasOldServices = new GeneralService;
-        $result = $consultasOldServices->consultaTipopc($tipopc, 'info', $id);
+        $generalService = new GeneralService;
+        $result = $generalService->consultaTipopc($tipopc, 'info', $id, '');
 
         $response = $result['consulta'];
         $response .= "<div class='jumbotron'>";
@@ -201,7 +195,7 @@ class ReasignaController extends ApplicationController
         return $this->renderText($response);
     }
 
-    public function cambiar_usuarioAction(Request $request)
+    public function cambiarUsuario(Request $request)
     {
         try {
 
@@ -209,11 +203,10 @@ class ReasignaController extends ApplicationController
             $tipopc = $request->input('tipopc');
             $id = $request->input('id');
             $usuario = $request->input('usuario');
-            $modelos = ['mercurio33', 'Mercurio35'];
 
             $response = $this->db->begin();
-            $consultasOldServices = new GeneralService;
-            $result = $consultasOldServices->consultaTipopc($tipopc, 'one', $id);
+            $generalService = new GeneralService;
+            $result = $generalService->consultaTipopc($tipopc, 'one', $id, '');
 
             $mercurio = $result['datos'];
             $mercurio->setUsuario($usuario);

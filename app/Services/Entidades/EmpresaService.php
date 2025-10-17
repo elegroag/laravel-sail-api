@@ -19,6 +19,7 @@ use App\Models\Tranoms;
 use App\Services\Srequest;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
+use Illuminate\Support\Facades\DB;
 
 class EmpresaService
 {
@@ -597,7 +598,7 @@ class EmpresaService
                     ->get();
                 break;
             case 'alluser':
-                $response["datos"] = Mercurio30::whereRaw("usuario='{$usuario}' and estado='P'")->get();
+                $response["datos"] = Mercurio30::where("usuario", $usuario)->where("estado", 'P')->get();
                 break;
             case 'count':
                 $res = Mercurio30::where("mercurio30.usuario", $usuario)
@@ -611,7 +612,7 @@ class EmpresaService
                 $response["all"] = $res;
                 break;
             case 'one':
-                $response["datos"] = Mercurio30::whereRaw("id='{$numero}' and estado='P'")->first();
+                $response["datos"] = Mercurio30::where("id", $numero)->where("estado", 'P')->first();
                 break;
             case 'info':
                 $mercurio = Mercurio30::where("id", $numero)->first();

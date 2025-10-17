@@ -1,98 +1,13 @@
 import { $App } from '@/App';
 import { Messages } from '@/Utils';
+import flatpickr from 'flatpickr';
+import { Spanish } from 'flatpickr/dist/l10n/es';
 
 window.App = $App;
-
-function traerDatos() {
-	if ($('#tipopc').val() == '') return;
-	if ($('#usuario').val() == '') return;
-
-	$.ajax({
-		type: 'POST',
-		url: Utils.getKumbiaURL($Kumbia.controller + '/traerDatos'),
-		data: {
-			tipopc: $('#tipopc').val(),
-			usuario: $('#usuario').val(),
-		},
-	})
-		.done(function (response) {
-			$('#consulta').html(response);
-		})
-		.fail(function (jqXHR, textStatus) {
-			_alert('Request failed: ' + textStatus);
-		});
-}
-
-function info(tipopc, id) {
-	$.ajax({
-		type: ' POST',
-		url: Utils.getKumbiaURL($Kumbia.controller + '/info'),
-		data: {
-			tipopc: tipopc,
-			id: id,
-		},
-	})
-		.done(function (response) {
-			$('#result_info').html(response);
-			$('#capture-modal-info').modal();
-		})
-		.fail(function (jqXHR, textStatus) {
-			_alert('Request failed: ' + textStatus);
-		});
-}
-
-function cambiar_usuario(tipopc, id) {
-	$.ajax({
-		type: ' POST',
-		url: Utils.getKumbiaURL($Kumbia.controller + '/cambiar_usuario'),
-		data: {
-			tipopc: tipopc,
-			id: id,
-			usuario: $('#usuario_rea').val(),
-		},
-	})
-		.done(function (response) {
-			if (response && response.flag == true) {
-				$('#capture-modal-info').modal('hide');
-				_alert('success', {
-					message: response['msg'],
-				});
-				traerDatos();
-				$('#capture-modal-info').modal('hide');
-			} else {
-				_alert('error', {
-					message: response['msg'],
-				});
-			}
-		})
-		.fail(function (jqXHR, textStatus) {
-			_alert('Request failed: ' + textStatus);
-		});
-}
-
-function cambiarAccion() {
-	const accion = $(' #accion').val();
-	if (accion == 'P') {
-		$('#consultar_form').hide();
-		$('#procesar_form').show();
-	} else {
-		$('#procesar_form').hide();
-		$('#consultar_form').show();
-	}
-}
 
 $(() =>{
 	window.App.initialize();
 
-	$('#consultar_form').hide();
-	$('#procesar_form').hide();
-	
-	$('#capture-modal').on('hide.bs.modal', function (e) {
-		validator.resetForm();
-		$('.select2-selection')
-			.removeClass(validator.settings.errorClass)
-			.removeClass(validator.settings.validClass);
-	});
 
 	$(document).on('click', '#btnProcesoReasignarMasivo', function (e) {
 		e.preventDefault();
@@ -127,6 +42,50 @@ $(() =>{
 
 	$(document).on('click', '#btnTraerDatos', function (e) {
 		e.preventDefault();
-		traerDatos();
+		const tipopc = $("[name='tipopc']").val();
+		const usuario = $("[name='usuario']").val();
+
+		if (tipopc == '') return;
+		if (usuario == '') return;
+		
+		window.App.trigger('ajax', {
+			url: window.ServerController + '/traer_datos',
+			data: {
+				tipopc,
+				usuario,
+			},
+			callback: function (response) {
+				$('#consulta').html(response);
+			},
+			error: function (jqXHR, textStatus) {
+				Messages.display('Request failed: ' + textStatus, 'error');
+			}
+		});
 	});
+
+	$(document).on('change', '[data-toggle="cambiar-main-accion"]', function(e){
+		const target = $('#renderProceso');
+		let html = '';
+		if ($('#accion').val() == 'P') {
+			const tpl = _.template($('#tmp_proceso').html()); 
+			html = tpl({});
+			target.html(html);
+			$('#usuori').select2();
+			$('#usudes').select2();	
+			$('#tipopc_proceso').select2();
+			flatpickr($('#fecini, #fecfin'), {
+				enableTime: false,
+				dateFormat: 'Y-m-d',
+				locale: Spanish,
+			});
+		} else {
+			const tpl = _.template($('#tmp_consulta').html()); 
+			html = tpl({});
+			target.html(html);
+			$('#tipopc').select2();
+			$('#usuario').select2();
+
+		}
+	});
+
 });

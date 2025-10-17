@@ -15,6 +15,5 @@ Route::middleware([CajasCookieAuthenticated::class])->group(function () {
         Route::post('/indicadores', [ConsultaController::class, 'consultaIndicadoresAction']);
         Route::get('/activacion_masiva', [ConsultaController::class, 'consultaActivacionMasivaViewAction']);
         Route::post('/activacion_masiva', [ConsultaController::class, 'consultaActivacionMasivaAction'])->name('consulta.activacion_masiva');
-        Route::get('/reasigna', [ConsultaController::class, 'reasignaViewAction']);
     });
 });

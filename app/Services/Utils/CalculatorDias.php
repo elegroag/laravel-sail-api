@@ -10,6 +10,7 @@ class CalculatorDias
     public static function calcular($tipopc, $numero, $fecsol = '')
     {
         $fecsis = Mercurio10::whereRaw("tipopc='{$tipopc}' and numero='{$numero}'")->max('fecsis');
+        if (!$fecsis) $fecsis = $fecsol;
 
         $eventoSeguimiento = Mercurio10::whereRaw("tipopc='{$tipopc}' and numero='{$numero}' and fecsis='{$fecsis}'")->first();
         if ($eventoSeguimiento == false) {

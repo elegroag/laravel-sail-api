@@ -70,6 +70,7 @@ require __DIR__ . '/cajas/movile_areas.php';
 require __DIR__ . '/cajas/movile_infraestructura.php';
 require __DIR__ . '/cajas/movile_comercios.php';
 require __DIR__ . '/cajas/movile_clasificaciones.php';
+require __DIR__ . '/cajas/reasigna.php';
 
 
 Route::fallback(function (Request $request) {

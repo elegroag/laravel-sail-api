@@ -13,6 +13,7 @@
     'attributes' => '',
     'options' => [],
     'dummy' => false,
+    'events' => ''
 ])
 
 <div class="form-group" group-for="{{ $name }}">
@@ -21,6 +22,7 @@
         name="{{ $name }}" 
         id="{{ $id ? $id : $name }}" 
         class="form-control {{ $className }}" 
+        {{ $events ? 'data-toggle=' . $events : '' }} 
         {{ $required ? 'required' : '' }} 
         {{ $disabled ? 'disabled' : '' }} 
         {{ $readonly ? 'readonly' : '' }} 
