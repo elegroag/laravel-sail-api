@@ -57,27 +57,30 @@
                                 'id' => 'tipopc_proceso',
                                 'name' => 'tipopc_proceso',
                                 'options' => $data_mercurio09,
-                                "label" => "Opción"
+                                "label" => "Opción",
+                                'dummy' => 'Seleccione una opción',
                             ])@endcomponent
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
                             @component('components.select-field', [
-                                'id' => 'usuori',
-                                'name' => 'usuori',
+                                'id' => 'usuori_proceso',
+                                'name' => 'usuori_proceso',
                                 'options' => $data_usuarios,
-                                "label" => "Usuario Origen"
+                                "label" => "Usuario Origen",
+                                'dummy' => 'Seleccione un usuario',
                             ])@endcomponent
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
                             @component('components.select-field', [
-                                'id' => 'usudes',
-                                'name' => 'usudes',
+                                'id' => 'usudes_proceso',
+                                'name' => 'usudes_proceso',
                                 'options' => $data_usuarios,
-                                "label" => "Usuario Destino"
+                                "label" => "Usuario Destino",
+                                'dummy' => 'Seleccione un usuario',
                             ])@endcomponent
                         </div>
                     </div>
@@ -109,7 +112,7 @@
 @endpush
 
 @section('content')
-@include('cajas/templates/tmp_header_adapter', ['sub_title' => $title, 'filtrar' => true, 'listar' => false, 'salir' => false, 'add' => true])
+@include('cajas/templates/tmp_header_adapter', ['sub_title' => $title, 'filtrar' => false, 'listar' => false, 'salir' => false, 'add' => false])
 <div class="container-fluid mt--9 pb-4">
     <div class="row">
         <div class="col-12">
@@ -130,7 +133,7 @@
                                 'options' => $accion,
                                 'events' => 'cambiar-main-accion',
                                 "label" => "Accion a realizar",
-                                'dummy' => 'Seleccione una accion'
+                                'dummy' => 'Seleccione una acción'
                             ])@endcomponent
                         </div>
                     </div>

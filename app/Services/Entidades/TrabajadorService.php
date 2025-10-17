@@ -562,7 +562,7 @@ class TrabajadorService
                     ->get();
                 break;
             case 'alluser':
-                $response["datos"] = Mercurio31::whereRaw("usuario='{$usuario}' and estado='P'")->get();
+                $response["datos"] = Mercurio31::where("usuario", $usuario)->where("estado", 'P')->get();
                 break;
             case 'count':
                 $res = Mercurio31::where("mercurio31.usuario", $usuario)
@@ -576,7 +576,7 @@ class TrabajadorService
                 $response["count"] = $res->count();
                 break;
             case 'one':
-                $response["datos"] = Mercurio31::whereRaw("id='$numero' and estado='P'")->first();
+                $response["datos"] = Mercurio31::where("id", $numero)->where("estado", 'P')->first();
                 break;
             case 'info':
                 $mercurio = Mercurio31::where("id", $numero)->first();

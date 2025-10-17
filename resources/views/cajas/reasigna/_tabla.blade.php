@@ -1,10 +1,10 @@
 <table class='table table-hover table-bordered align-items-center'>
     <thead>
         <tr>
-            <th>Id</th>
-            <th>Documento</th>
-            <th>Nombre</th>
-            <th>Acción</th>
+            <th width="10%">Id</th>
+            <th width="20%">Documento</th>
+            <th width="60%">Nombre</th>
+            <th width="10%">Acción</th>
         </tr>
     </thead>
     <tbody class='list'>
@@ -25,7 +25,7 @@
                     data-tipopc="{{ $tipopc }}"
                     data-id="{{ $solicitud['id'] }}"
                     data-toggle="info">
-                        <i class='fas fa-info'></i>
+                        <i class='fas fa-hand-pointer text-white'></i>
                 </a>
             </td>
         </tr>

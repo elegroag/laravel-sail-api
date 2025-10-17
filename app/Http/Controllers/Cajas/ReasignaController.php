@@ -52,7 +52,7 @@ class ReasignaController extends ApplicationController
     {
         $this->setResponse('ajax');
         try {
-            $tipopc = $request->input('tipopc_proceso');
+            $tipopc = $request->input('tipopc');
             $usuori = $request->input('usuori');
             $usudes = $request->input('usudes');
             $fecini = $request->input('fecini');
@@ -77,13 +77,11 @@ class ReasignaController extends ApplicationController
 
             $response = [
                 'success' => true,
-                'flag' => true,
                 'msj' => 'Asignacion de solicitudes con exito',
             ];
         } catch (Exception $e) {
             $response = [
                 'success' => false,
-                'flag' => false,
                 'msj' => $e->getMessage(),
             ];
         }
@@ -93,13 +91,12 @@ class ReasignaController extends ApplicationController
 
     function reasignaProceso($model, $usuori, $usudes, $fecini, $fecfin)
     {
-        if (! $model) {
-            return;
-        }
-        $tablaData = $model->find(" usuario ='{$usuori}' AND fecsol between '{$fecini}' AND '{$fecfin}' AND estado = 'P'");
+        if (! $model) return;
+        $tablaData = $model->whereRaw(" usuario='{$usuori}' AND fecsol BETWEEN '{$fecini}' AND '{$fecfin}' AND estado = 'P'")->get();
         foreach ($tablaData as $mtabla) {
-            $mtabla->setUsuario($usudes);
-            $mtabla->save();
+            $mtabla->update([
+                'usuario' => $usudes,
+            ]);
         }
     }
 
@@ -163,65 +160,67 @@ class ReasignaController extends ApplicationController
 
     public function infor(Request $request)
     {
-        $this->setResponse('ajax');
-        $tipopc = $request->input('tipopc');
-        $id = $request->input('id');
-        $response = '';
-        $generalService = new GeneralService;
-        $result = $generalService->consultaTipopc($tipopc, 'info', $id, '');
+        try {
+            $tipopc = $request->input('tipopc');
+            $id = $request->input('id');
+            $generalService = new GeneralService;
+            $out = $generalService->consultaTipopc($tipopc, 'info', $id, '');
 
-        $response = $result['consulta'];
-        $response .= "<div class='jumbotron'>";
-        $response .= "<h1 class='display-4'>Cambio Responsable!</h1>";
-        $response .= "<p class='lead'>Esta opcion permite cambiar el responsable</p>";
-        $response .= "<hr class='my-4'>";
-        $response .= "<p class='lead'>";
-        $response .= "<div class='form-group'>";
-        $response .= Tag::selectStatic(
-            new Srequest([
-                'name' => 'usuario_rea',
-                'options' => $this->Gener02->find("usuario in (select usuario from mercurio08 where tipopc='$tipopc')"),
-                'using' => 'usuario,nombre',
-                'use_dummy' => true,
-                'dummyValue' => '',
-                'class' => 'form-control',
-            ])
-        );
-        $response .= '</div>';
-        $response .= "<button type='button' class='btn btn-warning btn-lg btn-block' onclick='cambiar_usuario($tipopc,$id)'>Cambiar Usuario Responsable</button>";
-        $response .= '</p>';
-        $response .= '</div>';
+            $data_usuarios = Gener02::join('mercurio08', 'gener02.usuario', '=', 'mercurio08.usuario')
+                ->where('mercurio08.tipopc', $tipopc)
+                ->pluck('gener02.nombre', 'gener02.usuario');
 
-        return $this->renderText($response);
+            $html = view('cajas.reasigna._info', [
+                'tipopc' => $tipopc,
+                'id' => $id,
+                'consulta' => $out['consulta'],
+                'data_usuarios' => $data_usuarios,
+            ])->render();
+
+            return response()->json([
+                'success' => true,
+                'html' => $html,
+            ]);
+        } catch (Exception $th) {
+            return response()->json([
+                'success' => false,
+                'msj' => $th->getMessage(),
+            ]);
+        }
     }
 
     public function cambiarUsuario(Request $request)
     {
         try {
 
-            $this->setResponse('ajax');
             $tipopc = $request->input('tipopc');
             $id = $request->input('id');
             $usuario = $request->input('usuario');
 
             $response = $this->db->begin();
             $generalService = new GeneralService;
-            $result = $generalService->consultaTipopc($tipopc, 'one', $id, '');
-
-            $mercurio = $result['datos'];
-            $mercurio->setUsuario($usuario);
-            if (! $mercurio->save()) {
-                parent::setLogger($mercurio->getMessages());
-                $this->db->rollback();
+            $out = $generalService->consultaTipopc($tipopc, 'one', $id, '');
+            $solicitud = $out['datos'];
+            if (! $solicitud) {
+                throw new DebugException('No se encontro la solicitud', 501);
             }
+
+            $solicitud->update([
+                'usuario' => $usuario,
+            ]);
+
             $this->db->commit();
-            $response = parent::successFunc('Cambio de Usuario con Exito');
 
-            return $this->renderObject($response, false);
+            $response = [
+                'success' => true,
+                'msj' => 'Cambio de Usuario con Exito',
+            ];
         } catch (DebugException $e) {
-            $response = parent::errorFunc('No se pudo realizar la opcion');
-
-            return $this->renderObject($response, false);
+            $response = [
+                'success' => false,
+                'msj' => $e->getMessage(),
+            ];
         }
+        return response()->json($response);
     }
 }

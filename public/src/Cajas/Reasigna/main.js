@@ -7,37 +7,40 @@ window.App = $App;
 
 $(() =>{
 	window.App.initialize();
+	const modalCapture = new bootstrap.Modal(document.getElementById('captureModal'));
 
 
 	$(document).on('click', '#btnProcesoReasignarMasivo', function (e) {
 		e.preventDefault();
-		if ($('#tipopc_proceso').val() == '') return;
-		if ($('#usuori').val() == '') return;
-		if ($('#usudes').val() == '') return;
-		if ($('#fecini').val() == '') return;
-		if ($('#fecfin').val() == '') return;
+		const tipopc = $('#tipopc_proceso').val();
+		const usuori = $('#usuori_proceso').val();
+		const usudes = $('#usudes_proceso').val();
+		const fecini = $('#fecini').val();
+		const fecfin = $('#fecfin').val();
 
-		$.ajax({
-			type: 'POST',
-			url: Utils.getKumbiaURL($Kumbia.controller + '/proceso_reasignar_masivo'),
+		if (tipopc == '' || usuori == '' || usudes == '' || fecini == '' || fecfin == '') return;
+
+		window.App.trigger('syncro', {
+			url: window.App.url(window.ServerController + '/proceso_reasignar_masivo'),
 			data: {
-				tipopc_proceso: $('#tipopc_proceso').val(),
-				usuori: $('#usuori').val(),
-				usudes: $('#usudes').val(),
-				fecini: $('#fecini').val(),
-				fecfin: $('#fecfin').val(),
+				tipopc,
+				usuori,
+				usudes,
+				fecini,
+				fecfin
 			},
-		})
-			.done(function (response) {
+			callback: (response) => {
 				if (response && response.success === true) {
 					Messages.display(response.msj, 'success');
+					window.location.reload();
 				} else {
 					Messages.display(response.msj, 'error');
 				}
-			})
-			.fail(function (jqXHR, textStatus) {
+			},
+			error: (jqXHR, textStatus) => {
 				Messages.display('Request failed: ' + textStatus, 'error');
-			});
+			}
+		});
 	});
 
 	$(document).on('click', '#btnTraerDatos', function (e) {
@@ -86,6 +89,54 @@ $(() =>{
 			$('#usuario').select2();
 
 		}
+	});
+
+	$(document).on('click', '[data-toggle="info"]', function (e) {
+		e.preventDefault();
+		const id = $(this).data('id');
+		const tipopc = $(this).data('tipopc');
+		window.App.trigger('ajax', {
+			url: window.ServerController + '/infor',
+			data: {
+				id,
+				tipopc,
+			},
+			callback: function (response) {
+				if(response && response.success === true) {
+					modalCapture.show();
+					$('#captureModal').find('.modal-body').html(response.html);
+				}
+			},
+			error: function (jqXHR, textStatus) {
+				Messages.display('Request failed: ' + textStatus, 'error');
+			}
+		});
+	});
+
+	$(document).on('click', '[data-toggle="cambiar-usuario"]', function (e) {
+		e.preventDefault();
+		const id = $(this).data('id');
+		const tipopc = $(this).data('tipopc');
+		const usuario = $('#usuario_rea').val();
+
+		window.App.trigger('ajax', {
+			url: window.ServerController + '/cambiar_usuario',
+			data: {
+				id,
+				tipopc,
+				usuario
+			},
+			callback: function (response) {
+				if(response && response.success === true) {
+					Messages.display(response.msj, 'success');
+					modalCapture.hide();
+					$('#btnTraerDatos').trigger('click');
+				}
+			},
+			error: function (jqXHR, textStatus) {
+				Messages.display('Request failed: ' + textStatus, 'error');
+			}
+		});
 	});
 
 });
