@@ -14,7 +14,7 @@ use Exception;
 
 class UpDatosEmpresaServices
 {
-    private $orderpag = 'fecha_solicitud';
+    private $orderpag = 'fecsol';
 
     private $tipopc = 5;
 
@@ -91,7 +91,7 @@ class UpDatosEmpresaServices
 
     public function findPagination($query)
     {
-        return Mercurio47::where('tipo_actualizacion', 'E')->whereRaw($query)->orderBy($this->orderpag, 'DESC')->get();
+        return Mercurio47::where('tipact', 'E')->whereRaw($query)->orderBy($this->orderpag, 'DESC')->get();
     }
 
     public function getTemplateTable()

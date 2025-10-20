@@ -48,10 +48,7 @@ class TrabajadorService
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
 
-        if ((new Mercurio31)->getCount(
-            '*',
-            "conditions: documento='{$documento}' and coddoc='{$coddoc}'"
-        ) == 0) {
+        if (Mercurio31::whereRaw("documento='{$documento}' and coddoc='{$coddoc}'")->count() == 0) {
             return [];
         }
 
@@ -77,7 +74,8 @@ class TrabajadorService
             WHERE m31.documento='{$documento}' and m31.coddoc='{$coddoc}' {$conditions}
             ORDER BY m31.fecsol ASC";
 
-        return $this->db->inQueryAssoc($sql);
+        $results = DB::select($sql);
+        return json_decode(json_encode($results), true);
     }
 
     /**

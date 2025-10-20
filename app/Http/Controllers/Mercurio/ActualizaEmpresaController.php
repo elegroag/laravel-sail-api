@@ -67,7 +67,7 @@ class ActualizaEmpresaController extends ApplicationController
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
             $tipo = $this->tipo;
-            $tipo_actualizacion = 'E';
+            $tipact = 'E';
 
             $logger = new Logger;
             $log = $logger->registrarLog(
@@ -81,10 +81,10 @@ class ActualizaEmpresaController extends ApplicationController
             $id = $request->input('id');
 
             $params = [
-                'fecha_solicitud' => date('Y-m-d'),
-                'fecha_estado' => date('Y-m-d'),
+                'fecsol' => date('Y-m-d'),
+                'fecest' => date('Y-m-d'),
                 'estado' => 'T',
-                'tipo_actualizacion' => $tipo_actualizacion,
+                'tipact' => $tipact,
                 'tipo' => $tipo,
                 'coddoc' => $coddoc,
                 'documento' => $documento,

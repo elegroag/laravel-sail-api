@@ -208,7 +208,7 @@ class ApruebaUpEmpresaController extends ApplicationController
 
             Mercurio47::where('id', $id)->update([
                 'estado' => 'D',
-                'fecha_estado' => $today->format('Y-m-d H:i:s'),
+                'fecest' => $today->format('Y-m-d H:i:s'),
             ]);
 
             $item = Mercurio10::whereRaw("tipopc='$this->tipopc' and numero='$id'")->max('item') + 1;
@@ -274,7 +274,7 @@ class ApruebaUpEmpresaController extends ApplicationController
             }
             Mercurio47::where('id', $id)->update([
                 'estado' => 'X',
-                'fecha_estado' => $today->format('Y-m-d H:i:s'),
+                'fecest' => $today->format('Y-m-d H:i:s'),
             ]);
 
             $item = Mercurio10::whereRaw("tipopc='{$this->tipopc}' and numero='{$id}'")->max('item') + 1;
@@ -581,7 +581,7 @@ class ApruebaUpEmpresaController extends ApplicationController
                 throw new DebugException('Error se requiere del id independiente', 501);
             }
 
-            $mercurio47 = Mercurio47::where("id", $id)->where("tipo_actualizacion", 'E')->first();
+            $mercurio47 = Mercurio47::where("id", $id)->where("tipact", 'E')->first();
             $mercurio33 = Mercurio33::where("actualizacion", $id)->get();
             $dataItems = [];
 

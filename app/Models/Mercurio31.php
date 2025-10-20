@@ -1061,37 +1061,15 @@ class Mercurio31 extends ModelBase
 
     public function getEstadoArray()
     {
-        return [
-            'A' => 'APROBO',
-            'X' => 'RECHAZO',
-            'P' => 'PENDIENTE',
-            'D' => 'DEVOLVIO',
-        ];
+        return solicitud_estados_array();
     }
 
-    public function getEstadoDetalle()
+    public function getEstadoDetalle($estado = '')
     {
-        $return = '';
-        if ($this->estado == 'T') {
-            $return = 'TEMPORAL';
+        if ($estado != '') {
+            $this->estado = $estado;
         }
-        if ($this->estado == 'D') {
-            $return = 'DEVUELTO';
-        }
-        if ($this->estado == 'A') {
-            $return = 'APROBADO';
-        }
-        if ($this->estado == 'X') {
-            $return = 'RECHAZADO';
-        }
-        if ($this->estado == 'P') {
-            $return = 'PENDIENTE';
-        }
-        if ($this->estado == 'C') {
-            $return = 'CANCELAR';
-        }
-
-        return $return;
+        return solicitud_estado_detalle($this->estado);
     }
 
     public function getCodest()
@@ -1205,12 +1183,12 @@ class Mercurio31 extends ModelBase
 
     public function getNombre()
     {
-        return $this->priape.' '.$this->prinom;
+        return $this->priape . ' ' . $this->prinom;
     }
 
     public function getNombreCompleto()
     {
-        return $this->priape.' '.$this->segape.' '.$this->prinom.' '.$this->segnom;
+        return $this->priape . ' ' . $this->segape . ' ' . $this->prinom . ' ' . $this->segnom;
     }
 
     public function get_all()

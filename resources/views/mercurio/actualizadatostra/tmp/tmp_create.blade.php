@@ -6,7 +6,7 @@
                 <div class="d-none">
                     <input type="number" name="cedtra" class="d-none" value="{{ $cedtra }}" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                     <input type="number" name="id" class="d-none">
-                    <input type="number" name="tipo_actualizacion" class="d-none" value="T">
+                    <input type="number" name="tipact" class="d-none" value="T">
                 </div>
                 <div class="row mb-2">
                     <div class="col-12">

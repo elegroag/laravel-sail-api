@@ -45,7 +45,7 @@ export default class DatosTrabajadorModel extends Backbone.Model {
 			codsuc: void 0,
 			tippag: void 0,
 			estado: void 0,
-			tipo_actualizacion: void 0,
+			tipact: void 0,
 		};
 	}
 

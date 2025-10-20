@@ -17,10 +17,10 @@ class Mercurio47 extends ModelBase
         'documento',
         'tipo',
         'coddoc',
-        'fecha_solicitud',
-        'fecha_estado',
+        'fecsol',
+        'fecest',
         'estado',
-        'tipo_actualizacion',
+        'tipact',
         'usuario',
     ];
 
@@ -126,14 +126,14 @@ class Mercurio47 extends ModelBase
         return $this->coddoc;
     }
 
-    public function setFechaSolicitud($fecha_solicitud)
+    public function setFecsol($fecsol)
     {
-        $this->fecha_solicitud = $fecha_solicitud;
+        $this->fecsol = $fecsol;
     }
 
-    public function setFechaEstado($fecha_estado)
+    public function setFecest($fecest)
     {
-        $this->fecha_estado = $fecha_estado;
+        $this->fecest = $fecest;
     }
 
     public function setEstado($estado)
@@ -141,19 +141,19 @@ class Mercurio47 extends ModelBase
         $this->estado = $estado;
     }
 
-    public function setTipoActualizacion($tipo_actualizacion)
+    public function setTipact($tipact)
     {
-        $this->tipo_actualizacion = $tipo_actualizacion;
+        $this->tipact = $tipact;
     }
 
-    public function getFechaSolicitud()
+    public function getFecsol()
     {
-        return $this->fecha_solicitud;
+        return $this->fecsol;
     }
 
-    public function getFechaEstado()
+    public function getFecest()
     {
-        return $this->fecha_estado;
+        return $this->fecest;
     }
 
     public function getEstado()
@@ -161,20 +161,14 @@ class Mercurio47 extends ModelBase
         return $this->estado;
     }
 
-    public function getTipoActualizacion()
+    public function getTipact()
     {
-        return $this->tipo_actualizacion;
+        return $this->tipact;
     }
 
     public function getEstadosArray()
     {
-        return [
-            'A' => 'Aprobado',
-            'P' => 'Pendiente',
-            'D' => 'Devuelto',
-            'X' => 'Rechazado',
-            'T' => 'Temporal',
-        ];
+        return solicitud_estados_array();
     }
 
     public function getEstadoInArray($estado = '')
@@ -182,31 +176,20 @@ class Mercurio47 extends ModelBase
         if (! empty($estado)) {
             $this->estado = $estado;
         }
-        $estados = $this->getEstadosArray();
-
-        return (isset($estados["{$this->estado}"])) ? $estados["{$this->estado}"] : false;
+        return solicitud_estado_detalle($this->estado);
     }
 
-    public function getTipoActualizacionArray()
+    public function getTipActArray()
     {
-        return [
-            'E' => 'Empresa',
-            'I' => 'Independiente',
-            'T' => 'Trabajador',
-            'P' => 'Pensionado',
-            'B' => 'Beneficiario',
-            'C' => 'Conyuge',
-        ];
+        return solicitud_tipo_actualizacion_array();
     }
 
-    public function getTipoActualizacionInArray($tipo_actualizacion = '')
+    public function getTipActInArray($tipact = '')
     {
-        if (! empty($tipo_actualizacion)) {
-            $this->tipo_actualizacion = $tipo_actualizacion;
+        if (! empty($tipact)) {
+            $this->tipact = $tipact;
         }
-        $tipo_actualizaciones = $this->getTipoActualizacionArray();
-
-        return (isset($tipo_actualizaciones["{$this->tipo_actualizacion}"])) ? $tipo_actualizaciones["{$this->tipo_actualizacion}"] : false;
+        return solicitud_tipo_actualizacion_detalle($this->tipact);
     }
 
     public function createAttributes($data)

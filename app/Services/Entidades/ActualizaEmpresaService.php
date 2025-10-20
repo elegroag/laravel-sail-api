@@ -90,7 +90,7 @@ class ActualizaEmpresaService
             $mercurio47[$ai]['cantidad_eventos'] = $rqs['cantidad'];
             $mercurio47[$ai]['fecha_ultima_solicitud'] = $trayecto['fecsis'];
             $mercurio47[$ai]['estado_detalle'] = (new Mercurio47)->getEstadoInArray($row['estado']);
-            $mercurio47[$ai]['tipo_actualizacion_detalle'] = (new Mercurio47)->getTipoActualizacionInArray($row['tipo_actualizacion']);
+            $mercurio47[$ai]['tipact_detalle'] = (new Mercurio47)->getTipoActualizacionInArray($row['tipact']);
         }
 
         return $mercurio47;
@@ -416,7 +416,7 @@ class ActualizaEmpresaService
         $condi_extra = $request->getParam('condi_extra');
         $usuario = $request->getParam('usuario');
         $numero = $request->getParam('numero');
-        $tipo_actualizacion = 'E';
+        $tipact = 'E';
 
         switch ($tipo_consulta) {
             case 'all':
@@ -430,7 +430,7 @@ class ActualizaEmpresaService
                         'mercurio10.estado as estado',
                         'mercurio10.fecsis as fecest',
                     ])
-                    ->where('mercurio47.tipo_actualizacion', $tipo_actualizacion)
+                    ->where('mercurio47.tipact', $tipact)
                     ->when($condi_extra, function ($q) use ($condi_extra) {
                         if (is_array($condi_extra)) $q->where($condi_extra);
                         if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
@@ -438,11 +438,11 @@ class ActualizaEmpresaService
                     ->get();
                 break;
             case 'alluser':
-                $response["datos"] = Mercurio47::whereRaw("usuario='{$usuario}' and estado='P' and tipo_actualizacion='$tipo_actualizacion'")->get();
+                $response["datos"] = Mercurio47::whereRaw("usuario='{$usuario}' and estado='P' and tipact='$tipact'")->get();
                 break;
             case 'count':
                 $res = Mercurio47::where("mercurio47.usuario", $usuario)
-                    ->where("mercurio47.tipo_actualizacion", $tipo_actualizacion)
+                    ->where("mercurio47.tipact", $tipact)
                     ->when($condi_extra, function ($q) use ($condi_extra) {
                         if (is_array($condi_extra)) $q->where($condi_extra);
                         if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
@@ -453,7 +453,7 @@ class ActualizaEmpresaService
                 $response["all"] = $res;
                 break;
             case 'one':
-                $response["datos"] = Mercurio47::whereRaw("id='$numero' and estado='P' and tipo_actualizacion='$tipo_actualizacion'")->first();
+                $response["datos"] = Mercurio47::whereRaw("id='$numero' and estado='P' and tipact='$tipact'")->first();
                 break;
             case 'info':
                 $mercurio = Mercurio47::where("id", $numero)->first();

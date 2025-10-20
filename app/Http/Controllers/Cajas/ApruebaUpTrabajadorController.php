@@ -206,7 +206,7 @@ class ApruebaUpTrabajadorController extends ApplicationController
                 throw new DebugException('Error se requiere del id independiente', 501);
             }
 
-            $mercurio47 = Mercurio47::where("id", $id)->where("tipo_actualizacion", 'T')->first();
+            $mercurio47 = Mercurio47::where("id", $id)->where("tipact", 'T')->first();
             $mercurio33 = Mercurio33::where("actualizacion", $id)->get();
             $dataItems = [];
 

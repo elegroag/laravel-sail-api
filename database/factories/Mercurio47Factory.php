@@ -26,9 +26,9 @@ class Mercurio47Factory extends Factory
             'tipo' => $this->faker->randomElement(['01', '02']),
             'coddoc' => $this->faker->randomElement(['01', '02']),
             'estado' => $this->faker->randomElement(['A', 'I']),
-            'fecha_estado' => $this->faker->date(),
-            'fecha_solicitud' => $this->faker->date(),
-            'tipo_actualizacion' => $this->faker->randomElement(['U', 'N']),
+            'fecest' => $this->faker->date(),
+            'fecsol' => $this->faker->date(),
+            'tipact' => $this->faker->randomElement(['U', 'N']),
             'usuario' => $this->faker->optional()->randomNumber(5, true),
         ];
     }

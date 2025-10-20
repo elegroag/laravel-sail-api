@@ -5,7 +5,7 @@
                 <div class="d-none">
                     <input type="number" name="id" class="d-none" oninput="this.value=this.value.replace(/[^0-9]/g,'');">
                     <input type="text" name="codsuc" class="d-none">
-                    <input type="number" name="tipo_actualizacion" class="d-none">
+                    <input type="number" name="tipact" class="d-none">
                 </div>
                 <div class="row">
                     <div class="col-12">

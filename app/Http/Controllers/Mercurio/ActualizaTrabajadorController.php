@@ -218,7 +218,7 @@ class ActualizaTrabajadorController extends ApplicationController
             $mercurio47[$ai]['cantidad_eventos'] = $rqs['cantidad'];
             $mercurio47[$ai]['fecha_ultima_solicitud'] = $trayecto['fecsis'];
             $mercurio47[$ai]['estado_detalle'] = (new Mercurio47)->getEstadoInArray($row['estado']);
-            $mercurio47[$ai]['tipo_actualizacion_detalle'] = (new Mercurio47)->getTipoActualizacionInArray($row['tipo_actualizacion']);
+            $mercurio47[$ai]['tipact_detalle'] = (new Mercurio47)->getTipoActualizacionInArray($row['tipact']);
         }
 
         return $mercurio47;
@@ -296,16 +296,16 @@ class ActualizaTrabajadorController extends ApplicationController
         try {
             $asignarFuncionario = new AsignarFuncionario;
             $id = $request->input('id');
-            $tipo_actualizacion = 'T';
+            $tipact = 'T';
             $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
             $params = [
                 'documento' => $this->user['documento'],
                 'usuario' => $usuario,
                 'tipo' => $this->tipo,
                 'coddoc' => $this->user['coddoc'],
-                'fecha_solicitud' => date('Y-m-d'),
-                'fecha_estado' => date('Y-m-d'),
-                'tipo_actualizacion' => $tipo_actualizacion,
+                'fecsol' => date('Y-m-d'),
+                'fecest' => date('Y-m-d'),
+                'tipact' => $tipact,
             ];
 
             $logger = new Logger;
@@ -872,7 +872,7 @@ class ActualizaTrabajadorController extends ApplicationController
             $coddoc = parent::getActUser('coddoc');
 
             $datosTrabajadorService = new DatosTrabajadorService;
-            $mtrabajador = (new Mercurio47)->findFirst(" id='{$id}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND tipo_actualizacion='T'");
+            $mtrabajador = (new Mercurio47)->findFirst(" id='{$id}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND tipact='T'");
             if ($mtrabajador == false) {
                 throw new DebugException('Error no se puede identificar el propietario de la solicitud', 301);
             }

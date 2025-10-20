@@ -12,7 +12,7 @@ if (! function_exists('format_price')) {
     function format_price(float $amount): string
     {
         // Puedes hacer esta lógica tan compleja como necesites
-        return '$'.number_format($amount, 2);
+        return '$' . number_format($amount, 2);
     }
 }
 
@@ -60,8 +60,9 @@ if (! function_exists('get_params_destructures')) {
     }
 }
 
-require_once __DIR__.'/format.php';
-require_once __DIR__.'/flash.php';
-require_once __DIR__.'/files.php';
-require_once __DIR__.'/hashes.php';
-require_once __DIR__.'/company.php';
+require_once __DIR__ . '/format.php';
+require_once __DIR__ . '/flash.php';
+require_once __DIR__ . '/files.php';
+require_once __DIR__ . '/hashes.php';
+require_once __DIR__ . '/company.php';
+require_once __DIR__ . '/solicitudes.php';

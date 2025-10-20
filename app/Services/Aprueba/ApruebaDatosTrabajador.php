@@ -39,7 +39,7 @@ class ApruebaDatosTrabajador
      */
     public function procesar($postData)
     {
-        $mercurio47 = Mercurio47::whereRaw("id='{$this->solicitud->getId()}'")->first();
+        $mercurio47 = Mercurio47::where("id", $this->solicitud->getId())->first();
 
         $ps = Comman::Api();
         $ps->runCli(
@@ -60,7 +60,7 @@ class ApruebaDatosTrabajador
         }
         $trabajador = $out['data'];
 
-        $mercurio33 = Mercurio33::whereRaw("actualizacion='{$this->solicitud->getId()}'")->get();
+        $mercurio33 = Mercurio33::where("actualizacion", $this->solicitud->getId())->get();
         $dataItems = [];
         foreach ($mercurio33 as $row) {
             $dataItems[$row->getCampo()] = $row->getValor();
@@ -105,9 +105,9 @@ class ApruebaDatosTrabajador
         $registroSeguimiento = new RegistroSeguimiento;
         $registroSeguimiento->crearNota($this->tipopc, $this->solicitud->getId(), $postData['nota_aprobar'], 'A');
 
-        Mercurio47::whereRaw("id='{$this->solicitud->getId()}'")->update([
+        Mercurio47::where("id", $this->solicitud->getId())->update([
             "estado" => 'A',
-            "fecha_estado" => $this->today,
+            "fecest" => $this->today,
         ]);
 
         return true;
@@ -160,15 +160,15 @@ class ApruebaDatosTrabajador
 
     public function findSolicitud($idSolicitud)
     {
-        $this->solicitud = Mercurio47::whereRaw("id='{$idSolicitud}'")->first();
+        $this->solicitud = Mercurio47::where("id", $idSolicitud)->first();
         return $this->solicitud;
     }
 
     public function findSolicitante()
     {
-        $this->solicitante = Mercurio07::whereRaw("documento='{$this->solicitud->getDocumento()}' and " .
-            "coddoc='{$this->solicitud->getCoddoc()}' and " .
-            "tipo='{$this->solicitud->getTipo()}'")
+        $this->solicitante = Mercurio07::where("documento", $this->solicitud->getDocumento())
+            ->where("coddoc", $this->solicitud->getCoddoc())
+            ->where("tipo", $this->solicitud->getTipo())
             ->first();
 
         return $this->solicitante;

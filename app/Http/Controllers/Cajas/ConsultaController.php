@@ -176,92 +176,87 @@ class ConsultaController extends ApplicationController
 
     public function consultaIndicadoresAction(Request $request)
     {
-        $this->setResponse('ajax');
         $fecini = $request->input('fecini');
         $fecfin = $request->input('fecfin');
-        $mercurio09 = (new Mercurio09)->find('conditions: tipopc IN(1,2,3,4,8,9,13)');
+        $generalService = new GeneralService();
+        $data_indicadores = Gener02::select(
+            'gener02.usuario',
+            'gener02.nombre',
+            DB::raw('COUNT(*) as cantidad'),
+            'mercurio08.tipopc',
+            'mercurio09.detalle',
+            'mercurio09.dias'
+        )
+            ->join('mercurio08', 'gener02.usuario', '=', 'mercurio08.usuario')
+            ->join('mercurio09', 'mercurio08.tipopc', '=', 'mercurio09.tipopc')
+            ->groupBy('mercurio08.tipopc', 'gener02.usuario')
+            ->get()
+            ->map(function ($item) use ($generalService, $fecini) {
+                $item = $item->toArray();
 
-        $html = "<div class='table-responsive'>";
-        $html .= "<table class='table table-bordered table-hover table-sm'>";
-        $html .= '<thead>';
-        $html .= '<tr>';
-        $html .= '<th>Usuario</th>';
-        $html .= "<th>Acc\Estado</th>";
+                $condi_aprobado = "estado='A' and fecsol>='{$fecini}'";
+                $result_aprobado = $generalService->consultaTipopc($item['tipopc'], 'count', null, $item['usuario'], $condi_aprobado);
+                $item['estado_aprobado'] = $result_aprobado['count'];
+                $mercurio_aprobado = $result_aprobado['all'];
 
-        $estados = new Mercurio31;
-        $estados = $estados->getEstadoArray();
-
-        foreach ($estados as $mestados) {
-            $html .= "<th class='text-center'>";
-            $html .= "$mestados ";
-            $html .= '</th>';
-        }
-        $html .= "<th class='text-center'>";
-        $html .= 'TOT';
-        $html .= '</th>';
-        $html .= "<th class='text-center'>VEN</th>";
-        $html .= '</tr>';
-        $html .= '</thead>';
-        $html .= '<tbody>';
-
-        $gener02 = (new Gener02)->findAllBySql('SELECT distinct gener02.usuario,
-			gener02.nombre,
-			gener02.login
-		FROM gener02, mercurio08
-		where gener02.usuario=mercurio08.usuario');
-
-        foreach ($gener02 as $mgener02) {
-
-            $first = true;
-            foreach ($mercurio09 as $mmercurio09) {
-
-                $html .= '<tr>';
-                if ($first) {
-                    $html .= "<th class='align-middle' rowspan='" . $mercurio09->count() . "'>{$mgener02->getUsuario()}-{$mgener02->getNombre()}</th>";
-                }
-                $first = false;
-                $html .= "<td>{$mmercurio09->getDetalle()}</td>";
-
-                $valores_estado = '';
-                $total_estado = 0;
-                foreach ($estados as $key => $mestados) {
-                    $condi = "estado='$key' and mercurio20.fecha>='$fecini' and mercurio20.fecha<='$fecfin'";
-
-                    $consultasOldServices = new GeneralService;
-                    $result = $consultasOldServices->consultaTipopc($mmercurio09->getTipopc(), 'count', null, $mgener02->getUsuario(), $condi);
-                    $html .= "<td align='center'>";
-                    $html .= "{$result['count']}";
-                    $html .= '</td>';
-                    $total_estado += $result['count'];
-                }
-                $condi = "estado<>'T' and mercurio20.fecha>='$fecini' and mercurio20.fecha<='$fecfin'";
-
-                $consultasOldServices = new GeneralService;
-                $result = $consultasOldServices->consultaTipopc($mmercurio09->getTipopc(), 'count', null, $mgener02->getUsuario(), $condi);
-                $mercurio = $result['all'];
                 $total_vencido = 0;
-
-                foreach ($mercurio as $mmercurio) {
-                    $dias_vencidos = CalculatorDias::calcular(
-                        $mmercurio09->getTipopc(),
-                        $mmercurio->getId()
-                    );
-
-                    if ($dias_vencidos > $mmercurio09->getDias() && $mmercurio->getEstado() == 'P') {
+                foreach ($mercurio_aprobado as $mmercurio) {
+                    $dias_vencidos = CalculatorDias::calcular($item['tipopc'], $mmercurio->id);
+                    if ($dias_vencidos > $item['dias']) {
                         $total_vencido++;
                     }
                 }
 
-                $html .= "<td align='center'>$total_estado</td>";
-                $html .= "<td align='center'>$total_vencido</td>";
-                $html .= '</tr>';
-            }
-        }
-        $html .= '</tbody>';
-        $html .= '</table>';
-        $html .= '</div>';
+                $condi_rechazo = "estado='R' and fecsol>='{$fecini}'";
+                $result_rechazo = $generalService->consultaTipopc($item['tipopc'], 'count', null, $item['usuario'], $condi_rechazo);
+                $item['estado_rechazo'] = $result_rechazo['count'];
+                $mercurio_rechazo = $result_rechazo['all'];
 
-        return $this->renderText($html);
+                foreach ($mercurio_rechazo as $mmercurio) {
+                    $dias_vencidos = CalculatorDias::calcular($item['tipopc'], $mmercurio->id);
+                    if ($dias_vencidos > $item['dias']) {
+                        $total_vencido++;
+                    }
+                }
+
+                $condi_pendiente = "estado='P' and fecsol>='{$fecini}'";
+                $result_pendiente = $generalService->consultaTipopc($item['tipopc'], 'count', null, $item['usuario'], $condi_pendiente);
+                $item['estado_pendiente'] = $result_pendiente['count'];
+                $mercurio_pendiente = $result_pendiente['all'];
+                foreach ($mercurio_pendiente as $mmercurio) {
+                    $dias_vencidos = CalculatorDias::calcular($item['tipopc'], $mmercurio->id);
+                    if ($dias_vencidos > $item['dias']) {
+                        $total_vencido++;
+                    }
+                }
+
+                $condi_devuelto = "estado='D' and fecsol>='{$fecini}'";
+                $result_devuelto = $generalService->consultaTipopc($item['tipopc'], 'count', null, $item['usuario'], $condi_devuelto);
+                $item['estado_devuelto'] = $result_devuelto['count'];
+                $mercurio_devuelto = $result_devuelto['all'];
+
+                foreach ($mercurio_devuelto as $mmercurio) {
+                    $dias_vencidos = CalculatorDias::calcular($item['tipopc'], $mmercurio->id);
+                    if ($dias_vencidos > $item['dias']) {
+                        $total_vencido++;
+                    }
+                }
+
+                $item['total_vencido'] = $total_vencido;
+                return $item;
+            });
+
+        $html = view(
+            'cajas.consulta._tabla-indicadores',
+            [
+                'data_indicadores' => $data_indicadores,
+            ]
+        )
+            ->render();
+        return response()->json([
+            'html' => $html,
+            "success" => true
+        ]);
     }
 
     public function consultaActivacionMasivaViewAction()
@@ -273,8 +268,6 @@ class ConsultaController extends ApplicationController
 
     public function consultaActivacionMasivaAction(Request $request)
     {
-        $this->setResponse('ajax');
-        // $nit = $request->input("nit");
         $fecini = $request->input('fecini');
         $fecfin = $request->input('fecfin');
         $html = '';

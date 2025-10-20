@@ -102,7 +102,7 @@ class ApruebaDatosEmpresa
         $fechaEstado = $this->today->format('Y-m-d');
         Mercurio47::whereRaw("id='{$this->solicitud->getId()}'")->update([
             "estado" => 'A',
-            "fecha_estado" => $fechaEstado,
+            "fecest" => $fechaEstado,
         ]);
 
         return true;

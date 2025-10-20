@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Gener02;
 use App\Models\Mercurio06;
 use App\Models\Mercurio07;
+use App\Models\Mercurio08;
 use App\Models\Mercurio09;
 use App\Models\Mercurio10;
 use App\Models\Mercurio11;
@@ -213,48 +214,61 @@ class PrincipalController extends Controller
 
     public function traerMotivoMasUsuadaAction()
     {
-        $labels = [];
-        $data = [];
-        $mercurio10 = Mercurio10::select('codest', DB::raw('count(*) as numero'))->groupBy('codest')->get();
-        foreach ($mercurio10 as $mmercurio10) {
-            $mercurio11 = Mercurio11::where('codest', $mmercurio10->codest)->first();
-            $data[] = $mmercurio10->numero;
-            $labels[] = $mercurio11->detalle;
-        }
-        $response['data'] = $data;
-        $response['labels'] = $labels;
+        $out = Mercurio10::select('mercurio11.detalle', 'mercurio10.codest', DB::raw('count(*) as cantidad'))
+            ->join('mercurio11', 'mercurio10.codest', '=', 'mercurio11.codest')
+            ->groupBy('mercurio10.codest')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'data' => $item->cantidad,
+                    'labels' => $item->detalle
+                ];
+            });
 
-        return response()->json($response);
+        $data = [];
+        $labels = [];
+        foreach ($out as $item) {
+            $data[] = $item['data'];
+            $labels[] = $item['labels'];
+        }
+        return response()->json([
+            'data' => $data,
+            'labels' => $labels,
+        ]);
     }
 
     public function traerCargaLaboralAction()
     {
         try {
-            $data = [];
-            $labels = [];
-            $gener02 = Gener02::select('gener02.usuario', 'gener02.nombre', 'gener02.login')
+            $mercurio09 = Mercurio09::all();
+            $out = Gener02::select('gener02.usuario', 'gener02.nombre')
                 ->join('mercurio08', 'gener02.usuario', '=', 'mercurio08.usuario')
                 ->distinct()
-                ->get();
+                ->get()
+                ->map(function ($item) use ($mercurio09) {
+                    $count = 0;
+                    foreach ($mercurio09 as $m09) {
+                        $count += Mercurio08::where('tipopc', $m09->tipopc)
+                            ->where('usuario', $item->usuario)
+                            ->count();
+                    }
+                    return [
+                        'data' => $count,
+                        'labels' => $item->nombre
+                    ];
+                });
 
-            $mercurio09 = Mercurio09::all();
-            foreach ($gener02 as $mgener02) {
-                $count = 0;
-                foreach ($mercurio09 as $_mercurio09) {
-                    $count += Mercurio09::where('tipopc', $_mercurio09->tipopc)
-                        ->where('usuario', $mgener02->usuario)
-                        ->where('estado', 'P')
-                        ->count();
-                }
-                $data[] = $count;
-                $labels[] = $mgener02->nombre;
+            $data = [];
+            $labels = [];
+            foreach ($out as $item) {
+                $data[] = $item['data'];
+                $labels[] = $item['labels'];
             }
-
-            $response = [
+            return response()->json([
                 'data' => $data,
                 'labels' => $labels,
                 'success' => true,
-            ];
+            ]);
         } catch (DebugException $err) {
             $response = [
                 'success' => false,
