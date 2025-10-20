@@ -38,6 +38,7 @@ class Mercurio45Factory extends Factory
             'tipo' => $this->faker->randomElement(['01', '02']),
             'coddoc' => $this->faker->randomElement(['01', '02']),
             'documento' => $this->faker->numerify('###############'),
+            'fecsol' => $this->faker->optional()->date(),
         ];
     }
 }

@@ -35,6 +35,7 @@ return new class extends Migration
             $table->char('tipo', 2);
             $table->char('coddoc', 2);
             $table->char('documento', 15);
+            $table->date('fecsol')->nullable();
 
             // Índices
             $table->unique('id', 'id');

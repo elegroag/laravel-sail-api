@@ -30,6 +30,7 @@ class Mercurio45 extends ModelBase
         'tipo',
         'coddoc',
         'documento',
+        'fecsol'
     ];
 
     /**
