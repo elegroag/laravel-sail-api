@@ -22,44 +22,8 @@ class MenuPermission extends ModelBase
     protected $keyType = 'int';
 
     protected $fillable = [
-        'menu_item_id',
+        'menu_tipo',
         'tipfun',
         'can_view',
     ];
-
-    // Getters/Setters simples (compatibilidad y claridad)
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    public function setMenuItemId($v)
-    {
-        $this->menu_item_id = $v;
-    }
-
-    public function getMenuItemId()
-    {
-        return $this->menu_item_id;
-    }
-
-    public function setTipfun($v)
-    {
-        $this->tipfun = $v;
-    }
-
-    public function getTipfun()
-    {
-        return $this->tipfun;
-    }
-
-    public function setCanView($v)
-    {
-        $this->can_view = $v;
-    }
-
-    public function getCanView()
-    {
-        return $this->can_view;
-    }
 }
