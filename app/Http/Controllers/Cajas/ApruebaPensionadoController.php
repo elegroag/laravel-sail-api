@@ -31,7 +31,7 @@ class ApruebaPensionadoController extends ApplicationController
 
     protected $user;
 
-    protected $tipo;
+    protected $tipfun;
 
     /**
      * services variable
@@ -57,12 +57,12 @@ class ApruebaPensionadoController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user');
+        $this->tipfun = session('tipfun');
     }
 
     /**
-     * aplicarFiltroAction function
+     * aplicarFiltro function
      *
      * @changed [2023-12-00]
      *
@@ -71,7 +71,7 @@ class ApruebaPensionadoController extends ApplicationController
      * @param  string  $estado
      * @return void
      */
-    public function aplicarFiltroAction(Request $request, $estado = 'P')
+    public function aplicarFiltro(Request $request, $estado = 'P')
     {
         $this->setResponse('ajax');
         $cantidad_pagina = ($request->input('numero')) ? $request->input('numero') : 10;
@@ -113,9 +113,9 @@ class ApruebaPensionadoController extends ApplicationController
      *
      * @return void
      */
-    public function changeCantidadPaginaAction($estado = 'P')
+    public function changeCantidadPagina(Request $request, $estado = 'P')
     {
-        // $this->buscarAction($estado);
+        $this->buscar($request, $estado);
     }
 
     /**
@@ -128,7 +128,7 @@ class ApruebaPensionadoController extends ApplicationController
      * @param  string  $estado
      * @return void
      */
-    public function indexAction()
+    public function index()
     {
         $this->setParamToView('hide_header', true);
         $campo_field = [
@@ -160,7 +160,7 @@ class ApruebaPensionadoController extends ApplicationController
      * @param [type] $estado
      * @return void
      */
-    public function buscarAction(Request $request, $estado)
+    public function buscar(Request $request, $estado)
     {
         $this->setResponse('ajax');
         $pagina = ($request->input('pagina')) ? $request->input('pagina') : 1;
@@ -201,7 +201,7 @@ class ApruebaPensionadoController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function inforAction(Request $request)
+    public function infor(Request $request)
     {
         try {
             $id = $request->input('id');
@@ -286,7 +286,7 @@ class ApruebaPensionadoController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function apruebaAction(Request $request)
+    public function aprueba(Request $request)
     {
         $this->setResponse('ajax');
         $debuginfo = null;
@@ -333,7 +333,7 @@ class ApruebaPensionadoController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function devolverAction(Request $request)
+    public function devolver(Request $request)
     {
         $this->setResponse('ajax');
         $pensionadoServices = new PensionadoServices;
@@ -372,7 +372,7 @@ class ApruebaPensionadoController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function rechazarAction(Request $request)
+    public function rechazar(Request $request)
     {
         $this->setResponse('ajax');
         $notifyEmailServices = new NotifyEmailServices;
@@ -405,7 +405,7 @@ class ApruebaPensionadoController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function borrarFiltroAction(Request $request)
+    public function borrarFiltro(Request $request)
     {
         $this->setResponse('ajax');
         set_flashdata('filter_pensionado', false, true);
@@ -418,7 +418,7 @@ class ApruebaPensionadoController extends ApplicationController
         ]);
     }
 
-    public function buscarEnSisuViewAction(Request $request, $id, $nit)
+    public function buscarEnSisuView(Request $request, $id, $nit)
     {
         $user = session()->get('user');
         $mercurio38 = (new Mercurio38)->findFirst("nit='{$nit}'");
@@ -461,7 +461,7 @@ class ApruebaPensionadoController extends ApplicationController
         $this->setParamToView('title', "Empresa SisuWeb - {$nit}");
     }
 
-    public function editarViewAction(Request $request, $id)
+    public function editarView(Request $request, $id)
     {
         if (! $id) {
             return redirect('aprobaindepen/index');
@@ -498,7 +498,7 @@ class ApruebaPensionadoController extends ApplicationController
         $this->setParamToView('title', 'Editar Ficha Pensionado ' . $mercurio38->getCedtra());
     }
 
-    public function edita_empresaAction(Request $request)
+    public function editaEmpresa(Request $request)
     {
         $this->setResponse('ajax');
         $nit = $request->input('nit');
@@ -569,7 +569,7 @@ class ApruebaPensionadoController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function paginationAction(Request $request, $estado = 'P')
+    public function pagination(Request $request, $estado = 'P')
     {
         $this->setResponse('ajax');
         $cantidad_pagina = ($request->input('numero')) ? $request->input('numero') : 10;
@@ -606,7 +606,7 @@ class ApruebaPensionadoController extends ApplicationController
      * @param [type] $id
      * @return void
      */
-    public function aportesAction($id)
+    public function aportes($id)
     {
         $this->setResponse('ajax');
         try {
@@ -644,7 +644,7 @@ class ApruebaPensionadoController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function deshacerAction(Request $request)
+    public function deshacer(Request $request)
     {
         $this->setResponse('ajax');
 

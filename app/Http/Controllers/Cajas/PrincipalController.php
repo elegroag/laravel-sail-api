@@ -37,7 +37,7 @@ class PrincipalController extends Controller
         $this->tipfun = session('tipfun');
     }
 
-    public function indexAction()
+    public function index()
     {
         $user = $this->user['usuario'];
         $servicios = [
@@ -173,14 +173,14 @@ class PrincipalController extends Controller
         ]);
     }
 
-    public function dashboardAction()
+    public function dashboard()
     {
         return view('cajas/principal/dashboard', [
             'title' => 'Estadística',
         ]);
     }
 
-    public function traerUsuariosRegistradosAction()
+    public function traerUsuariosRegistrados()
     {
         $data = [];
         $labels = [];
@@ -197,7 +197,7 @@ class PrincipalController extends Controller
         return response()->json($response);
     }
 
-    public function traerOpcionMasUsuadaAction()
+    public function traerOpcionMasUsuada()
     {
         $data = [];
         $labels = [];
@@ -212,7 +212,7 @@ class PrincipalController extends Controller
         return response()->json($response);
     }
 
-    public function traerMotivoMasUsuadaAction()
+    public function traerMotivoMasUsuada()
     {
         $out = Mercurio10::select('mercurio11.detalle', 'mercurio10.codest', DB::raw('count(*) as cantidad'))
             ->join('mercurio11', 'mercurio10.codest', '=', 'mercurio11.codest')
@@ -237,7 +237,7 @@ class PrincipalController extends Controller
         ]);
     }
 
-    public function traerCargaLaboralAction()
+    public function traerCargaLaboral()
     {
         try {
             $mercurio09 = Mercurio09::all();
@@ -279,7 +279,7 @@ class PrincipalController extends Controller
         return response()->json($response);
     }
 
-    public function fileExisteGlobalAction(Request $request)
+    public function fileExisteGlobal(Request $request)
     {
         $file = $request->input('file');
         $id = $request->input('id');

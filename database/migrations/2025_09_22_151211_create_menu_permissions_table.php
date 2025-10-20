@@ -20,7 +20,7 @@ return new class extends Migration
 
             // Columnas
             $table->unsignedInteger('menu_item_id'); // NOT NULL
-            $table->integer('role_id'); // NOT NULL
+            $table->char('tipfun', 5);
             $table->tinyInteger('can_view')->default(1); // tinyint(1) DEFAULT '1'
 
             // Índice y FK

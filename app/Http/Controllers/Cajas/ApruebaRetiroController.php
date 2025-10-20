@@ -27,13 +27,13 @@ class ApruebaRetiroController extends ApplicationController
 
     protected $user;
 
-    protected $tipo;
+    protected $tipfun;
 
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user');
+        $this->tipfun = session('tipfun');
     }
 
     public function showTabla($paginate)
@@ -43,22 +43,21 @@ class ApruebaRetiroController extends ApplicationController
         ])->render();
     }
 
-    public function aplicarFiltroAction(Request $request)
+    public function aplicarFiltro(Request $request)
     {
-        $this->setResponse('ajax');
         $consultasOldServices = new GeneralService;
         $this->query = $consultasOldServices->converQuery($request);
-        $this->buscarAction($request);
+        $this->buscar($request);
     }
 
-    public function changeCantidadPaginaAction(Request $request)
+    public function changeCantidadPagina(Request $request)
     {
         $this->setResponse('ajax');
         $this->cantidad_pagina = $request->input('numero');
-        $this->buscarAction($request);
+        $this->buscar($request);
     }
 
-    public function indexAction()
+    public function index()
     {
         $campo_field = [
             'nit' => 'Nit',
@@ -71,7 +70,7 @@ class ApruebaRetiroController extends ApplicationController
         ]);
     }
 
-    public function buscarAction(Request $request)
+    public function buscar(Request $request)
     {
         $this->setResponse('ajax');
         $pagina = $request->input('pagina', 1);
@@ -88,7 +87,7 @@ class ApruebaRetiroController extends ApplicationController
         ], false);
     }
 
-    public function inforAction(Request $request)
+    public function infor(Request $request)
     {
         $this->setResponse('ajax');
         $id = $request->input('id');
@@ -168,7 +167,7 @@ class ApruebaRetiroController extends ApplicationController
         return $this->renderText($response);
     }
 
-    public function aprobarAction(Request $request)
+    public function aprobar(Request $request)
     {
         try {
             $id = $request->input('id');
@@ -231,7 +230,7 @@ class ApruebaRetiroController extends ApplicationController
         }
     }
 
-    public function rechazarAction(Request $request)
+    public function rechazar(Request $request)
     {
         try {
 

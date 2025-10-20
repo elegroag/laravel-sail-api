@@ -10,10 +10,10 @@ Route::middleware([CajasCookieAuthenticated::class])->group(function () {
         Route::post('/buscar', [Mercurio02Controller::class, 'buscar']);
         Route::post('/editar', [Mercurio02Controller::class, 'editar']);
         Route::post('/guardar', [Mercurio02Controller::class, 'guardar']);
-        Route::get('/configuracion', [Mercurio02Controller::class, 'getConfiguracionAction']);
-        Route::post('/configuracion', [Mercurio02Controller::class, 'updateConfiguracionAction']);
-        Route::get('/datos', [Mercurio02Controller::class, 'getDatosAction']);
-        Route::post('/datos', [Mercurio02Controller::class, 'updateDatosAction']);
+        Route::get('/configuracion', [Mercurio02Controller::class, 'getConfiguracion']);
+        Route::post('/configuracion', [Mercurio02Controller::class, 'updateConfiguracion']);
+        Route::get('/datos', [Mercurio02Controller::class, 'getDatos']);
+        Route::post('/datos', [Mercurio02Controller::class, 'updateDatos']);
         Route::post('/aplicar_filtro', [Mercurio02Controller::class, 'aplicarFiltro']);
         Route::post('/change_cantidad_pagina', [Mercurio02Controller::class, 'changeCantidadPagina']);
     });

@@ -22,23 +22,23 @@ class ConsultaController extends ApplicationController
 
     protected $user;
 
-    protected $tipo;
+    protected $tipfun;
 
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user');
+        $this->tipfun = session('tipfun');
     }
 
-    public function indexAction()
+    public function index()
     {
         return view('cajas.consulta.index', [
             'title' => 'Consulta',
         ]);
     }
 
-    public function cargaLaboralAction()
+    public function cargaLaboral()
     {
         $gener02 = Gener02::select('gener02.usuario', 'gener02.nombre', 'gener02.login')
             ->join('mercurio08', 'gener02.usuario', '=', 'mercurio08.usuario')
@@ -71,7 +71,7 @@ class ConsultaController extends ApplicationController
         ]);
     }
 
-    public function reporteExcelCargaLaboralAction(ReportService $reportService)
+    public function reporteExcelCargaLaboral(ReportService $reportService)
     {
         $fecha = new \DateTime;
         $filename = 'reporte_carga_laboral' . $fecha->format('Ymd') . '.xlsx';
@@ -103,7 +103,7 @@ class ConsultaController extends ApplicationController
         return $reportService->generateAndStream('xlsx', $dataGenerator, $filename);
     }
 
-    public function reporteExcelIndicadoresAction($fecini, $fecfin, ReportService $reportService)
+    public function reporteExcelIndicadores($fecini, $fecfin, ReportService $reportService)
     {
         $fecha = new \DateTime;
         $filename = 'reporte_indicadores' . $fecha->format('Ymd') . '.xlsx';
@@ -167,14 +167,14 @@ class ConsultaController extends ApplicationController
         return $reportService->generateAndStream('xlsx', $dataGenerator, $filename);
     }
 
-    public function indicadoresAction()
+    public function indicadores()
     {
         return view('cajas.consulta.indicadores', [
             'title' => 'Consulta Indicadores'
         ]);
     }
 
-    public function consultaIndicadoresAction(Request $request)
+    public function consultaIndicadores(Request $request)
     {
         $fecini = $request->input('fecini');
         $fecfin = $request->input('fecfin');
@@ -259,14 +259,14 @@ class ConsultaController extends ApplicationController
         ]);
     }
 
-    public function consultaActivacionMasivaViewAction()
+    public function consultaActivacionMasivaView()
     {
         return view('cajas.consulta.activacion_masiva', [
             'title' => 'Consulta Activacion Masiva',
         ]);
     }
 
-    public function consultaActivacionMasivaAction(Request $request)
+    public function consultaActivacionMasiva(Request $request)
     {
         $fecini = $request->input('fecini');
         $fecfin = $request->input('fecfin');

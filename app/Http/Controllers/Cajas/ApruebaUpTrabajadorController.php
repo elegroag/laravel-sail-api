@@ -32,7 +32,7 @@ class ApruebaUpTrabajadorController extends ApplicationController
 
     protected $user;
 
-    protected $tipo;
+    protected $tipfun;
 
     /**
      * services variable
@@ -44,11 +44,11 @@ class ApruebaUpTrabajadorController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user');
+        $this->tipfun = session('tipfun');
     }
 
-    public function aplicarFiltroAction(Request $request, string $estado = 'P')
+    public function aplicarFiltro(Request $request, string $estado = 'P')
     {
         $this->setResponse('ajax');
         $cantidad_pagina = $request->input('numero', 10);
@@ -76,12 +76,12 @@ class ApruebaUpTrabajadorController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function changeCantidadPaginaAction($estado = 'P')
+    public function changeCantidadPagina(Request $request, string $estado = 'P')
     {
-        // $this->buscarAction($estado);
+        $this->buscar($request, $estado);
     }
 
-    public function indexAction()
+    public function index()
     {
         $this->setParamToView('hide_header', true);
         $campo_field = [
@@ -157,7 +157,7 @@ class ApruebaUpTrabajadorController extends ApplicationController
         ];
     }
 
-    public function buscarAction(Request $request, $estado = 'P')
+    public function buscar(Request $request, string $estado = 'P')
     {
         $this->setResponse('ajax');
         $pagina = $request->input('pagina', 1);
@@ -193,11 +193,11 @@ class ApruebaUpTrabajadorController extends ApplicationController
     }
 
     /**
-     * inforAction function
+     * infor function
      *
      * @return void
      */
-    public function inforAction(Request $request)
+    public function info(Request $request)
     {
         try {
             $upServices = new UpDatosTrabajadorService;
@@ -299,7 +299,7 @@ class ApruebaUpTrabajadorController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function apruebaAction(Request $request)
+    public function aprueba(Request $request)
     {
         $this->setResponse('ajax');
         $debuginfo = [];
@@ -344,7 +344,7 @@ class ApruebaUpTrabajadorController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function rechazarAction(Request $request)
+    public function rechazar(Request $request)
     {
         try {
             $id = $request->input('id');

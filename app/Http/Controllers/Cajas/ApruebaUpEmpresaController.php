@@ -42,7 +42,7 @@ class ApruebaUpEmpresaController extends ApplicationController
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    public function aplicarFiltroAction(Request $request, string $estado = 'P')
+    public function aplicarFiltro(Request $request, string $estado = 'P')
     {
         $this->setResponse('ajax');
         $cantidad_pagina = $request->input('numero', 10);
@@ -71,12 +71,12 @@ class ApruebaUpEmpresaController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    public function changeCantidadPaginaAction(Request $request, string $estado = 'P')
+    public function changeCantidadPagina(Request $request, string $estado = 'P')
     {
-        return $this->buscarAction($request, $estado);
+        return $this->buscar($request, $estado);
     }
 
-    public function indexAction()
+    public function index()
     {
         $campo_field = [
             'nit' => 'NIT',
@@ -100,7 +100,7 @@ class ApruebaUpEmpresaController extends ApplicationController
         ]);
     }
 
-    public function opcionalAction($estado = 'P')
+    public function opcional($estado = 'P')
     {
         $this->setParamToView('hide_header', true);
         $campo_field = [
@@ -145,7 +145,7 @@ class ApruebaUpEmpresaController extends ApplicationController
         $this->setParamToView('pagina_con_estado', $estado);
     }
 
-    public function buscarAction(Request $request, $estado = 'P')
+    public function buscar(Request $request, $estado = 'P')
     {
         $this->setResponse('ajax');
         $pagina = $request->input('pagina', 1);
@@ -183,11 +183,11 @@ class ApruebaUpEmpresaController extends ApplicationController
     }
 
     /**
-     * devolverAction function
+     * devolver function
      *
      * @return void
      */
-    public function devolverAction(Request $request)
+    public function devolver(Request $request)
     {
         $this->setResponse('ajax');
         $modelos = ['mercurio10', 'mercurio47'];
@@ -251,11 +251,11 @@ class ApruebaUpEmpresaController extends ApplicationController
     }
 
     /**
-     * rechazarAction function
+     * rechazarion
      *
      * @return void
      */
-    public function rechazarAction(Request $request)
+    public function rechazar(Request $request)
     {
         $this->setResponse('ajax');
         $modelos = ['mercurio10', 'mercurio47'];
@@ -314,12 +314,12 @@ class ApruebaUpEmpresaController extends ApplicationController
     }
 
     /**
-     * info_empresaAction function
+     * info_empresa function
      * mostrar la ficha de afiliación de la empresa
      *
      * @return void
      */
-    public function info_actualizaAction($id = 0)
+    public function infoActualiza($id = 0)
     {
         if (! $id) {
             return redirect('actualizardatos/index');
@@ -476,7 +476,7 @@ class ApruebaUpEmpresaController extends ApplicationController
         }
     }
 
-    public function send_email($emisor, $asunto, $mensaje, $destinatarios)
+    public function sendEmail($emisor, $asunto, $mensaje, $destinatarios)
     {
         /* Core::importFromLibrary("Swift", "Swift.php");
         Core::importFromLibrary("Swift", "Swift/Connection/SMTP.php");
@@ -503,11 +503,11 @@ class ApruebaUpEmpresaController extends ApplicationController
     }
 
     /**
-     * apruebaAction function
+     * aprueba function
      *
      * @return void
      */
-    public function apruebaAction(Request $request)
+    public function aprueba(Request $request)
     {
         $this->setResponse('ajax');
         $debuginfo = [];
@@ -557,7 +557,7 @@ class ApruebaUpEmpresaController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function borrarFiltroAction()
+    public function borrarFiltro()
     {
         $this->setResponse('ajax');
         if (get_flashdata_item('filter_actualizacion')) {
@@ -567,12 +567,12 @@ class ApruebaUpEmpresaController extends ApplicationController
     }
 
     /**
-     * inforAction function
+     * infor function
      * mostrar la ficha de afiliación de la empresa
      *
      * @return void
      */
-    public function inforAction(Request $request)
+    public function info(Request $request)
     {
         try {
             $upServices = new UpDatosEmpresaServices;

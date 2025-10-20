@@ -3,8 +3,10 @@
 namespace App\Http\Middleware;
 
 use App\Library\Auth\SessionCookies;
+use App\Models\MenuPermission;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 class CajasCookieAuthenticated
 {
@@ -24,6 +26,17 @@ class CajasCookieAuthenticated
             }
 
             return redirect('cajas/login');
+        }
+
+        if ($this->autorization($request) === false) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No autorizado para acceder a la acción.',
+                ], 401);
+            }
+
+            return redirect('cajas/principal/index');
         }
 
         $tipo = session()->has('tipo') ? session('tipo') : null;
@@ -58,5 +71,46 @@ class CajasCookieAuthenticated
         }
 
         return $next($request);
+    }
+
+    public function autorization(Request $request)
+    {
+        $action = self::actionActive($request);
+        $tipfun = session('tipfun');
+
+        // Verificar si el tipfun tiene permiso para la acción
+        $hasPermission = MenuPermission::where('tipfun', $tipfun)
+            ->where('menu_item_id', $action['controller'] . '.' . $action['action']) // Asume que menu_item_id coincide con controller.action
+            ->where('can_view', true)
+            ->exists();
+
+        if (!$hasPermission) {
+            return false; // No autorizado
+        }
+
+        return true; // Autorizado
+    }
+
+    public static function actionActive(Request $request)
+    {
+        $actionMethod = $request->route()->getActionMethod();
+        $controllerName = $request->route()->getController(); // Esto devolverá una instancia de UserController
+        $controllerClassName = str_replace('App\\Http\\Controllers\\', '', get_class($controllerName));
+        $out = explode('\\', $controllerClassName);
+        if (count($out) < 2) {
+            $controller = $out[0];
+            return [
+                'application' => null,
+                'controller' => $controller,
+                'action' => $actionMethod,
+            ];
+        }
+        $application = $out[0];
+        $controller = $out[1];
+        return [
+            'application' => $application,
+            'controller' => $controller,
+            'action' => $actionMethod,
+        ];
     }
 }

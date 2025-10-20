@@ -32,12 +32,12 @@ class AuthController extends ApplicationController
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    public function indexAction()
+    public function index()
     {
         return view('cajas.auth.login');
     }
 
-    public function authenticateAction(Request $request, Response $response)
+    public function authenticate(Request $request)
     {
         $user = $request->input('user');
         $clave = $request->input('password');
@@ -85,14 +85,7 @@ class AuthController extends ApplicationController
         return redirect()->route('cajas.principal');
     }
 
-    public function salirAction()
-    {
-        session()->forget('user');
-
-        return redirect('cajas/login');
-    }
-
-    public function error_accessAction()
+    public function errorAccess()
     {
         $flash = get_flashdata();
         if (! isset($flash['error'])) {
@@ -104,7 +97,7 @@ class AuthController extends ApplicationController
         ]);
     }
 
-    public function error_access_restAction()
+    public function errorAccessRest()
     {
         $this->setResponse('ajax');
         $flash = get_flashdata();
@@ -114,7 +107,7 @@ class AuthController extends ApplicationController
         http_response_code($flash['error']['code']);
     }
 
-    public function recoveryAction()
+    public function recovery()
     {
         $request = request();
         try {
@@ -138,7 +131,7 @@ class AuthController extends ApplicationController
                     throw new AuthException('La dirección email del usuario no es valido para continuar con el proceso recuperación de cuenta.', 6);
                 }
 
-                $nueva_clave = $this->clave_aleatoria(8);
+                $nueva_clave = genera_clave(8);
                 // Migrado a Hash de Laravel
                 $hash = Hash::make($nueva_clave);
 
@@ -177,7 +170,7 @@ class AuthController extends ApplicationController
         return redirect()->route('subsidio.login.index');
     }
 
-    public function changeAction()
+    public function change()
     {
         $request = request();
         try {
@@ -254,7 +247,7 @@ class AuthController extends ApplicationController
         return redirect()->route('subsidio.login.index');
     }
 
-    public function clave_aleatoria($long = 8)
+    public function claveAleatoria($long = 8)
     {
         $str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890&_.';
         $password = '';
@@ -265,7 +258,7 @@ class AuthController extends ApplicationController
         return $password;
     }
 
-    public function tokenAction()
+    public function token()
     {
         $request = request();
         $this->setResponse('ajax');
@@ -298,7 +291,7 @@ class AuthController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function fuera_servicioAction()
+    public function fueraServicio()
     {
         $msj = 'El sistema se encuentra en estado de actualización y mantenimiento.<br/>
         Con el fin de corregir errores y actualizar a versiones más seguras y óptimas que buscan la satisfacción de sus usuarios.</br>';
@@ -307,7 +300,28 @@ class AuthController extends ApplicationController
         $this->setParamToView('nota', $msj);
     }
 
-    public function logoutAction()
+
+    public function cambioCorreo()
+    {
+        $request = request();
+        try {
+            $db = DbBase::rawConnect();
+            $usuario = $request->input('usuario');
+            $correo = $request->input('correo');
+            $this->Gener02->updateAll("estacion='{$correo}'", "conditions: usuario='{$usuario}'");
+            session()->flash('success', [
+                'msj' => 'El correo electrónico se ha actualizado correctamente.',
+            ]);
+        } catch (Exception $err) {
+            session()->flash('error', [
+                'msj' => 'Error ' . $err->getMessage() . ' ' . basename($err->getFile()) . ' ' . $err->getLine(),
+                'code' => 500,
+            ]);
+        }
+        return redirect()->route('cajas.principal');
+    }
+
+    public function logout()
     {
         SessionCookies::destroyIdentity();
         session()->forget('user');

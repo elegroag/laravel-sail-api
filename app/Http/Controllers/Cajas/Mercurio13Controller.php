@@ -18,7 +18,7 @@ class Mercurio13Controller extends ApplicationController
 
     protected $user;
 
-    protected $tipo;
+    protected $tipfun;
 
     protected $query = '1=1';
 
@@ -27,11 +27,11 @@ class Mercurio13Controller extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user');
+        $this->tipfun = session('tipfun');
     }
 
-    public function indexAction()
+    public function index()
     {
         $tipopc = ['' => 'Selecciona aquí...'] + Mercurio09::pluck('detalle', 'tipopc')->toArray();
         $coddoc = ['' => 'Selecciona aquí...'] + Mercurio12::pluck('detalle', 'coddoc')->toArray();
@@ -47,19 +47,17 @@ class Mercurio13Controller extends ApplicationController
         ]);
     }
 
-    public function aplicarFiltroAction(Request $request)
+    public function aplicarFiltro(Request $request)
     {
         $consultasOldServices = new GeneralService;
         $this->query = $consultasOldServices->converQuery($request);
-
-        return $this->buscarAction($request);
+        return $this->buscar($request);
     }
 
-    public function changeCantidadPaginaAction(Request $request)
+    public function changeCantidadPagina(Request $request)
     {
         $this->cantidad_pagina = $request->input('numero');
-
-        return $this->buscarAction($request);
+        return $this->buscar($request);
     }
 
     public function showTabla($paginate)
@@ -67,7 +65,7 @@ class Mercurio13Controller extends ApplicationController
         return view('cajas.mercurio13._table', compact('paginate'))->render();
     }
 
-    public function buscarAction(Request $request)
+    public function buscar(Request $request)
     {
         $pagina = ($request->input('pagina') == '') ? 1 : $request->input('pagina');
 
@@ -87,7 +85,7 @@ class Mercurio13Controller extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function editarAction(Request $request)
+    public function editar(Request $request)
     {
         try {
             $tipopc = $request->input('tipopc');
@@ -109,7 +107,7 @@ class Mercurio13Controller extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function guardarAction(Request $request)
+    public function guardar(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -144,7 +142,7 @@ class Mercurio13Controller extends ApplicationController
         }
     }
 
-    public function borrarAction(Request $request)
+    public function borrar(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -168,5 +166,28 @@ class Mercurio13Controller extends ApplicationController
 
             return $this->renderObject($response, false);
         }
+    }
+
+    public function infor(Request $request)
+    {
+        try {
+            $this->setResponse('ajax');
+            $tipopc = $request->input('tipopc');
+            $coddoc = $request->input('coddoc');
+            $mercurio13 = Mercurio13::where('tipopc', $tipopc)->where('coddoc', $coddoc)->first();
+            if (! $mercurio13) {
+                $mercurio13 = new Mercurio13;
+            }
+            $response = [
+                'success' => true,
+                'data' => $mercurio13->toArray()
+            ];
+        } catch (DebugException $e) {
+            $response = [
+                'success' => false,
+                'msg' => $e->getMessage()
+            ];
+        }
+        return $this->renderObject($response, false);
     }
 }

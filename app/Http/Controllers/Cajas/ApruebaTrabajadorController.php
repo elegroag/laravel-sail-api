@@ -33,7 +33,7 @@ class ApruebaTrabajadorController extends ApplicationController
 
     protected $user;
 
-    protected $tipo;
+    protected $tipfun;
 
     /**
      * services variable
@@ -52,12 +52,12 @@ class ApruebaTrabajadorController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user');
+        $this->tipfun = session('tipfun');
     }
 
     /**
-     * aplicarFiltroAction function
+     * aplicarFiltro function
      *
      * @changed [2023-12-19]
      *
@@ -65,7 +65,7 @@ class ApruebaTrabajadorController extends ApplicationController
      *
      * @return void
      */
-    public function aplicarFiltroAction(Request $request, string $estado = 'P')
+    public function aplicarFiltro(Request $request, string $estado = 'P')
     {
         $cantidad_pagina = $request->input('numero', 10);
         $usuario = $this->user['usuario'];
@@ -95,13 +95,13 @@ class ApruebaTrabajadorController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function changeCantidadPaginaAction(Request $request, string $estado = 'P')
+    public function changeCantidadPagina(Request $request, string $estado = 'P')
     {
-        $this->buscarAction($request, $estado);
+        $this->buscar($request, $estado);
     }
 
     /**
-     * indexAction function
+     * index function
      *
      * @changed [2023-12-00]
      *
@@ -110,7 +110,7 @@ class ApruebaTrabajadorController extends ApplicationController
      * @param  string  $estado
      * @return void
      */
-    public function indexAction()
+    public function index()
     {
         $this->setParamToView('hide_header', true);
         $campo_field = [
@@ -135,7 +135,7 @@ class ApruebaTrabajadorController extends ApplicationController
         ]);
     }
 
-    public function buscarAction(Request $request, string $estado = 'P')
+    public function buscar(Request $request, string $estado = 'P')
     {
         $this->setResponse('ajax');
         $pagina = ($request->input('pagina')) ? $request->input('pagina') : 1;
@@ -173,7 +173,7 @@ class ApruebaTrabajadorController extends ApplicationController
     }
 
     /**
-     * inforAction function
+     * infor function
      *
      * @changed [2023-12-19]
      *
@@ -184,7 +184,7 @@ class ApruebaTrabajadorController extends ApplicationController
      * @param  string  $id
      * @return void
      */
-    public function inforAction(Request $request)
+    public function infor(Request $request)
     {
         try {
             $id = $request->input('id');
@@ -343,7 +343,7 @@ class ApruebaTrabajadorController extends ApplicationController
     }
 
     /**
-     * apruebaAction function
+     * aprueba function
      *
      * @changed [2023-12-19]
      *
@@ -351,7 +351,7 @@ class ApruebaTrabajadorController extends ApplicationController
      *
      * @return void
      */
-    public function apruebaAction(Request $request)
+    public function aprueba(Request $request)
     {
         $this->setResponse('ajax');
         $debuginfo = [];
@@ -397,7 +397,7 @@ class ApruebaTrabajadorController extends ApplicationController
     }
 
     /**
-     * devolverAction function
+     * devolver function
      *
      * @changed [2023-12-19]
      *
@@ -405,7 +405,7 @@ class ApruebaTrabajadorController extends ApplicationController
      *
      * @return void
      */
-    public function devolverAction(Request $request)
+    public function devolver(Request $request)
     {
         $this->trabajadorServices = $this->services->get('TrabajadorServices');
         $notifyEmailServices = new NotifyEmailServices;
@@ -441,7 +441,7 @@ class ApruebaTrabajadorController extends ApplicationController
     }
 
     /**
-     * rechazarAction function
+     * rechazar function
      *
      * @changed [2023-12-19]
      *
@@ -449,7 +449,7 @@ class ApruebaTrabajadorController extends ApplicationController
      *
      * @return void
      */
-    public function rechazarAction(Request $request)
+    public function rechazar(Request $request)
     {
         $this->setResponse('ajax');
         $notifyEmailServices = new NotifyEmailServices;
@@ -484,7 +484,7 @@ class ApruebaTrabajadorController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function validarMultiafiliacionAction(Request $request)
+    public function validarMultiafiliacion(Request $request)
     {
         $this->setResponse('ajax');
         $id = $request->input('id');
@@ -522,7 +522,7 @@ class ApruebaTrabajadorController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    public function pendiente_emailAction()
+    public function pendienteEmail()
     {
         /* $flash_mensaje = SESSION::getData("flash_mensaje");
         SESSION::setData("flash_mensaje", null);
@@ -530,7 +530,7 @@ class ApruebaTrabajadorController extends ApplicationController
         $this->setParamToView("title", "Procesar Notificación Pendiente"); */
     }
 
-    public function rezagoCorreoAction(Request $request)
+    public function rezagoCorreo(Request $request)
     {
         $this->setResponse('view');
         $cedtra = $request->input('cedtra');
@@ -641,7 +641,7 @@ class ApruebaTrabajadorController extends ApplicationController
         ];
     }
 
-    public function editarViewAction($id = 0)
+    public function editarView($id = 0)
     {
         $this->setParamToView('hide_header', true);
 
@@ -672,7 +672,7 @@ class ApruebaTrabajadorController extends ApplicationController
         $this->setParamToView('title', "Solicitud Trabajador - {$trabajador->getCedtra()}");
     }
 
-    public function editar_solicitudAction(Request $request)
+    public function editarSolicitud(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -753,13 +753,13 @@ class ApruebaTrabajadorController extends ApplicationController
     }
 
     /**
-     * buscar_sisuAction function
+     * buscar_sisu function
      * Datos de la empresa en sisuweb, si ya está registrada. pruebas 98588506
      *
      * @param [type] $nit
      * @return void
      */
-    public function buscar_sisuAction(Request $request)
+    public function buscarSisu(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -807,7 +807,7 @@ class ApruebaTrabajadorController extends ApplicationController
         }
     }
 
-    public function opcionalAction($estado = 'P')
+    public function opcional($estado = 'P')
     {
         $this->setParamToView('hide_header', true);
         $this->setParamToView('title', 'Aprobación Trabajadores');
@@ -849,7 +849,7 @@ class ApruebaTrabajadorController extends ApplicationController
         $this->setParamToView('pagina_con_estado', $estado);
     }
 
-    public function reaprobarAction(Request $request)
+    public function reaprobar(Request $request)
     {
         $this->setResponse('ajax');
         $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
@@ -884,7 +884,7 @@ class ApruebaTrabajadorController extends ApplicationController
         $this->renderObject($response);
     }
 
-    public function borrarFiltroAction()
+    public function borrarFiltro()
     {
         $this->setResponse('ajax');
         set_flashdata('filter_trabajador', false, true);
@@ -897,7 +897,7 @@ class ApruebaTrabajadorController extends ApplicationController
         ]);
     }
 
-    public function infoAprobadoViewAction($id)
+    public function infoAprobadoView($id)
     {
         $this->tipopc = '1';
         try {
@@ -993,7 +993,7 @@ class ApruebaTrabajadorController extends ApplicationController
      * @param [type] $id
      * @return void
      */
-    public function deshacerAction(Request $request)
+    public function deshacer(Request $request)
     {
         $this->setResponse('ajax');
         $trabajadorServices = new TrabajadorServices;
@@ -1112,7 +1112,7 @@ class ApruebaTrabajadorController extends ApplicationController
      * @param [type] $id
      * @return void
      */
-    public function aportesAction($id)
+    public function aportes($id)
     {
         $this->setResponse('ajax');
         try {

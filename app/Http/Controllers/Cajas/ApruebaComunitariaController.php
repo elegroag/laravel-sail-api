@@ -30,7 +30,7 @@ class ApruebaComunitariaController extends ApplicationController
 
     protected $user;
 
-    protected $tipo;
+    protected $tipfun;
 
     /**
      * services variable
@@ -64,11 +64,11 @@ class ApruebaComunitariaController extends ApplicationController
     {
         $this->pagination = new Pagination;
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user');
+        $this->tipfun = session('tipfun');
     }
 
-    public function aplicarFiltroAction(Request $request, string $estado = 'P')
+    public function aplicarFiltro(Request $request, string $estado = 'P')
     {
         $this->setResponse('ajax');
         $cantidad_pagina = $request->input('numero', 10);
@@ -101,12 +101,12 @@ class ApruebaComunitariaController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function changeCantidadPaginaAction(Request $request, $estado = 'P')
+    public function changeCantidadPagina(Request $request, $estado = 'P')
     {
-        return $this->buscarAction($request, $estado);
+        return $this->buscar($request, $estado);
     }
 
-    public function indexAction()
+    public function index()
     {
         $this->setParamToView('hide_header', true);
         $campo_field = [
@@ -128,7 +128,7 @@ class ApruebaComunitariaController extends ApplicationController
         ]);
     }
 
-    public function buscarAction(Request $request, $estado = 'P')
+    public function buscar(Request $request, $estado = 'P')
     {
         $this->setResponse('ajax');
         $pagina = $request->input('pagina', 1);
@@ -164,12 +164,12 @@ class ApruebaComunitariaController extends ApplicationController
     }
 
     /**
-     * inforAction function
+     * infor function
      * mostrar la ficha de afiliación de la empresa
      *
      * @return void
      */
-    public function inforAction($id = 0)
+    public function info($id = 0)
     {
         $madreComuniServices = new MadresComuniServices;
         if (! $id) {
@@ -308,7 +308,7 @@ class ApruebaComunitariaController extends ApplicationController
      *
      * @return void
      */
-    public function apruebaAction(Request $request)
+    public function aprueba(Request $request)
     {
         $this->setResponse('ajax');
         $user = session()->get('user');
@@ -348,11 +348,11 @@ class ApruebaComunitariaController extends ApplicationController
     }
 
     /**
-     * devolverAction function
+     * devolver function
      *
      * @return void
      */
-    public function devolverAction(Request $request)
+    public function devolver(Request $request)
     {
         $this->setResponse('ajax');
         $this->madreComuniServices = new MadresComuniServices;
@@ -401,11 +401,11 @@ class ApruebaComunitariaController extends ApplicationController
     }
 
     /**
-     * rechazarAction function
+     * rechazar function
      *
      * @return void
      */
-    public function rechazarAction(Request $request)
+    public function rechazar(Request $request)
     {
         $this->setResponse('ajax');
         $notifyEmailServices = new NotifyEmailServices;
@@ -440,7 +440,7 @@ class ApruebaComunitariaController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function borrarFiltroAction()
+    public function borrarFiltro()
     {
         $this->setResponse('ajax');
         set_flashdata('filter_madres', false, true);

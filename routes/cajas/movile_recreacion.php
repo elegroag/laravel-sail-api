@@ -8,11 +8,11 @@ use Illuminate\Support\Facades\Route;
 Route::middleware([CajasCookieAuthenticated::class])->group(function () {
     Route::prefix('cajas/mercurio74')->group(function () {
         // Definir rutas para el controlador Mercurio74
-        Route::get('/index', [Mercurio74Controller::class, 'indexAction']);
-        Route::get('/galeria', [Mercurio74Controller::class, 'galeriaAction']);
-        Route::post('/guardar', [Mercurio74Controller::class, 'guardarAction']);
-        Route::post('/arriba', [Mercurio74Controller::class, 'arribaAction']);
-        Route::post('/abajo', [Mercurio74Controller::class, 'abajoAction']);
-        Route::post('/borrar', [Mercurio74Controller::class, 'borrarAction']);
+        Route::get('/index', [Mercurio74Controller::class, 'index']);
+        Route::get('/galeria', [Mercurio74Controller::class, 'galeria']);
+        Route::post('/guardar', [Mercurio74Controller::class, 'guardar']);
+        Route::post('/arriba', [Mercurio74Controller::class, 'arriba']);
+        Route::post('/abajo', [Mercurio74Controller::class, 'abajo']);
+        Route::post('/borrar', [Mercurio74Controller::class, 'borrar']);
     });
 });

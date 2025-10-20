@@ -30,6 +30,8 @@ class MenuItem extends ModelBase
         'is_visible',
         'codapl',
         'tipo',
+        'controller',
+        'action'
     ];
 
     // Getters/Setters básicos (compatibilidad y claridad)
@@ -136,5 +138,25 @@ class MenuItem extends ModelBase
     public function getTipo()
     {
         return $this->tipo;
+    }
+
+    public function setController($v)
+    {
+        $this->controller = $v;
+    }
+
+    public function getController()
+    {
+        return $this->controller;
+    }
+
+    public function setAction($v)
+    {
+        $this->action = $v;
+    }
+
+    public function getAction()
+    {
+        return $this->action;
     }
 }

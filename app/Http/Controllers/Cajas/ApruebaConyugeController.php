@@ -29,7 +29,7 @@ class ApruebaConyugeController extends ApplicationController
 
     protected $user;
 
-    protected $tipo;
+    protected $tipfun;
 
     /**
      * services variable
@@ -57,12 +57,12 @@ class ApruebaConyugeController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user');
+        $this->tipfun = session('tipfun');
     }
 
     /**
-     * aplicarFiltroAction function
+     * aplicarFiltro function
      *
      * @changed [2023-12-20]
      *
@@ -70,7 +70,7 @@ class ApruebaConyugeController extends ApplicationController
      *
      * @return void
      */
-    public function aplicarFiltroAction(Request $request, string $estado = 'P')
+    public function aplicarFiltro(Request $request, string $estado = 'P')
     {
         $this->setResponse('ajax');
         $cantidad_pagina = $request->input('numero', 10);
@@ -101,7 +101,7 @@ class ApruebaConyugeController extends ApplicationController
     }
 
     /**
-     * changeCantidadPaginaAction function
+     * changeCantidadPagina function
      *
      * @changed [2023-12-20]
      *
@@ -109,13 +109,13 @@ class ApruebaConyugeController extends ApplicationController
      *
      * @return void
      */
-    public function changeCantidadPaginaAction(Request $request, string $estado = 'P')
+    public function changeCantidadPagina(Request $request, string $estado = 'P')
     {
-        $this->buscarAction($request, $estado);
+        $this->buscar($request, $estado);
     }
 
     /**
-     * indexAction function
+     * index function
      *
      * @changed [2023-12-20]
      *
@@ -124,7 +124,7 @@ class ApruebaConyugeController extends ApplicationController
      * @param  string  $estado
      * @return void
      */
-    public function indexAction()
+    public function index()
     {
         $this->setParamToView('hide_header', true);
         $campo_field = [
@@ -150,7 +150,7 @@ class ApruebaConyugeController extends ApplicationController
     }
 
     /**
-     * buscarAction function
+     * buscar function
      *
      * @changed [2023-12-00]
      *
@@ -159,7 +159,7 @@ class ApruebaConyugeController extends ApplicationController
      * @param  string  $estado
      * @return void
      */
-    public function buscarAction(Request $request, $estado = 'P')
+    public function buscar(Request $request, $estado = 'P')
     {
         $this->setResponse('ajax');
         $pagina = $request->input('pagina', 1);
@@ -197,7 +197,7 @@ class ApruebaConyugeController extends ApplicationController
     }
 
     /**
-     * aprobarAction function
+     * aprobar function
      *
      * @changed [2023-12-20]
      *
@@ -205,7 +205,7 @@ class ApruebaConyugeController extends ApplicationController
      *
      * @return void
      */
-    public function apruebaAction(Request $request)
+    public function aprueba(Request $request)
     {
         $this->setResponse('ajax');
         $debuginfo = [];
@@ -252,7 +252,7 @@ class ApruebaConyugeController extends ApplicationController
     }
 
     /**
-     * devolverAction function
+     * devolver function
      *
      * @changed [2023-12-20]
      *
@@ -260,7 +260,7 @@ class ApruebaConyugeController extends ApplicationController
      *
      * @return void
      */
-    public function devolverAction(Request $request)
+    public function devolver(Request $request)
     {
         $this->conyugeServices = $this->services->get('ConyugeServices');
         $notifyEmailServices = new NotifyEmailServices;
@@ -294,7 +294,7 @@ class ApruebaConyugeController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function rechazarAction(Request $request)
+    public function rechazar(Request $request)
     {
         $notifyEmailServices = new NotifyEmailServices;
         $this->conyugeServices = new ConyugeServices;
@@ -324,7 +324,7 @@ class ApruebaConyugeController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function inforAction(Request $request)
+    public function info(Request $request)
     {
         try {
             $id = $request->input('id');
@@ -524,13 +524,13 @@ class ApruebaConyugeController extends ApplicationController
     }
 
     /**
-     * empresa_sisuwebAction function
+     * empresaSisuweb function
      * Datos de la empresa en sisuweb, si ya está registrada. pruebas 98588506
      *
      * @param [type] $nit
      * @return void
      */
-    public function buscarEnSisuViewAction($id)
+    public function buscarEnSisuView($id)
     {
         $mercurio32 = Mercurio32::where("id", $id)->first();
         if (! $mercurio32) {
@@ -578,7 +578,7 @@ class ApruebaConyugeController extends ApplicationController
         $this->setParamToView('title', "Conyuge SisuWeb - {$mercurio32->getCedcon()}");
     }
 
-    public function editar_solicitudAction(Request $request)
+    public function editarSolicitud(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -646,7 +646,7 @@ class ApruebaConyugeController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function editarViewAction($id = '')
+    public function editarView($id = '')
     {
         $this->setParamToView('hide_header', true);
 
@@ -675,7 +675,7 @@ class ApruebaConyugeController extends ApplicationController
         $this->setParamToView('title', "Solicitud Cónyuge - {$conyuge->getCedcon()}");
     }
 
-    public function opcionalAction($estado = 'P')
+    public function opcional($estado = 'P')
     {
         $this->setParamToView('hide_header', true);
         $this->setParamToView('title', 'Aprobación Conyuge');
@@ -689,7 +689,7 @@ class ApruebaConyugeController extends ApplicationController
         $this->setParamToView('pagina_con_estado', $estado);
     }
 
-    public function reaprobarAction(Request $request)
+    public function reaprobar(Request $request)
     {
         $this->setResponse('ajax');
         $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
@@ -761,7 +761,7 @@ class ApruebaConyugeController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function borrarFiltroAction()
+    public function borrarFiltro()
     {
         $this->setResponse('ajax');
         set_flashdata('filter_conyuge', false, true);
@@ -775,13 +775,13 @@ class ApruebaConyugeController extends ApplicationController
     }
 
     /**
-     * infoAprobadoViewAction function
+     * infoAprobadoView function
      * datos del solicitud aprobada en sisu
      *
      * @param [type] $id
      * @return void
      */
-    public function infoAprobadoViewAction($id)
+    public function infoAprobadoView($id)
     {
         $this->tipopc = '3';
         try {
@@ -881,7 +881,7 @@ class ApruebaConyugeController extends ApplicationController
      * @param [type] $id
      * @return void
      */
-    public function deshacerAction(Request $request)
+    public function deshacer(Request $request)
     {
         $this->setResponse('ajax');
         $action = $request->input('action');
@@ -995,7 +995,7 @@ class ApruebaConyugeController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function valida_conyugeAction(Request $request)
+    public function validaConyuge(Request $request)
     {
         $this->setResponse('ajax');
         try {

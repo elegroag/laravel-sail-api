@@ -22,12 +22,14 @@ class Gener42Controller extends ApplicationController
 
     protected $tipo;
 
+    protected $tipfun;
+
     public function __construct()
     {
-        $this->cantidad_pagina = $this->numpaginate;
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user') ?? null;
+        $this->tipfun = session('tipfun') ?? null;
+        $this->tipo = 'A';
     }
 
     public function tablePermisos($table, $tipo)
@@ -35,7 +37,7 @@ class Gener42Controller extends ApplicationController
         return view('cajas/gener42/asigna_permisos', ['table' => $table, 'tipo' => $tipo])->render();
     }
 
-    public function buscarAction(Request $request)
+    public function buscar(Request $request)
     {
         $usuario = $request->input('usuario');
         $buscar = $request->input('buscar');
@@ -58,7 +60,7 @@ class Gener42Controller extends ApplicationController
         $this->renderObject($response, false);
     }
 
-    public function indexAction()
+    public function index()
     {
         $this->setParamToView('title', 'Permisos por usuario');
         return view('cajas.gener42.index', [
@@ -71,7 +73,7 @@ class Gener42Controller extends ApplicationController
         ]);
     }
 
-    public function guardarAction(Request $request)
+    public function guardar(Request $request)
     {
         try {
             $tipo = $request->input('tipo');

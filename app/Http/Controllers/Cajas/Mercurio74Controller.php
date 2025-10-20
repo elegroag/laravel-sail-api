@@ -26,14 +26,14 @@ class Mercurio74Controller extends ApplicationController
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    public function indexAction()
+    public function index()
     {
         return view('cajas.mercurio74.index', [
             'title' => 'Promociones  de Recreación',
         ]);
     }
 
-    public function galeriaAction()
+    public function galeria()
     {
         try {
             $this->setResponse('ajax');
@@ -53,7 +53,7 @@ class Mercurio74Controller extends ApplicationController
         }
     }
 
-    public function guardarAction(Request $request)
+    public function guardar(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -97,7 +97,7 @@ class Mercurio74Controller extends ApplicationController
         }
     }
 
-    public function arribaAction(Request $request)
+    public function arriba(Request $request)
     {
         try {
 
@@ -127,7 +127,7 @@ class Mercurio74Controller extends ApplicationController
         }
     }
 
-    public function abajoAction(Request $request)
+    public function abajo(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -158,7 +158,7 @@ class Mercurio74Controller extends ApplicationController
         }
     }
 
-    public function borrarAction(Request $request)
+    public function borrar(Request $request)
     {
         try {
             $this->setResponse('ajax');

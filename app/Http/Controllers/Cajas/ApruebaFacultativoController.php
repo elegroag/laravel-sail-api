@@ -32,7 +32,7 @@ class ApruebaFacultativoController extends ApplicationController
 
     protected $user;
 
-    protected $tipo;
+    protected $tipfun;
 
     /**
      * services variable
@@ -58,12 +58,12 @@ class ApruebaFacultativoController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user');
+        $this->tipfun = session('tipfun');
     }
 
     /**
-     * aplicarFiltroAction function
+     * aplicarFiltro function
      *
      * @changed [2023-12-00]
      *
@@ -71,7 +71,7 @@ class ApruebaFacultativoController extends ApplicationController
      *
      * @return void
      */
-    public function aplicarFiltroAction(Request $request, $estado = 'P')
+    public function aplicarFiltro(Request $request, $estado = 'P')
     {
         $this->setResponse('ajax');
         $cantidad_pagina = ($request->input('numero')) ? $request->input('numero') : 10;
@@ -104,12 +104,12 @@ class ApruebaFacultativoController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function changeCantidadPaginaAction(Request $request, $estado = 'P')
+    public function changeCantidadPagina(Request $request, $estado = 'P')
     {
-        return $this->buscarAction($request, $estado);
+        return $this->buscar($request, $estado);
     }
 
-    public function indexAction()
+    public function index()
     {
         $this->setParamToView('hide_header', true);
         $campo_field = [
@@ -131,7 +131,7 @@ class ApruebaFacultativoController extends ApplicationController
         ]);
     }
 
-    public function buscarAction(Request $request, string $estado = 'P')
+    public function buscar(Request $request, string $estado = 'P')
     {
         $this->setResponse('ajax');
         $pagina = $request->input('pagina', 1);
@@ -175,7 +175,7 @@ class ApruebaFacultativoController extends ApplicationController
      *
      * @return void
      */
-    public function inforAction(Request $request)
+    public function infor(Request $request)
     {
         try {
             $id = $request->input('id');
@@ -254,7 +254,7 @@ class ApruebaFacultativoController extends ApplicationController
     }
 
     /**
-     * apruebaAction function
+     * aprueba function
      *
      * @changed [2023-12-00]
      *
@@ -262,7 +262,7 @@ class ApruebaFacultativoController extends ApplicationController
      *
      * @return void
      */
-    public function apruebaAction(Request $request)
+    public function aprueba(Request $request)
     {
         $this->setResponse('ajax');
         $user = session()->get('user');
@@ -312,7 +312,7 @@ class ApruebaFacultativoController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function borrarFiltroAction(Request $request)
+    public function borrarFiltro()
     {
         $this->setResponse('ajax');
         set_flashdata('filter_facultativo', false, true);
@@ -325,7 +325,7 @@ class ApruebaFacultativoController extends ApplicationController
         ]);
     }
 
-    public function editarViewAction($id)
+    public function editarView($id)
     {
         if (! $id) {
             return redirect('aprobacionfac/index');
@@ -362,7 +362,7 @@ class ApruebaFacultativoController extends ApplicationController
         $this->setParamToView('title', 'Editar Ficha Pensionado ' . $mercurio36->getCedtra());
     }
 
-    public function edita_empresaAction(Request $request)
+    public function editaEmpresa(Request $request)
     {
         $this->setResponse('ajax');
         $nit = $request->input('nit');
@@ -481,7 +481,7 @@ class ApruebaFacultativoController extends ApplicationController
         ];
     }
 
-    public function rechazarAction(Request $request)
+    public function rechazar(Request $request)
     {
         $this->setResponse('ajax');
         $notifyEmailServices = new NotifyEmailServices;
@@ -516,7 +516,7 @@ class ApruebaFacultativoController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function devolverAction(Request $request)
+    public function devolver(Request $request)
     {
         $this->setResponse('ajax');
         $this->facultativoServices = $this->services->get('facultativoServices');

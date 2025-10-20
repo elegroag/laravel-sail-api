@@ -68,22 +68,22 @@ class Mercurio03Controller extends ApplicationController
         return $table->generate();
     }
 
-    public function aplicarFiltroAction(Request $request)
+    public function aplicarFiltro(Request $request)
     {
         $consultasOldServices = new GeneralService;
         $this->query = $consultasOldServices->converQuery($request);
 
-        return $this->buscarAction($request);
+        return $this->buscar($request);
     }
 
-    public function changeCantidadPaginaAction(Request $request)
+    public function changeCantidadPagina(Request $request)
     {
         $this->cantidad_pagina = $request->input('numero');
 
-        return $this->buscarAction($request);
+        return $this->buscar($request);
     }
 
-    public function indexAction()
+    public function index()
     {
         $campo_field = [
             'codfir' => 'Código',
@@ -98,7 +98,7 @@ class Mercurio03Controller extends ApplicationController
         ]);
     }
 
-    public function buscarAction(Request $request)
+    public function buscar(Request $request)
     {
         try {
             $pagina = ($request->input('pagina') == '') ? 1 : $request->input('pagina');
@@ -126,7 +126,7 @@ class Mercurio03Controller extends ApplicationController
         }
     }
 
-    public function editarAction(Request $request)
+    public function editar(Request $request)
     {
         try {
             $codfir = $request->input('codfir');
@@ -140,13 +140,13 @@ class Mercurio03Controller extends ApplicationController
             return $this->renderObject($mercurio03->toArray(), false);
         } catch (\Exception $e) {
             parent::setLogger($e->getMessage());
-            $response = parent::errorFunc('Error al obtener el registro: '.$e->getMessage());
+            $response = parent::errorFunc('Error al obtener el registro: ' . $e->getMessage());
 
             return $this->renderObject($response, false);
         }
     }
 
-    public function borrarAction(Request $request)
+    public function borrar(Request $request)
     {
         try {
             $codfir = $request->input('codfir');
@@ -158,8 +158,8 @@ class Mercurio03Controller extends ApplicationController
             if ($mercurio03) {
                 // Eliminar archivo físico si existe
                 $mercurio01 = Mercurio01::first();
-                if ($mercurio01 && $mercurio03->getArchivo() && file_exists($mercurio01->getPath().$mercurio03->getArchivo())) {
-                    unlink($mercurio01->getPath().$mercurio03->getArchivo());
+                if ($mercurio01 && $mercurio03->getArchivo() && file_exists($mercurio01->getPath() . $mercurio03->getArchivo())) {
+                    unlink($mercurio01->getPath() . $mercurio03->getArchivo());
                 }
 
                 if (! $mercurio03->delete()) {
@@ -176,13 +176,13 @@ class Mercurio03Controller extends ApplicationController
         } catch (\Exception $e) {
             DB::rollBack();
             parent::setLogger($e->getMessage());
-            $response = parent::errorFunc('Error al eliminar el registro: '.$e->getMessage());
+            $response = parent::errorFunc('Error al eliminar el registro: ' . $e->getMessage());
 
             return $this->renderObject($response, false);
         }
     }
 
-    public function guardarAction(Request $request)
+    public function guardar(Request $request)
     {
         try {
             $codfir = $request->input('codfir');
@@ -215,13 +215,13 @@ class Mercurio03Controller extends ApplicationController
                 }
 
                 // Eliminar archivo anterior si existe
-                if (! $isNew && $mercurio03->getArchivo() && file_exists($mercurio01->getPath().$mercurio03->getArchivo())) {
-                    unlink($mercurio01->getPath().$mercurio03->getArchivo());
+                if (! $isNew && $mercurio03->getArchivo() && file_exists($mercurio01->getPath() . $mercurio03->getArchivo())) {
+                    unlink($mercurio01->getPath() . $mercurio03->getArchivo());
                 }
 
                 $file = $request->file('archivo');
                 $extension = $file->getClientOriginalExtension();
-                $fileName = $codfir.'_firma.'.$extension;
+                $fileName = $codfir . '_firma.' . $extension;
 
                 // Mover el archivo
                 $file->move($mercurio01->getPath(), $fileName);
@@ -240,13 +240,13 @@ class Mercurio03Controller extends ApplicationController
         } catch (\Exception $e) {
             DB::rollBack();
             parent::setLogger($e->getMessage());
-            $response = parent::errorFunc('Error al guardar el registro: '.$e->getMessage());
+            $response = parent::errorFunc('Error al guardar el registro: ' . $e->getMessage());
 
             return $this->renderObject($response, false);
         }
     }
 
-    public function validePkAction(Request $request)
+    public function validePk(Request $request)
     {
         try {
             $codfir = $request->input('codfir');
@@ -261,13 +261,13 @@ class Mercurio03Controller extends ApplicationController
             return $this->renderObject($response, false);
         } catch (\Exception $e) {
             parent::setLogger($e->getMessage());
-            $response = parent::errorFunc('Error al validar el código: '.$e->getMessage());
+            $response = parent::errorFunc('Error al validar el código: ' . $e->getMessage());
 
             return $this->renderObject($response, false);
         }
     }
 
-    public function reporteAction($format = 'P')
+    public function reporte($format = 'P')
     {
         try {
             $_fields = [
@@ -290,7 +290,7 @@ class Mercurio03Controller extends ApplicationController
             return $this->renderObject($file, false);
         } catch (\Exception $e) {
             parent::setLogger($e->getMessage());
-            $response = parent::errorFunc('Error al generar el reporte: '.$e->getMessage());
+            $response = parent::errorFunc('Error al generar el reporte: ' . $e->getMessage());
 
             return $this->renderObject($response, false);
         }

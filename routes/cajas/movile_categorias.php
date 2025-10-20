@@ -7,15 +7,15 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware([CajasCookieAuthenticated::class])->group(function () {
     Route::prefix('/cajas/mercurio51')->group(function () {
-        Route::get('/index', [Mercurio51Controller::class, 'indexAction']);
-        Route::post('/aplicar_filtro', [Mercurio51Controller::class, 'aplicarFiltroAction']);
-        Route::post('/change_cantidad_pagina', [Mercurio51Controller::class, 'changeCantidadPaginaAction']);
+        Route::get('/index', [Mercurio51Controller::class, 'index']);
+        Route::post('/aplicar_filtro', [Mercurio51Controller::class, 'aplicarFiltro']);
+        Route::post('/change_cantidad_pagina', [Mercurio51Controller::class, 'changeCantidadPagina']);
 
-        Route::get('/buscar', [Mercurio51Controller::class, 'buscarAction']);
-        Route::get('/editar', [Mercurio51Controller::class, 'editarAction']);
-        Route::delete('/borrar', [Mercurio51Controller::class, 'borrarAction']);
-        Route::post('/guardar', [Mercurio51Controller::class, 'guardarAction']);
-        Route::post('/valide-pk', [Mercurio51Controller::class, 'validePkAction']);
-        Route::get('/reporte/{format?}', [Mercurio51Controller::class, 'reporteAction']);
+        Route::get('/buscar', [Mercurio51Controller::class, 'buscar']);
+        Route::get('/editar', [Mercurio51Controller::class, 'editar']);
+        Route::delete('/borrar', [Mercurio51Controller::class, 'borrar']);
+        Route::post('/guardar', [Mercurio51Controller::class, 'guardar']);
+        Route::post('/valide-pk', [Mercurio51Controller::class, 'validePk']);
+        Route::get('/reporte/{format?}', [Mercurio51Controller::class, 'reporte']);
     });
 });

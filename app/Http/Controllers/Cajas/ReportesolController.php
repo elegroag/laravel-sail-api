@@ -33,7 +33,7 @@ class ReportesolController extends ApplicationController
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    public function indexAction()
+    public function index()
     {
         $m09 = (new Mercurio09)->find();
         $tipo_solicitudes = [];
@@ -44,7 +44,7 @@ class ReportesolController extends ApplicationController
         $this->setParamToView('title', 'Reportes de Solicitudes');
     }
 
-    public function procesarAction(Request $request)
+    public function procesar(Request $request)
     {
         $this->setResponse('ajax');
         $tipo = $request->input('tipo');

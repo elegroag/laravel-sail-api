@@ -19,13 +19,13 @@ class NotificacionesController extends ApplicationController
 
     public function __construct()
     {
-        $this->setParamToView('instancePath', env('APP_URL').'Cajas/');
+        $this->setParamToView('instancePath', env('APP_URL') . 'Cajas/');
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    public function refreshAction()
+    public function refresh()
     {
         $this->setResponse('ajax');
         try {
@@ -49,7 +49,7 @@ class NotificacionesController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function refresh_paginationAction(Request $request)
+    public function refreshPagination(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -71,12 +71,12 @@ class NotificacionesController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function indexAction()
+    public function index()
     {
         $this->setParamToView('title', 'Notificaciones');
     }
 
-    public function detalleAction($id = '')
+    public function detalle($id = '')
     {
         if ($id == '') {
             set_flashdata('error', [
@@ -94,7 +94,7 @@ class NotificacionesController extends ApplicationController
         // Tag::setDocumentTitle('Detalle Notificación');
     }
 
-    public function createAction()
+    public function create()
     {
         $this->setResponse('ajax');
         $html = 'Se requiere de actualizar el correo electronico de la cuenta de usuario<br/>
@@ -125,7 +125,7 @@ class NotificacionesController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function change_stateAction(Request $request)
+    public function changeState(Request $request)
     {
         $this->setResponse('ajax');
         try {

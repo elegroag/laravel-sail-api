@@ -17,16 +17,16 @@ class AdmproductosController extends ApplicationController
 
     protected $user;
 
-    protected $tipo;
+    protected $tipfun;
 
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user');
+        $this->tipfun = session('tipfun');
     }
 
-    public function listaAction()
+    public function lista()
     {
         return view('cajas.admproductos.lista', [
             'title' => 'Productos y Servicios',
@@ -38,7 +38,7 @@ class AdmproductosController extends ApplicationController
         ]);
     }
 
-    public function buscarListaAction()
+    public function buscarLista()
     {
         $serviciosCupos = new ServiciosCupos;
         $todosServicios = [];
@@ -63,14 +63,14 @@ class AdmproductosController extends ApplicationController
         );
     }
 
-    public function nuevoAction()
+    public function nuevo()
     {
         return view('cajas.admproductos.nuevo', [
             'title' => 'Productos y Servicios',
         ]);
     }
 
-    public function guardarAction(Request $request, $id = '')
+    public function guardar(Request $request, $id = '')
     {
         try {
             $this->setResponse('ajax');
@@ -121,7 +121,7 @@ class AdmproductosController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function editarAction($id = '')
+    public function editar($id = '')
     {
         if ($id == '') {
             set_flashdata('error', [
@@ -149,7 +149,7 @@ class AdmproductosController extends ApplicationController
         $this->setParamToView('title', 'Productos y Servicios');
     }
 
-    public function changeEstadoAction(Request $request)
+    public function changeEstado(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -183,7 +183,7 @@ class AdmproductosController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function aplicadosAction($codser = '')
+    public function aplicados($codser = '')
     {
         if ($codser == '') {
             set_flashdata('error', [
@@ -205,7 +205,7 @@ class AdmproductosController extends ApplicationController
         ]);
     }
 
-    public function buscarAfiliadosAplicadosAction(Request $request, $codser = '')
+    public function buscarAfiliadosAplicados(Request $request, $codser = '')
     {
         $this->setResponse('ajax');
 
@@ -240,7 +240,7 @@ class AdmproductosController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function cargue_pagosAction($codser = '')
+    public function carguePagos($codser = '')
     {
         if ($codser == '') {
             set_flashdata('error', [
@@ -262,7 +262,7 @@ class AdmproductosController extends ApplicationController
         $this->setParamToView('title', 'Productos y Servicios');
     }
 
-    public function detalleAplicadoAction(Request $request, $id)
+    public function detalleAplicado(Request $request, $id)
     {
         $this->setResponse('ajax');
         try {
@@ -343,7 +343,7 @@ class AdmproductosController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function rechazarAction(Request $request, $id = '')
+    public function rechazar(Request $request, $id = '')
     {
         $this->setResponse('ajax');
         try {

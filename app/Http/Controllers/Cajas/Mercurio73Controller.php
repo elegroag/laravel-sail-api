@@ -26,14 +26,14 @@ class Mercurio73Controller extends ApplicationController
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    public function indexAction()
+    public function index()
     {
         return view('cajas.mercurio73.index', [
             'title' => 'Promociones de Educación',
         ]);
     }
 
-    public function galeriaAction()
+    public function galeria()
     {
         $instancePath = env('APP_URL');
         $mercurio01 = Mercurio01::first();
@@ -46,7 +46,7 @@ class Mercurio73Controller extends ApplicationController
         $this->renderObject($response, false);
     }
 
-    public function guardarAction(Request $request)
+    public function guardar(Request $request)
     {
         try {
             $numedu = Mercurio73::max('numedu') + 1;
@@ -88,7 +88,7 @@ class Mercurio73Controller extends ApplicationController
         }
     }
 
-    public function arribaAction(Request $request)
+    public function arriba(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -116,7 +116,7 @@ class Mercurio73Controller extends ApplicationController
         }
     }
 
-    public function abajoAction(Request $request)
+    public function abajo(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -147,7 +147,7 @@ class Mercurio73Controller extends ApplicationController
         }
     }
 
-    public function borrarAction(Request $request)
+    public function borrar(Request $request)
     {
         try {
             $this->setResponse('ajax');

@@ -26,7 +26,7 @@ class ComandoController extends ApplicationController
      *
      * @return void
      */
-    public function statusComandoAction(Request $request)
+    public function statusComando(Request $request)
     {
         $this->setResponse('ajax');
         $id = $request->input('id');
@@ -58,7 +58,7 @@ class ComandoController extends ApplicationController
      *
      * @return void
      */
-    public function listarComandosAction(Request $request)
+    public function listarComandos(Request $request)
     {
         $this->setResponse('ajax');
         $servicio = $request->input('servicio');
@@ -83,7 +83,7 @@ class ComandoController extends ApplicationController
      *
      * @return void
      */
-    public function resultadoComandoAction(Request $request)
+    public function resultadoComando(Request $request)
     {
         $this->setResponse('ajax');
         $id = $request->input('id');
@@ -96,11 +96,11 @@ class ComandoController extends ApplicationController
                     'data' => $comando->getResultado(),
                 ];
             } else {
-                $msj = ($comando->getEstado() == 'E') ? 'El comando no ha terminado de procesar, el progreso logrado es del: '.$comando->getProgreso().'%' : '';
-                $msj = ($comando->getEstado() == 'X') ? 'El comando ha terminado con salida de error, el progreso logrado es del: '.$comando->getProgreso().'%' : $msj;
+                $msj = ($comando->getEstado() == 'E') ? 'El comando no ha terminado de procesar, el progreso logrado es del: ' . $comando->getProgreso() . '%' : '';
+                $msj = ($comando->getEstado() == 'X') ? 'El comando ha terminado con salida de error, el progreso logrado es del: ' . $comando->getProgreso() . '%' : $msj;
                 $salida = [
                     'success' => false,
-                    'msj' => $msj.' '.$comando->getEstado(),
+                    'msj' => $msj . ' ' . $comando->getEstado(),
                 ];
             }
         } else {

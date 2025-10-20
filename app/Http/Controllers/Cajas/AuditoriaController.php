@@ -31,16 +31,16 @@ class AuditoriaController extends ApplicationController
 
     protected $user;
 
-    protected $tipo;
+    protected $tipfun;
 
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user');
+        $this->tipfun = session('tipfun');
     }
 
-    public function indexAction()
+    public function index()
     {
         return view('cajas.auditoria.index', [
             'title' => 'Consulta Historica',
@@ -48,7 +48,7 @@ class AuditoriaController extends ApplicationController
         ]);
     }
 
-    public function consultaAuditoriaAction(Request $request)
+    public function consultaAuditoria(Request $request)
     {
         $this->setResponse('view');
         $tipopc = $request->input('tipopc');
@@ -67,7 +67,7 @@ class AuditoriaController extends ApplicationController
         return $this->renderText($html);
     }
 
-    public function reporteAuditoriaAction(Request $request)
+    public function reporteAuditoria(Request $request)
     {
         $format = strtolower($request->input('format', 'csv'));
         $tipopc = $request->input('tipopc');
@@ -149,7 +149,7 @@ class AuditoriaController extends ApplicationController
         return $service->generateAndStream($format, $generator, $filename);
     }
 
-    public function inforAction(Request $request, $id)
+    public function info(Request $request, $id)
     {
         $this->setResponse('ajax');
         $tipopc = $request->input('tipopc');

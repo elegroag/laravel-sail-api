@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Gener21;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,7 +19,7 @@ class MenuPermissionFactory extends Factory
     {
         return [
             'menu_item_id' => $this->faker->numberBetween(1, 2000),
-            'role_id' => $this->faker->numberBetween(1, 50),
+            'tipfun' => Gener21::all()->random()->tipfun,
             'can_view' => $this->faker->boolean(90) ? 1 : 0,
         ];
     }
@@ -28,7 +29,7 @@ class MenuPermissionFactory extends Factory
      */
     public function viewable(): self
     {
-        return $this->state(fn () => ['can_view' => 1]);
+        return $this->state(fn() => ['can_view' => 1]);
     }
 
     /**
@@ -36,6 +37,6 @@ class MenuPermissionFactory extends Factory
      */
     public function hidden(): self
     {
-        return $this->state(fn () => ['can_view' => 0]);
+        return $this->state(fn() => ['can_view' => 0]);
     }
 }

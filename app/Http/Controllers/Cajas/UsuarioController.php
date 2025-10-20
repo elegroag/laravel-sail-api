@@ -50,7 +50,7 @@ class UsuarioController extends Controller
         $this->tipfun = session('tipfun');
     }
 
-    public function indexAction()
+    public function index()
     {
         $campo_field = [
             'documento' => 'Identificación',
@@ -71,7 +71,7 @@ class UsuarioController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function paramsAction()
+    public function params()
     {
 
 
@@ -108,7 +108,7 @@ class UsuarioController extends Controller
         return response()->json($response);
     }
 
-    public function guardarAction(Request $request)
+    public function guardar(Request $request)
     {
 
         try {
@@ -251,7 +251,7 @@ class UsuarioController extends Controller
      * @param  string  $estado
      * @return void
      */
-    public function aplicarFiltroAction(Request $request, string $tipo = '')
+    public function aplicarFiltro(Request $request, string $tipo = '')
     {
         $cantidad_pagina = ($request->input('numero')) ? $request->input('numero') : 10;
         if ($tipo == '') {
@@ -284,9 +284,9 @@ class UsuarioController extends Controller
         return response()->json($response);
     }
 
-    public function changeCantidadPaginaAction(Request $request)
+    public function changeCantidadPagina(Request $request)
     {
-        $this->buscarAction($request->input('tipo'), $request->input('estado'));
+        $this->buscar($request->input('tipo'), $request->input('estado'));
     }
 
     /**
@@ -301,7 +301,7 @@ class UsuarioController extends Controller
      *
      * @return void
      */
-    public function buscarAction(Request $request, string $estado = '')
+    public function buscar(Request $request, string $estado = '')
     {
         $pagina = ($request->input('pagina')) ? $request->input('pagina') : 1;
         $cantidad_pagina = ($request->input('numero')) ? $request->input('numero') : 10;
@@ -331,7 +331,7 @@ class UsuarioController extends Controller
         return response()->json($response);
     }
 
-    public function borrarFiltroAction()
+    public function borrarFiltro()
     {
         set_flashdata('filter_usuarios', false, true);
         set_flashdata('filter_params', false, true);
@@ -355,7 +355,7 @@ class UsuarioController extends Controller
      *
      * @return void
      */
-    public function showUserAction(Request $request)
+    public function showUser(Request $request)
     {
         $documento = $request->input('documento');
         $tipo = $request->input('tipo');
@@ -389,7 +389,7 @@ class UsuarioController extends Controller
      *
      * @return void
      */
-    public function borrarUsuarioAction(Request $request)
+    public function borrarUsuario(Request $request)
     {
         try {
             $documento = $request->input('documento');

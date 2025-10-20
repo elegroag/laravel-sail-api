@@ -34,22 +34,22 @@ class Mercurio51Controller extends ApplicationController
         return view('cajas.mercurio51._tabla', compact('paginate'));
     }
 
-    public function aplicarFiltroAction(Request $request)
+    public function aplicarFiltro(Request $request)
     {
         $consultasOldServices = new GeneralService;
         $this->query = $consultasOldServices->converQuery($request);
 
-        return $this->buscarAction($request);
+        return $this->buscar($request);
     }
 
-    public function changeCantidadPaginaAction(Request $request)
+    public function changeCantidadPagina(Request $request)
     {
         $this->cantidad_pagina = $request->input('numero');
 
-        return $this->buscarAction($request);
+        return $this->buscar($request);
     }
 
-    public function indexAction()
+    public function index()
     {
         $campo_field = [
             'codcat' => 'Codigo',
@@ -66,7 +66,7 @@ class Mercurio51Controller extends ApplicationController
         ]);
     }
 
-    public function nuevoAction()
+    public function nuevo()
     {
         try {
             $this->setResponse('ajax');
@@ -81,7 +81,7 @@ class Mercurio51Controller extends ApplicationController
         }
     }
 
-    public function buscarAction(Request $request)
+    public function buscar(Request $request)
     {
         $pagina = ($request->input('pagina') == '') ? 1 : $request->input('pagina');
 
@@ -101,7 +101,7 @@ class Mercurio51Controller extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function editarAction(Request $request)
+    public function editar(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -119,7 +119,7 @@ class Mercurio51Controller extends ApplicationController
         }
     }
 
-    public function borrarAction(Request $request)
+    public function borrar(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -140,7 +140,7 @@ class Mercurio51Controller extends ApplicationController
         }
     }
 
-    public function guardarAction(Request $request)
+    public function guardar(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -176,7 +176,7 @@ class Mercurio51Controller extends ApplicationController
         }
     }
 
-    public function validePkAction(Request $request)
+    public function validePk(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -195,7 +195,7 @@ class Mercurio51Controller extends ApplicationController
         }
     }
 
-    public function reporteAction($format = 'P')
+    public function reporte($format = 'P')
     {
         $this->setResponse('ajax');
         $_fields = [];

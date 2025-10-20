@@ -8,15 +8,15 @@ use App\Http\Middleware\CajasCookieAuthenticated;
 Route::middleware([CajasCookieAuthenticated::class])->group(function () {
     Route::prefix('cajas/mercurio67')->group(function () {
         // Definir rutas para Mercurio67Controller
-        Route::get('/index', [Mercurio67Controller::class, 'indexAction']);
-        Route::post('buscar', [Mercurio67Controller::class, 'buscarAction']);
-        Route::get('nuevo', [Mercurio67Controller::class, 'nuevoAction']);
-        Route::post('editar', [Mercurio67Controller::class, 'editarAction']);
-        Route::post('borrar', [Mercurio67Controller::class, 'borrarAction']);
-        Route::post('guardar', [Mercurio67Controller::class, 'guardarAction']);
-        Route::post('valide-pk', [Mercurio67Controller::class, 'validePkAction']);
-        Route::get('reporte/{format?}', [Mercurio67Controller::class, 'reporteAction']);
-        Route::post('aplicar-filtro', [Mercurio67Controller::class, 'aplicarFiltroAction']);
-        Route::post('change-cantidad-pagina', [Mercurio67Controller::class, 'changeCantidadPaginaAction']);
+        Route::get('/index', [Mercurio67Controller::class, 'index']);
+        Route::post('buscar', [Mercurio67Controller::class, 'buscar']);
+        Route::get('nuevo', [Mercurio67Controller::class, 'nuevo']);
+        Route::post('editar', [Mercurio67Controller::class, 'editar']);
+        Route::post('borrar', [Mercurio67Controller::class, 'borrar']);
+        Route::post('guardar', [Mercurio67Controller::class, 'guardar']);
+        Route::post('valide-pk', [Mercurio67Controller::class, 'validePk']);
+        Route::get('reporte/{format?}', [Mercurio67Controller::class, 'reporte']);
+        Route::post('aplicar-filtro', [Mercurio67Controller::class, 'aplicarFiltro']);
+        Route::post('change-cantidad-pagina', [Mercurio67Controller::class, 'changeCantidadPagina']);
     });
 });

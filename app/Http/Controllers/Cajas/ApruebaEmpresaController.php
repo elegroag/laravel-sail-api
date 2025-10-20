@@ -36,7 +36,7 @@ class ApruebaEmpresaController extends ApplicationController
 
     protected $user;
 
-    protected $tipo;
+    protected $tipfun;
 
     /**
      * independienteServices variable
@@ -48,12 +48,12 @@ class ApruebaEmpresaController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user');
+        $this->tipfun = session('tipfun');
     }
 
     /**
-     * aplicarFiltroAction function
+     * aplicarFiltro function
      *
      * @changed [2023-12-19]
      *
@@ -61,7 +61,7 @@ class ApruebaEmpresaController extends ApplicationController
      *
      * @return void
      */
-    public function aplicarFiltroAction(Request $request, string $estado = 'P')
+    public function aplicarFiltro(Request $request, string $estado = 'P')
     {
         $cantidad_pagina = $request->input('numero', 10);
         $usuario = $this->user['usuario'];
@@ -89,7 +89,7 @@ class ApruebaEmpresaController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function listarAction(Request $request, $estado = 'P')
+    public function listar(Request $request, $estado = 'P')
     {
         $this->setResponse('ajax');
         try {
@@ -125,7 +125,7 @@ class ApruebaEmpresaController extends ApplicationController
     }
 
     /**
-     * changeCantidadPaginaAction function
+     * changeCantidadPagina function
      *
      * @changed [2023-12-19]
      *
@@ -134,13 +134,13 @@ class ApruebaEmpresaController extends ApplicationController
      * @param  string  $estado
      * @return void
      */
-    public function changeCantidadPaginaAction($estado = 'P')
+    public function changeCantidadPagina($estado = 'P')
     {
-        // $this->buscarAction($estado);
+        // $this->buscar($estado);
     }
 
     /**
-     * indexAction function
+     * index function
      *
      * @changed [2023-12-19]
      *
@@ -149,7 +149,7 @@ class ApruebaEmpresaController extends ApplicationController
      * @param  string  $estado
      * @return void
      */
-    public function indexAction()
+    public function index()
     {
         $campo_field = [
             'nit' => 'NIT',
@@ -172,7 +172,7 @@ class ApruebaEmpresaController extends ApplicationController
     }
 
     /**
-     * opcionalAction function
+     * opcional function
      *
      * @changed [2023-12-19]
      *
@@ -181,7 +181,7 @@ class ApruebaEmpresaController extends ApplicationController
      * @param  string  $estado
      * @return void
      */
-    public function opcionalAction($estado = 'P')
+    public function opcional($estado = 'P')
     {
         $this->setParamToView('hide_header', true);
         $campo_field = [
@@ -206,12 +206,12 @@ class ApruebaEmpresaController extends ApplicationController
     }
 
     /**
-     * buscarAction function
+     * buscar function
      *
      * @param  string  $estado
      * @return void
      */
-    public function buscarAction(Request $request, $estado = 'P')
+    public function buscar(Request $request, $estado = 'P')
     {
         $pagina = $request->input('pagina', 1);
         $cantidad_pagina = $request->input('numero', 10);
@@ -250,7 +250,7 @@ class ApruebaEmpresaController extends ApplicationController
     }
 
     /**
-     * devolverAction function
+     * devolver function
      *
      * @changed [2023-12-00]
      *
@@ -258,7 +258,7 @@ class ApruebaEmpresaController extends ApplicationController
      *
      * @return void
      */
-    public function devolverAction(Request $request)
+    public function devolver(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -298,7 +298,7 @@ class ApruebaEmpresaController extends ApplicationController
     }
 
     /**
-     * rechazarAction function
+     * rechazar function
      *
      * @changed [2023-12-19]
      *
@@ -306,7 +306,7 @@ class ApruebaEmpresaController extends ApplicationController
      *
      * @return void
      */
-    public function rechazarAction(Request $request)
+    public function rechazar(Request $request)
     {
         $this->setResponse('ajax');
         $notifyEmailServices = new NotifyEmailServices;
@@ -361,7 +361,7 @@ class ApruebaEmpresaController extends ApplicationController
      *
      * @return void
      */
-    public function pendiente_emailAction()
+    public function pendienteEmail()
     {
         /*  $flash_mensaje = SESSION::getData("flash_mensaje");
         SESSION::setData("flash_mensaje", null); */
@@ -377,7 +377,7 @@ class ApruebaEmpresaController extends ApplicationController
      *
      * @return void
      */
-    public function rezagoCorreoAction(Request $request)
+    public function rezagoCorreo(Request $request)
     {
         $this->setResponse('view');
         $meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -471,7 +471,7 @@ class ApruebaEmpresaController extends ApplicationController
      *
      * @return void
      */
-    public function empresa_searchAction(Request $request)
+    public function empresaSearch(Request $request)
     {
         $this->setResponse('ajax');
         $nit = $request->input('nit');
@@ -527,12 +527,12 @@ class ApruebaEmpresaController extends ApplicationController
     }
 
     /**
-     * info_empresaAction function
+     * info_empresa function
      * mostrar la ficha de afiliación de la empresa
      *
      * @return void
      */
-    public function inforAction(Request $request)
+    public function infor(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -658,7 +658,7 @@ class ApruebaEmpresaController extends ApplicationController
         ];
     }
 
-    public function editarViewAction($id)
+    public function editarView($id)
     {
         $this->empresaServices = new EmpresaServices;
         if (! $id) {
@@ -682,7 +682,7 @@ class ApruebaEmpresaController extends ApplicationController
         $this->setParamToView('title', 'Editar Ficha Empresa ' . $mercurio30->getNit());
     }
 
-    public function edita_empresaAction(Request $request)
+    public function editaEmpresa(Request $request)
     {
         $this->setResponse('ajax');
         $nit = $request->input('nit');
@@ -755,13 +755,13 @@ class ApruebaEmpresaController extends ApplicationController
     }
 
     /**
-     * empresa_sisuwebAction function
+     * empresaSisuweb function
      * Datos de la empresa en sisuweb, si ya está registrada. pruebas 98588506
      *
      * @param [type] $nit
      * @return void
      */
-    public function buscarEnSisuViewAction($id, $nit)
+    public function buscarEnSisuView($id, $nit)
     {
         $mercurio30 = Mercurio30::where("nit", $nit)->first();
         if (! $mercurio30) {
@@ -809,7 +809,7 @@ class ApruebaEmpresaController extends ApplicationController
      *
      * @return void
      */
-    public function excel_reporteAction($estado = 'P')
+    public function excelReporte($estado = 'P')
     {
         /* $this->setResponse('view');
         $fecha = new \DateTime();
@@ -889,7 +889,7 @@ class ApruebaEmpresaController extends ApplicationController
      *
      * @return void
      */
-    public function apruebaAction(Request $request)
+    public function aprueba(Request $request)
     {
         $this->setResponse('ajax');
         $debuginfo = [];
@@ -940,7 +940,7 @@ class ApruebaEmpresaController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function borrarFiltroAction(Request $request)
+    public function borrarFiltro(Request $request)
     {
         $this->setResponse('ajax');
         set_flashdata('filter_independiente', false, true);
@@ -953,7 +953,7 @@ class ApruebaEmpresaController extends ApplicationController
         ]);
     }
 
-    public function aportesViewAction($id)
+    public function aportesView($id)
     {
         $mercurio30 = Mercurio30::where('id', $id)->first();
         if (! $mercurio30) {
@@ -972,7 +972,7 @@ class ApruebaEmpresaController extends ApplicationController
         $this->setParamToView('title', 'Aportes de empresa ' . $mercurio30->getNit());
     }
 
-    public function aportesAction(Request $request, $id)
+    public function aportes($request, $id)
     {
         $this->setResponse('ajax');
         $comando = '';
@@ -1019,7 +1019,7 @@ class ApruebaEmpresaController extends ApplicationController
      * @param [type] $id
      * @return void
      */
-    public function infoAprobadoViewAction($id)
+    public function infoAprobadoView($id)
     {
         try {
             $mercurio30 = Mercurio30::where('id', $id)->first();
@@ -1103,13 +1103,13 @@ class ApruebaEmpresaController extends ApplicationController
     }
 
     /**
-     * deshacerAction function
+     * deshacer function
      * metodo ajax permite deshacer la afiliacion de la empresa
      *
      * @param [type] $id
      * @return void
      */
-    public function deshacerAction(Request $request)
+    public function deshacer(Request $request)
     {
         $this->setResponse('ajax');
 
@@ -1223,11 +1223,11 @@ class ApruebaEmpresaController extends ApplicationController
     }
 
     /**
-     * reaprobarAction function
+     * reaprobar function
      *
      * @return void
      */
-    public function reaprobarAction(Request $request)
+    public function reaprobar(Request $request)
     {
         $this->setResponse('ajax');
         try {

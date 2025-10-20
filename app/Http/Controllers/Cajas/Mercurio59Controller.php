@@ -38,22 +38,22 @@ class Mercurio59Controller extends ApplicationController
         ]);
     }
 
-    public function aplicarFiltroAction(Request $request)
+    public function aplicarFiltro(Request $request)
     {
         $consultasOldServices = new GeneralService;
         $this->query = $consultasOldServices->converQuery($request);
 
-        return $this->buscarAction($request, $request->input('codinf'));
+        return $this->buscar($request, $request->input('codinf'));
     }
 
-    public function changeCantidadPaginaAction(Request $request)
+    public function changeCantidadPagina(Request $request)
     {
         $this->cantidad_pagina = $request->input('numero');
 
-        return $this->buscarAction($request, $request->input('codinf'));
+        return $this->buscar($request, $request->input('codinf'));
     }
 
-    public function indexAction($codinf = '')
+    public function index($codinf = '')
     {
         $campo_field = [
             'codser' => 'Servicio',
@@ -76,7 +76,7 @@ class Mercurio59Controller extends ApplicationController
         ]);
     }
 
-    public function traerAperturaAction(Request $request)
+    public function traerApertura(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -98,7 +98,7 @@ class Mercurio59Controller extends ApplicationController
         }
     }
 
-    public function buscarAction(Request $request, $codinf)
+    public function buscar(Request $request, $codinf)
     {
         $pagina = ($request->input('pagina') == '') ? 1 : $request->input('pagina');
 
@@ -118,7 +118,7 @@ class Mercurio59Controller extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function editarAction(Request $request)
+    public function editar(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -142,7 +142,7 @@ class Mercurio59Controller extends ApplicationController
         }
     }
 
-    public function borrarAction(Request $request)
+    public function borrar(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -182,7 +182,7 @@ class Mercurio59Controller extends ApplicationController
         }
     }
 
-    public function guardarAction(Request $request)
+    public function guardar(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -250,7 +250,7 @@ class Mercurio59Controller extends ApplicationController
         }
     }
 
-    public function validePkAction(Request $request)
+    public function validePk(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -274,7 +274,7 @@ class Mercurio59Controller extends ApplicationController
         }
     }
 
-    public function reporteAction($format = 'P')
+    public function reporte($format = 'P')
     {
         $this->setResponse('ajax');
         $_fields = [];

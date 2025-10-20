@@ -7,12 +7,12 @@ use Illuminate\Support\Facades\Route;
 Route::middleware([CajasCookieAuthenticated::class])->group(function () {
 
     Route::prefix('/cajas/aprobacioncon')->group(function () {
-        Route::get('/index', [ApruebaConyugeController::class, 'indexAction']);
-        Route::post('/aplicar_filtro/{estado?}', [ApruebaConyugeController::class, 'aplicarFiltroAction']);
-        Route::post('/buscar/{estado?}', [ApruebaConyugeController::class, 'buscarAction']);
-        Route::post('/aprobar', [ApruebaConyugeController::class, 'apruebaAction']);
-        Route::post('/devolver', [ApruebaConyugeController::class, 'devolverAction']);
-        Route::post('/rechazar', [ApruebaConyugeController::class, 'rechazarAction']);
-        Route::post('/infor', [ApruebaConyugeController::class, 'inforAction']);
+        Route::get('/index', [ApruebaConyugeController::class, 'index']);
+        Route::post('/aplicar_filtro/{estado?}', [ApruebaConyugeController::class, 'aplicarFiltro']);
+        Route::post('/buscar/{estado?}', [ApruebaConyugeController::class, 'buscar']);
+        Route::post('/aprobar', [ApruebaConyugeController::class, 'aprueba']);
+        Route::post('/devolver', [ApruebaConyugeController::class, 'devolver']);
+        Route::post('/rechazar', [ApruebaConyugeController::class, 'rechazar']);
+        Route::post('/infor', [ApruebaConyugeController::class, 'infor']);
     });
 });

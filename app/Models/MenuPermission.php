@@ -23,7 +23,7 @@ class MenuPermission extends ModelBase
 
     protected $fillable = [
         'menu_item_id',
-        'role_id',
+        'tipfun',
         'can_view',
     ];
 
@@ -43,14 +43,14 @@ class MenuPermission extends ModelBase
         return $this->menu_item_id;
     }
 
-    public function setRoleId($v)
+    public function setTipfun($v)
     {
-        $this->role_id = $v;
+        $this->tipfun = $v;
     }
 
-    public function getRoleId()
+    public function getTipfun()
     {
-        return $this->role_id;
+        return $this->tipfun;
     }
 
     public function setCanView($v)

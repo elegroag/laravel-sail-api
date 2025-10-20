@@ -19,7 +19,7 @@ Route::middleware([CajasCookieAuthenticated::class])->group(function () {
         Route::post('/guardar_campo', [Mercurio06Controller::class, 'guardarCampo']);
         Route::post('/editar_campo', [Mercurio06Controller::class, 'editarCampo']);
         Route::post('/borrar_campo', [Mercurio06Controller::class, 'borrarCampo']);
-        Route::post('/reporte/{format?}', [Mercurio06Controller::class, 'reporteAction']);
+        Route::post('/reporte/{format?}', [Mercurio06Controller::class, 'reporte']);
 
         Route::post('/aplicar_filtro', [Mercurio06Controller::class, 'aplicarFiltro']);
         Route::post('/change_cantidad_pagina', [Mercurio06Controller::class, 'changeCantidadPagina']);

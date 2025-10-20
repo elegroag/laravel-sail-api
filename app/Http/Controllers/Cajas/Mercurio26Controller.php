@@ -15,23 +15,23 @@ class Mercurio26Controller extends ApplicationController
 
     protected $user;
 
-    protected $tipo;
+    protected $tipfun;
 
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user');
+        $this->tipfun = session('tipfun');
     }
 
-    public function indexAction()
+    public function index()
     {
         return view('cajas.mercurio26.index', [
             'title' => 'Galería'
         ]);
     }
 
-    public function galeriaAction()
+    public function galeria()
     {
         try {
             $this->setResponse('ajax');
@@ -64,7 +64,7 @@ class Mercurio26Controller extends ApplicationController
         }
     }
 
-    public function guardarAction(Request $request)
+    public function guardar(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -111,7 +111,7 @@ class Mercurio26Controller extends ApplicationController
         }
     }
 
-    public function arribaAction(Request $request)
+    public function arriba(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -148,7 +148,7 @@ class Mercurio26Controller extends ApplicationController
         }
     }
 
-    public function abajoAction(Request $request)
+    public function abajo(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -185,7 +185,7 @@ class Mercurio26Controller extends ApplicationController
         }
     }
 
-    public function borrarAction(Request $request)
+    public function borrar(Request $request)
     {
         try {
             $this->setResponse('ajax');

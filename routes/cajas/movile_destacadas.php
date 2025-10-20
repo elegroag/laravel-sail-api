@@ -8,11 +8,11 @@ use Illuminate\Support\Facades\Route;
 Route::middleware([CajasCookieAuthenticated::class])->group(function () {
     Route::prefix('/cajas/mercurio53')->group(function () {
         // Rutas para Mercurio53Controller - Destacadas
-        Route::get('/index', [Mercurio53Controller::class, 'indexAction']);
-        Route::get('/galeria', [Mercurio53Controller::class, 'galeriaAction']);
-        Route::post('/guardar', [Mercurio53Controller::class, 'guardarAction']);
-        Route::post('/arriba', [Mercurio53Controller::class, 'arribaAction']);
-        Route::post('/abajo', [Mercurio53Controller::class, 'abajoAction']);
-        Route::delete('/borrar', [Mercurio53Controller::class, 'borrarAction']);
+        Route::get('/index', [Mercurio53Controller::class, 'index']);
+        Route::get('/galeria', [Mercurio53Controller::class, 'galeria']);
+        Route::post('/guardar', [Mercurio53Controller::class, 'guardar']);
+        Route::post('/arriba', [Mercurio53Controller::class, 'arriba']);
+        Route::post('/abajo', [Mercurio53Controller::class, 'abajo']);
+        Route::delete('/borrar', [Mercurio53Controller::class, 'borrar']);
     });
 });

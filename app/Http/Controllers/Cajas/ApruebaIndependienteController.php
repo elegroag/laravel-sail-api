@@ -32,7 +32,7 @@ class ApruebaIndependienteController extends ApplicationController
 
     protected $user;
 
-    protected $tipo;
+    protected $tipfun;
 
     /**
      * services variable
@@ -58,11 +58,11 @@ class ApruebaIndependienteController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user');
+        $this->tipfun = session('tipfun');
     }
 
-    public function aplicarFiltroAction(Request $request, $estado = 'P')
+    public function aplicarFiltro(Request $request, $estado = 'P')
     {
         $cantidad_pagina = ($request->input('numero')) ? $request->input('numero') : 10;
         $usuario = $this->user['usuario'];
@@ -92,12 +92,12 @@ class ApruebaIndependienteController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function changeCantidadPaginaAction(Request $request, $estado = 'P')
+    public function changeCantidadPagina(Request $request, $estado = 'P')
     {
-        $this->buscarAction($request, $estado);
+        $this->buscar($request, $estado);
     }
 
-    public function indexAction()
+    public function index()
     {
         $this->setParamToView('hide_header', true);
         $campo_field = [
@@ -119,7 +119,7 @@ class ApruebaIndependienteController extends ApplicationController
         ]);
     }
 
-    public function opcionalAction($estado = 'P')
+    public function opcional($estado = 'P')
     {
         $this->setParamToView('hide_header', true);
         $campo_field = [
@@ -168,7 +168,7 @@ class ApruebaIndependienteController extends ApplicationController
         $this->setParamToView('pagina_con_estado', $estado);
     }
 
-    public function buscarAction(Request $request, $estado = 'P')
+    public function buscar(Request $request, $estado = 'P')
     {
         $pagina = ($request->input('pagina')) ? $request->input('pagina') : 1;
         $cantidad_pagina = ($request->input('numero')) ? $request->input('numero') : 10;
@@ -209,11 +209,11 @@ class ApruebaIndependienteController extends ApplicationController
     }
 
     /**
-     * devolverAction function
+     * devolver function
      *
      * @return void
      */
-    public function devolverAction(Request $request)
+    public function devolver(Request $request)
     {
         $independienteServices = new IndependienteServices;
         $notifyEmailServices = new NotifyEmailServices;
@@ -252,11 +252,11 @@ class ApruebaIndependienteController extends ApplicationController
     }
 
     /**
-     * rechazarAction function
+     * rechazarion
      *
      * @return void
      */
-    public function rechazarAction()
+    public function rechazar(Request $request)
     {
         $this->setResponse('ajax');
         $request = request();
@@ -300,7 +300,7 @@ class ApruebaIndependienteController extends ApplicationController
      *
      * @return void
      */
-    public function pendiente_emailAction()
+    public function pendienteEmail()
     {
         /* $flash_mensaje = SESSION::getData("flash_mensaje");
         SESSION::setData("flash_mensaje", null);
@@ -316,7 +316,7 @@ class ApruebaIndependienteController extends ApplicationController
      *
      * @return void
      */
-    public function rezagoCorreoAction()
+    public function rezagoCorreo()
     {
         $this->setResponse('view');
         $request = request();
@@ -411,7 +411,7 @@ class ApruebaIndependienteController extends ApplicationController
      *
      * @return void
      */
-    public function empresa_searchAction()
+    public function empresaSearch()
     {
         $this->setResponse('ajax');
         $request = request();
@@ -468,12 +468,12 @@ class ApruebaIndependienteController extends ApplicationController
     }
 
     /**
-     * inforAction function
+     * infor function
      * mostrar la ficha de afiliación de la empresa
      *
      * @return void
      */
-    public function inforAction(Request $request)
+    public function infor(Request $request)
     {
         try {
             $independienteServices = new IndependienteServices;
@@ -602,12 +602,12 @@ class ApruebaIndependienteController extends ApplicationController
     }
 
     /**
-     * editarViewAction function
+     * editarView function
      *
      * @param  int  $id
      * @return void
      */
-    public function editarViewAction($id)
+    public function editarView($id)
     {
         if (! $id) {
             return redirect('aprobaindepen/index');
@@ -642,7 +642,7 @@ class ApruebaIndependienteController extends ApplicationController
         $this->setParamToView('title', 'Editar Ficha Independiente ' . $mercurio41->getCedtra());
     }
 
-    public function edita_empresaAction()
+    public function editaEmpresa()
     {
         $this->setResponse('ajax');
         $request = request();
@@ -715,13 +715,13 @@ class ApruebaIndependienteController extends ApplicationController
     }
 
     /**
-     * buscarEnSisuAction function
+     * buscarEnSisuView function
      * Datos de la empresa en sisuweb, si ya está registrada. pruebas 98588506
      *
      * @param [type] $nit
      * @return void
      */
-    public function buscarEnSisuViewAction($id)
+    public function buscarEnSisuView($id)
     {
 
         $mercurio41 = Mercurio41::whereRaw("id='{$id}'")->first();
@@ -770,7 +770,7 @@ class ApruebaIndependienteController extends ApplicationController
      *
      * @return void
      */
-    public function excel_reporteAction($estado = 'P')
+    public function excelReporte($estado = 'P')
     {
         /*  $this->setResponse('view');
         $fecha = new Date();
@@ -850,7 +850,7 @@ class ApruebaIndependienteController extends ApplicationController
      *
      * @return void
      */
-    public function apruebaAction()
+    public function aprueba()
     {
         $this->setResponse('ajax');
         $request = request();
@@ -901,7 +901,7 @@ class ApruebaIndependienteController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function borrarFiltroAction()
+    public function borrarFiltro()
     {
         $this->setResponse('ajax');
         $request = request();
@@ -916,12 +916,12 @@ class ApruebaIndependienteController extends ApplicationController
     }
 
     /**
-     * aportesViewAction function
+     * aportesView function
      *
      * @param  int  $id
      * @return void
      */
-    public function aportesViewAction($id)
+    public function aportesView($id)
     {
         $mercurio41 = Mercurio41::whereRaw(" id='{$id}'")->first();
         if (! $mercurio41) {
@@ -946,7 +946,7 @@ class ApruebaIndependienteController extends ApplicationController
      * @param [type] $id
      * @return void
      */
-    public function aportesAction($id)
+    public function aportes($id)
     {
         $this->setResponse('ajax');
         $request = request();
@@ -992,7 +992,7 @@ class ApruebaIndependienteController extends ApplicationController
      * @param [type] $id
      * @return void
      */
-    public function infoAprobadoViewAction($id)
+    public function infoAprobadoView($id)
     {
         try {
             $mercurio41 = (new Mercurio41)->findFirst(" id='{$id}' and estado='A' ");
@@ -1071,7 +1071,7 @@ class ApruebaIndependienteController extends ApplicationController
         }
     }
 
-    public function deshacerAction()
+    public function deshacer()
     {
         $this->setResponse('ajax');
         $request = request();

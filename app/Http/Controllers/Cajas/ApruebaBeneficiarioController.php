@@ -31,7 +31,7 @@ class ApruebaBeneficiarioController extends ApplicationController
 
     protected $user;
 
-    protected $tipo;
+    protected $tipfun;
 
     /**
      * services variable
@@ -50,12 +50,12 @@ class ApruebaBeneficiarioController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user');
+        $this->tipfun = session('tipfun');
     }
 
     /**
-     * aplicarFiltroAction function
+     * aplicarFiltro function
      *
      * @changed [2023-12-20]
      *
@@ -63,7 +63,7 @@ class ApruebaBeneficiarioController extends ApplicationController
      *
      * @return void
      */
-    public function aplicarFiltroAction(Request $request, string $estado = 'P')
+    public function aplicarFiltro(Request $request, string $estado = 'P')
     {
         $cantidad_pagina = $request->input('numero', 10);
         $usuario = $this->user['usuario'];
@@ -90,13 +90,13 @@ class ApruebaBeneficiarioController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function changeCantidadPaginaAction(Request $request, $estado = 'P')
+    public function changeCantidadPagina(Request $request, $estado = 'P')
     {
-        $this->buscarAction($request, $estado);
+        $this->buscar($request, $estado);
     }
 
     /**
-     * indexAction function
+     * index function
      *
      * @changed [2023-12-20]
      *
@@ -105,7 +105,7 @@ class ApruebaBeneficiarioController extends ApplicationController
      * @param  string  $estado
      * @return void
      */
-    public function indexAction()
+    public function index()
     {
         $this->setParamToView('hide_header', true);
         $campo_field = [
@@ -131,7 +131,7 @@ class ApruebaBeneficiarioController extends ApplicationController
     }
 
     /**
-     * buscarAction function
+     * buscar function
      *
      * @changed [2023-12-20]
      *
@@ -140,12 +140,12 @@ class ApruebaBeneficiarioController extends ApplicationController
      * @param  string  $estado
      * @return void
      */
-    public function buscarAction(Request $request, $estado = 'P')
+    public function buscar(Request $request, $estado = 'P')
     {
         $this->setResponse('ajax');
         $pagina = ($request->input('pagina')) ? $request->input('pagina') : 1;
         $cantidad_pagina = ($request->input('numero')) ? $request->input('numero') : 10;
-        $usuario = parent::getActUser();
+        $usuario = $this->user['usuario'];
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
         $pagination = new Pagination(
@@ -174,7 +174,7 @@ class ApruebaBeneficiarioController extends ApplicationController
     }
 
     /**
-     * apruebaAction function
+     * aprueba function
      *
      * @changed [2023-12-19]
      *
@@ -182,7 +182,7 @@ class ApruebaBeneficiarioController extends ApplicationController
      *
      * @return void
      */
-    public function apruebaAction(Request $request)
+    public function aprueba(Request $request)
     {
         $this->setResponse('ajax');
         $user = session()->get('user');
@@ -231,7 +231,7 @@ class ApruebaBeneficiarioController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function devolverAction(Request $request)
+    public function devolver(Request $request)
     {
         $this->beneficiarioServices = new BeneficiarioServices;
         $notifyEmailServices = new NotifyEmailServices;
@@ -262,35 +262,7 @@ class ApruebaBeneficiarioController extends ApplicationController
         $this->renderObject($response);
     }
 
-    public function devolver($mercurio34, $nota, $codest, $campos_corregir)
-    {
-        $today = Carbon::now();
-        $id = $mercurio34->getId();
-        $mercurio34 = new Mercurio34;
-        $mercurio34->updateAll(" estado='D', motivo='{$nota}', codest='{$codest}', fecest='" . $today->format('Y-m-d H:i:s') . "'", "conditions: id='{$id}'");
-
-        $item = Mercurio10::whereRaw("tipopc='{$this->tipopc}' and numero='{$id}'")->max('item') + 1;
-        $mercurio10 = new Mercurio10;
-        $mercurio10->setTipopc($this->tipopc);
-        $mercurio10->setNumero($id);
-        $mercurio10->setItem(intval($item) + 1);
-        $mercurio10->setEstado('D');
-        $mercurio10->setNota($nota);
-        $mercurio10->setCodest($codest);
-        $mercurio10->setFecsis($today->format('Y-m-d H:i:s'));
-
-        if (! $mercurio10->save()) {
-            $msj = '';
-            foreach ($mercurio10->getMessages() as $key => $message) {
-                $msj .= $message . '<br/>';
-            }
-            throw new DebugException('Error ' . $msj, 501);
-        }
-
-        Mercurio10::whereRaw("item='{$item}' AND numero='{$id}' AND tipopc='{$this->tipopc}'")->update("campos_corregir='{$campos_corregir}'");
-    }
-
-    public function rechazarAction(Request $request)
+    public function rechazar(Request $request)
     {
         $notifyEmailServices = new NotifyEmailServices;
         $this->beneficiarioServices = new BeneficiarioServices;
@@ -320,38 +292,13 @@ class ApruebaBeneficiarioController extends ApplicationController
         $this->renderObject($response);
     }
 
-    public function rechazar($mercurio34, $nota, $codest)
-    {
-        $today = Carbon::now();
-        $id = $mercurio34->getId();
-        Mercurio34::where("id", $id)->update([
-            "estado" => "X",
-            "motivo" => $nota,
-            "codest" => $codest,
-            "fecest" => $today->format('Y-m-d H:i:s'),
-        ]);
-
-        $item = Mercurio10::whereRaw("tipopc='{$this->tipopc}' and numero='{$id}'")->max('item');
-        $mercurio10 = new Mercurio10;
-        $mercurio10->setTipopc($this->tipopc);
-        $mercurio10->setNumero($id);
-        $mercurio10->setItem(intval($item) + 1);
-        $mercurio10->setEstado('X');
-        $mercurio10->setNota($nota);
-        $mercurio10->setCodest($codest);
-        $mercurio10->setFecsis($today->format('Y-m-d H:i:s'));
-        $mercurio10->save();
-
-        return true;
-    }
-
     /**
-     * inforAction function
+     * infor function
      * @changed [2023-12-20]
      * @author elegroag <elegroag@ibero.edu.co
      * @return void
      */
-    public function inforAction(Request $request)
+    public function infor(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -512,7 +459,7 @@ class ApruebaBeneficiarioController extends ApplicationController
         ];
     }
 
-    public function editar_solicitudAction(Request $request)
+    public function editarSolicitud(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -581,13 +528,13 @@ class ApruebaBeneficiarioController extends ApplicationController
     }
 
     /**
-     * empresa_sisuwebAction function
+     * empresaSisuweb function
      * Datos de la empresa en sisuweb, si ya está registrada. pruebas 98588506
      *
      * @param [type] $nit
      * @return void
      */
-    public function buscarEnSisuViewAction($id = 0)
+    public function buscarEnSisuView($id = 0)
     {
 
         if (! $id) {
@@ -641,7 +588,7 @@ class ApruebaBeneficiarioController extends ApplicationController
         $this->setParamToView('title', "Beneficiario SISU - {$numdoc}");
     }
 
-    public function opcionalAction($estado = 'P')
+    public function opcional($estado = 'P')
     {
         $this->setParamToView('hide_header', true);
         $this->setParamToView('title', 'Aprobación Beneficiario');
@@ -655,7 +602,7 @@ class ApruebaBeneficiarioController extends ApplicationController
         $this->setParamToView('pagina_con_estado', $estado);
     }
 
-    public function reaprobarAction(Request $request)
+    public function reaprobar(Request $request)
     {
         $id = $request->input('id');
         $giro = $request->input('giro');
@@ -727,7 +674,7 @@ class ApruebaBeneficiarioController extends ApplicationController
         $this->renderObject($response);
     }
 
-    public function borrarFiltroAction(Request $request)
+    public function borrarFiltro(Request $request)
     {
         $this->setResponse('ajax');
         set_flashdata('filter_beneficiario', false, true);
@@ -741,13 +688,13 @@ class ApruebaBeneficiarioController extends ApplicationController
     }
 
     /**
-     * infoAprobadoViewAction function
+     * infoAprobadoView function
      * datos del solicitud aprobada enn sisu
      *
      * @param [type] $id
      * @return void
      */
-    public function infoAprobadoViewAction($id)
+    public function infoAprobadoView($id)
     {
         $this->tipopc = '1';
         try {
@@ -844,7 +791,7 @@ class ApruebaBeneficiarioController extends ApplicationController
      * @param [type] $id
      * @return void
      */
-    public function deshacerAction(Request $request)
+    public function deshacer(Request $request)
     {
         $this->beneficiarioServices = $this->services->get('BeneficiarioServices');
         $notifyEmailServices = new NotifyEmailServices;

@@ -28,13 +28,13 @@ class ApruebaCertificadoController extends ApplicationController
 
     protected $user;
 
-    protected $tipo;
+    protected $tipfun;
 
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user');
+        $this->tipfun = session('tipfun');
     }
 
     /**
@@ -44,7 +44,7 @@ class ApruebaCertificadoController extends ApplicationController
      */
     protected $services;
 
-    public function aplicarFiltroAction(Request $request, string $estado = 'P')
+    public function aplicarFiltro(Request $request, string $estado = 'P')
     {
         $cantidad_pagina = $request->input('numero', 10);
         $usuario = $this->user['usuario'];
@@ -73,12 +73,12 @@ class ApruebaCertificadoController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function changeCantidadPaginaAction(Request $request, string $estado = 'P')
+    public function changeCantidadPagina(Request $request, string $estado = 'P')
     {
-        $this->buscarAction($request, $estado);
+        $this->buscar($request, $estado);
     }
 
-    public function indexAction()
+    public function index()
     {
         $campo_field = [
             'codben' => 'Cedula',
@@ -94,7 +94,7 @@ class ApruebaCertificadoController extends ApplicationController
         ]);
     }
 
-    public function buscarAction(Request $request, string $estado = 'P')
+    public function buscar(Request $request, string $estado = 'P')
     {
         $this->setResponse('ajax');
         $pagina = $request->input('pagina', 1);
@@ -126,7 +126,7 @@ class ApruebaCertificadoController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function inforAction(Request $request)
+    public function info(Request $request)
     {
         try {
             $id = $request->input('id');
@@ -167,11 +167,11 @@ class ApruebaCertificadoController extends ApplicationController
     }
 
     /**
-     * apruebaAction function
+     * aprueba function
      *
      * @return void
      */
-    public function apruebaAction(Request $request)
+    public function aprueba(Request $request)
     {
         $this->setResponse('ajax');
 
@@ -221,7 +221,7 @@ class ApruebaCertificadoController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function rechazarAction(Request $request)
+    public function rechazar(Request $request)
     {
         try {
             $this->setResponse('ajax');
