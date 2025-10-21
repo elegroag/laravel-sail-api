@@ -12,12 +12,12 @@ Route::get('/web/login', [AuthController::class, 'index'])->name('login');
 Route::post('/web/login', [AuthController::class, 'authenticate'])->name('login.authenticate');
 Route::get('/web/register', [AuthController::class, 'register'])->name('register');
 Route::get('/web/password/request', [AuthController::class, 'resetPassword'])->name('password.request');
-Route::get('/web/verify/{tipo}/{coddoc}/{documento}', [AuthController::class, 'verify'])->name('verify.show');
+Route::get('/web/verify/{tipo}/{coddoc}/{documento}', [AuthController::class, 'verifyShow'])->name('verify.show');
 Route::post('/web/verify', [AuthController::class, 'verify'])->name('verify.request');
-Route::post('/web/verify_action', [AuthController::class, 'verifyAction'])->name('verify.action');
+Route::post('/web/verify_action', [AuthController::class, 'verify'])->name('verify.action');
 Route::post('/web/load_session', [AuthController::class, 'loadSession'])->name('load.session');
-Route::post('/web/salir', [AuthController::class, 'logoutAction'])->name('login.salir');
-Route::get('/web/salir', [AuthController::class, 'logoutAction'])->name('logout');
+Route::post('/web/salir', [AuthController::class, 'logout'])->name('login.salir');
+Route::get('/web/salir', [AuthController::class, 'logout'])->name('logout');
 
 Route::post('/mercurio/recuperar_clave', [LoginController::class, 'recuperarClave']);
 Route::post('/mercurio/registro', [LoginController::class, 'registro']);

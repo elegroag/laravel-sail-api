@@ -418,20 +418,20 @@ class PrincipalController extends ApplicationController
             $tipo = $this->tipo;
 
             $hoy = date('Y-m-d');
-            $solicitante = (new Mercurio07)->findFirst(" documento='{$documento}' and coddoc='{$coddoc}' and tipo='{$tipo}'");
-            if ($solicitante->getFechaSyncron() == '' || is_null($solicitante->getFechaSyncron())) {
-                $solicitante->setFechaSyncron($hoy);
+            $solicitante = Mercurio07::whereRaw("documento='{$documento}' and coddoc='{$coddoc}' and tipo='{$tipo}'")->first();
+            if ($solicitante->fecha_syncron == '' || is_null($solicitante->fecha_syncron)) {
+                $solicitante->fecha_syncron = $hoy;
                 $solicitante->save();
             }
 
             $hoy = Carbon::now();
-            $dif = $hoy->diff(Carbon::parse($solicitante->getFechaSyncron()));
+            $dif = $hoy->diff(Carbon::parse($solicitante->fecha_syncron));
             $interval = $dif->days;
             $salida = [
                 'success' => true,
                 'msj' => 'Consulta realizada con éxito',
                 'data' => [
-                    'ultimo_syncron' => Carbon::parse($solicitante->getFechaSyncron())->format('d - M - Y'),
+                    'ultimo_syncron' => Carbon::parse($solicitante->fecha_syncron)->format('d - M - Y'),
                     'syncron' => ($interval >= 10) ? true : false,
                 ],
             ];
@@ -446,7 +446,7 @@ class PrincipalController extends ApplicationController
     }
 
     /**
-     * ingresoDirigidoAction function
+     * ingresoDirigido function
      * aplica para los particulares que hacen su primer registro al sistema
      *
      * @param  string  $id

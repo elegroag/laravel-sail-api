@@ -52,7 +52,7 @@ class LoginController extends ApplicationController
     }
 
     /**
-     * recuperar_claveAction function
+     * recuperar_clave function
      * Opción solo para el caso de olvido de clave, para empresas o afiliados comfaca.
      *
      * @return void

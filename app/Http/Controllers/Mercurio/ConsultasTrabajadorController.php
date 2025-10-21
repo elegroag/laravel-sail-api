@@ -212,7 +212,7 @@ class ConsultasTrabajadorController extends ApplicationController
     }
 
     /**
-     * consulta_nucleoAction function
+     * consulta_nucleo function
      *
      * @param  string  $cedtra
      * @return void

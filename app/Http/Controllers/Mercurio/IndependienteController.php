@@ -95,7 +95,7 @@ class IndependienteController extends ApplicationController
     }
 
     /**
-     * showAction function
+     * show function
      *
      * @param [type] $id
      * @param [type] $documento
@@ -293,7 +293,7 @@ class IndependienteController extends ApplicationController
     }
 
     /**
-     * validaPkAction function
+     * validaPk function
      *
      * @return void
      */

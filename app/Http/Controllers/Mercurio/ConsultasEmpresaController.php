@@ -538,7 +538,7 @@ class ConsultasEmpresaController extends ApplicationController
     }
 
     /**
-     * actualiza_datos_basicos_viewAction function
+     * actualiza_datos_basicos_view function
      *
      * @return void
      */

@@ -85,7 +85,7 @@ class PensionadoController extends ApplicationController
     }
 
     /**
-     * actualizarAction function
+     * actualizar function
      *
      * @return \Illuminate\Http\JsonResponse
      */

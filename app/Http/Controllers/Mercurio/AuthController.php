@@ -169,7 +169,7 @@ class AuthController extends Controller
         }
     }
 
-    public function verify(Request $request, $tipo = null, $coddoc = null, $documento = null)
+    public function verifyShow(Request $request, $tipo = null, $coddoc = null, $documento = null)
     {
         if ($request->isMethod('post')) {
             $request->validate([
@@ -449,7 +449,7 @@ class AuthController extends Controller
             'documento' => $request->input('documento'),
             'coddoc' => $request->input('coddoc'),
             'tipo' => $request->input('tipo'),
-            'context' => 'verifyAction.retry',
+            'context' => 'verify.retry',
         ]);
 
         Mercurio19::where('documento', $request->input('documento'))
