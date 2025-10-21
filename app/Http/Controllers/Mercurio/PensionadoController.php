@@ -89,7 +89,7 @@ class PensionadoController extends ApplicationController
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function actualizarAction(Request $request)
+    public function actualizar(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -451,7 +451,7 @@ class PensionadoController extends ApplicationController
         );
     }
 
-    public function reloadArchivosAction(Request $request)
+    public function reloadArchivos(Request $request)
     {
         $this->setResponse('ajax');
         $this->pensionadoService = new PensionadoService;
@@ -485,7 +485,7 @@ class PensionadoController extends ApplicationController
      *
      * @return void
      */
-    public function cancelarSolicitudAction(Request $request)
+    public function cancelarSolicitud(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -515,7 +515,7 @@ class PensionadoController extends ApplicationController
         $this->renderObject(json_encode($salida, JSON_NUMERIC_CHECK));
     }
 
-    public function downloadFileAction($archivo = '')
+    public function downloadFile($archivo = '')
     {
         $this->setResponse('view');
         $fichero = 'public/temp/' . $archivo;
@@ -793,7 +793,7 @@ class PensionadoController extends ApplicationController
      *
      * @throws \Exception
      */
-    public function administrar_cuentaAction($id = '')
+    public function administrar_cuenta($id = '')
     {
         $this->setResponse('view');
 

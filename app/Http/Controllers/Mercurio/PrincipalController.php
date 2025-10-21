@@ -49,7 +49,7 @@ class PrincipalController extends ApplicationController
         ]);
     }
 
-    public function dashboardEmpresaAction()
+    public function dashboardEmpresa()
     {
         return view('mercurio/principal/dashboard_empresa', [
             'title' => 'Dashboard Empresas',
@@ -59,7 +59,7 @@ class PrincipalController extends ApplicationController
         ]);
     }
 
-    public function dashboardTrabajadorAction()
+    public function dashboardTrabajador()
     {
         return view('principal.dashboard_trabajador', [
             'help' => false,
@@ -71,7 +71,7 @@ class PrincipalController extends ApplicationController
         ]);
     }
 
-    public function traerAportesEmpresaAction()
+    public function traerAportesEmpresa()
     {
         try {
             $response['labels'] = [
@@ -118,7 +118,7 @@ class PrincipalController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function traerCategoriasEmpresaAction()
+    public function traerCategoriasEmpresa()
     {
         try {
             $data = [];
@@ -162,7 +162,7 @@ class PrincipalController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function traerGiroEmpresaAction()
+    public function traerGiroEmpresa()
     {
         try {
             $this->setResponse('ajax');
@@ -214,7 +214,7 @@ class PrincipalController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function fileExisteGlobalAction(Request $request, Response $response, string $filepath)
+    public function fileExisteGlobal(Request $request, Response $response, string $filepath)
     {
         $archivo = base64_decode($filepath);
         if (preg_match('/(storage)(\/)(temp)/i', $archivo) == false) {
@@ -229,7 +229,7 @@ class PrincipalController extends ApplicationController
         }
     }
 
-    public function actualizaEstadoSolicitudesAction()
+    public function actualizaEstadoSolicitudes()
     {
         try {
             $this->setResponse('ajax');
@@ -315,13 +315,13 @@ class PrincipalController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function upAction()
+    public function up()
     {
         $this->setResponse('view');
         get_flashdata_item('Syncron', true);
     }
 
-    public function listaAdressAction()
+    public function listaAdress()
     {
         try {
             $this->setResponse('ajax');
@@ -341,7 +341,7 @@ class PrincipalController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function serviciosAction()
+    public function servicios()
     {
         $this->setResponse('ajax');
         try {
@@ -408,7 +408,7 @@ class PrincipalController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function validaSyncroAction()
+    public function validaSyncro()
     {
         $this->setResponse('ajax');
 
@@ -455,7 +455,7 @@ class PrincipalController extends ApplicationController
      * @param  string  $calemp
      * @return void
      */
-    public function ingresoDirigidoAction(Request $request)
+    public function ingresoDirigido(Request $request)
     {
         $this->setResponse('view');
         try {
@@ -564,7 +564,7 @@ class PrincipalController extends ApplicationController
         }
     }
 
-    public function estado_actualAction()
+    public function estado_actual()
     {
         $this->setResponse('ajax');
 

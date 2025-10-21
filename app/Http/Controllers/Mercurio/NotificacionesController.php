@@ -39,7 +39,7 @@ class NotificacionesController extends ApplicationController
         ]);
     }
 
-    public function procesarNotificacionAction(Request $request, Response $response)
+    public function procesarNotificacion(Request $request, Response $response)
     {
         $this->setResponse('ajax');
         try {

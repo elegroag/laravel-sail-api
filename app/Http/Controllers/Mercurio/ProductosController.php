@@ -33,7 +33,7 @@ class ProductosController extends ApplicationController
      *
      * @return void
      */
-    public function complementoNutricionalAction()
+    public function complementoNutricional()
     {
         $codser = '27';
         $cupos_disponibles = ServiciosCupos::where('estado', 'A')
@@ -63,13 +63,12 @@ class ProductosController extends ApplicationController
         ]);
     }
 
-    public function aplicarCupoAction(Request $request)
+    public function aplicarCupo(Request $request)
     {
-        $this->setResponse('ajax');
-        $habilId = $request->input('id', 'striptags', 'extraspaces');
-        $docben = $request->input('docben', 'striptags', 'extraspaces');
-        $codser = $request->input('codser', 'striptags', 'extraspaces');
-        $cedtra = parent::getActUser('documento');
+        $habilId = $request->input('id');
+        $docben = $request->input('docben');
+        $codser = $request->input('codser');
+        $cedtra = $this->user['documento'];
 
         try {
             $pinesAfiliado = new PinesAfiliado;
@@ -131,9 +130,8 @@ class ProductosController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function numeroCuposDisponiblesAction($codser)
+    public function numeroCuposDisponibles($codser)
     {
-        $this->setResponse('ajax');
         $cupos_disponibles = (new ServiciosCupos)->findFirst(" estado='A' and codser='{$codser}'");
 
         return $this->renderObject(
@@ -144,9 +142,8 @@ class ProductosController extends ApplicationController
         );
     }
 
-    public function serviciosAplicadosAction($codser)
+    public function serviciosAplicados($codser)
     {
-        $this->setResponse('ajax');
         $data = $this->afiliadosBeneficiarios($codser);
 
         return $this->renderObject(
@@ -190,7 +187,7 @@ class ProductosController extends ApplicationController
         return $habiles;
     }
 
-    public function buscarCupoAction(Request $request)
+    public function buscarCupo(Request $request)
     {
         $this->setResponse('ajax');
         $docben = $request->input('docben', 'striptags', 'extraspaces');

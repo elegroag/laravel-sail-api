@@ -39,12 +39,12 @@ class ComunitariaController extends ApplicationController
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    public function aplicarFiltroAction(Request $request)
+    public function aplicarFiltro(Request $request)
     {
         $this->setResponse('ajax');
         $generalService = new GeneralService;
         $this->query = $generalService->converQuery();
-        $this->buscarAction($request);
+        $this->buscar($request);
     }
 
     public function showTabla($paginate)
@@ -80,11 +80,11 @@ class ComunitariaController extends ApplicationController
         return $html;
     }
 
-    public function changeCantidadPaginaAction(Request $request)
+    public function changeCantidadPagina(Request $request)
     {
         $this->setResponse('ajax');
         $this->cantidad_pagina = $request->input('numero');
-        $this->buscarAction($request);
+        $this->buscar($request);
     }
 
     public function index()
@@ -172,7 +172,7 @@ class ComunitariaController extends ApplicationController
         ]);
     }
 
-    public function buscarAction(Request $request) {}
+    public function buscar(Request $request) {}
 
     public function guardar(Request $request)
     {
@@ -283,7 +283,7 @@ class ComunitariaController extends ApplicationController
         }
     }
 
-    public function validePkAction(Request $request)
+    public function validePk(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -302,7 +302,7 @@ class ComunitariaController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    public function inforAction(Request $request)
+    public function infor(Request $request)
     {
         $this->setResponse('ajax');
         $id = $request->input('id');

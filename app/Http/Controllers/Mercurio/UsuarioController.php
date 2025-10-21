@@ -83,7 +83,7 @@ class UsuarioController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function showPerfilAction()
+    public function showPerfil()
     {
         $this->setResponse('ajax');
         try {

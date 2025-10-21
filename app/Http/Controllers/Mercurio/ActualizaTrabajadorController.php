@@ -42,8 +42,8 @@ class ActualizaTrabajadorController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user') ?? null;
+        $this->tipo = session('tipo') ?? null;
     }
 
     public function index()
@@ -241,7 +241,7 @@ class ActualizaTrabajadorController extends ApplicationController
         return ($salida['success'] == true) ? $salida['data'] : false;
     }
 
-    public function inforAction()
+    public function infor()
     {
         try {
             $documento = $this->user['documento'];
@@ -398,7 +398,7 @@ class ActualizaTrabajadorController extends ApplicationController
         $this->renderText(json_encode($salida, JSON_NUMERIC_CHECK));
     }
 
-    public function editar_solicitudAction(Request $request)
+    public function editarSolicitud(Request $request)
     {
         $this->setResponse('ajax');
 
@@ -463,7 +463,7 @@ class ActualizaTrabajadorController extends ApplicationController
         $this->renderText(json_encode($salida));
     }
 
-    public function archivos_requeridos($mercurio47)
+    function archivosRequeridos($mercurio47)
     {
         $archivos = [];
         $mercurio13 = Mercurio13::where('tipopc', $this->tipopc)->get();
@@ -515,7 +515,7 @@ class ActualizaTrabajadorController extends ApplicationController
         return $html;
     }
 
-    public function reload_archivosAction(Request $request)
+    public function reloadArchivos(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -526,7 +526,7 @@ class ActualizaTrabajadorController extends ApplicationController
                 throw new DebugException('No se requiere de ninguna acción', 501);
             } else {
                 $salida = [
-                    'documentos_adjuntos' => $this->archivos_requeridos($mercurio47),
+                    'documentos_adjuntos' => $this->archivosRequeridos($mercurio47),
                     'success' => true,
                 ];
             }
@@ -658,7 +658,7 @@ class ActualizaTrabajadorController extends ApplicationController
         ];
     }
 
-    public function descargar_formulario($id)
+    public function descargarFormulario($id)
     {
         $this->setResponse('view');
         $documento = parent::getActUser('documento');

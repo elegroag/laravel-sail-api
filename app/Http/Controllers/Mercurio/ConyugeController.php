@@ -154,7 +154,7 @@ class ConyugeController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function traerConyugueAction(Request $request)
+    public function traerConyugue(Request $request)
     {
         $this->setResponse('ajax');
         $cedcon = $request->input('cedcon');
@@ -215,7 +215,7 @@ class ConyugeController extends ApplicationController
         exit;
     }
 
-    public function downloadDocumentosAction($archivo = '')
+    public function downloadDocumentos($archivo = '')
     {
         $fichero = 'public/docs/formulario_mercurio/' . $archivo;
         $ext = substr(strrchr($archivo, '.'), 1);
@@ -828,7 +828,7 @@ class ConyugeController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function buscarTrabajadorAction(Request $request)
+    public function buscarTrabajador(Request $request)
     {
         $this->setResponse('ajax');
         try {

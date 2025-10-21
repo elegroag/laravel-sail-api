@@ -511,7 +511,7 @@ class ActualizaEmpresaController extends ApplicationController
         return $this->renderText($html);
     }
 
-    public function sucursalesAction()
+    public function sucursales()
     {
         try {
             $actualizaEmpresaService = new ActualizaEmpresaService;
@@ -576,7 +576,7 @@ class ActualizaEmpresaController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function empresaSisuAction()
+    public function empresaSisu()
     {
         try {
             $actualizaEmpresaService = new ActualizaEmpresaService;

@@ -67,7 +67,7 @@ class FacultativoController extends ApplicationController
         ]);
     }
 
-    public function actualizarAction(Request $request)
+    public function actualizar(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -452,7 +452,7 @@ class FacultativoController extends ApplicationController
         ]);
     }
 
-    public function reloadArchivosAction(Request $request)
+    public function reloadArchivos(Request $request)
     {
         $this->setResponse('ajax');
 
@@ -517,7 +517,7 @@ class FacultativoController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function downloadFileAction($archivo = '')
+    public function downloadFile($archivo = '')
     {
         $this->setResponse('view');
         $fichero = 'public/temp/' . $archivo;
@@ -748,7 +748,7 @@ class FacultativoController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function administrar_cuentaAction($id = '')
+    public function administrar_cuenta($id = '')
     {
         $this->setResponse('view');
         try {

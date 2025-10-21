@@ -94,7 +94,7 @@ class TrabajadorController extends ApplicationController
      * POST /trabajador/valide_nit
      * Valida existencia y estado de empresa vía API Comman
      */
-    public function valideNitAction(Request $request)
+    public function valideNit(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -195,7 +195,7 @@ class TrabajadorController extends ApplicationController
     /**
      * POST /trabajador/traer_trabajador
      */
-    public function traerTrabajadorAction(Request $request)
+    public function traerTrabajador(Request $request)
     {
         $this->setResponse('ajax');
         $cedtra = $this->clp($request, 'cedtra');
@@ -737,7 +737,7 @@ class TrabajadorController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    public function buscarTrabajadorAction(Request $request)
+    public function buscarTrabajador(Request $request)
     {
         $this->setResponse('ajax');
         try {

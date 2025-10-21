@@ -37,7 +37,7 @@ class MovimientosController extends ApplicationController
         ]);
     }
 
-    public function historialAction()
+    public function historial()
     {
         $logger = new Logger;
         $logger->registrarLog(false, 'Historial', '');
@@ -52,7 +52,7 @@ class MovimientosController extends ApplicationController
         }
     }
 
-    public function cambioEmailViewAction()
+    public function cambioEmailView()
     {
         return view('mercurio.movimientos.cambio_email', [
             'title' => 'Cambio Email',
@@ -60,7 +60,7 @@ class MovimientosController extends ApplicationController
         ]);
     }
 
-    public function cambioEmailAction(Request $request)
+    public function cambioEmail(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -87,14 +87,14 @@ class MovimientosController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    public function cambioClaveViewAction()
+    public function cambioClaveView()
     {
         return view('mercurio.movimientos.cambio_clave', [
             'title' => 'Cambio Clave',
         ]);
     }
 
-    public function cambioClaveAction(Request $request)
+    public function cambioClave(Request $request)
     {
         $this->setResponse('ajax');
         try {

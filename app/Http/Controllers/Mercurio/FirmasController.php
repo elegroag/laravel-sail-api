@@ -94,7 +94,7 @@ class FirmasController extends ApplicationController
     /**
      * GET /firmas/show
      */
-    public function showAction()
+    public function show()
     {
         $this->setResponse('ajax');
         try {
@@ -130,7 +130,7 @@ class FirmasController extends ApplicationController
     /**
      * POST /firmas/valida_firma
      */
-    public function validaFirmaAction(Request $request)
+    public function validaFirma(Request $request)
     {
         $this->setResponse('ajax');
         try {

@@ -49,7 +49,7 @@ class ConsultasEmpresaController extends ApplicationController
         ]);
     }
 
-    public function historialAction()
+    public function historial()
     {
         $tipo = $this->tipo;
         $coddoc = $this->user['coddoc'];
@@ -92,7 +92,7 @@ class ConsultasEmpresaController extends ApplicationController
         ]);
     }
 
-    public function consultaTrabajadoresViewAction()
+    public function consultaTrabajadoresView()
     {
         return view('mercurio/subsidioemp/consulta_trabajadores', [
             'title' => 'Consulta Trabajadores',
@@ -102,7 +102,7 @@ class ConsultasEmpresaController extends ApplicationController
         ]);
     }
 
-    public function consultaTrabajadoresAction(Request $request)
+    public function consultaTrabajadores(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -147,14 +147,14 @@ class ConsultasEmpresaController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function consultaGiroViewAction()
+    public function consultaGiroView()
     {
         return view('mercurio/subsidioemp/consulta_giro', [
             'title' => 'Consulta Giro',
         ]);
     }
 
-    public function consultaGiroAction(Request $request)
+    public function consultaGiro(Request $request)
     {
         try {
             $nit = $this->user['documento'];
@@ -198,14 +198,14 @@ class ConsultasEmpresaController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    public function consultaNominaViewAction()
+    public function consultaNominaView()
     {
         return view('mercurio/subsidioemp/consulta_nomina', [
             'title' => 'Consulta Nomina',
         ]);
     }
 
-    public function consultaNominaAction(Request $request)
+    public function consultaNomina(Request $request)
     {
         try {
             $periodo = $request->input('periodo');
@@ -248,7 +248,7 @@ class ConsultasEmpresaController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    public function consultaAportesViewAction()
+    public function consultaAportesView()
     {
         return view('mercurio/subsidioemp/consulta_aportes', [
             'hide_header' => true,
@@ -257,7 +257,7 @@ class ConsultasEmpresaController extends ApplicationController
         ]);
     }
 
-    public function consultaAportesAction(Request $request)
+    public function consultaAportes(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -304,14 +304,14 @@ class ConsultasEmpresaController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function consultaMoraPresuntaAction()
+    public function consultaMoraPresunta()
     {
         return view('mercurio/subsidioemp/consulta_mora_presunta', [
             'title' => 'Consulta Mora Presunta',
         ]);
     }
 
-    public function moraPresuntaAction()
+    public function moraPresunta()
     {
         try {
             $nit = $this->user['documento'];
@@ -371,7 +371,7 @@ class ConsultasEmpresaController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function novedad_retiro_viewAction()
+    public function novedadRetiroView()
     {
 
         $ps = Comman::Api();
@@ -400,7 +400,7 @@ class ConsultasEmpresaController extends ApplicationController
         ]);
     }
 
-    public function buscar_trabajadorAction(Request $request)
+    public function buscarTrabajador(Request $request)
     {
         try {
             $cedtra = $request->input('cedtra');
@@ -434,7 +434,7 @@ class ConsultasEmpresaController extends ApplicationController
         }
     }
 
-    public function novedad_retiroAction(Request $request)
+    public function novedadRetiro(Request $request)
     {
         try {
 
@@ -542,7 +542,7 @@ class ConsultasEmpresaController extends ApplicationController
      *
      * @return void
      */
-    public function actualiza_datos_basicos_viewAction()
+    public function actualizaDatosBasicosView()
     {
         set_flashdata('error', [
             'msj' => 'El modulo de actualización de datos está en mantenimiento.',
@@ -556,7 +556,7 @@ class ConsultasEmpresaController extends ApplicationController
             $campos[$mmercurio28->getCampo()] = $mmercurio28->getDetalle();
         }
 
-        $this->load_parametros_view();
+        $this->loadParametrosView();
         $documento = parent::getActUser('documento');
         $solicitante = Mercurio30::where('documento', $documento)->first();
 
@@ -577,7 +577,7 @@ class ConsultasEmpresaController extends ApplicationController
         ]);
     }
 
-    public function actualiza_datos_basicosAction(Request $request)
+    public function actualizaDatosBasicos(Request $request)
     {
         $cedtra = $request->input('cedtra', 'addslaches', 'alpha', 'extraspaces', 'striptags');
         $modelos = ['mercurio08', 'mercurio10', 'mercurio20', 'mercurio33', 'mercurio37'];
@@ -688,7 +688,7 @@ class ConsultasEmpresaController extends ApplicationController
         return $this->renderText(json_encode('Movimiento realizado con exito el archivo'));
     }
 
-    public function afilia_masiva_trabajador_viewAction()
+    public function afiliaMasivaTrabajadorView()
     {
         return view('mercurio/subsidioemp/tmp/afilia_masiva_trabajador', [
             'path' => base_path(),
@@ -708,12 +708,12 @@ class ConsultasEmpresaController extends ApplicationController
         return $html;
     }
 
-    public function ejemplo_planilla_masivaAction()
+    public function ejemploPlanillaMasiva()
     {
         $file = 'public/docs/' . 'ejemplo_planilla_masiva.xlsx';
     }
 
-    public function certificadoAfiliacionViewAction()
+    public function certificadoAfiliacionView()
     {
         return view('mercurio/subsidioemp/certificado_afiliacion', [
             'title' => 'Certificado Afiliacion',
@@ -721,14 +721,14 @@ class ConsultasEmpresaController extends ApplicationController
         ]);
     }
 
-    public function certificadoAfiliacionAction()
+    public function certificadoAfiliacion()
     {
         $this->setResponse('view');
 
         return header('Location: https://comfacaenlinea.com.co/SYS/Subsidio/subflo/gene_certi_emp/x/' . $this->user['documento']);
     }
 
-    public function certificadoParaTrabajadorViewAction()
+    public function certificadoParaTrabajadorView()
     {
         $ps = Comman::Api();
         $ps->runCli(
@@ -759,7 +759,7 @@ class ConsultasEmpresaController extends ApplicationController
         ]);
     }
 
-    public function certificadoParaTrabajadorAction(Request $request)
+    public function certificadoParaTrabajador(Request $request)
     {
         $logger = new Logger;
         $tipo = $request->input('tipo');
@@ -768,12 +768,12 @@ class ConsultasEmpresaController extends ApplicationController
         header("Location: https://comfacaenlinea.com.co/SYS/Subsidio/subflo/gene_certi_tra/{$tipo}/" . $cedtra);
     }
 
-    public function ejemplo_planilla_activacion_masivaAction()
+    public function ejemploPlanillaActivacionMasiva()
     {
         $file = 'public/docs/' . 'ejemplo_planilla_activacion_masiva.csv';
     }
 
-    public function activacion_masiva_trabajador_viewAction()
+    public function activacionMasivaTrabajadorView()
     {
         return view('subsidioemp/activacion_masiva_trabajador', [
             'hide_header' => true,
@@ -783,7 +783,7 @@ class ConsultasEmpresaController extends ApplicationController
         ]);
     }
 
-    public function load_parametros_view()
+    public function loadParametrosView()
     {
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
@@ -881,7 +881,7 @@ class ConsultasEmpresaController extends ApplicationController
         }
     }
 
-    public function consulta_nucleoAction(Request $request)
+    public function consultaNucleo(Request $request)
     {
         try {
             $this->setResponse('ajax');

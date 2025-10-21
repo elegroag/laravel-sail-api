@@ -72,7 +72,7 @@ class EmpresaController extends ApplicationController
      * POST /empresa/buscar_empresa
      * Busca empresa en servicio de subsidio (independiente del estado)
      */
-    public function buscarEmpresaAction(Request $request)
+    public function buscarEmpresa(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -252,7 +252,7 @@ class EmpresaController extends ApplicationController
     /**
      * GET /empresa/archivos_requeridos/{id}
      */
-    public function archivosRequeridosAction($id)
+    public function archivosRequeridos($id)
     {
         $this->setResponse('ajax');
         try {
@@ -427,7 +427,7 @@ class EmpresaController extends ApplicationController
     /**
      * GET /empresa/download_temp/{archivo}
      */
-    public function downloadFileAction($archivo = '')
+    public function downloadFile($archivo = '')
     {
         $this->setResponse('view');
         $fichero = public_path('temp/' . $archivo);
@@ -441,7 +441,7 @@ class EmpresaController extends ApplicationController
     /**
      * GET /empresa/download_docs/{archivo}
      */
-    public function downloadDocsAction($archivo = '')
+    public function downloadDocs($archivo = '')
     {
         $this->setResponse('view');
         $fichero = public_path('docs/formulario_mercurio/' . $archivo);
@@ -455,7 +455,7 @@ class EmpresaController extends ApplicationController
     /**
      * GET /empresa/digito_verification?nit=XXXX
      */
-    public function digitoVerificationAction(Request $request)
+    public function digitoVerification(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -666,7 +666,7 @@ class EmpresaController extends ApplicationController
         ];
     }
 
-    public function miEmpresaAction()
+    public function miEmpresa()
     {
         $ps = Comman::Api();
         $ps->runCli(

@@ -94,7 +94,7 @@ class BeneficiarioController extends ApplicationController
         ]);
     }
 
-    public function traerConyugesAction(Request $request)
+    public function traerConyuges(Request $request)
     {
         $this->setResponse('ajax');
         $cedtra = $request->input('cedtra');

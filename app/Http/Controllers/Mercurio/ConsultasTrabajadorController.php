@@ -29,8 +29,8 @@ class ConsultasTrabajadorController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user') ?? null;
+        $this->tipo = session('tipo') ?? null;
     }
 
     public function index()
@@ -40,7 +40,7 @@ class ConsultasTrabajadorController extends ApplicationController
         ]);
     }
 
-    public function historialAction()
+    public function historial()
     {
         $tipo = session()->get('tipo');
         $documento = $this->user['documento'];
@@ -217,7 +217,7 @@ class ConsultasTrabajadorController extends ApplicationController
      * @param  string  $cedtra
      * @return void
      */
-    public function consultaNucleoViewAction($cedtra = '')
+    public function consultaNucleoView($cedtra = '')
     {
         return view('mercurio/subsidio/consulta_nucleo', [
             'title' => 'Consulta nucleo familiar',
@@ -225,7 +225,7 @@ class ConsultasTrabajadorController extends ApplicationController
         ]);
     }
 
-    public function consultaNucleoAction()
+    public function consultaNucleo()
     {
         $this->setResponse('ajax');
         $cedtra = parent::getActUser('documento');
@@ -320,14 +320,14 @@ class ConsultasTrabajadorController extends ApplicationController
         );
     }
 
-    public function consultaGiroViewAction()
+    public function consultaGiroView()
     {
         return view('mercurio/subsidio/consulta_giro', [
             'title' => 'Consulta Giro',
         ]);
     }
 
-    public function consultaGiroAction(Request $request)
+    public function consultaGiro(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -371,14 +371,14 @@ class ConsultasTrabajadorController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    public function consultaNoGiroViewAction()
+    public function consultaNoGiroView()
     {
         return view('mercurio/subsidio/consulta_no_giro', [
             'title' => 'Consulta No Giro',
         ]);
     }
 
-    public function consultaNoGiroAction(Request $request)
+    public function consultaNoGiro(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -421,14 +421,14 @@ class ConsultasTrabajadorController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    public function consultaPlanillaTrabajadorViewAction()
+    public function consultaPlanillaTrabajadorView()
     {
         return view('mercurio/subsidio/consulta_planilla_trabajador', [
             'title' => 'Planillas Pila',
         ]);
     }
 
-    public function consultaPlanillaTrabajadorAction(Request $request)
+    public function consultaPlanillaTrabajador(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -470,7 +470,7 @@ class ConsultasTrabajadorController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    public function consultaTarjetaAction()
+    public function consultaTarjeta()
     {
         $ps = Comman::Api();
         $ps->runCli(
@@ -495,7 +495,7 @@ class ConsultasTrabajadorController extends ApplicationController
         ]);
     }
 
-    public function certificadoAfiliacionViewAction()
+    public function certificadoAfiliacionView()
     {
         return view('mercurio/subsidio/certificado_afiliacion', [
             'title' => 'Certificado Afiliacion',
@@ -508,7 +508,7 @@ class ConsultasTrabajadorController extends ApplicationController
         ]);
     }
 
-    public function certificadoAfiliacionAction(Request $request)
+    public function certificadoAfiliacion(Request $request)
     {
         $tipo = $request->input('tipo');
         $logger = new Logger;

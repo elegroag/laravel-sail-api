@@ -101,7 +101,7 @@ class IndependienteController extends ApplicationController
      * @param [type] $documento
      * @return void
      */
-    public function showAction(Request $request, Response $response, int $id, int $documento)
+    public function show(Request $request, Response $response, int $id, int $documento)
     {
         $this->setResponse('ajax');
 
@@ -199,7 +199,7 @@ class IndependienteController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    public function actualizarAction(Request $request)
+    public function actualizar(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -297,7 +297,7 @@ class IndependienteController extends ApplicationController
      *
      * @return void
      */
-    public function validaPkAction(Request $request)
+    public function validaPk(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -526,7 +526,7 @@ class IndependienteController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function downloadFileAction($archivo = '')
+    public function downloadFile($archivo = '')
     {
         $this->setResponse('view');
         $fichero = 'public/temp/' . $archivo;
@@ -534,7 +534,7 @@ class IndependienteController extends ApplicationController
         return $this->renderFile($fichero);
     }
 
-    public function reloadArchivosAction(Request $request)
+    public function reloadArchivos(Request $request)
     {
         $this->setResponse('ajax');
         $this->independienteService = new IndependienteService;
@@ -741,7 +741,7 @@ class IndependienteController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function cartaSolicitudAction($archivo = '')
+    public function cartaSolicitud($archivo = '')
     {
         $this->setResponse('view');
         $fichero = 'public/docs/formulario_mercurio/' . $archivo;
@@ -749,7 +749,7 @@ class IndependienteController extends ApplicationController
         return $this->renderFile($fichero);
     }
 
-    public function tratamientoDatosAction($archivo = '')
+    public function tratamientoDatos($archivo = '')
     {
         $this->setResponse('view');
         $fichero = 'public/docs/formulario_mercurio/' . $archivo;
@@ -791,7 +791,7 @@ class IndependienteController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function administrar_cuentaAction($id = '')
+    public function administrar_cuenta($id = '')
     {
         $this->setResponse('view');
         try {

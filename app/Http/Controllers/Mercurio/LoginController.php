@@ -46,7 +46,7 @@ class LoginController extends ApplicationController
         return view('mercurio.auth.login');
     }
 
-    public function showRegisterAction()
+    public function showRegister()
     {
         return view('mercurio.auth.register');
     }
@@ -57,7 +57,7 @@ class LoginController extends ApplicationController
      *
      * @return void
      */
-    public function recuperarClaveAction(Request $request)
+    public function recuperarClave(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -135,12 +135,12 @@ class LoginController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    public function guiaVideosAction()
+    public function guiaVideos()
     {
         // $this->setParamToView("path_externo", "https://www.comfacaenlinea.com.co/public/");
     }
 
-    public function validaEmailAction(Request $request)
+    public function validaEmail(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -169,7 +169,7 @@ class LoginController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    public function downloadDocumentsAction(Request $request)
+    public function downloadDocuments(Request $request)
     {
         $archivo = $request->route('archivo');
         $fichero = 'public/docs/formulario_mercurio/' . $archivo;
@@ -191,7 +191,7 @@ class LoginController extends ApplicationController
         }
     }
 
-    public function fueraServicioAction()
+    public function fueraServicio()
     {
         $this->setResponse('empty');
         $msj = 'El sistema se encuentra en estado de actualización y mantenimiento.<br/>
@@ -202,7 +202,7 @@ class LoginController extends ApplicationController
         $this->setParamToView("nota", $msj); */
     }
 
-    public function integracionServicioAction()
+    public function integracionServicio()
     {
         $this->setResponse('ajax');
 
@@ -217,7 +217,7 @@ class LoginController extends ApplicationController
         );
     }
 
-    public function paramsLoginAction(Request $request)
+    public function paramsLogin(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -303,7 +303,7 @@ class LoginController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function verifyAction(Request $request)
+    public function verify(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -452,7 +452,7 @@ class LoginController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function tokenParticularAction(Request $request)
+    public function tokenParticular(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -489,7 +489,7 @@ class LoginController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function cambioCorreoAction(Request $request)
+    public function cambioCorreo(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -595,7 +595,7 @@ class LoginController extends ApplicationController
         }
     }
 
-    public function showPdfAction(Request $request)
+    public function showPdf(Request $request)
     {
         $filename = $request->input('filename');
         $path = storage_path('temp/' . $filename);

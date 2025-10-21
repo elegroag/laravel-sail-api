@@ -33,7 +33,7 @@ class ParticularController extends ApplicationController
         ]);
     }
 
-    public function historialAction()
+    public function historial()
     {
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];

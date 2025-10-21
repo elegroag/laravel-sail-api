@@ -164,7 +164,7 @@ class AuthController extends Controller
         } catch (DebugException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al autenticar: '.$e->getMessage(),
+                'message' => 'Error al autenticar: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -244,7 +244,7 @@ class AuthController extends Controller
         return Inertia::render('Auth/VerifyEmail', $payload);
     }
 
-    public function verifyAction(Request $request)
+    public function verify(Request $request)
     {
         try {
             $request->validate([
@@ -333,8 +333,8 @@ class AuthController extends Controller
                 );
                 $senderEmail->send($user07->getEmail(), $html);
 
-                $error .= 'Ha superado el tiempo de validación y es necesario volver a generar un nuevo PIN, '.
-                    'y se ha enviado a la dirección de correo registrada en la plataforma. '.
+                $error .= 'Ha superado el tiempo de validación y es necesario volver a generar un nuevo PIN, ' .
+                    'y se ha enviado a la dirección de correo registrada en la plataforma. ' .
                     "Por favor comprobar en el buzon del correo e ingresar el nuevo PIN.\n";
             }
 
@@ -419,8 +419,8 @@ class AuthController extends Controller
                 'success',
                 [
                     'type' => 'html',
-                    'msj' => "<p style='font-size:1rem' class='text-left'>El usuario ha realizado el pre-registro de forma correcta</p>".
-                        "<p style='font-size:1rem' class='text-left'>El registro realizado es de tipo \"Particular\", ahora puedes realizar las afiliaciones de modo seguro.<br/>".
+                    'msj' => "<p style='font-size:1rem' class='text-left'>El usuario ha realizado el pre-registro de forma correcta</p>" .
+                        "<p style='font-size:1rem' class='text-left'>El registro realizado es de tipo \"Particular\", ahora puedes realizar las afiliaciones de modo seguro.<br/>" .
                         'Las credenciales de acceso le seran enviadas a la respectiva dirección de correo registrado.<br/></p>',
                 ]
             );
@@ -435,7 +435,7 @@ class AuthController extends Controller
         } catch (DebugException $e) {
             $payload = [
                 'success' => false,
-                'message' => 'Error al crear empresa: '.$e->getMessage(),
+                'message' => 'Error al crear empresa: ' . $e->getMessage(),
             ];
         } catch (\Exception $e) {
             $payload = [
@@ -495,7 +495,7 @@ class AuthController extends Controller
         return Inertia::location(url($url));
     }
 
-    public function logoutAction()
+    public function logout()
     {
         SessionCookies::destroyIdentity();
 
