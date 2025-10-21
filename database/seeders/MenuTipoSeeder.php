@@ -560,7 +560,7 @@ class MenuTipoSeeder extends Seeder
                     'position' => '1',
                     'is_visible' => '1',
                     'tipo' => 'E',
-                    'menu_item' => 199
+                    'menu_item' => 178
                 ],
                 [
                     'id' => 200,
@@ -574,7 +574,7 @@ class MenuTipoSeeder extends Seeder
                     'position' => '10',
                     'is_visible' => '1',
                     'tipo' => 'E',
-                    'menu_item' => 201
+                    'menu_item' => 179
                 ],
                 [
                     'id' => 202,
@@ -644,14 +644,14 @@ class MenuTipoSeeder extends Seeder
                     'position' => '3',
                     'is_visible' => '1',
                     'tipo' => 'E',
-                    'menu_item' => 211
+                    'menu_item' => 190
                 ],
                 [
                     'id' => 212,
                     'position' => '4',
                     'is_visible' => '1',
                     'tipo' => 'E',
-                    'menu_item' => 212
+                    'menu_item' => 191
                 ],
                 [
                     'id' => 213,
@@ -686,7 +686,7 @@ class MenuTipoSeeder extends Seeder
                     'position' => '1',
                     'is_visible' => '1',
                     'tipo' => 'E',
-                    'menu_item' => 217
+                    'menu_item' => 196
                 ],
                 [
                     'id' => 218,
@@ -700,21 +700,21 @@ class MenuTipoSeeder extends Seeder
                     'position' => '3',
                     'is_visible' => '1',
                     'tipo' => 'E',
-                    'menu_item' => 219
+                    'menu_item' => 198
                 ],
                 [
                     'id' => 220,
                     'position' => '1',
                     'is_visible' => '1',
                     'tipo' => 'P',
-                    'menu_item' => 220
+                    'menu_item' => 178
                 ],
                 [
                     'id' => 221,
                     'position' => '10',
                     'is_visible' => '1',
                     'tipo' => 'P',
-                    'menu_item' => 221
+                    'menu_item' => 179
                 ],
                 [
                     'id' => 222,
@@ -763,7 +763,7 @@ class MenuTipoSeeder extends Seeder
                     'position' => '1',
                     'is_visible' => '1',
                     'tipo' => 'P',
-                    'menu_item' => 228
+                    'menu_item' => 196
                 ],
                 [
                     'id' => 229,
@@ -777,21 +777,21 @@ class MenuTipoSeeder extends Seeder
                     'position' => '3',
                     'is_visible' => '1',
                     'tipo' => 'P',
-                    'menu_item' => 230
+                    'menu_item' => 198
                 ],
                 [
                     'id' => 231,
                     'position' => '1',
                     'is_visible' => '1',
                     'tipo' => 'F',
-                    'menu_item' => 231
+                    'menu_item' => 178
                 ],
                 [
                     'id' => 232,
                     'position' => '10',
                     'is_visible' => '1',
                     'tipo' => 'F',
-                    'menu_item' => 232
+                    'menu_item' => 179
                 ],
                 [
                     'id' => 233,
@@ -826,21 +826,21 @@ class MenuTipoSeeder extends Seeder
                     'position' => '1',
                     'is_visible' => '1',
                     'tipo' => 'F',
-                    'menu_item' => 237
+                    'menu_item' => 196
                 ],
                 [
                     'id' => 238,
                     'position' => '2',
                     'is_visible' => '1',
                     'tipo' => 'F',
-                    'menu_item' => 238
+                    'menu_item' => 229
                 ],
                 [
                     'id' => 239,
                     'position' => '3',
                     'is_visible' => '1',
                     'tipo' => 'F',
-                    'menu_item' => 239
+                    'menu_item' => 198
                 ],
                 [
                     'id' => 240,

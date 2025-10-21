@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Route;
 
 class CajasCookieAuthenticated
 {
+
+    protected $controller;
+    protected $actionMethod;
+    protected $application;
+
     /**
      * Manejar una solicitud entrante.
      *
@@ -35,8 +40,9 @@ class CajasCookieAuthenticated
                     'message' => 'No autorizado para acceder a la acción.',
                 ], 401);
             }
-
-            return redirect('cajas/principal/index');
+            if(!($this->controller == 'PrincipalController' && $this->actionMethod == 'index')){
+                return redirect('cajas/principal/index');              
+            }
         }
 
         $tipo = session()->has('tipo') ? session('tipo') : null;
@@ -75,12 +81,23 @@ class CajasCookieAuthenticated
 
     public function autorization(Request $request)
     {
-        $action = self::actionActive($request);
+        $controllerName = $request->route()->getController(); // Esto devolverá una instancia de UserController
+        $controllerClassName = str_replace('App\\Http\\Controllers\\', '', get_class($controllerName));
+        $out = explode('\\', $controllerClassName);
+        if (count($out) < 2) {
+            $this->controller = $out[0];
+            $this->application = null;
+        }else{
+            $this->application = $out[0];
+            $this->controller = $out[1];
+        }
+
+        $this->actionMethod = $request->route()->getActionMethod();
         $tipfun = session('tipfun');
 
         // Verificar si el tipfun tiene permiso para la acción
         $hasPermission = MenuPermission::where('tipfun', $tipfun)
-            ->where('menu_item_id', $action['controller'] . '.' . $action['action']) // Asume que menu_item_id coincide con controller.action
+            ->where('menu_item_id', $this->controller . '.' . $this->actionMethod) // Asume que menu_item_id coincide con controller.action
             ->where('can_view', true)
             ->exists();
 
@@ -89,28 +106,5 @@ class CajasCookieAuthenticated
         }
 
         return true; // Autorizado
-    }
-
-    public static function actionActive(Request $request)
-    {
-        $actionMethod = $request->route()->getActionMethod();
-        $controllerName = $request->route()->getController(); // Esto devolverá una instancia de UserController
-        $controllerClassName = str_replace('App\\Http\\Controllers\\', '', get_class($controllerName));
-        $out = explode('\\', $controllerClassName);
-        if (count($out) < 2) {
-            $controller = $out[0];
-            return [
-                'application' => null,
-                'controller' => $controller,
-                'action' => $actionMethod,
-            ];
-        }
-        $application = $out[0];
-        $controller = $out[1];
-        return [
-            'application' => $application,
-            'controller' => $controller,
-            'action' => $actionMethod,
-        ];
     }
 }

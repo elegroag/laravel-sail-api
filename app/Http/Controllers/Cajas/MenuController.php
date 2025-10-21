@@ -2,25 +2,23 @@
 
 namespace App\Http\Controllers\Cajas;
 
+use App\Http\Controllers\Controller;
 use App\Exceptions\DebugException;
-use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use App\Models\Gener02;
 use App\Models\Gener40;
 use App\Models\Gener42;
+use App\Models\MenuItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
-class Gener42Controller extends ApplicationController
+class MenuController extends Controller
 {
-    protected $query = '1=1';
-
-    protected $cantidad_pagina = 0;
 
     protected $db;
 
     protected $user;
-
-    protected $tipo;
 
     protected $tipfun;
 
@@ -29,48 +27,22 @@ class Gener42Controller extends ApplicationController
         $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipfun = session('tipfun') ?? null;
-        $this->tipo = 'A';
-    }
-
-    public function tablePermisos($table, $tipo)
-    {
-        return view('cajas/gener42/asigna_permisos', ['table' => $table, 'tipo' => $tipo])->render();
-    }
-
-    public function buscar(Request $request)
-    {
-        $usuario = $request->input('usuario');
-        $buscar = $request->input('buscar');
-        $tipo = $request->input('tipo');
-        $response['flag'] = true;
-
-        $likes = '';
-        if ($tipo == 'S') {
-            $likes = " and detalle like '%{$buscar}%'";
-        }
-        $table = Gener40::whereRaw("codigo IN(select permiso from gener42 where usuario={$usuario}) {$likes}")->orderBy('orden', 'ASC')->get();
-        $response['permite'] = $this->tablePermisos($table, 'S');
-
-        $liken = '';
-        if ($tipo == 'N') {
-            $liken = " and detalle like '%{$buscar}%'";
-        }
-        $table = Gener40::whereRaw("codigo NOT IN(select permiso from gener42 where usuario={$usuario}) {$liken}")->orderBy('orden', 'ASC')->get();
-        $response['nopermite'] = $this->tablePermisos($table, 'N');
-        $this->renderObject($response, false);
     }
 
     public function index()
     {
-        return view('cajas.gener42.index', [
-            'title' => 'Permisos por usuario',
-            'gener02' => Gener02::all(),
-            'campo_filtro' => [
-                'usuario' => 'Usuario',
-                'tipfun' => 'Tipo funcionario',
-            ]
-        ]);
+        $menu_items = MenuItem::select(
+            DB::raw("menu_items.*"),
+            'menu_tipos.is_visible',
+            'menu_tipos.tipo',
+            'menu_tipos.position'
+        )->join('menu_tipos', 'menu_tipos.menu_item', 'menu_items.id')
+            ->where('menu_items.codapl', 'CA');
+
+        return Inertia::render('Cajas/Menu/Index', ['menu_items' => $menu_items]);
     }
+
+    public function show(Request $request, string $tipo) {}
 
     public function guardar(Request $request)
     {
@@ -104,6 +76,24 @@ class Gener42Controller extends ApplicationController
                 'flag' => true,
                 'msg' => 'Operación realizada correctamente'
             ];
+        } catch (DebugException $e) {
+            $this->db->rollback();
+            $response = [
+                'flag' => false,
+                'msg' => $e->getMessage()
+            ];
+        }
+        return $this->renderObject($response, false);
+    }
+
+    public function borrar(Request $request)
+    {
+        $this->db->begin();
+        try {
+            $tipo = $request->input('tipo');
+            $usuario = $request->input('usuario');
+            $permisos = $request->input('permisos');
+            $permisos = explode(';', $permisos);
         } catch (DebugException $e) {
             $this->db->rollback();
             $response = [
