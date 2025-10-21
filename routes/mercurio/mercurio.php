@@ -33,7 +33,7 @@ Route::post('/mercurio/valida_email', [LoginController::class, 'validaEmail']);
 Route::get('/mercurio/integracion_servicio', [LoginController::class, 'integracionServicio']);
 Route::post('/mercurio/download_docs/{archivo}', [LoginController::class, 'downloadDocuments']);
 Route::post('/mercurio/documentos/ver-pdf', [LoginController::class, 'showPdf'])->name('documentos.ver-pdf');
-Route::post('mercurio/principal/ingreso_dirigido', [PrincipalController::class, 'ingresoDirigido']);
+Route::post('/mercurio/principal/ingreso_dirigido', [PrincipalController::class, 'ingresoDirigido']);
 
 // Movimientos
 Route::middleware([EnsureCookieAuthenticated::class])->group(function () {

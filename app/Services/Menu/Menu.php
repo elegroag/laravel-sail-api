@@ -74,9 +74,9 @@ class Menu
         menu_tipos.tipo = '{$menu_tipo}'";
 
         if ($parentId === null) {
-            $query .= ' AND parent_id IS NULL';
+            $query .= ' AND menu_items.parent_id IS NULL';
         } else {
-            $query .= ' AND parent_id = ' . intval($parentId);
+            $query .= ' AND menu_items.parent_id = ' . intval($parentId);
         }
         $query .= ' ORDER BY menu_tipos.position ASC';
         $sql = $this->db->inQueryAssoc($query);

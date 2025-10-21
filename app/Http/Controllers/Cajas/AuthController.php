@@ -28,8 +28,8 @@ class AuthController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user') ?? null;
+        $this->tipo = session('tipo') ?? null;
     }
 
     public function index()
@@ -55,6 +55,7 @@ class AuthController extends ApplicationController
                         'template' => 'tmp_bienvenida',
                     ]
                 );
+                return redirect()->route('cajas.principal');
             } catch (AuthException $auth_err) {
 
                 $code = $auth_err->getCode();
@@ -81,8 +82,6 @@ class AuthController extends ApplicationController
 
             return redirect()->route('cajas.login');
         }
-
-        return redirect()->route('cajas.principal');
     }
 
     public function errorAccess()

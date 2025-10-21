@@ -33,17 +33,17 @@ class CajasCookieAuthenticated
             return redirect('cajas/login');
         }
 
-        if ($this->autorization($request) === false) {
+        /* if ($this->autorization($request) === false) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'No autorizado para acceder a la acción.',
                 ], 401);
             }
-            if(!($this->controller == 'PrincipalController' && $this->actionMethod == 'index')){
-                return redirect('cajas/principal/index');              
+            if (!($this->controller == 'PrincipalController' && $this->actionMethod == 'index')) {
+                return redirect('cajas/principal/index');
             }
-        }
+        } */
 
         $tipo = session()->has('tipo') ? session('tipo') : null;
         if ($tipo) {
@@ -87,7 +87,7 @@ class CajasCookieAuthenticated
         if (count($out) < 2) {
             $this->controller = $out[0];
             $this->application = null;
-        }else{
+        } else {
             $this->application = $out[0];
             $this->controller = $out[1];
         }

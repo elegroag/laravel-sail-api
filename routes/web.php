@@ -25,6 +25,9 @@ require __DIR__ . '/mercurio/consultas_trabajador.php';
 require __DIR__ . '/mercurio/usuario.php';
 
 require __DIR__ . '/cajas/cajas.php';
+require __DIR__ . '/cajas/menu.php';
+require __DIR__ . '/cajas/principal.php';
+
 require __DIR__ . '/cajas/aprueba_beneficiario.php';
 require __DIR__ . '/cajas/aprueba_conyuge.php';
 require __DIR__ . '/cajas/aprueba_trabajador.php';

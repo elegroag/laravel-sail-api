@@ -40,6 +40,7 @@ class MenuTipoSeeder extends Seeder
                     'position' => 3,
                     'is_visible' => 1,
                     'tipo' => 'A',
+                    'menu_item' => 3
                 ],
                 [
                     'id' => 4,
@@ -721,7 +722,7 @@ class MenuTipoSeeder extends Seeder
                     'position' => '3',
                     'is_visible' => '1',
                     'tipo' => 'P',
-                    'menu_item' => 222
+                    'menu_item' => 208
                 ],
                 [
                     'id' => 223,
@@ -849,6 +850,20 @@ class MenuTipoSeeder extends Seeder
                     'tipo' => 'E',
                     'menu_item' => 240
                 ],
+                [
+                    'id' => 241,
+                    'position' => '2',
+                    'is_visible' => '1',
+                    'tipo' => 'T',
+                    'menu_item' => 210
+                ],
+                [
+                    'id' => 242,
+                    'position' => '3',
+                    'is_visible' => '1',
+                    'tipo' => 'T',
+                    'menu_item' => 208
+                ]
             ];
 
             foreach ($menu_mercurio as $item1) {

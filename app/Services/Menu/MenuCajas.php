@@ -36,17 +36,17 @@ class MenuCajas
     private function getMenuItems($parentId)
     {
         $query = "SELECT menu_items.*, menu_tipos.tipo, menu_tipos.is_visible, menu_tipos.position 
-        INNER JOIN menu_tipos ON menu_tipos.menu_item= menu_items.id
         FROM menu_items 
+        INNER JOIN menu_tipos ON menu_tipos.menu_item= menu_items.id
         WHERE 
         menu_items.codapl='{$this->codapl}' AND 
         menu_tipos.is_visible = TRUE
         ";
 
         if ($parentId === null) {
-            $query .= ' AND parent_id IS NULL';
+            $query .= ' AND menu_items.parent_id IS NULL';
         } else {
-            $query .= ' AND parent_id = ' . intval($parentId);
+            $query .= ' AND menu_items.parent_id = ' . intval($parentId);
         }
         $query .= ' ORDER BY menu_tipos.position ASC';
         $sql = $this->db->inQueryAssoc($query);
