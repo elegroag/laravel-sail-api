@@ -3,37 +3,37 @@ import { Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 
 type Props = {
-    empresa: {
+    menu_item: {
         id: number;
-        nombre: string;
-        rut: string;
-        direccion: string;
-        telefono: string;
-        email: string;
-        sector_economico: string;
-        numero_empleados: number;
-        descripcion: string;
-        estado: string;
-        trabajadores?: any[];
-        created_at: string;
-        updated_at: string;
+        title: string;
+        default_url: string | null;
+        icon: string | null;
+        color: string | null;
+        nota: string | null;
+        parent_id: number | null;
+        codapl: string;
+        controller: string;
+        action: string;
+        is_visible?: number | null;
+        tipo?: string | null;
+        position?: number | null;
     };
 };
 
-export default function Show({ empresa }: Props) {
+export default function Show({ menu_item }: Props) {
     const [deleting, setDeleting] = useState(false);
 
     const handleDelete = async () => {
-        if (!confirm('¿Estás seguro de que deseas eliminar esta empresa? Esta acción no se puede deshacer.')) {
+        if (!confirm('¿Estás seguro de que deseas eliminar este item de menú? Esta acción no se puede deshacer.')) {
             return;
         }
 
         setDeleting(true);
 
         try {
-            await router.delete(`/api/empresas/${empresa.id}`, {
+            await router.delete(`/cajas/menu/${menu_item.id}`, {
                 onSuccess: () => {
-                    router.visit('/web/empresas');
+                    router.visit('/cajas/menu');
                 },
                 onError: () => {
                     setDeleting(false);
@@ -56,26 +56,26 @@ export default function Show({ empresa }: Props) {
     };
 
     return (
-        <AppLayout title={`Empresa: ${empresa.nombre}`}>
+        <AppLayout title={`Menu Item: ${menu_item.title}`}>
             <div className="bg-white shadow overflow-hidden sm:rounded-md">
                 <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
                     <div>
                         <h3 className="text-lg leading-6 font-medium text-gray-900">
-                            Detalles de Empresa
+                            Detalles de Menu Item
                         </h3>
                         <p className="mt-1 max-w-2xl text-sm text-gray-500">
-                            Información completa de la empresa
+                            Información completa del item de menú
                         </p>
                     </div>
                     <div className="flex space-x-2">
                         <Link
-                            href={`/web/empresas/${empresa.id}/edit`}
+                            href={`/cajas/menu/${menu_item.id}/edit`}
                             className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
                         >
                             Editar
                         </Link>
                         <Link
-                            href="/web/empresas"
+                            href="/cajas/menu"
                             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                         >
                             Volver al listado
@@ -85,75 +85,71 @@ export default function Show({ empresa }: Props) {
 
                 <div className="border-t border-gray-200">
                     <dl>
-                        {/* Nombre */}
+                        {/* Título */}
                         <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">Nombre</dt>
+                            <dt className="text-sm font-medium text-gray-500">Título</dt>
                             <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                {empresa.nombre}
+                                {menu_item.title}
                             </dd>
                         </div>
 
-                        {/* RUT */}
+                        {/* Controller / Action */}
                         <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">RUT</dt>
+                            <dt className="text-sm font-medium text-gray-500">Controller / Action</dt>
                             <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                {empresa.rut}
+                                {menu_item.controller} / {menu_item.action}
                             </dd>
                         </div>
 
-                        {/* Dirección */}
+                        {/* URL por defecto */}
                         <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">Dirección</dt>
+                            <dt className="text-sm font-medium text-gray-500">URL por defecto</dt>
                             <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                {empresa.direccion}
+                                {menu_item.default_url || 'N/A'}
                             </dd>
                         </div>
 
-                        {/* Teléfono */}
+                        {/* Icono / Color */}
                         <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">Teléfono</dt>
+                            <dt className="text-sm font-medium text-gray-500">Icono / Color</dt>
                             <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                {empresa.telefono || 'No especificado'}
+                                {(menu_item.icon || 'N/A')} / {(menu_item.color || 'N/A')}
                             </dd>
                         </div>
 
-                        {/* Email */}
+                        {/* Padre */}
                         <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">Email</dt>
+                            <dt className="text-sm font-medium text-gray-500">Padre</dt>
                             <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                {empresa.email || 'No especificado'}
+                                {menu_item.parent_id ?? 'N/A'}
                             </dd>
                         </div>
 
-                        {/* Sector Económico */}
+                        {/* Aplicación */}
                         <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">Sector Económico</dt>
+                            <dt className="text-sm font-medium text-gray-500">Aplicación</dt>
                             <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                {empresa.sector_economico || 'No especificado'}
+                                {menu_item.codapl}
                             </dd>
                         </div>
 
-                        {/* Número de Empleados */}
+                        {/* Visible / Tipo / Posición */}
                         <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">Número de Empleados</dt>
+                            <dt className="text-sm font-medium text-gray-500">Visible / Tipo / Posición</dt>
                             <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                {empresa.numero_empleados || 0}
+                                {(menu_item.is_visible ?? 'N/A')} / {(menu_item.tipo ?? 'N/A')} / {(menu_item.position ?? 'N/A')}
                             </dd>
                         </div>
 
-                        {/* Estado */}
-                        <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">Estado</dt>
-                            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                    empresa.estado === 'activa'
-                                        ? 'bg-green-100 text-green-800'
-                                        : 'bg-red-100 text-red-800'
-                                }`}>
-                                    {empresa.estado === 'activa' ? 'Activa' : 'Inactiva'}
-                                </span>
-                            </dd>
-                        </div>
+                        {/* Nota */}
+                        {menu_item.nota && (
+                            <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                <dt className="text-sm font-medium text-gray-500">Nota</dt>
+                                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                    {menu_item.nota}
+                                </dd>
+                            </div>
+                        )}
 
                         {/* Descripción */}
                         {empresa.descripcion && (
@@ -165,19 +161,19 @@ export default function Show({ empresa }: Props) {
                             </div>
                         )}
 
-                        {/* Fecha de creación */}
+                        {/* Identificador */}
                         <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">Fecha de creación</dt>
+                            <dt className="text-sm font-medium text-gray-500">ID</dt>
                             <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                {formatDate(empresa.created_at)}
+                                {menu_item.id}
                             </dd>
                         </div>
 
-                        {/* Última actualización */}
+                        {/* Controller.Action para permisos */}
                         <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">Última actualización</dt>
+                            <dt className="text-sm font-medium text-gray-500">Permiso</dt>
                             <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                {formatDate(empresa.updated_at)}
+                                {`${menu_item.controller}.${menu_item.action}`}
                             </dd>
                         </div>
                     </dl>
@@ -222,13 +218,13 @@ export default function Show({ empresa }: Props) {
                             disabled={deleting}
                             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {deleting ? 'Eliminando...' : 'Eliminar Empresa'}
+                            {deleting ? 'Eliminando...' : 'Eliminar Item'}
                         </button>
                         <Link
-                            href={`/web/empresas/${empresa.id}/edit`}
+                            href={`/cajas/menu/${menu_item.id}/edit`}
                             className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
                         >
-                            Editar Empresa
+                            Editar Item
                         </Link>
                     </div>
                 </div>

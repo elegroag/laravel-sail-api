@@ -44,7 +44,7 @@ class ConyugeController extends ApplicationController
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    public function indexAction()
+    public function index()
     {
         $tipo = $this->tipo;
         $empresa = null;
@@ -93,7 +93,7 @@ class ConyugeController extends ApplicationController
         ]);
     }
 
-    public function borrarArchivoAction(Request $request)
+    public function borrarArchivo(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -101,7 +101,7 @@ class ConyugeController extends ApplicationController
             $coddoc = $this->clp($request, 'coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
+            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -125,7 +125,7 @@ class ConyugeController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function guardarArchivoAction(Request $request)
+    public function guardarArchivo(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -197,11 +197,11 @@ class ConyugeController extends ApplicationController
         $this->renderObject($mercurio32->toArray());
     }
 
-    public function descargar_declaracionAction()
+    public function descargarDeclaracion()
     {
         $this->setResponse('view');
         $archivo = 'declaracion_juramentada_nueva.pdf';
-        $fichero = 'public/docs/formulario_mercurio/'.$archivo;
+        $fichero = 'public/docs/formulario_mercurio/' . $archivo;
         $ext = substr(strrchr($archivo, '.'), 1);
         header('Content-Description: File Transfer');
         header("Content-Type: application/{$ext}");
@@ -209,7 +209,7 @@ class ConyugeController extends ApplicationController
         header('Cache-Control: must-revalidate');
         header('Expires: 0');
         header('Pragma: public');
-        header('Content-Length: '.filesize($fichero));
+        header('Content-Length: ' . filesize($fichero));
         ob_clean();
         readfile($fichero);
         exit;
@@ -217,7 +217,7 @@ class ConyugeController extends ApplicationController
 
     public function downloadDocumentosAction($archivo = '')
     {
-        $fichero = 'public/docs/formulario_mercurio/'.$archivo;
+        $fichero = 'public/docs/formulario_mercurio/' . $archivo;
         $ext = substr(strrchr($archivo, '.'), 1);
         if (file_exists($fichero)) {
             header('Content-Description: File Transfer');
@@ -226,7 +226,7 @@ class ConyugeController extends ApplicationController
             header('Cache-Control: must-revalidate');
             header('Expires: 0');
             header('Pragma: public');
-            header('Content-Length: '.filesize($fichero));
+            header('Content-Length: ' . filesize($fichero));
             ob_clean();
             readfile($fichero);
             exit;
@@ -236,9 +236,9 @@ class ConyugeController extends ApplicationController
         }
     }
 
-    public function download_reporteAction($archivo = '')
+    public function downloadReporte($archivo = '')
     {
-        $fichero = 'public/temp/'.$archivo;
+        $fichero = 'public/temp/' . $archivo;
         if (file_exists($fichero)) {
             header('Content-Description: File Transfer');
             header('Content-Type: application/csv');
@@ -246,7 +246,7 @@ class ConyugeController extends ApplicationController
             header('Cache-Control: must-revalidate');
             header('Expires: 0');
             header('Pragma: public');
-            header('Content-Length: '.filesize($fichero));
+            header('Content-Length: ' . filesize($fichero));
             ob_clean();
             readfile($fichero);
             exit;
@@ -364,7 +364,7 @@ class ConyugeController extends ApplicationController
         ];
     }
 
-    public function guardarAction(Request $request)
+    public function guardar(Request $request)
     {
         $this->setResponse('ajax');
         $conyugeService = new ConyugeService;
@@ -462,7 +462,7 @@ class ConyugeController extends ApplicationController
         ];
     }
 
-    public function enviarCajaAction(Request $request)
+    public function enviarCaja(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -490,7 +490,7 @@ class ConyugeController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function borrarAction(Request $request)
+    public function borrar(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -518,7 +518,7 @@ class ConyugeController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function paramsAction()
+    public function params()
     {
         $this->setResponse('ajax');
         try {
@@ -624,7 +624,7 @@ class ConyugeController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function renderTableAction(Request $request, Response $response, string $estado = '')
+    public function renderTable(Request $request, Response $response, string $estado = '')
     {
         $this->setResponse('view');
         $conyugeService = new ConyugeService;
@@ -639,7 +639,7 @@ class ConyugeController extends ApplicationController
         return $this->renderText($html);
     }
 
-    public function validaAction(Request $request, Response $response)
+    public function valida(Request $request, Response $response)
     {
         $this->setResponse('ajax');
         try {
@@ -689,7 +689,7 @@ class ConyugeController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    public function searchRequestAction(Request $request, Response $response, string $id)
+    public function searchRequest(Request $request, Response $response, string $id)
     {
         $this->setResponse('ajax');
         try {
@@ -724,7 +724,7 @@ class ConyugeController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function consultaDocumentosAction($id)
+    public function consultaDocumentos($id)
     {
         $this->setResponse('ajax');
         try {
@@ -756,7 +756,7 @@ class ConyugeController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function formularioAction($id)
+    public function formulario($id)
     {
         $this->setResponse('ajax');
         try {
@@ -799,7 +799,7 @@ class ConyugeController extends ApplicationController
             $response = [
                 'success' => true,
                 'name' => $file,
-                'url' => 'conyuge/download_reporte/'.$file,
+                'url' => 'conyuge/download_reporte/' . $file,
             ];
         } catch (DebugException $e) {
             $response = [
@@ -811,7 +811,7 @@ class ConyugeController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function seguimientoAction($id)
+    public function seguimiento($id)
     {
         $this->setResponse('ajax');
         try {

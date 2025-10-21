@@ -29,7 +29,7 @@ class MovimientosController extends ApplicationController
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    public function indexAction()
+    public function index()
     {
         return view('mercurio.movimientos.index', [
             'hide_header' => true,
@@ -112,7 +112,7 @@ class MovimientosController extends ApplicationController
                 ->first();
 
             $claant = password_hash_old($claant);
-            $claant = md5(''.$claant);
+            $claant = md5('' . $claant);
 
             if ($claant != $mercurio07->getClave()) {
                 $response = 'La clave no coincide con la actual';
@@ -127,7 +127,7 @@ class MovimientosController extends ApplicationController
             }
 
             $mclave = password_hash_old($clave);
-            $mclave = md5(''.$mclave);
+            $mclave = md5('' . $mclave);
 
             Mercurio07::where('tipo', $tipo)
                 ->where('documento', $documento)
@@ -154,7 +154,7 @@ class MovimientosController extends ApplicationController
 
             $params = [
                 'titulo' => "Cordial saludo, señor@ {$mercurio07->getNombre()}",
-                'msj' => 'Bienvenido a La Caja de Compensación Familiar del Caqueta COMFACA, '.
+                'msj' => 'Bienvenido a La Caja de Compensación Familiar del Caqueta COMFACA, ' .
                     'Acabas de utilizar nuestro servicio de cambio de clave. Le informamos que fue exitosa.<br/>Las siguientes son las credeciales de acceso',
                 'rutaImg' => 'https://comfacaenlinea.com.co/public/img/header_reporte_ugpp.png',
                 'url_activa' => 'https://comfacaenlinea.com.co/Mercurio/Mercurio/login/index',
@@ -177,9 +177,9 @@ class MovimientosController extends ApplicationController
 
             $sender_email = new SenderEmail;
             $sender_email->setters(
-                'asunto:'.$asunto,
-                'emisor_email:'.$email_caja->getEmail(),
-                'emisor_clave:'.$email_caja->getClave()
+                'asunto:' . $asunto,
+                'emisor_email:' . $email_caja->getEmail(),
+                'emisor_clave:' . $email_caja->getClave()
             );
 
             $sender_email->send($mercurio07->getEmail(), $html);

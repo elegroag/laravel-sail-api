@@ -46,7 +46,7 @@ class ActualizaTrabajadorController extends ApplicationController
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    public function indexAction()
+    public function index()
     {
         return view('mercurio.actualizadatostra.index', [
             'title' => 'Solicitud de actualización de datos',
@@ -54,7 +54,7 @@ class ActualizaTrabajadorController extends ApplicationController
         ]);
     }
 
-    public function paramsAction()
+    public function params()
     {
         $this->setResponse('ajax');
         try {
@@ -288,7 +288,7 @@ class ActualizaTrabajadorController extends ApplicationController
      *
      * @return void
      */
-    public function guardarAction(Request $request)
+    public function guardar(Request $request)
     {
         $this->setResponse('ajax');
         $this->db->begin();
@@ -368,7 +368,7 @@ class ActualizaTrabajadorController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function borrarAction(Request $request)
+    public function borrar(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -539,7 +539,7 @@ class ActualizaTrabajadorController extends ApplicationController
         $this->renderText(json_encode($salida, JSON_NUMERIC_CHECK));
     }
 
-    public function borrarArchivoAction(Request $request)
+    public function borrarArchivo(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -572,11 +572,11 @@ class ActualizaTrabajadorController extends ApplicationController
     }
 
     /**
-     * guardarArchivoAction function
+     * guardarArchivo function
      *
      * @return void
      */
-    public function guardarArchivoAction(Request $request)
+    public function guardarArchivo(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -607,11 +607,11 @@ class ActualizaTrabajadorController extends ApplicationController
     }
 
     /**
-     * enviarCajaAction function
+     * enviarCaja function
      *
      * @return void
      */
-    public function enviarCajaAction(Request $request)
+    public function enviarCaja(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -658,7 +658,7 @@ class ActualizaTrabajadorController extends ApplicationController
         ];
     }
 
-    public function descargar_formularioAction($id)
+    public function descargar_formulario($id)
     {
         $this->setResponse('view');
         $documento = parent::getActUser('documento');
@@ -810,7 +810,7 @@ class ActualizaTrabajadorController extends ApplicationController
         $pdf->Output('formulario_afiliacion.pdf', 'D');
     }
 
-    public function renderTableAction($estado = '')
+    public function renderTable($estado = '')
     {
         $this->setResponse('view');
         $datosTrabajadorService = new DatosTrabajadorService;
@@ -825,7 +825,7 @@ class ActualizaTrabajadorController extends ApplicationController
         return $this->renderText($html);
     }
 
-    public function searchRequestAction($id)
+    public function searchRequest($id)
     {
         $this->setResponse('ajax');
         try {
@@ -864,7 +864,7 @@ class ActualizaTrabajadorController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function consultaDocumentosAction($id)
+    public function consultaDocumentos($id)
     {
         $this->setResponse('ajax');
         try {

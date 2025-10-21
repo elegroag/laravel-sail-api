@@ -41,7 +41,7 @@ class LoginController extends ApplicationController
         $this->db = DbBase::rawConnect();
     }
 
-    public function indexAction()
+    public function index()
     {
         return view('mercurio.auth.login');
     }

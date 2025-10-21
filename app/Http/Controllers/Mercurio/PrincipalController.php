@@ -36,7 +36,7 @@ class PrincipalController extends ApplicationController
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    public function indexAction()
+    public function index()
     {
         if ($this->user == null) {
             return redirect()->route('login');
@@ -218,7 +218,7 @@ class PrincipalController extends ApplicationController
     {
         $archivo = base64_decode($filepath);
         if (preg_match('/(storage)(\/)(temp)/i', $archivo) == false) {
-            $fichero = storage_path('temp/'.$archivo);
+            $fichero = storage_path('temp/' . $archivo);
         } else {
             $fichero = storage_path($archivo);
         }
@@ -550,8 +550,8 @@ class PrincipalController extends ApplicationController
                 'success',
                 [
                     'type' => 'html',
-                    'msj' => "<p style='font-size:1rem' class='text-left'>El usuario ha realizado el pre-registro de forma correcta</p>".
-                        "<p style='font-size:1rem' class='text-left'>El registro realizado es de tipo \"Particular\", ahora puedes realizar las afiliaciones de modo seguro.<br/>".
+                    'msj' => "<p style='font-size:1rem' class='text-left'>El usuario ha realizado el pre-registro de forma correcta</p>" .
+                        "<p style='font-size:1rem' class='text-left'>El registro realizado es de tipo \"Particular\", ahora puedes realizar las afiliaciones de modo seguro.<br/>" .
                         'Las credenciales de acceso le seran enviadas a la respectiva dirección de correo registrado.<br/></p>',
                 ]
             );

@@ -58,7 +58,7 @@ class FacultativoController extends ApplicationController
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    public function indexAction()
+    public function index()
     {
         return view('mercurio/facultativo/index', [
             'title' => 'Afiliación Facultativos',
@@ -104,7 +104,7 @@ class FacultativoController extends ApplicationController
     }
 
     /**
-     * guardarAction function
+     * guardar function
      *
      * @changed [2023-12-01]
      *
@@ -112,7 +112,7 @@ class FacultativoController extends ApplicationController
      *
      * @return void
      */
-    public function guardarAction(Request $request)
+    public function guardar(Request $request)
     {
         $this->setResponse('ajax');
         $facultativoService = new FacultativoService;
@@ -247,11 +247,11 @@ class FacultativoController extends ApplicationController
     }
 
     /**
-     * validaAction function
+     * valida function
      *
      * @return void
      */
-    public function validaAction(Request $request)
+    public function valida(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -316,11 +316,11 @@ class FacultativoController extends ApplicationController
     }
 
     /**
-     * borrarArchivoAction function
+     * borrarArchivo function
      *
      * @return void
      */
-    public function borrarArchivoAction(Request $request)
+    public function borrarArchivo(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -328,7 +328,7 @@ class FacultativoController extends ApplicationController
             $coddoc = $this->clp($request, 'coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
+            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -352,7 +352,7 @@ class FacultativoController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function guardarArchivoAction(Request $request)
+    public function guardarArchivo(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -383,11 +383,11 @@ class FacultativoController extends ApplicationController
     }
 
     /**
-     * enviarCajaAction function
+     * enviarCaja function
      *
      * @return void
      */
-    public function enviarCajaAction(Request $request)
+    public function enviarCaja(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -415,7 +415,7 @@ class FacultativoController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function descargar_formularioAction($id)
+    public function descargar_formulario($id)
     {
         // /public/docs/formulario_mercurio/formulario_independiente.png
         $this->setResponse('ajax');
@@ -448,7 +448,7 @@ class FacultativoController extends ApplicationController
         return $this->renderObject([
             'success' => true,
             'name' => $file,
-            'url' => 'facultitivo/downloadFile/'.$file,
+            'url' => 'facultitivo/downloadFile/' . $file,
         ]);
     }
 
@@ -487,7 +487,7 @@ class FacultativoController extends ApplicationController
      *
      * @return void
      */
-    public function borrarAction(Request $request)
+    public function borrar(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -520,17 +520,17 @@ class FacultativoController extends ApplicationController
     public function downloadFileAction($archivo = '')
     {
         $this->setResponse('view');
-        $fichero = 'public/temp/'.$archivo;
+        $fichero = 'public/temp/' . $archivo;
 
         return $this->renderFile($fichero);
     }
 
     /**
-     * paramsAction function
+     * params function
      *
      * @return void
      */
-    public function paramsAction()
+    public function params()
     {
         $this->setResponse('ajax');
 
@@ -658,7 +658,7 @@ class FacultativoController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function searchRequestAction($id)
+    public function searchRequest($id)
     {
         $this->setResponse('ajax');
         try {
@@ -689,7 +689,7 @@ class FacultativoController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function consultaDocumentosAction($id)
+    public function consultaDocumentos($id)
     {
         $this->setResponse('ajax');
         try {
@@ -716,7 +716,7 @@ class FacultativoController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function renderTableAction($estado = '')
+    public function renderTable($estado = '')
     {
         $this->setResponse('view');
         $this->facultativoService = new FacultativoService;
@@ -731,7 +731,7 @@ class FacultativoController extends ApplicationController
         return $this->renderText($html);
     }
 
-    public function seguimientoAction($id)
+    public function seguimiento($id)
     {
         $this->setResponse('ajax');
         try {
@@ -762,7 +762,7 @@ class FacultativoController extends ApplicationController
                     'tipo' => 'F',
                     'coddoc' => $solicitud->getTipdoc(),
                     'documento' => $solicitud->getCedtra(),
-                    'usuario' => $solicitud->getPriape().' '.$solicitud->getSegape().' '.$solicitud->getPrinom().' '.$solicitud->getSegnom(),
+                    'usuario' => $solicitud->getPriape() . ' ' . $solicitud->getSegape() . ' ' . $solicitud->getPrinom() . ' ' . $solicitud->getSegnom(),
                 ]
             );
 

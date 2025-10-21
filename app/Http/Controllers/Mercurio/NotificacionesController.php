@@ -28,7 +28,7 @@ class NotificacionesController extends ApplicationController
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    public function indexAction()
+    public function index()
     {
         return view('mercurio.notificaciones.index', [
             'hide_header' => true,
@@ -58,7 +58,7 @@ class NotificacionesController extends ApplicationController
                 $tmp_name = $file['tmp_name'];
                 $name = basename($file['name']);
 
-                $rename = $documento.'_'.date('YmdHis').'_'.sanetizar($name);
+                $rename = $documento . '_' . date('YmdHis') . '_' . sanetizar($name);
                 $filepath = storage_path("temp/{$rename}");
 
                 if (file_exists($filepath)) {
@@ -132,7 +132,7 @@ class NotificacionesController extends ApplicationController
         } catch (DebugException $e) {
             $salida = [
                 'success' => false,
-                'msj' => $e->getMessage().' Linea: '.$e->getLine().' File: '.basename($e->getFile()),
+                'msj' => $e->getMessage() . ' Linea: ' . $e->getLine() . ' File: ' . basename($e->getFile()),
             ];
         }
 

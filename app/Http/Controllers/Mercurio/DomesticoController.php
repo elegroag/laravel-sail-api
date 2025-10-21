@@ -87,7 +87,7 @@ class DomesticoController extends ApplicationController
         self::buscarAction($request);
     }
 
-    public function indexAction()
+    public function index()
     {
         $help = 'Esta opcion permite manejar los ';
 
@@ -199,7 +199,7 @@ class DomesticoController extends ApplicationController
         $this->renderObject($response);
     }
 
-    public function guardarAction(Request $request)
+    public function guardar(Request $request)
     {
         try {
             $generalService = new GeneralService;
@@ -407,7 +407,7 @@ class DomesticoController extends ApplicationController
         return $this->renderText(json_encode($response));
     }
 
-    public function borrarArchivoAction(Request $request)
+    public function borrarArchivo(Request $request)
     {
         try {
 
@@ -422,7 +422,7 @@ class DomesticoController extends ApplicationController
                 ->where('coddoc', $coddoc)
                 ->first();
 
-            unlink($mercurio01->getPath().$mercurio37->getArchivo());
+            unlink($mercurio01->getPath() . $mercurio37->getArchivo());
 
             Mercurio37::where('tipopc', $this->tipopc)
                 ->where('numero', $numero)
@@ -443,7 +443,7 @@ class DomesticoController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    public function guardarArchivoAction(Request $request)
+    public function guardarArchivo(Request $request)
     {
         try {
 
@@ -459,10 +459,10 @@ class DomesticoController extends ApplicationController
             $mercurio37->setCoddoc($coddoc);
             $time = strtotime('now');
 
-            if (isset($_FILES['archivo_'.$coddoc]['name']) && $_FILES['archivo_'.$coddoc]['name'] != '') {
-                $extension = explode('.', $_FILES['archivo_'.$coddoc]['name']);
-                $name = $this->tipopc.'_'.$id."_{$coddoc}_{$time}.".end($extension);
-                $_FILES['archivo_'.$coddoc]['name'] = $name;
+            if (isset($_FILES['archivo_' . $coddoc]['name']) && $_FILES['archivo_' . $coddoc]['name'] != '') {
+                $extension = explode('.', $_FILES['archivo_' . $coddoc]['name']);
+                $name = $this->tipopc . '_' . $id . "_{$coddoc}_{$time}." . end($extension);
+                $_FILES['archivo_' . $coddoc]['name'] = $name;
                 // $estado = $this->uploadFile("archivo_" . $coddoc, $mercurio01->getPath());
                 /* if ($estado != false) {
 
@@ -491,7 +491,7 @@ class DomesticoController extends ApplicationController
         return $this->renderText($response);
     }
 
-    public function enviarCajaAction(Request $request)
+    public function enviarCaja(Request $request)
     {
         try {
             $this->setResponse('ajax');

@@ -25,7 +25,7 @@ class UsuarioController extends ApplicationController
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    public function indexAction()
+    public function index()
     {
         return view('mercurio.usuario.index', [
             'title' => 'Perfil usuario',
@@ -35,7 +35,7 @@ class UsuarioController extends ApplicationController
         ]);
     }
 
-    public function paramsAction()
+    public function params()
     {
         $this->setResponse('ajax');
         try {
@@ -135,7 +135,7 @@ class UsuarioController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function guardarAction(Request $request)
+    public function guardar(Request $request)
     {
         $this->setResponse('ajax');
         try {

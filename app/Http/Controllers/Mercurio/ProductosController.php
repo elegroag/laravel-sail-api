@@ -25,7 +25,7 @@ class ProductosController extends ApplicationController
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    public function indexAction() {}
+    public function index() {}
 
     /**
      * complemento_nutricional function
@@ -109,10 +109,10 @@ class ProductosController extends ApplicationController
                     'success' => true,
                     'data' => $pinesAfiliado->getArray(),
                     'beneficiarios' => $this->afiliadosBeneficiarios($codser),
-                    'msj' => 'El producto ya se solicito de forma correcta, se requiere de realizar el pago mediante PIN, por medio de Davivienda. Dispones de 3 días para realizar el pago respectivo.<br/> '.
-                        "<p class='text-center'>".
+                    'msj' => 'El producto ya se solicito de forma correcta, se requiere de realizar el pago mediante PIN, por medio de Davivienda. Dispones de 3 días para realizar el pago respectivo.<br/> ' .
+                        "<p class='text-center'>" .
                         "<span class='text-pin'>{$afiliadoHabiles->getPin()}</span>
-                        <button type='button' toggle='copy' data-cid='{$afiliadoHabiles->getPin()}' class='btn btn-light btn-sm' title='copiar'>".
+                        <button type='button' toggle='copy' data-cid='{$afiliadoHabiles->getPin()}' class='btn btn-light btn-sm' title='copiar'>" .
                         "<i class='ni ni-single-copy-04 fa-1x'></i>
                         </button>
                     </p>",
@@ -205,10 +205,10 @@ class ProductosController extends ApplicationController
                 'success' => true,
                 'cupo' => $pinAfiliado,
                 'msj' => ($pinAfiliado == false) ? 'No hay un pin activo para realizar el pago respectivo.' :
-                    'El producto ya se solicito de forma correcta, se requiere de realizar el pago mediante PIN, por medio de Davivienda.<br/>Si ya realizaste el pago no se requiere de hacer más acciones.<br/>'.
+                    'El producto ya se solicito de forma correcta, se requiere de realizar el pago mediante PIN, por medio de Davivienda.<br/>Si ya realizaste el pago no se requiere de hacer más acciones.<br/>' .
                     "<p class='text-center'>
-                    <span class='text-pin'>{$pinAfiliado['pin']}</span>".
-                    "<button type='button' toggle='copy' data-cid='{$pinAfiliado['pin']}' class='btn btn-light btn-sm' title='copiar'>".
+                    <span class='text-pin'>{$pinAfiliado['pin']}</span>" .
+                    "<button type='button' toggle='copy' data-cid='{$pinAfiliado['pin']}' class='btn btn-light btn-sm' title='copiar'>" .
                     "<i class='ni ni-single-copy-04 fa-1x'></i>
                     </button>
                 </p>",

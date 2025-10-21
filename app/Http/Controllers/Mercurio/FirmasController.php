@@ -29,7 +29,7 @@ class FirmasController extends ApplicationController
     /**
      * GET /firmas/index
      */
-    public function indexAction()
+    public function index()
     {
         // Acceso a sesión
         $user = session()->has('user') ? session('user') : [];
@@ -49,7 +49,7 @@ class FirmasController extends ApplicationController
     /**
      * POST /firmas/guardar
      */
-    public function guardarAction(Request $request)
+    public function guardar(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -148,7 +148,7 @@ class FirmasController extends ApplicationController
 
             $file = $request->file('file');
             $extension = $file->getClientOriginalExtension();
-            $name = strtoupper(uniqid('TMP_')).'_'.time().'.'.$extension;
+            $name = strtoupper(uniqid('TMP_')) . '_' . time() . '.' . $extension;
 
             $dir = public_path('temp');
             if (! is_dir($dir)) {
@@ -161,7 +161,7 @@ class FirmasController extends ApplicationController
                 throw new DebugException('No existe firma registrada para el usuario.', 404);
             }
 
-            $pdf = $dir.DIRECTORY_SEPARATOR.$name;
+            $pdf = $dir . DIRECTORY_SEPARATOR . $name;
             $cifrarDocumento = new CifrarDocumento;
             $out = $cifrarDocumento->comprobar($pdf, $mfirma->getKeypublic());
 

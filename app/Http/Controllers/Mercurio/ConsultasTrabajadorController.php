@@ -33,7 +33,7 @@ class ConsultasTrabajadorController extends ApplicationController
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    public function indexAction()
+    public function index()
     {
         return view('mercurio/subsidio/index', [
             'title' => 'Subsidio',

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Controller;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -22,6 +23,8 @@ return new class extends Migration
             $table->unsignedInteger('parent_id')->nullable();
             $table->char('codapl', 2)->default('CA');
             $table->index('parent_id', 'parent_id');
+            $table->string('controller', 100)->nullable();
+            $table->string('action', 100)->nullable();
         });
     }
 

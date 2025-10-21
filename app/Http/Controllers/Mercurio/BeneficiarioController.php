@@ -46,7 +46,7 @@ class BeneficiarioController extends ApplicationController
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    public function indexAction()
+    public function index()
     {
         $empresa = null;
         $documento = $this->user['documento'];
@@ -103,7 +103,7 @@ class BeneficiarioController extends ApplicationController
             ->get(['cedcon', 'priape', 'segape', 'prinom'])
             ->pluck('cedcon', 'priape', 'segape', 'prinom')
             ->map(function ($conyuge) {
-                return $conyuge->cedcon.'-'.$conyuge->priape.' '.$conyuge->segape.' '.$conyuge->prinom;
+                return $conyuge->cedcon . '-' . $conyuge->priape . ' ' . $conyuge->segape . ' ' . $conyuge->prinom;
             })
             ->toArray();
 
@@ -123,7 +123,7 @@ class BeneficiarioController extends ApplicationController
             $subsi20 = $subsi20['data'];
             if (count($subsi20) > 0) {
                 foreach ($subsi20 as $msubsi20) {
-                    $cedcons[$msubsi20['cedcon']] = $msubsi20['cedcon'].'-'.$msubsi20['priape'].' '.$msubsi20['prinom'];
+                    $cedcons[$msubsi20['cedcon']] = $msubsi20['cedcon'] . '-' . $msubsi20['priape'] . ' ' . $msubsi20['prinom'];
                 }
             }
         }
@@ -133,7 +133,7 @@ class BeneficiarioController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function borrarArchivoAction(Request $request)
+    public function borrarArchivo(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -141,7 +141,7 @@ class BeneficiarioController extends ApplicationController
             $coddoc = $this->clp($request, 'coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
+            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -165,7 +165,7 @@ class BeneficiarioController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function enviarCajaAction(Request $request)
+    public function enviarCaja(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -193,7 +193,7 @@ class BeneficiarioController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function traerBeneficiarioAction(Request $request)
+    public function traerBeneficiario(Request $request)
     {
         $this->setResponse('ajax');
         $numdoc = $request->input('numdoc');
@@ -219,7 +219,7 @@ class BeneficiarioController extends ApplicationController
         return $this->renderObject($mercurio34->toArray());
     }
 
-    public function borrarAction(Request $request)
+    public function borrar(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -294,7 +294,7 @@ class BeneficiarioController extends ApplicationController
         return $beneficiarios;
     }
 
-    public function cancelar_solicitudAction(Request $request)
+    public function cancelarSolicitud(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -323,11 +323,11 @@ class BeneficiarioController extends ApplicationController
     }
 
     /**
-     * buscar_conyuges_trabajadorAction function
+     * buscarConyugesTrabajador function
      *
      * @return void
      */
-    public function buscar_conyuges_trabajadorAction(Request $request)
+    public function buscarConyugesTrabajador(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -377,10 +377,10 @@ class BeneficiarioController extends ApplicationController
             $_cedcon = [];
             foreach ($datos_captura as $data) {
                 if ($cedtra == '') {
-                    $_cedcon[$data['cedcon']] = $data['cedcon'].' - '.$data['nombre'];
+                    $_cedcon[$data['cedcon']] = $data['cedcon'] . ' - ' . $data['nombre'];
                 } else {
                     if ($cedtra == $data['cedtra']) {
-                        $_cedcon[$data['cedcon']] = $data['cedcon'].' - '.$data['nombre'];
+                        $_cedcon[$data['cedcon']] = $data['cedcon'] . ' - ' . $data['nombre'];
                     }
                 }
             }
@@ -388,7 +388,7 @@ class BeneficiarioController extends ApplicationController
             $conyuguesPendientes = (new Mercurio32)->getFind("documento='{$documento}' AND estado NOT IN('I','X')");
             foreach ($conyuguesPendientes as $conCp) {
                 if (! isset($_cedcon[$conCp->getCedcon()])) {
-                    $_cedcon[$conCp->getCedcon()] = $conCp->getCedcon().' - '.$conCp->getPrinom().' '.$conCp->getSegnom().' '.$conCp->getPriape().' '.$conCp->getSegape();
+                    $_cedcon[$conCp->getCedcon()] = $conCp->getCedcon() . ' - ' . $conCp->getPrinom() . ' ' . $conCp->getSegnom() . ' ' . $conCp->getPriape() . ' ' . $conCp->getSegape();
                 }
             }
 
@@ -446,9 +446,9 @@ class BeneficiarioController extends ApplicationController
         ];
     }
 
-    public function download_docsAction($archivo = '')
+    public function downloadDocs($archivo = '')
     {
-        $fichero = 'public/docs/formulario_mercurio/'.$archivo;
+        $fichero = 'public/docs/formulario_mercurio/' . $archivo;
         $ext = substr(strrchr($archivo, '.'), 1);
         if (file_exists($fichero)) {
             header('Content-Description: File Transfer');
@@ -457,7 +457,7 @@ class BeneficiarioController extends ApplicationController
             header('Cache-Control: must-revalidate');
             header('Expires: 0');
             header('Pragma: public');
-            header('Content-Length: '.filesize($fichero));
+            header('Content-Length: ' . filesize($fichero));
             ob_clean();
             readfile($fichero);
             exit;
@@ -467,9 +467,9 @@ class BeneficiarioController extends ApplicationController
         }
     }
 
-    public function download_reporteAction($archivo = '')
+    public function downloadReporte($archivo = '')
     {
-        $fichero = 'public/temp/'.$archivo;
+        $fichero = 'public/temp/' . $archivo;
         if (file_exists($fichero)) {
             header('Content-Description: File Transfer');
             header('Content-Type: application/csv');
@@ -477,7 +477,7 @@ class BeneficiarioController extends ApplicationController
             header('Cache-Control: must-revalidate');
             header('Expires: 0');
             header('Pragma: public');
-            header('Content-Length: '.filesize($fichero));
+            header('Content-Length: ' . filesize($fichero));
             ob_clean();
             readfile($fichero);
             exit;
@@ -487,11 +487,11 @@ class BeneficiarioController extends ApplicationController
         }
     }
 
-    public function descargar_declaracionAction()
+    public function descargarDeclaracion()
     {
         $this->setResponse('view');
         $archivo = 'declaracion_juramentada_nueva.pdf';
-        $fichero = 'public/docs/formulario_mercurio/'.$archivo;
+        $fichero = 'public/docs/formulario_mercurio/' . $archivo;
         $ext = substr(strrchr($archivo, '.'), 1);
         header('Content-Description: File Transfer');
         header("Content-Type: application/{$ext}");
@@ -499,13 +499,13 @@ class BeneficiarioController extends ApplicationController
         header('Cache-Control: must-revalidate');
         header('Expires: 0');
         header('Pragma: public');
-        header('Content-Length: '.filesize($fichero));
+        header('Content-Length: ' . filesize($fichero));
         ob_clean();
         readfile($fichero);
         exit;
     }
 
-    public function paramsAction()
+    public function params()
     {
         $this->setResponse('ajax');
         try {
@@ -598,14 +598,14 @@ class BeneficiarioController extends ApplicationController
         } catch (DebugException $e) {
             $salida = [
                 'success' => false,
-                'msj' => $e->getMessage().' '.$e->getLine().' '.basename($e->getFile()),
+                'msj' => $e->getMessage() . ' ' . $e->getLine() . ' ' . basename($e->getFile()),
             ];
         }
 
         return $this->renderObject($salida);
     }
 
-    public function renderTableAction($estado = '')
+    public function renderTable($estado = '')
     {
         $this->setResponse('view');
         $benService = new BeneficiarioService;
@@ -620,7 +620,7 @@ class BeneficiarioController extends ApplicationController
         return $this->renderText($html);
     }
 
-    public function searchRequestAction($id)
+    public function searchRequest($id)
     {
         $this->setResponse('ajax');
         try {
@@ -655,7 +655,7 @@ class BeneficiarioController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function validaAction(Request $request)
+    public function valida(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -744,7 +744,7 @@ class BeneficiarioController extends ApplicationController
         ];
     }
 
-    public function guardarAction(Request $request)
+    public function guardar(Request $request)
     {
         // $this->setResponse("ajax");
         $benefiService = new BeneficiarioService;
@@ -807,7 +807,7 @@ class BeneficiarioController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function consultaDocumentosAction($id)
+    public function consultaDocumentos($id)
     {
         $this->setResponse('ajax');
         try {
@@ -839,7 +839,7 @@ class BeneficiarioController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function formularioAction($id)
+    public function formulario($id)
     {
         try {
             $paramsTrabajador = new ParamsTrabajador;
@@ -1023,7 +1023,7 @@ class BeneficiarioController extends ApplicationController
             )->outFile();
         } catch (DebugException $e) {
 
-            $msj = $e->getMessage().' linea: '.$e->getLine();
+            $msj = $e->getMessage() . ' linea: ' . $e->getLine();
             set_flashdata('error', [
                 'msj' => $msj,
             ]);
@@ -1032,7 +1032,7 @@ class BeneficiarioController extends ApplicationController
         }
     }
 
-    public function guardarArchivoAction(Request $request)
+    public function guardarArchivo(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -1061,7 +1061,7 @@ class BeneficiarioController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    public function seguimientoAction($id)
+    public function seguimiento($id)
     {
         $this->setResponse('ajax');
         try {

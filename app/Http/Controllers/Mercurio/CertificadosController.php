@@ -31,7 +31,7 @@ class CertificadosController extends ApplicationController
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    public function indexAction()
+    public function index()
     {
         $ps = Comman::Api();
         $ps->runCli(
@@ -69,7 +69,7 @@ class CertificadosController extends ApplicationController
         );
     }
 
-    public function guardarAction(Request $request)
+    public function guardar(Request $request)
     {
         $message = '';
         $this->db->begin();
@@ -111,7 +111,7 @@ class CertificadosController extends ApplicationController
 
             if ($usuario == '') {
                 throw new DebugException(
-                    'No se puede realizar el registro, no hay usuario disponible para la atención de la solicitud.'.
+                    'No se puede realizar el registro, no hay usuario disponible para la atención de la solicitud.' .
                         ' Comuniquese con la atencion al cliente',
                     501
                 );
@@ -122,13 +122,13 @@ class CertificadosController extends ApplicationController
             $mercurio45->setCoddoc($coddoc);
             $mercurio45->setDocumento($documento);
 
-            if (isset($_FILES['archivo_'.$codben]['name']) && $_FILES['archivo_'.$codben]['name'] != '') {
-                $extension = explode('.', $_FILES['archivo_'.$codben]['name']);
-                $name = $this->tipopc.'_'.$mercurio45->getId().'.'.end($extension);
-                $_FILES['archivo_'.$codben]['name'] = $name;
+            if (isset($_FILES['archivo_' . $codben]['name']) && $_FILES['archivo_' . $codben]['name'] != '') {
+                $extension = explode('.', $_FILES['archivo_' . $codben]['name']);
+                $name = $this->tipopc . '_' . $mercurio45->getId() . '.' . end($extension);
+                $_FILES['archivo_' . $codben]['name'] = $name;
 
                 $uploadFile = new UploadFile;
-                $estado = $uploadFile->upload('archivo_'.$codben, 'certificados');
+                $estado = $uploadFile->upload('archivo_' . $codben, 'certificados');
 
                 if ($estado) {
                     $mercurio45->setArchivo($name);

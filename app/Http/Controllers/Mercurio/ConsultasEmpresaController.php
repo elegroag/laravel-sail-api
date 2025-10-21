@@ -42,7 +42,7 @@ class ConsultasEmpresaController extends ApplicationController
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    public function indexAction()
+    public function index()
     {
         return view('mercurio/subsidioemp/index', [
             'title' => 'Subsidio Empresa',
@@ -140,7 +140,7 @@ class ConsultasEmpresaController extends ApplicationController
         } catch (DebugException $e) {
             $response = [
                 'success' => false,
-                'msj' => $e->getMessage().' '.$e->getLine(),
+                'msj' => $e->getMessage() . ' ' . $e->getLine(),
             ];
         }
 
@@ -241,7 +241,7 @@ class ConsultasEmpresaController extends ApplicationController
         } catch (DebugException $e) {
             $response = [
                 'success' => false,
-                'msj' => $e->getMessage().' '.$e->getLine(),
+                'msj' => $e->getMessage() . ' ' . $e->getLine(),
             ];
         }
 
@@ -297,7 +297,7 @@ class ConsultasEmpresaController extends ApplicationController
         } catch (DebugException $e) {
             $response = [
                 'success' => false,
-                'msj' => $e->getMessage().' '.$e->getLine(),
+                'msj' => $e->getMessage() . ' ' . $e->getLine(),
             ];
         }
 
@@ -492,7 +492,7 @@ class ConsultasEmpresaController extends ApplicationController
 
             if (isset($_FILES['archivo']['name']) && $_FILES['archivo']['name'] != '') {
                 $extension = explode('.', $_FILES['archivo']['name']);
-                $name = "{$mercurio35->getNit()}_{$mercurio35->getCedtra()}_{$id_log}_retiro.".end($extension);
+                $name = "{$mercurio35->getNit()}_{$mercurio35->getCedtra()}_{$id_log}_retiro." . end($extension);
                 $_FILES['archivo']['name'] = $name;
 
                 $estado = UploadFile::upload('archivo', $mercurio01->getPath());
@@ -601,7 +601,7 @@ class ConsultasEmpresaController extends ApplicationController
             return $this->renderObject(['success' => false, 'msj' => 'No se puede realizar el registro, comuniquese con la atención al cliente']);
         }
         foreach ($mercurio28 as $mmercurio28) {
-            $antval = $request->input($mmercurio28->getCampo().'_ant');
+            $antval = $request->input($mmercurio28->getCampo() . '_ant');
             $valor = $request->input($mmercurio28->getCampo());
             $cedrep = $request->input($mmercurio28->getCampo());
             $repleg = $request->input($mmercurio28->getCampo());
@@ -658,11 +658,11 @@ class ConsultasEmpresaController extends ApplicationController
                 $mercurio37->setTipopc('5');
                 $mercurio37->setNumero($mercurio33->getId());
                 $mercurio37->setCoddoc($coddoc);
-                if (isset($_FILES['archivo_'.$coddoc]['name']) && $_FILES['archivo_'.$coddoc]['name'] != '') {
-                    $extension = explode('.', $_FILES['archivo_'.$coddoc]['name']);
-                    $name = '5_'.$mercurio33->getId()."_{$coddoc}.".end($extension);
-                    $_FILES['archivo_'.$coddoc]['name'] = $name;
-                    $estado = UploadFile::upload('archivo_'.$coddoc, $mercurio01->getPath());
+                if (isset($_FILES['archivo_' . $coddoc]['name']) && $_FILES['archivo_' . $coddoc]['name'] != '') {
+                    $extension = explode('.', $_FILES['archivo_' . $coddoc]['name']);
+                    $name = '5_' . $mercurio33->getId() . "_{$coddoc}." . end($extension);
+                    $_FILES['archivo_' . $coddoc]['name'] = $name;
+                    $estado = UploadFile::upload('archivo_' . $coddoc, $mercurio01->getPath());
                     if ($estado != false) {
                         $mercurio37->setArchivo($name);
                         $mercurio37->save();
@@ -710,7 +710,7 @@ class ConsultasEmpresaController extends ApplicationController
 
     public function ejemplo_planilla_masivaAction()
     {
-        $file = 'public/docs/'.'ejemplo_planilla_masiva.xlsx';
+        $file = 'public/docs/' . 'ejemplo_planilla_masiva.xlsx';
     }
 
     public function certificadoAfiliacionViewAction()
@@ -725,7 +725,7 @@ class ConsultasEmpresaController extends ApplicationController
     {
         $this->setResponse('view');
 
-        return header('Location: https://comfacaenlinea.com.co/SYS/Subsidio/subflo/gene_certi_emp/x/'.$this->user['documento']);
+        return header('Location: https://comfacaenlinea.com.co/SYS/Subsidio/subflo/gene_certi_emp/x/' . $this->user['documento']);
     }
 
     public function certificadoParaTrabajadorViewAction()
@@ -765,12 +765,12 @@ class ConsultasEmpresaController extends ApplicationController
         $tipo = $request->input('tipo');
         $cedtra = $request->input('cedtra');
         $logger->registrarLog(false, 'Certificado Para Trabajador', "$tipo - $cedtra");
-        header("Location: https://comfacaenlinea.com.co/SYS/Subsidio/subflo/gene_certi_tra/{$tipo}/".$cedtra);
+        header("Location: https://comfacaenlinea.com.co/SYS/Subsidio/subflo/gene_certi_tra/{$tipo}/" . $cedtra);
     }
 
     public function ejemplo_planilla_activacion_masivaAction()
     {
-        $file = 'public/docs/'.'ejemplo_planilla_activacion_masiva.csv';
+        $file = 'public/docs/' . 'ejemplo_planilla_activacion_masiva.csv';
     }
 
     public function activacion_masiva_trabajador_viewAction()
@@ -802,17 +802,17 @@ class ConsultasEmpresaController extends ApplicationController
 
         $_ciupri = [];
         foreach ($datos_captura['ciudad_comercial'] as $data) {
-            $_ciupri["{$data['codciu']}"] = $data['codciu'].'-'.$data['detciu'];
+            $_ciupri["{$data['codciu']}"] = $data['codciu'] . '-' . $data['detciu'];
         }
 
         $_codciu = [];
         foreach ($datos_captura['ciudades'] as $data) {
-            $_codciu["{$data['codciu']}"] = $data['codciu'].'-'.$data['detciu'];
+            $_codciu["{$data['codciu']}"] = $data['codciu'] . '-' . $data['detciu'];
         }
 
         $_codzon = [];
         foreach ($datos_captura['zonas'] as $data) {
-            $_codzon[$data['codzon']] = $data['codzon'].'-'.$data['detzon'];
+            $_codzon[$data['codzon']] = $data['codzon'] . '-' . $data['detzon'];
         }
 
         $_codcaj = [];
@@ -835,7 +835,7 @@ class ConsultasEmpresaController extends ApplicationController
 
         $_codact = [];
         foreach ($datos_captura['actividades'] as $data) {
-            $_codact["{$data['codact']}"] = "{$data['codact']} - ".$data['detalle'];
+            $_codact["{$data['codact']}"] = "{$data['codact']} - " . $data['detalle'];
         }
 
         $_tipper = [];

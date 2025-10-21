@@ -43,11 +43,11 @@ class ActualizaEmpresaController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user') ?? null;
+        $this->tipo = session('tipo') ?? null;
     }
 
-    public function indexAction()
+    public function index()
     {
         return view('mercurio.actualizadatos.index', [
             'title' => 'Solicitud de actualización de datos',
@@ -58,7 +58,7 @@ class ActualizaEmpresaController extends ApplicationController
         ]);
     }
 
-    public function guardarAction(Request $request)
+    public function guardar(Request $request)
     {
         $this->db->begin();
         $actualizaEmpresaService = new ActualizaEmpresaService;
@@ -197,11 +197,9 @@ class ActualizaEmpresaController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    public function paramsAction()
+    public function params()
     {
-        $documento = parent::getActUser('documento');
-        $this->setResponse('ajax');
-
+        $documento = $this->user['documento'];
         try {
             $mtipoDocumentos = new Gener18;
             $tipoDocumentos = [];
@@ -306,9 +304,8 @@ class ActualizaEmpresaController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function borrarAction(Request $request)
+    public function borrar(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $id = $request->input('id');
             $solicitud = Mercurio47::where('id', $id)->first();
@@ -379,9 +376,8 @@ class ActualizaEmpresaController extends ApplicationController
         return $html;
     }
 
-    public function borrarArchivoAction(Request $request)
+    public function borrarArchivo(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $numero = $this->clp($request, 'id');
             $coddoc = $this->clp($request, 'coddoc');
@@ -411,12 +407,11 @@ class ActualizaEmpresaController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function guardarArchivoAction(Request $request)
+    public function guardarArchivo(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $coddoc = $request->input('coddoc', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $id = $request->input('id');
+            $coddoc = $request->input('coddoc');
 
             $guardarArchivoService = new GuardarArchivoService([
                 'tipopc' => $this->tipopc,
@@ -439,19 +434,16 @@ class ActualizaEmpresaController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function enviarCajaAction(Request $request)
+    public function enviarCaja(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $id = $request->input('id');
             $actualizaService = new ActualizaEmpresaService;
-            // $actualizaService->setTransa();
 
             $asignarFuncionario = new AsignarFuncionario;
             $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
 
             $actualizaService->enviarCaja(new SenderValidationCaja, $id, $usuario);
-            // $actualizaService->endTransa();
 
             $salida = [
                 'success' => true,
@@ -467,11 +459,9 @@ class ActualizaEmpresaController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function formularioAction($id)
+    public function formulario($id)
     {
-        $this->setResponse('view');
-        $documento = parent::getActUser('documento');
-        $mercurio47 = Mercurio47::where('id', $id)->where('documento', $documento)->first();
+        $mercurio47 = Mercurio47::where('id', $id)->where('documento', $this->user['documento'])->first();
         if ($mercurio47) {
             $campos = Mercurio33::where('actualizacion', $id)->get()->mapWithKeys(function ($row) {
                 return [$row->campo => $row->valor];
@@ -506,7 +496,7 @@ class ActualizaEmpresaController extends ApplicationController
         );
     }
 
-    public function renderTableAction($estado = '')
+    public function renderTable($estado = '')
     {
         $this->setResponse('view');
         $actualizaEmpresaService = new ActualizaEmpresaService;
@@ -524,10 +514,9 @@ class ActualizaEmpresaController extends ApplicationController
     public function sucursalesAction()
     {
         try {
-            $documento = parent::getActUser('documento');
             $actualizaEmpresaService = new ActualizaEmpresaService;
 
-            $rqs = $actualizaEmpresaService->buscarEmpresaSubsidio($documento);
+            $rqs = $actualizaEmpresaService->buscarEmpresaSubsidio($this->user['documento']);
             $list_sucursales = [];
             if ($rqs) {
                 $sucursales = (count($rqs['sucursales']) > 0) ? $rqs['sucursales'] : false;
@@ -552,17 +541,14 @@ class ActualizaEmpresaController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function searchRequestAction($id)
+    public function searchRequest($id)
     {
-        $this->setResponse('ajax');
         try {
             if (is_null($id)) {
                 throw new DebugException('Error no hay solicitud a buscar', 301);
             }
-            $documento = parent::getActUser('documento');
-            $coddoc = parent::getActUser('coddoc');
 
-            $mmercurio47 = Mercurio47::where('id', $id)->where('documento', $documento)->where('coddoc', $coddoc)->first();
+            $mmercurio47 = Mercurio47::where('id', $id)->where('documento', $this->user['documento'])->where('coddoc', $this->user['coddoc'])->first();
             if ($mmercurio47 == false) {
                 throw new DebugException('Error la solicitud no está disponible para acceder.', 301);
             } else {
@@ -592,11 +578,9 @@ class ActualizaEmpresaController extends ApplicationController
 
     public function empresaSisuAction()
     {
-        $this->setResponse('ajax');
         try {
-            $documento = parent::getActUser('documento');
             $actualizaEmpresaService = new ActualizaEmpresaService;
-            $rqs = $actualizaEmpresaService->buscarEmpresaSubsidio($documento);
+            $rqs = $actualizaEmpresaService->buscarEmpresaSubsidio($this->user['documento']);
             $salida = [
                 'success' => true,
                 'data' => ($rqs) ? $rqs['data'] : false,
@@ -612,17 +596,14 @@ class ActualizaEmpresaController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function consultaDocumentosAction($id)
+    public function consultaDocumentos($id)
     {
-        $this->setResponse('ajax');
         try {
-            $documento = parent::getActUser('documento');
-            $coddoc = parent::getActUser('coddoc');
             $empresaService = new ActualizaEmpresaService;
 
             $sindepe = Mercurio47::where('id', $id)
-                ->where('documento', $documento)
-                ->where('coddoc', $coddoc)
+                ->where('documento', $this->user['documento'])
+                ->where('coddoc', $this->user['coddoc'])
                 ->whereNotIn('estado', ['I', 'X'])
                 ->first();
 
@@ -644,9 +625,8 @@ class ActualizaEmpresaController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function seguimientoAction($id)
+    public function seguimiento($id)
     {
-        $this->setResponse('ajax');
         try {
             $actualizaEmpresaService = new ActualizaEmpresaService;
             $out = $actualizaEmpresaService->consultaSeguimiento($id);

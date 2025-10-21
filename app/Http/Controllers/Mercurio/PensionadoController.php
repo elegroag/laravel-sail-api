@@ -69,11 +69,11 @@ class PensionadoController extends ApplicationController
     }
 
     /**
-     * indexAction function
+     * indexfunction
      *
      * @return \Illuminate\View\View
      */
-    public function indexAction()
+    public function index()
     {
         return view('mercurio.pensionado.index', [
             'title' => 'Afiliación Pensionados',
@@ -124,11 +124,11 @@ class PensionadoController extends ApplicationController
     }
 
     /**
-     * guardarAction function
+     * guardar function
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function guardarAction(Request $request)
+    public function guardar(Request $request)
     {
         // $this->setResponse("ajax");
         $pensionadoService = new PensionadoService;
@@ -257,11 +257,11 @@ class PensionadoController extends ApplicationController
     }
 
     /**
-     * validaAction function
+     * valida function
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function validaAction(Request $request)
+    public function valida(Request $request)
     {
         $this->setResponse('ajax');
 
@@ -310,11 +310,11 @@ class PensionadoController extends ApplicationController
     }
 
     /**
-     * borrarArchivoAction function
+     * borrarArchivo function
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function borrarArchivoAction(Request $request)
+    public function borrarArchivo(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -347,11 +347,11 @@ class PensionadoController extends ApplicationController
     }
 
     /**
-     * guardarArchivoAction function
+     * guardarArchivo function
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function guardarArchivoAction(Request $request)
+    public function guardarArchivo(Request $request)
     {
         $this->setResponse('ajax');
 
@@ -388,11 +388,11 @@ class PensionadoController extends ApplicationController
     }
 
     /**
-     * enviarCajaAction function
+     * enviarCaja function
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function enviarCajaAction(Request $request)
+    public function enviarCaja(Request $request)
     {
         $this->db->begin();
         try {
@@ -523,7 +523,7 @@ class PensionadoController extends ApplicationController
         return $this->renderFile($fichero);
     }
 
-    public function paramsAction()
+    public function params()
     {
         $this->setResponse('ajax');
 
@@ -632,7 +632,7 @@ class PensionadoController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function searchRequestAction($id)
+    public function searchRequest($id)
     {
         $this->setResponse('ajax');
         try {
@@ -663,7 +663,7 @@ class PensionadoController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function consultaDocumentosAction($id)
+    public function consultaDocumentos($id)
     {
         $this->setResponse('ajax');
         try {
@@ -690,7 +690,7 @@ class PensionadoController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function borrarAction(Request $request)
+    public function borrar(Request $request)
     {
         $this->setResponse('ajax');
         $generales = new GeneralService;
@@ -723,7 +723,7 @@ class PensionadoController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function renderTableAction(Request $request, Response $response, string $estado = '')
+    public function renderTable(Request $request, Response $response, string $estado = '')
     {
         $this->setResponse('view');
         $pensionadoService = new PensionadoService;
@@ -738,7 +738,7 @@ class PensionadoController extends ApplicationController
         return $this->renderText($html);
     }
 
-    public function seguimientoAction($id)
+    public function seguimiento($id)
     {
         $this->setResponse('ajax');
         try {
@@ -755,7 +755,7 @@ class PensionadoController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function descargar_formularioAction($id)
+    public function descargar_formulario($id)
     {
         $this->setResponse('ajax');
 

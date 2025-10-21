@@ -42,7 +42,7 @@ class EmpresaController extends ApplicationController
 
     protected $tipopc = '2';
 
-    public function indexAction()
+    public function index()
     {
         return view('mercurio/empresa/index', [
             'tipo' => $this->tipo,
@@ -52,7 +52,7 @@ class EmpresaController extends ApplicationController
         ]);
     }
 
-    public function renderTableAction(Request $request, Response $response, string $estado = '')
+    public function renderTable(Request $request, Response $response, string $estado = '')
     {
         $this->setResponse('view');
         $empresaService = new EmpresaService;
@@ -100,7 +100,7 @@ class EmpresaController extends ApplicationController
      * POST /empresa/guardar
      * Crea o actualiza la solicitud de afiliación de empresa
      */
-    public function guardarAction(Request $request, Response $response)
+    public function guardar(Request $request, Response $response)
     {
         $service = new EmpresaService;
         $this->db->begin();
@@ -185,7 +185,7 @@ class EmpresaController extends ApplicationController
     /**
      * POST /empresa/borrar_archivo
      */
-    public function borrarArchivoAction(Request $request)
+    public function borrarArchivo(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -193,7 +193,7 @@ class EmpresaController extends ApplicationController
             $coddoc = $this->clp($request, 'coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
+            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -220,7 +220,7 @@ class EmpresaController extends ApplicationController
     /**
      * POST /empresa/guardar_archivo
      */
-    public function guardarArchivoAction(Request $request)
+    public function guardarArchivo(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -272,7 +272,7 @@ class EmpresaController extends ApplicationController
     /**
      * POST /empresa/enviar_caja
      */
-    public function enviarCajaAction(Request $request)
+    public function enviarCaja(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -301,7 +301,7 @@ class EmpresaController extends ApplicationController
     /**
      * GET /empresa/seguimiento/{id}
      */
-    public function seguimientoAction(Request $request, Response $response, int $id)
+    public function seguimiento(Request $request, Response $response, int $id)
     {
         $this->setResponse('ajax');
         try {
@@ -321,7 +321,7 @@ class EmpresaController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function paramsAction()
+    public function params()
     {
         $this->setResponse('ajax');
         try {
@@ -430,7 +430,7 @@ class EmpresaController extends ApplicationController
     public function downloadFileAction($archivo = '')
     {
         $this->setResponse('view');
-        $fichero = public_path('temp/'.$archivo);
+        $fichero = public_path('temp/' . $archivo);
         if (! file_exists($fichero)) {
             throw new DebugException('Archivo no disponible', 404);
         }
@@ -444,7 +444,7 @@ class EmpresaController extends ApplicationController
     public function downloadDocsAction($archivo = '')
     {
         $this->setResponse('view');
-        $fichero = public_path('docs/formulario_mercurio/'.$archivo);
+        $fichero = public_path('docs/formulario_mercurio/' . $archivo);
         if (! file_exists($fichero)) {
             throw new DebugException('Documento no disponible', 404);
         }
@@ -484,7 +484,7 @@ class EmpresaController extends ApplicationController
     /**
      * GET /empresa/search_request/{id}
      */
-    public function searchRequestAction(Request $request, Response $response, int $id)
+    public function searchRequest(Request $request, Response $response, int $id)
     {
         $this->setResponse('ajax');
         try {
@@ -521,7 +521,7 @@ class EmpresaController extends ApplicationController
     /**
      * GET /empresa/consulta_documentos/{id}
      */
-    public function consultaDocumentosAction(Request $request, Response $response, int $id)
+    public function consultaDocumentos(Request $request, Response $response, int $id)
     {
         try {
             $documento = $this->user['documento'] ?? '';
@@ -556,7 +556,7 @@ class EmpresaController extends ApplicationController
     /**
      * POST /empresa/borrar
      */
-    public function borrarAction(Request $request)
+    public function borrar(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -593,7 +593,7 @@ class EmpresaController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function validaAction(Request $request)
+    public function valida(Request $request)
     {
         $this->setResponse('ajax');
         try {

@@ -30,22 +30,25 @@ class MenuCajas
     private function initialize()
     {
         $this->menuItems = '';
-        $this->path = env('APP_URL').':'.env('APP_PORT');
+        $this->path = env('APP_URL') . ':' . env('APP_PORT');
     }
 
     private function getMenuItems($parentId)
     {
-        $query = "SELECT * FROM menu_items 
+        $query = "SELECT menu_items.*, menu_tipos.tipo, menu_tipos.is_visible, menu_tipos.position 
+        INNER JOIN menu_tipos ON menu_tipos.menu_item= menu_items.id
+        FROM menu_items 
         WHERE 
-        is_visible = TRUE AND 
-        codapl='{$this->codapl}'";
+        menu_items.codapl='{$this->codapl}' AND 
+        menu_tipos.is_visible = TRUE
+        ";
 
         if ($parentId === null) {
             $query .= ' AND parent_id IS NULL';
         } else {
-            $query .= ' AND parent_id = '.intval($parentId);
+            $query .= ' AND parent_id = ' . intval($parentId);
         }
-        $query .= ' ORDER BY position ASC';
+        $query .= ' ORDER BY menu_tipos.position ASC';
         $sql = $this->db->inQueryAssoc($query);
 
         return $sql;
@@ -68,7 +71,7 @@ class MenuCajas
                 'icon' => $menu['icon'] ?? null,
                 'title' => $menu['title'] ?? '',
                 'is_active' => true,
-                'url' => ($menu['default_url']) ? $this->path.'/'.$menu['default_url'] : '#',
+                'url' => ($menu['default_url']) ? $this->path . '/' . $menu['default_url'] : '#',
             ];
             $this->pageTitle = $menu['title'];
         }
@@ -100,14 +103,14 @@ class MenuCajas
                     'icon' => $menu['icon'] ?? null,
                     'title' => $menu['title'] ?? '',
                     'is_active' => false,
-                    'url' => ($menu['default_url']) ? $this->path.'/'.$menu['default_url'] : '#',
+                    'url' => ($menu['default_url']) ? $this->path . '/' . $menu['default_url'] : '#',
                 ];
                 // Agregar breadcrumb del hijo como activo
                 $this->breadcrumbs[] = [
                     'icon' => $child['icon'] ?? null,
                     'title' => $child['title'] ?? '',
                     'is_active' => true,
-                    'url' => ($child['default_url']) ? $this->path.'/'.$child['default_url'] : '#',
+                    'url' => ($child['default_url']) ? $this->path . '/' . $child['default_url'] : '#',
                 ];
                 $this->pageTitle = $menu['title'];
             }
@@ -139,7 +142,7 @@ class MenuCajas
 
         return "
             <li class='nav-item'>
-                <a data-id='{$title}' href='{$this->path}/".$child['default_url']."'
+                <a data-id='{$title}' href='{$this->path}/" . $child['default_url'] . "'
                    class='nav-link {$activeClass}'>
                     {$child['title']}
                 </a>
@@ -152,7 +155,7 @@ class MenuCajas
 
         return "
             <li class='nav-item'>
-                <a class='nav-link {$activeClass}' href='{$this->path}/".$menu['default_url']."'>
+                <a class='nav-link {$activeClass}' href='{$this->path}/" . $menu['default_url'] . "'>
                     {$icon}
                     {$linkText}
                 </a>

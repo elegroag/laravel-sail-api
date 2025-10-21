@@ -47,7 +47,7 @@ class TrabajadorController extends ApplicationController
     /**
      * GET /mercurio/trabajador/index
      */
-    public function indexAction()
+    public function index()
     {
         if ($this->tipo !== 'E') {
             return redirect()->route('mercurio.index');
@@ -131,7 +131,7 @@ class TrabajadorController extends ApplicationController
     /**
      * POST /trabajador/borrar_archivo
      */
-    public function borrarArchivoAction(Request $request)
+    public function borrarArchivo(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -139,7 +139,7 @@ class TrabajadorController extends ApplicationController
             $coddoc = $this->clp($request, 'coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
+            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -166,7 +166,7 @@ class TrabajadorController extends ApplicationController
     /**
      * POST /trabajador/guardar_archivo
      */
-    public function guardarArchivoAction(Request $request)
+    public function guardarArchivo(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -244,7 +244,7 @@ class TrabajadorController extends ApplicationController
     /**
      * POST /trabajador/enviar_caja
      */
-    public function enviarCajaAction(Request $request)
+    public function enviarCaja(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -264,7 +264,7 @@ class TrabajadorController extends ApplicationController
     /**
      * GET /trabajador/seguimiento/{id}
      */
-    public function seguimientoAction($id)
+    public function seguimiento($id)
     {
         $this->setResponse('ajax');
         try {
@@ -278,7 +278,7 @@ class TrabajadorController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function paramsAction()
+    public function params()
     {
         $this->setResponse('ajax');
 
@@ -353,7 +353,7 @@ class TrabajadorController extends ApplicationController
                         continue;
                     }
                     if (isset($codciu[$data['codzon']])) {
-                        $codsuc["{$data['codsuc']}"] = $data['detalle'].' - DE '.$codciu[$data['codzon']];
+                        $codsuc["{$data['codsuc']}"] = $data['detalle'] . ' - DE ' . $codciu[$data['codzon']];
                     } else {
                         $codsuc["{$data['codsuc']}"] = $data['detalle'];
                     }
@@ -416,7 +416,7 @@ class TrabajadorController extends ApplicationController
     }
 
     /**
-     * renderTableAction function
+     * renderTable function
      *
      * @changed [2023-12-00]
      *
@@ -425,7 +425,7 @@ class TrabajadorController extends ApplicationController
      * @param  string  $estado
      * @return string
      */
-    public function renderTableAction($estado = '')
+    public function renderTable($estado = '')
     {
         $this->setResponse('view');
         $trabajadorService = new TrabajadorService;
@@ -440,7 +440,7 @@ class TrabajadorController extends ApplicationController
         return $this->renderText($html);
     }
 
-    public function searchRequestAction($id)
+    public function searchRequest($id)
     {
         $this->setResponse('ajax');
         try {
@@ -477,7 +477,7 @@ class TrabajadorController extends ApplicationController
     }
 
     /**
-     * guardarAction function
+     * guardar function
      *
      * @changed [2024-03-10]
      *
@@ -485,7 +485,7 @@ class TrabajadorController extends ApplicationController
      *
      * @return void
      */
-    public function guardarAction(Request $request)
+    public function guardar(Request $request)
     {
         $this->setResponse('ajax');
         $trabajadorService = new TrabajadorService;
@@ -610,7 +610,7 @@ class TrabajadorController extends ApplicationController
         ];
     }
 
-    public function consultaDocumentosAction($id)
+    public function consultaDocumentos($id)
     {
         $this->setResponse('ajax');
         try {
@@ -642,7 +642,7 @@ class TrabajadorController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function borrarAction(Request $request, Response $response, $id)
+    public function borrar(Request $request, Response $response, $id)
     {
         $this->setResponse('ajax');
         $generales = new GeneralService;
@@ -679,7 +679,7 @@ class TrabajadorController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    public function validaAction(Request $request)
+    public function valida(Request $request)
     {
         $this->setResponse('ajax');
         try {

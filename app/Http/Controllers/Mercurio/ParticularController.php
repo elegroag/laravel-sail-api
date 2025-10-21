@@ -26,7 +26,7 @@ class ParticularController extends ApplicationController
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    public function indexAction()
+    public function index()
     {
         return view('mercurio/particular/index', [
             'title' => 'Subsidio Empresa',

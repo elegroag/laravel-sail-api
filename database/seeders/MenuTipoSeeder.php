@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\MenuItem;
+use App\Models\MenuTipo;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -852,11 +852,11 @@ class MenuTipoSeeder extends Seeder
             ];
 
             foreach ($menu_mercurio as $item1) {
-                MenuItem::create($item1);
+                MenuTipo::create($item1);
             }
 
             foreach ($menu_caja as $item2) {
-                MenuItem::create($item2);
+                MenuTipo::create($item2);
             }
         });
     }

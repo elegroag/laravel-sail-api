@@ -62,12 +62,12 @@ class IndependienteController extends ApplicationController
     }
 
     /**
-     * indexAction function
+     * indexfunction
      *
      * @param  string  $estado
      * @return void
      */
-    public function indexAction()
+    public function index()
     {
         return view('mercurio/independiente/index', [
             'title' => 'Afiliación Independientes',
@@ -78,7 +78,7 @@ class IndependienteController extends ApplicationController
         ]);
     }
 
-    public function renderTableAction(Request $request, Response $response, string $estado = '')
+    public function renderTable(Request $request, Response $response, string $estado = '')
     {
         $this->setResponse('view');
 
@@ -120,7 +120,7 @@ class IndependienteController extends ApplicationController
     }
 
     /**
-     * guardarAction function
+     * guardar function
      *
      * @changed [2023-12-01]
      *
@@ -128,7 +128,7 @@ class IndependienteController extends ApplicationController
      *
      * @return void
      */
-    public function guardarAction(Request $request)
+    public function guardar(Request $request)
     {
         $this->setResponse('ajax');
         $this->db->begin();
@@ -356,11 +356,11 @@ class IndependienteController extends ApplicationController
     }
 
     /**
-     * borrarArchivoAction function
+     * borrarArchivo function
      *
      * @return void
      */
-    public function borrarArchivoAction(Request $request)
+    public function borrarArchivo(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -368,7 +368,7 @@ class IndependienteController extends ApplicationController
             $coddoc = $this->clp($request, 'coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
+            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -393,11 +393,11 @@ class IndependienteController extends ApplicationController
     }
 
     /**
-     * guardarArchivoAction function
+     * guardarArchivo function
      *
      * @return void
      */
-    public function guardarArchivoAction(Request $request)
+    public function guardarArchivo(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -428,11 +428,11 @@ class IndependienteController extends ApplicationController
     }
 
     /**
-     * enviarCajaAction function
+     * enviarCaja function
      *
      * @return void
      */
-    public function enviarCajaAction(Request $request)
+    public function enviarCaja(Request $request)
     {
         $this->setResponse('ajax');
         try {
@@ -461,12 +461,12 @@ class IndependienteController extends ApplicationController
     }
 
     /**
-     * formularioAction function
+     * formulario function
      *
      * @param [type] $id
      * @return void
      */
-    public function formularioAction($id)
+    public function formulario($id)
     {
         $this->setResponse('ajax');
         try {
@@ -497,7 +497,7 @@ class IndependienteController extends ApplicationController
             $salida = [
                 'success' => true,
                 'name' => $file,
-                'url' => 'independinte/downloadFile/'.$file,
+                'url' => 'independinte/downloadFile/' . $file,
             ];
         } catch (DebugException $e) {
             $salida = [
@@ -509,7 +509,7 @@ class IndependienteController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function seguimientoAction(Request $request, Response $response, int $id)
+    public function seguimiento(Request $request, Response $response, int $id)
     {
         $this->setResponse('ajax');
         try {
@@ -529,7 +529,7 @@ class IndependienteController extends ApplicationController
     public function downloadFileAction($archivo = '')
     {
         $this->setResponse('view');
-        $fichero = 'public/temp/'.$archivo;
+        $fichero = 'public/temp/' . $archivo;
 
         return $this->renderFile($fichero);
     }
@@ -564,7 +564,7 @@ class IndependienteController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function paramsAction()
+    public function params()
     {
         $this->setResponse('ajax');
         try {
@@ -672,7 +672,7 @@ class IndependienteController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function searchRequestAction(Request $request, Response $response, int $id)
+    public function searchRequest(Request $request, Response $response, int $id)
     {
         $this->setResponse('ajax');
         try {
@@ -707,7 +707,7 @@ class IndependienteController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function consultaDocumentosAction(Request $request, Response $response, int $id)
+    public function consultaDocumentos(Request $request, Response $response, int $id)
     {
         $this->setResponse('ajax');
         try {
@@ -744,7 +744,7 @@ class IndependienteController extends ApplicationController
     public function cartaSolicitudAction($archivo = '')
     {
         $this->setResponse('view');
-        $fichero = 'public/docs/formulario_mercurio/'.$archivo;
+        $fichero = 'public/docs/formulario_mercurio/' . $archivo;
 
         return $this->renderFile($fichero);
     }
@@ -752,12 +752,12 @@ class IndependienteController extends ApplicationController
     public function tratamientoDatosAction($archivo = '')
     {
         $this->setResponse('view');
-        $fichero = 'public/docs/formulario_mercurio/'.$archivo;
+        $fichero = 'public/docs/formulario_mercurio/' . $archivo;
 
         return $this->renderFile($fichero);
     }
 
-    public function borrarAction(Request $request)
+    public function borrar(Request $request)
     {
         $this->setResponse('ajax');
         $generales = new GeneralService;
@@ -805,7 +805,7 @@ class IndependienteController extends ApplicationController
                     'tipo' => 'I',
                     'coddoc' => $solicitud->getTipdoc(),
                     'documento' => $solicitud->getCedtra(),
-                    'usuario' => $solicitud->getPriape().' '.$solicitud->getSegape().' '.$solicitud->getPrinom().' '.$solicitud->getSegnom(),
+                    'usuario' => $solicitud->getPriape() . ' ' . $solicitud->getSegape() . ' ' . $solicitud->getPrinom() . ' ' . $solicitud->getSegnom(),
                 ]
             );
 
