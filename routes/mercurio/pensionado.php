@@ -11,28 +11,28 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
             return redirect()->route('pensionado.index');
         });
 
-        Route::get('/index', [PensionadoController::class, 'indexAction'])->name('pensionado.index');
-        Route::post('/buscar_empresa', [PensionadoController::class, 'buscarEmpresaAction']);
-        Route::post('/guardar', [PensionadoController::class, 'guardarAction']);
-        Route::post('/borrar_archivo', [PensionadoController::class, 'borrarArchivoAction']);
-        Route::post('/guardar_archivo', [PensionadoController::class, 'guardarArchivoAction']);
-        Route::post('/enviar_caja', [PensionadoController::class, 'enviarCajaAction']);
-        Route::post('/seguimiento/{id}', [PensionadoController::class, 'seguimientoAction']);
-        Route::post('/params', [PensionadoController::class, 'paramsAction']);
-        Route::get('/download_temp/{archivo}', [PensionadoController::class, 'downloadFileAction']);
-        Route::get('/download_docs/{archivo}', [PensionadoController::class, 'downloadDocsAction']);
+        Route::get('/index', [PensionadoController::class, 'index'])->name('pensionado.index');
+        Route::post('/buscar_empresa', [PensionadoController::class, 'buscarEmpresa']);
+        Route::post('/guardar', [PensionadoController::class, 'guardar']);
+        Route::post('/borrar_archivo', [PensionadoController::class, 'borrarArchivo']);
+        Route::post('/guardar_archivo', [PensionadoController::class, 'guardarArchivo']);
+        Route::post('/enviar_caja', [PensionadoController::class, 'enviarCaja']);
+        Route::post('/seguimiento/{id}', [PensionadoController::class, 'seguimiento']);
+        Route::post('/params', [PensionadoController::class, 'params']);
+        Route::get('/download_temp/{archivo}', [PensionadoController::class, 'downloadFile']);
+        Route::get('/download_docs/{archivo}', [PensionadoController::class, 'downloadDocs']);
 
-        Route::post('/search_request/{id}', [PensionadoController::class, 'searchRequestAction']);
-        Route::post('/consulta_documentos/{id}', [PensionadoController::class, 'consultaDocumentosAction']);
+        Route::post('/search_request/{id}', [PensionadoController::class, 'searchRequest']);
+        Route::post('/consulta_documentos/{id}', [PensionadoController::class, 'consultaDocumentos']);
 
-        Route::post('/borrar', [PensionadoController::class, 'borrarAction']);
-        Route::post('/borrar/{id}', [PensionadoController::class, 'borrarAction']);
-        Route::post('/params', [PensionadoController::class, 'paramsAction']);
+        Route::post('/borrar', [PensionadoController::class, 'borrar']);
+        Route::post('/borrar/{id}', [PensionadoController::class, 'borrar']);
+        Route::post('/params', [PensionadoController::class, 'params']);
 
-        Route::post('/render_table', [PensionadoController::class, 'renderTableAction']);
-        Route::post('/render_table/{estado}', [PensionadoController::class, 'renderTableAction']);
+        Route::post('/render_table', [PensionadoController::class, 'renderTable']);
+        Route::post('/render_table/{estado}', [PensionadoController::class, 'renderTable']);
 
-        Route::post('/valida', [PensionadoController::class, 'validaAction']);
-        Route::post('/digito_verification', [PensionadoController::class, 'digitoVerificationAction']);
+        Route::post('/valida', [PensionadoController::class, 'valida']);
+        Route::post('/digito_verification', [PensionadoController::class, 'digitoVerification']);
     });
 });

@@ -9,9 +9,9 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
         Route::get('/', function () {
             return redirect()->route('usuario.index');
         });
-        Route::get('/index', [UsuarioController::class, 'indexAction'])->name('usuario.index');
-        Route::post('/show_perfil', [UsuarioController::class, 'showPerfilAction']);
-        Route::post('/params', [UsuarioController::class, 'paramsAction']);
-        Route::post('/guardar', [UsuarioController::class, 'guardarAction']);
+        Route::get('/index', [UsuarioController::class, 'index'])->name('usuario.index');
+        Route::post('/show_perfil', [UsuarioController::class, 'showPerfil']);
+        Route::post('/params', [UsuarioController::class, 'params']);
+        Route::post('/guardar', [UsuarioController::class, 'guardar']);
     });
 });

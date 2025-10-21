@@ -10,8 +10,8 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
         Route::get('/', function () {
             return redirect()->route('firmas.index');
         });
-        Route::get('/index', [FirmasController::class, 'indexAction'])->name('firmas.index');
-        Route::post('/guardar', [FirmasController::class, 'guardarAction'])->name('firmas.guardar');
-        Route::get('/show', [FirmasController::class, 'showAction'])->name('firmas.show');
+        Route::get('/index', [FirmasController::class, 'index'])->name('firmas.index');
+        Route::post('/guardar', [FirmasController::class, 'guardar'])->name('firmas.guardar');
+        Route::get('/show', [FirmasController::class, 'show'])->name('firmas.show');
     });
 });

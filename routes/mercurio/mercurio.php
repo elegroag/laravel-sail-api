@@ -19,25 +19,25 @@ Route::post('/web/load_session', [AuthController::class, 'loadSession'])->name('
 Route::post('/web/salir', [AuthController::class, 'logoutAction'])->name('login.salir');
 Route::get('/web/salir', [AuthController::class, 'logoutAction'])->name('logout');
 
-Route::post('/mercurio/recuperar_clave', [LoginController::class, 'recuperarClaveAction']);
-Route::post('/mercurio/registro', [LoginController::class, 'registroAction']);
-Route::post('/mercurio/paramsLogin', [LoginController::class, 'paramsLoginAction']);
+Route::post('/mercurio/recuperar_clave', [LoginController::class, 'recuperarClave']);
+Route::post('/mercurio/registro', [LoginController::class, 'registro']);
+Route::post('/mercurio/paramsLogin', [LoginController::class, 'paramsLogin']);
 
-Route::get('/mercurio/show_registro', [LoginController::class, 'showRegisterAction'])->name('mercurio.register');
-Route::get('/mercurio/fuera_servicio', [LoginController::class, 'fueraServicioAction']);
+Route::get('/mercurio/show_registro', [LoginController::class, 'showRegister'])->name('mercurio.register');
+Route::get('/mercurio/fuera_servicio', [LoginController::class, 'fueraServicio']);
 
-Route::post('/mercurio/tokenParticular', [LoginController::class, 'tokenParticularAction']);
-Route::post('/mercurio/cambio_correo', [LoginController::class, 'cambioCorreoAction']);
+Route::post('/mercurio/tokenParticular', [LoginController::class, 'tokenParticular']);
+Route::post('/mercurio/cambio_correo', [LoginController::class, 'cambioCorreo']);
 
-Route::post('/mercurio/valida_email', [LoginController::class, 'validaEmailAction']);
-Route::get('/mercurio/integracion_servicio', [LoginController::class, 'integracionServicioAction']);
-Route::post('/mercurio/download_docs/{archivo}', [LoginController::class, 'downloadDocumentsAction']);
-Route::post('/mercurio/documentos/ver-pdf', [LoginController::class, 'showPdfAction'])->name('documentos.ver-pdf');
-Route::post('mercurio/principal/ingreso_dirigido', [PrincipalController::class, 'ingresoDirigidoAction']);
+Route::post('/mercurio/valida_email', [LoginController::class, 'validaEmail']);
+Route::get('/mercurio/integracion_servicio', [LoginController::class, 'integracionServicio']);
+Route::post('/mercurio/download_docs/{archivo}', [LoginController::class, 'downloadDocuments']);
+Route::post('/mercurio/documentos/ver-pdf', [LoginController::class, 'showPdf'])->name('documentos.ver-pdf');
+Route::post('mercurio/principal/ingreso_dirigido', [PrincipalController::class, 'ingresoDirigido']);
 
 // Movimientos
 Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
-    Route::get('/mercurio/notificaciones/index', [NotificacionesController::class, 'indexAction'])->name('mercurio.notificaciones.index');
-    Route::post('/mercurio/notificaciones/procesar_notificacion', [NotificacionesController::class, 'procesarNotificacionAction']);
-    Route::get('/mercurio/particular/historial', [ParticularController::class, 'historialAction'])->name('particular.historial');
+    Route::get('/mercurio/notificaciones/index', [NotificacionesController::class, 'index'])->name('mercurio.notificaciones.index');
+    Route::post('/mercurio/notificaciones/procesar_notificacion', [NotificacionesController::class, 'procesarNotificacion']);
+    Route::get('/mercurio/particular/historial', [ParticularController::class, 'historial'])->name('particular.historial');
 });

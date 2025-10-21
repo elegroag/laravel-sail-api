@@ -10,25 +10,25 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
         Route::get('/', function () {
             return redirect()->route('beneficiario.index');
         });
-        Route::get('/index', [BeneficiarioController::class, 'indexAction'])->name('beneficiario.index');
-        Route::post('/buscar_trabajador', [BeneficiarioController::class, 'buscarTrabajadorAction']);
-        Route::post('/guardar', [BeneficiarioController::class, 'guardarAction']);
-        Route::post('/borrar_archivo', [BeneficiarioController::class, 'borrarArchivoAction']);
-        Route::post('/guardar_archivo', [BeneficiarioController::class, 'guardarArchivoAction']);
-        Route::get('/archivos_requeridos/{id}', [BeneficiarioController::class, 'archivosRequeridosAction']);
-        Route::post('/enviar_caja', [BeneficiarioController::class, 'enviarCajaAction']);
-        Route::get('/seguimiento/{id}', [BeneficiarioController::class, 'seguimientoAction']);
+        Route::get('/index', [BeneficiarioController::class, 'index'])->name('beneficiario.index');
+        Route::post('/buscar_trabajador', [BeneficiarioController::class, 'buscarTrabajador']);
+        Route::post('/guardar', [BeneficiarioController::class, 'guardar']);
+        Route::post('/borrar_archivo', [BeneficiarioController::class, 'borrarArchivo']);
+        Route::post('/guardar_archivo', [BeneficiarioController::class, 'guardarArchivo']);
+        Route::get('/archivos_requeridos/{id}', [BeneficiarioController::class, 'archivosRequeridos']);
+        Route::post('/enviar_caja', [BeneficiarioController::class, 'enviarCaja']);
+        Route::get('/seguimiento/{id}', [BeneficiarioController::class, 'seguimiento']);
 
-        Route::post('/params', [BeneficiarioController::class, 'paramsAction']);
-        Route::post('/render_table', [BeneficiarioController::class, 'renderTableAction']);
-        Route::post('/render_table/{estado}', [BeneficiarioController::class, 'renderTableAction']);
-        Route::post('/search_request/{id}', [BeneficiarioController::class, 'searchRequestAction']);
-        Route::post('/consulta_documentos/{id}', [BeneficiarioController::class, 'consultaDocumentosAction']);
-        Route::post('/valida', [BeneficiarioController::class, 'validaAction']);
+        Route::post('/params', [BeneficiarioController::class, 'params']);
+        Route::post('/render_table', [BeneficiarioController::class, 'renderTable']);
+        Route::post('/render_table/{estado}', [BeneficiarioController::class, 'renderTable']);
+        Route::post('/search_request/{id}', [BeneficiarioController::class, 'searchRequest']);
+        Route::post('/consulta_documentos/{id}', [BeneficiarioController::class, 'consultaDocumentos']);
+        Route::post('/valida', [BeneficiarioController::class, 'valida']);
 
-        Route::get('/download_temp/{archivo}', [BeneficiarioController::class, 'downloadFileAction']);
-        Route::get('/download_docs/{archivo}', [BeneficiarioController::class, 'downloadDocsAction']);
-        Route::post('/borrar', [BeneficiarioController::class, 'borrarAction']);
-        Route::post('/borrar/{id}', [BeneficiarioController::class, 'borrarAction']);
+        Route::get('/download_temp/{archivo}', [BeneficiarioController::class, 'downloadFile']);
+        Route::get('/download_docs/{archivo}', [BeneficiarioController::class, 'downloadDocs']);
+        Route::post('/borrar', [BeneficiarioController::class, 'borrar']);
+        Route::post('/borrar/{id}', [BeneficiarioController::class, 'borrar']);
     });
 });

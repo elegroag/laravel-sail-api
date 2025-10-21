@@ -10,28 +10,28 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
         Route::get('/', function () {
             return redirect()->route('facultativo.index');
         });
-        Route::get('/index', [FacultativoController::class, 'indexAction'])->name('facultativo.index');
-        Route::post('/buscar_empresa', [FacultativoController::class, 'buscarEmpresaAction']);
-        Route::post('/guardar', [FacultativoController::class, 'guardarAction']);
-        Route::post('/borrar_archivo', [FacultativoController::class, 'borrarArchivoAction']);
-        Route::post('/guardar_archivo', [FacultativoController::class, 'guardarArchivoAction']);
-        Route::post('/archivos_requeridos/{id}', [FacultativoController::class, 'archivosRequeridosAction']);
-        Route::post('/enviar_caja', [FacultativoController::class, 'enviarCajaAction']);
-        Route::post('/seguimiento/{id}', [FacultativoController::class, 'seguimientoAction']);
-        Route::post('/params', [FacultativoController::class, 'paramsAction']);
-        Route::get('/download_temp/{archivo}', [FacultativoController::class, 'downloadFileAction']);
-        Route::get('/download_docs/{archivo}', [FacultativoController::class, 'downloadDocsAction']);
+        Route::get('/index', [FacultativoController::class, 'index'])->name('facultativo.index');
+        Route::post('/buscar_empresa', [FacultativoController::class, 'buscarEmpresa']);
+        Route::post('/guardar', [FacultativoController::class, 'guardar']);
+        Route::post('/borrar_archivo', [FacultativoController::class, 'borrarArchivo']);
+        Route::post('/guardar_archivo', [FacultativoController::class, 'guardarArchivo']);
+        Route::post('/archivos_requeridos/{id}', [FacultativoController::class, 'archivosRequeridos']);
+        Route::post('/enviar_caja', [FacultativoController::class, 'enviarCaja']);
+        Route::post('/seguimiento/{id}', [FacultativoController::class, 'seguimiento']);
+        Route::post('/params', [FacultativoController::class, 'params']);
+        Route::get('/download_temp/{archivo}', [FacultativoController::class, 'downloadFile']);
+        Route::get('/download_docs/{archivo}', [FacultativoController::class, 'downloadDocs']);
 
-        Route::post('/search_request/{id}', [FacultativoController::class, 'searchRequestAction']);
-        Route::post('/consulta_documentos/{id}', [FacultativoController::class, 'consultaDocumentosAction']);
-        Route::post('/borrar', [FacultativoController::class, 'borrarAction']);
-        Route::post('/borrar/{id}', [FacultativoController::class, 'borrarAction']);
+        Route::post('/search_request/{id}', [FacultativoController::class, 'searchRequest']);
+        Route::post('/consulta_documentos/{id}', [FacultativoController::class, 'consultaDocumentos']);
+        Route::post('/borrar', [FacultativoController::class, 'borrar']);
+        Route::post('/borrar/{id}', [FacultativoController::class, 'borrar']);
 
-        Route::post('/params', [FacultativoController::class, 'paramsAction']);
-        Route::post('/render_table', [FacultativoController::class, 'renderTableAction']);
-        Route::post('/render_table/{estado}', [FacultativoController::class, 'renderTableAction']);
+        Route::post('/params', [FacultativoController::class, 'params']);
+        Route::post('/render_table', [FacultativoController::class, 'renderTable']);
+        Route::post('/render_table/{estado}', [FacultativoController::class, 'renderTable']);
 
-        Route::post('/valida', [FacultativoController::class, 'validaAction']);
-        Route::post('/digito_verification', [FacultativoController::class, 'digitoVerificationAction']);
+        Route::post('/valida', [FacultativoController::class, 'valida']);
+        Route::post('/digito_verification', [FacultativoController::class, 'digitoVerification']);
     });
 });

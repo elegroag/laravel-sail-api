@@ -10,26 +10,26 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
         Route::get('/', function () {
             return redirect()->route('independiente.index');
         });
-        Route::get('/index', [IndependienteController::class, 'indexAction'])->name('independiente.index');
-        Route::post('/buscar_empresa', [IndependienteController::class, 'buscarEmpresaAction']);
-        Route::post('/guardar', [IndependienteController::class, 'guardarAction']);
-        Route::post('/borrar_archivo', [IndependienteController::class, 'borrarArchivoAction']);
-        Route::post('/guardar_archivo', [IndependienteController::class, 'guardarArchivoAction']);
-        Route::post('/archivos_requeridos/{id}', [IndependienteController::class, 'archivosRequeridosAction']);
-        Route::post('/enviar_caja', [IndependienteController::class, 'enviarCajaAction']);
-        Route::post('/seguimiento/{id}', [IndependienteController::class, 'seguimientoAction']);
-        Route::post('/params', [IndependienteController::class, 'paramsAction']);
-        Route::get('/download_temp/{archivo}', [IndependienteController::class, 'downloadFileAction']);
-        Route::get('/download_docs/{archivo}', [IndependienteController::class, 'downloadDocsAction']);
+        Route::get('/index', [IndependienteController::class, 'index'])->name('independiente.index');
+        Route::post('/buscar_empresa', [IndependienteController::class, 'buscarEmpresa']);
+        Route::post('/guardar', [IndependienteController::class, 'guardar']);
+        Route::post('/borrar_archivo', [IndependienteController::class, 'borrarArchivo']);
+        Route::post('/guardar_archivo', [IndependienteController::class, 'guardarArchivo']);
+        Route::post('/archivos_requeridos/{id}', [IndependienteController::class, 'archivosRequeridos']);
+        Route::post('/enviar_caja', [IndependienteController::class, 'enviarCaja']);
+        Route::post('/seguimiento/{id}', [IndependienteController::class, 'seguimiento']);
+        Route::post('/params', [IndependienteController::class, 'params']);
+        Route::get('/download_temp/{archivo}', [IndependienteController::class, 'downloadFile']);
+        Route::get('/download_docs/{archivo}', [IndependienteController::class, 'downloadDocs']);
 
-        Route::post('/search_request/{id}', [IndependienteController::class, 'searchRequestAction']);
-        Route::post('/consulta_documentos/{id}', [IndependienteController::class, 'consultaDocumentosAction']);
-        Route::post('/borrar', [IndependienteController::class, 'borrarAction']);
-        Route::post('/params', [IndependienteController::class, 'paramsAction']);
-        Route::post('/render_table', [IndependienteController::class, 'renderTableAction']);
-        Route::post('/render_table/{estado}', [IndependienteController::class, 'renderTableAction']);
+        Route::post('/search_request/{id}', [IndependienteController::class, 'searchRequest']);
+        Route::post('/consulta_documentos/{id}', [IndependienteController::class, 'consultaDocumentos']);
+        Route::post('/borrar', [IndependienteController::class, 'borrar']);
+        Route::post('/params', [IndependienteController::class, 'params']);
+        Route::post('/render_table', [IndependienteController::class, 'renderTable']);
+        Route::post('/render_table/{estado}', [IndependienteController::class, 'renderTable']);
 
-        Route::post('/valida', [IndependienteController::class, 'validaAction']);
-        Route::post('/digito_verification', [IndependienteController::class, 'digitoVerificationAction']);
+        Route::post('/valida', [IndependienteController::class, 'valida']);
+        Route::post('/digito_verification', [IndependienteController::class, 'digitoVerification']);
     });
 });
