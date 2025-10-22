@@ -16,6 +16,8 @@ class MenuCajas
 
     private $codapl;
 
+    private $tipfun;
+
     private $pageTitle;
 
     private $path;
@@ -24,6 +26,7 @@ class MenuCajas
     {
         $this->codapl = $codapl;
         $this->db = DbBase::rawConnect();
+        $this->tipfun = session('tipfun');
         $this->initialize();
     }
 
@@ -38,6 +41,8 @@ class MenuCajas
         $query = "SELECT menu_items.*, menu_tipos.tipo, menu_tipos.is_visible, menu_tipos.position 
         FROM menu_items 
         INNER JOIN menu_tipos ON menu_tipos.menu_item = menu_items.id
+        INNER JOIN menu_permissions mp ON mp.menu_item = menu_items.id AND 
+        mp.tipfun = '{$this->tipfun}' AND mp.can_view = 1
         WHERE 
         menu_items.codapl='{$this->codapl}' AND 
         menu_tipos.is_visible = TRUE

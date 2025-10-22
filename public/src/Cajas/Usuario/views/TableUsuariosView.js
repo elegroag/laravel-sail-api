@@ -9,7 +9,7 @@ class TableUsuariosView extends Backbone.View {
 	beforeRender() {
 		this.filtro = new FiltroView();
 		this.listenTo(this.filtro, 'change:filtro', this.__applyFiltro);
-		this.$el.find('#filtro').html(this.filtro.render().el);
+		$('#filtroData').html(this.filtro.render().el);
 		this.__applyFiltro();
 	}
 

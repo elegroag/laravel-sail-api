@@ -43,23 +43,11 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-dark dropdown-menu-lg dropdown-menu-end bg-default">
                         <div class="row shortcuts px-4">
-                            <a href="{{ route('movimientos.historial') }}" class="col-4 shortcut-item text-decoration-none">
+                            <a href="#!" class="col-4 shortcut-item text-decoration-none">
                                 <span class="shortcut-media avatar rounded-circle bg-gradient-red d-flex align-items-center justify-content-center">
                                     <i class="ni ni-book-bookmark"></i>
                                 </span>
                                 <small class="d-block text-center mt-1">Historial</small>
-                            </a>
-                            <a href="{{ route('movimientos.cambio_email_view') }}" class="col-4 shortcut-item text-decoration-none">
-                                <span class="shortcut-media avatar rounded-circle bg-gradient-orange d-flex align-items-center justify-content-center">
-                                    <i class="ni ni-email-83"></i>
-                                </span>
-                                <small class="d-block text-center mt-1">Email</small>
-                            </a>
-                            <a href="{{ route('movimientos.cambio_clave_view') }}" class="col-4 shortcut-item text-decoration-none">
-                                <span class="shortcut-media avatar rounded-circle bg-gradient-info d-flex align-items-center justify-content-center">
-                                    <i class="ni ni-key-25"></i>
-                                </span>
-                                <small class="d-block text-center mt-1">Contraseña</small>
                             </a>
                         </div>
                     </div>

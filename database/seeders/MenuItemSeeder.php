@@ -426,7 +426,7 @@ class MenuItemSeeder extends Seeder
                     'nota' => 'texto',
                     'parent_id' => '7',
                     'codapl' => 'CA',
-                    'controller' => 'ConsultasController',
+                    'controller' => 'ConsultaController',
                     'action' => 'index',
                 ],
                 [
@@ -450,7 +450,7 @@ class MenuItemSeeder extends Seeder
                     'nota' => 'texto',
                     'parent_id' => '7',
                     'codapl' => 'CA',
-                    'controller' => 'ConsultasController',
+                    'controller' => 'ConsultaController',
                     'action' => 'carga_laboral',
                 ],
                 [
@@ -462,7 +462,7 @@ class MenuItemSeeder extends Seeder
                     'nota' => 'texto',
                     'parent_id' => '7',
                     'codapl' => 'CA',
-                    'controller' => 'ConsultasController',
+                    'controller' => 'ConsultaController',
                     'action' => 'indicadores',
                 ],
                 [

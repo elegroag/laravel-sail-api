@@ -58,11 +58,11 @@ class UsuarioController extends Controller
             'tipo' => 'Tipo usuario',
             'email' => 'Email',
         ];
-
         return view('cajas.usuario.index', [
             'campo_filtro' => $campo_field,
             'filters' => get_flashdata_item('filter_params'),
             'title' => 'Perfil usuario',
+            'mercurio11' => [],
         ]);
     }
 

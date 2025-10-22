@@ -6,6 +6,8 @@
 @endpush
 
 @push('scripts')
+    <div id='filtroData'></div>
+    
     <script id='tmp_filtro' type="text/template">
         @include('cajas/templates/tmp_filtro', ['campo_filtro' => $campo_filtro])
     </script>
@@ -22,7 +24,6 @@
         <div  class='table-excel-wrapper' id='consulta'></div>
         <div class='mt-3' id='paginate'></div>
         <div><p>Total de registros: <span id='total_registros'></span> consultados.</p></div>
-        <div id='filtro'></div>
     </script>
 
     <script type="text/template" id='tmp_detalle'>
@@ -46,5 +47,5 @@
 @endpush
 
 @section('content')
-<div id='boneLayout'></div>
+    <div id='boneLayout'></div>
 @endsection

@@ -39,6 +39,24 @@ class CajasCookieAuthenticated
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
+                    'message' => 'No autorizado para acceder al modulo. ' . $this->controller,
+                ], 401);
+            }
+
+            /*
+            d($this->controller);
+            d($this->actionMethod);
+            d($this->application);
+            exit; */
+            if (!($this->controller == 'PrincipalController' && $this->actionMethod == 'index')) {
+                return redirect('cajas/principal/index');
+            }
+        }
+
+        if ($this->validOption($request) === false) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
                     'message' => 'No autorizado para acceder a la acción. ' . $this->controller . ' ' . $this->actionMethod,
                 ], 401);
             }
@@ -108,7 +126,20 @@ class CajasCookieAuthenticated
         if (!$hasPermission->exists()) {
             return false; // No autorizado
         }
-        $request->attributes->set('opciones', json_decode($hasPermission->first()->opciones));
+        $request->attributes->set('opciones', json_decode($hasPermission->first()->opciones), true);
         return true; // Autorizado
+    }
+
+    public function validOption(Request $request)
+    {
+        $opciones = $request->attributes->get('opciones');
+        if (is_array($opciones)) {
+            if (key_exists(strtolower($this->actionMethod), $opciones)) {
+                if ($opciones[strtolower($this->actionMethod)] == false) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
