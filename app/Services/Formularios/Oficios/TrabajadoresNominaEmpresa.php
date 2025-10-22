@@ -72,9 +72,9 @@ class TrabajadoresNominaEmpresa extends Documento
         $this->pdf->Ln();
 
         $this->pdf->SetFont('helvetica', '', 12);
-        $this->pdf->Write(0, 'Yo '.capitalize($this->empresa->getRepleg()).'. Identificado con '.
-            $this->empresa->getCoddocrepleg().' número '.$this->empresa->getCedrep().'. Representante Legal de la empresa '.capitalize($this->empresa->getRazsoc()).
-            '. Con NIT '.$this->empresa->getNit().
+        $this->pdf->Write(0, 'Yo ' . capitalize($this->empresa->getRepleg()) . '. Identificado con ' .
+            $this->empresa->getCoddocrepleg() . ' número ' . $this->empresa->getCedrep() . '. Representante Legal de la empresa ' . capitalize($this->empresa->getRazsoc()) .
+            '. Con NIT ' . $this->empresa->getNit() .
             '. Certifico que las personas relacionadas en este documento figuran en nomina y laboran en el Departamento del Caquetá.', '', 0, 'L', true, 0, false, false, 0);
         $this->pdf->Ln();
         $this->pdf->Ln();
@@ -112,8 +112,8 @@ class TrabajadoresNominaEmpresa extends Documento
         foreach ($this->tranoms as $tranom) {
             $tbl->add_row([
                 ['data' => $tranom->getCedtra(), 'width' => '30mm'],
-                ['data' => capitalize($tranom->getNomtra().' '.$tranom->getApetra()), 'width' => '40mm'],
-                ['data' => '$ '.number_format($tranom->getSaltra(), 0, '.', '.'), 'width' => '30mm'],
+                ['data' => capitalize($tranom->getNomtra() . ' ' . $tranom->getApetra()), 'width' => '40mm'],
+                ['data' => '$ ' . number_format($tranom->getSaltra(), 0, '.', '.'), 'width' => '30mm'],
                 ['data' => $tranom->getFectra(), 'width' => '20mm'],
                 ['data' => $tranom->getCartra(), 'width' => '70mm'],
             ]);

@@ -122,7 +122,7 @@ class EmpresaAdjuntoService
     public function trabajadoresNomina()
     {
         KumbiaPDF::setBackgroundImage(false);
-        KumbiaPDF::setFooterImage(public_path('img/firmas/sello-firma.png'));
+        KumbiaPDF::setFooterImage(false);
 
         $tranoms = Tranoms::where('request', $this->request->getId())->get();
 

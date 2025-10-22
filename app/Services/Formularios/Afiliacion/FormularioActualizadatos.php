@@ -34,6 +34,9 @@ class FormularioActualizadatos extends Documento
 
     public function bloqueEmpresa($empresa, $campos)
     {
+        $this->pdf->SetXY(148, 50);
+        $this->pdf->Cell(15, 4, 'R-UI: ' . $empresa['ruuid'], 0, 0, 'C');
+
         $_codciu = ParamsEmpresa::getCiudades();
         $_codzon = ParamsEmpresa::getZonas();
         $_coddep = ParamsEmpresa::getDepartamentos();
@@ -41,7 +44,7 @@ class FormularioActualizadatos extends Documento
         $tipos_documentos = $this->getTiposDocumentos();
         $this->pdf->setY(58);
         $this->pdf->setX(27);
-        $this->pdf->Cell(53, 6, '('.$tipos_documentos["{$empresa['coddoc']}"].') '.$empresa['nit'], 0, 0, 'L');
+        $this->pdf->Cell(53, 6, '(' . $tipos_documentos["{$empresa['coddoc']}"] . ') ' . $empresa['nit'], 0, 0, 'L');
 
         $this->pdf->setX(86);
         $this->pdf->Cell(35, 6, $empresa['digver'], 0, 0, 'L');
@@ -56,10 +59,10 @@ class FormularioActualizadatos extends Documento
 
         $this->pdf->setY(85);
         $this->pdf->setX(27);
-        $this->pdf->Cell(180, 5, @$campos['prinom'].' '.@$campos['segnom'].' '.@$campos['priape'].' '.@$campos['segape'], 0, 0, 'L');
+        $this->pdf->Cell(180, 5, @$campos['prinom'] . ' ' . @$campos['segnom'] . ' ' . @$campos['priape'] . ' ' . @$campos['segape'], 0, 0, 'L');
 
         $this->pdf->setX(152);
-        $this->pdf->Cell(60, 5, @$campos['coddocrepleg'].'. '.@$campos['cedrep'], 0, 0, 'L');
+        $this->pdf->Cell(60, 5, @$campos['coddocrepleg'] . '. ' . @$campos['cedrep'], 0, 0, 'L');
 
         // Datos de ubicación
         $this->pdf->setY(105);

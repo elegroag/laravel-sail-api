@@ -62,6 +62,9 @@ class FormularioBeneficiario extends Documento
         $this->parent = $this->beneficiario->getParent();
         $this->pdf->SetFont('helvetica', '', 8.5);
 
+        $this->pdf->SetXY(148, 50);
+        $this->pdf->Cell(15, 4, 'R-UI: ' . $this->beneficiario->ruuid, 0, 0, 'C');
+
         $this->headerForm();
         $this->dataTrabajador();
         switch ($this->parent) {
@@ -110,7 +113,7 @@ class FormularioBeneficiario extends Documento
     {
         $mtidocs = Gener18::where('coddoc', $this->trabajador->getTipdoc())->first();
         $detdoc = ($mtidocs) ? $mtidocs->getDetdoc() : 'Cedula de ciudadania';
-        $nombtra = capitalize($this->trabajador->getPrinom().' '.$this->trabajador->getSegnom().' '.$this->trabajador->getPriape().' '.$this->trabajador->getSegape());
+        $nombtra = capitalize($this->trabajador->getPrinom() . ' ' . $this->trabajador->getSegnom() . ' ' . $this->trabajador->getPriape() . ' ' . $this->trabajador->getSegape());
         $y = 65;
         $datos = [
             ['lb' => 'Adición', 'texto' => 'X', 'x' => 45, 'y' => 46],
@@ -142,7 +145,7 @@ class FormularioBeneficiario extends Documento
         $mtipoDocumentos = new Gener18;
         $mtidocs = $mtipoDocumentos->findFirst(" coddoc='{$this->beneficiario->getTipdoc()}'");
         $detdoc = ($mtidocs) ? $mtidocs->getDetdoc() : 'Cedula de Ciudadania';
-        $nombre = capitalize($this->beneficiario->getPrinom().' '.$this->beneficiario->getSegnom().' '.$this->beneficiario->getPriape().' '.$this->beneficiario->getSegape());
+        $nombre = capitalize($this->beneficiario->getPrinom() . ' ' . $this->beneficiario->getSegnom() . ' ' . $this->beneficiario->getPriape() . ' ' . $this->beneficiario->getSegape());
 
         $mparent = ParamsBeneficiario::getParentesco();
         $parentesco = $mparent[$this->beneficiario->getParent()];
@@ -191,7 +194,7 @@ class FormularioBeneficiario extends Documento
         $mtipoDocumentos = new Gener18;
         $mtidocs = $mtipoDocumentos->findFirst(" coddoc='{$this->beneficiario->getTipdoc()}'");
         $detdoc = ($mtidocs) ? $mtidocs->getDetdoc() : 'Cedula de Ciudadania';
-        $nombre = capitalize($this->beneficiario->getPrinom().' '.$this->beneficiario->getSegnom().' '.$this->beneficiario->getPriape().' '.$this->beneficiario->getSegape());
+        $nombre = capitalize($this->beneficiario->getPrinom() . ' ' . $this->beneficiario->getSegnom() . ' ' . $this->beneficiario->getPriape() . ' ' . $this->beneficiario->getSegape());
 
         $mparent = ParamsBeneficiario::getParentesco();
         $parentesco = $mparent[$this->beneficiario->getParent()];
@@ -263,9 +266,9 @@ class FormularioBeneficiario extends Documento
         } else {
             $banco = ($this->beneficiario->getCodban()) ? $mbanco[$this->beneficiario->getCodban()] : '______________';
             $nombre = strtoupper(substr(
-                $this->trabajador->getPrinom().' '.
-                    $this->trabajador->getSegnom().' '.
-                    $this->trabajador->getPriape().' '.
+                $this->trabajador->getPrinom() . ' ' .
+                    $this->trabajador->getSegnom() . ' ' .
+                    $this->trabajador->getPriape() . ' ' .
                     $this->trabajador->getSegape(),
                 0,
                 140
@@ -281,9 +284,9 @@ class FormularioBeneficiario extends Documento
         $mtippga = ParamsBeneficiario::getTipoPago();
         $tippag = ($this->beneficiario->getTippag()) ? $mtippga[$this->beneficiario->getTippag()] : '__________________';
 
-        $html = 'El trabajador '.$nombre.', con '.$detdoc.' y número '.$numerocedtra.
-            ', solicita que el pago del subsidio cuota monetaria se realice a la cuenta <b>'.$numcue.'</b> del <b>'.$banco.'</b>, '.
-            'que corresponde al medio de pago <b>'.$tippag.'</b>.';
+        $html = 'El trabajador ' . $nombre . ', con ' . $detdoc . ' y número ' . $numerocedtra .
+            ', solicita que el pago del subsidio cuota monetaria se realice a la cuenta <b>' . $numcue . '</b> del <b>' . $banco . '</b>, ' .
+            'que corresponde al medio de pago <b>' . $tippag . '</b>.';
 
         $this->pdf->MultiCell(190, 5, $html, 0, 'L', 0, 1, 10, $y, null, null, true);
     }

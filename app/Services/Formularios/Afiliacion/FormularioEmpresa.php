@@ -62,10 +62,14 @@ class FormularioEmpresa extends Documento
             $this->empresa->setCiupri($this->empresa->getCodciu());
         }
 
+        $this->pdf->SetXY(148, 50);
+        $this->pdf->Cell(15, 4, 'R-UI: ' . $this->empresa->ruuid, 0, 0, 'C');
+
         $this->pdf->SetXY(162, 43);
         $this->pdf->Cell(12, 4, $today->format('d'), 0, 0, 'C');
         $this->pdf->Cell(12, 4, $today->format('m'), 0, 0, 'C');
         $this->pdf->Cell(15, 4, $today->format('Y'), 0, 0, 'C');
+
 
         $cc = '';
         $ti = '';
@@ -95,14 +99,14 @@ class FormularioEmpresa extends Documento
         ($this->empresa->getTipemp() == 'M') ? $mixta = 'X' : '';
 
         $this->pdf->SetXY(32, 61);
-        $this->pdf->Cell(8, 5, ''.$cc, 0, 0, 'C');
-        $this->pdf->Cell(8, 5, ''.$ti, 0, 0, 'C');
-        $this->pdf->Cell(8, 5, ''.$rc, 0, 0, 'C');
-        $this->pdf->Cell(8, 5, ''.$ce, 0, 0, 'C');
-        $this->pdf->Cell(8, 5, ''.$nuip, 0, 0, 'C');
-        $this->pdf->Cell(8, 5, ''.$p, 0, 0, 'C');
-        $this->pdf->Cell(8, 5, ''.$nit, 0, 0, 'C');
-        $this->pdf->Cell(8, 5, ''.$cd, 0, 0, 'C');
+        $this->pdf->Cell(8, 5, '' . $cc, 0, 0, 'C');
+        $this->pdf->Cell(8, 5, '' . $ti, 0, 0, 'C');
+        $this->pdf->Cell(8, 5, '' . $rc, 0, 0, 'C');
+        $this->pdf->Cell(8, 5, '' . $ce, 0, 0, 'C');
+        $this->pdf->Cell(8, 5, '' . $nuip, 0, 0, 'C');
+        $this->pdf->Cell(8, 5, '' . $p, 0, 0, 'C');
+        $this->pdf->Cell(8, 5, '' . $nit, 0, 0, 'C');
+        $this->pdf->Cell(8, 5, '' . $cd, 0, 0, 'C');
         $this->pdf->Cell(90, 5, $this->empresa->getNit(), 0, 0, 'L');
         $this->pdf->Cell(15, 5, $this->empresa->getDigver(), 0, 0, 'C');
 
@@ -176,15 +180,15 @@ class FormularioEmpresa extends Documento
          */
         $this->pdf->SetY(108);
         $this->pdf->SetX(74);
-        $this->pdf->Cell(5, 5, ''.$natural, 0, 0, 'L');
+        $this->pdf->Cell(5, 5, '' . $natural, 0, 0, 'L');
         $this->pdf->SetX(100);
-        $this->pdf->Cell(5, 5, ''.$juridica, 0, 0, 'L');
+        $this->pdf->Cell(5, 5, '' . $juridica, 0, 0, 'L');
         $this->pdf->SetX(145);
-        $this->pdf->Cell(5, 5, ''.$oficial, 0, 0, 'L');
+        $this->pdf->Cell(5, 5, '' . $oficial, 0, 0, 'L');
         $this->pdf->SetX(167);
-        $this->pdf->Cell(5, 5, ''.$privada, 0, 0, 'L');
+        $this->pdf->Cell(5, 5, '' . $privada, 0, 0, 'L');
         $this->pdf->SetX(194);
-        $this->pdf->Cell(5, 5, ''.$mixta, 0, 0, 'L');
+        $this->pdf->Cell(5, 5, '' . $mixta, 0, 0, 'L');
 
         /**
          * linea x
@@ -206,14 +210,14 @@ class FormularioEmpresa extends Documento
          * linea x
          */
         $this->pdf->setXY(32, 140);
-        $this->pdf->Cell(8, 5, ''.$cc, 0, 0, 'C');
-        $this->pdf->Cell(8, 5, ''.$ti, 0, 0, 'C');
-        $this->pdf->Cell(8, 5, ''.$rc, 0, 0, 'C');
-        $this->pdf->Cell(8, 5, ''.$ce, 0, 0, 'C');
-        $this->pdf->Cell(8, 5, ''.$nuip, 0, 0, 'C');
-        $this->pdf->Cell(8, 5, ''.$p, 0, 0, 'C');
-        $this->pdf->Cell(8, 5, ''.$nit, 0, 0, 'C');
-        $this->pdf->Cell(8, 5, ''.$cd, 0, 0, 'C');
+        $this->pdf->Cell(8, 5, '' . $cc, 0, 0, 'C');
+        $this->pdf->Cell(8, 5, '' . $ti, 0, 0, 'C');
+        $this->pdf->Cell(8, 5, '' . $rc, 0, 0, 'C');
+        $this->pdf->Cell(8, 5, '' . $ce, 0, 0, 'C');
+        $this->pdf->Cell(8, 5, '' . $nuip, 0, 0, 'C');
+        $this->pdf->Cell(8, 5, '' . $p, 0, 0, 'C');
+        $this->pdf->Cell(8, 5, '' . $nit, 0, 0, 'C');
+        $this->pdf->Cell(8, 5, '' . $cd, 0, 0, 'C');
         $this->pdf->Cell(105, 5, $this->empresa->getCedrep(), 0, 0, 'L');
 
         /**

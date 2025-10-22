@@ -52,6 +52,9 @@ class FormularioTrabajador extends Documento
         $this->pdf->SetCreator('Plataforma Web: comfacaenlinea.com.co, COMFACA');
         $this->pdf->SetKeywords('COMFACA');
 
+        $this->pdf->SetXY(148, 50);
+        $this->pdf->Cell(15, 4, 'R-UI: ' . $this->trabajador->ruuid, 0, 0, 'C');
+
         $this->tipoAfiliado();
         $this->dataEmpleador();
         $this->dataTrabajador();
@@ -108,7 +111,7 @@ class FormularioTrabajador extends Documento
     {
         $mbanco = ParamsTrabajador::getBancos();
         $banco = ($this->trabajador->getCodban()) ? $mbanco[$this->trabajador->getCodban()] : '';
-        $nombre = capitalize($this->trabajador->getPrinom().' '.$this->trabajador->getSegnom().' '.$this->trabajador->getPriape().' '.$this->trabajador->getSegape());
+        $nombre = capitalize($this->trabajador->getPrinom() . ' ' . $this->trabajador->getSegnom() . ' ' . $this->trabajador->getPriape() . ' ' . $this->trabajador->getSegape());
         $datos = [
             ['lb' => 'Nombre beneficio giro', 'texto' => $nombre, 'x' => 10, 'y' => $y],
             ['lb' => 'Documento beneficio giro', 'texto' => $this->trabajador->getCedtra(), 'x' => 112, 'y' => $y],

@@ -39,6 +39,9 @@ class FormularioFacultativo extends Documento
         $this->pdf->SetKeywords('COMFACA');
         $this->pdf->SetAutoPageBreak(false, 0);
 
+        $this->pdf->SetXY(148, 50);
+        $this->pdf->Cell(15, 4, 'R-UI: ' . $this->facultativo->ruuid, 0, 0, 'C');
+
         $this->tipoAfiliado();
         $this->dataEmpleador();
         $this->dataTrabajador();

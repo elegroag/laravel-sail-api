@@ -20,7 +20,6 @@ class DatabaseSeeder extends Seeder
             ComandoSeeder::class,
             MenuItemSeeder::class,
             MenuTipoSeeder::class,
-            MenuPermissionSeeder::class,
             NotificacionesSeeder::class,
             RecepcionSatSeeder::class,
             ServiciosCuposSeeder::class,
@@ -34,6 +33,8 @@ class DatabaseSeeder extends Seeder
             Gener18Seeder::class,
             Gener40Seeder::class,
             Gener42Seeder::class,
+
+            MenuPermissionSeeder::class,
 
             // Tablas Mercurio
             Mercurio01Seeder::class,

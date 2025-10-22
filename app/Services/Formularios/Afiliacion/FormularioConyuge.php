@@ -48,6 +48,9 @@ class FormularioConyuge extends Documento
         $this->pdf->SetCreator('Plataforma Web: comfacaenlinea.com.co, COMFACA');
         $this->pdf->SetKeywords('COMFACA');
 
+        $this->pdf->SetXY(148, 50);
+        $this->pdf->Cell(15, 4, 'R-UI: ' . $this->conyuge->ruuid, 0, 0, 'C');
+
         $this->headerForm(22);
         $this->dataTrabajador(45);
         $this->dataConyuge(80);
@@ -85,7 +88,7 @@ class FormularioConyuge extends Documento
         $mtidocs = $mtipoDocumentos->findFirst(" coddoc='{$this->trabajador->getTipdoc()}'");
         $detdoc = ($mtidocs) ? $mtidocs->getDetdoc() : 'Cedula de ciudadania';
 
-        $nombtra = capitalize($this->trabajador->getPrinom().' '.$this->trabajador->getSegnom().' '.$this->trabajador->getPriape().' '.$this->trabajador->getSegape());
+        $nombtra = capitalize($this->trabajador->getPrinom() . ' ' . $this->trabajador->getSegnom() . ' ' . $this->trabajador->getPriape() . ' ' . $this->trabajador->getSegape());
 
         $this->pdf->SetFont('helvetica', '', 8.5);
         $datos = [
@@ -123,7 +126,7 @@ class FormularioConyuge extends Documento
         $mtipdisca = ParamsConyuge::getTipoDiscapacidad();
         $discapacidad = ($this->conyuge->getTipdis()) ? $mtipdisca[$this->conyuge->getTipdis()] : 'No tiene';
 
-        $salario = ($this->conyuge->getSalario()) ? '$'.$this->conyuge->getSalario() : '$0';
+        $salario = ($this->conyuge->getSalario()) ? '$' . $this->conyuge->getSalario() : '$0';
 
         $empresalab = ($this->conyuge->getEmpresalab()) ? $this->conyuge->getEmpresalab() : 'NO APLICA';
 
@@ -170,9 +173,9 @@ class FormularioConyuge extends Documento
         } else {
             $banco = ($this->conyuge->getCodban()) ? $mbanco[$this->conyuge->getCodban()] : '______________';
             $nombre = strtoupper(substr(
-                $this->conyuge->getPrinom().' '.
-                    $this->conyuge->getSegnom().' '.
-                    $this->conyuge->getPriape().' '.
+                $this->conyuge->getPrinom() . ' ' .
+                    $this->conyuge->getSegnom() . ' ' .
+                    $this->conyuge->getPriape() . ' ' .
                     $this->conyuge->getSegape(),
                 0,
                 140
@@ -188,9 +191,9 @@ class FormularioConyuge extends Documento
         $mtippga = ParamsConyuge::getTipoPago();
         $tippag = ($this->conyuge->getTippag()) ? $mtippga[$this->conyuge->getTippag()] : '__________________';
 
-        $html = 'El cónyuge '.$nombre.', con '.$detdoc.' y número <b>'.$numerocedula.
-            '</b>, solicita que el pago del subsidio cuota monetaria se realice a la cuenta <b>'.$numcue.'</b> del '.$banco.', '.
-            'que corresponde al medio de pago <b>'.$tippag.'</b>.';
+        $html = 'El cónyuge ' . $nombre . ', con ' . $detdoc . ' y número <b>' . $numerocedula .
+            '</b>, solicita que el pago del subsidio cuota monetaria se realice a la cuenta <b>' . $numcue . '</b> del ' . $banco . ', ' .
+            'que corresponde al medio de pago <b>' . $tippag . '</b>.';
 
         $this->pdf->MultiCell(190, 5, $html, 0, 'L', 0, 1, 10, $y, null, null, true);
     }
