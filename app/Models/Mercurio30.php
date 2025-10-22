@@ -4,10 +4,13 @@ namespace App\Models;
 
 use App\Models\Adapter\DbBase;
 use App\Models\Adapter\ModelBase;
+use App\Models\Adapter\HasCustomUuid;
 use Carbon\Carbon;
 
 class Mercurio30 extends ModelBase
 {
+    use HasCustomUuid;
+
     protected $table = 'mercurio30';
 
     protected $primaryKey = 'id';
@@ -68,7 +71,8 @@ class Mercurio30 extends ModelBase
         'documento_representante_sat',
         'numero_transaccion',
         'fecapr',
-        'fecsol'
+        'fecsol',
+        'ruuid'
     ];
 
     public function getFecsol()

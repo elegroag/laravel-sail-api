@@ -3,12 +3,15 @@
 namespace App\Models;
 
 use App\Models\Adapter\DbBase;
+use App\Models\Adapter\HasCustomUuid;
 use App\Models\Adapter\ModelBase;
 // Agregado
 use Carbon\Carbon;
 
 class Mercurio34 extends ModelBase
 {
+    use HasCustomUuid;
+
     protected $table = 'mercurio34';
 
     public $timestamps = false;
@@ -46,7 +49,6 @@ class Mercurio34 extends ModelBase
         'coddoc',
         'documento',
         'cedacu',
-        'fecsol',
         'resguardo_id',
         'pub_indigena_id',
         'peretn',
@@ -67,6 +69,9 @@ class Mercurio34 extends ModelBase
         'biodire',
         'biourbana',
         'biodesco',
+        'fecsol',
+        'fecapr',
+        'ruuid'
     ];
 
     public function setBiodesco($biodesco)

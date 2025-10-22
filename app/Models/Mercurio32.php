@@ -3,11 +3,14 @@
 namespace App\Models;
 
 use App\Models\Adapter\DbBase;
+use App\Models\Adapter\HasCustomUuid;
 use App\Models\Adapter\ModelBase;
 use Carbon\Carbon;
 
 class Mercurio32 extends ModelBase
 {
+    use HasCustomUuid;
+
     protected $table = 'mercurio32';
 
     public $timestamps = false;
@@ -62,6 +65,8 @@ class Mercurio32 extends ModelBase
         'tipdis',
         'peretn',
         'zoneurbana',
+        'ruuid',
+        'fecapr'
     ];
 
     public function setZoneurbana($zoneurbana)

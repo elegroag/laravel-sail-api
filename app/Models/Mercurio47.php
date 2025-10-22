@@ -4,9 +4,12 @@ namespace App\Models;
 
 use App\Models\Adapter\DbBase;
 use App\Models\Adapter\ModelBase;
+use App\Models\Adapter\HasCustomUuid;
 
 class Mercurio47 extends ModelBase
 {
+    use HasCustomUuid;
+
     protected $table = 'mercurio47';
 
     public $timestamps = false;
@@ -22,6 +25,8 @@ class Mercurio47 extends ModelBase
         'estado',
         'tipact',
         'usuario',
+        'ruuid',
+        'fecapr'
     ];
 
     public function setUsuario($usuario)

@@ -58,13 +58,18 @@ return new class extends Migration
             $table->char('tipo', 2);
             $table->char('coddoc', 2);
             $table->char('documento', 15);
-            $table->date('fecsol');
+
+            $table->date('fecsol')->nullable()->comment('Fecha de solicitud');
+            $table->date('fecapr')->nullable()->comment('Fecha apobación resolucion');
+            $table->uuid('ruuid');
 
             // Índices
             $table->unique('id', 'id');
             $table->index('log', 'log');
             $table->index('codest', 'fk_mercurio31_mercurio111_idx');
             $table->index(['tipo', 'coddoc', 'documento'], 'fk_mercurio31_mercurio071_idx');
+            $table->index('ruuid', 'fk_mercurio39_ruuid');
+            $table->unique('ruuid', 'unique_mercurio39_ruuid');
 
             // FKs (usando los nombres indicados en el SQL)
             $table->foreign(['tipo', 'coddoc', 'documento'], 'fk_mercurio31_mercurio071000')
@@ -93,6 +98,8 @@ return new class extends Migration
             $table->dropIndex('fk_mercurio31_mercurio111_idx');
             $table->dropIndex('log');
             $table->dropUnique('id');
+            $table->dropIndex('fk_mercurio39_ruuid');
+            $table->dropUnique('unique_mercurio39_ruuid');
         });
         Schema::dropIfExists('mercurio39');
     }

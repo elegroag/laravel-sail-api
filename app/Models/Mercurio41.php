@@ -4,10 +4,13 @@ namespace App\Models;
 
 use App\Models\Adapter\DbBase;
 use App\Models\Adapter\ModelBase;
+use App\Models\Adapter\HasCustomUuid;
 use Carbon\Carbon;
 
 class Mercurio41 extends ModelBase
 {
+    use HasCustomUuid;
+
     protected $table = 'mercurio41';
 
     protected $primaryKey = 'id';
@@ -53,7 +56,6 @@ class Mercurio41 extends ModelBase
         'autoriza',
         'motivo',
         'codact',
-        'fecsol',
         'estado',
         'codest',
         'fecest',
@@ -71,6 +73,9 @@ class Mercurio41 extends ModelBase
         'codban',
         'tipcue',
         'dirlab',
+        'fecsol',
+        'fecapr',
+        'ruuid'
     ];
 
     public function setTipcue($tipcue)
@@ -703,6 +708,6 @@ class Mercurio41 extends ModelBase
 
     public function getNombreCompleto()
     {
-        return $this->priape.' '.$this->segape.' '.$this->prinom.' '.$this->segnom;
+        return $this->priape . ' ' . $this->segape . ' ' . $this->prinom . ' ' . $this->segnom;
     }
 }

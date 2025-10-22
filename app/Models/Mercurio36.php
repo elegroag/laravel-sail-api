@@ -3,11 +3,14 @@
 namespace App\Models;
 
 use App\Models\Adapter\DbBase;
+use App\Models\Adapter\HasCustomUuid;
 use App\Models\Adapter\ModelBase;
 use Carbon\Carbon;
 
 class Mercurio36 extends ModelBase
 {
+    use HasCustomUuid;
+
     protected $table = 'mercurio36';
 
     public $timestamps = false;
@@ -67,6 +70,7 @@ class Mercurio36 extends ModelBase
         'pub_indigena_id',
         'fecsol',
         'fecapr',
+        'ruuid'
     ];
 
     public function getFecapr()
@@ -1117,6 +1121,6 @@ class Mercurio36 extends ModelBase
 
     public function getNombreCompleto()
     {
-        return $this->priape.' '.$this->segape.' '.$this->prinom.' '.$this->segnom;
+        return $this->priape . ' ' . $this->segape . ' ' . $this->prinom . ' ' . $this->segnom;
     }
 }

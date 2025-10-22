@@ -24,7 +24,7 @@ class Mercurio33 extends ModelBase
         'fecest',
         'usuario',
         'actualizacion',
-        'log',
+        'log'
     ];
 
     public function __construct(?array $attributes = [])

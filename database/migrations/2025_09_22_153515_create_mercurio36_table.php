@@ -64,17 +64,23 @@ return new class extends Migration
             $table->char('pub_indigena_id', 4);
             $table->char('facvul', 2);
             $table->char('orisex', 3);
-            $table->date('fecsol')->nullable();
+
             $table->char('tippag', 2);
             $table->char('numcue', 20)->nullable();
             $table->char('codcaj', 3);
             $table->char('cargo', 5);
             $table->char('codban', 3)->nullable();
             $table->char('tipcue', 3)->nullable();
+
+            $table->date('fecsol')->nullable()->comment('Fecha de solicitud');
             $table->date('fecapr')->nullable()->comment('Fecha de aprobación');
+            $table->uuid('ruuid');
 
             // Índice y FK compuesta
             $table->index(['tipo', 'coddoc', 'documento'], 'mercurio36_FK');
+            $table->index('ruuid', 'fk_mercurio36_ruuid');
+            $table->unique('ruuid', 'unique_mercurio36_ruuid');
+
             $table->foreign(['tipo', 'coddoc', 'documento'], 'mercurio36_FK')
                 ->references(['tipo', 'coddoc', 'documento'])
                 ->on('mercurio07')
@@ -91,6 +97,8 @@ return new class extends Migration
         Schema::table('mercurio36', function (Blueprint $table) {
             $table->dropForeign('mercurio36_FK');
             $table->dropIndex('mercurio36_FK');
+            $table->dropIndex('fk_mercurio36_ruuid');
+            $table->dropUnique('unique_mercurio36_ruuid');
         });
         Schema::dropIfExists('mercurio36');
     }

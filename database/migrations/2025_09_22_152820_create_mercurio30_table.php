@@ -66,13 +66,17 @@ return new class extends Migration
             $table->char('prinomrepleg', 25)->nullable();
             $table->char('segnomrepleg', 25)->nullable();
             $table->char('codcaj', 2)->nullable();
-            $table->date('fecsol')->nullable();
+
+            $table->date('fecsol')->nullable()->comment('Fecha de solicitud');
             $table->date('fecapr')->nullable()->comment('Fecha de aprobación resolucion');
+            $table->uuid('ruuid');
 
             // Índices
             $table->index('log', 'log');
             $table->index(['tipo', 'coddoc', 'documento'], 'fk_mercurio30_mercurio071_idx');
             $table->index('codest', 'fk_mercurio30_mercurio111_idx');
+            $table->index('ruuid', 'fk_mercurio30_ruuid');
+            $table->unique('ruuid', 'unique_mercurio30_ruuid');
 
             // FKs
             $table->foreign(['tipo', 'coddoc', 'documento'], 'fk_mercurio30_mercurio071')
@@ -100,6 +104,8 @@ return new class extends Migration
             $table->dropIndex('fk_mercurio30_mercurio071_idx');
             $table->dropIndex('fk_mercurio30_mercurio111_idx');
             $table->dropIndex('log');
+            $table->dropIndex('fk_mercurio30_ruuid');
+            $table->dropUnique('unique_mercurio30_ruuid');
         });
         Schema::dropIfExists('mercurio30');
     }

@@ -49,7 +49,6 @@ return new class extends Migration
             $table->char('coddoc', 2);
             $table->char('documento', 15);
             $table->char('cedacu', 20)->nullable();
-            $table->date('fecsol')->nullable();
             $table->char('resguardo_id', 4)->nullable();
             $table->char('pub_indigena_id', 4)->nullable();
             $table->char('peretn', 2)->nullable();
@@ -69,13 +68,18 @@ return new class extends Migration
             $table->string('biodire', 142)->nullable();
             $table->char('biourbana', 1)->nullable();
             $table->char('biodesco', 1)->nullable();
+
+            $table->date('fecsol')->nullable()->comment('Fecha de solicitud');
             $table->date('fecapr')->nullable()->comment('Fecha de aprobación');
+            $table->uuid('ruuid');
 
             // Índices
             $table->unique('id', 'id');
             $table->index('log', 'log');
             $table->index('codest', 'fk_mercurio34_mercurio111_idx');
             $table->index(['tipo', 'coddoc', 'documento'], 'fk_mercurio34_mercurio071_idx');
+            $table->index('ruuid', 'fk_mercurio34_ruuid');
+            $table->unique('ruuid', 'unique_mercurio34_ruuid');
 
             // FKs
             $table->foreign(['tipo', 'coddoc', 'documento'], 'fk_mercurio34_mercurio071')
@@ -104,6 +108,8 @@ return new class extends Migration
             $table->dropIndex('fk_mercurio34_mercurio111_idx');
             $table->dropIndex('log');
             $table->dropUnique('id');
+            $table->dropIndex('fk_mercurio34_ruuid');
+            $table->dropUnique('unique_mercurio34_ruuid');
         });
         Schema::dropIfExists('mercurio34');
     }

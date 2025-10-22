@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Adapter\HasCustomUuid;
 use App\Models\Adapter\ModelBase;
 use Carbon\Carbon;
 
 class Mercurio31 extends ModelBase
 {
+    use HasCustomUuid;
+
     protected $table = 'mercurio31';
 
     public $timestamps = false;
@@ -83,6 +86,8 @@ class Mercurio31 extends ModelBase
         'codban',
         'tipcue',
         'fecafi',
+        'ruuid',
+        'fecapr'
     ];
 
     public function setFecafi($fecafi)

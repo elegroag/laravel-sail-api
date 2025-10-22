@@ -5,9 +5,12 @@ namespace App\Models;
 use App\Models\Adapter\DbBase;
 use App\Models\Adapter\ModelBase;
 use Carbon\Carbon;
+use App\Models\Adapter\HasCustomUuid;
 
 class Mercurio38 extends ModelBase
 {
+    use HasCustomUuid;
+
     protected $table = 'mercurio38';
 
     public $timestamps = false;
@@ -71,6 +74,8 @@ class Mercurio38 extends ModelBase
         'cargo',
         'numcue',
         'fecsol',
+        'ruuid',
+        'fecapr'
     ];
 
     public function getFecsol()
@@ -1194,6 +1199,6 @@ class Mercurio38 extends ModelBase
 
     public function getNombreCompleto()
     {
-        return $this->priape.' '.$this->segape.' '.$this->prinom.' '.$this->segnom;
+        return $this->priape . ' ' . $this->segape . ' ' . $this->prinom . ' ' . $this->segnom;
     }
 }

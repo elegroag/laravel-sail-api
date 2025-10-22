@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Adapter\HasCustomUuid;
 use App\Models\Adapter\ModelBase;
 use Carbon\Carbon;
 
 class Mercurio40 extends ModelBase
 {
+    use HasCustomUuid;
+
     protected $table = 'mercurio40';
 
     public $timestamps = false;
@@ -53,6 +56,9 @@ class Mercurio40 extends ModelBase
         'tipo',
         'coddoc',
         'documento',
+        'ruuid',
+        'fecapr',
+        'fecsol'
     ];
 
     /**

@@ -55,7 +55,6 @@ return new class extends Migration
             $table->char('tipo', 2);
             $table->char('coddoc', 2);
             $table->char('documento', 15);
-            $table->date('fecsol')->nullable();
             $table->char('tippag', 1)->default('T');
             $table->bigInteger('numcue')->default(0);
             $table->string('empresalab', 100)->nullable();
@@ -65,14 +64,18 @@ return new class extends Migration
             $table->char('tipcue', 1)->nullable();
             $table->char('tipdis', 2)->nullable();
             $table->char('peretn', 2)->default('7');
-            $table->date('fecapr')->nullable()->comment('Fecha de aprobación');
 
+            $table->date('fecsol')->nullable()->comment('Fecha de solicitud');
+            $table->date('fecapr')->nullable()->comment('Fecha de aprobación');
+            $table->uuid('ruuid');
 
             // Índices
             $table->unique('id', 'id');
             $table->index('log', 'log');
             $table->index('codest', 'fk_mercurio32_mercurio111_idx');
             $table->index(['tipo', 'coddoc', 'documento'], 'fk_mercurio32_mercurio071_idx');
+            $table->index('ruuid', 'fk_mercurio32_ruuid');
+            $table->unique('ruuid', 'unique_mercurio32_ruuid');
 
             // FKs
             $table->foreign(['tipo', 'coddoc', 'documento'], 'fk_mercurio32_mercurio071')
@@ -101,6 +104,8 @@ return new class extends Migration
             $table->dropIndex('fk_mercurio32_mercurio111_idx');
             $table->dropIndex('log');
             $table->dropUnique('id');
+            $table->dropIndex('fk_mercurio32_ruuid');
+            $table->dropUnique('unique_mercurio32_ruuid');
         });
         Schema::dropIfExists('mercurio32');
     }
