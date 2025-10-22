@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, CheckSquare, Folder, LayoutGrid } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, List, ShieldCheck } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -14,10 +14,15 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Tasks',
-        href: '/tasks',
-        icon: CheckSquare,
+        title: 'Menu',
+        href: '/cajas/menu',
+        icon: List,
     },
+    {
+        title: 'Permission',
+        href: '/cajas/menu_permission',
+        icon: ShieldCheck,
+    }
 ];
 
 const footerNavItems: NavItem[] = [
@@ -36,7 +41,7 @@ const footerNavItems: NavItem[] = [
 export function AppSidebar() {
     return (
         <Sidebar collapsible="icon" variant="inset">
-            <SidebarHeader>
+            <SidebarHeader className="bg-[rgb(52,73,94)]">
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
