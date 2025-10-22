@@ -11,7 +11,7 @@ Route::prefix('/cajas/menu')->group(function () {
     Route::get('/{id}/edit', [MenuController::class, 'edit'])->name('cajas.menu.edit');
     Route::put('/{id}', [MenuController::class, 'update'])->name('cajas.menu.update');
     Route::delete('/{id}', [MenuController::class, 'destroy'])->name('cajas.menu.destroy');
-    Route::get('/{id}/children', [MenuController::class, 'children'])->name('cajas.menu.children');
+    Route::post('/children', [MenuController::class, 'children'])->name('cajas.menu.children');
     Route::post('/options', [MenuController::class, 'options'])->name('cajas.menu.options');
-    Route::post('/{id}/attach-child', [MenuController::class, 'attachChild'])->name('cajas.menu.attachChild');
+    Route::post('/attach-child', [MenuController::class, 'attachChild'])->name('cajas.menu.attachChild');
 });

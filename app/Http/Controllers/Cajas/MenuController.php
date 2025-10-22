@@ -9,6 +9,7 @@ use App\Models\Gener02;
 use App\Models\Gener40;
 use App\Models\Gener42;
 use App\Models\MenuItem;
+use App\Models\MenuTipo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -156,8 +157,11 @@ class MenuController extends Controller
         return redirect()->to('/cajas/menu');
     }
 
-    public function children(int $id)
+    public function children(Request $request)
     {
+        $id = $request->input('id');
+        $codapl = $request->input('codapl');
+        $tipo = $request->input('tipo');
         $children = MenuItem::select(
             DB::raw('menu_items.*'),
             'menu_tipos.is_visible',
@@ -166,6 +170,8 @@ class MenuController extends Controller
         )
             ->join('menu_tipos', 'menu_tipos.menu_item', '=', 'menu_items.id')
             ->where('menu_items.parent_id', $id)
+            ->where('menu_items.codapl', $codapl)
+            ->where('menu_tipos.tipo', $tipo)
             ->orderBy('menu_tipos.position')
             ->orderBy('menu_items.id', 'ASC')
             ->get();
@@ -203,21 +209,52 @@ class MenuController extends Controller
         ]);
     }
 
-    public function attachChild(int $id, Request $request)
+    public function attachChild(Request $request)
     {
         $validated = $request->validate([
+            'id' => ['required', 'integer', 'exists:menu_items,id'],
             'child_id' => ['required', 'integer', 'exists:menu_items,id', 'different:id'],
+            'codapl' => ['required', 'string', 'max:5'],
+            'tipo' => ['required', 'string', 'max:5'],
         ]);
 
+        $id = (int) $validated['id'];
         $childId = (int) $validated['child_id'];
+        $codapl = $validated['codapl'];
+        $tipo = $validated['tipo'];
 
         if ($childId === $id) {
             return response()->json(['message' => 'No puedes adjuntar el mismo elemento como hijo.'], 422);
         }
 
-        $child = MenuItem::findOrFail($childId);
-        $child->parent_id = $id;
+        $parent = MenuItem::where('id', $id)->where('codapl', $codapl)->first();
+        if (! $parent) {
+            return response()->json(['message' => 'El item padre no pertenece a la aplicación indicada (codapl).'], 422);
+        }
+
+        $child = MenuItem::where('id', $childId)->where('codapl', $codapl)->first();
+        if (! $child) {
+            return response()->json(['message' => 'El item hijo no pertenece a la misma aplicación (codapl).'], 422);
+        }
+
+        $hasTipo = DB::table('menu_tipos')->where('menu_item', $childId)->where('tipo', $tipo)->exists();
+        if (! $hasTipo) {
+            return response()->json(['message' => 'El hijo no tiene configuración para el tipo seleccionado.'], 422);
+        }
+
+        $child->parent_id = $parent->id;
         $child->save();
+
+        //crea el tipo para el hijo si no existe
+        $menuTipo = MenuTipo::where('menu_item', $childId)->where('tipo', $tipo)->first();
+        if (! $menuTipo) {
+            $menuTipo = new MenuTipo();
+            $menuTipo->menu_item = $childId;
+            $menuTipo->tipo = $tipo;
+            $menuTipo->is_visible = true;
+            $menuTipo->position = 1;
+            $menuTipo->save();
+        }
 
         return response()->json([
             'message' => 'Hijo agregado correctamente',

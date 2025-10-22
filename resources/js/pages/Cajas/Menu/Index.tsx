@@ -36,6 +36,7 @@ export default function Index({ menu_items }: Props) {
     const [selectedChildId, setSelectedChildId] = useState<string>('');
     const [searchOption, setSearchOption] = useState<string>('');
     const [attaching, setAttaching] = useState(false);
+    const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
     // Filtros
     const searchParams = useMemo(() => new URLSearchParams(window.location.search), []);
@@ -91,12 +92,16 @@ export default function Index({ menu_items }: Props) {
             setSelectedId(_id);
             setLoadingChildren(true);
             setChildrenError(null);
-            const res = await fetch(`/cajas/menu/${_id}/children`, {
+            const res = await fetch(`/cajas/menu/children`, {
                 headers: {
+                    'Content-Type': 'application/json',
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
                 },
                 credentials: 'same-origin',
+                method: 'POST',
+                body: JSON.stringify({ id: _id, tipo: tipo, codapl:codapl })
             });
             if (!res.ok) {
                 throw new Error('No fue posible cargar los items hijos');
@@ -152,7 +157,7 @@ export default function Index({ menu_items }: Props) {
         if (!selectedId || !selectedChildId) return;
         try {
             setAttaching(true);
-            const res = await fetch(`/cajas/menu/${selectedId}/attach-child`, {
+            const res = await fetch(`/cajas/menu/attach-child`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -161,7 +166,7 @@ export default function Index({ menu_items }: Props) {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
                 },
                 credentials: 'same-origin',
-                body: JSON.stringify({ child_id: Number(selectedChildId) })
+                body: JSON.stringify({ id: selectedId, child_id: Number(selectedChildId), tipo, codapl })
             });
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
@@ -173,8 +178,9 @@ export default function Index({ menu_items }: Props) {
             setAddOpen(false);
             setSelectedChildId('');
             setSearchOption('');
+            setToast({ type: 'success', message: 'Hijo agregado correctamente' });
         } catch (e: any) {
-            alert(e?.message || 'Error desconocido al agregar');
+            setToast({ type: 'error', message: e?.message || 'Error desconocido al agregar' });
         } finally {
             setAttaching(false);
         }
@@ -183,7 +189,7 @@ export default function Index({ menu_items }: Props) {
 
     return (
         <AppLayout title="Menu">
-            <div className="bg-white shadow overflow-hidden sm:rounded-md">
+            <div className="bg-white shadow overflow-hidden sm:rounded-md m-2">
                 <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
                     <div>
                         <h3 className="text-lg leading-6 font-medium text-gray-900">
@@ -489,8 +495,24 @@ export default function Index({ menu_items }: Props) {
                         </div>
                     </div>
                 )}
- 
-                 {meta.pagination && (
+
+                {/* Toast simple (alineado con Register.tsx) */}
+                {toast && (
+                    <div
+                        className={`fixed bottom-4 right-4 z-50 min-w-[260px] max-w-[360px] px-4 py-3 rounded shadow-lg text-sm transition-all ${toast.type === 'success' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'}`}
+                    >
+                        {toast.message}
+                        <button
+                            type="button"
+                            className="ml-3 underline text-white/90 hover:text-white"
+                            onClick={() => setToast(null)}
+                        >
+                            Cerrar
+                        </button>
+                    </div>
+                )}
+
+                {meta.pagination && (
                     <div className="bg-white px-4 py-3 border-t border-gray-200 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex items-center gap-4">
                             <div className="text-sm text-gray-700">
