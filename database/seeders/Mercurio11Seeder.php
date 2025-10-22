@@ -15,27 +15,27 @@ class Mercurio11Seeder extends Seeder
         $estadosRechazo = [
             [
                 'codest' => '01',
-                'detalle' => 'DOCUMENTACION INCOMPLETA',
+                'detalle' => 'Documentación Incompleta',
             ],
             [
                 'codest' => '02',
-                'detalle' => 'FALTA DE FIRMAS',
+                'detalle' => 'Falta de Firmas',
             ],
             [
                 'codest' => '03',
-                'detalle' => 'DATOS INCOMPLETOS',
+                'detalle' => 'Datos Incompletos',
             ],
             [
                 'codest' => '04',
-                'detalle' => 'DATOS INCONSISTENTES PARA LA AFILIACION',
+                'detalle' => 'Datos Inconsistentes para la Afiliación',
             ],
             [
                 'codest' => '05',
-                'detalle' => 'YA EXISTE UN REGISTRO ACTIVO EN NUESTRA BASE',
+                'detalle' => 'Ya existe un registro activo en nuestra base',
             ],
             [
                 'codest' => '06',
-                'detalle' => 'ANULACION DE AFILIACION',
+                'detalle' => 'Anulación de Afiliación',
             ],
         ];
 
@@ -46,11 +46,4 @@ class Mercurio11Seeder extends Seeder
             );
         }
     }
-
-    /* INSERT INTO `mercurio11` VALUES
-    ('01','DOCUMENTACION INCOMPLETA'),('02','FALTA DE FIRMAS'),
-    ('03','DATOS INCOMPLETOS'),
-    ('04','DATOS INCONSISTENTES PARA LA AFILIACION'),
-    ('05','YA EXISTE UN REGISTRO ACTIVO EN NUESTRA BASE '),
-    ('06','ANULACION DE AFILIACION'); */
 }

@@ -15,31 +15,31 @@ class Mercurio12Seeder extends Seeder
         $codigosDocumentos = [
             [
                 'coddoc' => 1,
-                'detalle' => 'FORMULARIO',
+                'detalle' => 'Formulario',
             ],
             [
                 'coddoc' => 2,
-                'detalle' => 'DOCUMENTO IDENTIFICACIÓN',
+                'detalle' => 'Documento Identificación',
             ],
             [
                 'coddoc' => 3,
-                'detalle' => 'REGISTRO CIVIL',
+                'detalle' => 'Registro Civil',
             ],
             [
                 'coddoc' => 4,
-                'detalle' => 'DECLARACIÓN JURAMENTADA',
+                'detalle' => 'Declaración Juramentada',
             ],
             [
                 'coddoc' => 5,
-                'detalle' => 'TARJETA DE IDENTIDAD',
+                'detalle' => 'Tarjeta de Identidad',
             ],
             [
                 'coddoc' => 6,
-                'detalle' => 'CERTIFICADO DE EPS',
+                'detalle' => 'Certificado de EPS',
             ],
             [
                 'coddoc' => 7,
-                'detalle' => 'CUSTODIA LEGAL',
+                'detalle' => 'Custodia Legal',
             ],
             [
                 'coddoc' => 8,
@@ -47,119 +47,119 @@ class Mercurio12Seeder extends Seeder
             ],
             [
                 'coddoc' => 9,
-                'detalle' => 'CAMARA DE COMERCIO',
+                'detalle' => 'Camara de Comercio',
             ],
             [
                 'coddoc' => 10,
-                'detalle' => 'ACTA CONSORCIAL O CONFORMACIÓN',
+                'detalle' => 'Acta Consorcial o Conformación',
             ],
             [
                 'coddoc' => 11,
-                'detalle' => 'RELACION TRABAJADORES EN NOMINA',
+                'detalle' => 'Relación Trabajadores en Nomina',
             ],
             [
                 'coddoc' => 12,
-                'detalle' => 'ESTATUTOS DE COOPERATIVA',
+                'detalle' => 'Estatutos de Cooperativa',
             ],
             [
                 'coddoc' => 13,
-                'detalle' => 'RESOLUCION MINISTERIO TRABAJADO PARA COOPERATIVA',
+                'detalle' => 'Resolución Ministerio Trabajado para Cooperativa',
             ],
             [
                 'coddoc' => 14,
-                'detalle' => 'CERTIFICACION INGRESOS U OPS',
+                'detalle' => 'Certificación Ingresos U OPS',
             ],
             [
                 'coddoc' => 15,
-                'detalle' => 'PLANILLA SEGURIDAD SOCIAL',
+                'detalle' => 'Planilla Seguridad Social',
             ],
             [
                 'coddoc' => 17,
-                'detalle' => 'PERMISO ESPECIAL EXTRANJERIA',
+                'detalle' => 'Permiso Especial Extranjeria',
             ],
             [
                 'coddoc' => 18,
-                'detalle' => 'CERTIFICADO DE DISCAPACIDAD',
+                'detalle' => 'Certificado de Discapacidad',
             ],
             [
                 'coddoc' => 19,
-                'detalle' => 'CERTIFICADO BANCARIO O DAVIPLATA CÓNYUGES',
+                'detalle' => 'Certificado Bancario o Daviplata Cónyuges',
             ],
             [
                 'coddoc' => 21,
-                'detalle' => 'CERTIFICADO DE MUERTE PADRE O MADRE',
+                'detalle' => 'Certificado de Muerte Padre o Madre',
             ],
             [
                 'coddoc' => 22,
-                'detalle' => 'PERMISO DE TRABAJO MENOR DE EDAD',
+                'detalle' => 'Permiso de Trabajo Menor de Edad',
             ],
             [
                 'coddoc' => 23,
-                'detalle' => 'CERTIFICADO ESCOLAR',
+                'detalle' => 'Certificado Escolar',
             ],
             [
                 'coddoc' => 24,
-                'detalle' => 'OFICIO SOLICITUD AFILIACIÓN A COMFACA',
+                'detalle' => 'Oficio Solicitud Afiliación a Comfaca',
             ],
             [
                 'coddoc' => 25,
-                'detalle' => 'TRATAMIENTO DATOS PERSONALES',
+                'detalle' => 'Tratamiento Datos Personales',
             ],
             [
                 'coddoc' => 26,
-                'detalle' => 'PAZ Y SALVO CAJA ANTERIOR',
+                'detalle' => 'Paz y Salvo Caja Anterior',
             ],
             [
                 'coddoc' => 27,
-                'detalle' => 'FORMULARIO DE ACTUALIZACIÓN',
+                'detalle' => 'Formulario de Actualización',
             ],
             [
                 'coddoc' => 28,
-                'detalle' => 'DISOLUCIÓN SOCIEDAD CONYUGAL',
+                'detalle' => 'Disolución Sociedad Conyugal',
             ],
             [
                 'coddoc' => 29,
-                'detalle' => 'DECLARACIÓN EXTRAJUICIO DIS - CONYUGAL',
+                'detalle' => 'Declaración Extrajuicio DIS - Conyugal',
             ],
             [
                 'coddoc' => 30,
-                'detalle' => 'CERTIFICADO DE CUENTA BANCO O DAVIPLATA',
+                'detalle' => 'Certificado de Cuenta Banco o Daviplata',
             ],
             [
                 'coddoc' => 31,
-                'detalle' => 'COPIA OPS O CERTIFICADO DE INGRESOS EMITIDO POR UN CONTADOR',
+                'detalle' => 'Copia OPS o Certificado de Ingresos emitido por un Contador',
             ],
             [
                 'coddoc' => 32,
-                'detalle' => 'COPIA DOCUMENTO IDENTIFICACIÓN DEL CONTADOR',
+                'detalle' => 'Copia Documento Identificación del Contador',
             ],
             [
                 'coddoc' => 33,
-                'detalle' => 'CERTIFICADO O COPIA RESOLUCIÓN DE PENSIÓN',
+                'detalle' => 'Certificado o Copia Resolución de Pensión',
             ],
             [
                 'coddoc' => 34,
-                'detalle' => 'COLILLA DE PAGO ÚLTIMA MESADA PENSIONAL',
+                'detalle' => 'Colilla de Pago Última Mesada Pensional',
             ],
             [
                 'coddoc' => 35,
-                'detalle' => 'DOCUMENTOS DE IDENTIFICACIÓN HIJOS DEL PENSIONADO',
+                'detalle' => 'Documentos de Identificación Hijos del Pensionado',
             ],
             [
                 'coddoc' => 36,
-                'detalle' => 'DOCUMENTO IDENTIFICACIÓN CÓNYUGE DEL PENSIONADO',
+                'detalle' => 'Documento Identificación Cónyuge del Pensionado',
             ],
             [
                 'coddoc' => 37,
-                'detalle' => 'CERTIFICADO 25 AÑOS AFILIADO A COMFACA O HISTORIAL LABORAL',
+                'detalle' => 'Certificado 25 Años Afiliado a Comfaca o Historial Laboral',
             ],
             [
                 'coddoc' => 38,
-                'detalle' => 'CERTIFICADO FONDO DE PENSIÓNES',
+                'detalle' => 'Certificado Fondo de Pensiones',
             ],
             [
                 'coddoc' => 39,
-                'detalle' => 'RUT EMPLEADOR - APLICA SERVICIO DOMESTICO',
+                'detalle' => 'RUT Empleador - Aplica Servicio Doméstico',
             ],
         ];
 

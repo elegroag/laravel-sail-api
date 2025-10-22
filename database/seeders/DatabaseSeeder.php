@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             ComandoSeeder::class,
             MenuItemSeeder::class,
             MenuTipoSeeder::class,
+            MenuPermissionSeeder::class,
             NotificacionesSeeder::class,
             RecepcionSatSeeder::class,
             ServiciosCuposSeeder::class,
