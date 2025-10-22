@@ -19,15 +19,24 @@ return new class extends Migration
             $table->increments('id');
 
             // Columnas
-            $table->unsignedInteger('menu_item_id'); // NOT NULL
+            $table->unsignedInteger('menu_item');
             $table->char('tipfun', 5);
-            $table->tinyInteger('can_view')->default(1); // tinyint(1) DEFAULT '1'
+            $table->tinyInteger('can_view')->default(1);
+            $table->json('opciones')->nullable()->comment('{"mostrar": true, "editar":true,"guardar":true, "borrar": false}');
 
             // Índice y FK
-            $table->index('menu_item_id', 'menu_item_id');
-            $table->foreign('menu_item_id', 'menu_permissions_ibfk_1')
+            $table->index('menu_item', 'menu_item');
+            $table->index('tipfun', 'tipfun');
+
+            $table->foreign('menu_item', 'menu_permissions_ibfk_1')
                 ->references('id')
                 ->on('menu_items')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
+
+            $table->foreign('tipfun', 'menu_permissions_ibfk_2')
+                ->references('tipfun')
+                ->on('gener21')
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
         });
@@ -40,7 +49,9 @@ return new class extends Migration
     {
         Schema::table('menu_permissions', function (Blueprint $table) {
             $table->dropForeign('menu_permissions_ibfk_1');
-            $table->dropIndex('menu_item_id');
+            $table->dropIndex('menu_item');
+            $table->dropForeign('menu_permissions_ibfk_2');
+            $table->dropIndex('tipfun');
         });
 
         Schema::dropIfExists('menu_permissions');

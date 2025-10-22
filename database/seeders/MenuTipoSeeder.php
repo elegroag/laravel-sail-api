@@ -852,17 +852,17 @@ class MenuTipoSeeder extends Seeder
                 ],
                 [
                     'id' => 241,
-                    'position' => '2',
+                    'position' => '1',
                     'is_visible' => '1',
-                    'tipo' => 'T',
-                    'menu_item' => 210
+                    'tipo' => 'E',
+                    'menu_item' => 241
                 ],
                 [
                     'id' => 242,
-                    'position' => '3',
+                    'position' => '1',
                     'is_visible' => '1',
-                    'tipo' => 'T',
-                    'menu_item' => 208
+                    'tipo' => 'E',
+                    'menu_item' => 242
                 ]
             ];
 

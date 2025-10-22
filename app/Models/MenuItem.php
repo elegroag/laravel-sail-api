@@ -25,4 +25,9 @@ class MenuItem extends ModelBase
         'controller',
         'action'
     ];
+
+    public function permissions()
+    {
+        return $this->hasMany(MenuPermission::class, 'menu_item', 'id');
+    }
 }

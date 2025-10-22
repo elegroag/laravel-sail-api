@@ -37,7 +37,7 @@ class MenuCajas
     {
         $query = "SELECT menu_items.*, menu_tipos.tipo, menu_tipos.is_visible, menu_tipos.position 
         FROM menu_items 
-        INNER JOIN menu_tipos ON menu_tipos.menu_item= menu_items.id
+        INNER JOIN menu_tipos ON menu_tipos.menu_item = menu_items.id
         WHERE 
         menu_items.codapl='{$this->codapl}' AND 
         menu_tipos.is_visible = TRUE

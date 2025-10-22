@@ -3,9 +3,11 @@
 namespace App\Http\Middleware;
 
 use App\Library\Auth\SessionCookies;
+use App\Models\MenuItem;
 use App\Models\MenuPermission;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 class CajasCookieAuthenticated
@@ -33,17 +35,17 @@ class CajasCookieAuthenticated
             return redirect('cajas/login');
         }
 
-        /* if ($this->autorization($request) === false) {
+        if ($this->autorization($request) === false) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No autorizado para acceder a la acción.',
+                    'message' => 'No autorizado para acceder a la acción. ' . $this->controller . ' ' . $this->actionMethod,
                 ], 401);
             }
             if (!($this->controller == 'PrincipalController' && $this->actionMethod == 'index')) {
                 return redirect('cajas/principal/index');
             }
-        } */
+        }
 
         $tipo = session()->has('tipo') ? session('tipo') : null;
         if ($tipo) {
@@ -79,7 +81,7 @@ class CajasCookieAuthenticated
         return $next($request);
     }
 
-    public function autorization(Request $request)
+    public function autorization(Request &$request)
     {
         $controllerName = $request->route()->getController(); // Esto devolverá una instancia de UserController
         $controllerClassName = str_replace('App\\Http\\Controllers\\', '', get_class($controllerName));
@@ -96,15 +98,17 @@ class CajasCookieAuthenticated
         $tipfun = session('tipfun');
 
         // Verificar si el tipfun tiene permiso para la acción
-        $hasPermission = MenuPermission::where('tipfun', $tipfun)
-            ->where('menu_item_id', $this->controller . '.' . $this->actionMethod) // Asume que menu_item_id coincide con controller.action
-            ->where('can_view', true)
-            ->exists();
+        $hasPermission = MenuItem::select(
+            DB::raw('menu_permissions.opciones')
+        )
+            ->join('menu_permissions', 'menu_permissions.menu_item', '=', 'menu_items.id')
+            ->where('menu_items.controller', $this->controller)
+            ->where('menu_permissions.tipfun', $tipfun);
 
-        if (!$hasPermission) {
+        if (!$hasPermission->exists()) {
             return false; // No autorizado
         }
-
+        $request->attributes->set('opciones', json_decode($hasPermission->first()->opciones));
         return true; // Autorizado
     }
 }

@@ -95,7 +95,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 7,
-                    'title' => 'Movimientos',
+                    'title' => 'Movimientos administrador',
                     'default_url' => null,
                     'icon' => 'ni ni-active-40',
                     'color' => 'text-green',
@@ -155,7 +155,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 12,
-                    'title' => 'Basica',
+                    'title' => 'Configuración básica',
                     'default_url' => 'cajas/mercurio01/index',
                     'icon' => null,
                     'color' => 'text-primary',
@@ -167,7 +167,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 13,
-                    'title' => 'Datos Caja',
+                    'title' => 'Datos caja',
                     'default_url' => 'cajas/mercurio02/index',
                     'icon' => null,
                     'color' => 'text-primary',
@@ -191,7 +191,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 15,
-                    'title' => 'Tipos Acceso',
+                    'title' => 'Tipos acceso',
                     'default_url' => 'cajas/mercurio06/index',
                     'icon' => null,
                     'color' => 'text-primary',
@@ -227,7 +227,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 18,
-                    'title' => 'Motivos Rechazo',
+                    'title' => 'Motivos rechazo',
                     'default_url' => 'cajas/mercurio11/index',
                     'icon' => null,
                     'color' => 'text-primary',
@@ -239,7 +239,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 19,
-                    'title' => 'Tipos Opciones',
+                    'title' => 'Tipos opciones',
                     'default_url' => 'cajas/mercurio09/index',
                     'icon' => null,
                     'color' => 'text-primary',
@@ -323,7 +323,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 26,
-                    'title' => 'Madres Comunitarias',
+                    'title' => 'Madres comunitarias',
                     'default_url' => 'cajas/aprobacioncom/index',
                     'icon' => null,
                     'color' => 'text-primary',
@@ -335,7 +335,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 28,
-                    'title' => 'Datos Basicos Empresa',
+                    'title' => 'Datos basicos empresa',
                     'default_url' => 'cajas/actualizaemp/index',
                     'icon' => null,
                     'color' => 'text-primary',
@@ -395,7 +395,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 33,
-                    'title' => 'Datos Basicos Trabajador',
+                    'title' => 'Datos basicos trabajador',
                     'default_url' => 'cajas/actualizatra/index',
                     'icon' => null,
                     'color' => 'text-primary',
@@ -407,7 +407,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 34,
-                    'title' => 'Consulta de Auditoria',
+                    'title' => 'Consulta de auditoria',
                     'default_url' => 'cajas/auditoria/index',
                     'icon' => null,
                     'color' => 'text-primary',
@@ -419,7 +419,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 35,
-                    'title' => 'Consulta de Activacion Masiva',
+                    'title' => 'Consulta activación masiva',
                     'default_url' => 'cajas/consulta/activacion_masiva',
                     'icon' => null,
                     'color' => 'text-primary',
@@ -431,7 +431,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 36,
-                    'title' => 'Reasignar Solicitudes',
+                    'title' => 'Reasignar solicitudes',
                     'default_url' => 'cajas/reasigna/index',
                     'icon' => null,
                     'color' => 'text-primary',
@@ -443,7 +443,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 37,
-                    'title' => 'Carga Laboral',
+                    'title' => 'Carga laboral',
                     'default_url' => 'cajas/consulta/carga_laboral',
                     'icon' => null,
                     'color' => 'text-primary',
@@ -467,12 +467,12 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 39,
-                    'title' => 'Basica',
+                    'title' => 'Administración básica',
                     'default_url' => 'cajas/mercurio50/index',
                     'icon' => null,
                     'color' => 'text-primary',
                     'nota' => 'texto',
-                    'parent_id' => '8',
+                    'parent_id' => '8',  //para movile
                     'codapl' => 'CA',
                     'controller' => 'Mercurio50Controller',
                     'action' => 'index',
@@ -587,7 +587,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 49,
-                    'title' => 'Clasificacion Comercios',
+                    'title' => 'Clasificacion comercios',
                     'default_url' => 'cajas/mercurio67/index',
                     'icon' => null,
                     'color' => 'text-primary',
@@ -635,7 +635,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 53,
-                    'title' => 'Usuarios Enlinea',
+                    'title' => 'Usuarios enlinea',
                     'default_url' => 'cajas/usuario/index',
                     'icon' => null,
                     'color' => 'text-primary',
@@ -758,7 +758,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 184,
-                    'title' => 'Consulta Giro',
+                    'title' => 'Consulta giro',
                     'default_url' => 'mercurio/subsidio/consulta_giro_view',
                     'icon' => null,
                     'color' => '',
@@ -770,7 +770,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 185,
-                    'title' => 'Consulta No Giro',
+                    'title' => 'Consulta no giro',
                     'default_url' => 'mercurio/subsidio/consulta_no_giro_view',
                     'icon' => null,
                     'color' => '',
@@ -782,7 +782,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 186,
-                    'title' => 'Consulta Planilla',
+                    'title' => 'Consulta planilla',
                     'default_url' => 'mercurio/subsidio/consulta_planilla_trabajador_view',
                     'icon' => null,
                     'color' => '',
@@ -794,7 +794,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 187,
-                    'title' => 'Consulta Saldo',
+                    'title' => 'Consulta saldo',
                     'default_url' => 'mercurio/subsidio/consulta_tarjeta',
                     'icon' => null,
                     'color' => '',
@@ -806,7 +806,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 188,
-                    'title' => 'Movimientos',
+                    'title' => '(T) Afiliación',
                     'default_url' => null,
                     'icon' => 'ni ni-active-40',
                     'color' => 'text-info',
@@ -818,7 +818,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 189,
-                    'title' => 'Actualizacion Datos Basicos',
+                    'title' => 'Actualización trabajador básicos',
                     'default_url' => 'mercurio/actualizadatostra/index',
                     'icon' => null,
                     'color' => '',
@@ -830,7 +830,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 190,
-                    'title' => 'Afiliacion Conyuge',
+                    'title' => '(T) Afiliación conyuge',
                     'default_url' => 'mercurio/conyuge/index',
                     'icon' => null,
                     'color' => '',
@@ -842,7 +842,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 191,
-                    'title' => 'Afiliacion Beneficiario',
+                    'title' => '(T) Afiliación beneficiario',
                     'default_url' => 'mercurio/beneficiario/index',
                     'icon' => null,
                     'color' => '',
@@ -854,7 +854,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 192,
-                    'title' => 'Presentación Certificados',
+                    'title' => '(T) Presentación certificados',
                     'default_url' => 'mercurio/certificados/index',
                     'icon' => null,
                     'color' => '',
@@ -878,7 +878,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 194,
-                    'title' => 'Certificado de Afiliacion',
+                    'title' => 'Certificado de afiliación',
                     'default_url' => 'mercurio/subsidio/certificado_afiliacion',
                     'icon' => null,
                     'color' => '',
@@ -902,7 +902,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 196,
-                    'title' => 'Perfil Usuario',
+                    'title' => 'Perfil usuario',
                     'default_url' => 'mercurio/usuario/index',
                     'icon' => null,
                     'color' => '',
@@ -914,7 +914,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 197,
-                    'title' => 'Buscar Historial',
+                    'title' => 'Buscar historial',
                     'default_url' => 'mercurio/subsidio/historial',
                     'icon' => null,
                     'color' => '',
@@ -926,7 +926,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 198,
-                    'title' => 'Firma Digital',
+                    'title' => 'Firma digital',
                     'default_url' => 'mercurio/firmas/index',
                     'icon' => null,
                     'color' => '',
@@ -950,7 +950,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 202,
-                    'title' => 'Consultas',
+                    'title' => 'Consultas generales',
                     'default_url' => null,
                     'icon' => 'ni ni-collection',
                     'color' => 'text-red',
@@ -962,7 +962,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 203,
-                    'title' => 'Consulta Trabajadores',
+                    'title' => 'Consulta trabajadores',
                     'default_url' => 'mercurio/subsidioemp/consulta_trabajadores_view',
                     'icon' => null,
                     'color' => '',
@@ -974,7 +974,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 204,
-                    'title' => 'Consulta Giro',
+                    'title' => 'Consulta giro',
                     'default_url' => 'mercurio/subsidioemp/consulta_giro_view',
                     'icon' => null,
                     'color' => '',
@@ -986,7 +986,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 205,
-                    'title' => 'Consulta Mora Presunta',
+                    'title' => 'Consulta mora presunta',
                     'default_url' => 'mercurio/subsidioemp/consulta_mora_presunta',
                     'icon' => null,
                     'color' => '',
@@ -998,7 +998,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 206,
-                    'title' => 'Consulta Nomina',
+                    'title' => 'Consulta nomina',
                     'default_url' => 'mercurio/subsidioemp/consulta_nomina_view',
                     'icon' => null,
                     'color' => '',
@@ -1010,7 +1010,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 207,
-                    'title' => 'Consulta Aportes',
+                    'title' => 'Consulta aportes',
                     'default_url' => 'mercurio/subsidioemp/consulta_aportes_view',
                     'icon' => null,
                     'color' => '',
@@ -1022,7 +1022,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 208,
-                    'title' => 'Afiliaciones',
+                    'title' => '(E) Afiliación',
                     'default_url' => null,
                     'icon' => 'ni ni-active-40',
                     'color' => 'text-info',
@@ -1034,7 +1034,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 209,
-                    'title' => 'Actualización Datos Empresa',
+                    'title' => 'Actualización datos empresa',
                     'default_url' => 'mercurio/actualizadatos/index',
                     'icon' => null,
                     'color' => '',
@@ -1046,7 +1046,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 210,
-                    'title' => 'Afiliacion de Trabajador',
+                    'title' => '(E) Afiliación de trabajador',
                     'default_url' => 'mercurio/trabajador/index',
                     'icon' => null,
                     'color' => '',
@@ -1070,7 +1070,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 214,
-                    'title' => 'Certificado de Afiliacion',
+                    'title' => 'Certificado de afiliación',
                     'default_url' => 'mercurio/subsidioemp/certificado_afiliacion',
                     'icon' => null,
                     'color' => '',
@@ -1082,7 +1082,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 215,
-                    'title' => 'Certificado para el Trabajador',
+                    'title' => 'Certificado para trabajador',
                     'default_url' => 'mercurio/subsidioemp/certificado_para_trabajador',
                     'icon' => null,
                     'color' => '',
@@ -1106,7 +1106,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 218,
-                    'title' => 'Buscar Historial',
+                    'title' => 'Buscar historial',
                     'default_url' => 'mercurio/subsidioemp/historial',
                     'icon' => null,
                     'color' => '',
@@ -1178,7 +1178,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 229,
-                    'title' => 'Buscar Historial',
+                    'title' => 'Buscar historial',
                     'default_url' => 'mercurio/movimientos/historial',
                     'icon' => null,
                     'color' => '',
@@ -1190,7 +1190,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 233,
-                    'title' => 'Foniñez',
+                    'title' => 'Foniñez modulo',
                     'default_url' => null,
                     'icon' => 'fas fa-child',
                     'color' => 'text-yellow',
@@ -1248,6 +1248,30 @@ class MenuItemSeeder extends Seeder
                     'controller' => 'EmpresaController',
                     'action' => 'miempresa',
                 ],
+                [
+                    'id' => 241,
+                    'title' => '(E) Afiliación conyuge',
+                    'default_url' => 'mercurio/conyuge/index',
+                    'icon' => null,
+                    'color' => '',
+                    'nota' => 'texto',
+                    'parent_id' => '208',
+                    'codapl' => 'ME',
+                    'controller' => 'ConyugeController',
+                    'action' => 'index',
+                ],
+                [
+                    'id' => 242,
+                    'title' => '(E) Afiliación beneficiario',
+                    'default_url' => 'mercurio/beneficiario/index',
+                    'icon' => null,
+                    'color' => '',
+                    'nota' => 'texto',
+                    'parent_id' => '208',
+                    'codapl' => 'ME',
+                    'controller' => 'BeneficiarioController',
+                    'action' => 'index',
+                ]
             ];
 
             foreach ($menu_mercurio as $item1) {

@@ -237,19 +237,33 @@ class MenuController extends Controller
             return response()->json(['message' => 'El item hijo no pertenece a la misma aplicación (codapl).'], 422);
         }
 
+        $childParent = MenuItem::where('id', $childId)->where('parent_id', $id)->first();
+        if (!$childParent) {
+            $childParent = MenuItem::create(
+                [
+                    'parent_id' => $parent->id,
+                    'codapl' => $codapl,
+                    'controller' => $child->controller,
+                    'action' => $child->action,
+                    'title' => $child->title,
+                    'default_url' => $child->default_url,
+                    'icon' => $child->icon,
+                    'color' => $child->color,
+                    'nota' => $child->nota
+                ]
+            );
+        }
+
         $hasTipo = DB::table('menu_tipos')->where('menu_item', $childId)->where('tipo', $tipo)->exists();
         if (! $hasTipo) {
             return response()->json(['message' => 'El hijo no tiene configuración para el tipo seleccionado.'], 422);
         }
 
-        $child->parent_id = $parent->id;
-        $child->save();
-
         //crea el tipo para el hijo si no existe
-        $menuTipo = MenuTipo::where('menu_item', $childId)->where('tipo', $tipo)->first();
+        $menuTipo = MenuTipo::where('menu_item', $childParent->id)->where('tipo', $tipo)->first();
         if (! $menuTipo) {
             $menuTipo = new MenuTipo();
-            $menuTipo->menu_item = $childId;
+            $menuTipo->menu_item = $childParent->id;
             $menuTipo->tipo = $tipo;
             $menuTipo->is_visible = true;
             $menuTipo->position = 1;
