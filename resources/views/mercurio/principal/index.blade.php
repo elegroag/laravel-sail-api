@@ -9,6 +9,8 @@
 @endsection
 
 @push('scripts')
+@include('mercurio/templates/tmp_clave_firma')
+
 <script type="text/template" id='tmp_layout'>
     @include('mercurio/principal.tmp.tmp_layout')
 </script>
@@ -20,6 +22,5 @@
 <script type="text/template" id='tmp_totales'>
     @include('mercurio/principal.tmp.tmp_totales')
 </script>
-
 <script src="{{ asset('mercurio/build/Principal.js') }}"></script>
 @endpush

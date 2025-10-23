@@ -7,6 +7,7 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Auth\SessionCookies;
 use App\Models\Adapter\DbBase;
 use App\Models\Mercurio07;
+use App\Models\Mercurio16;
 use App\Models\Mercurio30;
 use App\Models\Mercurio36;
 use App\Models\Mercurio38;
@@ -15,6 +16,7 @@ use App\Services\Entidades\EmpresaService;
 use App\Services\Entidades\IndependienteService;
 use App\Services\Entidades\ParticularService;
 use App\Services\Entidades\TrabajadorService;
+use App\Services\PreparaFormularios\GestionFirmaNoImage;
 use App\Services\Srequest;
 use App\Services\Utils\Comman;
 use Carbon\Carbon;
@@ -32,8 +34,8 @@ class PrincipalController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user') ?? null;
+        $this->tipo = session('tipo') ?? null;
     }
 
     public function index()
@@ -45,7 +47,30 @@ class PrincipalController extends ApplicationController
         return view('mercurio/principal/index', [
             'tipo' => $this->tipo,
             'documento' => $this->user['documento'],
-            'nombre' => $this->user['nombre'],
+            'nombre' => $this->user['nombre']
+        ]);
+    }
+
+    public function requireFirma()
+    {
+        $documento = $this->user['documento'] ?? null;
+        $coddoc = $this->user['coddoc'] ?? null;
+
+        $requireFirma = false;
+        if ($documento && $coddoc) {
+            $mfirma = Mercurio16::whereRaw("documento='{$documento}' AND coddoc='{$coddoc}'")->first();
+            // Se considera que tiene firma cuando existe registro y algún recurso asociado (imagen de firma o clave pública)
+            if (!$mfirma) {
+                $requireFirma = true;
+            } else {
+                if (empty($mfirma->firma) && empty($mfirma->keypublic)) {
+                    $requireFirma = true;
+                }
+            }
+        }
+        return response()->json([
+            'success' => true,
+            'requireFirma' => $requireFirma,
         ]);
     }
 
@@ -443,6 +468,69 @@ class PrincipalController extends ApplicationController
         }
 
         return $this->renderObject($salida, false);
+    }
+
+    public function establecerClaveFirma(Request $request)
+    {
+        try {
+            $documento = $this->user['documento'];
+            $coddoc = $this->user['coddoc'];
+
+            $clave = $request->input('clave');
+            if (!preg_match('/^\d{6}$/', (string)$clave)) {
+                throw new DebugException('La clave debe ser un número de 6 dígitos.', 422);
+            }
+            // Validación: no permitir secuencias consecutivas (ascendente o descendente)
+            $digits = str_split((string) $clave);
+            $inc = true;
+            $dec = true;
+            for ($i = 1; $i < count($digits); $i++) {
+                $prev = intval($digits[$i - 1]);
+                $curr = intval($digits[$i]);
+                if ($curr - $prev !== 1) {
+                    $inc = false;
+                }
+                if ($curr - $prev !== -1) {
+                    $dec = false;
+                }
+                if (!$inc && !$dec) {
+                    break;
+                }
+            }
+            if ($inc || $dec) {
+                throw new DebugException('La clave no puede ser una secuencia consecutiva (ej: 123456 o 654321).', 422);
+            }
+
+            $gestionFirmas = new GestionFirmaNoImage(
+                [
+                    'documento' => $documento,
+                    'coddoc' => $coddoc,
+                    'password' => $clave,
+                ]
+            );
+            if ($gestionFirmas->hasFirma() == false) {
+                $gestionFirmas->guardarFirma();
+                $gestionFirmas->generarClaves();
+            } else {
+                $firma = $gestionFirmas->getFirma();
+                if (is_null($firma->getKeypublic()) || is_null($firma->getKeyprivate())) {
+                    $gestionFirmas->guardarFirma();
+                    $gestionFirmas->generarClaves();
+                }
+            }
+
+            $salida = [
+                'success' => true,
+                'msj' => 'La clave fue registrada correctamente.',
+            ];
+        } catch (DebugException $e) {
+            $salida = [
+                'success' => false,
+                'msj' => $e->getMessage(),
+            ];
+        }
+
+        return response()->json($salida);
     }
 
     /**

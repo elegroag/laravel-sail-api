@@ -13,6 +13,8 @@
     <script src="{{ asset('assets/datatables.net/js/dataTables.min.js') }}"></script>
     <script src="{{ asset('assets/datatables.net.bs5/js/dataTables.bootstrap5.min.js') }}"></script>
 
+    @include('mercurio/templates/tmp_clave_firma')
+
     <script type="text/template" id='tmp_layout'>
         @include('mercurio/templates/tmp_layout')
     </script>
