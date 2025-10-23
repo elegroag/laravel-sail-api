@@ -67,6 +67,7 @@ return new class extends Migration
             $table->char('numcue', 20);
             $table->char('codcaj', 3);
             $table->char('cargo', 5);
+            $table->date('fecing')->nullable();
             $table->char('codban', 3)->nullable();
             $table->char('tipcue', 3)->nullable();
 

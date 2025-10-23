@@ -277,8 +277,14 @@ class OpenAddress extends Backbone.View {
 				' ' +
 				barrio;
 		}
-		document.getElementById(this.model.name).value = address;
+		let target = document.getElementById(this.model.name)
+		target.value = address;
 		this.Modal.hide();
+		if(address){
+			target.classList.add('is-valid');
+			target.classList.remove('is-invalid');
+			document.getElementById(this.model.name + '-error').textContent = '';
+		}
 	}
 
 	addressZona(event) {

@@ -66,8 +66,7 @@ class AuthMercurioController extends Controller
             if (
                 $request->input('tipo') == 'I' ||
                 $request->input('tipo') == 'O' ||
-                $request->input('tipo') == 'S' ||
-                $request->input('tipo') == 'F'
+                $request->input('tipo') == 'S'
             ) {
                 $request->validate([
                     'contribution_rate' => 'required',

@@ -47,50 +47,51 @@ class SignupIndependientes implements SignupInterface
      */
     public function createSignupService($data)
     {
-        $this->solicitud = new Mercurio41($data);
+        $solicitud = new Mercurio41($data);
 
-        $this->solicitud->setCedtra($data['cedtra']);
-        $this->solicitud->setDocumento($data['documento']);
-        $this->solicitud->setUsuario($data['usuario']);
-        $this->solicitud->setCoddocrepleg($data['coddocrepleg']);
-        $this->solicitud->setCoddoc($data['coddoc']);
-        $this->solicitud->setTipdoc($data['coddoc']);
-        $this->solicitud->setCalemp($data['calemp']);
-        $this->solicitud->setFecsol(date('Y-m-d'));
-        $this->solicitud->setCodact('0000');
-        $this->solicitud->setTipo('P');
-        $this->solicitud->setCodcaj(13);
-        $this->solicitud->setLog('0');
-        $this->solicitud->setCodciu($data['codciu']);
-        $this->solicitud->setTelefono($data['telefono']);
-        $this->solicitud->setCelular($data['telefono']);
-        $this->solicitud->setEmail($data['email']);
-        $this->solicitud->setCodzon($data['codciu']);
-        $this->solicitud->setTipdoc($data['coddoc']);
-        $this->solicitud->setSexo('I');
-        $this->solicitud->setFecnac(null);
-        $this->solicitud->setCiunac($data['codciu']);
-        $this->solicitud->setSalario('1160000');
-        $this->solicitud->setFecini(date('Y-m-d'));
-        $this->solicitud->setTipafi('3');
-        $this->solicitud->setVivienda('N');
-        $this->solicitud->setRural('N');
-        $this->solicitud->setEstciv('1');
-        $this->solicitud->setCabhog('N');
-        $this->solicitud->setEstado('T');
-        $this->solicitud->setCaptra('N');
-        $this->solicitud->setTipdis('00');
-        $this->solicitud->setNivedu(14);
-        $this->solicitud->setAutoriza('S');
-        $this->solicitud->setCodest(null);
-        $this->solicitud->setPeretn(7);
-        $this->solicitud->setResguardo_id(2);
-        $this->solicitud->setPub_indigena_id(2);
-        $this->solicitud->setFacvul(12);
-        $this->solicitud->setOrisex(1);
-        $this->solicitud->setTippag('T');
-        $this->solicitud->setNumcue(0);
-        $this->solicitud->setCargo(0);
+        $solicitud->documento = $data['documento'];
+        $solicitud->coddoc = $data['coddoc'];
+        $solicitud->tipo = $data['tipo'];
+
+        $solicitud->cedtra = $data['cedtra'];
+        $solicitud->usuario = $data['usuario'];
+        $solicitud->coddocrepleg = $data['coddocrepleg'];
+        $solicitud->tipdoc = $data['coddoc'];
+        $solicitud->calemp = $data['calemp'];
+        $solicitud->fecsol = date('Y-m-d');
+        $solicitud->codact = '0000';
+        $solicitud->codcaj = 13;
+        $solicitud->log = '0';
+        $solicitud->codciu = $data['codciu'];
+        $solicitud->telefono = $data['telefono'];
+        $solicitud->celular = $data['telefono'];
+        $solicitud->email = $data['email'];
+        $solicitud->codzon = $data['codciu'];
+        $solicitud->tipdoc = $data['coddoc'];
+        $solicitud->sexo = 'I';
+        $solicitud->fecnac = null;
+        $solicitud->ciunac = $data['codciu'];
+        $solicitud->salario = '1160000';
+        $solicitud->fecini = date('Y-m-d');
+        $solicitud->tipafi = '3';
+        $solicitud->vivienda = 'N';
+        $solicitud->rural = 'N';
+        $solicitud->estciv = '1';
+        $solicitud->cabhog = 'N';
+        $solicitud->estado = 'T';
+        $solicitud->captra = 'N';
+        $solicitud->tipdis = '00';
+        $solicitud->nivedu = 14;
+        $solicitud->autoriza = 'S';
+        $solicitud->codest = null;
+        $solicitud->peretn = 7;
+        $solicitud->resguardo_id = 2;
+        $solicitud->pub_indigena_id = 2;
+        $solicitud->facvul = 12;
+        $solicitud->orisex = 1;
+        $solicitud->tippag = 'T';
+        $solicitud->numcue = 0;
+        $solicitud->cargo = 0;
 
         $segnom = '';
         $segape = '';
@@ -103,13 +104,13 @@ class SignupIndependientes implements SignupInterface
                     $prinom = $exp[0];
                     $segnom = $exp[1];
                     $priape = $exp[2];
-                    $segape = $exp[3].' '.$exp[4].' '.$exp[5];
+                    $segape = $exp[3] . ' ' . $exp[4] . ' ' . $exp[5];
                     break;
                 case 5:
                     $prinom = $exp[0];
                     $segnom = $exp[1];
                     $priape = $exp[2];
-                    $segape = $exp[3].' '.$exp[4];
+                    $segape = $exp[3] . ' ' . $exp[4];
                     break;
                 case 4:
                     $prinom = $exp[0];
@@ -119,7 +120,7 @@ class SignupIndependientes implements SignupInterface
                     break;
                 case 3:
                     $prinom = $exp[0];
-                    $priape = $exp[1].' '.$exp[2];
+                    $priape = $exp[1] . ' ' . $exp[2];
                     break;
                 case 2:
                     $prinom = $exp[0];
@@ -133,12 +134,12 @@ class SignupIndependientes implements SignupInterface
                     break;
             }
         }
-        $this->solicitud->setPriape($priape);
-        $this->solicitud->setSegape($segape);
-        $this->solicitud->setPrinom($prinom);
-        $this->solicitud->setSegnom($segnom);
-        $this->solicitud->save();
-        $id = $this->solicitud->getId();
+        $solicitud->priape = $priape;
+        $solicitud->segape = $segape;
+        $solicitud->prinom = $prinom;
+        $solicitud->segnom = $segnom;
+        $solicitud->save();
+        $id = $solicitud->id;
 
         Mercurio37::where('tipopc', $this->tipopc)
             ->where('numero', $id)
@@ -147,6 +148,8 @@ class SignupIndependientes implements SignupInterface
         Mercurio10::where('tipopc', $this->tipopc)
             ->where('numero', $id)
             ->delete();
+
+        $this->solicitud = $solicitud;
     }
 
     public function getSolicitud()

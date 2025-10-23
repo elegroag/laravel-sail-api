@@ -130,9 +130,7 @@ class IndependienteController extends ApplicationController
      */
     public function guardar(Request $request)
     {
-        $this->setResponse('ajax');
         $this->db->begin();
-
         $independienteService = new IndependienteService;
         try {
             $id = $request->input('id');

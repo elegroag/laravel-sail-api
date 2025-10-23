@@ -27,13 +27,13 @@ class SignupEmpresas implements SignupInterface
 
     public function findByDocumentTemp($documento, $coddoc, $calemp = '')
     {
-        $this->solicitud = (new Mercurio30)->findFirst(
-            "coddoc='{$coddoc}' and ".
-                "documento='{$documento}' and ".
-                "nit='{$documento}' and ".
-                "calemp='{$calemp}' and ".
-                "estado='T'"
-        );
+        $this->solicitud = Mercurio30::where("coddoc", $coddoc)
+            ->where("documento", $documento)
+            ->where("nit", $documento)
+            ->where("calemp", $calemp)
+            ->where("estado", 'T')
+            ->first();
+
         if ($this->solicitud == false) {
             $this->solicitud = new Mercurio30;
         }
@@ -51,33 +51,34 @@ class SignupEmpresas implements SignupInterface
     {
         $solicitud = new Mercurio30($data);
 
-        $solicitud->setDocumento($data['documento']);
-        $solicitud->setCoddoc($data['coddoc']);
-        $solicitud->setTipo($data['tipo']);
-        $solicitud->setEmailpri($data['email']);
-        $solicitud->setCelular($data['telefono']);
-        $solicitud->getCelpri($data['telefono']);
-        $solicitud->setTelpri($data['telefono']);
-        $solicitud->setDigver('0');
-        $solicitud->setDireccion('CR');
-        $solicitud->setSigla('');
-        $solicitud->setTottra(1);
-        $solicitud->setDirpri('');
-        $solicitud->setPrinom('');
-        $solicitud->setSegnom('');
-        $solicitud->setPriape('');
-        $solicitud->setSegape('');
-        $solicitud->setMatmer('');
-        $solicitud->setLog('0');
-        $solicitud->setEstado('T');
-        $solicitud->setFecini(date('Y-m-d'));
-        $solicitud->setValnom(0);
-        $solicitud->setCodact('0000');
-        $solicitud->setFecini(date('Y-m-d'));
-        $solicitud->setTottra(1);
-        $solicitud->setCodcaj(13);
-        $solicitud->setCodest(null);
-        $solicitud->setTipemp('E');
+        $solicitud->documento = $data['documento'];
+        $solicitud->coddoc = $data['coddoc'];
+        $solicitud->tipo = $data['tipo'];
+
+        $solicitud->emailpri = $data['email'];
+        $solicitud->celular = $data['telefono'];
+        $solicitud->celpri = $data['telefono'];
+        $solicitud->telpri = $data['telefono'];
+        $solicitud->digver = '0';
+        $solicitud->direccion = 'CR';
+        $solicitud->sigla = '';
+        $solicitud->tottra = 1;
+        $solicitud->dirpri = '';
+        $solicitud->prinom = '';
+        $solicitud->segnom = '';
+        $solicitud->priape = '';
+        $solicitud->segape = '';
+        $solicitud->matmer = '';
+        $solicitud->log = '0';
+        $solicitud->estado = 'T';
+        $solicitud->fecini = date('Y-m-d');
+        $solicitud->valnom = 0;
+        $solicitud->codact = '0000';
+        $solicitud->fecini = date('Y-m-d');
+        $solicitud->tottra = 1;
+        $solicitud->codcaj = 13;
+        $solicitud->codest = null;
+        $solicitud->tipemp = 'E';
 
         $segnom = '';
         $segape = '';
@@ -90,13 +91,13 @@ class SignupEmpresas implements SignupInterface
                     $prinom = $exp[0];
                     $segnom = $exp[1];
                     $priape = $exp[2];
-                    $segape = $exp[3].' '.$exp[4].' '.$exp[5];
+                    $segape = $exp[3] . ' ' . $exp[4] . ' ' . $exp[5];
                     break;
                 case 5:
                     $prinom = $exp[0];
                     $segnom = $exp[1];
                     $priape = $exp[2];
-                    $segape = $exp[3].' '.$exp[4];
+                    $segape = $exp[3] . ' ' . $exp[4];
                     break;
                 case 4:
                     $prinom = $exp[0];
@@ -106,7 +107,7 @@ class SignupEmpresas implements SignupInterface
                     break;
                 case 3:
                     $prinom = $exp[0];
-                    $priape = $exp[1].' '.$exp[2];
+                    $priape = $exp[1] . ' ' . $exp[2];
                     break;
                 case 2:
                     $prinom = $exp[0];
@@ -121,15 +122,15 @@ class SignupEmpresas implements SignupInterface
             }
         }
 
-        $solicitud->setPriape($priape);
-        $solicitud->setSegape($segape);
-        $solicitud->setPrinom($prinom);
-        $solicitud->setSegnom($segnom);
+        $solicitud->priape = $priape;
+        $solicitud->segape = $segape;
+        $solicitud->prinom = $prinom;
+        $solicitud->segnom = $segnom;
         $solicitud->save();
 
-        Mercurio37::where('tipopc', $this->tipopc)->where('numero', $solicitud->getId())->delete();
-        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $solicitud->getId())->delete();
-        Tranoms::where('request', $solicitud->getId())->delete();
+        Mercurio37::where('tipopc', $this->tipopc)->where('numero', $solicitud->id)->delete();
+        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $solicitud->id)->delete();
+        Tranoms::where('request', $solicitud->id)->delete();
 
         $this->solicitud = $solicitud;
     }

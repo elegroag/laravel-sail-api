@@ -342,7 +342,7 @@ class MenuItemSeeder extends Seeder
                     'nota' => 'texto',
                     'parent_id' => '5',
                     'codapl' => 'CA',
-                    'controller' => 'ActualizaempController',
+                    'controller' => 'ApruebaUpEmpresaController',
                     'action' => 'index',
                 ],
                 [
@@ -402,7 +402,7 @@ class MenuItemSeeder extends Seeder
                     'nota' => 'texto',
                     'parent_id' => '6',
                     'codapl' => 'CA',
-                    'controller' => 'ActualizatraController',
+                    'controller' => 'ApruebaUpTrabajadorController',
                     'action' => 'index',
                 ],
                 [

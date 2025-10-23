@@ -26,12 +26,12 @@ class SignupPensionados implements SignupInterface
 
     public function findByDocumentTemp($documento, $coddoc, $calemp = '')
     {
-        $this->solicitud = (new Mercurio38)->findFirst(
-            "coddoc='{$coddoc}' and ".
-                "documento='{$documento}' and ".
-                "cedtra='{$documento}' and ".
-                "estado='T'"
-        );
+        $this->solicitud = Mercurio38::where("coddoc", $coddoc)
+            ->where("documento", $documento)
+            ->where("cedtra", $documento)
+            ->where("estado", 'T')
+            ->first();
+
         if ($this->solicitud == false) {
             $this->solicitud = new Mercurio38;
         }
@@ -54,13 +54,13 @@ class SignupPensionados implements SignupInterface
         unset($data['tipemp']); // dato no hace parte del modelo
         unset($data['nit']); // dato no hace parte del modelo
 
-        $this->solicitud = new Mercurio38($data);
-        $this->solicitud->setDocumento($data['documento']);
-        $this->solicitud->setCoddoc($data['coddoc']);
-        $this->solicitud->setTipo($data['tipo']);
+        $solicitud = new Mercurio38($data);
 
-        $this->solicitud->setCedtra($data['cedrep']);
-        $this->solicitud->setTipdoc($data['coddoc']);
+        $solicitud->documento = $data['documento'];
+        $solicitud->coddoc = $data['coddoc'];
+        $solicitud->tipo = $data['tipo'];
+        $solicitud->cedtra = $data['cedrep'];
+        $solicitud->tipdoc = $data['coddoc'];
 
         $segnom = '';
         $segape = '';
@@ -73,13 +73,13 @@ class SignupPensionados implements SignupInterface
                     $prinom = $exp[0];
                     $segnom = $exp[1];
                     $priape = $exp[2];
-                    $segape = $exp[3].' '.$exp[4].' '.$exp[5];
+                    $segape = $exp[3] . ' ' . $exp[4] . ' ' . $exp[5];
                     break;
                 case 5:
                     $prinom = $exp[0];
                     $segnom = $exp[1];
                     $priape = $exp[2];
-                    $segape = $exp[3].' '.$exp[4];
+                    $segape = $exp[3] . ' ' . $exp[4];
                     break;
                 case 4:
                     $prinom = $exp[0];
@@ -89,7 +89,7 @@ class SignupPensionados implements SignupInterface
                     break;
                 case 3:
                     $prinom = $exp[0];
-                    $priape = $exp[1].' '.$exp[2];
+                    $priape = $exp[1] . ' ' . $exp[2];
                     break;
                 case 2:
                     $prinom = $exp[0];
@@ -103,48 +103,49 @@ class SignupPensionados implements SignupInterface
                     break;
             }
         }
-        $this->solicitud->setPriape($priape);
-        $this->solicitud->setSegape($segape);
-        $this->solicitud->setPrinom($prinom);
-        $this->solicitud->setSegnom($segnom);
-        $this->solicitud->setTelefono($data['telefono']);
-        $this->solicitud->setCelular($data['telefono']);
-        $this->solicitud->setCodzon($data['codciu']);
-        $this->solicitud->setCodciu($data['codciu']);
-        $this->solicitud->setUsuario($data['usuario']);
-        $this->solicitud->setCoddocrepleg($data['coddocrepleg']);
-        $this->solicitud->setEmail($data['email']);
-        $this->solicitud->setCalemp($data['calemp']);
-        $this->solicitud->setTipafi('3');
-        $this->solicitud->setFecnac(date('Y-m-d'));
-        $this->solicitud->setFecing(date('Y-m-d'));
-        $this->solicitud->setSalario(0);
-        $this->solicitud->setCiunac($data['codciu']);
-        $this->solicitud->setSexo('M');
-        $this->solicitud->setEstciv(1);
-        $this->solicitud->setCabhog('N');
-        $this->solicitud->setVivienda('N');
-        $this->solicitud->setRural('N');
-        $this->solicitud->setAutoriza('S');
-        $this->solicitud->setLog('0');
-        $this->solicitud->setDireccion('CR');
-        $this->solicitud->setEstado('T');
-        $this->solicitud->setCodact('0000');
-        $this->solicitud->setCodest(null);
-        $this->solicitud->setPeretn(7);
-        $this->solicitud->setResguardo_id(2);
-        $this->solicitud->setPub_indigena_id(2);
-        $this->solicitud->setFacvul(12);
-        $this->solicitud->setOrisex(1);
-        $this->solicitud->setTippag('T');
-        $this->solicitud->setNumcue(0);
-        $this->solicitud->setCargo(0);
-        $this->solicitud->setCaptra('N');
-        $this->solicitud->save();
-        $id = $this->solicitud->getId();
+        $solicitud->priape = $priape;
+        $solicitud->segape = $segape;
+        $solicitud->prinom = $prinom;
+        $solicitud->segnom = $segnom;
+        $solicitud->telefono = $data['telefono'];
+        $solicitud->celular = $data['telefono'];
+        $solicitud->codzon = $data['codciu'];
+        $solicitud->codciu = $data['codciu'];
+        $solicitud->usuario = $data['usuario'];
+        $solicitud->coddocrepleg = $data['coddocrepleg'];
+        $solicitud->email = $data['email'];
+        $solicitud->calemp = $data['calemp'];
+        $solicitud->tipafi = '3';
+        $solicitud->fecnac = date('Y-m-d');
+        $solicitud->fecing = date('Y-m-d');
+        $solicitud->salario = 0;
+        $solicitud->ciunac = $data['codciu'];
+        $solicitud->sexo = 'M';
+        $solicitud->estciv = 1;
+        $solicitud->cabhog = 'N';
+        $solicitud->vivienda = 'N';
+        $solicitud->rural = 'N';
+        $solicitud->autoriza = 'S';
+        $solicitud->log = '0';
+        $solicitud->direccion = 'CR';
+        $solicitud->estado = 'T';
+        $solicitud->codact = '0000';
+        $solicitud->codest = null;
+        $solicitud->peretn = 7;
+        $solicitud->resguardo_id = 2;
+        $solicitud->pub_indigena_id = 2;
+        $solicitud->facvul = 12;
+        $solicitud->orisex = 1;
+        $solicitud->tippag = 'T';
+        $solicitud->numcue = 0;
+        $solicitud->cargo = 0;
+        $solicitud->captra = 'N';
+        $solicitud->save();
 
-        Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
-        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
+        Mercurio37::where('tipopc', $this->tipopc)->where('numero', $solicitud->id)->delete();
+        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $solicitud->id)->delete();
+
+        $this->solicitud = $solicitud;
     }
 
     public function getSolicitud()
