@@ -21,8 +21,8 @@ class UsuarioController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user') ?? null;
+        $this->tipo = session('tipo') ?? null;
     }
 
     public function index()
@@ -37,7 +37,6 @@ class UsuarioController extends ApplicationController
 
     public function params()
     {
-        $this->setResponse('ajax');
         try {
             $mtipoDocumentos = new Gener18;
             $coddoc = [];
@@ -80,12 +79,11 @@ class UsuarioController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function showPerfil()
     {
-        $this->setResponse('ajax');
         try {
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
@@ -132,12 +130,11 @@ class UsuarioController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function guardar(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $tipo = $request->input('tipo');
             $coddoc = $request->input('coddoc');
@@ -178,7 +175,7 @@ class UsuarioController extends ApplicationController
             }
 
             $msubsi07->save();
-            $entity = $msubsi07->getArray();
+            $entity = $msubsi07->toArray();
             $response = [
                 'msj' => 'Proceso se ha completado con éxito',
                 'success' => true,
@@ -191,6 +188,6 @@ class UsuarioController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 }

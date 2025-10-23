@@ -1,4 +1,6 @@
+@extends('layouts.bone')
 
+@section('content')
 <div class="card-body">
     <div class="nav-wrapper">
         <ul class="nav nav-pills nav-fill flex-column flex-md-row" id="tabs-icons-text" role="tablist">
@@ -30,31 +32,33 @@
                 <div class="tab-pane fade show active" id="tabs-icons-text-1" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
 
                     <div class="row">
-                        {!! $actualizacion_basico !!}
+                        @include('mercurio.subsidio.tmp.actualizacion_basico', ['items' => $mercurio33])
                     </div>
                 </div>
                 <div class="tab-pane fade" id="tabs-icons-text-2" role="tabpanel" aria-labelledby="tabs-icons-text-2-tab">
 
                     <div class="row">
-                        {!! $html_afiliacion_beneficiario !!}
+                        @include('mercurio.subsidio.tmp.afiliacion_beneficiario', ['items' => $mercurio34])
                     </div>
                 </div>
                 <div class="tab-pane fade" id="tabs-icons-text-3" role="tabpanel" aria-labelledby="tabs-icons-text-3-tab">
 
                     <div class="row">
-                        {!! $html_afiliacion_conyuge !!}
+                        @include('mercurio.subsidio.tmp.afiliacion_conyuge', ['items' => $mercurio32])
                     </div>
                 </div>
                 <div class="tab-pane fade" id="tabs-icons-text-4" role="tabpanel" aria-labelledby="tabs-icons-text-4-tab">
 
                     <div class="row">
-                        {!! $html_certificados !!}
+                        @include('mercurio.subsidio.tmp.certificados', ['items' => $mercurio45])
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+@endsection
 
-
-{!! Tag::javascriptInclude('Mercurio/build/build.consulta_trabajador') !!}
+@push('scripts')
+<script src="{{ asset('mercurio/build/ConsultasTrabajador.js') }}"></script>
+@endpush

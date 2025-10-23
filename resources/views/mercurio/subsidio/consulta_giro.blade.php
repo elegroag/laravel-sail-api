@@ -80,29 +80,31 @@
         </table>
 </script>
 
-<div class="card mb-0">
-    <div class="card-header bg-green-blue p-1">
-        <div class="btn-group w-100">
-            <button type="button" class="btn btn-default w-10" id='bt_consulta_giro'><i class="fa fa-search"></i> Consultar</button>
-        </div>
-    </div>
-    <div class="card-body">
-        <form id="form" class="validation_form" autocomplete="off" novalidate>
-            <div class="row justify-content-center">
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label for="perini" class="form-control-label">Periodo Inicial</label>
-                        <input type="date" name="perini" placeholder="Periodo Inicial" class="form-control" value="@php echo date('Y-m-d', strtotime('-3 month')); @endphp">
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label for="perfin" class="form-control-label">Periodo Final</label>
-                        <input type="date" name="perfin" placeholder="Periodo Final" class="form-control" value="@php echo date('Y-m-d'); @endphp">
-                    </div>
-                </div>
+<div class="col-12 mt-3">
+    <div class="card mb-0">
+        <div class="card-header p-3">
+            <div class="btn-group w-100">
+                <button type="button" class="btn btn-default w-10" id='bt_consulta_giro'><i class="fa fa-search"></i> Consultar</button>
             </div>
-        </form>
+        </div>
+        <div class="card-body">
+            <form id="form" class="validation_form" autocomplete="off" novalidate>
+                <div class="row justify-content-center">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="perini" class="form-control-label">Periodo Inicial</label>
+                            <input type="date" name="perini" placeholder="Periodo Inicial" class="form-control" value="@php echo date('Y-m-d', strtotime('-3 month')); @endphp">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="perfin" class="form-control-label">Periodo Final</label>
+                            <input type="date" name="perfin" placeholder="Periodo Final" class="form-control" value="@php echo date('Y-m-d'); @endphp">
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 

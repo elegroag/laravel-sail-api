@@ -6,50 +6,52 @@
 @endpush
 
 @section('content')
-<div class="card m-3">
-    <div class="card-header bg-green-blue p-1">
-        <div class="nav-wrapper p-0">
-            <ul class="nav nav-pills" id="tabs-icons-text" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link mb-sm-3 mb-md-0 active"
-                        id="tabsTrabajadorTab"
-                        data-bs-toggle="tab"
-                        href="#tabsTrabajador"
-                        role="tab"
-                        aria-controls="tabsTrabajador"
-                        aria-selected="true">
-                        <i class="fas fa-user-tie  mr-2"></i>Trabajador
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link mb-sm-3 mb-md-0"
-                        id="tabsConyugeTab"
-                        data-bs-toggle="tab"
-                        href="#tabsConyuge"
-                        role="tab"
-                        aria-controls="tabsConyuge"
-                        aria-selected="false">
-                        <i class="fas fa-user-friends mr-2"></i>Conyuges
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a
-                        class="nav-link mb-sm-3 mb-md-0"
-                        id="tabsBeneficiarioTab"
-                        data-bs-toggle="tab"
-                        href="#tabsBeneficiario"
-                        role="tab"
-                        aria-controls="tabsBeneficiario"
-                        aria-selected="false">
-                        <i class="fas fa-child mr-2"></i>Beneficiarios
-                    </a>
-                </li>
-            </ul>
+<div class="col-12 mt-3">
+    <div class="card mb-0">
+        <div class="card-header p-3">
+            <div class="nav-wrapper p-0">
+                <ul class="nav nav-pills" id="tabs-icons-text" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link mb-sm-3 mb-md-0 active"
+                            id="tabsTrabajadorTab"
+                            data-bs-toggle="tab"
+                            href="#tabsTrabajador"
+                            role="tab"
+                            aria-controls="tabsTrabajador"
+                            aria-selected="true">
+                            <i class="fas fa-user-tie  mr-2"></i>Trabajador
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link mb-sm-3 mb-md-0"
+                            id="tabsConyugeTab"
+                            data-bs-toggle="tab"
+                            href="#tabsConyuge"
+                            role="tab"
+                            aria-controls="tabsConyuge"
+                            aria-selected="false">
+                            <i class="fas fa-user-friends mr-2"></i>Conyuges
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a
+                            class="nav-link mb-sm-3 mb-md-0"
+                            id="tabsBeneficiarioTab"
+                            data-bs-toggle="tab"
+                            href="#tabsBeneficiario"
+                            role="tab"
+                            aria-controls="tabsBeneficiario"
+                            aria-selected="false">
+                            <i class="fas fa-child mr-2"></i>Beneficiarios
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
+        <div class="card-body p-0 m-3">
+            <div id="myTabContent"></div>
+        </div>        
     </div>
-    <div class="card-body p-0 m-3">
-        <div id="myTabContent"></div>
-    </div>        
 </div>
 @endsection
 

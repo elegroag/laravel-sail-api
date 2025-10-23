@@ -73,8 +73,6 @@ class UsuarioController extends Controller
      */
     public function params()
     {
-
-
         try {
             // Obtener tipos de documento usando Eloquent
             $coddoc = Gener18::pluck('detdoc', 'coddoc')->toArray();
@@ -110,7 +108,6 @@ class UsuarioController extends Controller
 
     public function guardar(Request $request)
     {
-
         try {
             $tipo = $request->input('tipo');
             $coddoc = $request->input('coddoc');
