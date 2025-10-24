@@ -273,7 +273,7 @@ const useRegisterController = ({
               coddoc: responseJson.data.coddoc,
               documento: responseJson.data.documento,
             }));
-          }, 1500);
+          }, 1000);
         } else {
           console.error('Error al registrar:', responseJson)
           setToast({ message: typeof responseJson?.message === 'string' ? responseJson.message : 'No fue posible completar el registro.', type: 'error' })

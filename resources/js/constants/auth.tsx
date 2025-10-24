@@ -1,6 +1,6 @@
 // Constantes del flujo de registro
-import { Building2, GraduationCap, Briefcase, Users, Home, HardHat, User } from "lucide-react"
-import type { UserTypeOption } from "@/types/auth"
+import { Building2, GraduationCap, Briefcase, Users, HardHat, User, Mail, MessageCircle } from "lucide-react"
+import type { UserTypeOption, DeliveryMethod } from "@/types/auth"
 
 export const userTypes: UserTypeOption[] = [
   { id: "empresa", label: "Empresa aportante", icon: <Building2 className="w-8 h-8 text-blue-500" /> },
@@ -26,3 +26,23 @@ export enum TipoFuncionario {
     trabajador= "T",
     pensionado= "O",
 }
+
+export const DeliveryOptions: Array<{
+  id: DeliveryMethod
+  label: string
+  description: string
+  icon: typeof Mail
+}> = [
+  {
+    id: 'email',
+    label: 'Correo electrónico',
+    description: 'Recibirás el código en tu bandeja de entrada asociada.',
+    icon: Mail,
+  },
+  {
+    id: 'whatsapp',
+    label: 'WhatsApp',
+    description: 'Enviaremos el código a tu número registrado por WhatsApp.',
+    icon: MessageCircle,
+  },
+]

@@ -25,6 +25,12 @@ export interface FormBasic {
     isSuccess: boolean,
 }
 
+export interface FormBasicRecovery extends FormBasic {
+    delivery_method: string,
+    whatsapp?: string,
+    email?: string,
+}
+
 export interface FormState extends FormBasic {
     selectedUserType: UserType | null
     firstName: string
@@ -53,6 +59,16 @@ export interface FormState extends FormBasic {
 export type FormAction =
     | { type: "SET_USER_TYPE"; payload: UserType }
     | { type: "SET_FIELD"; field: keyof FormState; value: string }
+    | { type: "SET_ERROR"; field: string; error: string }
+    | { type: "CLEAR_ERRORS" }
+    | { type: "SET_SUBMITTING"; payload: boolean }
+    | { type: "RESET_FORM" }
+    | { type: "SET_SUCCESS"; payload: boolean }
+    | { type: "CLEAR_ERROR"; field: string }
+
+
+export type FormActionRecovery =
+    | { type: "SET_FIELD"; field: keyof FormBasicRecovery; value: string }
     | { type: "SET_ERROR"; field: string; error: string }
     | { type: "CLEAR_ERRORS" }
     | { type: "SET_SUBMITTING"; payload: boolean }

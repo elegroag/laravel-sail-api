@@ -169,7 +169,7 @@ class AuthMercurioController extends Controller
                 'delivery_method' => $request->input('delivery_method'),
                 'context' => 'verifyStore',
             ];
-            $token = (new AuthJwt(10))->SimpleToken($claims);
+            $token = (new AuthJwt(30))->SimpleToken($claims);
             // Primero validar existencia en mercurio07 para no romper la FK al insertar/actualizar mercurio19
             $user07 = Mercurio07::where('documento', $request->input('documento'))
                 ->where('coddoc', $request->input('coddoc'))
@@ -180,7 +180,7 @@ class AuthMercurioController extends Controller
                 return response()->json([
                     'success' => false,
                     'msj' => 'No existe un usuario registrado con los datos ingresados. Verifique o regístrese para continuar.',
-                ]);
+                ], 422);
             }
 
             $user19 = Mercurio19::where('documento', $request->input('documento'))
@@ -266,5 +266,131 @@ class AuthMercurioController extends Controller
                 'message' => 'Error al crear empresa: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function recoverySend(Request $request)
+    {
+        try {
+            $data = $request->validate([
+                'documento' => 'required|numeric|digits_between:6,18',
+                'coddoc' => 'required|string|min:1|max:2',
+                'tipo' => 'required|string|size:1',
+                'delivery_method' => 'required|string|min:5|max:15'
+            ]);
+
+            $delivery_method = $data['delivery_method'];
+            if ($delivery_method == 'email') {
+                //valida email
+                $request->validate([
+                    'email' => 'required|string|email',
+                ]);
+                $data['email'] = $request->input('email');
+            } else {
+                //valida whatsapp
+                $request->validate([
+                    'whatsapp' => 'required|string|numeric|digits_between:6,18',
+                ]);
+                $data['whatsapp'] = $request->input('whatsapp');
+            }
+
+            $user07 = Mercurio07::where('documento', $data['documento'])
+                ->where('coddoc', $data['coddoc'])
+                ->where('tipo', $data['tipo'])
+                ->first();
+
+            if (! $user07) {
+                return response()->json([
+                    'success' => false,
+                    'msj' => 'No existe un usuario registrado con los datos ingresados. Verifique o regístrese para continuar.',
+                ]);
+            }
+
+            $claims = [
+                'documento' => $request->input('documento'),
+                'coddoc' => $request->input('coddoc'),
+                'tipo' => $request->input('tipo'),
+                'delivery_method' => $request->input('delivery_method'),
+                'context' => 'recoverySend',
+            ];
+            $token = (new AuthJwt(30))->SimpleToken($claims);
+
+            $codigoVerify = genera_code();
+            $inicio = Carbon::now()->format('Y-m-d H:i:s');
+            $intentos = '0';
+
+            Mercurio19::where('documento', $data['documento'])
+                ->where('coddoc', $data['coddoc'])
+                ->where('tipo', $data['tipo'])
+                ->update([
+                    'inicio' => $inicio,
+                    'intentos' => (int) $intentos,
+                    'codver' => (string) $codigoVerify,
+                ]);
+
+            if ($request->input('delivery_method') == 'email') {
+
+                $html = "Utiliza el siguiente código de verificación, para confirmar el propietario de la dirección de correo:<br/>
+                <span style=\"font-size:16px;color:#333\">CÓDIGO DE VERIFICACIÓN: </span><br/>
+                <span style=\"font-size:30px;color:#11cdef\"><b>{$codigoVerify}</b></span>";
+
+                $asunto = 'Generación nuevo PIN plataforma Comfaca En Línea';
+                $emailCaja = Mercurio01::first();
+                $senderEmail = new SenderEmail;
+                $senderEmail->setters(
+                    "emisor_email: {$emailCaja->getEmail()}",
+                    "emisor_clave: {$emailCaja->getClave()}",
+                    "asunto: {$asunto}"
+                );
+                $senderEmail->send($user07->email, $html);
+            } else {
+                if (! $user07->whatsapp) {
+                    throw new DebugException('No se proporcionó número de whatsapp', 501);
+                }
+
+                $html = "> Código de verificación:
+                *{$codigoVerify}*. Generación de PIN plataforma Comfaca En Línea, utiliza el código de verificación para confirmar el propietario de la línea de whatsapp.";
+                $apiWhatsaap = new ApiWhatsapp;
+                $apiWhatsaap->send([
+                    'servicio' => 'Whatsapp',
+                    'metodo' => 'enviar',
+                    'params' => [
+                        'numero' => $user07->whatsapp,
+                        'mensaje' => $html,
+                    ],
+                ]);
+            }
+
+            $salida = [
+                'success' => true,
+                'message' => 'Código de verificación enviado correctamente',
+                'token' => $token,
+                'data' => [
+                    'documento' => $data['documento'],
+                    'coddoc' => $data['coddoc'],
+                    'tipo' => $data['tipo'],
+                ],
+            ];
+            $httpCode = 201;
+        } catch (ValidationException $e) {
+            $salida = [
+                'success' => false,
+                'message' => 'Error de validación',
+                'errors' => $e->errors(),
+            ];
+            $httpCode = 422;
+        } catch (DebugException $e) {
+            $salida = [
+                'success' => false,
+                'message' => 'Error de verificación de datos: ' . $e->getMessage(),
+            ];
+            $httpCode = 500;
+        } catch (\Exception $e) {
+            $salida = [
+                'success' => false,
+                'message' => 'Error de sistema: ' . $e->getMessage(),
+            ];
+            $httpCode = 500;
+        }
+        return response()->json($salida, $httpCode);
     }
 }

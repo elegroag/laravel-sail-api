@@ -1,33 +1,13 @@
 import { router } from '@inertiajs/react'
-import { LoaderCircle, CheckCircle, Mail, MessageCircle } from 'lucide-react'
+import { LoaderCircle, CheckCircle} from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import AuthLayout from '@/layouts/auth-layout'
 import AuthWelcome from './components/auth-welcome'
-import type { DeliveryMethod, VerifyEmailProps } from '@/types/auth'
+import type { VerifyEmailProps } from '@/types/auth'
 import useVerifyController from '@/pages/Auth/controllers/use-verify-controller'
-
-export const DeliveryOptions: Array<{
-    id: DeliveryMethod
-    label: string
-    description: string
-    icon: typeof Mail
-}> = [
-    {
-        id: 'email',
-        label: 'Correo electrónico',
-        description: 'Recibirás el código en tu bandeja de entrada asociada.',
-        icon: Mail,
-    },
-    {
-        id: 'whatsapp',
-        label: 'WhatsApp',
-        description: 'Enviaremos el código a tu número registrado por WhatsApp.',
-        icon: MessageCircle,
-    },
-]
-
+import { DeliveryOptions } from '@/constants/auth'
 
 export default function VerifyEmail({ documento, coddoc, tipo, token, status, errors }: VerifyEmailProps) {
     const {

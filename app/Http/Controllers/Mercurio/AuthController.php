@@ -99,7 +99,16 @@ class AuthController extends Controller
 
     public function resetPassword()
     {
-        return Inertia::render('Auth/ResetPassword');
+        $coddoc = [];
+        foreach (Gener18::all() as $entity) {
+            if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') {
+                continue;
+            }
+            $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
+        }
+        return Inertia::render('Auth/ResetPassword', [
+            'Coddoc' => $coddoc,
+        ]);
     }
 
     /**

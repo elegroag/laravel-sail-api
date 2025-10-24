@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { userTypes, documentTypes } from "@/constants/auth"
+import { userTypes, documentTypes, DeliveryOptions } from "@/constants/auth"
 import type { UserType } from "@/types/auth"
 
 // Tipo mínimo del estado necesario en este formulario
@@ -13,20 +13,24 @@ type ResetFormState = {
   documentType: string
   identification: string
   email: string
+  whatsapp: string,
+  delivery_method: string,
   errors: Record<string, string>
-  isSubmitting: boolean
+  isSubmitting: boolean,
 }
 
 interface Props {
   selectedUserType: UserType
   formState: ResetFormState
   onBack: () => void
-  onFieldChange: (field: "documentType" | "identification" | "email", value: string) => void
+  onFieldChange: (field: "documentType" | "identification" | "email" | "whatsapp" | "delivery_method", value: string) => void
   onSubmit: (e: React.FormEvent) => void
   documentTypeRef: React.RefObject<HTMLButtonElement | null>
   identificationRef: React.RefObject<HTMLInputElement | null>
   emailRef: React.RefObject<HTMLInputElement | null>
+  whatsappRef: React.RefObject<HTMLInputElement | null>
   loginHref: string
+  documentTypeOptions: { value: string; label: string }[]
 }
 
 // Componente presentacional del formulario de "Recuperar clave"
@@ -40,7 +44,9 @@ const ResetPasswordForm: React.FC<Props> = ({
   documentTypeRef,
   identificationRef,
   emailRef,
+  whatsappRef,
   loginHref,
+  documentTypeOptions
 }) => {
   const selectedLabel = userTypes.find((ut) => ut.id === selectedUserType)?.label
 
@@ -72,7 +78,7 @@ const ResetPasswordForm: React.FC<Props> = ({
               <SelectValue placeholder="Selecciona el tipo de documento" />
             </SelectTrigger>
             <SelectContent>
-              {documentTypes.map((doc) => (
+              {documentTypeOptions.map((doc) => (
                 <SelectItem key={doc.value} value={doc.value}>
                   {doc.label}
                 </SelectItem>
@@ -102,23 +108,76 @@ const ResetPasswordForm: React.FC<Props> = ({
           )}
         </div>
 
-        <div>
-          <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-            Correo electrónico *
-          </Label>
-          <Input
-            ref={emailRef}
-            id="email"
-            type="email"
-            value={formState.email}
-            onChange={(e) => onFieldChange("email", e.target.value)}
-            placeholder="Ingresa tu correo electrónico"
-            className={`in-b-form mt-1 ${formState.errors.email ? "border-red-500" : ""}`}
-          />
-          {formState.errors.email && (
-            <p className="text-red-500 text-xs mt-1">{formState.errors.email}</p>
-          )}
+        <div className="space-y-3">
+          <p className="text-sm font-medium text-gray-700">
+            Selecciona dónde deseas recibir el enlace de recuperación.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {DeliveryOptions.map(({ id, label, description, icon: Icon }) => {
+              const isActive = formState.delivery_method === id
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => onFieldChange("delivery_method", id)}
+                  className={`rounded-lg border px-4 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                    isActive ? 'border-emerald-500 bg-emerald-50 text-emerald-700 shadow-sm' : 'border-muted'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className={`inline-flex items-center justify-center rounded-full border p-2 ${isActive ? 'border-emerald-400 bg-white text-emerald-600' : 'border-muted text-muted-foreground'}`}>
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold">{label}</p>
+                      <p className="text-xs text-muted-foreground">{description}</p>
+                    </div>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
         </div>
+
+        {formState.delivery_method === 'email' && (
+          <div>
+            <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+              Correo electrónico *
+            </Label>
+            <Input
+              ref={emailRef}
+              id="email"
+              type="email"
+              value={formState.email}
+              onChange={(e) => onFieldChange("email", e.target.value)}
+              placeholder="Ingresa tu correo electrónico"
+              className={`in-b-form mt-1 ${formState.errors.email ? "border-red-500" : ""}`}
+            />
+            {formState.errors.email && (
+              <p className="text-red-500 text-xs mt-1">{formState.errors.email}</p>
+            )}
+          </div>
+        )}
+
+        {formState.delivery_method === 'whatsapp' && (
+          <div>
+            <Label htmlFor="whatsapp" className="text-sm font-medium text-gray-700">
+              WhatsApp *
+            </Label>
+            <Input
+              ref={whatsappRef}
+              id="whatsapp"
+              type="text"
+              value={formState.whatsapp}
+              onChange={(e) => onFieldChange("whatsapp", e.target.value)}
+              placeholder="Ingresa tu WhatsApp"
+              className={`in-b-form mt-1 ${formState.errors.whatsapp ? "border-red-500" : ""}`}
+            />
+            {formState.errors.whatsapp && (
+              <p className="text-red-500 text-xs mt-1">{formState.errors.whatsapp}</p>
+            )}
+          </div>
+        )}
 
         <Button
           type="submit"

@@ -130,7 +130,7 @@ class AuthJwt
             $payload = JWTFactory::customClaims($claims)->make();
             $this->token = JWTAuth::encode($payload)->get();
         } catch (JWTException $e) {
-            throw new AuthException('No fue posible generar el token de autenticación: '.$e->getMessage(), 500);
+            throw new AuthException('No fue posible generar el token de autenticación: ' . $e->getMessage(), 500);
         }
 
         return $this->token;
@@ -215,9 +215,6 @@ class AuthJwt
     public function SimpleToken(array $extraClaims = [])
     {
         $this->loadHeaders(true);
-        if (! is_ajax()) {
-            throw new AuthException('El acceso no es correcto al servicio, la solicitud no es REST', 404);
-        }
         if (! empty($_SERVER['HTTP_CLIENT_IP'])) {
             $ip = $_SERVER['HTTP_CLIENT_IP'];
         } elseif (! empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
@@ -251,7 +248,7 @@ class AuthJwt
 
             return JWTAuth::encode($payload)->get();
         } catch (JWTException $e) {
-            throw new AuthException('No fue posible generar el token: '.$e->getMessage(), 500);
+            throw new AuthException('No fue posible generar el token: ' . $e->getMessage(), 500);
         }
     }
 
