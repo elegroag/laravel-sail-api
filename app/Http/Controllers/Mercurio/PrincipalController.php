@@ -12,6 +12,11 @@ use App\Models\Mercurio30;
 use App\Models\Mercurio36;
 use App\Models\Mercurio38;
 use App\Models\Mercurio41;
+use App\Services\Autentications\AutenticaEmpresa;
+use App\Services\Autentications\AutenticaIndependiente;
+use App\Services\Autentications\AutenticaParticular;
+use App\Services\Autentications\AutenticaPensionado;
+use App\Services\Autentications\AutenticaTrabajador;
 use App\Services\Entidades\EmpresaService;
 use App\Services\Entidades\IndependienteService;
 use App\Services\Entidades\ParticularService;
@@ -56,6 +61,7 @@ class PrincipalController extends ApplicationController
         $documento = $this->user['documento'] ?? null;
         $coddoc = $this->user['coddoc'] ?? null;
 
+
         $requireFirma = false;
         if ($documento && $coddoc) {
             $mfirma = Mercurio16::whereRaw("documento='{$documento}' AND coddoc='{$coddoc}'")->first();
@@ -68,9 +74,32 @@ class PrincipalController extends ApplicationController
                 }
             }
         }
+
         return response()->json([
             'success' => true,
             'requireFirma' => $requireFirma,
+        ]);
+    }
+
+    public function requireChangeClave()
+    {
+        $documento = $this->user['documento'] ?? null;
+        $coddoc = $this->user['coddoc'] ?? null;
+
+        $requireChangeClave = false;
+        $m07 = Mercurio07::where("documento", $documento)
+            ->where("coddoc", $coddoc)
+            ->where(
+                "tipo",
+                $this->tipo
+            );
+        if ($m07->clave === 'x0x') {
+            $requireChangeClave = true;
+        }
+
+        return response()->json([
+            'success' => true,
+            'requireChangeClave' => $requireChangeClave
         ]);
     }
 
@@ -519,6 +548,31 @@ class PrincipalController extends ApplicationController
                 }
             }
 
+            $salida = [
+                'success' => true,
+                'msj' => 'La clave fue registrada correctamente.',
+            ];
+        } catch (DebugException $e) {
+            $salida = [
+                'success' => false,
+                'msj' => $e->getMessage(),
+            ];
+        }
+
+        return response()->json($salida);
+    }
+
+    public function changeClave(Request $request)
+    {
+        try {
+            $data = $request->validate([
+                'clave' => 'required|string|min:10|max:20',
+                'documento' => 'required|string',
+                'coddoc' => 'required|string',
+            ]);
+            $documento = $data['documento'];
+            $coddoc = $data['coddoc'];
+            $clave = $data['clave'];
             $salida = [
                 'success' => true,
                 'msj' => 'La clave fue registrada correctamente.',

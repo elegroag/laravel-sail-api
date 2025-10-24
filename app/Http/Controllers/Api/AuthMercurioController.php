@@ -6,6 +6,7 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Controller;
 use App\Library\Auth\AuthJwt;
 use App\Models\Adapter\DbBase;
+use App\Models\Gener02;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio19;
@@ -359,6 +360,14 @@ class AuthMercurioController extends Controller
                     ],
                 ]);
             }
+
+            //cambiar clave de usuario
+            Mercurio07::where('documento', $data['documento'])
+                ->where('coddoc', $data['coddoc'])
+                ->where('tipo', $data['tipo'])
+                ->update([
+                    'clave' => 'x0x',
+                ]);
 
             $salida = [
                 'success' => true,

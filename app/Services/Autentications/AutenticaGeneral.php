@@ -60,7 +60,7 @@ class AutenticaGeneral
         $coddoc_detalle = Generales::TipoDocumento($usuario);
         $nombre = capitalize($usuario->getNombre());
         $asunto = 'Asignación de clave sistema Comfaca En Línea';
-        $msj = "Bienvenido a {$this->caja->getRazsoc()}, a continuación confirmamos sus datos de usuario para el ingreso a nuestro portal web. ".
+        $msj = "Bienvenido a {$this->caja->getRazsoc()}, a continuación confirmamos sus datos de usuario para el ingreso a nuestro portal web. " .
             "Y continuar el proceso de solicitud de afiliación.<br/>
         Credenciales de acceso:<br/><br/>
         TIPO AFILIADO: {$tipoName}<br/>  
@@ -71,7 +71,7 @@ class AutenticaGeneral
         $html = view('emails.send-credentials', [
             'titulo' => "Cordial saludo,<br/>Señor@ {$nombre}",
             'msj' => $msj,
-            'url_activa' => env('APP_URL').'/Mercurio/Mercurio/login/index',
+            'url_activa' => env('APP_URL') . '/Mercurio/Mercurio/login/index',
             'fecha' => date('Y-m-d'),
             'nombre' => $nombre,
             'razon' => $nombre,
@@ -113,24 +113,24 @@ class AutenticaGeneral
         $clave = genera_clave(8);
         $hash = clave_hash($clave);
 
-        $this->afiliado->setClave($hash);
+        $this->afiliado->clave = $hash;
         $this->afiliado->save();
 
         $tipo_documento = Generales::TipoDocumento($this->afiliado);
-        $nombre = capitalize($this->afiliado->getNombre());
+        $nombre = capitalize($this->afiliado->nombre);
         $asunto = 'Recuperacion de clave - Comfaca En Linea';
-        $msj = 'En respuesta a la solicitud de recuperación de cuenta, se realiza el cambio automatico de la clave para el inicio de sesión. '.
+        $msj = 'En respuesta a la solicitud de recuperación de cuenta, se realiza el cambio automatico de la clave para el inicio de sesión. ' .
             "A continuación enviamos las credenciales de acceso.<br/> 
             Credenciales de acceso:<br/><br/>
             TIPO AFILIADO: {$this->tipoName}<br/>  
             TIPO DOCUMENTO: {$tipo_documento}<br/>
-            USUARIO: {$this->afiliado->getDocumento()}<br/>
+            USUARIO: {$this->afiliado->documento}<br/>
             CLAVE: {$clave}<br/>";
 
         $html = view('emails.change-clave', [
             'titulo' => "Cordial saludo, señor@ {$nombre}",
             'msj' => $msj,
-            'url_activa' => env('APP_URL').'/Mercurio/Mercurio/login/index',
+            'url_activa' => env('APP_URL') . '/web/login',
             'fecha' => date('Y-m-d'),
             'nombre' => $nombre,
             'razon' => $nombre,
@@ -139,17 +139,17 @@ class AutenticaGeneral
 
         ])->render();
 
-        $emailCaja = (new Mercurio01)->findFirst();
+        $emailCaja = Mercurio01::first();
         $senderEmail = new SenderEmail;
         $senderEmail->setters(
-            "emisor_email: {$emailCaja->getEmail()}",
-            "emisor_clave: {$emailCaja->getClave()}",
+            "emisor_email: {$emailCaja->email}",
+            "emisor_clave: {$emailCaja->clave}",
             "asunto: {$asunto}"
         );
 
         $senderEmail->send(
             [[
-                'email' => $this->afiliado->getEmail(),
+                'email' => $this->afiliado->email,
                 'nombre' => $nombre,
             ]],
             $html
