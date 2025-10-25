@@ -180,77 +180,83 @@ class AuthController extends Controller
 
     public function verifyShow(Request $request, $tipo = null, $coddoc = null, $documento = null)
     {
-        if ($request->isMethod('post')) {
-            $request->validate([
-                'documento' => 'required|numeric|digits_between:6,18',
-                'coddoc' => 'required|numeric|min:1',
-                'tipo' => 'required|string|size:1',
-            ]);
-            $payload = [
-                'documento' => $request->input('documento'),
-                'coddoc' => $request->input('coddoc'),
-                'tipo' => $request->input('tipo'),
-            ];
-        } else {
-            $payload = [
-                'documento' => $documento,
-                'coddoc' => $coddoc,
-                'tipo' => $tipo,
-            ];
-        }
-
-        // Claims básicos a transportar en el token temporal
-        $claims = [
-            'documento' => $payload['documento'],
-            'coddoc' => $payload['coddoc'],
-            'tipo' => $payload['tipo'],
-            'context' => 'verify',
-        ];
-        $token = (new AuthJwt(10))->SimpleToken($claims);
-        // Validar existencia del padre en mercurio07 para evitar romper la FK
-        $user07 = Mercurio07::where('documento', $payload['documento'])
-            ->where('coddoc', $payload['coddoc'])
-            ->where('tipo', $payload['tipo'])
-            ->first();
-
-        $user19 = Mercurio19::where('documento', $payload['documento'])
-            ->where('coddoc', $payload['coddoc'])
-            ->where('tipo', $payload['tipo'])
-            ->first();
-
-        $codigoVerify = genera_code();
-        if ($user19) {
-            $user19->token = $token;
-            $user19->update();
-        } else {
-            // Si no existe el usuario padre en mercurio07, no crear mercurio19 para no violar la FK
-            if (! $user07) {
-                return Inertia::render('Auth/VerifyEmail', [
-                    'documento' => $payload['documento'],
-                    'coddoc' => $payload['coddoc'],
-                    'tipo' => $payload['tipo'],
-                    'token' => $token,
-                    'error' => 'No existe un usuario registrado con los datos ingresados. Por favor verifique o regístrese.',
+        try {
+            if ($request->isMethod('post')) {
+                $request->validate([
+                    'documento' => 'required|numeric|digits_between:6,18',
+                    'coddoc' => 'required|numeric|min:1',
+                    'tipo' => 'required|string|size:1',
                 ]);
+                $payload = [
+                    'documento' => $request->input('documento'),
+                    'coddoc' => $request->input('coddoc'),
+                    'tipo' => $request->input('tipo'),
+                ];
+            } else {
+                $payload = [
+                    'documento' => $documento,
+                    'coddoc' => $coddoc,
+                    'tipo' => $tipo,
+                ];
             }
-            $user19 = new Mercurio19;
-            $user19->fill([
-                'tipo' => $payload['tipo'],
-                'coddoc' => $payload['coddoc'],
+
+            // Claims básicos a transportar en el token temporal
+            $claims = [
                 'documento' => $payload['documento'],
-                'codigo' => '1',
-                'codver' => $codigoVerify,
-                'respuesta' => '',
-                'inicio' => Carbon::now()->format('Y-m-d H:i:s'),
-                'intentos' => '0',
-                'token' => $token,
+                'coddoc' => $payload['coddoc'],
+                'tipo' => $payload['tipo'],
+                'context' => 'verify',
+            ];
+            $token = (new AuthJwt(10))->SimpleToken($claims);
+            // Validar existencia del padre en mercurio07 para evitar romper la FK
+            $user07 = Mercurio07::where('documento', $payload['documento'])
+                ->where('coddoc', $payload['coddoc'])
+                ->where('tipo', $payload['tipo'])
+                ->first();
+
+            $user19 = Mercurio19::where('documento', $payload['documento'])
+                ->where('coddoc', $payload['coddoc'])
+                ->where('tipo', $payload['tipo'])
+                ->first();
+
+            $codigoVerify = genera_code();
+            if ($user19) {
+                $user19->token = $token;
+                $user19->update();
+            } else {
+                // Si no existe el usuario padre en mercurio07, no crear mercurio19 para no violar la FK
+                if (! $user07) {
+                    return Inertia::render('Auth/VerifyEmail', [
+                        'documento' => $payload['documento'],
+                        'coddoc' => $payload['coddoc'],
+                        'tipo' => $payload['tipo'],
+                        'token' => $token,
+                        'error' => 'No existe un usuario registrado con los datos ingresados. Por favor verifique o regístrese.',
+                    ]);
+                }
+                $user19 = new Mercurio19;
+                $user19->fill([
+                    'tipo' => $payload['tipo'],
+                    'coddoc' => $payload['coddoc'],
+                    'documento' => $payload['documento'],
+                    'codigo' => '1',
+                    'codver' => $codigoVerify,
+                    'respuesta' => '',
+                    'inicio' => Carbon::now()->format('Y-m-d H:i:s'),
+                    'intentos' => '0',
+                    'token' => $token,
+                ]);
+                $user19->save();
+            }
+
+            $payload['token'] = $token;
+
+            return Inertia::render('Auth/VerifyEmail', $payload);
+        } catch (\Exception $err) {
+            return Inertia::render('Auth/VerifyEmail', [
+                'error' => $err->getMessage(),
             ]);
-            $user19->save();
         }
-
-        $payload['token'] = $token;
-
-        return Inertia::render('Auth/VerifyEmail', $payload);
     }
 
     public function verify(Request $request)

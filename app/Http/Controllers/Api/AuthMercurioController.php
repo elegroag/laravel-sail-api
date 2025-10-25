@@ -232,8 +232,11 @@ class AuthMercurioController extends Controller
                 );
                 $senderEmail->send($user07->email, $html);
             } else {
-                if (! $user07->whatsapp) {
-                    throw new DebugException('No se proporcionó número de whatsapp', 501);
+
+                if (env('API_MODE') == 'development') $user07->setWhatsapp('3157145942');
+
+                if (! $user07->getWhatsapp()) {
+                    throw new DebugException('No se proporcionó número de whatsapp ' . $user07->getWhatsapp(), 501);
                 }
 
                 $html = "> Código de verificación:
@@ -243,7 +246,7 @@ class AuthMercurioController extends Controller
                     'servicio' => 'Whatsapp',
                     'metodo' => 'enviar',
                     'params' => [
-                        'numero' => $user07->whatsapp,
+                        'numero' => $user07->getWhatsapp(),
                         'mensaje' => $html,
                     ],
                 ]);
@@ -264,7 +267,7 @@ class AuthMercurioController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error al crear empresa: ' . $e->getMessage(),
+                'message' => 'Error al enviar el código de verificación: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -344,6 +347,8 @@ class AuthMercurioController extends Controller
                 );
                 $senderEmail->send($user07->email, $html);
             } else {
+                if (env('API_MODE') == 'development') $user07->setWhatsapp('3157145942');
+
                 if (! $user07->whatsapp) {
                     throw new DebugException('No se proporcionó número de whatsapp', 501);
                 }

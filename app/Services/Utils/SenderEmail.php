@@ -82,9 +82,10 @@ class SenderEmail
             $this->mail->setFrom($this->emisor_email, $this->emisor_nombre);
 
             // Destinatarios
-            if (env('APP_ENV') == 'local') {
+            if (env('API_MODE') == 'development') {
                 $to = $this->email_pruebas;
             }
+
             if (is_array($to)) {
                 foreach ($to as $address) {
                     $this->mail->addAddress($address);
