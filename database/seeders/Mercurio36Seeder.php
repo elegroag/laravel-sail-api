@@ -2,21 +2,24 @@
 
 namespace Database\Seeders;
 
-use App\Models\Mercurio57;
+use App\Models\Mercurio36;
 use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
 
-class Mercurio57Seeder extends Seeder
+class Mercurio36Seeder extends Seeder
 {
+    /**
+     * Ejecuta las semillas de la base de datos.
+     */
     public function run(): void
     {
         $legacy = new LegacyDatabaseService();
 
         // Leer registros desde la base legada
-        $rows = $legacy->select('SELECT * FROM mercurio57');
+        $rows = $legacy->select('SELECT * FROM mercurio36');
 
         // Campos permitidos del modelo
-        $fillable = (new Mercurio57())->getFillable();
+        $fillable = (new Mercurio36())->getFillable();
 
         foreach ($rows as $row) {
             $data = [];
@@ -24,8 +27,13 @@ class Mercurio57Seeder extends Seeder
                 $data[$field] = $row[$field] ?? null;
             }
 
-            Mercurio57::updateOrCreate(
-                ['numpro' => $row['numpro']],
+            // Clave compuesta por tipo, documento y cédula
+            Mercurio36::updateOrCreate(
+                [
+                    'tipo' => $row['tipo'],
+                    'documento' => $row['documento'],
+                    'cedtra' => $row['cedtra']
+                ],
                 $data
             );
         }

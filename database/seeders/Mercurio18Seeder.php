@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Mercurio18;
 use Illuminate\Database\Seeder;
 
 class Mercurio18Seeder extends Seeder
@@ -23,7 +24,7 @@ class Mercurio18Seeder extends Seeder
         ];
 
         foreach ($preguntasSeguridad as $pregunta) {
-            \App\Models\Mercurio18::updateOrCreate(
+            Mercurio18::updateOrCreate(
                 ['codigo' => $pregunta['codigo']],
                 $pregunta
             );

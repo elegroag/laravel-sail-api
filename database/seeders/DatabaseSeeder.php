@@ -55,6 +55,7 @@ class DatabaseSeeder extends Seeder
             Mercurio19Seeder::class,
             Mercurio26Seeder::class,
             Mercurio28Seeder::class,
+            Mercurio30Seeder::class,
             Mercurio45Seeder::class,
             Mercurio46Seeder::class,
             Mercurio51Seeder::class,

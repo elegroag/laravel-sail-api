@@ -2,49 +2,37 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Gener40;
+use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
-use RuntimeException;
-
 
 class Gener40Seeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    private const TABLE = 'gener40';
-
     /**
-     * Ejecuta el seeder cargando el SQL externo.
+     * Ejecuta las semillas de la base de datos.
      */
     public function run(): void
     {
-        DB::transaction(function (): void {
-            $this->limpiarTabla();
-            DB::unprepared($this->sql());
-        });
-    }
+        $legacy = new LegacyDatabaseService();
 
-    /**
-     * Obtiene el contenido del archivo SQL requerido.
-     */
-    protected function sql(): string
-    {
-        $sqlPath = database_path('seeders/dbsql/Gener40.sql');
+        // Leer registros desde la base legada
+        $rows = $legacy->select('SELECT * FROM gener40');
 
-        if (! File::exists($sqlPath)) {
-            throw new RuntimeException('No se encontró el archivo SQL para el seeder Gener40.');
+        // Campos permitidos del modelo
+        $fillable = (new Gener40())->getFillable();
+
+        foreach ($rows as $row) {
+            $data = [];
+            foreach ($fillable as $field) {
+                $data[$field] = $row[$field] ?? null;
+            }
+
+            Gener40::updateOrCreate(
+                ['codigo' => $row['codigo']],
+                $data
+            );
         }
 
-        return File::get($sqlPath);
-    }
-
-    /**
-     * Elimina los registros existentes para permitir re-ejecuciones idempotentes.
-     */
-    protected function limpiarTabla(): void
-    {
-        DB::statement(sprintf('DELETE FROM %s', self::TABLE));
+        $legacy->disconnect();
     }
 }

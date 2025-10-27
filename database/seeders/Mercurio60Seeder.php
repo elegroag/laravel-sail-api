@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Mercurio60;
+use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
 
 class Mercurio60Seeder extends Seeder
@@ -12,16 +13,26 @@ class Mercurio60Seeder extends Seeder
      */
     public function run(): void
     {
-        $movimientos = [
-            ['id' => 2, 'codinf' => 'CCF013-24-00001', 'codser' => '1', 'numero' => 2, 'tipo' => 'T', 'documento' => '7561396', 'coddoc' => '1', 'codcat' => 'C', 'valtot' => 94000, 'fecsis' => '2020-12-10', 'hora' => '15:54:41', 'tipmov' => 'B', 'online' => null, 'consumo' => 'S', 'feccon' => '2020-12-10', 'punuti' => 0, 'puntos' => 0, 'estado' => 'P'],
-            ['id' => 3, 'codinf' => 'CCF013-24-00001', 'codser' => '110', 'numero' => 1, 'tipo' => 'T', 'documento' => '7561396', 'coddoc' => '1', 'codcat' => 'C', 'valtot' => 37000, 'fecsis' => '2020-12-10', 'hora' => '16:26:43', 'tipmov' => 'P', 'online' => null, 'consumo' => 'N', 'feccon' => null, 'punuti' => 37, 'puntos' => 0, 'estado' => 'P'],
-        ];
+        $legacy = new LegacyDatabaseService();
 
-        foreach ($movimientos as $movimiento) {
+        // Leer registros desde la base legada
+        $rows = $legacy->select('SELECT * FROM mercurio60');
+
+        // Campos permitidos del modelo
+        $fillable = (new Mercurio60())->getFillable();
+
+        foreach ($rows as $row) {
+            $data = [];
+            foreach ($fillable as $field) {
+                $data[$field] = $row[$field] ?? null;
+            }
+
             Mercurio60::updateOrCreate(
-                ['id' => $movimiento['id']],
-                $movimiento
+                ['id' => $row['id']],
+                $data
             );
         }
+
+        $legacy->disconnect();
     }
 }

@@ -2,21 +2,19 @@
 
 namespace Database\Seeders;
 
-use App\Models\Mercurio57;
+use App\Models\Mercurio30;
 use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
 
-class Mercurio57Seeder extends Seeder
+class Mercurio30Seeder extends Seeder
 {
     public function run(): void
     {
         $legacy = new LegacyDatabaseService();
 
-        // Leer registros desde la base legada
-        $rows = $legacy->select('SELECT * FROM mercurio57');
+        $rows = $legacy->select('SELECT * FROM mercurio30');
 
-        // Campos permitidos del modelo
-        $fillable = (new Mercurio57())->getFillable();
+        $fillable = (new Mercurio30())->getFillable();
 
         foreach ($rows as $row) {
             $data = [];
@@ -24,8 +22,8 @@ class Mercurio57Seeder extends Seeder
                 $data[$field] = $row[$field] ?? null;
             }
 
-            Mercurio57::updateOrCreate(
-                ['numpro' => $row['numpro']],
+            Mercurio30::updateOrCreate(
+                ['id' => $row['id']],
                 $data
             );
         }
