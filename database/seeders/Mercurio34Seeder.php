@@ -13,6 +13,12 @@ class Mercurio34Seeder extends Seeder
      */
     public function run(): void
     {
+        $this->call([
+            Mercurio06Seeder::class,
+            Mercurio07Seeder::class,
+            Mercurio11Seeder::class,
+        ]);
+
         $legacy = new LegacyDatabaseService();
 
         // Leer registros desde la base legada
@@ -26,6 +32,16 @@ class Mercurio34Seeder extends Seeder
             foreach ($fillable as $field) {
                 $data[$field] = $row[$field] ?? null;
             }
+
+            if($data['documento'] < 5) continue;
+            if(!is_numeric($data['coddoc'])){
+                continue;
+            }
+            if(!is_numeric($data['documento'])){
+                continue;
+            }
+
+            unset($data['celular']);
 
             Mercurio34::updateOrCreate(
                 ['id' => $row['id']],

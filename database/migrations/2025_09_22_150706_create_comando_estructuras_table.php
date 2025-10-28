@@ -25,8 +25,10 @@ return new class extends Migration
             $table->string('tipo', 45)->nullable();
             $table->string('sistema', 45)->nullable();
             $table->char('env', 1)->nullable();
+            $table->string('nombre', 45)->nullable();
             $table->string('descripcion', 255)->nullable();
-            $table->tinyInteger('asyncro')->default(1); // NOT NULL DEFAULT '1'
+            $table->tinyInteger('asyncro')->default(1);
+            $table->unique('nombre', 'comando_estructuras_nommbre_unique');
         });
     }
 
@@ -35,6 +37,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('comando_estructuras', function (Blueprint $table) {
+            $table->dropUnique('comando_estructuras_nommbre_unique');
+        });
         Schema::dropIfExists('comando_estructuras');
     }
 };

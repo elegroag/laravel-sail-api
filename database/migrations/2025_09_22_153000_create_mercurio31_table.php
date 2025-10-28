@@ -71,11 +71,13 @@ return new class extends Migration
             $table->char('ruralt', 1)->nullable();
             $table->char('comision', 1)->nullable();
             $table->char('tipjor', 1)->nullable();
-            $table->char('codsuc', 3)->default('001');
+            $table->char('codsuc', 3)->nullable();
             $table->char('fecha_giro', 10)->nullable();
             $table->char('tippag', 1)->default('T');
             $table->unsignedBigInteger('numcue')->default(0);
             $table->string('otra_empresa', 100)->nullable();
+            $table->char('ciulab', 6)->nullable();
+            
             $table->char('resguardo_id', 5)->nullable();
             $table->char('pub_indigena_id', 3)->nullable();
             $table->char('codban', 4)->nullable();

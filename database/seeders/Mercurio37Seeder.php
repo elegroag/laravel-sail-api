@@ -13,6 +13,14 @@ class Mercurio37Seeder extends Seeder
      */
     public function run(): void
     {
+
+        $this->call([
+            Mercurio06Seeder::class,
+            Mercurio07Seeder::class,
+            Mercurio09Seeder::class,
+        ]);
+
+
         $legacy = new LegacyDatabaseService();
 
         // Leer registros desde la base legada

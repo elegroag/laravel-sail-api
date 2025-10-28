@@ -13,6 +13,7 @@ class ComandoEstructuras extends ModelBase
     protected $primaryKey = 'id';
 
     protected $fillable = [
+        'nombre',
         'procesador',
         'estructura',
         'variables',

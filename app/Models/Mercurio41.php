@@ -73,6 +73,7 @@ class Mercurio41 extends ModelBase
         'dirlab',
         'fecsol',
         'fecapr',
+        'ciulab',
         'ruuid'
     ];
 

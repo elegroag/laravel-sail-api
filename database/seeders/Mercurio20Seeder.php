@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Mercurio07;
 use Illuminate\Database\Seeder;
 use App\Services\LegacyDatabaseService;
 use App\Models\Mercurio20;
@@ -25,6 +26,26 @@ class Mercurio20Seeder extends Seeder
             $data = [];
             foreach ($fillable as $field) {
                 $data[$field] = $row[$field] ?? null;
+            }
+
+            if($data['documento'] < 5) continue;
+            if(!is_numeric($data['coddoc'])){
+                continue;
+            }
+            
+            if(!is_numeric($data['documento'])){
+                continue;
+            }
+
+            if(!is_numeric($data['tipo'])){
+                continue;
+            }
+
+            if(Mercurio07::where('tipo', $data['tipo'])
+                ->where('coddoc', $data['coddoc'])
+                ->where('documento', $data['documento'])
+                ->exists() === false) {
+                continue;
             }
 
             Mercurio20::updateOrCreate(

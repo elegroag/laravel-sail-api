@@ -27,6 +27,15 @@ class Mercurio41Seeder extends Seeder
                 $data[$field] = $row[$field] ?? null;
             }
 
+            if($data['documento'] < 5) continue;
+            if(!is_numeric($data['coddoc'])){
+                continue;
+            }
+            if(!is_numeric($data['documento'])){
+                continue;
+            }
+            
+
             // Clave compuesta
             Mercurio41::updateOrCreate(
                 [

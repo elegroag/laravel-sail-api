@@ -41,24 +41,6 @@ return new class extends Migration
             $table->index('codest', 'fk_mercurio33_mercurio111_idx');
             $table->index(['tipo', 'campo'], 'fk_mercurio33_mercurio281');
 
-            // FKs
-            $table->foreign(['tipo', 'coddoc', 'documento'], 'fk_mercurio33_mercurio071')
-                ->references(['tipo', 'coddoc', 'documento'])
-                ->on('mercurio07')
-                ->onDelete('cascade')
-                ->onUpdate('cascade');
-
-            $table->foreign('codest', 'fk_mercurio33_mercurio111')
-                ->references('codest')
-                ->on('mercurio11')
-                ->onDelete('cascade')
-                ->onUpdate('cascade');
-
-            $table->foreign('log', 'fk_mercurio33_mercurio201')
-                ->references('log')
-                ->on('mercurio20')
-                ->onDelete('cascade')
-                ->onUpdate('cascade');
 
             $table->foreign(['tipo', 'campo'], 'fk_mercurio33_mercurio281')
                 ->references(['tipo', 'campo'])
