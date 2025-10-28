@@ -55,3 +55,4 @@ resources/js/assets/
 database/seeders/dbsql
 storage/app/testing
 .windsurf/
+.env.testing

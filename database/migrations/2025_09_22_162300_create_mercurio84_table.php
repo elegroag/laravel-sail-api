@@ -16,11 +16,14 @@ return new class extends Migration
             $table->engine = 'InnoDB';
 
             // Columnas
+            $table->integer('id')->autoIncrement();
+            $table->primary('id');
             $table->integer('evento');
             $table->integer('beneficiario');
 
             // PK compuesta
-            $table->primary(['evento', 'beneficiario']);
+            $table->index(['evento', 'beneficiario'], 'mercurio84_idx');
+            $table->unique(['evento', 'beneficiario'], 'mercurio84_unique_idx');
         });
     }
 
@@ -29,6 +32,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('mercurio84', function (Blueprint $table) {
+            $table->dropIndex('mercurio84_idx');
+            $table->dropUnique('mercurio84_unique_idx');
+        });
         Schema::dropIfExists('mercurio84');
     }
 };

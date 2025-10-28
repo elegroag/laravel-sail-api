@@ -30,8 +30,7 @@ class Mercurio35Seeder extends Seeder
             // Clave compuesta por cédula y fecha retiro
             Mercurio35::updateOrCreate(
                 [
-                    'cedtra' => $row['cedtra'],
-                    'fecret' => $row['fecret']
+                    'id' => $row['id']
                 ],
                 $data
             );

@@ -10,35 +10,37 @@ class Mercurio07Seeder extends Seeder
 {
     public function run(): void
     {
-        // Conexión a la base de datos legada (puedes mover estos datos a .env si lo prefieres)
-        $legacyDb = new LegacyDatabaseService();
-        // Obtener datos de la base legada
+        $legacy = new LegacyDatabaseService();
 
-        $legacyModel = $legacyDb->select('SELECT * FROM mercurio07');
+        // Leer registros desde la base legada
+        $rows = $legacy->select('SELECT * FROM mercurio07');
 
-        // Insertar en la nueva base usando Eloquent (solo escritura en la base actual de Laravel)
-        foreach ($legacyModel as $model) {
+        // Campos permitidos del modelo
+        $fillable = (new Mercurio07())->getFillable();
+
+        foreach ($rows as $row) {
+            $data = [];
+            foreach ($fillable as $field) {
+                $data[$field] = $row[$field] ?? null;
+            }
+
+            if($data['documento'] < 5) continue;
+            if(!is_numeric($data['coddoc'])){
+                continue;
+            }
+            if(!is_numeric($data['documento'])){
+                continue;
+            }
             Mercurio07::updateOrCreate(
                 [
-                    'id' => $model['id'],
+                    'tipo' => $row['tipo'],
+                    'coddoc' => $row['coddoc'],
+                    'documento' => $row['documento'],
                 ],
-                [
-                    'tipo' => $model['tipo'],
-                    'coddoc' => $model['coddoc'],
-                    'documento' => $model['documento'],
-                    'nombre' => $model['nombre'],
-                    'email' => $model['email'],
-                    'clave' => $model['clave'],
-                    'feccla' => $model['feccla'],
-                    'autoriza' => $model['autoriza'],
-                    'codciu' => $model['codciu'],
-                    'fecreg' => $model['fecreg'],
-                    'estado' => $model['estado'],
-                    'whatsapp' => $model['whatsapp'],
-                    'fecha_syncron' => $model['fecha_syncron'],
-                ]
+                $data
             );
         }
-        $legacyDb->disconnect();
+
+        $legacy->disconnect();
     }
 }

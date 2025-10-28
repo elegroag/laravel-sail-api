@@ -67,6 +67,10 @@ return new class extends Migration
             $table->char('segnomrepleg', 25)->nullable();
             $table->char('codcaj', 2)->nullable();
 
+            $table->char('sat_fecapr', 10)->nullable()->comment('Fecha de aprobación SAT');
+            $table->char('sat_cedrep', 18)->nullable()->comment('Documento del representante SAT');
+            $table->string('sat_numtra', 100)->nullable()->comment('Número de transacción');
+
             $table->date('fecsol')->nullable()->comment('Fecha de solicitud');
             $table->date('fecapr')->nullable()->comment('Fecha de aprobación resolucion');
             $table->uuid('ruuid');

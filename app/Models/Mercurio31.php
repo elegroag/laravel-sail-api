@@ -87,7 +87,10 @@ class Mercurio31 extends ModelBase
         'tipcue',
         'fecafi',
         'ruuid',
-        'fecapr'
+        'fecapr',
+        'sat_fecapr',
+        'sat_cedtra',
+        'sat_numtra',
     ];
 
     public function setFecafi($fecafi)

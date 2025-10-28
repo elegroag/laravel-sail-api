@@ -16,11 +16,11 @@ return new class extends Migration
             $table->engine = 'InnoDB';
 
             // Columnas
+            $table->id();
             $table->integer('usuario')->default(0); // int(11) NOT NULL DEFAULT '0'
             $table->char('permiso', 10); // char(10) NOT NULL
-
-            // Clave primaria compuesta
-            $table->primary(['usuario', 'permiso']);
+            $table->unique(['usuario', 'permiso'], 'gener42_unique_idx');
+            $table->index(['usuario', 'permiso'], 'gener42_idx');
         });
     }
 
@@ -29,6 +29,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+         Schema::table('gener42', function (Blueprint $table) {
+            $table->dropIndex('gener42_unique_idx');
+            $table->dropIndex('gener42_idx');
+        });
         Schema::dropIfExists('gener42');
     }
 };

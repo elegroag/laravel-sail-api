@@ -28,7 +28,7 @@ class Mercurio38Seeder extends Seeder
             }
 
             Mercurio38::updateOrCreate(
-                ['documento' => $row['documento']],
+                ['id' => $row['id']],
                 $data
             );
         }

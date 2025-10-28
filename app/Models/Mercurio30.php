@@ -67,9 +67,9 @@ class Mercurio30 extends ModelBase
         'prinomrepleg',
         'segnomrepleg',
         'codcaj',
-        'fecha_aprobacion_sat',
-        'documento_representante_sat',
-        'numero_transaccion',
+        'sat_fecapr',
+        'sat_cedrep',
+        'sat_numtra',
         'fecapr',
         'fecsol',
         'ruuid'

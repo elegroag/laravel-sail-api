@@ -16,8 +16,8 @@ return new class extends Migration
             $table->engine = 'InnoDB';
 
             // PK autoincremental
-            $table->increments('numero');
-
+            $table->integer('numero')->autoIncrement();
+            $table->primary('numero');
             // Columnas según SQL
             $table->char('tipo', 2);
             $table->char('documento', 7);

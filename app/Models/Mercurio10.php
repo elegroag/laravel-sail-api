@@ -3,12 +3,15 @@
 namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
+use App\Models\Adapter\ValidateWithRules;
 use Carbon\Carbon;
+use Illuminate\Validation\Rule;
 use Thiagoprz\CompositeKey\HasCompositeKey;
 
 class Mercurio10 extends ModelBase
 {
     use HasCompositeKey;
+    use ValidateWithRules;
 
     protected $table = 'mercurio10';
 
@@ -29,6 +32,23 @@ class Mercurio10 extends ModelBase
         'codest',
         'campos_corregir',
     ];
+
+    protected function rules()
+    {
+        return [
+            'tipopc' => 'required|string|min:1',
+            'numero' => 'required|numeric|min:1',
+            'item' => 'required|numeric|min:1',
+            '_id' => [
+                'required|string',
+                Rule::unique('mercurio10')->where(function ($query) {
+                    return $query->where('tipopc', $this->tipopc)
+                        ->where('numero', $this->numero)
+                        ->where('item', $this->item);
+                }),
+            ],
+        ];
+    }
 
     public function setCamposCorregir($campos_corregir)
     {

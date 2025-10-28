@@ -14,20 +14,20 @@ return new class extends Migration
         Schema::create('mercurio61', function (Blueprint $table) {
             // Motor InnoDB
             $table->engine = 'InnoDB';
-
+            $table->integer('id')->autoIncrement();
+            $table->primary('id');
             // Columnas según SQL
-            $table->unsignedInteger('numero');
+            $table->integer('numero');
             $table->integer('item');
             $table->string('tipo', 2);
             $table->string('documento', 15);
             $table->integer('cantidad');
             $table->integer('valor');
+            
+            $table->unique(['numero', 'item'], 'uk_mercurio61');
+            $table->index(['numero', 'item'], 'idx_mercurio61');
 
-            // PK compuesta
-            $table->primary(['numero', 'item']);
-
-            // FK hacia mercurio60(id) con RESTRICT (NO ACTION)
-            $table->foreign('numero')
+            $table->foreign('numero', 'fk_mercurio61_mercurio60')
                 ->references('id')
                 ->on('mercurio60')
                 ->onDelete('cascade')
@@ -41,8 +41,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('mercurio61', function (Blueprint $table) {
-            $table->dropForeign('fk_mercurio61_mercurio601');
-            $table->dropIndex('fk_mercurio61_mercurio601');
+            $table->dropForeign('fk_mercurio61_mercurio60');
+            $table->dropUnique('uk_mercurio61');
+            $table->dropIndex('idx_mercurio61');
         });
         Schema::dropIfExists('mercurio61');
     }

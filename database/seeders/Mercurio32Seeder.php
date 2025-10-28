@@ -28,7 +28,7 @@ class Mercurio32Seeder extends Seeder
             }
 
             Mercurio32::updateOrCreate(
-                ['cedtra' => $row['cedtra']],
+                ['id' => $row['id']],
                 $data
             );
         }

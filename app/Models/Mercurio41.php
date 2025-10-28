@@ -17,8 +17,6 @@ class Mercurio41 extends ModelBase
 
     public $incrementing = true;
 
-    public $keyType = 'int';
-
     public $timestamps = false;
 
     protected $fillable = [

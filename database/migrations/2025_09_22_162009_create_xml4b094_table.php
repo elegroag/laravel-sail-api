@@ -16,10 +16,8 @@ return new class extends Migration
             $table->engine = 'InnoDB';
 
             // Columnas según SQL
-            $table->integer('facvul'); // PK sin autoincremento
+            $table->integer('facvul', 11); // PK sin autoincremento
             $table->char('nombre', 45);
-
-            // PK
             $table->primary('facvul');
         });
     }

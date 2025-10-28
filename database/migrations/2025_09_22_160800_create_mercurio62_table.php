@@ -15,6 +15,8 @@ return new class extends Migration
             // Motor InnoDB
             $table->engine = 'InnoDB';
 
+            $table->integer('id')->autoIncrement();
+            $table->primary('id');
             // Columnas según SQL
             $table->char('tipo', 2);
             $table->char('documento', 15);
@@ -24,9 +26,9 @@ return new class extends Migration
             $table->integer('consumo');
             $table->integer('puntos');
             $table->integer('punuti');
-
-            // PK compuesta
-            $table->primary(['tipo', 'documento', 'coddoc']);
+            
+            $table->index(['tipo', 'documento', 'coddoc'], 'idx_mercurio62');
+            $table->unique(['tipo', 'documento', 'coddoc'], 'uk_mercurio62');
         });
     }
 
@@ -35,6 +37,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+
+        Schema::table('mercurio62', function (Blueprint $table) {
+           $table->dropUnique('uk_mercurio62');
+           $table->dropIndex('idx_mercurio62');
+        });
         Schema::dropIfExists('mercurio62');
     }
 };

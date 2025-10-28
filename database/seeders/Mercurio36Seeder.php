@@ -27,12 +27,18 @@ class Mercurio36Seeder extends Seeder
                 $data[$field] = $row[$field] ?? null;
             }
 
+            if($data['documento'] < 5) continue;
+            if(!is_numeric($data['coddoc'])){
+                continue;
+            }
+            if(!is_numeric($data['documento'])){
+                continue;
+            }
+
             // Clave compuesta por tipo, documento y cédula
             Mercurio36::updateOrCreate(
                 [
-                    'tipo' => $row['tipo'],
-                    'documento' => $row['documento'],
-                    'cedtra' => $row['cedtra']
+                    'id' => $row['id'],
                 ],
                 $data
             );

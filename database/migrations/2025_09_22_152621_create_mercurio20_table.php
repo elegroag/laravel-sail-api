@@ -17,7 +17,7 @@ return new class extends Migration
 
             // PK bigint(20) firmado AUTO_INCREMENT
             $table->bigInteger('log')->autoIncrement();
-
+            $table->primary('log');
             // Columnas
             $table->char('tipo', 2)->nullable();
             $table->char('coddoc', 2)->nullable();
@@ -29,7 +29,6 @@ return new class extends Migration
             $table->string('nota', 300)->nullable();
 
             // Índices
-            $table->unique('log', 'id'); // UNIQUE KEY `id` (`log`)
             $table->index(['tipo', 'coddoc', 'documento'], 'fk_mercurio20_mercurio071_idx');
 
             // FK compuesta hacia mercurio07

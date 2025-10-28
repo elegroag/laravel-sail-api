@@ -4,26 +4,17 @@ namespace Database\Seeders;
 
 use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio64;
 
 class Mercurio64Seeder extends Seeder
 {
-    /**
-     * Ejecuta las semillas de la base de datos.
-     */
     public function run(): void
     {
         $legacy = new LegacyDatabaseService();
 
-        // Columnas según migración y PK autoincremental numero
-        $columns = ['numero', 'tipo', 'documento', 'coddoc', 'tipmov', 'pergir', 'online', 'transferencia', 'valor', 'fecsis', 'hora', 'estado'];
+        $fillable = (new Mercurio64())->getFillable();
 
-        // Leer registros desde la base legada
-        $rows = $legacy->select('SELECT ' . implode(',', $columns) . ' FROM mercurio64');
-
-        $useModel = class_exists(Mercurio64::class);
-        $fillable = $useModel ? (new Mercurio64())->getFillable() : $columns;
+        $rows = $legacy->select('SELECT * FROM mercurio64');
 
         foreach ($rows as $row) {
             // Construir payload limitado a fillable/columns
@@ -32,13 +23,20 @@ class Mercurio64Seeder extends Seeder
                 $data[$field] = $row[$field] ?? null;
             }
 
-            $identity = ['numero' => $row['numero']];
-
-            if ($useModel) {
-                Mercurio64::updateOrCreate($identity, $data);
-            } else {
-                DB::table('mercurio64')->updateOrInsert($identity, $data);
+            if($data['documento'] < 5) continue;
+            if(!is_numeric($data['coddoc'])){
+                continue;
             }
+            if(!is_numeric($data['documento'])){
+                continue;
+            }
+            if(!is_numeric($data['tipo'])){
+                continue;
+            }
+
+            Mercurio64::updateOrCreate([
+                'numero' => $row['numero']
+            ], $data);
         }
 
         $legacy->disconnect();

@@ -16,7 +16,6 @@ class Gener42Seeder extends Seeder
         // Leer registros desde la base legada
         $rows = $legacy->select('SELECT * FROM gener42');
 
-        // Campos permitidos del modelo
         $fillable = (new Gener42())->getFillable();
 
         foreach ($rows as $row) {
@@ -25,8 +24,7 @@ class Gener42Seeder extends Seeder
                 $data[$field] = $row[$field] ?? null;
             }
 
-            Gener42::updateOrCreate(
-                ['id' => $row['id']],
+            Gener42::create(
                 $data
             );
         }

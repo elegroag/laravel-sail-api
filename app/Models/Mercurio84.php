@@ -10,7 +10,7 @@ class Mercurio84 extends ModelBase
 
     public $timestamps = false;
 
-    protected $primaryKey = ['evento', 'beneficiario'];
+    protected $primaryKey = 'id';
 
     protected $fillable = [
         'evento',

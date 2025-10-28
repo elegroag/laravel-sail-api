@@ -16,7 +16,8 @@ return new class extends Migration
             $table->engine = 'InnoDB';
 
             // PK autoincremental
-            $table->increments('id');
+            $table->integer('id')->autoIncrement();
+            $table->primary('id');
 
             // Columnas según SQL
             $table->char('codinf', 30);
@@ -36,6 +37,7 @@ return new class extends Migration
             $table->integer('punuti')->nullable();
             $table->integer('puntos')->nullable();
             $table->enum('estado', ['A', 'P']);
+            
         });
     }
 

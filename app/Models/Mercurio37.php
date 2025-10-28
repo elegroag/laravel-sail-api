@@ -29,7 +29,7 @@ class Mercurio37 extends ModelBase
     protected function rules()
     {
         return [
-            'tipopc' => 'required|numeric|min:1',
+            'tipopc' => 'required|string|min:1',
             'numero' => 'required|numeric|min:1',
             'coddoc' => 'required|numeric|min:1',
             '_id' => [

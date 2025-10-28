@@ -19,14 +19,13 @@ class Mercurio50Seeder extends Seeder
         $rows = $legacy->select('SELECT * FROM mercurio50');
 
         foreach ($rows as $row) {
+            $data = [];
+            foreach ((new Mercurio50())->getFillable() as $field) {
+                $data[$field] = $row[$field] ?? null;
+            }
             Mercurio50::updateOrCreate(
                 ['codapl' => $row['codapl']],
-                [
-                    'webser' => $row['webser'] ?? null,
-                    'path' => $row['path'] ?? null,
-                    'urlonl' => $row['urlonl'] ?? null,
-                    'puncom' => $row['puncom'] ?? null
-                ]
+                $data
             );
         }
 

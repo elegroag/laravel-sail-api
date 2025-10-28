@@ -27,8 +27,16 @@ class Mercurio31Seeder extends Seeder
                 $data[$field] = $row[$field] ?? null;
             }
 
+            if($data['documento'] < 5) continue;
+            if(!is_numeric($data['coddoc'])){
+                continue;
+            }
+            if(!is_numeric($data['documento'])){
+                continue;
+            }
+
             Mercurio31::updateOrCreate(
-                ['documento' => $row['documento']],
+                ['id' => $row['id']],
                 $data
             );
         }

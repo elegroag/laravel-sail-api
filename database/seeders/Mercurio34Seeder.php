@@ -28,7 +28,7 @@ class Mercurio34Seeder extends Seeder
             }
 
             Mercurio34::updateOrCreate(
-                ['numdoc' => $row['numdoc']],
+                ['id' => $row['id']],
                 $data
             );
         }

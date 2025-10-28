@@ -35,7 +35,7 @@ class Mercurio19 extends ModelBase
         return [
             'documento' => 'required|numeric|min:5',
             'coddoc' => 'required|numeric|min:1',
-            'tipo' => 'required|string|min:0',
+            'tipo' => 'required|string|min:1',
             '_id' => [
                 'required|string',
                 Rule::unique('mercurio19')->where(function ($query) {

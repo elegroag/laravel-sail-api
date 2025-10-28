@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Mercurio72;
+use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
 
 class Mercurio72Seeder extends Seeder
@@ -11,6 +13,26 @@ class Mercurio72Seeder extends Seeder
      */
     public function run(): void
     {
-        //
+        $legacy = new LegacyDatabaseService();
+
+        // Leer registros desde la base legada
+        $rows = $legacy->select('SELECT * FROM mercurio72');
+
+        // Campos permitidos del modelo
+        $fillable = (new Mercurio72())->getFillable();
+
+        foreach ($rows as $row) {
+            $data = [];
+            foreach ($fillable as $field) {
+                $data[$field] = $row[$field] ?? null;
+            }
+
+            Mercurio72::updateOrCreate(
+                ['numero' => $row['numero']],
+                $data
+            );
+        }
+
+        $legacy->disconnect();
     }
 }

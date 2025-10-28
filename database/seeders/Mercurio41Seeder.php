@@ -30,9 +30,7 @@ class Mercurio41Seeder extends Seeder
             // Clave compuesta
             Mercurio41::updateOrCreate(
                 [
-                    'tipo' => $row['tipo'],
-                    'documento' => $row['documento'],
-                    'cedtra' => $row['cedtra']
+                    'id' => $row['id']
                 ],
                 $data
             );

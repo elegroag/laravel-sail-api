@@ -26,13 +26,10 @@ class Mercurio33Seeder extends Seeder
             foreach ($fillable as $field) {
                 $data[$field] = $row[$field] ?? null;
             }
-
             // Clave compuesta
             Mercurio33::updateOrCreate(
                 [
-                    'tipo' => $row['tipo'],
-                    'documento' => $row['documento'],
-                    'campo' => $row['campo']
+                    'id' => $row['id']
                 ],
                 $data
             );

@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio74;
 
 class Mercurio74Seeder extends Seeder
@@ -16,14 +15,11 @@ class Mercurio74Seeder extends Seeder
     {
         $legacy = new LegacyDatabaseService();
 
-        // Columnas según migración y PK autoincremental numrec
-        $columns = ['numrec', 'archivo', 'orden', 'url', 'estado'];
-
         // Leer registros desde la base legada
-        $rows = $legacy->select('SELECT ' . implode(',', $columns) . ' FROM mercurio74');
+        $rows = $legacy->select('SELECT * FROM mercurio74');
 
-        $useModel = class_exists(Mercurio74::class);
-        $fillable = $useModel ? (new Mercurio74())->getFillable() : $columns;
+        // Campos permitidos del modelo
+        $fillable = (new Mercurio74())->getFillable();
 
         foreach ($rows as $row) {
             $data = [];
@@ -31,13 +27,10 @@ class Mercurio74Seeder extends Seeder
                 $data[$field] = $row[$field] ?? null;
             }
 
-            $identity = ['numrec' => $row['numrec']];
-
-            if ($useModel) {
-                Mercurio74::updateOrCreate($identity, $data);
-            } else {
-                DB::table('mercurio74')->updateOrInsert($identity, $data);
-            }
+            Mercurio74::updateOrCreate(
+                ['numero' => $row['numero']],
+                $data
+            );
         }
 
         $legacy->disconnect();

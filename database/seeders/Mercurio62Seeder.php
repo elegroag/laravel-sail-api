@@ -16,15 +16,9 @@ class Mercurio62Seeder extends Seeder
     {
         $legacy = new LegacyDatabaseService();
 
-        // Columnas y PK compuesta según migración
-        $columns = ['tipo', 'documento', 'coddoc', 'salgir', 'salrec', 'consumo', 'puntos', 'punuti'];
-        $keys = ['tipo', 'documento', 'coddoc'];
+        $fillable = (new Mercurio62())->getFillable();
 
-        // Leer registros desde la base legada
-        $rows = $legacy->select('SELECT ' . implode(',', $columns) . ' FROM mercurio62');
-
-        $useModel = class_exists(Mercurio62::class);
-        $fillable = $useModel ? (new Mercurio62())->getFillable() : $columns;
+        $rows = $legacy->select('SELECT * FROM mercurio62');
 
         foreach ($rows as $row) {
             // Construir payload limitado a fillable/columns
@@ -33,17 +27,22 @@ class Mercurio62Seeder extends Seeder
                 $data[$field] = $row[$field] ?? null;
             }
 
-            $identity = [
+            if($data['documento'] < 5) continue;
+            if(!is_numeric($data['coddoc'])){
+                continue;
+            }
+            if(!is_numeric($data['documento'])){
+                continue;
+            }
+            if(!is_numeric($data['tipo'])){
+                continue;
+            }
+
+            Mercurio62::updateOrCreate([
                 'tipo' => $row['tipo'],
                 'documento' => $row['documento'],
                 'coddoc' => $row['coddoc'],
-            ];
-
-            if ($useModel) {
-                Mercurio62::updateOrCreate($identity, $data);
-            } else {
-                DB::table('mercurio62')->updateOrInsert($identity, $data);
-            }
+            ], $data);
         }
 
         $legacy->disconnect();
