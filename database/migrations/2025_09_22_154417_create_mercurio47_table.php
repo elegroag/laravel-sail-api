@@ -12,7 +12,7 @@ return new class extends Migration
             $table->engine = 'InnoDB';
             $table->integer('id')->autoIncrement();
 
-            $table->integer('documento');
+            $table->char('documento', 15);
             $table->char('tipo', 2);
             $table->char('coddoc', 2);
             $table->char('estado', 1);

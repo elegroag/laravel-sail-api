@@ -28,7 +28,7 @@ class Mercurio72Seeder extends Seeder
             }
 
             Mercurio72::updateOrCreate(
-                ['numero' => $row['numero']],
+                ['numtur' => $row['numtur']],
                 $data
             );
         }

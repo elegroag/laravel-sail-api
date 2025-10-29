@@ -16,9 +16,11 @@ class Mercurio71 extends Model
         'tipo',
         'documento',
         'coddoc',
-        'codser',
-        'puntos',
+        'email',
+        'estado',
         'fecsis',
         'hora',
+        'fecest',
+        'codigo',
     ];
 }

@@ -27,7 +27,7 @@ class Mercurio37Seeder extends Seeder
         $legacy = new LegacyDatabaseService();
 
         // Leer registros desde la base legada
-        $rows = $legacy->select('SELECT * FROM mercurio37');
+        $rows = $legacy->select('SELECT * FROM mercurio37 limit 1000');
 
         // Campos permitidos del modelo
         $fillable = (new Mercurio37())->getFillable();
@@ -41,15 +41,12 @@ class Mercurio37Seeder extends Seeder
             if(!is_numeric($data['coddoc'])){
                 continue;
             }
-            if(!is_numeric($data['documento'])){
+            if(!is_numeric($data['numero'])){
                 continue;
             }
-            if($data['documento'] < 5) continue;
-
-            if($data['tipo'] != null || $data['tipo'] != ''){
+            if($data['tipopc'] == null || $data['tipopc'] == ''){
                 continue;
             }
-
             // Usar la clave compuesta definida en el modelo
             Mercurio37::updateOrCreate(
                 [

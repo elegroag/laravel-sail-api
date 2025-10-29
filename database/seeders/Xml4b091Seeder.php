@@ -28,7 +28,7 @@ class Xml4b091Seeder extends Seeder
             }
 
             Xml4b091::updateOrCreate(
-                ['codigo' => $row['codigo']], // Ajustar campo clave según modelo
+                ['codpai' => $row['codpai']], // Ajustar campo clave según modelo
                 $data
             );
         }
