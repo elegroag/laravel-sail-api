@@ -120,6 +120,13 @@ class ApiEndpointsSeeder extends Seeder
                 'host_dev' => 'http://172.168.0.40:9000',
                 'host_pro' => 'http://172.168.0.7:9000',
             ],
+            [
+                'service_name' => 'Python',
+                'endpoint_name' => 'generate-pdf',
+                'connection_name' => 'api-python',
+                'host_dev' => 'http://localhost:5000/api',
+                'host_pro' => 'http://localhost:5000/api',
+            ],
         ];
 
         foreach ($endpoints as $endpoint) {

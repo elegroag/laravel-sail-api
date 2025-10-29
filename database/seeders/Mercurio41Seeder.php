@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Mercurio41;
 use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class Mercurio41Seeder extends Seeder
 {
@@ -35,6 +36,7 @@ class Mercurio41Seeder extends Seeder
                 continue;
             }
             
+            $data['ruuid'] = (string) Str::orderedUuid(); 
 
             // Clave compuesta
             Mercurio41::updateOrCreate(

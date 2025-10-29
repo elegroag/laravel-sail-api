@@ -89,8 +89,8 @@ class ActualizaEmpresaService
             }
             $mercurio47[$ai]['cantidad_eventos'] = $rqs['cantidad'];
             $mercurio47[$ai]['fecha_ultima_solicitud'] = $trayecto['fecsis'];
-            $mercurio47[$ai]['estado_detalle'] = (new Mercurio47)->getEstadoInArray($row['estado']);
-            $mercurio47[$ai]['tipact_detalle'] = (new Mercurio47)->getTipoActualizacionInArray($row['tipact']);
+            $mercurio47[$ai]['estado_detalle'] = solicitud_estado_detalle($row['estado']);
+            $mercurio47[$ai]['tipact_detalle'] = solicitud_tipo_actualizacion_detalle($row['tipact']);
         }
 
         return $mercurio47;

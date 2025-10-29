@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Mercurio06;
 use App\Models\Mercurio32;
 use App\Services\LegacyDatabaseService;
 use Illuminate\Support\Str;
@@ -14,11 +15,13 @@ class Mercurio32Seeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
-            Mercurio06Seeder::class,
-            Mercurio07Seeder::class,
-            Mercurio11Seeder::class,
-        ]);
+        if(Mercurio06::count() == 0){
+            $this->call([
+                Mercurio06Seeder::class,
+                Mercurio07Seeder::class,
+                Mercurio11Seeder::class,
+            ]);
+        }
         
         $legacy = new LegacyDatabaseService();
 
@@ -32,6 +35,14 @@ class Mercurio32Seeder extends Seeder
             $data = [];
             foreach ($fillable as $field) {
                 $data[$field] = $row[$field] ?? null;
+            }
+            
+            if($data['documento'] < 5) continue;
+            if(!is_numeric($data['coddoc'])){
+                continue;
+            }
+            if(!is_numeric($data['documento'])){
+                continue;
             }
 
             unset($data['zoneurbana']);
@@ -53,9 +64,7 @@ class Mercurio32Seeder extends Seeder
                 $data['peretn'] = '7';
             }
             
-            $data['ruuid'] = $row['ruuid'] ?? (string) Str::orderedUuid();
-            
-            
+            $data['ruuid'] = (string) Str::orderedUuid(); 
             Mercurio32::updateOrCreate(
                 ['id' => $row['id']],
                 $data

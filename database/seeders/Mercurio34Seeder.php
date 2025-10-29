@@ -2,9 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Models\Mercurio06;
 use App\Models\Mercurio34;
 use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class Mercurio34Seeder extends Seeder
 {
@@ -13,11 +15,13 @@ class Mercurio34Seeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
-            Mercurio06Seeder::class,
-            Mercurio07Seeder::class,
-            Mercurio11Seeder::class,
-        ]);
+       if(Mercurio06::count() == 0){
+            $this->call([
+                Mercurio06Seeder::class,
+                Mercurio07Seeder::class,
+                Mercurio11Seeder::class,
+            ]);
+        }
 
         $legacy = new LegacyDatabaseService();
 
@@ -42,6 +46,8 @@ class Mercurio34Seeder extends Seeder
             }
 
             unset($data['celular']);
+
+            $data['ruuid'] = (string) Str::orderedUuid(); 
 
             Mercurio34::updateOrCreate(
                 ['id' => $row['id']],

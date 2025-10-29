@@ -3,6 +3,7 @@
 namespace App\Services\SatApi;
 
 use App\Exceptions\DebugException;
+use App\Models\Mercusat02;
 use App\Services\Utils\Comman;
 
 class SatServices
@@ -27,7 +28,7 @@ class SatServices
     {
         try {
             $ps = Comman::Api();
-            $numsat02 = (new Mercusat02)->count(
+            $numsat02 = (new Mercusat02())->count(
                 '*',
                 "conditions: id='{$entity->getId()}' AND documento='{$entity->getDocumento()}' AND coddoc='{$entity->getCoddoc()}'"
             );

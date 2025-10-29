@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Mercurio36;
 use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class Mercurio36Seeder extends Seeder
 {
@@ -34,6 +35,8 @@ class Mercurio36Seeder extends Seeder
             if(!is_numeric($data['documento'])){
                 continue;
             }
+
+            $data['ruuid'] = (string) Str::orderedUuid(); 
 
             // Clave compuesta por tipo, documento y cédula
             Mercurio36::updateOrCreate(

@@ -59,7 +59,7 @@ class UpDatosTrabajadorService
         if ($paginate->items) {
             foreach ($paginate->items as $entity) {
                 $style = '#61b5ff';
-                $dias_vencidos = CalculatorDias::calcular($this->tipopc, $entity->getId(), $entity->getFechaSolicitud());
+                $dias_vencidos = CalculatorDias::calcular($this->tipopc, $entity->getId(), $entity->getFecsol());
                 if ($entity->getEstado() == 'P') {
                     if ($dias_vencidos == 3) {
                         $style = '#d3a246; font-size:1.3em';
@@ -78,7 +78,7 @@ class UpDatosTrabajadorService
                     $entity->getDocumento(),
                     '',
                     '',
-                    $entity->getFechaSolicitud()
+                    $entity->getFecsol()
                 );
             }
         } else {
@@ -137,7 +137,7 @@ class UpDatosTrabajadorService
         Tag::displayTo('direccion', $mercurio47->getDireccion());
         Tag::displayTo('tipsoc', $mercurio47->getTipsoc());
         Tag::displayTo('codact', $mercurio47->getCodact());
-        Tag::displayTo('fecini', $mercurio47->getFechaSolicitud());
+        Tag::displayTo('fecini', $mercurio47->getFecsol());
         Tag::displayTo('digver', $mercurio47->getDigver());
         Tag::displayTo('codciu', $mercurio47->getCodciu());
         Tag::displayTo('codzon', $mercurio47->getCodzon());

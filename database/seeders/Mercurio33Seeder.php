@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Mercurio33;
+use App\Models\Mercurio47;
 use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
 
@@ -25,6 +26,21 @@ class Mercurio33Seeder extends Seeder
             $data = [];
             foreach ($fillable as $field) {
                 $data[$field] = $row[$field] ?? null;
+            }
+
+            if($data['documento'] < 5) continue;
+            if(!is_numeric($data['coddoc'])){
+                continue;
+            }
+            if(!is_numeric($data['documento'])){
+                continue;
+            }
+            if($data['tipo'] != null || $data['tipo'] != ''){
+                continue;
+            }
+
+            if(Mercurio47::where('id', $row['actualizacion'])->exists() == false){
+                continue;
             }
             // Clave compuesta
             Mercurio33::updateOrCreate(

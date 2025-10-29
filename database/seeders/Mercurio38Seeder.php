@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Mercurio38;
 use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class Mercurio38Seeder extends Seeder
 {
@@ -34,6 +35,8 @@ class Mercurio38Seeder extends Seeder
             if(!is_numeric($data['documento'])){
                 continue;
             }
+
+            $data['ruuid'] = (string) Str::orderedUuid(); 
 
             Mercurio38::updateOrCreate(
                 ['id' => $row['id']],

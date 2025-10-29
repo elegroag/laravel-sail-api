@@ -2,14 +2,23 @@
 
 namespace Database\Seeders;
 
+use App\Models\Mercurio06;
 use App\Models\Mercurio30;
 use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class Mercurio30Seeder extends Seeder
 {
     public function run(): void
     {
+        if(Mercurio06::count() == 0){
+            $this->call([
+                Mercurio06Seeder::class,
+                Mercurio07Seeder::class,
+                Mercurio11Seeder::class,
+            ]);
+        }
         $legacy = new LegacyDatabaseService();
 
         $rows = $legacy->select('SELECT * FROM mercurio30');
@@ -36,6 +45,8 @@ class Mercurio30Seeder extends Seeder
             unset($data['fecha_aprobacion_sat']);
             unset($data['documento_representante_sat']);
             unset($data['numero_transaccion']);
+
+            $data['ruuid'] = (string) Str::orderedUuid();
             
             Mercurio30::updateOrCreate(
                 ['id' => $row['id']],

@@ -48,7 +48,7 @@ class DatabaseSeeder extends Seeder
             
             Mercurio08Seeder::class,
             Mercurio11Seeder::class,
-            //Mercurio10Seeder::class,
+            Mercurio10Seeder::class,
 
             Mercurio12Seeder::class,
             Mercurio13Seeder::class,
@@ -115,7 +115,13 @@ class DatabaseSeeder extends Seeder
             Xml4b091Seeder::class,
             Xml4b094Seeder::class,
 
-            Mercusat02Seeder::class
+            Mercusat02Seeder::class,
+            Mercurio70Seeder::class,
+            Mercurio80Seeder::class,
+            Mercurio81Seeder::class,
+            Mercurio82Seeder::class,
+            Mercurio84Seeder::class,
+            Mercurio85Seeder::class,
         ];
 
         try {

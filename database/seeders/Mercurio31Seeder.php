@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Mercurio06;
 use App\Models\Mercurio31;
 use App\Services\LegacyDatabaseService;
 use Illuminate\Support\Str;
@@ -15,11 +16,13 @@ class Mercurio31Seeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
-            Mercurio06Seeder::class,
-            Mercurio07Seeder::class,
-            Mercurio11Seeder::class,
-        ]);
+        if(Mercurio06::count() == 0){
+            $this->call([
+                Mercurio06Seeder::class,
+                Mercurio07Seeder::class,
+                Mercurio11Seeder::class,
+            ]);
+        }
 
         $legacy = new LegacyDatabaseService();
 
@@ -57,8 +60,7 @@ class Mercurio31Seeder extends Seeder
 
             unset($data['zoneurbana']);
 
-            $data['ruuid'] = $row['ruuid'] ?? (string) Str::orderedUuid();
-
+            $data['ruuid'] = (string) Str::orderedUuid();
             Mercurio31::updateOrCreate(
                 ['id' => $row['id']],
                 $data
