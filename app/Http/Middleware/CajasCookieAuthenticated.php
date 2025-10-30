@@ -32,6 +32,11 @@ class CajasCookieAuthenticated
                 ], 401);
             }
 
+            set_flashdata('error', [
+                'msj' => 'No autorizado para acceder al modulo. ' .__LINE__ .' '. $this->controller,
+                'code' => 401,
+            ]);
+
             return redirect('cajas/login');
         }
 
@@ -42,13 +47,12 @@ class CajasCookieAuthenticated
                     'message' => 'No autorizado para acceder al modulo. ' . $this->controller,
                 ], 401);
             }
-
-            /*
-            d($this->controller);
-            d($this->actionMethod);
-            d($this->application);
-            exit; */
+            
             if (!($this->controller == 'PrincipalController' && $this->actionMethod == 'index')) {
+                set_flashdata('error', [
+                    'msj' => 'No autorizado para acceder al modulo. ' .__LINE__ .' '. $this->controller,
+                    'code' => 401,
+                ]);
                 return redirect('cajas/principal/index');
             }
         }
@@ -61,6 +65,11 @@ class CajasCookieAuthenticated
                 ], 401);
             }
             if (!($this->controller == 'PrincipalController' && $this->actionMethod == 'index')) {
+
+                set_flashdata('error', [
+                    'msj' => 'No autorizado para acceder a la acción. ' .__LINE__ .' '. $this->controller . ' ' . $this->actionMethod,
+                    'code' => 401,
+                ]);
                 return redirect('cajas/principal/index');
             }
         }
@@ -74,6 +83,11 @@ class CajasCookieAuthenticated
                     'message' => 'Usuario de mercurio no autorizado para acceso a Sistema de Caja.',
                 ], 401);
             }
+
+            set_flashdata('error', [
+                'msj' => 'Usuario de mercurio no autorizado para acceso a Sistema de Caja.',
+                'code' => 401,
+            ]);
 
             // redirigir a la pantalla de login de mercurio
             return redirect('web/login');
@@ -92,7 +106,10 @@ class CajasCookieAuthenticated
                     'message' => 'No autenticado.',
                 ], 401);
             }
-
+            set_flashdata('error', [
+                'msj' => 'No autenticado.',
+                'code' => 401,
+            ]);
             return redirect('cajas/login');
         }
 

@@ -354,7 +354,7 @@ class MenuItemSeeder extends Seeder
                     'nota' => 'texto',
                     'parent_id' => '6',
                     'codapl' => 'CA',
-                    'controller' => 'ApruebaTrabajadoresController',
+                    'controller' => 'ApruebaTrabajadorController',
                     'action' => 'index',
                 ],
                 [
@@ -390,7 +390,7 @@ class MenuItemSeeder extends Seeder
                     'nota' => 'texto',
                     'parent_id' => '6',
                     'codapl' => 'CA',
-                    'controller' => 'ApruebaCertificadosController',
+                    'controller' => 'ApruebaCertificadoController',
                     'action' => 'index',
                 ],
                 [

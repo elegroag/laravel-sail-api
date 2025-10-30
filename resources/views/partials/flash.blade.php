@@ -1,7 +1,8 @@
-@php($flash = get_flashdata())
+@php
+$flash = get_flashdata();
+@endphp
 @if (!empty($flash))
-    {{-- JSON seguro para pasar datos al JS sin directivas Blade dentro del <script> --}}
-    <script type="application/json" id="flash-data">{!! json_encode($flash, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT) !!}</script>
+    <script type="application/json" id="flash-data"> @php echo json_encode($flash) @endphp</script>
     <script type='text/javascript'>
     // Lee el JSON embebido y muestra notificaciones con SweetAlert
     document.addEventListener('DOMContentLoaded', function () {

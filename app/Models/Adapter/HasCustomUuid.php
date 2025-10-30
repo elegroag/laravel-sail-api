@@ -2,7 +2,8 @@
 
 namespace App\Models\Adapter;
 
-use Illuminate\Support\Str;
+use App\Models\Radicado;
+use Illuminate\Support\Facades\DB;
 
 trait HasCustomUuid
 {
@@ -16,8 +17,8 @@ trait HasCustomUuid
 
             // Verifica si la columna 'ruuid' (o la definida) no está establecida
             if (empty($model->{$uuidColumn})) {
-                // Genera un UUID ordenado (orderedUuid) para mejor rendimiento de la DB
-                $model->{$uuidColumn} = (string) Str::orderedUuid();
+                // Genera un radicado basado en el tipo del modelo y consecutivo único
+                $model->{$uuidColumn} = static::generateRadicadoForModel($model);
             }
         });
     }
@@ -38,7 +39,56 @@ trait HasCustomUuid
     public function regenerateUuid()
     {
         $uuidColumn = $this->getCustomUuidColumn();
-        $this->{$uuidColumn} = (string) Str::orderedUuid();
+        $this->{$uuidColumn} = static::generateRadicadoForModel($this);
         return $this;
     }
+
+    /**
+     * Genera un radicado y crea el registro en la tabla radicado con control de concurrencia.
+     */
+    protected static function generateRadicadoForModel($model): string
+    {
+        $tipo = static::mapModelToTipo($model);
+        $vigencia = (int) now()->year;
+
+        return DB::transaction(function () use ($tipo, $vigencia) {
+            // Obtiene el último registro por tipo y vigencia con bloqueo para evitar condiciones de carrera
+            $ultimo = Radicado::where('tipo', $tipo)
+                ->where('vigencia', $vigencia)
+                ->lockForUpdate()
+                ->orderByDesc('numero')
+                ->first();
+
+            $siguiente = ($ultimo?->numero ?? 0) + 1; // consecutivo único entero
+
+            // Construye el texto de radicado. Ajustar formato si se requiere diferente.
+            $radicadoTexto = sprintf('%s-%d-%d', $tipo, $vigencia, $siguiente);
+
+            // Crea el registro asociado en la tabla radicado
+            Radicado::create([
+                'vigencia' => $vigencia,
+                'tipo' => $tipo,
+                'numero' => $siguiente,
+                'radicado' => $radicadoTexto,
+            ]);
+
+            return $radicadoTexto;
+        });
+    }
+
+    /**
+     * Mapea el nombre de la clase del modelo al tipo de radicado requerido.
+     */
+    protected static function mapModelToTipo($model): string
+    {
+        $name = class_basename($model);
+        return match ($name) {
+            'Mercurio30' => 'E',
+            'Mercurio31' => 'T',
+            'Mercurio32' => 'C',
+            'Mercurio34' => 'B',
+            default => 'E', // Valor por defecto, ajustar si es necesario
+        };
+    }
 }
+

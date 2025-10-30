@@ -3,6 +3,8 @@
 @section('application', 'cajas')
 
 @section('content-main')
+@include('partials.flash')
+
 @php
 $user = session()->get('user');
 list($menu, $breadcrumbs, $pageTitle) = App\Services\Menu\MenuCajas::showMenu('CA');
@@ -18,8 +20,6 @@ list($menu, $breadcrumbs, $pageTitle) = App\Services\Menu\MenuCajas::showMenu('C
 @push('scripts')
     <script src="{{ asset('core/messages.js') }}"></script>
 @endpush
-
-@include('partials.flash')
 
 @include('templates.sidebar-cajas', 
     [
