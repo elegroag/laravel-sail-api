@@ -27,10 +27,10 @@ const validatorInit = () => {
 
 const validaPkOpcion = (e) => {
     e.stopPropagation();
-    
+
     if ($('#tipopc_opt').val() == '') return;
     if ($('#usuario_opt').val() == '') return;
-    
+
     window.App.trigger('syncro', {
         url: window.App.url(window.ServerController + '/valide_pk_opcion'),
         data: {
@@ -47,9 +47,9 @@ const validaPkOpcion = (e) => {
         },
         error: (xhr) => {
             Messages.display('Error al validar: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
-        }
-    });   
-}
+        },
+    });
+};
 
 $(function () {
     window.App.initialize();
@@ -83,7 +83,7 @@ $(function () {
             },
             error: (xhr) => {
                 Messages.display('Error al cargar los datos: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
-            }
+            },
         });
     });
 
@@ -108,7 +108,7 @@ $(function () {
             },
             error: (xhr) => {
                 Messages.display('Error al guardar los datos: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
-            }
+            },
         });
     });
 
@@ -139,13 +139,13 @@ $(function () {
                     },
                     error: (xhr) => {
                         Messages.display('Error al borrar: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
-                    }
+                    },
                 });
             }
         });
     });
 
-	$(document).on('click', "[data-toggle='header-nuevo']", (e) => {
+    $(document).on('click', "[data-toggle='header-nuevo']", (e) => {
         e.preventDefault();
         $('#form :input').each(function (elem) {
             $(this).val('');
@@ -153,12 +153,14 @@ $(function () {
         });
 
         const tpl = _.template(document.getElementById('tmp_form').innerHTML);
-        $('#captureModalbody').html(tpl({
-            codofi: '',
-            detalle: '',
-            principal: '',
-            estado: '',
-        }));
+        $('#captureModalbody').html(
+            tpl({
+                codofi: '',
+                detalle: '',
+                principal: '',
+                estado: '',
+            }),
+        );
         modalCapture.show();
         validatorInit();
     });
@@ -174,17 +176,19 @@ $(function () {
         const codofi = $(e.currentTarget).data('cid');
         window.App.trigger('syncro', {
             url: window.App.url(window.ServerController + '/opcion_view'),
-            data: { 
-                codofi
+            data: {
+                codofi,
             },
             callback: (response) => {
-                if(response) {
+                if (response) {
                     modalOpciones.show();
                     const tpl = _.template(document.getElementById('tmp_opciones').innerHTML);
-                    $('#captureOpcionesbody').html(tpl({
-                        _collection: response.data,
-                        codofi: codofi 
-                    }));
+                    $('#captureOpcionesbody').html(
+                        tpl({
+                            _collection: response.data,
+                            codofi: codofi,
+                        }),
+                    );
 
                     $('#form_opcion :input').each(function () {
                         if (this.type !== 'button') {
@@ -193,14 +197,14 @@ $(function () {
                         }
                     });
                     $('#usuario_opt, #tipopc_opt').select2({
-                        dropdownParent: $("#captureOpciones")
+                        dropdownParent: $('#captureOpciones'),
                     });
                     validatorOpcion();
                 }
             },
             error: (xhr) => {
                 Messages.display('Error al cargar opciones: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
-            }
+            },
         });
     });
 
@@ -215,7 +219,7 @@ $(function () {
                 modalCiudades.show();
 
                 const tpl = _.template(document.getElementById('tmp_ciudades').innerHTML);
-                $('#captureCiudadesbody').html(tpl({_collection: response.data}));
+                $('#captureCiudadesbody').html(tpl({ _collection: response.data }));
 
                 $('#form_ciudad :input').each(function () {
                     if (this.type !== 'button') {
@@ -226,7 +230,7 @@ $(function () {
             },
             error: (xhr) => {
                 Messages.display('Error al cargar ciudades: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
-            }
+            },
         });
     });
 
@@ -236,19 +240,19 @@ $(function () {
         const tipopc = $(e.currentTarget).attr('data-tipopc');
         const usuario = $(e.currentTarget).attr('data-usuario');
         window.App.trigger('syncro', {
-            url: window.App.url(window.ServerController + '/borrarOpcion'),
+            url: window.App.url(window.ServerController + '/borrar_opcion'),
             data: { codofi, tipopc, usuario },
             callback: (response) => {
-                if (response['flag'] == true) {
-                    Messages.display(response['msg'], 'success');
+                if (response.success == true) {
+                    Messages.display(response.msj, 'success');
                     modalOpciones.hide();
                 } else {
-                    Messages.display(response['msg'], 'error');
+                    Messages.display(response.msj, 'error');
                 }
             },
             error: (xhr) => {
                 Messages.display('Error al borrar opción: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
-            }
+            },
         });
     });
 
@@ -258,9 +262,9 @@ $(function () {
         const codciu = $(e.currentTarget).data('codciu');
         window.App.trigger('syncro', {
             url: window.App.url(window.ServerController + '/borrar_ciudad'),
-            data: { 
-                codofi, 
-                codciu 
+            data: {
+                codofi,
+                codciu,
             },
             callback: (response) => {
                 if (response.flag) {
@@ -272,7 +276,7 @@ $(function () {
             },
             error: (xhr) => {
                 Messages.display('Error al borrar ciudad: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
-            }
+            },
         });
     });
 
@@ -286,7 +290,7 @@ $(function () {
             url: window.App.url(window.ServerController + '/guardar_ciudad'),
             data: {
                 codofi,
-                codciu
+                codciu,
             },
             callback: (response) => {
                 if (response.success) {
@@ -297,7 +301,7 @@ $(function () {
             },
             error: (xhr) => {
                 Messages.display('Error al guardar ciudad: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
-            }
+            },
         });
     });
 
@@ -321,7 +325,7 @@ $(function () {
             },
             error: (xhr) => {
                 Messages.display('Error al validar ciudad: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
-            }
+            },
         });
     });
 
@@ -348,7 +352,7 @@ $(function () {
             },
             error: (xhr) => {
                 Messages.display('Error al guardar opcion: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
-            }
+            },
         });
     });
 

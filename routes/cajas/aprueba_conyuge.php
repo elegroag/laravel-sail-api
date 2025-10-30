@@ -5,8 +5,12 @@ use App\Http\Middleware\CajasCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware([CajasCookieAuthenticated::class])->group(function () {
-
     Route::prefix('/cajas/aprobacioncon')->group(function () {
+
+        Route::get('/', function () {
+            return redirect('cajas/aprobacioncon/index');
+        });
+
         Route::get('/index', [ApruebaConyugeController::class, 'index']);
         Route::post('/aplicar_filtro/{estado?}', [ApruebaConyugeController::class, 'aplicarFiltro']);
         Route::post('/buscar/{estado?}', [ApruebaConyugeController::class, 'buscar']);

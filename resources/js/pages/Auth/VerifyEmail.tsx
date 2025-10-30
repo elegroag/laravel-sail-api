@@ -148,7 +148,7 @@ export default function VerifyEmail({ documento, coddoc, tipo, token, status, er
               onChange={(event) => handleInputChange(index, event.target.value)}
               onKeyDown={(event) => handleKeyDown(index, event)}
               onPaste={index === 0 ? handlePaste : undefined}
-              className="w-14 h-14 text-center text-xl font-semibold"
+              className="w-14 h-14 text-center text-xl font-semibold text-gray-700"
               placeholder="0"
             />
           ))}

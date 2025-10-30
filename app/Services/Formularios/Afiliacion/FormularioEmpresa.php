@@ -63,7 +63,7 @@ class FormularioEmpresa extends Documento
         }
 
         $this->pdf->SetXY(148, 50);
-        $this->pdf->Cell(15, 4, 'R-UI: ' . $this->empresa->ruuid, 0, 0, 'C');
+        $this->pdf->Cell(15, 4, 'Radicado: ' . $this->empresa->ruuid, 0, 0, 'C');
 
         $this->pdf->SetXY(162, 43);
         $this->pdf->Cell(12, 4, $today->format('d'), 0, 0, 'C');

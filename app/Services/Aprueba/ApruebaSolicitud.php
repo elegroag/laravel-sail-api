@@ -39,7 +39,10 @@ class ApruebaSolicitud
         }
 
         $solicitud = $procesoAprobacion->findSolicitud($idSolicitud);
-        $solicitante = $procesoAprobacion->findSolicitante($solicitud);
+        if (! $solicitud) {
+            throw new DebugException('La solicitud no existe o no está disponible para continuar el proceso.', 404);
+        }
+        $solicitante = $procesoAprobacion->findSolicitante();
 
         if ($solicitante == false) {
             throw new DebugException('El solicitante no está disponible para continuar el proceso.', 501);

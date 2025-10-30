@@ -883,28 +883,14 @@ class ApruebaEmpresaController extends ApplicationController
         header("location: " . env('APP_URL') . "/{$file}"); */
     }
 
-    /**
-     * aprobar function
-     * Aprobación de empresa
-     *
-     * @return void
-     */
     public function aprueba(Request $request)
     {
-        $this->setResponse('ajax');
-        $debuginfo = [];
+        $this->db->begin();
         try {
             try {
-                $user = session()->get('user');
-                $acceso = (new Gener42)->count('*', "conditions: permiso='62' AND usuario='{$user['usuario']}'");
-                if ($acceso == 0) {
-                    return $this->renderObject(['success' => false, 'msj' => 'El usuario no dispone de permisos de aprobación'], false);
-                }
-                $apruebaSolicitud = new ApruebaSolicitud;
-                $this->db->begin();
-
-                $postData = $_POST;
-                $idSolicitud = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+                $apruebaSolicitud = new ApruebaSolicitud();
+                $postData = $request->all();
+                $idSolicitud = $request->input('id');
                 $calemp = 'E';
                 $solicitud = $apruebaSolicitud->main(
                     $calemp,
@@ -918,26 +904,22 @@ class ApruebaEmpresaController extends ApplicationController
                     'success' => true,
                     'msj' => 'El registro se completo con éxito',
                 ];
-            } catch (DebugException $err) {
 
+            } catch (DebugException $err) {
                 $this->db->rollback();
                 $salida = [
                     'success' => false,
                     'msj' => $err->getMessage(),
                 ];
             }
-        } catch (DebugException $e) {
+        } catch (\Exception $e) {
+            $this->db->rollback();
             $salida = [
                 'success' => false,
                 'msj' => $e->getMessage(),
             ];
         }
-
-        if ($debuginfo) {
-            $salida['info'] = $debuginfo;
-        }
-
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function borrarFiltro(Request $request)

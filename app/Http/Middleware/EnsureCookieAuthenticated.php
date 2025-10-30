@@ -30,19 +30,27 @@ class EnsureCookieAuthenticated
                 ], 401);
             }
 
+            set_flashdata('error', [
+                'msj' => 'No autenticado.',
+                'code' => 401,
+            ]);
             return redirect('web/login');
         }
 
-        //valida opcion de menu valida para ingreso por tipo
         if ($this->autorization($request) === false) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No autorizado para acceder al modulo. ' . $this->controller,
+                    'message' => 'No autorizado para acceder al modulo. ',
                 ], 401);
             }
+
+            set_flashdata('error', [
+                'msj' => 'No autorizado para acceder al modulo. ',
+                'code' => 401,
+            ]);
             if (!($this->controller == 'PrincipalController' && $this->actionMethod == 'index')) {
-                return redirect('cajas/principal/index');
+                return redirect('mercurio/principal/index');
             }
         }
 
@@ -60,7 +68,11 @@ class EnsureCookieAuthenticated
                 ], 401);
             }
 
-            return redirect('web/login');
+            set_flashdata('error', [
+                'msj' => 'No autorizado para acceder al modulo. ',
+                'code' => 401,
+            ]);
+            return redirect('mercurio/principal/index');
         }
 
         return $next($request);
@@ -81,6 +93,11 @@ class EnsureCookieAuthenticated
 
         $this->actionMethod = $request->route()->getActionMethod();
         $tipo = session('tipo');
+        $estado_afiliado = session('estado_afiliado');
+
+        if ($estado_afiliado == 'I') {
+            $tipo = 'P';
+        }
 
         // Verificar si el tipfun tiene permiso para la acción
         $hasPermission = MenuItem::select(
@@ -88,6 +105,7 @@ class EnsureCookieAuthenticated
         )
             ->join('menu_tipos', 'menu_tipos.menu_item', '=', 'menu_items.id')
             ->where('menu_items.controller', $this->controller)
+            ->where('menu_items.codapl', 'ME')
             ->where('menu_tipos.tipo', $tipo);
 
         if (!$hasPermission->exists()) {

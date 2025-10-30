@@ -433,7 +433,7 @@ class Mercurio04Controller extends ApplicationController
                 'msj' => 'No se pudo realizar el movimiento ' . $e->getMessage()
             ];
         }
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function borrarOpcion(Request $request)
@@ -448,15 +448,23 @@ class Mercurio04Controller extends ApplicationController
                 $response = $this->db->begin();
                 Mercurio08::whereRaw("codofi='$codofi' and tipopc='$tipopc' and usuario='$usuario'")->delete();
                 $this->db->commit();
-                $response = 'Movimiento Realizado Con Exito';
-
-                return $this->renderObject($response, false);
+                $response = [
+                    'success' => true,
+                    'msj' => 'Movimiento Realizado Con Exito'
+                ];
             } catch (DebugException $e) {
                 $this->db->rollback();
+                $response = [
+                    'success' => false,
+                    'msj' => 'No se pudo realizar el movimiento ' . $e->getMessage()
+                ];
             }
         } catch (DebugException $e) {
-            $response = 'No se pudo realizar el movimiento ' . $e->getMessage();
-            return $this->renderObject($response, false);
+            $response = [
+                'success' => false,
+                'msj' => 'No se pudo realizar el movimiento ' . $e->getMessage()
+            ];
         }
+        return response()->json($response);
     }
 }

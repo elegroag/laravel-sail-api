@@ -1,3 +1,4 @@
+import '@/css/app.css';
 import '@/css/global.css';
 import '@/css/layout.css';
 import AuthLayoutTemplate from '@/layouts/auth/auth-simple-layout';
