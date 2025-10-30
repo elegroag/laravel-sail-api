@@ -498,7 +498,7 @@ class ApruebaIndependienteController extends ApplicationController
             $htmlEmpresa = view('cajas/aprobaindepen/tmp/consulta', [
                 'mercurio41' => $mercurio41,
                 'mercurio01' => Mercurio01::first(),
-                'det_tipo' => Mercurio06::whereRaw("tipo = '{$mercurio41->getTipo()}'")->first()->getDetalle(),
+                'det_tipo' => Mercurio06::where("tipo", $mercurio41->tipo)->first()->getDetalle(),
                 '_coddoc' => ParamsIndependiente::getTipoDocumentos(),
                 '_calemp' => ParamsIndependiente::getCalidadEmpresa(),
                 '_codciu' => ParamsIndependiente::getCiudades(),
@@ -520,7 +520,7 @@ class ApruebaIndependienteController extends ApplicationController
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_empresa',
                     'params' => [
-                        'nit' => $mercurio41->getCedtra(),
+                        'nit' => $mercurio41->cedtra,
                     ],
                 ]
             );
@@ -531,7 +531,7 @@ class ApruebaIndependienteController extends ApplicationController
             }
             $response = [
                 'success' => true,
-                'data' => $mercurio41->getArray(),
+                'data' => $mercurio41->toArray(),
                 'mercurio11' => Mercurio11::all(),
                 'consulta_empresa' => $htmlEmpresa,
                 'adjuntos' => $independienteServices->adjuntos($mercurio41),

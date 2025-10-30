@@ -1,6 +1,9 @@
+import flatpickr from 'flatpickr';
+import { Spanish } from 'flatpickr/dist/l10n/es';
 import { $App } from '@/App';
 import { FormInfoView } from '@/Cajas/FormInfoView';
 import { PensionadoAprobarModel } from '../models/PensionadoAprobarModel';
+import { ValidaTipoPago } from '@/Cajas/ValidaTipoPago';
 
 class PensionadoInfoView extends FormInfoView {
 	constructor(options = {}) {
@@ -12,6 +15,7 @@ class PensionadoInfoView extends FormInfoView {
 			solicitudAprobar: options.collection.solicitud,
 			camposDisponibles: options.collection.campos_disponibles,
 		});
+		this.selectores = undefined;
 	}
 
 	render() {
@@ -34,6 +38,7 @@ class PensionadoInfoView extends FormInfoView {
 			'click #devolver_solicitud': 'devolverSolicitud',
 			'click #rechazar_solicitud': 'rechazarSolicitud',
 			"click [data-toggle='adjunto']": 'verArchivo',
+			'change #tippag': 'validaTipoPago',
 		};
 	}
 
@@ -52,12 +57,11 @@ class PensionadoInfoView extends FormInfoView {
 			tipapo: 'P',
 		});
 		this.actualizaForm();
-		this.$el.find('.js-basic-multiple, #codind, #tipapo, #codban, #codgir').select2();
-
-		flatpickr(this.$el.find('#fecafi, #fecapr'), {
-			enableTime: false,
-			dateFormat: 'Y-m-d',
-			locale: Spanish,
+		this.selectores = this.$el.find('.js-basic-multiple, #codind, #tipapo, #codban, #codgir');
+		this.selectores.select2({
+			placeholder: 'Seleccione',
+			allowClear: true,
+			zIndex: 9999,
 		});
 
 		if (this.model.get('tippag') == 'T') {
@@ -66,6 +70,12 @@ class PensionadoInfoView extends FormInfoView {
 			this.$el.find('#tipcue').prop('disabled', true);
 			this.$el.find('#numcue').prop('disabled', true);
 		}
+
+		flatpickr(this.$el.find('#fecafi, #fecapr'), {
+			enableTime: false,
+			dateFormat: 'Y-m-d',
+			locale: Spanish,
+		});
 	}
 
 	aprobarSolicitud(e) {
@@ -127,6 +137,14 @@ class PensionadoInfoView extends FormInfoView {
 				}
 			},
 		});
+	}
+
+	validaTipoPago(e) {
+		e.stopPropagation();
+		let tippag = this.$el.find(e.currentTarget).val();
+		let el = this.$el;
+		ValidaTipoPago({ tippag, el});
+		this.selectores.trigger('change');
 	}
 }
 

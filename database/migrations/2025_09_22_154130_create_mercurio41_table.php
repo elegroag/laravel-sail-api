@@ -72,6 +72,7 @@ return new class extends Migration
             $table->char('cargo', 5);
             $table->char('codban', 3)->nullable();
             $table->char('tipcue', 3)->nullable();
+            $table->char('tipper', 2);
 
             $table->date('fecsol')->nullable()->comment('Fecha de solicitud');
             $table->date('fecapr')->nullable()->comment('Fecha apobación resolucion');

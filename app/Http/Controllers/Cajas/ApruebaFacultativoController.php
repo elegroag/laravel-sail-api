@@ -199,7 +199,7 @@ class ApruebaFacultativoController extends ApplicationController
             $htmlEmpresa = view('cajas/aprobacionfac/tmp/consulta', [
                 'mercurio36' => $mercurio36,
                 'mercurio01' => Mercurio01::first(),
-                'det_tipo' => Mercurio06::where("tipo = '{$mercurio36->getTipo()}'")->first()->getDetalle(),
+                'det_tipo' => Mercurio06::where("tipo", $mercurio36->tipo)->first()->detalle,
                 '_coddoc' => ParamsFacultativo::getTipoDocumentos(),
                 '_calemp' => ParamsFacultativo::getCalidadEmpresa(),
                 '_codciu' => ParamsFacultativo::getCiudades(),
@@ -222,7 +222,7 @@ class ApruebaFacultativoController extends ApplicationController
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_empresa',
                     'params' => [
-                        'nit' => $mercurio36->getCedtra(),
+                        'nit' => $mercurio36->cedtra,
                     ],
                 ]
             );
@@ -235,7 +235,7 @@ class ApruebaFacultativoController extends ApplicationController
             }
             $response = [
                 'success' => true,
-                'data' => $mercurio36->getArray(),
+                'data' => $mercurio36->toArray(),
                 'mercurio11' => Mercurio11::all(),
                 'consulta_empresa' => $htmlEmpresa,
                 'adjuntos' => $facultativoServices->adjuntos($mercurio36),

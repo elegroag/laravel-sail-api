@@ -156,7 +156,7 @@ class PensionadoEntity
     protected function getRules()
     {
         return [
-            'nit' => ['type' => 'string', 'max' => 16],
+            'nit' => ['type' => 'rangelength', 'min' => 6, 'max' => 16],
             'digver' => ['type' => 'string', 'max' => 1, 'is_null' => true],
             'tipper' => ['type' => 'string', 'max' => 1],
             'coddoc' => ['type' => 'string', 'max' => 1],
@@ -233,7 +233,7 @@ class PensionadoEntity
             'codcaj' => ['type' => 'string', 'max' => 2, 'is_null' => true],
             'codsuc' => ['type' => 'string', 'max' => 3, 'is_null' => false],
             'codlis' => ['type' => 'string', 'max' => 3, 'is_null' => false],
-            'cedtra' => ['type' => 'string', 'max' => 16, 'is_null' => false],
+            'cedtra' => ['type' => 'rangelength', 'min' => 6, 'max' => 16, 'is_null' => false],
             'rural' => ['type' => 'string', 'max' => 1, 'is_null' => false],
             'agro' => ['type' => 'string', 'max' => 1, 'is_null' => false],
             'cabhog' => ['type' => 'string', 'max' => 1, 'is_null' => false],
@@ -279,7 +279,7 @@ class PensionadoEntity
             'fosfec' => ['type' => 'string', 'max' => 1, 'is_null' => true],
             'fecact' => ['type' => 'date', 'is_null' => true],
             'tipjor' => ['type' => 'string', 'max' => 1, 'is_null' => true],
-            'usuario' => ['type' => 'string', 'max' => 10, 'is_null' => true],
+            'usuario' => ['type' => 'rangelength', 'min' => 1, 'max' => 4, 'is_null' => true],
             'correo' => ['type' => 'string', 'max' => 1, 'is_null' => true],
             'tottra' => ['type' => 'rangelength', 'min' => 1, 'max' => 11, 'is_null' => true],
             'cargo' => ['type' => 'string', 'max' => 100, 'is_null' => true],

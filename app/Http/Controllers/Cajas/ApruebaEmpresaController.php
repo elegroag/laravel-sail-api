@@ -559,7 +559,7 @@ class ApruebaEmpresaController extends ApplicationController
             $adjuntos = $empresaServices->adjuntos($mercurio30);
             $seguimiento = $empresaServices->seguimiento($mercurio30);
 
-            $mercurio06 = Mercurio06::where("tipo", $mercurio30->getTipo())->first();
+            $mercurio06 = Mercurio06::where("tipo", $mercurio30->tipo)->first();
             $_tipsoc = ParamsEmpresa::getTipoSociedades();
             $tipsoc_detalle = $_tipsoc[$mercurio30->tipsoc];
 
@@ -584,7 +584,7 @@ class ApruebaEmpresaController extends ApplicationController
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_empresa',
                     'params' => [
-                        'nit' => $mercurio30->getNit(),
+                        'nit' => $mercurio30->nit,
                     ],
                 ]
             );
@@ -595,7 +595,7 @@ class ApruebaEmpresaController extends ApplicationController
             $campos_disponibles = $mercurio30->CamposDisponibles();
             $response = [
                 'success' => true,
-                'data' => $mercurio30->getArray(),
+                'data' => $mercurio30->toArray(),
                 'empresa_sisuweb' => $empresa_sisuweb,
                 'mercurio11' => Mercurio11::all(),
                 'consulta_empresa' => $htmlEmpresa,

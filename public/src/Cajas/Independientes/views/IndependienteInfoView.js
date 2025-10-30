@@ -1,6 +1,7 @@
 import { $App } from '@/App';
 import { FormInfoView } from '@/Cajas/FormInfoView';
 import IndependienteAprobarModel from '../models/IndependienteAprobarModel';
+import { ValidaTipoPago } from '@/Cajas/ValidaTipoPago';
 
 export default class IndependienteInfoView extends FormInfoView {
 	constructor(options = {}) {
@@ -32,7 +33,7 @@ export default class IndependienteInfoView extends FormInfoView {
 			'click #devolver_solicitud': 'devolverSolicitud',
 			'click #rechazar_solicitud': 'rechazarSolicitud',
 			"click [data-toggle='adjunto']": 'verArchivo',
-			'change #tippag': 'valTippag',
+			'change #tippag': 'validaTipoPago',
 		};
 	}
 
@@ -128,59 +129,10 @@ export default class IndependienteInfoView extends FormInfoView {
 		});
 	}
 
-	valTippag(e) {
-		e.preventDefault();
+	validaTipoPago(e) {
+		e.stopPropagation();
 		let tippag = this.$el.find(e.currentTarget).val();
-		if (tippag == '') return;
-
-		this.$el.find('#numcue').prop('disabled', false);
-		this.$el.find('#tipcue').prop('disabled', false);
-		this.$el.find('#numcue').attr('placeholder', '');
-
-		switch (tippag) {
-			case 'B':
-				this.$el.find('#numcue').prop('disabled', true);
-				this.$el.find('#tipcue').prop('disabled', true);
-
-				this.$el.find('#numcue').val('');
-				this.$el.find('#tipcue').val('');
-
-				this.$el.find('#codban').rules('add', { required: false });
-				this.$el.find('#codban').prop('disabled', true);
-				break;
-			case 'E':
-				this.$el.find('#numcue').prop('disabled', true);
-				this.$el.find('#tipcue').prop('disabled', true);
-
-				this.$el.find('#numcue').val('');
-				this.$el.find('#tipcue').val('');
-
-				this.$el.find('#codban').rules('add', { required: false });
-				$('#codban').prop('disabled', true);
-				break;
-			case 'T':
-				this.$el.find('#numcue').prop('disabled', true);
-				this.$el.find('#tipcue').prop('disabled', true);
-
-				this.$el.find('#numcue').val('');
-				this.$el.find('#tipcue').val('');
-
-				this.$el.find('#codban').rules('add', { required: false });
-				this.$el.find('#codban').prop('disabled', true);
-
-				break;
-			case 'A':
-				this.$el.find('#codban').removeAttr('disabled');
-				this.$el.find('#codban').rules('add', { required: true });
-				break;
-			case 'D':
-				this.$el.find('#numcue').removeAttr('disabled');
-				this.$el.find('#codban').val('51');
-				this.$el.find('#tipcue').val('A');
-				this.$el.find('#numcue').attr('placeholder', 'Número teléfono certificado');
-				this.$el.find('#numcue').rules('add', { required: true });
-				this.$el.find('#codban').rules('add', { required: true });
-				break;
-		}
+		let el = this.$el;
+		ValidaTipoPago({ tippag, el});
 	}
 }

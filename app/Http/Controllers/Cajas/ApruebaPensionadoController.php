@@ -222,7 +222,7 @@ class ApruebaPensionadoController extends ApplicationController
             $paramsPensionado = new ParamsPensionado;
             $paramsPensionado->setDatosCaptura($ps->toArray());
 
-            $det_tipo = Mercurio06::where("tipo", $mercurio38->getTipo())->first()->getDetalle();
+            $det_tipo = Mercurio06::where("tipo", $mercurio38->tipo)->first()->getDetalle();
 
             $this->setParamToView('adjuntos', $pensionadoServices->adjuntos($mercurio38));
 
@@ -254,7 +254,7 @@ class ApruebaPensionadoController extends ApplicationController
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_empresa',
                     'params' => [
-                        'nit' => $mercurio38->getCedtra(),
+                        'nit' => $mercurio38->cedtra,
                     ],
                 ]
             );
@@ -268,7 +268,7 @@ class ApruebaPensionadoController extends ApplicationController
 
             $response = [
                 'success' => true,
-                'data' => $mercurio38->getArray(),
+                'data' => $mercurio38->toArray(),
                 'mercurio11' => Mercurio11::all(),
                 'consulta_empresa' => $htmlEmpresa,
                 'adjuntos' => $pensionadoServices->adjuntos($mercurio38),
@@ -288,49 +288,30 @@ class ApruebaPensionadoController extends ApplicationController
 
     public function aprueba(Request $request)
     {
-        $this->setResponse('ajax');
-        $debuginfo = null;
+        $this->db->begin();
         try {
-            try {
-                $user = session()->get('user');
-                $acceso = (new Gener42)->count("permiso='74' AND usuario='{$user['usuario']}'");
-                if ($acceso == 0) {
-                    return $this->renderObject(['success' => false, 'msj' => 'El usuario no dispone de permisos de aprobación'], false);
-                }
-
-                $apruebaSolicitud = new ApruebaSolicitud;
-                $this->db->begin();
-
-                $calemp = 'P';
-                $solicitud = $apruebaSolicitud->main(
-                    $calemp,
-                    $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags'),
-                    $request->all()
-                );
-
-                $this->db->commit();
-                $solicitud->enviarMail($request->input('actapr'), $request->input('fecapr'));
-
-                return $this->renderObject([
-                    'success' => true,
-                    'msj' => 'El registro se completo con éxito',
-                ], false);
-            } catch (DebugException $e) {
-                $this->db->rollback();
-
-                return $this->renderObject([
-                    'success' => false,
-                    'msj' => $e->getMessage(),
-                ], false);
-            }
-        } catch (DebugException $err) {
+            $apruebaSolicitud = new ApruebaSolicitud();
+            $calemp = 'P';
+            $solicitud = $apruebaSolicitud->main(
+                $calemp,
+                $request->input('id'),
+                $request->all()
+            );
+            $solicitud->enviarMail($request->input('actapr'), $request->input('fecapr'));
+            $salida = [
+                'success' => true,
+                'msj' => 'El registro se completo con éxito',
+            ];
+            $this->db->commit();
+        } catch (DebugException $e) {
+            $this->db->rollback();
             $salida = [
                 'success' => false,
-                'msj' => 'No se pudo realizar el movimiento ' . "\n" . $err->getMessage() . "\n " . $err->getLine(),
+                'msj' => $e->getMessage(),
+                'errors' => $e->render($request),
             ];
         }
-
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     public function devolver(Request $request)

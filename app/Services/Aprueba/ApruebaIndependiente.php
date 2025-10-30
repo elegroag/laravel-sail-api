@@ -254,7 +254,7 @@ class ApruebaIndependiente
         }
 
         $registroSeguimiento = new RegistroSeguimiento;
-        $registroSeguimiento->crearNota($this->tipopc, $this->solicitud->getId(), $postData['nota_aprobar'], 'A');
+        $registroSeguimiento->crearNota($this->tipopc, $this->solicitud->id, $postData['nota_aprobar'], 'A');
 
         /**
          * Crea de una vez e registro, permitiendo que el usuario entre con la misma password

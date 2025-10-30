@@ -265,8 +265,8 @@ class ApruebaPensionado
          * como empresa sin tener que hacer la solicitud de clave
          */
         $empresa = Mercurio07::where("coddoc", $this->solicitud->tipdoc)
-            ->where("documento", $this->solicitud->nit)
-            ->where("tipo", 'P')
+            ->where("documento", $this->solicitud->cedtra)
+            ->where("tipo", $this->solicitud->tipo)
             ->first();
 
         $feccla = $this->solicitante->feccla;
@@ -278,7 +278,7 @@ class ApruebaPensionado
                 [
                     'tipo' => 'O',
                     'coddoc' => $this->solicitud->tipdoc,
-                    'documento' => $this->solicitud->nit,
+                    'documento' => $this->solicitud->cedtra,
                     'nombre' => $fullname,
                     'email' => $this->solicitud->email,
                     'codciu' => $this->solicitud->codciu,
@@ -346,9 +346,11 @@ class ApruebaPensionado
         $data['dia'] = $dia;
         $data['mes'] = $mes;
         $data['anno'] = $anno;
+        $data['repleg'] = $this->solicitante->nombre;
+        $data['razsoc'] = $this->solicitante->nombre;
 
         $html = view('cajas.layouts.aprobar', $data)->render();
-        $asunto = "Afiliación trabajador pensionado realizada con éxito, identificación {$this->solicitud->nit}";
+        $asunto = "Afiliación trabajador pensionado realizada con éxito, identificación {$this->solicitud->cedtra}";
         $emailCaja = Mercurio01::first();
         $senderEmail = new SenderEmail;
 

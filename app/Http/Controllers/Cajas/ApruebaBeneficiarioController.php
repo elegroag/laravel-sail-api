@@ -300,10 +300,8 @@ class ApruebaBeneficiarioController extends ApplicationController
      */
     public function infor(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $id = $request->input('id');
-
             if (! $id) {
                 throw new DebugException('Error la solicitud es requerida para continuar', 501);
             }
@@ -320,7 +318,7 @@ class ApruebaBeneficiarioController extends ApplicationController
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'trabajador',
-                    'params' => ['cedtra' => $solicitud->getCedtra(), 'estado' => 'A'],
+                    'params' => ['cedtra' => $solicitud->cedtra, 'estado' => 'A'],
                 ]
             );
 
@@ -331,10 +329,11 @@ class ApruebaBeneficiarioController extends ApplicationController
 
             $trabajador = new \stdClass;
             if (! $trabajador_sisu) {
-                $tr = Mercurio31::whereRaw("cedtra='{$solicitud->getCedtra()}' and estado='A'")->first();
-                $trabajador->estado = ($tr) ? $tr->getEstado() : 'I';
+                $tr = Mercurio31::where("cedtra", $solicitud->cedtra)->where("estado", 'A')->first();
+                if (!$tr) $trabajador->estado = 'I';
             } else {
-                $trabajador->estado = $trabajador_sisu['estado'];
+                $trabajador = new Mercurio31;
+                $trabajador->fill($trabajador_sisu);
             }
 
             $procesadorComando = Comman::Api();
@@ -342,7 +341,7 @@ class ApruebaBeneficiarioController extends ApplicationController
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_beneficiario',
-                    'params' => $solicitud->getNumdoc(),
+                    'params' => $solicitud->numdoc,
                 ]
             );
 
@@ -359,7 +358,7 @@ class ApruebaBeneficiarioController extends ApplicationController
                     if ($rqs['relaciones']) {
                         $relacion_multiple = $rqs['relaciones'];
                         foreach ($rqs['relaciones'] as $ai => $relacion) {
-                            if ($relacion['cedtra'] == $solicitud->getCedtra()) {
+                            if ($relacion['cedtra'] == $solicitud->cedtra) {
                                 $vinculo_trabajador = true;
                                 break;
                             }
@@ -385,7 +384,7 @@ class ApruebaBeneficiarioController extends ApplicationController
                 'cajas/aprobacionben/tmp/consulta',
                 [
                     'beneficiario' => $solicitud,
-                    'detTipo' => Mercurio06::where("tipo", $solicitud->getTipo())->first()->getDetalle(),
+                    'detTipo' => Mercurio06::where("tipo", $solicitud->tipo)->first()->detalle,
                     '_coddoc' => ParamsBeneficiario::getTiposDocumentos(),
                     '_codciu' => ParamsBeneficiario::getCiudades(),
                     '_sexo' => ParamsBeneficiario::getSexos(),
@@ -407,7 +406,7 @@ class ApruebaBeneficiarioController extends ApplicationController
 
             $response = [
                 'success' => true,
-                'data' => $solicitud->getArray(),
+                'data' => $solicitud->toArray(),
                 'mercurio11' => Mercurio11::all(),
                 'consulta' => $html,
                 'adjuntos' => $beneficiarioServices->adjuntos($solicitud),

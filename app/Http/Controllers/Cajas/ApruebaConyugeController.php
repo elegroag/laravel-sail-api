@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\View;
 
 class ApruebaConyugeController extends ApplicationController
 {
-    protected $tipopc = 3;
+    protected $tipopc = '3';
 
     protected $db;
 
@@ -781,16 +781,16 @@ class ApruebaConyugeController extends ApplicationController
      * @param [type] $id
      * @return void
      */
-    public function infoAprobadoView($id)
+    public function infor(Request $request)
     {
-        $this->tipopc = '3';
         try {
+            $id = $request->input('id');
             $mercurio32 = Mercurio32::where("id", $id)->where("estado", 'A')->first();
             if (! $mercurio32) {
                 throw new DebugException('Error al buscar la beneficiario', 501);
             }
 
-            $cedtra = $mercurio32->getCedtra();
+            $cedtra = $mercurio32->cedtra;
             $procesadorComando = Comman::Api();
             $procesadorComando->runCli(
                 [
@@ -810,7 +810,7 @@ class ApruebaConyugeController extends ApplicationController
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_conyuge',
                     'params' => [
-                        'cedcon' => $mercurio32->getCedcon(),
+                        'cedcon' => $mercurio32->cedcon,
                     ],
                 ]
             );
@@ -823,14 +823,15 @@ class ApruebaConyugeController extends ApplicationController
             $beneSisu = $out['data'];
 
             $conyuge = new Mercurio32;
-            $conyuge->createAttributes($beneSisu);
-            $conyuge->setTipo('E');
-            $conyuge->setCedcon($beneSisu['cedcon']);
+            $conyuge->fill($beneSisu);
+            $conyuge->tipo = 'E';
+            $conyuge->cedcon = $beneSisu['cedcon'];
+
             $html = View::render(
                 'aprobacioncon/tmp/consulta',
                 [
                     'conyuge' => $conyuge,
-                    'detTipo' => Mercurio06::where("tipo", $conyuge->getTipo())->first()->getDetalle(),
+                    'detTipo' => Mercurio06::where("tipo", $conyuge->tipo)->first()->getDetalle(),
                     '_coddoc' => ParamsConyuge::getTiposDocumentos(),
                     '_codciu' => ParamsConyuge::getCiudades(),
                     '_sexo' => ParamsConyuge::getSexos(),
@@ -853,7 +854,7 @@ class ApruebaConyugeController extends ApplicationController
             $code_estados = [];
             $query = Mercurio11::all();
             foreach ($query as $row) {
-                $code_estados[$row->getCodest()] = $row->getDetalle();
+                $code_estados[$row->codest] = $row->detalle;
             }
 
             $this->setParamToView('code_estados', $code_estados);
@@ -862,7 +863,7 @@ class ApruebaConyugeController extends ApplicationController
             $this->setParamToView('hide_header', true);
             $this->setParamToView('idModel', $id);
             $this->setParamToView('cedtra', $cedtra);
-            $this->setParamToView('title', "Conyuge Aprobado {$conyuge->getCedcon()}");
+            $this->setParamToView('title', "Conyuge Aprobado {$conyuge->cedcon}");
         } catch (DebugException $err) {
             set_flashdata('error', [
                 'msj' => $err->getMessage(),

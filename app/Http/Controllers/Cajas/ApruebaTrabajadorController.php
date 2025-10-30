@@ -15,7 +15,6 @@ use App\Models\Mercurio30;
 use App\Models\Mercurio31;
 use App\Services\Aprueba\ApruebaTrabajador;
 use App\Services\CajaServices\TrabajadorServices;
-use App\Services\Request as ServicesRequest;
 use App\Services\Srequest;
 use App\Services\Tag;
 use App\Services\Utils\CalculatorDias;
@@ -211,7 +210,7 @@ class ApruebaTrabajadorController extends ApplicationController
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_empresa',
-                    'params' => $mercurio31->getNit(),
+                    'params' => $mercurio31->nit,
                 ]
             );
 
@@ -227,7 +226,7 @@ class ApruebaTrabajadorController extends ApplicationController
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'trabajador',
                     'params' => [
-                        'cedtra' => $mercurio31->getCedtra(),
+                        'cedtra' => $mercurio31->cedtra,
                     ],
                 ]
             );
@@ -271,7 +270,7 @@ class ApruebaTrabajadorController extends ApplicationController
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'buscar_sucursales_en_empresa',
-                    'params' => $mercurio31->getNit(),
+                    'params' => $mercurio31->nit,
                 ]
             );
 
@@ -288,7 +287,7 @@ class ApruebaTrabajadorController extends ApplicationController
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'buscar_listas_en_empresa',
-                    'params' => $mercurio31->getNit(),
+                    'params' => $mercurio31->nit,
                 ]
             );
 
@@ -321,7 +320,7 @@ class ApruebaTrabajadorController extends ApplicationController
             $campos_disponibles = $mercurio31->CamposDisponibles();
             $response = [
                 'success' => true,
-                'data' => $mercurio31->getArray(),
+                'data' => $mercurio31->toArray(),
                 'trabajador_sisu' => $trabajador_sisuweb,
                 'mercurio11' => Mercurio11::all(),
                 'consulta' => $html,

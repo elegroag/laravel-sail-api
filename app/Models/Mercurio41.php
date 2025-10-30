@@ -74,6 +74,7 @@ class Mercurio41 extends ModelBase
         'fecsol',
         'fecapr',
         'ciulab',
+        'tipper',
         'ruuid'
     ];
 

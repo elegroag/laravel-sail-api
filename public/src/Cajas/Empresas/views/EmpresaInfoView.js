@@ -1,3 +1,5 @@
+import flatpickr from 'flatpickr';
+import { Spanish } from 'flatpickr/dist/l10n/es';
 import { FormInfoView } from '@/Cajas/FormInfoView';
 import EmpresaAprobarModel from '../models/EmpresaAprobarModel';
 import { $App } from '@/App';
