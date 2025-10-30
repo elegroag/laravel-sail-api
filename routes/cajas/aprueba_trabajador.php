@@ -11,7 +11,7 @@ Route::middleware([CajasCookieAuthenticated::class])->group(function () {
         Route::post('/buscar/{estado?}', [ApruebaTrabajadorController::class, 'buscar']);
 
         Route::post('/infor', [ApruebaTrabajadorController::class, 'infor']);
-        Route::post('/aprobar', [ApruebaTrabajadorController::class, 'aprueba']);
+        Route::post('/aprueba', [ApruebaTrabajadorController::class, 'aprueba']);
         Route::post('/devolver', [ApruebaTrabajadorController::class, 'devolver']);
         Route::post('/rechazar', [ApruebaTrabajadorController::class, 'rechazar']);
         Route::get('/opcional', [ApruebaTrabajadorController::class, 'opcional']);

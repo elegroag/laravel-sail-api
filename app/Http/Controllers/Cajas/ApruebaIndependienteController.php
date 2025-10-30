@@ -437,7 +437,7 @@ class ApruebaIndependienteController extends ApplicationController
                         'tipo' => $row->getTipo(),
                         'estado' => $row->getEstado(),
                         'coddoc' => $row->getCoddoc(),
-                        'fecreg' => $row->getFecreg()->getUsingFormatDefault(),
+                        'fecreg' => $row->getFecreg(),
                     ];
                 }
 
@@ -450,8 +450,8 @@ class ApruebaIndependienteController extends ApplicationController
                         'razsoc' => $mercurio41->getRazsoc(),
                         'email' => $mercurio41->getEmail(),
                         'estado' => $mercurio41->getEstado(),
-                        'fecest' => $mercurio41->getFecest()->getUsingFormatDefault(),
-                        'fecini' => $mercurio41->getFecini()->getUsingFormatDefault(),
+                        'fecest' => $mercurio41->getFecest(),
+                        'fecini' => $mercurio41->getFecini(),
                     ],
                     'mercurio07' => $mercurio07,
                     'subsi02' => $servicio['data'],
@@ -774,7 +774,7 @@ class ApruebaIndependienteController extends ApplicationController
     {
         /*  $this->setResponse('view');
         $fecha = new Date();
-        $file = "public/temp/" . "reporte_solicitudes_" . $fecha->getUsingFormatDefault() . ".xls";
+        $file = "public/temp/" . "reporte_solicitudes_" . $fecha . ".xls";
         require_once "Library/Excel/Main.php";
         $excels = new Spreadsheet_Excel_Writer($file);
         $excel = $excels->addWorksheet();
@@ -850,28 +850,19 @@ class ApruebaIndependienteController extends ApplicationController
      *
      * @return void
      */
-    public function aprueba()
+    public function aprueba(Request $request)
     {
-        $this->setResponse('ajax');
-        $request = request();
-        $debuginfo = [];
+        $this->db->begin();
         try {
             try {
-                $user = session()->get('user');
-                $acceso = (new Gener42)->count('*', "conditions: permiso='62' AND usuario='{$user['usuario']}'");
-                if ($acceso == 0) {
-                    return $this->renderObject(['success' => false, 'msj' => 'El usuario no dispone de permisos de aprobación'], false);
-                }
-
-                $apruebaSolicitud = new ApruebaSolicitud;
-                $this->db->begin();
-
-                $idSolicitud = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+                $apruebaSolicitud = new ApruebaSolicitud();
+                $postData = $request->all();
+                $idSolicitud = $request->input('id');
                 $calemp = 'I';
                 $solicitud = $apruebaSolicitud->main(
                     $calemp,
                     $idSolicitud,
-                    $_POST
+                    $postData
                 );
 
                 $this->db->commit();
@@ -881,24 +872,20 @@ class ApruebaIndependienteController extends ApplicationController
                     'msj' => 'El registro se completo con éxito',
                 ];
             } catch (DebugException $err) {
-
                 $this->db->rollback();
                 $salida = [
                     'success' => false,
                     'msj' => $err->getMessage(),
+                    'errors' => $err->render($request),
                 ];
             }
-        } catch (DebugException $e) {
+        } catch (\Exception $e) {
             $salida = [
                 'success' => false,
                 'msj' => $e->getMessage(),
             ];
         }
-        if ($debuginfo) {
-            $salida['info'] = $debuginfo;
-        }
-
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function borrarFiltro()

@@ -496,7 +496,7 @@ class ApruebaEmpresaController extends ApplicationController
                         'tipo' => $row->getTipo(),
                         'estado' => $row->getEstado(),
                         'coddoc' => $row->getCoddoc(),
-                        'fecreg' => $row->getFecreg()->getUsingFormatDefault(),
+                        'fecreg' => $row->getFecreg(),
                     ];
                 }
 
@@ -509,8 +509,8 @@ class ApruebaEmpresaController extends ApplicationController
                         'razsoc' => $mercurio30->getRazsoc(),
                         'email' => $mercurio30->getEmail(),
                         'estado' => $mercurio30->getEstado(),
-                        'fecest' => $mercurio30->getFecest()->getUsingFormatDefault(),
-                        'fecini' => $mercurio30->getFecini()->getUsingFormatDefault(),
+                        'fecest' => $mercurio30->getFecest(),
+                        'fecini' => $mercurio30->getFecini(),
                     ],
                     'mercurio07' => $mercurio07,
                     'subsi02' => $servicio['data'],
@@ -904,13 +904,9 @@ class ApruebaEmpresaController extends ApplicationController
                     'success' => true,
                     'msj' => 'El registro se completo con éxito',
                 ];
-
             } catch (DebugException $err) {
                 $this->db->rollback();
-                $salida = [
-                    'success' => false,
-                    'msj' => $err->getMessage(),
-                ];
+                $salida = $err->render($request);
             }
         } catch (\Exception $e) {
             $this->db->rollback();

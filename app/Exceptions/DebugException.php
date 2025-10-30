@@ -48,7 +48,8 @@ class DebugException extends Exception
                     'file' => basename($this->getFile()),
                     'line' => $this->getLine(),
                 ],
-            ], 203
+            ],
+            203
         );
     }
 

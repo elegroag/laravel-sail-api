@@ -123,7 +123,7 @@ class AuditoriaController extends ApplicationController
                     $mmercurio->$documento(),
                     $mmercurio->$nombre(),
                     $responsable,
-                    $mmercurio->getFecest()->getUsingFormatDefault(),
+                    $mmercurio->getFecest(),
                     $dias_vencidos,
                 ];
 

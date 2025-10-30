@@ -3,55 +3,6 @@
 namespace App\Services\Validator;
 
 use DateTime;
-use Exception;
-
-trait ValidatorTrait
-{
-    protected $validator;
-
-    protected $entity;
-
-    public function create($data)
-    {
-        $this->entity = [];
-        foreach ($this->fillable as $key) {
-            $this->entity[$key] = isset($data[$key]) ? $data[$key] : null;
-        }
-    }
-
-    public function getData()
-    {
-        return $this->entity;
-    }
-
-    public function initValidator()
-    {
-        $this->validator = new ValidatorEntity;
-        $this->validator->setRules($this->getRules());
-    }
-
-    public function validate()
-    {
-        if (! $this->validator) {
-            $this->initValidator();
-        }
-
-        return $this->validator->validate($this->entity);
-    }
-
-    public function getValidationErrors()
-    {
-        return $this->validator ? $this->validator->getErrors() : [];
-    }
-
-    public function getAttrErrors()
-    {
-        return $this->validator ? $this->validator->getAttrErrors() : [];
-    }
-
-    // Este método debe ser implementado por cada modelo
-    abstract protected function getRules();
-}
 
 class ValidatorEntity
 {
@@ -107,7 +58,7 @@ class ValidatorEntity
                 break;
             case 'enum':
                 if (! empty($value) && ! in_array($value, $rules['values'])) {
-                    $this->addError($field, "El campo {$field} debe ser uno de los siguientes valores: ".implode(', ', $rules['values']));
+                    $this->addError($field, "El campo {$field} debe ser uno de los siguientes valores: " . implode(', ', $rules['values']));
                 }
                 break;
             case 'date':
@@ -174,21 +125,5 @@ class ValidatorEntity
     public function getAttrErrors()
     {
         return $this->attrerrors;
-    }
-}
-
-class EntityException extends Exception
-{
-    public $errors;
-
-    public function __construct($errors)
-    {
-        parent::__construct('Error validación de datos', 501);
-        $this->errors = $errors;
-    }
-
-    public function getErrors()
-    {
-        return $this->errors;
     }
 }

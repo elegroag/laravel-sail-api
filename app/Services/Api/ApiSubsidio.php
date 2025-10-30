@@ -32,7 +32,7 @@ class ApiSubsidio extends ApiAbstract
             ]);
         } else {
             if (is_null($params) == false) {
-                $metodo .= '/'.$params;
+                $metodo .= '/' . $params;
             }
             $params = [
                 '_user' => 2,
@@ -56,7 +56,7 @@ class ApiSubsidio extends ApiAbstract
         // $basicAuth->encript($this->app->encryption, $this->app->portal_clave);
 
         $url = "{$endpoint->endpoint_name}/{$metodo}";
-        $this->lineaComando = $hostConnection."\n".$url."\n".json_encode($params);
+        $this->lineaComando = $hostConnection . "\n" . $url . "\n" . json_encode($params);
 
         $api = new APIClient($basicAuth, $hostConnection, $url);
         $api->setTypeJson(true);

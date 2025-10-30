@@ -17,7 +17,7 @@ class ApruebaMadreComuni
 {
     private $today;
 
-    private $tipopc = 11;
+    private $tipopc = '11';
 
     private $procesadorComando;
 
@@ -88,7 +88,7 @@ class ApruebaMadreComuni
             throw new Exception('Error, no hay respuesta del servidor para validación del resultado.', 501);
         }
 
-        Debug::addVariable('Comando', $this->procesadorComando->getLineaComando());
+        dd($this->procesadorComando->getLineaComando());
 
         $out = $this->procesadorComando->toArray();
 
@@ -121,8 +121,8 @@ class ApruebaMadreComuni
             "codciu: {$this->solicitud->getCodciu()}",
             "autoriza: '{$this->solicitante->getAutoriza()}'",
             "clave: {$this->solicitante->getClave()}",
-            "fecreg: {$fecreg->getUsingFormatDefault()}",
-            "feccla: {$feccla->getUsingFormatDefault()}"
+            "fecreg: {$fecreg}",
+            "feccla: {$feccla}"
         );
 
         $crearUsuario->procesar();
@@ -181,7 +181,7 @@ class ApruebaMadreComuni
         $data['mes'] = $mes;
         $data['anno'] = $anno;
 
-        $html = view('layouts/aprobar', $data)->render();
+        $html = view('cajas.layouts.aprobar', $data)->render();
         $asunto = "Afiliación trabajador pensionado realizada con éxito, identificación {$this->solicitud->getNit()}";
         $emailCaja = (new Mercurio01)->findFirst();
         $senderEmail = new SenderEmail;

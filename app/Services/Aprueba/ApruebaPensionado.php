@@ -23,7 +23,7 @@ class ApruebaPensionado
 {
     private $today;
 
-    private $tipopc = 9;
+    private $tipopc = '9';
 
     private $solicitante;
 
@@ -45,14 +45,14 @@ class ApruebaPensionado
      */
     public function procesar($postData)
     {
-        $mercurio38 = (new Mercurio38)->findFirst("id='{$this->solicitud->getId()}'");
+        $mercurio38 = Mercurio38::where("id", $this->solicitud->id)->first();
         $hoy = $this->today->format('Y-m-d');
         /**
          * buscar registro de la empresa
          */
-        $fullname = $this->solicitud->getPriape().' '.$this->solicitud->getSegape().' '.$this->solicitud->getPrinom().' '.$this->solicitud->getSegnom();
+        $fullname = $this->solicitud->priape . ' ' . $this->solicitud->segape . ' ' . $this->solicitud->prinom . ' ' . $this->solicitud->segnom;
         $tipper = 'N';
-        $params = array_merge($this->solicitud->getArray(), $postData);
+        $params = array_merge($this->solicitud->toArray(), $postData);
 
         /**
          * valida indice de aportes
@@ -69,7 +69,7 @@ class ApruebaPensionado
             throw new Exception('Error, el indice de aportes no es valido para pensionados', 501);
         }
 
-        if ($this->solicitud->getTipdoc() == 3) {
+        if ($this->solicitud->tipdoc == 3) {
             throw new Exception('Error, el tipo documento para pensionado no puede ser tipo NIT.', 501);
         }
 
@@ -91,20 +91,20 @@ class ApruebaPensionado
         $params['codest'] = null;
         $params['tipper'] = $tipper;
         $params['tipapo'] = 'O';
-        $params['calsuc'] = $this->solicitud->getCalemp();
-        $params['celpri'] = $this->solicitud->getCelular();
-        $params['emailpri'] = $this->solicitud->getEmail();
+        $params['calsuc'] = $this->solicitud->calemp;
+        $params['celpri'] = $this->solicitud->celular;
+        $params['emailpri'] = $this->solicitud->email;
 
-        $repleg = $this->solicitud->getPriape().' '
-            .$this->solicitud->getSegape().' '
-            .$this->solicitud->getPrinom().' '
-            .$this->solicitud->getSegnom();
+        $repleg = $this->solicitud->priape . ' '
+            . $this->solicitud->segape . ' '
+            . $this->solicitud->prinom . ' '
+            . $this->solicitud->segnom;
 
         $params['repleg'] = $repleg;
         $params['razsoc'] = $repleg;
 
-        $params['nit'] = $this->solicitud->getCedtra();
-        $params['coddoc'] = $this->solicitud->getTipdoc();
+        $params['nit'] = $this->solicitud->cedtra;
+        $params['coddoc'] = $this->solicitud->tipdoc;
         $params['digver'] = '0';
         $params['tottra'] = '1';
         $params['fax'] = '0';
@@ -119,7 +119,7 @@ class ApruebaPensionado
             $params['codlis'] = $params['codsuc'];
         }
 
-        $params['nomcon'] = substr($this->solicitud->getPriape().' '.$this->solicitud->getSegape(), 0, 39);
+        $params['nomcon'] = substr($this->solicitud->priape . ' ' . $this->solicitud->segape, 0, 39);
         $params['codase'] = '1';
         $params['resest'] = null;
         $params['fecmer'] = null;
@@ -258,30 +258,34 @@ class ApruebaPensionado
         }
 
         $registroSeguimiento = new RegistroSeguimiento;
-        $registroSeguimiento->crearNota($this->tipopc, $this->solicitud->getId(), $postData['nota_aprobar'], 'A');
+        $registroSeguimiento->crearNota($this->tipopc, $this->solicitud->id, $postData['nota_aprobar'], 'A');
 
         /**
          * Crea de una vez e registro, permitiendo que el usuario entre con la misma password
          * como empresa sin tener que hacer la solicitud de clave
          */
-        $empresa = (new Mercurio07)->findFirst("coddoc='{$this->solicitud->getTipdoc()}' and documento='{$this->solicitud->getNit()}' and tipo='P'");
-        $feccla = $this->solicitante->getFeccla();
-        $fecreg = $this->solicitante->getFecreg();
+        $empresa = Mercurio07::where("coddoc", $this->solicitud->tipdoc)
+            ->where("documento", $this->solicitud->nit)
+            ->where("tipo", 'P')
+            ->first();
+
+        $feccla = $this->solicitante->feccla;
+        $fecreg = $this->solicitante->fecreg;
         $fecapr = $postData['fecapr'];
 
         $crearUsuario = new CrearUsuario(
             new Srequest(
                 [
                     'tipo' => 'O',
-                    'coddoc' => $this->solicitud->getTipdoc(),
-                    'documento' => $this->solicitud->getNit(),
+                    'coddoc' => $this->solicitud->tipdoc,
+                    'documento' => $this->solicitud->nit,
                     'nombre' => $fullname,
-                    'email' => $this->solicitud->getEmail(),
-                    'codciu' => $this->solicitud->getCodciu(),
-                    'autoriza' => $this->solicitante->getAutoriza(),
-                    'clave' => $this->solicitante->getClave(),
-                    'fecreg' => $fecreg->getUsingFormatDefault(),
-                    'feccla' => $feccla->getUsingFormatDefault(),
+                    'email' => $this->solicitud->email,
+                    'codciu' => $this->solicitud->codciu,
+                    'autoriza' => $this->solicitante->autoriza,
+                    'clave' => $this->solicitante->clave,
+                    'fecreg' => $fecreg,
+                    'feccla' => $feccla,
                     'fecapr' => $fecapr,
                 ]
             )
@@ -296,10 +300,10 @@ class ApruebaPensionado
         /**
          * actualiza la ficha de registro
          */
-        $mercurio38->setEstado('A');
-        $mercurio38->setFecest($hoy);
-        $mercurio38->setTipper($tipper);
-        $mercurio38->setFecapr($postData['fecapr']);
+        $mercurio38->estado = 'A';
+        $mercurio38->fecest = $hoy;
+        $mercurio38->tipper = $tipper;
+        $mercurio38->fecapr = $postData['fecapr'];
         $mercurio38->save();
 
         return true;
@@ -343,21 +347,21 @@ class ApruebaPensionado
         $data['mes'] = $mes;
         $data['anno'] = $anno;
 
-        $html = view('layouts/aprobar', $data)->render();
-        $asunto = "Afiliación trabajador pensionado realizada con éxito, identificación {$this->solicitud->getNit()}";
-        $emailCaja = (new Mercurio01)->findFirst();
+        $html = view('cajas.layouts.aprobar', $data)->render();
+        $asunto = "Afiliación trabajador pensionado realizada con éxito, identificación {$this->solicitud->nit}";
+        $emailCaja = Mercurio01::first();
         $senderEmail = new SenderEmail;
 
         $senderEmail->setters(
-            "emisor_email: {$emailCaja->getEmail()}",
-            "emisor_clave: {$emailCaja->getClave()}",
+            "emisor_email: {$emailCaja->email}",
+            "emisor_clave: {$emailCaja->clave}",
             "asunto: {$asunto}"
         );
 
         $senderEmail->send([
             [
-                'email' => $this->solicitante->getEmail(),
-                'nombre' => $this->solicitante->getNombre(),
+                'email' => $this->solicitante->email,
+                'nombre' => $this->solicitante->nombre,
             ],
         ], $html);
 
@@ -366,14 +370,17 @@ class ApruebaPensionado
 
     public function findSolicitud($idSolicitud)
     {
-        $this->solicitud = (new Mercurio38)->findFirst("id='{$idSolicitud}'");
+        $this->solicitud = Mercurio38::where("id", $idSolicitud)->first();
 
         return $this->solicitud;
     }
 
     public function findSolicitante()
     {
-        $this->solicitante = (new Mercurio07)->findFirst("documento='{$this->solicitud->getDocumento()}' and coddoc='{$this->solicitud->getCoddoc()}' and tipo='{$this->solicitud->getTipo()}'");
+        $this->solicitante = Mercurio07::where("documento", $this->solicitud->documento)
+            ->where("coddoc", $this->solicitud->coddoc)
+            ->where("tipo", $this->solicitud->tipo)
+            ->first();
 
         return $this->solicitante;
     }

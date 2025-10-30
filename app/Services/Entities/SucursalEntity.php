@@ -48,7 +48,7 @@ class SucursalEntity
     protected function getRules()
     {
         return [
-            'nit' => ['type' => 'string', 'max' => 14, 'required' => true],
+            'nit' => ['type' => 'rangelength', 'min' => 1, 'max' => 16, 'required' => true],
             'codsuc' => ['type' => 'string', 'max' => 3, 'required' => true],
             'detalle' => ['type' => 'string', 'max' => 180, 'required' => true],
             'subpla' => ['type' => 'string', 'max' => 20, 'required' => false],

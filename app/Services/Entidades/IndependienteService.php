@@ -22,7 +22,7 @@ use App\Services\Utils\Comman;
 
 class IndependienteService
 {
-    private $tipopc = 13;
+    private $tipopc = '13';
 
     private $tipsoc = '08';
 

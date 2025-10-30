@@ -23,9 +23,7 @@ class ApruebaFacultativo
 {
     private $today;
 
-    private $tipopc = 10;
-
-    private $procesadorComando;
+    private $tipopc = '10';
 
     private $solicitante;
 
@@ -35,7 +33,6 @@ class ApruebaFacultativo
 
     public function __construct()
     {
-        $this->procesadorComando = Comman::Api();
         $this->today = Carbon::now();
         $this->dominio = env('APP_URL', 'http://localhost:8000');
     }
@@ -49,36 +46,36 @@ class ApruebaFacultativo
      */
     public function procesar($postData)
     {
-        $mercurio36 = (new Mercurio36)->findFirst("id='{$this->solicitud->getId()}'");
+        $mercurio36 = Mercurio36::where("id", $this->solicitud->id)->first();
         $hoy = $this->today->format('Y-m-d');
 
         /**
          * buscar registro de la empresa
          */
         $tipper = 'N';
-        $params = array_merge($this->solicitud->getArray(), $postData);
+        $params = array_merge($this->solicitud->toArray(), $postData);
         if ($params['codind'] != '46') {
             throw new Exception('Error, el indice de aportes no es valido para facultativos', 501);
         }
 
-        if ($this->solicitud->getTipdoc() == 3) {
+        if ($this->solicitud->tipdoc == 3) {
             throw new Exception('Error, el tipo documento para facultativos no puede ser tipo NIT.', 501);
         }
 
-        $fullname = $this->solicitud->getPriape().' '.$this->solicitud->getSegape().' '.$this->solicitud->getPrinom().' '.$this->solicitud->getSegnom();
+        $fullname = $this->solicitud->priape . ' ' . $this->solicitud->segape . ' ' . $this->solicitud->prinom . ' ' . $this->solicitud->segnom;
         $tipcot = 63;
 
         $params['tipsoc'] = '06';
         $params['digver'] = '0';
-        $params['nit'] = $this->solicitud->getCedtra();
-        $params['coddoc'] = $this->solicitud->getTipdoc();
-        $params['calsuc'] = $this->solicitud->getCalemp();
+        $params['nit'] = $this->solicitud->cedtra;
+        $params['coddoc'] = $this->solicitud->tipdoc;
+        $params['calsuc'] = $this->solicitud->calemp;
         $params['estado'] = 'A';
         $params['fecest'] = null;
         $params['codest'] = null;
         $params['tipper'] = $tipper;
-        $params['celpri'] = $this->solicitud->getCelular();
-        $params['emailpri'] = $this->solicitud->getEmail();
+        $params['celpri'] = $this->solicitud->celular;
+        $params['emailpri'] = $this->solicitud->email;
         $params['repleg'] = $fullname;
         $params['razsoc'] = $fullname;
         $params['fax'] = '0';
@@ -97,7 +94,7 @@ class ApruebaFacultativo
             $params['codlis'] = $params['codsuc'];
         }
         $params['subpla'] = $postData['codsuc'];
-        $params['nomcon'] = substr($this->solicitud->getPriape().' '.$this->solicitud->getSegape(), 0, 39);
+        $params['nomcon'] = substr($this->solicitud->priape . ' ' . $this->solicitud->segape, 0, 39);
         $params['codase'] = '1';
         $params['resest'] = null;
         $params['fecmer'] = null;
@@ -230,30 +227,34 @@ class ApruebaFacultativo
         }
 
         $registroSeguimiento = new RegistroSeguimiento;
-        $registroSeguimiento->crearNota($this->tipopc, $this->solicitud->getId(), $postData['nota_aprobar'], 'A');
+        $registroSeguimiento->crearNota($this->tipopc, $this->solicitud->id, $postData['nota_aprobar'], 'A');
 
         /**
          * Crea de una vez e registro, permitiendo que el usuario entre con la misma password
          * como empresa sin tener que hacer la solicitud de clave
          */
-        $empresa = (new Mercurio07)->findFirst("coddoc='{$this->solicitud->getTipdoc()}' and documento='{$this->solicitud->getCedtra()}' and tipo='F'");
-        $feccla = $this->solicitante->getFeccla();
-        $fecreg = $this->solicitante->getFecreg();
+        $empresa = Mercurio07::where("coddoc", $this->solicitud->tipdoc)
+            ->where("documento", $this->solicitud->cedtra)
+            ->where("tipo", $this->solicitud->tipo)
+            ->first();
+
+        $feccla = $this->solicitante->feccla;
+        $fecreg = $this->solicitante->fecreg;
         $fecapr = $postData['fecapr'];
 
         $crearUsuario = new CrearUsuario(
             new Srequest(
                 [
                     'tipo' => 'F',
-                    'coddoc' => $this->solicitud->getTipdoc(),
-                    'documento' => $this->solicitud->getCedtra(),
+                    'coddoc' => $this->solicitud->tipdoc,
+                    'documento' => $this->solicitud->cedtra,
                     'nombre' => $fullname,
-                    'email' => $this->solicitud->getEmail(),
-                    'codciu' => $this->solicitud->getCodciu(),
-                    'autoriza' => $this->solicitante->getAutoriza(),
-                    'clave' => $this->solicitante->getClave(),
-                    'fecreg' => $fecreg->getUsingFormatDefault(),
-                    'feccla' => $feccla->getUsingFormatDefault(),
+                    'email' => $this->solicitud->email,
+                    'codciu' => $this->solicitud->codciu,
+                    'autoriza' => $this->solicitante->autoriza,
+                    'clave' => $this->solicitante->clave,
+                    'fecreg' => $fecreg,
+                    'feccla' => $feccla,
                     'fecapr' => $fecapr,
                 ]
             )
@@ -268,9 +269,9 @@ class ApruebaFacultativo
         /**
          * actualiza la ficha de registro
          */
-        $mercurio36->setEstado('A');
-        $mercurio36->setFecest($hoy);
-        $mercurio36->setFecapr($postData['fecapr']);
+        $mercurio36->estado = 'A';
+        $mercurio36->fecest = $hoy;
+        $mercurio36->fecapr = $postData['fecapr'];
         $mercurio36->save();
 
         return true;
@@ -298,17 +299,17 @@ class ApruebaFacultativo
         $data['dia'] = $dia;
         $data['mes'] = $mes;
         $data['anno'] = $anno;
-        $data['repleg'] = $this->solicitante->getNombre();
-        $data['razsoc'] = $this->solicitante->getNombre();
+        $data['repleg'] = $this->solicitante->nombre;
+        $data['razsoc'] = $this->solicitante->nombre;
 
-        $html = view('layouts/aprobar', $data)->render();
-        $asunto = "Afiliación de facultativo realizada con éxito, identificación {$this->solicitud->getCedtra()}";
-        $emailCaja = (new Mercurio01)->findFirst();
+        $html = view('cajas.layouts.aprobar', $data)->render();
+        $asunto = "Afiliación de facultativo realizada con éxito, identificación {$this->solicitud->cedtra}";
+        $emailCaja = Mercurio01::first();
         $senderEmail = new SenderEmail(
             new Srequest(
                 [
-                    'emisor_email' => $emailCaja->getEmail(),
-                    'emisor_clave' => $emailCaja->getClave(),
+                    'emisor_email' => $emailCaja->email,
+                    'emisor_clave' => $emailCaja->clave,
                     'asunto' => $asunto,
                 ]
             )
@@ -316,8 +317,8 @@ class ApruebaFacultativo
 
         $senderEmail->send([
             [
-                'email' => $this->solicitante->getEmail(),
-                'nombre' => $this->solicitante->getNombre(),
+                'email' => $this->solicitante->email,
+                'nombre' => $this->solicitante->nombre,
             ],
         ], $html);
 
@@ -326,14 +327,16 @@ class ApruebaFacultativo
 
     public function findSolicitud($idSolicitud)
     {
-        $this->solicitud = (new Mercurio36)->findFirst("id='{$idSolicitud}'");
-
+        $this->solicitud = Mercurio36::where("id", $idSolicitud)->first();
         return $this->solicitud;
     }
 
     public function findSolicitante()
     {
-        $this->solicitante = (new Mercurio07)->findFirst("documento='{$this->solicitud->getDocumento()}' and coddoc='{$this->solicitud->getCoddoc()}' and tipo='{$this->solicitud->getTipo()}'");
+        $this->solicitante = Mercurio07::where("documento", $this->solicitud->cedtra)
+            ->where("coddoc", $this->solicitud->tipdoc)
+            ->where("tipo", $this->solicitud->tipo)
+            ->first();
 
         return $this->solicitante;
     }

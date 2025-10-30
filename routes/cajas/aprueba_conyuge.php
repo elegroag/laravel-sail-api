@@ -14,7 +14,7 @@ Route::middleware([CajasCookieAuthenticated::class])->group(function () {
         Route::get('/index', [ApruebaConyugeController::class, 'index']);
         Route::post('/aplicar_filtro/{estado?}', [ApruebaConyugeController::class, 'aplicarFiltro']);
         Route::post('/buscar/{estado?}', [ApruebaConyugeController::class, 'buscar']);
-        Route::post('/aprobar', [ApruebaConyugeController::class, 'aprueba']);
+        Route::post('/aprueba', [ApruebaConyugeController::class, 'aprueba']);
         Route::post('/devolver', [ApruebaConyugeController::class, 'devolver']);
         Route::post('/rechazar', [ApruebaConyugeController::class, 'rechazar']);
         Route::post('/infor', [ApruebaConyugeController::class, 'infor']);

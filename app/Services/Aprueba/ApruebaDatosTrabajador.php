@@ -149,7 +149,7 @@ class ApruebaDatosTrabajador
             )
         );
 
-        $html = View('layouts/mail_aprobar', $data)->render();
+        $html = View('cajas.layouts.aprobar', $data)->render();
         $sender->send(
             $this->solicitante->getEmail(),
             $html

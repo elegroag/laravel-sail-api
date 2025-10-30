@@ -19,7 +19,7 @@ class ApruebaBeneficiario
 {
     private $today;
 
-    private $tipopc = 4;
+    private $tipopc = '4';
 
     private $solicitante;
 
@@ -41,7 +41,7 @@ class ApruebaBeneficiario
      */
     public function procesar($postData)
     {
-        $benefi = Mercurio34::where('id', $this->solicitud->getId())->first();
+        $benefi = Mercurio34::where('id', $this->solicitud->id)->first();
         $hoy = $this->today->format('Y-m-d');
         $trabajador_sisu = false;
         $ps = Comman::Api();
@@ -50,7 +50,7 @@ class ApruebaBeneficiario
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'trabajador',
                 'params' => [
-                    'cedtra' => $benefi->getCedtra(),
+                    'cedtra' => $benefi->cedtra,
                     'estado' => 'A',
                 ],
             ]
@@ -65,20 +65,20 @@ class ApruebaBeneficiario
             throw new DebugException('El trabajador aun no está activo en el sistema principal de subsidio.', 505);
         }
 
-        if (is_null($benefi->getCedcon()) == false && $benefi->getCedcon() != '') {
+        if (is_null($benefi->cedcon) == false && $benefi->cedcon != '') {
             $apiRest = Comman::Api();
             $apiRest->runCli(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'conyuge',
                     'params' => [
-                        'cedcon' => $benefi->getCedcon(),
+                        'cedcon' => $benefi->cedcon,
                     ],
                 ]
             );
 
             $datos_conyuge = $apiRest->toArray();
-            if ($benefi->getCedcon() != null) {
+            if ($benefi->cedcon != null) {
                 if (! isset($datos_conyuge['data']['estado'])) {
                     throw new DebugException('El conyuge del trabajador aún no esta afiliado.', 500);
                 }
@@ -88,10 +88,10 @@ class ApruebaBeneficiario
         /**
          * buscar registro de la empresa
          */
-        $params = array_merge($benefi->getArray(), $postData);
+        $params = array_merge($benefi->toArray(), $postData);
         $params['estado'] = 'A';
-        $params['documento'] = $benefi->getNumdoc();
-        $params['coddoc'] = $benefi->getTipdoc();
+        $params['documento'] = $benefi->numdoc;
+        $params['coddoc'] = $benefi->tipdoc;
         $params['fecest'] = null;
         $params['codest'] = null;
         $params['fecsis'] = $hoy;
@@ -99,7 +99,7 @@ class ApruebaBeneficiario
         $params['ruaf'] = 'N';
         $params['numhij'] = (! $postData['numhij']) ? 0 : $postData['numhij'];
 
-        if ($benefi->getTipdoc() == 3) {
+        if ($benefi->tipdoc == 3) {
             throw new DebugException('Error, el tipo documento para independientes no puede ser tipo NIT.', 501);
         }
 
@@ -140,13 +140,13 @@ class ApruebaBeneficiario
         }
 
         $registroSeguimiento = new RegistroSeguimiento;
-        $registroSeguimiento->crearNota($this->tipopc, $this->solicitud->getId(), $postData['nota_aprobar'], 'A');
+        $registroSeguimiento->crearNota($this->tipopc, $this->solicitud->id, $postData['nota_aprobar'], 'A');
         /**
          * actualiza la ficha de registro
          */
-        $benefi->setMotivo($postData['nota_aprobar']);
-        $benefi->setEstado('A');
-        $benefi->setFecest($hoy);
+        $benefi->motivo = $postData['nota_aprobar'];
+        $benefi->estado = 'A';
+        $benefi->fecest = $hoy;
         $benefi->save();
 
         return true;
@@ -162,25 +162,25 @@ class ApruebaBeneficiario
      */
     public function enviarMail($actapr, $feccap)
     {
-        $nombre = $this->solicitud->getPrinom().' '.$this->solicitud->getSegnom().' '.$this->solicitud->getPriape().' '.$this->solicitud->getSegape();
+        $nombre = $this->solicitud->prinom . ' ' . $this->solicitud->segnom . ' ' . $this->solicitud->priape . ' ' . $this->solicitud->segape;
         $data = [];
-        $data['razsoc'] = $this->solicitante->getNombre();
-        $data['email'] = $this->solicitante->getEmail();
+        $data['razsoc'] = $this->solicitante->nombre;
+        $data['email'] = $this->solicitante->email;
         $data['membrete'] = "{$this->dominio}/public/img/header_reporte_ugpp.png";
         $data['ruta_firma'] = "{$this->dominio}Mercurio/public/img/Mercurio/firma_jefe_yenny.jpg";
         $data['actapr'] = $actapr;
         $data['url_activa'] = '';
-        $data['msj'] = "Se informa que el beneficiario {$nombre}, con número de documento de indetificación {$this->solicitud->getNumdoc()} fue afiliado con éxito.";
+        $data['msj'] = "Se informa que el beneficiario {$nombre}, con número de documento de indetificación {$this->solicitud->numdoc} fue afiliado con éxito.";
 
         $html = view('layouts/mail_aprobar', $data)->render();
-        $asunto = "Afiliación beneficiario realizada con éxito, identificación {$this->solicitud->getNumdoc()}";
+        $asunto = "Afiliación beneficiario realizada con éxito, identificación {$this->solicitud->numdoc}";
 
-        $emailCaja = (new Mercurio01)->findFirst();
+        $emailCaja = Mercurio01::first();
         $senderEmail = new SenderEmail(
             new Srequest(
                 [
-                    'emisor_email' => $emailCaja->getEmail(),
-                    'emisor_clave' => $emailCaja->getClave(),
+                    'emisor_email' => $emailCaja->email,
+                    'emisor_clave' => $emailCaja->clave,
                     'asunto' => $asunto,
                 ]
             )
@@ -188,8 +188,8 @@ class ApruebaBeneficiario
 
         $senderEmail->send([
             [
-                'email' => $this->solicitante->getEmail(),
-                'nombre' => $this->solicitante->getNombre(),
+                'email' => $this->solicitante->email,
+                'nombre' => $this->solicitante->nombre,
             ],
         ], $html);
 
@@ -198,16 +198,16 @@ class ApruebaBeneficiario
 
     public function findSolicitud($idSolicitud)
     {
-        $this->solicitud = (new Mercurio34)->findFirst("id='{$idSolicitud}'");
+        $this->solicitud = Mercurio34::where('id', $idSolicitud)->first();
 
         return $this->solicitud;
     }
 
     public function findSolicitante()
     {
-        $this->solicitante = (new Mercurio07)->findFirst(
-            "documento='{$this->solicitud->getDocumento()}' and coddoc='{$this->solicitud->getCoddoc()}' and tipo='{$this->solicitud->getTipo()}'"
-        );
+        $this->solicitante = Mercurio07::whereRaw(
+            "documento='{$this->solicitud->numdoc}' and coddoc='{$this->solicitud->tipdoc}' and tipo='{$this->solicitud->tipo}'"
+        )->first();
 
         return $this->solicitante;
     }
@@ -238,7 +238,7 @@ class ApruebaBeneficiario
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_beneficiario',
-                'params' => $mercurio34->getNumdoc(),
+                'params' => $mercurio34->numdoc,
             ],
             false
         );
@@ -259,10 +259,10 @@ class ApruebaBeneficiario
                 'servicio' => 'DeshacerAfiliaciones',
                 'metodo' => 'deshacerAprobacionTrabajador',
                 'params' => [
-                    'nit' => $mercurio34->getNit(),
-                    'cedtra' => $mercurio34->getCedtra(),
-                    'documento' => $mercurio34->getDocumento(),
-                    'tipo_documento' => $mercurio34->getTipdoc(),
+                    'nit' => $mercurio34->nit,
+                    'cedtra' => $mercurio34->cedtra,
+                    'documento' => $mercurio34->numdoc,
+                    'tipo_documento' => $mercurio34->tipdoc,
                     'nota' => $nota,
                 ],
             ]
@@ -294,8 +294,8 @@ class ApruebaBeneficiario
         }
 
         if ($action == 'I') {
-            $mercurio34->setEstado('I');
-            $mercurio34->setFecest(date('Y-m-d'));
+            $mercurio34->estado = 'I';
+            $mercurio34->fecest = date('Y-m-d');
             $mercurio34->save();
         }
 

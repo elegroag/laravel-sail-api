@@ -20,7 +20,7 @@ class ApruebaTrabajador
 {
     private $today;
 
-    private $tipopc = 1;
+    private $tipopc = '1';
 
     private $solicitante;
 
@@ -42,19 +42,19 @@ class ApruebaTrabajador
      */
     public function procesar($postData)
     {
-        $mercurio31 = (new Mercurio31)->findFirst("id='{$this->solicitud->getId()}'");
+        $mercurio31 = Mercurio31::where("id", $this->solicitud->id)->first();
         $hoy = $this->today->format('Y-m-d');
         /**
          * buscar registro de la empresa
          */
-        if ($this->solicitud->getTipdoc() == 3) {
+        if ($this->solicitud->tipdoc == 3) {
             throw new Exception('Error, el tipo documento para independientes no puede ser tipo NIT.', 501);
         }
-        $params = array_merge($this->solicitud->getArray(), $postData);
+        $params = array_merge($this->solicitud->toArray(), $postData);
         $params['estado'] = 'A';
         $params['fecest'] = null;
         $params['codest'] = null;
-        $params['coddoc'] = $this->solicitud->getTipdoc();
+        $params['coddoc'] = $this->solicitud->tipdoc;
         $params['estado'] = 'A';
         $params['horas'] = '240';
         $params['fecsal'] = $params['fecafi'];
@@ -132,13 +132,13 @@ class ApruebaTrabajador
         }
 
         $registroSeguimiento = new RegistroSeguimiento;
-        $registroSeguimiento->crearNota($this->tipopc, $this->solicitud->getId(), $postData['nota_aprobar'], 'A');
+        $registroSeguimiento->crearNota($this->tipopc, $this->solicitud->id, $postData['nota_aprobar'], 'A');
         /**
          * actualiza la ficha de registro
          */
-        $mercurio31->setMotivo($postData['nota_aprobar']);
-        $mercurio31->setEstado('A');
-        $mercurio31->setFecest($hoy);
+        $mercurio31->motivo = $postData['nota_aprobar'];
+        $mercurio31->estado = 'A';
+        $mercurio31->fecest = $hoy;
         $mercurio31->save();
 
         return true;
@@ -154,25 +154,25 @@ class ApruebaTrabajador
      */
     public function enviarMail($actapr, $feccap)
     {
-        $nombre = $this->solicitud->getPrinom().' '.$this->solicitud->getSegnom().' '.$this->solicitud->getPriape().' '.$this->solicitud->getSegape();
+        $nombre = $this->solicitud->prinom . ' ' . $this->solicitud->segnom . ' ' . $this->solicitud->priape . ' ' . $this->solicitud->segape;
         $data = [];
-        $data['razsoc'] = $this->solicitante->getNombre();
-        $data['email'] = $this->solicitante->getEmail();
+        $data['razsoc'] = $this->solicitante->nombre;
+        $data['email'] = $this->solicitante->email;
         $data['membrete'] = "{$this->dominio}/public/img/header_reporte_ugpp.png";
         $data['ruta_firma'] = "{$this->dominio}Mercurio/public/img/Mercurio/firma_jefe_yenny.jpg";
         $data['actapr'] = $actapr;
         $data['url_activa'] = '';
-        $data['msj'] = "Se informa que el trabajador {$nombre}, con número de documento de indetificación {$this->solicitud->getCedtra()} fue afiliado con éxito.";
+        $data['msj'] = "Se informa que el trabajador {$nombre}, con número de documento de indetificación {$this->solicitud->cedtra} fue afiliado con éxito.";
 
         $html = view('layouts/mail_aprobar', $data)->render();
 
-        $asunto = "Afiliación trabajador realizada con éxito, identificación {$this->solicitud->getCedtra()}";
-        $emailCaja = (new Mercurio01)->findFirst();
+        $asunto = "Afiliación trabajador realizada con éxito, identificación {$this->solicitud->cedtra}";
+        $emailCaja = Mercurio01::first();
         $senderEmail = new SenderEmail(
             new Srequest(
                 [
-                    'emisor_email' => $emailCaja->getEmail(),
-                    'emisor_clave' => $emailCaja->getClave(),
+                    'emisor_email' => $emailCaja->email,
+                    'emisor_clave' => $emailCaja->clave,
                     'asunto' => $asunto,
                 ]
             )
@@ -180,8 +180,8 @@ class ApruebaTrabajador
         $senderEmail->send(
             [
                 [
-                    'email' => $this->solicitante->getEmail(),
-                    'nombre' => $this->solicitante->getNombre(),
+                    'email' => $this->solicitante->email,
+                    'nombre' => $this->solicitante->nombre,
                 ],
             ],
             $html
@@ -192,14 +192,20 @@ class ApruebaTrabajador
 
     public function findSolicitud($idSolicitud)
     {
-        $this->solicitud = (new Mercurio31)->findFirst("id='{$idSolicitud}'");
+        $this->solicitud = Mercurio31::where("id", $idSolicitud)->first();
 
         return $this->solicitud;
     }
 
     public function findSolicitante()
     {
-        $this->solicitante = (new Mercurio07)->findFirst("documento='{$this->solicitud->getDocumento()}' and coddoc='{$this->solicitud->getCoddoc()}' and tipo='{$this->solicitud->getTipo()}'");
+        $this->solicitante = Mercurio07::where(
+            "documento",
+            $this->solicitud->documento
+        )
+            ->where("coddoc", $this->solicitud->coddoc)
+            ->where("tipo", $this->solicitud->tipo)
+            ->first();
 
         return $this->solicitante;
     }
@@ -230,7 +236,7 @@ class ApruebaTrabajador
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_trabajador',
-                'params' => $mercurio31->getCedtra(),
+                'params' => $mercurio31->cedtra,
             ]
         );
         if ($ps->isJson() == false) {
@@ -250,11 +256,11 @@ class ApruebaTrabajador
                 'servicio' => 'DeshacerAfiliaciones',
                 'metodo' => 'deshacer_aprobacion_trabajador',
                 'params' => [
-                    'nit' => $mercurio31->getNit(),
-                    'cedtra' => $mercurio31->getCedtra(),
-                    'documento' => $mercurio31->getDocumento(),
-                    'tipo_documento' => $mercurio31->getTipdoc(),
-                    'fecha_aprobacion' => $mercurio31->getFecest(),
+                    'nit' => $mercurio31->nit,
+                    'cedtra' => $mercurio31->cedtra,
+                    'documento' => $mercurio31->documento,
+                    'tipo_documento' => $mercurio31->tipdoc,
+                    'fecha_aprobacion' => $mercurio31->fecest,
                     'nota' => $nota,
                 ],
             ]
@@ -286,8 +292,8 @@ class ApruebaTrabajador
         }
 
         if ($action == 'I') {
-            $mercurio31->setEstado('I');
-            $mercurio31->setFecest(date('Y-m-d'));
+            $mercurio31->estado = 'I';
+            $mercurio31->fecest = date('Y-m-d');
             $mercurio31->save();
         }
 

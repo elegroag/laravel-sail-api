@@ -97,10 +97,10 @@ class TrabajadorEntity
     protected function getRules()
     {
         return [
-            'nit' => ['type' => 'string', 'max' => 14, 'is_null' => false],
+            'nit' => ['type' => 'rangelength', 'min' => 1, 'max' => 16, 'is_null' => false],
             'codsuc' => ['type' => 'string', 'max' => 3, 'is_null' => false],
             'codlis' => ['type' => 'string', 'max' => 3, 'is_null' => false],
-            'cedtra' => ['type' => 'string', 'max' => 16, 'is_null' => false],
+            'cedtra' => ['type' => 'rangelength', 'min' => 1, 'max' => 16, 'is_null' => false],
             'coddoc' => ['type' => 'string', 'max' => 2, 'is_null' => false],
             'priape' => ['type' => 'string', 'max' => 20, 'is_null' => false],
             'segape' => ['type' => 'string', 'max' => 20, 'is_null' => true],
@@ -165,7 +165,7 @@ class TrabajadorEntity
             'fosfec' => ['type' => 'string', 'max' => 1, 'is_null' => true],
             'fecact' => ['type' => 'date', 'is_null' => true],
             'tipjor' => ['type' => 'string', 'max' => 1, 'is_null' => true],
-            'usuario' => ['type' => 'string', 'max' => 10, 'is_null' => true],
+            'usuario' => ['type' => 'rangelength', 'min' => 1, 'max' => 4, 'is_null' => true],
             'correo' => ['type' => 'string', 'max' => 1, 'is_null' => true],
             'tottra' => ['type' => 'numeric', 'is_null' => true],
             'cargo' => ['type' => 'string', 'max' => 100, 'is_null' => true],

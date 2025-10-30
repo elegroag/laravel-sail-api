@@ -18,7 +18,7 @@ use App\Services\Utils\Comman;
 
 class PensionadoService
 {
-    private $tipopc = 9;
+    private $tipopc = '9';
 
     private $tipsoc = '08';
 

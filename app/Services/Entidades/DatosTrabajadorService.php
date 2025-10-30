@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\DB;
 
 class DatosTrabajadorService
 {
-    private $tipopc = 14;
+    private $tipopc = '14';
 
     private $user;
 

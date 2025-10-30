@@ -397,7 +397,6 @@ class IndependienteController extends ApplicationController
      */
     public function guardarArchivo(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $id = $request->input('id');
             $coddoc = $request->input('coddoc');
@@ -422,7 +421,7 @@ class IndependienteController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     /**
@@ -432,17 +431,14 @@ class IndependienteController extends ApplicationController
      */
     public function enviarCaja(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $id = $request->input('id', true, true, true, true);
+            $id = $request->input('id');
             $independienteService = new IndependienteService;
-            // $independienteService->setTransa();
 
             $asignarFuncionario = new AsignarFuncionario;
             $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
 
             $independienteService->enviarCaja(new SenderValidationCaja, $id, $usuario);
-            // $independienteService->endTransa();
 
             $salida = [
                 'success' => true,
@@ -454,8 +450,7 @@ class IndependienteController extends ApplicationController
                 'msj' => $e->getMessage(),
             ];
         }
-
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     /**

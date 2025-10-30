@@ -17,7 +17,7 @@ class ApruebaServicioDomestico
 {
     private $today;
 
-    private $tipopc = 12;
+    private $tipopc = '12';
 
     private $procesadorComando;
 
@@ -119,8 +119,8 @@ class ApruebaServicioDomestico
             "codciu: {$this->solicitud->getCodciu()}",
             "autoriza: '{$this->solicitante->getAutoriza()}'",
             "clave: {$this->solicitante->getClave()}",
-            "fecreg: {$fecreg->getUsingFormatDefault()}",
-            "feccla: {$feccla->getUsingFormatDefault()}"
+            "fecreg: {$fecreg}",
+            "feccla: {$feccla}"
         );
 
         $crearUsuario->procesar();

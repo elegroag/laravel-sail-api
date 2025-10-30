@@ -19,7 +19,7 @@ class ApruebaConyuge
 {
     private $today;
 
-    private $tipopc = 3;
+    private $tipopc = '3';
 
     private $solicitante;
 
@@ -41,21 +41,20 @@ class ApruebaConyuge
      */
     public function procesar($postData)
     {
-        $conyuge = (new Mercurio32)->findFirst("id='{$this->solicitud->getId()}'");
-
+        $conyuge = Mercurio32::where("id", $this->solicitud->id)->first();
         $hoy = $this->today->format('Y-m-d');
 
-        $params = array_merge($this->solicitud->getArray(), $postData);
+        $params = array_merge($this->solicitud->toArray(), $postData);
         $params['estado'] = 'A';
         $params['fecest'] = null;
         $params['codest'] = null;
-        $params['coddoc'] = $this->solicitud->getTipdoc();
+        $params['coddoc'] = $this->solicitud->tipdoc;
         $params['direccion'] = 'CR';
         $params['fecsal'] = null;
         $params['ruaf'] = 'N';
         $params['salario'] = '0';
 
-        if ($this->solicitud->getTipdoc() == 3) {
+        if ($this->solicitud->tipdoc == 3) {
             throw new DebugException('Error, el tipo documento para independientes no puede ser tipo NIT.', 501);
         }
 
@@ -66,7 +65,7 @@ class ApruebaConyuge
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'trabajador',
                 'params' => [
-                    'cedtra' => $conyuge->getCedtra(),
+                    'cedtra' => $conyuge->cedtra,
                     'estado' => 'A',
                 ],
             ]
@@ -117,13 +116,13 @@ class ApruebaConyuge
         }
 
         $registroSeguimiento = new RegistroSeguimiento;
-        $registroSeguimiento->crearNota($this->tipopc, $this->solicitud->getId(), $postData['nota_aprobar'], 'A');
+        $registroSeguimiento->crearNota($this->tipopc, $this->solicitud->id, $postData['nota_aprobar'], 'A');
         /**
          * actualiza la ficha de registro
          */
-        $conyuge->setMotivo($postData['nota_aprobar']);
-        $conyuge->setEstado('A');
-        $conyuge->setFecest($hoy);
+        $conyuge->motivo = $postData['nota_aprobar'];
+        $conyuge->estado = 'A';
+        $conyuge->fecest = $hoy;
         $conyuge->save();
 
         return true;
@@ -139,25 +138,25 @@ class ApruebaConyuge
      */
     public function enviarMail($actapr = '', $feccap = '')
     {
-        $nombre = $this->solicitud->getPrinom().' '.$this->solicitud->getSegnom().' '.$this->solicitud->getPriape().' '.$this->solicitud->getSegape();
+        $nombre = $this->solicitud->prinom . ' ' . $this->solicitud->segnom . ' ' . $this->solicitud->priape . ' ' . $this->solicitud->segape;
         $data = [];
-        $data['razsoc'] = $this->solicitante->getNombre();
-        $data['email'] = $this->solicitante->getEmail();
+        $data['razsoc'] = $this->solicitante->nombre;
+        $data['email'] = $this->solicitante->email;
         $data['membrete'] = "{$this->dominio}/public/img/header_reporte_ugpp.png";
         $data['ruta_firma'] = "{$this->dominio}Mercurio/public/img/Mercurio/firma_jefe_yenny.jpg";
         $data['actapr'] = $actapr;
         $data['url_activa'] = '';
-        $data['msj'] = "Se informa que el beneficiario {$nombre}, con número de documento de indetificación {$this->solicitud->getCedcon()} fue afiliado con éxito.";
+        $data['msj'] = "Se informa que el beneficiario {$nombre}, con número de documento de indetificación {$this->solicitud->cedcon} fue afiliado con éxito.";
 
         $html = view('layouts/mail_aprobar', $data)->render();
-        $asunto = "Afiliación beneficiario realizada con éxito, identificación {$this->solicitud->getCedcon()}";
-        $emailCaja = (new Mercurio01)->findFirst();
+        $asunto = "Afiliación beneficiario realizada con éxito, identificación {$this->solicitud->cedcon}";
+        $emailCaja = Mercurio01::first();
 
         $senderEmail = new SenderEmail(
             new Srequest(
                 [
-                    'emisor_email' => $emailCaja->getEmail(),
-                    'emisor_clave' => $emailCaja->getClave(),
+                    'emisor_email' => $emailCaja->email,
+                    'emisor_clave' => $emailCaja->clave,
                     'asunto' => $asunto,
                 ]
             )
@@ -165,8 +164,8 @@ class ApruebaConyuge
 
         $senderEmail->send([
             [
-                'email' => $this->solicitante->getEmail(),
-                'nombre' => $this->solicitante->getNombre(),
+                'email' => $this->solicitante->email,
+                'nombre' => $this->solicitante->nombre,
             ],
         ], $html);
 
@@ -175,16 +174,16 @@ class ApruebaConyuge
 
     public function findSolicitud($idSolicitud)
     {
-        $this->solicitud = (new Mercurio32)->findFirst(" id='{$idSolicitud}'");
+        $this->solicitud = Mercurio32::where("id", $idSolicitud)->first();
 
         return $this->solicitud;
     }
 
     public function findSolicitante()
     {
-        $this->solicitante = (new Mercurio07)->findFirst(
-            "documento='{$this->solicitud->getDocumento()}' and coddoc='{$this->solicitud->getCoddoc()}' and tipo='{$this->solicitud->getTipo()}'"
-        );
+        $this->solicitante = Mercurio07::where(
+            "documento='{$this->solicitud->documento}' and coddoc='{$this->solicitud->coddoc}' and tipo='{$this->solicitud->tipo}'"
+        )->first();
 
         return $this->solicitante;
     }
@@ -216,7 +215,7 @@ class ApruebaConyuge
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_conyuge',
                 'params' => [
-                    'cedcon' => $mercurio32->getCedcon(),
+                    'cedcon' => $mercurio32->cedcon,
                 ],
             ]
         );
@@ -237,10 +236,10 @@ class ApruebaConyuge
                 'servicio' => 'DeshacerAfiliaciones',
                 'metodo' => 'deshacerAprobacionTrabajador',
                 'params' => [
-                    'nit' => $mercurio32->getNit(),
-                    'cedtra' => $mercurio32->getCedtra(),
-                    'documento' => $mercurio32->getCedcon(),
-                    'tipo_documento' => $mercurio32->getTipdoc(),
+                    'nit' => $mercurio32->nit,
+                    'cedtra' => $mercurio32->cedtra,
+                    'documento' => $mercurio32->cedcon,
+                    'tipo_documento' => $mercurio32->tipdoc,
                     'nota' => $nota,
                 ],
             ]
@@ -272,8 +271,8 @@ class ApruebaConyuge
         }
 
         if ($action == 'I') {
-            $mercurio32->setEstado('I');
-            $mercurio32->setFecest(date('Y-m-d'));
+            $mercurio32->estado = 'I';
+            $mercurio32->fecest = date('Y-m-d');
             $mercurio32->save();
         }
 

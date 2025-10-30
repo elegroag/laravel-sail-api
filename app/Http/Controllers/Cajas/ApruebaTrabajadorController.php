@@ -839,7 +839,7 @@ class ApruebaTrabajadorController extends ApplicationController
                 'razsoc' => $mercurio->getRazsoc(),
                 'dias_vencidos' => $dias_vencidos,
                 'id' => $mercurio->getId(),
-                'fecsol' => $mercurio->getFecsol()->getUsingFormatDefault(),
+                'fecsol' => $mercurio->getFecsol(),
                 'url' => $url,
             ];
         }

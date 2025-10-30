@@ -143,7 +143,7 @@ class ApruebaDatosEmpresa
             )
         );
 
-        $html = view('layouts/mail_aprobar', $data)->render();
+        $html = view('cajas.layouts.aprobar', $data)->render();
         $sender->send(
             [
                 [

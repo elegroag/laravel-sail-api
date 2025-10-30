@@ -276,8 +276,7 @@ class EmpresaController extends ApplicationController
     {
         $this->setResponse('ajax');
         try {
-            $id = (int) $this->clp($request, 'id');
-
+            $id = $request->input('id');
             $asignarFuncionario = new AsignarFuncionario;
             $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
 
@@ -294,8 +293,7 @@ class EmpresaController extends ApplicationController
                 'msj' => $e->getMessage(),
             ];
         }
-
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     /**

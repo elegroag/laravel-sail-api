@@ -384,7 +384,7 @@ class PensionadoController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     /**
@@ -420,7 +420,7 @@ class PensionadoController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($response);
+        return response()->json($response);
     }
 
     /**

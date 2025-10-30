@@ -29,7 +29,7 @@ use Illuminate\Http\Request;
 
 class FacultativoController extends ApplicationController
 {
-    protected $tipopc = 10;
+    protected $tipopc = '10';
 
     /**
      * facultativoService variable
@@ -354,33 +354,29 @@ class FacultativoController extends ApplicationController
 
     public function guardarArchivo(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $coddoc = $request->input('coddoc', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-
+            $id = $request->input('id');
+            $coddoc = $request->input('coddoc');
             $guardarArchivoService = new GuardarArchivoService([
                 'tipopc' => $this->tipopc,
                 'coddoc' => $coddoc,
                 'id' => $id,
             ]);
-
-            $mercurio37 = (new Mercurio37)->findFirst("tipopc='{$this->tipopc}' and numero='{$id}' and coddoc='{$coddoc}'");
-
+            $mercurio37 = $guardarArchivoService->main();
             $response = [
                 'success' => true,
                 'msj' => 'Ok archivo procesado',
                 'data' => $mercurio37->getArray(),
             ];
-        } catch (DebugException $e) {
+        } catch (DebugException $ert) {
             $response = [
                 'success' => false,
-                'msj' => $e->getMessage(),
+                'msj' => $ert->getMessage(),
             ];
         }
-
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
+
 
     /**
      * enviarCaja function

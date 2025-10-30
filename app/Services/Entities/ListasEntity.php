@@ -23,7 +23,7 @@ class ListasEntity
     protected function getRules()
     {
         return [
-            'nit' => ['type' => 'string', 'max' => 18, 'required' => true],
+            'nit' => ['type' => 'rangelength', 'min' => 1, 'max' => 16, 'required' => true],
             'codlis' => ['type' => 'string', 'max' => 3, 'required' => true],
             'detalle' => ['type' => 'string', 'max' => 140, 'required' => true],
             'direccion' => ['type' => 'string', 'max' => 120, 'required' => false],

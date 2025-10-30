@@ -23,7 +23,7 @@ class ApruebaIndependiente
 {
     private $today;
 
-    private $tipopc = 13;
+    private $tipopc = '13';
 
     private $solicitante;
 
@@ -45,18 +45,18 @@ class ApruebaIndependiente
      */
     public function procesar($postData)
     {
-        $mercurio41 = (new Mercurio41)->findFirst("id='{$this->solicitud->getId()}'");
+        $mercurio41 = Mercurio41::where('id', $this->solicitud->id)->first();
         $hoy = $this->today->format('Y-m-d');
         /**
          * buscar registro de la empresa
          */
-        $repleg = $this->solicitud->getPriape().' '
-            .$this->solicitud->getSegape().' '
-            .$this->solicitud->getPrinom().' '
-            .$this->solicitud->getSegnom();
+        $repleg = $this->solicitud->priape . ' '
+            . $this->solicitud->segape . ' '
+            . $this->solicitud->prinom . ' '
+            . $this->solicitud->segnom;
 
         $tipper = 'N';
-        $params = array_merge($this->solicitud->getArray(), $postData);
+        $params = array_merge($this->solicitud->toArray(), $postData);
         /**
          * valida indice de aportes
          * 14 => aportes del 0.2% independiente
@@ -66,7 +66,7 @@ class ApruebaIndependiente
             throw new Exception('Error, el indice de aportes no es valido para independientes', 501);
         }
 
-        if ($this->solicitud->getTipdoc() == 3) {
+        if ($this->solicitud->tipdoc == 3) {
             throw new Exception('Error, el tipo documento para independientes no puede ser tipo NIT.', 501);
         }
 
@@ -77,17 +77,17 @@ class ApruebaIndependiente
             $tipcot = 65;
         }
 
-        $fullname = $this->solicitud->getPriape().' '.$this->solicitud->getSegape().' '.$this->solicitud->getPrinom().' '.$this->solicitud->getSegnom();
-        $params['nit'] = $this->solicitud->getCedtra();
-        $params['coddoc'] = $this->solicitud->getTipdoc();
+        $fullname = $this->solicitud->priape . ' ' . $this->solicitud->segape . ' ' . $this->solicitud->prinom . ' ' . $this->solicitud->segnom;
+        $params['nit'] = $this->solicitud->cedtra;
+        $params['coddoc'] = $this->solicitud->tipdoc;
         $params['estado'] = 'A';
         $params['fecest'] = null;
         $params['codest'] = null;
         $params['tipper'] = $tipper;
         $params['tipapo'] = 'I';
         $params['tipsoc'] = '08';
-        $params['celpri'] = $this->solicitud->getCelular();
-        $params['emailpri'] = $this->solicitud->getEmail();
+        $params['celpri'] = $this->solicitud->celular;
+        $params['emailpri'] = $this->solicitud->email;
         $params['repleg'] = $repleg;
         $params['razsoc'] = $params['repleg'];
         $params['fax'] = '0';
@@ -106,15 +106,15 @@ class ApruebaIndependiente
 
         $params['digver'] = '0';
         $params['tottra'] = '1';
-        $params['nomcon'] = substr($this->solicitud->getPriape().' '.$this->solicitud->getSegape(), 0, 39);
+        $params['nomcon'] = substr($this->solicitud->priape . ' ' . $this->solicitud->segape, 0, 39);
         $params['fecsis'] = $hoy; // fecha captura del sistema
         $params['feccam'] = $hoy; // fecha de actualizacion
         $params['codase'] = '1';
         $params['estado'] = 'A';
-        $params['telt'] = $this->solicitud->getCelular();
-        $params['telr'] = $this->solicitud->getTelefono();
-        $params['mailr'] = $this->solicitud->getEmail();
-        $params['calsuc'] = $this->solicitud->getCalemp();
+        $params['telt'] = $this->solicitud->celular;
+        $params['telr'] = $this->solicitud->telefono;
+        $params['mailr'] = $this->solicitud->email;
+        $params['calsuc'] = $this->solicitud->calemp;
         $params['detalle'] = $repleg;
         $params['nomemp'] = $repleg;
         $params['fecapr'] = $postData['fecapr'];
@@ -150,10 +150,10 @@ class ApruebaIndependiente
         $params['coddiv'] = $params['codciu'];
 
         $params['horas'] = '240';
-        if (! $this->solicitud->getPub_indigena_id()) {
+        if (! $this->solicitud->pub_indigena_id) {
             $params['pub_indigena_id'] = 2;
         }
-        if (! $this->solicitud->getResguardo_id()) {
+        if (! $this->solicitud->resguardo_id) {
             $params['resguardo_id'] = 2;
         }
 
@@ -260,24 +260,27 @@ class ApruebaIndependiente
          * Crea de una vez e registro, permitiendo que el usuario entre con la misma password
          * como empresa sin tener que hacer la solicitud de clave
          */
-        $empresa = (new Mercurio07)->findFirst("coddoc='{$this->solicitud->getTipdoc()}' and documento='{$this->solicitud->getCedtra()}' and tipo='I'");
+        $empresa = Mercurio07::where("coddoc", $this->solicitud->tipdoc)
+            ->where("documento", $this->solicitud->cedtra)
+            ->where("tipo", $this->solicitud->tipo)
+            ->first();
 
-        $fecreg = $this->solicitante->getFecreg();
-        $feccla = $this->solicitante->getFeccla();
+        $fecreg = $this->solicitante->fecreg;
+        $feccla = $this->solicitante->feccla;
         $fecapr = $postData['fecapr'];
 
         $crearUsuario = new CrearUsuario(
             new Srequest(
                 [
                     'tipo' => 'I',
-                    'coddoc' => $this->solicitud->getTipdoc(),
-                    'documento' => $this->solicitud->getCedtra(),
+                    'coddoc' => $this->solicitud->tipdoc,
+                    'documento' => $this->solicitud->cedtra,
                     'nombre' => $fullname,
-                    'email' => $this->solicitud->getEmail(),
-                    'codciu' => $this->solicitud->getCodciu(),
-                    'autoriza' => $this->solicitante->getAutoriza(),
-                    'clave' => $this->solicitante->getClave(),
-                    'fecreg' => $fecreg->getUsingFormatDefault(),
+                    'email' => $this->solicitud->email,
+                    'codciu' => $this->solicitud->codciu,
+                    'autoriza' => $this->solicitante->autoriza,
+                    'clave' => $this->solicitante->clave,
+                    'fecreg' => $fecreg,
                     'feccla' => $feccla,
                     'fecapr' => $fecapr,
                 ]
@@ -293,9 +296,9 @@ class ApruebaIndependiente
         /**
          * actualiza la ficha de registro
          */
-        $mercurio41->setEstado('A');
-        $mercurio41->setFecest($hoy);
-        $mercurio41->setFecapr($postData['fecapr']);
+        $mercurio41->estado = 'A';
+        $mercurio41->fecest = $hoy;
+        $mercurio41->fecapr = $postData['fecapr'];
         $mercurio41->save();
 
         return true;
@@ -316,25 +319,25 @@ class ApruebaIndependiente
         $mes = get_mes_name($feccap->format('m'));
         $anno = $feccap->format('Y');
 
-        $data = $this->solicitud->getArray();
+        $data = $this->solicitud->toArray();
         $data['membrete'] = "{$this->dominio}public/img/membrete_aprueba.jpg";
         $data['ruta_firma'] = "{$this->dominio}Mercurio/public/img/Mercurio/firma_jefe_yenny.jpg";
         $data['actapr'] = $actapr;
         $data['dia'] = $dia;
         $data['mes'] = $mes;
         $data['anno'] = $anno;
-        $data['repleg'] = $this->solicitante->getNombre();
-        $data['razsoc'] = $this->solicitante->getNombre();
+        $data['repleg'] = $this->solicitante->nombre;
+        $data['razsoc'] = $this->solicitante->nombre;
 
-        $html = view('layouts/aprobar', $data)->render();
-        $asunto = "Afiliación trabajador independiente realizada con éxito, identificación {$this->solicitud->getCedtra()}";
+        $html = view('cajas.layouts.aprobar', $data)->render();
+        $asunto = "Afiliación trabajador independiente realizada con éxito, identificación {$this->solicitud->cedtra}";
 
-        $emailCaja = (new Mercurio01)->findFirst();
+        $emailCaja = Mercurio01::first();
         $senderEmail = new SenderEmail(
             new Srequest(
                 [
-                    'emisor_email' => $emailCaja->getEmail(),
-                    'emisor_clave' => $emailCaja->getClave(),
+                    'emisor_email' => $emailCaja->email,
+                    'emisor_clave' => $emailCaja->clave,
                     'asunto' => $asunto,
                 ]
             )
@@ -342,8 +345,8 @@ class ApruebaIndependiente
 
         $senderEmail->send([
             [
-                'email' => $this->solicitante->getEmail(),
-                'nombre' => $this->solicitante->getNombre(),
+                'email' => $this->solicitante->email,
+                'nombre' => $this->solicitante->nombre,
             ],
         ], $html);
 
@@ -362,16 +365,22 @@ class ApruebaIndependiente
      */
     public function findSolicitud($id)
     {
-        $this->solicitud = (new Mercurio41)->findFirst(" id='{$id}'");
-
+        $this->solicitud = Mercurio41::where("id", $id)->first();
         return $this->solicitud;
     }
 
     public function findSolicitante()
     {
-        $this->solicitante = (new Mercurio07)->findFirst(
-            "documento='{$this->solicitud->getDocumento()}' and coddoc='{$this->solicitud->getCoddoc()}' and tipo='{$this->solicitud->getTipo()}'"
-        );
+        $this->solicitante = Mercurio07::where(
+            "documento",
+            $this->solicitud->documento
+        )->where(
+            "coddoc",
+            $this->solicitud->coddoc
+        )->where(
+            "tipo",
+            $this->solicitud->tipo
+        )->first();
 
         return $this->solicitante;
     }

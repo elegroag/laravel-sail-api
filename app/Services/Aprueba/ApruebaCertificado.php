@@ -16,7 +16,7 @@ class ApruebaCertificado
 {
     private $today;
 
-    private $tipopc = 8;
+    private $tipopc = '8';
 
     private $solicitante;
 
@@ -66,7 +66,7 @@ class ApruebaCertificado
          */
         $certificado->setMotivo($postData['nota_aprobar']);
         $certificado->setEstado('A');
-        $certificado->setFecest($this->today->getUsingFormatDefault());
+        $certificado->setFecest($this->today->format('Y-m-d'));
         $certificado->save();
 
         return true;

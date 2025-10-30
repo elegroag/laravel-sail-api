@@ -23,7 +23,7 @@ class ApruebaEmpresa
 {
     private $today;
 
-    private $tipopc = 2;
+    private $tipopc = '2';
 
     private $solicitante;
 
@@ -45,13 +45,13 @@ class ApruebaEmpresa
      */
     public function procesar($postData)
     {
-        $mercurio30 = (new Mercurio30)->findFirst("id='{$this->solicitud->getId()}'");
+        $mercurio30 = Mercurio30::where('id', $this->solicitud->id)->first();
         $hoy = $this->today->format('Y-m-d');
         /**
          * buscar registro de la empresa
          */
-        $tipper = ($this->solicitud->getTipdoc() == 3) ? 'J' : 'N';
-        $params = array_merge($this->solicitud->getArray(), $postData);
+        $tipper = ($this->solicitud->tipdoc == 3) ? 'J' : 'N';
+        $params = array_merge($this->solicitud->toArray(), $postData);
 
         /**
          * valida indice de aportes de empresas
@@ -70,17 +70,17 @@ class ApruebaEmpresa
         $params['fecest'] = null;
         $params['codest'] = null;
         $params['tipper'] = $tipper;
-        $params['coddoc'] = $mercurio30->getTipdoc();
+        $params['coddoc'] = $mercurio30->tipdoc;
         $params['fecsis'] = $hoy; // fecha captura del sistema
         $params['feccam'] = $hoy; // fecha de actualizacion
         $params['estado'] = 'A';
-        $params['telt'] = $mercurio30->getCelpri();
-        $params['telr'] = $mercurio30->getTelefono();
-        $params['mailr'] = $mercurio30->getEmailpri();
-        $params['calsuc'] = $mercurio30->getCalemp();
-        $params['nomcon'] = $mercurio30->getPriape() . ' ' . $mercurio30->getSegape();
-        $params['detalle'] = $mercurio30->getRazsoc();
-        $params['nomemp'] = $mercurio30->getRazsoc();
+        $params['telt'] = $mercurio30->celpri;
+        $params['telr'] = $mercurio30->telefono;
+        $params['mailr'] = $mercurio30->emailpri;
+        $params['calsuc'] = $mercurio30->calemp;
+        $params['nomcon'] = substr($mercurio30->priape . ' ' . $mercurio30->segape, 0, 40);
+        $params['detalle'] = $mercurio30->razsoc;
+        $params['nomemp'] = $mercurio30->razsoc;
         $params['fecapr'] = $postData['fecapr'];
         $params['observacion'] = $postData['nota_aprobar'];
         $params['totapo'] = '0';
@@ -174,33 +174,36 @@ class ApruebaEmpresa
         }
 
         if ($out['success'] == false) {
-            throw new DebugException($out['message'], 501);
+            throw new DebugException($out['message'], 501, ['out' => $out, 'command' => $ps->getLineaComando()]);
         }
 
         $registroSeguimiento = new RegistroSeguimiento;
-        $registroSeguimiento->crearNota($this->tipopc, $this->solicitud->getId(), $postData['nota_aprobar'], 'A');
+        $registroSeguimiento->crearNota($this->tipopc, $this->solicitud->id, $postData['nota_aprobar'], 'A');
         /**
          * Crea de una vez e registro, permitiendo que el usuario entre con la misma password
          * como empresa sin tener que hacer la solicitud de clave
          */
-        $empresa = (new Mercurio07)->findFirst("coddoc='{$this->solicitud->getTipdoc()}' and documento='{$this->solicitud->getNit()}' and tipo='E'");
-        $feccla = $this->solicitante->getFeccla();
-        $fecreg = $this->solicitante->getFecreg();
+        $empresa = Mercurio07::where('coddoc', $this->solicitud->tipdoc)
+            ->where('documento', $this->solicitud->nit)
+            ->where('tipo', 'E')->first();
+
+        $feccla = $this->solicitante->feccla;
+        $fecreg = $this->solicitante->fecreg;
         $fecapr = $postData['fecapr'];
 
         $crearUsuario = new CrearUsuario(
             new Srequest(
                 [
                     'tipo' => 'E',
-                    'coddoc' => $this->solicitud->getTipdoc(),
-                    'documento' => $this->solicitud->getNit(),
-                    'nombre' => $this->solicitud->getRazsoc(),
-                    'email' => $this->solicitud->getEmail(),
-                    'codciu' => $this->solicitud->getCodciu(),
-                    'autoriza' => $this->solicitante->getAutoriza(),
-                    'clave' => $this->solicitante->getClave(),
-                    'fecreg' => $fecreg->getUsingFormatDefault(),
-                    'feccla' => $feccla->getUsingFormatDefault(),
+                    'coddoc' => $this->solicitud->tipdoc,
+                    'documento' => $this->solicitud->nit,
+                    'nombre' => $this->solicitud->razsoc,
+                    'email' => $this->solicitud->email,
+                    'codciu' => $this->solicitud->codciu,
+                    'autoriza' => $this->solicitante->autoriza,
+                    'clave' => $this->solicitante->clave,
+                    'fecreg' => $fecreg,
+                    'feccla' => $feccla,
                     'fecapr' => $fecapr,
                 ]
             )
@@ -222,10 +225,10 @@ class ApruebaEmpresa
         /**
          * actualiza la ficha de registro
          */
-        $mercurio30->setEstado('A');
-        $mercurio30->setFecapr($postData['fecapr']);
-        $mercurio30->setFecest($hoy);
-        $mercurio30->setTipper($tipper);
+        $mercurio30->estado = 'A';
+        $mercurio30->fecapr = $postData['fecapr'];
+        $mercurio30->fecest = $hoy;
+        $mercurio30->tipper = $tipper;
         $mercurio30->save();
 
         return true;
@@ -246,7 +249,7 @@ class ApruebaEmpresa
         $mes = get_mes_name($feccap->format('m'));
         $anno = $feccap->format('Y');
 
-        $data = $this->solicitud->getArray();
+        $data = $this->solicitud->toArray();
         $data['membrete'] = "{$this->dominio}Mercurio/public/img/membrete_aprueba.jpg";
         $data['ruta_firma'] = "{$this->dominio}Mercurio/public/img/Mercurio/firma_jefe_yenny.jpg";
         $data['actapr'] = $actapr;
@@ -260,13 +263,13 @@ class ApruebaEmpresa
                 [
                     'emisor_email' => $emailCaja->getEmail(),
                     'emisor_clave' => $emailCaja->getClave(),
-                    'asunto' => "Afiliación de la empresa realizada con éxito, NIT {$this->solicitud->getNit()}",
+                    'asunto' => "Afiliación de la empresa realizada con éxito, NIT {$this->solicitud->nit}",
                 ]
             )
         );
         $sender->send(
-            $this->solicitante->getEmail(),
-            view('layouts/aprobar', $data)->render()
+            $this->solicitante->email,
+            view('cajas.layouts.aprobar', $data)->render()
         );
 
         return true;
@@ -281,7 +284,7 @@ class ApruebaEmpresa
     public function findSolicitante()
     {
         $this->solicitante = Mercurio07::whereRaw(
-            "documento='{$this->solicitud->getDocumento()}' and coddoc='{$this->solicitud->getCoddoc()}' and tipo='{$this->solicitud->getTipo()}'"
+            "documento='{$this->solicitud->documento}' and coddoc='{$this->solicitud->coddoc}' and tipo='{$this->solicitud->tipo}'"
         )->first();
         return $this->solicitante;
     }

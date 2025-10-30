@@ -18,7 +18,7 @@ use App\Services\Utils\Comman;
 
 class FacultativoService
 {
-    private $tipopc = 10;
+    private $tipopc = '10';
 
     private $tipsoc = '08';
 

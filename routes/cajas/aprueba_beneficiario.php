@@ -8,7 +8,7 @@ Route::middleware([CajasCookieAuthenticated::class])->group(function () {
     Route::prefix('/cajas/aprobacionben')->group(function () {
         Route::get('/index', [ApruebaBeneficiarioController::class, 'index']);
         Route::post('/filtrar', [ApruebaBeneficiarioController::class, 'aplicarFiltro']);
-        Route::post('/aprobar', [ApruebaBeneficiarioController::class, 'aprueba']);
+        Route::post('/aprueba', [ApruebaBeneficiarioController::class, 'aprueba']);
         Route::post('/devolver', [ApruebaBeneficiarioController::class, 'devolver']);
         Route::post('/rechazar', [ApruebaBeneficiarioController::class, 'rechazar']);
         Route::post('/borrar_filtro', [ApruebaBeneficiarioController::class, 'borrarFiltro']);
