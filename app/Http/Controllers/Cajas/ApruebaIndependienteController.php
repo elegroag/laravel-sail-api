@@ -1058,12 +1058,11 @@ class ApruebaIndependienteController extends ApplicationController
         }
     }
 
-    public function deshacer()
+    public function deshacer(Request $request)
     {
-        $this->setResponse('ajax');
-        $request = request();
         $indepeServices = new IndependienteServices;
         $notifyEmailServices = new NotifyEmailServices;
+
         $action = $request->input('action');
         $codest = $request->input('codest');
         $sendEmail = $request->input('send_email');
@@ -1071,8 +1070,7 @@ class ApruebaIndependienteController extends ApplicationController
 
         try {
             $id = $request->input('id');
-
-            $mercurio41 = (new Mercurio41)->findFirst("id='{$id}'");
+            $mercurio41 = Mercurio41::where("id", $id)->first();
             if (! $mercurio41) {
                 throw new DebugException('Los datos de la empresa no son validos para procesar.', 501);
             }
@@ -1083,8 +1081,8 @@ class ApruebaIndependienteController extends ApplicationController
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_empresa',
                     'params' => [
-                        'nit' => $mercurio41->getCedtra(),
-                        'coddoc' => $mercurio41->getTipdoc(),
+                        'nit' => $mercurio41->cedtra,
+                        'coddoc' => $mercurio41->tipdoc,
                     ],
                 ]
             );
@@ -1098,13 +1096,13 @@ class ApruebaIndependienteController extends ApplicationController
 
             $ps->runCli(
                 [
-                    'servicio' => 'DeshacerAfiliaciones',
+                    'servicio' => 'ComfacaAfilia',
                     'metodo' => 'deshacer_aprobacion_independiente',
                     'params' => [
-                        'cedtra' => $mercurio41->getCedtra(),
-                        'coddoc' => $mercurio41->getTipdoc(),
-                        'fecafi' => $mercurio41->getFecapr(),
-                        'fecapr' => $mercurio41->getFecapr(),
+                        'cedtra' => $mercurio41->cedtra,
+                        'coddoc' => $mercurio41->tipdoc,
+                        'fecafi' => $mercurio41->fecapr,
+                        'fecapr' => $mercurio41->fecapr,
                         'nota' => $nota,
                     ],
                 ]
@@ -1170,6 +1168,6 @@ class ApruebaIndependienteController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 }

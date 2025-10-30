@@ -147,7 +147,7 @@ class AuthController extends ApplicationController
 
                 // TODO: Implementar Mail de Laravel
                 $senderEmail = new SenderEmail;
-                $senderEmail->send('Recuperar cuenta de acceso al sistema SISUWEB.', $mensaje, [['nombre' => $nombre, 'email' => $email]]);
+                $senderEmail->send('Recuperar cuenta de acceso al sistema SISUWEB.', $mensaje, [$email]);
 
                 $_email = mask_email($email);
                 session()->flash('success', [
@@ -227,7 +227,7 @@ class AuthController extends ApplicationController
                 ob_end_clean();
 
                 $senderEmail = new SenderEmail;
-                $senderEmail->send('Cambio de clave sistema SISUWEB.', $mensaje, [['nombre' => $nombre, 'email' => $email]]);
+                $senderEmail->send('Cambio de clave sistema SISUWEB.', $mensaje, [$email]);
                 $_email = mask_email($email);
                 set_flashdata('success', ['msj' => "El cambio de clave se ha completado de forma exitosa. Y se ha emitido un mensaje a la dirección email {$_email} para confirmar la solicitud. Gracias."]);
             }

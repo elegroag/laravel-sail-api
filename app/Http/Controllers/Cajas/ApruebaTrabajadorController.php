@@ -1029,7 +1029,7 @@ class ApruebaTrabajadorController extends ApplicationController
             $ps = Comman::Api();
             $ps->runCli(
                 [
-                    'servicio' => 'DeshacerAfiliaciones',
+                    'servicio' => 'ComfacaAfilia',
                     'metodo' => 'deshacer_aprobacion_trabajador',
                     'params' => [
                         'nit' => $mercurio31->getNit(),

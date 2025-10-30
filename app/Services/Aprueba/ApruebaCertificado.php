@@ -106,12 +106,10 @@ class ApruebaCertificado
             )
         );
 
-        $senderEmail->send([
-            [
-                'email' => $this->solicitante->getEmail(),
-                'nombre' => $this->solicitante->getNombre(),
-            ],
-        ], $html);
+        $senderEmail->send(
+            $this->solicitante->getEmail(),
+            $html
+        );
 
         return true;
     }

@@ -145,12 +145,7 @@ class ApruebaDatosEmpresa
 
         $html = view('cajas.layouts.aprobar', $data)->render();
         $sender->send(
-            [
-                [
-                    'email' => $this->solicitante->getEmail(),
-                    'nombre' => $this->solicitante->getNombre(),
-                ],
-            ],
+            $this->solicitante->getEmail(),
             $html
         );
 

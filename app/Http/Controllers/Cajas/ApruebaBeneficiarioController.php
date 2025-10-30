@@ -829,8 +829,8 @@ class ApruebaBeneficiarioController extends ApplicationController
 
             $procesadorComando->runCli(
                 [
-                    'servicio' => 'DeshacerAfiliaciones',
-                    'metodo' => 'deshacerAprobacionBeneficiario',
+                    'servicio' => 'ComfacaAfilia',
+                    'metodo' => 'deshacer_aprobacion_beneficiario',
                     'params' => [
                         'cedtra' => $mercurio34->getCedtra(),
                         'numdoc' => $mercurio34->getNumdoc(),

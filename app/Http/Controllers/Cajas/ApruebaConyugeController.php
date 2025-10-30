@@ -920,8 +920,8 @@ class ApruebaConyugeController extends ApplicationController
 
             $procesadorComando->runCli(
                 [
-                    'servicio' => 'DeshacerAfiliaciones',
-                    'metodo' => 'deshacerAprobacionConyuge',
+                    'servicio' => 'ComfacaAfilia',
+                    'metodo' => 'deshacer_aprobacion_conyuge',
                     'params' => [
                         'cedtra' => $mercurio32->getCedtra(),
                         'cedcon' => $mercurio32->getCedcon(),

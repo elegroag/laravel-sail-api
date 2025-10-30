@@ -178,12 +178,7 @@ class ApruebaTrabajador
             )
         );
         $senderEmail->send(
-            [
-                [
-                    'email' => $this->solicitante->email,
-                    'nombre' => $this->solicitante->nombre,
-                ],
-            ],
+            $this->solicitante->email,
             $html
         );
 

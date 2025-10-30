@@ -1123,7 +1123,7 @@ class ApruebaEmpresaController extends ApplicationController
 
             $procesadorComando->runCli(
                 [
-                    'servicio' => 'DeshacerAfiliaciones',
+                    'servicio' => 'ComfacaAfilia',
                     'metodo' => 'deshacer_aprobacion_empresa',
                     'params' => [
                         'nit' => $mercurio30->getNit(),

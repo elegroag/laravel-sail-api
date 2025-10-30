@@ -145,7 +145,7 @@ class ValidationService {
 	static deshacerSolicitud(app, transfer = { data: {}, callback: void 0 }) {
 		const { data, callback } = transfer;
 		app.trigger('syncro', {
-			url: app.url('deshacer'),
+			url: 'deshacer',
 			data: data,
 			silent: true,
 			callback: (response) => {

@@ -681,7 +681,7 @@ class ApruebaPensionadoController extends ApplicationController
             $ps = Comman::Api();
             $ps->runCli(
                 [
-                    'servicio' => 'DeshacerAfiliaciones',
+                    'servicio' => 'ComfacaAfilia',
                     'metodo' => 'deshacer_aprobacion_pensionado',
                     'params' => [
                         'cedtra' => $mercurio38->getCedtra(),

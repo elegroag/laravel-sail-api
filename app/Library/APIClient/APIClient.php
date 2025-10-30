@@ -93,7 +93,7 @@ class APIClient
         if (is_null($result) || $this->statusCode >= 400) {
             $error = curl_error($ch);
             curl_close($ch);
-            throw new DebugException('Error access Api, detalles: ' . $error, 501, $error);
+            throw new DebugException('Error access api', 501, $error);
         } else {
             curl_close($ch);
             if ($this->auth instanceof AuthClientInterface) {

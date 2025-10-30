@@ -225,10 +225,9 @@ class UsuarioController extends Controller
         );
 
         $senderEmail->send(
-            [[
-                'email' => $usuario_externo->email,
-                'nombre' => $nombre,
-            ]],
+            [
+                $usuario_externo->email,
+            ],
             $html
         );
 

@@ -551,10 +551,7 @@ class LoginController extends ApplicationController
 
             $senderEmail->send(
                 [
-                    [
-                        'email' => $to_email,
-                        'nombre' => 'Comfaca en linea',
-                    ],
+                    $to_email,
                 ],
                 $html
             );

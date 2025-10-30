@@ -186,12 +186,10 @@ class ApruebaBeneficiario
             )
         );
 
-        $senderEmail->send([
-            [
-                'email' => $this->solicitante->email,
-                'nombre' => $this->solicitante->nombre,
-            ],
-        ], $html);
+        $senderEmail->send(
+            $this->solicitante->email,
+            $html
+        );
 
         return true;
     }
@@ -199,7 +197,6 @@ class ApruebaBeneficiario
     public function findSolicitud($idSolicitud)
     {
         $this->solicitud = Mercurio34::where('id', $idSolicitud)->first();
-
         return $this->solicitud;
     }
 
@@ -208,17 +205,13 @@ class ApruebaBeneficiario
         $this->solicitante = Mercurio07::whereRaw(
             "documento='{$this->solicitud->numdoc}' and coddoc='{$this->solicitud->tipdoc}' and tipo='{$this->solicitud->tipo}'"
         )->first();
-
         return $this->solicitante;
     }
 
     /**
      * deshacerAprobacion function
-     *
      * @changed [2023-12-19]
-     *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
      * @param  int  $id
      * @param  string  $action
      * @param  string  $nota

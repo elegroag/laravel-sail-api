@@ -358,12 +358,10 @@ class ApruebaPensionado
             "asunto: {$asunto}"
         );
 
-        $senderEmail->send([
-            [
-                'email' => $this->solicitante->email,
-                'nombre' => $this->solicitante->nombre,
-            ],
-        ], $html);
+        $senderEmail->send(
+            $this->solicitante->email,
+            $html
+        );
 
         return true;
     }
