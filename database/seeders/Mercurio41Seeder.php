@@ -28,15 +28,15 @@ class Mercurio41Seeder extends Seeder
                 $data[$field] = $row[$field] ?? null;
             }
 
-            if($data['documento'] < 5) continue;
-            if(!is_numeric($data['coddoc'])){
+            if ($data['documento'] < 5) continue;
+            if (!is_numeric($data['coddoc'])) {
                 continue;
             }
-            if(!is_numeric($data['documento'])){
+            if (!is_numeric($data['documento'])) {
                 continue;
             }
-            
-            $data['ruuid'] = (string) Str::orderedUuid(); 
+
+            $data['ruuid'] = (string) Str::orderedUuid();
 
             // Clave compuesta
             Mercurio41::updateOrCreate(

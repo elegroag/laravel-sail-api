@@ -13,9 +13,8 @@ return new class extends Migration
     {
         Schema::create('radicados', function (Blueprint $table) {
             // Motor InnoDB
-
             $table->engine = 'InnoDB';
-            $table->integer('id')->autoIncrement(); 
+            $table->integer('id')->autoIncrement();
             $table->primary('id');
             $table->char('vigencia', 4);
             $table->char('tipo', 1);
@@ -23,6 +22,7 @@ return new class extends Migration
             $table->char('radicado', 15);
             $table->unique(['vigencia', 'tipo', 'numero'], 'radicado_unique');
             $table->index(['vigencia', 'tipo', 'numero'], 'radicado_index');
+            $table->timestamps();
         });
     }
 

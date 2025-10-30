@@ -16,7 +16,7 @@ class Mercurio31Seeder extends Seeder
      */
     public function run(): void
     {
-        if(Mercurio06::count() == 0){
+        if (Mercurio06::count() == 0) {
             $this->call([
                 Mercurio06Seeder::class,
                 Mercurio07Seeder::class,
@@ -38,23 +38,23 @@ class Mercurio31Seeder extends Seeder
                 $data[$field] = $row[$field] ?? null;
             }
 
-            if($data['documento'] < 5) continue;
-            if(!is_numeric($data['coddoc'])){
+            if ($data['documento'] < 5) continue;
+            if (!is_numeric($data['coddoc'])) {
                 continue;
             }
-            if(!is_numeric($data['documento'])){
+            if (!is_numeric($data['documento'])) {
                 continue;
             }
 
-            if($data['tippag'] == null || $data['tippag'] == ''){
+            if ($data['tippag'] == null || $data['tippag'] == '') {
                 $data['tippag'] = 'T';
             }
 
-            if($data['numcue'] == null || $data['numcue'] == ''){
+            if ($data['numcue'] == null || $data['numcue'] == '') {
                 $data['numcue'] = 0;
             }
 
-            if($data['codban'] == null || $data['codban'] == ''){
+            if ($data['codban'] == null || $data['codban'] == '') {
                 $data['codban'] = 0;
             }
 

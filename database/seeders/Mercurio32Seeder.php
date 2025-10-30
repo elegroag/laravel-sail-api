@@ -15,14 +15,14 @@ class Mercurio32Seeder extends Seeder
      */
     public function run(): void
     {
-        if(Mercurio06::count() == 0){
+        if (Mercurio06::count() == 0) {
             $this->call([
                 Mercurio06Seeder::class,
                 Mercurio07Seeder::class,
                 Mercurio11Seeder::class,
             ]);
         }
-        
+
         $legacy = new LegacyDatabaseService();
 
         // Leer registros desde la base legada
@@ -36,35 +36,35 @@ class Mercurio32Seeder extends Seeder
             foreach ($fillable as $field) {
                 $data[$field] = $row[$field] ?? null;
             }
-            
-            if($data['documento'] < 5) continue;
-            if(!is_numeric($data['coddoc'])){
+
+            if ($data['documento'] < 5) continue;
+            if (!is_numeric($data['coddoc'])) {
                 continue;
             }
-            if(!is_numeric($data['documento'])){
+            if (!is_numeric($data['documento'])) {
                 continue;
             }
 
             unset($data['zoneurbana']);
             $data['tiecon'] = $row['tiecon'] ?? '1';
 
-            if($data['tippag'] == null || $data['tippag'] == ''){
+            if ($data['tippag'] == null || $data['tippag'] == '') {
                 $data['tippag'] = 'T';
             }
 
-            if($data['numcue'] == null || $data['numcue'] == ''){
+            if ($data['numcue'] == null || $data['numcue'] == '') {
                 $data['numcue'] = '0';
             }
 
-            if($data['codban'] == null || $data['codban'] == ''){
+            if ($data['codban'] == null || $data['codban'] == '') {
                 $data['codban'] = '0';
             }
-            
-            if($data['peretn'] == null || $data['peretn'] == ''){
+
+            if ($data['peretn'] == null || $data['peretn'] == '') {
                 $data['peretn'] = '7';
             }
-            
-            $data['ruuid'] = (string) Str::orderedUuid(); 
+
+            $data['ruuid'] = (string) Str::orderedUuid();
             Mercurio32::updateOrCreate(
                 ['id' => $row['id']],
                 $data

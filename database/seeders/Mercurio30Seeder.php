@@ -12,7 +12,7 @@ class Mercurio30Seeder extends Seeder
 {
     public function run(): void
     {
-        if(Mercurio06::count() == 0){
+        if (Mercurio06::count() == 0) {
             $this->call([
                 Mercurio06Seeder::class,
                 Mercurio07Seeder::class,
@@ -31,11 +31,11 @@ class Mercurio30Seeder extends Seeder
                 $data[$field] = $row[$field] ?? null;
             }
 
-            if($data['documento'] < 5) continue;
-            if(!is_numeric($data['coddoc'])){
+            if ($data['documento'] < 5) continue;
+            if (!is_numeric($data['coddoc'])) {
                 continue;
             }
-            if(!is_numeric($data['documento'])){
+            if (!is_numeric($data['documento'])) {
                 continue;
             }
             $data['sat_fecapr'] = $row['fecha_aprobacion_sat'];
@@ -47,7 +47,7 @@ class Mercurio30Seeder extends Seeder
             unset($data['numero_transaccion']);
 
             $data['ruuid'] = (string) Str::orderedUuid();
-            
+
             Mercurio30::updateOrCreate(
                 ['id' => $row['id']],
                 $data

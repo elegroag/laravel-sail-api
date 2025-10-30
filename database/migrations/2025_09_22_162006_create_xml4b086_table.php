@@ -18,8 +18,6 @@ return new class extends Migration
             // Columnas según SQL
             $table->integer('codgru'); // PK sin autoincremento
             $table->char('nombre', 70);
-
-            // PK
             $table->primary('codgru');
         });
     }

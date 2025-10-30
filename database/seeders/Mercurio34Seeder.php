@@ -15,7 +15,7 @@ class Mercurio34Seeder extends Seeder
      */
     public function run(): void
     {
-       if(Mercurio06::count() == 0){
+        if (Mercurio06::count() == 0) {
             $this->call([
                 Mercurio06Seeder::class,
                 Mercurio07Seeder::class,
@@ -37,17 +37,17 @@ class Mercurio34Seeder extends Seeder
                 $data[$field] = $row[$field] ?? null;
             }
 
-            if($data['documento'] < 5) continue;
-            if(!is_numeric($data['coddoc'])){
+            if ($data['documento'] < 5) continue;
+            if (!is_numeric($data['coddoc'])) {
                 continue;
             }
-            if(!is_numeric($data['documento'])){
+            if (!is_numeric($data['documento'])) {
                 continue;
             }
 
             unset($data['celular']);
 
-            $data['ruuid'] = (string) Str::orderedUuid(); 
+            $data['ruuid'] = (string) Str::orderedUuid();
 
             Mercurio34::updateOrCreate(
                 ['id' => $row['id']],
