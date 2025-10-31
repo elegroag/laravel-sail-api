@@ -54,8 +54,8 @@ class ApruebaTrabajadorController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session('user');
-        $this->tipfun = session('tipfun');
+        $this->user = session('user') ?? null;
+        $this->tipfun = session('tipfun') ?? null;
     }
 
     /**
@@ -185,7 +185,7 @@ class ApruebaTrabajadorController extends ApplicationController
 
         $params = $this->loadParametrosView();
 
-        return view('cajas.aprobaindepen.index', [
+        return view('cajas.aprobaciontra.index', [
             ...$params,
             'campo_filtro' => $campo_field,
             'filters' => get_flashdata_item('filter_params'),
@@ -246,16 +246,16 @@ class ApruebaTrabajadorController extends ApplicationController
     public function infor(Request $request)
     {
         try {
-            $id = $request->input('id');
-            if (! $id) {
-                throw new DebugException('Error no se puede identificar el identificador de la solicitud.', 501);
-            }
+            $validated = $request->validate([
+                'id' => 'required|integer',
+            ]);
 
-            $this->trabajadorServices = new TrabajadorServices;
+            $id = $validated['id'];
+            $trabajadorServices = new TrabajadorServices;
             $mercurio31 = Mercurio31::where("id", $id)->first();
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $ps = Comman::Api();
+            $ps->runCli(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_trabajadores',
@@ -263,10 +263,10 @@ class ApruebaTrabajadorController extends ApplicationController
             );
 
             $paramsTrabajador = new ParamsTrabajador;
-            $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
+            $paramsTrabajador->setDatosCaptura($ps->toArray());
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $px = Comman::Api();
+            $px->runCli(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_empresa',
@@ -274,14 +274,14 @@ class ApruebaTrabajadorController extends ApplicationController
                 ]
             );
 
-            $datos_captura = $procesadorComando->toArray();
+            $datos_captura = $px->toArray();
             $empresa_sisu = false;
             if ($datos_captura) {
                 $empresa_sisu = ($datos_captura['success']) ? $datos_captura['data'] : false;
             }
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $pt = Comman::Api();
+            $pt->runCli(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'trabajador',
@@ -292,7 +292,7 @@ class ApruebaTrabajadorController extends ApplicationController
             );
 
             $trabajador_sisuweb = false;
-            $rqs = $procesadorComando->toArray();
+            $rqs = $pt->toArray();
             if ($rqs) {
                 if ($rqs['success']) {
                     $trabajador_sisuweb = $rqs['data'];
@@ -319,14 +319,12 @@ class ApruebaTrabajadorController extends ApplicationController
                     '_tipafi' => ParamsTrabajador::getTipoAfiliado(),
                     '_trasin' => ParamsTrabajador::getSindicalizado(),
                     '_bancos' => ParamsTrabajador::getBancos(),
+                    '_ocupaciones' => ParamsTrabajador::getOcupaciones(),
                 ]
             )->render();
 
-            $adjuntos = $this->trabajadorServices->adjuntos($mercurio31);
-            $seguimiento = $this->trabajadorServices->seguimiento($mercurio31);
-
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $pr = Comman::Api();
+            $pr->runCli(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'buscar_sucursales_en_empresa',
@@ -334,7 +332,7 @@ class ApruebaTrabajadorController extends ApplicationController
                 ]
             );
 
-            $sucursales = $procesadorComando->toArray();
+            $sucursales = $pr->toArray();
             $_codsuc = [];
             if ($sucursales['success']) {
                 foreach ($sucursales['data'] as $data) {
@@ -342,8 +340,8 @@ class ApruebaTrabajadorController extends ApplicationController
                 }
             }
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $pl = Comman::Api();
+            $pl->runCli(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'buscar_listas_en_empresa',
@@ -351,7 +349,7 @@ class ApruebaTrabajadorController extends ApplicationController
                 ]
             );
 
-            $listas = $procesadorComando->toArray();
+            $listas = $pl->toArray();
             $_codlis = [];
             if ($listas['success']) {
                 foreach ($listas['data'] as $data) {
@@ -383,13 +381,13 @@ class ApruebaTrabajadorController extends ApplicationController
                 'data' => $mercurio31->toArray(),
                 'trabajador_sisu' => $trabajador_sisuweb,
                 'mercurio11' => Mercurio11::all(),
-                'consulta' => $html,
-                'adjuntos' => $adjuntos,
-                'seguimiento' => $seguimiento,
+                "consulta" => $html,
+                'adjuntos' => $trabajadorServices->adjuntos($mercurio31),
+                'seguimiento' => $trabajadorServices->seguimiento($mercurio31),
                 'campos_disponibles' => $campos_disponibles,
                 'empresa_sisu' => $empresa_sisu,
                 'componente_codsuc' => $componente_codsuc,
-                'componente_codlis' => $componente_codlis,
+                'componente_codlis' => $componente_codlis
             ];
         } catch (DebugException $err) {
             $response = [
@@ -412,44 +410,38 @@ class ApruebaTrabajadorController extends ApplicationController
      */
     public function aprueba(Request $request)
     {
-        $this->setResponse('ajax');
-        $debuginfo = [];
+        $this->db->begin();
         try {
             try {
-                $user = session()->get('user');
-                $acceso = $this->Gener42->count("permiso='92' AND usuario='{$user['usuario']}'");
-                if ($acceso == 0) {
-                    return response()->json(['success' => false, 'msj' => 'El usuario no dispone de permisos de aprobación']);
-                }
+
                 $apruebaSolicitud = new ApruebaTrabajador;
-                $this->db->begin();
-                $idSolicitud = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+                $idSolicitud = $request->input('id');
+
                 $solicitud = $apruebaSolicitud->findSolicitud($idSolicitud);
                 $apruebaSolicitud->findSolicitante($solicitud);
-                $apruebaSolicitud->procesar($_POST);
+                $apruebaSolicitud->procesar($request->all());
 
-                $this->db->commit();
                 $apruebaSolicitud->enviarMail($request->input('actapr'), $request->input('fecapr'));
                 $salida = [
                     'success' => true,
                     'msj' => 'El registro se completo con éxito',
                 ];
+                $this->db->commit();
             } catch (DebugException $err) {
 
                 $this->db->rollback();
                 $salida = [
                     'success' => false,
                     'msj' => $err->getMessage(),
+                    'erros' => $err->render($request),
                 ];
             }
-        } catch (DebugException $e) {
+        } catch (\Exception $e) {
+            $this->db->rollback();
             $salida = [
                 'success' => false,
                 'msj' => $e->getMessage(),
             ];
-        }
-        if ($debuginfo) {
-            $salida['info'] = $debuginfo;
         }
 
         return response()->json($salida);
@@ -557,49 +549,42 @@ class ApruebaTrabajadorController extends ApplicationController
 
     public function validarMultiafiliacion(Request $request)
     {
-        $this->setResponse('ajax');
         $id = $request->input('id');
         $mercurio31 = Mercurio31::where("id", $id)->first();
-        $nit = $mercurio31->getNit();
-        $cedtra = $mercurio31->getCedtra();
+        $nit = $mercurio31->nit;
+        $cedtra = $mercurio31->cedtra;
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $ps = Comman::Api();
+        $ps->runCli(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_trabajador',
                 'params' => $cedtra,
             ]
         );
+        $out = $ps->toArray();
 
-        $out = $procesadorComando->toArray();
         if ($out['success']) {
             $datos_trabajador = $out['data'];
             foreach ($datos_trabajador as $key => $value) {
                 if (is_numeric($key)) {
                     continue;
                 }
-                if ($mercurio31->isAttribute($key)) {
-                    $mercurio31->writeAttribute($key, "{$value}");
+                if ($mercurio31->hasAttribute($key)) {
+                    $mercurio31->$key = $value;
                 }
             }
         }
 
         $response['multi'] = false;
-        if ($mercurio31->getNit() != $nit && $mercurio31->getEstado() == 'A') {
+        if ($mercurio31->nit != $nit && $mercurio31->estado == 'A') {
             $response['multi'] = true;
         }
 
         return response()->json($response);
     }
 
-    public function pendienteEmail()
-    {
-        /* $flash_mensaje = SESSION::getData("flash_mensaje");
-        SESSION::setData("flash_mensaje", null);
-        $this->setParamToView("flash_mensaje", $flash_mensaje);
-        $this->setParamToView("title", "Procesar Notificación Pendiente"); */
-    }
+    public function pendienteEmail() {}
 
     public function rezagoCorreo(Request $request)
     {

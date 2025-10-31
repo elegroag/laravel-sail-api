@@ -14,10 +14,11 @@ class FiltroView extends ModelView {
 	get events() {
 		return {
 			"click [toggle-event='volver']": 'volverLista',
-			"click [toggle-event='add_filtro']": 'addFiltro',
-			"click [toggle-event='borrar_filtro']": 'borrarFiltro',
-			"click [toggle-event='remove']": 'removeFiltro',
-			"click [toggle-event='aplicar_filtro']": 'aplicaFiltro',
+			"click [data-toggle='filter-close']": 'volverLista',
+			"click [data-toggle='filter-add']": 'addFiltro',
+			"click [data-toggle='filter-remove']": 'borrarFiltro',
+			"click [data-toggle='filter-item-remove']": 'removeFiltro',
+			"click [data-toggle='filter-aplicate']": 'aplicaFiltro',
 		};
 	}
 

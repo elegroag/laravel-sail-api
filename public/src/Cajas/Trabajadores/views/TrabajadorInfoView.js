@@ -111,7 +111,7 @@ export default class TrabajadorInfoView extends FormInfoView {
 		_target.attr('disabled', true);
 
 		$App.trigger('syncro', {
-			url: 'validarMultiafiliacion',
+			url: 'validar-multiafiliacion',
 			data: {
 				id: this.solicitudAprobar.get('id'),
 			},

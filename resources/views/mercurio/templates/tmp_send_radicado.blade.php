@@ -1,5 +1,5 @@
-<div class="col">
-    <fieldset>
+<div class="col-auto">
+    <fieldset class="m-4">
         <legend>Enviar Radicado</legend>
         <div class="row">
             <div class="col-xs-12 col-md-7">

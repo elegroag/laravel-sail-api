@@ -268,25 +268,17 @@ class ApruebaConyugeController extends ApplicationController
      */
     public function aprueba(Request $request)
     {
-        $this->setResponse('ajax');
-        $debuginfo = [];
+        $this->db->begin();
         try {
             try {
-                $user = session()->get('user');
-                $acceso = $this->Gener42->count("permiso='92' AND usuario='{$user['usuario']}'");
-                if ($acceso == 0) {
-                    return $this->renderObject(['success' => false, 'msj' => 'El usuario no dispone de permisos de aprobación'], false);
-                }
                 $apruebaSolicitud = new ApruebaConyuge;
-                $this->db->begin();
 
-                $idSolicitud = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+                $idSolicitud = $request->input('id');
                 $solicitud = $apruebaSolicitud->findSolicitud($idSolicitud);
                 $apruebaSolicitud->findSolicitante($solicitud);
-                $apruebaSolicitud->procesar($_POST);
+                $apruebaSolicitud->procesar($request->all());
                 $this->db->commit();
                 $apruebaSolicitud->enviarMail($request->input('actapr'), $request->input('fecapr'));
-
                 $salida = [
                     'success' => true,
                     'msj' => 'El registro se completo con éxito',
@@ -296,20 +288,18 @@ class ApruebaConyugeController extends ApplicationController
                 $salida = [
                     'success' => false,
                     'msj' => $err->getMessage(),
+                    'errors' => $err->render($request),
                 ];
             }
-        } catch (DebugException $e) {
+        } catch (\Exception $e) {
             $salida = [
                 'success' => false,
                 'msj' => $e->getMessage(),
             ];
+            $this->db->rollback();
         }
 
-        if ($debuginfo) {
-            $salida['info'] = $debuginfo;
-        }
-
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     /**
@@ -845,28 +835,31 @@ class ApruebaConyugeController extends ApplicationController
     public function infor(Request $request)
     {
         try {
-            $id = $request->input('id');
-            $mercurio32 = Mercurio32::where("id", $id)->where("estado", 'A')->first();
+            $conyugeServices =  new ConyugeServices();
+            $validated = $request->validate([
+                'id' => 'required|integer',
+            ]);
+            $id = $validated['id'];
+
+            $mercurio32 = Mercurio32::where("id", $id)->first();
             if (! $mercurio32) {
                 throw new DebugException('Error al buscar la beneficiario', 501);
             }
 
-            $cedtra = $mercurio32->cedtra;
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $ps = Comman::Api();
+            $ps->runCli(
                 [
                     'servicio' => 'ComfacaAfilia',
-                    'metodo' => 'parametros_conyuges',
-                    'params' => true,
+                    'metodo' => 'parametros_conyuges'
                 ]
             );
 
-            $datos_captura = $procesadorComando->toArray();
+            $datos_captura = $ps->toArray();
             $paramsConyuge = new ParamsConyuge;
             $paramsConyuge->setDatosCaptura($datos_captura);
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $px = Comman::Api();
+            $px->runCli(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_conyuge',
@@ -876,20 +869,24 @@ class ApruebaConyugeController extends ApplicationController
                 ]
             );
 
-            if ($procesadorComando->isJson() == false) {
+            if ($px->isJson() == false) {
                 throw new DebugException('Error al buscar la beneficiario en Sisuweb', 501);
             }
 
-            $out = $procesadorComando->toArray();
+            $out = $px->toArray();
             $beneSisu = $out['data'];
 
-            $conyuge = new Mercurio32;
-            $conyuge->fill($beneSisu);
-            $conyuge->tipo = 'E';
-            $conyuge->cedcon = $beneSisu['cedcon'];
+            if ($beneSisu) {
+                $conyuge = new Mercurio32;
+                $conyuge->fill($beneSisu);
+                $conyuge->tipo = 'E';
+                $conyuge->cedcon = $mercurio32->cedcon;
+            } else {
+                $conyuge = $mercurio32;
+            }
 
-            $html = View::render(
-                'aprobacioncon/tmp/consulta',
+            $html = view(
+                'cajas.aprobacioncon.tmp.consulta',
                 [
                     'conyuge' => $conyuge,
                     'detTipo' => Mercurio06::where("tipo", $conyuge->tipo)->first()->getDetalle(),
@@ -910,7 +907,7 @@ class ApruebaConyugeController extends ApplicationController
                     '_codocu' => ParamsConyuge::getOcupaciones(),
                     '_tipsal' => ['', 'NINGUNO'],
                 ]
-            );
+            )->render();
 
             $code_estados = [];
             $query = Mercurio11::all();
@@ -918,22 +915,28 @@ class ApruebaConyugeController extends ApplicationController
                 $code_estados[$row->codest] = $row->detalle;
             }
 
-            $this->setParamToView('code_estados', $code_estados);
-            $this->setParamToView('mercurio32', $conyuge);
-            $this->setParamToView('consulta_trabajador', $html);
-            $this->setParamToView('hide_header', true);
-            $this->setParamToView('idModel', $id);
-            $this->setParamToView('cedtra', $cedtra);
-            $this->setParamToView('title', "Conyuge Aprobado {$conyuge->cedcon}");
-        } catch (DebugException $err) {
-            set_flashdata('error', [
-                'msj' => $err->getMessage(),
-                'code' => 201,
-            ]);
+            $seguimiento = $conyugeServices->seguimiento($mercurio32);
+            $adjuntos = $conyugeServices->adjuntos($mercurio32);
+            $campos_disponibles = $mercurio32->CamposDisponibles();
 
-            return redirect('aprobacionben/index');
-            exit;
+            $response = [
+                'success' => true,
+                'data' => $mercurio32->toArray(),
+                'mercurio11' => $code_estados,
+                "consulta" => $html,
+                'adjuntos' => $adjuntos,
+                'seguimiento' => $seguimiento,
+                'campos_disponibles' => $campos_disponibles
+            ];
+        } catch (DebugException $err) {
+            $response = [
+                'success' => false,
+                'msj' => $err->getMessage(),
+                'errors' => $err->render($request),
+            ];
         }
+
+        return response()->json($response);
     }
 
     /**

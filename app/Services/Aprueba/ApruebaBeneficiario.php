@@ -172,7 +172,7 @@ class ApruebaBeneficiario
         $data['url_activa'] = '';
         $data['msj'] = "Se informa que el beneficiario {$nombre}, con número de documento de indetificación {$this->solicitud->numdoc} fue afiliado con éxito.";
 
-        $html = view('layouts/mail_aprobar', $data)->render();
+        $html = view('emails.mail_aprobar', $data)->render();
         $asunto = "Afiliación beneficiario realizada con éxito, identificación {$this->solicitud->numdoc}";
 
         $emailCaja = Mercurio01::first();

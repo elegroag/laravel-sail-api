@@ -62,7 +62,7 @@ trait HasCustomUuid
             $siguiente = ($ultimo?->numero ?? 0) + 1; // consecutivo único entero
 
             // Construye el texto de radicado. Ajustar formato si se requiere diferente.
-            $radicadoTexto = $vigencia . '' . $tipo . '' . $siguiente;
+            $radicadoTexto = $tipo . '-' . $vigencia . '-' . str_pad($siguiente, 5, '0', STR_PAD_LEFT);
 
             // Crea el registro asociado en la tabla radicado
             Radicado::create([
@@ -82,17 +82,17 @@ trait HasCustomUuid
     {
         $name = class_basename($model);
         return match ($name) {
-            'Mercurio30' => 'E', // empresa
-            'Mercurio31' => 'T', // trabajador
-            'Mercurio32' => 'C', // conyuges
-            'Mercurio34' => 'B', // beneficiario
-            'Mercurio36' => 'F', // facultativo
-            'Mercurio38' => 'P', // pensionado
-            'Mercurio39' => 'M', // madres comunitarias
-            'Mercurio40' => 'D', // servicio domestico
-            'Mercurio41' => 'I', // independiente
-            'Mercurio47' => 'U', // actualziacion de datos
-            default => 'E', // Valor por defecto, ajustar si es necesario
+            'Mercurio30' => 'EMP', // empresa
+            'Mercurio31' => 'TRA', // trabajador
+            'Mercurio32' => 'CON', // conyuges
+            'Mercurio34' => 'BEN', // beneficiario
+            'Mercurio36' => 'FAC', // facultativo
+            'Mercurio38' => 'PEN', // pensionado
+            'Mercurio39' => 'MAD', // madres comunitarias
+            'Mercurio40' => 'DOM', // servicio domestico
+            'Mercurio41' => 'IND', // independiente
+            'Mercurio47' => 'ACT', // actualziacion de datos
+            default => 'XNA', // Valor por defecto, ajustar si es necesario
         };
     }
 }

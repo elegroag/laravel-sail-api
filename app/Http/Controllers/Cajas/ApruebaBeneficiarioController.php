@@ -110,7 +110,6 @@ class ApruebaBeneficiarioController extends ApplicationController
      */
     public function index()
     {
-        $this->setParamToView('hide_header', true);
         $campo_field = [
             'numdoc' => 'Identificación',
             'priape' => 'Primer apellido',
@@ -364,7 +363,7 @@ class ApruebaBeneficiarioController extends ApplicationController
                 'id' => 'required|integer',
             ]);
             $id = $validated['id'];
-            
+
             $beneficiarioServices = new BeneficiarioServices;
             $solicitud = Mercurio34::where("id", $id)->first();
             if ($solicitud == false) {
@@ -395,8 +394,8 @@ class ApruebaBeneficiarioController extends ApplicationController
                 $trabajador->fill($trabajador_sisu);
             }
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $ps = Comman::Api();
+            $ps->runCli(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_beneficiario',
@@ -404,43 +403,45 @@ class ApruebaBeneficiarioController extends ApplicationController
                 ]
             );
 
-            $rqs = $procesadorComando->toArray();
+            $rqs = $ps->toArray();
             $relacion_multiple = false;
+            $beneficiario_sisuweb = false;
 
             if ($rqs) {
                 if ($rqs['success']) {
                     $sys_beneficiario = $rqs['data'];
-                    $this->setParamToView('beneficiario_sisuweb', $sys_beneficiario);
-                    $giro = $sys_beneficiario['giro'];
-                    $vinculo_trabajador = false;
+                    if ($sys_beneficiario) {
+                        $beneficiario_sisuweb = $sys_beneficiario;
+                        $giro = $sys_beneficiario['giro'];
+                        $vinculo_trabajador = false;
 
-                    if ($rqs['relaciones']) {
-                        $relacion_multiple = $rqs['relaciones'];
-                        foreach ($rqs['relaciones'] as $ai => $relacion) {
-                            if ($relacion['cedtra'] == $solicitud->cedtra) {
-                                $vinculo_trabajador = true;
-                                break;
+                        if ($rqs['relaciones']) {
+                            $relacion_multiple = $rqs['relaciones'];
+                            foreach ($rqs['relaciones'] as $ai => $relacion) {
+                                if ($relacion['cedtra'] == $solicitud->cedtra) {
+                                    $vinculo_trabajador = true;
+                                    break;
+                                }
                             }
                         }
                     }
-                    $estado = ($vinculo_trabajador == false) ? 'I' : $sys_beneficiario['estado'];
                 }
             }
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $px = Comman::Api();
+            $px->runCli(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_beneficiarios',
                 ]
             );
 
-            $datos_captura = $procesadorComando->toArray();
+            $datos_captura = $px->toArray();
             $paramsBeneficiario = new ParamsBeneficiario;
             $paramsBeneficiario->setDatosCaptura($datos_captura);
 
             $html = view(
-                'cajas/aprobacionben/tmp/consulta',
+                'cajas.aprobacionben.tmp.consulta',
                 [
                     'beneficiario' => $solicitud,
                     'detTipo' => Mercurio06::where("tipo", $solicitud->tipo)->first()->detalle,
@@ -473,6 +474,7 @@ class ApruebaBeneficiarioController extends ApplicationController
                 'campos_disponibles' => (new Mercurio34)->CamposDisponibles(),
                 'relacion_multiple' => $relacion_multiple,
                 'trabajador' => $trabajador,
+                'beneficiario_sisuweb' => $beneficiario_sisuweb,
             ];
         } catch (DebugException $err) {
             $response = [
@@ -577,7 +579,9 @@ class ApruebaBeneficiarioController extends ApplicationController
                     'calendario' => $validated['calendario'] ?? null,
                     'cedacu' => $validated['cedacu'] ?? null,
                 ];
-                $data = array_filter($data, function ($v) { return !is_null($v) && $v !== ''; });
+                $data = array_filter($data, function ($v) {
+                    return !is_null($v) && $v !== '';
+                });
 
                 Mercurio34::where('id', $id)
                     ->where('numdoc', $numdoc)

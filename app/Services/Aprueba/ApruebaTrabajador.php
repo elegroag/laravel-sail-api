@@ -57,6 +57,8 @@ class ApruebaTrabajador
         $params['coddoc'] = $this->solicitud->tipdoc;
         $params['estado'] = 'A';
         $params['horas'] = '240';
+        $params['agro'] = 'N';
+        $params['carnet'] = 'N';
         $params['fecsal'] = $params['fecafi'];
         $params['fecpre'] = $params['fecsol'];
         $params['ciulab'] = $params['codciu'];
@@ -100,9 +102,12 @@ class ApruebaTrabajador
         $entity->create($params);
         if (! $entity->validate()) {
             throw new DebugException(
-                'Error, no se puede crear el trabajador pensionado por validación previa.',
+                'Error, no se puede crear el trabajador por validación previa.',
                 501,
-
+                [
+                    'errors' => $entity->getValidationErrors(),
+                    'attributes' => $entity->getData(),
+                ]
             );
         }
 
@@ -161,10 +166,11 @@ class ApruebaTrabajador
         $data['membrete'] = "{$this->dominio}/public/img/header_reporte_ugpp.png";
         $data['ruta_firma'] = "{$this->dominio}Mercurio/public/img/Mercurio/firma_jefe_yenny.jpg";
         $data['actapr'] = $actapr;
+
         $data['url_activa'] = '';
         $data['msj'] = "Se informa que el trabajador {$nombre}, con número de documento de indetificación {$this->solicitud->cedtra} fue afiliado con éxito.";
 
-        $html = view('layouts/mail_aprobar', $data)->render();
+        $html = view('emails.mail_aprobar', $data)->render();
 
         $asunto = "Afiliación trabajador realizada con éxito, identificación {$this->solicitud->cedtra}";
         $emailCaja = Mercurio01::first();

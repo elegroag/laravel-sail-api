@@ -129,13 +129,13 @@ class UsuarioController extends Controller
                 throw new DebugException('Error el registro de usuario no existe registrado', 501);
             }
 
-            $mercurio07 = Mercurio07::whereRaw("documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$old_coddoc}'")->first();
-            $clave = $mercurio07->getClave();
+            $mercurio07 = Mercurio07::where("documento", $documento)
+                ->where("tipo", $tipo)
+                ->where("coddoc", $old_coddoc)
+                ->first();
 
-            if (strlen($newclave) > 5 && strlen($newclave) < 80) {
-                $hash = Generales::GeneraHashByClave($newclave);
-                $clave = $hash;
-            }
+
+            $hash = clave_hash($newclave);
 
             if ($old_coddoc != $coddoc) {
                 $hasUsuario = Mercurio07::where('documento', $documento)
@@ -156,7 +156,7 @@ class UsuarioController extends Controller
                             'fecreg' => date('Y-m-d'),
                             'feccla' => date('Y-m-d'),
                             'autoriza' => 'S',
-                            'clave' => $clave,
+                            'clave' => $hash,
                         ]
                     );
                 }
@@ -171,12 +171,16 @@ class UsuarioController extends Controller
                         'codciu' => $codciu,
                         'nombre' => $nombre,
                         'coddoc' => $coddoc,
-                        'clave' => $clave,
+                        'clave' => $hash,
                     ]);
                 $this->cambiarClave($newclave, $mercurio07);
             }
 
-            $entity = Mercurio07::whereRaw("documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}'")->first();
+            $entity = Mercurio07::where("documento", $documento)
+                ->where("tipo", $tipo)
+                ->where("coddoc", $coddoc)
+                ->first();
+
             $response = [
                 'msj' => 'Proceso se ha completado con éxito',
                 'success' => true,
@@ -203,7 +207,7 @@ class UsuarioController extends Controller
             <b>CLAVE {$clave}</b><br/>";
 
         $html = view(
-            'templates/cambio_clave',
+            'cajas.templates.cambio_clave',
             [
                 'titulo' => "Cordial saludo, señor@ {$nombre}",
                 'msj' => $msj,
@@ -225,9 +229,7 @@ class UsuarioController extends Controller
         );
 
         $senderEmail->send(
-            [
-                $usuario_externo->email,
-            ],
+            $usuario_externo->email,
             $html
         );
 

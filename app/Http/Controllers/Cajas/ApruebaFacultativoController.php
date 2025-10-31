@@ -325,61 +325,46 @@ class ApruebaFacultativoController extends ApplicationController
      */
     public function aprueba(Request $request)
     {
-        $this->setResponse('ajax');
-        $user = session()->get('user');
-        $debuginfo = [];
-
-        $acceso = (new Gener42)->count("permiso='62' AND usuario='{$user['usuario']}'");
-        if ($acceso == 0) {
-            return $this->renderObject(['success' => false, 'msj' => 'El usuario no dispone de permisos de aprobación'], false);
-        }
         $apruebaSolicitud = new ApruebaSolicitud;
         $this->db->begin();
         try {
             try {
-                $postData = $_POST;
-                $idSolicitud = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-                $calemp = 'F';
                 $solicitud = $apruebaSolicitud->main(
-                    $calemp,
-                    $idSolicitud,
-                    $postData
+                    'F',
+                    $request->input('id'),
+                    $request->all()
                 );
-
-                $this->db->commit();
                 $solicitud->enviarMail($request->input('actapr'), $request->input('feccap'));
                 $salida = [
                     'success' => true,
                     'msj' => 'El registro se completo con éxito',
                 ];
+                $this->db->commit();
             } catch (DebugException $err) {
-
                 $this->db->rollback();
                 $salida = [
                     'success' => false,
                     'msj' => $err->getMessage(),
+                    'erros' => $err->render($request)
                 ];
             }
-        } catch (DebugException $e) {
+        } catch (\Exception $e) {
+            $this->db->rollback();
             $salida = [
                 'success' => false,
                 'msj' => $e->getMessage(),
             ];
         }
-        if ($debuginfo) {
-            $salida['info'] = $debuginfo;
-        }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function borrarFiltro()
     {
-        $this->setResponse('ajax');
         set_flashdata('filter_facultativo', false, true);
         set_flashdata('filter_params', false, true);
 
-        return $this->renderObject([
+        return response()->json([
             'success' => true,
             'query' => get_flashdata_item('filter_facultativo'),
             'filter' => get_flashdata_item('filter_params'),

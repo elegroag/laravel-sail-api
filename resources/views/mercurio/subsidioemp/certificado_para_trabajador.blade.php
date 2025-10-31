@@ -1,7 +1,7 @@
 @extends('layouts.dash')
 
 @push('scripts')
-<script src="{{ asset('Mercurio/consultasempresa/consultasempresa.build.js') }}"></script>
+<script src="{{ asset('mercurio/build/ConsultasEmpresa.js') }}"></script>
 @endpush
 
 @section('title', 'Certificado para Trabajador')
@@ -30,8 +30,8 @@ $tipo = [
                 <div class="form-group">
                     <label for="cedtra" class="form-control-label">Trabajador</label>
                     <select name="cedtra" id="cedtra" class="form-control">
-                        @foreach ($trabajadores as $trabajador)
-                            <option value="{{ $trabajador->cedula }}">{{ $trabajador->nombre }}</option>
+                        @foreach ($trabajadores as $cedula => $nombre )
+                            <option value="{{ $cedula }}">{{ $nombre }}</option>
                         @endforeach
                     </select>
                 </div>

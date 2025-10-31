@@ -5,6 +5,10 @@
         @include('cajas/templates/tmp_filtro', ['campo_filtro' => $campo_filtro])
     </script>
 
+    <script type="text/template" id='tmp_aprobar'>
+        @include('cajas/aprobaciontra/tmp/tmp_aprobar')
+    </script>
+
     <script type='text/template' id='tmp_layout_trabajador'>
         <div class="row justify-content-between">
             <div class="col-md-12" id='show_trabajador'></div>

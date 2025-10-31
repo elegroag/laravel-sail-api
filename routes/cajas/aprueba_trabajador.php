@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware([CajasCookieAuthenticated::class])->group(function () {
     Route::prefix('cajas/aprobaciontra')->group(function () {
+        Route::get('/', function () {
+            return redirect('cajas/aprobaciontra/index');
+        });
         Route::get('/index', [ApruebaTrabajadorController::class, 'index']);
         Route::post('/aplicar_filtro/{estado?}', [ApruebaTrabajadorController::class, 'aplicarFiltro']);
         Route::post('/buscar/{estado?}', [ApruebaTrabajadorController::class, 'buscar']);
