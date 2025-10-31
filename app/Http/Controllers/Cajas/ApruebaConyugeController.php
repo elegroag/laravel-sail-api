@@ -13,6 +13,9 @@ use App\Models\Mercurio31;
 use App\Models\Mercurio32;
 use App\Services\Aprueba\ApruebaConyuge;
 use App\Services\CajaServices\ConyugeServices;
+use App\Services\Reports\CsvReportStrategy;
+use App\Services\Reports\ExcelReportStrategy;
+use App\Services\Reports\ReportGenerator;
 use App\Services\Srequest;
 use App\Services\Utils\Comman;
 use App\Services\Utils\NotifyEmailServices;
@@ -98,6 +101,64 @@ class ApruebaConyugeController extends ApplicationController
         $response = $pagination->render(new ConyugeServices);
 
         return $this->renderObject($response, false);
+    }
+
+    /**
+     * export function
+     * Descargar reporte de cónyuges según filtros del aplicativo
+     */
+    public function export(Request $request)
+    {
+        try {
+            $format = $request->query('format', 'csv');
+            $strategy = $format === 'excel' ? new ExcelReportStrategy() : new CsvReportStrategy();
+            $ext = $format === 'excel' ? 'xlsx' : 'csv';
+
+            // Base del filtro igual que en buscar/aplicarFiltro
+            $estado = (string) $request->input('estado', 'P');
+            $usuario = parent::getActUser();
+            $query_str = ($estado === 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
+
+            $pagination = new Pagination(new Srequest([
+                'query' => $query_str,
+                'estado' => $estado,
+            ]));
+
+            // Construir filtro del aplicativo (cadena SQL)
+            $filtro = $pagination->filter(
+                $request->input('campo'),
+                $request->input('condi'),
+                $request->input('value')
+            );
+
+            // Columnas de Mercurio32
+            $columns = [
+                'Cédula Cónyuge' => 'cedcon',
+                'Nombres' => fn($r) => trim(($r->prinom ?? '') . ' ' . ($r->segnom ?? '')),
+                'Apellidos' => fn($r) => trim(($r->priape ?? '') . ' ' . ($r->segape ?? '')),
+                'Cédula Trabajador' => 'cedtra',
+                'Estado' => 'estado',
+                'Fecha Solicitud' => 'fecsol',
+                'Usuario' => 'usuario',
+            ];
+
+            $gen = (new ReportGenerator($strategy))
+                ->for(Mercurio32::query())
+                ->columns($columns)
+                ->filename('mercurio32_' . now()->format('Ymd_His') . '.' . $ext)
+                ->filter(function ($q) use ($filtro) {
+                    if (is_string($filtro) && trim($filtro) !== '') {
+                        $q->whereRaw($filtro);
+                    }
+                });
+
+            return $gen->download();
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage(),
+            ]);
+        }
     }
 
     /**

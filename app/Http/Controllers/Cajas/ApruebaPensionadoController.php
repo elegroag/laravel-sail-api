@@ -14,6 +14,9 @@ use App\Models\Mercurio11;
 use App\Models\Mercurio31;
 use App\Models\Mercurio37;
 use App\Models\Mercurio38;
+use App\Services\Reports\CsvReportStrategy;
+use App\Services\Reports\ExcelReportStrategy;
+use App\Services\Reports\ReportGenerator;
 use App\Services\Aprueba\ApruebaSolicitud;
 use App\Services\CajaServices\PensionadoServices;
 use App\Services\Srequest;
@@ -102,6 +105,64 @@ class ApruebaPensionadoController extends ApplicationController
         );
 
         return $this->renderObject($response, false);
+    }
+
+    /**
+     * export function
+     * Descargar reporte de pensionados según filtros del aplicativo
+     */
+    public function export(Request $request)
+    {
+        try {
+            $format = $request->query('format', 'csv');
+            $strategy = $format === 'excel' ? new ExcelReportStrategy() : new CsvReportStrategy();
+            $ext = $format === 'excel' ? 'xlsx' : 'csv';
+
+            // Base del filtro igual que en buscar/aplicarFiltro
+            $estado = (string) $request->input('estado', 'P');
+            $usuario = $this->user['usuario'] ?? null;
+            $query_str = ($estado === 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
+
+            $pagination = new Pagination(new Srequest([
+                'query' => $query_str,
+                'estado' => $estado,
+            ]));
+
+            // Construir filtro del aplicativo (cadena SQL)
+            $filtro = $pagination->filter(
+                $request->input('campo'),
+                $request->input('condi'),
+                $request->input('value')
+            );
+
+            // Columnas de Mercurio38
+            $columns = [
+                'Cédula' => 'cedtra',
+                'Nombres' => fn($r) => trim(($r->prinom ?? '') . ' ' . ($r->segnom ?? '')),
+                'Apellidos' => fn($r) => trim(($r->priape ?? '') . ' ' . ($r->segape ?? '')),
+                'Nit Empresa' => 'cedtra',
+                'Estado' => 'estado',
+                'Fecha Solicitud' => 'fecsol',
+                'Usuario' => 'usuario',
+            ];
+
+            $gen = (new ReportGenerator($strategy))
+                ->for(Mercurio38::query())
+                ->columns($columns)
+                ->filename('mercurio38_' . now()->format('Ymd_His') . '.' . $ext)
+                ->filter(function ($q) use ($filtro) {
+                    if (is_string($filtro) && trim($filtro) !== '') {
+                        $q->whereRaw($filtro);
+                    }
+                });
+
+            return $gen->download();
+        } catch (\Throwable $th) {
+            return $this->renderObject([
+                'success' => false,
+                'message' => $th->getMessage(),
+            ], false);
+        }
     }
 
     /**

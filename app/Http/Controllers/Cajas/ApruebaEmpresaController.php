@@ -17,12 +17,16 @@ use App\Models\Mercurio30;
 use App\Models\Mercurio37;
 use App\Services\Aprueba\ApruebaSolicitud;
 use App\Services\CajaServices\EmpresaServices;
+use App\Services\Reports\CsvReportStrategy;
+use App\Services\Reports\ExcelReportStrategy;
+use App\Services\Reports\ReportGenerator;
 use App\Services\Srequest;
 use App\Services\Utils\CalculatorDias;
 use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
 
@@ -86,12 +90,11 @@ class ApruebaEmpresaController extends ApplicationController
 
         $response = $pagination->render(new EmpresaServices);
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function listar(Request $request, $estado = 'P')
     {
-        $this->setResponse('ajax');
         try {
             $pagination = new Pagination;
             $filtro = $pagination->filter(
@@ -103,7 +106,7 @@ class ApruebaEmpresaController extends ApplicationController
             $empresaServices = new EmpresaServices;
             $out = $empresaServices->findByUserAndEstado(
                 new Srequest([
-                    'usuario' => session()->get('user'),
+                    'usuario' => $this->user['usuario'],
                     'estado' => $estado,
                     'filtro' => $filtro,
                 ])
@@ -121,7 +124,7 @@ class ApruebaEmpresaController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     /**
@@ -134,9 +137,9 @@ class ApruebaEmpresaController extends ApplicationController
      * @param  string  $estado
      * @return void
      */
-    public function changeCantidadPagina($estado = 'P')
+    public function changeCantidadPagina(Request $request, string $estado = 'P')
     {
-        // $this->buscar($estado);
+        return $this->buscar($request, $estado);
     }
 
     /**
@@ -192,7 +195,8 @@ class ApruebaEmpresaController extends ApplicationController
         $this->setParamToView('help', $help);
         $this->setParamToView('title', 'Aprueba Empresa');
 
-        $collection = Mercurio30::whereRaw("estado='{$estado}' AND usuario=" . $this->user['usuario'])
+        $collection = Mercurio30::where('estado', $estado)
+            ->where('usuario', $this->user['usuario'])
             ->orderBy('fecini', 'ASC')
             ->get();
 
@@ -265,13 +269,21 @@ class ApruebaEmpresaController extends ApplicationController
             $empresaServices = new EmpresaServices;
             $notifyEmailServices = new NotifyEmailServices;
 
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $codest = $request->input('codest', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $nota = $request->input('nota');
-            $array_corregir = $request->input('campos_corregir');
-            $campos_corregir = implode(';', $array_corregir);
+            $validated = $request->validate([
+                'id' => 'required|integer',
+                'codest' => 'required|string|max:10',
+                'nota' => 'nullable|string|max:5000',
+                'campos_corregir' => 'sometimes|array',
+                'campos_corregir.*' => 'string|max:100',
+            ]);
 
-            $mercurio30 = (new Mercurio30)->findFirst("id='{$id}'");
+            $id = $validated['id'];
+            $codest = $validated['codest'];
+            $nota = $validated['nota'] ?? null;
+            $array_corregir = $validated['campos_corregir'] ?? [];
+            $campos_corregir = $array_corregir ? implode(';', $array_corregir) : '';
+
+            $mercurio30 = Mercurio30::where('id', $id)->first();
             if ($mercurio30->getEstado() == 'D') {
                 throw new DebugException('El registro ya se encuentra devuelto, no se requiere de repetir la acción.', 201);
             }
@@ -312,11 +324,16 @@ class ApruebaEmpresaController extends ApplicationController
         $notifyEmailServices = new NotifyEmailServices;
         $empresaServices = new EmpresaServices;
         try {
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $nota = $request->input('nota');
-            $codest = $request->input('codest', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $validated = $request->validate([
+                'id' => 'required|integer',
+                'codest' => 'required|string|max:10',
+                'nota' => 'nullable|string|max:5000',
+            ]);
+            $id = $validated['id'];
+            $nota = $validated['nota'] ?? null;
+            $codest = $validated['codest'];
 
-            $mercurio30 = (new Mercurio30)->findFirst(" id='{$id}'");
+            $mercurio30 = Mercurio30::where('id', $id)->first();
 
             if ($mercurio30->getEstado() == 'X') {
                 throw new DebugException('El registro ya se encuentra rechazado, no se requiere de repetir la acción.', 201);
@@ -333,15 +350,6 @@ class ApruebaEmpresaController extends ApplicationController
                 'success' => true,
                 'msj' => 'El proceso se ha completado con éxito',
             ];
-
-            /*
-            $satServices = new SatServices();
-            if ($mercurio30->getDocumentoRepresentanteSat() > 0) {
-                $resultado_tramite = '2'; //Afiliación Rechazada
-                $fecha = date('Y-m-d');
-                $rqs_sat = $satServices->notificarServicioSat($mercurio30, $resultado_tramite, $fecha, $nota);
-                $salida['respuesta_solicitud_sat'] = $rqs_sat;
-            }*/
         } catch (DebugException $err) {
             $salida = [
                 'success' => false,
@@ -363,9 +371,6 @@ class ApruebaEmpresaController extends ApplicationController
      */
     public function pendienteEmail()
     {
-        /*  $flash_mensaje = SESSION::getData("flash_mensaje");
-        SESSION::setData("flash_mensaje", null); */
-        /* $this->setParamToView("flash_mensaje", $flash_mensaje); */
         $this->setParamToView('title', 'Procesar Notificación Pendiente');
     }
 
@@ -377,91 +382,7 @@ class ApruebaEmpresaController extends ApplicationController
      *
      * @return void
      */
-    public function rezagoCorreo(Request $request)
-    {
-        $this->setResponse('view');
-        $meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-        $nit = $request->input('nit');
-        $anexo_final = $request->input('anexo_final');
-        $anexo_inicial = $request->input('anexo_inicial');
-        $feccap = $request->input('feccap');
-        $feccap = new \DateTime($feccap);
-
-        try {
-            $mercurio30 = Mercurio30::whereRaw("nit='{$nit}' AND estado='A'")->first();
-            if (! $mercurio30) {
-                throw new DebugException('Error la empresa no es valida para envio de correo.', 501);
-            }
-            $consultasOldServices = new GeneralService;
-            $servicio = $consultasOldServices->webService('datosEmpresa', $_POST);
-            if ($servicio['flag'] == false) {
-                throw new DebugException('Error al buscar la empresa en SISUWEB.', 502);
-            }
-            if (! $servicio['data']) {
-                throw new DebugException('Los datos de la empresa no está disponible en SISUWEB.', 503);
-            }
-
-            $asunto = 'Afiliacion de la empresa realizada con Exito. Nit: ' . $mercurio30->getNit();
-            $mercurio07 = Mercurio07::whereRaw("tipo='{$mercurio30->getTipo()}' and coddoc='{$mercurio30->getCoddoc()}' and documento='{$mercurio30->getDocumento()}'")->first();
-            if (! $mercurio07) {
-                throw new DebugException('Error no hay usuario empresa para el servicio de autogestión de comfaca en línea.', 504);
-            }
-            $mercurio07->setTipo('E');
-            $mercurio07->save();
-            $mercurio01 = Mercurio01::first();
-            $mercurio02 = Mercurio02::first();
-            $_email = trim($mercurio01->getEmail());
-            $_clave = trim($mercurio01->getClave());
-
-            // Prueba
-            // $_email = "soporte_sistemas@comfaca.com";
-            // $_clave = "";
-
-            $mensaje = '';
-            ob_start();
-            $this->setParamToView('rutaImg', 'https://comfacaenlinea.com.co/Mercurio/public/img/Mercurio/logob.png');
-            $this->setParamToView('mercurio30', $mercurio30);
-            $this->setParamToView('actapr', $request->input('actapr'));
-            $this->setParamToView('dia', $feccap->format('d'));
-            $this->setParamToView('mes', $meses[intval($feccap->format('m') - 1)]);
-            $this->setParamToView('anno', $feccap->format('Y'));
-            $this->setParamToView('ruta_firma', 'https://comfacaenlinea.com.co/Mercurio/public/img/Mercurio/firma_jefe_yenny.jpg');
-            $this->setParamToView('mercurio02', $mercurio02);
-            $this->setParamToView('anexo_final', $anexo_final);
-            $this->setParamToView('anexo_inicial', $anexo_inicial);
-            echo View::renderView('aprobacionemp/mail/aprobar');
-            $mensaje = ob_get_contents();
-            ob_end_clean();
-
-            /* Core::importFromLibrary("Swift", "Swift.php");
-            Core::importFromLibrary("Swift", "Swift/Connection/SMTP.php");
-            $smtp = new Swift_Connection_SMTP(
-                "smtp.gmail.com",
-                Swift_Connection_SMTP::PORT_SECURE,
-                Swift_Connection_SMTP::ENC_TLS
-            );
-
-            $smtp->setUsername($_email);
-            $smtp->setPassword($_clave);
-            $smsj = new Swift_Message();
-            $smsj->setSubject($asunto);
-            $smsj->setContentType("text/html");
-            $smsj->setBody($mensaje);
-            $swift = new Swift($smtp);
-            $recip = new Swift_RecipientList();
-
-            $email = $mercurio07->getEmail();
-            $nombre = $mercurio07->getNombre();
-
-            $recip->addTo($email, $nombre);
-            $swift->send($smsj, $recip, new Swift_Address($_email));
-            SESSION::setData("flash_mensaje", "El envío se ha completado a la dirección de email: " . $mercurio07->getEmail() . " nombre: " . $mercurio07->getNombre());
-         */
-        } catch (\Exception $err) {
-            /* SESSION::setData("flash_mensaje", $err->getMessage()); */
-        }
-        /* Router::redirectToApplication('Cajas/aprobacionemp/pendiente_email'); */
-    }
+    public function rezagoCorreo(Request $request) {}
 
     /**
      * empresa_search function
@@ -476,11 +397,11 @@ class ApruebaEmpresaController extends ApplicationController
         $this->setResponse('ajax');
         $nit = $request->input('nit');
         try {
-            $mercurio30 = Mercurio30::whereRaw("nit='{$nit}' AND estado='A'")->first();
+            $mercurio30 = Mercurio30::where('nit', $nit)->where('estado', 'A')->first();
             if (! $mercurio30) {
                 throw new DebugException('La empresa no está disponible para notificar por email', 501);
             } else {
-                $data07 = Mercurio07::whereRaw("documento='{$mercurio30->getDocumento()}'")->get();
+                $data07 = Mercurio07::where('documento', $mercurio30->getDocumento())->get();
                 $consultasOldServices = new GeneralService;
                 $servicio = $consultasOldServices->webService('datosEmpresa', $_POST);
                 if ($servicio['flag'] == false) {
@@ -537,11 +458,10 @@ class ApruebaEmpresaController extends ApplicationController
         $this->setResponse('ajax');
         try {
             $empresaServices = new EmpresaServices;
-            $id = $request->input('id');
-            if (! $id) {
-                return redirect('aprobacionemp/index');
-                exit;
-            }
+            $validated = $request->validate([
+                'id' => 'required|integer',
+            ]);
+            $id = $validated['id'];
 
             $mercurio30 = Mercurio30::where('id', $id)->first();
             $procesadorComando = Comman::Api();
@@ -564,7 +484,7 @@ class ApruebaEmpresaController extends ApplicationController
             $tipsoc_detalle = $_tipsoc[$mercurio30->tipsoc];
 
             $htmlEmpresa = view(
-                'cajas/aprobacionemp/tmp/consulta',
+                'cajas.aprobacionemp.tmp.consulta',
                 [
                     'mercurio30' => $mercurio30,
                     'mercurio01' => Mercurio01::first(),
@@ -658,87 +578,101 @@ class ApruebaEmpresaController extends ApplicationController
         ];
     }
 
-    public function editarView($id)
-    {
-        $this->empresaServices = new EmpresaServices;
-        if (! $id) {
-            return redirect('aprobacionemp/index');
-            exit;
-        }
-        $this->setParamToView('hide_header', true);
-        $mercurio30 = Mercurio30::where("id='{$id}'")->first();
-        $this->setParamToView('tipopc', 2);
-        $this->setParamToView('seguimiento', $this->empresaServices->seguimiento($mercurio30));
-
-        $mercurio01 = Mercurio01::first();
-        $this->setParamToView('mercurio01', $mercurio01);
-        $mercurio37 = Mercurio37::where(" tipopc=2 AND numero='{$mercurio30->getId()}'")->get();
-        $this->setParamToView('mercurio37', $mercurio37);
-        $this->setParamToView('idModel', $id);
-        $this->setParamToView('det_tipo', Mercurio06::where("tipo = '{$mercurio30->getTipo()}'")->getDetalle());
-        $this->loadParametrosView();
-
-        $this->setParamToView('mercurio30', $mercurio30);
-        $this->setParamToView('title', 'Editar Ficha Empresa ' . $mercurio30->getNit());
-    }
-
     public function editaEmpresa(Request $request)
     {
         $this->setResponse('ajax');
-        $nit = $request->input('nit');
-        $id = $request->input('id');
+        $validated = $request->validate([
+            'id' => 'required|integer',
+            'nit' => 'required|string',
+            'razsoc' => 'sometimes|string|max:255',
+            'codact' => 'sometimes|string|max:10',
+            'digver' => 'sometimes|string|max:2',
+            'calemp' => 'sometimes|string|max:5',
+            'cedrep' => 'sometimes|string|max:50',
+            'repleg' => 'sometimes|string|max:150',
+            'direccion' => 'sometimes|string|max:255',
+            'codciu' => 'sometimes|string|max:10',
+            'codzon' => 'sometimes|string|max:10',
+            'telefono' => 'sometimes|string|max:50',
+            'celular' => 'sometimes|string|max:50',
+            'fax' => 'sometimes|string|max:50',
+            'email' => 'sometimes|email|max:255',
+            'sigla' => 'sometimes|string|max:50',
+            'fecini' => 'sometimes|date',
+            'tottra' => 'sometimes|numeric',
+            'valnom' => 'sometimes|numeric',
+            'tipsoc' => 'sometimes|string|max:2',
+            'dirpri' => 'sometimes|string|max:255',
+            'ciupri' => 'sometimes|string|max:10',
+            'celpri' => 'sometimes|string|max:50',
+            'tipemp' => 'sometimes|string|max:5',
+            'emailpri' => 'sometimes|email|max:255',
+            'tipper' => 'sometimes|in:N,J',
+            'matmer' => 'sometimes|string|max:50',
+            'coddocrepleg' => 'sometimes|string|max:5',
+            'prinom' => 'sometimes|string|max:50',
+            'priape' => 'sometimes|string|max:50',
+            'segnom' => 'sometimes|nullable|string|max:50',
+            'segape' => 'sometimes|nullable|string|max:50',
+            'prinomrepleg' => 'sometimes|nullable|string|max:50',
+            'priaperepleg' => 'sometimes|nullable|string|max:50',
+            'segnomrepleg' => 'sometimes|nullable|string|max:50',
+            'segaperepleg' => 'sometimes|nullable|string|max:50',
+            'telpri' => 'sometimes|string|max:50',
+        ]);
+        $nit = $validated['nit'];
+        $id = $validated['id'];
         try {
-            $mercurio30 = Mercurio30::where("nit='{$nit}' AND id='{$id}'")->first();
+            $mercurio30 = Mercurio30::where('nit', $nit)->where('id', $id)->first();
             if (! $mercurio30) {
                 throw new DebugException('La empresa no está disponible para notificar por email', 501);
             } else {
-                $tipsoc = $request->input('tipsoc');
+                $tipsoc = $validated['tipsoc'] ?? $request->input('tipsoc');
                 if (strlen($tipsoc) == 1) {
                     $tipsoc = str_pad($tipsoc, 2, '0', STR_PAD_LEFT);
                 }
                 $data = [
-                    'razsoc' => $request->input('razsoc'),
-                    'codact' => $request->input('codact'),
-                    'digver' => $request->input('digver'),
-                    'calemp' => $request->input('calemp'),
-                    'cedrep' => $request->input('cedrep'),
-                    'repleg' => $request->input('repleg'),
-                    'direccion' => $request->input('direccion'),
-                    'codciu' => $request->input('codciu'),
-                    'codzon' => $request->input('codzon'),
-                    'telefono' => $request->input('telefono'),
-                    'celular' => $request->input('celular'),
-                    'fax' => $request->input('fax'),
-                    'email' => $request->input('email'),
-                    'sigla' => $request->input('sigla'),
-                    'fecini' => $request->input('fecini'),
-                    'tottra' => $request->input('tottra'),
-                    'valnom' => $request->input('valnom'),
+                    'razsoc' => $validated['razsoc'] ?? null,
+                    'codact' => $validated['codact'] ?? null,
+                    'digver' => $validated['digver'] ?? null,
+                    'calemp' => $validated['calemp'] ?? null,
+                    'cedrep' => $validated['cedrep'] ?? null,
+                    'repleg' => $validated['repleg'] ?? null,
+                    'direccion' => $validated['direccion'] ?? null,
+                    'codciu' => $validated['codciu'] ?? null,
+                    'codzon' => $validated['codzon'] ?? null,
+                    'telefono' => $validated['telefono'] ?? null,
+                    'celular' => $validated['celular'] ?? null,
+                    'fax' => $validated['fax'] ?? null,
+                    'email' => $validated['email'] ?? null,
+                    'sigla' => $validated['sigla'] ?? null,
+                    'fecini' => $validated['fecini'] ?? null,
+                    'tottra' => $validated['tottra'] ?? null,
+                    'valnom' => $validated['valnom'] ?? null,
                     'tipsoc' => $tipsoc,
-                    'dirpri' => $request->input('dirpri'),
-                    'ciupri' => $request->input('ciupri'),
-                    'celpri' => $request->input('celpri'),
-                    'tipemp' => $request->input('tipemp'),
-                    'emailpri' => $request->input('emailpri'),
-                    'tipper' => $request->input('tipper'),
-                    'matmer' => $request->input('matmer'),
-                    'coddocrepleg' => (! $request->input('coddocrepleg')) ? '1' : $request->input('coddocrepleg'),
-                    'prinom' => ($request->input('tipper') == 'N') ? $request->input('prinom') : $request->input('prinomrepleg'),
-                    'priape' => ($request->input('tipper') == 'N') ? $request->input('priape') : $request->input('priaperepleg'),
-                    'segnom' => ($request->input('tipper') == 'N') ? $request->input('segnom') : $request->input('segnomrepleg'),
-                    'segape' => ($request->input('tipper') == 'N') ? $request->input('segape') : $request->input('segaperepleg'),
-                    'prinomrepleg' => ($request->input('tipper') == 'J') ? $request->input('prinomrepleg') : '',
-                    'priaperepleg' => ($request->input('tipper') == 'J') ? $request->input('priaperepleg') : '',
-                    'segnomrepleg' => ($request->input('tipper') == 'J') ? $request->input('segnomrepleg') : '',
-                    'segaperepleg' => ($request->input('tipper') == 'J') ? $request->input('segaperepleg') : '',
-                    'telpri' => $request->input('telpri'),
+                    'dirpri' => $validated['dirpri'] ?? null,
+                    'ciupri' => $validated['ciupri'] ?? null,
+                    'celpri' => $validated['celpri'] ?? null,
+                    'tipemp' => $validated['tipemp'] ?? null,
+                    'emailpri' => $validated['emailpri'] ?? null,
+                    'tipper' => $validated['tipper'] ?? null,
+                    'matmer' => $validated['matmer'] ?? null,
+                    'coddocrepleg' => $validated['coddocrepleg'] ?? '1',
+                    'prinom' => (($validated['tipper'] ?? $request->input('tipper')) == 'N') ? ($validated['prinom'] ?? $request->input('prinom')) : ($validated['prinomrepleg'] ?? $request->input('prinomrepleg')),
+                    'priape' => (($validated['tipper'] ?? $request->input('tipper')) == 'N') ? ($validated['priape'] ?? $request->input('priape')) : ($validated['priaperepleg'] ?? $request->input('priaperepleg')),
+                    'segnom' => (($validated['tipper'] ?? $request->input('tipper')) == 'N') ? ($validated['segnom'] ?? $request->input('segnom')) : ($validated['segnomrepleg'] ?? $request->input('segnomrepleg')),
+                    'segape' => (($validated['tipper'] ?? $request->input('tipper')) == 'N') ? ($validated['segape'] ?? $request->input('segape')) : ($validated['segaperepleg'] ?? $request->input('segaperepleg')),
+                    'prinomrepleg' => (($validated['tipper'] ?? $request->input('tipper')) == 'J') ? ($validated['prinomrepleg'] ?? $request->input('prinomrepleg')) : '',
+                    'priaperepleg' => (($validated['tipper'] ?? $request->input('tipper')) == 'J') ? ($validated['priaperepleg'] ?? $request->input('priaperepleg')) : '',
+                    'segnomrepleg' => (($validated['tipper'] ?? $request->input('tipper')) == 'J') ? ($validated['segnomrepleg'] ?? $request->input('segnomrepleg')) : '',
+                    'segaperepleg' => (($validated['tipper'] ?? $request->input('tipper')) == 'J') ? ($validated['segaperepleg'] ?? $request->input('segaperepleg')) : '',
+                    'telpri' => $validated['telpri'] ?? null,
                 ];
-                $setters = '';
-                foreach ($data as $ai => $row) {
-                    $setters .= " $ai='{$row}',";
-                }
-                $setters = trim($setters, ',');
-                Mercurio30::whereRaw("id='{$id}' AND nit='{$nit}'")->update($setters);
+                // evita sobreescribir con null: solo campos enviados
+                $data = array_filter($data, function ($v) {
+                    return ! is_null($v);
+                });
+                Mercurio30::where('id', $id)->where('nit', $nit)->update($data);
                 $salida = [
                     'msj' => 'Proceso se ha completado con éxito',
                     'success' => true,
@@ -748,10 +682,11 @@ class ApruebaEmpresaController extends ApplicationController
             $salida = [
                 'success' => false,
                 'msj' => $err->getMessage(),
+                'errors' => $err->render($request),
             ];
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     /**
@@ -795,12 +730,14 @@ class ApruebaEmpresaController extends ApplicationController
             exit();
         }
 
-        $this->setParamToView('idEmpresa', $id);
-        $this->setParamToView('empresa', $response['data']);
-        $this->setParamToView('trayectoria', $response['trayectoria']);
-        $this->setParamToView('sucursales', $response['sucursales']);
-        $this->setParamToView('listas', $response['listas']);
-        $this->setParamToView('title', "Empresa SisuWeb - {$nit}");
+        return response()->json([
+            'success' => true,
+            'idEmpresa' => $id,
+            'empresa' => $response['data'],
+            'trayectoria' => $response['trayectoria'],
+            'sucursales' => $response['sucursales'],
+            'listas' => $response['listas']
+        ]);
     }
 
     /**
@@ -809,78 +746,58 @@ class ApruebaEmpresaController extends ApplicationController
      *
      * @return void
      */
-    public function excelReporte($estado = 'P')
+    public function export(Request $request)
     {
-        /* $this->setResponse('view');
-        $fecha = new \DateTime();
-        $file = "public/temp/" . "reporte_solicitudes_" . $fecha->format('Y-m-d_H:i:s') . ".xls";
-        require_once "Library/Excel/Main.php";
-        $excels = new Spreadsheet_Excel_Writer($file);
-        $excel = $excels->addWorksheet();
-        $column_title = $excels->addFormat(array(
-            'fontfamily' => 'Verdana',
-            'size' => 12,
-            'fgcolor' => 12,
-            'border' => 1,
-            'bordercolor' => 'black',
-            "halign" => 'center'
-        ));
-        $title = $excels->addFormat(array(
-            'fontfamily' => 'Verdana',
-            'size' => 13,
-            'border' => 0,
-            'bordercolor' => 'black',
-            "halign" => 'center'
-        ));
-        $column_style = $excels->addFormat(array(
-            'fontfamily' => 'Verdana',
-            'size' => 11,
-            'border' => 1,
-            'bordercolor' => 'black',
-        ));
-        $excel->setMerge(0, 1, 0, 6);
-        $excel->write(0, 1, 'Reporte De Solicitudes Afiliacion Empresas', $title);
-        $columns = array('Documento', 'Nit', 'Razon social', 'Cedula Representante', 'Cod documento', 'Dias vencidos', 'Estado', 'Tipsoc', 'Tipper', 'Email', 'Cod actividad', 'Telefono');
-        $excel->setColumn(0, 0, 16);
-        $excel->setColumn(1, 1, 16);
-        $excel->setColumn(2, 2, 35);
-        $excel->setColumn(3, 3, 25);
-        $excel->setColumn(4, 4, 25);
-        $excel->setColumn(5, 5, 25);
-        $excel->setColumn(6, 6, 30);
-        $excel->setColumn(7, 7, 10);
-        $excel->setColumn(8, 8, 10);
-        $excel->setColumn(9, 9, 50);
-        $excel->setColumn(10, 10, 20);
-        $excel->setColumn(11, 11, 20);
-        $i = 0;
-        $j = 2;
-        foreach ($columns as $column) {
-            $value = ucfirst($column);
-            $excel->write($j, $i++, $value, $column_title);
+        try {
+            $format = $request->query('format', 'csv');
+            $strategy = $format === 'excel' ? new ExcelReportStrategy() : new CsvReportStrategy();
+            $ext = $format === 'excel' ? 'xlsx' : 'csv';
+
+            // Base del filtro igual que en listar/aplicarFiltro
+            $estado = (string) $request->input('estado', 'P');
+            $usuario = $this->user['usuario'] ?? null;
+            $query_str = ($estado === 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
+
+            $pagination = new Pagination(new Srequest([
+                'query' => $query_str,
+                'estado' => $estado,
+            ]));
+
+            // Construir filtro del aplicativo (cadena SQL completa)
+            $filtro = $pagination->filter(
+                $request->input('campo'),
+                $request->input('condi'),
+                $request->input('value')
+            );
+
+            // Columnas exportadas (campos válidos de Mercurio30)
+            $columns = [
+                'NIT' => 'nit',
+                'Razón Social' => 'razsoc',
+                'Zona' => 'codzon',
+                'Documento' => 'documento',
+                'Fecha Inicio' => 'fecini',
+                'Estado' => 'estado',
+                'Usuario' => 'usuario',
+            ];
+
+            $gen = (new ReportGenerator($strategy))
+                ->for(Mercurio30::query())
+                ->columns($columns)
+                ->filename('mercurio30_' . now()->format('Ymd_His') . '.' . $ext)
+                ->filter(function ($q) use ($filtro) {
+                    if (is_string($filtro) && trim($filtro) !== '') {
+                        $q->whereRaw($filtro);
+                    }
+                });
+
+            return $gen->download();
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ]);
         }
-        $usuario = session()->get('user');
-        $solicitudes = Mercurio30::where(" estado='{$estado}' AND usuario='{$usuario}' ORDER BY fecini DESC")->get();
-        $j++;
-        foreach ($solicitudes as $solicitud) {
-            $i = 0;
-            $dias_vencidos = CalculatorDias::calcular($this->tipopc, $solicitud->getId(), $solicitud->getFecini());
-            $excel->write($j, $i++, $solicitud->getDocumento(), $column_style);
-            $excel->write($j, $i++, $solicitud->getNit(), $column_style);
-            $excel->write($j, $i++, $solicitud->getRazsoc(), $column_style);
-            $excel->write($j, $i++, $solicitud->getCedrep(), $column_style);
-            $excel->write($j, $i++, $solicitud->getCoddoc(), $column_style);
-            $excel->write($j, $i++, $dias_vencidos, $column_style);
-            $excel->write($j, $i++, $solicitud->getEstadoDetalle(), $column_style);
-            $excel->write($j, $i++, $solicitud->getTipsoc(), $column_style);
-            $excel->write($j, $i++, $solicitud->getTipper(), $column_style);
-            $excel->write($j, $i++, $solicitud->getEmail(), $column_style);
-            $excel->write($j, $i++, '#' . $solicitud->getCodact(), $column_style);
-            $excel->write($j, $i++, $solicitud->getTelefono(), $column_style);
-            $j++;
-        }
-        $excels->close();
-        header("location: " . env('APP_URL') . "/{$file}"); */
     }
 
     public function aprueba(Request $request)
@@ -918,76 +835,53 @@ class ApruebaEmpresaController extends ApplicationController
         return response()->json($salida);
     }
 
-    public function borrarFiltro(Request $request)
+    public function borrarFiltro()
     {
-        $this->setResponse('ajax');
         set_flashdata('filter_independiente', false, true);
         set_flashdata('filter_params', false, true);
 
-        return $this->renderObject([
+        return response()->json([
             'success' => true,
             'query' => get_flashdata_item('filter_independiente'),
             'filter' => get_flashdata_item('filter_params'),
         ]);
     }
 
-    public function aportesView($id)
+    public function aportes(Request $request, int $id)
     {
-        $mercurio30 = Mercurio30::where('id', $id)->first();
-        if (! $mercurio30) {
-            set_flashdata('error', [
-                'msj' => 'La empresa no se encuentra registrada.',
-                'code' => 201,
-            ]);
-
-            return redirect('aprobacionemp/index');
-            exit();
-        }
-
-        $this->setParamToView('hide_header', true);
-        $this->setParamToView('idModel', $id);
-        $this->setParamToView('nit', $mercurio30->getNit());
-        $this->setParamToView('title', 'Aportes de empresa ' . $mercurio30->getNit());
-    }
-
-    public function aportes($request, $id)
-    {
-        $this->setResponse('ajax');
         $comando = '';
         try {
-            try {
-                $mercurio30 = Mercurio30::where('id', $id)->first();
-                if (! $mercurio30) {
-                    throw new DebugException('La empresa no se encuentra registrada.', 201);
-                }
 
-                $ps = Comman::Api();
-                $ps->runCli(
-                    [
-                        'servicio' => 'AportesEmpresas',
-                        'metodo' => 'buscarAportesEmpresa',
-                        'params' => $mercurio30->getNit(),
-                    ]
-                );
-
-                if ($ps->isJson() == false) {
-                    throw new DebugException('Error procesando la consulta de aportes', 501);
-                }
-
-                $salida = $ps->toArray();
-                $salida['solicitud'] = $mercurio30->getArray();
-            } catch (DebugException $e) {
-                throw new DebugException($e->getMessage(), 501);
+            $mercurio30 = Mercurio30::where('id', $id)->first();
+            if (! $mercurio30) {
+                throw new DebugException('La empresa no se encuentra registrada.', 201);
             }
+
+            $ps = Comman::Api();
+            $ps->runCli(
+                [
+                    'servicio' => 'AportesEmpresas',
+                    'metodo' => 'buscarAportesEmpresa',
+                    'params' => $mercurio30->getNit(),
+                ]
+            );
+
+            if ($ps->isJson() == false) {
+                throw new DebugException('Error procesando la consulta de aportes', 501);
+            }
+
+            $salida = $ps->toArray();
+            $salida['solicitud'] = $mercurio30->getArray();
         } catch (DebugException $err) {
             $salida = [
                 'success' => false,
                 'msj' => 'No se pudo realizar el movimiento ' . "\n" . $err->getMessage() . "\n " . $err->getLine(),
                 'comando' => $comando,
+                'errors' => $err->render($request),
             ];
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     /**
@@ -1044,7 +938,7 @@ class ApruebaEmpresaController extends ApplicationController
             $mercurio30 = new Mercurio30;
             $mercurio30->createAttributes($empresa);
 
-            $htmlEmpresa = View::render('aprobacionemp/tmp/consulta', [
+            $htmlEmpresa = view('cajas.aprobacionemp.tmp.consulta', [
                 'mercurio30' => $mercurio30,
                 'mercurio01' => $mercurio01,
                 'det_tipo' => $det_tipo,
@@ -1054,7 +948,7 @@ class ApruebaEmpresaController extends ApplicationController
                 '_codzon' => ParamsEmpresa::getZonas(),
                 '_codact' => ParamsEmpresa::getActividades(),
                 '_tipsoc' => ParamsEmpresa::getTipoSociedades(),
-            ]);
+            ])->render();
 
             $code_estados = [];
             $query = Mercurio11::all();
@@ -1097,13 +991,13 @@ class ApruebaEmpresaController extends ApplicationController
         $action = $request->input('action');
         $codest = $request->input('codest');
         $sendEmail = $request->input('send_email');
-        $nota = sanetizar($request->input('nota'));
+        $nota = $request->input('nota');
         $comando = '';
         try {
 
             $id = $request->input('id');
 
-            $mercurio30 = (new Mercurio30)->findFirst(" id='{$id}' and estado='A' ");
+            $mercurio30 = Mercurio30::where('id', $id)->where('estado', 'A')->first();
             if (! $mercurio30) {
                 throw new DebugException('Los datos de la empresa no son validos para procesar.', 501);
             }
@@ -1197,7 +1091,7 @@ class ApruebaEmpresaController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     /**
@@ -1207,21 +1101,24 @@ class ApruebaEmpresaController extends ApplicationController
      */
     public function reaprobar(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $nota = sanetizar($request->input('nota'));
-            $today = new \DateTime;
-            (new Mercurio30)->updateAll("estado='A', fecest='{$today->format('Y-m-d')}'", "conditions: id='{$id}' ");
+            $id = $request->input('id');
+            $nota = $request->input('nota');
+            $today = Carbon::now();
 
-            $item = (new Mercurio10)->maximum('item', "conditions: tipopc='{$this->tipopc}' and numero='{$id}'") + 1;
+            Mercurio30::where("id", $id)->update([
+                'estado' => 'A',
+                'fecest' => $today->format('Y-m-d'),
+            ]);
+
+            $item = Mercurio10::where("tipopc", $this->tipopc)->where("numero", $id)->max('item') + 1;
             $mercurio10 = new Mercurio10;
-            $mercurio10->setTipopc($this->tipopc);
-            $mercurio10->setNumero($id);
-            $mercurio10->setItem($item);
-            $mercurio10->setEstado('A');
-            $mercurio10->setNota($nota);
-            $mercurio10->setFecsis($today->format('Y-m-d'));
+            $mercurio10->tipopc = $this->tipopc;
+            $mercurio10->numero = $id;
+            $mercurio10->item = $item;
+            $mercurio10->estado = 'A';
+            $mercurio10->nota = $nota;
+            $mercurio10->fecsis = $today->format('Y-m-d');
             $mercurio10->save();
 
             $response = [
@@ -1234,6 +1131,6 @@ class ApruebaEmpresaController extends ApplicationController
                 'msj' => 'No se pudo realizar el movimiento ' . "\n" . $e->getMessage() . "\n " . $e->getLine(),
             ];
         }
-        $this->renderObject($response);
+        return response()->json($response);
     }
 }

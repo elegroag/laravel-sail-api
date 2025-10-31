@@ -15,6 +15,9 @@ use App\Models\Mercurio30;
 use App\Models\Mercurio31;
 use App\Services\Aprueba\ApruebaTrabajador;
 use App\Services\CajaServices\TrabajadorServices;
+use App\Services\Reports\CsvReportStrategy;
+use App\Services\Reports\ExcelReportStrategy;
+use App\Services\Reports\ReportGenerator;
 use App\Services\Srequest;
 use App\Services\Tag;
 use App\Services\Utils\CalculatorDias;
@@ -91,12 +94,70 @@ class ApruebaTrabajadorController extends ApplicationController
             new TrabajadorServices
         );
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
+    }
+
+    /**
+     * export function
+     * Descargar reporte de trabajadores según filtros del aplicativo
+     */
+    public function export(Request $request)
+    {
+        try {
+            $format = $request->query('format', 'csv');
+            $strategy = $format === 'excel' ? new ExcelReportStrategy() : new CsvReportStrategy();
+            $ext = $format === 'excel' ? 'xlsx' : 'csv';
+
+            // Base del filtro igual que en buscar/aplicarFiltro
+            $estado = (string) $request->input('estado', 'P');
+            $usuario = $this->user['usuario'] ?? null;
+            $query_str = ($estado === 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
+
+            $pagination = new Pagination(new Srequest([
+                'query' => $query_str,
+                'estado' => $estado,
+            ]));
+
+            // Construir filtro del aplicativo
+            $filtro = $pagination->filter(
+                $request->input('campo'),
+                $request->input('condi'),
+                $request->input('value')
+            );
+
+            // Columnas de Mercurio31
+            $columns = [
+                'Cédula' => 'cedtra',
+                'Nombres' => fn($r) => trim(($r->prinom ?? '') . ' ' . ($r->segnom ?? '')),
+                'Apellidos' => fn($r) => trim(($r->priape ?? '') . ' ' . ($r->segape ?? '')),
+                'Nit Empresa' => 'nit',
+                'Estado' => 'estado',
+                'Fecha Solicitud' => 'fecsol',
+                'Usuario' => 'usuario',
+            ];
+
+            $gen = (new ReportGenerator($strategy))
+                ->for(Mercurio31::query())
+                ->columns($columns)
+                ->filename('mercurio31_' . now()->format('Ymd_His') . '.' . $ext)
+                ->filter(function ($q) use ($filtro) {
+                    if (is_string($filtro) && trim($filtro) !== '') {
+                        $q->whereRaw($filtro);
+                    }
+                });
+
+            return $gen->download();
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage(),
+            ]);
+        }
     }
 
     public function changeCantidadPagina(Request $request, string $estado = 'P')
     {
-        $this->buscar($request, $estado);
+        return $this->buscar($request, $estado);
     }
 
     /**
@@ -111,7 +172,6 @@ class ApruebaTrabajadorController extends ApplicationController
      */
     public function index()
     {
-        $this->setParamToView('hide_header', true);
         $campo_field = [
             'cedtra' => 'Cedula',
             'priape' => 'Primer Apellido',
@@ -168,7 +228,7 @@ class ApruebaTrabajadorController extends ApplicationController
 
         $response = $pagination->render(new TrabajadorServices);
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     /**
@@ -240,7 +300,7 @@ class ApruebaTrabajadorController extends ApplicationController
             }
 
             $html = view(
-                'cajas/aprobaciontra/tmp/consulta',
+                'cajas.aprobaciontra.tmp.consulta',
                 [
                     'mercurio01' => Mercurio01::first(),
                     'trabajador' => $mercurio31,
@@ -338,7 +398,7 @@ class ApruebaTrabajadorController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     /**
@@ -359,7 +419,7 @@ class ApruebaTrabajadorController extends ApplicationController
                 $user = session()->get('user');
                 $acceso = $this->Gener42->count("permiso='92' AND usuario='{$user['usuario']}'");
                 if ($acceso == 0) {
-                    return $this->renderObject(['success' => false, 'msj' => 'El usuario no dispone de permisos de aprobación'], false);
+                    return response()->json(['success' => false, 'msj' => 'El usuario no dispone de permisos de aprobación']);
                 }
                 $apruebaSolicitud = new ApruebaTrabajador;
                 $this->db->begin();
@@ -392,7 +452,7 @@ class ApruebaTrabajadorController extends ApplicationController
             $salida['info'] = $debuginfo;
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     /**
@@ -410,11 +470,18 @@ class ApruebaTrabajadorController extends ApplicationController
         $notifyEmailServices = new NotifyEmailServices;
         $this->setResponse('ajax');
         try {
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $nota = $request->input('nota');
-            $codest = $request->input('codest', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $array_corregir = $request->input('campos_corregir');
-            $campos_corregir = implode(';', $array_corregir);
+            $validated = $request->validate([
+                'id' => 'required|integer',
+                'nota' => 'nullable|string|max:5000',
+                'codest' => 'required|string|max:10',
+                'campos_corregir' => 'sometimes|array',
+                'campos_corregir.*' => 'string|max:100',
+            ]);
+            $id = $validated['id'];
+            $nota = $validated['nota'] ?? null;
+            $codest = $validated['codest'];
+            $array_corregir = $validated['campos_corregir'] ?? [];
+            $campos_corregir = $array_corregir ? implode(';', $array_corregir) : '';
 
             $mercurio31 = Mercurio31::where("id", $id)->first();
             $this->trabajadorServices->devolver($mercurio31, $nota, $codest, $campos_corregir);
@@ -436,7 +503,7 @@ class ApruebaTrabajadorController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     /**
@@ -455,9 +522,14 @@ class ApruebaTrabajadorController extends ApplicationController
         $this->trabajadorServices = $this->services->get('TrabajadorServices');
 
         try {
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $nota = $request->input('nota');
-            $codest = $request->input('codest', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $validated = $request->validate([
+                'id' => 'required|integer',
+                'nota' => 'nullable|string|max:5000',
+                'codest' => 'required|string|max:10',
+            ]);
+            $id = $validated['id'];
+            $nota = $validated['nota'] ?? null;
+            $codest = $validated['codest'];
 
             $mercurio31 = Mercurio31::where("id", $id)->first();
 
@@ -480,7 +552,7 @@ class ApruebaTrabajadorController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function validarMultiafiliacion(Request $request)
@@ -518,7 +590,7 @@ class ApruebaTrabajadorController extends ApplicationController
             $response['multi'] = true;
         }
 
-        return $this->renderObject($response);
+        return response()->json($response);
     }
 
     public function pendienteEmail()
@@ -532,13 +604,27 @@ class ApruebaTrabajadorController extends ApplicationController
     public function rezagoCorreo(Request $request)
     {
         $this->setResponse('view');
-        $cedtra = $request->input('cedtra');
-        $anexo_final = $request->input('anexo_final');
-        $anexo_inicial = $request->input('anexo_inicial');
+        $validated = $request->validate([
+            'cedtra' => 'required|string',
+            'anexo_final' => 'sometimes|nullable|string',
+            'anexo_inicial' => 'sometimes|nullable|string',
+        ]);
+        $cedtra = $validated['cedtra'];
+        $anexo_final = $validated['anexo_final'] ?? null;
+        $anexo_inicial = $validated['anexo_inicial'] ?? null;
 
         $asunto = 'Afiliacion con Exito - Comfaca En Linea';
-        $mercurio31 = Mercurio31::where("documento", $cedtra)->first();
-        $mercurio07 = Mercurio07::whereRaw("tipo='{$mercurio31->getTipo()}' and coddoc='{$mercurio31->getCoddoc()}' and documento = '{$mercurio31->getDocumento()}'")->first();
+        $mercurio31 = Mercurio31::where('documento', $cedtra)->first();
+        if (! $mercurio31) {
+            throw new DebugException('El trabajador no se encuentra disponible para enviar correo.', 501);
+        }
+        $mercurio07 = Mercurio07::where('tipo', $mercurio31->getTipo())
+            ->where('coddoc', $mercurio31->getCoddoc())
+            ->where('documento', $mercurio31->getDocumento())
+            ->first();
+        if (! $mercurio07) {
+            throw new DebugException('No existe usuario de autogestión asociado al trabajador.', 501);
+        }
         $mercurio01 = Mercurio01::first();
         $mercurio02 = Mercurio02::first();
 
@@ -677,7 +763,7 @@ class ApruebaTrabajadorController extends ApplicationController
         try {
             $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
             $cedtra = $request->input('cedtra', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $mercurio31 = Mercurio31::whereRaw(" id='{$id}' and cedtra='{$cedtra}'")->first();
+            $mercurio31 = Mercurio31::where('id', $id)->where('cedtra', $cedtra)->first();
             if (! $mercurio31) {
                 throw new DebugException('El trabajador no está disponible para notificar por email', 501);
             } else {
@@ -730,7 +816,7 @@ class ApruebaTrabajadorController extends ApplicationController
                     }
                 }
                 $setters = trim($setters, ',');
-                Mercurio31::whereRaw("id='{$id}' AND cedtra='{$cedtra}'")->update($setters);
+                Mercurio31::where('id', $id)->where('cedtra', $cedtra)->update($setters);
 
                 $db = DbBase::rawConnect();
 
@@ -748,7 +834,7 @@ class ApruebaTrabajadorController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     /**
@@ -762,9 +848,12 @@ class ApruebaTrabajadorController extends ApplicationController
     {
         try {
             $this->setResponse('ajax');
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $validated = $request->validate([
+                'id' => 'required|integer',
+            ]);
+            $id = $validated['id'];
 
-            $mercurio31 = Mercurio31::whereRaw("id='{$id}'")->first();
+            $mercurio31 = Mercurio31::where('id', $id)->first();
             if (! $mercurio31) {
                 throw new DebugException('Error el trabajador no se encuentra registrado', 501);
             }
@@ -783,7 +872,7 @@ class ApruebaTrabajadorController extends ApplicationController
                 throw new DebugException('Error el trabajador no se encuentra registrado', 501);
             }
 
-            $this->renderObject(
+            return response()->json(
                 [
                     'success' => true,
                     'data' => [
@@ -794,10 +883,9 @@ class ApruebaTrabajadorController extends ApplicationController
                         'title' => 'Trabajador SisuWeb ' . $mercurio31->getCedtra(),
                     ],
                 ],
-                false
             );
         } catch (DebugException $err) {
-            $this->renderObject(
+            return response()->json(
                 [
                     'success' => false,
                     'msj' => $err->getMessage(),
@@ -810,7 +898,10 @@ class ApruebaTrabajadorController extends ApplicationController
     {
         $this->setParamToView('hide_header', true);
         $this->setParamToView('title', 'Aprobación Trabajadores');
-        $mercurio31 = Mercurio31::whereRaw("estado='{$estado}' AND usuario=" . parent::getActUser() . ' ORDER BY fecsol ASC')->get();
+        $mercurio31 = Mercurio31::where('estado', $estado)
+            ->where('usuario', parent::getActUser())
+            ->orderBy('fecsol', 'ASC')
+            ->get();
         $trabajadores = [];
         foreach ($mercurio31 as $ai => $mercurio) {
             $background = '';
@@ -851,16 +942,22 @@ class ApruebaTrabajadorController extends ApplicationController
     public function reaprobar(Request $request)
     {
         $this->setResponse('ajax');
-        $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-        $nota = sanetizar($request->input('nota'));
+        $validated = $request->validate([
+            'id' => 'required|integer',
+            'nota' => 'nullable|string|max:5000',
+        ]);
+        $id = $validated['id'];
+        $nota = sanetizar($validated['nota'] ?? '');
         $today = new \DateTime;
         try {
-            Mercurio31::whereRaw("id='$id'")->update([
+            Mercurio31::where('id', $id)->update([
                 'estado' => 'A',
                 'fecest' => $today->format('Y-m-d'),
             ]);
 
-            $item = (new Mercurio10)->maximum('item', "conditions: tipopc='$this->tipopc' and numero='$id'") + 1;
+            $item = Mercurio10::where('tipopc', $this->tipopc)
+                ->where('numero', $id)
+                ->max('item') + 1;
             $mercurio10 = new Mercurio10;
             $mercurio10->setTipopc($this->tipopc);
             $mercurio10->setNumero($id);
@@ -880,7 +977,7 @@ class ApruebaTrabajadorController extends ApplicationController
                 'msj' => 'No se pudo realizar el movimiento ' . "\n" . $e->getMessage() . "\n " . $e->getLine(),
             ];
         }
-        $this->renderObject($response);
+        return response()->json($response);
     }
 
     public function borrarFiltro()
@@ -889,7 +986,7 @@ class ApruebaTrabajadorController extends ApplicationController
         set_flashdata('filter_trabajador', false, true);
         set_flashdata('filter_params', false, true);
 
-        return $this->renderObject([
+        return response()->json([
             'success' => true,
             'query' => get_flashdata_item('filter_trabajador'),
             'filter' => get_flashdata_item('filter_params'),
@@ -1006,7 +1103,7 @@ class ApruebaTrabajadorController extends ApplicationController
 
             $id = $request->input('id');
 
-            $mercurio31 = Mercurio31::whereRaw(" id='{$id}' and estado='A' ")->first();
+            $mercurio31 = Mercurio31::where('id', $id)->where('estado', 'A')->first();
             if (! $mercurio31) {
                 throw new DebugException('Los datos del trabajador no son validos para procesar.', 501);
             }
@@ -1102,7 +1199,7 @@ class ApruebaTrabajadorController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     /**
@@ -1116,7 +1213,7 @@ class ApruebaTrabajadorController extends ApplicationController
         $this->setResponse('ajax');
         try {
             try {
-                $mercurio31 = (new Mercurio31)->findFirst(" id='{$id}'");
+                $mercurio31 = Mercurio31::where('id', $id)->first();
                 if (! $mercurio31) {
                     throw new DebugException('La empresa no se encuentra registrada.', 201);
                 }
@@ -1146,6 +1243,6 @@ class ApruebaTrabajadorController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 }

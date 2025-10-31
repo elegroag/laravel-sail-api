@@ -70,7 +70,7 @@ class ApruebaCertificadoController extends ApplicationController
 
         $response = $pagination->render(new CertificadosServices);
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function changeCantidadPagina(Request $request, string $estado = 'P')
@@ -89,17 +89,15 @@ class ApruebaCertificadoController extends ApplicationController
             'campo_filtro' => $campo_field,
             'filters' => get_flashdata_item('filter_params'),
             'title' => 'Aprueba Certificado',
-            'buttons' => ['F'],
             'mercurio11' => Mercurio11::all(),
         ]);
     }
 
     public function buscar(Request $request, string $estado = 'P')
     {
-        $this->setResponse('ajax');
         $pagina = $request->input('pagina', 1);
         $cantidad_pagina = $request->input('numero', 10);
-        $usuario = parent::getActUser();
+        $usuario = $this->user['usuario'];
 
         $pagination = new Pagination(
             new Srequest(
@@ -123,7 +121,7 @@ class ApruebaCertificadoController extends ApplicationController
 
         $response = $pagination->render(new CertificadosServices);
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function info(Request $request)
@@ -149,7 +147,7 @@ class ApruebaCertificadoController extends ApplicationController
             $campos_disponibles = $mercurio45->CamposDisponibles();
             $response = [
                 'success' => true,
-                'data' => $mercurio45->getArray(),
+                'data' => $mercurio45->toArray(),
                 'mercurio11' => Mercurio11::all(),
                 'consulta' => $html,
                 'adjuntos' => $adjuntos,
@@ -163,7 +161,7 @@ class ApruebaCertificadoController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     /**
@@ -173,24 +171,12 @@ class ApruebaCertificadoController extends ApplicationController
      */
     public function aprueba(Request $request)
     {
-        $this->setResponse('ajax');
-
-        $user = session()->get('user');
-        $debuginfo = [];
+        $this->db->begin();
         try {
             try {
-                $acceso = (new Gener42)->count('*', "conditions: permiso='92' AND usuario='{$user['usuario']}'");
-                if ($acceso == 0) {
-                    return $this->renderObject([
-                        'success' => false,
-                        'msj' => 'El usuario no dispone de permisos de aprobación',
-                    ]);
-                }
-
                 $aprueba = new ApruebaCertificado;
-                $this->db->begin();
                 $postData = $request->all();
-                $idSolicitud = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+                $idSolicitud = $request->input('id');
                 $aprueba->findSolicitud($idSolicitud);
                 $aprueba->findSolicitante();
                 $aprueba->procesar($postData);
@@ -206,32 +192,28 @@ class ApruebaCertificadoController extends ApplicationController
                 $salida = [
                     'success' => false,
                     'msj' => $err->getMessage(),
+                    'errors' => $err->render($request),
                 ];
             }
-        } catch (DebugException $e) {
+        } catch (\Exception $e) {
             $salida = [
                 'success' => false,
                 'msj' => $e->getMessage(),
             ];
         }
-        if ($debuginfo) {
-            $salida['info'] = $debuginfo;
-        }
-
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function rechazar(Request $request)
     {
+        $this->db->begin();
         try {
-            $this->setResponse('ajax');
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $nota = $request->input('nota', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $codest = $request->input('codest', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $modelos = ['mercurio10', 'mercurio45'];
 
-            $response = $this->db->begin();
+            $id = $request->input('id');
+            $nota = $request->input('nota');
+            $codest = $request->input('codest');
             $today = Carbon::now();
+
             $mercurio45 = Mercurio45::where("id", $id)->first();
             $mercurio45->update([
                 "estado" => "X",
@@ -242,38 +224,40 @@ class ApruebaCertificadoController extends ApplicationController
             $item = Mercurio10::whereRaw("tipopc='{$this->tipopc}' and numero='{$id}'")->max('item') + 1;
             $mercurio10 = new Mercurio10;
 
-            $mercurio10->setTipopc($this->tipopc);
-            $mercurio10->setNumero($id);
-            $mercurio10->setItem($item);
-            $mercurio10->setEstado('X');
-            $mercurio10->setNota($nota);
-            $mercurio10->setCodest($codest);
-            $mercurio10->setFecsis($today->format('Y-m-d H:i:s'));
-            if (! $mercurio10->save()) {
+            $mercurio10->tipopc = $this->tipopc;
+            $mercurio10->numero = $id;
+            $mercurio10->item = $item;
+            $mercurio10->estado = 'X';
+            $mercurio10->nota = $nota;
+            $mercurio10->codest = $codest;
+            $mercurio10->fecsis = $today->format('Y-m-d H:i:s');
+            $mercurio10->save();
 
-                $this->db->rollback();
-            }
             $mercurio07 = Mercurio07::whereRaw("tipo='{$mercurio45->getTipo()}' and coddoc='{$mercurio45->getCoddoc()}' and documento = '{$mercurio45->getDocumento()}'")->first();
-            $asunto = 'Certificado';
-            $msj = 'acabas de utilizar';
+            $body = 'Certificado rechazado no es valido';
+
             $senderEmail = new SenderEmail(
                 new Srequest([
                     'email_emisor' => $mercurio07->getEmail(),
                     'email_clave' => $mercurio07->getClave(),
-                    'asunto' => $asunto,
+                    'asunto' => "Certificado rechazado",
                 ])
             );
 
-            $senderEmail->send($mercurio07->getEmail(), $asunto);
+            $senderEmail->send($mercurio07->getEmail(), $body);
             $this->db->commit();
-            $response = parent::successFunc('Movimiento Realizado Con Exito');
-
-            return $this->renderObject($response, false);
+            $response = [
+                'success' => true,
+                'msj' => 'El registro se completo con éxito',
+            ];
         } catch (DebugException $e) {
             $this->db->rollback();
-            $response = parent::errorFunc('No se pudo realizar el movimiento');
-
-            return $this->renderObject($response, false);
+            $response = [
+                'success' => false,
+                'msj' => $e->getMessage(),
+                'errors' => $e->render($request),
+            ];
         }
+        return response()->json($response);
     }
 }
