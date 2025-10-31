@@ -251,12 +251,14 @@ class ApruebaBeneficiarioController extends ApplicationController
                 $aprueba->findSolicitud($idSolicitud);
                 $aprueba->findSolicitante();
                 $aprueba->procesar($postData);
-                $this->db->commit();
+
                 $aprueba->enviarMail($request->input('actapr'), $request->input('feccap'));
                 $salida = [
                     'success' => true,
                     'msj' => 'El registro se completo con éxito',
                 ];
+
+                $this->db->commit();
             } catch (DebugException $err) {
                 $this->db->rollback();
                 $salida = [

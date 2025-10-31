@@ -45,12 +45,13 @@ class BeneficiarioEntity
         'fosfec',
         'fecrua',
         'cedacu',
+        'fecsol'
     ];
 
     protected function getRules()
     {
         return [
-            'codben' => ['type' => 'integer', 'is_null' => false],
+            'codben' => ['type' => 'integer', 'is_null' => true],
             'documento' => ['type' => 'string', 'max' => 20, 'is_null' => false],
             'coddoc' => ['type' => 'string', 'max' => 2, 'is_null' => false],
             'priape' => ['type' => 'string', 'max' => 20, 'is_null' => true],
@@ -73,7 +74,7 @@ class BeneficiarioEntity
             'fecest' => ['type' => 'date', 'is_null' => true],
             'feccon' => ['type' => 'date', 'is_null' => true],
             'giass' => ['type' => 'string', 'max' => 2, 'is_null' => true],
-            'usuario' => ['type' => 'string', 'max' => 10, 'is_null' => true],
+            'usuario' => ['type' => 'rangelength', 'min' => 1, 'max' => 5, 'is_null' => true],
             'cedtra' => ['type' => 'string', 'max' => 18, 'is_null' => false],
             'cedcon' => ['type' => 'string', 'max' => 20, 'is_null' => true],
             'numhij' => ['type' => 'numeric', 'is_null' => false, 'max' => 2],
@@ -81,6 +82,7 @@ class BeneficiarioEntity
             'fecpre' => ['type' => 'date', 'is_null' => false],
             'fecafi' => ['type' => 'date', 'is_null' => false],
             'fecsis' => ['type' => 'date', 'is_null' => false],
+            'fecsol' => ['type' => 'date', 'is_null' => false],
             'ruaf' => ['type' => 'string', 'max' => 1, 'is_null' => false],
             'numrua' => ['type' => 'integer', 'is_null' => true],
             'fosfec' => ['type' => 'string', 'max' => 1, 'is_null' => true],

@@ -95,6 +95,7 @@ class ApruebaBeneficiario
         $params['fecest'] = null;
         $params['codest'] = null;
         $params['fecsis'] = $hoy;
+        $params['calendario'] = 'N';
         $params['pago'] = 'C';
         $params['ruaf'] = 'N';
         $params['numhij'] = (! $postData['numhij']) ? 0 : $postData['numhij'];
@@ -108,7 +109,11 @@ class ApruebaBeneficiario
         if (! $entity->validate()) {
             throw new DebugException(
                 'Error, no se puede crear el beneficiario por validación previa.',
-                501
+                501,
+                [
+                    'errors' => $entity->getValidationErrors(),
+                    'attributes' => $entity->getData(),
+                ]
             );
         }
         /**
@@ -136,7 +141,9 @@ class ApruebaBeneficiario
         }
 
         if ($out['success'] == false) {
-            throw new DebugException($out['message'], 501);
+            throw new DebugException($out['message'], 501, [
+                'command' => $ps->getLineaComando(),
+            ]);
         }
 
         $registroSeguimiento = new RegistroSeguimiento;
@@ -202,8 +209,8 @@ class ApruebaBeneficiario
 
     public function findSolicitante()
     {
-        $this->solicitante = Mercurio07::where("documento", $this->solicitud->numdoc)
-            ->where("coddoc", $this->solicitud->tipdoc)
+        $this->solicitante = Mercurio07::where("documento", $this->solicitud->documento)
+            ->where("coddoc", $this->solicitud->coddoc)
             ->where("tipo", $this->solicitud->tipo)
             ->first();
         return $this->solicitante;
