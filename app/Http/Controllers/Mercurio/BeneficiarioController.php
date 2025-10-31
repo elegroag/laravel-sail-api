@@ -19,6 +19,7 @@ use App\Services\Entidades\ConyugeService;
 use App\Services\Entidades\TrabajadorService;
 use App\Services\FormulariosAdjuntos\BeneficiarioAdjuntoService;
 use App\Services\FormulariosAdjuntos\Formularios;
+use App\Services\Srequest;
 use App\Services\Tag;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
@@ -128,9 +129,16 @@ class BeneficiarioController extends ApplicationController
             }
         }
 
-        $response = Tag::selectStatic('cedcon', $cedcons, 'use_dummy: true', 'dummyValue: ', 'class: form-control');
+        $response = Tag::selectStatic(
+            new Srequest([
+                'cedcon' => $cedcons,
+                'use_dummy' => true,
+                'dummyValue' => '',
+                'class' => 'form-control'
+            ])
+        );
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function borrarArchivo(Request $request)
@@ -339,7 +347,7 @@ class BeneficiarioController extends ApplicationController
 
             // solo conyuges activas a buscar
             if ($tipo == 'T') {
-                $trabajador = (new Mercurio31)->findFirst("documento='{$documento}' AND estado='A'");
+                $trabajador = Mercurio31::where('documento', $documento)->where('estado', 'A')->first();
                 $documento = ($trabajador) ? $trabajador->getCedtra() : $documento;
 
                 $procesadorComando->runCli(
@@ -385,14 +393,22 @@ class BeneficiarioController extends ApplicationController
                 }
             }
 
-            $conyuguesPendientes = (new Mercurio32)->getFind("documento='{$documento}' AND estado NOT IN('I','X')");
+            $conyuguesPendientes = Mercurio32::where('documento', $documento)->whereNotIn('estado', ['I', 'X'])->get();
             foreach ($conyuguesPendientes as $conCp) {
                 if (! isset($_cedcon[$conCp->getCedcon()])) {
                     $_cedcon[$conCp->getCedcon()] = $conCp->getCedcon() . ' - ' . $conCp->getPrinom() . ' ' . $conCp->getSegnom() . ' ' . $conCp->getPriape() . ' ' . $conCp->getSegape();
                 }
             }
 
-            $html = Tag::selectStatic('cedcon', $_cedcon, 'use_dummy: true', 'dummyValue: ', 'class: form-control');
+            $html = Tag::selectStatic(
+                new Srequest([
+                    'cedcon' => $_cedcon,
+                    'use_dummy' => true,
+                    'dummyValue' => '',
+                    'class' => 'form-control'
+                ])
+            );
+
             $salida = [
                 'success' => true,
                 'list' => $html,
@@ -505,12 +521,9 @@ class BeneficiarioController extends ApplicationController
         exit;
     }
 
-    public function params()
+    public function params(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $tipo = $this->tipo;
-
             $nombre = $this->user['nombre'];
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
@@ -521,7 +534,7 @@ class BeneficiarioController extends ApplicationController
             $cedtras = [];
 
             $trabajadorService = new TrabajadorService;
-            if ($tipo == 'E') {
+            if ($this->tipo == 'E') {
                 $cedtras = $trabajadorService->findRequestByDocumentoCoddoc($documento, $coddoc);
 
                 if ($list = $trabajadorService->findApiTrabajadoresByNit($documento)) {
@@ -535,7 +548,7 @@ class BeneficiarioController extends ApplicationController
             }
 
             $conyugeService = new ConyugeService;
-            if ($tipo == 'E') {
+            if ($this->tipo == 'E') {
                 $conyuges[] = $conyugeService->findRequestByDocumentoCoddoc($documento, $coddoc);
                 $list = $conyugeService->findApiConyugesByNit($documento);
                 $listConyuges = [];
@@ -546,15 +559,18 @@ class BeneficiarioController extends ApplicationController
                 $conyuges = $conyugeService->findRequestByCedtra($documento);
             }
 
-            $codzons = Gener09::where('codzon', '>=', 18000)->where('codzon', '<=', 19000)->pluck('detzon', 'codzon')->toArray();
+            $codzons = Gener09::where('codzon', '>=', 18000)
+                ->where('codzon', '<=', 19000)
+                ->pluck('detzon', 'codzon')
+                ->toArray();
 
             $procesadorComando = Comman::Api();
             $procesadorComando->runCli(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_beneficiarios',
-                ],
-                false
+                    'params' => false
+                ]
             );
 
             $biourbana = ['S' => 'SI', 'N' => 'NO'];
@@ -599,10 +615,11 @@ class BeneficiarioController extends ApplicationController
             $salida = [
                 'success' => false,
                 'msj' => $e->getMessage() . ' ' . $e->getLine() . ' ' . basename($e->getFile()),
+                'error' => $e->render($request),
             ];
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     public function renderTable($estado = '')
@@ -746,11 +763,10 @@ class BeneficiarioController extends ApplicationController
 
     public function guardar(Request $request)
     {
-        // $this->setResponse("ajax");
-        $benefiService = new BeneficiarioService;
         $this->db->begin();
         try {
-            $id = $this->cleanInput($request->input('id'));
+            $benefiService = new BeneficiarioService;
+            $id = $request->input('id');
             $clave_certificado = $request->input('clave');
             $params = $this->serializeData($request);
             $params['tipo'] = $this->tipo;

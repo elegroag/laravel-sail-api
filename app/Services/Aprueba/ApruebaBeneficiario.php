@@ -67,13 +67,13 @@ class ApruebaBeneficiario
 
         if (is_null($benefi->cedcon) == false && $benefi->cedcon != '') {
             $apiRest = Comman::Api();
-            $apiRest->runCli(
+            $apiRest->dispatch(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'conyuge',
                     'params' => [
                         'cedcon' => $benefi->cedcon,
-                    ],
+                    ]
                 ]
             );
 
@@ -202,9 +202,10 @@ class ApruebaBeneficiario
 
     public function findSolicitante()
     {
-        $this->solicitante = Mercurio07::whereRaw(
-            "documento='{$this->solicitud->numdoc}' and coddoc='{$this->solicitud->tipdoc}' and tipo='{$this->solicitud->tipo}'"
-        )->first();
+        $this->solicitante = Mercurio07::where("documento", $this->solicitud->numdoc)
+            ->where("coddoc", $this->solicitud->tipdoc)
+            ->where("tipo", $this->solicitud->tipo)
+            ->first();
         return $this->solicitante;
     }
 

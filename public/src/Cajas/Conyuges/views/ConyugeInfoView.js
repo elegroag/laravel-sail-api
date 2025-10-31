@@ -2,6 +2,7 @@ import { $App } from '@/App';
 import { is_numeric } from '@/Core';
 import { FormInfoView } from '@/Cajas/FormInfoView';
 import { ConyugeAprobarModel } from '../models/ConyugeAprobarModel';
+import { ValidaTipoPago } from '@/Cajas/ValidaTipoPago';
 
 class ConyugeInfoView extends FormInfoView {
 	constructor(options = {}) {

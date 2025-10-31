@@ -18,5 +18,6 @@ Route::middleware([CajasCookieAuthenticated::class])->group(function () {
         Route::post('/devolver', [ApruebaConyugeController::class, 'devolver']);
         Route::post('/rechazar', [ApruebaConyugeController::class, 'rechazar']);
         Route::post('/infor', [ApruebaConyugeController::class, 'infor']);
+        Route::post('/valida_conyuge', [ApruebaConyugeController::class, 'validaConyuge']);
     });
 });

@@ -271,18 +271,22 @@ class ApruebaConyugeController extends ApplicationController
         $this->db->begin();
         try {
             try {
-                $apruebaSolicitud = new ApruebaConyuge;
+                $validated = $request->validate([
+                    'id' => 'required|integer',
+                ]);
+                $id = $validated['id'];
 
-                $idSolicitud = $request->input('id');
-                $solicitud = $apruebaSolicitud->findSolicitud($idSolicitud);
+                $apruebaSolicitud = new ApruebaConyuge;
+                $solicitud = $apruebaSolicitud->findSolicitud($id);
                 $apruebaSolicitud->findSolicitante($solicitud);
                 $apruebaSolicitud->procesar($request->all());
-                $this->db->commit();
                 $apruebaSolicitud->enviarMail($request->input('actapr'), $request->input('fecapr'));
+
                 $salida = [
                     'success' => true,
                     'msj' => 'El registro se completo con éxito',
                 ];
+                $this->db->commit();
             } catch (DebugException $err) {
                 $this->db->rollback();
                 $salida = [
@@ -1062,11 +1066,9 @@ class ApruebaConyugeController extends ApplicationController
 
     public function validaConyuge(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $cedtra = $request->input('cedtra', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $coddoc = $request->input('tipdoc', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $cedtra = $request->input('cedtra');
+            $coddoc = $request->input('tipdoc');
 
             $ps = Comman::Api();
             $ps->runCli(
@@ -1107,6 +1109,6 @@ class ApruebaConyugeController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 }

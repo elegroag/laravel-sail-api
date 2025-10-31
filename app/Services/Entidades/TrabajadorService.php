@@ -438,7 +438,7 @@ class TrabajadorService
             ]
         );
         if ($procesadorComando->isJson() == false) {
-            throw new DebugException('Error resultado de API', 501);
+            throw new DebugException('Error resultado de api', 501, base64_encode($procesadorComando->getLineaComando()));
         }
         $out = $procesadorComando->getObject();
 

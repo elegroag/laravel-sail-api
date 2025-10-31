@@ -46,6 +46,12 @@ class Comman
         $this->procesadorComandos->send($attr);
     }
 
+    public function dispatch($attr)
+    {
+        $this->procesadorComandos = new ApiSubsidio($this->app);
+        $this->procesadorComandos->send($attr);
+    }
+
     public function runPortal($attr)
     {
         $attr['base64'] = 0;
@@ -83,7 +89,6 @@ class Comman
     public static function Api()
     {
         $comman = new Comman;
-
         return $comman;
     }
 

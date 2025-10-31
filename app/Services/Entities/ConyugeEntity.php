@@ -97,7 +97,7 @@ class ConyugeEntity
             'fecest' => ['type' => 'date', 'is_null' => true],
             'numtar' => ['type' => 'string', 'max' => 15, 'is_null' => true],
             'giass' => ['type' => 'string', 'max' => 1, 'is_null' => true],
-            'usuario' => ['type' => 'string', 'max' => 10, 'is_null' => true],
+            'usuario' => ['type' => 'rangelength', 'min' => 1, 'max' => 4, 'is_null' => true],
             'fecact' => ['type' => 'date', 'is_null' => true],
             'empresalab' => ['type' => 'string', 'max' => 100, 'is_null' => true],
         ];

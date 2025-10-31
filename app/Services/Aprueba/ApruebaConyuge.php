@@ -86,7 +86,11 @@ class ApruebaConyuge
         if (! $entity->validate()) {
             throw new DebugException(
                 'Error, no se puede crear el conyuge por validación previa.',
-                501
+                501,
+                [
+                    'errors' => $entity->getValidationErrors(),
+                    'attributes' => $entity->getData(),
+                ]
             );
         }
 
@@ -179,10 +183,10 @@ class ApruebaConyuge
 
     public function findSolicitante()
     {
-        $this->solicitante = Mercurio07::where(
-            "documento='{$this->solicitud->documento}' and coddoc='{$this->solicitud->coddoc}' and tipo='{$this->solicitud->tipo}'"
-        )->first();
-
+        $this->solicitante = Mercurio07::where("documento", $this->solicitud->documento)
+            ->where("coddoc", $this->solicitud->coddoc)
+            ->where("tipo", $this->solicitud->tipo)
+            ->first();
         return $this->solicitante;
     }
 
