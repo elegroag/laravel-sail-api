@@ -12,7 +12,7 @@ use App\Models\Mercurio36;
 use App\Models\Mercurio38;
 use App\Models\Mercurio41;
 use App\Services\Entidades\TrabajadorService;
-use App\Services\Formularios\FactoryDocuments;
+use App\Services\Formularios\Generation\DocumentGenerationManager;
 use App\Services\PreparaFormularios\CifrarDocumento;
 use App\Services\Utils\Comman;
 
@@ -44,14 +44,15 @@ class ConyugeAdjuntoService
 
     public function __construct($request)
     {
-        $this->user = session()->has('user') ? session('user') : null;
+        $this->user = session('user') ?? null;
         $this->request = $request;
         $this->initialize();
     }
 
     private function initialize()
     {
-        $this->lfirma = Mercurio16::whereRaw("documento='{$this->user['documento']}' AND coddoc='{$this->user['coddoc']}'")->first();
+        $this->lfirma = Mercurio16::where("documento", $this->user['documento'])
+            ->where("coddoc", $this->user['coddoc'])->first();
         $procesadorComando = Comman::Api();
         $procesadorComando->runCli(
             [
@@ -67,28 +68,24 @@ class ConyugeAdjuntoService
 
     public function formulario()
     {
-        $solicitante = (new Mercurio07)->findFirst(
-            "documento='{$this->request->getDocumento()}' and " .
-                "coddoc='{$this->request->getCoddoc()}' and " .
-                "tipo='{$this->request->getTipo()}'"
-        );
+        $solicitante = Mercurio07::where("documento", $this->request->documento)
+            ->where("coddoc", $this->request->coddoc)
+            ->where("tipo", $this->request->tipo)
+            ->first();
 
-        $this->filename = strtotime('now') . "_{$this->request->getCedcon()}.pdf";
-        KumbiaPDF::setBackgroundImage(public_path('img/form/conyuge/formulario_adicion_conyuge.png'));
+        $this->filename = strtotime('now') . "_{$this->request->cedcon}.pdf";
+        $manager = new DocumentGenerationManager();
+        $documento = $manager->generate('api', 'conyuge', [
+            'categoria' => 'formulario',
+            'filename' => $this->filename,
+            'background' => 'img/form/conyuge/formulario_adicion_conyuge.png',
+            'conyuge' => $this->request,
+            'trabajador' => $this->getTrabajador(),
+            'solicitante' => $solicitante,
+            'firma' => $this->lfirma,
+        ]);
 
-        $fabrica = new FactoryDocuments;
-        $documento = $fabrica->crearFormulario('conyuge');
-        $documento->setParamsInit(
-            [
-                'conyuge' => $this->request,
-                'trabajador' => $this->getTrabajador(),
-                'solicitante' => $solicitante,
-                'firma' => $this->lfirma,
-                'filename' => $this->filename,
-            ]
-        );
-
-        $documento->main();
+        // En canal local, main() retorna el Documento listo para outPut
         $documento->outPut();
         $this->cifrarDocumento();
 
@@ -99,7 +96,7 @@ class ConyugeAdjuntoService
     {
         $trabajador = false;
         $mtrabajador = false;
-        switch (trim($this->request->getTipo())) {
+        switch (trim($this->request->tipo)) {
             case 'I':
                 $mtrabajador = new Mercurio41;
                 break;
@@ -114,24 +111,24 @@ class ConyugeAdjuntoService
                 $mtrabajador = new Mercurio31;
                 break;
             default:
-                $trabajador = (new Mercurio31)->findFirst(
-                    " documento='{$this->request->getDocumento()}' and " .
-                        " coddoc='{$this->request->getCoddoc()}' and " .
-                        " cedtra='{$this->request->getCedtra()}' and " .
-                        " estado NOT IN('X','I')"
-                );
+                $trabajador = Mercurio31::where("documento", $this->request->documento)
+                    ->where("coddoc", $this->request->coddoc)
+                    ->where("cedtra", $this->request->cedtra)
+                    ->where("estado", "NOT IN('X','I')")
+                    ->first();
                 break;
         }
 
         if (! $trabajador && $mtrabajador) {
-            $trabajador = $mtrabajador->findFirst(
-                " cedtra='{$this->request->getCedtra()}' AND  documento='{$this->request->getDocumento()}' AND coddoc='{$this->request->getCoddoc()}'"
-            );
+            $trabajador = $mtrabajador::where("cedtra", $this->request->cedtra)
+                ->where("documento", $this->request->documento)
+                ->where("coddoc", $this->request->coddoc)
+                ->first();
         }
 
         if (! $trabajador && $mtrabajador) {
             $trabajadorService = new TrabajadorService;
-            $out = $trabajadorService->buscarTrabajadorSubsidio($this->request->getCedtra());
+            $out = $trabajadorService->buscarTrabajadorSubsidio($this->request->cedtra);
             if ($out) {
                 $trabajador = clone $mtrabajador;
                 $trabajador->fill($out);
@@ -147,24 +144,16 @@ class ConyugeAdjuntoService
 
     public function declaraJurament()
     {
-        $this->filename = strtotime('now') . "_{$this->request->getCedcon()}.pdf";
-        KumbiaPDF::setBackgroundImage(public_path('img/form/declaraciones/declaracion_jura_conyuge.png'));
-        $fabrica = new FactoryDocuments;
-        $documento = $fabrica->crearDeclaracion('conyuge');
-
-        $documento->setParamsInit(
-            [
-                'conyuge' => $this->request,
-                'trabajador' => $this->getTrabajador(),
-                'firma' => $this->lfirma,
-                'filename' => $this->filename,
-            ]
-        );
-
-        $documento->main();
-        $documento->outPut();
+        $this->filename = strtotime('now') . "_{$this->request->cedcon}.pdf";
+        $manager = new DocumentGenerationManager();
+        $manager->generate('api', 'conyuge', [
+            'categoria' => 'declaracion',
+            'conyuge' => $this->request,
+            'trabajador' => $this->getTrabajador(),
+            'template' => 'declaracion.html',
+            'output' => storage_path('temp/' . $this->filename),
+        ]);
         $this->cifrarDocumento();
-
         return $this;
     }
 

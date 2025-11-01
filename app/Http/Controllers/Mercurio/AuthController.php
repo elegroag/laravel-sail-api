@@ -23,41 +23,10 @@ use Inertia\Inertia;
 
 class AuthController extends Controller
 {
+
     public function index()
     {
-        $tipsoc = [];
-        $coddoc = [];
-        $detadoc = [];
-        $codciu = [];
-
-        foreach (Subsi54::all() as $entity) {
-            $tipsoc["{$entity->getTipsoc()}"] = $entity->getDetalle();
-        }
-
-        foreach (Gener18::all() as $entity) {
-            if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') {
-                continue;
-            }
-            $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
-        }
-
-        foreach (Gener18::all() as $entity) {
-            if ($entity->getCodrua() == 'TI' || $entity->getCodrua() == 'RC') {
-                continue;
-            }
-            $detadoc["{$entity->getCodrua()}"] = $entity->getDetdoc();
-        }
-
-        foreach (Gener09::where('codzon', '>=', 18000)->where('codzon', '<=', 19000)->get() as $entity) {
-            $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
-        }
-
-        return Inertia::render('Auth/Login', [
-            'Coddoc' => $coddoc,
-            'Tipsoc' => $tipsoc,
-            'Codciu' => $codciu,
-            'Detadoc' => $detadoc,
-        ]);
+        return Inertia::render('Auth/Login');
     }
 
     public function register()
@@ -117,65 +86,97 @@ class AuthController extends Controller
     public function authenticate(Request $request)
     {
         try {
-            $request->validate([
-                'documentType' => 'required|string|min:1',
-                'identification' => 'required|integer|digits_between:6,18',
-                'password' => 'required|string|min:8',
-                'tipo' => 'required|string|min:1',
-            ]);
+            try {
+                $request->validate([
+                    'documentType' => 'required|string|min:1',
+                    'identification' => 'required|integer|digits_between:6,18',
+                    'password' => 'required|string|min:8',
+                    'tipo' => 'required|string|min:1',
+                ]);
 
-            $service = new AutenticaService;
-            [$access, $message] = $service->execute(
-                new Srequest([
-                    'coddoc' => $request->input('documentType'),
-                    'documento' => $request->input('identification'),
-                    'clave' => $request->input('password'),
-                    'tipo' => $request->input('tipo'),
-                ])
-            );
+                $service = new AutenticaService;
+                [$access, $message] = $service->execute(
+                    new Srequest([
+                        'coddoc' => $request->input('documentType'),
+                        'documento' => $request->input('identification'),
+                        'clave' => $request->input('password'),
+                        'tipo' => $request->input('tipo'),
+                    ])
+                );
 
-            if (! $access) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $message,
-                ], 401);
+                if (! $access) {
+                    throw new DebugException($message);
+                }
+
+                // Redirección según tipo
+                switch ($request->input('tipo')) {
+                    case 'T':
+                        $url = 'mercurio/principal/index';
+                        break;
+                    case 'E':
+                        $url = 'mercurio/empresa/index';
+                        break;
+                    case 'I':
+                        $url = 'mercurio/independiente/index';
+                        break;
+                    case 'O':
+                        $url = 'mercurio/pensionado/index';
+                        break;
+                    case 'F':
+                        $url = 'mercurio/facultativo/index';
+                        break;
+                    default:
+                        $url = 'mercurio/principal/index';
+                        break;
+                }
+
+                return Inertia::location(url($url));
+            } catch (ValidationException $e) {
+                throw new DebugException($e->getMessage());
             }
-
-            // Redirección según tipo
-            switch ($request->input('tipo')) {
-                case 'T':
-                    $url = 'mercurio/principal/index';
-                    break;
-                case 'E':
-                    $url = 'mercurio/empresa/index';
-                    break;
-                case 'I':
-                    $url = 'mercurio/independiente/index';
-                    break;
-                case 'O':
-                    $url = 'mercurio/pensionado/index';
-                    break;
-                case 'F':
-                    $url = 'mercurio/facultativo/index';
-                    break;
-                default:
-                    $url = 'mercurio/principal/index';
-                    break;
-            }
-
-            return Inertia::location(url($url));
-        } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error de validación',
-                'errors' => $e->errors(),
-            ], 422);
         } catch (DebugException $e) {
-            return response()->json([
+            return Inertia::render('Auth/Login', [
                 'success' => false,
-                'message' => 'Error al autenticar: ' . $e->getMessage(),
-            ], 500);
+                'message' => $e->getMessage(),
+                'errors' => $e->render($request)
+            ]);
         }
+    }
+
+    public function paramsLogin()
+    {
+        $tipsoc = [];
+        $coddoc = [];
+        $detadoc = [];
+        $codciu = [];
+
+        foreach (Subsi54::all() as $entity) {
+            $tipsoc["{$entity->getTipsoc()}"] = $entity->getDetalle();
+        }
+
+        foreach (Gener18::all() as $entity) {
+            if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') {
+                continue;
+            }
+            $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
+        }
+
+        foreach (Gener18::all() as $entity) {
+            if ($entity->getCodrua() == 'TI' || $entity->getCodrua() == 'RC') {
+                continue;
+            }
+            $detadoc["{$entity->getCodrua()}"] = $entity->getDetdoc();
+        }
+
+        foreach (Gener09::where('codzon', '>=', 18000)->where('codzon', '<=', 19000)->get() as $entity) {
+            $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
+        }
+        return response()->json([
+            'Coddoc' => $coddoc,
+            'Tipsoc' => $tipsoc,
+            'Codciu' => $codciu,
+            'Detadoc' => $detadoc,
+        ]);
     }
 
     public function verifyShow(Request $request, $tipo = null, $coddoc = null, $documento = null)

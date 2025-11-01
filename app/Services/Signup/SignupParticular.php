@@ -119,9 +119,9 @@ class SignupParticular
             $crearUsuario->crearOpcionesRecuperacion($this->codigo_verify);
         } else {
             if ($usuarioParticular->getEstado() == 'A') {
-                throw new DebugException('El usuario ya existe y se encuentra registrado en el sistema. '.
-                    'La solicitud para afiliación está pendiente de enviar, compruebe las credenciales de acceso en la dirección de correo registrada previamente: '.
-                    mask_email($usuarioParticular->getEmail()).'. <br/>'.
+                throw new DebugException('El usuario ya existe y se encuentra registrado en el sistema. ' .
+                    'La solicitud para afiliación está pendiente de enviar, compruebe las credenciales de acceso en la dirección de correo registrada previamente: ' .
+                    mask_email($usuarioParticular->getEmail()) . '. <br/>' .
                     ' Y ahora puedes ingresar por la opción "2 Afiliación Pendiente" continua el proceso de afiliación.', 501);
             }
             // actualiza y activa la cuenta de la persona solo si el correo es igual al reportado
@@ -159,15 +159,15 @@ class SignupParticular
         )->render();
 
         $asunto = ($this->tipo == 'P') ? 'Registro de usuario particular portal Comfaca En Linea' : 'Registro de usuario portal Comfaca En Linea';
-        $emailCaja = (new Mercurio01)->findFirst();
+        $emailCaja = Mercurio01::first();
         $senderEmail = new SenderEmail;
         $senderEmail->setters(
-            "emisor_email: {$emailCaja->getEmail()}",
-            "emisor_clave: {$emailCaja->getClave()}",
+            "emisor_email: {$emailCaja->email}",
+            "emisor_clave: {$emailCaja->clave}",
             "asunto: {$asunto}"
         );
 
-        $senderEmail->send($usuario->getEmail(), $html);
+        $senderEmail->send($usuario->email, $html);
     }
 
     public function generaCode()

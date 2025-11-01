@@ -11,7 +11,7 @@ import { DocumentTypeOption } from "@/types/auth"
 // Principio SRP: Este componente solo se encarga de mostrar el formulario y manejar los callbacks recibidos por props
 interface LoginFormProps {
   userTypes: { id: string; label: string }[]
-  documentTypes: DocumentTypeOption[]
+  documentTypeOptions: DocumentTypeOption[]
   selectedUserType: string | null
   documentType: string
   identification: string
@@ -27,7 +27,7 @@ interface LoginFormProps {
 // Patrón: Presentational Component
 const LoginForm: React.FC<LoginFormProps> = ({
   userTypes,
-  documentTypes,
+  documentTypeOptions,
   selectedUserType,
   documentType,
   identification,
@@ -65,7 +65,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
                 <SelectValue placeholder="Selecciona el tipo de documento" />
               </SelectTrigger>
               <SelectContent>
-                {documentTypes.map((doc) => (
+                {documentTypeOptions.map((doc) => (
                   <SelectItem key={doc.value} value={doc.value}>
                     {doc.label}
                   </SelectItem>

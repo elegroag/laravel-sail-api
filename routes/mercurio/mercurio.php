@@ -18,6 +18,7 @@ Route::post('/web/verify_action', [AuthController::class, 'verify'])->name('veri
 Route::post('/web/load_session', [AuthController::class, 'loadSession'])->name('load.session');
 Route::post('/web/salir', [AuthController::class, 'logout'])->name('login.salir');
 Route::get('/web/salir', [AuthController::class, 'logout'])->name('logout');
+Route::get('/web/params-login', [AuthController::class, 'paramsLogin'])->name('login.params');
 
 Route::post('/mercurio/recuperar_clave', [LoginController::class, 'recuperarClave']);
 Route::post('/mercurio/registro', [LoginController::class, 'registro']);

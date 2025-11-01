@@ -40,8 +40,8 @@ class TrabajadorController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user') ?? null;
+        $this->tipo = session('tipo') ?? null;
     }
 
     /**
@@ -96,9 +96,8 @@ class TrabajadorController extends ApplicationController
      */
     public function valideNit(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $nit = $this->clp($request, 'nit');
+            $nit = $request->input('nit');
             if (! $nit) {
                 throw new DebugException('El nit es requerido', 422);
             }
@@ -119,9 +118,9 @@ class TrabajadorController extends ApplicationController
                 $response = ['success' => true, 'msj' => '', 'data' => $datos['data']['razsoc'] ?? null];
             }
 
-            return $this->renderObject($response);
+            return response()->json($response);
         } catch (DebugException $e) {
-            return $this->renderObject([
+            return response()->json([
                 'success' => false,
                 'msj' => $e->getMessage(),
             ]);
@@ -133,10 +132,9 @@ class TrabajadorController extends ApplicationController
      */
     public function borrarArchivo(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $numero = $this->clp($request, 'id');
-            $coddoc = $this->clp($request, 'coddoc');
+            $numero = $request->input('id');
+            $coddoc = $request->input('coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
             $filepath = storage_path('temp/' . $mercurio37->getArchivo());
@@ -160,7 +158,7 @@ class TrabajadorController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     /**
@@ -168,10 +166,9 @@ class TrabajadorController extends ApplicationController
      */
     public function guardarArchivo(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $id = $this->clp($request, 'id');
-            $coddoc = $this->clp($request, 'coddoc');
+            $id = $request->input('id');
+            $coddoc = $request->input('coddoc');
 
             $guardarArchivoService = new GuardarArchivoService([
                 'tipopc' => $this->tipopc,
@@ -189,7 +186,7 @@ class TrabajadorController extends ApplicationController
             $response = ['success' => false, 'msj' => $e->getMessage()];
         }
 
-        return $this->renderObject($response);
+        return response()->json($response);
     }
 
     /**
@@ -197,9 +194,8 @@ class TrabajadorController extends ApplicationController
      */
     public function traerTrabajador(Request $request)
     {
-        $this->setResponse('ajax');
-        $cedtra = $this->clp($request, 'cedtra');
-        $nit = $this->clp($request, 'nit');
+        $cedtra = $request->input('cedtra');
+        $nit = $request->input('nit');
 
         $datos_trabajador = [];
 
@@ -238,7 +234,7 @@ class TrabajadorController extends ApplicationController
 
         $response['data'] = $mercurio31->toArray();
 
-        return $this->renderObject($response);
+        return response()->json($response);
     }
 
     /**
@@ -246,9 +242,8 @@ class TrabajadorController extends ApplicationController
      */
     public function enviarCaja(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $id = $this->clp($request, 'id');
+            $id = $request->input('id');
             $trabajadorService = new TrabajadorService;
             $asignarFuncionario = new AsignarFuncionario;
             $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
@@ -258,7 +253,7 @@ class TrabajadorController extends ApplicationController
             $salida = ['success' => false, 'msj' => $e->getMessage()];
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     /**
@@ -266,7 +261,6 @@ class TrabajadorController extends ApplicationController
      */
     public function seguimiento($id)
     {
-        $this->setResponse('ajax');
         try {
             $trabajadorService = new TrabajadorService;
             $out = $trabajadorService->consultaSeguimiento($id);
@@ -275,13 +269,11 @@ class TrabajadorController extends ApplicationController
             $salida = ['success' => false, 'msj' => $e->getMessage()];
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     public function params()
     {
-        $this->setResponse('ajax');
-
         try {
             $nit = $this->user['documento'];
 
@@ -412,7 +404,7 @@ class TrabajadorController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     /**
@@ -473,7 +465,7 @@ class TrabajadorController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     /**
@@ -487,12 +479,11 @@ class TrabajadorController extends ApplicationController
      */
     public function guardar(Request $request)
     {
-        $this->setResponse('ajax');
         $trabajadorService = new TrabajadorService;
-
         try {
             $clave_certificado = $request->input('clave');
             $id = $request->get('id');
+
             $params = $this->serializeData($request);
             $params['tipo'] = $this->tipo;
             $params['coddoc'] = $this->user['coddoc'];
@@ -546,7 +537,7 @@ class TrabajadorController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($response);
+        return response()->json($response);
     }
 
     public function serializeData(Request $request)
@@ -601,10 +592,10 @@ class TrabajadorController extends ApplicationController
             'comision' => $request->get('comision'),
             'codsuc' => $request->get('codsuc'),
             'otra_empresa' => $request->get('otra_empresa'),
-            'numcue' => $request->get('numcue'),
-            'codban' => $request->get('codban'),
-            'tipcue' => $request->get('tipcue'),
-            'tippag' => $request->get('tippag'),
+            'numcue' => $request->get('numcue') ?? '0',
+            'codban' => $request->get('codban') ?? null,
+            'tipcue' => $request->get('tipcue') ?? null,
+            'tippag' => $request->get('tippag') ?? 'T',
             'log' => '0',
             'usuario' => $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']),
         ];
@@ -612,7 +603,6 @@ class TrabajadorController extends ApplicationController
 
     public function consultaDocumentos($id)
     {
-        $this->setResponse('ajax');
         try {
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
@@ -639,13 +629,11 @@ class TrabajadorController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     public function borrar(Request $request, Response $response, $id)
     {
-        $this->setResponse('ajax');
-        $generales = new GeneralService;
         try {
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
@@ -676,12 +664,11 @@ class TrabajadorController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($response);
+        return response()->json($response);
     }
 
     public function valida(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $empresa = [];
             $nit = $this->user['documento'];
@@ -734,12 +721,11 @@ class TrabajadorController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($response);
+        return response()->json($response);
     }
 
     public function buscarTrabajador(Request $request)
     {
-        $this->setResponse('ajax');
         try {
 
             $cedtra = $request->input('cedtra');
@@ -789,6 +775,6 @@ class TrabajadorController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 }

@@ -366,10 +366,10 @@ class ConyugeController extends ApplicationController
 
     public function guardar(Request $request)
     {
-        $this->setResponse('ajax');
-        $conyugeService = new ConyugeService;
-
+        $this->db->begin();
         try {
+
+            $conyugeService = new ConyugeService;
             $id = $request->input('id');
             $clave_certificado = $request->input('clave');
             $params = $this->serializeData($request);
@@ -385,7 +385,6 @@ class ConyugeController extends ApplicationController
                     throw new DebugException('Error no se actualizo los datos', 301);
                 }
             }
-            // $conyugeService->endTransa();
 
             $solicitud = $conyugeService->findById($id);
 
@@ -414,15 +413,16 @@ class ConyugeController extends ApplicationController
                 'success' => true,
                 'data' => $solicitud->getArray(),
             ];
-        } catch (DebugException $erro) {
-            // $conyugeService->closeTransa($erro->getMessage());
+            $this->db->commit();
+        } catch (DebugException $err) {
+            $this->db->rollback();
             $salida = [
                 'success' => false,
-                'error' => $erro->getMessage(),
+                'msj' => $err->getMessage(),
+                'error' => $err->render($request),
             ];
         }
-
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function mapper()
@@ -487,7 +487,7 @@ class ConyugeController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     public function borrar(Request $request)
@@ -515,7 +515,7 @@ class ConyugeController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     public function params()
@@ -621,7 +621,7 @@ class ConyugeController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function renderTable(Request $request, Response $response, string $estado = '')
@@ -641,17 +641,19 @@ class ConyugeController extends ApplicationController
 
     public function valida(Request $request, Response $response)
     {
-        $this->setResponse('ajax');
         try {
-            $documento = parent::getActUser('documento');
-            $coddoc = parent::getActUser('coddoc');
+            $documento = $this->user['documento'];
+            $coddoc = $this->user['coddoc'];
             $cedcon = $request->input('cedcon');
 
-            $solicitud_previa = (new Mercurio32)->findFirst("cedcon='{$cedcon}' and documento='{$documento}' and coddoc='{$coddoc}'");
-            $conyuge = false;
+            $solicitud_previa = Mercurio32::where("cedcon", $cedcon)
+                ->where("documento", $documento)
+                ->where("coddoc", $coddoc)
+                ->first();
 
+            $conyuge = false;
             if ($solicitud_previa) {
-                $conyuge = $solicitud_previa->getArray();
+                $conyuge = $solicitud_previa->toArray();
             }
 
             if (! $conyuge) {

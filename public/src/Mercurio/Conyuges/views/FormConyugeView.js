@@ -246,31 +246,33 @@ export class FormConyugeView extends FormView {
         if (cedcon === '') return false;
 
         $App.trigger('syncro', {
-            url: $App.url('valida'),
+            url: $App.url(window.ServerController + '/valida'),
             data: {
                 cedcon: cedcon,
             },
             callback: (solicitud) => {
                 if (solicitud) {
                     const conyuge = solicitud.conyuge || {};
-                    $App.trigger('confirma', {
-                        message:
-                            'El sistema identifica información del afiliado en el sistema central de la Caja. ¿Desea que se actualice el presente formulario con los datos existentes?.',
-                        callback: (status) => {
-                            if (status) {
-                                conyuge.estado = 'T';
-                                conyuge.fecsol = null;
+                    if(conyuge !== false) {
+                        $App.trigger('confirma', {
+                            message:
+                                'El sistema identifica información del afiliado en el sistema central de la Caja. ¿Desea que se actualice el presente formulario con los datos existentes?.',
+                            callback: (status) => {
+                                if (status) {
+                                    conyuge.estado = 'T';
+                                    conyuge.fecsol = null;
 
-                                this.model.set(conyuge);
-                                this.actualizaForm();
+                                    this.model.set(conyuge);
+                                    this.actualizaForm();
 
-                                $.each(this.selectores, (index, element) => {
-                                    const name = this.model.get(element.name);
-                                    if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
-                                });
-                            }
-                        },
-                    });
+                                    $.each(this.selectores, (index, element) => {
+                                        const name = this.model.get(element.name);
+                                        if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
+                                    });
+                                }
+                            },
+                        });
+                    }
                 }
             },
         });

@@ -77,9 +77,9 @@ export type FormActionRecovery =
     | { type: "CLEAR_ERROR"; field: string }
 
 export type LoginProps = {
-    Coddoc: { [key: string]: string };
-    Tipsoc: { [key: string]: string };
-    Codciu: { [key: string]: string };
+    Coddoc?: { [key: string]: string };
+    Tipsoc?: { [key: string]: string };
+    Codciu?: { [key: string]: string };
     Detadoc?: { [key: string]: string };
     errors?: Record<string, string>,
 }

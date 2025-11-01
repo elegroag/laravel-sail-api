@@ -10,10 +10,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 import useLoginController from "./controllers/use-login-controller";
 
 export default function Login({
-    Coddoc,
-    Tipsoc,
-    Codciu,
-    Detadoc
+    errors
 }: LoginProps)
 {
   const {
@@ -31,12 +28,9 @@ export default function Login({
     setIdentification,
     setPassword,
   } = useLoginController({
-    Coddoc,
-    Tipsoc,
-    Codciu,
-    Detadoc
+    errors
   });
-    
+
 
   return (
     <AuthLayout title="Inicio de sesión COMFACA EN LÍNEA" description="Bienvenido a Comfaca En Línea, el portal en línea de la Comfaca. Aquí podrás gestionar tus servicios y contratar nuevos servicios de manera segura y cómoda.">
@@ -72,7 +66,7 @@ export default function Login({
             // Componente LoginForm extraído y reutilizable
             <LoginForm
               userTypes={userTypes}
-              documentTypes={documentTypeOptions}
+              documentTypeOptions={documentTypeOptions}
               selectedUserType={selectedUserType}
               documentType={documentType}
               identification={identification}

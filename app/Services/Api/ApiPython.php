@@ -23,15 +23,18 @@ class ApiPython extends ApiAbstract
         if (is_null($metodo) || $metodo === '') {
             throw new DebugException('Error no es valido el metodo de acceso API ', 501);
         }
-        
-        $basicAuth = new BasicAuth('200', 'ok');
+
+        $user = env('API_FLASK_USER');
+        $password = env('API_FLASK_PASSWORD');
+
+        $basicAuth = new BasicAuth($user, $password);
         $api_end_point = ApiEndpoint::where('connection_name', 'api-python')
             ->where('service_name', $servicio)
             ->first();
 
         $hostConnection = env('API_MODE') == 'development' ? $api_end_point->host_dev : $api_end_point->host_pro;
         $url = "{$api_end_point->endpoint_name}/{$metodo}";
-        $this->lineaComando = $hostConnection."\n ".$url."\n ".json_encode($params);
+        $this->lineaComando = $hostConnection . "\n " . $url . "\n " . json_encode($params);
 
         $api = new APIClient($basicAuth, $hostConnection, $url);
         $api->setTypeJson(true);
