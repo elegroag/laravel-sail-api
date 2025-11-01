@@ -1,11 +1,12 @@
 import flatpickr from 'flatpickr';
 import { Spanish } from 'flatpickr/dist/l10n/es.js';
-import { $App } from '../../../App';
-import Logger from '../../../Common/Logger';
-import { ComponentModel } from '../../../Componentes/Models/ComponentModel';
-import { eventsFormControl } from '../../../Core';
-import { FormView } from '../../FormView';
+import { $App } from '@/App';
+import Logger from '@/Common/Logger';
+import { ComponentModel } from '@/Componentes/Models/ComponentModel';
+import { eventsFormControl } from '@/Core';
+import { FormView } from '@/Mercurio/FormView';
 import { ConyugeModel } from '../models/ConyugeModel';
+
 
 export class FormConyugeView extends FormView {
     #choiceComponents = null;
@@ -32,7 +33,7 @@ export class FormConyugeView extends FormView {
             'change #labora_otra_empresa': 'changeOtraEmpresa',
             'click [data-toggle="address"]': 'openAddress',
             'click #btEnviarRadicado': 'enviarRadicado',
-            'change #codocu': 'changeCodocu',
+            'change #codocu': 'changeCodocu'
         };
     }
 
@@ -91,14 +92,19 @@ export class FormConyugeView extends FormView {
                 this.#choiceComponents[element.name] = new Choices(element);
                 const name = this.model.get(element.name);
                 if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
+
             });
         } else {
             $.each(this.selectores, (index, element) => (this.#choiceComponents[element.name] = new Choices(element)));
         }
 
+        this.selectores.on('change', (event) => {
+            this.validateChoicesField(event.detail.value, this.#choiceComponents[event.currentTarget.name]);
+        });
+
         eventsFormControl($el);
 
-        flatpickr($el.find('#fecnac'), {
+        flatpickr($el.find('#fecnac, #fecing'), {
             enableTime: false,
             dateFormat: 'Y-m-d',
             locale: Spanish,
@@ -192,7 +198,7 @@ export class FormConyugeView extends FormView {
                     entity.clave = clave;
                 }
             }
-        
+
             this.App.trigger('confirma', {
                 message: 'Confirma que desea guardar los datos del formulario.',
                 callback: (status) => {
@@ -203,7 +209,7 @@ export class FormConyugeView extends FormView {
                             callback: (response) => {
                                 target.removeAttr('disabled');
                                 this.$el.find('#nit').attr('disabled', 'true');
-    
+
                                 if (response) {
                                     if (response.success) {
                                         this.App.trigger('alert:success', { message: response.msj });
@@ -231,7 +237,7 @@ export class FormConyugeView extends FormView {
             });
         });
 
-        
+
     }
 
     validaConyuge(e) {

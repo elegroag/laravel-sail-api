@@ -128,6 +128,10 @@ export class FormBeneficiarioView extends FormView {
             $.each(this.selectores, (index, element) => (this.#choiceComponents[element.name] = new Choices(element)));
         }
 
+        this.selectores.on('change', (event) => {
+            this.validateChoicesField(event.detail.value, this.#choiceComponents[event.currentTarget.name]);
+        });
+
         eventsFormControl(this.$el);
 
         flatpickr(this.$el.find('#fecnac, #fecing'), {
@@ -222,7 +226,7 @@ export class FormBeneficiarioView extends FormView {
                             callback: (response) => {
                                 target.removeAttr('disabled');
                                 this.$el.find('#cedtra').attr('disabled', true);
-    
+
                                 if (response.success) {
                                     this.App.trigger('alert:success', { message: response.msj });
                                     this.model.set({ id: parseInt(response.data.id) });
@@ -245,10 +249,10 @@ export class FormBeneficiarioView extends FormView {
                     }
                 },
             });
-            
+
         });
 
-        
+
     }
 
     validaBeneficiario(e) {

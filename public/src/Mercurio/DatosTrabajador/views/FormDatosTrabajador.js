@@ -86,6 +86,10 @@ export default class FormDatosTrabajador extends FormView {
 			$.each(this.selectores, (index, element) => this.#choiceComponents[element.name] = new Choices(element));
 		}
 
+        this.selectores.on('change', (event) => {
+            this.validateChoicesField(event.detail.value, this.#choiceComponents[event.currentTarget.name]);
+        });
+
 		flatpickr(this.$el.find('#expedicion, #respo_expedicion'), {
 			enableTime: false,
 			dateFormat: 'Y-m-d',

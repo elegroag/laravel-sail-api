@@ -113,6 +113,10 @@ export class FormFacultativoView extends FormView {
             $.each(this.selectores, (index, element) => (this.#choiceComponents[element.name] = new Choices(element)));
         }
 
+        this.selectores.on('change', (event) => {
+            this.validateChoicesField(event.detail.value, this.#choiceComponents[event.currentTarget.name]);
+        });
+
         flatpickr(this.$el.find('#fecnac, #fecini'), {
             enableTime: false,
             dateFormat: 'Y-m-d',
@@ -211,7 +215,7 @@ export class FormFacultativoView extends FormView {
                             callback: (response) => {
                                 target.removeAttr('disabled');
                                 this.$el.find('#cedtra').attr('disabled', true);
-    
+
                                 if (response) {
                                     if (response.success) {
                                         $App.trigger('alert:success', { message: response.msj });
@@ -236,10 +240,10 @@ export class FormFacultativoView extends FormView {
                     }
                 },
             });
-            
+
         });
 
-        
+
     }
 
     nameRepleg() {

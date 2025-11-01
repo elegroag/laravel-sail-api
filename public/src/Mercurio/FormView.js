@@ -333,6 +333,17 @@ export class FormView extends Backbone.View {
         }
     }
 
+    validateChoicesField(value, choicesInstance) {
+        const containerInner = choicesInstance.containerInner.element;
+        if (value !== '') {
+            containerInner.classList.remove('is-invalid');
+            containerInner.classList.add('is-valid');
+        } else {
+            containerInner.classList.remove('is-valid');
+            containerInner.classList.add('is-invalid');
+        }
+    }
+
     remove() {
         if (this.subHeader) this.subHeader.remove();
         if (this.viewDocuments) this.viewDocuments.remove();

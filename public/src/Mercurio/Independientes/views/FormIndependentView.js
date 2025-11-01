@@ -114,6 +114,10 @@ export class FormIndependentView extends FormView {
             $.each(this.selectores, (index, element) => (this.#choiceComponents[element.name] = new Choices(element)));
         }
 
+        this.selectores.on('change', (event) => {
+            this.validateChoicesField(event.detail.value, this.#choiceComponents[event.currentTarget.name]);
+        });
+
         eventsFormControl(this.$el);
 
         flatpickr(this.$el.find('#fecnac, #fecini'), {

@@ -19,14 +19,14 @@
                                     <div class="col-md-3">
                                         <div class='form-group' group-for='nit'>
                                             <label class='control-label'>NIT empresa</label>
-                                            <input type="number" name="nit" class="form-control" readonly value="{{ $documento }}" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                            <input type="number" name="nit" id="nit" class="form-control" readonly value="{{ $documento }}" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                                         </div>
                                     </div>
                                 @else
                                     <div class="col-md-3">
                                         <div class='form-group' group-for='nit'>
                                             <label class='control-label'>NIT empleador</label>
-                                            <input type="number" name="nit" class="form-control" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                            <input type="number" name="nit" id="nit" class="form-control" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                                         </div>
                                     </div>
                                 @endif
@@ -42,14 +42,14 @@
                                     <div class="col-md-3">
                                         <div class='form-group' group-for='cedtra'>
                                             <label for="cedtra" class="control-label">Cedula trabajador</label>
-                                            <input type="number" name="cedtra" class="form-control" placeholder="Cedula trabajador" maxlength="18" minlength="5" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                            <input type="number" name="cedtra" id="cedtra" class="form-control" placeholder="Cedula trabajador" maxlength="18" minlength="5" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                                         </div>
                                     </div>
                                 @else
                                     <div class="col-md-3">
                                         <div class='form-group' group-for='cedtra'>
                                             <label for="cedtra" class="control-label">Identificación trabajador</label>
-                                            <input type="number" name="cedtra" class="form-control" readonly value="{{ $documento }}" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                            <input type="number" name="cedtra" id="cedtra" class="form-control" readonly value="{{ $documento }}" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                                         </div>
                                     </div>
                                 @endif
@@ -57,7 +57,7 @@
                                 <div class="col-md-3  d-none" id="show_mother">
                                     <div class='form-group' group-for='cedcon'>
                                         <label for="cedcon" class="control-label">Identificación (madre/padre) diferente trabajador</label>
-                                        <input type="number" name="cedcon" class="form-control" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                        <input type="number" name="cedcon" id="cedcon" class="form-control" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                                     </div>
                                 </div>
 
@@ -72,7 +72,7 @@
                                     <div class='form-group' group-for='cedacu'>
                                         <label for="cedacu" class="control-label">Identificación convive:</label>
                                         <span>
-                                            <input type="number" name="cedacu" class="form-control" placeholder="Pendiente definir acudiente convive" readonly oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                            <input type="number" name="cedacu" id="cedacu" class="form-control" placeholder="Pendiente definir acudiente convive" readonly oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                                         </span>
                                     </div>
                                 </div>
@@ -132,35 +132,35 @@
                                 <div class="col-md-3">
                                     <div class='form-group' group-for='numdoc'>
                                         <label for="numdoc" class="control-label">Número identificación</label>
-                                        <input type="number" name="numdoc" class="form-control" placeholder="Identificación" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                        <input type="number" name="numdoc" id="numdoc" class="form-control" placeholder="Identificación" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class='form-group' group-for='priape'>
                                         <label for="priape" class="control-label">Primer apellido</label>
-                                        <input type="text" name="priape" class="form-control" placeholder="Primer Apellido" oninput="this.value = this.value.toUpperCase()">
+                                        <input type="text" name="priape" id="priape" class="form-control" placeholder="Primer Apellido" oninput="this.value = this.value.toUpperCase()">
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class='form-group' group-for='segape'>
                                         <label for="segape" class="control-label">Segundo apellido</label>
-                                        <input type="text" name="segape" class="form-control" placeholder="Segundo Apellido" oninput="this.value = this.value.toUpperCase()">
+                                        <input type="text" name="segape" id="segape" class="form-control" placeholder="Segundo Apellido" oninput="this.value = this.value.toUpperCase()">
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class='form-group' group-for='prinom'>
                                         <label for="prinom" class="control-label">Primer nombre</label>
-                                        <input type="text" name="prinom" class="form-control" placeholder="Primer Nombre" oninput="this.value = this.value.toUpperCase()">
+                                        <input type="text" name="prinom" id="prinom" class="form-control" placeholder="Primer Nombre" oninput="this.value = this.value.toUpperCase()">
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class='form-group' group-for=''>
                                         <label for="segnom" class="control-label">Segundo nombre</label>
-                                        <input type="text" name="segnom" class="form-control" placeholder="Segundo Nombre" oninput="this.value = this.value.toUpperCase()">
+                                        <input type="text" name="segnom" id="segnom" class="form-control" placeholder="Segundo Nombre" oninput="this.value = this.value.toUpperCase()">
                                     </div>
                                 </div>
 
@@ -168,7 +168,7 @@
                                     <div class='form-group' group-for='fecnac'>
                                         <label for="fecnac" class="control-label">Fecha nacimiento <small>(AÑO-MES-DÍA)</small></label>
                                         <span>
-                                            <input type="date" name="fecnac" class="form-control">
+                                            <input type="date" name="fecnac" id="fecnac" class="form-control" placeholder="Fecha nacimiento" />
                                         </span>
                                         <label id="fecnac-error" class="error" for="fecnac"></label>
                                     </div>
@@ -238,7 +238,7 @@
                                 <div class="col-md-3">
                                     <div class='form-group' group-for='biocedu'>
                                         <label class='control-label'>Cedula padre/madre biológico</label>
-                                        <input type="number" name="biocedu" class="form-control" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                        <input type="number" name="biocedu" id="biocedu" class="form-control" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                                     </div>
                                 </div>
 
@@ -253,42 +253,42 @@
                                 <div class="col-md-3">
                                     <div class='form-group' group-for='bioprinom'>
                                         <label class='control-label'>Primer nombre padre/madre biológico</label>
-                                        <input type="text" name="bioprinom" class="form-control" oninput="this.value = this.value.toUpperCase()">
+                                        <input type="text" name="bioprinom" id="bioprinom" class="form-control" oninput="this.value = this.value.toUpperCase()">
                                     </div>
                                 </div>
 
                                 <div class="col-md-3 ">
                                     <div class='form-group' group-for='biosegnom'>
                                         <label class='control-label'>Segundo nombre padre/madre biológico</label>
-                                        <input type="text" name="biosegnom" class="form-control" oninput="this.value = this.value.toUpperCase()">
+                                        <input type="text" name="biosegnom" id="biosegnom" class="form-control" oninput="this.value = this.value.toUpperCase()">
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class='form-group' group-for='biopriape'>
                                         <label class='control-label'>Primer apellido padre/madre biológico</label>
-                                        <input type="text" name="biopriape" class="form-control" oninput="this.value = this.value.toUpperCase()">
+                                        <input type="text" name="biopriape" id="biopriape" class="form-control" oninput="this.value = this.value.toUpperCase()">
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class='form-group' group-for='biosegape'>
                                         <label class='control-label'>Segundo apellido padre/madre biológico</label>
-                                        <input type="text" name="biosegape" class="form-control" oninput="this.value = this.value.toUpperCase()">
+                                        <input type="text" name="biosegape" id="biosegape" class="form-control" oninput="this.value = this.value.toUpperCase()">
                                     </div>
                                 </div>
 
                                 <div class="col-md-3 s-bio-desco">
                                     <div class='form-group' group-for='bioemail'>
                                         <label class='control-label'>Email padre/madre biológico</label>
-                                        <input type="text" name="bioemail" class="form-control" oninput="this.value = this.value.toUpperCase()">
+                                        <input type="text" name="bioemail" id="bioemail" class="form-control" oninput="this.value = this.value.toUpperCase()">
                                     </div>
                                 </div>
 
                                 <div class="col-md-3 s-bio-desco">
                                     <div class='form-group' group-for='biophone'>
                                         <label class='control-label'>Teléfono padre/madre biológico</label>
-                                        <input type="number" name="biophone" class="form-control" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                        <input type="number" name="biophone" id="biophone" class="form-control" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                                     </div>
                                 </div>
 
@@ -302,7 +302,7 @@
                                 <div class="col-md-3  s-bio-desco">
                                     <div class='form-group' group-for='biodire'>
                                         <label class='control-label'>Dirección residencia padre/madre biológico</label>
-                                        <input type="text" name="biodire" class="form-control" oninput="this.value = this.value.toUpperCase()">
+                                        <input type="text" name="biodire" id="biodire" class="form-control" oninput="this.value = this.value.toUpperCase()">
                                     </div>
                                 </div>
 
@@ -337,7 +337,7 @@
                                 <div class="col-md-3" id='show_numcue'>
                                     <div class='form-group' group-for='numcue'>
                                         <label class='control-label'>Número de cuenta o Daviplata</label>
-                                        <input type="number" name="numcue" class="form-control" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                        <input type="number" name="numcue" id="numcue" class="form-control" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                                     </div>
                                 </div>
 

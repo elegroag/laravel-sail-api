@@ -101,6 +101,10 @@ class FormTrabajadorView extends FormView {
             $.each(this.selectores, (index, element) => (this.#choiceComponents[element.name] = new Choices(element)));
         }
 
+        this.selectores.on('change', (event) => {
+            this.validateChoicesField(event.detail.value, this.#choiceComponents[event.currentTarget.name]);
+        });
+
         eventsFormControl($el);
 
         flatpickr($el.find('#fecnac, #fecing'), {
@@ -211,7 +215,7 @@ class FormTrabajadorView extends FormView {
                             callback: (response) => {
                                 target.removeAttr('disabled');
                                 this.$el.find('#nit').attr('disabled', 'true');
-    
+
                                 if (response) {
                                     if (response.success) {
                                         this.App.trigger('alert:success', { message: response.msj });
@@ -237,10 +241,10 @@ class FormTrabajadorView extends FormView {
                     }
                 },
             });
-            
+
         });
 
-       
+
     }
 
     validePk(e) {

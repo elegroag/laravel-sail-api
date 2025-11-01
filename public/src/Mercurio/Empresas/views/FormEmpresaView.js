@@ -90,6 +90,10 @@ export class FormEmpresaView extends FormView {
             $.each(this.selectores, (index, element) => (this.#choiceComponents[element.name] = new Choices(element)));
         }
 
+        this.selectores.on('change', (event) => {
+            this.validateChoicesField(event.detail.value, this.#choiceComponents[event.currentTarget.name]);
+        });
+
         flatpickr(this.$el.find('#fecini, #fectra'), {
             enableTime: false,
             dateFormat: 'Y-m-d',
@@ -214,7 +218,7 @@ export class FormEmpresaView extends FormView {
                             callback: (response) => {
                                 target.removeAttr('disabled');
                                 this.$el.find('#nit').attr('disabled', true);
-    
+
                                 if (response) {
                                     if (response.success) {
                                         this.App.trigger('alert:success', { message: response.msj });
@@ -239,10 +243,10 @@ export class FormEmpresaView extends FormView {
                     }
                 },
             });
-           
+
         });
 
-        
+
     }
 
     nameRepleg() {
