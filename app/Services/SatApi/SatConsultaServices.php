@@ -2,7 +2,7 @@
 
 namespace App\Services\SatApi;
 
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 
 class SatConsultaServices
 {
@@ -25,15 +25,15 @@ class SatConsultaServices
         $response .= '</thead>';
         $response .= '<tbody>';
 
-        $apiRest = Comman::Api();
-        $apiRest->runCli(0, ['servicio' => 'datosSat20', 'params' => $_POST]);
+        $apiRest = new ApiSubsidio();
+        $apiRest->send(0, ['servicio' => 'datosSat20', 'params' => $_POST]);
         $sat20 = $apiRest->toArray();
         $sat20 = $sat20['data'];
 
         if (! empty($sat20)) {
 
-            $apiRest = Comman::Api();
-            $apiRest->runCli(0, ['servicio' => 'datosSat20', 'params' => $_POST]);
+            $apiRest = new ApiSubsidio();
+            $apiRest->send(0, ['servicio' => 'datosSat20', 'params' => $_POST]);
             $sat20 = $apiRest->toArray();
 
             $sat20 = $sat20['data']['info'];
@@ -79,8 +79,8 @@ class SatConsultaServices
     public function consultaEmpresaSat($sat02)
     {
         $tipopc = 2;
-        $apiRest = Comman::Api();
-        $apiRest->runCli(0, ['servicio' => 'captura_empresa', 'params' => []]);
+        $apiRest = new ApiSubsidio();
+        $apiRest->send(0, ['servicio' => 'captura_empresa', 'params' => []]);
         $datos_captura = $apiRest->toArray();
 
         if ($datos_captura['flag'] == true) {
@@ -184,8 +184,8 @@ class SatConsultaServices
     public function consultaEmpresaSat2($sat03)
     {
         $tipopc = 2;
-        $apiRest = Comman::Api();
-        $apiRest->runCli(0, ['servicio' => 'captura_empresa', 'params' => []]);
+        $apiRest = new ApiSubsidio();
+        $apiRest->send(0, ['servicio' => 'captura_empresa', 'params' => []]);
         $datos_captura = $apiRest->toArray();
 
         if ($datos_captura['flag'] == true) {
@@ -292,8 +292,8 @@ class SatConsultaServices
     {
         $tipopc = 2;
 
-        $apiRest = Comman::Api();
-        $apiRest->runCli(0, ['servicio' => 'captura_empresa', 'params' => []]);
+        $apiRest = new ApiSubsidio();
+        $apiRest->send(0, ['servicio' => 'captura_empresa', 'params' => []]);
         $datos_captura = $apiRest->toArray();
         if ($datos_captura['flag'] == true) {
             $datos_captura = $datos_captura['data'];
@@ -396,8 +396,8 @@ class SatConsultaServices
     {
         $tipopc = 2;
 
-        $apiRest = Comman::Api();
-        $apiRest->runCli(0, ['servicio' => 'captura_empresa', 'params' => []]);
+        $apiRest = new ApiSubsidio();
+        $apiRest->send(0, ['servicio' => 'captura_empresa', 'params' => []]);
         $datos_captura = $apiRest->toArray();
 
         if ($datos_captura['flag'] == true) {
@@ -481,8 +481,8 @@ class SatConsultaServices
     {
         $tipopc = 2;
 
-        $apiRest = Comman::Api();
-        $apiRest->runCli(0, ['servicio' => 'captura_empresa', 'params' => []]);
+        $apiRest = new ApiSubsidio();
+        $apiRest->send(0, ['servicio' => 'captura_empresa', 'params' => []]);
         $datos_captura = $apiRest->toArray();
 
         if ($datos_captura['flag'] == true) {
@@ -570,8 +570,8 @@ class SatConsultaServices
     {
         $tipopc = 2;
 
-        $apiRest = Comman::Api();
-        $apiRest->runCli(0, ['servicio' => 'captura_empresa', 'params' => []]);
+        $apiRest = new ApiSubsidio();
+        $apiRest->send(0, ['servicio' => 'captura_empresa', 'params' => []]);
         $datos_captura = $apiRest->toArray();
 
         if ($datos_captura['flag'] == true) {
@@ -663,8 +663,8 @@ class SatConsultaServices
     {
         $tipopc = 2;
 
-        $apiRest = Comman::Api();
-        $apiRest->runCli(0, ['servicio' => 'captura_empresa', 'params' => []]);
+        $apiRest = new ApiSubsidio();
+        $apiRest->send(0, ['servicio' => 'captura_empresa', 'params' => []]);
         $datos_captura = $apiRest->toArray();
 
         if ($datos_captura['flag'] == true) {
@@ -780,8 +780,8 @@ class SatConsultaServices
     {
         $tipopc = 2;
 
-        $apiRest = Comman::Api();
-        $apiRest->runCli(0, ['servicio' => 'captura_empresa', 'params' => []]);
+        $apiRest = new ApiSubsidio();
+        $apiRest->send(0, ['servicio' => 'captura_empresa', 'params' => []]);
         $datos_captura = $apiRest->toArray();
 
         if ($datos_captura['flag'] == true) {
@@ -865,8 +865,8 @@ class SatConsultaServices
     {
         $tipopc = 2;
 
-        $apiRest = Comman::Api();
-        $apiRest->runCli(0, ['servicio' => 'captura_empresa', 'params' => []]);
+        $apiRest = new ApiSubsidio();
+        $apiRest->send(0, ['servicio' => 'captura_empresa', 'params' => []]);
         $datos_captura = $apiRest->toArray();
 
         if ($datos_captura['flag'] == true) {
@@ -958,8 +958,8 @@ class SatConsultaServices
     {
         $tipopc = 2;
 
-        $apiRest = Comman::Api();
-        $apiRest->runCli(0, ['servicio' => 'captura_empresa', 'params' => []]);
+        $apiRest = new ApiSubsidio();
+        $apiRest->send(0, ['servicio' => 'captura_empresa', 'params' => []]);
         $datos_captura = $apiRest->toArray();
 
         if ($datos_captura['flag'] == true) {
@@ -1051,8 +1051,8 @@ class SatConsultaServices
     {
         $tipopc = 2;
 
-        $apiRest = Comman::Api();
-        $apiRest->runCli(0, ['servicio' => 'captura_empresa', 'params' => []]);
+        $apiRest = new ApiSubsidio();
+        $apiRest->send(0, ['servicio' => 'captura_empresa', 'params' => []]);
         $datos_captura = $apiRest->toArray();
 
         if ($datos_captura['flag'] == true) {
@@ -1148,8 +1148,8 @@ class SatConsultaServices
     {
         $tipopc = 2;
 
-        $apiRest = Comman::Api();
-        $apiRest->runCli(0, ['servicio' => 'captura_empresa', 'params' => []]);
+        $apiRest = new ApiSubsidio();
+        $apiRest->send(0, ['servicio' => 'captura_empresa', 'params' => []]);
         $datos_captura = $apiRest->toArray();
 
         if ($datos_captura['flag'] == true) {

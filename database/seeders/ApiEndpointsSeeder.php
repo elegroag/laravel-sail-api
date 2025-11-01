@@ -122,10 +122,10 @@ class ApiEndpointsSeeder extends Seeder
             ],
             [
                 'service_name' => 'Python',
-                'endpoint_name' => 'generate-pdf',
+                'endpoint_name' => 'api',
                 'connection_name' => 'api-python',
-                'host_dev' => 'http://localhost:5000/api',
-                'host_pro' => 'http://localhost:5000/api',
+                'host_dev' => 'http://localhost:5000',
+                'host_pro' => 'http://localhost:5000',
             ],
         ];
 

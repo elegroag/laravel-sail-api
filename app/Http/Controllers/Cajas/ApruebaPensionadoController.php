@@ -14,6 +14,7 @@ use App\Models\Mercurio11;
 use App\Models\Mercurio31;
 use App\Models\Mercurio37;
 use App\Models\Mercurio38;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Reports\CsvReportStrategy;
 use App\Services\Reports\ExcelReportStrategy;
 use App\Services\Reports\ReportGenerator;
@@ -273,8 +274,8 @@ class ApruebaPensionadoController extends ApplicationController
             $pensionadoServices = new PensionadoServices;
             $mercurio38 = Mercurio38::where("id", $id)->first();
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_pensionado',
@@ -309,8 +310,8 @@ class ApruebaPensionadoController extends ApplicationController
                 '_codgir' => ParamsPensionado::getCodigoGiro(),
             ])->render();
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_empresa',
@@ -474,8 +475,8 @@ class ApruebaPensionadoController extends ApplicationController
             exit();
         }
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',
@@ -523,13 +524,12 @@ class ApruebaPensionadoController extends ApplicationController
         $this->setParamToView('idModel', $id);
         $this->setParamToView('det_tipo', Mercurio06::whereRaw("tipo = '{$mercurio38->getTipo()}'")->first()->getDetalle());
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_pensionado',
-            ],
-            false
+            ]
         );
 
         $paramsPensionado = new ParamsPensionado;
@@ -658,8 +658,8 @@ class ApruebaPensionadoController extends ApplicationController
                     throw new DebugException('La empresa no se encuentra registrada.', 201);
                 }
 
-                $procesadorComando = Comman::Api();
-                $procesadorComando->runCli(
+                $procesadorComando = new ApiSubsidio();
+                $procesadorComando->send(
                     [
                         'servicio' => 'AportesEmpresas',
                         'metodo' => 'buscarAportesEmpresa',
@@ -706,8 +706,8 @@ class ApruebaPensionadoController extends ApplicationController
                 throw new DebugException('Los datos del pensionado no son validos para procesar.', 501);
             }
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_empresa',
@@ -720,8 +720,8 @@ class ApruebaPensionadoController extends ApplicationController
             $out = $ps->toArray();
             $pensionadoSisu = $out['data'];
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'deshacer_aprobacion_pensionado',
@@ -801,8 +801,8 @@ class ApruebaPensionadoController extends ApplicationController
 
     public function loadParametrosView()
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_pensionado',

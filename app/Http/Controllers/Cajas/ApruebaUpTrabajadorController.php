@@ -14,6 +14,7 @@ use App\Models\Mercurio11;
 use App\Models\Mercurio31;
 use App\Models\Mercurio33;
 use App\Models\Mercurio47;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Aprueba\ApruebaDatosTrabajador;
 use App\Services\CajaServices\UpDatosTrabajadorService;
 use App\Services\Srequest;
@@ -102,8 +103,8 @@ class ApruebaUpTrabajadorController extends ApplicationController
 
     public function loadParametrosView()
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_trabajadores',
@@ -215,8 +216,8 @@ class ApruebaUpTrabajadorController extends ApplicationController
                 $dataItems["{$campo}"] = $row->getValor();
             }
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_trabajadores',
@@ -227,8 +228,8 @@ class ApruebaUpTrabajadorController extends ApplicationController
             $paramsIndependiente = new ParamsTrabajador;
             $paramsIndependiente->setDatosCaptura($datos_captura);
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_trabajador',
@@ -262,8 +263,8 @@ class ApruebaUpTrabajadorController extends ApplicationController
                 '_bancos' => ParamsTrabajador::getBancos(),
             ])->render();
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_empresa',

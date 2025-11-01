@@ -15,6 +15,7 @@ use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Logger;
+use App\Services\Api\ApiSubsidio;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -41,10 +42,7 @@ class ComunitariaController extends ApplicationController
 
     public function aplicarFiltro(Request $request)
     {
-        $this->setResponse('ajax');
-        $generalService = new GeneralService;
-        $this->query = $generalService->converQuery();
-        $this->buscar($request);
+        return $this->buscar($request);
     }
 
     public function showTabla($paginate)
@@ -89,8 +87,8 @@ class ComunitariaController extends ApplicationController
 
     public function index()
     {
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'PoblacionAfilia',
                 'metodo' => 'captura_trabajador',

@@ -11,7 +11,7 @@ class ApiPython extends ApiAbstract
 {
     public function __construct()
     {
-        parent::__construct();
+        $this->mode = env('API_MODE', 'development');
     }
 
     public function send($attr)

@@ -8,7 +8,7 @@ use App\Models\Mercurio16;
 use App\Models\Mercurio32;
 use App\Services\Formularios\FactoryDocuments;
 use App\Services\PreparaFormularios\CifrarDocumento;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 
 class IndependienteAdjuntoService
 {
@@ -40,8 +40,8 @@ class IndependienteAdjuntoService
             'coddoc' => $this->user['coddoc'],
         ])->first();
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_empresa',
@@ -78,8 +78,8 @@ class IndependienteAdjuntoService
 
     public function cartaSolicitud()
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_trabajador',

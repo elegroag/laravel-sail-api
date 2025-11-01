@@ -16,11 +16,10 @@ use App\Models\Mercurio37;
 use App\Models\Subsi54;
 use App\Services\Entidades\TrabajadorService;
 use App\Services\FormulariosAdjuntos\TrabajadorAdjuntoService;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Srequest;
 use App\Services\Tag;
 use App\Services\Utils\AsignarFuncionario;
-use App\Services\Utils\Comman;
-use App\Services\Utils\GeneralService;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
 use Carbon\Carbon;
@@ -102,8 +101,8 @@ class TrabajadorController extends ApplicationController
                 throw new DebugException('El nit es requerido', 422);
             }
 
-            $ps = Comman::Api();
-            $ps->runCli([
+            $ps = new ApiSubsidio();
+            $ps->send([
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',
                 'params' => ['nit' => $nit],
@@ -199,8 +198,8 @@ class TrabajadorController extends ApplicationController
 
         $datos_trabajador = [];
 
-        $ps = Comman::Api();
-        $ps->runCli([
+        $ps = new ApiSubsidio();
+        $ps->send([
             'servicio' => 'ComfacaEmpresas',
             'metodo' => 'informacion_trabajador',
             'params' => [
@@ -315,8 +314,8 @@ class TrabajadorController extends ApplicationController
                 $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
             }
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_trabajadores',
@@ -325,8 +324,8 @@ class TrabajadorController extends ApplicationController
             $paramsTrabajador = new ParamsTrabajador;
             $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => "buscar_sucursales_en_empresa/{$nit}",
@@ -434,7 +433,6 @@ class TrabajadorController extends ApplicationController
 
     public function searchRequest($id)
     {
-        $this->setResponse('ajax');
         try {
             if (is_null($id)) {
                 throw new DebugException('Error no hay solicitud a buscar', 301);
@@ -675,8 +673,8 @@ class TrabajadorController extends ApplicationController
             $coddoc = $this->user['coddoc'];
             $cedtra = $request->get('cedtra');
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_empresa',
@@ -729,8 +727,8 @@ class TrabajadorController extends ApplicationController
         try {
 
             $cedtra = $request->input('cedtra');
-            $ps = Comman::Api();
-            $ps->runCli([
+            $ps = new ApiSubsidio();
+            $ps->send([
                 'servicio' => 'PoblacionAfiliada',
                 'metodo' => 'datosTrabajador',
                 'params' => ['cedtra' => $cedtra],

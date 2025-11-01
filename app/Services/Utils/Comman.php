@@ -21,8 +21,6 @@ class Comman
         $this->app->mode = env('API_MODE', 'development');
         $this->app->host_portal_dev = env('HOST_PORTAL_DEV', 'http://localhost:8000');
         $this->app->host_portal_pro = env('HOST_PORTAL_PRO', 'http://localhost:8000');
-        $this->app->host_api_dev = env('HOST_API_DEV', 'http://localhost:8000');
-        $this->app->host_api_pro = env('HOST_API_PRO', 'http://localhost:8000');
         $this->app->portal = env('PORTAL', 'Portal');
         $this->app->portal_key = env('PORTAL_KEY', 'PortalKey');
         $this->app->encryption = env('API_ENCRYPTION', 'ApiEncryption');
@@ -39,16 +37,16 @@ class Comman
      *
      * @return ApiSubsidio
      */
-    public function runCli($attr, $base64 = null)
+    public function send($attr, $base64 = null)
     {
         $attr['base64'] = $base64;
-        $this->procesadorComandos = new ApiSubsidio($this->app);
+        $this->procesadorComandos = new ApiSubsidio();
         $this->procesadorComandos->send($attr);
     }
 
     public function dispatch($attr)
     {
-        $this->procesadorComandos = new ApiSubsidio($this->app);
+        $this->procesadorComandos = new ApiSubsidio();
         $this->procesadorComandos->send($attr);
     }
 

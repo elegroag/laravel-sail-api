@@ -4,7 +4,7 @@ namespace App\Services\Autentications;
 
 use App\Models\Mercurio01;
 use App\Models\Mercurio02;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Utils\Generales;
 use App\Services\Utils\SenderEmail;
 
@@ -26,7 +26,7 @@ class AutenticaGeneral
 
     public function __construct()
     {
-        $this->procesadorComando = Comman::Api();
+        $this->procesadorComando = new ApiSubsidio();
         $this->caja = (new Mercurio02)->findFirst();
     }
 
@@ -63,7 +63,7 @@ class AutenticaGeneral
         $msj = "Bienvenido a {$this->caja->getRazsoc()}, a continuación confirmamos sus datos de usuario para el ingreso a nuestro portal web. " .
             "Y continuar el proceso de solicitud de afiliación.<br/>
         Credenciales de acceso:<br/><br/>
-        TIPO AFILIADO: {$tipoName}<br/>  
+        TIPO AFILIADO: {$tipoName}<br/>
         TIPO DOCUMENTO: {$coddoc_detalle}<br/>
         USUARIO: {$usuario->getDocumento()}<br/>
         CLAVE: {$clave}<br/>";
@@ -120,9 +120,9 @@ class AutenticaGeneral
         $nombre = capitalize($this->afiliado->nombre);
         $asunto = 'Recuperacion de clave - Comfaca En Linea';
         $msj = 'En respuesta a la solicitud de recuperación de cuenta, se realiza el cambio automatico de la clave para el inicio de sesión. ' .
-            "A continuación enviamos las credenciales de acceso.<br/> 
+            "A continuación enviamos las credenciales de acceso.<br/>
             Credenciales de acceso:<br/><br/>
-            TIPO AFILIADO: {$this->tipoName}<br/>  
+            TIPO AFILIADO: {$this->tipoName}<br/>
             TIPO DOCUMENTO: {$tipo_documento}<br/>
             USUARIO: {$this->afiliado->documento}<br/>
             CLAVE: {$clave}<br/>";
@@ -170,9 +170,9 @@ class AutenticaGeneral
                 'tipo' => 'Usuario',
                 'nombre' => $nombre,
                 'razon' => $nombre,
-                'msj' => "El usuario ha realizado el registro mediante validación de PIN, al portal web Comfaca En Línea.<br/> 
+                'msj' => "El usuario ha realizado el registro mediante validación de PIN, al portal web Comfaca En Línea.<br/>
             Utiliza el siguiente código de verificación, para confirmar el propietario de la dirección de correo:<br/>
-            <span style=\"font-size:16px;color:#333\">CÓDIGO DE VERIFICACIÓN: </span> 
+            <span style=\"font-size:16px;color:#333\">CÓDIGO DE VERIFICACIÓN: </span>
             <span style=\"font-size:30px;color:#11cdef\"><b>{$codigo_verify}</b></span>",
             ]
         )->render();

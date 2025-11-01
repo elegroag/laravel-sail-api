@@ -3,7 +3,7 @@
 namespace App\Services\Formularios\Api;
 
 use App\Library\Collections\ParamsEmpresa;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 
 class ActualizadatosDocuments
 {
@@ -42,8 +42,8 @@ class ActualizadatosDocuments
         ];
 
         foreach ($this->params['oficios'] as $oficio) {
-            $ps = Comman::Api();
-            $ps->runCli([
+            $ps = new ApiSubsidio();
+            $ps->send([
                 'servicio' => 'Python',
                 'metodo' => 'generate-pdf',
                 'params' => [

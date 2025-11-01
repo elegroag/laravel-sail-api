@@ -20,10 +20,10 @@ use App\Models\Mercurio34;
 use App\Models\Mercurio35;
 use App\Models\Mercurio37;
 use App\Services\Utils\AsignarFuncionario;
-use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Logger;
 use App\Services\Utils\UploadFile;
+use App\Services\Api\ApiSubsidio;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -110,8 +110,8 @@ class ConsultasEmpresaController extends ApplicationController
             $nit = $request->input('nit') ? $request->input('nit') : $this->user['documento'];
             $estado = $estado == 'T' ? '' : $estado;
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'listar_trabajadores',
@@ -161,8 +161,8 @@ class ConsultasEmpresaController extends ApplicationController
             $perini = $request->input('perini');
             $perfin = $request->input('perfin');
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'CuotaMonetaria',
                     'metodo' => 'cuotas_by_empresa_and_periodo',
@@ -211,8 +211,8 @@ class ConsultasEmpresaController extends ApplicationController
             $periodo = $request->input('periodo');
             $nit = $this->user['documento'];
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'AportesEmpresas',
                     'metodo' => 'nomina_by_nit_and_periodo',
@@ -266,8 +266,8 @@ class ConsultasEmpresaController extends ApplicationController
             $perfin = $request->input('perfin');
             $nit = $this->user['documento'];
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'AportesEmpresas',
                     'metodo' => 'aportes_by_nit_and_periodos',
@@ -315,8 +315,8 @@ class ConsultasEmpresaController extends ApplicationController
     {
         try {
             $nit = $this->user['documento'];
-            $ps = Comman::Api();
-            $ps->runCli([
+            $ps = new ApiSubsidio();
+            $ps->send([
                 'servicio' => 'AportesEmpresas',
                 'metodo' => 'mora_presunta_by_nit',
                 'params' => [
@@ -329,8 +329,8 @@ class ConsultasEmpresaController extends ApplicationController
                 throw new DebugException($consulta['msj']);
             }
 
-            $ps = Comman::Api();
-            $ps->runCli([
+            $ps = new ApiSubsidio();
+            $ps->send([
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'buscar_sucursales_en_empresa',
                 'params' => [
@@ -374,8 +374,8 @@ class ConsultasEmpresaController extends ApplicationController
     public function novedadRetiroView()
     {
 
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'motivosRechazo',
@@ -405,8 +405,8 @@ class ConsultasEmpresaController extends ApplicationController
         try {
             $cedtra = $request->input('cedtra');
 
-            $ps = Comman::Api();
-            $ps->runCli([
+            $ps = new ApiSubsidio();
+            $ps->send([
                 'servicio' => 'PoblacionAfiliada',
                 'metodo' => 'datosTrabajador',
                 'params' => ['cedtra' => $cedtra],
@@ -730,8 +730,8 @@ class ConsultasEmpresaController extends ApplicationController
 
     public function certificadoParaTrabajadorView()
     {
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'listar_trabajadores',
@@ -785,13 +785,12 @@ class ConsultasEmpresaController extends ApplicationController
 
     public function loadParametrosView()
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_empresa',
-            ],
-            false
+            ]
         );
 
         $datos_captura = $procesadorComando->toArray();
@@ -865,8 +864,8 @@ class ConsultasEmpresaController extends ApplicationController
 
     public function buscarEmpresaSubsidio($nit)
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',
@@ -886,8 +885,8 @@ class ConsultasEmpresaController extends ApplicationController
         try {
             $this->setResponse('ajax');
             $cedtra = $request->input('cedtra');
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'PoblacionAfiliada',
                     'metodo' => 'nucleo_familiar_trabajador',
@@ -903,8 +902,8 @@ class ConsultasEmpresaController extends ApplicationController
             $conyuges = $salida['data']['conyuges'];
             $beneficiarios = $salida['data']['beneficiarios'];
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_trabajadores',
@@ -913,8 +912,8 @@ class ConsultasEmpresaController extends ApplicationController
             $paramsTrabajador = new ParamsTrabajador;
             $paramsTrabajador->setDatosCaptura($ps->toArray());
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_conyuges',
@@ -923,8 +922,8 @@ class ConsultasEmpresaController extends ApplicationController
             $paramsConyuge = new ParamsConyuge;
             $paramsConyuge->setDatosCaptura($ps->toArray());
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_beneficiarios',

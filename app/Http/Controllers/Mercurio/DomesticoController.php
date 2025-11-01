@@ -15,6 +15,7 @@ use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Logger;
+use App\Services\Api\ApiSubsidio;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -35,16 +36,13 @@ class DomesticoController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user') ?? null;
+        $this->tipo = session('tipo') ?? null;
     }
 
     public function aplicarFiltro(Request $request)
     {
-        $this->setResponse('ajax');
-        $generalService = new GeneralService;
-        $this->query = $generalService->converQuery();
-        self::buscar($request);
+        return $this->buscar($request);
     }
 
     public function showTabla($paginate)
@@ -91,8 +89,8 @@ class DomesticoController extends ApplicationController
     {
         $help = 'Esta opcion permite manejar los ';
 
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'PoblacionAfilia',
                 'metodo' => 'captura_trabajador',

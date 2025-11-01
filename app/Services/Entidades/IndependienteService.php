@@ -18,7 +18,7 @@ use App\Models\Mercurio41;
 use App\Models\Mercurio47;
 use App\Services\Srequest;
 use App\Services\Utils\AsignarFuncionario;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 
 class IndependienteService
 {
@@ -101,8 +101,8 @@ class IndependienteService
     public function buscarEmpresaSubsidio($nit)
     {
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',
@@ -410,8 +410,8 @@ class IndependienteService
 
     public function paramsApi()
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_empresa',
@@ -421,8 +421,8 @@ class IndependienteService
         $paramsPensionado = new ParamsIndependiente;
         $paramsPensionado->setDatosCaptura($procesadorComando->toArray());
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_trabajadores',
@@ -516,8 +516,8 @@ class IndependienteService
      */
     public function buscarTrabajadorSubsidio($cedtra)
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_trabajador',

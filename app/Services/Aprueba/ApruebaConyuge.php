@@ -9,7 +9,7 @@ use App\Models\Mercurio32;
 use App\Services\CajaServices\TrabajadorServices;
 use App\Services\Entities\ConyugeEntity;
 use App\Services\Srequest;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
@@ -59,8 +59,8 @@ class ApruebaConyuge
         }
 
         $trabajador_sisu = false;
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'trabajador',
@@ -94,8 +94,8 @@ class ApruebaConyuge
             );
         }
 
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'afilia_conyuge',
@@ -211,8 +211,8 @@ class ApruebaConyuge
 
         $mercurio32 = $this->findSolicitud($id);
 
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_conyuge',
@@ -232,8 +232,8 @@ class ApruebaConyuge
 
         $dataSisu = $out['data'];
 
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'DeshacerAfiliaciones',
                 'metodo' => 'deshacerAprobacionTrabajador',

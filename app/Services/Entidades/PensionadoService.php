@@ -14,7 +14,7 @@ use App\Models\Mercurio14;
 use App\Models\Mercurio37;
 use App\Models\Mercurio38;
 use App\Services\Srequest;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 
 class PensionadoService
 {
@@ -85,8 +85,8 @@ class PensionadoService
     public function buscarEmpresaSubsidio($nit)
     {
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',
@@ -378,8 +378,8 @@ class PensionadoService
 
     public function paramsApi()
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_empresa',
@@ -389,8 +389,8 @@ class PensionadoService
         $paramsPensionado = new ParamsPensionado;
         $paramsPensionado->setDatosCaptura($procesadorComando->toArray());
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_trabajadores',
@@ -403,8 +403,8 @@ class PensionadoService
 
     public function buscarTrabajadorSubsidio($cedtra)
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_trabajador',

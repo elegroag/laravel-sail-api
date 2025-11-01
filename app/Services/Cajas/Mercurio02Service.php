@@ -3,7 +3,7 @@
 namespace App\Services\Cajas;
 
 use App\Models\Mercurio02;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -48,15 +48,15 @@ class Mercurio02Service
 
     public function obtenerCiudades()
     {
-        $apiRest = Comman::Api();
-        $apiRest->runCli([
+        $apiRest = new ApiSubsidio();
+        $apiRest->send([
             'servicio' => 'ComfacaAfilia',
             'metodo' => 'listar_ciudades_departamentos',
         ]);
 
         $data = $apiRest->toArray();
         $ciudades = $data['ciudades'] ?? [];
-        
+
         $_codciu = [];
         if (is_array($ciudades)) {
             foreach ($ciudades as $mcodciu) {

@@ -10,6 +10,7 @@ use App\Models\Mercurio04;
 use App\Models\Mercurio05;
 use App\Models\Mercurio08;
 use App\Models\Mercurio09;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Paginate;
@@ -61,8 +62,8 @@ class Mercurio04Controller extends ApplicationController
             'codofi' => 'Codigo',
             'detalle' => 'Detalle',
         ];
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'listar_ciudades_departamentos',

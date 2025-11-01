@@ -34,7 +34,7 @@ class AutenticaEmpresa extends AutenticaGeneral
         /**
          * buscar empresa en sisu
          */
-        $this->procesadorComando->runCli(
+        $this->procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',
@@ -87,8 +87,8 @@ class AutenticaEmpresa extends AutenticaGeneral
             if ($usuarioParticular == false) {
 
                 if (strlen($afiliado['email']) == 0) {
-                    $this->message = 'La dirección email no es valida para realizar el registro. '.
-                        'Debe solicitar cambio del correo personal a la dirección afiliacionyregistro@comfaca.com, indicando la necesidad. '.
+                    $this->message = 'La dirección email no es valida para realizar el registro. ' .
+                        'Debe solicitar cambio del correo personal a la dirección afiliacionyregistro@comfaca.com, indicando la necesidad. ' .
                         'No olvidar el compartir la dirección email, el número de cedula y el nombre del afiliado, para realizar la comprobación y los cambios solicitados.';
 
                     return false;
@@ -116,8 +116,8 @@ class AutenticaEmpresa extends AutenticaGeneral
 
                 $this->prepareMail($usuarioParticular, $clave, 'Particular');
 
-                $this->message = 'La empresa no está activa en el sistema principal de Subsidio, debe realizar el proceso de afiliación, para acceder a los servicios de comfaca en línea. '.
-                    'Es necesario readicar una nueva solicitud de afiliación ya que la empresa se encuentra (INACTIVA).'.
+                $this->message = 'La empresa no está activa en el sistema principal de Subsidio, debe realizar el proceso de afiliación, para acceder a los servicios de comfaca en línea. ' .
+                    'Es necesario readicar una nueva solicitud de afiliación ya que la empresa se encuentra (INACTIVA).' .
                     'Las credenciales de acceso le serán enviadas al respectivo correo registrado.';
             } else {
                 /**
@@ -182,7 +182,7 @@ class AutenticaEmpresa extends AutenticaGeneral
                     $usuarioParticular->save();
                 }
 
-                $this->message = 'La empresa no está activa en el sistema principal de Subsidio, debe realizar el proceso de afiliación, para acceder a los servicios de comfaca en línea. '.
+                $this->message = 'La empresa no está activa en el sistema principal de Subsidio, debe realizar el proceso de afiliación, para acceder a los servicios de comfaca en línea. ' .
                     'Es necesario radicar una nueva solicitud de afiliación ya que la empresa se encuentra (INACTIVA)';
             }
 
@@ -230,7 +230,7 @@ class AutenticaEmpresa extends AutenticaGeneral
                 $crearUsuario->crearOpcionesRecuperacion($codigoVerify);
 
                 $this->prepareMail($usuarioEmpresa, $clave);
-                $this->message = 'La empresa está activa y se ha creado de forma automatica la cuenta de usuario tipo Empresa, '.
+                $this->message = 'La empresa está activa y se ha creado de forma automatica la cuenta de usuario tipo Empresa, ' .
                     'las credenciales de acceso le serán enviadas al respectivo correo registrado, y debe usar la nueva clave generada.';
 
                 return false;

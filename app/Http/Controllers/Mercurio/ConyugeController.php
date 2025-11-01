@@ -17,6 +17,7 @@ use App\Services\Entidades\TrabajadorService;
 use App\Services\FormulariosAdjuntos\ConyugeAdjuntoService;
 use App\Services\FormulariosAdjuntos\Formularios;
 use App\Services\PreparaFormularios\TrabajadorFormulario;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
 use App\Services\Utils\GuardarArchivoService;
@@ -24,6 +25,7 @@ use App\Services\Utils\SenderValidationCaja;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 class ConyugeController extends ApplicationController
 {
@@ -54,8 +56,8 @@ class ConyugeController extends ApplicationController
             $tipo == 'O' ||
             $tipo == 'F'
         ) {
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_empresa',
@@ -95,10 +97,9 @@ class ConyugeController extends ApplicationController
 
     public function borrarArchivo(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $numero = $this->clp($request, 'id');
-            $coddoc = $this->clp($request, 'coddoc');
+            $numero = $request->input('id');
+            $coddoc = $request->input('coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
             $filepath = storage_path('temp/' . $mercurio37->getArchivo());
@@ -127,7 +128,6 @@ class ConyugeController extends ApplicationController
 
     public function guardarArchivo(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $id = $request->input('id');
             $coddoc = $request->input('coddoc');
@@ -156,11 +156,10 @@ class ConyugeController extends ApplicationController
 
     public function traerConyugue(Request $request)
     {
-        $this->setResponse('ajax');
         $cedcon = $request->input('cedcon');
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_conyuge',
@@ -177,7 +176,7 @@ class ConyugeController extends ApplicationController
             $mercurio32 = new Mercurio32($datos_conyuge);
         }
 
-        $procesadorComando->runCli(
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_trabajador',
@@ -258,57 +257,66 @@ class ConyugeController extends ApplicationController
 
     public function buscarConyugues($db, $estado = '')
     {
-        // usuario empresa, unica solicitud de afiliación
-        $documento = parent::getActUser('documento');
-        $tipo = parent::getActUser('tipo');
-        $coddoc = parent::getActUser('coddoc');
+        $documento = $this->user['documento'];
+        $tipo = $this->user['tipo'];
+        $coddoc = $this->user['coddoc'];
 
         if (empty($estado)) {
-            $mercurio32 = $db->inQueryAssoc("SELECT * FROM mercurio32 WHERE  tipo='{$tipo}' AND coddoc='{$coddoc}' AND documento='{$documento}' AND estado IN('T','D','P','A','X') ORDER BY id, estado DESC");
+            $mercurio32 = Mercurio32::where('tipo', $tipo)
+                ->where('coddoc', $coddoc)
+                ->where('documento', $documento)
+                ->whereIn('estado', ['T', 'D', 'P', 'A', 'X'])
+                ->orderBy('id', 'desc')
+                ->get();
         } else {
-            $mercurio32 = $db->inQueryAssoc("SELECT * FROM mercurio32 WHERE tipo='{$tipo}' AND coddoc='{$coddoc}' AND documento='{$documento}' AND estado='{$estado}' ORDER BY id DESC");
+            $mercurio32 = Mercurio32::where('tipo', $tipo)
+                ->where('coddoc', $coddoc)
+                ->where('documento', $documento)
+                ->where('estado', $estado)
+                ->orderBy('id', 'desc')
+                ->get();
         }
+        $conyuges = [];
+        foreach ($mercurio32 as $mercurio32) {
+            $rqs = Mercurio10::select(DB::raw('count(mercurio10.numero) as cantidad'))
+                ->join('mercurio32', 'mercurio32.id', '=', 'mercurio10.numero')
+                ->where('mercurio10.tipopc', $this->tipopc)
+                ->where('mercurio32.id', $mercurio32->id)
+                ->first();
 
-        foreach ($mercurio32 as $ai => $row) {
-            $rqs = $db->fetchOne("SELECT count(mercurio10.numero) as cantidad
-                FROM mercurio10
-                LEFT JOIN mercurio32 ON mercurio32.id=mercurio10.numero
-                WHERE mercurio10.tipopc='{$this->tipopc}' AND
-                mercurio32.id ='{$row['id']}'
-            ");
-            $trayecto = $db->fetchOne("SELECT max(mercurio10.item), mercurio10.*
-                FROM mercurio10
-                LEFT JOIN mercurio32 ON mercurio32.id=mercurio10.numero
-                WHERE mercurio10.tipopc='{$this->tipopc}' AND
-                mercurio32.id ='{$row['id']}' LIMIT 1
-            ");
+            $trayecto = Mercurio10::select(DB::raw('max(mercurio10.item), mercurio10.*'))
+                ->join('mercurio32', 'mercurio32.id', '=', 'mercurio10.numero')
+                ->where('mercurio10.tipopc', $this->tipopc)
+                ->where('mercurio32.id', $mercurio32->id)
+                ->first();
 
-            $mercurio32[$ai] = $row;
-            $mercurio32[$ai]['cantidad_eventos'] = $rqs['cantidad'];
-            $mercurio32[$ai]['fecha_ultima_solicitud'] = $trayecto['fecsis'];
-            switch ($row['estado']) {
+            $conyuge = $mercurio32->toArray();
+            $conyuge['cantidad_eventos'] = $rqs->cantidad;
+            $conyuge['fecha_ultima_solicitud'] = $trayecto->fecsis;
+            switch ($mercurio32->estado) {
                 case 'T':
-                    $mercurio32[$ai]['estado_detalle'] = 'TEMPORAL';
+                    $conyuge['estado_detalle'] = 'TEMPORAL';
                     break;
                 case 'D':
-                    $mercurio32[$ai]['estado_detalle'] = 'DEVUELTO';
+                    $conyuge['estado_detalle'] = 'DEVUELTO';
                     break;
                 case 'A':
-                    $mercurio32[$ai]['estado_detalle'] = 'APROBADO';
+                    $conyuge['estado_detalle'] = 'APROBADO';
                     break;
                 case 'X':
-                    $mercurio32[$ai]['estado_detalle'] = 'RECHAZADO';
+                    $conyuge['estado_detalle'] = 'RECHAZADO';
                     break;
                 case 'P':
-                    $mercurio32[$ai]['estado_detalle'] = 'Pendiente De Validación CAJA';
+                    $conyuge['estado_detalle'] = 'Pendiente De Validación CAJA';
                     break;
                 default:
-                    $mercurio32[$ai]['estado_detalle'] = 'T';
+                    $conyuge['estado_detalle'] = 'T';
                     break;
             }
+            $conyuges[] = $conyuge;
         }
 
-        return $mercurio32;
+        return $conyuges;
     }
 
     public function serializeData(Request $request)
@@ -566,8 +574,8 @@ class ConyugeController extends ApplicationController
                 $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
             }
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_conyuges',
@@ -657,8 +665,8 @@ class ConyugeController extends ApplicationController
             }
 
             if (! $conyuge) {
-                $procesadorComando = Comman::Api();
-                $procesadorComando->runCli(
+                $procesadorComando = new ApiSubsidio();
+                $procesadorComando->send(
                     [
                         'servicio' => 'ComfacaEmpresas',
                         'metodo' => 'informacion_conyuge',
@@ -836,8 +844,8 @@ class ConyugeController extends ApplicationController
         try {
 
             $cedtra = $request->input('cedtra');
-            $ps = Comman::Api();
-            $ps->runCli([
+            $ps = new ApiSubsidio();
+            $ps->send([
                 'servicio' => 'PoblacionAfiliada',
                 'metodo' => 'datosTrabajador',
                 'params' => ['cedtra' => $cedtra],

@@ -365,7 +365,7 @@ class GeneralService
             ->where('numero', $mercurio30->getId())
             ->first();
 
-        $procesadorComando = Comman::Api();
+        $procesadorComando = new ApiSubsidio();
         $procesadorComando->runPortal(['servicio' => 'captura_empresa', 'params' => null]);
         $datos_captura = $procesadorComando->toArray();
 
@@ -559,7 +559,7 @@ class GeneralService
             ->where('numero', $mercurio38->getId())
             ->get();
 
-        $procesadorComando = Comman::Api();
+        $procesadorComando = new ApiSubsidio();
         $procesadorComando->runPortal(['servicio' => 'captura_trabajador', 'params' => null]);
         $datos_captura = $procesadorComando->toArray();
 
@@ -786,7 +786,7 @@ class GeneralService
             ->where('numero', $mercurio36->getId())
             ->get();
 
-        $procesadorComando = Comman::Api();
+        $procesadorComando = new ApiSubsidio();
         $procesadorComando->runPortal(['servicio' => 'captura_trabajador', 'params' => null]);
         $datos_captura = $procesadorComando->toArray();
 
@@ -1011,7 +1011,7 @@ class GeneralService
             ->where('numero', $mercurio39->getId())
             ->get();
 
-        $procesadorComando = Comman::Api();
+        $procesadorComando = new ApiSubsidio();
         $procesadorComando->runPortal(['servicio' => 'captura_trabajador', 'params' => null]);
         $datos_captura = $procesadorComando->toArray();
 
@@ -1236,7 +1236,7 @@ class GeneralService
             ->where('numero', $mercurio40->getId())
             ->first();
 
-        $procesadorComando = Comman::Api();
+        $procesadorComando = new ApiSubsidio();
         $procesadorComando->runPortal(['servicio' => 'captura_trabajador', 'params' => null]);
         $datos_captura = $procesadorComando->toArray();
 
@@ -1458,7 +1458,7 @@ class GeneralService
             ->where('numero', $mercurio31->getId())
             ->get();
 
-        $procesadorComando = Comman::Api();
+        $procesadorComando = new ApiSubsidio();
         $procesadorComando->runPortal(['servicio' => 'captura_trabajador']);
         $datos_captura = $procesadorComando->toArray();
 
@@ -1716,7 +1716,7 @@ class GeneralService
             ->where('numero', $mercurio32->getId())
             ->first();
 
-        $procesadorComando = Comman::Api();
+        $procesadorComando = new ApiSubsidio();
         $procesadorComando->runPortal(['servicio' => 'captura_conyuge']);
         $datos_captura = $procesadorComando->toArray();
 
@@ -1914,7 +1914,7 @@ class GeneralService
             ->where('numero', $mercurio34->getId())
             ->first();
 
-        $procesadorComando = Comman::Api();
+        $procesadorComando = new ApiSubsidio();
         $procesadorComando->runPortal(['servicio' => 'captura_beneficiario']);
         $datos_captura = $procesadorComando->toArray();
 

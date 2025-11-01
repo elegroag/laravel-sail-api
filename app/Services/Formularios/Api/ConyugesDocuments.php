@@ -4,7 +4,7 @@ namespace App\Services\Formularios\Api;
 
 use App\Library\Collections\ParamsConyuge;
 use App\Models\Gener18;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiPython;
 
 class ConyugesDocuments
 {
@@ -76,26 +76,23 @@ class ConyugesDocuments
             ...$this->conyuge->toArray(),
         ];
 
-        foreach ($this->params['oficios'] as $oficio) {
-            $ps = Comman::Api();
-            $ps->runCli(
-                [
-                    'servicio' => 'Python',
-                    'metodo' => 'generate-pdf',
-                    'params' => [
-                        'template' => $oficio['template'],
-                        'output' => $oficio['output'],
-                        'context' => $context,
-                    ]
-                ]
-            );
-            if ($ps->isJson() == false) {
-                break;
-            }
-            $out = $ps->toArray();
-            if ($out['success'] == false) {
-                break;
-            }
+        $ps = (new ApiPython())->send([
+            'servicio' => 'Python',
+            'metodo' => 'generate-pdf',
+            'params' => [
+                'template' => $this->params['template'],
+                'output' => $this->params['output'],
+                'context' => $context,
+            ]
+        ]);
+
+        if ($ps->isJson() == false) {
+            return false;
+        }
+
+        $out = $ps->toArray();
+        if ($out['success'] == false) {
+            return false;
         }
 
         sleep(2);

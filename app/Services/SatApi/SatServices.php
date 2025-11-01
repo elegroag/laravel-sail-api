@@ -4,7 +4,7 @@ namespace App\Services\SatApi;
 
 use App\Exceptions\DebugException;
 use App\Models\Mercusat02;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 
 class SatServices
 {
@@ -27,7 +27,7 @@ class SatServices
     public function notificaSatEmpresas($entity, $resultado_tramite, $fecafi, $motivo = '')
     {
         try {
-            $ps = Comman::Api();
+            $ps = new ApiSubsidio();
             $numsat02 = (new Mercusat02())->count(
                 '*',
                 "conditions: id='{$entity->getId()}' AND documento='{$entity->getDocumento()}' AND coddoc='{$entity->getCoddoc()}'"
@@ -38,7 +38,7 @@ class SatServices
             }
 
             $mercusat02 = (new Mercusat02)->findFirst("id='{$entity->getId()}' AND documento='{$entity->getDocumento()}' AND coddoc='{$entity->getCoddoc()}'");
-            $ps->runCli(
+            $ps->send(
                 [
                     'servicio' => 'Funcionalidades',
                     'metodo' => 'respuesta_notificaciones',

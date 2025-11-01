@@ -12,18 +12,13 @@ use App\Models\Mercurio30;
 use App\Models\Mercurio36;
 use App\Models\Mercurio38;
 use App\Models\Mercurio41;
-use App\Services\Autentications\AutenticaEmpresa;
-use App\Services\Autentications\AutenticaIndependiente;
-use App\Services\Autentications\AutenticaParticular;
-use App\Services\Autentications\AutenticaPensionado;
-use App\Services\Autentications\AutenticaTrabajador;
 use App\Services\Entidades\EmpresaService;
 use App\Services\Entidades\IndependienteService;
 use App\Services\Entidades\ParticularService;
 use App\Services\Entidades\TrabajadorService;
 use App\Services\PreparaFormularios\GestionFirmaNoImage;
 use App\Services\Srequest;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -144,8 +139,8 @@ class PrincipalController extends ApplicationController
             ];
             $data = [];
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'AportesEmpresas',
                     'metodo' => 'aportes_empresa_mensual',
@@ -178,8 +173,8 @@ class PrincipalController extends ApplicationController
             $data = [];
             $labels = [];
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'PoblacionAfiliada',
                     'metodo' => 'categoria_trabajador_empresa',
@@ -236,8 +231,8 @@ class PrincipalController extends ApplicationController
                 'Diciembre',
             ];
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'CuotaMonetaria',
                     'metodo' => 'giro_trabajador_empresa',
@@ -299,8 +294,8 @@ class PrincipalController extends ApplicationController
             $coddoc = $this->user['coddoc'];
             $documento = $this->user['documento'];
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'actualiza_empresa_enlinea',
@@ -310,8 +305,8 @@ class PrincipalController extends ApplicationController
             $out = $procesadorComando->toArray();
             $salida_empresas = $out;
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'actualiza_trabajador_enlinea',
@@ -321,8 +316,8 @@ class PrincipalController extends ApplicationController
             $out = $procesadorComando->toArray();
             $salida_trabajadores = $out;
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'actualiza_conyuge_enlinea',
@@ -332,8 +327,8 @@ class PrincipalController extends ApplicationController
             $out = $procesadorComando->toArray();
             $salida_conyuges = $out;
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'actualiza_beneficiario_enlinea',
@@ -716,8 +711,8 @@ class PrincipalController extends ApplicationController
 
             switch ($tipo) {
                 case 'T':
-                    $procesadorComando = Comman::Api();
-                    $procesadorComando->runCli(
+                    $procesadorComando = new ApiSubsidio();
+                    $procesadorComando->send(
                         [
                             'servicio' => 'ComfacaEmpresas',
                             'metodo' => 'informacion_trabajador',
@@ -732,8 +727,8 @@ class PrincipalController extends ApplicationController
                 case 'I':
                 case 'F':
                 case 'O':
-                    $procesadorComando = Comman::Api();
-                    $procesadorComando->runCli(
+                    $procesadorComando = new ApiSubsidio();
+                    $procesadorComando->send(
                         [
                             'servicio' => 'ComfacaEmpresas',
                             'metodo' => 'informacion_empresa',

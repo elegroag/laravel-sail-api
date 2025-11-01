@@ -22,9 +22,9 @@ use App\Services\FormulariosAdjuntos\FacultativoAdjuntoService;
 use App\Services\FormulariosAdjuntos\Formularios;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\ChangeCuentaService;
-use App\Services\Utils\Comman;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
+use App\Services\Api\ApiSubsidio;
 use Illuminate\Http\Request;
 
 class FacultativoController extends ApplicationController
@@ -264,8 +264,8 @@ class FacultativoController extends ApplicationController
                 $solicitudPrevia = $solicitud->toArray();
             }
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_empresa',
@@ -283,8 +283,8 @@ class FacultativoController extends ApplicationController
                 $empresa = (count($out['data']) > 0) ? $out['data'] : false;
             }
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_trabajador',
@@ -418,13 +418,12 @@ class FacultativoController extends ApplicationController
 
         $mercurio36 = (new Mercurio36)->findFirst("id='{$id}'");
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_empresa',
-            ],
-            false
+            ]
         );
 
         $datos_captura = $procesadorComando->toArray();
@@ -569,24 +568,22 @@ class FacultativoController extends ApplicationController
                 $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
             }
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_empresa',
-                ],
-                false
+                ]
             );
             $paramsFacultativo = new ParamsFacultativo;
             $paramsFacultativo->setDatosCaptura($procesadorComando->toArray());
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_trabajadores',
-                ],
-                false
+                ]
             );
             $paramsTrabajador = new ParamsTrabajador;
             $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());

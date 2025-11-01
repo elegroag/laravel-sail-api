@@ -13,6 +13,7 @@ use App\Models\Mercurio10;
 use App\Models\Mercurio11;
 use App\Models\Mercurio31;
 use App\Models\Mercurio39;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Aprueba\ApruebaSolicitud;
 use App\Services\CajaServices\MadresComuniServices;
 use App\Services\Srequest;
@@ -188,8 +189,8 @@ class ApruebaComunitariaController extends ApplicationController
             exit;
         }
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_empresa',
@@ -218,8 +219,8 @@ class ApruebaComunitariaController extends ApplicationController
             '_tipsoc' => ParamsEmpresa::getTipoSociedades(),
         ])->render();
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',
@@ -250,8 +251,8 @@ class ApruebaComunitariaController extends ApplicationController
 
     public function loadParametrosView()
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_trabajadores',

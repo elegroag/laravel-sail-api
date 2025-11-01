@@ -24,6 +24,7 @@ use App\Services\Utils\CalculatorDias;
 use App\Services\Utils\Comman;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
+use App\Services\Api\ApiSubsidio;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
 
@@ -254,8 +255,8 @@ class ApruebaTrabajadorController extends ApplicationController
             $trabajadorServices = new TrabajadorServices;
             $mercurio31 = Mercurio31::where("id", $id)->first();
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_trabajadores',
@@ -265,8 +266,8 @@ class ApruebaTrabajadorController extends ApplicationController
             $paramsTrabajador = new ParamsTrabajador;
             $paramsTrabajador->setDatosCaptura($ps->toArray());
 
-            $px = Comman::Api();
-            $px->runCli(
+            $px = new ApiSubsidio();
+            $px->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_empresa',
@@ -280,8 +281,8 @@ class ApruebaTrabajadorController extends ApplicationController
                 $empresa_sisu = ($datos_captura['success']) ? $datos_captura['data'] : false;
             }
 
-            $pt = Comman::Api();
-            $pt->runCli(
+            $pt = new ApiSubsidio();
+            $pt->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'trabajador',
@@ -323,8 +324,8 @@ class ApruebaTrabajadorController extends ApplicationController
                 ]
             )->render();
 
-            $pr = Comman::Api();
-            $pr->runCli(
+            $pr = new ApiSubsidio();
+            $pr->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'buscar_sucursales_en_empresa',
@@ -340,8 +341,8 @@ class ApruebaTrabajadorController extends ApplicationController
                 }
             }
 
-            $pl = Comman::Api();
-            $pl->runCli(
+            $pl = new ApiSubsidio();
+            $pl->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'buscar_listas_en_empresa',
@@ -554,8 +555,8 @@ class ApruebaTrabajadorController extends ApplicationController
         $nit = $mercurio31->nit;
         $cedtra = $mercurio31->cedtra;
 
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_trabajador',
@@ -654,8 +655,8 @@ class ApruebaTrabajadorController extends ApplicationController
 
     public function loadParametrosView()
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_trabajadores',
@@ -722,13 +723,12 @@ class ApruebaTrabajadorController extends ApplicationController
         $trabajador = Mercurio31::where("id", $id)->first();
         $empresa = Mercurio30::where("nit", $trabajador->getNit())->first();
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_trabajadores',
-            ],
-            false
+            ]
         );
         $paramsTrabajador = new ParamsTrabajador;
         $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
@@ -843,8 +843,8 @@ class ApruebaTrabajadorController extends ApplicationController
                 throw new DebugException('Error el trabajador no se encuentra registrado', 501);
             }
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_trabajador',
@@ -863,8 +863,8 @@ class ApruebaTrabajadorController extends ApplicationController
                     'data' => [
                         'trabajador' => $out['data'],
                         'solicitud' => $mercurio31->getArray(),
-                        'trayectorias' => $out['data']['trayectoria'],
-                        'salarios' => $out['data']['salarios'],
+                        'trayectorias' => $out['data']['trayectoria'] ?? [],
+                        'salarios' => $out['data']['salarios'] ?? [],
                         'title' => 'Trabajador SisuWeb ' . $mercurio31->getCedtra(),
                     ],
                 ],
@@ -986,8 +986,8 @@ class ApruebaTrabajadorController extends ApplicationController
             if (! $mercurio31) {
                 throw new DebugException('El trabajador no se encuentra aprobado para consultar sus datos.', 501);
             }
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_trabajadores',
@@ -1000,8 +1000,8 @@ class ApruebaTrabajadorController extends ApplicationController
             $paramsTrabajador = new ParamsTrabajador;
             $paramsTrabajador->setDatosCaptura($datos_captura);
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'trabajador',
@@ -1093,8 +1093,8 @@ class ApruebaTrabajadorController extends ApplicationController
                 throw new DebugException('Los datos del trabajador no son validos para procesar.', 501);
             }
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaTrabajadores',
                     'metodo' => 'informacion_trabajador',
@@ -1107,8 +1107,8 @@ class ApruebaTrabajadorController extends ApplicationController
             $out = $ps->toArray();
             $trabajadorSisu = $out['data'];
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'deshacer_aprobacion_trabajador',
@@ -1203,8 +1203,8 @@ class ApruebaTrabajadorController extends ApplicationController
                     throw new DebugException('La empresa no se encuentra registrada.', 201);
                 }
 
-                $procesadorComando = Comman::Api();
-                $procesadorComando->runCli(
+                $procesadorComando = new ApiSubsidio();
+                $procesadorComando->send(
                     [
                         'servicio' => 'AportesEmpresas',
                         'metodo' => 'buscarAportesEmpresa',

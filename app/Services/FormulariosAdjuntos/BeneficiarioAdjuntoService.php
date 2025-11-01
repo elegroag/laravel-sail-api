@@ -14,7 +14,7 @@ use App\Models\Mercurio41;
 use App\Services\Entidades\TrabajadorService;
 use App\Services\Formularios\FactoryDocuments;
 use App\Services\PreparaFormularios\CifrarDocumento;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 
 class BeneficiarioAdjuntoService
 {
@@ -51,8 +51,8 @@ class BeneficiarioAdjuntoService
             'coddoc' => $this->user['coddoc'],
         ])->first();
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_trabajadores',
@@ -63,8 +63,8 @@ class BeneficiarioAdjuntoService
         $paramsConyuge = new ParamsTrabajador;
         $paramsConyuge->setDatosCaptura($datos_captura);
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_beneficiarios',
@@ -203,8 +203,8 @@ class BeneficiarioAdjuntoService
         ])->first();
 
         if (! $mconyuge) {
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_conyuge',

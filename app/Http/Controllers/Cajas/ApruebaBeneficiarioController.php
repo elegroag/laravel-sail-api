@@ -23,6 +23,7 @@ use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
+use App\Services\Api\ApiSubsidio;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -373,8 +374,8 @@ class ApruebaBeneficiarioController extends ApplicationController
             }
 
             $trabajador_sisu = false;
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'trabajador',
@@ -396,8 +397,8 @@ class ApruebaBeneficiarioController extends ApplicationController
                 $trabajador->fill($trabajador_sisu);
             }
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_beneficiario',
@@ -430,8 +431,8 @@ class ApruebaBeneficiarioController extends ApplicationController
                 }
             }
 
-            $px = Comman::Api();
-            $px->runCli(
+            $px = new ApiSubsidio();
+            $px->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_beneficiarios',
@@ -491,8 +492,8 @@ class ApruebaBeneficiarioController extends ApplicationController
 
     public function loadParametrosView()
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_beneficiarios',
@@ -634,8 +635,8 @@ class ApruebaBeneficiarioController extends ApplicationController
             exit;
         }
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_beneficiario',
@@ -721,8 +722,8 @@ class ApruebaBeneficiarioController extends ApplicationController
 
             $beneficiario = Mercurio34::where("id", $id)->first();
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'actualiza_beneficiario',
@@ -793,8 +794,8 @@ class ApruebaBeneficiarioController extends ApplicationController
                 throw new DebugException('Error al buscar la beneficiario', 501);
             }
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_beneficiarios',
@@ -805,8 +806,8 @@ class ApruebaBeneficiarioController extends ApplicationController
             $paramsBeneficiario = new ParamsBeneficiario;
             $paramsBeneficiario->setDatosCaptura($datos_captura);
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_beneficiario',
@@ -904,8 +905,8 @@ class ApruebaBeneficiarioController extends ApplicationController
                 throw new DebugException('Los datos del beneficiario no son validos para procesar.', 501);
             }
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_beneficiario',
@@ -920,7 +921,7 @@ class ApruebaBeneficiarioController extends ApplicationController
             $out = $procesadorComando->toArray();
             $beneficiarioSisu = $out['data'];
 
-            $procesadorComando->runCli(
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'deshacer_aprobacion_beneficiario',

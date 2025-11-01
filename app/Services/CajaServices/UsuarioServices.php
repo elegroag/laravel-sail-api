@@ -6,7 +6,7 @@ use App\Exceptions\AuthException;
 use App\Models\Gener02;
 use App\Models\Gener21;
 use App\Models\Mercurio07;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Utils\Table;
 
 class UsuarioServices
@@ -22,7 +22,7 @@ class UsuarioServices
 
     public function __construct()
     {
-        $this->procesadorComando = Comman::Api();
+        $this->procesadorComando = new ApiSubsidio();
         $this->table = new Table;
     }
 
@@ -67,7 +67,7 @@ class UsuarioServices
 
     public function buscarUsuarioByUser($user)
     {
-        $this->procesadorComando->runCli(
+        $this->procesadorComando->send(
             [
                 'servicio' => 'Usuarios',
                 'metodo' => 'trae_usuario',
@@ -81,8 +81,8 @@ class UsuarioServices
             throw new AuthException('El usuario no es correcto para continuar con la autenticación. 4', 4);
         }
         if ($usuario->estado == 'B') {
-            throw new AuthException('El usuario se encuentra bloqueado, por fallar en la autenticación con más de 3 intentos.'.
-                ' Para poder desbloquear su cuenta puede recuperar la cuenta de usuario o solicitar el desbloqueo de su cuenta, '.
+            throw new AuthException('El usuario se encuentra bloqueado, por fallar en la autenticación con más de 3 intentos.' .
+                ' Para poder desbloquear su cuenta puede recuperar la cuenta de usuario o solicitar el desbloqueo de su cuenta, ' .
                 'al aréa de sistemas, soporte_sistemas@comfaca.com.', 5);
         }
 

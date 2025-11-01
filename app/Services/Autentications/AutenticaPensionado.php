@@ -23,7 +23,7 @@ class AutenticaPensionado extends AutenticaGeneral
         /**
          * buscar empresa en sisu
          */
-        $this->procesadorComando->runCli(
+        $this->procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',
@@ -54,16 +54,16 @@ class AutenticaPensionado extends AutenticaGeneral
         }
 
         if ($sucurPension == false) {
-            $this->message = 'Error acceso incorrecto. El afiliado pensionado tiene un error de registro en su afiliación, '.
-                'se debe comunicar a la dirección de correo: <b>afiliacionyregistro@comfaca.com</b> indicando la comprobación del estado afiliado pensionado. '.
+            $this->message = 'Error acceso incorrecto. El afiliado pensionado tiene un error de registro en su afiliación, ' .
+                'se debe comunicar a la dirección de correo: <b>afiliacionyregistro@comfaca.com</b> indicando la comprobación del estado afiliado pensionado. ' .
                 'No olvidar el compartir la dirección email, el número de cedula y el nombre del afiliado, para poder identificar al afiliado.';
 
             return false;
         }
 
         if ($coddoc == 3 || $coddoc == 7 || $coddoc == 2) {
-            $this->message = 'El tipo documento del afiliado pensionado no es valido, debe solicitar el cambio en tipo documento a la dirección: '.
-                '<b>afiliacionyregistro@comfaca.com</b> indicando la comprobación del estado afiliado pensionado con tipo documento errado.'.
+            $this->message = 'El tipo documento del afiliado pensionado no es valido, debe solicitar el cambio en tipo documento a la dirección: ' .
+                '<b>afiliacionyregistro@comfaca.com</b> indicando la comprobación del estado afiliado pensionado con tipo documento errado.' .
                 'No olvidar el compartir la dirección email, el número de cedula y el nombre del afiliado, para poder identificar al afiliado.';
 
             return false;
@@ -91,8 +91,8 @@ class AutenticaPensionado extends AutenticaGeneral
         $this->estadoAfiliado = ($afiliado['estado'] != 'I') ? 'A' : 'I';
 
         if ($afiliado['coddoc'] != $coddoc) {
-            $this->message = 'El tipo documento del afiliado pensionado no es valido, debe solicitar el cambio en tipo documento a la dirección: '.
-                '<b>afiliacionyregistro@comfaca.com</b> indicando la comprobación del estado afiliado pensionado con tipo documento errado.'.
+            $this->message = 'El tipo documento del afiliado pensionado no es valido, debe solicitar el cambio en tipo documento a la dirección: ' .
+                '<b>afiliacionyregistro@comfaca.com</b> indicando la comprobación del estado afiliado pensionado con tipo documento errado.' .
                 'No olvidar el compartir la dirección email, el número de cedula y el nombre del afiliado, para poder identificar al afiliado.';
 
             return false;
@@ -109,8 +109,8 @@ class AutenticaPensionado extends AutenticaGeneral
             if ($usuarioParticular == false) {
 
                 if (strlen($afiliado['email']) == 0) {
-                    $this->message = 'La dirección email no es valida para realizar el registro. '.
-                        'Debe solicitar cambio del correo personal a la dirección <b>afiliacionyregistro@comfaca.com</b> indicando la necesidad. '.
+                    $this->message = 'La dirección email no es valida para realizar el registro. ' .
+                        'Debe solicitar cambio del correo personal a la dirección <b>afiliacionyregistro@comfaca.com</b> indicando la necesidad. ' .
                         'No olvidar el compartir la dirección email, el número de cedula y el nombre del afiliado, para realizar la comprobación y los cambios solicitados.';
 
                     return false;
@@ -138,9 +138,9 @@ class AutenticaPensionado extends AutenticaGeneral
                 $crearUsuario->crearOpcionesRecuperacion($key);
                 $this->prepareMail($usuarioParticular, $clave, 'Particular');
 
-                $this->message = 'El afiliado pensionado no está activo en el "SISU", debe realizar el proceso de afiliación, para acceder a los servicios de comfaca en línea. '.
-                    'Es necesario readicar una nueva solicitud de afiliación ya que el pensionado se encuentra <b>Inactivo</b>. '.
-                    'Las credenciales de acceso le serán enviadas al respectivo correo registrado. '.
+                $this->message = 'El afiliado pensionado no está activo en el "SISU", debe realizar el proceso de afiliación, para acceder a los servicios de comfaca en línea. ' .
+                    'Es necesario readicar una nueva solicitud de afiliación ya que el pensionado se encuentra <b>Inactivo</b>. ' .
+                    'Las credenciales de acceso le serán enviadas al respectivo correo registrado. ' .
                     'Ingresa a la opción 2 de "Afiliación Pendiente"';
             } else {
                 /**
@@ -186,8 +186,8 @@ class AutenticaPensionado extends AutenticaGeneral
                     $usuarioParticular->save();
                 }
 
-                $this->message = 'El afiliado no está activo en el "SISU", debe realizar el proceso de afiliación, para acceder a los servicios de comfaca en línea. '.
-                    'Es necesario readicar una nueva solicitud de afiliación ya que el afiliado se encuentra <b>Inactivo</b>. '.
+                $this->message = 'El afiliado no está activo en el "SISU", debe realizar el proceso de afiliación, para acceder a los servicios de comfaca en línea. ' .
+                    'Es necesario readicar una nueva solicitud de afiliación ya que el afiliado se encuentra <b>Inactivo</b>. ' .
                     'Ingresa a la opción 2 de "Afiliación Pendiente"';
             }
 
@@ -237,7 +237,7 @@ class AutenticaPensionado extends AutenticaGeneral
                 $crearUsuario->crearOpcionesRecuperacion($key);
                 $this->prepareMail($usuarioPensionado, $clave);
 
-                $this->message = 'El afiliado está activo y se ha creado de forma automatica la cuenta de Pensionado, '.
+                $this->message = 'El afiliado está activo y se ha creado de forma automatica la cuenta de Pensionado, ' .
                     'las credenciales de acceso le serán enviadas al respectivo correo registrado, y debe usar la nueva clave generada.';
 
                 return false;

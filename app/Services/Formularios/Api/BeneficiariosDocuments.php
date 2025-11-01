@@ -4,7 +4,7 @@ namespace App\Services\Formularios\Api;
 
 use App\Library\Collections\ParamsBeneficiario;
 use App\Models\Gener18;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 
 class BeneficiariosDocuments
 {
@@ -48,7 +48,7 @@ class BeneficiariosDocuments
             $context_trabajador = [
                 'cedtra' => $this->trabajador->cedtra ?? null,
                 'detdoc_detalle' => $detdoc_detalle_trabajador,
-                'nombre_trabajador' => trim(($this->trabajador->prinom ?? '').' '.($this->trabajador->segnom ?? '').' '.($this->trabajador->priape ?? '').' '.($this->trabajador->segape ?? '')),
+                'nombre_trabajador' => trim(($this->trabajador->prinom ?? '') . ' ' . ($this->trabajador->segnom ?? '') . ' ' . ($this->trabajador->priape ?? '') . ' ' . ($this->trabajador->segape ?? '')),
                 'nit' => $this->trabajador->nit ?? null,
                 'detdoc_rua_trabajador' => $detdoc_rua_trabajador,
                 ...$this->trabajador->toArray(),
@@ -65,14 +65,14 @@ class BeneficiariosDocuments
             'discapacidad_name' => $discapacidad_name,
             'tippag_detalle' => $tippag_detalle,
             'detdoc_rua_beneficiario' => $detdoc_rua_beneficiario,
-            'nombre_beneficiario' => trim(($this->beneficiario->prinom ?? '').' '.($this->beneficiario->segnom ?? '').' '.($this->beneficiario->priape ?? '').' '.($this->beneficiario->segape ?? '')),
+            'nombre_beneficiario' => trim(($this->beneficiario->prinom ?? '') . ' ' . ($this->beneficiario->segnom ?? '') . ' ' . ($this->beneficiario->priape ?? '') . ' ' . ($this->beneficiario->segape ?? '')),
             'trabajador' => $context_trabajador,
             ...$this->beneficiario->toArray(),
         ];
 
         foreach ($this->params['oficios'] as $oficio) {
-            $ps = Comman::Api();
-            $ps->runCli([
+            $ps = new ApiSubsidio();
+            $ps->send([
                 'servicio' => 'Python',
                 'metodo' => 'generate-pdf',
                 'params' => [

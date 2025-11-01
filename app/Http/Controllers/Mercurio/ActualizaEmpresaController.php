@@ -28,6 +28,7 @@ use App\Services\Utils\Comman;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\Logger;
 use App\Services\Utils\SenderValidationCaja;
+use App\Services\Api\ApiSubsidio;
 use Illuminate\Http\Request;
 
 class ActualizaEmpresaController extends ApplicationController
@@ -239,13 +240,12 @@ class ActualizaEmpresaController extends ApplicationController
                 $zonas["{$entity->getCodzon()}"] = $entity->getDetzon();
             }
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_empresa',
-                ],
-                false
+                ]
             );
             $paramsEmpresa = new ParamsEmpresa;
             $paramsEmpresa->setDatosCaptura($procesadorComando->toArray());
@@ -468,13 +468,12 @@ class ActualizaEmpresaController extends ApplicationController
             })->toArray();
         }
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_empresa',
-            ],
-            false
+            ]
         );
         $paramsEmpresa = new ParamsEmpresa;
         $paramsEmpresa->setDatosCaptura($procesadorComando->toArray());

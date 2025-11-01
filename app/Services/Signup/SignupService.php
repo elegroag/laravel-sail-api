@@ -7,7 +7,7 @@ use App\Models\Mercurio07;
 use App\Services\PreparaFormularios\GestionFirmaNoImage;
 use App\Services\Srequest;
 use App\Services\Utils\AsignarFuncionario;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 
 class SignupService
 {
@@ -217,8 +217,8 @@ class SignupService
      */
     public function buscaEmpresaSisu($nit)
     {
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',
@@ -261,8 +261,8 @@ class SignupService
 
     public function validaTrabajadorEmpresa()
     {
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',
@@ -279,7 +279,7 @@ class SignupService
             return false;
         }
 
-        $ps->runCli(
+        $ps->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_trabajador',

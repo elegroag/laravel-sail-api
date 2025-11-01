@@ -3,15 +3,20 @@
 namespace App\Services\Aportes;
 
 use App\Services\SatApi\SatConsultaServices;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 
 class AporteServices
 {
     public function ConsultaEstadoAporte($sat15)
     {
         $tipopc = 2;
-        $apiRest = Comman::Api();
-        $apiRest->runCli(0, ['servicio' => 'captura_empresa', 'params' => []]);
+        $apiRest = new ApiSubsidio();
+        $apiRest->send(
+            [
+                'servicio' => 'captura_empresa',
+                'params' => []
+            ]
+        );
         $datos_captura = $apiRest->toArray();
 
         if ($datos_captura['flag'] == true) {

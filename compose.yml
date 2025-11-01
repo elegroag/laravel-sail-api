@@ -2,7 +2,7 @@ services:
   laravel.test:
     container_name: 'sail-enlinea'
     build:
-      context: ./vendor/laravel/sail/runtimes/8.4
+      context: ./runtimes
       dockerfile: Dockerfile
       args:
         WWWGROUP: '${WWWGROUP}'

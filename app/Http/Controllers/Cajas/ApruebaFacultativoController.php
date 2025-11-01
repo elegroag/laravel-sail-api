@@ -14,6 +14,7 @@ use App\Models\Mercurio11;
 use App\Models\Mercurio36;
 use App\Models\Mercurio37;
 use App\Models\Mercurio41;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Reports\CsvReportStrategy;
 use App\Services\Reports\ExcelReportStrategy;
 use App\Services\Reports\ReportGenerator;
@@ -245,8 +246,8 @@ class ApruebaFacultativoController extends ApplicationController
             }
             $facultativoServices = new FacultativoServices;
             $mercurio36 = Mercurio36::where("id", $id)->first();
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_facultativo',
@@ -277,8 +278,8 @@ class ApruebaFacultativoController extends ApplicationController
                 '_codgir' => ParamsFacultativo::getCodigoGiro(),
             ])->render();
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_empresa',
@@ -391,13 +392,12 @@ class ApruebaFacultativoController extends ApplicationController
         $this->setParamToView('idModel', $id);
         $this->setParamToView('det_tipo', Mercurio06::where("tipo = '{$mercurio36->getTipo()}'")->first()->getDetalle());
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_pensionado',
-            ],
-            false
+            ]
         );
 
         $paramsPensionado = new ParamsPensionado;
@@ -482,9 +482,9 @@ class ApruebaFacultativoController extends ApplicationController
 
     public function loadParametrosView($datos_captura = '')
     {
-        $ps = Comman::Api();
+        $ps = new ApiSubsidio();
         if ($datos_captura == '') {
-            $ps->runCli(
+            $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_facultativo',

@@ -27,7 +27,7 @@ class AutenticaTrabajador extends AutenticaGeneral
      */
     public function comprobarSISU($documento, $coddoc)
     {
-        $this->procesadorComando->runCli(
+        $this->procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_trabajador',
@@ -71,7 +71,7 @@ class AutenticaTrabajador extends AutenticaGeneral
         // trabajadores no inactivos y no muertos
         if ($afiliado['estado'] == 'I' || $afiliado['estado'] == 'M') {
 
-            $this->message = 'El trabajador se encuentra actualmente (INACTIVO) en el sistema principal de Subsidio, '.
+            $this->message = 'El trabajador se encuentra actualmente (INACTIVO) en el sistema principal de Subsidio, ' .
                 'dispone de acceso a la plataforma, pero no puede solicitar afiliación de beneficiarios, conyuges, actualización de datos y otros servicios que ofrece COMFACA.';
             $this->afiliado = $usuarioTrabajador;
 
@@ -84,7 +84,7 @@ class AutenticaTrabajador extends AutenticaGeneral
             if ($usuarioTrabajador == false) {
 
                 if (strlen($afiliado['email']) > 0) {
-                    $nombre = strtoupper($afiliado['prinom'].' '.$afiliado['segnom'].' '.$afiliado['priape'].' '.$afiliado['segape']);
+                    $nombre = strtoupper($afiliado['prinom'] . ' ' . $afiliado['segnom'] . ' ' . $afiliado['priape'] . ' ' . $afiliado['segape']);
                     $codzon = ($afiliado['codzon'] == '') ? 18001 : $afiliado['codzon'];
 
                     $clave = genera_clave(8);
@@ -106,14 +106,14 @@ class AutenticaTrabajador extends AutenticaGeneral
                     $crearUsuario->crearOpcionesRecuperacion($key);
                     $this->prepareMail($usuarioTrabajador, $clave);
 
-                    $this->message = 'El trabajador se encuentra actualmente activo en el sistema principal de Subsidio, '.
+                    $this->message = 'El trabajador se encuentra actualmente activo en el sistema principal de Subsidio, ' .
                         'las credenciales de acceso le serán enviadas al respectivo correo registrado, y debe usar la nueva clave generada.';
 
                     return false;
                 } else {
 
-                    $this->message = 'La dirección email no es valida para realizar el registro. '.
-                        'Debe solicitar cambio del correo personal a la dirección afiliacionyregistro@comfaca.com indicando la necesidad. '.
+                    $this->message = 'La dirección email no es valida para realizar el registro. ' .
+                        'Debe solicitar cambio del correo personal a la dirección afiliacionyregistro@comfaca.com indicando la necesidad. ' .
                         'No olvidar el compartir la dirección email, el número de cedula y el nombre del afiliado, para realizar la comprobación y los cambios solicitados.';
 
                     return false;

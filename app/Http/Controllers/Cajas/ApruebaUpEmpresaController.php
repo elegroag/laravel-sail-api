@@ -14,6 +14,7 @@ use App\Models\Mercurio11;
 use App\Models\Mercurio30;
 use App\Models\Mercurio33;
 use App\Models\Mercurio47;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Aprueba\ApruebaSolicitud;
 use App\Services\CajaServices\UpDatosEmpresaServices;
 use App\Services\Srequest;
@@ -356,8 +357,8 @@ class ApruebaUpEmpresaController extends ApplicationController
 
     public function loadParametrosView()
     {
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_empresa',
@@ -590,8 +591,8 @@ class ApruebaUpEmpresaController extends ApplicationController
                 $dataItems["{$campo}"] = $row->getValor();
             }
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_empresa',
@@ -616,8 +617,8 @@ class ApruebaUpEmpresaController extends ApplicationController
                 '_tipdoc' => ParamsEmpresa::getTipoDocumentos(),
             ])->render();
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_empresa',

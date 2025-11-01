@@ -16,6 +16,7 @@ use App\Services\Autentications\AutenticaService;
 use App\Services\Srequest;
 use App\Services\Utils\Comman;
 use App\Services\Utils\SenderEmail;
+use App\Services\Api\ApiSubsidio;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -372,7 +373,7 @@ class AuthController extends Controller
                 }
             }
 
-            $ps = Comman::Api();
+            $ps = new ApiSubsidio();
             switch ($tipo) {
                 case 'T':
                     $url = 'mercurio/principal/index';
@@ -406,7 +407,7 @@ class AuthController extends Controller
                     break;
             }
 
-            $ps->runCli([
+            $ps->send([
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => $metodo,
                 'params' => $params,

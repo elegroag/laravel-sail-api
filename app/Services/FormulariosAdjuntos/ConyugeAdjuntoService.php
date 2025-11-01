@@ -14,7 +14,7 @@ use App\Models\Mercurio41;
 use App\Services\Entidades\TrabajadorService;
 use App\Services\Formularios\Generation\DocumentGenerationManager;
 use App\Services\PreparaFormularios\CifrarDocumento;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 
 class ConyugeAdjuntoService
 {
@@ -53,8 +53,8 @@ class ConyugeAdjuntoService
     {
         $this->lfirma = Mercurio16::where("documento", $this->user['documento'])
             ->where("coddoc", $this->user['coddoc'])->first();
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_conyuges',
@@ -75,20 +75,15 @@ class ConyugeAdjuntoService
 
         $this->filename = strtotime('now') . "_{$this->request->cedcon}.pdf";
         $manager = new DocumentGenerationManager();
-        $documento = $manager->generate('api', 'conyuge', [
+        $manager->generate('api', 'conyuge', [
             'categoria' => 'formulario',
-            'filename' => $this->filename,
-            'background' => 'img/form/conyuge/formulario_adicion_conyuge.png',
+            'output' => storage_path('temp/' . $this->filename),
+            'template' => 'adicion-conyuge.html',
             'conyuge' => $this->request,
             'trabajador' => $this->getTrabajador(),
             'solicitante' => $solicitante,
-            'firma' => $this->lfirma,
         ]);
-
-        // En canal local, main() retorna el Documento listo para outPut
-        $documento->outPut();
         $this->cifrarDocumento();
-
         return $this;
     }
 
@@ -150,7 +145,7 @@ class ConyugeAdjuntoService
             'categoria' => 'declaracion',
             'conyuge' => $this->request,
             'trabajador' => $this->getTrabajador(),
-            'template' => 'declaracion.html',
+            'template' => 'declaracion-conyuge.html',
             'output' => storage_path('temp/' . $this->filename),
         ]);
         $this->cifrarDocumento();

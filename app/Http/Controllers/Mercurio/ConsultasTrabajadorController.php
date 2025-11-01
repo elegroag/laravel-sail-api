@@ -15,6 +15,7 @@ use App\Models\Mercurio33;
 use App\Models\Mercurio34;
 use App\Models\Mercurio45;
 use App\Models\Mercurio47;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Utils\Comman;
 use App\Services\Utils\Logger;
 use Illuminate\Http\Request;
@@ -122,8 +123,8 @@ class ConsultasTrabajadorController extends ApplicationController
     {
         $this->setResponse('ajax');
         $cedtra = parent::getActUser('documento');
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'PoblacionAfiliada',
                 'metodo' => 'nucleo_familiar_trabajador',
@@ -144,8 +145,8 @@ class ConsultasTrabajadorController extends ApplicationController
             $dataBeneficiarios = $out['data']['beneficiarios'];
         }
 
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_trabajadores',
@@ -154,8 +155,8 @@ class ConsultasTrabajadorController extends ApplicationController
         $paramsTrabajador = new ParamsTrabajador;
         $paramsTrabajador->setDatosCaptura($ps->toArray());
 
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_conyuges',
@@ -164,8 +165,8 @@ class ConsultasTrabajadorController extends ApplicationController
         $paramsConyuge = new ParamsConyuge;
         $paramsConyuge->setDatosCaptura($ps->toArray());
 
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_beneficiarios',
@@ -231,8 +232,8 @@ class ConsultasTrabajadorController extends ApplicationController
             $params['perini'] = $perini;
             $params['perfin'] = $perfin;
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'CuotaMonetaria',
                     'metodo' => 'cuotas_by_trabajador',
@@ -281,8 +282,8 @@ class ConsultasTrabajadorController extends ApplicationController
             $params['perini'] = $perini;
             $params['perfin'] = $perfin;
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'CuotaMonetaria',
                     'metodo' => 'nogiro_by_trabajador',
@@ -331,8 +332,8 @@ class ConsultasTrabajadorController extends ApplicationController
             $params['perini'] = $perini;
             $params['perfin'] = $perfin;
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'AportesEmpresas',
                     'metodo' => 'planilla_trabajador',
@@ -365,8 +366,8 @@ class ConsultasTrabajadorController extends ApplicationController
 
     public function consultaTarjeta()
     {
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'CuotaMonetaria',
                 'metodo' => 'saldo_pendiente_cobrar_trabajador',

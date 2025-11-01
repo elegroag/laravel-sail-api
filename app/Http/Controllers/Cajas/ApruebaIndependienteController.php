@@ -14,6 +14,7 @@ use App\Models\Mercurio07;
 use App\Models\Mercurio11;
 use App\Models\Mercurio37;
 use App\Models\Mercurio41;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Aprueba\ApruebaSolicitud;
 use App\Services\CajaServices\IndependienteServices;
 use App\Services\Reports\CsvReportStrategy;
@@ -543,8 +544,8 @@ class ApruebaIndependienteController extends ApplicationController
             }
 
             $mercurio41 = Mercurio41::where("id", $id)->first();
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_independiente',
@@ -574,8 +575,8 @@ class ApruebaIndependienteController extends ApplicationController
                 '_tipafi' => ParamsIndependiente::getTipoAfiliado(),
             ])->render();
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_empresa',
@@ -610,8 +611,8 @@ class ApruebaIndependienteController extends ApplicationController
 
     public function loadParametrosView()
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_independiente',
@@ -681,13 +682,12 @@ class ApruebaIndependienteController extends ApplicationController
         $this->setParamToView('seguimiento', $this->independienteServices->seguimiento($mercurio41));
 
         $mercurio01 = Mercurio01::first();
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_independiente',
-            ],
-            false
+            ]
         );
         $paramsEmpresa = new ParamsIndependiente;
         $paramsEmpresa->setDatosCaptura($procesadorComando->toArray());
@@ -795,8 +795,8 @@ class ApruebaIndependienteController extends ApplicationController
             exit();
         }
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',
@@ -1004,8 +1004,8 @@ class ApruebaIndependienteController extends ApplicationController
                     throw new DebugException('La empresa no se encuentra registrada.', 201);
                 }
 
-                $procesadorComando = Comman::Api();
-                $procesadorComando->runCli(
+                $procesadorComando = new ApiSubsidio();
+                $procesadorComando->send(
                     [
                         'servicio' => 'AportesEmpresas',
                         'metodo' => 'buscarAportesEmpresa',
@@ -1047,8 +1047,8 @@ class ApruebaIndependienteController extends ApplicationController
                 throw new DebugException('La empresa no se encuentra aprobada para consultar sus datos.', 501);
             }
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_empresa',
@@ -1058,8 +1058,8 @@ class ApruebaIndependienteController extends ApplicationController
             $paramsEmpresa = new ParamsIndependiente;
             $paramsEmpresa->setDatosCaptura($datos_captura);
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_empresa',
@@ -1135,8 +1135,8 @@ class ApruebaIndependienteController extends ApplicationController
                 throw new DebugException('Los datos de la empresa no son validos para procesar.', 501);
             }
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_empresa',
@@ -1154,7 +1154,7 @@ class ApruebaIndependienteController extends ApplicationController
             $out = $ps->toArray();
             $empresaSisu = $out['data'];
 
-            $ps->runCli(
+            $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'deshacer_aprobacion_independiente',

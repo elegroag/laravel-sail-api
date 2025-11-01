@@ -5,7 +5,7 @@ namespace App\Services\Signup;
 use App\Exceptions\DebugException;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Utils\CrearUsuario;
 use App\Services\Utils\Generales;
 use App\Services\Utils\SenderEmail;
@@ -61,7 +61,7 @@ class SignupDomestico
 
     public function __construct()
     {
-        $this->procesadorComando = Comman::Api();
+        $this->procesadorComando = new ApiSubsidio();
         $this->tipo = 'N';
     }
 
@@ -106,9 +106,9 @@ class SignupDomestico
             $this->crearSolicitud = true;
         } else {
             if ($usuarioParticular->getEstado() == 'A') {
-                throw new DebugException('El usuario ya existe y se encuentra registrado en el sistema. '.
-                    'La solicitud para afiliación está pendiente de enviar, compruebe las credenciales de acceso en la dirección de correo registrada previamente: '.
-                    mask_email($usuarioParticular->getEmail()).'. <br/>'.
+                throw new DebugException('El usuario ya existe y se encuentra registrado en el sistema. ' .
+                    'La solicitud para afiliación está pendiente de enviar, compruebe las credenciales de acceso en la dirección de correo registrada previamente: ' .
+                    mask_email($usuarioParticular->getEmail()) . '. <br/>' .
                     ' Y ahora puedes ingresar por la opción "2 Afiliación Pendiente" continua el proceso de afiliación.', 501);
             } else {
                 // actualiza y activa la cuenta de la persona solo si el correo es igual al reportado

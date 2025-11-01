@@ -14,7 +14,7 @@ use App\Models\Mercurio33;
 use App\Models\Mercurio37;
 use App\Models\Mercurio47;
 use App\Services\Srequest;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 use Illuminate\Support\Facades\DB;
 
 class DatosTrabajadorService
@@ -99,8 +99,8 @@ class DatosTrabajadorService
     public function buscarEmpresaSubsidio($nit)
     {
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',
@@ -358,8 +358,8 @@ class DatosTrabajadorService
 
     public function buscarTrabajadorSubsidio($cedtra)
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_trabajador',
@@ -395,8 +395,8 @@ class DatosTrabajadorService
 
     public function paramsApi()
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_trabajadores',
@@ -432,8 +432,8 @@ class DatosTrabajadorService
 
     public function findApiTrabajadoresByNit($nit)
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'listar_trabajadores',

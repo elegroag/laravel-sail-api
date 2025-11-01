@@ -4,7 +4,7 @@ namespace App\Services\Formularios\Api;
 
 use App\Library\Collections\ParamsFacultativo;
 use App\Models\Gener18;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 
 class FacultativosDocuments
 {
@@ -43,7 +43,7 @@ class FacultativosDocuments
         $giro_name = ($this->facultativo->giro ?? null) ? ($giro[$this->facultativo->giro] ?? null) : null;
         $codigo_giro_name = ($this->facultativo->codgir ?? null) ? ($codigo_giro[$this->facultativo->codgir] ?? null) : null;
 
-        $nombre_facultativo = trim(($this->facultativo->prinom ?? '').' '.($this->facultativo->segnom ?? '').' '.($this->facultativo->priape ?? '').' '.($this->facultativo->segape ?? ''));
+        $nombre_facultativo = trim(($this->facultativo->prinom ?? '') . ' ' . ($this->facultativo->segnom ?? '') . ' ' . ($this->facultativo->priape ?? '') . ' ' . ($this->facultativo->segape ?? ''));
 
         // Contexto para los templates
         $context = [
@@ -62,8 +62,8 @@ class FacultativosDocuments
         ];
 
         foreach ($this->params['oficios'] as $oficio) {
-            $ps = Comman::Api();
-            $ps->runCli([
+            $ps = new ApiSubsidio();
+            $ps->send([
                 'servicio' => 'Python',
                 'metodo' => 'generate-pdf',
                 'params' => [

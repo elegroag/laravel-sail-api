@@ -26,6 +26,7 @@ use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
+use App\Services\Api\ApiSubsidio;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -57,8 +58,8 @@ class IndependienteController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user') ?? null;
+        $this->tipo = session('tipo') ?? null;
     }
 
     /**
@@ -103,15 +104,11 @@ class IndependienteController extends ApplicationController
      */
     public function show(Request $request, Response $response, int $id, int $documento)
     {
-        $this->setResponse('ajax');
-
         $mercurio41 = Mercurio41::where('id', $id)->where('documento', $documento)->first();
-
         if ($mercurio41 == false) {
             $mercurio41 = new Mercurio41;
         }
-
-        return $this->renderObject(
+        return response()->json(
             [
                 'success' => true,
                 'entity' => $mercurio41->toArray(),
@@ -121,11 +118,8 @@ class IndependienteController extends ApplicationController
 
     /**
      * guardar function
-     *
      * @changed [2023-12-01]
-     *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
      * @return void
      */
     public function guardar(Request $request)
@@ -309,8 +303,8 @@ class IndependienteController extends ApplicationController
                 $solicitudPrevia = $solicitud->getArray();
             }
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_empresa',
@@ -323,8 +317,8 @@ class IndependienteController extends ApplicationController
             $out = $procesadorComando->toArray();
             $empresa = (count($out['data']) > 0) ? $out['data'] : false;
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_trabajador',
@@ -465,13 +459,12 @@ class IndependienteController extends ApplicationController
         try {
 
             $mercurio41 = Mercurio41::where('id', $id)->first();
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_empresa',
-                ],
-                false
+                ]
             );
 
             $datos_captura = $procesadorComando->toArray();

@@ -4,6 +4,8 @@ namespace App\Services\Api;
 
 abstract class ApiAbstract
 {
+    protected $mode;
+
     protected $app;
 
     protected $db;

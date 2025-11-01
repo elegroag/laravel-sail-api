@@ -12,6 +12,7 @@ use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Logger;
 use App\Services\Utils\SenderEmail;
+use App\Services\Api\ApiSubsidio;
 use Illuminate\Http\Request;
 
 class MovimientosController extends ApplicationController
@@ -134,8 +135,8 @@ class MovimientosController extends ApplicationController
                 ->where('coddoc', $coddoc)
                 ->update(['clave' => $mclave]);
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_empresa',

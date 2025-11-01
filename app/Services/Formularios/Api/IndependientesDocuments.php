@@ -4,7 +4,7 @@ namespace App\Services\Formularios\Api;
 
 use App\Library\Collections\ParamsIndependiente;
 use App\Models\Gener18;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 
 class IndependientesDocuments
 {
@@ -41,7 +41,7 @@ class IndependientesDocuments
         $banco_name = ($this->independiente->codban ?? null) ? ($bancos[$this->independiente->codban] ?? null) : null;
         $tipo_cuenta_name = ($this->independiente->tipcue ?? null) ? ($tipo_cuenta[$this->independiente->tipcue] ?? null) : null;
 
-        $nombre_independiente = trim(($this->independiente->prinom ?? '').' '.($this->independiente->segnom ?? '').' '.($this->independiente->priape ?? '').' '.($this->independiente->segape ?? ''));
+        $nombre_independiente = trim(($this->independiente->prinom ?? '') . ' ' . ($this->independiente->segnom ?? '') . ' ' . ($this->independiente->priape ?? '') . ' ' . ($this->independiente->segape ?? ''));
 
         // Contexto para los templates
         $context = [
@@ -63,8 +63,8 @@ class IndependientesDocuments
         ];
 
         foreach ($this->params['oficios'] as $oficio) {
-            $ps = Comman::Api();
-            $ps->runCli([
+            $ps = new ApiSubsidio();
+            $ps->send([
                 'servicio' => 'Python',
                 'metodo' => 'generate-pdf',
                 'params' => [

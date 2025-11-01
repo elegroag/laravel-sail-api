@@ -9,7 +9,7 @@ use App\Models\Mercurio31;
 use App\Services\CajaServices\TrabajadorServices;
 use App\Services\Entities\TrabajadorEntity;
 use App\Services\Srequest;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
@@ -111,8 +111,8 @@ class ApruebaTrabajador
             );
         }
 
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'afilia_trabajador',
@@ -232,8 +232,8 @@ class ApruebaTrabajador
 
         $mercurio31 = $this->findSolicitud($id);
 
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_trabajador',
@@ -251,8 +251,8 @@ class ApruebaTrabajador
 
         $trabajadorSisu = $out['data'];
 
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'DeshacerAfiliaciones',
                 'metodo' => 'deshacer_aprobacion_trabajador',

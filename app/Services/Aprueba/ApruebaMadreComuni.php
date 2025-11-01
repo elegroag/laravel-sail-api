@@ -5,7 +5,7 @@ namespace App\Services\Aprueba;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio39;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Utils\CrearUsuario;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
@@ -29,7 +29,7 @@ class ApruebaMadreComuni
 
     public function __construct()
     {
-        $this->procesadorComando = Comman::Api();
+        $this->procesadorComando = new ApiSubsidio();
         $this->today = Carbon::now();
         $this->dominio = env('APP_URL', 'http://localhost:8000');
     }
@@ -76,7 +76,7 @@ class ApruebaMadreComuni
         /**
          * la empresa se debe registrar con el tipo de documento correspondiente y no con el tipo del registro de solicitud
          */
-        $this->procesadorComando->runCli(
+        $this->procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'afilia_madre_comunitaria',

@@ -29,6 +29,7 @@ use Carbon\Carbon;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\Api\ApiSubsidio;
 
 class PensionadoController extends ApplicationController
 {
@@ -272,8 +273,8 @@ class PensionadoController extends ApplicationController
             $solicitudPrevia = $solicitud ? $solicitud->getArray() : false;
 
             // Obtener información de la empresa
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli([
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send([
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',
                 'params' => ['nit' => $cedtra],
@@ -283,8 +284,8 @@ class PensionadoController extends ApplicationController
             $empresa = ! empty($empresa['data']) ? $empresa['data'] : false;
 
             // Obtener información del trabajador
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli([
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send([
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_trabajador',
                 'params' => ['cedtra' => $cedtra],

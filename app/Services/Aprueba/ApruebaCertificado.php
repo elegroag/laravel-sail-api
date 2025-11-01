@@ -7,7 +7,7 @@ use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio45;
 use App\Services\Srequest;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
 use Carbon\Carbon;
@@ -35,8 +35,8 @@ class ApruebaCertificado
         $certificado = Mercurio45::where('id', $this->solicitud->getId())->first();
         $params = array_merge($certificado->getArray(), $_POST);
 
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'Certificados',
                 'metodo' => 'presentaCertificado',

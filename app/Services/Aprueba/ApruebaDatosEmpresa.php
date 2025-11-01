@@ -9,7 +9,7 @@ use App\Models\Mercurio30;
 use App\Models\Mercurio33;
 use App\Models\Mercurio47;
 use App\Services\Srequest;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
 use Carbon\Carbon;
@@ -43,8 +43,8 @@ class ApruebaDatosEmpresa
     {
         $mercurio47 = Mercurio47::whereRaw("id='{$this->solicitud->getId()}'")->first();
 
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',
@@ -72,8 +72,8 @@ class ApruebaDatosEmpresa
         /**
          * la empresa se debe registrar con el tipo de documento correspondiente y no con el tipo del registro de solicitud
          */
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'actualiza_empresa',

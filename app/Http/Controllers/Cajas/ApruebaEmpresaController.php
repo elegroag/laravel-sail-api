@@ -15,6 +15,7 @@ use App\Models\Mercurio10;
 use App\Models\Mercurio11;
 use App\Models\Mercurio30;
 use App\Models\Mercurio37;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Aprueba\ApruebaSolicitud;
 use App\Services\CajaServices\EmpresaServices;
 use App\Services\Reports\CsvReportStrategy;
@@ -464,8 +465,8 @@ class ApruebaEmpresaController extends ApplicationController
             $id = $validated['id'];
 
             $mercurio30 = Mercurio30::where('id', $id)->first();
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_empresa',
@@ -498,8 +499,8 @@ class ApruebaEmpresaController extends ApplicationController
                 ]
             )->render();
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_empresa',
@@ -535,8 +536,8 @@ class ApruebaEmpresaController extends ApplicationController
 
     public function loadParametrosView()
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_empresa',
@@ -709,8 +710,8 @@ class ApruebaEmpresaController extends ApplicationController
             exit();
         }
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',
@@ -857,8 +858,8 @@ class ApruebaEmpresaController extends ApplicationController
                 throw new DebugException('La empresa no se encuentra registrada.', 201);
             }
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'AportesEmpresas',
                     'metodo' => 'buscarAportesEmpresa',
@@ -899,8 +900,8 @@ class ApruebaEmpresaController extends ApplicationController
                 throw new DebugException('La empresa no se encuentra aprobada para consultar sus datos.', 501);
             }
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_empresa',
@@ -910,8 +911,8 @@ class ApruebaEmpresaController extends ApplicationController
             $paramsEmpresa = new ParamsEmpresa;
             $paramsEmpresa->setDatosCaptura($datos_captura);
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_empresa',
@@ -1002,7 +1003,8 @@ class ApruebaEmpresaController extends ApplicationController
                 throw new DebugException('Los datos de la empresa no son validos para procesar.', 501);
             }
 
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_empresa',
@@ -1015,7 +1017,8 @@ class ApruebaEmpresaController extends ApplicationController
             $out = $procesadorComando->toArray();
             $empresaSisu = $out['data'];
 
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'deshacer_aprobacion_empresa',

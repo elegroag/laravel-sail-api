@@ -6,6 +6,7 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use App\Models\Mercurio02;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Paginate;
@@ -36,8 +37,8 @@ class Mercurio02Controller extends ApplicationController
             $this->setParamToView('buttons', ['N']);
         }
 
-        $apiRest = Comman::Api();
-        $apiRest->runCli(
+        $apiRest = new ApiSubsidio();
+        $apiRest->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'listar_ciudades_departamentos',

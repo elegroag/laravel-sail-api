@@ -43,8 +43,8 @@ class SolicitaClaveService
             $this->tipo == 'I' ||
             $this->tipo == 'F'
         ) {
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_empresa',
@@ -66,15 +66,15 @@ class SolicitaClaveService
                         }
                     }
                     if ($sucursal_activa == false) {
-                        throw new DebugException('No es posible continuar con la solicitud, ya qué, el afiliado no se encuentra activo. '.
+                        throw new DebugException('No es posible continuar con la solicitud, ya qué, el afiliado no se encuentra activo. ' .
                             'Se requiere de validar el estado de la empresa, las sucursales y los aportes realizados a la CAJA.', 503);
                     }
                 }
             }
         } elseif ($this->tipo == 'T') {
             // tipo trabajadores para consultas y auto-gestión
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'trabajador',
@@ -93,19 +93,19 @@ class SolicitaClaveService
         }
 
         if (! $afiliado) {
-            throw new DebugException('No es posible continuar con la solicitud, ya qué, el afiliado no se encuentra actualmente '.
+            throw new DebugException('No es posible continuar con la solicitud, ya qué, el afiliado no se encuentra actualmente ' .
                 'registrado en el sistema principal de subsidio que dispone la CAJA.', 503);
         }
 
         $cl = $this->genera_clave();
         $mclave = $cl[0];
         $pass = $cl[1];
-        $nombre = ($this->tipo == 'T') ? $afiliado['priape'].' '.$afiliado['segape'].' '.$afiliado['prinom'].' '.$afiliado['segnom'] : $afiliado['razsoc'];
+        $nombre = ($this->tipo == 'T') ? $afiliado['priape'] . ' ' . $afiliado['segape'] . ' ' . $afiliado['prinom'] . ' ' . $afiliado['segnom'] : $afiliado['razsoc'];
         $mercurio07 = (new Mercurio07)->findFirst("tipo='{$this->tipo}' AND documento='{$this->documento}' AND coddoc='{$this->coddoc}'");
         if ($mercurio07) {
             if (trim(strtolower($mercurio07->getEmail())) != trim(strtolower($this->email))) {
-                throw new DebugException('La dirección de email no es igual a la que tenemos registrada.'.
-                    ' Y por tal motivo, no se puede restablecer la clave de acceso.  El indicio de email que está registrado es: '.
+                throw new DebugException('La dirección de email no es igual a la que tenemos registrada.' .
+                    ' Y por tal motivo, no se puede restablecer la clave de acceso.  El indicio de email que está registrado es: ' .
                     mask_email($mercurio07->getEmail()), 503);
             }
             Mercurio07::where('tipo', $this->tipo)
@@ -124,8 +124,8 @@ class SolicitaClaveService
         }
 
         if (trim(strtolower($afiliado['email'])) != trim(strtolower($this->email))) {
-            throw new DebugException('La dirección de email no es igual a la que tenemos registrada.'.
-                ' Y por tal motivo, no se puede restablecer la clave de acceso. El indicio de email que está registrado es: '.mask_email($afiliado['email']), 503);
+            throw new DebugException('La dirección de email no es igual a la que tenemos registrada.' .
+                ' Y por tal motivo, no se puede restablecer la clave de acceso. El indicio de email que está registrado es: ' . mask_email($afiliado['email']), 503);
         }
 
         $this->crear_usuario($nombre, $this->email, '18001', $mclave);
@@ -223,9 +223,9 @@ class SolicitaClaveService
         if (! $mercurio07->save()) {
             $msj = '';
             foreach ($mercurio07->getMessages() as $m07) {
-                $msj .= $m07->getMessage()."\n";
+                $msj .= $m07->getMessage() . "\n";
             }
-            throw new DebugException("Error \n".$msj, 503);
+            throw new DebugException("Error \n" . $msj, 503);
         }
 
         $mercurio19 = (new Mercurio19)->findFirst(" tipo='{$this->tipo}' and coddoc='{$this->coddoc}' and documento='{$this->documento}'");
@@ -240,9 +240,9 @@ class SolicitaClaveService
         if (! $mercurio19->save()) {
             $msj = '';
             foreach ($mercurio19->getMessages() as $m19) {
-                $msj .= $m19->getMessage()."\n";
+                $msj .= $m19->getMessage() . "\n";
             }
-            throw new DebugException("Error \n".$msj, 503);
+            throw new DebugException("Error \n" . $msj, 503);
         }
 
         return true;
@@ -293,17 +293,17 @@ class SolicitaClaveService
             if (! $mercurio30->save()) {
                 $msj = '';
                 foreach ($mercurio30->getMessages() as $m30) {
-                    $msj .= $m30->getMessage()."\n";
+                    $msj .= $m30->getMessage() . "\n";
                 }
-                throw new DebugException("Error \n".$msj, 503);
+                throw new DebugException("Error \n" . $msj, 503);
             }
         }
     }
 
     public function traer_empresa($documento)
     {
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',

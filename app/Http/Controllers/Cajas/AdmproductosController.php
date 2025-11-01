@@ -8,6 +8,7 @@ use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
 use App\Models\PinesAfiliado;
 use App\Models\ServiciosCupos;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Utils\Comman;
 use Illuminate\Http\Request;
 
@@ -277,8 +278,8 @@ class AdmproductosController extends ApplicationController
             $pinAfiliado['trabajador'] = false;
             $pinAfiliado['estado_detalle'] = $model->getEstadoDetalle();
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_trabajadores',
@@ -292,8 +293,8 @@ class AdmproductosController extends ApplicationController
                 $paramsTrabajador->setDatosCaptura($datos_captura);
             }
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'trabajador',
@@ -312,8 +313,8 @@ class AdmproductosController extends ApplicationController
                 }
             }
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_beneficiario',

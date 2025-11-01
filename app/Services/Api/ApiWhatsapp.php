@@ -11,7 +11,7 @@ class ApiWhatsapp extends ApiAbstract
 {
     public function __construct()
     {
-        parent::__construct();
+        $this->mode = env('API_MODE', 'development');
     }
 
     public function send($attr)
@@ -31,7 +31,7 @@ class ApiWhatsapp extends ApiAbstract
 
         $hostConnection = env('API_MODE') == 'development' ? $api_end_point->host_dev : $api_end_point->host_pro;
         $url = "{$api_end_point->endpoint_name}/{$metodo}";
-        $this->lineaComando = $hostConnection."\n ".$url."\n ".json_encode($params);
+        $this->lineaComando = $hostConnection . "\n " . $url . "\n " . json_encode($params);
 
         $api = new APIClient($basicAuth, $hostConnection, $url);
         $api->setTypeJson(true);

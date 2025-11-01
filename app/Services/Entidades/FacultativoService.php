@@ -14,7 +14,7 @@ use App\Models\Mercurio14;
 use App\Models\Mercurio36;
 use App\Models\Mercurio37;
 use App\Services\Srequest;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 
 class FacultativoService
 {
@@ -83,8 +83,8 @@ class FacultativoService
      */
     public function buscarEmpresaSubsidio($nit)
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',
@@ -378,8 +378,8 @@ class FacultativoService
 
     public function paramsApi()
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_empresa',
@@ -389,8 +389,8 @@ class FacultativoService
         $paramsFacultativo = new ParamsFacultativo;
         $paramsFacultativo->setDatosCaptura($procesadorComando->toArray());
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_trabajadores',
@@ -402,8 +402,8 @@ class FacultativoService
 
     public function buscarTrabajadorSubsidio($cedtra)
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_trabajador',

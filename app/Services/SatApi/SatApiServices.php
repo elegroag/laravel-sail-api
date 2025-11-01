@@ -3,7 +3,7 @@
 namespace App\Services\SatApi;
 
 use App\Exceptions\DebugException;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 
 class SatApiServices
 {
@@ -18,7 +18,7 @@ class SatApiServices
 
     public function __construct()
     {
-        $this->procesadorComando = Comman::Api();
+        $this->procesadorComando = new ApiSubsidio();
     }
 
     /**
@@ -35,7 +35,7 @@ class SatApiServices
     public function afiliaTrabajador($numdoctra)
     {
         try {
-            $this->procesadorComando->runCli(
+            $this->procesadorComando->send(
                 [
                     'servicio' => 'ServicioSat',
                     'metodo' => 'procesa_trabajador',
@@ -69,7 +69,7 @@ class SatApiServices
     public function empresaNueva($numdocemp)
     {
         try {
-            $this->procesadorComando->runCli(
+            $this->procesadorComando->send(
                 [
                     'servicio' => 'ServicioSat',
                     'metodo' => 'empresa_nueva',
@@ -105,7 +105,7 @@ class SatApiServices
     public function empresaReintegro($numdocemp)
     {
         try {
-            $this->procesadorComando->runCli(
+            $this->procesadorComando->send(
                 [
                     'servicio' => 'ServicioSat',
                     'metodo' => 'empresa_reintegro',
@@ -140,7 +140,7 @@ class SatApiServices
     public function empresaRetiro($numdocemp)
     {
         try {
-            $this->procesadorComando->runCli(
+            $this->procesadorComando->send(
                 [
                     'servicio' => 'ServicioSat',
                     'metodo' => 'empresa_retiro',
@@ -176,7 +176,7 @@ class SatApiServices
     public function terminaTrabajador($cedtra)
     {
         try {
-            $this->procesadorComando->runCli(
+            $this->procesadorComando->send(
                 [
                     'servicio' => 'ServicioSat',
                     'metodo' => 'termina_trabajador',
@@ -212,7 +212,7 @@ class SatApiServices
     public function consultaEmpresaEmpleados($nit)
     {
         try {
-            $this->procesadorComando->runCli(
+            $this->procesadorComando->send(
                 [
                     'servicio' => 'ServicioSat',
                     'metodo' => 'consulta_empresa_empleados',

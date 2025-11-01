@@ -19,14 +19,15 @@ use App\Services\Entidades\ConyugeService;
 use App\Services\Entidades\TrabajadorService;
 use App\Services\FormulariosAdjuntos\BeneficiarioAdjuntoService;
 use App\Services\FormulariosAdjuntos\Formularios;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Srequest;
 use App\Services\Tag;
 use App\Services\Utils\AsignarFuncionario;
-use App\Services\Utils\Comman;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BeneficiarioController extends ApplicationController
 {
@@ -43,8 +44,8 @@ class BeneficiarioController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user') ?? null;
+        $this->tipo = session('tipo') ?? null;
     }
 
     public function index()
@@ -58,8 +59,8 @@ class BeneficiarioController extends ApplicationController
             $this->tipo == 'O' ||
             $this->tipo == 'F'
         ) {
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_empresa',
@@ -97,7 +98,6 @@ class BeneficiarioController extends ApplicationController
 
     public function traerConyuges(Request $request)
     {
-        $this->setResponse('ajax');
         $cedtra = $request->input('cedtra');
 
         $cedcons = Mercurio32::where('cedtra', $cedtra)
@@ -108,8 +108,8 @@ class BeneficiarioController extends ApplicationController
             })
             ->toArray();
 
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'listar_conyuges_trabajador',
@@ -143,10 +143,9 @@ class BeneficiarioController extends ApplicationController
 
     public function borrarArchivo(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $numero = $this->clp($request, 'id');
-            $coddoc = $this->clp($request, 'coddoc');
+            $numero = $request->input('id');
+            $coddoc = $request->input('coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
             $filepath = storage_path('temp/' . $mercurio37->getArchivo());
@@ -167,26 +166,21 @@ class BeneficiarioController extends ApplicationController
             $response = [
                 'success' => false,
                 'msj' => $e->getMessage(),
+                'errors' => $e->render($request)
             ];
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function enviarCaja(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $id = $this->cleanInput($request->input('id'));
+            $id = $request->input('id');
             $beneficiarioService = new BeneficiarioService;
-            // $beneficiarioService->setTransa();
-
             $asignarFuncionario = new AsignarFuncionario;
             $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
-
             $beneficiarioService->enviarCaja(new SenderValidationCaja, $id, $usuario);
-            // $beneficiarioService->endTransa();
-
             $salida = [
                 'success' => true,
                 'msj' => 'El envio de la solicitud se ha completado con éxito',
@@ -195,21 +189,21 @@ class BeneficiarioController extends ApplicationController
             $salida = [
                 'success' => false,
                 'msj' => $e->getMessage(),
+                'errors' => $e->render($request)
             ];
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     public function traerBeneficiario(Request $request)
     {
-        $this->setResponse('ajax');
         $numdoc = $request->input('numdoc');
 
         $datos_beneficiario = [];
 
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'beneficiario',
@@ -224,79 +218,90 @@ class BeneficiarioController extends ApplicationController
         }
         $mercurio34 = new Mercurio34($datos_beneficiario);
 
-        return $this->renderObject($mercurio34->toArray());
+        return response()->json($mercurio34->toArray());
     }
 
     public function borrar(Request $request)
     {
         try {
-            $this->setResponse('ajax');
             $id = $request->input('id');
             Mercurio34::where('id', $id)->delete();
-
-            $response = 'Borrado Con Exito';
-
-            return $this->renderObject(json_encode($response));
+            $response = [
+                'success' => true,
+                'msj' => 'Borrado Con Exito',
+            ];
+            return response()->json($response);
         } catch (DebugException $e) {
-            $response = 'No se puede Borrar el Registro';
+            $response = [
+                'success' => false,
+                'msj' => $e->getMessage(),
+                'errors' => $e->render($request)
+            ];
         }
 
-        return $this->renderObject(json_encode($response));
+        return response()->json($response);
     }
 
     public function buscarBeneficiarios($estado)
     {
-
-        // usuario empresa, unica solicitud de afiliación
-        $documento = parent::getActUser('documento');
-        $tipo = parent::getActUser('tipo');
-        $coddoc = parent::getActUser('coddoc');
+        $documento = $this->user['documento'];
+        $tipo = $this->user['tipo'];
+        $coddoc = $this->user['coddoc'];
 
         if (empty($estado)) {
-            $beneficiarios = $this->db->inQueryAssoc("SELECT * FROM mercurio34
-			WHERE  tipo='{$tipo}' AND coddoc='{$coddoc}' AND documento='{$documento}' AND estado IN('T','D','P','A','X') ORDER BY id, estado DESC");
+            $mercurio34s = Mercurio34::where('tipo', $tipo)
+                ->where('coddoc', $coddoc)
+                ->where('documento', $documento)
+                ->where('estado', 'IN', ['T', 'D', 'P', 'A', 'X'])
+                ->orderBy('id', 'estado', 'desc')
+                ->get();
         } else {
-            $beneficiarios = $this->db->inQueryAssoc("SELECT * FROM mercurio34
-			WHERE tipo='{$tipo}' AND coddoc='{$coddoc}' AND documento='{$documento}' AND estado='{$estado}' ORDER BY id DESC");
+            $mercurio34s = Mercurio34::where('tipo', $tipo)
+                ->where('coddoc', $coddoc)
+                ->where('documento', $documento)
+                ->where('estado', $estado)
+                ->orderBy('id', 'desc')
+                ->get();
         }
 
-        foreach ($beneficiarios as $ai => $row) {
-            $rqs = $this->db->fetchOne("SELECT count(mercurio10.numero) as cantidad
-                FROM mercurio10
-                LEFT JOIN mercurio34 ON mercurio34.id=mercurio10.numero
-                WHERE mercurio10.tipopc='{$this->tipopc}' AND
-                mercurio34.id ='{$row['id']}'
-            ");
-            $trayecto = $this->db->fetchOne("SELECT max(mercurio10.item), mercurio10.*
-                FROM mercurio10
-                LEFT JOIN mercurio34 ON mercurio34.id=mercurio10.numero
-                WHERE mercurio10.tipopc='{$this->tipopc}' AND
-                mercurio34.id ='{$row['id']}' LIMIT 1
-            ");
+        $beneficiarios = [];
+        foreach ($mercurio34s as $mercurio34) {
+            $rqs = Mercurio10::select(DB::raw('count(mercurio10.numero) as cantidad'))
+                ->join('mercurio34', 'mercurio34.id', '=', 'mercurio10.numero')
+                ->where('mercurio10.tipopc', $this->tipopc)
+                ->where('mercurio34.id', $mercurio34->id)
+                ->first();
 
-            $beneficiarios[$ai] = $row;
-            $beneficiarios[$ai]['cantidad_eventos'] = $rqs['cantidad'];
-            $beneficiarios[$ai]['fecha_ultima_solicitud'] = $trayecto['fecsis'];
-            switch ($row['estado']) {
+            $trayecto = Mercurio10::select(DB::raw('max(mercurio10.item), mercurio10.*'))
+                ->join('mercurio34', 'mercurio34.id', '=', 'mercurio10.numero')
+                ->where('mercurio10.tipopc', $this->tipopc)
+                ->where('mercurio34.id', $mercurio34->id)
+                ->first();
+
+            $beneficiario = $mercurio34->toArray();
+            $beneficiario['cantidad_eventos'] = $rqs->cantidad;
+            $beneficiario['fecha_ultima_solicitud'] = $trayecto->fecsis;
+            switch ($beneficiario['estado']) {
                 case 'T':
-                    $beneficiarios[$ai]['estado_detalle'] = 'TEMPORAL';
+                    $beneficiario['estado_detalle'] = 'TEMPORAL';
                     break;
                 case 'D':
-                    $beneficiarios[$ai]['estado_detalle'] = 'DEVUELTO';
+                    $beneficiario['estado_detalle'] = 'DEVUELTO';
                     break;
                 case 'A':
-                    $beneficiarios[$ai]['estado_detalle'] = 'APROBADO';
+                    $beneficiario['estado_detalle'] = 'APROBADO';
                     break;
                 case 'X':
-                    $beneficiarios[$ai]['estado_detalle'] = 'RECHAZADO';
+                    $beneficiario['estado_detalle'] = 'RECHAZADO';
                     break;
                 case 'P':
-                    $beneficiarios[$ai]['estado_detalle'] = 'Pendinete De Validación CAJA';
+                    $beneficiario['estado_detalle'] = 'Pendinete De Validación CAJA';
                     break;
                 default:
-                    $beneficiarios[$ai]['estado_detalle'] = 'T';
+                    $beneficiario['estado_detalle'] = 'T';
                     break;
             }
+            $beneficiarios[] = $beneficiario;
         }
 
         return $beneficiarios;
@@ -304,9 +309,8 @@ class BeneficiarioController extends ApplicationController
 
     public function cancelarSolicitud(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $documento = parent::getActUser('documento');
+            $documento = $this->user['documento'];
             $id = $request->input('id');
 
             $m34 = Mercurio34::where('id', $id)->where('documento', $documento)->first();
@@ -337,12 +341,11 @@ class BeneficiarioController extends ApplicationController
      */
     public function buscarConyugesTrabajador(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $cedtra = $request->input('cedtra');
-            $documento = parent::getActUser('documento');
-            $tipo = parent::getActUser('tipo');
-            $procesadorComando = Comman::Api();
+            $documento = $this->user['documento'];
+            $tipo = $this->user['tipo'];
+            $procesadorComando = new ApiSubsidio();
             $datos_captura = [];
 
             // solo conyuges activas a buscar
@@ -350,7 +353,7 @@ class BeneficiarioController extends ApplicationController
                 $trabajador = Mercurio31::where('documento', $documento)->where('estado', 'A')->first();
                 $documento = ($trabajador) ? $trabajador->getCedtra() : $documento;
 
-                $procesadorComando->runCli(
+                $procesadorComando->send(
                     [
                         'servicio' => 'ComfacaAfilia',
                         'metodo' => 'listar_conyuges_trabajador',
@@ -367,7 +370,7 @@ class BeneficiarioController extends ApplicationController
             } else {
                 $empresa = Mercurio30::where('documento', $documento)->where('estado', 'A')->first();
                 $nit = ($empresa) ? $empresa->getNit() : $documento;
-                $procesadorComando->runCli(
+                $procesadorComando->send(
                     [
                         'servicio' => 'ComfacaAfilia',
                         'metodo' => 'listar_conyuges',
@@ -422,7 +425,7 @@ class BeneficiarioController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     public function mapper()
@@ -564,8 +567,8 @@ class BeneficiarioController extends ApplicationController
                 ->pluck('detzon', 'codzon')
                 ->toArray();
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_beneficiarios',
@@ -669,7 +672,7 @@ class BeneficiarioController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function valida(Request $request)
@@ -707,7 +710,7 @@ class BeneficiarioController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($response);
+        return response()->json($response);
     }
 
     public function serializeData(Request $request)
@@ -820,12 +823,11 @@ class BeneficiarioController extends ApplicationController
             $this->db->rollBack();
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     public function consultaDocumentos($id)
     {
-        $this->setResponse('ajax');
         try {
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
@@ -852,7 +854,7 @@ class BeneficiarioController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     public function formulario($id)
@@ -863,13 +865,12 @@ class BeneficiarioController extends ApplicationController
             $tipo = $this->user['tipo'];
             $documento = $this->user['documento'];
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_trabajadores',
-                ],
-                false
+                ]
             );
 
             $datos_captura = $procesadorComando->toArray();
@@ -884,7 +885,7 @@ class BeneficiarioController extends ApplicationController
             }
 
             // traer primero de sisuweb
-            $procesadorComando->runCli(
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'trabajador_empresa',
@@ -922,7 +923,7 @@ class BeneficiarioController extends ApplicationController
                 throw new DebugException('El trabajador no esta correctamente afiliado.', 505);
             }
 
-            $procesadorComando->runCli(
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_empresa',
@@ -956,7 +957,7 @@ class BeneficiarioController extends ApplicationController
 
                 if (! $mercurio32) {
 
-                    $procesadorComando->runCli(
+                    $procesadorComando->send(
                         [
                             'servicio' => 'ComfacaAfilia',
                             'metodo' => 'conyugue_trabajador_beneficiario',
@@ -987,8 +988,8 @@ class BeneficiarioController extends ApplicationController
 
                 if (! $mercurio32) {
 
-                    $procesadorComando = Comman::Api();
-                    $procesadorComando->runCli(
+                    $procesadorComando = new ApiSubsidio();
+                    $procesadorComando->send(
                         [
                             'servicio' => 'ComfacaAfilia',
                             'metodo' => 'listar_conyuges_trabajador',
@@ -1050,10 +1051,9 @@ class BeneficiarioController extends ApplicationController
 
     public function guardarArchivo(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $id = $this->clp($request, 'id');
-            $coddoc = $this->clp($request, 'coddoc');
+            $id = $request->input('id');
+            $coddoc = $request->input('coddoc');
 
             $guardarArchivoService = new GuardarArchivoService([
                 'tipopc' => $this->tipopc,
@@ -1074,12 +1074,11 @@ class BeneficiarioController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($response);
+        return response()->json($response);
     }
 
     public function seguimiento($id)
     {
-        $this->setResponse('ajax');
         try {
             $beneficiarioService = new BeneficiarioService;
             $out = $beneficiarioService->consultaSeguimiento($id);
@@ -1091,6 +1090,6 @@ class BeneficiarioController extends ApplicationController
             $salida = ['success' => false, 'msj' => $e->getMessage()];
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 }

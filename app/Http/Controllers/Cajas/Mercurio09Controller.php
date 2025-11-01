@@ -9,6 +9,7 @@ use App\Models\Mercurio09;
 use App\Models\Mercurio12;
 use App\Models\Mercurio13;
 use App\Models\Mercurio14;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Paginate;
@@ -53,8 +54,8 @@ class Mercurio09Controller extends ApplicationController
 
     public function index()
     {
-        $apiRest = Comman::Api();
-        $apiRest->runCli(
+        $apiRest = new ApiSubsidio();
+        $apiRest->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_empresa',

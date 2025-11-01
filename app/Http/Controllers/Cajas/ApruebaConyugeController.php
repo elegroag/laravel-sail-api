@@ -20,6 +20,7 @@ use App\Services\Srequest;
 use App\Services\Utils\Comman;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
+use App\Services\Api\ApiSubsidio;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
@@ -401,8 +402,8 @@ class ApruebaConyugeController extends ApplicationController
             }
 
             $trabajador_sisu = false;
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'trabajador',
@@ -424,8 +425,8 @@ class ApruebaConyugeController extends ApplicationController
                 }
             }
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_conyuge',
@@ -464,8 +465,8 @@ class ApruebaConyugeController extends ApplicationController
                 $numcue = ($solicitud->getNumcue()) ? $solicitud->getNumcue() : $numcue;
             }
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_conyuges',
@@ -529,8 +530,8 @@ class ApruebaConyugeController extends ApplicationController
         $_ciunac = [];
         $_ciures = [];
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_conyuges',
@@ -598,8 +599,8 @@ class ApruebaConyugeController extends ApplicationController
             exit;
         }
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_conyuge',
@@ -712,8 +713,8 @@ class ApruebaConyugeController extends ApplicationController
         $conyuge = Mercurio32::where("id", $id)->first();
         $trabajador = Mercurio31::where("cedtra", $conyuge->getCedtra())->first();
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_conyuges',
@@ -769,8 +770,8 @@ class ApruebaConyugeController extends ApplicationController
             $mercurio10->save();
             $mercurio32 = Mercurio32::where("id", $id)->first();
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_conyuge',
@@ -787,8 +788,8 @@ class ApruebaConyugeController extends ApplicationController
             $params['fecafi'] = ($fecsol) ? $fecsol : $fecafi;
             $params['recsub'] = 'N';
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'afilia_conyuge',
@@ -850,8 +851,8 @@ class ApruebaConyugeController extends ApplicationController
                 throw new DebugException('Error al buscar la beneficiario', 501);
             }
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_conyuges'
@@ -862,8 +863,8 @@ class ApruebaConyugeController extends ApplicationController
             $paramsConyuge = new ParamsConyuge;
             $paramsConyuge->setDatosCaptura($datos_captura);
 
-            $px = Comman::Api();
-            $px->runCli(
+            $px = new ApiSubsidio();
+            $px->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_conyuge',
@@ -964,13 +965,13 @@ class ApruebaConyugeController extends ApplicationController
         try {
             $id = $request->input('id');
 
-            $mercurio32 = (new Mercurio32)->findFirst(" id='{$id}' and estado='A' ");
+            $mercurio32 = Mercurio32::where("id", $id)->where("estado", 'A')->first();
             if (! $mercurio32) {
                 throw new DebugException('Los datos del cónyuge no son validos para procesar.', 501);
             }
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_conyuge',
@@ -987,7 +988,7 @@ class ApruebaConyugeController extends ApplicationController
             $out = $procesadorComando->toArray();
             $beneficiarioSisu = $out['data'];
 
-            $procesadorComando->runCli(
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'deshacer_aprobacion_conyuge',
@@ -1070,8 +1071,8 @@ class ApruebaConyugeController extends ApplicationController
             $cedtra = $request->input('cedtra');
             $coddoc = $request->input('tipdoc');
 
-            $ps = Comman::Api();
-            $ps->runCli(
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'trabajador',

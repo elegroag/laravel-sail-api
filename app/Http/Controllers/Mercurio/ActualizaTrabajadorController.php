@@ -26,6 +26,7 @@ use App\Services\Utils\Comman;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\Logger;
 use App\Services\Utils\SenderValidationCaja;
+use App\Services\Api\ApiSubsidio;
 use Illuminate\Http\Request;
 use TCPDF;
 
@@ -98,8 +99,8 @@ class ActualizaTrabajadorController extends ApplicationController
                 $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
             }
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_trabajadores',
@@ -108,8 +109,8 @@ class ActualizaTrabajadorController extends ApplicationController
             $paramsTrabajador = new ParamsTrabajador;
             $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => "buscar_sucursales_en_empresa/{$nit}",
@@ -226,8 +227,8 @@ class ActualizaTrabajadorController extends ApplicationController
 
     public function buscarTrabajadorSubsidio($cedtra)
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_trabajador',
@@ -263,8 +264,8 @@ class ActualizaTrabajadorController extends ApplicationController
 
     public function buscarEmpresaSubsidio($nit)
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',
@@ -672,14 +673,12 @@ class ActualizaTrabajadorController extends ApplicationController
             }
         }
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_trabajadores',
-                'params' => true,
-            ],
-            false
+            ]
         );
         $datos_captura = $procesadorComando->toArray();
         $_bancos = [];
@@ -687,14 +686,12 @@ class ActualizaTrabajadorController extends ApplicationController
             $_bancos[$data['codcue']] = $data['detalle'];
         }
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'listar_ciudades_departamentos',
-                'params' => true,
-            ],
-            false
+            ]
         );
         $salida = $procesadorComando->toArray();
 

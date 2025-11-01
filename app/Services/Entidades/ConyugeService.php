@@ -13,7 +13,7 @@ use App\Models\Mercurio13;
 use App\Models\Mercurio32;
 use App\Models\Mercurio37;
 use App\Services\Srequest;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 use Illuminate\Support\Facades\DB;
 
 class ConyugeService
@@ -83,8 +83,8 @@ class ConyugeService
     public function buscarEmpresaSubsidio($nit)
     {
 
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',
@@ -327,8 +327,8 @@ class ConyugeService
 
     public function buscarConyugeSubsidio($cedcon)
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_conyuge',
@@ -366,8 +366,8 @@ class ConyugeService
 
     public function paramsApi()
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_conyuges',
@@ -400,8 +400,8 @@ class ConyugeService
 
     public function findApiConyugesByNit($nit)
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'listar_conyuges',

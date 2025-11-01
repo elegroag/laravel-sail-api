@@ -10,7 +10,7 @@ class PortalMercurio extends ApiAbstract
 {
     public function __construct($app)
     {
-        parent::__construct();
+        $this->mode = env('API_MODE', 'development');
         $this->app = $app;
     }
 
@@ -43,9 +43,9 @@ class PortalMercurio extends ApiAbstract
             // $basicAuth->encript($this->app->encryption, $this->app->portal_clave);
             $hostConnection = "{$this->app->host_portal_pro}/";
         }
-        $url = $this->app->portal."/{$servicio}.php";
+        $url = $this->app->portal . "/{$servicio}.php";
 
-        $this->lineaComando = $hostConnection."\n".$url."\n".json_encode($params);
+        $this->lineaComando = $hostConnection . "\n" . $url . "\n" . json_encode($params);
         $api = new APIClient($basicAuth, $hostConnection, $url);
         $api->setTypeJson(false);
         $this->output = $api->consumeAPI(

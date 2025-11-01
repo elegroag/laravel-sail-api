@@ -6,10 +6,10 @@ use App\Exceptions\DebugException;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio34;
+use App\Services\Api\ApiSubsidio;
 use App\Services\CajaServices\TrabajadorServices;
 use App\Services\Entities\BeneficiarioEntity;
 use App\Services\Srequest;
-use App\Services\Utils\Comman;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
@@ -44,8 +44,8 @@ class ApruebaBeneficiario
         $benefi = Mercurio34::where('id', $this->solicitud->id)->first();
         $hoy = $this->today->format('Y-m-d');
         $trabajador_sisu = false;
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'trabajador',
@@ -66,8 +66,8 @@ class ApruebaBeneficiario
         }
 
         if (is_null($benefi->cedcon) == false && $benefi->cedcon != '') {
-            $apiRest = Comman::Api();
-            $apiRest->dispatch(
+            $apiRest = new ApiSubsidio();
+            $apiRest->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'conyuge',
@@ -119,8 +119,8 @@ class ApruebaBeneficiario
         /**
          * la empresa se debe registrar con el tipo de documento correspondiente y no con el tipo del registro de solicitud
          */
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'afilia_beneficiario',
@@ -234,8 +234,8 @@ class ApruebaBeneficiario
 
         $mercurio34 = $this->findSolicitud($id);
 
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_beneficiario',
@@ -254,8 +254,8 @@ class ApruebaBeneficiario
 
         $trabajadorSisu = $out['data'];
 
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'DeshacerAfiliaciones',
                 'metodo' => 'deshacerAprobacionTrabajador',

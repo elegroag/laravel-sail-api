@@ -7,7 +7,7 @@ use App\Library\Collections\ParamsTrabajador;
 use App\Models\Mercurio30;
 use App\Models\Mercurio32;
 use App\Models\Mercurio34;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 
 class TrabajadorFormulario
 {
@@ -24,8 +24,8 @@ class TrabajadorFormulario
     public function main($mercurio31)
     {
         $paramsTrabajador = new ParamsTrabajador;
-        $pc = Comman::Api();
-        $pc->runCli(1, [
+        $pc = new ApiSubsidio();
+        $pc->send(1, [
             'servicio' => 'ComfacaAfilia',
             'metodo' => 'parametros_trabajadores',
         ], false);
@@ -33,8 +33,8 @@ class TrabajadorFormulario
         $datos_captura = $pc->toArray();
         $paramsTrabajador->setDatosCaptura($datos_captura);
 
-        $pc = Comman::Api();
-        $pc->runCli(
+        $pc = new ApiSubsidio();
+        $pc->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',
@@ -58,8 +58,8 @@ class TrabajadorFormulario
             throw new DebugException('Error los datos de la empresa no estan disponibles', 505);
         }
 
-        $pc = Comman::Api();
-        $pc->runCli(
+        $pc = new ApiSubsidio();
+        $pc->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'listar_conyuges_trabajador',
@@ -86,8 +86,8 @@ class TrabajadorFormulario
                 }
 
                 if ($data_conyuge) {
-                    $ps = Comman::Api();
-                    $ps->runCli(
+                    $ps = new ApiSubsidio();
+                    $ps->send(
                         [
                             'servicio' => 'ComfacaEmpresas',
                             'metodo' => 'informacion_conyuge',
@@ -122,8 +122,8 @@ class TrabajadorFormulario
                         }
                     }
                     if ($data_other) {
-                        $ps = Comman::Api();
-                        $ps->runCli(
+                        $ps = new ApiSubsidio();
+                        $ps->send(
                             [
                                 'servicio' => 'ComfacaEmpresas',
                                 'metodo' => 'informacion_conyuge',

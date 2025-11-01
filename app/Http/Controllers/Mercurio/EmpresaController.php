@@ -22,6 +22,7 @@ use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
+use App\Services\Api\ApiSubsidio;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -364,8 +365,8 @@ class EmpresaController extends ApplicationController
                 $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
             }
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_empresa',
@@ -375,13 +376,12 @@ class EmpresaController extends ApplicationController
             $paramsEmpresa = new ParamsEmpresa;
             $paramsEmpresa->setDatosCaptura($procesadorComando->toArray());
 
-            $procesadorComando = Comman::Api();
-            $procesadorComando->runCli(
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'parametros_trabajadores',
-                ],
-                false
+                ]
             );
             $paramsTrabajador = new ParamsTrabajador;
             $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
@@ -666,8 +666,8 @@ class EmpresaController extends ApplicationController
 
     public function miEmpresa()
     {
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',
@@ -687,8 +687,8 @@ class EmpresaController extends ApplicationController
             return redirect()->route('principal/index');
         }
 
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_empresa',

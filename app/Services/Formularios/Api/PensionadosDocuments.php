@@ -4,7 +4,7 @@ namespace App\Services\Formularios\Api;
 
 use App\Library\Collections\ParamsPensionado;
 use App\Models\Gener18;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 
 class PensionadosDocuments
 {
@@ -43,7 +43,7 @@ class PensionadosDocuments
         $giro_name = ($this->pensionado->giro ?? null) ? ($giro[$this->pensionado->giro] ?? null) : null;
         $codigo_giro_name = ($this->pensionado->codgir ?? null) ? ($codigo_giro[$this->pensionado->codgir] ?? null) : null;
 
-        $nombre_pensionado = trim(($this->pensionado->prinom ?? '').' '.($this->pensionado->segnom ?? '').' '.($this->pensionado->priape ?? '').' '.($this->pensionado->segape ?? ''));
+        $nombre_pensionado = trim(($this->pensionado->prinom ?? '') . ' ' . ($this->pensionado->segnom ?? '') . ' ' . ($this->pensionado->priape ?? '') . ' ' . ($this->pensionado->segape ?? ''));
 
         // Contexto para los templates
         $context = [
@@ -62,8 +62,8 @@ class PensionadosDocuments
         ];
 
         foreach ($this->params['oficios'] as $oficio) {
-            $ps = Comman::Api();
-            $ps->runCli([
+            $ps = new ApiSubsidio();
+            $ps->send([
                 'servicio' => 'Python',
                 'metodo' => 'generate-pdf',
                 'params' => [

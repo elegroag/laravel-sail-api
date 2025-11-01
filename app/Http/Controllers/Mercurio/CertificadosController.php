@@ -11,6 +11,7 @@ use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Comman;
 use App\Services\Utils\Logger;
 use App\Services\Utils\UploadFile;
+use App\Services\Api\ApiSubsidio;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -33,8 +34,8 @@ class CertificadosController extends ApplicationController
 
     public function index()
     {
-        $ps = Comman::Api();
-        $ps->runCli(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'Certificados',
                 'metodo' => 'buscarCertificadosBeneficiario',

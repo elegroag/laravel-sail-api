@@ -6,14 +6,13 @@ use App\Exceptions\DebugException;
 use App\Library\APIClient\APIClient;
 use App\Library\APIClient\BasicAuth;
 use App\Models\ApiEndpoint;
-use App\Models\Gener02;
 
 class ApiSubsidio extends ApiAbstract
 {
-    public function __construct($app)
+
+    public function __construct()
     {
-        parent::__construct();
-        $this->app = $app;
+        $this->mode = env('API_MODE', 'development');
     }
 
     public function send($attr)
@@ -27,7 +26,7 @@ class ApiSubsidio extends ApiAbstract
             $params = array_merge($params, [
                 '_user' => 2,
                 '_sistema' => 'Mercurio', // Core::getInstanceName(),
-                '_env' => $this->app->mode,
+                '_env' => $this->mode,
                 '_base64' => ($base64 == 1),
             ]);
         } else {
@@ -37,13 +36,12 @@ class ApiSubsidio extends ApiAbstract
             $params = [
                 '_user' => 2,
                 '_sistema' => 'Mercurio', // Core::getInstanceName(),
-                '_env' => $this->app->mode,
+                '_env' => $this->mode,
                 '_base64' => ($base64 == 1),
             ];
         }
 
-        $userApi = Gener02::where('usuario', '2')->first();
-        $basicAuth = new BasicAuth('2', $userApi->clave);
+        $basicAuth = new BasicAuth(env('HOST_API_USER'), env('HOST_API_PASSWORD'));
 
         if (is_null($metodo) || $metodo === '') {
             throw new DebugException('Error no es valido el metodo de acceso API ', 501);
@@ -52,11 +50,11 @@ class ApiSubsidio extends ApiAbstract
             ->where('service_name', $servicio)
             ->first();
 
-        $hostConnection = env('API_MODE') == 'development' ? $endpoint->host_dev : $endpoint->host_pro;
+        $hostConnection = $this->mode == 'development' ? $endpoint->host_dev : $endpoint->host_pro;
         // $basicAuth->encript($this->app->encryption, $this->app->portal_clave);
 
         $url = "{$endpoint->endpoint_name}/{$metodo}";
-        $this->lineaComando = $hostConnection . "\n" . $url . "\n" . json_encode($params);
+        $this->setCurlCommand($hostConnection, $url, $params, $basicAuth);
 
         $api = new APIClient($basicAuth, $hostConnection, $url);
         $api->setTypeJson(true);
@@ -66,5 +64,13 @@ class ApiSubsidio extends ApiAbstract
         );
 
         return $this;
+    }
+
+    public function setCurlCommand($hostConnection, $url, $params, $basicAuth)
+    {
+        $this->lineaComando = "curl -X POST {$hostConnection}/{$url} \"" .
+            " -H 'Content-Type: application/json' " .
+            " -H 'Authorization: Basic " . $basicAuth->getHeader() . "'" .
+            " -d \"" . json_encode($params) . "\" \"";
     }
 }

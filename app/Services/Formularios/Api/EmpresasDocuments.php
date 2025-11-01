@@ -4,7 +4,7 @@ namespace App\Services\Formularios\Api;
 
 use App\Library\Collections\ParamsEmpresa;
 use App\Models\Gener18;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 
 class EmpresasDocuments
 {
@@ -54,8 +54,8 @@ class EmpresasDocuments
         ];
 
         foreach ($this->params['oficios'] as $oficio) {
-            $ps = Comman::Api();
-            $ps->runCli([
+            $ps = new ApiSubsidio();
+            $ps->send([
                 'servicio' => 'Python',
                 'metodo' => 'generate-pdf',
                 'params' => [

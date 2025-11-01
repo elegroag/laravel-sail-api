@@ -12,7 +12,7 @@ use App\Models\Mercurio13;
 use App\Models\Mercurio34;
 use App\Models\Mercurio37;
 use App\Services\Srequest;
-use App\Services\Utils\Comman;
+use App\Services\Api\ApiSubsidio;
 
 class BeneficiarioService
 {
@@ -79,8 +79,8 @@ class BeneficiarioService
      */
     public function buscarEmpresaSubsidio($nit)
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',
@@ -294,8 +294,8 @@ class BeneficiarioService
 
     public function buscarBeneficiarioSubsidio($numdoc)
     {
-        $procesadorComando = Comman::Api();
-        $procesadorComando->runCli(
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_beneficiario',
