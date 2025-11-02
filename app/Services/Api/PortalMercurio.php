@@ -4,14 +4,20 @@ namespace App\Services\Api;
 
 use App\Library\APIClient\APIClient;
 use App\Library\APIClient\BasicAuth;
-use App\Models\Gener02;
 
 class PortalMercurio extends ApiAbstract
 {
-    public function __construct($app)
+
+    private $host_portal_dev;
+    private $host_portal_pro;
+    private $portal;
+
+    public function __construct()
     {
         $this->mode = env('API_MODE', 'development');
-        $this->app = $app;
+        $this->host_portal_dev = env('HOST_PORTAL_DEV');
+        $this->host_portal_pro = env('HOST_PORTAL_PRO');
+        $this->portal = env('PORTAL');
     }
 
     public function send($attr)
@@ -23,29 +29,27 @@ class PortalMercurio extends ApiAbstract
         if (is_array($params)) {
             $params = array_merge($params, [
                 '_user' => $user,
-                '_sistema' => 'Mercurio', // Core::getInstanceName(),
-                '_env' => $this->app->mode,
+                '_sistema' => 'Mercurio',
+                '_env' => $this->mode,
             ]);
         } else {
             $params = [
                 '_user' => $user,
-                '_sistema' => 'Mercurio', // Core::getInstanceName(),
-                '_env' => $this->app->mode,
+                '_sistema' => 'Mercurio',
+                '_env' => $this->mode,
             ];
         }
 
-        $userApi = (new Gener02)->findFirst("usuario='{$user}'");
-        $basicAuth = new BasicAuth('2', $userApi->getClave());
-
-        if ($this->app->mode == 'development') {
-            $hostConnection = "{$this->app->host_portal_dev}/";
+        $basicAuth = new BasicAuth(env('HOST_API_USER'), env('HOST_API_PASSWORD'));
+        if ($this->mode == 'development') {
+            $hostConnection = "{$this->host_portal_dev}/";
         } else {
-            // $basicAuth->encript($this->app->encryption, $this->app->portal_clave);
-            $hostConnection = "{$this->app->host_portal_pro}/";
+            $hostConnection = "{$this->host_portal_pro}/";
         }
-        $url = $this->app->portal . "/{$servicio}.php";
+        $url = $this->portal . "/{$servicio}.php";
 
-        $this->lineaComando = $hostConnection . "\n" . $url . "\n" . json_encode($params);
+        $this->setCurlCommand($hostConnection, $url, $params, $basicAuth);
+
         $api = new APIClient($basicAuth, $hostConnection, $url);
         $api->setTypeJson(false);
         $this->output = $api->consumeAPI(
@@ -54,5 +58,13 @@ class PortalMercurio extends ApiAbstract
         );
 
         return $this;
+    }
+
+    public function setCurlCommand($hostConnection, $url, $params, $basicAuth)
+    {
+        $this->lineaComando = "curl -X POST {$hostConnection}/{$url} \"" .
+            " -H 'Content-Type: application/json' " .
+            " -H 'Authorization: Basic " . $basicAuth->getHeader() . "'" .
+            " -d \"" . json_encode($params) . "\" \"";
     }
 }

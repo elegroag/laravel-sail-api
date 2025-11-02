@@ -3,20 +3,19 @@
 namespace App\Services\Aportes;
 
 use App\Services\SatApi\SatConsultaServices;
-use App\Services\Api\ApiSubsidio;
+use App\Services\Api\PortalMercurio;
 
 class AporteServices
 {
     public function ConsultaEstadoAporte($sat15)
     {
         $tipopc = 2;
-        $apiRest = new ApiSubsidio();
-        $apiRest->send(
-            [
-                'servicio' => 'captura_empresa',
-                'params' => []
-            ]
-        );
+        $apiRest = new PortalMercurio();
+        $apiRest->send([
+            'servicio' => 'captura_empresa',
+            'params' => []
+        ]);
+
         $datos_captura = $apiRest->toArray();
 
         if ($datos_captura['flag'] == true) {

@@ -12,13 +12,7 @@ class ProcesadorComandos
 
     private $linea_comando;
 
-    private $Comandos;
-
-    private $ComandoEstructuras;
-
     private $userAuth;
-
-    private $outPutFile;
 
     private $outPutText;
 
@@ -28,16 +22,11 @@ class ProcesadorComandos
 
     public function __construct($procesador = 'p7')
     {
-        if (session()->has('documento')) {
-            $this->userAuth = session()->all();
-        }
+        $this->userAuth = session('user') ?? null;
         if (! isset($this->userAuth['usuario'])) {
-            $this->userAuth['usuario'] = ((isset($this->userAuth['documento'])) ? $this->userAuth['documento'] : 1);
+            $this->userAuth['usuario'] = ((isset($this->userAuth['usuario'])) ? $this->userAuth['usuario'] : 1);
         }
         $this->procesador = $procesador;
-        $this->Comandos = new Comandos;
-        $this->ComandoEstructuras = new ComandoEstructuras;
-        $this->outPutFile = storage_path('logs/'.$this->userAuth['usuario'].'_'.strtotime('now').'.log');
         $this->procesarAsyncrono = '';
     }
 
@@ -49,7 +38,9 @@ class ProcesadorComandos
      */
     public function listarComandosRunner()
     {
-        return shell_exec("ps aux | grep '{$this->procesador}'");
+        $pattern = escapeshellarg($this->procesador);
+        // Excluir el propio grep y devolver líneas completas de ps
+        return shell_exec("ps aux | grep -i -- $pattern | grep -v grep");
     }
 
     /**
@@ -60,17 +51,14 @@ class ProcesadorComandos
      */
     public function procesoRunning()
     {
-        $lineas = [];
-        exec("ps aux | grep '{$this->procesador} {$this->linea_comando}'", $lineas);
+        $pattern = trim("{$this->procesador} {$this->linea_comando}");
+        $pattern = escapeshellarg($pattern);
         $this->proceso = 0;
-
-        // retorna siempre más de 2 lineas de salida, cuando el comando esta en ejecucion
-        if (count($lineas) >= 3) {
-            $linea_proceso = trim(substr($lineas[0], 6, 10));
-            $exp = explode(' ', $linea_proceso);
-            if (! empty($exp[0])) {
-                $this->proceso = $exp[0];
-            }
+        // Obtener PID por awk de la salida de ps, columna 2
+        $cmd = "ps aux | grep -i -- $pattern | grep -v grep | awk '{print $2}' | head -n1";
+        $pid = trim(shell_exec($cmd) ?? '');
+        if ($pid !== '' && ctype_digit($pid)) {
+            $this->proceso = (int) $pid;
         }
     }
 
@@ -82,10 +70,19 @@ class ProcesadorComandos
      */
     public function runnerComando()
     {
+        $proc = trim($this->procesador);
+        $line = trim($this->linea_comando);
+        if ($proc === '' || $line === '') {
+            $this->outPutText = '';
+            return;
+        }
+        // Capturar stderr también
         if ($this->procesarAsyncrono == '&') {
-            $this->proceso = shell_exec("{$this->procesador} {$this->linea_comando} > /dev/null 2>&1 & echo $!");
+            $pid = shell_exec("$proc $line > /dev/null 2>&1 & echo $!");
+            $pid = trim($pid ?? '');
+            $this->proceso = ctype_digit($pid) ? (int) $pid : 0;
         } else {
-            $this->outPutText = shell_exec("{$this->procesador} {$this->linea_comando}");
+            $this->outPutText = shell_exec("$proc $line 2>&1");
             $this->procesoRunning();
         }
     }
@@ -99,21 +96,18 @@ class ProcesadorComandos
      */
     public function checkServiceRunner($servicio)
     {
-        $lcr = "\n".$this->listarComandosRunner();
+        $lcr = "\n" . $this->listarComandosRunner();
         $lista_comandos_runner = explode("\n", $lcr);
         $service_runner = [];
         foreach ($lista_comandos_runner as $linea) {
             if (trim($linea) == '') {
                 continue;
             }
-            if (preg_match("/({$servicio})/i", $linea) !== false) {
-                if (strpos($linea, 'grep') !== false) {
-                    continue;
-                }
-                $linea_proceso = trim(substr($linea, 6, 10));
-                $exp = explode(' ', $linea_proceso);
-                if (! empty($exp[0])) {
-                    $service_runner[] = $exp[0];
+            if (@preg_match("/(" . preg_quote($servicio, '/') . ")/i", $linea) === 1) {
+                // tomar PID (columna 2 de ps aux)
+                $cols = preg_split('/\s+/', trim($linea));
+                if (isset($cols[1]) && ctype_digit($cols[1])) {
+                    $service_runner[] = (int) $cols[1];
                 }
             }
         }
@@ -131,22 +125,22 @@ class ProcesadorComandos
     public function dispararComando(Comandos $comando, $id = 0)
     {
         if ($id) {
-            $comando = $this->Comandos->findFirst(" id='{$id}'");
+            $comando = Comandos::where('id', $id)->first();
         }
-        $this->linea_comando = $comando->getLineaComando();
+        $this->linea_comando = $comando->linea_comando;
         $this->runnerComando();
         if ($comando) {
-            $comando = $this->Comandos->findFirst(" id='{$comando->getId()}'");
+            $comando = Comandos::where('id', $comando->id)->first();
         } else {
-            $comando = $this->Comandos->findFirst(" id='{$id}'");
+            $comando = Comandos::where('id', $id)->first();
         }
         if (empty($this->procesarAsyncrono)) {
-            $comando->setProgreso(100);
-            $comando->setEstado('F');
+            $comando->progreso = 100;
+            $comando->estado = 'F';
         } else {
-            $comando->setProgreso(1);
+            $comando->progreso = 1;
         }
-        $comando->setProceso($this->proceso);
+        $comando->proceso = $this->proceso;
         $comando->save();
     }
 
@@ -188,17 +182,24 @@ class ProcesadorComandos
         if (! $idEstructura) {
             throw new DebugException('Error el id de la infraestructura no es valido', 501);
         }
-        $comandoEstructura = $this->ComandoEstructuras->findFirst("id='{$idEstructura}'");
-        $estructura = $comandoEstructura->getEstructura();
-        $this->procesarAsyncrono = ($comandoEstructura->getAsyncro() == 1) ? '&' : '';
+        $comandoEstructura = ComandoEstructuras::where('id', $idEstructura)->first();
+        if (! $comandoEstructura) {
+            throw new DebugException('Estructura de comando no encontrada', 501);
+        }
+        $estructura = $comandoEstructura->estructura;
+        if ($estructura === null || $estructura === '') {
+            throw new DebugException('La estructura del comando está vacía', 501);
+        }
+        $this->procesarAsyncrono = ($comandoEstructura->asyncro == 1) ? '&' : '';
         $parametros = (isset($params['params'])) ? json_encode($params['params']) : '{}';
 
         $estado = ($nohub) ? 'P' : 'E';
         // agrega el comando a los parametros
-        $comando = (object) $this->crearComando($comandoEstructura->getId(), $parametros, $estado);
-        $params['comando'] = $comando->getId();
-        $this->linea_comando = $this->argumentosServicio($estructura, $params, true);
-        $comando->setLineaComando($this->linea_comando);
+        $comando = (object) $this->crearComando($comandoEstructura->id, $parametros, $estado);
+        $params['comando'] = $comando->id;
+
+        $this->linea_comando = (string) $this->argumentosServicio($estructura, $params, true);
+        $comando->linea_comando = $this->linea_comando;
         $comando->save();
 
         // los comandos asyncronos no se ejecutan se ejecutan por nohup
@@ -216,22 +217,17 @@ class ProcesadorComandos
      */
     public function crearComando($idEstructura, $parametros, $estado = 'E')
     {
-        $idComnado = $this->Comandos->maximum('id') + 1;
         $comando = new Comandos;
-        $comando->setId($idComnado);
-        $comando->setFechaRunner(date('Y-m-d'));
-        $comando->setHoraRunner(date('H:i:s'));
-        $comando->setEstado($estado);
-        $comando->setUsuario($this->userAuth['usuario']);
-        $comando->setProgreso(1);
-        $comando->setProceso(0);
-        $comando->setLineaComando('0');
-        $comando->setEstructura($idEstructura);
-        $comando->setParametros($parametros);
-        if (! $comando->save()) {
-            throw new DebugException('Error al guardar el comando', 501);
-        }
-
+        $comando->fecha_runner = date('Y-m-d');
+        $comando->hora_runner = date('H:i:s');
+        $comando->estado = $estado;
+        $comando->usuario = $this->userAuth['usuario'];
+        $comando->progreso = 1;
+        $comando->proceso = 0;
+        $comando->linea_comando = '0';
+        $comando->estructura = $idEstructura;
+        $comando->parametros = $parametros;
+        $comando->save();
         return $comando;
     }
 
@@ -248,10 +244,16 @@ class ProcesadorComandos
         if (! $id) {
             throw new DebugException('Error el id de la infraestructura no es valido', 501);
         }
-        $comandoEstructura = $this->ComandoEstructuras->findFirst("id='{$id}'");
-        $estructura = $comandoEstructura->getEstructura();
-        $this->procesarAsyncrono = ($comandoEstructura->getAsyncro() == 1) ? '&' : '';
-        $this->linea_comando = $this->argumentosServicio($estructura, $params, $base64);
+        $comandoEstructura = ComandoEstructuras::where('id', $id)->first();
+        if (! $comandoEstructura) {
+            throw new DebugException('Estructura de comando no encontrada', 501);
+        }
+        $estructura = $comandoEstructura->estructura;
+        if ($estructura === null || $estructura === '') {
+            throw new DebugException('La estructura del comando está vacía', 501);
+        }
+        $this->procesarAsyncrono = ($comandoEstructura->asyncro == 1) ? '&' : '';
+        $this->linea_comando = trim((string) $this->argumentosServicio($estructura, $params, $base64));
         $this->runnerComando();
 
         return $this->getOutPutText();
@@ -259,15 +261,15 @@ class ProcesadorComandos
 
     public function detenerComando(Comandos $comando)
     {
-        $proceso = $comando->getProceso();
+        $proceso = $comando->proceso;
         if ($proceso == 0 || empty($proceso) || is_null($proceso)) {
-            $this->linea_comando = $comando->getLineaComando();
+            $this->linea_comando = $comando->linea_comando;
             $this->procesoRunning();
         } else {
             $this->proceso = $proceso;
         }
-        $comando->setProgreso(100);
-        $comando->setEstado('X');
+        $comando->progreso = 100;
+        $comando->estado = 'X';
         $comando->save();
 
         return shell_exec("kill -9 {$this->proceso}");
@@ -323,19 +325,25 @@ class ProcesadorComandos
 
     public function comandoEjecutando($servicio, $proceso = '')
     {
-        return $this->Comandos->findFirst(" usuario='{$this->userAuth['usuario']}' and estado='E' and (linea_comando like '%{$servicio}%')");
+        if (! is_string($servicio) || $servicio === '') {
+            return null;
+        }
+        $usuario = $this->userAuth['usuario'] ?? '';
+        // Escapar comodines para LIKE
+        $pattern = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $servicio) . '%';
+
+        return Comandos::where('usuario', $usuario)
+            ->where('estado', 'E')
+            ->where('linea_comando', 'like', $pattern)
+            ->first();
     }
 
     public function isJson()
     {
-        $macth = preg_match('/^\{(.*)\:(.*)\}$/', trim($this->outPutText));
-        if ($macth === 0 || $macth === false) {
-            $macth = preg_match('/^\[(.*)\:(.*)\]$/', trim($this->outPutText));
-        }
-        if ($macth === 0 || $macth === false) {
+        if (! is_string($this->outPutText) || trim($this->outPutText) === '') {
             return false;
-        } else {
-            return true;
         }
+        json_decode($this->outPutText);
+        return (json_last_error() === JSON_ERROR_NONE);
     }
 }

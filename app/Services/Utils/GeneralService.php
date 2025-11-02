@@ -9,6 +9,7 @@ use App\Models\Mercurio04;
 use App\Models\Mercurio05;
 use App\Models\Mercurio08;
 use App\Models\Mercurio10;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Api\PortalMercurio;
 use App\Services\Entidades\ActualizaEmpresaService;
 use App\Services\Entidades\BeneficiarioService;
@@ -160,13 +161,7 @@ class GeneralService
 
     public function webService($funcion, $params)
     {
-        $app = [
-            'mode' => env('API_MODE'),
-            'host_portal_dev' => env('HOST_PORTAL_DEV'),
-            'host_portal_pro' => env('HOST_PORTAL_PRO'),
-            'portal' => env('PORTAL'),
-        ];
-        $portalMercurio = new PortalMercurio(json_decode(json_encode($app)));
+        $portalMercurio = new PortalMercurio();
         $portalMercurio->send(
             [
                 'servicio' => $funcion,
@@ -365,8 +360,10 @@ class GeneralService
             ->where('numero', $mercurio30->getId())
             ->first();
 
-        $procesadorComando = new ApiSubsidio();
-        $procesadorComando->runPortal(['servicio' => 'captura_empresa', 'params' => null]);
+        $procesadorComando = new PortalMercurio();
+        $procesadorComando->send(
+            ['servicio' => 'captura_empresa', 'params' => null]
+        );
         $datos_captura = $procesadorComando->toArray();
 
         if ($datos_captura['flag'] == true) {
@@ -559,8 +556,13 @@ class GeneralService
             ->where('numero', $mercurio38->getId())
             ->get();
 
-        $procesadorComando = new ApiSubsidio();
-        $procesadorComando->runPortal(['servicio' => 'captura_trabajador', 'params' => null]);
+        $procesadorComando = new PortalMercurio();
+        $procesadorComando->send(
+            [
+                'servicio' => 'captura_trabajador',
+                'params' => null
+            ]
+        );
         $datos_captura = $procesadorComando->toArray();
 
         if ($datos_captura['flag'] == true) {
@@ -786,8 +788,13 @@ class GeneralService
             ->where('numero', $mercurio36->getId())
             ->get();
 
-        $procesadorComando = new ApiSubsidio();
-        $procesadorComando->runPortal(['servicio' => 'captura_trabajador', 'params' => null]);
+        $procesadorComando = new PortalMercurio();
+        $procesadorComando->send(
+            [
+                'servicio' => 'captura_trabajador',
+                'params' => null
+            ]
+        );
         $datos_captura = $procesadorComando->toArray();
 
         if ($datos_captura['flag'] == true) {
@@ -1011,8 +1018,13 @@ class GeneralService
             ->where('numero', $mercurio39->getId())
             ->get();
 
-        $procesadorComando = new ApiSubsidio();
-        $procesadorComando->runPortal(['servicio' => 'captura_trabajador', 'params' => null]);
+        $procesadorComando = new PortalMercurio();
+        $procesadorComando->send(
+            [
+                'servicio' => 'captura_trabajador',
+                'params' => null
+            ]
+        );
         $datos_captura = $procesadorComando->toArray();
 
         if ($datos_captura['flag'] == true) {
@@ -1236,8 +1248,13 @@ class GeneralService
             ->where('numero', $mercurio40->getId())
             ->first();
 
-        $procesadorComando = new ApiSubsidio();
-        $procesadorComando->runPortal(['servicio' => 'captura_trabajador', 'params' => null]);
+        $procesadorComando = new PortalMercurio();
+        $procesadorComando->send(
+            [
+                'servicio' => 'captura_trabajador',
+                'params' => null
+            ]
+        );
         $datos_captura = $procesadorComando->toArray();
 
         if ($datos_captura['flag'] == true) {
@@ -1458,8 +1475,13 @@ class GeneralService
             ->where('numero', $mercurio31->getId())
             ->get();
 
-        $procesadorComando = new ApiSubsidio();
-        $procesadorComando->runPortal(['servicio' => 'captura_trabajador']);
+        $procesadorComando = new PortalMercurio();
+        $procesadorComando->send(
+            [
+                'servicio' => 'captura_trabajador',
+                'params' => null
+            ]
+        );
         $datos_captura = $procesadorComando->toArray();
 
         if ($datos_captura['flag'] == true) {
@@ -1716,8 +1738,13 @@ class GeneralService
             ->where('numero', $mercurio32->getId())
             ->first();
 
-        $procesadorComando = new ApiSubsidio();
-        $procesadorComando->runPortal(['servicio' => 'captura_conyuge']);
+        $procesadorComando = new PortalMercurio();
+        $procesadorComando->send(
+            [
+                'servicio' => 'captura_conyuge',
+                'params' => null
+            ]
+        );
         $datos_captura = $procesadorComando->toArray();
 
         if ($datos_captura['flag'] == true) {
@@ -1914,8 +1941,13 @@ class GeneralService
             ->where('numero', $mercurio34->getId())
             ->first();
 
-        $procesadorComando = new ApiSubsidio();
-        $procesadorComando->runPortal(['servicio' => 'captura_beneficiario']);
+        $procesadorComando = new PortalMercurio();
+        $procesadorComando->send(
+            [
+                'servicio' => 'captura_beneficiario',
+                'params' => null
+            ]
+        );
         $datos_captura = $procesadorComando->toArray();
 
         if ($datos_captura['flag'] == true) {

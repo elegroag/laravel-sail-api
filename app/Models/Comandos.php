@@ -12,6 +12,8 @@ class Comandos extends ModelBase
 
     protected $primaryKey = 'id';
 
+    public $incrementing = true;
+
     protected $fillable = [
         'fecha_runner',
         'hora_runner',
