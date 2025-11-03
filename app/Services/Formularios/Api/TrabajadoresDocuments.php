@@ -4,6 +4,7 @@ namespace App\Services\Formularios\Api;
 
 use App\Library\Collections\ParamsTrabajador;
 use App\Models\Gener18;
+use App\Services\Api\ApiPython;
 use App\Services\Api\ApiSubsidio;
 
 class TrabajadoresDocuments
@@ -60,24 +61,23 @@ class TrabajadoresDocuments
             ...$this->trabajador->toArray(),
         ];
 
-        foreach ($this->params['oficios'] as $oficio) {
-            $ps = new ApiSubsidio();
-            $ps->send([
-                'servicio' => 'Python',
-                'metodo' => 'generate-pdf',
-                'params' => [
-                    'template' => $oficio['template'],
-                    'output' => $oficio['output'],
-                    'context' => $context,
-                ]
-            ]);
-            if ($ps->isJson() == false) {
-                break;
-            }
-            $out = $ps->toArray();
-            if ($out['success'] == false) {
-                break;
-            }
+        $ps = new ApiPython();
+        $ps->send([
+            'servicio' => 'Python',
+            'metodo' => 'generate-pdf',
+            'params' => [
+                'template' => $this->params['template'],
+                'output' => $this->params['output'],
+                'context' => $context,
+            ]
+        ]);
+
+        if ($ps->isJson() == false) {
+            return false;
+        }
+        $out = $ps->toArray();
+        if ($out['success'] == false) {
+            return false;
         }
 
         sleep(2);

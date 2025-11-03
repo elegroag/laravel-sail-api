@@ -56,3 +56,6 @@ database/seeders/dbsql
 storage/app/testing
 .windsurf/
 .env.testing
+uv
+.venv/
+uv.lock

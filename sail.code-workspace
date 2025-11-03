@@ -1,141 +1,141 @@
 {
-	"folders": [
-		{
-			"path": "./"
-		},
-		{
-			"path": "app/Http/Controllers/",
-			"name": "Controllers"
-		},
-		{
-			"path": "app/Models/",
-			"name": "Models"
-		},
-		{
-			"path": "app/Services/",
-			"name": "Services"
-		},
-		{
-			"path": "app/Helpers/",
-			"name": "Helpers"
-		},
-		{
-			"path": "resources/views/",
-			"name": "Views"
-		},
-		{
-			"path": "public/src/",
-			"name": "Src"
-		},
-		{
-			"path": "routes/",
-			"name": "Routes"
-		},
-		{
-			"path": "resources"
-		},
-		{
-			"path": "database"
-		},
-		{
-			"path": "tests"
-		},
-		{
-			"path": "public"
-		}
-	],
-	"settings": {
-		"editor.fontSize": 14,
-		"editor.bracketPairColorization.enabled": true,
-		"editor.guides.bracketPairs": "active",
-		"workbench.editor.showTabs": "multiple",
-		"workbench.colorTheme": "Atom One Dark",
-		"editor.formatOnSave": true,
-		"php.validate.executablePath": "/usr/bin/php",
-		"[javascript]": {
-			"editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
-		},
-		"[typescript]": {
-			"editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
-		},
-		"workbench.colorCustomizations": {
-			"activityBar.activeBackground": "#0c7359",
-			"activityBar.activeBorder": "#ddf06f",
-			"activityBar.background": "#0c7359",
-			"activityBar.foreground": "#e7e7e7",
-			"activityBar.inactiveForeground": "#e7e7e799",
-			"activityBarBadge.background": "#f0dd6f",
-			"activityBarBadge.foreground": "#0c7359",
-			"editorGroup.border": "#0c7359",
-			"panel.border": "#c9ad11",
-			"sash.hoverBorder": "#97a514",
-			"sideBar.border": "#dfd117",
-			"statusBar.background": "#0c7359",
-			"statusBar.foreground": "#e7e7e7",
-			"statusBarItem.hoverBackground": "#97a514",
-			"statusBarItem.remoteBackground": "#97a514",
-			"statusBarItem.remoteForeground": "#e7e7e7",
-			"tab.activeBorder": "#d4ca35",
-			"titleBar.activeBackground": "#606610",
-			"titleBar.activeForeground": "#e7e7e7",
-			"titleBar.inactiveBackground": "#45440799",
-			"titleBar.inactiveForeground": "#e7e7e799"
-		},
-		"better-comments.tags": [
-			{
-				"tag": "!",
-				"color": "#ff4040",
-				"strikethrough": false,
-				"underline": false,
-				"backgroundColor": "transparent",
-				"bold": false,
-				"italic": false
-			},
-			{
-				"tag": "?",
-				"color": "#3498DB",
-				"strikethrough": false,
-				"underline": false,
-				"backgroundColor": "transparent",
-				"bold": false,
-				"italic": false
-			},
-			{
-				"tag": "//",
-				"color": "#474747",
-				"strikethrough": true,
-				"underline": false,
-				"backgroundColor": "transparent",
-				"bold": false,
-				"italic": false
-			},
-			{
-				"tag": "@date",
-				"color": "#46638a",
-				"strikethrough": false,
-				"underline": false,
-				"backgroundColor": "transparent",
-				"bold": false,
-				"italic": false
-			},
-			{
-				"tag": "@name",
-				"color": "#aeaeae",
-				"strikethrough": false,
-				"underline": false,
-				"backgroundColor": "transparent",
-				"bold": true,
-				"italic": false
-			},
-			{
-				"tag": "@description",
-				"color": "#a1b114",
-				"strikethrough": false,
-				"underline": false,
-				"backgroundColor": "transparent",
-				"bold": false,
-				"italic": false
-			}
-		]
-	}
+    "folders": [
+        {
+            "path": "./"
+        },
+        {
+            "path": "app/Http/Controllers/",
+            "name": "controllers"
+        },
+        {
+            "path": "app/Models/",
+            "name": "models"
+        },
+        {
+            "path": "app/Services/",
+            "name": "services"
+        },
+        {
+            "path": "app/Helpers/",
+            "name": "helpers"
+        },
+        {
+            "path": "resources/views/",
+            "name": "views"
+        },
+        {
+            "path": "public/src/",
+            "name": "src"
+        },
+        {
+            "path": "routes/",
+            "name": "routes"
+        },
+        {
+            "path": "resources"
+        },
+        {
+            "path": "database"
+        },
+        {
+            "path": "tests"
+        },
+        {
+            "path": "public"
+        }
+    ],
+    "settings": {
+        "editor.fontSize": 14,
+        "editor.bracketPairColorization.enabled": true,
+        "editor.guides.bracketPairs": "active",
+        "editor.formatOnSave": true,
+        "php.validate.executablePath": "/usr/bin/php",
+        "[javascript]": {
+            "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[typescript]": {
+            "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "workbench.colorCustomizations": {
+            "editor.showTabs": "multiple",
+            "colorTheme": "Atom One Dark",
+            "activityBar.activeBackground": "#0c7359",
+            "activityBar.activeBorder": "#ddf06f",
+            "activityBar.background": "#0c7359",
+            "activityBar.foreground": "#e7e7e7",
+            "activityBar.inactiveForeground": "#e7e7e799",
+            "activityBarBadge.background": "#f0dd6f",
+            "activityBarBadge.foreground": "#0c7359",
+            "editorGroup.border": "#0c7359",
+            "panel.border": "#c9ad11",
+            "sash.hoverBorder": "#97a514",
+            "sideBar.border": "#dfd117",
+            "statusBar.background": "#0c7359",
+            "statusBar.foreground": "#e7e7e7",
+            "statusBarItem.hoverBackground": "#97a514",
+            "statusBarItem.remoteBackground": "#97a514",
+            "statusBarItem.remoteForeground": "#e7e7e7",
+            "tab.activeBorder": "#d4ca35",
+            "titleBar.activeBackground": "#606610",
+            "titleBar.activeForeground": "#e7e7e7",
+            "titleBar.inactiveBackground": "#45440799",
+            "titleBar.inactiveForeground": "#e7e7e799"
+        },
+        "better-comments.tags": [
+            {
+                "tag": "!",
+                "color": "#ff4040",
+                "strikethrough": false,
+                "underline": false,
+                "backgroundColor": "transparent",
+                "bold": false,
+                "italic": false
+            },
+            {
+                "tag": "?",
+                "color": "#3498DB",
+                "strikethrough": false,
+                "underline": false,
+                "backgroundColor": "transparent",
+                "bold": false,
+                "italic": false
+            },
+            {
+                "tag": "//",
+                "color": "#474747",
+                "strikethrough": true,
+                "underline": false,
+                "backgroundColor": "transparent",
+                "bold": false,
+                "italic": false
+            },
+            {
+                "tag": "@date",
+                "color": "#46638a",
+                "strikethrough": false,
+                "underline": false,
+                "backgroundColor": "transparent",
+                "bold": false,
+                "italic": false
+            },
+            {
+                "tag": "@name",
+                "color": "#aeaeae",
+                "strikethrough": false,
+                "underline": false,
+                "backgroundColor": "transparent",
+                "bold": true,
+                "italic": false
+            },
+            {
+                "tag": "@description",
+                "color": "#a1b114",
+                "strikethrough": false,
+                "underline": false,
+                "backgroundColor": "transparent",
+                "bold": false,
+                "italic": false
+            }
+        ]
+    }
 }

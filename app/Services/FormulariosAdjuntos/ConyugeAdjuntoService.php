@@ -77,7 +77,7 @@ class ConyugeAdjuntoService
         $manager = new DocumentGenerationManager();
         $manager->generate('api', 'conyuge', [
             'categoria' => 'formulario',
-            'output' => storage_path('temp/' . $this->filename),
+            'output' => $this->filename,
             'template' => 'adicion-conyuge.html',
             'conyuge' => $this->request,
             'trabajador' => $this->getTrabajador(),
@@ -146,7 +146,7 @@ class ConyugeAdjuntoService
             'conyuge' => $this->request,
             'trabajador' => $this->getTrabajador(),
             'template' => 'declaracion-conyuge.html',
-            'output' => storage_path('temp/' . $this->filename),
+            'output' => $this->filename,
         ]);
         $this->cifrarDocumento();
         return $this;

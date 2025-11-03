@@ -3,6 +3,7 @@
 namespace App\Services\Formularios\Api;
 
 use App\Library\Collections\ParamsConyuge;
+use App\Library\ProcesadorComandos\ProcesadorComandos;
 use App\Models\Gener18;
 use App\Services\Api\ApiPython;
 
@@ -76,7 +77,8 @@ class ConyugesDocuments
             ...$this->conyuge->toArray(),
         ];
 
-        $ps = (new ApiPython())->send([
+        $ps = new ApiPython();
+        $ps->send([
             'servicio' => 'Python',
             'metodo' => 'generate-pdf',
             'params' => [

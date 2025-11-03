@@ -34,7 +34,7 @@ class ApiPython extends ApiAbstract
 
         $hostConnection = env('API_MODE') == 'development' ? $api_end_point->host_dev : $api_end_point->host_pro;
         $url = "{$api_end_point->endpoint_name}/{$metodo}";
-        $this->lineaComando = $hostConnection . "\n " . $url . "\n " . json_encode($params);
+        $this->setCurlCommand($hostConnection, $url, $params, $basicAuth);
 
         $api = new APIClient($basicAuth, $hostConnection, $url);
         $api->setTypeJson(true);
@@ -44,5 +44,14 @@ class ApiPython extends ApiAbstract
         );
 
         return $this;
+    }
+
+    public function setCurlCommand($hostConnection, $url, $params, $basicAuth)
+    {
+        $token = $basicAuth->authenticate();
+        $this->lineaComando = "curl -X POST {$hostConnection}/{$url} \"" .
+            " -H 'Content-Type: application/json' " .
+            " -H 'Authorization: Basic {$token}'" .
+            " -d \"" . json_encode($params) . "\" \"";
     }
 }

@@ -31,7 +31,6 @@ class BasicAuth implements AuthClientInterface
     public function authenticate()
     {
         $this->token = base64_encode("$this->username:$this->password");
-
         return $this->token;
     }
 
@@ -72,5 +71,10 @@ class BasicAuth implements AuthClientInterface
                 "Authorization: Basic {$this->token}",
             ];
         }
+    }
+
+    public function getToken()
+    {
+        return $this->token;
     }
 }

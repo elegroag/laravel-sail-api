@@ -62,9 +62,10 @@ class PortalMercurio extends ApiAbstract
 
     public function setCurlCommand($hostConnection, $url, $params, $basicAuth)
     {
+        $token = $basicAuth->authenticate();
         $this->lineaComando = "curl -X POST {$hostConnection}/{$url} \"" .
             " -H 'Content-Type: application/json' " .
-            " -H 'Authorization: Basic " . $basicAuth->getHeader() . "'" .
+            " -H 'Authorization: Basic {$token}'" .
             " -d \"" . json_encode($params) . "\" \"";
     }
 }
