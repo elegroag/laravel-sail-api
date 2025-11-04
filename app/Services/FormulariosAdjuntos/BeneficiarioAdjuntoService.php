@@ -5,6 +5,7 @@ namespace App\Services\FormulariosAdjuntos;
 use App\Library\Collections\ParamsBeneficiario;
 use App\Library\Collections\ParamsTrabajador;
 use App\Library\Tcpdf\KumbiaPDF;
+use App\Models\Mercurio07;
 use App\Models\Mercurio16;
 use App\Models\Mercurio31;
 use App\Models\Mercurio32;
@@ -15,6 +16,7 @@ use App\Services\Entidades\TrabajadorService;
 use App\Services\Formularios\FactoryDocuments;
 use App\Services\PreparaFormularios\CifrarDocumento;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Formularios\Generation\DocumentGenerationManager;
 
 class BeneficiarioAdjuntoService
 {
@@ -37,9 +39,12 @@ class BeneficiarioAdjuntoService
 
     private $user;
 
+    private $tipo;
+
     public function __construct($request)
     {
-        $this->user = session()->has('user') ? session('user') : null;
+        $this->user = session('user') ?? null;
+        $this->tipo = session('tipo') ?? null;
         $this->request = $request;
         $this->initialize();
     }
@@ -79,48 +84,50 @@ class BeneficiarioAdjuntoService
     {
         $trabajador = false;
         $mtrabajador = false;
-        switch (session('tipo')) {
+
+        switch ($this->tipo) {
             case 'I':
-                $mtrabajador = Mercurio41::where('cedtra', $this->request->getCedtra())
-                    ->where('documento', $this->request->getDocumento())
-                    ->where('coddoc', $this->request->getCoddoc())
+                $mtrabajador = Mercurio41::where('cedtra', $this->request->cedtra)
+                    ->where('documento', $this->request->documento)
+                    ->where('coddoc', $this->request->coddoc)
                     ->first();
                 break;
             case 'O':
-                $mtrabajador = Mercurio38::where('cedtra', $this->request->getCedtra())
-                    ->where('documento', $this->request->getDocumento())
-                    ->where('coddoc', $this->request->getCoddoc())
+                $mtrabajador = Mercurio38::where('cedtra', $this->request->cedtra)
+                    ->where('documento', $this->request->documento)
+                    ->where('coddoc', $this->request->coddoc)
                     ->first();
                 break;
             case 'F':
-                $mtrabajador = Mercurio36::where('cedtra', $this->request->getCedtra())
-                    ->where('documento', $this->request->getDocumento())
-                    ->where('coddoc', $this->request->getCoddoc())
+                $mtrabajador = Mercurio36::where('cedtra', $this->request->cedtra)
+                    ->where('documento', $this->request->documento)
+                    ->where('coddoc', $this->request->coddoc)
                     ->first();
                 break;
             case 'T':
             case 'E':
-                $mtrabajador = Mercurio31::where('cedtra', $this->request->getCedtra())
-                    ->where('documento', $this->request->getDocumento())
-                    ->where('coddoc', $this->request->getCoddoc())
+                $mtrabajador = Mercurio31::where('cedtra', $this->request->cedtra)
+                    ->where('documento', $this->request->documento)
+                    ->where('coddoc', $this->request->coddoc)
                     ->first();
                 break;
             default:
-                $trabajador = Mercurio31::where('cedtra', $this->request->getCedtra())
-                    ->where('documento', $this->request->getDocumento())
-                    ->where('coddoc', $this->request->getCoddoc())
+                $trabajador = Mercurio31::where('cedtra', $this->request->cedtra)
+                    ->where('documento', $this->request->documento)
+                    ->where('coddoc', $this->request->coddoc)
                     ->whereIn('estado', ['A', 'P', 'T'])
                     ->first();
                 break;
         }
 
         $trabajadorService = new TrabajadorService;
-        $data = $trabajadorService->buscarTrabajadorSubsidio($this->request->getCedtra());
+        $data = $trabajadorService->buscarTrabajadorSubsidio($this->request->cedtra);
         if ($data) {
             if ($mtrabajador) {
                 $trabajador = clone $mtrabajador;
             } else {
                 $trabajador = new Mercurio31;
+                $trabajador->fill($data);
             }
         }
 
@@ -129,112 +136,110 @@ class BeneficiarioAdjuntoService
 
     public function formulario()
     {
-        $this->filename = "formulario_beneficiario_{$this->request->getNumdoc()}.pdf";
-        KumbiaPDF::setBackgroundImage(public_path('img/form/beneficiarios/form_adicion_beneficiario.png'));
-        $fabrica = new FactoryDocuments;
-        $documento = $fabrica->crearFormulario('beneficiario');
-        $documento->setParamsInit(
-            [
-                'beneficiario' => $this->request,
-                'trabajador' => $this->getTrabajador(),
-                'bioconyu' => $this->getBiologioConyuge(),
-                'filename' => $this->filename,
-            ]
-        );
+        $solicitante = Mercurio07::where("documento", $this->request->documento)
+            ->where("coddoc", $this->request->coddoc)
+            ->where("tipo", $this->request->tipo)
+            ->first();
 
-        $documento->main();
-        $documento->outPut();
+        $this->filename = 'formulario-beneficiario-' . strtotime('now') . "_{$this->request->numdoc}.pdf";
+        $manager = new DocumentGenerationManager();
+        $manager->generate('api', 'beneficiario', [
+            'categoria' => 'formulario',
+            'output' => $this->filename,
+            'template' => 'adicion-beneficiario.html',
+            'beneficiario' => $this->request,
+            'trabajador' => $this->getTrabajador(),
+            'solicitante' => $solicitante,
+            'bioconyu' => $this->getBiologioConyuge(),
+        ]);
+
         $this->cifrarDocumento();
-
         return $this;
     }
 
     public function declaraJurament()
     {
-        $this->filename = "declaracion_hijo_{$this->request->getNumdoc()}.pdf";
-        $parent = $this->request->getParent();
+        $parent = $this->request->parent;
         switch ($parent) {
             case '1':
-                $page = public_path('img/form/declaraciones/declaracion_jura_hijo.png');
+                $template = 'declaracion-hijos.html';
+                $this->filename = "declaracion_hijo_{$this->request->numdoc}.pdf";
                 break;
             case '4':
-                $page = public_path('img/form/declaraciones/declaracion_jura_custodia.png');
+                $template = 'declaracion-custodia.html';
+                $this->filename = "declaracion_custodia_{$this->request->numdoc}.pdf";
                 break;
             case '3': // padre
             case '2': // hermano
-                $page = public_path('img/form/declaraciones/declaracion_jura_padres.png');
+                $template = 'declaracion-padres.html';
+                $this->filename = "declaracion_padres_{$this->request->numdoc}.pdf";
                 break;
             case '5': // cuidador persona discapacitada
-                $page = public_path('img/form/declaraciones/declaracion_jura_cuidador.png');
+                $template = 'declaracion-cuidador.html';
+                $this->filename = "declaracion_cuidador_{$this->request->numdoc}.pdf";
                 break;
             default:
                 break;
         }
-        KumbiaPDF::setBackgroundImage($page);
-        $fabrica = new FactoryDocuments;
 
-        $documento = $fabrica->crearDeclaracion('beneficiario');
-        $documento->setParamsInit(
-            [
-                'beneficiario' => $this->request,
-                'trabajador' => $this->getTrabajador(),
-                'firma' => $this->lfirma,
-                'filename' => $this->filename,
-            ]
-        );
+        $manager = new DocumentGenerationManager();
+        $manager->generate('api', 'beneficiario', [
+            'categoria' => 'declaracion',
+            'output' => $this->filename,
+            'template' => $template,
+            'beneficiario' => $this->request,
+            'trabajador' => $this->getTrabajador(),
+            'bioconyu' => $this->getBiologioConyuge(),
+        ]);
 
-        $documento->main();
-        $documento->outPut();
         $this->cifrarDocumento();
-
         return $this;
     }
 
     public function getBiologioConyuge()
     {
-        if (! $this->request->getCedcon()) {
+        if (! $this->request->cedcon) {
             return false;
         }
 
-        $mconyuge = Mercurio32::where([
-            'cedcon' => $this->request->getCedcon(),
-            'documento' => $this->request->getDocumento(),
-            'coddoc' => $this->request->getCoddoc(),
-        ])->first();
+        $mconyuge = Mercurio32::where('cedcon', $this->request->cedcon)
+            ->where('documento', $this->request->documento)
+            ->where('coddoc', $this->request->coddoc)
+            ->first();
 
-        if (! $mconyuge) {
-            $procesadorComando = new ApiSubsidio();
-            $procesadorComando->send(
+        if (!$mconyuge) {
+            $mconyuge = new Mercurio32;
+            $ps = new ApiSubsidio();
+            $ps->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_conyuge',
-                    'params' => $this->request->getCedcon(),
+                    'params' => $this->request->cedcon,
                 ]
             );
             $data = false;
-            $out = $procesadorComando->toArray();
+            $out = $ps->toArray();
             if ($out['success'] == true) {
                 $data = ($out['data']) ? $out['data'] : false;
             }
 
             if ($data) {
-                $mconyuge = new Mercurio32($data);
-            } else {
-                $mconyuge = new Mercurio32;
+                $mconyuge = new Mercurio32();
+                $mconyuge->fill($data);
             }
         }
-        if ($this->request->getBiocedu() == $this->request->getCedcon()) {
-            $mconyuge->setCedcon($this->request->getBiocedu());
-            $mconyuge->setTipdoc($this->request->getBiotipdoc());
-            $mconyuge->setPrinom($this->request->getBioprinom());
-            $mconyuge->setSegnom($this->request->getBiosegnom());
-            $mconyuge->setPriape($this->request->getBiopriape());
-            $mconyuge->setSegape($this->request->getBiosegape());
-            $mconyuge->setEmail($this->request->getBioemail());
-            $mconyuge->setTelefono($this->request->getBiophone());
-            $mconyuge->setCiures($this->request->getBiocodciu());
-            $mconyuge->setDireccion($this->request->getBiodire());
-            $mconyuge->setZoneurbana($this->request->getBiourbana());
+        if ($this->request->biocedu == $this->request->cedcon) {
+            $mconyuge->cedcon = $this->request->biocedu;
+            $mconyuge->tipdoc = $this->request->biotipdoc;
+            $mconyuge->prinom = $this->request->bioprinom;
+            $mconyuge->segnom = $this->request->biosegnom;
+            $mconyuge->priape = $this->request->biopriape;
+            $mconyuge->segape = $this->request->biosegape;
+            $mconyuge->email = $this->request->bioemail;
+            $mconyuge->telefono = $this->request->biophone;
+            $mconyuge->ciures = $this->request->biocodciu;
+            $mconyuge->direccion = $this->request->biodire;
+            $mconyuge->zoneurbana = $this->request->biourbana;
         }
 
         return $mconyuge;

@@ -348,8 +348,8 @@ class TrabajadorService
      */
     public function buscarTrabajadorSubsidio($cedtra)
     {
-        $procesadorComando = new ApiSubsidio();
-        $procesadorComando->send(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_trabajador',
@@ -358,8 +358,7 @@ class TrabajadorService
                 ],
             ]
         );
-        $out = $procesadorComando->toArray();
-
+        $out = $ps->toArray();
         return ($out['success'] == true) ? $out['data'] : false;
     }
 
@@ -386,8 +385,8 @@ class TrabajadorService
 
     public function paramsApi()
     {
-        $procesadorComando = new ApiSubsidio();
-        $procesadorComando->send(
+        $ps = new ApiSubsidio();
+        $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_trabajadores',
@@ -395,7 +394,7 @@ class TrabajadorService
             false
         );
         $paramsTrabajador = new ParamsTrabajador;
-        $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
+        $paramsTrabajador->setDatosCaptura($ps->toArray());
     }
 
     /**

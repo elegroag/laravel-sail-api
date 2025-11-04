@@ -73,7 +73,7 @@ class ConyugeAdjuntoService
             ->where("tipo", $this->request->tipo)
             ->first();
 
-        $this->filename = strtotime('now') . "_{$this->request->cedcon}.pdf";
+        $this->filename = 'formulario-conyuge-' . strtotime('now') . "_{$this->request->cedcon}.pdf";
         $manager = new DocumentGenerationManager();
         $manager->generate('api', 'conyuge', [
             'categoria' => 'formulario',
@@ -139,7 +139,7 @@ class ConyugeAdjuntoService
 
     public function declaraJurament()
     {
-        $this->filename = strtotime('now') . "_{$this->request->cedcon}.pdf";
+        $this->filename = 'declaracion-conyuge-' . strtotime('now') . "_{$this->request->cedcon}.pdf";
         $manager = new DocumentGenerationManager();
         $manager->generate('api', 'conyuge', [
             'categoria' => 'declaracion',
