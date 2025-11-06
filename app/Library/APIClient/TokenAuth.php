@@ -23,7 +23,7 @@ class TokenAuth implements AuthClientInterface
 
     public function authenticate()
     {
-        return $this->newToken($this->host.''.$this->point);
+        return $this->newToken($this->host . '' . $this->point);
     }
 
     public function newToken($endpoint)
@@ -47,7 +47,7 @@ class TokenAuth implements AuthClientInterface
 
                 return $this->token;
             } else {
-                throw new AuthException('Error '.$out['response']['message'], 1);
+                throw new AuthException('Error ' . $out['response']['message'], 1);
             }
         } else {
             throw new AuthException('Error, no es posible generar el token para el servicio', 1);
@@ -74,22 +74,34 @@ class TokenAuth implements AuthClientInterface
      */
     public function procesaRequest($result)
     {
-        if ($result == '' || is_null($result)) {
-            return false;
-        }
-
-        $macth = preg_match('/^\{(.*)\:(.*)\}$/', trim($result));
-        if ($macth === 0 || $macth === false) {
-            $macth = preg_match('/^\[(.*)\:(.*)\]$/', trim($result));
-        }
-        if ($macth === 0 || $macth === false) {
+        if ($result === '' || is_null($result)) {
             return [
                 'success' => false,
                 'response' => [],
-                'errors' => "Error:\n{$result}",
+                'errors' => 'Respuesta vacía',
             ];
-        } else {
-            return json_decode($result, true);
         }
+
+        if (is_array($result)) {
+            return $result;
+        }
+
+        $decoded = json_decode($result, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+            return [
+                'success' => true,
+                'response' => $decoded,
+                'errors' => [],
+            ];
+        }
+
+        return [
+            'success' => false,
+            'response' => [],
+            'errors' => $result,
+        ];
     }
 }

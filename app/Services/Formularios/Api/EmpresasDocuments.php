@@ -6,6 +6,7 @@ use App\Library\Collections\ParamsEmpresa;
 use App\Models\Gener18;
 use App\Services\Api\ApiPython;
 use App\Services\Api\ApiSubsidio;
+use Carbon\Carbon;
 
 class EmpresasDocuments
 {
@@ -33,7 +34,11 @@ class EmpresasDocuments
         $detdoc_detalle_empresa = ($mtipoDocumentos) ? $mtipoDocumentos->detdoc : 'NIT';
         $detdoc_rua_empresa = ($mtipoDocumentos) ? $mtipoDocumentos->codrua : 'NIT';
 
+        $today = Carbon::now();
         $context = [
+            'year' => $today->format('Y'),
+            'month' => $today->format('m'),
+            'day' => $today->format('d'),
             'nit' => $this->empresa->nit ?? null,
             'digver' => $this->empresa->digver ?? null,
             'razsoc' => $this->empresa->razsoc ?? null,

@@ -532,6 +532,7 @@ class TrabajadorController extends ApplicationController
             $response = [
                 'success' => false,
                 'msj' => $err->getMessage(),
+                'errrs' => $err->render($request)
             ];
         }
 

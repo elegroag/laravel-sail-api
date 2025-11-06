@@ -6,6 +6,7 @@ use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsTrabajador;
 use App\Models\Gener18;
 use App\Services\Api\ApiPython;
+use Carbon\Carbon;
 
 class TrabajadoresDocuments
 {
@@ -49,7 +50,11 @@ class TrabajadoresDocuments
         $nombre_trabajador = ($this->trabajador->prinom . ' ' . $this->trabajador->segnom . ' ' . $this->trabajador->priape . ' ' . $this->trabajador->segape);
 
         $sucursal = 'N° ' . $this->trabajador->codsuc . ' - ' . capitalize($this->empresa->razsoc);
+        $today = Carbon::now();
         $context = [
+            'year' => $today->format('Y'),
+            'month' => $today->format('m'),
+            'day' => $today->format('d'),
             'cedtra' => $this->trabajador->cedtra ?? null,
             'nit' => $this->trabajador->nit ?? null,
             'ciudad_name' => $ciudad_name,

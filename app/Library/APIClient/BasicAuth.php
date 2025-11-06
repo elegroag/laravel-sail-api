@@ -42,23 +42,35 @@ class BasicAuth implements AuthClientInterface
      */
     public function procesaRequest($result)
     {
-        if ($result == '' || is_null($result)) {
-            return false;
-        }
-
-        $macth = preg_match('/^\{(.*)\:(.*)\}$/', trim($result));
-        if ($macth === 0 || $macth === false) {
-            $macth = preg_match('/^\[(.*)\:(.*)\]$/', trim($result));
-        }
-        if ($macth === 0 || $macth === false) {
+        if ($result === '' || is_null($result)) {
             return [
                 'success' => false,
                 'response' => [],
-                'errors' => "Error:\n{$result}",
+                'errors' => 'Respuesta vacía',
             ];
-        } else {
-            return json_decode($result, true);
         }
+
+        if (is_array($result)) {
+            return $result;
+        }
+
+        $decoded = json_decode($result, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+            return [
+                'success' => true,
+                'response' => $decoded,
+                'errors' => [],
+            ];
+        }
+
+        return [
+            'success' => false,
+            'response' => [],
+            'errors' => $result,
+        ];
     }
 
     public function getHeader($autenticar = 0)
