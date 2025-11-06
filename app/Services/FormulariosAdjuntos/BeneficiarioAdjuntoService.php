@@ -106,10 +106,7 @@ class BeneficiarioAdjuntoService
                 break;
             case 'T':
             case 'E':
-                $mtrabajador = Mercurio31::where('cedtra', $this->request->cedtra)
-                    ->where('documento', $this->request->documento)
-                    ->where('coddoc', $this->request->coddoc)
-                    ->first();
+                $mtrabajador = Mercurio31::where('cedtra', $this->request->cedtra)->first();
                 break;
             default:
                 $trabajador = Mercurio31::where('cedtra', $this->request->cedtra)
@@ -150,7 +147,7 @@ class BeneficiarioAdjuntoService
             'beneficiario' => $this->request,
             'trabajador' => $this->getTrabajador(),
             'solicitante' => $solicitante,
-            'bioconyu' => $this->getBiologioConyuge(),
+            'biologico' => $this->getBiologioConyuge(),
         ]);
 
         $this->cifrarDocumento();
@@ -189,7 +186,7 @@ class BeneficiarioAdjuntoService
             'template' => $template,
             'beneficiario' => $this->request,
             'trabajador' => $this->getTrabajador(),
-            'bioconyu' => $this->getBiologioConyuge(),
+            'biologico' => $this->getBiologioConyuge(),
         ]);
 
         $this->cifrarDocumento();
@@ -207,16 +204,17 @@ class BeneficiarioAdjuntoService
             ->where('coddoc', $this->request->coddoc)
             ->first();
 
-        if (!$mconyuge) {
+        if (!$mconyuge && $this->request->biocedu) {
             $mconyuge = new Mercurio32;
             $ps = new ApiSubsidio();
             $ps->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_conyuge',
-                    'params' => $this->request->cedcon,
+                    'params' => $this->request->biocedu,
                 ]
             );
+
             $data = false;
             $out = $ps->toArray();
             if ($out['success'] == true) {

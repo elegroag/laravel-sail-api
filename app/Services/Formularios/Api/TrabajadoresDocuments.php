@@ -2,16 +2,20 @@
 
 namespace App\Services\Formularios\Api;
 
+use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsTrabajador;
 use App\Models\Gener18;
 use App\Services\Api\ApiPython;
-use App\Services\Api\ApiSubsidio;
 
 class TrabajadoresDocuments
 {
     private $params;
 
     private $trabajador;
+
+    private $empresa;
+
+    private $solicitante;
 
     public function main()
     {
@@ -42,7 +46,9 @@ class TrabajadoresDocuments
 
         $mtippga = ParamsTrabajador::getTipoPago();
         $tippag_detalle = ($this->trabajador->tippag) ? $mtippga[$this->trabajador->tippag] : '';
+        $nombre_trabajador = ($this->trabajador->prinom . ' ' . $this->trabajador->segnom . ' ' . $this->trabajador->priape . ' ' . $this->trabajador->segape);
 
+        $sucursal = 'N° ' . $this->trabajador->codsuc . ' - ' . capitalize($this->empresa->razsoc);
         $context = [
             'cedtra' => $this->trabajador->cedtra ?? null,
             'nit' => $this->trabajador->nit ?? null,
@@ -57,7 +63,13 @@ class TrabajadoresDocuments
             'empresa_labora' => $empresa_labora,
             'tippag_detalle' => $tippag_detalle,
             'detdoc_rua_trabajador' => $detdoc_rua_trabajador,
-            'nombre_trabajador' => ($this->trabajador->prinom . ' ' . $this->trabajador->segnom . ' ' . $this->trabajador->priape . ' ' . $this->trabajador->segape),
+            'nombre_trabajador' => $nombre_trabajador,
+            'fecnac_year' => substr($this->trabajador->fecnac, 0, 4),
+            'fecnac_month' => substr($this->trabajador->fecnac, 5, 2),
+            'fecnac_day' => substr($this->trabajador->fecnac, 8, 2),
+            'sucursal' => $sucursal,
+            'empresa' => $this->empresa->toArray(),
+            'solicitante' => $this->solicitante->toArray(),
             ...$this->trabajador->toArray(),
         ];
 
@@ -72,12 +84,10 @@ class TrabajadoresDocuments
             ]
         ]);
 
-        if ($ps->isJson() == false) {
-            return false;
-        }
+        if ($ps->isJson() == false) return false;
         $out = $ps->toArray();
         if ($out['success'] == false) {
-            return false;
+            throw new DebugException("Error generando el PDF", 501, $out);
         }
 
         sleep(2);
@@ -88,5 +98,7 @@ class TrabajadoresDocuments
     {
         $this->params = $params;
         $this->trabajador = $params['trabajador'];
+        $this->solicitante = $params['solicitante'];
+        $this->empresa = $params['empresa'];
     }
 }

@@ -4,13 +4,13 @@ namespace App\Services\FormulariosAdjuntos;
 
 use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsEmpresa;
-use App\Library\Tcpdf\KumbiaPDF;
+use App\Models\Mercurio07;
 use App\Models\Mercurio16;
 use App\Models\Mercurio30;
 use App\Models\Mercurio32;
-use App\Services\Formularios\FactoryDocuments;
 use App\Services\PreparaFormularios\CifrarDocumento;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Formularios\Generation\DocumentGenerationManager;
 
 class TrabajadorAdjuntoService
 {
@@ -39,17 +39,16 @@ class TrabajadorAdjuntoService
 
     public function __construct($request)
     {
-        $this->user = session()->has('user') ? session('user') : null;
+        $this->user = session('user') ?? null;
         $this->request = $request;
         $this->initialize();
     }
 
     public function initialize()
     {
-        $this->lfirma = Mercurio16::where([
-            'documento' => $this->user['documento'],
-            'coddoc' => $this->user['coddoc'],
-        ])->first();
+        $this->lfirma = Mercurio16::where('documento', $this->user['documento'])
+            ->where('coddoc', $this->user['coddoc'])
+            ->first();
 
         $procesadorComando = new ApiSubsidio();
         $procesadorComando->send(
@@ -66,59 +65,18 @@ class TrabajadorAdjuntoService
 
     public function tratamientoDatos()
     {
-        $this->filename = "tratamiento_datos_trabajador_{$this->request->getCedtra()}.pdf";
-        KumbiaPDF::setBackgroundImage(false);
-        $fabrica = new FactoryDocuments;
-        $documento = $fabrica->crearPolitica('trabajador');
-        $documento->setParamsInit(
-            [
-                'trabajador' => $this->request,
-                'firma' => $this->lfirma,
-                'filename' => $this->filename,
-                'background' => false,
-                'rfirma' => false,
-            ]
-        );
-
-        $documento->main();
-        $documento->outPut();
-        $this->cifrarDocumento();
-
-        return $this;
-    }
-
-    public function cartaSolicitud()
-    {
-        $procesadorComando = new ApiSubsidio();
-        $procesadorComando->send(
-            [
-                'servicio' => 'ComfacaEmpresas',
-                'metodo' => 'informacion_trabajador',
-                'params' => ['cedtra' => $this->request->getCedtra()],
-            ]
-        );
-
-        if ($procesadorComando->isJson() == false) {
-            d('Se genero un error al buscar al trabajador usando el servicio CLI-Comando. ');
-        }
-
-        $out = $procesadorComando->toArray();
-        $this->filename = "carta_solicitud_independiente_{$this->request->getCedtra()}.pdf";
-        KumbiaPDF::setBackgroundImage(false);
-
-        $fabrica = new FactoryDocuments;
-        $documento = $fabrica->crearOficio('trabajador');
-        $documento->setParamsInit([
+        $this->filename = 'tratamiento_datos_trabajador_' . strtotime('now') . "_{$this->request->cedtra}.pdf";
+        $manager = new DocumentGenerationManager();
+        $manager->generate('api', 'trabajador', [
+            'categoria' => 'politica',
+            'output' => $this->filename,
+            'template' => 'politica-trabajador.html',
             'trabajador' => $this->request,
-            'firma' => $this->lfirma,
-            'filename' => $this->filename,
-            'previus' => $out['success'] ? $out['data'] : null,
+            'conyuge' => $this->getBuscarConyuge(),
+            'solicitante' => $this->getSolicitante(),
+            'empresa' => $this->getBuscarEmpresa(),
         ]);
-
-        $documento->main();
-        $documento->outPut();
         $this->cifrarDocumento();
-
         return $this;
     }
 
@@ -128,47 +86,60 @@ class TrabajadorAdjuntoService
             throw new DebugException('Error no hay firma digital', 501);
         }
 
-        $conyuge = Mercurio32::where([
-            'documento' => $this->request->getDocumento(),
-            'coddoc' => $this->request->getCoddoc(),
-            'cedtra' => $this->request->getCedtra(),
-            'comper' => 'S',
-        ])->first();
+        $this->filename = 'formulario-trabajador-' . strtotime('now') . "_{$this->request->cedtra}.pdf";
+        $manager = new DocumentGenerationManager();
+        $manager->generate('api', 'trabajador', [
+            'categoria' => 'formulario',
+            'output' => $this->filename,
+            'template' => 'trabajador.html',
+            'trabajador' => $this->request,
+            'empresa' => $this->getBuscarEmpresa(),
+            'conyuge' => $this->getBuscarConyuge(),
+            'solicitante' => $this->getSolicitante()
+        ]);
 
+        $this->cifrarDocumento();
+        return $this;
+    }
+
+    public function getSolicitante()
+    {
+        $solicitante = Mercurio07::where("documento", $this->request->documento)
+            ->where("coddoc", $this->request->coddoc)
+            ->where("tipo", $this->request->tipo)
+            ->first();
+        return $solicitante;
+    }
+
+    public function getBuscarEmpresa()
+    {
         $procesadorComando = new ApiSubsidio();
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',
                 'params' => [
-                    'nit' => $this->request->getNit(),
+                    'nit' => $this->request->nit,
                 ],
             ]
         );
-
         if ($procesadorComando->isJson() == false) {
             throw new DebugException('Error al consultar la empresa', 501);
         }
         $out = $procesadorComando->toArray();
-        $empresa = new Mercurio30($out['data']);
+        $model = new Mercurio30();
+        return $model->fill($out['data']);
+    }
 
-        $this->filename = strtotime('now') . "_{$this->request->getCedtra()}.pdf";
-        $fabrica = new FactoryDocuments;
-        $documento = $fabrica->crearFormulario('trabajador');
-        $documento->setParamsInit([
-            'background' => 'img/form/trabajador/form-001-tra-p01.png',
-            'trabajador' => $this->request,
-            'empresa' => $empresa,
-            'conyuge' => $conyuge,
-            'firma' => $this->lfirma,
-            'filename' => $this->filename,
-        ]);
-
-        $documento->main();
-        $documento->outPut();
-        $this->cifrarDocumento();
-
-        return $this;
+    public function getBuscarConyuge()
+    {
+        $conyuge = Mercurio32::where([
+            'documento' => $this->request->documento,
+            'coddoc' => $this->request->coddoc,
+            'cedtra' => $this->request->cedtra,
+            'comper' => 'S',
+        ])->first();
+        return $conyuge;
     }
 
     public function cifrarDocumento()
