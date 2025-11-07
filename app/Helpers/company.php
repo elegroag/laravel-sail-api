@@ -227,3 +227,30 @@ if (! function_exists('coddoc_repleg_detalle')) {
         return coddoc_repleg_array()[$coddoc] ?? false;
     }
 }
+
+
+if (! function_exists('tipo_document_repleg_detalle')) {
+    /**
+     * @return array
+     */
+    function tipo_document_repleg_detalle()
+    {
+        return [
+            'CC' => 'CEDULA DE CIUDADANIA',
+            'TMF' => 'TARJETA DE MOVILIDAD FRONTERIZA',
+            'CD' => 'CARNET DIPLOMATICO',
+            'ISE' => 'IDENTIFICACION DADA POR LA SECRETARIA DE EDUCACIÓN',
+            'V' => 'VISA',
+            'PT' => 'PASAPORTE',
+            'TI' => 'TARJETA DE IDENTIDAD',
+            'NI' => 'NIT',
+            'CE' => 'CEDULA DE EXTRANJERIA',
+            'NU' => 'NUIP',
+            'PA' => 'PASAPORTE DE EXTRANJERIA',
+            'RC' => 'REGISTRO CIVIL',
+            'PEP' => 'PERMISO ESPECIAL DE PERMANENCIA',
+            'CB' => 'CERTIFICADO CABILDO',
+            '' => 'NO DEFINIDO'
+        ];
+    }
+}

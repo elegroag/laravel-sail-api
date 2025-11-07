@@ -2,6 +2,7 @@
 
 namespace App\Services\FormulariosAdjuntos;
 
+use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsEmpresa;
 use App\Library\Tcpdf\KumbiaPDF;
 use App\Models\Mercurio16;
@@ -9,6 +10,7 @@ use App\Models\Tranoms;
 use App\Services\Formularios\FactoryDocuments;
 use App\Services\PreparaFormularios\CifrarDocumento;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Formularios\Generation\DocumentGenerationManager;
 
 class EmpresaAdjuntoService
 {
@@ -28,7 +30,7 @@ class EmpresaAdjuntoService
 
     public function __construct($request)
     {
-        $this->user = session()->has('user') ? session('user') : null;
+        $this->user = session('user') ?? null;
         $this->request = $request;
         $this->initialize();
     }
@@ -54,26 +56,15 @@ class EmpresaAdjuntoService
 
     public function tratamientoDatos()
     {
-        $this->filename = "tratamiento_datos_empresa_{$this->request->getNit()}.pdf";
-        KumbiaPDF::setFooterImage(false);
-        KumbiaPDF::setBackgroundImage(false);
-
-        $fabrica = new FactoryDocuments;
-        $documento = $fabrica->crearPolitica('empresa');
-
-        $documento->setParamsInit(
-            [
-                'empresa' => $this->request,
-                'firma' => $this->lfirma,
-                'filename' => $this->filename,
-                'background' => false,
-                'rfirma' => false,
-            ]
-        );
-        $documento->main();
-        $documento->outPut();
+        $this->filename = 'tratamiento_datos_empresa_' . strtotime('now') . "_{$this->request->nit}.pdf";
+        $manager = new DocumentGenerationManager();
+        $manager->generate('api', 'empresa', [
+            'categoria' => 'politica',
+            'output' => $this->filename,
+            'template' => 'politica-empresa.html',
+            'empresa' => $this->request,
+        ]);
         $this->cifrarDocumento();
-
         return $this;
     }
 
@@ -102,20 +93,19 @@ class EmpresaAdjuntoService
 
     public function formulario()
     {
-        $this->filename = "formulario_empresa_{$this->request->getNit()}.pdf";
-        $background = 'img/form/empresa/form-empresa.jpg';
-        $fabrica = new FactoryDocuments;
-        $documento = $fabrica->crearFormulario('empresa');
-        $documento->setParamsInit([
-            'background' => $background,
-            'empresa' => $this->request,
-            'firma' => $this->lfirma,
-            'filename' => $this->filename,
+        if (! $this->lfirma) {
+            throw new DebugException('Error no hay firma digital', 501);
+        }
+        $this->filename = 'formulario-empresa-' . strtotime('now') . "_{$this->request->nit}.pdf";
+        $manager = new DocumentGenerationManager();
+        $manager->generate('api', 'empresa', [
+            'categoria' => 'formulario',
+            'output' => $this->filename,
+            'template' => 'empresa.html',
+            'empresa' => $this->request
         ]);
-        $documento->main();
-        $documento->outPut();
-        $this->cifrarDocumento();
 
+        $this->cifrarDocumento();
         return $this;
     }
 

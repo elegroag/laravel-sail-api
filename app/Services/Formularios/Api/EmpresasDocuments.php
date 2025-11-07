@@ -2,10 +2,10 @@
 
 namespace App\Services\Formularios\Api;
 
+use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsEmpresa;
 use App\Models\Gener18;
 use App\Services\Api\ApiPython;
-use App\Services\Api\ApiSubsidio;
 use Carbon\Carbon;
 
 class EmpresasDocuments
@@ -31,8 +31,14 @@ class EmpresasDocuments
         }
 
         $mtipoDocumentos = Gener18::where('coddoc', $this->empresa->tipdoc)->first();
-        $detdoc_detalle_empresa = ($mtipoDocumentos) ? $mtipoDocumentos->detdoc : 'NIT';
-        $detdoc_rua_empresa = ($mtipoDocumentos) ? $mtipoDocumentos->codrua : 'NIT';
+        $tipo_documento = ($mtipoDocumentos) ? $mtipoDocumentos->detdoc : 'NIT';
+
+        $coddorepleg = array_flip(tipo_document_repleg_detalle());
+        $representante = [
+            'nombre' => $this->empresa->repleg,
+            'tipo_documento' => ($this->empresa->coddorepleg) ? $coddorepleg[$this->empresa->coddorepleg] : 'CEDULA DE CIUDADANIA',
+            'cedula' => $this->empresa->cedrep,
+        ];
 
         $today = Carbon::now();
         $context = [
@@ -54,8 +60,9 @@ class EmpresasDocuments
             'zona_name' => $zona_name,
             'actividad_name' => $actividad_name,
             'departamento_name' => $departamento_name,
-            'detdoc_detalle_empresa' => $detdoc_detalle_empresa,
-            'detdoc_rua_empresa' => $detdoc_rua_empresa,
+            'tipo_documento' => $tipo_documento,
+            'cargo' => 'NINGUNO',
+            'representante' => $representante,
             ...$this->empresa->toArray(),
         ];
 
@@ -70,12 +77,10 @@ class EmpresasDocuments
             ]
         ]);
 
-        if ($ps->isJson() == false) {
-            return false;
-        }
+        if ($ps->isJson() == false) return false;
         $out = $ps->toArray();
         if ($out['success'] == false) {
-            return false;
+            throw new DebugException("Error generando el PDF", 501, $out);
         }
         sleep(2);
         return true;
