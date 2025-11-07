@@ -27,6 +27,7 @@ use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\Logger;
 use App\Services\Utils\SenderValidationCaja;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Entidades\EmpresaService;
 use Illuminate\Http\Request;
 use TCPDF;
 
@@ -262,22 +263,10 @@ class ActualizaTrabajadorController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function buscarEmpresaSubsidio($nit)
+    function buscarEmpresaSubsidio($nit)
     {
-        $procesadorComando = new ApiSubsidio();
-        $procesadorComando->send(
-            [
-                'servicio' => 'ComfacaEmpresas',
-                'metodo' => 'informacion_empresa',
-                'params' => ['nit' => $nit],
-            ]
-        );
-        $salida = $procesadorComando->toArray();
-        if ($salida['success']) {
-            return $salida;
-        } else {
-            return false;
-        }
+        $empresaService = new EmpresaService;
+        return $empresaService->buscarEmpresaSubsidio($nit);
     }
 
     /**

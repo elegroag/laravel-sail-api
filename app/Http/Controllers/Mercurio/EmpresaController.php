@@ -75,26 +75,26 @@ class EmpresaController extends ApplicationController
      */
     public function buscarEmpresa(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $nit = $this->clp($request, 'nit');
+            $nit = $request->input('nit');
             if (! $nit) {
                 throw new DebugException('El nit es requerido', 422);
             }
 
             $service = new EmpresaService;
-            $salida = $service->buscarEmpresaSubsidio($nit);
-
-            if ($salida === false) {
-                $salida = ['success' => false, 'msj' => 'No se encontró la empresa en subsidio'];
+            $empresa_sisu = $service->buscarEmpresaSubsidio($nit);
+            if (!$empresa_sisu || count($empresa_sisu) == 0) {
+                throw new DebugException("No se encontró la empresa en subsidio", 500);
             } else {
-                $salida = ['success' => true, 'data' => $salida['data']];
+                $salida = [
+                    'success' => true,
+                    'data' => $empresa_sisu
+                ];
             }
         } catch (DebugException $e) {
             $salida = ['success' => false, 'msj' => $e->getMessage()];
         }
-
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     /**
@@ -583,24 +583,20 @@ class EmpresaController extends ApplicationController
                 'msj' => $e->getMessage(),
             ];
         }
-
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     public function valida(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $nit = $this->clp($request, 'nit');
-            $solicitud_previa = (new Mercurio30)->getCount('*', "conditions: estado IN('P','T','D') AND nit='{$nit}'");
+            $nit = $request->input('nit');
+            $solicitud_previa = Mercurio30::whereIn("estado", ['P', 'T', 'D'])->where("nit", $nit)->count();
             $empresa = false;
-
             $empresaService = new EmpresaService;
-            $rqs = $empresaService->buscarEmpresaSubsidio($nit);
-            if ($rqs) {
-                $empresa = (count($rqs['data']) > 0) ? $rqs['data'] : false;
+            $empresa_sisu = $empresaService->buscarEmpresaSubsidio($nit);
+            if ($empresa_sisu) {
+                $empresa = (count($empresa_sisu) > 0) ? $empresa_sisu : false;
             }
-
             $response = [
                 'success' => true,
                 'solicitud_previa' => ($solicitud_previa > 0) ? true : false,
@@ -612,8 +608,7 @@ class EmpresaController extends ApplicationController
                 'msj' => $err->getMessage(),
             ];
         }
-
-        return $this->renderObject($response);
+        return response()->json($response);
     }
 
     public function serializeData(Request $request)

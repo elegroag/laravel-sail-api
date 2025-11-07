@@ -551,21 +551,20 @@ class ConsultasEmpresaController extends ApplicationController
         redirect()->route('principal.index');
         exit;
 
-        $mercurio28 = Mercurio28::where('tipo', parent::getActUser('tipo'))->orderBy('orden')->get();
+        $mercurio28 = Mercurio28::where('tipo', $this->tipo)->orderBy('orden')->get();
         foreach ($mercurio28 as $mmercurio28) {
-            $campos[$mmercurio28->getCampo()] = $mmercurio28->getDetalle();
+            $campos[$mmercurio28->campo] = $mmercurio28->detalle;
         }
 
-        $this->loadParametrosView();
-        $documento = parent::getActUser('documento');
+        $params = $this->loadParametrosView();
+
+        $documento = $this->user['documento'];
         $solicitante = Mercurio30::where('documento', $documento)->first();
 
         $empresa = false;
-        $rqs = $this->buscarEmpresaSubsidio($solicitante->getNit());
-        if ($rqs) {
+        $empresa_sisu = $this->buscarEmpresaSubsidio($solicitante->getNit());
+        if ($empresa_sisu && count($empresa_sisu) > 0) $empresa = $empresa_sisu;
 
-            $empresa = (count($rqs['data']) > 0) ? $rqs['data'] : false;
-        }
         $mercurio14 = Mercurio14::where('tipopc', '5')->get();
 
         return view('mercurio/subsidioemp/tmp/actualiza_datos_basicos', [
@@ -574,7 +573,7 @@ class ConsultasEmpresaController extends ApplicationController
             'archivos_adjuntar' => $mercurio14,
             'datosBasicos' => $empresa,
             'title' => 'Solicitud actualizar datos basicos',
-        ]);
+        ])->render();
     }
 
     public function actualizaDatosBasicos(Request $request)

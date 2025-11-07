@@ -155,11 +155,16 @@ class ActualizaEmpresaController extends ApplicationController
                     $data[$m33->campo] = $m33->valor;
                 }
             }
-            $data = array_merge($solicitud->getArray(), $data);
+            $data = array_merge($solicitud->toArray(), $data);
 
-            $out = $actualizaEmpresaService->buscarEmpresaSubsidio($documento);
-            $empresa = new Mercurio30($out['data']);
-            $empresa->setId($solicitud->getId());
+            $empresa_sisu = $actualizaEmpresaService->buscarEmpresaSubsidio($documento);
+            if ($empresa_sisu && count($empresa_sisu) > 0) {
+                $empresa = new Mercurio30();
+                $empresa->fill($empresa_sisu);
+            } else {
+                $empresa = new Mercurio30();
+            }
+            $empresa->id = $id;
 
             $actualizaEmpresaService = new DatosEmpresaService(
                 [
@@ -171,13 +176,12 @@ class ActualizaEmpresaController extends ApplicationController
                 ]
             );
             $actualizaEmpresaService->setClaveCertificado($clave_certificado);
-
             $out = $actualizaEmpresaService->formulario()->getResult();
             (new GuardarArchivoService(
                 [
                     'tipopc' => $this->tipopc,
                     'coddoc' => 27,
-                    'id' => $empresa->getId(),
+                    'id' => $solicitud->id,
                 ]
             ))->salvarDatos($out);
 
@@ -251,12 +255,12 @@ class ActualizaEmpresaController extends ApplicationController
             $paramsEmpresa->setDatosCaptura($procesadorComando->toArray());
 
             $actualizaEmpresaService = new ActualizaEmpresaService;
-            $rqs = $actualizaEmpresaService->buscarEmpresaSubsidio($documento);
+            $empresa_sisu = $actualizaEmpresaService->buscarEmpresaSubsidio($documento);
             $ciudades = ParamsEmpresa::getCiudades();
 
             $list_sucursales = [];
-            if ($rqs) {
-                $sucursales = (count($rqs['sucursales']) > 0) ? $rqs['sucursales'] : false;
+            if ($empresa_sisu && count($empresa_sisu) > 0) {
+                $sucursales = ($empresa_sisu['sucursales'] && count($empresa_sisu['sucursales']) > 0) ? $empresa_sisu['sucursales'] : false;
                 if ($sucursales) {
                     foreach ($sucursales as $sucursal) {
                         if ($sucursal['estado'] != 'I') {
@@ -479,8 +483,8 @@ class ActualizaEmpresaController extends ApplicationController
         $paramsEmpresa->setDatosCaptura($procesadorComando->toArray());
 
         $actualizaEmpresaService = new ActualizaEmpresaService;
-        $rqs = $actualizaEmpresaService->buscarEmpresaSubsidio($campos->nit);
-        $empresa = (count($rqs['data']) > 0) ? $rqs['data'] : false;
+        $empresa_sisu = $actualizaEmpresaService->buscarEmpresaSubsidio($campos->nit);
+        $empresa = ($empresa_sisu && count($empresa_sisu) > 0) ? $empresa_sisu : false;
 
         $timer = strtotime('now');
         $file = "formulario_afiliacion_{$id}_{$timer}.pdf";
@@ -515,10 +519,10 @@ class ActualizaEmpresaController extends ApplicationController
         try {
             $actualizaEmpresaService = new ActualizaEmpresaService;
 
-            $rqs = $actualizaEmpresaService->buscarEmpresaSubsidio($this->user['documento']);
+            $empresa_sisu = $actualizaEmpresaService->buscarEmpresaSubsidio($this->user['documento']);
             $list_sucursales = [];
-            if ($rqs) {
-                $sucursales = (count($rqs['sucursales']) > 0) ? $rqs['sucursales'] : false;
+            if ($empresa_sisu && count($empresa_sisu) > 0) {
+                $sucursales = ($empresa_sisu['sucursales'] && count($empresa_sisu['sucursales']) > 0) ? $empresa_sisu['sucursales'] : false;
                 if ($sucursales) {
                     foreach ($sucursales as $sucursal) {
                         if ($sucursal['estado'] != 'I') {
@@ -579,10 +583,10 @@ class ActualizaEmpresaController extends ApplicationController
     {
         try {
             $actualizaEmpresaService = new ActualizaEmpresaService;
-            $rqs = $actualizaEmpresaService->buscarEmpresaSubsidio($this->user['documento']);
+            $empresa_sisu = $actualizaEmpresaService->buscarEmpresaSubsidio($this->user['documento']);
             $salida = [
                 'success' => true,
-                'data' => ($rqs) ? $rqs['data'] : false,
+                'data' => ($empresa_sisu && count($empresa_sisu) > 0) ? $empresa_sisu : false,
                 'msj' => 'OK',
             ];
         } catch (DebugException $e) {

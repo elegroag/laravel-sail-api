@@ -90,11 +90,13 @@ class EmpresaService
      * buscar empresa en subsidio sin importar el estado
      *
      * @param [type] $nit
-     * @return void
+     * @return array|bool
      */
     public function buscarEmpresaSubsidio($nit)
     {
-
+        if (!$nit) {
+            return false;
+        }
         $procesadorComando = new ApiSubsidio();
         $procesadorComando->send(
             [
@@ -107,7 +109,7 @@ class EmpresaService
         );
         $salida = $procesadorComando->toArray();
         if ($salida['success']) {
-            return $salida;
+            return isset($salida['data']) ? $salida['data'] : false;
         } else {
             return false;
         }

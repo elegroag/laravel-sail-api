@@ -87,23 +87,8 @@ class TrabajadorService
      */
     public function buscarEmpresaSubsidio($nit)
     {
-
-        $procesadorComando = new ApiSubsidio();
-        $procesadorComando->send(
-            [
-                'servicio' => 'ComfacaEmpresas',
-                'metodo' => 'informacion_empresa',
-                'params' => [
-                    'nit' => $nit,
-                ],
-            ]
-        );
-        $salida = $procesadorComando->toArray();
-        if ($salida['success']) {
-            return $salida;
-        } else {
-            return false;
-        }
+        $empresaService = new EmpresaService();
+        return $empresaService->buscarEmpresaSubsidio($nit);
     }
 
     public function archivosRequeridos($solicitud)
@@ -112,9 +97,6 @@ class TrabajadorService
             return false;
         }
         $archivos = [];
-
-        $db = DbBase::rawConnect();
-
         $mercurio10 = Mercurio10::where('numero', $solicitud->getId())
             ->where('tipopc', $this->tipopc)
             ->orderBy('item', 'desc')
