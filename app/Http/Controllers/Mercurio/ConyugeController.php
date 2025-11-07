@@ -528,12 +528,12 @@ class ConyugeController extends ApplicationController
 
     public function params()
     {
-        $this->setResponse('ajax');
         try {
-            $nombre = parent::getActUser('nombre');
-            $documento = parent::getActUser('documento');
-            $tipo = parent::getActUser('tipo');
-            $coddoc = parent::getActUser('coddoc');
+            $nombre = $this->user['nombre'];
+            $documento = $this->user['documento'];
+            $coddoc = $this->user['coddoc'];
+            $tipo = $this->tipo;
+
             $listAfiliados = false;
             $cedtras = [];
 
@@ -696,7 +696,7 @@ class ConyugeController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($response);
+        return response()->json($response);
     }
 
     public function searchRequest(Request $request, Response $response, string $id)
@@ -731,7 +731,7 @@ class ConyugeController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function consultaDocumentos($id)
@@ -763,12 +763,11 @@ class ConyugeController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function formulario($id)
     {
-        $this->setResponse('ajax');
         try {
             $documento = parent::getActUser('documento');
             $coddoc = parent::getActUser('coddoc');
@@ -818,13 +817,13 @@ class ConyugeController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
-    public function seguimiento($id)
+    public function seguimiento(Request $request)
     {
-        $this->setResponse('ajax');
         try {
+            $id = $request->input('id');
             $conyugeService = new ConyugeService;
             $out = $conyugeService->consultaSeguimiento($id);
             $salida = [
@@ -835,14 +834,12 @@ class ConyugeController extends ApplicationController
             $salida = ['success' => false, 'msj' => $e->getMessage()];
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function buscarTrabajador(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-
             $cedtra = $request->input('cedtra');
             $ps = new ApiSubsidio();
             $ps->send([
@@ -889,7 +886,6 @@ class ConyugeController extends ApplicationController
                 'msj' => $e->getMessage(),
             ];
         }
-
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 }

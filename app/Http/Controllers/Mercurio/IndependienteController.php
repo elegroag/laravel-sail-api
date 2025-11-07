@@ -495,12 +495,11 @@ class IndependienteController extends ApplicationController
         return $this->renderObject($salida);
     }
 
-    public function seguimiento(Request $request, Response $response, int $id)
+    public function seguimiento(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $independienteService = new IndependienteService;
-            $out = $independienteService->consultaSeguimiento($id);
+            $out = $independienteService->consultaSeguimiento($request->input('id'));
             $salida = [
                 'success' => true,
                 'data' => $out,
@@ -508,15 +507,13 @@ class IndependienteController extends ApplicationController
         } catch (DebugException $e) {
             $salida = ['success' => false, 'msj' => $e->getMessage()];
         }
-
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function downloadFile($archivo = '')
     {
         $this->setResponse('view');
         $fichero = 'public/temp/' . $archivo;
-
         return $this->renderFile($fichero);
     }
 

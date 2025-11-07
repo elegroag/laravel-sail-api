@@ -238,8 +238,8 @@ export class FormView extends Backbone.View {
 
     __renderSeguimiento() {
         this.App.trigger('syncro', {
-            url: this.App.url('seguimiento/' + this.model.get('id'), window.ServerController ?? 'empresa'),
-            data: {},
+            url: this.App.url('seguimiento', window.ServerController),
+            data: { id: this.model.get('id') },
             callback: (response) => {
                 if (response.success) {
                     const view = new SeguimientosView({

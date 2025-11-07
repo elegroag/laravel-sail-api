@@ -739,12 +739,11 @@ class PensionadoController extends ApplicationController
         return $this->renderText($html);
     }
 
-    public function seguimiento($id)
+    public function seguimiento(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $pensionadoService = new PensionadoService;
-            $out = $pensionadoService->consultaSeguimiento($id);
+            $out = $pensionadoService->consultaSeguimiento($request->input('id'));
             $salida = [
                 'success' => true,
                 'data' => $out,
@@ -752,8 +751,7 @@ class PensionadoController extends ApplicationController
         } catch (DebugException $e) {
             $salida = ['success' => false, 'msj' => $e->getMessage()];
         }
-
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     public function descargar_formulario($id)

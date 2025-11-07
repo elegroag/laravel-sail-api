@@ -624,11 +624,11 @@ class ActualizaEmpresaController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
-    public function seguimiento($id)
+    public function seguimiento(Request $request)
     {
         try {
             $actualizaEmpresaService = new ActualizaEmpresaService;
-            $out = $actualizaEmpresaService->consultaSeguimiento($id);
+            $out = $actualizaEmpresaService->consultaSeguimiento($request->input('id'));
             $salida = [
                 'success' => true,
                 'data' => $out,
@@ -636,7 +636,6 @@ class ActualizaEmpresaController extends ApplicationController
         } catch (DebugException $e) {
             $salida = ['success' => false, 'msj' => $e->getMessage()];
         }
-
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 }

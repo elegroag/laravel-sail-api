@@ -255,17 +255,21 @@ class TrabajadorController extends ApplicationController
         return response()->json($salida);
     }
 
-    /**
-     * GET /trabajador/seguimiento/{id}
-     */
-    public function seguimiento($id)
+    public function seguimiento(Request $request)
     {
         try {
+            $id = $request->input('id');
             $trabajadorService = new TrabajadorService;
             $out = $trabajadorService->consultaSeguimiento($id);
-            $salida = ['success' => true, 'data' => $out];
-        } catch (\Exception $e) {
-            $salida = ['success' => false, 'msj' => $e->getMessage()];
+            $salida = [
+                'success' => true,
+                'data' => $out
+            ];
+        } catch (DebugException $e) {
+            $salida = [
+                'success' => false,
+                'msj' => $e->getMessage()
+            ];
         }
 
         return response()->json($salida);
@@ -631,9 +635,13 @@ class TrabajadorController extends ApplicationController
         return response()->json($salida);
     }
 
-    public function borrar(Request $request, Response $response, $id)
+    public function borrar(Request $request)
     {
         try {
+            if (!$request->get('id')) {
+                throw new DebugException('Error no se puede identificar el propietario de la solicitud', 301);
+            }
+            $id = $request->get('id');
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
 
@@ -643,18 +651,16 @@ class TrabajadorController extends ApplicationController
                 ->first();
             if ($m31) {
                 if ($m31->estado != 'T') {
-                    Mercurio10::where('numero', $id)->where('tipopc', $this->tipopc)->delete();
+                    Mercurio10::where('numero', $id)->delete();
                 }
             }
 
-            Mercurio31::where('id', $id)
-                ->where('documento', $documento)
-                ->where('coddoc', $coddoc)
-                ->delete();
+            Mercurio37::where('numero', $id)->delete();
+            Mercurio31::where('id', $id)->delete();
 
             $response = [
                 'success' => true,
-                'msj' => 'Ok',
+                'msj' => 'Registro eliminado con exito',
             ];
         } catch (DebugException $e) {
             $response = [

@@ -888,4 +888,19 @@ class ActualizaTrabajadorController extends ApplicationController
 
         return $this->renderObject($salida, false);
     }
+
+    public function seguimiento(Request $request)
+    {
+        try {
+            $actualizaEmpresaService = new DatosTrabajadorService;
+            $out = $actualizaEmpresaService->consultaSeguimiento($request->input('id'));
+            $salida = [
+                'success' => true,
+                'data' => $out,
+            ];
+        } catch (DebugException $e) {
+            $salida = ['success' => false, 'msj' => $e->getMessage()];
+        }
+        return response()->json($salida);
+    }
 }

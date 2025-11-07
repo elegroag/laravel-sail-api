@@ -1077,9 +1077,10 @@ class BeneficiarioController extends ApplicationController
         return response()->json($response);
     }
 
-    public function seguimiento($id)
+    public function seguimiento(Request $request)
     {
         try {
+            $id = $request->input('id');
             $beneficiarioService = new BeneficiarioService;
             $out = $beneficiarioService->consultaSeguimiento($id);
             $salida = [

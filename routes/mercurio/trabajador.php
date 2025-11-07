@@ -17,7 +17,7 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
         Route::post('/guardar_archivo', [TrabajadorController::class, 'guardarArchivo'])->name('trabajador.guardar_archivo');
         Route::get('/archivos_requeridos/{id}', [TrabajadorController::class, 'archivosRequeridos'])->name('trabajador.archivos_requeridos');
         Route::post('/enviar_caja', [TrabajadorController::class, 'enviarCaja'])->name('trabajador.enviar_caja');
-        Route::get('/seguimiento/{id}', [TrabajadorController::class, 'seguimiento'])->name('trabajador.seguimiento');
+        Route::post('/seguimiento', [TrabajadorController::class, 'seguimiento'])->name('trabajador.seguimiento');
 
         Route::post('/params', [TrabajadorController::class, 'params']);
         Route::post('/render_table', [TrabajadorController::class, 'renderTable']);
@@ -25,9 +25,7 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
         Route::post('/search_request/{id}', [TrabajadorController::class, 'searchRequest']);
         Route::post('/consulta_documentos/{id}', [TrabajadorController::class, 'consultaDocumentos']);
         Route::post('/valida', [TrabajadorController::class, 'valida']);
-
         Route::post('/borrar', [TrabajadorController::class, 'borrar']);
-        Route::post('/borrar/{id}', [TrabajadorController::class, 'borrar']);
 
         Route::post('/valide_nit', [TrabajadorController::class, 'valideNit']);
         Route::post('/traer_trabajador', [TrabajadorController::class, 'traerTrabajador']);

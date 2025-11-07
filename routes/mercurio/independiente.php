@@ -17,7 +17,7 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
         Route::post('/guardar_archivo', [IndependienteController::class, 'guardarArchivo']);
         Route::post('/archivos_requeridos/{id}', [IndependienteController::class, 'archivosRequeridos']);
         Route::post('/enviar_caja', [IndependienteController::class, 'enviarCaja']);
-        Route::post('/seguimiento/{id}', [IndependienteController::class, 'seguimiento']);
+        Route::post('/seguimiento', [IndependienteController::class, 'seguimiento']);
         Route::post('/params', [IndependienteController::class, 'params']);
         Route::get('/download_temp/{archivo}', [IndependienteController::class, 'downloadFile']);
         Route::get('/download_docs/{archivo}', [IndependienteController::class, 'downloadDocs']);

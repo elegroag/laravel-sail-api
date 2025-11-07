@@ -297,15 +297,11 @@ class EmpresaController extends ApplicationController
         return response()->json($salida);
     }
 
-    /**
-     * GET /empresa/seguimiento/{id}
-     */
-    public function seguimiento(Request $request, Response $response, int $id)
+    public function seguimiento(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $service = new EmpresaService;
-            $out = $service->consultaSeguimiento($id);
+            $out = $service->consultaSeguimiento($request->input('id'));
             $salida = [
                 'success' => true,
                 'data' => $out,
@@ -317,7 +313,7 @@ class EmpresaController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     public function params()

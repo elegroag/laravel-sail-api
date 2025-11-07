@@ -35,7 +35,7 @@ class TrabajadoresDocuments
         $ocupaciones = ParamsTrabajador::getOcupaciones();
 
         $mtipoDocumentos = Gener18::where('coddoc', $this->trabajador->tipdoc)->first();
-        $detdoc_detalle_trabajador = ($mtipoDocumentos) ? $mtipoDocumentos->detdoc : 'Cedula de ciudadania';
+        $tipo_documento = ($mtipoDocumentos) ? $mtipoDocumentos->detdoc : 'Cedula de ciudadania';
         $detdoc_rua_trabajador = ($mtipoDocumentos) ? $mtipoDocumentos->codrua : 'CC';
 
         $mtipdisca = ParamsTrabajador::getTipoDiscapacidad();
@@ -62,7 +62,7 @@ class TrabajadoresDocuments
             'etnica_name' => $etnica_name,
             'pueblo_name' => $pueblo_name,
             'ocupaciones' => $ocupaciones,
-            'detdoc_detalle' => $detdoc_detalle_trabajador,
+            'tipo_documento' => $tipo_documento,
             'discapacidad_name' => $discapacidad_name,
             'salario' => $salario,
             'empresa_labora' => $empresa_labora,

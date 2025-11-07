@@ -724,12 +724,11 @@ class FacultativoController extends ApplicationController
         return $this->renderText($html);
     }
 
-    public function seguimiento($id)
+    public function seguimiento(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $facultativoService = new FacultativoService;
-            $out = $facultativoService->consultaSeguimiento($id);
+            $out = $facultativoService->consultaSeguimiento($request->input('id'));
             $salida = [
                 'success' => true,
                 'data' => $out,

@@ -17,7 +17,7 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
         Route::post('/guardar_archivo', [ActualizaEmpresaController::class, 'guardarArchivo']);
         Route::post('/archivos_requeridos/{id}', [ActualizaEmpresaController::class, 'archivosRequeridos']);
         Route::post('/enviar_caja', [ActualizaEmpresaController::class, 'enviarCaja']);
-        Route::post('/seguimiento/{id}', [ActualizaEmpresaController::class, 'seguimiento']);
+        Route::post('/seguimiento', [ActualizaEmpresaController::class, 'seguimiento']);
         Route::post('/params', [ActualizaEmpresaController::class, 'params']);
         Route::get('/download_temp/{archivo}', [ActualizaEmpresaController::class, 'downloadFile']);
         Route::get('/download_docs/{archivo}', [ActualizaEmpresaController::class, 'downloadDocs']);
