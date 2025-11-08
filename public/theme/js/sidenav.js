@@ -1,129 +1,116 @@
 (function () {
+    function pinSidenav() {
+        $('.sidenav-toggler').addClass('active');
+        $('.sidenav-toggler').data('action', 'sidenav-unpin');
+        $('body').removeClass('g-sidenav-hidden').addClass('g-sidenav-show g-sidenav-pinned');
+        $('body').append('<div class="backdrop d-xl-none" data-action="sidenav-unpin" data-target=' + $('#sidenav-main').data('target') + ' />');
+        // Store the sidenav state in a cookie session
+        Cookies.set('sidenav-state', 'pinned');
+    }
 
-	function pinSidenav() {
-		$('.sidenav-toggler').addClass('active');
-		$('.sidenav-toggler').data('action', 'sidenav-unpin');
-		$('body').removeClass('g-sidenav-hidden').addClass('g-sidenav-show g-sidenav-pinned');
-		$('body').append(
-			'<div class="backdrop d-xl-none" data-action="sidenav-unpin" data-target=' +
-				$('#sidenav-main').data('target') +
-				' />'
-		);
-		// Store the sidenav state in a cookie session
-		Cookies.set('sidenav-state', 'pinned');
-	}
+    function unpinSidenav() {
+        $('.sidenav-toggler').removeClass('active');
+        $('.sidenav-toggler').data('action', 'sidenav-pin');
+        $('body').removeClass('g-sidenav-pinned').addClass('g-sidenav-hidden');
+        $('body').find('.backdrop').remove();
+        // Store the sidenav state in a cookie session
+        Cookies.set('sidenav-state', 'unpinned');
 
-	function unpinSidenav() {
-		$('.sidenav-toggler').removeClass('active');
-		$('.sidenav-toggler').data('action', 'sidenav-pin');
-		$('body').removeClass('g-sidenav-pinned').addClass('g-sidenav-hidden');
-		$('body').find('.backdrop').remove();
-		// Store the sidenav state in a cookie session
-		Cookies.set('sidenav-state', 'unpinned');
-	}
+        if (!$('body').hasClass('g-sidenav-pinned')) {
+            $('body').removeClass('g-sidenav-show').addClass('g-sidenav-hide');
 
-	// Set sidenav state from cookie
+            setTimeout(function () {
+                $('body').removeClass('g-sidenav-hide').addClass('g-sidenav-hidden');
+            }, 300);
+        }
+    }
 
-	// Evitar animaciones en la carga inicial
-	$('body').addClass('no-animate');
+    // Set sidenav state from cookie
 
-	var $sidenavState = Cookies.get('sidenav-state') ? Cookies.get('sidenav-state') : 'pinned';
+    // Evitar animaciones en la carga inicial
+    $('body').addClass('no-animate');
 
-	if ($(window).width() > 1200) {
-		if ($sidenavState == 'pinned') {
-			pinSidenav();
-		}
+    var $sidenavState = Cookies.get('sidenav-state') ? Cookies.get('sidenav-state') : 'pinned';
 
-		if (Cookies.get('sidenav-state') == 'unpinned') {
-			unpinSidenav();
-		}
-	}
+    if ($(window).width() > 1200) {
+        if ($sidenavState == 'pinned') {
+            pinSidenav();
+        }
 
-	// Reactivar transiciones después de aplicar el estado inicial, garantizando 1 frame de pintura
-	if (document && document.body) {
-		requestAnimationFrame(function () {
-			requestAnimationFrame(function () {
-				$('body').removeClass('no-animate');
-			});
-		});
-	} else {
-		setTimeout(function () { $('body').removeClass('no-animate'); }, 0);
-	}
+        if (Cookies.get('sidenav-state') == 'unpinned') {
+            unpinSidenav();
+        }
+    }
 
-	$('body').on('click', '[data-action]', function (e) {
-		e.preventDefault();
+    // Reactivar transiciones después de aplicar el estado inicial, garantizando 1 frame de pintura
+    if (document && document.body) {
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                $('body').removeClass('no-animate');
+            });
+        });
+    } else {
+        setTimeout(function () {
+            $('body').removeClass('no-animate');
+        }, 0);
+    }
 
-		var $this = $(this);
-		var action = $this.data('action');
-		var target = $this.data('target');
+    $('body').on('click', '[data-action]', function (e) {
+        e.preventDefault();
 
-		// Manage actions
+        var $this = $(this);
+        var action = $this.data('action');
+        var target = $this.data('target');
 
-		switch (action) {
-			case 'sidenav-pin':
-				pinSidenav();
-				break;
+        // Manage actions
 
-			case 'sidenav-unpin':
-				unpinSidenav();
-				break;
+        switch (action) {
+            case 'sidenav-pin':
+                pinSidenav();
+                break;
 
-			case 'search-show':
-				target = $this.data('target');
-				$('body').removeClass('g-navbar-search-show').addClass('g-navbar-search-showing');
+            case 'sidenav-unpin':
+                unpinSidenav();
+                break;
 
-				setTimeout(function () {
-					$('body').removeClass('g-navbar-search-showing').addClass('g-navbar-search-show');
-				}, 150);
+            case 'search-show':
+                target = $this.data('target');
+                $('body').removeClass('g-navbar-search-show').addClass('g-navbar-search-showing');
 
-				setTimeout(function () {
-					$('body').addClass('g-navbar-search-shown');
-				}, 300);
-				break;
+                setTimeout(function () {
+                    $('body').removeClass('g-navbar-search-showing').addClass('g-navbar-search-show');
+                }, 150);
 
-			case 'search-close':
-				target = $this.data('target');
-				$('body').removeClass('g-navbar-search-shown');
+                setTimeout(function () {
+                    $('body').addClass('g-navbar-search-shown');
+                }, 300);
+                break;
 
-				setTimeout(function () {
-					$('body').removeClass('g-navbar-search-show').addClass('g-navbar-search-hiding');
-				}, 150);
+            case 'search-close':
+                target = $this.data('target');
+                $('body').removeClass('g-navbar-search-shown');
 
-				setTimeout(function () {
-					$('body').removeClass('g-navbar-search-hiding').addClass('g-navbar-search-hidden');
-				}, 300);
+                setTimeout(function () {
+                    $('body').removeClass('g-navbar-search-show').addClass('g-navbar-search-hiding');
+                }, 150);
 
-				setTimeout(function () {
-					$('body').removeClass('g-navbar-search-hidden');
-				}, 500);
-				break;
-		}
-	});
+                setTimeout(function () {
+                    $('body').removeClass('g-navbar-search-hiding').addClass('g-navbar-search-hidden');
+                }, 300);
 
-	// Add sidenav modifier classes on mouse events
+                setTimeout(function () {
+                    $('body').removeClass('g-navbar-search-hidden');
+                }, 500);
+                break;
+        }
+    });
 
-	$('.sidenav').on('mouseenter', function () {
-		if (!$('body').hasClass('g-sidenav-pinned')) {
-			$('body').removeClass('g-sidenav-hide').removeClass('g-sidenav-hidden').addClass('g-sidenav-show');
-		}
-	});
-
-	$('.sidenav').on('mouseleave', function () {
-		if (!$('body').hasClass('g-sidenav-pinned')) {
-			$('body').removeClass('g-sidenav-show').addClass('g-sidenav-hide');
-
-			setTimeout(function () {
-				$('body').removeClass('g-sidenav-hide').addClass('g-sidenav-hidden');
-			}, 300);
-		}
-	});
-
-	// Make the body full screen size if it has not enough content inside
-	$(window).on('load resize', function () {
-		if ($('body').height() < 800) {
-			$('body').css('min-height', '100%');
-			$('body').css('overflow-x', 'hidden');
-			$('#footer-main').addClass('footer-auto-bottom');
-		}
-	});
+    // Make the body full screen size if it has not enough content inside
+    $(window).on('load resize', function () {
+        if ($('body').height() < 800) {
+            $('body').css('min-height', '100%');
+            $('body').css('overflow-x', 'hidden');
+            $('#footer-main').addClass('footer-auto-bottom');
+        }
+    });
 })();

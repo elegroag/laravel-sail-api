@@ -38,6 +38,10 @@ class Mercurio41Seeder extends Seeder
 
             $data['ruuid'] = (string) Str::orderedUuid();
 
+            if ($data['tipper'] == null || $data['tipper'] == '') {
+                $data['tipper'] = 'N';
+            }
+
             // Clave compuesta
             Mercurio41::updateOrCreate(
                 [

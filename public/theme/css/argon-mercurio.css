@@ -331,10 +331,18 @@ caption {
 .table th {
 	font-family: 'roboto', sans-serif;
 	font-weight: 500;
-	font-size: 15px;
+	font-size: .99rem;
 	justify-content: space-between;
 	align-items: center;
 	background: var(--secondary) !important;
+}
+
+.table thead td,
+.table td {
+	font-family: 'roboto', sans-serif;
+	font-size: .9rem;
+	justify-content: space-between;
+	align-items: center;
 }
 
 .table td .progress {
@@ -5153,10 +5161,6 @@ input[type='button'].btn-block {
 .navbar-light .navbar-brand:hover,
 .navbar-light .navbar-brand:focus {
 	color: rgba(0, 0, 0, .9);
-}
-
-.navbar-light .navbar-nav .nav-link {
-	color: rgba(255, 255, 255, .9);
 }
 
 .navbar-light .navbar-nav .nav-link:hover,
@@ -17330,11 +17334,6 @@ textarea[resize='horizontal'] {
 	box-shadow: 0 0 2rem 0 rgba(136, 152, 170, .15);
 }
 
-.navbar-vertical.navbar-light {
-	border-color: rgb(28, 197, 213, 1);
-	background-color: #475A6C;
-}
-
 .navbar-vertical.navbar-dark {
 	border-color: rgba(255, 255, 255, .1);
 	background-color: transparent;
@@ -17373,8 +17372,6 @@ textarea[resize='horizontal'] {
 
 .navbar-vertical .navbar-nav .nav-link {
 	font-size: .875rem;
-	font-weight: 500;
-
 	padding-right: 1rem;
 	padding-left: 1rem;
 }
@@ -17539,17 +17536,12 @@ textarea[resize='horizontal'] {
 	margin-left: .5rem;
 	padding-right: 1rem;
 	padding-left: 1rem;
-	background: #354452;	
 	font-weight: 500;
-	border-radius: 1.3rem;
 }
-
 
 .navbar-vertical.navbar-expand-xs .navbar-nav>.nav-item>.nav-link:hover {
 	margin-right: .5rem;
 	margin-left: .5rem;
-	background: rgba(52, 73, 94, .5);
-	border-radius: .9rem;
 	padding-right: 1rem;
 	padding-left: 1rem;
 }
@@ -17558,11 +17550,8 @@ textarea[resize='horizontal'] {
 	margin-right: 0.5rem;
 	margin-left: 0.5rem;
 	border-radius: 0px;
-	background: rgba(52, 73, 94, .5);
 	padding-right: 1rem;
 	padding-left: 1rem;
-	border-radius: .9rem;
-	color: #efefef;
 }
 
 .navbar-vertical.navbar-expand-xs .lavalamp-object {
@@ -17655,7 +17644,6 @@ textarea[resize='horizontal'] {
 
 	.navbar-vertical.navbar-expand-sm .navbar-nav {
 		flex-direction: column;
-
 		margin-right: -1.5rem;
 		margin-left: -1.5rem;
 	}
@@ -17673,9 +17661,6 @@ textarea[resize='horizontal'] {
 		margin-left: .5rem;
 		padding-right: 1rem;
 		padding-left: 1rem;
-
-		border-radius: .375rem;
-		background: #f6f9fc;
 	}
 
 	.navbar-vertical.navbar-expand-sm .lavalamp-object {
@@ -17684,7 +17669,6 @@ textarea[resize='horizontal'] {
 		margin-left: .5rem;
 		padding-right: 1rem;
 		padding-left: 1rem;
-
 		color: #fff;
 		border-radius: .375rem;
 		background: #3f8349;

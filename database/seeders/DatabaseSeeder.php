@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+ini_set('memory_limit', '512M');
+
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -45,7 +47,7 @@ class DatabaseSeeder extends Seeder
             Mercurio06Seeder::class,
             Mercurio07Seeder::class,
             Mercurio09Seeder::class,
-            
+
             Mercurio08Seeder::class,
             Mercurio11Seeder::class,
             Mercurio10Seeder::class,
@@ -81,7 +83,7 @@ class DatabaseSeeder extends Seeder
             Mercurio52Seeder::class,
             Mercurio53Seeder::class,
             Mercurio54Seeder::class,
-            
+
             Mercurio55Seeder::class,
             Mercurio56Seeder::class,
             Mercurio57Seeder::class,
@@ -93,11 +95,11 @@ class DatabaseSeeder extends Seeder
             Mercurio63Seeder::class,
 
             Mercurio64Seeder::class,
-            
+
             Mercurio67Seeder::class,
             Mercurio65Seeder::class,
             Mercurio66Seeder::class,
-            
+
             Mercurio68Seeder::class,
             Mercurio69Seeder::class,
             Mercurio71Seeder::class,
