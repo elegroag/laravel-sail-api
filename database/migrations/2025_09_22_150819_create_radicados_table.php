@@ -17,7 +17,7 @@ return new class extends Migration
             $table->integer('id')->autoIncrement();
             $table->primary('id');
             $table->char('vigencia', 4);
-            $table->char('tipo', 1);
+            $table->char('tipo', 3);
             $table->integer('numero');
             $table->char('radicado', 15);
             $table->unique(['vigencia', 'tipo', 'numero'], 'radicado_unique');

@@ -806,7 +806,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 188,
-                    'title' => '(T) Afiliación',
+                    'title' => 'Afiliación',
                     'default_url' => null,
                     'icon' => 'ni ni-active-40',
                     'color' => 'text-info',
@@ -830,7 +830,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 190,
-                    'title' => '(T) Afiliación conyuge',
+                    'title' => 'Afiliación conyuge',
                     'default_url' => 'mercurio/conyuge/index',
                     'icon' => null,
                     'color' => '',
@@ -842,7 +842,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 191,
-                    'title' => '(T) Afiliación beneficiario',
+                    'title' => 'Afiliación beneficiario',
                     'default_url' => 'mercurio/beneficiario/index',
                     'icon' => null,
                     'color' => '',
@@ -854,7 +854,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 192,
-                    'title' => '(T) Presentación certificados',
+                    'title' => 'Presentación certificados',
                     'default_url' => 'mercurio/certificados/index',
                     'icon' => null,
                     'color' => '',
@@ -1022,7 +1022,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 208,
-                    'title' => '(E) Afiliación',
+                    'title' => 'Afiliación',
                     'default_url' => null,
                     'icon' => 'ni ni-active-40',
                     'color' => 'text-info',
@@ -1046,7 +1046,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 210,
-                    'title' => '(E) Afiliación de trabajador',
+                    'title' => 'Afiliación de trabajador',
                     'default_url' => 'mercurio/trabajador/index',
                     'icon' => null,
                     'color' => '',
@@ -1250,7 +1250,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 241,
-                    'title' => '(E) Afiliación conyuge',
+                    'title' => 'Afiliación conyuge',
                     'default_url' => 'mercurio/conyuge/index',
                     'icon' => null,
                     'color' => '',
@@ -1262,7 +1262,7 @@ class MenuItemSeeder extends Seeder
                 ],
                 [
                     'id' => 242,
-                    'title' => '(E) Afiliación beneficiario',
+                    'title' => 'Afiliación beneficiario',
                     'default_url' => 'mercurio/beneficiario/index',
                     'icon' => null,
                     'color' => '',
