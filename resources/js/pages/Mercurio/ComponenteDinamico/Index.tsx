@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, router } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { ComponentList, FilterBar, PaginationControls, ActionButtons } from '@/components/atomic';
 import { useFilters } from '@/hooks/useFilters';
@@ -39,7 +39,6 @@ interface Props {
 
 export default function Index({ componentes_dinamicos }: Props) {
     const [loading, setLoading] = useState(false);
-    const [selectedComponente, setSelectedComponente] = useState<Componente | null>(null);
 
     const { filters, searchValue, updateFilter, updateSearch, clearAllFilters, getQueryParams } = useFilters({
         initialFilters: {

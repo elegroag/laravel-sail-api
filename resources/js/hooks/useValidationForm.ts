@@ -2,7 +2,6 @@ import { useState, useCallback } from 'react';
 import type {
     ValidationData,
     ValidationRule,
-    ErrorMessage,
     UseValidationFormReturn
 } from '@/types/componentes';
 

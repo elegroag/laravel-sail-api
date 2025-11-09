@@ -107,7 +107,7 @@ export default function Index({ menu_items }: Props) {
 
     const handlePermissionChange = (tipfun: string, field: 'can_view' | 'opciones', value: any) => {
         const existingPermissionIndex = permissions.findIndex(p => p.tipfun === tipfun);
-        let updatedPermissions = [...permissions];
+        const updatedPermissions = [...permissions];
 
         if (existingPermissionIndex > -1) {
             updatedPermissions[existingPermissionIndex] = {

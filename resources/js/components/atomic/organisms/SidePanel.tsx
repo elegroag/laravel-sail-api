@@ -1,5 +1,4 @@
 import React from 'react';
-import Badge from '../atoms/Badge';
 import Button from '../atoms/Button';
 
 interface SidePanelProps {

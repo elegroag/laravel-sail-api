@@ -1,5 +1,4 @@
 import React, { memo, useState } from 'react';
-import FormField from './FormField';
 import Button from '../atoms/Button';
 // Using inline SVG icons instead of heroicons dependency
 const SearchIcon = ({ className }: { className?: string }) => (

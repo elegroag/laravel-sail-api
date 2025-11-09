@@ -1,13 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import type { UseFiltersReturn } from '@/types/componentes';
 
-interface FilterOption {
-    key: string;
-    label: string;
-    value: string;
-    options?: Array<{ value: string; label: string }>;
-}
-
 interface UseFiltersProps {
     initialFilters?: Record<string, string>;
     searchKey?: string;

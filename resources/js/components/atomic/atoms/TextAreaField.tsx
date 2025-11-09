@@ -18,7 +18,7 @@ const TextAreaField = memo(forwardRef<HTMLTextAreaElement, TextAreaFieldProps>(
         const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
             setCurrentLength(e.target.value.length);
             props.onChange?.(e);
-        }, [props.onChange]);
+        }, [props]);
 
         return (
             <div className="space-y-1">

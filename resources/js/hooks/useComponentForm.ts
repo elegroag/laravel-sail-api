@@ -2,7 +2,6 @@ import { useState, useCallback } from 'react';
 import type {
     ComponentData,
     DataSourceOption,
-    EventConfig,
     UseComponentFormReturn
 } from '@/types/componentes';
 
