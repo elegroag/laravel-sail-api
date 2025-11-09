@@ -1,2 +1,0 @@
-- Usa siempre lengua en Español para comunicarse
-- Usa mcp si hay disponibles
