@@ -3,6 +3,7 @@ import React, { forwardRef, memo } from 'react';
 interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
     error?: string;
     helperText?: string;
+    inputType?: 'text' | 'email' | 'password' | 'number' | 'date' | 'url';
 }
 
 const InputField = memo(forwardRef<HTMLInputElement, InputFieldProps>(

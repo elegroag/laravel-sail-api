@@ -9,6 +9,7 @@ export { default as Button } from './atoms/Button';
 export { default as Badge } from './atoms/Badge';
 export { default as Spinner } from './atoms/Spinner';
 export { default as ErrorMessage } from './atoms/ErrorMessage';
+export { default as SuccessMessage } from './atoms/SuccessMessage';
 
 // Molecules
 export { default as FormField } from './molecules/FormField';

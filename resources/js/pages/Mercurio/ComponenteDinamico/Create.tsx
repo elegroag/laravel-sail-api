@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { router } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { ComponentForm, ActionButtons } from '@/components/atomic';
-import { useComponentForm } from '@/hooks/useComponentForm';
 
 interface Props {
     formulario?: {
@@ -13,14 +12,26 @@ interface Props {
 }
 
 export default function Create({ formulario }: Props) {
-    const { formData, errors, loading, updateField, updateDataSource, handleSubmit, isValid } = useComponentForm({
-        initialData: formulario ? {
-            formulario_id: formulario.id
-        } : {},
-        onSubmit: async (data) => {
-            await router.post('/mercurio/componente-dinamico', data);
+    const [loading, setLoading] = useState(false);
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const handleSubmit = async (data: any) => {
+        setLoading(true);
+        setErrors({});
+
+        try {
+            await router.post('/mercurio/componente-dinamico', data as any);
+        } catch (error: unknown) {
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosError = error as { response?: { data?: { errors?: Record<string, string> } } };
+                if (axiosError.response?.data?.errors) {
+                    setErrors(axiosError.response.data.errors);
+                }
+            }
+        } finally {
+            setLoading(false);
         }
-    });
+    };
 
     const handleCancel = () => {
         router.visit('/mercurio/componente-dinamico');
@@ -57,15 +68,15 @@ export default function Create({ formulario }: Props) {
                         </div>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="px-4 py-5 sm:px-6">
+                    <div className="px-4 py-5 sm:px-6">
                         <ComponentForm
-                            initialData={formData}
+                            initialData={{}}
                             onSubmit={handleSubmit}
                             onCancel={handleCancel}
                             loading={loading}
                             errors={errors}
                         />
-                    </form>
+                    </div>
                 </div>
             </div>
         </AppLayout>

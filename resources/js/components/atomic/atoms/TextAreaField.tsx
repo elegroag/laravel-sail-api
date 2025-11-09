@@ -46,7 +46,7 @@ const TextAreaField = memo(forwardRef<HTMLTextAreaElement, TextAreaFieldProps>(
             </div>
         );
     }
-);
+));
 
 TextAreaField.displayName = 'TextAreaField';
 

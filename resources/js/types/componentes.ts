@@ -35,6 +35,7 @@ export interface ComponentData {
     number_min: number;
     number_max: number;
     number_step: number;
+    formulario_id?: number; // Optional: for associating with forms
     created_at?: string;
     updated_at?: string;
 }
@@ -149,7 +150,14 @@ export interface CheckboxFormFieldProps extends BaseFormFieldProps {
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export type FormFieldProps = InputFormFieldProps | SelectFormFieldProps | TextAreaFormFieldProps | CheckboxFormFieldProps;
+export interface ExtendedFormFieldProps {
+    disabled?: boolean;
+    className?: string;
+    indeterminate?: boolean;
+    labelPosition?: 'left' | 'right';
+}
+
+export type FormFieldProps = (InputFormFieldProps | SelectFormFieldProps | TextAreaFormFieldProps | CheckboxFormFieldProps) & ExtendedFormFieldProps;
 
 // Button variants and sizes
 export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'success' | 'warning';
