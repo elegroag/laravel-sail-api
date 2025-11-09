@@ -1,3 +1,2 @@
 - Usa siempre lengua en Español para comunicarse
 - Usa mcp si hay disponibles
-- Analiza bien el codigo y el contexto del proyecto para hacer diagnosticos y antes de emitir respuestas
