@@ -22,9 +22,7 @@ class FormularioDinamico extends Model
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
-        'layout_config' => 'array',
-        'permissions' => 'array',
+        'is_active' => 'boolean'
     ];
 
     /**

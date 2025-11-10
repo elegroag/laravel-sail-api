@@ -42,12 +42,3 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
     Route::post('/mercurio/notificaciones/procesar_notificacion', [NotificacionesController::class, 'procesarNotificacion']);
     Route::get('/mercurio/particular/historial', [ParticularController::class, 'historial'])->name('particular.historial');
 });
-
-// Formularios Dinámicos
-require __DIR__ . '/formularios_dinamicos.php';
-
-// Componentes Dinámicos
-require __DIR__ . '/componentes_dinamicos.php';
-
-// Validaciones de Componentes
-require __DIR__ . '/componentes_validaciones.php';

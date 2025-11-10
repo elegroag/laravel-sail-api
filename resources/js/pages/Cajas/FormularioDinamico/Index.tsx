@@ -56,14 +56,14 @@ export default function Index({ formularios_dinamicos }: Props) {
     const currentFilterParams = useMemo(() => ({ q: q || undefined, module: module || undefined, is_active: isActive || undefined, per_page: perPage }), [q, module, isActive, perPage]);
 
     const applyFilters = () => {
-        router.get('/mercurio/formulario-dinamico', { ...currentFilterParams, page: 1 }, { preserveState: true, preserveScroll: true });
+        router.get('/cajas/formulario-dinamico', { ...currentFilterParams, page: 1 }, { preserveState: true, preserveScroll: true });
     };
 
     const clearFilters = () => {
         setQ('');
         setModule('');
         setIsActive('');
-        router.get('/mercurio/formulario-dinamico', { per_page: perPage, page: 1 }, { preserveState: true, preserveScroll: true });
+        router.get('/cajas/formulario-dinamico', { per_page: perPage, page: 1 }, { preserveState: true, preserveScroll: true });
     };
 
     const handleDelete = async (_id: number, title: string) => {
@@ -72,7 +72,7 @@ export default function Index({ formularios_dinamicos }: Props) {
         }
 
         try {
-            await router.delete(`/mercurio/formulario-dinamico/${_id}`, {
+            await router.delete(`/cajas/formulario-dinamico/${_id}`, {
                 onSuccess: () => {
                     // La página se recargará automáticamente con los datos actualizados
                 },
@@ -91,7 +91,7 @@ export default function Index({ formularios_dinamicos }: Props) {
             setSelectedId(_id);
             setLoadingChildren(true);
             setChildrenError(null);
-            const res = await fetch(`/mercurio/formulario-dinamico/children`, {
+            const res = await fetch(`/cajas/formulario-dinamico/children`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
@@ -126,7 +126,7 @@ export default function Index({ formularios_dinamicos }: Props) {
         try {
             setOptionsLoading(true);
             setOptionsError(null);
-            const url = new URL(window.location.origin + `/mercurio/formulario-dinamico/options`);
+            const url = new URL(window.location.origin + `/cajas/formulario-dinamico/options`);
             if (q) url.searchParams.set('q', q);
 
             const res = await fetch(
@@ -156,7 +156,7 @@ export default function Index({ formularios_dinamicos }: Props) {
         if (!selectedId || !selectedChildId) return;
         try {
             setAttaching(true);
-            const res = await fetch(`/mercurio/formulario-dinamico/attach-child`, {
+            const res = await fetch(`/cajas/formulario-dinamico/attach-child`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -187,7 +187,7 @@ export default function Index({ formularios_dinamicos }: Props) {
 
     const toggleActive = async (id: number) => {
         try {
-            const res = await fetch(`/mercurio/formulario-dinamico/${id}/toggle-active`, {
+            const res = await fetch(`/cajas/formulario-dinamico/${id}/toggle-active`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -218,7 +218,7 @@ export default function Index({ formularios_dinamicos }: Props) {
                         </p>
                     </div>
                     <Link
-                        href="/mercurio/formulario-dinamico/create"
+                        href="/cajas/formulario-dinamico/create"
                         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                     >
                         Nuevo Formulario Dinámico
@@ -326,13 +326,13 @@ export default function Index({ formularios_dinamicos }: Props) {
                                                 </button>
                                                 <div className="flex space-x-2">
                                                     <Link
-                                                        href={`/mercurio/formulario-dinamico/${formulario.id}/show`}
+                                                        href={`/cajas/formulario-dinamico/${formulario.id}/show`}
                                                         className="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
                                                     >
                                                         Ver
                                                     </Link>
                                                     <Link
-                                                        href={`/mercurio/formulario-dinamico/${formulario.id}/edit`}
+                                                        href={`/cajas/formulario-dinamico/${formulario.id}/edit`}
                                                         className="text-gray-600 hover:text-gray-900 text-sm font-medium"
                                                     >
                                                         Editar
@@ -538,7 +538,7 @@ export default function Index({ formularios_dinamicos }: Props) {
                                     id="per_page"
                                     className="rounded-md border border-gray-300 px-2 py-1 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                     value={meta.pagination.per_page}
-                                    onChange={(e) => router.get('/mercurio/formulario-dinamico', { page: 1, per_page: Number(e.target.value), ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                    onChange={(e) => router.get('/cajas/formulario-dinamico', { page: 1, per_page: Number(e.target.value), ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
                                 >
                                     {[10,25,50,100].map(n => (
                                         <option key={n} value={n}>{n}</option>
@@ -548,14 +548,14 @@ export default function Index({ formularios_dinamicos }: Props) {
                         </div>
                         <div className="inline-flex items-center gap-2">
                             <button
-                                onClick={() => router.get('/mercurio/formulario-dinamico', { page: 1, per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                onClick={() => router.get('/cajas/formulario-dinamico', { page: 1, per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
                                 disabled={meta.pagination.current_page === 1}
                                 className="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Primera
                             </button>
                             <button
-                                onClick={() => router.get('/mercurio/formulario-dinamico', { page: Math.max(1, meta.pagination!.current_page - 1), per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                onClick={() => router.get('/cajas/formulario-dinamico', { page: Math.max(1, meta.pagination!.current_page - 1), per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
                                 disabled={meta.pagination.current_page === 1}
                                 className="px-3 py-1 border rounded disabled:opacity-50 text-gray-600 hover:text-gray-900"
                             >
@@ -572,7 +572,7 @@ export default function Index({ formularios_dinamicos }: Props) {
                                         {pages.map((num) => (
                                             <button
                                                 key={num}
-                                                onClick={() => router.get('/mercurio/formulario-dinamico', { page: num, per_page: p.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                                onClick={() => router.get('/cajas/formulario-dinamico', { page: num, per_page: p.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
                                                 className={`inline-flex items-center h-9 px-3 rounded-md border text-sm font-medium ${num === p.current_page ? 'bg-indigo-600 text-gray border-indigo-600' : 'text-gray-700 border-gray-300 hover:bg-indigo-50 hover:border-indigo-300'} focus:outline-none focus:ring-2 focus:ring-indigo-500`}
                                             >
                                                 {num}
@@ -582,14 +582,14 @@ export default function Index({ formularios_dinamicos }: Props) {
                                 );
                             })()}
                             <button
-                                onClick={() => router.get('/mercurio/formulario-dinamico', { page: Math.min(meta.pagination!.last_page, meta.pagination!.current_page + 1), per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                onClick={() => router.get('/cajas/formulario-dinamico', { page: Math.min(meta.pagination!.last_page, meta.pagination!.current_page + 1), per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
                                 disabled={meta.pagination.current_page === meta.pagination.last_page}
                                 className="px-3 py-1 border rounded disabled:opacity-50 text-gray-600 hover:text-gray-900"
                             >
                                 Siguiente
                             </button>
                             <button
-                                onClick={() => router.get('/mercurio/formulario-dinamico', { page: meta.pagination!.last_page, per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                onClick={() => router.get('/cajas/formulario-dinamico', { page: meta.pagination!.last_page, per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
                                 disabled={meta.pagination.current_page === meta.pagination.last_page}
                                 className="px-3 py-1 border rounded disabled:opacity-50 text-gray-600 hover:text-gray-900"
                             >
@@ -608,7 +608,7 @@ export default function Index({ formularios_dinamicos }: Props) {
                         <p className="mt-1 text-sm text-gray-500">Comienza creando un nuevo formulario dinámico.</p>
                         <div className="mt-6">
                             <Link
-                                href="/mercurio/formulario-dinamico/create"
+                                href="/cajas/formulario-dinamico/create"
                                 className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                             >
                                 Nuevo Formulario Dinámico

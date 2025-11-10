@@ -1,23 +1,8 @@
 import AppLayout from '@/layouts/app-layout';
 import { Link, router } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
-type Props = {
-    formulario: {
-        id: number;
-        name: string;
-        title: string;
-        description: string | null;
-        module: string;
-        endpoint: string;
-        method: string;
-        is_active: boolean;
-        layout_config: any;
-        permissions: any;
-    };
-};
-
-export default function Edit({ formulario }: Props) {
+export default function Create() {
     const [formData, setFormData] = useState({
         name: '',
         title: '',
@@ -39,28 +24,6 @@ export default function Edit({ formulario }: Props) {
 
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [processing, setProcessing] = useState(false);
-
-    // Cargar datos del formulario al montar el componente
-    useEffect(() => {
-        setFormData({
-            name: formulario.name || '',
-            title: formulario.title || '',
-            description: formulario.description || '',
-            module: formulario.module || '',
-            endpoint: formulario.endpoint || '',
-            method: formulario.method || 'POST',
-            is_active: formulario.is_active || true,
-            layout_config: formulario.layout_config || {
-                columns: 1,
-                spacing: 'md',
-                theme: 'default'
-            },
-            permissions: formulario.permissions || {
-                public: false,
-                roles: []
-            }
-        });
-    }, [formulario]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
@@ -90,53 +53,39 @@ export default function Edit({ formulario }: Props) {
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setProcessing(true);
-
-        try {
-            const response = await fetch(`/mercurio/formulario-dinamico/${formulario.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        console.log(formData);
+        router.post(
+            '/cajas/formulario-dinamico',
+            {
+                ...formData,
+                layout_config: JSON.stringify(formData.layout_config),
+                permissions: JSON.stringify(formData.permissions),
+            },
+            {
+                onError: (errs: Record<string, string>) => {
+                    setErrors(errs);
                 },
-                body: JSON.stringify({
-                    ...formData,
-                    layout_config: JSON.stringify(formData.layout_config),
-                    permissions: JSON.stringify(formData.permissions),
-                })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                router.visit('/mercurio/formulario-dinamico');
-            } else {
-                if (data.errors) {
-                    setErrors(data.errors);
-                } else {
-                    console.error('Error desconocido:', data);
-                }
+                onFinish: () => {
+                    setProcessing(false);
+                },
             }
-        } catch (error) {
-            console.error('Error al actualizar formulario:', error);
-        } finally {
-            setProcessing(false);
-        }
+        );
     };
 
     return (
-        <AppLayout title={`Editar Formulario: ${formulario.title}`}>
+        <AppLayout title="Crear Formulario Dinámico">
             <div className="bg-white shadow overflow-hidden sm:rounded-md">
                 <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
                     <div>
                         <h3 className="text-lg leading-6 font-medium text-gray-900">
-                            Editar Formulario Dinámico
+                            Crear Formulario Dinámico
                         </h3>
                         <p className="mt-1 max-w-2xl text-sm text-gray-500">
-                            Modificar los datos del formulario dinámico
+                            Formulario para crear un nuevo formulario dinámico
                         </p>
                     </div>
                     <Link
-                        href="/mercurio/formulario-dinamico"
+                        href="/cajas/formulario-dinamico"
                         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                     >
                         Volver
@@ -157,7 +106,7 @@ export default function Edit({ formulario }: Props) {
                                     onChange={handleChange}
                                 />
                                 {errors.name && (<p className="mt-1 text-sm text-red-600">{errors.name}</p>)}
-                                <p className="mt-1 text-xs text-gray-500">Identificador único para el formulario</p>
+                                <p className="mt-1 text-xs text-gray-500">Identificador único para el formulario (ej: formulario_registro)</p>
                             </div>
 
                             <div className="col-span-6 sm:col-span-3">
@@ -201,7 +150,7 @@ export default function Edit({ formulario }: Props) {
                                     onChange={handleChange}
                                 />
                                 {errors.module && (<p className="mt-1 text-sm text-red-600">{errors.module}</p>)}
-                                <p className="mt-1 text-xs text-gray-500">Módulo al que pertenece</p>
+                                <p className="mt-1 text-xs text-gray-500">Módulo al que pertenece (ej: auth, creditos)</p>
                             </div>
 
                             <div className="col-span-6 sm:col-span-2">
@@ -329,7 +278,7 @@ export default function Edit({ formulario }: Props) {
                                                                 onChange={(e) => {
                                                                     const roles = e.target.checked
                                                                         ? [...formData.permissions.roles, role]
-                                                                        : formData.permissions.roles.filter((r: string) => r !== role);
+                                                                        : formData.permissions.roles.filter(r => r !== role);
                                                                     handleJsonChange('permissions', { ...formData.permissions, roles });
                                                                 }}
                                                             />
@@ -350,7 +299,7 @@ export default function Edit({ formulario }: Props) {
                                 disabled={processing}
                                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {processing ? 'Actualizando...' : 'Actualizar Formulario'}
+                                {processing ? 'Guardando...' : 'Guardar Formulario'}
                             </button>
                         </div>
                     </form>

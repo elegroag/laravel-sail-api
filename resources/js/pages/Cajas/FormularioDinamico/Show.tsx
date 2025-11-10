@@ -31,9 +31,9 @@ export default function Show({ formulario }: Props) {
         setDeleting(true);
 
         try {
-            await router.delete(`/mercurio/formulario-dinamico/${formulario.id}`, {
+            await router.delete(`/cajas/formulario-dinamico/${formulario.id}`, {
                 onSuccess: () => {
-                    router.visit('/mercurio/formulario-dinamico');
+                    router.visit('/cajas/formulario-dinamico');
                 },
                 onError: () => {
                     setDeleting(false);
@@ -69,13 +69,13 @@ export default function Show({ formulario }: Props) {
                     </div>
                     <div className="flex space-x-2">
                         <Link
-                            href={`/mercurio/formulario-dinamico/${formulario.id}/edit`}
+                            href={`/cajas/formulario-dinamico/${formulario.id}/edit`}
                             className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
                         >
                             Editar
                         </Link>
                         <Link
-                            href="/mercurio/formulario-dinamico"
+                            href="/cajas/formulario-dinamico"
                             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                         >
                             Volver al listado
@@ -247,7 +247,7 @@ export default function Show({ formulario }: Props) {
                             {deleting ? 'Eliminando...' : 'Eliminar Formulario'}
                         </button>
                         <Link
-                            href={`/mercurio/formulario-dinamico/${formulario.id}/edit`}
+                            href={`/cajas/formulario-dinamico/${formulario.id}/edit`}
                             className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
                         >
                             Editar Formulario

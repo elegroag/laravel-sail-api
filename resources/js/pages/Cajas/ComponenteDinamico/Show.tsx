@@ -59,9 +59,9 @@ export default function Show({ componente }: Props) {
         setDeleting(true);
 
         try {
-            await router.delete(`/mercurio/componente-dinamico/${componente.id}`, {
+            await router.delete(`/cajas/componente-dinamico/${componente.id}`, {
                 onSuccess: () => {
-                    router.visit('/mercurio/componente-dinamico');
+                    router.visit('/cajas/componente-dinamico');
                 },
                 onError: () => {
                     setDeleting(false);
@@ -109,13 +109,13 @@ export default function Show({ componente }: Props) {
                     </div>
                     <div className="flex space-x-2">
                         <Link
-                            href={`/mercurio/componente-dinamico/${componente.id}/edit`}
+                            href={`/cajas/componente-dinamico/${componente.id}/edit`}
                             className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
                         >
                             Editar
                         </Link>
                         <Link
-                            href="/mercurio/componente-dinamico"
+                            href="/cajas/componente-dinamico"
                             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                         >
                             Volver al listado
@@ -254,7 +254,7 @@ export default function Show({ componente }: Props) {
                                 <dt className="text-sm font-medium text-gray-500">Formulario asociado</dt>
                                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                                     <Link
-                                        href={`/mercurio/formulario-dinamico/${componente.formulario.id}/show`}
+                                        href={`/cajas/formulario-dinamico/${componente.formulario.id}/show`}
                                         className="text-indigo-600 hover:text-indigo-900"
                                     >
                                         {componente.formulario.title}
@@ -373,7 +373,7 @@ export default function Show({ componente }: Props) {
                             {deleting ? 'Eliminando...' : 'Eliminar Componente'}
                         </button>
                         <Link
-                            href={`/mercurio/componente-dinamico/${componente.id}/edit`}
+                            href={`/cajas/componente-dinamico/${componente.id}/edit`}
                             className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
                         >
                             Editar Componente

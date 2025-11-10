@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Mercurio;
+namespace App\Http\Controllers\Cajas;
 
 use App\Http\Controllers\Controller;
+use App\Models\Adapter\DbBase;
 use App\Models\FormularioDinamico;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +19,7 @@ class FormularioDinamicoController extends Controller
 
     public function __construct()
     {
-        $this->db = \App\Models\Adapter\DbBase::rawConnect();
+        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipfun = session('tipfun') ?? null;
     }
@@ -68,71 +69,79 @@ class FormularioDinamicoController extends Controller
             ],
         ];
 
-        return Inertia::render('Mercurio/FormularioDinamico/Index', compact('formularios_dinamicos'));
+        return Inertia::render('Cajas/FormularioDinamico/Index', compact('formularios_dinamicos'));
     }
 
     public function create()
     {
-        return Inertia::render('Mercurio/FormularioDinamico/Create');
+        return Inertia::render('Cajas/FormularioDinamico/Create');
     }
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255|unique:formularios_dinamicos,name',
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'module' => 'required|string|max:100',
-            'endpoint' => 'required|string|max:255',
-            'method' => 'required|string|max:10',
-            'is_active' => 'boolean',
-            'layout_config' => 'nullable|array',
-            'permissions' => 'nullable|array',
-        ]);
+        try {
+            $data = $request->validate([
+                'name' => 'required|string|max:255|unique:formularios_dinamicos,name',
+                'title' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'module' => 'required|string|max:100',
+                'endpoint' => 'required|string|max:255',
+                'method' => 'required|string|max:10',
+                'is_active' => 'boolean',
+                'layout_config' => 'nullable',
+                'permissions' => 'nullable',
+            ]);
 
-        $formulario = FormularioDinamico::create($data);
+            $formulario = FormularioDinamico::create($data);
 
-        return redirect()->to('/mercurio/formulario-dinamico/' . $formulario->id . '/show');
+            return redirect()->to('/cajas/formulario-dinamico/' . $formulario->id . '/show');
+        } catch (\Exception $th) {
+            return redirect()->back()->withErrors($th->getMessage());
+        }
     }
 
     public function show(int $id)
     {
-        $formulario = FormularioDinamico::with('componentes')->findOrFail($id);
+        $formulario = FormularioDinamico::findOrFail($id);
 
-        return Inertia::render('Mercurio/FormularioDinamico/Show', compact('formulario'));
+        return Inertia::render('Cajas/FormularioDinamico/Show', compact('formulario'));
     }
 
     public function edit(int $id)
     {
         $formulario = FormularioDinamico::findOrFail($id);
-        return Inertia::render('Mercurio/FormularioDinamico/Edit', compact('formulario'));
+        return Inertia::render('Cajas/FormularioDinamico/Edit', compact('formulario'));
     }
 
     public function update(Request $request, int $id)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255|unique:formularios_dinamicos,name,' . $id,
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'module' => 'required|string|max:100',
-            'endpoint' => 'required|string|max:255',
-            'method' => 'required|string|max:10',
-            'is_active' => 'boolean',
-            'layout_config' => 'nullable|array',
-            'permissions' => 'nullable|array',
-        ]);
+        try {
+            $data = $request->validate([
+                'name' => 'required|string|max:255|unique:formularios_dinamicos,name,' . $id,
+                'title' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'module' => 'required|string|max:100',
+                'endpoint' => 'required|string|max:255',
+                'method' => 'required|string|max:10',
+                'is_active' => 'boolean',
+                'layout_config' => 'nullable',
+                'permissions' => 'nullable',
+            ]);
 
-        $formulario = FormularioDinamico::findOrFail($id);
-        $formulario->update($data);
+            $formulario = FormularioDinamico::findOrFail($id);
+            $formulario->update($data);
 
-        return redirect()->to('/mercurio/formulario-dinamico/' . $formulario->id . '/show');
+            return redirect()->to('/cajas/formulario-dinamico/' . $formulario->id . '/show');
+        } catch (\Exception $th) {
+            return redirect()->back()->withErrors($th->getMessage());
+        }
     }
 
     public function destroy(int $id)
     {
         $formulario = FormularioDinamico::findOrFail($id);
         $formulario->delete();
-        return redirect()->to('/mercurio/formulario-dinamico');
+        return redirect()->to('/cajas/formulario-dinamico');
     }
 
     public function options(Request $request)
@@ -219,6 +228,6 @@ class FormularioDinamicoController extends Controller
             ]);
         }
 
-        return redirect()->to('/mercurio/formulario-dinamico/' . $duplicated->id . '/show');
+        return redirect()->to('/cajas/formulario-dinamico/' . $duplicated->id . '/show');
     }
 }

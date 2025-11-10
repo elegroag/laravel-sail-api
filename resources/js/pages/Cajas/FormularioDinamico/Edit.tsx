@@ -1,8 +1,23 @@
 import AppLayout from '@/layouts/app-layout';
 import { Link, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-export default function Create() {
+type Props = {
+    formulario: {
+        id: number;
+        name: string;
+        title: string;
+        description: string | null;
+        module: string;
+        endpoint: string;
+        method: string;
+        is_active: boolean;
+        layout_config: any;
+        permissions: any;
+    };
+};
+
+export default function Edit({ formulario }: Props) {
     const [formData, setFormData] = useState({
         name: '',
         title: '',
@@ -24,6 +39,28 @@ export default function Create() {
 
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [processing, setProcessing] = useState(false);
+
+    // Cargar datos del formulario al montar el componente
+    useEffect(() => {
+        setFormData({
+            name: formulario.name || '',
+            title: formulario.title || '',
+            description: formulario.description || '',
+            module: formulario.module || '',
+            endpoint: formulario.endpoint || '',
+            method: formulario.method || 'POST',
+            is_active: formulario.is_active || true,
+            layout_config: formulario.layout_config || {
+                columns: 1,
+                spacing: 'md',
+                theme: 'default'
+            },
+            permissions: formulario.permissions || {
+                public: false,
+                roles: []
+            }
+        });
+    }, [formulario]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
@@ -53,53 +90,38 @@ export default function Create() {
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setProcessing(true);
-
-        try {
-            const response = await fetch('/mercurio/formulario-dinamico', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        router.put(
+            `/cajas/formulario-dinamico/${formulario.id}`,
+            {
+                ...formData,
+                layout_config: JSON.stringify(formData.layout_config),
+                permissions: JSON.stringify(formData.permissions),
+            },
+            {
+                onError: (errs: Record<string, string>) => {
+                    setErrors(errs);
                 },
-                body: JSON.stringify({
-                    ...formData,
-                    layout_config: JSON.stringify(formData.layout_config),
-                    permissions: JSON.stringify(formData.permissions),
-                })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                router.visit('/mercurio/formulario-dinamico');
-            } else {
-                if (data.errors) {
-                    setErrors(data.errors);
-                } else {
-                    console.error('Error desconocido:', data);
-                }
+                onFinish: () => {
+                    setProcessing(false);
+                },
             }
-        } catch (error) {
-            console.error('Error al crear formulario:', error);
-        } finally {
-            setProcessing(false);
-        }
+        );
     };
 
     return (
-        <AppLayout title="Crear Formulario Dinámico">
+        <AppLayout title={`Editar Formulario: ${formulario.title}`}>
             <div className="bg-white shadow overflow-hidden sm:rounded-md">
                 <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
                     <div>
                         <h3 className="text-lg leading-6 font-medium text-gray-900">
-                            Crear Formulario Dinámico
+                            Editar Formulario Dinámico
                         </h3>
                         <p className="mt-1 max-w-2xl text-sm text-gray-500">
-                            Formulario para crear un nuevo formulario dinámico
+                            Modificar los datos del formulario dinámico
                         </p>
                     </div>
                     <Link
-                        href="/mercurio/formulario-dinamico"
+                        href="/cajas/formulario-dinamico"
                         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                     >
                         Volver
@@ -120,7 +142,7 @@ export default function Create() {
                                     onChange={handleChange}
                                 />
                                 {errors.name && (<p className="mt-1 text-sm text-red-600">{errors.name}</p>)}
-                                <p className="mt-1 text-xs text-gray-500">Identificador único para el formulario (ej: formulario_registro)</p>
+                                <p className="mt-1 text-xs text-gray-500">Identificador único para el formulario</p>
                             </div>
 
                             <div className="col-span-6 sm:col-span-3">
@@ -164,7 +186,7 @@ export default function Create() {
                                     onChange={handleChange}
                                 />
                                 {errors.module && (<p className="mt-1 text-sm text-red-600">{errors.module}</p>)}
-                                <p className="mt-1 text-xs text-gray-500">Módulo al que pertenece (ej: auth, creditos)</p>
+                                <p className="mt-1 text-xs text-gray-500">Módulo al que pertenece</p>
                             </div>
 
                             <div className="col-span-6 sm:col-span-2">
@@ -288,11 +310,10 @@ export default function Create() {
                                                             <input
                                                                 type="checkbox"
                                                                 className="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                                                checked={formData.permissions.roles.includes(role)}
                                                                 onChange={(e) => {
                                                                     const roles = e.target.checked
                                                                         ? [...formData.permissions.roles, role]
-                                                                        : formData.permissions.roles.filter(r => r !== role);
+                                                                        : formData.permissions.roles.filter((r: string) => r !== role);
                                                                     handleJsonChange('permissions', { ...formData.permissions, roles });
                                                                 }}
                                                             />
@@ -313,7 +334,7 @@ export default function Create() {
                                 disabled={processing}
                                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {processing ? 'Guardando...' : 'Guardar Formulario'}
+                                {processing ? 'Actualizando...' : 'Actualizar Formulario'}
                             </button>
                         </div>
                     </form>

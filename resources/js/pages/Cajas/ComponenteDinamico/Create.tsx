@@ -20,7 +20,7 @@ export default function Create({ formulario }: Props) {
         setErrors({});
 
         try {
-            await router.post('/mercurio/componente-dinamico', data as any);
+            await router.post('/cajas/componente-dinamico', data as any);
         } catch (error: unknown) {
             if (error && typeof error === 'object' && 'response' in error) {
                 const axiosError = error as { response?: { data?: { errors?: Record<string, string> } } };
@@ -34,7 +34,7 @@ export default function Create({ formulario }: Props) {
     };
 
     const handleCancel = () => {
-        router.visit('/mercurio/componente-dinamico');
+        router.visit('/cajas/componente-dinamico');
     };
 
     return (

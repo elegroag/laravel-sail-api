@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Mercurio;
+namespace App\Http\Controllers\Cajas;
 
 use App\Http\Controllers\Controller;
+use App\Models\Adapter\DbBase;
 use App\Models\ComponenteDinamico;
 use App\Models\FormularioDinamico;
 use Illuminate\Http\Request;
@@ -19,7 +20,7 @@ class ComponenteDinamicoController extends Controller
 
     public function __construct()
     {
-        $this->db = \App\Models\Adapter\DbBase::rawConnect();
+        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipfun = session('tipfun') ?? null;
     }
@@ -75,7 +76,7 @@ class ComponenteDinamicoController extends Controller
             ],
         ];
 
-        return Inertia::render('Mercurio/ComponenteDinamico/Index', compact('componentes_dinamicos'));
+        return Inertia::render('Cajas/ComponenteDinamico/Index', compact('componentes_dinamicos'));
     }
 
     public function create(Request $request)
@@ -86,7 +87,7 @@ class ComponenteDinamicoController extends Controller
             $formulario = FormularioDinamico::find($formularioId);
         }
 
-        return Inertia::render('Mercurio/ComponenteDinamico/Create', compact('formulario'));
+        return Inertia::render('Cajas/ComponenteDinamico/Create', compact('formulario'));
     }
 
     public function store(Request $request)
@@ -116,20 +117,20 @@ class ComponenteDinamicoController extends Controller
 
         $componente = ComponenteDinamico::create($data);
 
-        return redirect()->to('/mercurio/componente-dinamico/' . $componente->id . '/show');
+        return redirect()->to('/cajas/componente-dinamico/' . $componente->id . '/show');
     }
 
     public function show(int $id)
     {
         $componente = ComponenteDinamico::with(['validacion', 'formulario'])->findOrFail($id);
 
-        return Inertia::render('Mercurio/ComponenteDinamico/Show', compact('componente'));
+        return Inertia::render('Cajas/ComponenteDinamico/Show', compact('componente'));
     }
 
     public function edit(int $id)
     {
         $componente = ComponenteDinamico::findOrFail($id);
-        return Inertia::render('Mercurio/ComponenteDinamico/Edit', compact('componente'));
+        return Inertia::render('Cajas/ComponenteDinamico/Edit', compact('componente'));
     }
 
     public function update(Request $request, int $id)
@@ -160,14 +161,14 @@ class ComponenteDinamicoController extends Controller
         $componente = ComponenteDinamico::findOrFail($id);
         $componente->update($data);
 
-        return redirect()->to('/mercurio/componente-dinamico/' . $componente->id . '/show');
+        return redirect()->to('/cajas/componente-dinamico/' . $componente->id . '/show');
     }
 
     public function destroy(int $id)
     {
         $componente = ComponenteDinamico::findOrFail($id);
         $componente->delete();
-        return redirect()->to('/mercurio/componente-dinamico');
+        return redirect()->to('/cajas/componente-dinamico');
     }
 
     public function options(Request $request)
@@ -278,7 +279,7 @@ class ComponenteDinamicoController extends Controller
             ]);
         }
 
-        return redirect()->to('/mercurio/componente-dinamico/' . $duplicated->id . '/show');
+        return redirect()->to('/cajas/componente-dinamico/' . $duplicated->id . '/show');
     }
 
     public function byFormulario(Request $request, int $formularioId)

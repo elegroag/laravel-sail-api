@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Mercurio;
+namespace App\Http\Controllers\Cajas;
 
 use App\Http\Controllers\Controller;
+use App\Models\Adapter\DbBase;
 use App\Models\ComponenteDinamico;
 use App\Models\ComponenteValidacion;
 use Illuminate\Http\Request;
@@ -19,7 +20,7 @@ class ComponenteValidacionController extends Controller
 
     public function __construct()
     {
-        $this->db = \App\Models\Adapter\DbBase::rawConnect();
+        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipfun = session('tipfun') ?? null;
     }
@@ -71,7 +72,7 @@ class ComponenteValidacionController extends Controller
             ],
         ];
 
-        return Inertia::render('Mercurio/ComponenteValidacion/Index', compact('componentes_validaciones'));
+        return Inertia::render('Cajas/ComponenteValidacion/Index', compact('componentes_validaciones'));
     }
 
     public function create(Request $request)
@@ -84,7 +85,7 @@ class ComponenteValidacionController extends Controller
 
         $componentes = ComponenteDinamico::orderBy('name')->get(['id', 'name', 'label']);
 
-        return Inertia::render('Mercurio/ComponenteValidacion/Create', compact('componente', 'componentes'));
+        return Inertia::render('Cajas/ComponenteValidacion/Create', compact('componente', 'componentes'));
     }
 
     public function store(Request $request)
@@ -111,14 +112,14 @@ class ComponenteValidacionController extends Controller
 
         $validacion = ComponenteValidacion::create($data);
 
-        return redirect()->to('/mercurio/componente-validacion/' . $validacion->id . '/show');
+        return redirect()->to('/cajas/componente-validacion/' . $validacion->id . '/show');
     }
 
     public function show(int $id)
     {
         $validacion = ComponenteValidacion::with('componente')->findOrFail($id);
 
-        return Inertia::render('Mercurio/ComponenteValidacion/Show', compact('validacion'));
+        return Inertia::render('Cajas/ComponenteValidacion/Show', compact('validacion'));
     }
 
     public function edit(int $id)
@@ -126,7 +127,7 @@ class ComponenteValidacionController extends Controller
         $validacion = ComponenteValidacion::findOrFail($id);
         $componentes = ComponenteDinamico::orderBy('name')->get(['id', 'name', 'label']);
 
-        return Inertia::render('Mercurio/ComponenteValidacion/Edit', compact('validacion', 'componentes'));
+        return Inertia::render('Cajas/ComponenteValidacion/Edit', compact('validacion', 'componentes'));
     }
 
     public function update(Request $request, int $id)
@@ -156,14 +157,14 @@ class ComponenteValidacionController extends Controller
         $validacion = ComponenteValidacion::findOrFail($id);
         $validacion->update($data);
 
-        return redirect()->to('/mercurio/componente-validacion/' . $validacion->id . '/show');
+        return redirect()->to('/cajas/componente-validacion/' . $validacion->id . '/show');
     }
 
     public function destroy(int $id)
     {
         $validacion = ComponenteValidacion::findOrFail($id);
         $validacion->delete();
-        return redirect()->to('/mercurio/componente-validacion');
+        return redirect()->to('/cajas/componente-validacion');
     }
 
     public function options(Request $request)
@@ -228,7 +229,7 @@ class ComponenteValidacionController extends Controller
             'error_messages' => $original->error_messages,
         ]);
 
-        return redirect()->to('/mercurio/componente-validacion/' . $duplicated->id . '/show');
+        return redirect()->to('/cajas/componente-validacion/' . $duplicated->id . '/show');
     }
 
     public function validateRules(Request $request)

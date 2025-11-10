@@ -40,9 +40,9 @@ export default function Show({ validacion }: Props) {
         setDeleting(true);
 
         try {
-            await router.delete(`/mercurio/componente-validacion/${validacion.id}`, {
+            await router.delete(`/cajas/componente-validacion/${validacion.id}`, {
                 onSuccess: () => {
-                    router.visit('/mercurio/componente-validacion');
+                    router.visit('/cajas/componente-validacion');
                 },
                 onError: () => {
                     setDeleting(false);
@@ -90,13 +90,13 @@ export default function Show({ validacion }: Props) {
                     </div>
                     <div className="flex space-x-2">
                         <Link
-                            href={`/mercurio/componente-validacion/${validacion.id}/edit`}
+                            href={`/cajas/componente-validacion/${validacion.id}/edit`}
                             className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
                         >
                             Editar
                         </Link>
                         <Link
-                            href="/mercurio/componente-validacion"
+                            href="/cajas/componente-validacion"
                             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                         >
                             Volver al listado
@@ -112,7 +112,7 @@ export default function Show({ validacion }: Props) {
                                 <dt className="text-sm font-medium text-gray-500">Componente Asociado</dt>
                                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                                     <Link
-                                        href={`/mercurio/componente-dinamico/${validacion.componente.id}/show`}
+                                        href={`/cajas/componente-dinamico/${validacion.componente.id}/show`}
                                         className="text-indigo-600 hover:text-indigo-900"
                                     >
                                         {validacion.componente.label}
@@ -274,7 +274,7 @@ export default function Show({ validacion }: Props) {
                             {deleting ? 'Eliminando...' : 'Eliminar Validación'}
                         </button>
                         <Link
-                            href={`/mercurio/componente-validacion/${validacion.id}/edit`}
+                            href={`/cajas/componente-validacion/${validacion.id}/edit`}
                             className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
                         >
                             Editar Validación

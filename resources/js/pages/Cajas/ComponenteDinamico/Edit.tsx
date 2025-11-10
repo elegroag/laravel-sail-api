@@ -137,7 +137,7 @@ export default function Edit({ componente }: Props) {
                 number_step: formData.type === 'number' ? Number(formData.number_step) : 1,
             };
 
-            const response = await fetch(`/mercurio/componente-dinamico/${componente.id}`, {
+            const response = await fetch(`/cajas/componente-dinamico/${componente.id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -149,7 +149,7 @@ export default function Edit({ componente }: Props) {
             const data = await response.json();
 
             if (response.ok) {
-                router.visit('/mercurio/componente-dinamico');
+                router.visit('/cajas/componente-dinamico');
             } else {
                 if (data.errors) {
                     setErrors(data.errors);
@@ -177,7 +177,7 @@ export default function Edit({ componente }: Props) {
                         </p>
                     </div>
                     <Link
-                        href="/mercurio/componente-dinamico"
+                        href="/cajas/componente-dinamico"
                         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                     >
                         Volver

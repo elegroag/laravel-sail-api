@@ -124,7 +124,7 @@ export default function Create({ componente, componentes }: Props) {
                 error_messages: Object.keys(formData.error_messages).length > 0 ? formData.error_messages : null,
             };
 
-            const response = await fetch('/mercurio/componente-validacion', {
+            const response = await fetch('/cajas/componente-validacion', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -136,7 +136,7 @@ export default function Create({ componente, componentes }: Props) {
             const data = await response.json();
 
             if (response.ok) {
-                router.visit('/mercurio/componente-validacion');
+                router.visit('/cajas/componente-validacion');
             } else {
                 if (data.errors) {
                     setErrors(data.errors);
@@ -169,7 +169,7 @@ export default function Create({ componente, componentes }: Props) {
                         )}
                     </div>
                     <Link
-                        href="/mercurio/componente-validacion"
+                        href="/cajas/componente-validacion"
                         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                     >
                         Volver

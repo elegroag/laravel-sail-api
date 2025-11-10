@@ -24,9 +24,9 @@ services:
         target: /var/www/html
         consistency: z
     networks:
-      - scraping
+      - wslnet
 
 networks:
-  scraping:
+  wslnet:
     driver: bridge
     external: true

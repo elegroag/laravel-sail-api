@@ -46,13 +46,13 @@ export default function Index({ componentes_validaciones }: Props) {
     }), [q, isRequired, perPage]);
 
     const applyFilters = () => {
-        router.get('/mercurio/componente-validacion', { ...currentFilterParams, page: 1 }, { preserveState: true, preserveScroll: true });
+        router.get('/cajas/componente-validacion', { ...currentFilterParams, page: 1 }, { preserveState: true, preserveScroll: true });
     };
 
     const clearFilters = () => {
         setQ('');
         setIsRequired('');
-        router.get('/mercurio/componente-validacion', { per_page: perPage, page: 1 }, { preserveState: true, preserveScroll: true });
+        router.get('/cajas/componente-validacion', { per_page: perPage, page: 1 }, { preserveState: true, preserveScroll: true });
     };
 
     const handleDelete = async (_id: number, componenteName: string) => {
@@ -61,7 +61,7 @@ export default function Index({ componentes_validaciones }: Props) {
         }
 
         try {
-            await router.delete(`/mercurio/componente-validacion/${_id}`, {
+            await router.delete(`/cajas/componente-validacion/${_id}`, {
                 onSuccess: () => {
                     // La página se recargará automáticamente con los datos actualizados
                 },
@@ -121,7 +121,7 @@ export default function Index({ componentes_validaciones }: Props) {
                         </p>
                     </div>
                     <Link
-                        href="/mercurio/componente-validacion/create"
+                        href="/cajas/componente-validacion/create"
                         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                     >
                         Nueva Validación
@@ -228,13 +228,13 @@ export default function Index({ componentes_validaciones }: Props) {
                                                 </div>
                                                 <div className="flex space-x-2">
                                                     <Link
-                                                        href={`/mercurio/componente-validacion/${validacion.id}/show`}
+                                                        href={`/cajas/componente-validacion/${validacion.id}/show`}
                                                         className="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
                                                     >
                                                         Ver
                                                     </Link>
                                                     <Link
-                                                        href={`/mercurio/componente-validacion/${validacion.id}/edit`}
+                                                        href={`/cajas/componente-validacion/${validacion.id}/edit`}
                                                         className="text-gray-600 hover:text-gray-900 text-sm font-medium"
                                                     >
                                                         Editar
@@ -404,7 +404,7 @@ export default function Index({ componentes_validaciones }: Props) {
                                     id="per_page"
                                     className="rounded-md border border-gray-300 px-2 py-1 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                     value={meta.pagination.per_page}
-                                    onChange={(e) => router.get('/mercurio/componente-validacion', { page: 1, per_page: Number(e.target.value), ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                    onChange={(e) => router.get('/cajas/componente-validacion', { page: 1, per_page: Number(e.target.value), ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
                                 >
                                     {[10,15,25,50,100].map(n => (
                                         <option key={n} value={n}>{n}</option>
@@ -414,14 +414,14 @@ export default function Index({ componentes_validaciones }: Props) {
                         </div>
                         <div className="inline-flex items-center gap-2">
                             <button
-                                onClick={() => router.get('/mercurio/componente-validacion', { page: 1, per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                onClick={() => router.get('/cajas/componente-validacion', { page: 1, per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
                                 disabled={meta.pagination.current_page === 1}
                                 className="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Primera
                             </button>
                             <button
-                                onClick={() => router.get('/mercurio/componente-validacion', { page: Math.max(1, meta.pagination!.current_page - 1), per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                onClick={() => router.get('/cajas/componente-validacion', { page: Math.max(1, meta.pagination!.current_page - 1), per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
                                 disabled={meta.pagination.current_page === 1}
                                 className="px-3 py-1 border rounded disabled:opacity-50 text-gray-600 hover:text-gray-900"
                             >
@@ -438,7 +438,7 @@ export default function Index({ componentes_validaciones }: Props) {
                                         {pages.map((num) => (
                                             <button
                                                 key={num}
-                                                onClick={() => router.get('/mercurio/componente-validacion', { page: num, per_page: p.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                                onClick={() => router.get('/cajas/componente-validacion', { page: num, per_page: p.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
                                                 className={`inline-flex items-center h-9 px-3 rounded-md border text-sm font-medium ${num === p.current_page ? 'bg-indigo-600 text-gray border-indigo-600' : 'text-gray-700 border-gray-300 hover:bg-indigo-50 hover:border-indigo-300'} focus:outline-none focus:ring-2 focus:ring-indigo-500`}
                                             >
                                                 {num}
@@ -448,14 +448,14 @@ export default function Index({ componentes_validaciones }: Props) {
                                 );
                             })()}
                             <button
-                                onClick={() => router.get('/mercurio/componente-validacion', { page: Math.min(meta.pagination!.last_page, meta.pagination!.current_page + 1), per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                onClick={() => router.get('/cajas/componente-validacion', { page: Math.min(meta.pagination!.last_page, meta.pagination!.current_page + 1), per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
                                 disabled={meta.pagination.current_page === meta.pagination.last_page}
                                 className="px-3 py-1 border rounded disabled:opacity-50 text-gray-600 hover:text-gray-900"
                             >
                                 Siguiente
                             </button>
                             <button
-                                onClick={() => router.get('/mercurio/componente-validacion', { page: meta.pagination!.last_page, per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                onClick={() => router.get('/cajas/componente-validacion', { page: meta.pagination!.last_page, per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
                                 disabled={meta.pagination.current_page === meta.pagination.last_page}
                                 className="px-3 py-1 border rounded disabled:opacity-50 text-gray-600 hover:text-gray-900"
                             >
@@ -474,7 +474,7 @@ export default function Index({ componentes_validaciones }: Props) {
                         <p className="mt-1 text-sm text-gray-500">Comienza creando reglas de validación para los componentes dinámicos.</p>
                         <div className="mt-6">
                             <Link
-                                href="/mercurio/componente-validacion/create"
+                                href="/cajas/componente-validacion/create"
                                 className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                             >
                                 Nueva Validación

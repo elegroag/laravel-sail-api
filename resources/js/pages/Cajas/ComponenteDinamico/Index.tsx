@@ -76,7 +76,7 @@ export default function Index({ componentes_dinamicos }: Props) {
             per_page: perPage
         };
 
-        router.get('/mercurio/componente-dinamico', params, {
+        router.get('/cajas/componente-dinamico', params, {
             preserveState: true,
             onFinish: () => setLoading(false)
         });
@@ -91,7 +91,7 @@ export default function Index({ componentes_dinamicos }: Props) {
             per_page: perPage
         };
 
-        router.get('/mercurio/componente-dinamico', params, {
+        router.get('/cajas/componente-dinamico', params, {
             preserveState: true,
             onFinish: () => setLoading(false)
         });
@@ -106,19 +106,19 @@ export default function Index({ componentes_dinamicos }: Props) {
             per_page: newPerPage
         };
 
-        router.get('/mercurio/componente-dinamico', params, {
+        router.get('/cajas/componente-dinamico', params, {
             preserveState: true,
             onFinish: () => setLoading(false)
         });
     };
 
     const handleEdit = (id: number) => {
-        router.visit(`/mercurio/componente-dinamico/${id}/edit`);
+        router.visit(`/cajas/componente-dinamico/${id}/edit`);
     };
 
     const handleDelete = (id: number) => {
         if (confirm('¿Estás seguro de que deseas eliminar este componente?')) {
-            router.delete(`/mercurio/componente-dinamico/${id}`, {
+            router.delete(`/cajas/componente-dinamico/${id}`, {
                 onSuccess: () => {
                     // Data will be refreshed automatically
                 }
@@ -127,11 +127,11 @@ export default function Index({ componentes_dinamicos }: Props) {
     };
 
     const handleShow = (id: number) => {
-        router.visit(`/mercurio/componente-dinamico/${id}/show`);
+        router.visit(`/cajas/componente-dinamico/${id}/show`);
     };
 
     const handleDuplicate = (id: number) => {
-        router.post(`/mercurio/componente-dinamico/${id}/duplicate`, {}, {
+        router.post(`/cajas/componente-dinamico/${id}/duplicate`, {}, {
             onSuccess: () => {
                 // Refresh the list
                 router.reload();
@@ -176,7 +176,7 @@ export default function Index({ componentes_dinamicos }: Props) {
                         actions={[
                             {
                                 label: 'Nuevo Componente',
-                                onClick: () => router.visit('/mercurio/componente-dinamico/create'),
+                                onClick: () => router.visit('/cajas/componente-dinamico/create'),
                                 variant: 'primary'
                             }
                         ]}
