@@ -27,7 +27,7 @@ class ComponenteDinamicoController extends Controller
 
     public function index(Request $request)
     {
-        $query = ComponenteDinamico::with('validacion');
+        $query = ComponenteDinamico::with(['validacion'])->withCount('validacion');
 
         $q = trim((string) $request->query('q', ''));
         if ($q !== '') {
@@ -49,6 +49,16 @@ class ComponenteDinamicoController extends Controller
             $query->where('formulario_id', $formularioId);
         }
 
+        // Filtro: has_validation => '1' (con validación) | '0' (sin validación)
+        $hasValidation = $request->query('has_validation');
+        if ($hasValidation !== null && $hasValidation !== '') {
+            if ((string)$hasValidation === '1') {
+                $query->has('validacion');
+            } elseif ((string)$hasValidation === '0') {
+                $query->doesntHave('validacion');
+            }
+        }
+
         $groupId = $request->query('group_id');
         if ($groupId !== null && $groupId !== '') {
             $query->where('group_id', $groupId);
@@ -59,7 +69,7 @@ class ComponenteDinamicoController extends Controller
             ->orderBy('created_at', 'DESC');
 
         $perPage = 15;
-        $items = $query->paginate($perPage)->appends($request->only(['q', 'type', 'formulario_id', 'group_id', 'per_page']));
+        $items = $query->paginate($perPage)->appends($request->only(['q', 'type', 'formulario_id', 'group_id', 'has_validation', 'per_page']));
 
         $componentes_dinamicos = [
             'data' => $items->items(),
@@ -286,14 +296,34 @@ class ComponenteDinamicoController extends Controller
 
     public function byFormulario(Request $request, int $formularioId)
     {
-        $componentes = ComponenteDinamico::with('validacion')
+        $q = trim((string) $request->query('q', ''));
+        $perPage = (int) $request->query('per_page', 10);
+
+        $query = ComponenteDinamico::with('validacion')
             ->where('formulario_id', $formularioId)
+            ->when($q !== '', function ($sub) use ($q) {
+                $like = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $q) . '%';
+                $sub->where(function ($s) use ($like) {
+                    $s->where('name', 'like', $like)
+                        ->orWhere('label', 'like', $like)
+                        ->orWhere('type', 'like', $like);
+                });
+            })
             ->orderBy('group_id')
-            ->orderBy('order')
-            ->get();
+            ->orderBy('order');
+
+        $items = $query->paginate($perPage);
 
         return response()->json([
-            'data' => $componentes,
+            'data' => $items->items(),
+            'meta' => [
+                'current_page' => $items->currentPage(),
+                'last_page' => $items->lastPage(),
+                'per_page' => $items->perPage(),
+                'total' => $items->total(),
+                'from' => $items->firstItem(),
+                'to' => $items->lastItem(),
+            ],
         ]);
     }
 }

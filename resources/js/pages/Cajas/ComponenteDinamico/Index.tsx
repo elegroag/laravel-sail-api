@@ -47,6 +47,7 @@ export default function Index({ componentes_dinamicos }: Props) {
         initialFilters: {
             type: '',
             group_id: '',
+            has_validation: '',
         }
     });
 
@@ -136,7 +137,7 @@ export default function Index({ componentes_dinamicos }: Props) {
                     setLoading(false);
                 }
             });
-        } catch (e) {
+        } catch {
             setLoading(false);
         }
     };
@@ -152,6 +153,10 @@ export default function Index({ componentes_dinamicos }: Props) {
                 router.reload();
             }
         });
+    };
+
+    const handleValidations = (id: number) => {
+        router.visit(`/cajas/componente-validacion?componente_id=${id}`);
     };
 
     const filterOptions = [
@@ -175,6 +180,18 @@ export default function Index({ componentes_dinamicos }: Props) {
             label: 'Grupo',
             value: filters.group_id,
             onChange: (value: string) => handleFilterChange('group_id', value)
+        }
+        ,
+        {
+            key: 'has_validation',
+            label: 'Validación',
+            value: filters.has_validation,
+            options: [
+                { value: '', label: 'Todos' },
+                { value: '1', label: 'Con validación' },
+                { value: '0', label: 'Sin validación' },
+            ],
+            onChange: (value: string) => handleFilterChange('has_validation', value)
         }
     ];
 
@@ -236,6 +253,7 @@ export default function Index({ componentes_dinamicos }: Props) {
                         onDelete={handleDelete}
                         onShow={handleShow}
                         onDuplicate={handleDuplicate}
+                        onValidations={handleValidations}
                     />
                 </div>
 

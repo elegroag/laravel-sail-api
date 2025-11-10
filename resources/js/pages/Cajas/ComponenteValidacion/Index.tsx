@@ -36,6 +36,7 @@ export default function Index({ componentes_validaciones }: Props) {
     const searchParams = useMemo(() => new URLSearchParams(window.location.search), []);
     const [q, setQ] = useState<string>(searchParams.get('q') || '');
     const [isRequired, setIsRequired] = useState<string>(searchParams.get('is_required') || '');
+    const [componenteId, setComponenteId] = useState<string>(searchParams.get('componente_id') || '');
     const perPage = meta.pagination?.per_page || 15;
 
     useEffect(() => {
@@ -43,6 +44,7 @@ export default function Index({ componentes_validaciones }: Props) {
             const sp = new URLSearchParams(window.location.search);
             setQ(sp.get('q') || '');
             setIsRequired(sp.get('is_required') || '');
+            setComponenteId(sp.get('componente_id') || '');
         };
         window.addEventListener('popstate', handlePopstate);
         return () => window.removeEventListener('popstate', handlePopstate);
@@ -51,8 +53,9 @@ export default function Index({ componentes_validaciones }: Props) {
     const currentFilterParams = useMemo(() => ({
         q: q || undefined,
         is_required: isRequired || undefined,
+        componente_id: componenteId || undefined,
         per_page: perPage
-    }), [q, isRequired, perPage]);
+    }), [q, isRequired, componenteId, perPage]);
 
     const applyFilters = () => {
         router.get('/cajas/componente-validacion', { ...currentFilterParams, page: 1 }, { preserveState: true, preserveScroll: true });
@@ -61,6 +64,7 @@ export default function Index({ componentes_validaciones }: Props) {
     const clearFilters = () => {
         setQ('');
         setIsRequired('');
+        setComponenteId('');
         router.get('/cajas/componente-validacion', { per_page: perPage, page: 1 }, { preserveState: true, preserveScroll: true });
     };
 
@@ -143,12 +147,22 @@ export default function Index({ componentes_validaciones }: Props) {
                             Lista de todas las reglas de validación definidas para componentes dinámicos
                         </p>
                     </div>
-                    <Link
-                        href="/cajas/componente-validacion/create"
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-                    >
-                        Nueva Validación
-                    </Link>
+                    <div className="flex items-center gap-2">
+                        {componenteId && (
+                            <Link
+                                href={`/cajas/componente-dinamico/${componenteId}/show`}
+                                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                            >
+                                Volver al Componente
+                            </Link>
+                        )}
+                        <Link
+                            href={`/cajas/componente-validacion/create${componenteId ? `?componente_id=${componenteId}` : ''}`}
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                        >
+                            Nueva Validación
+                        </Link>
+                    </div>
                 </div>
 
                 {/* Filtros */}
@@ -161,6 +175,19 @@ export default function Index({ componentes_validaciones }: Props) {
                         onClearFilters={clearFilters}
                         loading={false}
                     />
+                    {componenteId && (
+                        <div className="mt-2">
+                            <span className="inline-flex items-center gap-2 text-xs bg-blue-50 text-blue-700 border border-blue-200 rounded px-2 py-1">
+                                Filtrando por componente ID: {componenteId}
+                                <button
+                                    onClick={() => { setComponenteId(''); router.get('/cajas/componente-validacion', { ...currentFilterParams, componente_id: undefined, page: 1 }, { preserveState: true, preserveScroll: true }); }}
+                                    className="text-blue-700 hover:underline"
+                                >
+                                    Quitar
+                                </button>
+                            </span>
+                        </div>
+                    )}
                 </div>
 
                 {/* Estadísticas */}
@@ -404,7 +431,7 @@ export default function Index({ componentes_validaciones }: Props) {
                                     id="per_page"
                                     className="rounded-md border border-gray-300 px-2 py-1 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                     value={meta.pagination.per_page}
-                                    onChange={(e) => router.get('/cajas/componente-validacion', { page: 1, per_page: Number(e.target.value), q: q || undefined, is_required: isRequired || undefined }, { preserveState: true, preserveScroll: true })}
+                                    onChange={(e) => router.get('/cajas/componente-validacion', { page: 1, per_page: Number(e.target.value), q: q || undefined, is_required: isRequired || undefined, componente_id: componenteId || undefined }, { preserveState: true, preserveScroll: true })}
                                 >
                                     {[10,15,25,50,100].map(n => (
                                         <option key={n} value={n}>{n}</option>
@@ -414,7 +441,7 @@ export default function Index({ componentes_validaciones }: Props) {
                         </div>
                         <div className="inline-flex items-center gap-2">
                             <button
-                                onClick={() => router.get('/cajas/componente-validacion', { page: 1, per_page: meta.pagination!.per_page, q: q || undefined, is_required: isRequired || undefined }, { preserveState: true, preserveScroll: true })}
+                                onClick={() => router.get('/cajas/componente-validacion', { page: 1, per_page: meta.pagination!.per_page, q: q || undefined, is_required: isRequired || undefined, componente_id: componenteId || undefined }, { preserveState: true, preserveScroll: true })}
                                 disabled={meta.pagination.current_page === 1}
                                 className="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
@@ -438,7 +465,7 @@ export default function Index({ componentes_validaciones }: Props) {
                                         {pages.map((num) => (
                                             <button
                                                 key={num}
-                                                onClick={() => router.get('/cajas/componente-validacion', { page: num, per_page: p.per_page, q: q || undefined, is_required: isRequired || undefined }, { preserveState: true, preserveScroll: true })}
+                                                onClick={() => router.get('/cajas/componente-validacion', { page: num, per_page: p.per_page, q: q || undefined, is_required: isRequired || undefined, componente_id: componenteId || undefined }, { preserveState: true, preserveScroll: true })}
                                                 className={`inline-flex items-center h-9 px-3 rounded-md border text-sm font-medium ${num === p.current_page ? 'bg-indigo-600 text-gray border-indigo-600' : 'text-gray-700 border-gray-300 hover:bg-indigo-50 hover:border-indigo-300'} focus:outline-none focus:ring-2 focus:ring-indigo-500`}
                                             >
                                                 {num}
@@ -448,14 +475,14 @@ export default function Index({ componentes_validaciones }: Props) {
                                 );
                             })()}
                             <button
-                                onClick={() => router.get('/cajas/componente-validacion', { page: Math.min(meta.pagination!.last_page, meta.pagination!.current_page + 1), per_page: meta.pagination!.per_page, q: q || undefined, is_required: isRequired || undefined }, { preserveState: true, preserveScroll: true })}
+                                onClick={() => router.get('/cajas/componente-validacion', { page: Math.min(meta.pagination!.last_page, meta.pagination!.current_page + 1), per_page: meta.pagination!.per_page, q: q || undefined, is_required: isRequired || undefined, componente_id: componenteId || undefined }, { preserveState: true, preserveScroll: true })}
                                 disabled={meta.pagination.current_page === meta.pagination.last_page}
                                 className="px-3 py-1 border rounded disabled:opacity-50 text-gray-600 hover:text-gray-900"
                             >
                                 Siguiente
                             </button>
                             <button
-                                onClick={() => router.get('/cajas/componente-validacion', { page: meta.pagination!.last_page, per_page: meta.pagination!.per_page, q: q || undefined, is_required: isRequired || undefined }, { preserveState: true, preserveScroll: true })}
+                                onClick={() => router.get('/cajas/componente-validacion', { page: meta.pagination!.last_page, per_page: meta.pagination!.per_page, q: q || undefined, is_required: isRequired || undefined, componente_id: componenteId || undefined }, { preserveState: true, preserveScroll: true })}
                                 disabled={meta.pagination.current_page === meta.pagination.last_page}
                                 className="px-3 py-1 border rounded disabled:opacity-50 text-gray-600 hover:text-gray-900"
                             >

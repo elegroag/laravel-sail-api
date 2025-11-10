@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { Link, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Componente } from '@/types/cajas';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
 
@@ -42,6 +42,15 @@ export default function Create({ componente, componentes }: Props) {
     const [processing, setProcessing] = useState(false);
     const [pickerOpen, setPickerOpen] = useState(false);
     const [pickerQuery, setPickerQuery] = useState('');
+
+    // Preselección desde query: componente_id
+    useEffect(() => {
+        const sp = new URLSearchParams(window.location.search);
+        const cid = sp.get('componente_id');
+        if (cid) {
+            setFormData(prev => ({ ...prev, componente_id: Number(cid) || cid }));
+        }
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
@@ -276,12 +285,22 @@ export default function Create({ componente, componentes }: Props) {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-                    <Link
-                        href="/cajas/componente-validacion"
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-                    >
-                        Volver
-                    </Link>
+                    <div className="flex gap-2">
+                        {formData.componente_id && (
+                            <Link
+                                href={`/cajas/componente-dinamico/${String(formData.componente_id)}/show`}
+                                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                            >
+                                Volver al Componente
+                            </Link>
+                        )}
+                        <Link
+                            href="/cajas/componente-validacion"
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                        >
+                            Volver
+                        </Link>
+                    </div>
                 </div>
                 <div className="px-4 py-5 sm:px-6">
                     <form onSubmit={handleSubmit}>

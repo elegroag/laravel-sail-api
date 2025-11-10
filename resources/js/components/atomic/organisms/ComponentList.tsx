@@ -25,6 +25,7 @@ interface ComponentListProps {
     onDelete?: (id: number) => void;
     onShow?: (id: number) => void;
     onDuplicate?: (id: number) => void;
+    onValidations?: (id: number) => void;
 }
 
 const ComponentList: React.FC<ComponentListProps> = ({
@@ -33,7 +34,8 @@ const ComponentList: React.FC<ComponentListProps> = ({
     onEdit,
     onDelete,
     onShow,
-    onDuplicate
+    onDuplicate,
+    onValidations
 }) => {
     const getTypeColor = (type: string) => {
         switch (type) {
@@ -157,6 +159,15 @@ const ComponentList: React.FC<ComponentListProps> = ({
                                         onClick={() => onDuplicate(componente.id)}
                                     >
                                         Duplicar
+                                    </Button>
+                                )}
+                                {onValidations && (
+                                    <Button
+                                        variant="primary"
+                                        size="sm"
+                                        onClick={() => onValidations(componente.id)}
+                                    >
+                                        Validaciones
                                     </Button>
                                 )}
                                 {onDelete && (
