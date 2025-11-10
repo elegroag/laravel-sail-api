@@ -113,6 +113,7 @@ class ComponenteDinamicoController extends Controller
             'number_min' => 'nullable|numeric',
             'number_max' => 'nullable|numeric',
             'number_step' => 'numeric|min:0.01',
+            'formulario_id' => 'required|integer|exists:formularios_dinamicos,id',
         ]);
 
         $componente = ComponenteDinamico::create($data);
@@ -156,6 +157,7 @@ class ComponenteDinamicoController extends Controller
             'number_min' => 'nullable|numeric',
             'number_max' => 'nullable|numeric',
             'number_step' => 'numeric|min:0.01',
+            'formulario_id' => 'sometimes|integer|exists:formularios_dinamicos,id',
         ]);
 
         $componente = ComponenteDinamico::findOrFail($id);

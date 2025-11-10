@@ -148,8 +148,9 @@ class FormularioDinamicoController extends Controller
     {
         $q = trim((string) $request->input('q', ''));
         $module = $request->input('module');
+        $perPage = (int) $request->input('per_page', 10);
 
-        $options = FormularioDinamico::query()
+        $query = FormularioDinamico::query()
             ->when($q !== '', function ($query) use ($q) {
                 $like = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $q) . '%';
                 $query->where(function ($sub) use ($like) {
@@ -161,12 +162,18 @@ class FormularioDinamicoController extends Controller
                 $query->where('module', $module);
             })
             ->where('is_active', true)
-            ->orderBy('title')
-            ->limit(100)
-            ->get(['id', 'name', 'title', 'module']);
+            ->orderBy('title');
+
+        $items = $query->paginate($perPage, ['id', 'name', 'title', 'module']);
 
         return response()->json([
-            'data' => $options,
+            'data' => $items->items(),
+            'meta' => [
+                'current_page' => $items->currentPage(),
+                'last_page' => $items->lastPage(),
+                'per_page' => $items->perPage(),
+                'total' => $items->total(),
+            ],
         ]);
     }
 
