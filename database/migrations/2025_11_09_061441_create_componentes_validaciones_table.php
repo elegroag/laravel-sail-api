@@ -28,6 +28,7 @@ return new class extends Migration
             $table->json('error_messages')->nullable();
             $table->timestamps();
 
+            $table->index('componente_id');
             $table->foreign('componente_id')->references('id')->on('componentes_dinamicos')->onDelete('cascade');
         });
     }

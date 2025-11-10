@@ -1,31 +1,32 @@
 import AppLayout from '@/layouts/app-layout';
 import { Link, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
+import type { Validacion as ValidacionType, Componente } from '@/types/cajas';
 
 type Props = {
-    validacion: {
-        id: number;
-        componente_id: number;
-        pattern: string | null;
-        default_value: string | null;
-        max_length: number | null;
-        min_length: number | null;
-        numeric_range: string | null;
-        field_size: number;
-        detail_info: string | null;
-        is_required: boolean;
-        custom_rules: any;
-        error_messages: any;
+    validacion: ValidacionType & {
+        custom_rules: Record<string, string> | null;
+        error_messages: Record<string, string> | null;
     };
-    componentes: Array<{
-        id: number;
-        name: string;
-        label: string;
-    }>;
+    componentes: Array<Pick<Componente, 'id' | 'name' | 'label'>>;
+};
+
+type FormData = {
+    componente_id: string;
+    pattern: string;
+    default_value: string;
+    max_length: string;
+    min_length: string;
+    numeric_range: string;
+    field_size: number;
+    detail_info: string;
+    is_required: boolean;
+    custom_rules: Record<string, string>;
+    error_messages: Record<string, string>;
 };
 
 export default function Edit({ validacion, componentes }: Props) {
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<FormData>({
         componente_id: '',
         pattern: '',
         default_value: '',
@@ -35,8 +36,8 @@ export default function Edit({ validacion, componentes }: Props) {
         field_size: 42,
         detail_info: '',
         is_required: false,
-        custom_rules: {} as any,
-        error_messages: {} as any,
+        custom_rules: {},
+        error_messages: {},
     });
 
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -77,66 +78,47 @@ export default function Edit({ validacion, componentes }: Props) {
         }
     };
 
-    const handleJsonChange = (field: string, key: string, value: string) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: {
-                ...prev[field as keyof typeof prev] as any,
-                [key]: value
+    // (Se removieron helpers de reglas/mensajes personalizados al no existir UI asociada en esta pantalla)
+
+    const validate = (): Record<string, string> => {
+        const vErrors: Record<string, string> = {};
+        if (!formData.componente_id || Number(formData.componente_id) <= 0) vErrors.componente_id = 'Selecciona un componente válido.';
+        if (!formData.field_size || formData.field_size < 1 || formData.field_size > 100) vErrors.field_size = 'El tamaño debe estar entre 1 y 100.';
+        const maxL = formData.max_length ? Number(formData.max_length) : null;
+        const minL = formData.min_length ? Number(formData.min_length) : null;
+        if (maxL !== null && Number.isNaN(maxL)) vErrors.max_length = 'Debe ser un número válido.';
+        if (minL !== null && Number.isNaN(minL)) vErrors.min_length = 'Debe ser un número válido.';
+        if (maxL !== null && minL !== null && minL > maxL) vErrors.min_length = 'La longitud mínima no puede superar la máxima.';
+        if (formData.pattern) {
+            try {
+                const src = formData.pattern.trim();
+                const body = src.startsWith('/') && src.lastIndexOf('/') > 0 ? src.slice(1, src.lastIndexOf('/')) : src;
+                void new RegExp(body);
+            } catch {
+                vErrors.pattern = 'La expresión regular no es válida.';
             }
-        }));
-    };
-
-    const addCustomRule = () => {
-        const key = prompt('Nombre de la regla personalizada:');
-        if (key && key.trim()) {
-            setFormData(prev => ({
-                ...prev,
-                custom_rules: {
-                    ...prev.custom_rules,
-                    [key.trim()]: ''
-                }
-            }));
         }
-    };
-
-    const removeCustomRule = (key: string) => {
-        setFormData(prev => {
-            const newRules = { ...prev.custom_rules };
-            delete newRules[key];
-            return {
-                ...prev,
-                custom_rules: newRules
-            };
-        });
-    };
-
-    const addErrorMessage = () => {
-        const key = prompt('Nombre del mensaje de error (ej: pattern, required, max_length):');
-        if (key && key.trim()) {
-            setFormData(prev => ({
-                ...prev,
-                error_messages: {
-                    ...prev.error_messages,
-                    [key.trim()]: ''
-                }
-            }));
+        if (formData.numeric_range) {
+            const m = formData.numeric_range.match(/^\s*(-?\d+(?:\.\d+)?)\s*-\s*(-?\d+(?:\.\d+)?)\s*$/);
+            if (!m) {
+                vErrors.numeric_range = 'Formato inválido. Usa min-max (ej: 1-100).';
+            } else {
+                const a = Number(m[1]);
+                const b = Number(m[2]);
+                if (Number.isNaN(a) || Number.isNaN(b)) vErrors.numeric_range = 'Valores numéricos inválidos.';
+                else if (a > b) vErrors.numeric_range = 'El mínimo no puede ser mayor que el máximo.';
+            }
         }
-    };
-
-    const removeErrorMessage = (key: string) => {
-        setFormData(prev => {
-            const newMessages = { ...prev.error_messages };
-            delete newMessages[key];
-            return {
-                ...prev,
-                error_messages: newMessages
-            };
-        });
+        return vErrors;
     };
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        const vErrors = validate();
+        if (Object.keys(vErrors).length > 0) {
+            setErrors(vErrors);
+            return;
+        }
         setProcessing(true);
 
         try {
@@ -341,84 +323,6 @@ export default function Edit({ validacion, componentes }: Props) {
                                     </label>
                                 </div>
                                 <p className="mt-1 text-xs text-gray-500">Si este campo debe ser obligatorio</p>
-                            </div>
-
-                            {/* Reglas personalizadas */}
-                            <div className="col-span-6">
-                                <div className="border-t border-gray-200 pt-6">
-                                    <div className="flex justify-between items-center mb-4">
-                                        <h4 className="text-sm font-medium text-gray-900">Reglas Personalizadas</h4>
-                                        <button
-                                            type="button"
-                                            onClick={addCustomRule}
-                                            className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                                        >
-                                            + Agregar Regla
-                                        </button>
-                                    </div>
-                                    <div className="space-y-3">
-                                        {Object.entries(formData.custom_rules).map(([key, value]: [string, any]) => (
-                                            <div key={key} className="flex gap-3 items-end">
-                                                <div className="flex-1">
-                                                    <label className="block text-sm font-medium text-gray-700">{key}</label>
-                                                    <input
-                                                        type="text"
-                                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-                                                        value={value}
-                                                        onChange={(e) => handleJsonChange('custom_rules', key, e.target.value)}
-                                                        placeholder="Valor de la regla"
-                                                    />
-                                                </div>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeCustomRule(key)}
-                                                    className="inline-flex items-center h-9 px-3 rounded-md border border-red-300 text-sm font-medium text-red-700 hover:bg-red-50"
-                                                >
-                                                    ✕
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Mensajes de error personalizados */}
-                            <div className="col-span-6">
-                                <div className="border-t border-gray-200 pt-6">
-                                    <div className="flex justify-between items-center mb-4">
-                                        <h4 className="text-sm font-medium text-gray-900">Mensajes de Error Personalizados</h4>
-                                        <button
-                                            type="button"
-                                            onClick={addErrorMessage}
-                                            className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                                        >
-                                            + Agregar Mensaje
-                                        </button>
-                                    </div>
-                                    <div className="space-y-3">
-                                        {Object.entries(formData.error_messages).map(([key, value]: [string, any]) => (
-                                            <div key={key} className="flex gap-3 items-end">
-                                                <div className="flex-1">
-                                                    <label className="block text-sm font-medium text-gray-700">{key}</label>
-                                                    <input
-                                                        type="text"
-                                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-                                                        value={value}
-                                                        onChange={(e) => handleJsonChange('error_messages', key, e.target.value)}
-                                                        placeholder="Mensaje de error personalizado"
-                                                    />
-                                                </div>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeErrorMessage(key)}
-                                                    className="inline-flex items-center h-9 px-3 rounded-md border border-red-300 text-sm font-medium text-red-700 hover:bg-red-50"
-                                                >
-                                                    ✕
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
                             </div>
                         </div>
 

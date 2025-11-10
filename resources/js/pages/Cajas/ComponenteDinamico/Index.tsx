@@ -4,6 +4,7 @@ import AppLayout from '@/layouts/app-layout';
 import { ComponentList, FilterBar, PaginationControls, ActionButtons } from '@/components/atomic';
 import { useFilters } from '@/hooks/useFilters';
 import { usePagination } from '@/hooks/usePagination';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
 
 interface Componente {
     id: number;
@@ -39,6 +40,8 @@ interface Props {
 
 export default function Index({ componentes_dinamicos }: Props) {
     const [loading, setLoading] = useState(false);
+    const [confirmOpen, setConfirmOpen] = useState(false);
+    const [pendingDelete, setPendingDelete] = useState<{ id: number; name: string } | null>(null);
 
     const { filters, searchValue, updateFilter, updateSearch, clearAllFilters, getQueryParams } = useFilters({
         initialFilters: {
@@ -117,12 +120,24 @@ export default function Index({ componentes_dinamicos }: Props) {
     };
 
     const handleDelete = (id: number) => {
-        if (confirm('¿Estás seguro de que deseas eliminar este componente?')) {
-            router.delete(`/cajas/componente-dinamico/${id}`, {
-                onSuccess: () => {
-                    // Data will be refreshed automatically
+        const comp = componentes_dinamicos.data.find(c => c.id === id);
+        setPendingDelete({ id, name: comp?.name || 'componente' });
+        setConfirmOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!pendingDelete) return;
+        setLoading(true);
+        try {
+            await router.delete(`/cajas/componente-dinamico/${pendingDelete.id}`, {
+                onFinish: () => {
+                    setConfirmOpen(false);
+                    setPendingDelete(null);
+                    setLoading(false);
                 }
             });
+        } catch (e) {
+            setLoading(false);
         }
     };
 
@@ -239,6 +254,36 @@ export default function Index({ componentes_dinamicos }: Props) {
                     />
                 </div>
             </div>
+            {/* Modal de confirmación de eliminación */}
+            <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Confirmar eliminación</DialogTitle>
+                    <DialogDescription>
+                        Esta acción eliminará definitivamente el componente "{pendingDelete?.name}". No podrás deshacerla.
+                    </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <button
+                            type="button"
+                            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                            disabled={loading}
+                        >
+                            Cancelar
+                        </button>
+                    </DialogClose>
+                    <button
+                        type="button"
+                        onClick={confirmDelete}
+                        disabled={loading}
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 disabled:opacity-50"
+                    >
+                        {loading ? 'Eliminando...' : 'Eliminar'}
+                    </button>
+                </DialogFooter>
+            </DialogContent>
+            </Dialog>
         </AppLayout>
     );
 }

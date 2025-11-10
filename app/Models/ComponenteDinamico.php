@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class ComponenteDinamico extends Model
@@ -30,6 +31,7 @@ class ComponenteDinamico extends Model
         'number_min',
         'number_max',
         'number_step',
+        'formulario_id'
     ];
 
     protected $casts = [
@@ -46,5 +48,10 @@ class ComponenteDinamico extends Model
     public function validacion(): HasOne
     {
         return $this->hasOne(ComponenteValidacion::class, 'componente_id');
+    }
+
+    public function formulario(): BelongsTo
+    {
+        return $this->belongsTo(FormularioDinamico::class, 'formulario_id');
     }
 }

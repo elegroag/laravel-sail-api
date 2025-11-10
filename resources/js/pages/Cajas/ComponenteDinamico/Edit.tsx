@@ -1,32 +1,9 @@
 import AppLayout from '@/layouts/app-layout';
 import { Link, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
+import type { Componente, DataSourceItem } from '@/types/cajas';
 
-type Props = {
-    componente: {
-        id: number;
-        name: string;
-        type: string;
-        label: string;
-        placeholder: string | null;
-        form_type: string;
-        group_id: number;
-        order: number;
-        default_value: string | null;
-        is_disabled: boolean;
-        is_readonly: boolean;
-        data_source: any[] | null;
-        css_classes: string | null;
-        help_text: string | null;
-        target: number;
-        event_config: any;
-        search_type: string | null;
-        date_max: string | null;
-        number_min: number | null;
-        number_max: number | null;
-        number_step: number;
-    };
-};
+type Props = { componente: Componente };
 
 export default function Edit({ componente }: Props) {
     const [formData, setFormData] = useState({
@@ -40,11 +17,11 @@ export default function Edit({ componente }: Props) {
         default_value: '',
         is_disabled: false,
         is_readonly: false,
-        data_source: [] as Array<{value: string, label: string}>,
+        data_source: [] as DataSourceItem[],
         css_classes: '',
         help_text: '',
         target: -1,
-        event_config: {} as any,
+        event_config: {} as Record<string, unknown>,
         search_type: '',
         date_max: '',
         number_min: '',
@@ -68,11 +45,11 @@ export default function Edit({ componente }: Props) {
             default_value: componente.default_value || '',
             is_disabled: componente.is_disabled || false,
             is_readonly: componente.is_readonly || false,
-            data_source: componente.data_source || [],
+            data_source: (componente.data_source as DataSourceItem[] | null) || [],
             css_classes: componente.css_classes || '',
             help_text: componente.help_text || '',
             target: componente.target || -1,
-            event_config: componente.event_config || {},
+            event_config: (componente.event_config as Record<string, unknown>) || {},
             search_type: componente.search_type || '',
             date_max: componente.date_max || '',
             number_min: componente.number_min?.toString() || '',
@@ -122,8 +99,45 @@ export default function Edit({ componente }: Props) {
         }));
     };
 
+    const validate = (): Record<string, string> => {
+        const v: Record<string, string> = {};
+        const typeAllowed = ['input','select','textarea','date','number','dialog'];
+        if (!formData.name.trim()) v.name = 'El nombre es obligatorio.';
+        if (!formData.label.trim()) v.label = 'La etiqueta es obligatoria.';
+        if (!typeAllowed.includes(formData.type)) v.type = 'Tipo inválido.';
+        if (!formData.group_id || Number(formData.group_id) < 1) v.group_id = 'Grupo debe ser un entero ≥ 1.';
+        if (!formData.order || Number(formData.order) < 1) v.order = 'Orden debe ser un entero ≥ 1.';
+        if (formData.type === 'select') {
+            if (!Array.isArray(formData.data_source) || formData.data_source.length === 0) {
+                v.data_source = 'Debe agregar al menos una opción.';
+            } else {
+                const invalid = formData.data_source.find(it => !it.value.trim() || !it.label.trim());
+                if (invalid) v.data_source = 'Todas las opciones deben tener valor y etiqueta.';
+            }
+        }
+        if (formData.type === 'number') {
+            const step = Number(formData.number_step);
+            if (!(step > 0)) v.number_step = 'El incremento debe ser mayor que 0.';
+            const min = formData.number_min !== '' ? Number(formData.number_min) : null;
+            const max = formData.number_max !== '' ? Number(formData.number_max) : null;
+            if (min !== null && Number.isNaN(min)) v.number_min = 'Número mínimo inválido.';
+            if (max !== null && Number.isNaN(max)) v.number_max = 'Número máximo inválido.';
+            if (min !== null && max !== null && min > max) v.number_min = 'El mínimo no puede ser mayor que el máximo.';
+        }
+        if (formData.type === 'date' && formData.date_max) {
+            const ts = Date.parse(formData.date_max);
+            if (Number.isNaN(ts)) v.date_max = 'Fecha máxima inválida.';
+        }
+        return v;
+    };
+
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        const v = validate();
+        if (Object.keys(v).length > 0) {
+            setErrors(v);
+            return;
+        }
         setProcessing(true);
 
         try {

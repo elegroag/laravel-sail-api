@@ -35,10 +35,13 @@ return new class extends Migration
             $table->decimal('number_min', 10, 2)->nullable();
             $table->decimal('number_max', 10, 2)->nullable();
             $table->decimal('number_step', 10, 2)->default(1);
+            $table->unsignedBigInteger('formulario_id');
             $table->timestamps();
 
             $table->index('name');
+            $table->index('formulario_id');
             $table->index(['group_id', 'order']);
+            $table->foreign('formulario_id')->references('id')->on('formularios_dinamicos')->onDelete('cascade');
         });
     }
 

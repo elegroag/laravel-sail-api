@@ -1,10 +1,13 @@
 import AppLayout from '@/layouts/app-layout';
 import { Link, router } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
+import { FilterBar } from '@/components/atomic';
+import type { Componente, Validacion, DataSourceItem } from '@/types/cajas';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
 
 type Props = {
     componentes_validaciones: {
-        data: any[];
+        data: Array<Validacion & { componente?: Componente }>;
         meta: {
             total_validaciones: number;
             pagination?: {
@@ -23,9 +26,11 @@ export default function Index({ componentes_validaciones }: Props) {
     const { data, meta } = componentes_validaciones;
 
     const [selectedId, setSelectedId] = useState<number | null>(null);
-    const [componente, setComponente] = useState<any>(null);
+    const [componente, setComponente] = useState<Componente | null>(null);
     const [loadingComponente, setLoadingComponente] = useState(false);
     const [componenteError, setComponenteError] = useState<string | null>(null);
+    const [confirmOpen, setConfirmOpen] = useState(false);
+    const [pendingDelete, setPendingDelete] = useState<{ id: number; name: string } | null>(null);
 
     // Filtros
     const searchParams = useMemo(() => new URLSearchParams(window.location.search), []);
@@ -34,10 +39,14 @@ export default function Index({ componentes_validaciones }: Props) {
     const perPage = meta.pagination?.per_page || 15;
 
     useEffect(() => {
-        const sp = new URLSearchParams(window.location.search);
-        setQ(sp.get('q') || '');
-        setIsRequired(sp.get('is_required') || '');
-    }, [window.location.search]);
+        const handlePopstate = () => {
+            const sp = new URLSearchParams(window.location.search);
+            setQ(sp.get('q') || '');
+            setIsRequired(sp.get('is_required') || '');
+        };
+        window.addEventListener('popstate', handlePopstate);
+        return () => window.removeEventListener('popstate', handlePopstate);
+    }, []);
 
     const currentFilterParams = useMemo(() => ({
         q: q || undefined,
@@ -55,23 +64,36 @@ export default function Index({ componentes_validaciones }: Props) {
         router.get('/cajas/componente-validacion', { per_page: perPage, page: 1 }, { preserveState: true, preserveScroll: true });
     };
 
-    const handleDelete = async (_id: number, componenteName: string) => {
-        if (!confirm(`¿Estás seguro de que deseas eliminar las reglas de validación para "${componenteName}"? Esta acción no se puede deshacer.`)) {
-            return;
+    const filterOptions = [
+        {
+            key: 'is_required',
+            label: 'Requerido',
+            value: isRequired,
+            options: [
+                { value: '', label: 'Todos' },
+                { value: '1', label: 'Sí' },
+                { value: '0', label: 'No' },
+            ],
+            onChange: (value: string) => setIsRequired(value)
         }
+    ];
 
+    const handleDelete = (_id: number, componenteName: string) => {
+        setPendingDelete({ id: _id, name: componenteName });
+        setConfirmOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!pendingDelete) return;
         try {
-            await router.delete(`/cajas/componente-validacion/${_id}`, {
-                onSuccess: () => {
-                    // La página se recargará automáticamente con los datos actualizados
+            await router.delete(`/cajas/componente-validacion/${pendingDelete.id}`, {
+                onFinish: () => {
+                    setConfirmOpen(false);
+                    setPendingDelete(null);
                 },
-                onError: () => {
-                    alert('Error al eliminar las reglas de validación. Por favor, inténtalo de nuevo.');
-                }
             });
         } catch (error) {
             console.error('Error al eliminar validación:', error);
-            alert('Error al eliminar las reglas de validación. Por favor, inténtalo de nuevo.');
         }
     };
 
@@ -88,9 +110,10 @@ export default function Index({ componentes_validaciones }: Props) {
             } else {
                 setComponente(null);
             }
-        } catch (e: any) {
+        } catch (e) {
             setComponente(null);
-            setComponenteError(e?.message || 'Error desconocido');
+            const msg = e instanceof Error ? e.message : 'Error desconocido';
+            setComponenteError(msg);
         } finally {
             setLoadingComponente(false);
         }
@@ -129,38 +152,15 @@ export default function Index({ componentes_validaciones }: Props) {
                 </div>
 
                 {/* Filtros */}
-                <div className="px-4 sm:px-6 pb-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div className="sm:col-span-2">
-                            <label htmlFor="q" className="block text-sm font-medium text-gray-700">Buscar</label>
-                            <input
-                                id="q"
-                                type="text"
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-600 p-2"
-                                placeholder="Patrón, información, componente..."
-                                value={q}
-                                onChange={(e) => setQ(e.target.value)}
-                                onKeyDown={(e) => { if (e.key === 'Enter') applyFilters(); }}
-                            />
-                        </div>
-                        <div className="flex items-end gap-2">
-                            <div className="flex-1">
-                                <label htmlFor="is_required" className="block text-sm font-medium text-gray-700">Requerido</label>
-                                <select
-                                    id="is_required"
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white text-gray-600 p-2"
-                                    value={isRequired}
-                                    onChange={(e) => setIsRequired(e.target.value)}
-                                >
-                                    <option value="">Todos</option>
-                                    <option value="1">Sí</option>
-                                    <option value="0">No</option>
-                                </select>
-                            </div>
-                            <button onClick={applyFilters} className="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">Filtrar</button>
-                            <button onClick={clearFilters} className="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500">Limpiar</button>
-                        </div>
-                    </div>
+                <div className="px-4 py-5 sm:px-6">
+                    <FilterBar
+                        searchValue={q}
+                        onSearchChange={setQ}
+                        onSearchSubmit={applyFilters}
+                        filters={filterOptions}
+                        onClearFilters={clearFilters}
+                        loading={false}
+                    />
                 </div>
 
                 {/* Estadísticas */}
@@ -261,8 +261,8 @@ export default function Index({ componentes_validaciones }: Props) {
 
                     {/* Panel lateral de detalle del componente */}
                     <aside className="lg:col-span-1 m-2">
-                        <div className="sticky top-4 rounded-xl bg-white shadow-md ring-1 ring-gray-200 overflow-hidden">
-                            <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+                        <div className="sticky top-4 bg-white shadow overflow-hidden sm:rounded-md">
+                            <div className="px-4 py-5 sm:px-6 flex items-center justify-between border-b">
                                 <div>
                                     <h4 className="text-sm font-semibold text-gray-900">Componente Asociado</h4>
                                     {selectedId ? (
@@ -272,7 +272,7 @@ export default function Index({ componentes_validaciones }: Props) {
                                     )}
                                 </div>
                             </div>
-                            <div className="p-4 max-h-[70vh] overflow-auto">
+                            <div className="px-4 py-5 sm:px-6 max-h-[70vh] overflow-auto">
                                 {loadingComponente && (
                                     <div className="space-y-2">
                                         <div className="h-3 w-1/2 bg-gray-200 rounded animate-pulse" />
@@ -359,7 +359,7 @@ export default function Index({ componentes_validaciones }: Props) {
                                                     <div>
                                                         <span className="text-sm font-medium text-gray-900">Opciones del Select</span>
                                                         <div className="mt-1 space-y-1">
-                                                            {componente.data_source.slice(0, 3).map((option: any, index: number) => (
+                                                            {componente.data_source.slice(0, 3).map((option: DataSourceItem, index: number) => (
                                                                 <div key={index} className="text-xs text-gray-600 bg-gray-50 p-1 rounded">
                                                                     {option.label} ({option.value})
                                                                 </div>
@@ -404,7 +404,7 @@ export default function Index({ componentes_validaciones }: Props) {
                                     id="per_page"
                                     className="rounded-md border border-gray-300 px-2 py-1 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                     value={meta.pagination.per_page}
-                                    onChange={(e) => router.get('/cajas/componente-validacion', { page: 1, per_page: Number(e.target.value), ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                    onChange={(e) => router.get('/cajas/componente-validacion', { page: 1, per_page: Number(e.target.value), q: q || undefined, is_required: isRequired || undefined }, { preserveState: true, preserveScroll: true })}
                                 >
                                     {[10,15,25,50,100].map(n => (
                                         <option key={n} value={n}>{n}</option>
@@ -414,14 +414,14 @@ export default function Index({ componentes_validaciones }: Props) {
                         </div>
                         <div className="inline-flex items-center gap-2">
                             <button
-                                onClick={() => router.get('/cajas/componente-validacion', { page: 1, per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                onClick={() => router.get('/cajas/componente-validacion', { page: 1, per_page: meta.pagination!.per_page, q: q || undefined, is_required: isRequired || undefined }, { preserveState: true, preserveScroll: true })}
                                 disabled={meta.pagination.current_page === 1}
                                 className="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Primera
                             </button>
                             <button
-                                onClick={() => router.get('/cajas/componente-validacion', { page: Math.max(1, meta.pagination!.current_page - 1), per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                onClick={() => router.get('/cajas/componente-validacion', { page: Math.max(1, meta.pagination!.current_page - 1), per_page: meta.pagination!.per_page, q: q || undefined, is_required: isRequired || undefined }, { preserveState: true, preserveScroll: true })}
                                 disabled={meta.pagination.current_page === 1}
                                 className="px-3 py-1 border rounded disabled:opacity-50 text-gray-600 hover:text-gray-900"
                             >
@@ -438,7 +438,7 @@ export default function Index({ componentes_validaciones }: Props) {
                                         {pages.map((num) => (
                                             <button
                                                 key={num}
-                                                onClick={() => router.get('/cajas/componente-validacion', { page: num, per_page: p.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                                onClick={() => router.get('/cajas/componente-validacion', { page: num, per_page: p.per_page, q: q || undefined, is_required: isRequired || undefined }, { preserveState: true, preserveScroll: true })}
                                                 className={`inline-flex items-center h-9 px-3 rounded-md border text-sm font-medium ${num === p.current_page ? 'bg-indigo-600 text-gray border-indigo-600' : 'text-gray-700 border-gray-300 hover:bg-indigo-50 hover:border-indigo-300'} focus:outline-none focus:ring-2 focus:ring-indigo-500`}
                                             >
                                                 {num}
@@ -448,14 +448,14 @@ export default function Index({ componentes_validaciones }: Props) {
                                 );
                             })()}
                             <button
-                                onClick={() => router.get('/cajas/componente-validacion', { page: Math.min(meta.pagination!.last_page, meta.pagination!.current_page + 1), per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                onClick={() => router.get('/cajas/componente-validacion', { page: Math.min(meta.pagination!.last_page, meta.pagination!.current_page + 1), per_page: meta.pagination!.per_page, q: q || undefined, is_required: isRequired || undefined }, { preserveState: true, preserveScroll: true })}
                                 disabled={meta.pagination.current_page === meta.pagination.last_page}
                                 className="px-3 py-1 border rounded disabled:opacity-50 text-gray-600 hover:text-gray-900"
                             >
                                 Siguiente
                             </button>
                             <button
-                                onClick={() => router.get('/cajas/componente-validacion', { page: meta.pagination!.last_page, per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                onClick={() => router.get('/cajas/componente-validacion', { page: meta.pagination!.last_page, per_page: meta.pagination!.per_page, q: q || undefined, is_required: isRequired || undefined }, { preserveState: true, preserveScroll: true })}
                                 disabled={meta.pagination.current_page === meta.pagination.last_page}
                                 className="px-3 py-1 border rounded disabled:opacity-50 text-gray-600 hover:text-gray-900"
                             >
@@ -483,6 +483,34 @@ export default function Index({ componentes_validaciones }: Props) {
                     </div>
                 )}
             </div>
+            {/* Modal de confirmación de eliminación */}
+            <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Confirmar eliminación</DialogTitle>
+                        <DialogDescription>
+                            Esta acción eliminará definitivamente las reglas de validación para "{pendingDelete?.name}". No podrás deshacerla.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <DialogClose asChild>
+                            <button
+                                type="button"
+                                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                            >
+                                Cancelar
+                            </button>
+                        </DialogClose>
+                        <button
+                            type="button"
+                            onClick={confirmDelete}
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
+                        >
+                            Eliminar
+                        </button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </AppLayout>
     );
 }

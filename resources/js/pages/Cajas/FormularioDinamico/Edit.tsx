@@ -1,24 +1,27 @@
 import AppLayout from '@/layouts/app-layout';
 import { Link, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
+import type { LayoutConfig, Permissions, Formulario as FormularioType } from '@/types/cajas';
+import { parseJsonSafe } from '@/utils/json';
 
 type Props = {
-    formulario: {
-        id: number;
-        name: string;
-        title: string;
-        description: string | null;
-        module: string;
-        endpoint: string;
-        method: string;
-        is_active: boolean;
-        layout_config: any;
-        permissions: any;
-    };
+    formulario: FormularioType;
+};
+
+type FormData = {
+    name: string;
+    title: string;
+    description: string;
+    module: string;
+    endpoint: string;
+    method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+    is_active: boolean;
+    layout_config: LayoutConfig;
+    permissions: Permissions;
 };
 
 export default function Edit({ formulario }: Props) {
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<FormData>({
         name: '',
         title: '',
         description: '',
@@ -33,7 +36,7 @@ export default function Edit({ formulario }: Props) {
         },
         permissions: {
             public: false,
-            roles: []
+            roles: [] as string[]
         }
     });
 
@@ -42,29 +45,16 @@ export default function Edit({ formulario }: Props) {
 
     // Cargar datos del formulario al montar el componente
     useEffect(() => {
-        // Normalizar y parsear posibles strings JSON desde el backend
-        let layout = formulario.layout_config as any;
-        let perms = formulario.permissions as any;
-        try {
-            if (typeof layout === 'string') layout = JSON.parse(layout);
-        } catch (_) {
-            layout = null;
-        }
-        try {
-            if (typeof perms === 'string') perms = JSON.parse(perms);
-        } catch (_) {
-            perms = null;
-        }
+        const defaultsLayout: LayoutConfig = { columns: 1, spacing: 'md', theme: 'default' };
+        const defaultsPermissions: Permissions = { public: false, roles: [] };
 
-        // Defaults seguros para evitar values undefined
-        layout = layout && typeof layout === 'object' ? layout : { columns: 1, spacing: 'md', theme: 'default' };
-        if (layout.columns == null) layout.columns = 1;
-        if (layout.spacing == null) layout.spacing = 'md';
-        if (layout.theme == null) layout.theme = 'default';
+        const layout = parseJsonSafe<LayoutConfig>(formulario.layout_config, defaultsLayout);
+        const perms = parseJsonSafe<Permissions>(formulario.permissions, defaultsPermissions);
 
-        perms = perms && typeof perms === 'object' ? perms : { public: false, roles: [] };
-        if (perms.public == null) perms.public = false;
-        if (!Array.isArray(perms.roles)) perms.roles = [];
+        const allowedMethods = ['GET','POST','PUT','PATCH','DELETE'] as const;
+        const safeMethod = allowedMethods.includes(formulario.method as typeof allowedMethods[number])
+            ? (formulario.method as typeof allowedMethods[number])
+            : 'POST';
 
         setFormData({
             name: formulario.name || '',
@@ -72,7 +62,7 @@ export default function Edit({ formulario }: Props) {
             description: formulario.description || '',
             module: formulario.module || '',
             endpoint: formulario.endpoint || '',
-            method: formulario.method || 'POST',
+            method: safeMethod,
             // mantener booleano exactamente, sin coaccionar a true cuando es false
             is_active: Boolean(formulario.is_active),
             layout_config: layout,
@@ -86,7 +76,11 @@ export default function Edit({ formulario }: Props) {
 
         setFormData(prev => ({
             ...prev,
-            [name]: type === 'checkbox' ? checked : value
+            [name]: type === 'checkbox'
+                ? checked
+                : name === 'method'
+                    ? (value as FormData['method'])
+                    : value
         }));
 
         // Limpiar error cuando el usuario comienza a escribir
@@ -98,15 +92,46 @@ export default function Edit({ formulario }: Props) {
         }
     };
 
-    const handleJsonChange = (field: string, value: any) => {
+    const handleJsonChange = (field: 'layout_config' | 'permissions', value: LayoutConfig | Permissions) => {
         setFormData(prev => ({
             ...prev,
             [field]: value
         }));
     };
 
+    const validate = (): Record<string, string> => {
+        const v: Record<string, string> = {};
+        const methodAllowed = ['GET','POST','PUT','PATCH','DELETE'];
+        const spacingAllowed = ['sm','md','lg'];
+        const themeAllowed = ['default','professional','clean','support','feedback'];
+
+        if (!formData.name.trim()) v.name = 'El nombre es obligatorio.';
+        if (!formData.title.trim()) v.title = 'El título es obligatorio.';
+        if (!formData.module.trim()) v.module = 'El módulo es obligatorio.';
+        if (!formData.endpoint.trim()) v.endpoint = 'El endpoint es obligatorio.';
+        if (!methodAllowed.includes(formData.method)) v.method = 'Método inválido.';
+
+        const cols = Number(formData.layout_config?.columns ?? 1);
+        if (Number.isNaN(cols) || cols < 1 || cols > 3) v.layout_config = 'Columnas debe estar entre 1 y 3.';
+        const spacing = formData.layout_config?.spacing ?? 'md';
+        if (!spacingAllowed.includes(spacing)) v.layout_config = (v.layout_config || '') || 'Espaciado inválido.';
+        const theme = formData.layout_config?.theme ?? 'default';
+        if (!themeAllowed.includes(theme)) v.layout_config = (v.layout_config || '') || 'Tema inválido.';
+
+        const perms = formData.permissions || { public: false, roles: [] };
+        if (!perms.public) {
+            if (!Array.isArray(perms.roles)) v.permissions = 'La lista de roles es inválida.';
+        }
+        return v;
+    };
+
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        const v = validate();
+        if (Object.keys(v).length > 0) {
+            setErrors(v);
+            return;
+        }
         setProcessing(true);
         router.put(
             `/cajas/formulario-dinamico/${formulario.id}`,
@@ -279,7 +304,7 @@ export default function Edit({ formulario }: Props) {
                                             <select
                                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
                                                 value={formData.layout_config.spacing ?? 'md'}
-                                                onChange={(e) => handleJsonChange('layout_config', { ...formData.layout_config, spacing: e.target.value })}
+                                                onChange={(e) => handleJsonChange('layout_config', { ...formData.layout_config, spacing: e.target.value as LayoutConfig['spacing'] })}
                                             >
                                                 <option value="sm">Pequeño</option>
                                                 <option value="md">Mediano</option>
@@ -291,7 +316,7 @@ export default function Edit({ formulario }: Props) {
                                             <select
                                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
                                                 value={formData.layout_config.theme ?? 'default'}
-                                                onChange={(e) => handleJsonChange('layout_config', { ...formData.layout_config, theme: e.target.value })}
+                                                onChange={(e) => handleJsonChange('layout_config', { ...formData.layout_config, theme: e.target.value as LayoutConfig['theme'] })}
                                             >
                                                 <option value="default">Por defecto</option>
                                                 <option value="professional">Profesional</option>
@@ -323,17 +348,17 @@ export default function Edit({ formulario }: Props) {
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-2">Roles permitidos</label>
                                                 <div className="grid grid-cols-2 gap-2">
-                                                    {['cliente', 'asesor', 'admin', 'usuario'].map(role => (
+                                                    {(['cliente', 'asesor', 'admin', 'usuario'] as string[]).map(role => (
                                                         <label key={role} className="inline-flex items-center">
                                                             <input
                                                                 type="checkbox"
                                                                 className="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                                                 checked={formData.permissions.roles.includes(role)}
                                                                 onChange={(e) => {
-                                                                    const roles = e.target.checked
+                                                                    const roles = (e.target.checked
                                                                         ? [...formData.permissions.roles, role]
-                                                                        : formData.permissions.roles.filter((r: string) => r !== role);
-                                                                    handleJsonChange('permissions', { ...formData.permissions, roles });
+                                                                        : formData.permissions.roles.filter((r) => r !== role)) as string[];
+                                                                    handleJsonChange('permissions', { ...formData.permissions, roles: roles as string[] });
                                                                 }}
                                                             />
                                                             <span className="ml-2 text-sm text-gray-700 capitalize">{role}</span>

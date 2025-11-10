@@ -1,74 +1,37 @@
 import AppLayout from '@/layouts/app-layout';
 import { Link, router } from '@inertiajs/react';
 import { useState } from 'react';
+import type { Componente as ComponenteType, DataSourceItem, Validacion as ValidacionType, Formulario as FormularioType } from '@/types/cajas';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
 
 type Props = {
-    componente: {
-        id: number;
-        name: string;
-        type: string;
-        label: string;
-        placeholder: string | null;
-        form_type: string;
-        group_id: number;
-        order: number;
-        default_value: string | null;
-        is_disabled: boolean;
-        is_readonly: boolean;
-        data_source: any[] | null;
-        css_classes: string | null;
-        help_text: string | null;
-        target: number;
-        event_config: any;
-        search_type: string | null;
-        date_max: string | null;
-        number_min: number | null;
-        number_max: number | null;
-        number_step: number;
-        validacion?: {
-            id: number;
-            pattern: string | null;
-            default_value: string | null;
-            max_length: number | null;
-            min_length: number | null;
-            numeric_range: string | null;
-            field_size: number;
-            detail_info: string | null;
-            is_required: boolean;
-            custom_rules: any;
-            error_messages: any;
-        };
-        formulario?: {
-            id: number;
-            name: string;
-            title: string;
-        };
+    componente: (ComponenteType & {
+        data_source: DataSourceItem[] | null;
+        event_config: Record<string, unknown>;
+        validacion?: (ValidacionType & {
+            custom_rules: Record<string, string> | null;
+            error_messages: Record<string, string> | null;
+        }) | null;
+        formulario?: Pick<FormularioType, 'id' | 'name' | 'title'> | null;
         created_at: string;
         updated_at: string;
-    };
+    });
 };
 
 export default function Show({ componente }: Props) {
     const [deleting, setDeleting] = useState(false);
+    const [confirmOpen, setConfirmOpen] = useState(false);
 
-    const handleDelete = async () => {
-        if (!confirm('¿Estás seguro de que deseas eliminar este componente dinámico? Esta acción no se puede deshacer.')) {
-            return;
-        }
-
-        setDeleting(true);
-
+    const confirmDelete = async () => {
         try {
+            setDeleting(true);
             await router.delete(`/cajas/componente-dinamico/${componente.id}`, {
-                onSuccess: () => {
-                    router.visit('/cajas/componente-dinamico');
-                },
-                onError: () => {
-                    setDeleting(false);
-                }
+                onSuccess: () => router.visit('/cajas/componente-dinamico'),
+                onFinish: () => setConfirmOpen(false)
             });
         } catch (error) {
             console.error('Error al eliminar componente:', error);
+        } finally {
             setDeleting(false);
         }
     };
@@ -204,7 +167,7 @@ export default function Show({ componente }: Props) {
                                 <dt className="text-sm font-medium text-gray-500">Opciones del Select</dt>
                                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                                     <div className="space-y-1">
-                                        {componente.data_source.map((option: any, index: number) => (
+                                        {componente.data_source.map((option: DataSourceItem, index: number) => (
                                             <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
                                                 <span className="font-medium">{option.label}</span>
                                                 <span className="text-xs text-gray-500">({option.value})</span>
@@ -326,7 +289,7 @@ export default function Show({ componente }: Props) {
                                         <div>
                                             <span className="text-sm font-medium text-gray-900">Reglas Personalizadas</span>
                                             <div className="mt-1 space-y-1">
-                                                {Object.entries(componente.validacion.custom_rules).map(([key, value]: [string, any]) => (
+                                                {Object.entries(componente.validacion.custom_rules).map(([key, value]: [string, string]) => (
                                                     <div key={key} className="text-xs text-gray-600">
                                                         <span className="font-medium">{key}:</span> {String(value)}
                                                     </div>
@@ -339,7 +302,7 @@ export default function Show({ componente }: Props) {
                                         <div>
                                             <span className="text-sm font-medium text-gray-900">Mensajes de Error</span>
                                             <div className="mt-1 space-y-1">
-                                                {Object.entries(componente.validacion.error_messages).map(([key, value]: [string, any]) => (
+                                                {Object.entries(componente.validacion.error_messages).map(([key, value]: [string, string]) => (
                                                     <div key={key} className="text-xs text-red-600 bg-red-50 p-2 rounded">
                                                         <span className="font-medium">{key}:</span> {String(value)}
                                                     </div>
@@ -366,7 +329,7 @@ export default function Show({ componente }: Props) {
                 <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
                     <div className="flex justify-between">
                         <button
-                            onClick={handleDelete}
+                            onClick={() => setConfirmOpen(true)}
                             disabled={deleting}
                             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
@@ -381,6 +344,36 @@ export default function Show({ componente }: Props) {
                     </div>
                 </div>
             </div>
+        {/* Modal de confirmación */}
+        <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Confirmar eliminación</DialogTitle>
+                    <DialogDescription>
+                        Esta acción eliminará definitivamente el componente "{componente.label}". No podrás deshacerla.
+                    </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <button
+                            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                            type="button"
+                            disabled={deleting}
+                        >
+                            Cancelar
+                        </button>
+                    </DialogClose>
+                    <button
+                        onClick={confirmDelete}
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 disabled:opacity-50"
+                        type="button"
+                        disabled={deleting}
+                    >
+                        {deleting ? 'Eliminando...' : 'Eliminar'}
+                    </button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
         </AppLayout>
     );
 }
