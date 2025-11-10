@@ -91,7 +91,7 @@ export default function Index({ formularios_dinamicos }: Props) {
             setSelectedId(_id);
             setLoadingChildren(true);
             setChildrenError(null);
-            const res = await fetch(`/cajas/formulario-dinamico/children`, {
+            const res = await fetch(`/cajas/formulario-dinamico/${_id}/children`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
@@ -99,8 +99,7 @@ export default function Index({ formularios_dinamicos }: Props) {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
                 },
                 credentials: 'same-origin',
-                method: 'POST',
-                body: JSON.stringify({ id: _id })
+                method: 'GET',
             });
             if (!res.ok) {
                 throw new Error('No fue posible cargar los componentes hijos');

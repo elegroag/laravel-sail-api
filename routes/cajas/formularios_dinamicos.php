@@ -19,6 +19,10 @@ Route::prefix('/cajas/formulario-dinamico')->group(function () {
     Route::get('/options', [FormularioDinamicoController::class, 'options'])
         ->name('formulario-dinamico.options');
 
+    // Hijos (componentes) del formulario con filtros y paginación
+    Route::get('/{id}/children', [FormularioDinamicoController::class, 'children'])
+        ->name('formulario-dinamico.children');
+
     Route::post('/{id}/toggle-active', [FormularioDinamicoController::class, 'toggleActive'])
         ->name('formulario-dinamico.toggle-active');
 

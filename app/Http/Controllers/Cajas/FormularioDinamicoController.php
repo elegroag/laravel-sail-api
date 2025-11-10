@@ -237,4 +237,45 @@ class FormularioDinamicoController extends Controller
 
         return redirect()->to('/cajas/formulario-dinamico/' . $duplicated->id . '/show');
     }
+
+    /**
+     * Devuelve componentes hijos de un formulario con filtros y paginación.
+     * GET /cajas/formulario-dinamico/children?formulario_id=&q=&per_page=&page=
+     */
+    public function children(Request $request, int $formularioId)
+    {
+        if (!$formularioId) {
+            return response()->json(['message' => 'formulario_id es requerido'], 422);
+        }
+
+        $q = trim((string) $request->query('q', ''));
+        $perPage = (int) $request->query('per_page', 10);
+
+        $query = \App\Models\ComponenteDinamico::with('validacion')
+            ->where('formulario_id', $formularioId)
+            ->when($q !== '', function ($sub) use ($q) {
+                $like = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $q) . '%';
+                $sub->where(function ($s) use ($like) {
+                    $s->where('name', 'like', $like)
+                        ->orWhere('label', 'like', $like)
+                        ->orWhere('type', 'like', $like);
+                });
+            })
+            ->orderBy('group_id')
+            ->orderBy('order');
+
+        $items = $query->paginate($perPage);
+
+        return response()->json([
+            'data' => $items->items(),
+            'meta' => [
+                'current_page' => $items->currentPage(),
+                'last_page' => $items->lastPage(),
+                'per_page' => $items->perPage(),
+                'total' => $items->total(),
+                'from' => $items->firstItem(),
+                'to' => $items->lastItem(),
+            ],
+        ]);
+    }
 }
