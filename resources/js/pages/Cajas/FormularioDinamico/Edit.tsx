@@ -42,6 +42,30 @@ export default function Edit({ formulario }: Props) {
 
     // Cargar datos del formulario al montar el componente
     useEffect(() => {
+        // Normalizar y parsear posibles strings JSON desde el backend
+        let layout = formulario.layout_config as any;
+        let perms = formulario.permissions as any;
+        try {
+            if (typeof layout === 'string') layout = JSON.parse(layout);
+        } catch (_) {
+            layout = null;
+        }
+        try {
+            if (typeof perms === 'string') perms = JSON.parse(perms);
+        } catch (_) {
+            perms = null;
+        }
+
+        // Defaults seguros para evitar values undefined
+        layout = layout && typeof layout === 'object' ? layout : { columns: 1, spacing: 'md', theme: 'default' };
+        if (layout.columns == null) layout.columns = 1;
+        if (layout.spacing == null) layout.spacing = 'md';
+        if (layout.theme == null) layout.theme = 'default';
+
+        perms = perms && typeof perms === 'object' ? perms : { public: false, roles: [] };
+        if (perms.public == null) perms.public = false;
+        if (!Array.isArray(perms.roles)) perms.roles = [];
+
         setFormData({
             name: formulario.name || '',
             title: formulario.title || '',
@@ -49,16 +73,10 @@ export default function Edit({ formulario }: Props) {
             module: formulario.module || '',
             endpoint: formulario.endpoint || '',
             method: formulario.method || 'POST',
-            is_active: formulario.is_active || true,
-            layout_config: formulario.layout_config || {
-                columns: 1,
-                spacing: 'md',
-                theme: 'default'
-            },
-            permissions: formulario.permissions || {
-                public: false,
-                roles: []
-            }
+            // mantener booleano exactamente, sin coaccionar a true cuando es false
+            is_active: Boolean(formulario.is_active),
+            layout_config: layout,
+            permissions: perms,
         });
     }, [formulario]);
 
@@ -248,7 +266,7 @@ export default function Edit({ formulario }: Props) {
                                             <label className="block text-sm font-medium text-gray-700">Columnas</label>
                                             <select
                                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-                                                value={formData.layout_config.columns}
+                                                value={formData.layout_config.columns ?? 1}
                                                 onChange={(e) => handleJsonChange('layout_config', { ...formData.layout_config, columns: Number(e.target.value) })}
                                             >
                                                 <option value={1}>1 Columna</option>
@@ -260,7 +278,7 @@ export default function Edit({ formulario }: Props) {
                                             <label className="block text-sm font-medium text-gray-700">Espaciado</label>
                                             <select
                                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-                                                value={formData.layout_config.spacing}
+                                                value={formData.layout_config.spacing ?? 'md'}
                                                 onChange={(e) => handleJsonChange('layout_config', { ...formData.layout_config, spacing: e.target.value })}
                                             >
                                                 <option value="sm">Pequeño</option>
@@ -272,7 +290,7 @@ export default function Edit({ formulario }: Props) {
                                             <label className="block text-sm font-medium text-gray-700">Tema</label>
                                             <select
                                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-                                                value={formData.layout_config.theme}
+                                                value={formData.layout_config.theme ?? 'default'}
                                                 onChange={(e) => handleJsonChange('layout_config', { ...formData.layout_config, theme: e.target.value })}
                                             >
                                                 <option value="default">Por defecto</option>
@@ -310,6 +328,7 @@ export default function Edit({ formulario }: Props) {
                                                             <input
                                                                 type="checkbox"
                                                                 className="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                                checked={formData.permissions.roles.includes(role)}
                                                                 onChange={(e) => {
                                                                     const roles = e.target.checked
                                                                         ? [...formData.permissions.roles, role]

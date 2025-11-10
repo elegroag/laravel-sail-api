@@ -359,8 +359,8 @@ export default function Index({ formularios_dinamicos }: Props) {
 
                     {/* Panel lateral de detalle de componentes */}
                     <aside className="lg:col-span-1 m-2">
-                        <div className="sticky top-4 rounded-xl bg-white shadow-md ring-1 ring-gray-200 overflow-hidden">
-                            <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+                        <div className="sticky top-4 bg-white shadow overflow-hidden sm:rounded-md">
+                            <div className="px-4 py-5 sm:px-6 flex items-center justify-between border-b">
                                 <div>
                                     <h4 className="text-sm font-semibold text-gray-900">Detalle del Formulario</h4>
                                     {selectedId ? (
@@ -383,7 +383,7 @@ export default function Index({ formularios_dinamicos }: Props) {
                                     </div>
                                 )}
                             </div>
-                            <div className="p-4 max-h-[70vh] overflow-auto">
+                            <div className="px-4 py-5 sm:px-6 max-h-[70vh] overflow-auto">
                                 {loadingChildren && (
                                     <div className="space-y-2">
                                         <div className="h-3 w-1/2 bg-gray-200 rounded animate-pulse" />
@@ -401,9 +401,9 @@ export default function Index({ formularios_dinamicos }: Props) {
                                         {children.length === 0 ? (
                                             <div className="text-sm text-gray-500">Este formulario no tiene componentes.</div>
                                         ) : (
-                                            <ul className="space-y-3">
+                                            <ul className="divide-y divide-gray-200">
                                                 {children.map((componente) => (
-                                                    <li key={componente.id} className="rounded-lg border border-gray-200 p-3 hover:border-indigo-200 transition-colors">
+                                                    <li key={componente.id} className="px-4 py-4 sm:px-6">
                                                         <div className="flex items-start gap-3">
                                                             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-white text-sm font-semibold">
                                                                 {componente.label?.charAt(0)?.toUpperCase() || componente.name?.charAt(0)?.toUpperCase()}

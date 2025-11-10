@@ -40,8 +40,8 @@ export default function Create({ formulario }: Props) {
     return (
         <AppLayout title="Crear Componente Dinámico">
             <div className="max-w-4xl mx-auto">
-                <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-                    <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
+                <div className="bg-white shadow overflow-hidden sm:rounded-md">
+                    <div className="px-4 py-5 sm:px-6">
                         <div className="flex justify-between items-center">
                             <div>
                                 <h3 className="text-lg leading-6 font-medium text-gray-900">

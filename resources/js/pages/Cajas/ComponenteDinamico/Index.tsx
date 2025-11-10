@@ -165,12 +165,11 @@ export default function Index({ componentes_dinamicos }: Props) {
 
     return (
         <AppLayout title="Componentes Dinámicos">
-            <div className="space-y-6">
-                {/* Header */}
-                <div className="flex justify-between items-center">
+            <div className="bg-white shadow overflow-hidden sm:rounded-md m-2">
+                <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Componentes Dinámicos</h1>
-                        <p className="text-gray-600">Gestiona los componentes reutilizables del sistema</p>
+                        <h3 className="text-lg leading-6 font-medium text-gray-900">Componentes Dinámicos</h3>
+                        <p className="mt-1 max-w-2xl text-sm text-gray-500">Gestiona los componentes reutilizables del sistema</p>
                     </div>
                     <ActionButtons
                         actions={[
@@ -183,64 +182,62 @@ export default function Index({ componentes_dinamicos }: Props) {
                     />
                 </div>
 
-                {/* Statistics */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="bg-white p-4 rounded-lg shadow">
-                        <div className="text-2xl font-bold text-blue-600">{componentes_dinamicos.meta.total_componentes}</div>
-                        <div className="text-sm text-gray-600">Total Componentes</div>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg shadow">
-                        <div className="text-2xl font-bold text-green-600">
-                            {componentes_dinamicos.data.filter(c => c.validacion?.is_required).length}
+                {/* Estadísticas */}
+                <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <div className="text-center">
+                            <div className="text-2xl font-bold text-indigo-600">{componentes_dinamicos.meta.total_componentes}</div>
+                            <div className="text-sm text-gray-500">Total Componentes</div>
                         </div>
-                        <div className="text-sm text-gray-600">Campos Requeridos</div>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg shadow">
-                        <div className="text-2xl font-bold text-orange-600">
-                            {componentes_dinamicos.data.filter(c => c.type === 'select').length}
+                        <div className="text-center">
+                            <div className="text-2xl font-bold text-green-600">{componentes_dinamicos.data.filter(c => c.validacion?.is_required).length}</div>
+                            <div className="text-sm text-gray-500">Requeridos</div>
                         </div>
-                        <div className="text-sm text-gray-600">Selects</div>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg shadow">
-                        <div className="text-2xl font-bold text-purple-600">
-                            {componentes_dinamicos.data.filter(c => c.validacion?.pattern).length}
+                        <div className="text-center">
+                            <div className="text-2xl font-bold text-orange-600">{componentes_dinamicos.data.filter(c => c.type === 'select').length}</div>
+                            <div className="text-sm text-gray-500">Selects</div>
                         </div>
-                        <div className="text-sm text-gray-600">Con Patrón</div>
                     </div>
                 </div>
 
                 {/* Filters */}
-                <FilterBar
-                    searchValue={searchValue}
-                    onSearchChange={updateSearch}
-                    onSearchSubmit={handleSearch}
-                    filters={filterOptions}
-                    onClearFilters={clearAllFilters}
-                    loading={loading}
-                />
+                <div className="px-4 py-5 sm:px-6">
+                    <FilterBar
+                        searchValue={searchValue}
+                        onSearchChange={updateSearch}
+                        onSearchSubmit={handleSearch}
+                        filters={filterOptions}
+                        onClearFilters={clearAllFilters}
+                        loading={loading}
+                    />
+                </div>
 
                 {/* Component List */}
-                <ComponentList
-                    componentes={componentes_dinamicos.data}
-                    loading={loading}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    onShow={handleShow}
-                    onDuplicate={handleDuplicate}
-                />
+                <div className="px-4 py-5 sm:px-6">
+                    <ComponentList
+                        componentes={componentes_dinamicos.data}
+                        loading={loading}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        onShow={handleShow}
+                        onDuplicate={handleDuplicate}
+                    />
+                </div>
 
                 {/* Pagination */}
-                <PaginationControls
-                    currentPage={currentPage}
-                    lastPage={totalPages}
-                    perPage={perPage}
-                    total={totalItems}
-                    from={from}
-                    to={to}
-                    onPageChange={handlePageChange}
-                    onPerPageChange={handlePerPageChange}
-                    loading={loading}
-                />
+                <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
+                    <PaginationControls
+                        currentPage={currentPage}
+                        lastPage={totalPages}
+                        perPage={perPage}
+                        total={totalItems}
+                        from={from}
+                        to={to}
+                        onPageChange={handlePageChange}
+                        onPerPageChange={handlePerPageChange}
+                        loading={loading}
+                    />
+                </div>
             </div>
         </AppLayout>
     );
