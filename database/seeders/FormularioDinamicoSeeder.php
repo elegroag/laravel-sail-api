@@ -23,29 +23,11 @@ class FormularioDinamicoSeeder extends Seeder
 
         $formularios = [
             [
-                'name' => 'formulario_registro_usuario',
-                'title' => 'Registro de Usuario',
-                'description' => 'Formulario para registro de nuevos usuarios en el sistema',
-                'module' => 'auth',
-                'endpoint' => '/api/auth/register',
-                'method' => 'POST',
-                'is_active' => true,
-                'layout_config' => [
-                    'columns' => 2,
-                    'spacing' => 'md',
-                    'theme' => 'default'
-                ],
-                'permissions' => [
-                    'public' => true,
-                    'roles' => []
-                ]
-            ],
-            [
                 'name' => 'mercurio30',
                 'title' => 'Mercurio 30',
                 'description' => 'Formulario para el modelo de datos Mercurio 30',
                 'module' => 'mercurio',
-                'endpoint' => '/api/mercurio/30',
+                'endpoint' => '/mercurio/mercurio30/guardar',
                 'method' => 'POST',
                 'is_active' => true,
                 'layout_config' => [
@@ -63,7 +45,7 @@ class FormularioDinamicoSeeder extends Seeder
                 'title' => 'Mercurio 31',
                 'description' => 'Formulario para el modelo de datos Mercurio 31',
                 'module' => 'mercurio',
-                'endpoint' => '/api/mercurio/31',
+                'endpoint' => '/mercurio/mercurio31/guardar',
                 'method' => 'POST',
                 'is_active' => true,
                 'layout_config' => [
@@ -81,7 +63,7 @@ class FormularioDinamicoSeeder extends Seeder
                 'title' => 'Mercurio 32',
                 'description' => 'Formulario para el modelo de datos Mercurio 32',
                 'module' => 'mercurio',
-                'endpoint' => '/api/mercurio/32',
+                'endpoint' => '/mercurio/mercurio32/guardar',
                 'method' => 'POST',
                 'is_active' => true,
                 'layout_config' => [
@@ -99,7 +81,7 @@ class FormularioDinamicoSeeder extends Seeder
                 'title' => 'Mercurio 34',
                 'description' => 'Formulario para el modelo de datos Mercurio 34',
                 'module' => 'mercurio',
-                'endpoint' => '/api/mercurio/34',
+                'endpoint' => '/mercurio/mercurio34/guardar',
                 'method' => 'POST',
                 'is_active' => true,
                 'layout_config' => [
@@ -117,7 +99,7 @@ class FormularioDinamicoSeeder extends Seeder
                 'title' => 'Mercurio 36',
                 'description' => 'Formulario para el modelo de datos Mercurio 36',
                 'module' => 'mercurio',
-                'endpoint' => '/api/mercurio/36',
+                'endpoint' => '/mercurio/mercurio36/guardar',
                 'method' => 'POST',
                 'is_active' => true,
                 'layout_config' => [
@@ -135,7 +117,43 @@ class FormularioDinamicoSeeder extends Seeder
                 'title' => 'Mercurio 38',
                 'description' => 'Formulario para el modelo de datos Mercurio 38',
                 'module' => 'mercurio',
-                'endpoint' => '/api/mercurio/38',
+                'endpoint' => '/mercurio/mercurio38/guardar',
+                'method' => 'POST',
+                'is_active' => true,
+                'layout_config' => [
+                    'columns' => 2,
+                    'spacing' => 'md',
+                    'theme' => 'default'
+                ],
+                'permissions' => [
+                    'public' => false,
+                    'roles' => ['admin', 'editor']
+                ]
+            ],
+            [
+                'name' => 'mercurio39',
+                'title' => 'Mercurio 39',
+                'description' => 'Formulario para el modelo de datos Mercurio 39',
+                'module' => 'mercurio',
+                'endpoint' => '/mercurio/mercurio39/guardar',
+                'method' => 'POST',
+                'is_active' => true,
+                'layout_config' => [
+                    'columns' => 2,
+                    'spacing' => 'md',
+                    'theme' => 'default'
+                ],
+                'permissions' => [
+                    'public' => false,
+                    'roles' => ['admin', 'editor']
+                ]
+            ],
+            [
+                'name' => 'mercurio40',
+                'title' => 'Mercurio 40',
+                'description' => 'Formulario para el modelo de datos Mercurio 40',
+                'module' => 'mercurio',
+                'endpoint' => '/mercurio/mercurio40/guardar',
                 'method' => 'POST',
                 'is_active' => true,
                 'layout_config' => [
@@ -153,7 +171,7 @@ class FormularioDinamicoSeeder extends Seeder
                 'title' => 'Mercurio 41',
                 'description' => 'Formulario para el modelo de datos Mercurio 41',
                 'module' => 'mercurio',
-                'endpoint' => '/api/mercurio/41',
+                'endpoint' => '/mercurio/mercurio41/guardar',
                 'method' => 'POST',
                 'is_active' => true,
                 'layout_config' => [
@@ -171,7 +189,7 @@ class FormularioDinamicoSeeder extends Seeder
                 'title' => 'Mercurio 45',
                 'description' => 'Formulario para el modelo de datos Mercurio 45',
                 'module' => 'mercurio',
-                'endpoint' => '/api/mercurio/45',
+                'endpoint' => '/mercurio/mercurio45/guardar',
                 'method' => 'POST',
                 'is_active' => true,
                 'layout_config' => [
@@ -189,7 +207,7 @@ class FormularioDinamicoSeeder extends Seeder
                 'title' => 'Mercurio 47',
                 'description' => 'Formulario para el modelo de datos Mercurio 47',
                 'module' => 'mercurio',
-                'endpoint' => '/api/mercurio/47',
+                'endpoint' => '/mercurio/mercurio47/guardar',
                 'method' => 'POST',
                 'is_active' => true,
                 'layout_config' => [
@@ -221,82 +239,5 @@ class FormularioDinamicoSeeder extends Seeder
         }
 
         $this->command->info('Formularios dinámicos creados exitosamente');
-
-        // Crear asociaciones entre formularios y componentes
-        $this->asociarComponentesFormularios();
-    }
-
-    /**
-     * Asociar componentes a formularios específicos
-     */
-    private function asociarComponentesFormularios(): void
-    {
-        // Verificar si existe la tabla de asociación
-        if (!Schema::hasTable('formulario_componentes')) {
-            $this->command->info('Tabla formulario_componentes no existe, omitiendo asociaciones');
-            return;
-        }
-
-        $asociaciones = [
-            'formulario_registro_usuario' => [
-                'nombre_completo',
-                'email',
-                'tipo_documento',
-                'numero_documento',
-                'fecha_nacimiento',
-                'telefono'
-            ],
-            'formulario_solicitud_credito' => [
-                'nombre_completo',
-                'email',
-                'tipo_documento',
-                'numero_documento',
-                'telefono',
-                'salario'
-            ],
-            'formulario_actualizacion_datos' => [
-                'nombre_completo',
-                'email',
-                'telefono',
-                'fecha_nacimiento'
-            ],
-            'formulario_contacto_soporte' => [
-                'nombre_completo',
-                'email',
-                'tipo_documento',
-                'numero_documento',
-                'comentarios'
-            ],
-            'formulario_evaluacion_servicio' => [
-                'email',
-                'comentarios'
-            ]
-        ];
-
-        foreach ($asociaciones as $formularioName => $componentes) {
-            $formulario = DB::table('formularios_dinamicos')
-                ->where('name', $formularioName)
-                ->first();
-
-            if (!$formulario) continue;
-
-            foreach ($componentes as $index => $componenteName) {
-                $componente = ComponenteDinamico::where('name', $componenteName)->first();
-
-                if ($componente) {
-                    DB::table('formulario_componentes')->insert([
-                        'formulario_id' => $formulario->id,
-                        'componente_id' => $componente->id,
-                        'order' => $index + 1,
-                        'group_id' => 1,
-                        'is_required' => in_array($componenteName, ['nombre_completo', 'email']),
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-                }
-            }
-        }
-
-        $this->command->info('Asociaciones formulario-componentes creadas exitosamente');
     }
 }

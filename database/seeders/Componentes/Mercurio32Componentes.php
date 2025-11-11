@@ -3,6 +3,7 @@
 return [
     // Campos del sistema (ocultos)
     [
+        'formulario_id' => 3,
         'name' => 'profesion',
         'type' => 'hidden',
         'label' => 'Profesión',
@@ -19,6 +20,7 @@ return [
         'validacion' => ['is_required' => false]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'fax',
         'type' => 'hidden',
         'label' => 'Fax',
@@ -34,9 +36,10 @@ return [
         'target' => -1,
         'validacion' => ['is_required' => false]
     ],
-    
+
     // Grupo 1: Datos del Trabajador
     [
+        'formulario_id' => 3,
         'name' => 'cedtra',
         'type' => 'number',
         'label' => 'Identificación del Trabajador',
@@ -54,15 +57,19 @@ return [
             'is_required' => true,
             'min_length' => 5,
             'max_length' => 20,
+            'field_size' => 20,
+            'detail_info' => 'Número de identificación del trabajador',
+            'pattern' => '^[0-9]+$',
             'error_messages' => [
                 'required' => 'La identificación del trabajador es obligatoria',
                 'min_length' => 'La identificación debe tener al menos 5 dígitos',
                 'max_length' => 'La identificación no puede exceder 20 dígitos',
-                'pattern' => 'Solo se permiten números'
+                'pattern' => 'Solo se permiten números sin puntos ni comas'
             ]
         ]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'nit',
         'type' => 'number',
         'label' => 'NIT (cuando aplica)',
@@ -80,16 +87,20 @@ return [
             'is_required' => false,
             'min_length' => 5,
             'max_length' => 20,
+            'field_size' => 20,
+            'detail_info' => 'Número de Identificación Tributaria (opcional)',
+            'pattern' => '^[0-9-]+$',
             'error_messages' => [
                 'min_length' => 'El NIT debe tener al menos 5 dígitos',
-                'max_length' => 'El NIT no puede exceder 20 dígitos',
-                'pattern' => 'Solo se permiten números'
+                'max_length' => 'El NIT no puede exceder 20 caracteres',
+                'pattern' => 'Solo se permiten números y guiones'
             ]
         ]
     ],
-    
+
     // Grupo 2: Información de la Relación
     [
+        'formulario_id' => 3,
         'name' => 'comper',
         'type' => 'select',
         'label' => '¿Es compañer@ permanente?',
@@ -109,12 +120,19 @@ return [
         'target' => -1,
         'validacion' => [
             'is_required' => true,
+            'min_length' => 1,
+            'max_length' => 1,
+            'field_size' => 1,
+            'detail_info' => 'Indica si es una unión marital de hecho',
             'error_messages' => [
-                'required' => 'Este campo es obligatorio'
+                'required' => 'Debe indicar si es compañero/a permanente',
+                'min_length' => 'Seleccione una opción válida',
+                'max_length' => 'Solo se permite un carácter (S/N)'
             ]
         ]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'tiecon',
         'type' => 'number',
         'label' => 'Tiempo de Convivencia (años)',
@@ -130,17 +148,21 @@ return [
         'target' => -1,
         'validacion' => [
             'is_required' => true,
-            'min' => 0,
-            'max' => 100,
+            'min_length' => 0,
+            'max_length' => 100,
+            'field_size' => 3,
+            'detail_info' => 'Tiempo de convivencia en años con el afiliado',
+            'pattern' => '^[0-9]+$',
             'error_messages' => [
                 'required' => 'El tiempo de convivencia es obligatorio',
-                'min' => 'El valor mínimo es 0',
-                'max' => 'El valor máximo es 100',
+                'min_length' => 'El valor mínimo es 0',
+                'max_length' => 'El valor máximo es 100',
                 'pattern' => 'Solo se permiten números enteros'
             ]
         ]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'autoriza',
         'type' => 'select',
         'label' => 'Autoriza tratamiento de datos',
@@ -165,9 +187,10 @@ return [
             ]
         ]
     ],
-    
+
     // Grupo 3: Datos Personales del Cónyuge
     [
+        'formulario_id' => 3,
         'name' => 'tipdoc',
         'type' => 'select',
         'label' => 'Tipo de Documento',
@@ -196,6 +219,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'cedcon',
         'type' => 'number',
         'label' => 'Número de Documento',
@@ -222,6 +246,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'prinom',
         'type' => 'text',
         'label' => 'Primer Nombre',
@@ -247,6 +272,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'segnom',
         'type' => 'text',
         'label' => 'Segundo Nombre',
@@ -269,6 +295,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'priape',
         'type' => 'text',
         'label' => 'Primer Apellido',
@@ -294,6 +321,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'segape',
         'type' => 'text',
         'label' => 'Segundo Apellido',
@@ -316,6 +344,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'fecnac',
         'type' => 'date',
         'label' => 'Fecha de Nacimiento',
@@ -337,6 +366,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'sexo',
         'type' => 'select',
         'label' => 'Sexo',
@@ -363,6 +393,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'estciv',
         'type' => 'select',
         'label' => 'Estado Civil',
@@ -391,9 +422,10 @@ return [
             ]
         ]
     ],
-    
+
     // Grupo 4: Información de Contacto
     [
+        'formulario_id' => 3,
         'name' => 'telefono',
         'type' => 'tel',
         'label' => 'Teléfono Fijo',
@@ -416,6 +448,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'celular',
         'type' => 'tel',
         'label' => 'Celular',
@@ -439,6 +472,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'email',
         'type' => 'email',
         'label' => 'Correo Electrónico',
@@ -459,9 +493,10 @@ return [
             ]
         ]
     ],
-    
+
     // Grupo 5: Información de Residencia
     [
+        'formulario_id' => 3,
         'name' => 'ciures',
         'type' => 'select',
         'label' => 'Ciudad de Residencia',
@@ -484,6 +519,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'codzon',
         'type' => 'select',
         'label' => 'Zona',
@@ -509,6 +545,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'tipviv',
         'type' => 'select',
         'label' => 'Tipo de Vivienda',
@@ -536,6 +573,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'direccion',
         'type' => 'text',
         'label' => 'Dirección de Residencia',
@@ -560,9 +598,10 @@ return [
             ]
         ]
     ],
-    
+
     // Grupo 6: Información Educativa y Laboral
     [
+        'formulario_id' => 3,
         'name' => 'nivedu',
         'type' => 'select',
         'label' => 'Nivel Educativo',
@@ -593,6 +632,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'captra',
         'type' => 'select',
         'label' => 'Capacidad de Trabajo',
@@ -618,6 +658,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'tipdis',
         'type' => 'select',
         'label' => 'Tipo de Discapacidad',
@@ -647,6 +688,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'codocu',
         'type' => 'select',
         'label' => 'Ocupación',
@@ -669,6 +711,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'empresalab',
         'type' => 'text',
         'label' => 'Empresa donde labora',
@@ -691,6 +734,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'fecing',
         'type' => 'date',
         'label' => 'Fecha de Inicio Laboral',
@@ -710,6 +754,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'salario',
         'type' => 'number',
         'label' => 'Ingresos Mensuales',
@@ -731,9 +776,10 @@ return [
             ]
         ]
     ],
-    
+
     // Grupo 7: Información Bancaria
     [
+        'formulario_id' => 3,
         'name' => 'tippag',
         'type' => 'select',
         'label' => 'Tipo de Pago de Subsidio',
@@ -761,6 +807,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'numcue',
         'type' => 'text',
         'label' => 'Número de Cuenta',
@@ -785,6 +832,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'codban',
         'type' => 'select',
         'label' => 'Banco',
@@ -804,9 +852,10 @@ return [
             'error_messages' => []
         ]
     ],
-    
+
     // Grupo 8: Información Adicional
     [
+        'formulario_id' => 3,
         'name' => 'peretn',
         'type' => 'select',
         'label' => 'Pertenencia Étnica',
@@ -836,6 +885,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'resguardo_id',
         'type' => 'select',
         'label' => 'Resguardo Indígena',
@@ -856,6 +906,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 3,
         'name' => 'pub_indigena_id',
         'type' => 'select',
         'label' => 'Pueblo Indígena',

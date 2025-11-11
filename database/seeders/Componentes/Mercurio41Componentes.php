@@ -3,6 +3,7 @@
 return [
     // Campos del sistema (ocultos)
     [
+        'formulario_id' => 9,
         'name' => 'calemp',
         'type' => 'hidden',
         'label' => 'Calificación Afiliado',
@@ -19,6 +20,7 @@ return [
         'validacion' => ['is_required' => false]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'coddocrepleg',
         'type' => 'hidden',
         'label' => 'Tipo Doc. Rep. Legal',
@@ -35,6 +37,7 @@ return [
         'validacion' => ['is_required' => false]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'fecsol',
         'type' => 'hidden',
         'label' => 'Fecha de Solicitud',
@@ -50,9 +53,10 @@ return [
         'target' => -1,
         'validacion' => ['is_required' => false]
     ],
-    
+
     // Grupo 1: Datos de Identificación
     [
+        'formulario_id' => 9,
         'name' => 'coddoc',
         'type' => 'select',
         'label' => 'Tipo de Documento',
@@ -74,12 +78,19 @@ return [
         'target' => -1,
         'validacion' => [
             'is_required' => true,
+            'min_length' => 2,
+            'max_length' => 5,
+            'field_size' => 5,
+            'detail_info' => 'Tipo de documento de identificación del afiliado independiente',
             'error_messages' => [
-                'required' => 'El tipo de documento es obligatorio'
+                'required' => 'El tipo de documento es obligatorio',
+                'min_length' => 'Seleccione una opción válida',
+                'max_length' => 'El valor seleccionado no es válido'
             ]
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'cedtra',
         'type' => 'number',
         'label' => 'Número de Documento',
@@ -97,6 +108,9 @@ return [
             'is_required' => true,
             'min_length' => 5,
             'max_length' => 20,
+            'field_size' => 20,
+            'detail_info' => 'Número de documento de identificación del afiliado',
+            'pattern' => '^[0-9]+$',
             'error_messages' => [
                 'required' => 'El número de documento es obligatorio',
                 'min_length' => 'El documento debe tener al menos 5 dígitos',
@@ -106,6 +120,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'prinom',
         'type' => 'text',
         'label' => 'Primer Nombre',
@@ -123,14 +138,19 @@ return [
             'is_required' => true,
             'min_length' => 2,
             'max_length' => 100,
+            'field_size' => 100,
+            'detail_info' => 'Primer nombre del afiliado independiente',
+            'pattern' => '^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\'-]+$',
             'error_messages' => [
                 'required' => 'El primer nombre es obligatorio',
                 'min_length' => 'El nombre debe tener al menos 2 caracteres',
-                'max_length' => 'El nombre no puede exceder 100 caracteres'
+                'max_length' => 'El nombre no puede exceder 100 caracteres',
+                'pattern' => 'Solo se permiten letras, espacios y guiones'
             ]
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'segnom',
         'type' => 'text',
         'label' => 'Segundo Nombre',
@@ -146,13 +166,20 @@ return [
         'target' => -1,
         'validacion' => [
             'is_required' => false,
+            'min_length' => 2,
             'max_length' => 100,
+            'field_size' => 100,
+            'detail_info' => 'Segundo nombre del afiliado independiente (opcional)',
+            'pattern' => '^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\'-]*$',
             'error_messages' => [
-                'max_length' => 'El nombre no puede exceder 100 caracteres'
+                'min_length' => 'El nombre debe tener al menos 2 caracteres',
+                'max_length' => 'El nombre no puede exceder 100 caracteres',
+                'pattern' => 'Solo se permiten letras, espacios y guiones'
             ]
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'priape',
         'type' => 'text',
         'label' => 'Primer Apellido',
@@ -178,6 +205,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'segape',
         'type' => 'text',
         'label' => 'Segundo Apellido',
@@ -200,6 +228,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'fecnac',
         'type' => 'date',
         'label' => 'Fecha de Nacimiento',
@@ -221,6 +250,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'sexo',
         'type' => 'select',
         'label' => 'Sexo',
@@ -247,6 +277,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'orisex',
         'type' => 'select',
         'label' => 'Orientación Sexual',
@@ -275,6 +306,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'estciv',
         'type' => 'select',
         'label' => 'Estado Civil',
@@ -304,6 +336,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'cabhog',
         'type' => 'select',
         'label' => '¿Es cabeza de hogar?',
@@ -328,9 +361,10 @@ return [
             ]
         ]
     ],
-    
+
     // Grupo 2: Información de Ubicación
     [
+        'formulario_id' => 9,
         'name' => 'codciu',
         'type' => 'select',
         'label' => 'Ciudad de Residencia',
@@ -353,6 +387,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'direccion',
         'type' => 'textarea',
         'label' => 'Dirección de Residencia',
@@ -378,6 +413,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'dirlab',
         'type' => 'textarea',
         'label' => 'Dirección Laboral',
@@ -400,6 +436,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'codzon',
         'type' => 'select',
         'label' => 'Zona de Trabajo',
@@ -425,6 +462,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'rural',
         'type' => 'select',
         'label' => 'Residencia Rural',
@@ -450,6 +488,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'ruralt',
         'type' => 'select',
         'label' => 'Trabajo Rural',
@@ -474,9 +513,10 @@ return [
             ]
         ]
     ],
-    
+
     // Grupo 3: Información Laboral
     [
+        'formulario_id' => 9,
         'name' => 'codact',
         'type' => 'select',
         'label' => 'Actividad Económica (CIUU)',
@@ -499,6 +539,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'cargo',
         'type' => 'select',
         'label' => 'Ocupación o Cargo',
@@ -521,6 +562,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'fecini',
         'type' => 'date',
         'label' => 'Fecha de Inicio',
@@ -542,6 +584,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'salario',
         'type' => 'number',
         'label' => 'Ingresos Mensuales',
@@ -557,14 +600,17 @@ return [
         'target' => -1,
         'validacion' => [
             'is_required' => true,
-            'min' => 0,
+            'min_length' => 0,
+            'field_size' => 12,
+            'detail_info' => 'Ingresos mensuales del trabajador independiente',
             'error_messages' => [
                 'required' => 'Los ingresos mensuales son obligatorios',
-                'min' => 'El valor no puede ser negativo'
+                'min_length' => 'El valor no puede ser negativo'
             ]
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'tipsal',
         'type' => 'select',
         'label' => 'Tipo de Ingresos',
@@ -591,6 +637,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'codcaj',
         'type' => 'select',
         'label' => 'Caja de Compensación Anterior',
@@ -610,9 +657,10 @@ return [
             'error_messages' => []
         ]
     ],
-    
+
     // Grupo 4: Información de Salud y Educación
     [
+        'formulario_id' => 9,
         'name' => 'captra',
         'type' => 'select',
         'label' => 'Capacidad de Trabajo',
@@ -638,6 +686,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'tipdis',
         'type' => 'select',
         'label' => 'Tipo de Discapacidad',
@@ -667,6 +716,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'nivedu',
         'type' => 'select',
         'label' => 'Nivel Educativo',
@@ -697,6 +747,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'vivienda',
         'type' => 'select',
         'label' => 'Tipo de Vivienda',
@@ -724,6 +775,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'facvul',
         'type' => 'select',
         'label' => 'Factor de Vulnerabilidad',
@@ -752,9 +804,10 @@ return [
             ]
         ]
     ],
-    
+
     // Grupo 5: Información de Afiliación y Contacto
     [
+        'formulario_id' => 9,
         'name' => 'tipafi',
         'type' => 'select',
         'label' => 'Tipo de Afiliado',
@@ -779,6 +832,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'peretn',
         'type' => 'select',
         'label' => 'Pertenencia Étnica',
@@ -808,6 +862,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'resguardo_id',
         'type' => 'select',
         'label' => 'Resguardo Indígena',
@@ -828,6 +883,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'pub_indigena_id',
         'type' => 'select',
         'label' => 'Pueblo Indígena',
@@ -848,6 +904,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'email',
         'type' => 'email',
         'label' => 'Correo Electrónico',
@@ -870,6 +927,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'telefono',
         'type' => 'tel',
         'label' => 'Teléfono Fijo',
@@ -892,6 +950,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'celular',
         'type' => 'tel',
         'label' => 'Celular',
@@ -914,9 +973,10 @@ return [
             ]
         ]
     ],
-    
+
     // Grupo 6: Información Bancaria
     [
+        'formulario_id' => 9,
         'name' => 'tippag',
         'type' => 'select',
         'label' => 'Tipo de Pago de Subsidio',
@@ -944,6 +1004,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'numcue',
         'type' => 'text',
         'label' => 'Número de Cuenta',
@@ -968,6 +1029,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'tipcue',
         'type' => 'select',
         'label' => 'Tipo de Cuenta',
@@ -991,6 +1053,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'codban',
         'type' => 'select',
         'label' => 'Banco',
@@ -1011,6 +1074,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 9,
         'name' => 'autoriza',
         'type' => 'select',
         'label' => 'Autoriza Tratamiento de Datos',

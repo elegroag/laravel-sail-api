@@ -3,6 +3,7 @@
 return [
     // Campos del sistema (ocultos)
     [
+        'formulario_id' => 4,
         'name' => 'profesion',
         'type' => 'hidden',
         'label' => 'Profesión',
@@ -19,6 +20,7 @@ return [
         'validacion' => ['is_required' => false]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'fax',
         'type' => 'hidden',
         'label' => 'Fax',
@@ -37,6 +39,7 @@ return [
 
     // Grupo 1: Datos de la Empresa
     [
+        'formulario_id' => 4,
         'name' => 'nit',
         'type' => 'number',
         'label' => 'NIT Empresa/Empleador',
@@ -54,17 +57,21 @@ return [
             'is_required' => true,
             'min_length' => 5,
             'max_length' => 20,
+            'field_size' => 20,
+            'detail_info' => 'Número de Identificación Tributaria de la empresa o empleador',
+            'pattern' => '^[0-9-]+$',
             'error_messages' => [
                 'required' => 'El NIT es obligatorio',
                 'min_length' => 'El NIT debe tener al menos 5 dígitos',
-                'max_length' => 'El NIT no puede exceder 20 dígitos',
-                'pattern' => 'Solo se permiten números'
+                'max_length' => 'El NIT no puede exceder 20 caracteres',
+                'pattern' => 'Solo se permiten números y guiones'
             ]
         ]
     ],
 
     // Grupo 2: Relación con el Trabajador
     [
+        'formulario_id' => 4,
         'name' => 'cedtra',
         'type' => 'number',
         'label' => 'Identificación del Trabajador',
@@ -82,15 +89,19 @@ return [
             'is_required' => true,
             'min_length' => 5,
             'max_length' => 20,
+            'field_size' => 20,
+            'detail_info' => 'Documento de identidad del trabajador titular',
+            'pattern' => '^[0-9]+$',
             'error_messages' => [
                 'required' => 'La identificación del trabajador es obligatoria',
                 'min_length' => 'La identificación debe tener al menos 5 dígitos',
                 'max_length' => 'La identificación no puede exceder 20 dígitos',
-                'pattern' => 'Solo se permiten números'
+                'pattern' => 'Solo se permiten números sin puntos ni comas'
             ]
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'parent',
         'type' => 'select',
         'label' => 'Parentesco con el Trabajador',
@@ -116,14 +127,21 @@ return [
         'target' => -1,
         'validacion' => [
             'is_required' => true,
+            'min_length' => 2,
+            'max_length' => 20,
+            'field_size' => 20,
+            'detail_info' => 'Relación de parentesco con el trabajador titular',
             'error_messages' => [
-                'required' => 'El parentesco es obligatorio'
+                'required' => 'El parentesco es obligatorio',
+                'min_length' => 'Seleccione una opción válida',
+                'max_length' => 'El valor seleccionado no es válido'
             ]
         ]
     ],
 
     // Grupo 3: Datos del Beneficiario
     [
+        'formulario_id' => 4,
         'name' => 'tipdoc',
         'type' => 'select',
         'label' => 'Tipo de Documento',
@@ -146,12 +164,19 @@ return [
         'target' => -1,
         'validacion' => [
             'is_required' => true,
+            'min_length' => 2,
+            'max_length' => 2,
+            'field_size' => 2,
+            'detail_info' => 'Tipo de documento de identificación del beneficiario',
             'error_messages' => [
-                'required' => 'El tipo de documento es obligatorio'
+                'required' => 'El tipo de documento es obligatorio',
+                'min_length' => 'Seleccione una opción válida',
+                'max_length' => 'El código del documento debe tener 2 caracteres'
             ]
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'numdoc',
         'type' => 'number',
         'label' => 'Número de Documento',
@@ -169,15 +194,19 @@ return [
             'is_required' => true,
             'min_length' => 5,
             'max_length' => 20,
+            'field_size' => 20,
+            'detail_info' => 'Número de documento de identificación del beneficiario',
+            'pattern' => '^[0-9]+$',
             'error_messages' => [
                 'required' => 'El número de documento es obligatorio',
                 'min_length' => 'El documento debe tener al menos 5 dígitos',
                 'max_length' => 'El documento no puede exceder 20 dígitos',
-                'pattern' => 'Solo se permiten números'
+                'pattern' => 'Solo se permiten números sin puntos ni comas'
             ]
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'prinom',
         'type' => 'text',
         'label' => 'Primer Nombre',
@@ -195,14 +224,19 @@ return [
             'is_required' => true,
             'min_length' => 2,
             'max_length' => 100,
+            'field_size' => 100,
+            'detail_info' => 'Primer nombre del beneficiario',
+            'pattern' => '^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\'-]+$',
             'error_messages' => [
                 'required' => 'El primer nombre es obligatorio',
                 'min_length' => 'El nombre debe tener al menos 2 caracteres',
-                'max_length' => 'El nombre no puede exceder 100 caracteres'
+                'max_length' => 'El nombre no puede exceder 100 caracteres',
+                'pattern' => 'Solo se permiten letras, espacios y guiones'
             ]
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'segnom',
         'type' => 'text',
         'label' => 'Segundo Nombre',
@@ -225,6 +259,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'priape',
         'type' => 'text',
         'label' => 'Primer Apellido',
@@ -250,6 +285,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'segape',
         'type' => 'text',
         'label' => 'Segundo Apellido',
@@ -272,6 +308,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'fecnac',
         'type' => 'date',
         'label' => 'Fecha de Nacimiento',
@@ -293,6 +330,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'sexo',
         'type' => 'select',
         'label' => 'Sexo',
@@ -321,6 +359,7 @@ return [
 
     // Grupo 4: Información de Contacto
     [
+        'formulario_id' => 4,
         'name' => 'telefono',
         'type' => 'tel',
         'label' => 'Teléfono Fijo',
@@ -343,6 +382,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'celular',
         'type' => 'tel',
         'label' => 'Celular',
@@ -366,6 +406,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'email',
         'type' => 'email',
         'label' => 'Correo Electrónico',
@@ -389,6 +430,7 @@ return [
 
     // Grupo 5: Información de Residencia
     [
+        'formulario_id' => 4,
         'name' => 'codciu',
         'type' => 'select',
         'label' => 'Ciudad de Residencia',
@@ -411,6 +453,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'direccion',
         'type' => 'textarea',
         'label' => 'Dirección de Residencia',
@@ -438,6 +481,7 @@ return [
 
     // Grupo 6: Información Bancaria
     [
+        'formulario_id' => 4,
         'name' => 'tippag',
         'type' => 'select',
         'label' => 'Tipo de Medio de Pago',
@@ -465,6 +509,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'numcue',
         'type' => 'text',
         'label' => 'Número de Cuenta/Daviplata',
@@ -490,6 +535,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'tipcue',
         'type' => 'select',
         'label' => 'Tipo de Cuenta',
@@ -513,6 +559,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'codban',
         'type' => 'select',
         'label' => 'Banco',
@@ -535,6 +582,7 @@ return [
 
     // Grupo 7: Información de los Padres Biológicos
     [
+        'formulario_id' => 4,
         'name' => 'biodesco',
         'type' => 'select',
         'label' => '¿Desconoce ubicación del padre/madre biológico?',
@@ -560,6 +608,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'biocedu',
         'type' => 'number',
         'label' => 'Cédula Padre/Madre Biológico',
@@ -585,6 +634,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'biotipdoc',
         'type' => 'select',
         'label' => 'Tipo Documento Padre/Madre',
@@ -611,6 +661,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'bioprinom',
         'type' => 'text',
         'label' => 'Primer Nombre',
@@ -633,6 +684,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'biosegnom',
         'type' => 'text',
         'label' => 'Segundo Nombre',
@@ -655,6 +707,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'biopriape',
         'type' => 'text',
         'label' => 'Primer Apellido',
@@ -677,6 +730,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'biosegape',
         'type' => 'text',
         'label' => 'Segundo Apellido',
@@ -699,6 +753,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'bioemail',
         'type' => 'email',
         'label' => 'Correo Electrónico',
@@ -720,6 +775,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'biophone',
         'type' => 'tel',
         'label' => 'Teléfono',
@@ -742,6 +798,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'biocodciu',
         'type' => 'select',
         'label' => 'Ciudad de Residencia',
@@ -762,6 +819,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'biodire',
         'type' => 'text',
         'label' => 'Dirección de Residencia',
@@ -784,6 +842,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'biourbana',
         'type' => 'select',
         'label' => 'Zona de Residencia',
@@ -809,6 +868,7 @@ return [
 
     // Grupo 8: Información Adicional
     [
+        'formulario_id' => 4,
         'name' => 'huerfano',
         'type' => 'select',
         'label' => '¿Es huérfano?',
@@ -834,6 +894,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'tiphij',
         'type' => 'select',
         'label' => 'Tipo de Hijo',
@@ -859,6 +920,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'peretn',
         'type' => 'select',
         'label' => 'Pertenencia Étnica',
@@ -886,6 +948,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'resguardo_id',
         'type' => 'select',
         'label' => 'Resguardo Indígena',
@@ -906,6 +969,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'pub_indigena_id',
         'type' => 'select',
         'label' => 'Pueblo Indígena',
@@ -926,6 +990,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'convive',
         'type' => 'select',
         'label' => '¿Con quién convive?',
@@ -952,6 +1017,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'cedacu',
         'type' => 'number',
         'label' => 'Identificación del Acudiente',
@@ -977,6 +1043,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 4,
         'name' => 'cedcon',
         'type' => 'number',
         'label' => 'Identificación del Padre/Madre Acudiente',

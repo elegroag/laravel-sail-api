@@ -60,7 +60,6 @@ class ComponenteDinamicoSeeder extends Seeder
         foreach ($componentes as $componenteData) {
             $validacion = $componenteData['validacion'] ?? null;
             unset($componenteData['validacion']);
-
             $componente = ComponenteDinamico::create($componenteData);
 
             if ($validacion) {

@@ -22,46 +22,10 @@ class ComponenteValidacionSeeder extends Seeder
             if ($componente->validacion) {
                 continue;
             }
-
             // Crear validaciones por defecto basadas en el tipo
             $validacionData = $this->getValidacionPorTipo($componente->type);
-
             if ($validacionData) {
                 $componente->validacion()->create($validacionData);
-            }
-        }
-
-        // Crear validaciones adicionales de ejemplo
-        $validacionesAdicionales = [
-            [
-                'componente_id' => 1, // Asumiendo que existe el componente con ID 1
-                'pattern' => '/^[A-Z][a-z]+\s[A-Z][a-z]+$/',
-                'max_length' => 50,
-                'is_required' => true,
-                'custom_rules' => [
-                    'capitalized' => true
-                ],
-                'error_messages' => [
-                    'pattern' => 'El nombre debe empezar con mayúscula y tener nombre y apellido',
-                    'max_length' => 'El nombre no puede exceder 50 caracteres',
-                    'required' => 'El nombre es obligatorio'
-                ]
-            ],
-            [
-                'componente_id' => 2, // Email
-                'pattern' => '/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
-                'is_required' => true,
-                'error_messages' => [
-                    'pattern' => 'Formato de email inválido',
-                    'required' => 'El email es obligatorio'
-                ]
-            ]
-        ];
-
-        foreach ($validacionesAdicionales as $validacion) {
-            // Solo crear si el componente existe
-            if (ComponenteDinamico::find($validacion['componente_id'])) {
-                ComponenteValidacion::create($validacion);
             }
         }
     }

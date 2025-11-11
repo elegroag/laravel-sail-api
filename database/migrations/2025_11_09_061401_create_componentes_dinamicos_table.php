@@ -15,7 +15,7 @@ return new class extends Migration
             $table->engine = 'InnoDB';
 
             $table->id();
-            $table->string('name', 255)->unique();
+            $table->string('name', 255);
             $table->enum('type', ['input', 'select', 'textarea', 'dialog', 'date', 'number'])->default('input');
             $table->string('label', 255);
             $table->string('placeholder', 255)->nullable();

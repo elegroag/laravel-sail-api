@@ -3,6 +3,7 @@
 return [
     // Campo oculto del sistema
     [
+        'formulario_id' => 2,
         'name' => 'profesion',
         'type' => 'hidden',
         'label' => 'Profesión',
@@ -20,9 +21,10 @@ return [
             'is_required' => false
         ]
     ],
-    
+
     // Grupo 1: Datos Básicos del Trabajador
     [
+        'formulario_id' => 2,
         'name' => 'tipdoc',
         'type' => 'select',
         'label' => 'Tipo de Documento',
@@ -45,12 +47,19 @@ return [
         'target' => -1,
         'validacion' => [
             'is_required' => true,
+            'min_length' => 1,
+            'max_length' => 2,
+            'field_size' => 2,
+            'detail_info' => 'Tipo de documento de identidad del trabajador',
             'error_messages' => [
-                'required' => 'El tipo de documento es obligatorio'
+                'required' => 'El tipo de documento es obligatorio',
+                'min_length' => 'Seleccione un tipo de documento válido',
+                'max_length' => 'El tipo de documento no puede tener más de 2 caracteres'
             ]
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'cedtra',
         'type' => 'number',
         'label' => 'Número de Documento',
@@ -68,15 +77,19 @@ return [
             'is_required' => true,
             'min_length' => 5,
             'max_length' => 20,
+            'field_size' => 20,
+            'detail_info' => 'Número de documento de identidad del trabajador',
+            'pattern' => '^[0-9]+$',
             'error_messages' => [
                 'required' => 'El número de documento es obligatorio',
                 'min_length' => 'El documento debe tener al menos 5 dígitos',
                 'max_length' => 'El documento no puede exceder 20 dígitos',
-                'pattern' => 'Solo se permiten números'
+                'pattern' => 'Solo se permiten números sin puntos ni comas'
             ]
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'priape',
         'type' => 'text',
         'label' => 'Primer Apellido',
@@ -94,14 +107,19 @@ return [
             'is_required' => true,
             'min_length' => 2,
             'max_length' => 100,
+            'field_size' => 100,
+            'detail_info' => 'Primer apellido del trabajador',
+            'pattern' => '^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\'-]+$',
             'error_messages' => [
                 'required' => 'El primer apellido es obligatorio',
                 'min_length' => 'El apellido debe tener al menos 2 caracteres',
-                'max_length' => 'El apellido no puede exceder 100 caracteres'
+                'max_length' => 'El apellido no puede exceder 100 caracteres',
+                'pattern' => 'Solo se permiten letras, espacios y guiones'
             ]
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'segape',
         'type' => 'text',
         'label' => 'Segundo Apellido',
@@ -117,13 +135,20 @@ return [
         'target' => -1,
         'validacion' => [
             'is_required' => false,
+            'min_length' => 2,
             'max_length' => 100,
+            'field_size' => 100,
+            'detail_info' => 'Segundo apellido del trabajador (opcional)',
+            'pattern' => '^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\'-]*$',
             'error_messages' => [
-                'max_length' => 'El apellido no puede exceder 100 caracteres'
+                'min_length' => 'El apellido debe tener al menos 2 caracteres',
+                'max_length' => 'El apellido no puede exceder 100 caracteres',
+                'pattern' => 'Solo se permiten letras, espacios y guiones'
             ]
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'prinom',
         'type' => 'text',
         'label' => 'Primer Nombre',
@@ -141,14 +166,19 @@ return [
             'is_required' => true,
             'min_length' => 2,
             'max_length' => 100,
+            'field_size' => 100,
+            'detail_info' => 'Primer nombre del trabajador',
+            'pattern' => '^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\'-]+$',
             'error_messages' => [
                 'required' => 'El primer nombre es obligatorio',
                 'min_length' => 'El nombre debe tener al menos 2 caracteres',
-                'max_length' => 'El nombre no puede exceder 100 caracteres'
+                'max_length' => 'El nombre no puede exceder 100 caracteres',
+                'pattern' => 'Solo se permiten letras, espacios y guiones'
             ]
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'segnom',
         'type' => 'text',
         'label' => 'Segundo Nombre',
@@ -164,13 +194,20 @@ return [
         'target' => -1,
         'validacion' => [
             'is_required' => false,
+            'min_length' => 2,
             'max_length' => 100,
+            'field_size' => 100,
+            'detail_info' => 'Segundo nombre del trabajador (opcional)',
+            'pattern' => '^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\'-]*$',
             'error_messages' => [
-                'max_length' => 'El nombre no puede exceder 100 caracteres'
+                'min_length' => 'El nombre debe tener al menos 2 caracteres',
+                'max_length' => 'El nombre no puede exceder 100 caracteres',
+                'pattern' => 'Solo se permiten letras, espacios y guiones'
             ]
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'sexo',
         'type' => 'select',
         'label' => 'Sexo',
@@ -197,6 +234,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'fecnac',
         'type' => 'date',
         'label' => 'Fecha de Nacimiento',
@@ -218,6 +256,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'ciunac',
         'type' => 'select',
         'label' => 'Ciudad de Nacimiento',
@@ -240,6 +279,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'estciv',
         'type' => 'select',
         'label' => 'Estado Civil',
@@ -271,6 +311,7 @@ return [
 
     // Grupo 2: Datos Laborales
     [
+        'formulario_id' => 2,
         'name' => 'fecing',
         'type' => 'date',
         'label' => 'Fecha de Ingreso',
@@ -292,6 +333,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'cargo',
         'type' => 'select',
         'label' => 'Cargo',
@@ -314,6 +356,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'salario',
         'type' => 'number',
         'label' => 'Salario',
@@ -337,6 +380,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'tipsal',
         'type' => 'select',
         'label' => 'Tipo de Salario',
@@ -363,6 +407,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'horas',
         'type' => 'number',
         'label' => 'Horas Mensuales',
@@ -388,6 +433,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'tipcon',
         'type' => 'select',
         'label' => 'Tipo de Contrato',
@@ -416,6 +462,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'tipjor',
         'type' => 'select',
         'label' => 'Tipo de Jornada',
@@ -444,6 +491,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'comision',
         'type' => 'select',
         'label' => 'Recibe Comisión',
@@ -469,6 +517,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'labora_otra_empresa',
         'type' => 'select',
         'label' => 'Labora en Otra Empresa',
@@ -494,6 +543,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'otra_empresa',
         'type' => 'text',
         'label' => 'Empresa donde también labora',
@@ -518,6 +568,7 @@ return [
 
     // Grupo 3: Información de Contacto
     [
+        'formulario_id' => 2,
         'name' => 'telefono',
         'type' => 'tel',
         'label' => 'Teléfono',
@@ -541,6 +592,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'celular',
         'type' => 'tel',
         'label' => 'Celular',
@@ -564,6 +616,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'email',
         'type' => 'email',
         'label' => 'Correo Electrónico',
@@ -586,6 +639,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'direccion',
         'type' => 'textarea',
         'label' => 'Dirección de Residencia',
@@ -611,6 +665,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'codciu',
         'type' => 'select',
         'label' => 'Ciudad de Residencia',
@@ -633,6 +688,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'barrio',
         'type' => 'text',
         'label' => 'Barrio',
@@ -658,6 +714,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'rural',
         'type' => 'select',
         'label' => 'Residencia Rural',
@@ -683,6 +740,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'vivienda',
         'type' => 'select',
         'label' => 'Tipo de Vivienda',
@@ -712,6 +770,7 @@ return [
 
     // Grupo 4: Información Adicional
     [
+        'formulario_id' => 2,
         'name' => 'orisex',
         'type' => 'select',
         'label' => 'Orientación Sexual',
@@ -738,6 +797,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'facvul',
         'type' => 'select',
         'label' => 'Factor de Vulnerabilidad',
@@ -766,6 +826,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'tipafi',
         'type' => 'select',
         'label' => 'Tipo de Afiliado',
@@ -791,6 +852,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 2,
         'name' => 'autoriza',
         'type' => 'select',
         'label' => 'Autorización de Tratamiento de Datos',

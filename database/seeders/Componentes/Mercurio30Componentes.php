@@ -4,6 +4,7 @@ namespace Database\Seeders\Componentes;
 
 return [
     [
+        'formulario_id' => 1,
         'name' => 'tipper',
         'type' => 'select',
         'label' => 'Tipo de Persona',
@@ -23,12 +24,17 @@ return [
         'target' => -1,
         'validacion' => [
             'is_required' => true,
+            'min_length' => 1,
+            'max_length' => 1,
             'error_messages' => [
-                'required' => 'El tipo de persona es obligatorio'
+                'required' => 'El tipo de persona es obligatorio',
+                'min_length' => 'Debe seleccionar una opción',
+                'max_length' => 'Solo se permite una opción'
             ]
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'nit',
         'type' => 'number',
         'label' => 'NIT o Documento',
@@ -46,6 +52,8 @@ return [
             'is_required' => true,
             'min_length' => 5,
             'max_length' => 20,
+            'field_size' => 20, // Tamaño máximo del campo en la base de datos
+            'detail_info' => 'Campo para NIT o documento de identidad',
             'error_messages' => [
                 'required' => 'El NIT o documento es obligatorio',
                 'min_length' => 'El NIT o documento debe tener al menos 5 caracteres',
@@ -54,6 +62,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'razsoc',
         'type' => 'text',
         'label' => 'Razón Social',
@@ -71,6 +80,8 @@ return [
             'is_required' => true,
             'min_length' => 3,
             'max_length' => 255,
+            'field_size' => 255, // Tamaño máximo en la base de datos
+            'detail_info' => 'Nombre completo o razón social del cliente',
             'error_messages' => [
                 'required' => 'La razón social es obligatoria',
                 'min_length' => 'La razón social debe tener al menos 3 caracteres',
@@ -79,6 +90,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'digver',
         'type' => 'number',
         'label' => 'Dígito de Verificación',
@@ -95,14 +107,18 @@ return [
         'validacion' => [
             'is_required' => false,
             'min_length' => 1,
-            'max_length' => 2,
+            'max_length' => 1,
+            'field_size' => 2, // Espacio para el dígito y un posible signo
+            'detail_info' => 'Dígito de verificación del NIT',
             'error_messages' => [
-                'min_length' => 'El dígito de verificación debe tener al menos 1 dígito',
-                'max_length' => 'El dígito de verificación no puede exceder 2 dígitos'
+                'min_length' => 'El dígito de verificación debe tener 1 carácter',
+                'max_length' => 'El dígito de verificación no puede tener más de 1 carácter',
+                'numeric' => 'El dígito de verificación debe ser un número'
             ]
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'dirpri',
         'type' => 'textarea',
         'label' => 'Dirección Comercial',
@@ -128,6 +144,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'ciupri',
         'type' => 'select',
         'label' => 'Ciudad Comercial',
@@ -156,6 +173,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'telpri',
         'type' => 'tel',
         'label' => 'Teléfono Comercial',
@@ -183,6 +201,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'emailpri',
         'type' => 'email',
         'label' => 'Correo Electrónico Comercial',
@@ -209,6 +228,7 @@ return [
     ],
     // Campos adicionales para el formulario Mercurio30
     [
+        'formulario_id' => 1,
         'name' => 'coddoc',
         'type' => 'select',
         'label' => 'Tipo de Documento',
@@ -236,6 +256,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'sigla',
         'type' => 'text',
         'label' => 'Sigla',
@@ -257,6 +278,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'matmer',
         'type' => 'text',
         'label' => 'Matrícula Mercantil',
@@ -278,6 +300,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'tipsoc',
         'type' => 'select',
         'label' => 'Tipo de Sociedad',
@@ -304,6 +327,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'tipemp',
         'type' => 'select',
         'label' => 'Tipo de Empresa',
@@ -329,6 +353,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'codzon',
         'type' => 'select',
         'label' => 'Zona de Trabajo',
@@ -354,6 +379,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'codact',
         'type' => 'select',
         'label' => 'Actividad Económica',
@@ -382,6 +408,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'fecini',
         'type' => 'date',
         'label' => 'Fecha de Inicio de Actividades',
@@ -404,6 +431,7 @@ return [
     ],
     // Campos adicionales para el formulario Mercurio30 - Continuación
     [
+        'formulario_id' => 1,
         'name' => 'tottra',
         'type' => 'number',
         'label' => 'Total de Trabajadores',
@@ -427,6 +455,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'valnom',
         'type' => 'number',
         'label' => 'Valor Nómina',
@@ -450,6 +479,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'codcaj',
         'type' => 'select',
         'label' => 'Caja de Compensación Anterior',
@@ -476,6 +506,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'celpri',
         'type' => 'tel',
         'label' => 'Celular Comercial',
@@ -503,6 +534,7 @@ return [
     ],
     // Sección de Notificaciones
     [
+        'formulario_id' => 1,
         'name' => 'codciu',
         'type' => 'select',
         'label' => 'Ciudad de Notificación',
@@ -531,6 +563,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'direccion',
         'type' => 'textarea',
         'label' => 'Dirección de Notificación',
@@ -556,6 +589,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'telefono',
         'type' => 'tel',
         'label' => 'Teléfono de Notificación',
@@ -583,6 +617,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'email',
         'type' => 'email',
         'label' => 'Correo Electrónico de Notificación',
@@ -608,6 +643,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'fax',
         'type' => 'tel',
         'label' => 'Fax de Notificación',
@@ -632,6 +668,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'celular',
         'type' => 'tel',
         'label' => 'Celular de Notificación',
@@ -659,6 +696,7 @@ return [
     ],
     // Sección de Representante Legal
     [
+        'formulario_id' => 1,
         'name' => 'cedrep',
         'type' => 'number',
         'label' => 'Documento del Representante Legal',
@@ -684,6 +722,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'repleg',
         'type' => 'text',
         'label' => 'Nombre Completo del Representante Legal',
@@ -710,6 +749,7 @@ return [
     ],
     // Campos para persona natural (cuando el empleador es persona natural)
     [
+        'formulario_id' => 1,
         'name' => 'priape',
         'type' => 'text',
         'label' => 'Primer Apellido',
@@ -732,6 +772,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'segape',
         'type' => 'text',
         'label' => 'Segundo Apellido',
@@ -754,6 +795,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'prinom',
         'type' => 'text',
         'label' => 'Primer Nombre',
@@ -776,6 +818,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'segnom',
         'type' => 'text',
         'label' => 'Segundo Nombre',
@@ -799,6 +842,7 @@ return [
     ],
     // Autorización de tratamiento de datos
     [
+        'formulario_id' => 1,
         'name' => 'autoriza',
         'type' => 'select',
         'label' => 'Autorización de Tratamiento de Datos',
@@ -825,6 +869,7 @@ return [
     ],
     // Datos detallados del representante legal
     [
+        'formulario_id' => 1,
         'name' => 'priaperepleg',
         'type' => 'text',
         'label' => 'Primer Apellido Representante Legal',
@@ -850,6 +895,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'segaperepleg',
         'type' => 'text',
         'label' => 'Segundo Apellido Representante Legal',
@@ -872,6 +918,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'prinomrepleg',
         'type' => 'text',
         'label' => 'Primer Nombre Representante Legal',
@@ -897,6 +944,7 @@ return [
         ]
     ],
     [
+        'formulario_id' => 1,
         'name' => 'segnomrepleg',
         'type' => 'text',
         'label' => 'Segundo Nombre Representante Legal',
@@ -921,6 +969,7 @@ return [
 
     // Campos del sistema (ocultos/proceso)
     [
+        'formulario_id' => 1,
         'name' => 'fecsol',
         'type' => 'date',
         'label' => 'Fecha de Solicitud',
