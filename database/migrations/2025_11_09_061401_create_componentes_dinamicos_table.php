@@ -38,6 +38,7 @@ return new class extends Migration
             $table->unsignedBigInteger('formulario_id');
             $table->timestamps();
 
+            $table->unique(['name', 'formulario_id']);
             $table->index('name');
             $table->index('formulario_id');
             $table->index(['group_id', 'order']);

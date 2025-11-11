@@ -372,10 +372,16 @@ return [
         'target' => -1,
         'validacion' => [
             'is_required' => true,
-            'min_value' => 0,
+            'min_length' => 0,
+            'max_length' => 999999999,
+            'field_size' => 12,
+            'detail_info' => 'Salario mensual del trabajador',
+            'numeric_range' => '0-999999999',
             'error_messages' => [
                 'required' => 'El salario es obligatorio',
-                'min_value' => 'El salario no puede ser negativo'
+                'min_length' => 'El salario no puede ser negativo',
+                'max_length' => 'El valor no puede exceder $999,999,999',
+                'pattern' => 'Debe ser un valor numérico válido'
             ]
         ]
     ],
@@ -423,12 +429,18 @@ return [
         'target' => -1,
         'validacion' => [
             'is_required' => true,
-            'min_value' => 1,
-            'max_value' => 240,
+            'min_length' => 1,
+            'max_length' => 3,
+            'field_size' => 3,
+            'detail_info' => 'Número de horas mensuales laboradas (1-240)',
+            'pattern' => '^[0-9]+$',
+            'numeric_range' => '1-240',
             'error_messages' => [
                 'required' => 'Las horas mensuales son obligatorias',
-                'min_value' => 'Las horas no pueden ser menores a 1',
-                'max_value' => 'Las horas no pueden exceder 240 al mes'
+                'min_length' => 'Las horas no pueden ser menores a 1',
+                'max_length' => 'Máximo 3 dígitos permitidos',
+                'pattern' => 'Solo se permiten números enteros',
+                'numeric_range' => 'El valor debe estar entre 1 y 240 horas'
             ]
         ]
     ],

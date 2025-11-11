@@ -541,15 +541,15 @@ return [
         'target' => -1,
         'validacion' => [
             'is_required' => true,
-            'min' => 0,
-            'max' => 999999999,
+            'min_length' => 0,
+            'max_length' => 999999999,
             'field_size' => 12,
             'detail_info' => 'Salario mensual del afiliado',
             'numeric_range' => '0-999999999',
             'error_messages' => [
                 'required' => 'El salario es obligatorio',
-                'min' => 'El valor no puede ser negativo',
-                'max' => 'El valor no puede exceder $999,999,999',
+                'min_length' => 'El valor no puede ser negativo',
+                'max_length' => 'El valor no puede exceder $999,999,999',
                 'numeric' => 'Debe ser un valor numérico válido'
             ]
         ]

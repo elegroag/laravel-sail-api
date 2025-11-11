@@ -603,10 +603,10 @@ return [
         'target' => -1,
         'validacion' => [
             'is_required' => true,
-            'min' => 0,
+            'min_length' => 0,
             'error_messages' => [
                 'required' => 'Los ingresos mensuales son obligatorios',
-                'min' => 'El valor no puede ser negativo'
+                'min_length' => 'El valor no puede ser negativo'
             ]
         ]
     ],

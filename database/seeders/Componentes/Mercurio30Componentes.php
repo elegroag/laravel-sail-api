@@ -447,10 +447,18 @@ return [
         'target' => -1,
         'validacion' => [
             'is_required' => true,
-            'min_value' => 0,
+            'min_length' => 0,
+            'max_length' => 6,
+            'field_size' => 6,
+            'detail_info' => 'Número total de trabajadores en la empresa',
+            'pattern' => '^[0-9]+$',
+            'numeric_range' => '0-999999',
             'error_messages' => [
                 'required' => 'El total de trabajadores es obligatorio',
-                'min_value' => 'El valor no puede ser negativo'
+                'min_length' => 'El valor no puede ser negativo',
+                'max_length' => 'El valor no puede exceder 6 dígitos',
+                'pattern' => 'Solo se permiten números enteros',
+                'numeric_range' => 'El valor debe ser un número entre 0 y 999,999'
             ]
         ]
     ],
@@ -471,10 +479,18 @@ return [
         'target' => -1,
         'validacion' => [
             'is_required' => true,
-            'min_value' => 0,
+            'min_length' => 0,
+            'max_length' => 15,
+            'field_size' => 15,
+            'detail_info' => 'Valor total de la nómina de la empresa',
+            'pattern' => '^[0-9]+$',
+            'numeric_range' => '0-999999999999999',
             'error_messages' => [
                 'required' => 'El valor de la nómina es obligatorio',
-                'min_value' => 'El valor no puede ser negativo'
+                'min_length' => 'El valor no puede ser negativo',
+                'max_length' => 'El valor no puede exceder 15 dígitos',
+                'pattern' => 'Solo se permiten números enteros',
+                'numeric_range' => 'El valor debe ser un número positivo'
             ]
         ]
     ],

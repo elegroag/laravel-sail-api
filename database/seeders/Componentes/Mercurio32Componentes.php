@@ -770,9 +770,9 @@ return [
         'target' => -1,
         'validacion' => [
             'is_required' => false,
-            'min' => 0,
+            'min_length' => 0,
             'error_messages' => [
-                'min' => 'El valor no puede ser negativo'
+                'min_length' => 'El valor no puede ser negativo'
             ]
         ]
     ],
