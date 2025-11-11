@@ -6,15 +6,12 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsEmpresa;
 use App\Models\Adapter\DbBase;
-use App\Models\Gener42;
 use App\Models\Mercurio01;
-use App\Models\Mercurio02;
 use App\Models\Mercurio06;
 use App\Models\Mercurio07;
 use App\Models\Mercurio10;
 use App\Models\Mercurio11;
 use App\Models\Mercurio30;
-use App\Models\Mercurio37;
 use App\Services\Api\ApiSubsidio;
 use App\Services\Aprueba\ApruebaSolicitud;
 use App\Services\CajaServices\EmpresaServices;
@@ -22,14 +19,11 @@ use App\Services\Reports\CsvReportStrategy;
 use App\Services\Reports\ExcelReportStrategy;
 use App\Services\Reports\ReportGenerator;
 use App\Services\Srequest;
-use App\Services\Utils\CalculatorDias;
-use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\View;
 
 class ApruebaEmpresaController extends ApplicationController
 {
@@ -984,9 +978,6 @@ class ApruebaEmpresaController extends ApplicationController
      */
     public function deshacer(Request $request)
     {
-        $this->setResponse('ajax');
-
-        $procesadorComando = Comman::Api();
         $empresaServices = new EmpresaServices;
         $notifyEmailServices = new NotifyEmailServices;
         $action = $request->input('action');

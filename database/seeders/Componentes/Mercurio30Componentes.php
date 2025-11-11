@@ -229,9 +229,9 @@ return [
     // Campos adicionales para el formulario Mercurio30
     [
         'formulario_id' => 1,
-        'name' => 'coddoc',
+        'name' => 'coddocrepleg',
         'type' => 'select',
-        'label' => 'Tipo de Documento',
+        'label' => 'Tipo de Documento Repleg',
         'placeholder' => 'Seleccione el tipo de documento',
         'form_type' => 'select',
         'group_id' => 2,
@@ -240,10 +240,17 @@ return [
         'is_disabled' => false,
         'is_readonly' => false,
         'data_source' => [
-            ['value' => 'NIT', 'label' => 'NIT'],
             ['value' => 'CC', 'label' => 'Cédula de Ciudadanía'],
             ['value' => 'CE', 'label' => 'Cédula de Extranjería'],
-            ['value' => 'PAS', 'label' => 'Pasaporte']
+            ['value' => 'PA', 'label' => 'Pasaporte'],
+            ['value' => 'TMF', 'label' => 'Tarjeta de Movilidad Fronteriza'],
+            ['value' => 'CD', 'label' => 'Carne Diplomatico'],
+            ['value' => 'ISE', 'label' => 'Identificación Dada por la Secretaría de Educación'],
+            ['value' => 'V', 'label' => 'VISA'],
+            ['value' => 'PT', 'label' => 'Permiso Protección Temporal'],
+            ['value' => 'NU', 'label' => 'NUIP'],
+            ['value' => 'PEP', 'label' => 'Permiso Especial de Permanencia'],
+            ['value' => 'CB', 'label' => 'Certificado Cabildo']
         ],
         'css_classes' => 'form-select',
         'help_text' => 'Seleccione el tipo de documento de la empresa',
@@ -364,12 +371,9 @@ return [
         'default_value' => '',
         'is_disabled' => false,
         'is_readonly' => false,
-        'data_source' => [
-            // Estos datos deberían venir de una tabla de zonas
-            ['value' => 'URB', 'label' => 'Urbana'],
-            ['value' => 'RUR', 'label' => 'Rural'],
-            ['value' => 'MIX', 'label' => 'Mixta']
-        ],
+        'data_source' => null,
+        'search_type' => 'local',
+        'search_endpoint' => null,
         'css_classes' => 'form-select',
         'help_text' => 'Seleccione la zona donde laboran los trabajadores',
         'target' => -1,
@@ -390,13 +394,9 @@ return [
         'default_value' => '',
         'is_disabled' => false,
         'is_readonly' => false,
-        'data_source' => [
-            // Estos datos deberían venir de una tabla de actividades económicas CIUU
-            ['value' => 'A', 'label' => 'Agricultura, ganadería, caza, silvicultura y pesca'],
-            ['value' => 'B', 'label' => 'Explotación de minas y canteras'],
-            ['value' => 'C', 'label' => 'Industrias manufactureras']
-            // Agregar más actividades según sea necesario
-        ],
+        'data_source' => null,
+        'search_type' => 'local',
+        'search_endpoint' => null,
         'css_classes' => 'form-select',
         'help_text' => 'Seleccione la actividad económica principal',
         'target' => -1,
@@ -1003,6 +1003,32 @@ return [
             'is_required' => true,
             'error_messages' => [
                 'required' => 'La fecha de solicitud es obligatoria'
+            ]
+        ]
+    ],
+    [
+        'formulario_id' => 1,
+        'name' => 'calemp',
+        'type' => 'select',
+        'label' => 'Calidad de la Empresa',
+        'placeholder' => 'Seleccione la calidad de la empresa',
+        'form_type' => 'select',
+        'group_id' => 8, // Grupo para campos del sistema
+        'order' => 2,
+        'default_value' => '',
+        'is_disabled' => false,
+        'is_readonly' => false,
+        'data_source' => [
+            ['value' => 'E', 'label' => 'Empresa'],
+            ['value' => 'F', 'label' => 'Facultativo'],
+        ],
+        'css_classes' => 'form-select',
+        'help_text' => 'Seleccione la calidad de la empresa',
+        'target' => -1,
+        'validacion' => [
+            'is_required' => true,
+            'error_messages' => [
+                'required' => 'La calidad de la empresa es obligatoria'
             ]
         ]
     ]

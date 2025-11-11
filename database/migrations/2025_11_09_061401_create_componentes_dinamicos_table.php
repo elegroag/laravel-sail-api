@@ -31,6 +31,7 @@ return new class extends Migration
             $table->integer('target')->default(-1);
             $table->json('event_config')->nullable();
             $table->string('search_type', 50)->nullable();
+            $table->string('search_endpoint', 180)->nullable();
             $table->date('date_max')->nullable();
             $table->decimal('number_min', 10, 2)->nullable();
             $table->decimal('number_max', 10, 2)->nullable();

@@ -102,33 +102,42 @@ class ComponenteDinamicoController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255|unique:componentes_dinamicos,name',
-            'type' => 'required|in:input,select,textarea,dialog,date,number',
-            'label' => 'required|string|max:255',
-            'placeholder' => 'nullable|string|max:255',
-            'form_type' => 'required|string|max:50',
-            'group_id' => 'required|integer|min:1',
-            'order' => 'required|integer|min:1',
-            'default_value' => 'nullable|string',
-            'is_disabled' => 'boolean',
-            'is_readonly' => 'boolean',
-            'data_source' => 'nullable|array',
-            'css_classes' => 'nullable|string|max:255',
-            'help_text' => 'nullable|string',
-            'target' => 'integer|min:-1',
-            'event_config' => 'nullable|array',
-            'search_type' => 'nullable|string|max:50',
-            'date_max' => 'nullable|date',
-            'number_min' => 'nullable|numeric',
-            'number_max' => 'nullable|numeric',
-            'number_step' => 'numeric|min:0.01',
-            'formulario_id' => 'required|integer|exists:formularios_dinamicos,id',
-        ]);
+        try {
+            $data = $request->validate([
+                'name' => 'required|string|max:255',
+                'type' => 'required|in:input,select,textarea,dialog,date,number',
+                'label' => 'required|string|max:255',
+                'placeholder' => 'nullable|string|max:255',
+                'form_type' => 'required|string|max:50',
+                'group_id' => 'required|integer|min:1',
+                'order' => 'required|integer|min:1',
+                'default_value' => 'nullable|string',
+                'is_disabled' => 'boolean',
+                'is_readonly' => 'boolean',
+                'data_source' => 'nullable|array',
+                'css_classes' => 'nullable|string|max:255',
+                'help_text' => 'nullable|string',
+                'target' => 'integer|min:-1',
+                'event_config' => 'nullable|array',
+                'search_type' => 'nullable|string|max:50',
+                'date_max' => 'nullable|date',
+                'number_min' => 'nullable|numeric',
+                'number_max' => 'nullable|numeric',
+                'number_step' => 'numeric|min:0.01',
+                'formulario_id' => 'required|integer|exists:formularios_dinamicos,id',
+            ]);
 
-        $componente = ComponenteDinamico::create($data);
+            $componente = ComponenteDinamico::create($data);
 
-        return redirect()->to('/cajas/componente-dinamico/' . $componente->id . '/show');
+            return redirect()->to('/cajas/componente-dinamico/' . $componente->fomulario_id);
+        } catch (\Throwable $th) {
+            $response = [
+                'success' => false,
+                'message' => 'Error al crear el componente',
+                'data'  => $th->getMessage()
+            ];
+            return response()->json($response);
+        }
     }
 
     public function show(int $id)

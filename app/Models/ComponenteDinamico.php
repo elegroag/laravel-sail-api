@@ -27,6 +27,7 @@ class ComponenteDinamico extends Model
         'target',
         'event_config',
         'search_type',
+        'search_endpoint',
         'date_max',
         'number_min',
         'number_max',
