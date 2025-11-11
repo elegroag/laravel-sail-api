@@ -17,6 +17,7 @@ Route::prefix('/cajas/componente-dinamico')->group(function () {
     Route::get('/options', [ComponenteDinamicoController::class, 'options'])->name('componente-dinamico.options');
     Route::post('/reorder', [ComponenteDinamicoController::class, 'reorder'])->name('componente-dinamico.reorder');
     Route::post('/{id}/duplicate', [ComponenteDinamicoController::class, 'duplicate'])->name('componente-dinamico.duplicate');
-    Route::get('/by-formulario/{formularioId}', [ComponenteDinamicoController::class, 'byFormulario'])->name('componente-dinamico.by-formulario');
+    Route::get('/{formularioId}/by-formulario', [ComponenteDinamicoController::class, 'byFormulario'])->name('componente-dinamico.by-formulario');
+    Route::get('/{formularioId}/listar-por-formulario', [ComponenteDinamicoController::class, 'listarPorFormulario'])->name('componente-dinamico.listar-por-formulario');
 });
 //});

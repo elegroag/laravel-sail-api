@@ -294,26 +294,88 @@ class ComponenteDinamicoController extends Controller
         return redirect()->to('/cajas/componente-dinamico/' . $duplicated->id . '/show');
     }
 
+    /**
+     * Muestra la lista de componentes de un formulario específico
+     *
+     * @param int $formularioId ID del formulario
+     * @return \Inertia\Response|\Illuminate\Http\JsonResponse
+     */
+    public function listarPorFormulario(int $formularioId)
+    {
+        if (request()->wantsJson()) {
+            return $this->byFormulario(request(), $formularioId);
+        }
+
+        return redirect()->to('/cajas/componente-dinamico?formulario_id=' . $formularioId);
+    }
+
+    /**
+     * Obtiene los componentes dinámicos de un formulario específico con paginación y filtros
+     * 
+     * @queryParam q string Término de búsqueda para filtrar por nombre, etiqueta o tipo
+     * @queryParam per_page int Número de elementos por página (default: 10)
+     * @queryParam page int Número de página (default: 1)
+     * @queryParam type string Filtrar por tipo de componente
+     * @queryParam group_id int Filtrar por ID de grupo
+     * @queryParam has_validation boolean Filtrar por componentes con/sin validación
+     */
     public function byFormulario(Request $request, int $formularioId)
     {
+        // 1. Validar que el formulario exista
+        $formulario = FormularioDinamico::find($formularioId);
+        if (!$formulario) {
+            return response()->json(['message' => 'El formulario no existe o no tienes permiso para acceder a él'], 404);
+        }
+
+        // 2. Validar parámetros de entrada
+        $request->validate([
+            'q' => 'nullable|string|max:255',
+            'per_page' => 'nullable|integer|min:1|max:100',
+            'page' => 'nullable|integer|min:1',
+            'type' => 'nullable|string',
+            'group_id' => 'nullable|integer',
+            'has_validation' => 'nullable|boolean'
+        ]);
+
+        // 3. Configurar la consulta base
+        $query = ComponenteDinamico::with(['validacion'])
+            ->where('formulario_id', $formularioId);
+
+        // 4. Aplicar búsqueda por texto (q)
         $q = trim((string) $request->query('q', ''));
-        $perPage = (int) $request->query('per_page', 10);
+        if ($q !== '') {
+            $like = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $q) . '%';
+            $query->where(function ($sub) use ($like) {
+                $sub->where('name', 'like', $like)
+                    ->orWhere('label', 'like', $like)
+                    ->orWhere('type', 'like', $like);
+            });
+        }
 
-        $query = ComponenteDinamico::with('validacion')
-            ->where('formulario_id', $formularioId)
-            ->when($q !== '', function ($sub) use ($q) {
-                $like = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $q) . '%';
-                $sub->where(function ($s) use ($like) {
-                    $s->where('name', 'like', $like)
-                        ->orWhere('label', 'like', $like)
-                        ->orWhere('type', 'like', $like);
-                });
-            })
-            ->orderBy('group_id')
-            ->orderBy('order');
+        // 5. Aplicar filtros adicionales
+        if ($request->has('type') && $request->type !== '') {
+            $query->where('type', $request->type);
+        }
 
-        $items = $query->paginate($perPage);
+        if ($request->has('group_id') && $request->group_id !== '') {
+            $query->where('group_id', $request->group_id);
+        }
 
+        if ($request->has('has_validation')) {
+            if ($request->boolean('has_validation')) {
+                $query->has('validacion');
+            } else {
+                $query->doesntHave('validacion');
+            }
+        }
+
+        // 6. Ordenar y paginar
+        $perPage = $request->input('per_page', 10);
+        $items = $query->orderBy('group_id')
+            ->orderBy('order')
+            ->paginate($perPage);
+
+        // 7. Retornar respuesta
         return response()->json([
             'data' => $items->items(),
             'meta' => [

@@ -331,6 +331,12 @@ export default function Index({ formularios_dinamicos }: Props) {
                                                         Ver
                                                     </Link>
                                                     <Link
+                                                        href={`/cajas/componente-dinamico/${formulario.id}/listar-por-formulario`}
+                                                        className="text-green-600 hover:text-green-900 text-sm font-medium"
+                                                    >
+                                                        Componentes ({formulario.components_count || 0})
+                                                    </Link>
+                                                    <Link
                                                         href={`/cajas/formulario-dinamico/${formulario.id}/edit`}
                                                         className="text-gray-600 hover:text-gray-900 text-sm font-medium"
                                                     >
