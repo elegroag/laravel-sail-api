@@ -1,14 +1,39 @@
 import AppLayout from '@/layouts/app-layout';
-import { Link, router } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
+import { Link, useForm } from '@inertiajs/react';
+import { useEffect } from 'react';
 import type { Componente, DataSourceItem } from '@/types/cajas';
 
 type Props = { componente: Componente };
 
+type FormState = {
+    name: string;
+    type: Componente['type'];
+    label: string;
+    placeholder: string;
+    form_type: string;
+    group_id: number;
+    order: number;
+    default_value: string;
+    is_disabled: boolean;
+    is_readonly: boolean;
+    data_source: DataSourceItem[];
+    css_classes: string;
+    help_text: string;
+    target: number;
+    event_config: Record<string, string | number | boolean | null>;
+    search_type: string;
+    search_endpoint: string;
+    date_max: string;
+    number_min: string | number | null;
+    number_max: string | number | null;
+    number_step: number;
+    formulario_id?: number;
+};
+
 export default function Edit({ componente }: Props) {
-    const [formData, setFormData] = useState({
+    const { data, setData, put, processing, errors, setError, clearErrors, transform } = useForm<FormState>({
         name: '',
-        type: 'input',
+        type: 'input' as Componente['type'],
         label: '',
         placeholder: '',
         form_type: 'input',
@@ -21,22 +46,21 @@ export default function Edit({ componente }: Props) {
         css_classes: '',
         help_text: '',
         target: -1,
-        event_config: {} as Record<string, unknown>,
+        event_config: {} as FormState['event_config'],
         search_type: '',
+        search_endpoint: '',
         date_max: '',
         number_min: '',
         number_max: '',
         number_step: 1,
+        formulario_id: componente.formulario_id ?? undefined,
     });
-
-    const [errors, setErrors] = useState<Record<string, string>>({});
-    const [processing, setProcessing] = useState(false);
 
     // Cargar datos del componente al montar el componente
     useEffect(() => {
-        setFormData({
+        setData({
             name: componente.name || '',
-            type: componente.type || 'input',
+            type: (componente.type as Componente['type']) || 'input',
             label: componente.label || '',
             placeholder: componente.placeholder || '',
             form_type: componente.form_type || 'input',
@@ -49,83 +73,79 @@ export default function Edit({ componente }: Props) {
             css_classes: componente.css_classes || '',
             help_text: componente.help_text || '',
             target: componente.target || -1,
-            event_config: (componente.event_config as Record<string, unknown>) || {},
-            search_type: componente.search_type || '',
+            event_config: (componente.event_config as unknown as FormState['event_config']) || {},
+            search_type: (componente.search_type as string) || '',
+            search_endpoint: (componente as any).search_endpoint || '',
             date_max: componente.date_max || '',
             number_min: componente.number_min?.toString() || '',
             number_max: componente.number_max?.toString() || '',
             number_step: componente.number_step || 1,
+            formulario_id: componente.formulario_id ?? undefined,
         });
-    }, [componente]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [componente.id]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { name, value, type } = e.target;
-        const checked = (e.target as HTMLInputElement).checked;
-
-        setFormData(prev => ({
-            ...prev,
-            [name]: type === 'checkbox' ? checked : type === 'number' ? Number(value) : value
-        }));
-
-        // Limpiar error cuando el usuario comienza a escribir
-        if (errors[name]) {
-            setErrors(prev => ({
-                ...prev,
-                [name]: ''
-            }));
-        }
+        const { name, value, type, checked } = e.target as HTMLInputElement;
+        const v = type === 'checkbox' ? checked : type === 'number' ? Number(value) : value;
+        setData(name as keyof FormState, v as never);
+        clearErrors();
     };
 
     const handleDataSourceChange = (index: number, field: 'value' | 'label', value: string) => {
-        setFormData(prev => ({
-            ...prev,
-            data_source: prev.data_source.map((item, i) =>
-                i === index ? { ...item, [field]: value } : item
-            )
-        }));
+        const list = Array.isArray(data.data_source) ? [...data.data_source] : [];
+        list[index] = { ...(list[index] || { value: '', label: '' }), [field]: value } as DataSourceItem;
+        setData('data_source', list);
     };
 
     const addDataSourceItem = () => {
-        setFormData(prev => ({
-            ...prev,
-            data_source: [...prev.data_source, { value: '', label: '' }]
-        }));
+        const list = Array.isArray(data.data_source) ? [...data.data_source] : [];
+        list.push({ value: '', label: '' });
+        setData('data_source', list);
     };
 
     const removeDataSourceItem = (index: number) => {
-        setFormData(prev => ({
-            ...prev,
-            data_source: prev.data_source.filter((_, i) => i !== index)
-        }));
+        const list = Array.isArray(data.data_source) ? data.data_source.filter((_, i) => i !== index) : [];
+        setData('data_source', list);
     };
 
     const validate = (): Record<string, string> => {
         const v: Record<string, string> = {};
         const typeAllowed = ['input','select','textarea','date','number','dialog'];
-        if (!formData.name.trim()) v.name = 'El nombre es obligatorio.';
-        if (!formData.label.trim()) v.label = 'La etiqueta es obligatoria.';
-        if (!typeAllowed.includes(formData.type)) v.type = 'Tipo inválido.';
-        if (!formData.group_id || Number(formData.group_id) < 1) v.group_id = 'Grupo debe ser un entero ≥ 1.';
-        if (!formData.order || Number(formData.order) < 1) v.order = 'Orden debe ser un entero ≥ 1.';
-        if (formData.type === 'select') {
-            if (!Array.isArray(formData.data_source) || formData.data_source.length === 0) {
-                v.data_source = 'Debe agregar al menos una opción.';
-            } else {
-                const invalid = formData.data_source.find(it => !it.value.trim() || !it.label.trim());
-                if (invalid) v.data_source = 'Todas las opciones deben tener valor y etiqueta.';
+        if (!data.name.trim()) v.name = 'El nombre es obligatorio.';
+        if (!data.label.trim()) v.label = 'La etiqueta es obligatoria.';
+        if (!typeAllowed.includes(data.type)) v.type = 'Tipo inválido.';
+        if (!data.group_id || Number(data.group_id) < 1) v.group_id = 'Grupo debe ser un entero ≥ 1.';
+        if (!data.order || Number(data.order) < 1) v.order = 'Orden debe ser un entero ≥ 1.';
+        // Validar search_type cuando aplica (form_type select o dialog)
+        const appliesSearchType = data.form_type === 'select' || data.form_type === 'dialog';
+        if (appliesSearchType) {
+            const allowedSearch = ['ninguno', 'local', 'ajax', 'collection', ''];
+            if (!allowedSearch.includes(data.search_type)) {
+                v.search_type = 'Tipo de búsqueda inválido.';
+            }
+            if (data.search_type === 'ajax') {
+                if (!data.search_endpoint || data.search_endpoint.trim().length < 160) {
+                    v.search_endpoint = 'Debe especificar un endpoint (mínimo 160 caracteres).';
+                }
             }
         }
-        if (formData.type === 'number') {
-            const step = Number(formData.number_step);
+        // Nota: data_source ya NO es requerido cuando type === 'select'
+        if (data.type === 'select' && Array.isArray(data.data_source) && data.data_source.length > 0) {
+            const invalid = data.data_source.find(it => !it.value.trim() || !it.label.trim());
+            if (invalid) v.data_source = 'Todas las opciones deben tener valor y etiqueta.';
+        }
+        if (data.type === 'number') {
+            const step = Number(data.number_step);
             if (!(step > 0)) v.number_step = 'El incremento debe ser mayor que 0.';
-            const min = formData.number_min !== '' ? Number(formData.number_min) : null;
-            const max = formData.number_max !== '' ? Number(formData.number_max) : null;
+            const min = data.number_min !== '' ? Number(data.number_min) : null;
+            const max = data.number_max !== '' ? Number(data.number_max) : null;
             if (min !== null && Number.isNaN(min)) v.number_min = 'Número mínimo inválido.';
             if (max !== null && Number.isNaN(max)) v.number_max = 'Número máximo inválido.';
             if (min !== null && max !== null && min > max) v.number_min = 'El mínimo no puede ser mayor que el máximo.';
         }
-        if (formData.type === 'date' && formData.date_max) {
-            const ts = Date.parse(formData.date_max);
+        if (data.type === 'date' && data.date_max) {
+            const ts = Date.parse(data.date_max);
             if (Number.isNaN(ts)) v.date_max = 'Fecha máxima inválida.';
         }
         return v;
@@ -135,29 +155,26 @@ export default function Edit({ componente }: Props) {
         event.preventDefault();
         const v = validate();
         if (Object.keys(v).length > 0) {
-            setErrors(v);
+            clearErrors();
+            Object.entries(v).forEach(([k, msg]) => setError(k as any, msg));
             return;
         }
-        setProcessing(true);
-
-        const submitData = {
-            ...formData,
-            data_source: formData.type === 'select' ? formData.data_source : null,
-            event_config: Object.keys(formData.event_config).length > 0 ? formData.event_config : null,
-            date_max: formData.type === 'date' && formData.date_max ? formData.date_max : null,
-            number_min: formData.type === 'number' && formData.number_min ? Number(formData.number_min) : null,
-            number_max: formData.type === 'number' && formData.number_max ? Number(formData.number_max) : null,
-            number_step: formData.type === 'number' ? Number(formData.number_step) : 1,
-        };
-
-        router.put(`/cajas/componente-dinamico/${componente.id}`, submitData as unknown as Record<string, any>, {
+        transform((current) => {
+            const normalizedSearchType = (current.search_type === 'ninguno' || current.search_type === '') ? null : current.search_type;
+            return {
+                ...current,
+                search_type: normalizedSearchType,
+                data_source: (current.type === 'select' && normalizedSearchType === 'local') ? current.data_source : null,
+                search_endpoint: normalizedSearchType === 'ajax' ? current.search_endpoint : null,
+                event_config: (current.event_config && Object.keys(current.event_config).length > 0) ? current.event_config : null,
+                date_max: current.type === 'date' && current.date_max ? current.date_max : null,
+                number_min: current.type === 'number' && current.number_min ? Number(current.number_min) : null,
+                number_max: current.type === 'number' && current.number_max ? Number(current.number_max) : null,
+                number_step: current.type === 'number' ? Number(current.number_step) : 1,
+            };
+        });
+        put(`/cajas/componente-dinamico/${componente.id}`, {
             preserveState: true,
-            onError: (errs: Record<string, string>) => {
-                setErrors(errs);
-            },
-            onFinish: () => {
-                setProcessing(false);
-            },
         });
     };
 
@@ -202,7 +219,7 @@ export default function Edit({ componente }: Props) {
                                     id="name"
                                     required
                                     className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.name ? 'border-red-300' : ''}`}
-                                    value={formData.name}
+                                    value={data.name}
                                     onChange={handleChange}
                                 />
                                 {errors.name && (<p className="mt-1 text-sm text-red-600">{errors.name}</p>)}
@@ -217,7 +234,7 @@ export default function Edit({ componente }: Props) {
                                     id="type"
                                     required
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2"
-                                    value={formData.type}
+                                    value={data.type}
                                     onChange={handleChange}
                                 >
                                     <option value="input">Input (Texto)</option>
@@ -230,6 +247,46 @@ export default function Edit({ componente }: Props) {
                                 <p className="mt-1 text-xs text-gray-500">Tipo de componente</p>
                             </div>
 
+                            {/* Tipo de búsqueda (solo para form_type select o dialog) */}
+                            {(data.form_type === 'select' || data.form_type === 'dialog') && (
+                                <div className="col-span-6 sm:col-span-3">
+                                    <label htmlFor="search_type" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tipo de búsqueda</label>
+                                    <select
+                                        name="search_type"
+                                        id="search_type"
+                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2"
+                                        value={data.search_type}
+                                        onChange={handleChange}
+                                    >
+                                        <option value="">Seleccione</option>
+                                        <option value="ninguno">Ninguno</option>
+                                        <option value="local">Local</option>
+                                        <option value="ajax">Ajax</option>
+                                        <option value="collection">Collection</option>
+                                    </select>
+                                    {errors.search_type && (<p className="mt-1 text-sm text-red-600">{errors.search_type}</p>)}
+                                    <p className="mt-1 text-xs text-gray-500">Aplica para componentes de tipo select o dialog</p>
+                                </div>
+                            )}
+
+                            {/* Endpoint de búsqueda (solo cuando search_type = ajax) */}
+                            {(data.form_type === 'select' || data.form_type === 'dialog') && data.search_type === 'ajax' && (
+                                <div className="col-span-6">
+                                    <label htmlFor="search_endpoint" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Endpoint de búsqueda (AJAX)</label>
+                                    <input
+                                        type="text"
+                                        name="search_endpoint"
+                                        id="search_endpoint"
+                                        minLength={160}
+                                        className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.search_endpoint ? 'border-red-300' : ''}`}
+                                        value={data.search_endpoint}
+                                        onChange={handleChange}
+                                        placeholder="https://api.midominio.com/recurso?param1=... (mínimo 160 caracteres)"
+                                    />
+                                    {errors.search_endpoint && (<p className="mt-1 text-sm text-red-600">{errors.search_endpoint}</p>)}
+                                    <p className="mt-1 text-xs text-gray-500">URL completa a consultar por AJAX. Debe tener mínimo 160 caracteres.</p>
+                                </div>
+                            )}
                             {/* Etiqueta */}
                             <div className="col-span-6 sm:col-span-3">
                                 <label htmlFor="label" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Etiqueta *</label>
@@ -239,7 +296,7 @@ export default function Edit({ componente }: Props) {
                                     id="label"
                                     required
                                     className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.label ? 'border-red-300' : ''}`}
-                                    value={formData.label}
+                                    value={data.label}
                                     onChange={handleChange}
                                 />
                                 {errors.label && (<p className="mt-1 text-sm text-red-600">{errors.label}</p>)}
@@ -254,7 +311,7 @@ export default function Edit({ componente }: Props) {
                                     name="placeholder"
                                     id="placeholder"
                                     className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.placeholder ? 'border-red-300' : ''}`}
-                                    value={formData.placeholder}
+                                    value={data.placeholder}
                                     onChange={handleChange}
                                 />
                                 <p className="mt-1 text-xs text-gray-500">Texto de ayuda dentro del campo</p>
@@ -270,7 +327,7 @@ export default function Edit({ componente }: Props) {
                                     required
                                     min="1"
                                     className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.group_id ? 'border-red-300' : ''}`}
-                                    value={formData.group_id}
+                                    value={data.group_id}
                                     onChange={handleChange}
                                 />
                                 <p className="mt-1 text-xs text-gray-500">ID del grupo al que pertenece</p>
@@ -285,7 +342,7 @@ export default function Edit({ componente }: Props) {
                                     required
                                     min="1"
                                     className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.order ? 'border-red-300' : ''}`}
-                                    value={formData.order}
+                                    value={data.order}
                                     onChange={handleChange}
                                 />
                                 <p className="mt-1 text-xs text-gray-500">Orden de aparición en el formulario</p>
@@ -301,7 +358,7 @@ export default function Edit({ componente }: Props) {
                                                 name="is_disabled"
                                                 id="is_disabled"
                                                 className="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                                checked={formData.is_disabled}
+                                                checked={data.is_disabled}
                                                 onChange={handleChange}
                                             />
                                             <span className="ml-2 text-sm text-gray-700">Deshabilitado</span>
@@ -314,7 +371,7 @@ export default function Edit({ componente }: Props) {
                                                 name="is_readonly"
                                                 id="is_readonly"
                                                 className="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                                checked={formData.is_readonly}
+                                                checked={data.is_readonly}
                                                 onChange={handleChange}
                                             />
                                             <span className="ml-2 text-sm text-gray-700">Solo lectura</span>
@@ -331,7 +388,7 @@ export default function Edit({ componente }: Props) {
                                     name="default_value"
                                     id="default_value"
                                     className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.default_value ? 'border-red-300' : ''}`}
-                                    value={formData.default_value}
+                                    value={data.default_value}
                                     onChange={handleChange}
                                 />
                             </div>
@@ -344,18 +401,18 @@ export default function Edit({ componente }: Props) {
                                     id="help_text"
                                     rows={2}
                                     className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.help_text ? 'border-red-300' : ''}`}
-                                    value={formData.help_text}
+                                    value={data.help_text}
                                     onChange={handleChange}
                                 />
                             </div>
 
-                            {/* Data Source para Select */}
-                            {formData.type === 'select' && (
+                            {/* Data Source para Select (visible cuando search_type = local) */}
+                            {data.type === 'select' && (data.search_type === 'local') && (
                                 <div className="col-span-6">
                                     <div className="border-t border-gray-200 pt-6">
                                         <h4 className="text-sm font-medium text-gray-900 mb-4">Opciones del Select</h4>
                                         <div className="space-y-3">
-                                            {formData.data_source.map((item, index) => (
+                                            {data.data_source.map((item: DataSourceItem, index: number) => (
                                                 <div key={index} className="flex gap-3 items-end">
                                                     <div className="flex-1">
                                                         <label className="block text-sm font-medium text-gray-700">Valor</label>
@@ -399,7 +456,7 @@ export default function Edit({ componente }: Props) {
                             )}
 
                             {/* Configuración específica por tipo */}
-                            {formData.type === 'date' && (
+                            {data.type === 'date' && (
                                 <div className="col-span-6 sm:col-span-3">
                                     <label htmlFor="date_max" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha máxima</label>
                                     <input
@@ -407,13 +464,13 @@ export default function Edit({ componente }: Props) {
                                         name="date_max"
                                         id="date_max"
                                         className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.date_max ? 'border-red-300' : ''}`}
-                                        value={formData.date_max}
+                                        value={data.date_max}
                                         onChange={handleChange}
                                     />
                                 </div>
                             )}
 
-                            {formData.type === 'number' && (
+                            {data.type === 'number' && (
                                 <>
                                     <div className="col-span-6 sm:col-span-2">
                                         <label htmlFor="number_min" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Valor mínimo</label>
@@ -423,7 +480,7 @@ export default function Edit({ componente }: Props) {
                                             name="number_min"
                                             id="number_min"
                                             className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.number_min ? 'border-red-300' : ''}`}
-                                            value={formData.number_min}
+                                            value={data.number_min as number | string | undefined}
                                             onChange={handleChange}
                                         />
                                     </div>
@@ -435,7 +492,7 @@ export default function Edit({ componente }: Props) {
                                             name="number_max"
                                             id="number_max"
                                             className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.number_max ? 'border-red-300' : ''}`}
-                                            value={formData.number_max}
+                                            value={data.number_max as number | string | undefined}
                                             onChange={handleChange}
                                         />
                                     </div>
@@ -449,7 +506,7 @@ export default function Edit({ componente }: Props) {
                                             required
                                             min="0.01"
                                             className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.number_step ? 'border-red-300' : ''}`}
-                                            value={formData.number_step}
+                                            value={data.number_step}
                                             onChange={handleChange}
                                         />
                                     </div>
