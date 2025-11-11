@@ -41,75 +41,165 @@ class FormularioDinamicoSeeder extends Seeder
                 ]
             ],
             [
-                'name' => 'formulario_solicitud_credito',
-                'title' => 'Solicitud de Crédito',
-                'description' => 'Formulario para solicitud de crédito hipotecario',
-                'module' => 'creditos',
-                'endpoint' => '/api/creditos/solicitar',
+                'name' => 'mercurio30',
+                'title' => 'Mercurio 30',
+                'description' => 'Formulario para el modelo de datos Mercurio 30',
+                'module' => 'mercurio',
+                'endpoint' => '/api/mercurio/30',
                 'method' => 'POST',
-                'is_active' => true,
-                'layout_config' => [
-                    'columns' => 1,
-                    'spacing' => 'lg',
-                    'theme' => 'professional'
-                ],
-                'permissions' => [
-                    'public' => false,
-                    'roles' => ['cliente', 'asesor']
-                ]
-            ],
-            [
-                'name' => 'formulario_actualizacion_datos',
-                'title' => 'Actualización de Datos Personales',
-                'description' => 'Formulario para actualizar información personal del usuario',
-                'module' => 'perfil',
-                'endpoint' => '/api/perfil/actualizar',
-                'method' => 'PUT',
                 'is_active' => true,
                 'layout_config' => [
                     'columns' => 2,
                     'spacing' => 'md',
-                    'theme' => 'clean'
+                    'theme' => 'default'
                 ],
                 'permissions' => [
                     'public' => false,
-                    'roles' => ['usuario']
+                    'roles' => ['admin', 'editor']
                 ]
             ],
             [
-                'name' => 'formulario_contacto_soporte',
-                'title' => 'Contacto con Soporte',
-                'description' => 'Formulario para contactar al equipo de soporte técnico',
-                'module' => 'soporte',
-                'endpoint' => '/api/soporte/contactar',
+                'name' => 'mercurio31',
+                'title' => 'Mercurio 31',
+                'description' => 'Formulario para el modelo de datos Mercurio 31',
+                'module' => 'mercurio',
+                'endpoint' => '/api/mercurio/31',
                 'method' => 'POST',
                 'is_active' => true,
                 'layout_config' => [
-                    'columns' => 1,
-                    'spacing' => 'sm',
-                    'theme' => 'support'
-                ],
-                'permissions' => [
-                    'public' => true,
-                    'roles' => []
-                ]
-            ],
-            [
-                'name' => 'formulario_evaluacion_servicio',
-                'title' => 'Evaluación de Servicio',
-                'description' => 'Formulario para evaluar la calidad del servicio recibido',
-                'module' => 'evaluaciones',
-                'endpoint' => '/api/evaluaciones/servicio',
-                'method' => 'POST',
-                'is_active' => true,
-                'layout_config' => [
-                    'columns' => 1,
+                    'columns' => 2,
                     'spacing' => 'md',
-                    'theme' => 'feedback'
+                    'theme' => 'default'
                 ],
                 'permissions' => [
                     'public' => false,
-                    'roles' => ['cliente']
+                    'roles' => ['admin', 'editor']
+                ]
+            ],
+            [
+                'name' => 'mercurio32',
+                'title' => 'Mercurio 32',
+                'description' => 'Formulario para el modelo de datos Mercurio 32',
+                'module' => 'mercurio',
+                'endpoint' => '/api/mercurio/32',
+                'method' => 'POST',
+                'is_active' => true,
+                'layout_config' => [
+                    'columns' => 2,
+                    'spacing' => 'md',
+                    'theme' => 'default'
+                ],
+                'permissions' => [
+                    'public' => false,
+                    'roles' => ['admin', 'editor']
+                ]
+            ],
+            [
+                'name' => 'mercurio34',
+                'title' => 'Mercurio 34',
+                'description' => 'Formulario para el modelo de datos Mercurio 34',
+                'module' => 'mercurio',
+                'endpoint' => '/api/mercurio/34',
+                'method' => 'POST',
+                'is_active' => true,
+                'layout_config' => [
+                    'columns' => 2,
+                    'spacing' => 'md',
+                    'theme' => 'default'
+                ],
+                'permissions' => [
+                    'public' => false,
+                    'roles' => ['admin', 'editor']
+                ]
+            ],
+            [
+                'name' => 'mercurio36',
+                'title' => 'Mercurio 36',
+                'description' => 'Formulario para el modelo de datos Mercurio 36',
+                'module' => 'mercurio',
+                'endpoint' => '/api/mercurio/36',
+                'method' => 'POST',
+                'is_active' => true,
+                'layout_config' => [
+                    'columns' => 2,
+                    'spacing' => 'md',
+                    'theme' => 'default'
+                ],
+                'permissions' => [
+                    'public' => false,
+                    'roles' => ['admin', 'editor']
+                ]
+            ],
+            [
+                'name' => 'mercurio38',
+                'title' => 'Mercurio 38',
+                'description' => 'Formulario para el modelo de datos Mercurio 38',
+                'module' => 'mercurio',
+                'endpoint' => '/api/mercurio/38',
+                'method' => 'POST',
+                'is_active' => true,
+                'layout_config' => [
+                    'columns' => 2,
+                    'spacing' => 'md',
+                    'theme' => 'default'
+                ],
+                'permissions' => [
+                    'public' => false,
+                    'roles' => ['admin', 'editor']
+                ]
+            ],
+            [
+                'name' => 'mercurio41',
+                'title' => 'Mercurio 41',
+                'description' => 'Formulario para el modelo de datos Mercurio 41',
+                'module' => 'mercurio',
+                'endpoint' => '/api/mercurio/41',
+                'method' => 'POST',
+                'is_active' => true,
+                'layout_config' => [
+                    'columns' => 2,
+                    'spacing' => 'md',
+                    'theme' => 'default'
+                ],
+                'permissions' => [
+                    'public' => false,
+                    'roles' => ['admin', 'editor']
+                ]
+            ],
+            [
+                'name' => 'mercurio45',
+                'title' => 'Mercurio 45',
+                'description' => 'Formulario para el modelo de datos Mercurio 45',
+                'module' => 'mercurio',
+                'endpoint' => '/api/mercurio/45',
+                'method' => 'POST',
+                'is_active' => true,
+                'layout_config' => [
+                    'columns' => 2,
+                    'spacing' => 'md',
+                    'theme' => 'default'
+                ],
+                'permissions' => [
+                    'public' => false,
+                    'roles' => ['admin', 'editor']
+                ]
+            ],
+            [
+                'name' => 'mercurio47',
+                'title' => 'Mercurio 47',
+                'description' => 'Formulario para el modelo de datos Mercurio 47',
+                'module' => 'mercurio',
+                'endpoint' => '/api/mercurio/47',
+                'method' => 'POST',
+                'is_active' => true,
+                'layout_config' => [
+                    'columns' => 2,
+                    'spacing' => 'md',
+                    'theme' => 'default'
+                ],
+                'permissions' => [
+                    'public' => false,
+                    'roles' => ['admin', 'editor']
                 ]
             ]
         ];
