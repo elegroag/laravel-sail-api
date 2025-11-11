@@ -140,42 +140,25 @@ export default function Edit({ componente }: Props) {
         }
         setProcessing(true);
 
-        try {
-            const submitData = {
-                ...formData,
-                data_source: formData.type === 'select' ? formData.data_source : null,
-                event_config: Object.keys(formData.event_config).length > 0 ? formData.event_config : null,
-                date_max: formData.type === 'date' && formData.date_max ? formData.date_max : null,
-                number_min: formData.type === 'number' && formData.number_min ? Number(formData.number_min) : null,
-                number_max: formData.type === 'number' && formData.number_max ? Number(formData.number_max) : null,
-                number_step: formData.type === 'number' ? Number(formData.number_step) : 1,
-            };
+        const submitData = {
+            ...formData,
+            data_source: formData.type === 'select' ? formData.data_source : null,
+            event_config: Object.keys(formData.event_config).length > 0 ? formData.event_config : null,
+            date_max: formData.type === 'date' && formData.date_max ? formData.date_max : null,
+            number_min: formData.type === 'number' && formData.number_min ? Number(formData.number_min) : null,
+            number_max: formData.type === 'number' && formData.number_max ? Number(formData.number_max) : null,
+            number_step: formData.type === 'number' ? Number(formData.number_step) : 1,
+        };
 
-            const response = await fetch(`/cajas/componente-dinamico/${componente.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-                },
-                body: JSON.stringify(submitData)
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                router.visit('/cajas/componente-dinamico');
-            } else {
-                if (data.errors) {
-                    setErrors(data.errors);
-                } else {
-                    console.error('Error desconocido:', data);
-                }
-            }
-        } catch (error) {
-            console.error('Error al actualizar componente:', error);
-        } finally {
-            setProcessing(false);
-        }
+        router.put(`/cajas/componente-dinamico/${componente.id}`, submitData as unknown as Record<string, any>, {
+            preserveState: true,
+            onError: (errs: Record<string, string>) => {
+                setErrors(errs);
+            },
+            onFinish: () => {
+                setProcessing(false);
+            },
+        });
     };
 
     return (
@@ -190,12 +173,22 @@ export default function Edit({ componente }: Props) {
                             Modificar los datos del componente dinámico
                         </p>
                     </div>
+                    <div className="flex space-x-2">
                     <Link
+                        href={`/cajas/componente-dinamico?formulario_id=${componente.formulario_id}`}
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-400 hover:bg-indigo-400"
+                    >
+                        Volver con formulario
+                    </Link>
+
+                     <Link
                         href="/cajas/componente-dinamico"
                         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                     >
-                        Volver
+                        Volver 
                     </Link>
+                    </div>
+
                 </div>
                 <div className="px-4 py-5 sm:px-6">
                     <form onSubmit={handleSubmit}>

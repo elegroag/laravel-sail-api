@@ -5,6 +5,7 @@ import { ComponentList, FilterBar, PaginationControls, ActionButtons } from '@/c
 import { useFilters } from '@/hooks/useFilters';
 import { usePagination } from '@/hooks/usePagination';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { getByFormulario, type FrontendResponse } from '@/services/componente-dinamico';
 
 interface Componente {
     id: number;
@@ -40,6 +41,7 @@ interface Props {
 
 export default function Index({ componentes_dinamicos }: Props) {
     const [loading, setLoading] = useState(false);
+    const [list, setList] = useState<FrontendResponse>(componentes_dinamicos);
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [pendingDelete, setPendingDelete] = useState<{ id: number; name: string } | null>(null);
 
@@ -57,10 +59,9 @@ export default function Index({ componentes_dinamicos }: Props) {
         totalItems: componentes_dinamicos.meta.total_componentes
     });
 
-    // Update pagination when data changes
     useEffect(() => {
-        setTotalItems(componentes_dinamicos.meta.total_componentes);
-    }, [componentes_dinamicos.meta.total_componentes, setTotalItems]);
+        setTotalItems(list.meta.total_componentes);
+    }, [list.meta.total_componentes, setTotalItems]);
 
     const handleSearch = () => {
         performSearch();
@@ -72,21 +73,32 @@ export default function Index({ componentes_dinamicos }: Props) {
         setTimeout(performSearch, 300);
     };
 
-    const performSearch = () => {
+    const performSearch = async () => {
         setLoading(true);
         const params = {
             ...getQueryParams(),
-            page: 1, // Reset to first page on search
+            page: 1,
             per_page: perPage
         };
-
-        router.get('/cajas/componente-dinamico', params, {
-            preserveState: true,
-            onFinish: () => setLoading(false)
-        });
+        const searchParams = new URLSearchParams(window.location.search);
+        const formularioId = searchParams.get('formulario_id');
+        if (formularioId) {
+            try {
+                const res = await getByFormulario(formularioId, params);
+                setList(res);
+                setTotalItems(res.meta.total_componentes);
+            } finally {
+                setLoading(false);
+            }
+        } else {
+            router.get('/cajas/componente-dinamico', params, {
+                preserveState: true,
+                onFinish: () => setLoading(false)
+            });
+        }
     };
 
-    const handlePageChange = (page: number) => {
+    const handlePageChange = async (page: number) => {
         goToPage(page);
         setLoading(true);
         const params = {
@@ -94,26 +106,48 @@ export default function Index({ componentes_dinamicos }: Props) {
             page,
             per_page: perPage
         };
-
-        router.get('/cajas/componente-dinamico', params, {
-            preserveState: true,
-            onFinish: () => setLoading(false)
-        });
+        const searchParams = new URLSearchParams(window.location.search);
+        const formularioId = searchParams.get('formulario_id');
+        if (formularioId) {
+            try {
+                const res = await getByFormulario(formularioId, params);
+                setList(res);
+                setTotalItems(res.meta.total_componentes);
+            } finally {
+                setLoading(false);
+            }
+        } else {
+            router.get('/cajas/componente-dinamico', params, {
+                preserveState: true,
+                onFinish: () => setLoading(false)
+            });
+        }
     };
 
-    const handlePerPageChange = (newPerPage: number) => {
+    const handlePerPageChange = async (newPerPage: number) => {
         setPerPage(newPerPage);
         setLoading(true);
         const params = {
             ...getQueryParams(),
-            page: 1, // Reset to first page
+            page: 1,
             per_page: newPerPage
         };
-
-        router.get('/cajas/componente-dinamico', params, {
-            preserveState: true,
-            onFinish: () => setLoading(false)
-        });
+        const searchParams = new URLSearchParams(window.location.search);
+        const formularioId = searchParams.get('formulario_id');
+        if (formularioId) {
+            try {
+                const res = await getByFormulario(formularioId, params);
+                setList(res);
+                setTotalItems(res.meta.total_componentes);
+            } finally {
+                setLoading(false);
+            }
+        } else {
+            router.get('/cajas/componente-dinamico', params, {
+                preserveState: true,
+                onFinish: () => setLoading(false)
+            });
+        }
     };
 
     const handleEdit = (id: number) => {
@@ -218,15 +252,15 @@ export default function Index({ componentes_dinamicos }: Props) {
                 <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <div className="text-center">
-                            <div className="text-2xl font-bold text-indigo-600">{componentes_dinamicos.meta.total_componentes}</div>
+                            <div className="text-2xl font-bold text-indigo-600">{list.meta.total_componentes}</div>
                             <div className="text-sm text-gray-500">Total Componentes</div>
                         </div>
                         <div className="text-center">
-                            <div className="text-2xl font-bold text-green-600">{componentes_dinamicos.data.filter(c => c.validacion?.is_required).length}</div>
+                            <div className="text-2xl font-bold text-green-600">{list.data.filter(c => c.validacion?.is_required).length}</div>
                             <div className="text-sm text-gray-500">Requeridos</div>
                         </div>
                         <div className="text-center">
-                            <div className="text-2xl font-bold text-orange-600">{componentes_dinamicos.data.filter(c => c.type === 'select').length}</div>
+                            <div className="text-2xl font-bold text-orange-600">{list.data.filter(c => c.type === 'select').length}</div>
                             <div className="text-sm text-gray-500">Selects</div>
                         </div>
                     </div>
@@ -247,7 +281,7 @@ export default function Index({ componentes_dinamicos }: Props) {
                 {/* Component List */}
                 <div className="px-4 py-5 sm:px-6">
                     <ComponentList
-                        componentes={componentes_dinamicos.data}
+                        componentes={list.data}
                         loading={loading}
                         onEdit={handleEdit}
                         onDelete={handleDelete}

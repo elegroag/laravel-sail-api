@@ -10,7 +10,7 @@ import AppLogo from './app-logo';
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
-        href: '/dashboard',
+        href: '/cajas/principal',
         icon: LayoutGrid,
     },
     {
@@ -22,6 +22,11 @@ const mainNavItems: NavItem[] = [
         title: 'Permission',
         href: '/cajas/menu_permission',
         icon: ShieldCheck,
+    },
+    {
+        title: 'Formulario dinámico',
+        href: '/cajas/formulario-dinamico',
+        icon: Folder,
     }
 ];
 
@@ -45,7 +50,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href="/dashboard" prefetch>
+                            <Link href="/cajas/principal" prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

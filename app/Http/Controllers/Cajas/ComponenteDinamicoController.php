@@ -146,34 +146,42 @@ class ComponenteDinamicoController extends Controller
 
     public function update(Request $request, int $id)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255|unique:componentes_dinamicos,name,' . $id,
-            'type' => 'required|in:input,select,textarea,dialog,date,number',
-            'label' => 'required|string|max:255',
-            'placeholder' => 'nullable|string|max:255',
-            'form_type' => 'required|string|max:50',
-            'group_id' => 'required|integer|min:1',
-            'order' => 'required|integer|min:1',
-            'default_value' => 'nullable|string',
-            'is_disabled' => 'boolean',
-            'is_readonly' => 'boolean',
-            'data_source' => 'nullable|array',
-            'css_classes' => 'nullable|string|max:255',
-            'help_text' => 'nullable|string',
-            'target' => 'integer|min:-1',
-            'event_config' => 'nullable|array',
-            'search_type' => 'nullable|string|max:50',
-            'date_max' => 'nullable|date',
-            'number_min' => 'nullable|numeric',
-            'number_max' => 'nullable|numeric',
-            'number_step' => 'numeric|min:0.01',
-            'formulario_id' => 'sometimes|integer|exists:formularios_dinamicos,id',
-        ]);
+        try {
+            $data = $request->validate([
+                'name' => 'required|string|max:255',
+                'type' => 'required|in:input,select,textarea,dialog,date,number',
+                'label' => 'required|string|max:255',
+                'placeholder' => 'nullable|string|max:255',
+                'form_type' => 'required|string|max:50',
+                'group_id' => 'required|integer|min:1',
+                'order' => 'required|integer|min:1',
+                'default_value' => 'nullable|string',
+                'is_disabled' => 'boolean',
+                'is_readonly' => 'boolean',
+                'data_source' => 'nullable|array',
+                'css_classes' => 'nullable|string|max:255',
+                'help_text' => 'nullable|string',
+                'target' => 'integer|min:-1',
+                'event_config' => 'nullable|array',
+                'search_type' => 'nullable|string|max:50',
+                'date_max' => 'nullable|date',
+                'number_min' => 'nullable|numeric',
+                'number_max' => 'nullable|numeric',
+                'number_step' => 'numeric|min:0.01',
+                'formulario_id' => 'sometimes|integer|exists:formularios_dinamicos,id',
+            ]);
 
-        $componente = ComponenteDinamico::findOrFail($id);
-        $componente->update($data);
-
-        return redirect()->to('/cajas/componente-dinamico/' . $componente->id . '/show');
+            $componente = ComponenteDinamico::findOrFail($id);
+            $componente->update($data);
+            return redirect()->to('/cajas/componente-dinamico/' . $componente->id . '/edit');
+        } catch (\Throwable $th) {
+            $response = [
+                'success' => false,
+                'message' => 'Error al actualizar el componente',
+                'data'  => $th->getMessage()
+            ];
+            return response()->json($response);
+        }
     }
 
     public function destroy(int $id)
@@ -342,7 +350,7 @@ class ComponenteDinamicoController extends Controller
             ->where('formulario_id', $formularioId);
 
         // 4. Aplicar búsqueda por texto (q)
-        $q = trim((string) $request->query('q', ''));
+        $q = trim((string) $request->input('q', ''));
         if ($q !== '') {
             $like = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $q) . '%';
             $query->where(function ($sub) use ($like) {
@@ -353,11 +361,11 @@ class ComponenteDinamicoController extends Controller
         }
 
         // 5. Aplicar filtros adicionales
-        if ($request->has('type') && $request->type !== '') {
+        if ($request->has('type') && $request->input('type') !== '') {
             $query->where('type', $request->type);
         }
 
-        if ($request->has('group_id') && $request->group_id !== '') {
+        if ($request->has('group_id') && $request->input('group_id') !== '') {
             $query->where('group_id', $request->group_id);
         }
 
@@ -370,7 +378,7 @@ class ComponenteDinamicoController extends Controller
         }
 
         // 6. Ordenar y paginar
-        $perPage = $request->input('per_page', 10);
+        $perPage = (int) $request->input('per_page', 10);
         $items = $query->orderBy('group_id')
             ->orderBy('order')
             ->paginate($perPage);

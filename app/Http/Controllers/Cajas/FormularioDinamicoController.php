@@ -26,7 +26,8 @@ class FormularioDinamicoController extends Controller
 
     public function index(Request $request)
     {
-        $query = FormularioDinamico::query();
+        // Cargar la relación 'componentes' para contar los componentes
+        $query = FormularioDinamico::withCount('componentes');
 
         $q = trim((string) $request->query('q', ''));
         if ($q !== '') {
@@ -54,8 +55,15 @@ class FormularioDinamicoController extends Controller
         $perPage = 10;
         $items = $query->paginate($perPage)->appends($request->only(['q', 'module', 'is_active', 'per_page']));
 
+        // Transformar los resultados para incluir el conteo de componentes
+        $formularios = $items->getCollection()->map(function ($formulario) {
+            return array_merge($formulario->toArray(), [
+                'components_count' => $formulario->componentes_count
+            ]);
+        });
+
         $formularios_dinamicos = [
-            'data' => $items->items(),
+            'data' => $formularios,
             'meta' => [
                 'total_formularios' => $items->total(),
                 'pagination' => [

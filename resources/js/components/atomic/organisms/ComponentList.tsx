@@ -8,6 +8,7 @@ interface Componente {
     name: string;
     label: string;
     type: string;
+    form_type?: string;
     group_id: number;
     order: number;
     is_disabled: boolean;
@@ -84,100 +85,65 @@ const ComponentList: React.FC<ComponentListProps> = ({
 
     return (
         <div className="bg-white shadow overflow-hidden sm:rounded-md">
+            {/* Encabezados */}
+            <div className="hidden sm:grid grid-cols-12 gap-4 px-6 py-3 border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <div className="col-span-4">Componente</div>
+                <div className="col-span-3">Nombre</div>
+                <div className="col-span-2">Grupo</div>
+                <div className="col-span-1">Orden</div>
+                <div className="col-span-1">Tipo</div>
+                <div className="col-span-1 text-right">Acciones</div>
+            </div>
             <ul className="divide-y divide-gray-200">
                 {componentes.map((componente) => (
                     <li key={componente.id} className="px-6 py-4">
-                        <div className="flex items-center justify-between">
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center space-x-3">
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-medium text-gray-900 truncate">
-                                            {componente.label}
-                                        </p>
-                                        <p className="text-sm text-gray-500 truncate">
-                                            {componente.name}
-                                        </p>
+                        <div className="grid grid-cols-12 gap-4 items-center">
+                            {/* Columna: Componente (label) */}
+                            <div className="col-span-12 sm:col-span-4 min-w-0">
+                                <div className="flex items-center justify-between sm:justify-start sm:space-x-3">
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-medium text-gray-900 truncate">{componente.label}</p>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <Badge variant={getTypeColor(componente.type)}>
                                             {getTypeLabel(componente.type)}
                                         </Badge>
                                         {componente.validacion?.is_required && (
-                                            <Badge variant="danger" size="sm">
-                                                Req
-                                            </Badge>
+                                            <Badge variant="danger" size="sm">Req</Badge>
                                         )}
                                         {componente.is_disabled && (
-                                            <Badge variant="secondary" size="sm">
-                                                Desh
-                                            </Badge>
+                                            <Badge variant="secondary" size="sm">Desh</Badge>
                                         )}
                                         {componente.is_readonly && (
-                                            <Badge variant="secondary" size="sm">
-                                                Solo Lect
-                                            </Badge>
+                                            <Badge variant="secondary" size="sm">Solo Lect</Badge>
                                         )}
                                     </div>
                                 </div>
-                                <div className="mt-2 flex items-center text-sm text-gray-500">
-                                    <span>Grupo {componente.group_id}</span>
-                                    <span className="mx-2">•</span>
-                                    <span>Orden {componente.order}</span>
-                                    {componente.validacion?.pattern && (
-                                        <>
-                                            <span className="mx-2">•</span>
-                                            <span className="text-xs bg-gray-100 px-1 py-0.5 rounded">
-                                                Patrón
-                                            </span>
-                                        </>
-                                    )}
-                                </div>
                             </div>
-                            <div className="flex items-center space-x-2">
+                            {/* Columna: Nombre (name) */}
+                            <div className="col-span-12 sm:col-span-3 text-sm text-gray-700 truncate">{componente.name}</div>
+                            {/* Columna: Grupo */}
+                            <div className="col-span-4 sm:col-span-2 text-sm text-gray-700">{componente.group_id}</div>
+                            {/* Columna: Orden */}
+                            <div className="col-span-4 sm:col-span-1 text-sm text-gray-700">{componente.order}</div>
+                            {/* Columna: Tipo */}
+                            <div className="col-span-4 sm:col-span-1 text-sm text-gray-700">{getTypeLabel(componente.form_type || componente.type)}</div>
+                            {/* Columna: Acciones */}
+                            <div className="col-span-12 sm:col-span-1 flex sm:justify-end gap-2 mt-2 sm:mt-0">
                                 {onShow && (
-                                    <Button
-                                        variant="secondary"
-                                        size="sm"
-                                        onClick={() => onShow(componente.id)}
-                                    >
-                                        Ver
-                                    </Button>
+                                    <Button variant="secondary" size="sm" onClick={() => onShow(componente.id)}>Ver</Button>
                                 )}
                                 {onEdit && (
-                                    <Button
-                                        variant="secondary"
-                                        size="sm"
-                                        onClick={() => onEdit(componente.id)}
-                                    >
-                                        Editar
-                                    </Button>
+                                    <Button variant="secondary" size="sm" onClick={() => onEdit(componente.id)}>Editar</Button>
                                 )}
                                 {onDuplicate && (
-                                    <Button
-                                        variant="secondary"
-                                        size="sm"
-                                        onClick={() => onDuplicate(componente.id)}
-                                    >
-                                        Duplicar
-                                    </Button>
+                                    <Button variant="secondary" size="sm" onClick={() => onDuplicate(componente.id)}>Duplicar</Button>
                                 )}
                                 {onValidations && (
-                                    <Button
-                                        variant="primary"
-                                        size="sm"
-                                        onClick={() => onValidations(componente.id)}
-                                    >
-                                        Validaciones
-                                    </Button>
+                                    <Button variant="primary" size="sm" onClick={() => onValidations(componente.id)}>Validaciones</Button>
                                 )}
                                 {onDelete && (
-                                    <Button
-                                        variant="danger"
-                                        size="sm"
-                                        onClick={() => onDelete(componente.id)}
-                                    >
-                                        Eliminar
-                                    </Button>
+                                    <Button variant="danger" size="sm" onClick={() => onDelete(componente.id)}>Eliminar</Button>
                                 )}
                             </div>
                         </div>
