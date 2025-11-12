@@ -1157,11 +1157,7 @@ class Mercurio31 extends ModelBase
 
     public function getTipsalArray()
     {
-        return [
-            'F' => 'FIJO',
-            'V' => 'VARIABLE',
-            'I' => 'INTEGRAL',
-        ];
+        return tipsal_array();
     }
 
     public function getCoddocArray()

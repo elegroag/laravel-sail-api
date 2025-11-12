@@ -7,6 +7,7 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsEmpresa;
 use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
+use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
 use App\Models\Mercurio07;
@@ -318,7 +319,6 @@ class EmpresaController extends ApplicationController
 
     public function params()
     {
-        $this->setResponse('ajax');
         try {
             $mtipoDocumentos = new Gener18;
             $tipoDocumentos = [];
@@ -347,18 +347,13 @@ class EmpresaController extends ApplicationController
                 $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
             }
 
-            $coddocrepleg = [];
-            foreach ($mtipoDocumentos->all() as $entity) {
-                if ($entity->getCodrua() == 'TI' || $entity->getCodrua() == 'RC') {
-                    continue;
-                }
-                $coddocrepleg["{$entity->getCodrua()}"] = $entity->getDetdoc();
-            }
-
             $codciu = [];
-            $mgener09 = new Gener09;
-            foreach ($mgener09->getFind("conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
-                $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
+            $mgener09 = Gener09::where("codzon", '>=', 18000)
+                ->where("codzon", "<=", 19000)
+                ->get();
+
+            foreach ($mgener09 as $entity) {
+                $codciu["{$entity->codzon}"] = $entity->detzon;
             }
 
             $procesadorComando = new ApiSubsidio();
@@ -382,14 +377,16 @@ class EmpresaController extends ApplicationController
             $paramsTrabajador = new ParamsTrabajador;
             $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
 
-            $tipafi = (new Mercurio07)->getArrayTipos();
-            $coddoc = $tipoDocumentos;
+            $coddocrepleg = tipo_document_repleg_detalle();
+            unset($coddocrepleg['RC']);
+            unset($coddocrepleg['TI']);
+
             $data = [
-                'tipafi' => $tipafi,
+                'tipafi' => get_array_tipos(),
                 'coddoc' => $coddoc,
-                'tipper' => (new Mercurio30)->getTipperArray(),
+                'tipper' => tipper_array(),
                 'tipsoc' => $tipsoc,
-                'calemp' => (new Mercurio30)->getCalempArray(),
+                'calemp' => calemp_array(),
                 'codciu' => $codciu,
                 'coddocrepleg' => $coddocrepleg,
                 'codzon' => ParamsEmpresa::getZonas(),
@@ -398,14 +395,26 @@ class EmpresaController extends ApplicationController
                 'codcaj' => ParamsEmpresa::getCodigoCajas(),
                 'ciupri' => ParamsEmpresa::getCiudades(),
                 'ciunac' => ParamsEmpresa::getCiudades(),
-                'tipsal' => (new Mercurio31)->getTipsalArray(),
-                'autoriza' => ['S' => 'SI', 'N' => 'NO'],
+                'tipsal' => tipsal_array(),
+                'autoriza' => autoriza_array(),
                 'ciupri' => ParamsEmpresa::getCiudades(),
+                'cartra' => ParamsTrabajador::getOcupaciones()
             ];
+
+            $formulario = FormularioDinamico::where('name', 'mercurio30')->first();
+            $componentes = $formulario->componentes()->get();
+            $componentes = $componentes->map(function ($componente) use ($data) {
+                $_componente = $componente->toArray();
+                if (isset($data[$componente->name])) {
+                    $_componente['data_source'] = $data[$componente->name];
+                }
+                $_componente['id'] = $componente->name;
+                return $_componente;
+            });
 
             $salida = [
                 'success' => true,
-                'data' => $data,
+                'data' => $componentes,
                 'msj' => 'OK',
             ];
         } catch (DebugException $err) {

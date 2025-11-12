@@ -41,7 +41,7 @@ return [
     [
         'formulario_id' => 7,
         'name' => 'tipdoc',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Tipo de Documento',
         'placeholder' => 'Seleccione el tipo de documento',
         'form_type' => 'select',
@@ -235,7 +235,7 @@ return [
     [
         'formulario_id' => 7,
         'name' => 'ciunac',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Ciudad de Nacimiento',
         'placeholder' => 'Seleccione la ciudad de nacimiento',
         'form_type' => 'select',
@@ -258,7 +258,7 @@ return [
     [
         'formulario_id' => 7,
         'name' => 'sexo',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Sexo',
         'placeholder' => 'Seleccione el sexo',
         'form_type' => 'select',
@@ -285,7 +285,7 @@ return [
     [
         'formulario_id' => 7,
         'name' => 'estciv',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Estado Civil',
         'placeholder' => 'Seleccione el estado civil',
         'form_type' => 'select',
@@ -315,7 +315,7 @@ return [
     [
         'formulario_id' => 7,
         'name' => 'cabhog',
-        'type' => 'select',
+        'type' => 'text',
         'label' => '¿Es cabeza de hogar?',
         'placeholder' => 'Seleccione una opción',
         'form_type' => 'select',
@@ -343,7 +343,7 @@ return [
     [
         'formulario_id' => 7,
         'name' => 'codciu',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Ciudad de Residencia',
         'placeholder' => 'Seleccione la ciudad',
         'form_type' => 'select',
@@ -366,7 +366,7 @@ return [
     [
         'formulario_id' => 7,
         'name' => 'codzon',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Zona',
         'placeholder' => 'Seleccione la zona',
         'form_type' => 'select',
@@ -392,7 +392,7 @@ return [
     [
         'formulario_id' => 7,
         'name' => 'direccion',
-        'type' => 'textarea',
+        'type' => 'text',
         'label' => 'Dirección',
         'placeholder' => 'Ingrese la dirección completa',
         'form_type' => 'textarea',
@@ -444,7 +444,7 @@ return [
     [
         'formulario_id' => 7,
         'name' => 'rural',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Residencia Rural',
         'placeholder' => 'Seleccione una opción',
         'form_type' => 'select',
@@ -613,7 +613,7 @@ return [
     [
         'formulario_id' => 7,
         'name' => 'captra',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Capacidad de Trabajo',
         'placeholder' => 'Seleccione la capacidad',
         'form_type' => 'select',
@@ -639,7 +639,7 @@ return [
     [
         'formulario_id' => 7,
         'name' => 'tipdis',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Tipo de Discapacidad',
         'placeholder' => 'Seleccione si aplica',
         'form_type' => 'select',
@@ -669,7 +669,7 @@ return [
     [
         'formulario_id' => 7,
         'name' => 'nivedu',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Nivel Educativo',
         'placeholder' => 'Seleccione el nivel',
         'form_type' => 'select',
@@ -700,7 +700,7 @@ return [
     [
         'formulario_id' => 7,
         'name' => 'vivienda',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Tipo de Vivienda',
         'placeholder' => 'Seleccione el tipo',
         'form_type' => 'select',
@@ -728,7 +728,7 @@ return [
     [
         'formulario_id' => 7,
         'name' => 'tipafi',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Tipo de Afiliado',
         'placeholder' => 'Seleccione el tipo',
         'form_type' => 'select',
@@ -753,7 +753,7 @@ return [
     [
         'formulario_id' => 7,
         'name' => 'autoriza',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Autoriza Tratamiento de Datos',
         'placeholder' => 'Seleccione una opción',
         'form_type' => 'select',

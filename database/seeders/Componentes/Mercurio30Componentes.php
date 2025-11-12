@@ -6,7 +6,7 @@ return [
     [
         'formulario_id' => 1,
         'name' => 'tipper',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Tipo de Persona',
         'placeholder' => 'Seleccione el tipo de persona',
         'form_type' => 'select',
@@ -120,7 +120,7 @@ return [
     [
         'formulario_id' => 1,
         'name' => 'dirpri',
-        'type' => 'textarea',
+        'type' => 'text',
         'label' => 'Dirección Comercial',
         'placeholder' => 'Ingrese la dirección comercial',
         'form_type' => 'textarea',
@@ -146,7 +146,7 @@ return [
     [
         'formulario_id' => 1,
         'name' => 'ciupri',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Ciudad Comercial',
         'placeholder' => 'Seleccione la ciudad',
         'form_type' => 'select',
@@ -155,13 +155,7 @@ return [
         'default_value' => '',
         'is_disabled' => false,
         'is_readonly' => false,
-        'data_source' => [
-            // Estos datos deberían venir de una tabla de ciudades
-            ['value' => '5001', 'label' => 'Bogotá D.C.'],
-            ['value' => '5002', 'label' => 'Medellín'],
-            ['value' => '5003', 'label' => 'Cali'],
-            // Agregar más ciudades según sea necesario
-        ],
+        'data_source' => null,
         'css_classes' => 'form-select',
         'help_text' => 'Seleccione la ciudad donde se encuentra la empresa',
         'target' => -1,
@@ -230,7 +224,7 @@ return [
     [
         'formulario_id' => 1,
         'name' => 'coddocrepleg',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Tipo de Documento Repleg',
         'placeholder' => 'Seleccione el tipo de documento',
         'form_type' => 'select',
@@ -309,7 +303,7 @@ return [
     [
         'formulario_id' => 1,
         'name' => 'tipsoc',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Tipo de Sociedad',
         'placeholder' => 'Seleccione el tipo de sociedad',
         'form_type' => 'select',
@@ -318,13 +312,7 @@ return [
         'default_value' => '',
         'is_disabled' => false,
         'is_readonly' => false,
-        'data_source' => [
-            ['value' => 'SA', 'label' => 'Sociedad Anónima'],
-            ['value' => 'LTDA', 'label' => 'Sociedad Limitada'],
-            ['value' => 'SAS', 'label' => 'Sociedad por Acciones Simplificada'],
-            ['value' => 'SCA', 'label' => 'Sociedad Comandita por Acciones'],
-            ['value' => 'SCS', 'label' => 'Sociedad Comandita Simple']
-        ],
+        'data_source' => null,
         'css_classes' => 'form-select',
         'help_text' => 'Seleccione el tipo de sociedad de la empresa',
         'target' => -1,
@@ -336,7 +324,7 @@ return [
     [
         'formulario_id' => 1,
         'name' => 'tipemp',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Tipo de Empresa',
         'placeholder' => 'Seleccione el tipo de empresa',
         'form_type' => 'select',
@@ -345,12 +333,7 @@ return [
         'default_value' => '',
         'is_disabled' => false,
         'is_readonly' => false,
-        'data_source' => [
-            ['value' => 'PUB', 'label' => 'Pública'],
-            ['value' => 'PRI', 'label' => 'Privada'],
-            ['value' => 'MIX', 'label' => 'Mixta'],
-            ['value' => 'COO', 'label' => 'Cooperativa']
-        ],
+        'data_source' => null,
         'css_classes' => 'form-select',
         'help_text' => 'Seleccione el tipo de empresa',
         'target' => -1,
@@ -362,7 +345,7 @@ return [
     [
         'formulario_id' => 1,
         'name' => 'codzon',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Zona de Trabajo',
         'placeholder' => 'Seleccione la zona de trabajo',
         'form_type' => 'select',
@@ -385,7 +368,7 @@ return [
     [
         'formulario_id' => 1,
         'name' => 'codact',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Actividad Económica',
         'placeholder' => 'Seleccione la actividad económica',
         'form_type' => 'select',
@@ -497,7 +480,7 @@ return [
     [
         'formulario_id' => 1,
         'name' => 'codcaj',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Caja de Compensación Anterior',
         'placeholder' => 'Seleccione la caja de compensación',
         'form_type' => 'select',
@@ -552,7 +535,7 @@ return [
     [
         'formulario_id' => 1,
         'name' => 'codciu',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Ciudad de Notificación',
         'placeholder' => 'Seleccione la ciudad',
         'form_type' => 'select',
@@ -581,7 +564,7 @@ return [
     [
         'formulario_id' => 1,
         'name' => 'direccion',
-        'type' => 'textarea',
+        'type' => 'text',
         'label' => 'Dirección de Notificación',
         'placeholder' => 'Ingrese la dirección para notificaciones',
         'form_type' => 'textarea',
@@ -860,7 +843,7 @@ return [
     [
         'formulario_id' => 1,
         'name' => 'autoriza',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Autorización de Tratamiento de Datos',
         'placeholder' => 'Seleccione una opción',
         'form_type' => 'select',
@@ -1009,7 +992,7 @@ return [
     [
         'formulario_id' => 1,
         'name' => 'calemp',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Calidad de la Empresa',
         'placeholder' => 'Seleccione la calidad de la empresa',
         'form_type' => 'select',

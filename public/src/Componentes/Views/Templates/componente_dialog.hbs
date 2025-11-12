@@ -1,0 +1,65 @@
+<div class="input-group  mt-2">
+    <input
+        type="text"
+        toggle-entity="entitie_form"
+        class="d-none"
+        id="<%= name%>"
+        name="<%= name%>"
+        value="<%= valor%>"
+        target="-1"
+    />
+    <% if(type === 'text'){ %>
+        <input type="<%=type%>"
+        placeholder="<%=(placeholder)? placeholder : label %>"
+        ondblclick="document.querySelector('.search_<%=name%>').click()"
+        id="<%= name%>_detalle"
+        name="<%= name%>_detalle"
+        class="form-control"
+        value="<%= detalle%>"
+        target="-1"
+        readonly
+    />
+    <% } %>
+    <% if(type === 'textarea'){ %>
+        <textarea
+        rows='1'
+        placeholder="<%=(placeholder)? placeholder : label %>"
+        ondblclick="document.querySelector('.search_<%=name%>').click()"
+        id="<%= name%>_detalle"
+        name="<%= name%>_detalle"
+        class="form-control"
+        target="-1"
+        readonly ><%= detalle%></textarea>
+    <% } %>
+
+    <span class="input-group-text">
+        <% if(searchType === "ajax"){ %>
+            <button type="button"
+            target= "<%= target%>"
+            data-search="<%=search%>"
+            data-tag="<%=name%>"
+            data-size="<%=(size)? size : 100 %>"
+            data-detalle="<%=name%>_detalle"
+            onclick="buscarDataAjax(this)"
+            class="btn btn-sm bg-gray search_<%=name%>"
+            <%=(disabled)? 'disabled': ''%>
+            >
+                <i class="fa fa-search"></i>
+        </button>
+        <% } else { %>
+            <button type="button"
+            target= "<%= target%>"
+            data-search="<%=search%>"
+            data-tag="<%=name%>"
+            data-size="<%=(size)? size : 100 %>"
+            data-detalle="<%=name%>_detalle"
+            onclick="buscarData(this, Colletions)"
+            class="btn btn-sm bg-gray search_<%=name%>"
+            <%=(disabled)? 'disabled': ''%>
+            >
+                <i class="fa fa-search"></i>
+        </button>
+        <% } %>
+    </span>
+</div>
+<p id="<%=name%>_hp" class="d-none text-danger"></p>

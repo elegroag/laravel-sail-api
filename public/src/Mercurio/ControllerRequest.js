@@ -8,13 +8,13 @@ class ControllerRequest {
         this.afiService = {};
         this.App = {};
         this.headerOptions = {};
-        
+
         this.TableView = undefined;
         this.EntityModel = undefined;
         this.FormRequest = undefined;
         this.trigger = undefined;
         this.layout = undefined;
-        
+
         _.extend(this, Backbone.Events);
         _.extend(this, options);
 
@@ -28,16 +28,7 @@ class ControllerRequest {
     }
 
     serealizeParams() {
-        const resources = _.keys(this.App.Collections.formParams);
-        const collection = _.map(resources, (item) => {
-            return {
-                name: item,
-                type: 'select',
-                placeholder: item,
-                search: item,
-            };
-        });
-        return collection;
+        return this.App.Collections.formParams;
     }
 
     listRequests(tipo) {

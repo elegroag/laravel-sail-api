@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { router } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
+import { router, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { ComponentForm, ActionButtons } from '@/components/atomic';
-import type { Formulario as FormularioType } from '@/types/cajas';
+import type { Formulario as FormularioType, Componente } from '@/types/cajas';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
 
 interface Props {
@@ -13,10 +13,10 @@ interface Props {
 // Tipado local alineado con ComponentForm (estructura esperada)
 type ComponentData = {
     name: string;
-    type: string;
+    type: Componente['type'];
     label: string;
     placeholder: string;
-    form_type: string;
+    form_type: Componente['form_type'];
     group_id: number;
     order: number;
     default_value: string;
@@ -26,7 +26,7 @@ type ComponentData = {
     css_classes: string;
     help_text: string;
     target: number;
-    event_config: Record<string, string>;
+    event_config: Record<string, string | number | boolean | null>;
     search_type: string;
     date_max: string;
     number_min: number;
@@ -35,7 +35,11 @@ type ComponentData = {
 };
 
 export default function Create({ formulario, formularios = [] }: Props) {
+    const { props } = usePage<{ flash?: { success?: string; error?: string } }>();
+
     const [loading, setLoading] = useState(false);
+    const [successOpen, setSuccessOpen] = useState(false);
+    const [successMsg, setSuccessMsg] = useState('');
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [formPickerOpen, setFormPickerOpen] = useState(false);
     const [formPickerQuery, setFormPickerQuery] = useState('');
@@ -74,6 +78,14 @@ export default function Create({ formulario, formularios = [] }: Props) {
         return () => controller.abort();
     }, [formPickerOpen, formPickerQuery, formPickerModule, page]);
 
+     useEffect(() => {
+        const msg = props?.flash?.success as string | undefined;
+        if (msg && typeof msg === 'string') {
+            setSuccessMsg(msg);
+            setSuccessOpen(true);
+        }
+    }, [props]);
+
     const handleSubmit = async (data: ComponentData) => {
         setLoading(true);
         setErrors({});
@@ -101,7 +113,25 @@ export default function Create({ formulario, formularios = [] }: Props) {
 
     return (
         <AppLayout title="Crear Componente Dinámico">
-            <div className="max-w-4xl mx-auto">
+            <Dialog open={successOpen} onOpenChange={setSuccessOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Actualización exitosa</DialogTitle>
+                        <DialogDescription>{successMsg || 'Cambios guardados correctamente.'}</DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <DialogClose asChild>
+                            <button
+                                type="button"
+                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                            >
+                                Cerrar
+                            </button>
+                        </DialogClose>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+            <div className="bg-white shadow overflow-hidden sm:rounded-md m-2">
                 <div className="bg-white shadow overflow-hidden sm:rounded-md">
                     <div className="px-4 py-5 sm:px-6">
                         <div className="flex justify-between items-center">

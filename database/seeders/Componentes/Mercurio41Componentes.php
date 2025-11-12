@@ -58,7 +58,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'coddoc',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Tipo de Documento',
         'placeholder' => 'Seleccione el tipo de documento',
         'form_type' => 'select',
@@ -252,7 +252,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'sexo',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Sexo',
         'placeholder' => 'Seleccione el sexo',
         'form_type' => 'select',
@@ -279,7 +279,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'orisex',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Orientación Sexual',
         'placeholder' => 'Seleccione la orientación sexual',
         'form_type' => 'select',
@@ -308,7 +308,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'estciv',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Estado Civil',
         'placeholder' => 'Seleccione el estado civil',
         'form_type' => 'select',
@@ -338,7 +338,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'cabhog',
-        'type' => 'select',
+        'type' => 'text',
         'label' => '¿Es cabeza de hogar?',
         'placeholder' => 'Seleccione una opción',
         'form_type' => 'select',
@@ -366,7 +366,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'codciu',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Ciudad de Residencia',
         'placeholder' => 'Seleccione la ciudad',
         'form_type' => 'select',
@@ -389,7 +389,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'direccion',
-        'type' => 'textarea',
+        'type' => 'text',
         'label' => 'Dirección de Residencia',
         'placeholder' => 'Ingrese la dirección completa',
         'form_type' => 'textarea',
@@ -415,7 +415,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'dirlab',
-        'type' => 'textarea',
+        'type' => 'text',
         'label' => 'Dirección Laboral',
         'placeholder' => 'Ingrese la dirección laboral',
         'form_type' => 'textarea',
@@ -438,7 +438,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'codzon',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Zona de Trabajo',
         'placeholder' => 'Seleccione la zona',
         'form_type' => 'select',
@@ -464,7 +464,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'rural',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Residencia Rural',
         'placeholder' => 'Seleccione una opción',
         'form_type' => 'select',
@@ -490,7 +490,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'ruralt',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Trabajo Rural',
         'placeholder' => 'Seleccione una opción',
         'form_type' => 'select',
@@ -518,7 +518,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'codact',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Actividad Económica (CIUU)',
         'placeholder' => 'Seleccione la actividad económica',
         'form_type' => 'select',
@@ -541,7 +541,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'cargo',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Ocupación o Cargo',
         'placeholder' => 'Seleccione la ocupación',
         'form_type' => 'select',
@@ -612,7 +612,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'tipsal',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Tipo de Ingresos',
         'placeholder' => 'Seleccione el tipo',
         'form_type' => 'select',
@@ -639,7 +639,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'codcaj',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Caja de Compensación Anterior',
         'placeholder' => 'Seleccione la caja',
         'form_type' => 'select',
@@ -662,7 +662,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'captra',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Capacidad de Trabajo',
         'placeholder' => 'Seleccione la capacidad',
         'form_type' => 'select',
@@ -688,7 +688,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'tipdis',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Tipo de Discapacidad',
         'placeholder' => 'Seleccione si aplica',
         'form_type' => 'select',
@@ -718,7 +718,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'nivedu',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Nivel Educativo',
         'placeholder' => 'Seleccione el nivel',
         'form_type' => 'select',
@@ -749,7 +749,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'vivienda',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Tipo de Vivienda',
         'placeholder' => 'Seleccione el tipo',
         'form_type' => 'select',
@@ -777,7 +777,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'facvul',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Factor de Vulnerabilidad',
         'placeholder' => 'Seleccione el factor',
         'form_type' => 'select',
@@ -809,7 +809,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'tipafi',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Tipo de Afiliado',
         'placeholder' => 'Seleccione el tipo',
         'form_type' => 'select',
@@ -834,7 +834,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'peretn',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Pertenencia Étnica',
         'placeholder' => 'Seleccione si aplica',
         'form_type' => 'select',
@@ -864,7 +864,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'resguardo_id',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Resguardo Indígena',
         'placeholder' => 'Seleccione si aplica',
         'form_type' => 'select',
@@ -885,7 +885,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'pub_indigena_id',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Pueblo Indígena',
         'placeholder' => 'Seleccione si aplica',
         'form_type' => 'select',
@@ -978,7 +978,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'tippag',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Tipo de Pago de Subsidio',
         'placeholder' => 'Seleccione el tipo de pago',
         'form_type' => 'select',
@@ -1031,7 +1031,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'tipcue',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Tipo de Cuenta',
         'placeholder' => 'Seleccione el tipo de cuenta',
         'form_type' => 'select',
@@ -1055,7 +1055,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'codban',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Banco',
         'placeholder' => 'Seleccione el banco',
         'form_type' => 'select',
@@ -1076,7 +1076,7 @@ return [
     [
         'formulario_id' => 9,
         'name' => 'autoriza',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Autoriza Tratamiento de Datos',
         'placeholder' => 'Seleccione una opción',
         'form_type' => 'select',

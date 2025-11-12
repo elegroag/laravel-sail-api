@@ -236,21 +236,44 @@ if (! function_exists('tipo_document_repleg_detalle')) {
     function tipo_document_repleg_detalle()
     {
         return [
-            'CC' => 'CEDULA DE CIUDADANIA',
-            'TMF' => 'TARJETA DE MOVILIDAD FRONTERIZA',
-            'CD' => 'CARNET DIPLOMATICO',
-            'ISE' => 'IDENTIFICACION DADA POR LA SECRETARIA DE EDUCACIÓN',
-            'V' => 'VISA',
-            'PT' => 'PASAPORTE',
-            'TI' => 'TARJETA DE IDENTIDAD',
+            'CC' => 'Cedula de ciudadania',
+            'TMF' => 'Tarjeta de movilidad fronteriza',
+            'CD' => 'Carnet diplomático',
+            'ISE' => 'Identificación dada por la secretaria de educación',
+            'V' => 'Visa',
+            'PT' => 'Pasaporte',
+            'TI' => 'Tarjeta de identidad',
             'NI' => 'NIT',
-            'CE' => 'CEDULA DE EXTRANJERIA',
+            'CE' => 'Cédula de extranjería',
             'NU' => 'NUIP',
-            'PA' => 'PASAPORTE DE EXTRANJERIA',
-            'RC' => 'REGISTRO CIVIL',
-            'PEP' => 'PERMISO ESPECIAL DE PERMANENCIA',
-            'CB' => 'CERTIFICADO CABILDO',
-            '' => 'NO DEFINIDO'
+            'PA' => 'Pasaporte de extranjería',
+            'RC' => 'Registro civil',
+            'PEP' => 'Permiso especial de permanencia',
+            'CB' => 'Certificado cabildo',
+            '' => 'No definido'
+        ];
+    }
+}
+
+if (! function_exists('tipsal_array')) {
+
+    function tipsal_array()
+    {
+        return [
+            'F' => 'FIJO',
+            'V' => 'VARIABLE',
+            'I' => 'INTEGRAL',
+        ];
+    }
+}
+
+if (! function_exists('autoriza_array')) {
+
+    function autoriza_array()
+    {
+        return [
+            'S' => 'SI',
+            'N' => 'NO',
         ];
     }
 }

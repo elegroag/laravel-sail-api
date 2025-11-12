@@ -2,7 +2,7 @@ import { ComponentModel } from '@/Componentes/Models/ComponentModel';
 import { TrabajadorNominaModel } from '@/Componentes/Models/TrabajadorNominaModel';
 import { eventsFormControl } from '@/Core';
 import { FormView } from '@/Mercurio/FormView';
-import { TraNomCollection } from '../../Trabajadores/collections/TrabajadoresCollection';
+import { TraNomCollection } from '@/Mercurio/Trabajadores/collections/TrabajadoresCollection';
 import { EmpresaModel } from '../models/EmpresaModel';
 import { TrabajadoresNominaView } from './TrabajadoresNominaView';
 
@@ -40,19 +40,11 @@ export class FormEmpresaView extends FormView {
 
     #afterRender($el = {}) {
         _.each(this.collection, (component) => {
-            if (component.name == 'autoriza') component.type = 'radio';
-
             const view = this.addComponent(
                 new ComponentModel({
-                    disabled: false,
-                    readonly: false,
-                    order: 0,
-                    target: 1,
-                    searchType: 'local',
                     ...component,
                     valor: this.model.get(component.name),
                 }),
-                component.type,
             );
             $el.find('#component_' + component.name).html(view.$el);
         });
@@ -67,7 +59,7 @@ export class FormEmpresaView extends FormView {
             },
         });
 
-        this.selectores = $el.find('#tipdoc, #tipsoc, #ciupri, #codzon, #codciu, #codact, #coddocrepleg');
+        this.selectores = $el.find('#tipdoc, #tipsoc, #ciupri, #codzon, #codciu, #codact, #coddocrepleg, #cartra');
 
         if (this.model.get('id') !== null) {
             $.each(this.model.toJSON(), (key, valor) => {
@@ -87,7 +79,10 @@ export class FormEmpresaView extends FormView {
                 if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
             });
         } else {
-            $.each(this.selectores, (index, element) => (this.#choiceComponents[element.name] = new Choices(element)));
+            $.each(
+                this.selectores,
+                (index, element) => (this.#choiceComponents[element.name] = new Choices(element, { silent: true, itemSelectText: '' })),
+            );
         }
 
         this.selectores.on('change', (event) => {
@@ -243,10 +238,7 @@ export class FormEmpresaView extends FormView {
                     }
                 },
             });
-
         });
-
-
     }
 
     nameRepleg() {

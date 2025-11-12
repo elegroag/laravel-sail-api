@@ -1,0 +1,37 @@
+ <div class="form-check form-check-inline mt-2">
+    <input
+        id="<%=name%>1"
+        name="<%=name%>"
+        toggle-entity="entitie_form"
+        target="<%= target%>"
+        class="form-check-input mt-0"
+        toggle-event="<%=(event)? event :'' %>"
+        type="radio"
+        value='S'
+        <%=(valor == 'S')? 'checked':''%>
+        <%=(readonly)? 'readonly': ''%>
+        <%=(disabled)? 'disabled': ''%>
+    />
+    <label class="form-check-label mt-0" for="flexRadioDefault1">
+        SI
+    </label>
+</div>
+<div class="form-check form-check-inline">
+    <input
+        id="<%=name%>2"
+        name="<%=name%>"
+        toggle-entity="entitie_form"
+        target="<%= target%>"
+        class="form-check-input mt-0"
+        toggle-event="<%=(event)? event.name:'' %>"
+        type="radio"
+        value='N'
+        <%=(valor != 'S')? 'checked':''%>
+        <%=(readonly)? 'readonly': ''%>
+        <%=(disabled)? 'disabled': ''%>
+    />
+    <label class="form-check-label mt-0" for="flexRadioDefault2">
+        NO
+    </label>
+</div>
+<label toggle-error="<%=name%>" id="<%=name%>-error" class="error" for="<%=name%>"></label>

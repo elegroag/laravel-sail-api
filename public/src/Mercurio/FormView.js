@@ -150,7 +150,7 @@ export class FormView extends Backbone.View {
             }
         }
         if (!view) {
-            switch (model.get('type')) {
+            switch (model.get('form_type')) {
                 case 'select':
                     view = new SelectComponent({ model, collection });
                     break;
@@ -163,18 +163,20 @@ export class FormView extends Backbone.View {
                 case 'date':
                     view = new DateComponent({ model });
                     break;
-                case 'text':
+                case 'textarea':
                     view = new TextComponent({ model });
                     break;
                 case 'dialog':
                     view = new DialogComponent({ model, collection });
                     break;
                 default:
+                    model.set('form_type', 'input');
+                    view = new InputComponent({ model });
                     break;
             }
             this.children[model.get('cid')] = view;
         }
-        view.render();
+        if (view) view.render();
         return view;
     }
 

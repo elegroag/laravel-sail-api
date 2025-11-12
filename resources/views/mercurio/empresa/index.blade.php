@@ -64,5 +64,5 @@
         window.ServerController = 'empresa';
     </script>
 
-    <script src="{{ asset('mercurio/build/Empresas.js') }}"></script>
+    <script src="{{ asset('mercurio/build/Mercurio30.js') }}"></script>
 @endpush

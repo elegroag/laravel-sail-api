@@ -26,7 +26,7 @@ return [
     [
         'formulario_id' => 2,
         'name' => 'tipdoc',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Tipo de Documento',
         'placeholder' => 'Seleccione el tipo de documento',
         'form_type' => 'select',
@@ -209,7 +209,7 @@ return [
     [
         'formulario_id' => 2,
         'name' => 'sexo',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Sexo',
         'placeholder' => 'Seleccione el sexo',
         'form_type' => 'select',
@@ -258,7 +258,7 @@ return [
     [
         'formulario_id' => 2,
         'name' => 'ciunac',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Ciudad de Nacimiento',
         'placeholder' => 'Seleccione la ciudad de nacimiento',
         'form_type' => 'select',
@@ -281,7 +281,7 @@ return [
     [
         'formulario_id' => 2,
         'name' => 'estciv',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Estado Civil',
         'placeholder' => 'Seleccione el estado civil',
         'form_type' => 'select',
@@ -335,7 +335,7 @@ return [
     [
         'formulario_id' => 2,
         'name' => 'cargo',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Cargo',
         'placeholder' => 'Seleccione el cargo',
         'form_type' => 'select',
@@ -388,7 +388,7 @@ return [
     [
         'formulario_id' => 2,
         'name' => 'tipsal',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Tipo de Salario',
         'placeholder' => 'Seleccione el tipo de salario',
         'form_type' => 'select',
@@ -447,7 +447,7 @@ return [
     [
         'formulario_id' => 2,
         'name' => 'tipcon',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Tipo de Contrato',
         'placeholder' => 'Seleccione el tipo de contrato',
         'form_type' => 'select',
@@ -476,7 +476,7 @@ return [
     [
         'formulario_id' => 2,
         'name' => 'tipjor',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Tipo de Jornada',
         'placeholder' => 'Seleccione el tipo de jornada',
         'form_type' => 'select',
@@ -505,7 +505,7 @@ return [
     [
         'formulario_id' => 2,
         'name' => 'comision',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Recibe Comisión',
         'placeholder' => 'Seleccione una opción',
         'form_type' => 'select',
@@ -531,7 +531,7 @@ return [
     [
         'formulario_id' => 2,
         'name' => 'labora_otra_empresa',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Labora en Otra Empresa',
         'placeholder' => 'Seleccione una opción',
         'form_type' => 'select',
@@ -653,7 +653,7 @@ return [
     [
         'formulario_id' => 2,
         'name' => 'direccion',
-        'type' => 'textarea',
+        'type' => 'text',
         'label' => 'Dirección de Residencia',
         'placeholder' => 'Ingrese la dirección completa',
         'form_type' => 'textarea',
@@ -679,7 +679,7 @@ return [
     [
         'formulario_id' => 2,
         'name' => 'codciu',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Ciudad de Residencia',
         'placeholder' => 'Seleccione la ciudad',
         'form_type' => 'select',
@@ -728,7 +728,7 @@ return [
     [
         'formulario_id' => 2,
         'name' => 'rural',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Residencia Rural',
         'placeholder' => 'Seleccione una opción',
         'form_type' => 'select',
@@ -754,7 +754,7 @@ return [
     [
         'formulario_id' => 2,
         'name' => 'vivienda',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Tipo de Vivienda',
         'placeholder' => 'Seleccione el tipo de vivienda',
         'form_type' => 'select',
@@ -784,7 +784,7 @@ return [
     [
         'formulario_id' => 2,
         'name' => 'orisex',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Orientación Sexual',
         'placeholder' => 'Seleccione la orientación sexual',
         'form_type' => 'select',
@@ -811,7 +811,7 @@ return [
     [
         'formulario_id' => 2,
         'name' => 'facvul',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Factor de Vulnerabilidad',
         'placeholder' => 'Seleccione si aplica',
         'form_type' => 'select',
@@ -840,7 +840,7 @@ return [
     [
         'formulario_id' => 2,
         'name' => 'tipafi',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Tipo de Afiliado',
         'placeholder' => 'Seleccione el tipo de afiliación',
         'form_type' => 'select',
@@ -866,7 +866,7 @@ return [
     [
         'formulario_id' => 2,
         'name' => 'autoriza',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Autorización de Tratamiento de Datos',
         'placeholder' => 'Seleccione una opción',
         'form_type' => 'select',

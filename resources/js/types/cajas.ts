@@ -5,10 +5,10 @@ export type DataSourceItem = { value: string; label: string };
 export type Componente = {
     id: number;
     name: string;
-    type: 'input' | 'select' | 'textarea' | 'date' | 'number' | 'dialog' | string;
+    type: 'text' | 'number' | 'date' | 'hidden' | 'phone' | 'email' | string;
     label: string;
     placeholder?: string | null;
-    form_type: string;
+    form_type: 'input' | 'select' | 'textarea' | 'date' | 'dialog' | 'radio' | 'checkbox' | string;
     group_id: number;
     order: number;
     default_value?: string | null;

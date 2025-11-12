@@ -21,13 +21,13 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='nit'>
                                         <label for="nit" class="control-label">NIT o documento empresa:</label>
-                                        <input type="number" id="nit" name="nit" class="form-control" placeholder="nit" />
+                                        <span id='component_nit'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='razsoc'>
                                         <label for="razsoc" class="control-label">Razón social:</label>
-                                        <input type="text" id="razsoc" name="razsoc" class="form-control uppercase" placeholder="Razon social" />
+                                        <span id='component_razsoc'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -39,20 +39,20 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='digver'>
                                         <label for="digver" class="control-label">Digito verificación:</label>
-                                        <input type="number" id="digver" name="digver" class="form-control" placeholder="digver" />
+                                        <span id='component_digver'></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='sigla'>
                                         <label for="sigla" class="control-label">Sigla:</label>
-                                        <input type="text" id="sigla" name="sigla" class="form-control uppercase" placeholder="Sigla" />
+                                        <span id='component_sigla'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='matmer'>
                                         <label for="matmer" class="control-label">Matricula mercantil:</label>
-                                        <input type="text" id="matmer" name="matmer" class="form-control uppercase" placeholder="Matricula Mercantil" />
+                                        <span id='component_matmer'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -105,19 +105,19 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='fecini'>
                                         <label for="fecini" class="control-label">Fecha inicio:</label>
-                                        <input type="date" id="fecini" name="fecini" class="form-control" placeholder="Fecha inicio" />
+                                        <span id='component_fecini'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='tottra'>
                                         <label for="tottra" class="control-label">Total trabajadores:</label>
-                                        <input type="number" id="tottra" name="tottra" class="form-control" placeholder="Total trabajadores" />
+                                        <span id='component_tottra'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='valnom'>
                                         <label for="valnom" class="control-label">Valor nomina:</label>
-                                        <input type="number" id="valnom" name="valnom" class="form-control" placeholder="Valor nomina" />
+                                        <span id='component_valnom'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -135,19 +135,19 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='telpri'>
                                         <label for="telpri" class="control-label">Telefono comercial con indicativo:</label>
-                                        <input type="number" id="telpri" name="telpri" class="form-control" placeholder="Telefono comercial con indicativo" />
+                                        <span id='component_telpri'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='celpri'>
                                         <label for="celpri" class="control-label">Celular comercial:</label>
-                                        <input type="number" id="celpri" name="celpri" class="form-control" placeholder="Celular comercial" />
+                                        <span id='component_celpri'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='emailpri'>
                                         <label for="emailpri" class="control-label">Email comercial:</label>
-                                        <input type="text" id="emailpri" name="emailpri" class="form-control uppercase" placeholder="Email comercial" />
+                                        <span id='component_emailpri'></span>
                                     </div>
                                 </div>
                             </div>
@@ -170,39 +170,37 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='cedrep'>
                                         <label for="cedrep" class="control-label">Identificación representante:</label>
-                                        <input type="number" id="cedrep" name="cedrep" class="form-control" placeholder="Cedula representante" />
+                                        <span id='component_cedrep'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='priape'>
                                         <label for="priape" class="control-label">Primer apellido:</label>
-                                        <input type="text" id="priape" name="priape" class="form-control uppercase" placeholder="Primer apellido" />
-                                        <label id="priape-error" class="error" for="priape"></label>
+                                        <span id='component_priape'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='segape'>
                                         <label for="segape" class="control-label">Segundo apellido:</label>
-                                        <input type="text" id="segape" name="segape" class="form-control uppercase" placeholder="Segundo apellido" />
+                                        <span id='component_segape'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='prinom'>
                                         <label for="prinom" class="control-label">Primer nombre:</label>
-                                        <input type="text" id="prinom" name="prinom" class="form-control uppercase" placeholder="Primer nombre" />
-                                        <label id="prinom-error" class="error" for="prinom"></label>
+                                        <span id='component_prinom'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='segnom'>
                                         <label for="segnom" class="control-label">Segundo nombre:</label>
-                                        <input type="text" id="segnom" name="segnom" class="form-control uppercase" placeholder="Segundo nombre" />
+                                        <span id='component_segnom'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='repleg'>
                                         <label for="repleg" class="control-label">Representante legal:</label>
-                                        <input type="text" id="repleg" name="repleg" class="form-control uppercase" placeholder="Representante legal" readonly />
+                                        <span id='component_repleg'></span>
                                     </div>
                                 </div>
                             </div>
@@ -238,29 +236,29 @@
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='telefono'>
-                                        <label for="telefono" class="control-label">Telefono notificación con indicativo:</label>
-                                        <input type="number" id="telefono" name="telefono" class="form-control" placeholder="Telefono con indicativo" />
+                                        <label for="telefono" class="control-label">Teléfono notificación con indicativo:</label>
+                                        <span id='component_telefono'></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='email'>
                                         <label for="email" class="control-label">Email notificación</label>
-                                        <input type="text" id="email" name="email" class="form-control uppercase" placeholder="Email notificación" />
+                                        <span id='component_email'></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='fax'>
                                         <label for="fax" class="control-label">Fax notificación</label>
-                                        <input type="text" id="fax" name="fax" class="form-control uppercase" placeholder="Fax" />
+                                        <span id='component_fax'></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='celular'>
                                         <label for="celular" class="control-label">Celular notificación</label>
-                                        <input type="number" id="celular" name="celular" class="form-control" placeholder="Celular notificación" />
+                                        <span id='component_celular'></span>
                                     </div>
                                 </div>
 
@@ -285,47 +283,41 @@
                                 <div class="col-md-6">
                                     <div class="form-group" group-for='cedtra'>
                                         <label for="cedtra" class="control-label">Identificación trabajador:</label>
-                                        <input type="number" id="cedtra" name="cedtra" class="form-control" placeholder="Cédula de identidad" />
-                                        <label id="cedtra-error" class="error" toggle-error="cedtra"></label>
+                                        <span id='component_cedtra'></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-6">
                                     <div class="form-group" group-for='nomtra'>
                                         <label for="nomtra" class="control-label">Nombres trabajador:</label>
-                                        <input type="text" id="nomtra" name="nomtra" class="form-control uppercase" placeholder="Nombres trabajador" />
-                                        <label id="nomtra-error" class="error" toggle-error="nomtra"></label>
+                                        <span id='component_nomtra'></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-6">
                                     <div class="form-group" group-for='apetra'>
                                         <label for="apetra" class="control-label">Apellidos trabajador:</label>
-                                        <input type="text" id="apetra" name="apetra" class="form-control uppercase" placeholder="Apellidos trabajador" />
-                                        <label id="apetra-error" class="error" toggle-error="apetra"></label>
+                                        <span id="component_apetra"></span>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group" group-for='saltra'>
                                         <label for="saltra" class="control-label">Salario:</label>
-                                        <input type="number" id='saltra' name='saltra' class='form-control number' placeholder="Salario" />
-                                        <label id="saltra-error" class="error" toggle-error="saltra"></label>
+                                        <span id="component_saltra"></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-6">
                                     <div class="form-group" group-for='fectra'>
                                         <label for="fectra" class="control-label">Fecha inicia labores:</label>
-                                        <input type="date" id="fectra" name="fectra" class="form-control" placeholder="Fecha de inicio labores" />
-                                        <label id="fectra-error" class="error" toggle-error="fectra"></label>
+                                        <span id="component_fectra"></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-6">
                                     <div class="form-group" group-for='cartra'>
                                         <label for="cartra" class="control-label">Cargo:</label>
-                                        <input type="text" id="cartra" name="cartra" class="form-control uppercase" placeholder="Cargo" />
-                                        <label id="cartra-error" class="error" toggle-error="cartra"></label>
+                                        <span id="component_cartra"></span>
                                     </div>
                                 </div>
                             </div>

@@ -105,10 +105,10 @@ class ComponenteDinamicoController extends Controller
         try {
             $data = $request->validate([
                 'name' => 'required|string|max:255',
-                'type' => 'required|in:input,select,textarea,dialog,date,number',
+                'type' => 'required|in:text,number,date,hidden,email,phone',
                 'label' => 'required|string|max:255',
                 'placeholder' => 'nullable|string|max:255',
-                'form_type' => 'required|string|max:50',
+                'form_type' => 'required|string|max:50|in:input,select,textarea,dialog,date,number,radio,checkbox',
                 'group_id' => 'required|integer|min:1',
                 'order' => 'required|integer|min:1',
                 'default_value' => 'nullable|string',
@@ -159,10 +159,10 @@ class ComponenteDinamicoController extends Controller
         try {
             $data = $request->validate([
                 'name' => 'required|string|max:255',
-                'type' => 'required|in:input,select,textarea,dialog,date,number',
+                'type' => 'required|in:text,number,date,hidden,email,phone',
                 'label' => 'required|string|max:255',
                 'placeholder' => 'nullable|string|max:255',
-                'form_type' => 'required|string|max:50',
+                'form_type' => 'required|string|max:50|in:input,select,textarea,dialog,date,number,radio,checkbox',
                 'group_id' => 'required|integer|min:1',
                 'order' => 'required|integer|min:1',
                 'default_value' => 'nullable|string',
@@ -184,7 +184,9 @@ class ComponenteDinamicoController extends Controller
 
             $componente = ComponenteDinamico::findOrFail($id);
             $componente->update($data);
-            return redirect()->to('/cajas/componente-dinamico/' . $componente->id . '/edit');
+            return redirect()
+                ->to('/cajas/componente-dinamico/' . $componente->id . '/edit')
+                ->with('success', 'Componente actualizado correctamente.');
         } catch (\Throwable $th) {
             $response = [
                 'success' => false,

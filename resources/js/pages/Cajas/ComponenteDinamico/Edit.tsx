@@ -1,6 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
-import { Link, useForm } from '@inertiajs/react';
-import { useEffect } from 'react';
+import { Link, useForm, usePage } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import type { Componente, DataSourceItem } from '@/types/cajas';
 
 type Props = { componente: Componente };
@@ -10,7 +11,7 @@ type FormState = {
     type: Componente['type'];
     label: string;
     placeholder: string;
-    form_type: string;
+    form_type: Componente['form_type'];
     group_id: number;
     order: number;
     default_value: string;
@@ -31,12 +32,15 @@ type FormState = {
 };
 
 export default function Edit({ componente }: Props) {
+    const { props } = usePage<{ flash?: { success?: string; error?: string } }>();
+    const [successOpen, setSuccessOpen] = useState(false);
+    const [successMsg, setSuccessMsg] = useState('');
     const { data, setData, put, processing, errors, setError, clearErrors, transform } = useForm<FormState>({
         name: '',
-        type: 'input' as Componente['type'],
+        type: 'text' as Componente['type'],
         label: '',
         placeholder: '',
-        form_type: 'input',
+        form_type: 'input' as Componente['form_type'],
         group_id: 1,
         order: 1,
         default_value: '',
@@ -60,10 +64,10 @@ export default function Edit({ componente }: Props) {
     useEffect(() => {
         setData({
             name: componente.name || '',
-            type: (componente.type as Componente['type']) || 'input',
+            type: ((componente.type || 'text').toString().toLowerCase() as Componente['type']),
             label: componente.label || '',
             placeholder: componente.placeholder || '',
-            form_type: componente.form_type || 'input',
+            form_type: ((componente.form_type || 'input').toString().toLowerCase() as Componente['form_type']),
             group_id: componente.group_id || 1,
             order: componente.order || 1,
             default_value: componente.default_value || '',
@@ -75,7 +79,10 @@ export default function Edit({ componente }: Props) {
             target: componente.target || -1,
             event_config: (componente.event_config as unknown as FormState['event_config']) || {},
             search_type: (componente.search_type as string) || '',
-            search_endpoint: (componente as any).search_endpoint || '',
+            search_endpoint: ((): string => {
+                const se = (componente as unknown as Record<string, unknown>)?.search_endpoint;
+                return typeof se === 'string' ? se : '';
+            })(),
             date_max: componente.date_max || '',
             number_min: componente.number_min?.toString() || '',
             number_max: componente.number_max?.toString() || '',
@@ -83,11 +90,20 @@ export default function Edit({ componente }: Props) {
             formulario_id: componente.formulario_id ?? undefined,
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [componente.id]);
+    }, [componente]);
+
+    useEffect(() => {
+        const msg = props?.flash?.success as string | undefined;
+        if (msg && typeof msg === 'string') {
+            setSuccessMsg(msg);
+            setSuccessOpen(true);
+        }
+    }, [props]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type, checked } = e.target as HTMLInputElement;
-        const v = type === 'checkbox' ? checked : type === 'number' ? Number(value) : value;
+        const vRaw = type === 'checkbox' ? checked : type === 'number' ? Number(value) : value;
+        const v = (name === 'type' && typeof vRaw === 'string') ? (vRaw.toLowerCase() as Componente['type']) : vRaw;
         setData(name as keyof FormState, v as never);
         clearErrors();
     };
@@ -111,12 +127,16 @@ export default function Edit({ componente }: Props) {
 
     const validate = (): Record<string, string> => {
         const v: Record<string, string> = {};
-        const typeAllowed = ['input','select','textarea','date','number','dialog'];
+        const typeAllowed = ['text','number','date','email','phone','hidden'];
+        const form_typeAllowed = ['input','select','textarea','date','dialog','radio', 'checkbox'];
+
         if (!data.name.trim()) v.name = 'El nombre es obligatorio.';
         if (!data.label.trim()) v.label = 'La etiqueta es obligatoria.';
-        if (!typeAllowed.includes(data.type)) v.type = 'Tipo inválido.';
+        if (!typeAllowed.includes(data.type)) v.type = 'Propiedad type del componente inválido.';
+        if (!form_typeAllowed.includes(data.form_type)) v.form_type = 'Tipo de formulario inválido.';
         if (!data.group_id || Number(data.group_id) < 1) v.group_id = 'Grupo debe ser un entero ≥ 1.';
         if (!data.order || Number(data.order) < 1) v.order = 'Orden debe ser un entero ≥ 1.';
+
         // Validar search_type cuando aplica (form_type select o dialog)
         const appliesSearchType = data.form_type === 'select' || data.form_type === 'dialog';
         if (appliesSearchType) {
@@ -131,11 +151,12 @@ export default function Edit({ componente }: Props) {
             }
         }
         // Nota: data_source ya NO es requerido cuando type === 'select'
-        if (data.type === 'select' && Array.isArray(data.data_source) && data.data_source.length > 0) {
+        if (data.form_type === 'select' && Array.isArray(data.data_source) && data.data_source.length > 0) {
             const invalid = data.data_source.find(it => !it.value.trim() || !it.label.trim());
             if (invalid) v.data_source = 'Todas las opciones deben tener valor y etiqueta.';
         }
-        if (data.type === 'number') {
+
+        if (data.type === 'number' && data.form_type == 'input') {
             const step = Number(data.number_step);
             if (!(step > 0)) v.number_step = 'El incremento debe ser mayor que 0.';
             const min = data.number_min !== '' ? Number(data.number_min) : null;
@@ -144,6 +165,7 @@ export default function Edit({ componente }: Props) {
             if (max !== null && Number.isNaN(max)) v.number_max = 'Número máximo inválido.';
             if (min !== null && max !== null && min > max) v.number_min = 'El mínimo no puede ser mayor que el máximo.';
         }
+
         if (data.type === 'date' && data.date_max) {
             const ts = Date.parse(data.date_max);
             if (Number.isNaN(ts)) v.date_max = 'Fecha máxima inválida.';
@@ -154,6 +176,7 @@ export default function Edit({ componente }: Props) {
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const v = validate();
+        console.log(v);
         if (Object.keys(v).length > 0) {
             clearErrors();
             Object.entries(v).forEach(([k, msg]) => setError(k as any, msg));
@@ -175,12 +198,35 @@ export default function Edit({ componente }: Props) {
         });
         put(`/cajas/componente-dinamico/${componente.id}`, {
             preserveState: true,
+            onSuccess: () => {
+                const msg = (typeof (props?.flash?.success) === 'string' && props.flash.success) ? props.flash.success : 'Componente actualizado correctamente.';
+                setSuccessMsg(msg);
+                setSuccessOpen(true);
+            },
         });
     };
 
     return (
         <AppLayout title={`Editar Componente: ${componente.label}`}>
-            <div className="bg-white shadow overflow-hidden sm:rounded-md">
+            <Dialog open={successOpen} onOpenChange={setSuccessOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Actualización exitosa</DialogTitle>
+                        <DialogDescription>{successMsg || 'Cambios guardados correctamente.'}</DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <DialogClose asChild>
+                            <button
+                                type="button"
+                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                            >
+                                Cerrar
+                            </button>
+                        </DialogClose>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+            <div className="bg-white shadow overflow-hidden sm:rounded-md m-2">
                 <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
                     <div>
                         <h3 className="text-lg leading-6 font-medium text-gray-900">
@@ -237,17 +283,39 @@ export default function Edit({ componente }: Props) {
                                     value={data.type}
                                     onChange={handleChange}
                                 >
-                                    <option value="input">Input (Texto)</option>
-                                    <option value="select">Select (Lista desplegable)</option>
-                                    <option value="textarea">Textarea (Texto largo)</option>
-                                    <option value="date">Date (Fecha)</option>
-                                    <option value="number">Number (Número)</option>
-                                    <option value="dialog">Dialog (Modal)</option>
+                                    <option value="text">Texto</option>
+                                    <option value="number">Número</option>
+                                    <option value="date">Fecha</option>
+                                    <option value="hidden">Oculto</option>
+                                    <option value="phone">Teléfono</option>
+                                    <option value="email">Email</option>
                                 </select>
-                                <p className="mt-1 text-xs text-gray-500">Tipo de componente</p>
+                                <p className="mt-1 text-xs text-gray-500">Tipo de componente {data.type}</p>
                             </div>
 
-                            {/* Tipo de búsqueda (solo para form_type select o dialog) */}
+                             {/* Tipo  form*/}
+                            <div className="col-span-6 sm:col-span-3">
+                                <label htmlFor="type" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tipo de formulario *</label>
+                                <select
+                                    name="form_type"
+                                    id="form_type"
+                                    required
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2"
+                                    value={data.form_type}
+                                    onChange={handleChange}
+                                >
+                                    <option value="input">Input</option>
+                                    <option value="select">Select</option>
+                                    <option value="textarea">Textarea</option>
+                                    <option value="date">Date</option>
+                                    <option value="dialog">Dialog</option>
+                                    <option value="radio">Radio</option>
+                                    <option value="checkbox">Checkbox</option>
+                                </select>
+                                <p className="mt-1 text-xs text-gray-500">Tipo componente formulario</p>
+                            </div>
+
+                            {/* Tipo de búsqueda (solo para type select o dialog) */}
                             {(data.form_type === 'select' || data.form_type === 'dialog') && (
                                 <div className="col-span-6 sm:col-span-3">
                                     <label htmlFor="search_type" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tipo de búsqueda</label>
@@ -270,7 +338,7 @@ export default function Edit({ componente }: Props) {
                             )}
 
                             {/* Endpoint de búsqueda (solo cuando search_type = ajax) */}
-                            {(data.form_type === 'select' || data.form_type === 'dialog') && data.search_type === 'ajax' && (
+                            {(data.type === 'select' || data.type === 'dialog') && data.search_type === 'ajax' && (
                                 <div className="col-span-6">
                                     <label htmlFor="search_endpoint" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Endpoint de búsqueda (AJAX)</label>
                                     <input
@@ -407,7 +475,7 @@ export default function Edit({ componente }: Props) {
                             </div>
 
                             {/* Data Source para Select (visible cuando search_type = local) */}
-                            {data.type === 'select' && (data.search_type === 'local') && (
+                            {data.form_type === 'select' && (data.search_type === 'local') && (
                                 <div className="col-span-6">
                                     <div className="border-t border-gray-200 pt-6">
                                         <h4 className="text-sm font-medium text-gray-900 mb-4">Opciones del Select</h4>
@@ -456,7 +524,7 @@ export default function Edit({ componente }: Props) {
                             )}
 
                             {/* Configuración específica por tipo */}
-                            {data.type === 'date' && (
+                            {data.form_type === 'date' && (
                                 <div className="col-span-6 sm:col-span-3">
                                     <label htmlFor="date_max" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha máxima</label>
                                     <input
@@ -470,7 +538,7 @@ export default function Edit({ componente }: Props) {
                                 </div>
                             )}
 
-                            {data.type === 'number' && (
+                            {data.form_type === 'input' && data.type === 'number' && (
                                 <>
                                     <div className="col-span-6 sm:col-span-2">
                                         <label htmlFor="number_min" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Valor mínimo</label>

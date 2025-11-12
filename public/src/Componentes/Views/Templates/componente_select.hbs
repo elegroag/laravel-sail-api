@@ -1,0 +1,29 @@
+<select
+    id="<%=name%>" 
+    type="<%=type%>" 
+    class="form-control <%=className%>" 
+    toggle-entity="_entitie_form"
+    toggle-event="<%=(event)? event : '' %>"
+    name="<%=name%>"
+    target="<%= target%>"
+    placeholder="<%=placeholder%>"
+    value="<%= valor%>"
+    <%=(readonly)? "readonly": "" %>
+    <%=(disabled)? "disabled": "" %>
+>
+    <option value="">Pendiente seleccionar...</option>
+    <% if (search_type === 'local' || search_type === 'collection') { %>
+        <% if(_.size(data_source) > 0){ %>
+            <% 
+            _.each(data_source, function(_valor, index){ 	%>
+                <% selected = (_valor == valor)? 'selected': '' %>
+                <option value="<%= index%>" <%=selected%>><%= _valor%></option>
+            <% }) %>
+        <% } else { %>
+            <option value="">...</option>
+        <% } %>
+    <% } else { %>
+        <option value="">...</option>
+    <% } %>
+</select>
+<label toggle-error="<%=name%>" id="<%=name%>-error" class="error" for="<%=name%>"></label>

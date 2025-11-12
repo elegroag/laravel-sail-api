@@ -3,24 +3,26 @@ import FormField from '../molecules/FormField';
 import DataSourceEditor from '../molecules/DataSourceEditor';
 import ActionButtons from '../molecules/ActionButtons';
 import ErrorMessage from '../atoms/ErrorMessage';
+import type { Componente } from '@/types/cajas';
 
 interface ComponentData {
     name: string;
-    type: string;
+    type: Componente['type'];
     label: string;
     placeholder: string;
-    form_type: string;
+    form_type: Componente['form_type'];
     group_id: number;
     order: number;
     default_value: string;
     is_disabled: boolean;
     is_readonly: boolean;
-    data_source: any[];
+    data_source: Array<{ value: string; label: string }> | null;
     css_classes: string;
     help_text: string;
     target: number;
-    event_config: any;
+    event_config: Record<string, string | number | boolean | null>;
     search_type: string;
+    search_endpoint?: string;
     date_max: string;
     number_min: number;
     number_max: number;
@@ -35,13 +37,22 @@ interface ComponentFormProps {
     errors?: Record<string, string>;
 }
 
-const COMPONENT_TYPES = [
+const COMPONENT_FORM_TYPES = [
     { value: 'input', label: 'Campo de Texto' },
     { value: 'select', label: 'Lista Desplegable' },
     { value: 'textarea', label: 'Área de Texto' },
     { value: 'date', label: 'Campo de Fecha' },
     { value: 'number', label: 'Campo Numérico' },
     { value: 'dialog', label: 'Diálogo/Modal' },
+];
+
+const COMPONENT_TYPES = [
+    { value: 'text', label: 'Texto' },
+    { value: 'number', label: 'Número' },
+    { value: 'email', label: 'Email' },
+    { value: 'date', label: 'Fecha' },
+    { value: 'phone', label: 'Teléfono' },
+    { value: 'hidden', label: 'Oculto' },
 ];
 
 const ComponentForm: React.FC<ComponentFormProps> = ({
@@ -53,7 +64,7 @@ const ComponentForm: React.FC<ComponentFormProps> = ({
 }) => {
     const [formData, setFormData] = useState<ComponentData>({
         name: '',
-        type: 'input',
+        type: 'text',
         label: '',
         placeholder: '',
         form_type: 'input',
@@ -68,6 +79,7 @@ const ComponentForm: React.FC<ComponentFormProps> = ({
         target: -1,
         event_config: {},
         search_type: '',
+        search_endpoint: '',
         date_max: '',
         number_min: 0,
         number_max: 0,
@@ -85,81 +97,92 @@ const ComponentForm: React.FC<ComponentFormProps> = ({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        await onSubmit(formData);
+        const normalizedSearchType = (formData.search_type === 'ninguno' || formData.search_type === '') ? null : formData.search_type;
+        const payload = {
+            ...formData,
+            search_type: normalizedSearchType,
+            data_source: (formData.form_type === 'select' && normalizedSearchType === 'local') ? formData.data_source : null,
+            search_endpoint: normalizedSearchType === 'ajax' ? (formData.search_endpoint || '') : null,
+            date_max: formData.form_type === 'date' ? formData.date_max : null,
+            number_min: (formData.form_type === 'input' && formData.type === 'number') ? formData.number_min : null,
+            number_max: (formData.form_type === 'input' && formData.type === 'number') ? formData.number_max : null,
+            number_step: (formData.form_type === 'input' && formData.type === 'number') ? formData.number_step : 1,
+        } as unknown as ComponentData;
+        await onSubmit(payload);
     };
 
     const renderTypeSpecificFields = () => {
-        switch (formData.type) {
-            case 'select':
-                return (
-                    <div className="col-span-6">
-                        <DataSourceEditor
-                            options={formData.data_source || []}
-                            onChange={(options) => handleChange('data_source', options)}
-                            error={errors.data_source}
-                        />
-                    </div>
-                );
-
-            case 'date':
-                return (
-                    <div className="col-span-6 sm:col-span-3">
+        // DataSource para Select cuando la búsqueda es local
+        if (formData.form_type === 'select' && formData.search_type === 'local') {
+            return (
+                <div className="col-span-6">
+                    <DataSourceEditor
+                        options={formData.data_source || []}
+                        onChange={(options) => handleChange('data_source', options)}
+                        error={errors.data_source}
+                    />
+                </div>
+            );
+        }
+        // Configuración de fecha
+        if (formData.form_type === 'date') {
+            return (
+                <div className="col-span-6 sm:col-span-3">
+                    <FormField
+                        type="input"
+                        inputType="date"
+                        label="Fecha Máxima Permitida"
+                        name="date_max"
+                        value={formData.date_max}
+                        onChange={(e) => handleChange('date_max', e.target.value)}
+                        error={errors.date_max}
+                        helperText="Fecha máxima que se puede seleccionar"
+                    />
+                </div>
+            );
+        }
+        // Configuración de número
+        if (formData.form_type === 'input' && formData.type === 'number') {
+            return (
+                <>
+                    <div className="col-span-6 sm:col-span-2">
                         <FormField
                             type="input"
-                            inputType="date"
-                            label="Fecha Máxima Permitida"
-                            name="date_max"
-                            value={formData.date_max}
-                            onChange={(e) => handleChange('date_max', e.target.value)}
-                            error={errors.date_max}
-                            helperText="Fecha máxima que se puede seleccionar"
+                            inputType="number"
+                            label="Valor Mínimo"
+                            name="number_min"
+                            value={formData.number_min}
+                            onChange={(e) => handleChange('number_min', Number(e.target.value))}
+                            error={errors.number_min}
                         />
                     </div>
-                );
-
-            case 'number':
-                return (
-                    <>
-                        <div className="col-span-6 sm:col-span-2">
-                            <FormField
-                                type="input"
-                                inputType="number"
-                                label="Valor Mínimo"
-                                name="number_min"
-                                value={formData.number_min}
-                                onChange={(e) => handleChange('number_min', Number(e.target.value))}
-                                error={errors.number_min}
-                            />
-                        </div>
-                        <div className="col-span-6 sm:col-span-2">
-                            <FormField
-                                type="input"
-                                inputType="number"
-                                label="Valor Máximo"
-                                name="number_max"
-                                value={formData.number_max}
-                                onChange={(e) => handleChange('number_max', Number(e.target.value))}
-                                error={errors.number_max}
-                            />
-                        </div>
-                        <div className="col-span-6 sm:col-span-2">
-                            <FormField
-                                type="input"
-                                inputType="number"
-                                label="Incremento"
-                                name="number_step"
-                                value={formData.number_step}
-                                onChange={(e) => handleChange('number_step', Number(e.target.value))}
-                                error={errors.number_step}
-                                helperText="Valor de incremento/decremento"
-                            />
-                        </div>
-                    </>
-                );
-
-            default:
-                return null;
+                    <div className="col-span-6 sm:col-span-2">
+                        <FormField
+                            type="input"
+                            inputType="number"
+                            label="Valor Máximo"
+                            name="number_max"
+                            value={formData.number_max}
+                            onChange={(e) => handleChange('number_max', Number(e.target.value))}
+                            error={errors.number_max}
+                        />
+                    </div>
+                    <div className="col-span-6 sm:col-span-2">
+                        <FormField
+                            type="input"
+                            inputType="number"
+                            label="Incremento"
+                            name="number_step"
+                            value={formData.number_step}
+                            onChange={(e) => handleChange('number_step', Number(e.target.value))}
+                            error={errors.number_step}
+                            helperText="Valor de incremento/decremento"
+                        />
+                    </div>
+                </>
+            );
         }
+        return null;
     };
 
     return (
@@ -192,6 +215,19 @@ const ComponentForm: React.FC<ComponentFormProps> = ({
                         onChange={(e) => handleChange('type', e.target.value)}
                         options={COMPONENT_TYPES}
                         error={errors.type}
+                        required
+                    />
+                </div>
+
+                <div className="col-span-6 sm:col-span-3">
+                    <FormField
+                        type="select"
+                        label="Tipo de Formulario"
+                        name="form_type"
+                        value={formData.form_type}
+                        onChange={(e) => handleChange('form_type', e.target.value)}
+                        options={COMPONENT_FORM_TYPES}
+                        error={errors.form_type}
                         required
                     />
                 </div>
@@ -283,6 +319,41 @@ const ComponentForm: React.FC<ComponentFormProps> = ({
                         helperText="Si el campo debe ser solo de lectura"
                     />
                 </div>
+
+                {(formData.form_type === 'select' || formData.form_type === 'dialog') && (
+                    <div className="col-span-6 sm:col-span-3">
+                        <FormField
+                            type="select"
+                            label="Tipo de búsqueda"
+                            name="search_type"
+                            value={formData.search_type}
+                            onChange={(e) => handleChange('search_type', e.target.value)}
+                            options={[
+                                { value: '', label: 'Seleccione' },
+                                { value: 'ninguno', label: 'Ninguno' },
+                                { value: 'local', label: 'Local' },
+                                { value: 'ajax', label: 'Ajax' },
+                                { value: 'collection', label: 'Collection' },
+                            ]}
+                            error={errors.search_type}
+                        />
+                    </div>
+                )}
+
+                {(formData.form_type === 'select' || formData.form_type === 'dialog') && formData.search_type === 'ajax' && (
+                    <div className="col-span-6">
+                        <FormField
+                            type="input"
+                            inputType="text"
+                            label="Endpoint de búsqueda (AJAX)"
+                            name="search_endpoint"
+                            value={formData.search_endpoint || ''}
+                            onChange={(e) => handleChange('search_endpoint', e.target.value)}
+                            error={errors.search_endpoint}
+                            helperText="URL completa a consultar por AJAX. Debe tener mínimo 160 caracteres."
+                        />
+                    </div>
+                )}
 
                 {/* Campos específicos por tipo */}
                 {renderTypeSpecificFields()}

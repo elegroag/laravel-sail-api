@@ -103,7 +103,7 @@ return [
     [
         'formulario_id' => 4,
         'name' => 'parent',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Parentesco con el Trabajador',
         'placeholder' => 'Seleccione el parentesco',
         'form_type' => 'select',
@@ -143,7 +143,7 @@ return [
     [
         'formulario_id' => 4,
         'name' => 'tipdoc',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Tipo de Documento',
         'placeholder' => 'Seleccione el tipo de documento',
         'form_type' => 'select',
@@ -332,7 +332,7 @@ return [
     [
         'formulario_id' => 4,
         'name' => 'sexo',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Sexo',
         'placeholder' => 'Seleccione el sexo',
         'form_type' => 'select',
@@ -432,7 +432,7 @@ return [
     [
         'formulario_id' => 4,
         'name' => 'codciu',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Ciudad de Residencia',
         'placeholder' => 'Seleccione la ciudad',
         'form_type' => 'select',
@@ -455,7 +455,7 @@ return [
     [
         'formulario_id' => 4,
         'name' => 'direccion',
-        'type' => 'textarea',
+        'type' => 'text',
         'label' => 'Dirección de Residencia',
         'placeholder' => 'Ingrese la dirección completa',
         'form_type' => 'textarea',
@@ -483,7 +483,7 @@ return [
     [
         'formulario_id' => 4,
         'name' => 'tippag',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Tipo de Medio de Pago',
         'placeholder' => 'Seleccione el medio de pago',
         'form_type' => 'select',
@@ -537,7 +537,7 @@ return [
     [
         'formulario_id' => 4,
         'name' => 'tipcue',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Tipo de Cuenta',
         'placeholder' => 'Seleccione el tipo de cuenta',
         'form_type' => 'select',
@@ -561,7 +561,7 @@ return [
     [
         'formulario_id' => 4,
         'name' => 'codban',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Banco',
         'placeholder' => 'Seleccione el banco',
         'form_type' => 'select',
@@ -584,7 +584,7 @@ return [
     [
         'formulario_id' => 4,
         'name' => 'biodesco',
-        'type' => 'select',
+        'type' => 'text',
         'label' => '¿Desconoce ubicación del padre/madre biológico?',
         'placeholder' => 'Seleccione una opción',
         'form_type' => 'select',
@@ -636,7 +636,7 @@ return [
     [
         'formulario_id' => 4,
         'name' => 'biotipdoc',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Tipo Documento Padre/Madre',
         'placeholder' => 'Seleccione el tipo de documento',
         'form_type' => 'select',
@@ -800,7 +800,7 @@ return [
     [
         'formulario_id' => 4,
         'name' => 'biocodciu',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Ciudad de Residencia',
         'placeholder' => 'Seleccione la ciudad',
         'form_type' => 'select',
@@ -844,7 +844,7 @@ return [
     [
         'formulario_id' => 4,
         'name' => 'biourbana',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Zona de Residencia',
         'placeholder' => 'Seleccione la zona',
         'form_type' => 'select',
@@ -870,7 +870,7 @@ return [
     [
         'formulario_id' => 4,
         'name' => 'huerfano',
-        'type' => 'select',
+        'type' => 'text',
         'label' => '¿Es huérfano?',
         'placeholder' => 'Seleccione una opción',
         'form_type' => 'select',
@@ -896,7 +896,7 @@ return [
     [
         'formulario_id' => 4,
         'name' => 'tiphij',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Tipo de Hijo',
         'placeholder' => 'Seleccione el tipo de hijo',
         'form_type' => 'select',
@@ -922,7 +922,7 @@ return [
     [
         'formulario_id' => 4,
         'name' => 'peretn',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Pertenencia Étnica',
         'placeholder' => 'Seleccione la etnia',
         'form_type' => 'select',
@@ -950,7 +950,7 @@ return [
     [
         'formulario_id' => 4,
         'name' => 'resguardo_id',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Resguardo Indígena',
         'placeholder' => 'Seleccione el resguardo',
         'form_type' => 'select',
@@ -971,7 +971,7 @@ return [
     [
         'formulario_id' => 4,
         'name' => 'pub_indigena_id',
-        'type' => 'select',
+        'type' => 'text',
         'label' => 'Pueblo Indígena',
         'placeholder' => 'Seleccione el pueblo indígena',
         'form_type' => 'select',
@@ -992,7 +992,7 @@ return [
     [
         'formulario_id' => 4,
         'name' => 'convive',
-        'type' => 'select',
+        'type' => 'text',
         'label' => '¿Con quién convive?',
         'placeholder' => 'Seleccione con quién convive',
         'form_type' => 'select',

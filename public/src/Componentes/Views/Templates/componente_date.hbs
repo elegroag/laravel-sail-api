@@ -1,0 +1,15 @@
+<input
+    type="<%=type%>"
+    class="form-control datepicker mt-2 ddate"
+    toggle-entity="entitie_form"
+    toggle-event="<%= (event)? event : '' %>"
+    id="<%=name%>"
+    name="<%=name%>"
+    target="<%= target%>"
+    placeholder="<%=(placeholder)? placeholder : label %>"
+    value="<%= valor%>"
+    for="<%= name%>"
+    title="<%=(placeholder)? placeholder : label %>"
+    <%=(disabled)? 'disabled': ''%>
+    <%=(readonly)? 'readonly': ''%>
+/>
