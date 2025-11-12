@@ -86,20 +86,20 @@ const ComponentList: React.FC<ComponentListProps> = ({
     return (
         <div className="bg-white shadow overflow-hidden sm:rounded-md">
             {/* Encabezados */}
-            <div className="hidden sm:grid grid-cols-12 gap-4 px-6 py-3 border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                <div className="col-span-4">Componente</div>
-                <div className="col-span-3">Nombre</div>
-                <div className="col-span-2">Grupo</div>
-                <div className="col-span-1">Orden</div>
-                <div className="col-span-1">Tipo</div>
-                <div className="col-span-1 text-right">Acciones</div>
+            <div className="hidden sm:grid gap-4 px-6 py-3 border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase tracking-wider sm:grid-cols-[30%_8%_8%_8%_8%_40%]">
+                <div>Componente</div>
+                <div>Nombre</div>
+                <div>Grupo</div>
+                <div>Orden</div>
+                <div>Tipo</div>
+                <div>Acciones</div>
             </div>
             <ul className="divide-y divide-gray-200">
                 {componentes.map((componente) => (
                     <li key={componente.id} className="px-6 py-4">
-                        <div className="grid grid-cols-12 gap-4 items-center">
+                        <div className="grid grid-cols-1 gap-4 items-start sm:items-center sm:grid-cols-[30%_8%_8%_8%_8%_40%]">
                             {/* Columna: Componente (label) */}
-                            <div className="col-span-12 sm:col-span-4 min-w-0">
+                            <div className="min-w-0">
                                 <div className="flex items-center justify-between sm:justify-start sm:space-x-3">
                                     <div className="min-w-0">
                                         <p className="text-sm font-medium text-gray-900 truncate">{componente.label}</p>
@@ -121,15 +121,15 @@ const ComponentList: React.FC<ComponentListProps> = ({
                                 </div>
                             </div>
                             {/* Columna: Nombre (name) */}
-                            <div className="col-span-12 sm:col-span-3 text-sm text-gray-700 truncate">{componente.name}</div>
+                            <div className="text-sm text-gray-700 truncate">{componente.name}</div>
                             {/* Columna: Grupo */}
-                            <div className="col-span-4 sm:col-span-2 text-sm text-gray-700">{componente.group_id}</div>
+                            <div className="text-sm text-gray-700">{componente.group_id}</div>
                             {/* Columna: Orden */}
-                            <div className="col-span-4 sm:col-span-1 text-sm text-gray-700">{componente.order}</div>
+                            <div className="text-sm text-gray-700">{componente.order}</div>
                             {/* Columna: Tipo */}
-                            <div className="col-span-4 sm:col-span-1 text-sm text-gray-700">{getTypeLabel(componente.form_type || componente.type)}</div>
+                            <div className="text-sm text-gray-700">{getTypeLabel(componente.form_type || componente.type)}</div>
                             {/* Columna: Acciones */}
-                            <div className="col-span-12 sm:col-span-1 flex sm:justify-end gap-2 mt-2 sm:mt-0">
+                            <div className="flex flex-wrap gap-2 mt-2 sm:mt-0">
                                 {onShow && (
                                     <Button variant="secondary" size="sm" onClick={() => onShow(componente.id)}>Ver</Button>
                                 )}

@@ -543,7 +543,7 @@ export default function Index({ formularios_dinamicos }: Props) {
                                     id="per_page"
                                     className="rounded-md border border-gray-300 px-2 py-1 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                     value={meta.pagination.per_page}
-                                    onChange={(e) => router.get('/cajas/formulario-dinamico', { page: 1, per_page: Number(e.target.value), ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                    onChange={(e) => router.get('/cajas/formulario-dinamico', { ...currentFilterParams, page: 1, per_page: Number(e.target.value) }, { preserveState: true, preserveScroll: true })}
                                 >
                                     {[10,25,50,100].map(n => (
                                         <option key={n} value={n}>{n}</option>
@@ -553,14 +553,14 @@ export default function Index({ formularios_dinamicos }: Props) {
                         </div>
                         <div className="inline-flex items-center gap-2">
                             <button
-                                onClick={() => router.get('/cajas/formulario-dinamico', { page: 1, per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                onClick={() => router.get('/cajas/formulario-dinamico', { ...currentFilterParams, page: 1 }, { preserveState: true, preserveScroll: true })}
                                 disabled={meta.pagination.current_page === 1}
                                 className="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Primera
                             </button>
                             <button
-                                onClick={() => router.get('/cajas/formulario-dinamico', { page: Math.max(1, meta.pagination!.current_page - 1), per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                onClick={() => router.get('/cajas/formulario-dinamico', { ...currentFilterParams, page: Math.max(1, meta.pagination!.current_page - 1) }, { preserveState: true, preserveScroll: true })}
                                 disabled={meta.pagination.current_page === 1}
                                 className="px-3 py-1 border rounded disabled:opacity-50 text-gray-600 hover:text-gray-900"
                             >
@@ -577,7 +577,7 @@ export default function Index({ formularios_dinamicos }: Props) {
                                         {pages.map((num) => (
                                             <button
                                                 key={num}
-                                                onClick={() => router.get('/cajas/formulario-dinamico', { page: num, per_page: p.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                                onClick={() => router.get('/cajas/formulario-dinamico', { ...currentFilterParams, page: num }, { preserveState: true, preserveScroll: true })}
                                                 className={`inline-flex items-center h-9 px-3 rounded-md border text-sm font-medium ${num === p.current_page ? 'bg-indigo-600 text-gray border-indigo-600' : 'text-gray-700 border-gray-300 hover:bg-indigo-50 hover:border-indigo-300'} focus:outline-none focus:ring-2 focus:ring-indigo-500`}
                                             >
                                                 {num}
@@ -587,14 +587,14 @@ export default function Index({ formularios_dinamicos }: Props) {
                                 );
                             })()}
                             <button
-                                onClick={() => router.get('/cajas/formulario-dinamico', { page: Math.min(meta.pagination!.last_page, meta.pagination!.current_page + 1), per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                onClick={() => router.get('/cajas/formulario-dinamico', { ...currentFilterParams, page: Math.min(meta.pagination!.last_page, meta.pagination!.current_page + 1) }, { preserveState: true, preserveScroll: true })}
                                 disabled={meta.pagination.current_page === meta.pagination.last_page}
                                 className="px-3 py-1 border rounded disabled:opacity-50 text-gray-600 hover:text-gray-900"
                             >
                                 Siguiente
                             </button>
                             <button
-                                onClick={() => router.get('/cajas/formulario-dinamico', { page: meta.pagination!.last_page, per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                onClick={() => router.get('/cajas/formulario-dinamico', { ...currentFilterParams, page: meta.pagination!.last_page }, { preserveState: true, preserveScroll: true })}
                                 disabled={meta.pagination.current_page === meta.pagination.last_page}
                                 className="px-3 py-1 border rounded disabled:opacity-50 text-gray-600 hover:text-gray-900"
                             >
