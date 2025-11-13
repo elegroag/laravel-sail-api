@@ -6,6 +6,7 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
+use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
 use App\Models\Mercurio07;
@@ -279,44 +280,17 @@ class TrabajadorController extends ApplicationController
     {
         try {
             $nit = $this->user['documento'];
+            $coddoc = Gener18::whereNotIn('coddoc', ['7', '5', '2'])->pluck('detdoc', 'coddoc');
+            $coddocrepleg = tipo_document_repleg_detalle();
+            unset($coddocrepleg['RC']);
+            unset($coddocrepleg['TI']);
 
-            $mtipoDocumentos = new Gener18;
-            $tipoDocumentos = [];
+            $tipsoc = Subsi54::all()->pluck('detalle', 'tipsoc');
+            $codzon = Gener09::where("codzon", '>=', 18000)
+                ->where("codzon", "<=", 19000)
+                ->pluck('detzon', 'codzon');
 
-            foreach ($mtipoDocumentos->all() as $mtipo) {
-                if ($mtipo->getCoddoc() == '7' || $mtipo->getCoddoc() == '2') {
-                    continue;
-                }
-                $tipoDocumentos["{$mtipo->getCoddoc()}"] = $mtipo->getDetdoc();
-            }
-
-            $msubsi54 = new Subsi54;
-            $tipsoc = [];
-            foreach ($msubsi54->all() as $entity) {
-                $tipsoc["{$entity->getTipsoc()}"] = $entity->getDetalle();
-            }
-
-            $coddoc = [];
-            foreach ($mtipoDocumentos->all() as $entity) {
-                if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') {
-                    continue;
-                }
-                $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
-            }
-
-            $coddocrepleg = [];
-            foreach ($mtipoDocumentos->all() as $entity) {
-                if ($entity->getCodrua() == 'TI' || $entity->getCodrua() == 'RC') {
-                    continue;
-                }
-                $coddocrepleg["{$entity->getCodrua()}"] = $entity->getDetdoc();
-            }
-
-            $codciu = [];
-            $mzonas = Gener09::where('codzon', '>=', 18000)->where('codzon', '<=', 19000)->get();
-            foreach ($mzonas as $entity) {
-                $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
-            }
+            $codciu = Gener09::all()->pluck('detzon', 'codzon');
 
             $procesadorComando = new ApiSubsidio();
             $procesadorComando->send(
@@ -335,7 +309,7 @@ class TrabajadorController extends ApplicationController
                     'metodo' => "buscar_sucursales_en_empresa/{$nit}",
                     'params' => [
                         'nit' => $nit,
-                    ],
+                    ]
                 ]
             );
             $rqs = $procesadorComando->toArray();
@@ -355,50 +329,62 @@ class TrabajadorController extends ApplicationController
                 }
             }
 
-            $tipafi = (new Mercurio07)->getArrayTipos();
-            $coddoc = $tipoDocumentos;
+            $data = [
+                'ciunac' => ParamsTrabajador::getCiudades(),
+                'tipafi' => ParamsTrabajador::getTipoAfiliado(),
+                'cargo' => ParamsTrabajador::getOcupaciones(),
+                'resguardo_id' => ParamsTrabajador::getResguardos(),
+                'pub_indigena_id' => ParamsTrabajador::getPueblosIndigenas(),
+                'codban' => ParamsTrabajador::getBancos(),
+                'tipo' => get_array_tipos(),
+                'tipdoc' => $coddoc,
+                'tipper' => tipper_array(),
+                'tipsoc' => $tipsoc,
+                'calemp' => calemp_array(),
+                'codciu' => $codciu,
+                'codzon' => $codzon,
+                'coddocrepleg' => $coddocrepleg,
+                'sexo' => sexos_array(),
+                'estciv' => estados_civiles_array(),
+                'cabhog' => cabeza_hogar(),
+                'captra' => capacidad_trabajar(),
+                'tipdis' => tipo_discapacidad_array(),
+                'nivedu' => nivel_educativo_array(),
+                'rural' => es_rural(),
+                'tipcon' => tipo_contrato(),
+                'trasin' => es_sindicalizado(),
+                'vivienda' => vivienda_array(),
+                'orisex' => orientacion_sexual_array(),
+                'facvul' => vulnerabilidades_array(),
+                'peretn' => pertenencia_etnica_array(),
+                'tippag' => tipo_pago_array(),
+                'tipsal' => tipsal_array(),
+                'tipcue' => tipo_cuenta_array(),
+                'ruralt' => es_rural(),
+                'tipjor' => tipo_jornada_array(),
+                'autoriza' => autoriza_array(),
+                'comision' => comision_array(),
+                'labora_otra_empresa' => labora_otra_empresa_array(),
+                'codsuc' => $codsuc,
+                'nit' => [$nit => $nit],
+                'razsoc' => [],
+            ];
+
+            $formulario = FormularioDinamico::where('name', 'mercurio31')->first();
+            $componentes = $formulario->componentes()->get();
+            $componentes = $componentes->map(function ($componente) use ($data) {
+                $_componente = $componente->toArray();
+                if (isset($data[$componente->name])) {
+                    $_componente['data_source'] = $data[$componente->name];
+                }
+                $_componente['id'] = $componente->name;
+                return $_componente;
+            });
 
             $salida = [
                 'success' => true,
+                'data' => $componentes,
                 'msj' => 'OK',
-                'data' => [
-                    'tipo' => $tipafi,
-                    'tipdoc' => $coddoc,
-                    'tipper' => (new Mercurio30)->getTipperArray(),
-                    'tipsoc' => $tipsoc,
-                    'calemp' => (new Mercurio30)->getCalempArray(),
-                    'codciu' => $codciu,
-                    'codzon' => $codciu,
-                    'coddocrepleg' => $coddocrepleg,
-                    'sexo' => ParamsTrabajador::getSexos(),
-                    'estciv' => ParamsTrabajador::getEstadoCivil(),
-                    'cabhog' => ParamsTrabajador::getCabezaHogar(),
-                    'captra' => ParamsTrabajador::getCapacidadTrabajar(),
-                    'tipdis' => ParamsTrabajador::getTipoDiscapacidad(),
-                    'nivedu' => ParamsTrabajador::getNivelEducativo(),
-                    'rural' => ParamsTrabajador::getRural(),
-                    'tipcon' => ParamsTrabajador::getTipoContrato(),
-                    'trasin' => ParamsTrabajador::getSindicalizado(),
-                    'vivienda' => ParamsTrabajador::getVivienda(),
-                    'tipafi' => ParamsTrabajador::getTipoAfiliado(),
-                    'cargo' => ParamsTrabajador::getOcupaciones(),
-                    'orisex' => ParamsTrabajador::getOrientacionSexual(),
-                    'facvul' => ParamsTrabajador::getVulnerabilidades(),
-                    'peretn' => ParamsTrabajador::getPertenenciaEtnicas(),
-                    'ciunac' => ParamsTrabajador::getCiudades(),
-                    'tippag' => ParamsTrabajador::getTipoPago(),
-                    'resguardo_id' => ParamsTrabajador::getResguardos(),
-                    'pub_indigena_id' => ParamsTrabajador::getPueblosIndigenas(),
-                    'codban' => ParamsTrabajador::getBancos(),
-                    'tipsal' => (new Mercurio31)->getTipsalArray(),
-                    'tipcue' => ParamsTrabajador::getTipoCuenta(),
-                    'ruralt' => ParamsTrabajador::getRural(),
-                    'tipjor' => ['C' => 'COMPLETA', 'M' => 'MEDIA', 'P' => 'PARCIAL'],
-                    'autoriza' => ['S' => 'SI', 'N' => 'NO'],
-                    'comision' => ['S' => 'SI', 'N' => 'NO'],
-                    'labora_otra_empresa' => ['S' => 'SI', 'N' => 'NO'],
-                    'codsuc' => $codsuc,
-                ],
             ];
         } catch (DebugException $err) {
             $salida = [
@@ -406,17 +392,13 @@ class TrabajadorController extends ApplicationController
                 'msj' => $err->getMessage(),
             ];
         }
-
         return response()->json($salida);
     }
 
     /**
      * renderTable function
-     *
      * @changed [2023-12-00]
-     *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
      * @param  string  $estado
      * @return string
      */

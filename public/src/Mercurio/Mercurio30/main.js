@@ -1,6 +1,7 @@
 import { $App } from '@/App';
 import loading from '@/Componentes/Views/Loading';
 import FormClaveFirma from '@/Mercurio/Principal/FormClaveFirma';
+import '@/style.scss';
 import { RouterEmpresas } from './RouterEmpresas';
 
 window.App = $App;

@@ -1,6 +1,7 @@
 import { $App } from '@/App';
+import FormClaveFirma from '@/Mercurio/Principal/FormClaveFirma';
+import '@/style.scss';
 import { RouterTrabajadores } from './RouterTrabajadores';
-import FormClaveFirma from '../Principal/FormClaveFirma';
 
 window.App = $App;
 

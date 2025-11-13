@@ -1,7 +1,8 @@
-import qs from 'qs';
+import { ModalController } from '@/Common/ModalController';
 import { Region } from '@/Common/Region';
 import loading from '@/Componentes/Views/Loading';
 import { $Kumbia } from '@/Utils';
+import qs from 'qs';
 
 Backbone.$ = $;
 window.$ = $;
@@ -14,6 +15,7 @@ const $App = {
     router: null,
     currentSubapp: null,
     Modal: null,
+    modalController: null,
     layout: null,
     el: null,
     mainRegion: null,
@@ -157,34 +159,17 @@ const $App = {
         });
     },
     renderModal(transfer = {}) {
-        const { title, view, options = false } = transfer;
-        const targetModal = $('#modalComponent');
-        if (!this.Modal) {
-            this.Modal = new bootstrap.Modal(document.getElementById('modalComponent'), {
-                keyboard: true,
-                backdrop: 'static',
-            });
+        if (!this.modalController) {
+            this.modalController = new ModalController('modalComponent', this);
         }
-        targetModal.find('#mdl_set_title').text(title);
-        targetModal.find('#mdl_set_footer').css('display', 'none');
-        if (options) {
-            targetModal.find('.modal-dialog').addClass(options.bootstrapSize);
-        }
-        targetModal.find('#mdl_set_body').html(view.render().$el);
-        this.Modal.show();
-        if (options) {
-            this.Modal.on('hidden.bs.modal', (event) => view.remove());
-            targetModal.find('.close').addClass('d-none');
-        }
+        this.modalController.show(transfer);
+        this.Modal = this.modalController.instance;
     },
     closeModal(view) {
-        if (this.Modal) {
-            this.Modal.hide();
-            this.Modal = null;
+        if (this.modalController) {
+            this.modalController.hide(view);
         }
-        if (view) {
-            view.remove();
-        }
+        this.Modal = null;
     },
     url(method = '', controller = undefined) {
         if (controller) {

@@ -66,3 +66,4 @@ require_once __DIR__ . '/files.php';
 require_once __DIR__ . '/hashes.php';
 require_once __DIR__ . '/company.php';
 require_once __DIR__ . '/solicitudes.php';
+require_once __DIR__ . '/afiliados.php';

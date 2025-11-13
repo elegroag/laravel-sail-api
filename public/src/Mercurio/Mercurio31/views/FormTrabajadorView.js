@@ -1,7 +1,7 @@
-import { ComponentModel } from '../../../Componentes/Models/ComponentModel';
-import { eventsFormControl } from '../../../Core';
-import { FormView } from '../../FormView';
-import { TrabajadorModel } from '../models/TrabajadorModel';
+import { ComponentModel } from '@/Componentes/Models/ComponentModel';
+import { eventsFormControl } from '@/Core';
+import { FormView } from '@/Mercurio/FormView';
+import { TrabajadorModel } from '@/Mercurio/Mercurio31/models/TrabajadorModel';
 
 class FormTrabajadorView extends FormView {
     #choiceComponents = null;
@@ -30,21 +30,13 @@ class FormTrabajadorView extends FormView {
     }
 
     #afterRender($el = {}) {
-        _.each(this.collection, (component = { name: '', type: undefined }) => {
-            if (component.name == 'autoriza') component.type = 'radio';
+        _.each(this.collection, (component) => {
             const view = this.addComponent(
                 new ComponentModel({
-                    disabled: false,
-                    readonly: false,
-                    order: 0,
-                    target: 1,
-                    searchType: 'local',
                     ...component,
                     valor: this.model.get(component.name),
                 }),
             );
-
-            this.viewComponents.push(view);
             $el.find('#component_' + component.name).html(view.$el);
         });
 
@@ -98,7 +90,10 @@ class FormTrabajadorView extends FormView {
                 if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
             });
         } else {
-            $.each(this.selectores, (index, element) => (this.#choiceComponents[element.name] = new Choices(element)));
+            $.each(
+                this.selectores,
+                (index, element) => (this.#choiceComponents[element.name] = new Choices(element, { silent: true, itemSelectText: '' })),
+            );
         }
 
         this.selectores.on('change', (event) => {
@@ -241,10 +236,7 @@ class FormTrabajadorView extends FormView {
                     }
                 },
             });
-
         });
-
-
     }
 
     validePk(e) {

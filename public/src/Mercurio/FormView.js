@@ -10,13 +10,17 @@ import {
     TextComponent,
 } from '@/Componentes/Views/ComponentsView';
 import { LoadDocumentsView } from '@/Componentes/Views/LoadDocumentsView';
+import { PoliticaModalView } from '@/Componentes/Views/PoliticaModalView';
 import { SeguimientosView } from '@/Componentes/Views/SeguimientosView';
 import { SubHeaderView } from '@/Componentes/Views/SubHeaderView';
-import tmp_politica from '@/Componentes/Views/Templates/politica_tratamiento_datos.hbs?raw';
 import { is_numeric } from '@/Core';
 
 function cancelarPolitica() {
-    Swal.fire('Proceso Cancelado', 'Debe aceptar la política para poder utilizar nuestros servicios.', 'error');
+    if (window.App && typeof window.App.trigger === 'function') {
+        window.App.trigger('alert:error', { message: 'Debe aceptar la política para poder utilizar nuestros servicios.' });
+    } else {
+        Swal.fire('Proceso Cancelado', 'Debe aceptar la política para poder utilizar nuestros servicios.', 'error');
+    }
 }
 
 export class FormView extends Backbone.View {
@@ -268,33 +272,43 @@ export class FormView extends Backbone.View {
     }
 
     __enviarCaja() {
-        const _tmp = _.template(tmp_politica);
+        const view = new PoliticaModalView();
 
-        Swal.fire({
-            html: _tmp(),
-            icon: 'info',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Sí, Acepto la Política',
-            cancelButtonText: 'No Acepto / Cancelar',
-            allowOutsideClick: false,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                this.trigger('form:send', {
-                    model: this.model,
-                    callback: (response) => {
-                        if (response.success) {
-                            this.remove();
-                            this.App.router.navigate('list', { trigger: true });
-                        }
+        this.App.trigger('show:modal', {
+            title: 'Política de Tratamiento de Datos',
+            view,
+            options: {
+                size: 'modal-xl',
+                scrollable: true,
+                footer: [
+                    {
+                        text: 'No Acepto / Cancelar',
+                        className: 'btn-secondary',
+                        onClick: () => {
+                            this.App.trigger('hide:modal', view);
+                            setTimeout(() => {
+                                cancelarPolitica();
+                            }, 300);
+                        },
                     },
-                });
-            } else {
-                setTimeout(() => {
-                    cancelarPolitica();
-                }, 300);
-            }
+                    {
+                        text: 'Sí, Acepto la Política',
+                        className: 'btn-primary',
+                        onClick: () => {
+                            this.trigger('form:send', {
+                                model: this.model,
+                                callback: (response) => {
+                                    if (response.success) {
+                                        this.App.trigger('hide:modal', view);
+                                        this.remove();
+                                        this.App.router.navigate('list', { trigger: true });
+                                    }
+                                },
+                            });
+                        },
+                    },
+                ],
+            },
         });
     }
 

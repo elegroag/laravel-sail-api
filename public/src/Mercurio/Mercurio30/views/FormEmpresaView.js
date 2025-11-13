@@ -2,8 +2,7 @@ import { ComponentModel } from '@/Componentes/Models/ComponentModel';
 import { TrabajadorNominaModel } from '@/Componentes/Models/TrabajadorNominaModel';
 import { eventsFormControl } from '@/Core';
 import { FormView } from '@/Mercurio/FormView';
-import { TraNomCollection } from '@/Mercurio/Trabajadores/collections/TrabajadoresCollection';
-import { setTimeout } from 'timers/promises';
+import { TraNomCollection } from '@/Mercurio/Mercurio31/collections/TrabajadoresCollection';
 import { EmpresaModel } from '../models/EmpresaModel';
 import { TrabajadoresNominaView } from './TrabajadoresNominaView';
 
@@ -229,7 +228,7 @@ export class FormEmpresaView extends FormView {
                                         setTimeout(() => {
                                             const _tab = new bootstrap.Tab('a[href="#documentos_adjuntos"]');
                                             _tab.show();
-                                        }, 300);
+                                        }, 1000);
                                     } else {
                                         this.App.trigger('alert:error', { message: response.msj });
                                     }

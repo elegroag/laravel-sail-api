@@ -1,5 +1,5 @@
 import { TrabajadorNominaModel } from '@/Componentes/Models/TrabajadorNominaModel';
-import { TrabajadorModel } from '../models/TrabajadorModel';
+import { TrabajadorModel } from '@/Mercurio/Mercurio31/models/TrabajadorModel';
 
 class TrabajadoresCollection extends Backbone.Collection {
     constructor() {
