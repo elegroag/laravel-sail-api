@@ -8,7 +8,7 @@ export type Componente = {
     type: 'text' | 'number' | 'date' | 'hidden' | 'phone' | 'email' | string;
     label: string;
     placeholder?: string | null;
-    form_type: 'input' | 'select' | 'textarea' | 'date' | 'dialog' | 'radio' | 'checkbox' | string;
+    form_type: 'input' | 'select' | 'textarea' | 'date' | 'dialog' | 'radio' | 'checkbox' | 'address' | string;
     group_id: number;
     order: number;
     default_value?: string | null;

@@ -58,13 +58,7 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='dirpri'>
                                         <label for="dirpri" class="control-label">Dirección comercial:</label>
-                                         @component('components/address', [
-                                            'name' => 'dirpri', 
-                                            'value' => '',
-                                            'placeholder' => 'Dirección comercial',
-                                            'event' => 'address',
-                                            'label' => 'Dirección comercial'
-                                        ])@endcomponent
+                                        <span id='component_dirpri'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -134,7 +128,7 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='telpri'>
-                                        <label for="telpri" class="control-label">Telefono comercial con indicativo:</label>
+                                        <label for="telpri" class="control-label">Teléfono comercial con indicativo:</label>
                                         <span id='component_telpri'></span>
                                     </div>
                                 </div>
@@ -224,13 +218,7 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='direccion'>
                                         <label for="direccion" class="control-label">Dirección notificación:</label>
-                                        @component('components/address', [
-                                            'name' => 'direccion', 
-                                            'value' => '',
-                                            'placeholder' => 'Dirección notificación',
-                                            'event' => 'address',
-                                            'label' => 'Dirección notificación'
-                                        ])@endcomponent
+                                        <span id='component_direccion'></span>
                                     </div>
                                 </div>
 

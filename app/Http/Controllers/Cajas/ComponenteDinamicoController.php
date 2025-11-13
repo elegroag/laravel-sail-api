@@ -108,7 +108,7 @@ class ComponenteDinamicoController extends Controller
                 'type' => 'required|in:text,number,date,hidden,email,phone',
                 'label' => 'required|string|max:255',
                 'placeholder' => 'nullable|string|max:255',
-                'form_type' => 'required|string|max:50|in:input,select,textarea,dialog,date,number,radio,checkbox',
+                'form_type' => 'required|string|max:50|in:input,select,textarea,dialog,date,number,radio,checkbox,address',
                 'group_id' => 'required|integer|min:1',
                 'order' => 'required|integer|min:1',
                 'default_value' => 'nullable|string',
@@ -162,7 +162,7 @@ class ComponenteDinamicoController extends Controller
                 'type' => 'required|in:text,number,date,hidden,email,phone',
                 'label' => 'required|string|max:255',
                 'placeholder' => 'nullable|string|max:255',
-                'form_type' => 'required|string|max:50|in:input,select,textarea,dialog,date,number,radio,checkbox',
+                'form_type' => 'required|string|max:50|in:input,select,textarea,dialog,date,number,radio,checkbox,address',
                 'group_id' => 'required|integer|min:1',
                 'order' => 'required|integer|min:1',
                 'default_value' => 'nullable|string',
@@ -332,7 +332,7 @@ class ComponenteDinamicoController extends Controller
 
     /**
      * Obtiene los componentes dinámicos de un formulario específico con paginación y filtros
-     * 
+     *
      * @queryParam q string Término de búsqueda para filtrar por nombre, etiqueta o tipo
      * @queryParam per_page int Número de elementos por página (default: 10)
      * @queryParam page int Número de página (default: 1)

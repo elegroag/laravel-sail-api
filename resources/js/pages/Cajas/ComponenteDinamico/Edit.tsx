@@ -128,7 +128,7 @@ export default function Edit({ componente }: Props) {
     const validate = (): Record<string, string> => {
         const v: Record<string, string> = {};
         const typeAllowed = ['text','number','date','email','phone','hidden'];
-        const form_typeAllowed = ['input','select','textarea','date','dialog','radio', 'checkbox'];
+        const form_typeAllowed = ['input','select','textarea','date','dialog','radio', 'checkbox', 'address'];
 
         if (!data.name.trim()) v.name = 'El nombre es obligatorio.';
         if (!data.label.trim()) v.label = 'La etiqueta es obligatoria.';
@@ -248,7 +248,7 @@ export default function Edit({ componente }: Props) {
                         href="/cajas/componente-dinamico"
                         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                     >
-                        Volver 
+                        Volver
                     </Link>
                     </div>
 
@@ -311,6 +311,7 @@ export default function Edit({ componente }: Props) {
                                     <option value="dialog">Dialog</option>
                                     <option value="radio">Radio</option>
                                     <option value="checkbox">Checkbox</option>
+                                    <option value="address">Dirección</option>
                                 </select>
                                 <p className="mt-1 text-xs text-gray-500">Tipo componente formulario</p>
                             </div>

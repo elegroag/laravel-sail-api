@@ -1,9 +1,9 @@
 import { $App } from '@/App';
 import { ComponentModel } from '@/Componentes/Models/ComponentModel';
 import { eventsFormControl } from '@/Core';
+import { ActualizadatosModel } from '@/Mercurio/Actualizadatos/models/ActualizadatosModel';
 import { FormView } from '@/Mercurio/FormView';
-import { ActualizadatosModel } from '../models/ActualizadatosModel';
-import { EmpresaModel } from '../models/EmpresaModel';
+import { EmpresaModel } from '@/Mercurio/Mercurio30/models/EmpresaModel';
 
 class FormActualizadatosView extends FormView {
     #choiceComponents = null;

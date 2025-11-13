@@ -1,5 +1,6 @@
 import { GestionAdjuntoService } from '@/Componentes/Services/GestionAdjuntoService';
 import {
+    AddressComponent,
     DateComponent,
     DialogComponent,
     InputComponent,
@@ -168,6 +169,9 @@ export class FormView extends Backbone.View {
                     break;
                 case 'dialog':
                     view = new DialogComponent({ model, collection });
+                    break;
+                case 'address':
+                    view = new AddressComponent({ model });
                     break;
                 default:
                     model.set('form_type', 'input');

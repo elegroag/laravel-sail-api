@@ -6,12 +6,20 @@ import componente_input from '@/Componentes/Views/Templates/componente_input.hbs
 import componente_radio from '@/Componentes/Views/Templates/componente_radio.hbs?raw';
 import componente_select from '@/Componentes/Views/Templates/componente_select.hbs?raw';
 import componente_textarea from '@/Componentes/Views/Templates/componente_textarea.hbs?raw';
+import modal_address from '@/Componentes/Views/Templates/modal-address.hbs?raw';
 import Choices from 'choices.js';
 
 class SelectComponent extends ModelView {
     constructor(options = {}) {
         super(options);
         this.template = _.template(componente_select);
+    }
+}
+
+class AddressComponent extends ModelView {
+    constructor(options = {}) {
+        super(options);
+        this.template = _.template(componente_address);
     }
 }
 
@@ -67,27 +75,28 @@ class InputComponent extends ModelView {
 }
 
 class OpenAddress extends Backbone.View {
+    static Modal = null;
+
     constructor(options = {}) {
         super(options);
-        this.Modal = null;
     }
 
     initialize() {
-        this.Modal = new bootstrap.Modal(document.getElementById('modal_generic'), {
+        OpenAddress.Modal = new bootstrap.Modal(document.getElementById('modal_generic'), {
             keyboard: true,
             backdrop: 'static',
         });
     }
 
     render() {
-        const template = _.template(componente_address);
+        const template = _.template(modal_address);
         this.$el.html(
             template({
                 adress: this.collection,
             }),
         );
         $('#size_modal_generic').addClass('modal-lg');
-        this.Modal.show();
+        OpenAddress.Modal.show();
         document.getElementById('modal_generic').addEventListener('hidden.bs.modal', (e) => {
             if ($('.modal:visible').length == 0) this.remove();
         });
@@ -106,7 +115,7 @@ class OpenAddress extends Backbone.View {
 
     closeModal(e) {
         e.preventDefault();
-        this.Modal.hide();
+        OpenAddress.Modal.hide();
     }
 
     validaCaracteres(e) {
@@ -138,11 +147,11 @@ class OpenAddress extends Backbone.View {
         }
         let target = document.getElementById(this.model.name);
         target.value = address;
-        this.Modal.hide();
+        OpenAddress.Modal.hide();
         if (address) {
             target.classList.add('is-valid');
             target.classList.remove('is-invalid');
-            document.getElementById(this.model.name + '-error').textContent = '';
+            $('#' + this.model.name + '-error').text('');
         }
     }
 
@@ -194,4 +203,4 @@ class OpenAddress extends Backbone.View {
     }
 }
 
-export { DateComponent, DialogComponent, InputComponent, OpenAddress, RadioComponent, SelectComponent, TextComponent };
+export { AddressComponent, DateComponent, DialogComponent, InputComponent, OpenAddress, RadioComponent, SelectComponent, TextComponent };

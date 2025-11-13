@@ -44,6 +44,7 @@ const COMPONENT_FORM_TYPES = [
     { value: 'date', label: 'Campo de Fecha' },
     { value: 'number', label: 'Campo Numérico' },
     { value: 'dialog', label: 'Diálogo/Modal' },
+    { value: 'address', label: 'Dirección' },
 ];
 
 const COMPONENT_TYPES = [

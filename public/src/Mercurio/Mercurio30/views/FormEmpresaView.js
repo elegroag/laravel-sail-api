@@ -86,7 +86,8 @@ export class FormEmpresaView extends FormView {
         }
 
         this.selectores.on('change', (event) => {
-            this.validateChoicesField(event.detail.value, this.#choiceComponents[event.currentTarget.name]);
+            const value = $(event.currentTarget).val();
+            this.validateChoicesField(value, this.#choiceComponents[event.currentTarget.name]);
         });
 
         flatpickr(this.$el.find('#fecini, #fectra'), {
