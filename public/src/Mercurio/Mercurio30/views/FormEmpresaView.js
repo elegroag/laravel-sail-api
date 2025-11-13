@@ -3,6 +3,7 @@ import { TrabajadorNominaModel } from '@/Componentes/Models/TrabajadorNominaMode
 import { eventsFormControl } from '@/Core';
 import { FormView } from '@/Mercurio/FormView';
 import { TraNomCollection } from '@/Mercurio/Trabajadores/collections/TrabajadoresCollection';
+import { setTimeout } from 'timers/promises';
 import { EmpresaModel } from '../models/EmpresaModel';
 import { TrabajadoresNominaView } from './TrabajadoresNominaView';
 
@@ -224,10 +225,11 @@ export class FormEmpresaView extends FormView {
                                                 trigger: true,
                                                 replace: true,
                                             });
-                                        } else {
+                                        }
+                                        setTimeout(() => {
                                             const _tab = new bootstrap.Tab('a[href="#documentos_adjuntos"]');
                                             _tab.show();
-                                        }
+                                        }, 300);
                                     } else {
                                         this.App.trigger('alert:error', { message: response.msj });
                                     }

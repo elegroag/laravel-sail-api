@@ -181,7 +181,7 @@ class EmpresaController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     /**
@@ -189,10 +189,9 @@ class EmpresaController extends ApplicationController
      */
     public function borrarArchivo(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $numero = $this->clp($request, 'id');
-            $coddoc = $this->clp($request, 'coddoc');
+            $numero = $request->input('id');
+            $coddoc = $request->input('coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
             $filepath = storage_path('temp/' . $mercurio37->getArchivo());
@@ -216,7 +215,7 @@ class EmpresaController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     /**
@@ -224,22 +223,21 @@ class EmpresaController extends ApplicationController
      */
     public function guardarArchivo(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $id = $this->clp($request, 'id');
-            $coddoc = $this->clp($request, 'coddoc');
+            $id = $request->input('id');
+            $coddoc = $request->input('coddoc');
 
             $guardarArchivoService = new GuardarArchivoService([
                 'tipopc' => $this->tipopc,
                 'coddoc' => $coddoc,
                 'id' => $id,
             ]);
-            $mercurio37 = $guardarArchivoService->main();
 
+            $mercurio37 = $guardarArchivoService->main();
             $salida = [
                 'success' => true,
                 'msj' => 'Ok archivo procesado',
-                'data' => method_exists($mercurio37, 'getArray') ? $mercurio37->getArray() : null,
+                'data' => $mercurio37->toArray(),
             ];
         } catch (DebugException $e) {
             $salida = [
@@ -248,7 +246,7 @@ class EmpresaController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     /**
@@ -320,41 +318,11 @@ class EmpresaController extends ApplicationController
     public function params()
     {
         try {
-            $mtipoDocumentos = new Gener18;
-            $tipoDocumentos = [];
-
-            foreach ($mtipoDocumentos->all() as $mtipo) {
-                if ($mtipo->getCoddoc() == '7' || $mtipo->getCoddoc() == '2') {
-                    continue;
-                }
-                $tipoDocumentos["{$mtipo->getCoddoc()}"] = $mtipo->getDetdoc();
-            }
-
-            $msubsi54 = new Subsi54;
-            $tipsoc = [];
-            foreach ($msubsi54->all() as $entity) {
-                if ($entity->getTipsoc() == '08') {
-                    continue;
-                }
-                $tipsoc["{$entity->getTipsoc()}"] = $entity->getDetalle();
-            }
-
-            $coddoc = [];
-            foreach ($mtipoDocumentos->all() as $entity) {
-                if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') {
-                    continue;
-                }
-                $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
-            }
-
-            $codciu = [];
-            $mgener09 = Gener09::where("codzon", '>=', 18000)
+            $coddoc = Gener18::whereNotIn('coddoc', ['7', '5', '2'])->pluck('detdoc', 'coddoc');
+            $tipsoc = Subsi54::where('tipsoc', '!=', '08')->pluck('detalle', 'tipsoc');
+            $codciu = Gener09::where("codzon", '>=', 18000)
                 ->where("codzon", "<=", 19000)
-                ->get();
-
-            foreach ($mgener09 as $entity) {
-                $codciu["{$entity->codzon}"] = $entity->detzon;
-            }
+                ->pluck('detzon', 'codzon');
 
             $procesadorComando = new ApiSubsidio();
             $procesadorComando->send(
@@ -424,7 +392,7 @@ class EmpresaController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     /**
@@ -661,6 +629,8 @@ class EmpresaController extends ApplicationController
             'tipo' => $this->tipo,
             'coddoc' => $this->user['coddoc'],
             'documento' => $this->user['documento'],
+            'barnotif' => $request->input('barnotif'),
+            'barcomer' => $request->input('barcomer'),
         ];
     }
 

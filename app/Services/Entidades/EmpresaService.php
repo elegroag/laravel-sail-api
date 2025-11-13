@@ -266,21 +266,16 @@ class EmpresaService
         if ($empresa != false) {
             // Usar asignación masiva para actualizar los atributos
             $empresa->fill($data);
-
             // Establecer el representante legal
-            $empresa->setRepleg($data['priape'] . ' ' . $data['segape'] . ' ' . $data['prinom'] . ' ' . $data['segnom']);
-
+            $empresa->repleg = $data['priape'] . ' ' . $data['segape'] . ' ' . $data['prinom'] . ' ' . $data['segnom'];
             // Asignar funcionario
-            $empresa->setUsuario((new AsignarFuncionario)->asignar($this->tipopc, $this->user['codciu']));
-
-            $empresa->setTipo(session('tipo'));
-            $empresa->setCoddoc($this->user['coddoc']);
-            $empresa->setDocumento($this->user['documento']);
-
+            $empresa->usuario = (new AsignarFuncionario)->asignar($this->tipopc, $this->user['codciu']);
+            $empresa->tipo = session('tipo');
+            $empresa->coddoc = $this->user['coddoc'];
+            $empresa->documento = $this->user['documento'];
             // Establecer estado y fecha de solicitud
-            $empresa->setEstado('T');
-            $empresa->setFecsol(date('Y-m-d'));
-
+            $empresa->estado = 'T';
+            $empresa->fecsol = date('Y-m-d');
             return $empresa->save();
         } else {
             return false;
@@ -295,20 +290,17 @@ class EmpresaService
      */
     public function create($data)
     {
-        $empresa = new Mercurio30($data);
-        $empresa->setRepleg($data['priape'] . ' ' . $data['segape'] . ' ' . $data['prinom'] . ' ' . $data['segnom']);
-
-        $empresa->setUsuario((new AsignarFuncionario)->asignar($this->tipopc, $this->user['codciu']));
-
-        $empresa->setTipo(session('tipo'));
-
-        $empresa->setCoddoc($this->user['coddoc']);
-
-        $empresa->setDocumento($this->user['documento']);
-
-        $empresa->setMatmer(substr($data['matmer'], 0, 12));
-
-        $empresa->setFax('18001');
+        $empresa = new Mercurio30();
+        $empresa->fill($data);
+        $empresa->repleg = $data['priape'] . ' ' . $data['segape'] . ' ' . $data['prinom'] . ' ' . $data['segnom'];
+        $empresa->usuario = (new AsignarFuncionario)->asignar($this->tipopc, $this->user['codciu']);
+        $empresa->tipo = session('tipo');
+        $empresa->coddoc = $this->user['coddoc'];
+        $empresa->documento = $this->user['documento'];
+        $empresa->matmer = substr($data['matmer'], 0, 12);
+        $empresa->fax = (isset($data['fax']) ? $data['fax'] : '180001');
+        $empresa->estado = 'T';
+        $empresa->log = '0';
 
         Mercurio37::where('tipopc', $this->tipopc)->where('numero', $empresa->id)->delete();
         Mercurio10::where('tipopc', $this->tipopc)->where('numero', $empresa->id)->delete();
@@ -326,10 +318,7 @@ class EmpresaService
     public function createByFormData($data)
     {
         $empresa = $this->create($data);
-        $empresa->setEstado('T');
-        $empresa->setLog('0');
         $empresa->save();
-
         return $empresa;
     }
 

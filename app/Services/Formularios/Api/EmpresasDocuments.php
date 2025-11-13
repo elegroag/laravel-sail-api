@@ -22,6 +22,8 @@ class EmpresasDocuments
         $actividades = ParamsEmpresa::getActividades();
 
         $ciudad_name = ($this->empresa->codciu ?? null) ? ($ciudades[$this->empresa->codciu] ?? $this->empresa->codciu) : null;
+        $ciupri_name = ($this->empresa->ciupri ?? null) ? ($ciudades[$this->empresa->ciupri] ?? $this->empresa->ciupri) : null;
+
         $zona_name = ($this->empresa->codzon ?? null) ? ($zonas[$this->empresa->codzon] ?? $this->empresa->codzon) : null;
         $actividad_name = ($this->empresa->codact ?? null) ? ($actividades[$this->empresa->codact] ?? $this->empresa->codact) : null;
         $departamento_name = null;
@@ -57,6 +59,7 @@ class EmpresasDocuments
             'celular' => $this->empresa->celular ?? null,
             'email' => $this->empresa->email ?? null,
             'ciudad_name' => $ciudad_name,
+            'ciupri_name' => $ciupri_name,
             'zona_name' => $zona_name,
             'actividad_name' => $actividad_name,
             'departamento_name' => $departamento_name,

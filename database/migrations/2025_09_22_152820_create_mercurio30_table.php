@@ -66,6 +66,8 @@ return new class extends Migration
             $table->char('prinomrepleg', 25)->nullable();
             $table->char('segnomrepleg', 25)->nullable();
             $table->char('codcaj', 2)->nullable();
+            $table->char('barnotif', 45)->nullable();
+            $table->char('barcomer', 45)->nullable();
 
             $table->char('sat_fecapr', 10)->nullable()->comment('Fecha de aprobación SAT');
             $table->char('sat_cedrep', 18)->nullable()->comment('Documento del representante SAT');

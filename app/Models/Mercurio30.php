@@ -72,7 +72,9 @@ class Mercurio30 extends ModelBase
         'sat_numtra',
         'fecapr',
         'fecsol',
-        'ruuid'
+        'ruuid',
+        'barnotif',
+        'barcomer'
     ];
 
     public function getFecsol()

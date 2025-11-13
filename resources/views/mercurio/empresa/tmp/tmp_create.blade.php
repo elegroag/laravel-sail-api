@@ -11,8 +11,8 @@
                     <div class="col-12">
                         <fieldset>
                             <legend>Generales empleador</legend>
-                            <div class="row">
-                                <div class="col-md-3">
+                            <div class="row justify-content-around">
+                                <div class="col-md-4">
                                     <div class="form-group" group-for='tipper'>
                                         <label for="tipper" class="control-label">Tipo persona:</label>
                                         <span id='component_tipper'></span>
@@ -24,44 +24,50 @@
                                         <span id='component_nit'></span>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-5">
                                     <div class="form-group" group-for='razsoc'>
                                         <label for="razsoc" class="control-label">Razón social:</label>
                                         <span id='component_razsoc'></span>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <div class="form-group" group-for='coddoc'>
                                         <label for="coddoc" class="control-label">Tipo documento empresa:</label>
                                         <span id='component_coddoc'></span>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class="form-group" group-for='digver'>
                                         <label for="digver" class="control-label">Digito verificación:</label>
                                         <span id='component_digver'></span>
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class="form-group" group-for='sigla'>
                                         <label for="sigla" class="control-label">Sigla:</label>
                                         <span id='component_sigla'></span>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class="form-group" group-for='matmer'>
                                         <label for="matmer" class="control-label">Matricula mercantil:</label>
                                         <span id='component_matmer'></span>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <div class="form-group" group-for='dirpri'>
                                         <label for="dirpri" class="control-label">Dirección comercial:</label>
                                         <span id='component_dirpri'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
+                                    <div class="form-group" group-for='barcomer'>
+                                        <label for="barcomer" class="control-label">Barrio comercial:</label>
+                                        <span id='component_barcomer'></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
                                     <div class="form-group" group-for='tipsoc'>
                                         <label for="tipsoc" class="control-label">Tipo sociedad:</label>
                                         <span id='component_tipsoc'></span>
@@ -77,7 +83,7 @@
                     <div class="col-12">
                         <fieldset>
                             <legend>Especifico del empleador</legend>
-                            <div class="row">
+                            <div class="row justify-content-around">
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='tipemp'>
                                         <label for="tipemp" class="control-label">Tipo empresa:</label>
@@ -90,7 +96,7 @@
                                         <span id='component_codzon'></span>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-6">
                                     <div class="form-group" group-for='codact'>
                                         <label for="codact" class="control-label">CIUU-DIAN Actividad economica:</label>
                                         <span id='component_codact'></span>
@@ -154,7 +160,7 @@
                     <div class="col-12">
                         <fieldset>
                             <legend>Representante legal</legend>
-                            <div class="row">
+                            <div class="row justify-content-around">
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='coddocrepleg'>
                                         <label for="coddocrepleg" class="control-label">Tipo documento representante:</label>
@@ -207,7 +213,7 @@
                     <div class="col-12">
                         <fieldset>
                             <legend>Contacto administrativo</legend>
-                            <div class="row">
+                            <div class="row justify-content-around">
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='codciu'>
                                         <label for="codciu" class="control-label">Ciudad notificación:</label>
@@ -219,6 +225,13 @@
                                     <div class="form-group" group-for='direccion'>
                                         <label for="direccion" class="control-label">Dirección notificación:</label>
                                         <span id='component_direccion'></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group" group-for='barnotif'>
+                                        <label for="barnotif" class="control-label">Barrio notificación:</label>
+                                        <span id='component_barnotif'></span>
                                     </div>
                                 </div>
 
@@ -267,7 +280,7 @@
                         <fieldset>
                             <legend>Relaciona trabajadores en nomina</legend>
                             <p>Certifica que las personas relacionadas en este formulario está en la nomina, son empleados de la empresa y sus labores son realizadas en el Departamento del Caquetá</p>
-                            <div class="row">
+                            <div class="row justify-content-around">
                                 <div class="col-md-6">
                                     <div class="form-group" group-for='cedtra'>
                                         <label for="cedtra" class="control-label">Identificación trabajador:</label>

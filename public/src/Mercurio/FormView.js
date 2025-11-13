@@ -12,6 +12,7 @@ import {
 import { LoadDocumentsView } from '@/Componentes/Views/LoadDocumentsView';
 import { SeguimientosView } from '@/Componentes/Views/SeguimientosView';
 import { SubHeaderView } from '@/Componentes/Views/SubHeaderView';
+import tmp_politica from '@/Componentes/Views/Templates/politica_tratamiento_datos.hbs?raw';
 import { is_numeric } from '@/Core';
 
 function cancelarPolitica() {
@@ -267,33 +268,18 @@ export class FormView extends Backbone.View {
     }
 
     __enviarCaja() {
+        const _tmp = _.template(tmp_politica);
+
         Swal.fire({
-            // Título del cuadro de diálogo
-            title: '¡Su privacidad es importante!',
-
-            // Texto principal que incluye el enlace a la política
-            html:
-                'Para continuar, debe aceptar nuestra **Política de Privacidad y Tratamiento de Datos Personales**.' +
-                '<br><br>' +
-                'Por favor, revísela haciendo clic en el siguiente enlace:' +
-                '<br>' +
-                // Asegúrate de reemplazar # con la URL real de tu política
-                '<a href="[URL_DE_TU_POLITICA]" target="_blank" style="color: #3085d6; font-weight: bold;">Ver Política de Datos</a>',
-
-            // Icono de información o advertencia
+            html: _tmp(),
             icon: 'info',
-
-            // Configuración de botones
             showCancelButton: true,
-            confirmButtonColor: '#3085d6', // Color primario
-            cancelButtonColor: '#d33', // Color secundario (rojo)
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
             confirmButtonText: 'Sí, Acepto la Política',
             cancelButtonText: 'No Acepto / Cancelar',
-
-            // Opcional: Permitir cerrar haciendo clic fuera
             allowOutsideClick: false,
         }).then((result) => {
-            // Manejo de la respuesta
             if (result.isConfirmed) {
                 this.trigger('form:send', {
                     model: this.model,
