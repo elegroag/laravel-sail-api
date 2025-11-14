@@ -306,7 +306,7 @@ class TrabajadorController extends ApplicationController
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
-                    'metodo' => "buscar_sucursales_en_empresa/{$nit}",
+                    'metodo' => "informacion_empresa",
                     'params' => [
                         'nit' => $nit,
                     ]
@@ -315,9 +315,9 @@ class TrabajadorController extends ApplicationController
             $rqs = $procesadorComando->toArray();
 
             $codsuc = [];
-            $sucursales = $rqs['data'];
-            if ($sucursales) {
-                foreach ($sucursales as $data) {
+            $empresa_sisu = $rqs['data'];
+            if ($empresa_sisu) {
+                foreach ($empresa_sisu['sucursales'] as $data) {
                     if ($data['estado'] == 'I') {
                         continue;
                     }
@@ -367,7 +367,7 @@ class TrabajadorController extends ApplicationController
                 'labora_otra_empresa' => labora_otra_empresa_array(),
                 'codsuc' => $codsuc,
                 'nit' => [$nit => $nit],
-                'razsoc' => [],
+                'razsoc' => [$empresa_sisu['razsoc'] => $empresa_sisu['razsoc']],
             ];
 
             $formulario = FormularioDinamico::where('name', 'mercurio31')->first();

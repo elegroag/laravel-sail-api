@@ -2,14 +2,14 @@
     type="<%=type%>"
     toggle-entity="entitie_form"
     class="form-control  mt-2"
-    toggle-event="<%=(event)? event : '' %>"
+    toggle-event="<%=(event_config)? event_config : '' %>"
     id="<%=name%>"
     name="<%=name%>"
     target="<%= target%>"
     placeholder="<%=(placeholder)? placeholder : label %>"
     maxlength="<%= number_max %>"
     rows="2"
-    <%=(readonly)? 'readonly': ''%>
-    <%=(disabled)? 'disabled': ''%>><%= valor%>
+    <%=(is_readonly)? 'readonly': ''%>
+    <%=(is_disabled)? 'disabled': ''%>><%= valor%>
 </textarea>
 <label toggle-error="<%=name%>" id="<%=name%>-error" class="error" for="<%=name%>"></label>

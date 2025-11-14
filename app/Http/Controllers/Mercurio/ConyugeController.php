@@ -6,6 +6,7 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsConyuge;
 use App\Models\Adapter\DbBase;
+use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
 use App\Models\Mercurio10;
@@ -529,51 +530,58 @@ class ConyugeController extends ApplicationController
     public function params()
     {
         try {
-            $nombre = $this->user['nombre'];
-            $documento = $this->user['documento'];
-            $coddoc = $this->user['coddoc'];
             $tipo = $this->tipo;
-
-            $listAfiliados = false;
-            $cedtras = [];
-
             $trabajadorService = new TrabajadorService;
+
+            $mercurio31 = $trabajadorService->findRequestByDocumentoCoddoc($this->user['documento'], $this->user['coddoc']);
             if ($tipo == 'E') {
-                $cedtras[] = $trabajadorService->findRequestByDocumentoCoddoc($documento, $coddoc);
-                $list = $trabajadorService->findApiTrabajadoresByNit($documento);
+                $trabajadoresSisu = $trabajadorService->findApiTrabajadoresByNit($this->user['documento']);
 
-                $listAfiliados = [];
-                foreach ($list as $row) {
-                    $listAfiliados[] = ['cedula' => $row['cedtra'], 'nombre_completo' => $row['nombre']];
+                $listAfiliados = collect($trabajadoresSisu)->map(function ($row) {
+                    return ['cedula' => $row['cedtra'], 'nombre_completo' => $row['nombre']];
+                });
+
+                $cedtras = [];
+                foreach ($listAfiliados as $value) {
+                    $cedtras[$value['cedula']] = $value['cedula'];
                 }
+                foreach ($trabajadoresSisu as $value) {
+                    $cedtras[$value['cedtra']] = $value['cedtra'];
+                }
+
+                $procesadorComando = new ApiSubsidio();
+                $procesadorComando->send(
+                    [
+                        'servicio' => 'ComfacaEmpresas',
+                        'metodo' => "informacion_empresa",
+                        'params' => [
+                            'nit' => $this->user['documento'],
+                        ]
+                    ]
+                );
+                $rqs = $procesadorComando->toArray();
+                $empresa_sisu = $rqs['data'];
+                $nit = [$this->user['documento'] => $this->user['documento']];
             } else {
-                $cedtras[] = ['cedula' => $documento,  'nombre_completo' => $nombre];
+                $cedtras[$this->user['documento']] = $this->user['documento'];
+                $empresa_sisu = false;
+
+                $listAfiliados = collect($mercurio31)->map(function ($row) {
+                    return ['cedula' => $row['cedula'], 'nombre_completo' => $row['nombre']];
+                });
+                $nit = collect($mercurio31)->pluck('nit', 'nit');
             }
 
-            $mtipoDocumentos = new Gener18;
-            $tipoDocumentos = [];
+            $coddoc = Gener18::whereNotIn('coddoc', ['7', '5', '2'])->pluck('detdoc', 'coddoc');
+            $coddocrepleg = tipo_document_repleg_detalle();
+            unset($coddocrepleg['RC']);
+            unset($coddocrepleg['TI']);
 
-            foreach ($mtipoDocumentos->all() as $mtipo) {
-                if ($mtipo->getCoddoc() == '7' || $mtipo->getCoddoc() == '2') {
-                    continue;
-                }
-                $tipoDocumentos["{$mtipo->getCoddoc()}"] = $mtipo->getDetdoc();
-            }
+            $codzon = Gener09::where("codzon", '>=', 18000)
+                ->where("codzon", "<=", 19000)
+                ->pluck('detzon', 'codzon');
 
-            $coddoc = [];
-            foreach ($mtipoDocumentos->all() as $entity) {
-                if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') {
-                    continue;
-                }
-                $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
-            }
-
-            $codciu = [];
-            $mgener09 = new Gener09;
-            foreach ($mgener09->getFind("conditions: codzon >='18000' and codzon <= '19000'") as $entity) {
-                $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
-            }
-
+            $codciu = Gener09::all()->pluck('detzon', 'codzon');
             $procesadorComando = new ApiSubsidio();
             $procesadorComando->send(
                 [
@@ -581,45 +589,72 @@ class ConyugeController extends ApplicationController
                     'metodo' => 'parametros_conyuges',
                 ]
             );
-
-            $tipsal = (new Mercurio32)->getTipsalArray();
-            $tipsal['@'] = 'NINGUNO';
-
             $paramsConyuge = new ParamsConyuge;
             $paramsConyuge->setDatosCaptura($procesadorComando->toArray());
 
-            $coddoc = $tipoDocumentos;
             $data = [
                 'tipdoc' => $coddoc,
                 'coddoc' => $coddoc,
-                'codzon' => $codciu,
-                'codciu' => ParamsConyuge::getCiudades(),
-                'sexo' => ParamsConyuge::getSexos(),
-                'estciv' => ParamsConyuge::getEstadoCivil(),
-                'captra' => ParamsConyuge::getCapacidadTrabajar(),
-                'nivedu' => ParamsConyuge::getNivelEducativo(),
-                'tipviv' => ParamsConyuge::getVivienda(),
-                'cargo' => ParamsConyuge::getOcupaciones(),
-                'ciunac' => ParamsConyuge::getCiudades(),
-                'tippag' => ParamsConyuge::getTipoPago(),
-                'codban' => ParamsConyuge::getBancos(),
-                'tipcue' => ParamsConyuge::getTipoCuenta(),
-                'autoriza' => ['S' => 'SI', 'N' => 'NO'],
-                'comper' => ParamsConyuge::getCompaneroPermanente(),
-                'codocu' => ParamsConyuge::getOcupaciones(),
-                'tipsal' => $tipsal,
+                'codzon' => $codzon,
+                'codciu' => $codciu,
+                'sexo' => sexos_array(),
+                'estciv' => estados_civiles_array(),
+                'captra' => capacidad_trabajar(),
+                'nivedu' => nivel_educativo_array(),
+                'tipviv' => vivienda_array(),
+                'ciunac' => $codciu,
+                'tippag' => tipo_pago_array(),
+                'tipcue' => tipo_cuenta_array(),
+                'autoriza' => autoriza_array(),
+                'tipsal' => tipsal_array(),
                 'ciures' => $codciu,
-                'trabajadores' => $cedtras,
-                'list_afiliados' => $listAfiliados,
-                'tipdis' => ParamsConyuge::getTipoDiscapacidad(),
-                'peretn' => ParamsConyuge::getPertenenciaEtnicas(),
+                'tipdis' => tipo_discapacidad_array(),
+                'peretn' => pertenencia_etnica_array(),
                 'resguardo_id' => ParamsConyuge::getResguardos(),
                 'pub_indigena_id' => ParamsConyuge::getPueblosIndigenas(),
+                'cargo' => ParamsConyuge::getOcupaciones(),
+                'codban' => ParamsConyuge::getBancos(),
+                'comper' => ParamsConyuge::getCompaneroPermanente(),
+                'codocu' => ParamsConyuge::getOcupaciones(),
+                'nit' => $nit,
+                'cedtra' => $cedtras,
+                'tipo' => $tipo,
+            ];
+
+            $formulario = FormularioDinamico::where('name', 'mercurio32')->first();
+            $componentes = $formulario->componentes()->get();
+            $componentes = $componentes->map(function ($componente) use ($data) {
+
+                $_componente = $componente->toArray();
+                $_componente['id'] = $componente->name;
+                if ($data['tipo'] !== 'E' && ($componente->name == 'nit' || $componente->name == 'cedtra')) {
+                    $_componente['form_type'] = 'input';
+                    $_componente['is_readonly'] = true;
+                }
+
+                if ($data['tipo'] === 'E' && ($componente->name == 'nit' || $componente->name == 'cedtra')) {
+                    $_componente['form_type'] = 'select';
+                    $_componente['search_type'] = "collection";
+                    $_componente['type'] = 'text';
+                }
+
+                if (isset($data[$componente->name])) {
+                    $_componente['data_source'] = $data[$componente->name];
+                }
+
+                return $_componente;
+            });
+
+            $componentes['props'] = [
+                'name' => null,
+                'tipo' => $tipo,
+                'list_afiliados' => $listAfiliados,
+                'empresa_sisu' => $empresa_sisu,
             ];
 
             $salida = [
                 'success' => true,
-                'data' => $data,
+                'data' => $componentes,
                 'msj' => 'OK',
             ];
         } catch (DebugException $e) {

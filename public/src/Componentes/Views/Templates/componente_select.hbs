@@ -1,15 +1,15 @@
 <select
     id="<%=name%>" 
     type="<%=type%>" 
-    class="form-control <%=className%>" 
+    class="<%=(css_classes)? css_classes : 'form-control' %>" 
     toggle-entity="_entitie_form"
-    toggle-event="<%=(event)? event : '' %>"
+    toggle-event="<%=(event_config)? event_config : '' %>"
     name="<%=name%>"
     target="<%= target%>"
     placeholder="<%=placeholder%>"
     value="<%= valor%>"
-    <%=(readonly)? "readonly": "" %>
-    <%=(disabled)? "disabled": "" %>
+    <%=(is_readonly)? "readonly": "" %>
+    <%=(is_disabled)? "disabled": "" %>
 >
     <option value="">Pendiente seleccionar...</option>
     <% if (search_type === 'local' || search_type === 'collection') { %>

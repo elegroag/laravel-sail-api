@@ -1,8 +1,8 @@
 <input
     type="<%=type%>"
-    class="form-control datepicker mt-2 ddate"
+    class="form-control datepicker mt-2 ddate <%=css_classes%>" 
     toggle-entity="entitie_form"
-    toggle-event="<%= (event)? event : '' %>"
+    toggle-event="<%= (event_config)? event_config : '' %>"
     id="<%=name%>"
     name="<%=name%>"
     target="<%= target%>"
@@ -10,6 +10,6 @@
     value="<%= valor%>"
     for="<%= name%>"
     title="<%=(placeholder)? placeholder : label %>"
-    <%=(disabled)? 'disabled': ''%>
-    <%=(readonly)? 'readonly': ''%>
+    <%=(is_disabled)? 'disabled': ''%>
+    <%=(is_readonly)? 'readonly': ''%>
 />

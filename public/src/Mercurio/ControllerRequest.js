@@ -51,14 +51,16 @@ class ControllerRequest {
     }
 
     createRequest() {
-        const model = new this.EntityModel();
+        let model;
         if (_.isNull(this.App.Collections.formParams)) {
             this.trigger('params', {
                 callback: (response) => {
+                    model = new this.EntityModel();
                     if (response) this.renderCreateRequest(model);
                 },
             });
         } else {
+            model = new this.EntityModel();
             this.renderCreateRequest(model);
         }
     }

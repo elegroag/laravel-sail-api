@@ -5,12 +5,12 @@
         toggle-entity="entitie_form"
         target="<%= target%>"
         class="form-check-input mt-0"
-        toggle-event="<%=(event)? event :'' %>"
+        toggle-event="<%=(event_config)? event_config :'' %>"
         type="radio"
         value='S'
         <%=(valor == 'S')? 'checked':''%>
-        <%=(readonly)? 'readonly': ''%>
-        <%=(disabled)? 'disabled': ''%>
+        <%=(is_readonly)? 'readonly': ''%>
+        <%=(is_disabled)? 'disabled': ''%>
     />
     <label class="form-check-label mt-0" for="flexRadioDefault1">
         SI
@@ -23,12 +23,12 @@
         toggle-entity="entitie_form"
         target="<%= target%>"
         class="form-check-input mt-0"
-        toggle-event="<%=(event)? event.name:'' %>"
+        toggle-event="<%=(event_config)? event_config :'' %>"
         type="radio"
         value='N'
         <%=(valor != 'S')? 'checked':''%>
-        <%=(readonly)? 'readonly': ''%>
-        <%=(disabled)? 'disabled': ''%>
+        <%=(is_readonly)? 'readonly': ''%>
+        <%=(is_disabled)? 'disabled': ''%>
     />
     <label class="form-check-label mt-0" for="flexRadioDefault2">
         NO

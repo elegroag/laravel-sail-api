@@ -393,12 +393,18 @@ class TrabajadorService
      */
     public function findRequestByDocumentoCoddoc($documento, $coddoc)
     {
-        $datos = Mercurio31::select('cedtra as cedula', DB::raw("CONCAT_WS('', prinom, segnom, priape, segape) as nombre_completo"))
+        $datos = Mercurio31::select(
+            'cedtra as cedula',
+            'nit',
+            'id',
+            'coddoc',
+            'tipo',
+            'documento',
+            DB::raw("CONCAT_WS('', prinom, segnom, priape, segape) as nombre_completo")
+        )
             ->where([
                 ['documento', $documento],
-                ['coddoc', $coddoc],
-                ['estado', '<>', 'X'],
-                ['estado', '<>', 'I'],
+                ['coddoc', $coddoc]
             ])
             ->get()
             ->toArray();

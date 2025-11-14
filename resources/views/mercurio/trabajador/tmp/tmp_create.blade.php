@@ -8,31 +8,33 @@
                     <input type="text" name="fax" id="fax" class="d-none" value="" />
                 </div>
 
-                <div class="row">
+                <div class="row mb-2">
                     <div class="col-12">
                         <fieldset>
                             <legend>Datos empresa y trabajador</legend>
-                            <div class="row">
-                                <div class="form-group d-none">
-                                    <label for="fecsol" class="control-label d-none">Fecha solicitud:</label>
-                                    <span id='component_fecsol'></span>
+                            <div class="row justify-content-around">
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="fecsol" class="control-label">Fecha solicitud:</label>
+                                        <span id='component_fecsol'></span>
+                                    </div>
                                 </div>
 
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class='form-group' group-for='nit'>
                                         <label for='nit' class='control-label'>NIT</label>
                                         <span id='component_nit'></span>
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <div class='form-group' group-for='razsoc'>
                                         <label for='razsoc' class='control-label'>Razón social</label>
                                         <span id='component_razsoc'></span>
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <div class='form-group' group-for='codsuc'>
                                         <label for="codsuc" class="control-label">Sucursal empresa</label>
                                         <span id='component_codsuc'></span>
@@ -46,49 +48,49 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class='form-group' group-for='cedtra'>
                                         <label for="cedtra" class="control-label">Número identificación</label>
                                         <span id='component_cedtra'></span>
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class='form-group' group-for='priape'>
                                         <label for="priape" class="control-label">Primer apellido</label>
                                         <span id='component_priape'></span>
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class='form-group' group-for='segape'>
                                         <label for="segape" class="control-label">Segundo apellido</label>
                                         <span id='component_segape'></span>
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class='form-group' group-for='prinom'>
                                         <label for="prinom" class="control-label">Primer nombre</label>
                                         <span id='component_prinom'></span>
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class='form-group' group-for='segnom'>
                                         <label for="segnom" class="control-label">Segundo nombre</label>
                                         <span id='component_segnom'></span>
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <div class='form-group' group-for='codzon'>
                                         <label for="codzon" class="control-label">Zona trabajo</label>
                                         <span id='component_codzon'></span>
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <div class='form-group' group-for='dirlab'>
                                         <label for="dirlab" class="control-label">Dirección de trabajo</label>
                                         <span id='component_dirlab'></span>
@@ -102,7 +104,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class='form-group' group-for='fecing'>
                                         <label for="fecing" class="control-label">Fecha ingreso <small>(AÑO-MES-DÍA)</small></label>
                                         <span id='component_fecing'></span>
@@ -113,22 +115,21 @@
                         </fieldset>
                     </div>
                 </div>
-                <br />
 
-                <div class="row">
+                <div class="row mb-2">
                     <div class="col-12">
                         <fieldset>
                             <legend>Datos basicos trabajador</legend>
-                            <div class="row">
+                            <div class="row justify-content-around">
 
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class='form-group' group-for='fecnac'>
                                         <label for="fecnac" class="control-label">Fecha nacimiento <small>(AÑO-MES-DÍA)</small></label>
                                         <span id='component_fecnac'></span>
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <div class='form-group' group-for='ciunac'>
                                         <label for="ciunac" class="control-label">Ciudad nacimiento</label>
                                         <span id='component_ciunac'></span>
@@ -238,12 +239,11 @@
                     </div>
                 </div>
 
-                <div class="row">
+                <div class="row mb-2">
                     <div class="col-12">
                         <fieldset>
                             <legend>Datos requeridos afiliación</legend>
-                            <div class="row">
-
+                            <div class="row justify-content-around">
                                 <div class="col-md-3">
                                     <div class='form-group' group-for='tipafi'>
                                         <label for="tipafi" class="control-label">Tipo afiliados</label>
@@ -251,7 +251,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-4">
+                                <div class="col-md-6">
                                     <div class='form-group' group-for='cargo'>
                                         <label for="cargo" class="control-label">Cargo</label>
                                         <span id='component_cargo'></span>
@@ -300,7 +300,7 @@
                                 </div>
 
 
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class='form-group' group-for='labora_otra_empresa'>
                                         <label for="labora_otra_empresa" class="control-label">Labora en otra empresa:</label>
                                         <span id='component_labora_otra_empresa'></span>
@@ -318,11 +318,11 @@
                     </div>
                 </div>
 
-                <div class="row">
+                <div class="row mb-2">
                     <div class="col-12">
                         <fieldset>
                             <legend>Datos de contacto</legend>
-                            <div class="row">
+                            <div class="row justify-content-around">
                                 <div class="col-md-3 ">
                                     <div class='form-group' group-for='telefono'>
                                         <label for="telefono" class="control-label">Teléfono</label>
@@ -344,7 +344,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <div class='form-group' group-for='direccion'>
                                         <label for="direccion" class="control-label">Dirección de residencia</label>
                                         <span id='component_direccion'></span>

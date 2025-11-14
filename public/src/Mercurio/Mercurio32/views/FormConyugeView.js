@@ -1,12 +1,10 @@
-import flatpickr from 'flatpickr';
-import { Spanish } from 'flatpickr/dist/l10n/es.js';
-import { $App } from '@/App';
 import Logger from '@/Common/Logger';
 import { ComponentModel } from '@/Componentes/Models/ComponentModel';
 import { eventsFormControl } from '@/Core';
 import { FormView } from '@/Mercurio/FormView';
+import flatpickr from 'flatpickr';
+import { Spanish } from 'flatpickr/dist/l10n/es.js';
 import { ConyugeModel } from '../models/ConyugeModel';
-
 
 export class FormConyugeView extends FormView {
     #choiceComponents = null;
@@ -24,7 +22,7 @@ export class FormConyugeView extends FormView {
 
     get events() {
         return {
-            'focusout #cedtra': 'validaTrabajador',
+            'change #cedtra': 'validoTrabajador',
             'click #guardar_ficha': 'saveFormData',
             'click #cancel': 'cancel',
             'focusout #telefono, #digver': 'isNumber',
@@ -33,20 +31,14 @@ export class FormConyugeView extends FormView {
             'change #labora_otra_empresa': 'changeOtraEmpresa',
             'click [data-toggle="address"]': 'openAddress',
             'click #btEnviarRadicado': 'enviarRadicado',
-            'change #codocu': 'changeCodocu'
+            'change #codocu': 'changeCodocu',
         };
     }
 
     #afterRender($el = {}) {
-        _.each(this.collection, (component = { name: '', type: undefined }) => {
-            if (component.name == 'autoriza') component.type = 'radio';
+        _.each(this.collection, (component) => {
             const view = this.addComponent(
                 new ComponentModel({
-                    disabled: false,
-                    readonly: false,
-                    order: 0,
-                    target: 1,
-                    searchType: 'local',
                     ...component,
                     valor: this.model.get(component.name),
                 }),
@@ -56,15 +48,15 @@ export class FormConyugeView extends FormView {
 
         this.form.validate({
             ...ConyugeModel.Rules,
-            highlight: function (element = '') {
+            highlight: function (element) {
                 $(element).removeClass('is-valid').addClass('is-invalid');
             },
-            unhighlight: function (element = '') {
+            unhighlight: function (element) {
                 $(element).removeClass('is-invalid').addClass('is-valid');
             },
         });
 
-        this.selectores = $el.find('#tipdoc, #codzon, #ciures, #ciunac, #pub_indigena_id, #resguardo_id');
+        this.selectores = $el.find('#tipdoc, #codzon, #ciures, #ciunac, #pub_indigena_id, #resguardo_id, #codban');
 
         if (this.model.get('id') !== null) {
             $.each(this.model.toJSON(), (key, valor) => {
@@ -92,10 +84,20 @@ export class FormConyugeView extends FormView {
                 this.#choiceComponents[element.name] = new Choices(element);
                 const name = this.model.get(element.name);
                 if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
-
             });
         } else {
-            $.each(this.selectores, (index, element) => (this.#choiceComponents[element.name] = new Choices(element)));
+            $.each(
+                this.selectores,
+                (index, element) => (this.#choiceComponents[element.name] = new Choices(element, { silent: true, itemSelectText: '' })),
+            );
+        }
+
+        if (this.collection.props['tipo'] === 'E') {
+            this.setInput('nit', this.collection.props.empresa_sisu['nit']);
+        }
+
+        if (this.collection.props['tipo'] !== 'E') {
+            this.setInput('cedtra', this.collection.props.list_afiliados[0]['cedula']);
         }
 
         this.selectores.on('change', (event) => {
@@ -148,7 +150,7 @@ export class FormConyugeView extends FormView {
         if (this.form.valid() == false) _err++;
         if (_err > 0) {
             target.removeAttr('disabled');
-            $App.trigger('alert:warning', {
+            this.App.trigger('alert:warning', {
                 message: 'Se requiere de resolver los campos requeridos para continuar.',
             });
             setTimeout(() => $('label.error').text(''), 6000);
@@ -160,7 +162,7 @@ export class FormConyugeView extends FormView {
 
         if (entity.isValid() === false) {
             target.removeAttr('disabled');
-            $App.trigger('alert:warning', {
+            this.App.trigger('alert:warning', {
                 message: 'Algunos campos son requeridos para continuar: ' + entity.validationError.join(' '),
             });
             setTimeout(() => $('label.error').text(''), 6000);
@@ -236,8 +238,6 @@ export class FormConyugeView extends FormView {
                 },
             });
         });
-
-
     }
 
     validaConyuge(e) {
@@ -245,16 +245,16 @@ export class FormConyugeView extends FormView {
         let cedcon = this.$el.find(e.currentTarget).val();
         if (cedcon === '') return false;
 
-        $App.trigger('syncro', {
-            url: $App.url(window.ServerController + '/valida'),
+        this.App.trigger('syncro', {
+            url: this.App.url(window.ServerController + '/valida'),
             data: {
                 cedcon: cedcon,
             },
             callback: (solicitud) => {
                 if (solicitud) {
                     const conyuge = solicitud.conyuge || {};
-                    if(conyuge !== false) {
-                        $App.trigger('confirma', {
+                    if (conyuge !== false) {
+                        this.App.trigger('confirma', {
                             message:
                                 'El sistema identifica información del afiliado en el sistema central de la Caja. ¿Desea que se actualice el presente formulario con los datos existentes?.',
                             callback: (status) => {
@@ -291,33 +291,31 @@ export class FormConyugeView extends FormView {
         $('#nit').attr('disabled', true);
 
         setTimeout(() => {
-            $App.trigger('alert:success', {
+            this.App.trigger('alert:success', {
                 message: 'El formulario se actualizo de forma correcta',
             });
         }, 700);
     }
 
-    validaTrabajador(e) {
-        if (!this.isNew) return false;
-        let cedtra = this.getInput('#cedtra');
-        if (cedtra == '') return false;
+    validoTrabajador(e) {
+        e.preventDefault();
+        if (!this.isNew) return null;
+        const cedtra = this.getInput('[name="cedtra"]');
+        if (!cedtra) return null;
 
-        let has = [];
-        let list = [];
+        const afiliado = this.collection.props.list_afiliados;
+        const has = _.where(afiliado, { cedula: cedtra });
 
-        const afili = $App.Collections.formParams.list_afiliados || [];
-        const mtrab = $App.Collections.formParams.trabajadores || [];
-        list = _.union(afili, mtrab);
-
-        if (!_.isEmpty(list)) has = _.where(list, { cedula: cedtra });
-
-        if (_.isEmpty(has)) {
-            this.setInput('cedtra', '');
-            $App.trigger('alert:warning', {
+        if (has.length === 0) {
+            this.App.trigger('alert:warning', {
                 message:
                     'El número de identificación del trabajador no existe como afiliado o como una solicitud pendiente de validación. ' +
                     'Se recomienda primero crear la solicitud del trabajador para poder continuar.',
             });
+            this.setInput('cedtra', '');
+        } else {
+            console.log(has);
+            this.setInput('nomtra', has[0].nombre_completo);
         }
     }
 

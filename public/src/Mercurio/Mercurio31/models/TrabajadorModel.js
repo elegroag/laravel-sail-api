@@ -61,7 +61,7 @@ class TrabajadorModel extends Backbone.Model {
     static Rules = {
         rules: {
             nit: { required: true },
-            razsoc: { required: true, minlength: 5 },
+            razsoc: { required: true },
             cedtra: { required: true, rangelength: [5, 18] },
             tipdoc: { required: true },
             priape: { required: true, minlength: 4 },

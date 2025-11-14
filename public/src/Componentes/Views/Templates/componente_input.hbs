@@ -1,14 +1,14 @@
 <input
     type="<%=type%>"
-    class="form-control <%=className%>"
+    class="form-control <%=css_classes%>"
     toggle-entity="_entitie_form"
-    toggle-event="<%=(event)? event : '' %>"
+    toggle-event="<%=(event_config)? event_config : '' %>"
     id="<%=name%>"
     name="<%=name%>"
     target="<%= target%>"
     placeholder="<%=placeholder%>"
     value="<%= valor%>"
-    <%=(readonly)? 'readonly': ''%>
-    <%=(disabled)? 'disabled': ''%>
+    <%=(is_readonly)? 'readonly': ''%>
+    <%=(is_disabled)? 'disabled': ''%>
 />
 <label toggle-error="<%=name%>" id="<%=name%>-error" class="error" for="<%=name%>"></label>

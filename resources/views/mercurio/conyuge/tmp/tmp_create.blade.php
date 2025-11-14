@@ -12,46 +12,27 @@
                     <div class="col">
                         <fieldset>
                             <legend>Datos relación trabajador - conyuge</legend>
-                            <div class="row">
-                                @if($tipo == 'E')
-                                    <div class="col-md-3">
-                                        <div class="form-group" group-for='cedtra'>
-                                            <label for="cedtra" class="control-label">Cedula trabajador</label>
-                                            <input type="number"
-                                                name="cedtra"
-                                                id="cedtra"
-                                                class="form-control"
-                                                placeholder="Cedula trabajador"
-                                                maxlength="18"
-                                                minlength="5"
-                                                oninput="this.value=this.value.replace(/[^0-9]/g,'')"
-                                                event="is_numeric">
-                                        </div>
+                            <div class="row justify-content-around">
+                                <div class="col-md-4 col-lg-3">
+                                    <div class="form-group" group-for='cedtra'>
+                                        <label for="cedtra" class="control-label">Identificación del trabajador</label>
+                                        <span id='component_cedtra'></span>
                                     </div>
-                                @else
-                                    <div class="col-md-4 col-lg-3">
-                                        <div class="form-group" group-for='cedtra'>
-                                            <label for="cedtra" class="control-label">Identificación del trabajador</label>
-                                            <input type="number"
-                                                name="cedtra"
-                                                id="cedtra"
-                                                class="form-control"
-                                                readonly
-                                                value="{{ $documento }}"
-                                                oninput="this.value=this.value.replace(/[^0-9]/g,'')"
-                                                event="is_numeric">
-                                        </div>
-                                    </div>
-                                @endif
+                                </div>
 
-                                @if($tipo == 'E')
-                                    <div class="col-md-3">
-                                        <div class='form-group' group-for='nit'>
-                                            <label class='control-label'>NIT</label>
-                                            <input type="number" name="nit" id="nit" class="form-control" readonly value="{{ $documento }}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" event="is_numeric">
-                                        </div>
+                                <div class="col-md-4 col-lg-3">
+                                    <div class="form-group" group-for='nomtra'>
+                                        <label for="nomtra" class="control-label">Nombre trabajador</label>
+                                        <span id='component_nomtra'></span>
                                     </div>
-                                @endif
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class='form-group' group-for='nit'>
+                                        <label class='control-label'>NIT</label>
+                                        <span id='component_nit'></span>
+                                    </div>
+                                </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='comper'>
@@ -61,10 +42,8 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='tiecon'>
-                                        <div class="form-group" group-for='tiecon'>
-                                            <label for="tiecon" class="control-label">Tiempo convivencia (Año)</label>
-                                            <input type="number" name="tiecon" id="tiecon" class="form-control" placeholder="Tiempo de Convivencia" maxlength="3" minlength="1" type="number" event="is_numeric">
-                                        </div>
+                                        <label for="tiecon" class="control-label">Tiempo convivencia (Año)</label>
+                                        <span id='component_tiecon'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -89,14 +68,8 @@
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='direccion'>
-                                        @component('components/address', [
-                                            'name' => 'direccion',
-                                            'id' => 'direccion',
-                                            'value' => '',
-                                            'placeholder' => 'Dirección de residencia',
-                                            'event' => 'address',
-                                            'label' => 'Dirección de residencia'
-                                        ])@endcomponent
+                                        <label for="direccion" class="control-label">Dirección de residencia</label>
+                                        <span id='component_direccion'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -130,23 +103,21 @@
                                 <div class="col-md-3 d-none" id='show_empresalab'>
                                     <div class="form-group" group-for='empresalab'>
                                         <label for="empresalab" class="control-label">Empresa donde labora</label>
-                                        <input type="text" name="empresalab" id="empresalab" placeholder="nombre empresa" class="form-control" />
+                                        <span id='component_empresalab'></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3 d-none" id='show_fecing'>
                                     <div class="form-group" group-for='fecing'>
                                         <label for="fecing" class="control-label">Fecha inicio laboral </label>
-                                        <span>
-                                            <input type="date" name="fecing" id="fecing" class="form-control" placeholder="Fecha Ingreso">
-                                        </span>
+                                        <span id='component_fecing'></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3 d-none" id='show_salario'>
                                     <div class="form-group" group-for='salario'>
                                         <label for="salario" class="control-label">Ingresos mensuales</label>
-                                        <input type="number" name="salario" id="salario" class="form-control" placeholder="Salario" type="number" event="is_numeric">
+                                        <span id='component_salario'></span>
                                     </div>
                                 </div>
 
@@ -160,7 +131,7 @@
                                 <div class="col-md-3 d-none" id="show_numcue">
                                     <div class="form-group" group-for='numcue'>
                                         <label for="numcue" class="control-label">Número de cuenta</label>
-                                        <input type="number" name="numcue" id="numcue" class="form-control" event="is_numeric"/>
+                                        <span id='component_numcue'></span>
                                     </div>
                                 </div>
 
@@ -186,7 +157,7 @@
                     <div class="col">
                         <fieldset>
                             <legend>Datos basicos conyuge</legend>
-                            <div class="row">
+                            <div class="row justify-content-around">
                                 <div class="w-25">
                                     <div class="form-group" group-for='tipdoc'>
                                         <label for="tipdoc" class="control-label">Tipo documento conyuge</label>
@@ -197,42 +168,41 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='cedcon'>
                                         <label for="cedcon" class="control-label">Número identificación</label>
-                                        <input type="number" name="cedcon" id="cedcon" class="form-control" type="number" placeholder="Identificación" event="is_numeric">
+                                        <span id='component_cedcon'></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='priape'>
                                         <label for="priape" class="control-label">Primer apellido</label>
-                                        <input type="text" name="priape" id="priape" class="form-control" placeholder="Primer Apellido" oninput="this.value = this.value.toUpperCase()">
+                                        <span id='component_priape'></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='segape'>
                                         <label for="segape" class="control-label">Segundo apellido</label>
-                                        <input type="text" name="segape" id="segape" class="form-control" placeholder="Segundo Apellido" oninput="this.value = this.value.toUpperCase()">
+                                        <span id='component_segape'></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='prinom'>
                                         <label for="prinom" class="control-label">Primer nombre</label>
-                                        <input type="text" name="prinom" id="prinom" class="form-control" placeholder="Primer Nombre" oninput="this.value = this.value.toUpperCase()">
+                                        <span id='component_prinom'></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='segnom'>
                                         <label for="segnom" class="control-label">Segundo nombre</label>
-                                        <input type="text" name="segnom" id="segnom" class="form-control" placeholder="Segundo Nombre" oninput="this.value = this.value.toUpperCase()">
+                                        <span id='component_segnom'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='fecnac'>
                                         <label for="fecnac" class="control-label">Fecha nacimiento <small>(AÑO-MES-DÍA)</small></label>
-                                        <input type="date" name="fecnac" id="fecnac" class="form-control"  placeholder="Fecha nacimiento"/>
-                                        <label id="fecnac-error" class="error" for="fecnac"></label>
+                                        <span id='component_fecnac'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -256,21 +226,21 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='telefono'>
                                         <label for="telefono" class="control-label">Teléfono</label>
-                                        <input type="number" name="telefono" id="telefono" class="form-control" placeholder="Telefono" maxlength="10" minlength="10" type="number" event="is_numeric">
+                                        <span id='component_telefono'></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='celular'>
                                         <label for="celular" class="control-label">Celular</label>
-                                        <input type="number" name="celular" id="celular" class="form-control" placeholder="Celular" maxlength="10" minlength="10" type="number" event="is_numeric">
+                                        <span id='component_celular'></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='email'>
                                         <label for="email" class="control-label">Email</label>
-                                        <input type="text" name="email" id="email" class="form-control uppercase" placeholder="Email">
+                                        <span id='component_email'></span>
                                     </div>
                                 </div>
 

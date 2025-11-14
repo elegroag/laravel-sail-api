@@ -21,7 +21,7 @@ class FormTrabajadorView extends FormView {
             'focusout #telefono, #digver': 'isNumber',
             'focusout #cedtra': 'validePk',
             'change #tippag': 'changeTippag',
-            'change #labora_otra_empresa': 'changeOtraEmpresa',
+            'change [name="labora_otra_empresa"]': 'changeOtraEmpresa',
             'click #btEnviarRadicado': 'enviarRadicado',
             'click [data-toggle="address"]': 'openAddress',
             'click #cancel': 'cancel',
@@ -50,7 +50,9 @@ class FormTrabajadorView extends FormView {
             },
         });
 
-        this.selectores = $el.find('#tipdoc, #tipsoc, #ciupri, #codzon, #codciu, #codact, #coddoc, #ciunac, #cargo, #pub_indigena_id, #resguardo_id');
+        this.selectores = $el.find(
+            '#tipdoc, #tipsoc, #ciupri, #codzon, #codciu, #codact, #coddoc, #ciunac, #cargo, #pub_indigena_id, #resguardo_id, #codban',
+        );
 
         if (this.model.get('id') !== null) {
             $.each(this.model.toJSON(), (key, valor) => {
@@ -110,9 +112,8 @@ class FormTrabajadorView extends FormView {
     }
 
     changeOtraEmpresa(e) {
-        let target = this.$el.find(e.currentTarget).val();
-        if (target == 'S') {
-            this.form.find('#show_otra_empresa').removeClass('d-none');
+        if (document.querySelector('[name="labora_otra_empresa"]').checked) {
+            this.$el.find('#show_otra_empresa').removeClass('d-none');
         } else {
             this.$el.find('#show_otra_empresa').addClass('d-none');
         }

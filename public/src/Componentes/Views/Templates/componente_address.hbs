@@ -5,7 +5,7 @@
         </button>
     </div>
     <input type="text" name="<%= name %>" id="<%= id ? id : name %>" value="<%= valor %>"
-        placeholder="<%= placeholder ? placeholder : label %>" class="<%= className ? className : 'form-control' %>"
+        placeholder="<%= placeholder ? placeholder : label %>" class="<%= css_classes ? css_classes : 'form-control' %>"
         readonly />
 </div>
 <label toggle-error="<%= name %>" id="<%= name %>-error" class="error" for="<%= name %>"></label>
