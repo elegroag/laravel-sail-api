@@ -7,7 +7,9 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsBeneficiario;
 use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
+use App\Models\FormularioDinamico;
 use App\Models\Gener09;
+use App\Models\Gener18;
 use App\Models\Mercurio10;
 use App\Models\Mercurio30;
 use App\Models\Mercurio31;
@@ -527,7 +529,6 @@ class BeneficiarioController extends ApplicationController
     public function params(Request $request)
     {
         try {
-            $nombre = $this->user['nombre'];
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
 
@@ -537,17 +538,43 @@ class BeneficiarioController extends ApplicationController
             $cedtras = [];
 
             $trabajadorService = new TrabajadorService;
+            $mercurio31 = $trabajadorService->findRequestByDocumentoCoddoc($this->user['documento'], $this->user['coddoc']);
             if ($this->tipo == 'E') {
-                $cedtras = $trabajadorService->findRequestByDocumentoCoddoc($documento, $coddoc);
+                $trabajadoresSisu = $trabajadorService->findApiTrabajadoresByNit($this->user['documento']);
+                $listAfiliados = collect($trabajadoresSisu)->map(function ($row) {
+                    return ['cedula' => $row['cedtra'], 'nombre_completo' => $row['nombre']];
+                });
 
-                if ($list = $trabajadorService->findApiTrabajadoresByNit($documento)) {
-                    $listAfiliados = [];
-                    foreach ($list as $row) {
-                        $listAfiliados[] = ['cedula' => $row['cedtra'], 'nombre_completo' => $row['nombre']];
-                    }
+                $cedtras = [];
+                foreach ($listAfiliados as $value) {
+                    $cedtras[$value['cedula']] = $value['cedula'];
                 }
+
+                foreach ($trabajadoresSisu as $value) {
+                    $cedtras[$value['cedtra']] = $value['cedtra'];
+                }
+
+                $procesadorComando = new ApiSubsidio();
+                $procesadorComando->send(
+                    [
+                        'servicio' => 'ComfacaEmpresas',
+                        'metodo' => "informacion_empresa",
+                        'params' => [
+                            'nit' => $this->user['documento'],
+                        ]
+                    ]
+                );
+                $rqs = $procesadorComando->toArray();
+                $empresa_sisu = $rqs['data'];
+                $nit = [$this->user['documento'] => $this->user['documento']];
             } else {
-                $cedtras[] = ['cedula' => $documento,  'nombre_completo' => $nombre];
+                $cedtras[$this->user['documento']] = $this->user['documento'];
+                $empresa_sisu = false;
+
+                $listAfiliados = collect($mercurio31)->map(function ($row) {
+                    return ['cedula' => $row['cedula'], 'nombre_completo' => $row['nombre']];
+                });
+                $nit = collect($mercurio31)->pluck('nit', 'nit');
             }
 
             $conyugeService = new ConyugeService;
@@ -581,37 +608,75 @@ class BeneficiarioController extends ApplicationController
             $paramsConyuge = new ParamsBeneficiario;
             $paramsConyuge->setDatosCaptura($procesadorComando->toArray());
 
+            $codciu = Gener09::all()->pluck('detzon', 'codzon');
+            $coddoc = Gener18::all()->pluck('detdoc', 'coddoc');
+
+            $data = [
+                'biotipdoc' => $coddoc,
+                'tipdoc' => $coddoc,
+                'ciunac' => $codciu,
+                'biocodciu' => $codciu,
+                'codzon' => $codzons,
+                'biourbana' => $biourbana,
+                'biodesco' => $biodesco,
+                'sexo' => sexos_array(),
+                'estciv' => estados_civiles_array(),
+                'captra' => capacidad_trabajar(),
+                'parent' => parentesco_array(),
+                'huerfano' => huerfano_array(),
+                'tiphij' => tipo_hijo_array(),
+                'nivedu' => nivel_educativo_array(),
+                'tipdis' => tipo_discapacidad_array(),
+                'calendario' => calendario_array(),
+                'peretn' => pertenencia_etnica_array(),
+                'tippag' => tipo_pago_array(),
+                'tipcue' => tipo_cuenta_array(),
+                'convive' => convive_array(),
+                'codban' => ParamsBeneficiario::getBancos(),
+                'resguardo_id' => ParamsBeneficiario::getResguardos(),
+                'pub_indigena_id' => ParamsBeneficiario::getPueblosIndigenas(),
+                'nit' => $nit,
+                'cedtra' => $cedtras,
+                'tipo' => $this->tipo,
+            ];
+
+            $formulario = FormularioDinamico::where('name', 'mercurio34')->first();
+            $componentes = $formulario->componentes()->get();
+            $componentes = $componentes->map(function ($componente) use ($data) {
+
+                $_componente = $componente->toArray();
+                $_componente['id'] = $componente->name;
+                if ($data['tipo'] !== 'E' && ($componente->name == 'nit' || $componente->name == 'cedtra')) {
+                    $_componente['form_type'] = 'input';
+                    $_componente['is_readonly'] = true;
+                }
+
+                if ($data['tipo'] === 'E' && ($componente->name == 'nit' || $componente->name == 'cedtra')) {
+                    $_componente['form_type'] = 'select';
+                    $_componente['search_type'] = "collection";
+                    $_componente['type'] = 'text';
+                }
+
+                if (isset($data[$componente->name])) {
+                    $_componente['data_source'] = $data[$componente->name];
+                }
+
+                return $_componente;
+            });
+
+            $componentes['props'] = [
+                'name' => null,
+                'tipo' => $this->tipo,
+                'list_afiliados' => $listAfiliados,
+                'list_conyuges' => $listConyuges,
+                'empresa_sisu' => $empresa_sisu,
+                'trabajadores' => $cedtras,
+                'conyuges' => $conyuges,
+            ];
+
             $salida = [
                 'success' => true,
-                'data' => [
-                    'biotipdoc' => ParamsBeneficiario::getTiposDocumentos(),
-                    'tipdoc' => ParamsBeneficiario::getTiposDocumentos(),
-                    'sexo' => ParamsBeneficiario::getSexos(),
-                    'estciv' => ParamsBeneficiario::getEstadoCivil(),
-                    'ciunac' => ParamsBeneficiario::getCiudades(),
-                    'captra' => ParamsBeneficiario::getCapacidadTrabajar(),
-                    'parent' => ParamsBeneficiario::getParentesco(),
-                    'huerfano' => ParamsBeneficiario::getHuerfano(),
-                    'tiphij' => ParamsBeneficiario::getTipoHijo(),
-                    'nivedu' => ParamsBeneficiario::getNivelEducativo(),
-                    'tipdis' => ParamsBeneficiario::getTipoDiscapacidad(),
-                    'calendario' => ParamsBeneficiario::getCalendario(),
-                    'resguardo_id' => ParamsBeneficiario::getResguardos(),
-                    'pub_indigena_id' => ParamsBeneficiario::getPueblosIndigenas(),
-                    'biocodciu' => ParamsBeneficiario::getCiudades(),
-                    'peretn' => ParamsBeneficiario::getPertenenciaEtnicas(),
-                    'tippag' => ParamsBeneficiario::getTipoPago(),
-                    'codban' => ParamsBeneficiario::getBancos(),
-                    'tipcue' => ParamsBeneficiario::getTipoCuenta(),
-                    'codzon' => $codzons,
-                    'biourbana' => $biourbana,
-                    'biodesco' => $biodesco,
-                    'trabajadores' => $cedtras,
-                    'conyuges' => $conyuges,
-                    'list_conyuges' => $listConyuges,
-                    'convive' => (new Mercurio34)->getConvive(),
-                    'list_afiliados' => $listAfiliados,
-                ],
+                'data' => $componentes,
                 'msj' => 'OK',
             ];
         } catch (DebugException $e) {

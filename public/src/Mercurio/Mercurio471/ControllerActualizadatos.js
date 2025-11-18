@@ -1,5 +1,5 @@
 import { $App } from '@/App';
-import { ControllerRequest } from '../ControllerRequest';
+import { ControllerRequest } from '@/Mercurio/ControllerRequest';
 import { ActualizadatosModel } from './models/ActualizadatosModel';
 import { ActualizadatosView } from './views/ActualizadatosView';
 import { FormActualizadatosView } from './views/FormActualizadatosView';

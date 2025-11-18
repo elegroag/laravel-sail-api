@@ -17,12 +17,12 @@ if (! function_exists('estados_civiles_array')) {
     function estados_civiles_array()
     {
         return [
-            '1' => 'SOLTERO',
-            '2' => 'CASADO',
-            '3' => 'VIUDO',
-            '4' => 'UNION LIBRE',
-            '5' => 'SEPARADO',
-            '6' => 'DIVORCIADO',
+            '1' => 'Soltero',
+            '2' => 'Casado',
+            '3' => 'Viudo',
+            '4' => 'Union libre',
+            '5' => 'Separado',
+            '6' => 'Divorciado',
         ];
     }
 }
@@ -55,14 +55,14 @@ if (! function_exists('tipo_discapacidad_array')) {
     function tipo_discapacidad_array()
     {
         return [
-            '00' => 'NINGUNA',
-            '01' => 'DISCAPACIDAD FISICA',
-            '02' => 'DISCAPACIDAD VISUAL',
-            '03' => 'DISCAPACIDAD AUDITIVA',
-            '04' => 'DISCAPACIDAD INTELECTUAL',
-            '05' => 'DISCAPACIDAD PSICOSOCIAL (MENTAL)',
-            '06' => 'SORDOCEGUERA',
-            '07' => 'DISCAPACIDAD MULTIPLE',
+            '00' => 'Ninguna',
+            '01' => 'Discapacidad Fisica',
+            '02' => 'Discapacidad Visual',
+            '03' => 'Discapacidad Auditiva',
+            '04' => 'Discapacidad Intelectual',
+            '05' => 'Discapacidad Psicosocial (Mental)',
+            '06' => 'Sordoceguera',
+            '07' => 'Discapacidad Multiple',
         ];
     }
 }
@@ -73,18 +73,18 @@ if (! function_exists('nivel_educativo_array')) {
     function nivel_educativo_array()
     {
         return [
-            '1' => 'PREESCOLAR',
-            '10' => 'TECNICO/TEGNOLOGO',
-            '11' => 'UNIVERSITARIO',
-            '12' => 'POSGRADO/MAESTRÍA',
-            '13' => 'NINGUNO',
-            '14' => 'INFORMACION NO DISPONIBLE',
-            '2' => 'BASICA',
-            '3' => 'SECUNDARIA',
-            '4' => 'MEDIA',
-            '6' => 'BÁSICA ADULTOS',
-            '7' => 'SECUNDARIA ADULTO',
-            '8' => 'MEDIA ADULTO',
+            '1' => 'Preescolar',
+            '10' => 'Tecnico/Tecnologo',
+            '11' => 'Universitario',
+            '12' => 'Posgrado/Maestria',
+            '13' => 'Ninguno',
+            '14' => 'Informacion no disponible',
+            '2' => 'Basica',
+            '3' => 'Secundaria',
+            '4' => 'Media',
+            '6' => 'Basica adulto',
+            '7' => 'Secundaria adulto',
+            '8' => 'Media adulto',
         ];
     }
 }
@@ -107,8 +107,8 @@ if (! function_exists('tipo_contrato')) {
     function tipo_contrato()
     {
         return [
-            'F' => 'FIJO',
-            'I' => 'INDEFINIDO',
+            'F' => 'Fijo',
+            'I' => 'Indefinido',
         ];
     }
 }
@@ -119,8 +119,8 @@ if (! function_exists('es_sindicalizado')) {
     function es_sindicalizado()
     {
         return [
-            'S' => 'SI',
-            'N' => 'NO',
+            'S' => 'Sí',
+            'N' => 'No',
         ];
     }
 }
@@ -131,11 +131,11 @@ if (! function_exists('vivienda_array')) {
     function vivienda_array()
     {
         return [
-            'N' => 'NO',
-            'F' => 'FAMILIAR',
-            'P' => 'PROPIA',
-            'A' => 'ARRENDADA',
-            'H' => 'HIPOTECA',
+            'N' => 'No',
+            'F' => 'Familiar',
+            'P' => 'Propia',
+            'A' => 'Arrendada',
+            'H' => 'Hipoteca',
         ];
     }
 }
@@ -200,9 +200,9 @@ if (! function_exists('tipo_pago_array')) {
     function tipo_pago_array()
     {
         return [
-            'T' => 'PENDIENTE FORMA DE PAGO',
-            'A' => 'ABONO CUENTA PERSONAL',
-            'D' => 'CUENTA DAVIPLATA',
+            'T' => 'Pendiente forma de pago',
+            'A' => 'Abono cuenta personal',
+            'D' => 'Cuenta Daviplata',
         ];
     }
 }
@@ -213,8 +213,8 @@ if (! function_exists('tipo_cuenta_array')) {
     function tipo_cuenta_array()
     {
         return [
-            'A' => 'AHORROS',
-            'C' => 'CORRIENTE',
+            'A' => 'Ahorros',
+            'C' => 'Corriente',
         ];
     }
 }
@@ -224,9 +224,9 @@ if (! function_exists('tipo_jornada_array')) {
     function tipo_jornada_array()
     {
         return [
-            'C' => 'COMPLETA',
-            'M' => 'MEDIA',
-            'P' => 'PARCIAL',
+            'C' => 'Completa',
+            'M' => 'Media',
+            'P' => 'Parcial',
         ];
     }
 }
@@ -237,8 +237,8 @@ if (! function_exists('comision_array')) {
     function comision_array()
     {
         return [
-            'S' => 'SI',
-            'N' => 'NO',
+            'S' => 'Sí',
+            'N' => 'No',
         ];
     }
 }
@@ -249,8 +249,78 @@ if (! function_exists('labora_otra_empresa_array')) {
     function labora_otra_empresa_array()
     {
         return [
-            'S' => 'SI',
-            'N' => 'NO',
+            'S' => 'Sí',
+            'N' => 'No',
+        ];
+    }
+}
+
+
+if (! function_exists('parentesco_array')) {
+
+    function parentesco_array()
+    {
+        return [
+            "1" => "Hijo",
+            "2" => "Hermano",
+            "3" => "Padre",
+            "4" => "Custodia",
+            "5" => "Cuidador"
+        ];
+    }
+}
+
+
+if (! function_exists('huerfano_array')) {
+
+    function huerfano_array()
+    {
+        return [
+            "0" => "No aplica",
+            "1" => "Huerfano padre",
+            "2" => "Huerfano madre"
+        ];
+    }
+}
+
+if (! function_exists('tipo_hijo_array')) {
+
+    function tipo_hijo_array()
+    {
+        return [
+            "0" => "No aplica",
+            "1" => "Hijo natural",
+            "2" => "Hijastro",
+            "3" => 'Custodia nieto',
+            "4" => 'Custodia sobrino',
+            "5" => 'Custodia otro',
+            "6" => 'Cuidador discapacitado',
+        ];
+    }
+}
+
+if (! function_exists('calendario_array')) {
+
+    function calendario_array()
+    {
+        return [
+            "A" => "A",
+            "B" => "B",
+            "N" => "No aplica"
+        ];
+    }
+}
+
+
+if (! function_exists('convive_array')) {
+
+    function convive_array()
+    {
+        return [
+            '1' => 'Conyuge',
+            '2' => 'Trabajador',
+            '3' => 'No aplica',
+            '4' => 'Otras personas',
         ];
     }
 }

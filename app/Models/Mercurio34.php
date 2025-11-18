@@ -619,24 +619,7 @@ class Mercurio34 extends ModelBase
 
     public function getEstadoDetalle()
     {
-        $return = '';
-        if ($this->estado == 'T') {
-            $return = 'TEMPORAL';
-        }
-        if ($this->estado == 'D') {
-            $return = 'DEVUELTO';
-        }
-        if ($this->estado == 'A') {
-            $return = 'APROBADO';
-        }
-        if ($this->estado == 'X') {
-            $return = 'RECHAZADO';
-        }
-        if ($this->estado == 'P') {
-            $return = 'PENDIENTE';
-        }
-
-        return $return;
+        return solicitud_estado_detalle($this->estado);
     }
 
     /**
@@ -719,12 +702,7 @@ class Mercurio34 extends ModelBase
 
     public function getConvive()
     {
-        return [
-            '1' => 'Conyuge',
-            '2' => 'Trabajador',
-            '3' => 'No aplica',
-            '4' => 'Otras personas',
-        ];
+        return convive_array();
     }
 
     public function CamposDisponibles()

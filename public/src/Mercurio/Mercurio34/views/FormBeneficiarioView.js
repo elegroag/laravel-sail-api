@@ -1,8 +1,8 @@
-import flatpickr from 'flatpickr';
-import { Spanish } from 'flatpickr/dist/l10n/es';
 import { ComponentModel } from '@/Componentes/Models/ComponentModel';
 import { eventsFormControl } from '@/Core';
 import { FormView } from '@/Mercurio/FormView';
+import flatpickr from 'flatpickr';
+import { Spanish } from 'flatpickr/dist/l10n/es';
 import { BeneficiarioModel } from '../models/BeneficiarioModel';
 
 export class FormBeneficiarioView extends FormView {
@@ -35,24 +35,14 @@ export class FormBeneficiarioView extends FormView {
     }
 
     #afterRender($el = {}) {
-        _.each(this.collection, (component = { name: '', type: '' }) => {
-            if (component.name == 'biourbana') component.type = 'radio';
-            if (component.name == 'biodesco') component.type = 'radio';
-
+        _.each(this.collection, (component) => {
             const view = this.addComponent(
                 new ComponentModel({
-                    disabled: false,
-                    readonly: false,
-                    order: 0,
-                    target: 1,
-                    searchType: 'local',
                     ...component,
                     valor: this.model.get(component.name),
                 }),
             );
-
-            this.viewComponents.push(view);
-            this.$el.find('#component_' + component.name).html(view.$el);
+            $el.find('#component_' + component.name).html(view.$el);
         });
 
         this.form.validate({
@@ -65,7 +55,7 @@ export class FormBeneficiarioView extends FormView {
             },
         });
 
-        this.selectores = this.$el.find('#tipdoc, #ciunac, #codban, #biocodciu, #resguardo_id, #pub_indigena_id, #peretn');
+        this.selectores = this.$el.find('#tipdoc, #ciunac, #codban, #biocodciu, #resguardo_id, #pub_indigena_id, #peretn, #cedtra');
 
         if (this.model.get('id') !== null) {
             let silent = true;
@@ -125,7 +115,18 @@ export class FormBeneficiarioView extends FormView {
         } else {
             this.$el.find("[name='biodesco'][value='N']").attr('checked', 'true');
             this.$el.find("[name='biourbana'][value='S']").attr('checked', 'true');
-            $.each(this.selectores, (index, element) => (this.#choiceComponents[element.name] = new Choices(element)));
+            $.each(
+                this.selectores,
+                (index, element) => (this.#choiceComponents[element.name] = new Choices(element, { silent: true, itemSelectText: '' })),
+            );
+        }
+
+        if (this.collection.props['tipo'] === 'E') {
+            this.setInput('nit', this.collection.props.empresa_sisu['nit']);
+        }
+
+        if (this.collection.props['tipo'] !== 'E') {
+            this.setInput('cedtra', this.collection.props.list_afiliados[0]['cedula']);
         }
 
         this.selectores.on('change', (event) => {
@@ -249,10 +250,7 @@ export class FormBeneficiarioView extends FormView {
                     }
                 },
             });
-
         });
-
-
     }
 
     validaBeneficiario(e) {
@@ -487,32 +485,23 @@ export class FormBeneficiarioView extends FormView {
 
     validaTrabajador(e) {
         e.preventDefault();
-        if (!this.isNew) return false;
-        let cedtra = this.getInput('[name="cedtra"]');
-        if (cedtra == '') return false;
+        if (!this.isNew) return null;
+        const cedtra = this.getInput('[name="cedtra"]');
+        if (!cedtra) return null;
 
-        let list = [];
-        let has = [];
+        const afiliado = this.collection.props.list_afiliados;
+        const has = _.where(afiliado, { cedula: cedtra });
 
-        const afili = this.App.Collections.formParams.list_afiliados;
-        const mtrab = this.App.Collections.formParams.trabajadores;
-
-        if (afili !== false && mtrab !== false) {
-            list = _.union(afili, mtrab);
-        } else {
-            list = mtrab;
-        }
-
-        if (!_.isEmpty(list)) {
-            has = _.where(list, { cedula: cedtra });
-        }
-
-        if (_.isEmpty(has)) {
-            this.setInput('cedtra', '');
+        if (has.length === 0) {
             this.App.trigger('alert:warning', {
                 message:
-                    'El número de identificación del trabajador no existe como afiliado o como una solicitud pendiente de validación. Se recomienda primero crear la solicitud del trabajador para poder continuar.',
+                    'El número de identificación del trabajador no existe como afiliado o como una solicitud pendiente de validación. ' +
+                    'Se recomienda primero crear la solicitud del trabajador para poder continuar.',
             });
+            this.setInput('cedtra', '');
+        } else {
+            console.log(has);
+            this.setInput('nomtra', has[0].nombre_completo);
         }
     }
 

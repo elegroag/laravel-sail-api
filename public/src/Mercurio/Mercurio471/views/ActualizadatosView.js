@@ -1,7 +1,5 @@
-//
 import { $App } from '@/App';
-
-import { langDataTable } from '../../../Core';
+import { langDataTable } from '@/Core';
 
 class ActualizadatosView extends Backbone.View {
     constructor(options = {}) {

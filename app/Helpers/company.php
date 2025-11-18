@@ -7,11 +7,11 @@ if (! function_exists('calemp_array')) {
     function calemp_array()
     {
         return [
-            'E' => 'EMPRESA',
-            'I' => 'INDEPENDIENTE',
-            'P' => 'PENSIONADO',
-            'F' => 'FACULTATIVO',
-            'D' => 'DESEMPLEADO',
+            'E' => 'Empresa',
+            'I' => 'Independiente',
+            'P' => 'Pensionado',
+            'F' => 'Facultativo',
+            'D' => 'Desempleado',
         ];
     }
 }
@@ -48,8 +48,8 @@ if (! function_exists('tipper_array')) {
     function tipper_array()
     {
         return [
-            'N' => 'NATURAL',
-            'J' => 'JURIDICA',
+            'N' => 'Natural',
+            'J' => 'Juridica',
         ];
     }
 }
@@ -63,19 +63,19 @@ if (! function_exists('calemp_detalle_value')) {
     {
         switch ($calemp) {
             case 'E':
-                return 'EMPRESA';
+                return 'Empresa';
                 break;
             case 'I':
-                return 'INDEPENDIENTE';
+                return 'Independiente';
                 break;
             case 'P':
-                return 'PENSIONADO';
+                return 'Pensionado';
                 break;
             case 'F':
-                return 'FACULTATIVO';
+                return 'Facultativo';
                 break;
             case 'D':
-                return 'DESEMPLEADO';
+                return 'Desempleado';
                 break;
             default:
                 return null;
@@ -123,16 +123,16 @@ if (! function_exists('estado_detalle_value')) {
     {
         $return = '';
         if ($estado == 'T') {
-            $return = 'TEMPORAL';
+            $return = 'Temporal';
         }
         if ($estado == 'D') {
-            $return = 'DEVUELTO';
+            $return = 'Devuelto';
         }
         if ($estado == 'A') {
-            $return = 'APROBADO';
+            $return = 'Aprobado';
         }
         if ($estado == 'X') {
-            $return = 'RECHAZADO';
+            $return = 'Rechazado';
         }
 
         return $return;
@@ -188,10 +188,10 @@ if (! function_exists('get_user_estados')) {
     function get_user_estados()
     {
         return [
-            'A' => 'ACTIVO',
-            'I' => 'INACTIVO',
-            'M' => 'MUERTO',
-            'B' => 'BLOQUEADO',
+            'A' => 'Activo',
+            'I' => 'Inactivo',
+            'M' => 'Muerto',
+            'B' => 'Bloqueado',
         ];
     }
 }
@@ -201,16 +201,16 @@ if (! function_exists('get_user_estado_detalle')) {
     {
         switch ($estado) {
             case 'A':
-                return 'ACTIVO';
+                return 'Activo';
                 break;
             case 'I':
-                return 'INACTIVO';
+                return 'Inactivo';
                 break;
             case 'M':
-                return 'MUERTO';
+                return 'Muerto';
                 break;
             case 'B':
-                return 'BLOQUEADO';
+                return 'Bloqueado';
                 break;
         }
         return false;

@@ -6,6 +6,7 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsEmpresa;
 use App\Models\Adapter\DbBase;
+use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
 use App\Models\Mercurio01;
@@ -270,15 +271,14 @@ class ActualizaEmpresaController extends ApplicationController
                 }
             }
 
-            $tipafi = (new Mercurio07)->getArrayTipos();
             $coddoc = $tipoDocumentos;
             $data = [
-                'tipafi' => $tipafi,
+                'tipafi' => get_array_tipos(),
                 'coddoc' => $coddoc,
                 'tipdoc' => $coddoc,
-                'tipper' => (new Mercurio30)->getTipperArray(),
+                'tipper' => tipper_array(),
                 'tipsoc' => $tipsoc,
-                'calemp' => (new Mercurio30)->getCalempArray(),
+                'calemp' => calemp_array(),
                 'codciu' => ParamsEmpresa::getCiudades(),
                 'coddocrepleg' => $coddocrepleg,
                 'codzon' => $zonas,
@@ -287,15 +287,26 @@ class ActualizaEmpresaController extends ApplicationController
                 'codcaj' => ParamsEmpresa::getCodigoCajas(),
                 'ciupri' => ParamsEmpresa::getCiudades(),
                 'ciunac' => ParamsEmpresa::getCiudades(),
-                'tipsal' => (new Mercurio31)->getTipsalArray(),
-                'autoriza' => ['S' => 'SI', 'N' => 'NO'],
+                'tipsal' => tipsal_array(),
+                'autoriza' => autoriza_array(),
                 'ciupri' => ParamsEmpresa::getCiudades(),
                 'codsuc' => $list_sucursales,
             ];
 
+            $formulario = FormularioDinamico::where('name', 'mercurio471')->first();
+            $componentes = $formulario->componentes()->get();
+            $componentes = $componentes->map(function ($componente) use ($data) {
+                $_componente = $componente->toArray();
+                if (isset($data[$componente->name])) {
+                    $_componente['data_source'] = $data[$componente->name];
+                }
+                $_componente['id'] = $componente->name;
+                return $_componente;
+            });
+
             $salida = [
                 'success' => true,
-                'data' => $data,
+                'data' => $componentes,
                 'msj' => 'OK',
             ];
         } catch (DebugException $e) {

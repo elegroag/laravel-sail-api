@@ -7,10 +7,10 @@ if (! function_exists('solicitud_estados_array')) {
     function solicitud_estados_array()
     {
         return [
-            'A' => 'APROBO',
-            'X' => 'RECHAZO',
-            'P' => 'PENDIENTE',
-            'D' => 'DEVOLVIO',
+            'A' => 'Aprobado',
+            'X' => 'Rechazado',
+            'P' => 'Pendiente',
+            'D' => 'Devuelto',
         ];
     }
 }
@@ -24,25 +24,25 @@ if (! function_exists('solicitud_estado_detalle')) {
     {
         switch ($estado) {
             case 'T':
-                return 'TEMPORAL';
+                return 'Temporal';
                 break;
             case 'D':
-                return 'DEVUELTO';
+                return 'Devuelto';
                 break;
             case 'A':
-                return 'APROBADO';
+                return 'Aprobado';
                 break;
             case 'X':
-                return 'RECHAZADO';
+                return 'Rechazado';
                 break;
             case 'P':
-                return 'PENDIENTE';
+                return 'Pendiente';
                 break;
             case 'C':
-                return 'CANCELAR';
+                return 'Cancelar';
                 break;
             default:
-                return 'SIN ESTADO';
+                return 'Sin estado';
                 break;
         }
     }
@@ -92,7 +92,7 @@ if (! function_exists('solicitud_tipo_actualizacion_detalle')) {
                 return 'Conyuge';
                 break;
             default:
-                return 'SIN TIPO';
+                return 'Sin tipo';
                 break;
         }
     }

@@ -1,9 +1,9 @@
 import { $App } from '@/App';
 import { ComponentModel } from '@/Componentes/Models/ComponentModel';
 import { eventsFormControl } from '@/Core';
-import { ActualizadatosModel } from '@/Mercurio/Actualizadatos/models/ActualizadatosModel';
 import { FormView } from '@/Mercurio/FormView';
 import { EmpresaModel } from '@/Mercurio/Mercurio30/models/EmpresaModel';
+import { ActualizadatosModel } from '@/Mercurio/Mercurio471/models/ActualizadatosModel';
 
 class FormActualizadatosView extends FormView {
     #choiceComponents = null;
@@ -44,22 +44,13 @@ class FormActualizadatosView extends FormView {
         }
 
         _.each(this.collection, (component) => {
-            if (component.name == 'autoriza') component.type = 'radio';
-
             const view = this.addComponent(
                 new ComponentModel({
-                    disabled: false,
-                    readonly: false,
-                    order: 0,
-                    target: 1,
-                    searchType: 'local',
                     ...component,
                     valor: this.model.get(component.name),
                 }),
-                component.type,
             );
-            this.viewComponents.push(view);
-            this.$el.find('#component_' + component.name).html(view.$el);
+            $el.find('#component_' + component.name).html(view.$el);
         });
 
         if (this.modelEmpresa instanceof EmpresaModel) {
@@ -98,7 +89,10 @@ class FormActualizadatosView extends FormView {
                 if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
             });
         } else {
-            $.each(this.selectores, (index, element) => (this.#choiceComponents[element.name] = new Choices(element)));
+            $.each(
+                this.selectores,
+                (index, element) => (this.#choiceComponents[element.name] = new Choices(element, { silent: true, itemSelectText: '' })),
+            );
         }
 
         this.selectores.on('change', (event) => {
