@@ -13,7 +13,9 @@ use App\Services\Formularios\Generation\DocumentGenerationManager;
 
 class DatosEmpresaService
 {
-    private $request;
+    private $empresa;
+
+    private $solicitud;
 
     private $lfirma;
 
@@ -27,10 +29,11 @@ class DatosEmpresaService
 
     private $user;
 
-    public function __construct($request)
+    public function __construct($argv)
     {
         $this->user = session('user') ?? null;
-        $this->request = $request;
+        $this->empresa = $argv[0];
+        $this->solicitud = $argv[1];
         $this->initialize();
     }
 
@@ -58,13 +61,15 @@ class DatosEmpresaService
         if (! $this->lfirma) {
             throw new DebugException('Error no hay firma digital', 501);
         }
-        $this->filename = 'formulario-datos-empresa-' . strtotime('now') . "_{$this->request['nit']}.pdf";
+        $nit = $this->empresa->nit;
+        $this->filename = 'formulario-datos-empresa-' . strtotime('now') . "_{$nit}.pdf";
         $manager = new DocumentGenerationManager();
         $manager->generate('api', 'actualizadatos', [
             'categoria' => 'formulario',
             'output' => $this->filename,
             'template' => 'actualiza-empresa.html',
-            ...$this->request
+            'empresa' => $this->empresa,
+            'solicitud' => $this->solicitud,
         ]);
 
         $this->cifrarDocumento();

@@ -3,9 +3,11 @@
 namespace App\Services\Formularios\Api;
 
 use App\Library\Collections\ParamsPensionado;
+use App\Library\Collections\ParamsTrabajador;
 use App\Models\Gener18;
 use App\Services\Api\ApiPython;
 use App\Services\Api\ApiSubsidio;
+use Carbon\Carbon;
 
 class PensionadosDocuments
 {
@@ -13,17 +15,21 @@ class PensionadosDocuments
 
     private $pensionado;
 
+    private $solicitante;
+
     public function main()
     {
         // Catálogos relevantes
         $ciudades = ParamsPensionado::getCiudades();
         $zonas = ParamsPensionado::getZonas();
         $departamentos = ParamsPensionado::getDepartamentos();
-        $tipo_pago = ParamsPensionado::getTipoPago();
-        $bancos = ParamsPensionado::getBancos();
-        $tipo_cuenta = ParamsPensionado::getTipoCuenta();
-        $giro = ParamsPensionado::getGiro();
-        $codigo_giro = ParamsPensionado::getCodigoGiro();
+        $codigo_giro = ParamsTrabajador::getCodigoGiro();
+        $bancos = ParamsTrabajador::getBancos();
+        $ocupaciones = ParamsTrabajador::getOcupaciones();
+
+        $tipo_pago = tipo_pago_array();
+        $tipo_cuenta = tipo_cuenta_array();
+        $giro = giro_array();
 
         // Enriquecimientos
         $ciudad_name = ($this->pensionado->codciu ?? null) ? ($ciudades[$this->pensionado->codciu] ?? $this->pensionado->codciu) : null;
@@ -47,7 +53,11 @@ class PensionadosDocuments
         $nombre_pensionado = trim(($this->pensionado->prinom ?? '') . ' ' . ($this->pensionado->segnom ?? '') . ' ' . ($this->pensionado->priape ?? '') . ' ' . ($this->pensionado->segape ?? ''));
 
         // Contexto para los templates
+        $today = Carbon::now();
         $context = [
+            'year' => $today->format('Y'),
+            'month' => $today->format('m'),
+            'day' => $today->format('d'),
             'ciudad_name' => $ciudad_name,
             'zona_name' => $zona_name,
             'departamento_name' => $departamento_name,
@@ -59,6 +69,12 @@ class PensionadosDocuments
             'giro_name' => $giro_name,
             'codigo_giro_name' => $codigo_giro_name,
             'nombre_pensionado' => $nombre_pensionado,
+            'ocupaciones' => $ocupaciones,
+            'fecnac_year' => substr($this->pensionado->fecnac, 0, 4),
+            'fecnac_month' => substr($this->pensionado->fecnac, 5, 2),
+            'fecnac_day' => substr($this->pensionado->fecnac, 8, 2),
+            'empresa' => $this->pensionado->toArray(),
+            'solicitante' => $this->solicitante->toArray(),
             ...$this->pensionado->toArray(),
         ];
 
@@ -88,5 +104,6 @@ class PensionadosDocuments
     {
         $this->params = $params;
         $this->pensionado = $params['pensionado'];
+        $this->solicitante = $params['solicitante'];
     }
 }

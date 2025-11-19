@@ -159,7 +159,6 @@ class ActualizaEmpresaController extends ApplicationController
                         $data[$m33->campo] = $m33->valor;
                     }
                 }
-                $data = array_merge($solicitud->toArray(), $data);
 
                 $empresa_sisu = $actualizaEmpresaService->buscarEmpresaSubsidio($documento);
                 if ($empresa_sisu && count($empresa_sisu) > 0) {
@@ -169,17 +168,11 @@ class ActualizaEmpresaController extends ApplicationController
                     $empresa = new Mercurio30();
                 }
 
-                $empresa->id = $id;
-                $empresa->ruuid = $solicitud->ruuid;
-                $actualizaEmpresaService = new DatosEmpresaService(
-                    [
-                        'empresa' => $empresa->toArray(),
-                        'campos' => $data,
-                        'documento' => $documento,
-                        'coddoc' => $coddoc,
-                        'nit' => $documento,
-                    ]
-                );
+                $data = array_merge($solicitud->toArray(), $data);
+                $actualizaEmpresaService = new DatosEmpresaService([
+                    $empresa,
+                    $data
+                ]);
 
                 $actualizaEmpresaService->setClaveCertificado($clave_certificado);
                 $out = $actualizaEmpresaService->formulario()->getResult();

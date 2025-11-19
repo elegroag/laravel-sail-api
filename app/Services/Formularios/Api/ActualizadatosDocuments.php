@@ -6,14 +6,16 @@ use App\Library\Collections\ParamsEmpresa;
 use App\Models\Gener18;
 use App\Services\Api\ApiPython;
 use App\Services\Api\ApiSubsidio;
+use Carbon\Carbon;
 
 class ActualizadatosDocuments
 {
     private $params;
 
-    private $empresa; // array|object
+    private $empresa;
 
-    private $campos;  // array de cambios/valores actualizados
+    private $solicitud;
+
 
     public function main()
     {
@@ -29,30 +31,43 @@ class ActualizadatosDocuments
         // Catálogos mínimos para enriquecer
         $ciudades = ParamsEmpresa::getCiudades();
         $zonas = ParamsEmpresa::getZonas();
+        $departamentos = ParamsEmpresa::getDepartamentos();
+        $codciu = $this->solicitud['codciu'] ?? ($this->solicitud['ciupri'] ?? null);
+        $codzon = $this->solicitud['codzon'] ?? null;
 
-        $codciu = $empresaData['codciu'] ?? ($empresaData['ciupri'] ?? null);
-        $codzon = $empresaData['codzon'] ?? null;
+        $departamento_name = null;
+        if (!empty($codzon)) {
+            $dep = substr((string) $codzon, 0, 2);
+            $departamento_name = $departamentos[$dep] ?? null;
+        }
+
+        $departamento_notify = null;
+        if (!empty($codciu)) {
+            $dep = substr((string) $codciu, 0, 2);
+            $departamento_notify = $departamentos[$dep] ?? null;
+        }
 
         $ciudad_name = $codciu ? ($ciudades[$codciu] ?? $codciu) : null;
         $zona_name = $codzon ? ($zonas[$codzon] ?? $codzon) : null;
 
-        $mtipoDocumentos = Gener18::where('coddoc', $empresaData['tipdoc'])->first();
+        $mtipoDocumentos = Gener18::where('coddoc', $this->solicitud['tipdoc'])->first();
         $tipo_documento = ($mtipoDocumentos) ? $mtipoDocumentos->detdoc : 'NIT';
 
-        $coddorepleg = array_flip(tipo_document_repleg_detalle());
-        $representante = [
-            'nombre' => $empresaData['repleg'],
-            'tipo_documento' => ($empresaData['coddorepleg']) ? $coddorepleg[$empresaData['coddorepleg']] : 'CEDULA DE CIUDADANIA',
-            'cedula' => $empresaData['cedrep'],
-        ];
-
+        $coddorepleg = tipo_document_repleg_detalle();
+        $data = array_merge($empresaData, $this->solicitud);
+        $today = Carbon::now();
         $context = [
-            ...$empresaData,
-            ...$this->campos,
+            ...$data,
+            'year' => $today->format('Y'),
+            'month' => $today->format('m'),
+            'day' => $today->format('d'),
             'ciudad_name' => $ciudad_name,
             'zona_name' => $zona_name,
+            'departamento_name' => $departamento_name,
+            'departamento_notify' => $departamento_notify,
             'tipo_documento' => $tipo_documento,
-            'representante' => $representante,
+            'nombre_representante' => $this->solicitud['repleg'],
+            'tipo_documento' => ($this->solicitud['coddocrepleg']) ? $coddorepleg[$this->solicitud['coddocrepleg']] : 'CEDULA DE CIUDADANIA',
         ];
 
         $ps = new ApiPython();
@@ -82,6 +97,6 @@ class ActualizadatosDocuments
     {
         $this->params = $params;
         $this->empresa = $params['empresa'];
-        $this->campos = $params['campos'] ?? [];
+        $this->solicitud = $params['solicitud'];
     }
 }

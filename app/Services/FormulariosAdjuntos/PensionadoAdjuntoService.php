@@ -2,13 +2,16 @@
 
 namespace App\Services\FormulariosAdjuntos;
 
+use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsPensionado;
 use App\Library\Tcpdf\KumbiaPDF;
+use App\Models\Mercurio07;
 use App\Models\Mercurio16;
 use App\Models\Mercurio32;
 use App\Services\Formularios\FactoryDocuments;
 use App\Services\PreparaFormularios\CifrarDocumento;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Formularios\Generation\DocumentGenerationManager;
 
 class PensionadoAdjuntoService
 {
@@ -55,24 +58,26 @@ class PensionadoAdjuntoService
 
     public function tratamientoDatos()
     {
-        $this->filename = "tratamiento_datos_pensionado_{$this->request->getCedtra()}.pdf";
-        KumbiaPDF::setFooterImage(false);
-        KumbiaPDF::setBackgroundImage(false);
-
-        $fabrica = new FactoryDocuments;
-        $documento = $fabrica->crearPolitica('pensionado');
-        $documento->setParamsInit([
+        $this->filename = 'tratamiento_datos_pensionado_' . strtotime('now') . "_{$this->request->cedtra}.pdf";
+        $manager = new DocumentGenerationManager();
+        $manager->generate('api', 'pensionado', [
+            'categoria' => 'politica',
+            'output' => $this->filename,
+            'template' => 'politica-trabajador.html',
             'pensionado' => $this->request,
-            'firma' => $this->lfirma,
-            'filename' => $this->filename,
-            'background' => false,
-            'rfirma' => false,
+            'solicitante' => $this->getSolicitante()
         ]);
-        $documento->main();
-        $documento->outPut();
         $this->cifrarDocumento();
-
         return $this;
+    }
+
+    public function getSolicitante()
+    {
+        $solicitante = Mercurio07::where("documento", $this->request->documento)
+            ->where("coddoc", $this->request->coddoc)
+            ->where("tipo", $this->request->tipo)
+            ->first();
+        return $solicitante;
     }
 
     public function cartaSolicitud()
@@ -111,30 +116,21 @@ class PensionadoAdjuntoService
 
     public function formulario()
     {
-        $conyuge = Mercurio32::where([
-            'documento' => $this->request->getDocumento(),
-            'coddoc' => $this->request->getCoddoc(),
-            'cedtra' => $this->request->getCedtra(),
-            'comper' => 'S',
-        ])->first();
+        if (! $this->lfirma) {
+            throw new DebugException('Error no hay firma digital', 501);
+        }
 
-        $this->filename = "formulario_pensionado_{$this->request->getCedtra()}.pdf";
-        $fabrica = new FactoryDocuments;
-        $documento = $fabrica->crearFormulario('pensionado');
-        $documento->setParamsInit(
-            [
-                'background' => 'img/form/trabajador/form-001-tra-p01.png',
-                'pensionado' => $this->request,
-                'conyuge' => $conyuge,
-                'firma' => $this->lfirma,
-                'filename' => $this->filename,
-            ]
-        );
+        $this->filename = 'formulario-trabajador-' . strtotime('now') . "_{$this->request->cedtra}.pdf";
+        $manager = new DocumentGenerationManager();
+        $manager->generate('api', 'pensionado', [
+            'categoria' => 'formulario',
+            'output' => $this->filename,
+            'template' => 'trabajador.html',
+            'pensionado' => $this->request,
+            'solicitante' => $this->getSolicitante()
+        ]);
 
-        $documento->main();
-        $documento->outPut();
         $this->cifrarDocumento();
-
         return $this;
     }
 

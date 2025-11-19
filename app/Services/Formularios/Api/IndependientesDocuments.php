@@ -3,9 +3,10 @@
 namespace App\Services\Formularios\Api;
 
 use App\Library\Collections\ParamsIndependiente;
+use App\Library\Collections\ParamsTrabajador;
 use App\Models\Gener18;
 use App\Services\Api\ApiPython;
-use App\Services\Api\ApiSubsidio;
+use Carbon\Carbon;
 
 class IndependientesDocuments
 {
@@ -13,20 +14,25 @@ class IndependientesDocuments
 
     private $independiente;
 
+    private $empresa;
+
+    private $solicitante;
+
     public function main()
     {
         // Catálogos principales
         $ciudades = ParamsIndependiente::getCiudades();
         $zonas = ParamsIndependiente::getZonas();
         $actividades = ParamsIndependiente::getActividades();
-        $nivel_educativo = ParamsIndependiente::getNivelEducativo();
-        $ocupaciones = ParamsIndependiente::getOcupaciones();
-        $estado_civil = ParamsIndependiente::getEstadoCivil();
-        $sexos = ParamsIndependiente::getSexos();
-        $tipo_discapacidad = ParamsIndependiente::getTipoDiscapacidad();
-        $tipo_pago = ParamsIndependiente::getTipoPago();
-        $bancos = ParamsIndependiente::getBancos();
-        $tipo_cuenta = ParamsIndependiente::getTipoCuenta();
+        $bancos = ParamsTrabajador::getBancos();
+        $ocupaciones = ParamsTrabajador::getOcupaciones();
+
+        $nivel_educativo = nivel_educativo_array();
+        $estado_civil = estados_civiles_array();
+        $sexos = sexos_array();
+        $tipo_discapacidad = tipo_discapacidad_array();
+        $tipo_pago = tipo_pago_array();
+        $tipo_cuenta = tipo_cuenta_array();
 
         // Enriquecimientos
         $ciudad_name = ($this->independiente->codciu ?? null) ? ($ciudades[$this->independiente->codciu] ?? $this->independiente->codciu) : null;
@@ -43,13 +49,18 @@ class IndependientesDocuments
         $tipo_cuenta_name = ($this->independiente->tipcue ?? null) ? ($tipo_cuenta[$this->independiente->tipcue] ?? null) : null;
 
         $nombre_independiente = trim(($this->independiente->prinom ?? '') . ' ' . ($this->independiente->segnom ?? '') . ' ' . ($this->independiente->priape ?? '') . ' ' . ($this->independiente->segape ?? ''));
+        $nivel_educativo_detalle = ($this->independiente->nivedu ?? null) ? ($nivel_educativo[$this->independiente->nivedu] ?? null) : null;
 
         // Contexto para los templates
+        $today = Carbon::now();
         $context = [
+            'year' => $today->format('Y'),
+            'month' => $today->format('m'),
+            'day' => $today->format('d'),
             'ciudad_name' => $ciudad_name,
             'zona_name' => $zona_name,
             'actividad_name' => $actividad_name,
-            'nivel_educativo' => $nivel_educativo,
+            'nivel_educativo' => $nivel_educativo_detalle,
             'ocupaciones' => $ocupaciones,
             'estado_civil' => $estado_civil,
             'sexos' => $sexos,
@@ -60,6 +71,11 @@ class IndependientesDocuments
             'banco_name' => $banco_name,
             'tipo_cuenta_name' => $tipo_cuenta_name,
             'nombre_independiente' => $nombre_independiente,
+            'empresa' => $this->independiente->toArray(),
+            'solicitante' => $this->solicitante->toArray(),
+            'fecnac_year' => substr($this->independiente->fecnac, 0, 4),
+            'fecnac_month' => substr($this->independiente->fecnac, 5, 2),
+            'fecnac_day' => substr($this->independiente->fecnac, 8, 2),
             ...$this->independiente->toArray(),
         ];
 
@@ -90,5 +106,6 @@ class IndependientesDocuments
     {
         $this->params = $params;
         $this->independiente = $params['independiente'];
+        $this->solicitante = $params['solicitante'];
     }
 }

@@ -324,3 +324,14 @@ if (! function_exists('convive_array')) {
         ];
     }
 }
+
+if (! function_exists('giro_array')) {
+
+    function giro_array()
+    {
+        return [
+            'S' => 'Sí',
+            'N' => 'No',
+        ];
+    }
+}

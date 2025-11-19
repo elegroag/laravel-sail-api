@@ -1,12 +1,11 @@
+import { ComponentModel } from '@/Componentes/Models/ComponentModel';
+import { eventsFormControl } from '@/Core';
+import { FormView } from '@/Mercurio/FormView';
+import { PensionadoModel } from '@/Mercurio/Mercurio38/models/PensionadoModel';
 import flatpickr from 'flatpickr';
 import { Spanish } from 'flatpickr/dist/l10n/es';
-import { $App } from '../../../App';
-import { ComponentModel } from '../../../Componentes/Models/ComponentModel';
-import { eventsFormControl } from '../../../Core';
-import { FormView } from '../../FormView';
-import { FacultativoModel } from '../models/FacultativoModel';
 
-export class FormFacultativoView extends FormView {
+class FormPensionadoView extends FormView {
     #choiceComponents = null;
 
     constructor(options = {}) {
@@ -22,8 +21,8 @@ export class FormFacultativoView extends FormView {
         return {
             'click #guardar_ficha': 'saveFormData',
             'click #cancel': 'cancel',
-            'focusout #telefono': 'isNumber',
-            'focusout #cedtra': 'valideNitkey',
+            'focusout #telefono, #digver': 'isNumber',
+            'focusout #cedtra': 'validePk',
             'change #tipdoc': 'changeTipoDocumento',
             'click [data-toggle="address"]': 'openAddress',
             'click #btEnviarRadicado': 'enviarRadicado',
@@ -34,27 +33,17 @@ export class FormFacultativoView extends FormView {
 
     #afterRender($el = {}) {
         _.each(this.collection, (component) => {
-            if (component.name == 'ruralt') component.type = 'radio';
-            if (component.name == 'rural') component.type = 'radio';
-            if (component.name == 'autoriza') component.type = 'radio';
-
             const view = this.addComponent(
                 new ComponentModel({
-                    disabled: false,
-                    readonly: false,
-                    order: 0,
-                    target: 1,
-                    searchType: 'local',
                     ...component,
                     valor: this.model.get(component.name),
                 }),
-                component.type,
             );
-            this.$el.find('#component_' + component.name).html(view.$el);
+            $el.find('#component_' + component.name).html(view.$el);
         });
 
         this.form.validate({
-            ...FacultativoModel.Rules,
+            ...PensionadoModel.Rules,
             highlight: function (element) {
                 $(element).removeClass('is-valid').addClass('is-invalid');
             },
@@ -63,13 +52,20 @@ export class FormFacultativoView extends FormView {
             },
         });
 
-        this.selectores = this.$el.find(
+        if (this.collection.props) {
+            _.each(this.collection.props, (prop, key) => {
+                $el.find('#' + key).val(prop);
+            });
+        }
+        $el.find('#cedtra').attr('readonly', true);
+
+        this.selectores = $el.find(
             '#tipdoc, #tipsoc, #ciupri, #codzon, #codciu, #codact, #coddocrepleg, #ciunac, #cargo, #pub_indigena_id, #resguardo_id',
         );
 
         if (this.model.get('id') !== null) {
             $.each(this.model.toJSON(), (key, valor) => {
-                const inputElement = this.$el.find(`[name="${key}"]`);
+                const inputElement = $el.find(`[name="${key}"]`);
                 if (inputElement.length && valor) {
                     inputElement.val(valor);
                 }
@@ -80,11 +76,11 @@ export class FormFacultativoView extends FormView {
                 this.form.find('#show_codban').removeClass('d-none');
                 this.form.find('#show_tipcue').removeClass('d-none');
             } else {
-                this.$el.find('#numcue').rules('remove', 'required');
-                this.$el.find('#codban').rules('remove', 'required');
-                this.$el.find('#tipcue').rules('remove', 'required');
+                $el.find('#numcue').rules('remove', 'required');
+                $el.find('#codban').rules('remove', 'required');
+                $el.find('#tipcue').rules('remove', 'required');
 
-                FacultativoModel.changeRulesProperty([
+                PensionadoModel.changeRulesProperty([
                     { rule: 'numcue', prop: 'required', value: false },
                     { rule: 'codban', prop: 'required', value: false },
                     { rule: 'tipcue', prop: 'required', value: false },
@@ -92,16 +88,15 @@ export class FormFacultativoView extends FormView {
             }
 
             if (this.model.get('peretn') == '3') {
-                this.$el.find('.show-peretn').removeClass('d-none');
+                $el.find('.show-peretn').removeClass('d-none');
             } else {
-                this.$el.find('.show-peretn').addClass('d-none');
-                this.$el.find('#resguardo_id').val('2');
-                this.$el.find('#pub_indigena_id').val('2');
+                $el.find('.show-peretn').addClass('d-none');
+                $el.find('#resguardo_id').val('2');
+                $el.find('#pub_indigena_id').val('2');
             }
 
             this.selectores.trigger('change');
-            this.$el.find('#cedtra').attr('disabled', true);
-
+            $el.find('#cedtra').attr('disabled', true);
             setTimeout(() => this.form.valid(), 200);
 
             $.each(this.selectores, (index, element) => {
@@ -110,31 +105,38 @@ export class FormFacultativoView extends FormView {
                 if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
             });
         } else {
-            $.each(this.selectores, (index, element) => (this.#choiceComponents[element.name] = new Choices(element)));
+            $.each(
+                this.selectores,
+                (index, element) => (this.#choiceComponents[element.name] = new Choices(element, { silent: true, itemSelectText: '' })),
+            );
         }
 
         this.selectores.on('change', (event) => {
-            this.validateChoicesField(event.detail.value, this.#choiceComponents[event.currentTarget.name]);
+            if (event.detail) {
+                this.validateChoicesField(event.detail.value, this.#choiceComponents[event.currentTarget.name]);
+            }
         });
 
-        flatpickr(this.$el.find('#fecnac, #fecini'), {
+        eventsFormControl($el);
+
+        flatpickr($el.find('#fecnac, #fecini'), {
             enableTime: false,
             dateFormat: 'Y-m-d',
             locale: Spanish,
         });
 
-        eventsFormControl(this.$el);
+        eventsFormControl($el);
     }
 
     changeTipoDocumento(e) {
         let tipdoc = $(e.currentTarget).val();
-        let coddocrepleg = FacultativoModel.changeTipdoc(tipdoc);
+        let coddocrepleg = PensionadoModel.changeTipdoc(tipdoc);
         this.$el.find('#coddocrepleg').val(coddocrepleg);
     }
 
     serializeData() {
         var data;
-        if (this.model.entity instanceof FacultativoModel) {
+        if (this.model.entity instanceof PensionadoModel) {
             data = this.model.entity.toJSON();
         }
         return data;
@@ -151,12 +153,16 @@ export class FormFacultativoView extends FormView {
             this.$el.find('#pub_indigena_id').val('2');
         }
 
+        if (this.$el.find('#tippag').val() == 'T') {
+            this.$el.find('#numcue').val('0');
+        }
+
         let _err = 0;
         if (this.form.valid() == false) _err++;
 
         if (_err > 0) {
             target.removeAttr('disabled');
-            $App.trigger('alert:warning', {
+            this.App.trigger('alert:warning', {
                 message: 'Se requiere de resolver los campos requeridos para continuar.',
             });
             setTimeout(() => $('label.error').text(''), 6000);
@@ -165,14 +171,20 @@ export class FormFacultativoView extends FormView {
 
         this.$el.find('#cedtra').removeAttr('disabled');
 
-        const entity = this.serializeModel(new FacultativoModel());
+        console.log(this.getInput('[name="fecsol"]'));
+
+        const entity = this.serializeModel(new PensionadoModel());
 
         if (entity.isValid() !== true) {
+            console.log(entity.validationError);
             target.removeAttr('disabled');
-            $App.trigger('alert:warning', { message: entity.validationError.join(' ') });
+            this.App.trigger('alert:warning', { message: entity.validationError.join(' ') });
             setTimeout(() => $('label.error').text(''), 6000);
             return false;
         }
+
+        entity.set('repleg', this.nameRepleg());
+        this.$el.find('#repleg').val(entity.get('repleg'));
 
         Swal.fire({
             title: 'Confirmación requerida',
@@ -205,7 +217,7 @@ export class FormFacultativoView extends FormView {
                     entity.clave = clave;
                 }
             }
-            $App.trigger('confirma', {
+            this.App.trigger('confirma', {
                 message: 'Confirma que desea guardar los datos del formulario.',
                 callback: (status) => {
                     if (status) {
@@ -218,10 +230,10 @@ export class FormFacultativoView extends FormView {
 
                                 if (response) {
                                     if (response.success) {
-                                        $App.trigger('alert:success', { message: response.msj });
+                                        this.App.trigger('alert:success', { message: response.msj });
                                         this.model.set({ id: parseInt(response.data.id) });
                                         if (this.isNew === true) {
-                                            $App.router.navigate('proceso/' + this.model.get('id'), {
+                                            this.App.router.navigate('proceso/' + this.model.get('id'), {
                                                 trigger: true,
                                                 replace: true,
                                             });
@@ -230,7 +242,7 @@ export class FormFacultativoView extends FormView {
                                             _tab.show();
                                         }
                                     } else {
-                                        $App.trigger('alert:error', { message: response.msj });
+                                        this.App.trigger('alert:error', { message: response.msj });
                                     }
                                 }
                             },
@@ -240,50 +252,46 @@ export class FormFacultativoView extends FormView {
                     }
                 },
             });
-
         });
-
-
     }
 
     nameRepleg() {
         return this.getInput('#priape') + ' ' + this.getInput('#segape') + ' ' + this.getInput('#prinom') + ' ' + this.getInput('#segnom');
     }
 
-    valideNitkey(e) {
+    digver(e) {
         e.preventDefault();
-        if (!this.isNew) return false;
-
-        let nit = this.$el.find(e.currentTarget).val();
-        if (nit === '' || _.isUndefined(nit)) return false;
-        this.$el.find('#digver').val('0');
-
-        this.trigger('form:find', {
-            data: {
-                nit: nit,
+        let cedtra = $(e.currentTarget).val();
+        if (cedtra === '') {
+            return false;
+        }
+        this.appController.trigger('form:digit', {
+            cedtra: cedtra,
+            callback: (entity) => {
+                console.log(entity);
+                $('#digver').val(entity.digver);
             },
-            callback: (solicitud) => {
-                if (solicitud) {
-                    $App.trigger('confirma', {
-                        message:
-                            'El sistema identifica datos de la empresa en su sistema principal. ¿Desea que se actualice el presente formulario con los datos existentes?.',
-                        callback: (status) => {
-                            if (status) {
-                                solicitud.estado = 'T';
-                                solicitud.fecsol = null;
-                                this.model.set(solicitud);
-                                this.actualizaForm();
-                                $('#nit').attr('disabled', true);
-                            }
-                        },
-                    });
-                }
+        });
+    }
+
+    validePk(e) {
+        e.preventDefault();
+        let cedtra = this.$el.find(e.currentTarget).val();
+        if (cedtra === '') return false;
+        this.App.trigger('form:find', {
+            cedtra: cedtra,
+            callback: (entity) => {
+                this.actualizaForm();
+                $.each(this.selectores, (index, element) => {
+                    const name = this.model.get(element.name);
+                    if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
+                });
             },
         });
     }
 
     changePeretn(e) {
-        const _parent = this.$el.find(e.currentTarget).val();
+        let _parent = this.$el.find(e.currentTarget).val();
         if (_parent == '3') {
             this.$el.find('.show-peretn').removeClass('d-none');
         } else {
@@ -305,7 +313,7 @@ export class FormFacultativoView extends FormView {
                 this.selectores.trigger('change');
             }
 
-            FacultativoModel.changeRulesProperty([
+            PensionadoModel.changeRulesProperty([
                 { rule: 'numcue', prop: 'required', value: true },
                 { rule: 'codban', prop: 'required', value: true },
                 { rule: 'tipcue', prop: 'required', value: true },
@@ -319,7 +327,7 @@ export class FormFacultativoView extends FormView {
             this.$el.find('#show_codban').addClass('d-none');
             this.$el.find('#show_tipcue').addClass('d-none');
 
-            FacultativoModel.changeRulesProperty([
+            PensionadoModel.changeRulesProperty([
                 { rule: 'numcue', prop: 'required', value: false },
                 { rule: 'codban', prop: 'required', value: false },
                 { rule: 'tipcue', prop: 'required', value: false },
@@ -338,7 +346,9 @@ export class FormFacultativoView extends FormView {
         if (_.size(this.viewComponents) > 0) {
             _.each(this.viewComponents, (view) => view.remove());
         }
-        $.each(this.#choiceComponents, (choice) => choice.destroy());
         FormView.prototype.remove.call(this, {});
+        $.each(this.#choiceComponents, (choice) => choice.destroy());
     }
 }
+
+export { FormPensionadoView };

@@ -3,9 +3,9 @@
         <div class="card-body">
             <form id="formRequest" class="validation_form" autocomplete="off" novalidate>
                 <div class="d-none">
-                    <input type="number" name="id" class="d-none" value="">
-                    <input type="text" name="calemp" class="d-none" value="I">
-                    <input type="text" name="coddocrepleg" class="d-none" value="">
+                    <input type="number" name="id" class="d-none" />
+                    <input type="text" name="calemp" class="d-none" value="I" />
+                    <input type="text" name="coddocrepleg" class="d-none" />
                 </div>
                 <div class="row">
                     <div class="col-12">
@@ -14,11 +14,11 @@
                             <div class="row">
                                 <div class="form-group d-none">
                                     <label for="fecsol" class="control-label d-none">Fecha solicitud:</label>
-                                    <input class='form-control d-none' type="date" name='fecsol' id='fecsol' value="{{ date('Y-m-d') }}">
+                                    <span id='component_fecsol'></span>
                                 </div>
-                                <div class="col-md-3" group-for='coddoc'>
+                                <div class="col-md-3" group-for='tipdoc'>
                                     <div class="form-group ">
-                                        <label for="coddoc" class="control-label ">Tipo documento:</label>
+                                        <label for="tipdoc" class="control-label ">Tipo documento:</label>
                                         <span id='component_tipdoc'></span>
                                     </div>
                                 </div>
@@ -26,51 +26,33 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='cedtra'>
                                         <label for="cedtra" class="control-label">Identificación:</label>
-                                        <input
-                                            type="number"
-                                            name="cedtra"
-                                            id="cedtra"
-                                            class="form-control"
-                                            placeholder="Cedula representante"/>
+                                        <span id='component_cedtra'></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='priape'>
                                         <label for="priape" class="control-label">Primer apellido:</label>
-                                        <input
-                                            type="text"
-                                            name="priape"
-                                            id="priape"
-                                            class="form-control text-uppercase"
-                                            placeholder="Primer Apellido"
-                                            oninput="this.value = this.value.toUpperCase()">
-                                        <label id="priape-error" class="error" for="priape"></label>
+                                        <span id='component_priape'></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='segape'>
                                         <label for="segape" class="control-label">Segundo apellido:</label>
-                                        <input
-                                            type="text"
-                                            name="segape"
-                                            id="segape"
-                                            class="form-control text-uppercase"
-                                            placeholder="Segundo Apellido" oninput="this.value = this.value.toUpperCase()">
+                                        <span id='component_segape'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='prinom'>
                                         <label for="prinom" class="control-label">Primer nombre:</label>
-                                        <input type="text" name="prinom" id="prinom" class="form-control text-uppercase" placeholder="Primer Nombre" oninput="this.value = this.value.toUpperCase()">
-                                        <label id="prinom-error" class="error" for="prinom"></label>
+                                        <span id='component_prinom'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='segnom'>
                                         <label for="segnom" class="control-label">Segundo nombre:</label>
-                                        <input type="text" name="segnom" id="segnom" class="form-control text-uppercase" placeholder="Segundo Nombre" oninput="this.value = this.value.toUpperCase()">
+                                        <span id='component_segnom'></span>
                                     </div>
                                 </div>
 
@@ -95,7 +77,7 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='fecini'>
                                         <label for="fecini" class="control-label ">Fecha inicio:</label>
-                                        <input type="date" name="fecini" id="fecini" class="form-control" placeholder="Fecha Inicial">
+                                        <span id='component_fecini'></span>
                                     </div>
                                 </div>
 
@@ -109,8 +91,7 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='fecnac'>
                                         <label for="fecnac" class="control-label ">Fecha nacimiento</label>
-                                        <input type="date" name="fecnac" id="fecnac" class="form-control" placeholder="AÑO-MES-DÍA">
-                                        <label id="fecnac-error" class="error" for="fecnac"></label>
+                                        <span id='component_fecnac'></span>
                                     </div>
                                 </div>
 
@@ -118,7 +99,6 @@
                                     <div class="form-group" group-for='ciunac'>
                                         <label for="ciunac" class="control-label ">Ciudad nacimiento</label>
                                         <span id='component_ciunac'></span>
-
                                     </div>
                                 </div>
 
@@ -140,7 +120,6 @@
                                     <div class="form-group" group-for='orisex'>
                                         <label for="orisex" class="control-label ">Orientación sexual</label>
                                         <span id='component_orisex'></span>
-
                                     </div>
                                 </div>
 
@@ -155,7 +134,6 @@
                                     <div class="form-group" group-for='cabhog'>
                                         <label for="cabhog" class="control-label ">Cabeza hogar</label>
                                         <span id='component_cabhog'></span>
-
                                     </div>
                                 </div>
 
@@ -169,33 +147,22 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='direccion'>
                                         <label for="direccion" class="control-label ">Dirección de residencia</label>
-                                        @component('components/address', [
-                                            'name' => 'direccion', 
-                                            'value' => '',
-                                            'placeholder' => 'Dirección notificación',
-                                            'event' => 'address',
-                                            'label' => 'Dirección notificación'
-                                        ])@endcomponent
+                                        <span id='component_direccion'></span>
+                                       
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='dirlab'>
                                         <label for="dirlab" class="control-label ">Dirección de trabajo</label>
-                                         @component('components/address', [
-                                            'name' => 'dirlab', 
-                                            'value' => '',
-                                            'placeholder' => 'Dirección laboral',
-                                            'event' => 'address',
-                                            'label' => 'Dirección laboral'
-                                        ])@endcomponent
+                                        <span id='component_dirlab'></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='salario'>
                                         <label for="salario" class="control-label">Salario</label>
-                                        <input type="number" name="salario" id="salario" class="form-control" placeholder="Salario" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                        <span id='component_salario'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -277,7 +244,7 @@
                                 <div class="col-md-3 d-none" id='show_numcue'>
                                     <div class="form-group" group-for='numcue'>
                                         <label for="numcue" class="control-label ">Número de cuenta</label>
-                                        <input type="number" name="numcue" id="numcue" class="form-control" placeholder="Número de cuenta" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                        <span id='component_numcue'></span>
                                     </div>
                                 </div>
 
@@ -308,21 +275,21 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='email'>
                                         <label for="email" class="control-label">Email notificación</label>
-                                        <input type="email" name="email" id="email" class="form-control" placeholder="Email">
+                                        <span id='component_email'></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='telefono'>
                                         <label for="telefono" class="control-label">Telefono notificación con indicativo:</label>
-                                        <input type="number" name="telefono" id="telefono" class="form-control" placeholder="Telefono con Indicativo">
+                                        <span id='component_telefono'></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='celular'>
                                         <label for="celular" class="control-label">Celular notificación</label>
-                                        <input type="number" name="celular" id="celular" class="form-control" placeholder="Celular">
+                                        <span id='component_celular'></span>
                                     </div>
                                 </div>
 

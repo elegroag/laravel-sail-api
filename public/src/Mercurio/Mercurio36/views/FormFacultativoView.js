@@ -1,11 +1,12 @@
-import flatpickr from 'flatpickr';
-import { Spanish } from 'flatpickr/dist/l10n/es';
+import { $App } from '@/App';
 import { ComponentModel } from '@/Componentes/Models/ComponentModel';
 import { eventsFormControl } from '@/Core';
 import { FormView } from '@/Mercurio/FormView';
-import { IndependienteModel } from '@/Mercurio/Independientes/models/IndependienteModel';
+import flatpickr from 'flatpickr';
+import { Spanish } from 'flatpickr/dist/l10n/es';
+import { FacultativoModel } from '../models/FacultativoModel';
 
-export class FormIndependentView extends FormView {
+export class FormFacultativoView extends FormView {
     #choiceComponents = null;
 
     constructor(options = {}) {
@@ -21,8 +22,8 @@ export class FormIndependentView extends FormView {
         return {
             'click #guardar_ficha': 'saveFormData',
             'click #cancel': 'cancel',
-            'focusout #telefono, #digver': 'isNumber',
-            'focusout #cedtra': 'validePk',
+            'focusout #telefono': 'isNumber',
+            'focusout #cedtra': 'valideNitkey',
             'change #tipdoc': 'changeTipoDocumento',
             'click [data-toggle="address"]': 'openAddress',
             'click #btEnviarRadicado': 'enviarRadicado',
@@ -33,29 +34,17 @@ export class FormIndependentView extends FormView {
 
     #afterRender($el = {}) {
         _.each(this.collection, (component) => {
-            if (component.name == 'ruralt') component.type = 'radio';
-            if (component.name == 'rural') component.type = 'radio';
-            if (component.name == 'autoriza') component.type = 'radio';
-
             const view = this.addComponent(
                 new ComponentModel({
-                    disabled: false,
-                    readonly: false,
-                    order: 0,
-                    target: 1,
-                    searchType: 'local',
                     ...component,
                     valor: this.model.get(component.name),
                 }),
-                component.type,
             );
-
-            this.viewComponents.push(view);
-            this.$el.find('#component_' + component.name).html(view.$el);
+            $el.find('#component_' + component.name).html(view.$el);
         });
 
         this.form.validate({
-            ...IndependienteModel.Rules,
+            ...FacultativoModel.Rules,
             highlight: function (element) {
                 $(element).removeClass('is-valid').addClass('is-invalid');
             },
@@ -64,30 +53,35 @@ export class FormIndependentView extends FormView {
             },
         });
 
+        if (this.collection.props) {
+            _.each(this.collection.props, (prop, key) => {
+                $el.find('#' + key).val(prop);
+            });
+        }
+        $el.find('#cedtra').attr('readonly', true);
+
         this.selectores = this.$el.find(
             '#tipdoc, #tipsoc, #ciupri, #codzon, #codciu, #codact, #coddocrepleg, #ciunac, #cargo, #pub_indigena_id, #resguardo_id',
         );
 
         if (this.model.get('id') !== null) {
             $.each(this.model.toJSON(), (key, valor) => {
-                const inputElement = this.$el.find(`[name="${key}"]`);
+                const inputElement = $el.find(`[name="${key}"]`);
                 if (inputElement.length && valor) {
                     inputElement.val(valor);
                 }
             });
-
-            this.$el.find('#cedtra').attr('readonly', true);
 
             if (this.model.get('tippag') == 'A' || this.model.get('tippag') == 'D') {
                 this.form.find('#show_numcue').removeClass('d-none');
                 this.form.find('#show_codban').removeClass('d-none');
                 this.form.find('#show_tipcue').removeClass('d-none');
             } else {
-                this.$el.find('#numcue').rules('remove', 'required');
-                this.$el.find('#codban').rules('remove', 'required');
-                this.$el.find('#tipcue').rules('remove', 'required');
+                $el.find('#numcue').rules('remove', 'required');
+                $el.find('#codban').rules('remove', 'required');
+                $el.find('#tipcue').rules('remove', 'required');
 
-                IndependienteModel.changeRulesProperty([
+                FacultativoModel.changeRulesProperty([
                     { rule: 'numcue', prop: 'required', value: false },
                     { rule: 'codban', prop: 'required', value: false },
                     { rule: 'tipcue', prop: 'required', value: false },
@@ -95,14 +89,16 @@ export class FormIndependentView extends FormView {
             }
 
             if (this.model.get('peretn') == '3') {
-                this.$el.find('.show-peretn').removeClass('d-none');
+                $el.find('.show-peretn').removeClass('d-none');
             } else {
-                this.$el.find('.show-peretn').addClass('d-none');
-                this.$el.find('#resguardo_id').val('2');
-                this.$el.find('#pub_indigena_id').val('2');
+                $el.find('.show-peretn').addClass('d-none');
+                $el.find('#resguardo_id').val('2');
+                $el.find('#pub_indigena_id').val('2');
             }
 
             this.selectores.trigger('change');
+            $el.find('#cedtra').attr('disabled', true);
+
             setTimeout(() => this.form.valid(), 200);
 
             $.each(this.selectores, (index, element) => {
@@ -111,31 +107,42 @@ export class FormIndependentView extends FormView {
                 if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
             });
         } else {
-            $.each(this.selectores, (index, element) => (this.#choiceComponents[element.name] = new Choices(element)));
+            $.each(
+                this.selectores,
+                (index, element) => (this.#choiceComponents[element.name] = new Choices(element, { silent: true, itemSelectText: '' })),
+            );
         }
 
         this.selectores.on('change', (event) => {
             this.validateChoicesField(event.detail.value, this.#choiceComponents[event.currentTarget.name]);
         });
 
-        eventsFormControl(this.$el);
-
-        flatpickr(this.$el.find('#fecnac, #fecini'), {
+        flatpickr($el.find('#fecnac, #fecini'), {
             enableTime: false,
             dateFormat: 'Y-m-d',
             locale: Spanish,
         });
+
+        eventsFormControl($el);
     }
 
     changeTipoDocumento(e) {
         let tipdoc = $(e.currentTarget).val();
-        let coddocrepleg = IndependienteModel.changeTipdoc(tipdoc);
+        let coddocrepleg = FacultativoModel.changeTipdoc(tipdoc);
         this.$el.find('#coddocrepleg').val(coddocrepleg);
+    }
+
+    serializeData() {
+        var data;
+        if (this.model.entity instanceof FacultativoModel) {
+            data = this.model.entity.toJSON();
+        }
+        return data;
     }
 
     saveFormData(event) {
         event.preventDefault();
-        const target = this.$el.find(event.currentTarget);
+        var target = this.$el.find(event.currentTarget);
         target.attr('disabled', true);
 
         const _parent = this.$el.find('#peretn').val();
@@ -149,7 +156,7 @@ export class FormIndependentView extends FormView {
 
         if (_err > 0) {
             target.removeAttr('disabled');
-            this.App.trigger('alert:warning', {
+            $App.trigger('alert:warning', {
                 message: 'Se requiere de resolver los campos requeridos para continuar.',
             });
             setTimeout(() => $('label.error').text(''), 6000);
@@ -158,17 +165,15 @@ export class FormIndependentView extends FormView {
 
         this.$el.find('#cedtra').removeAttr('disabled');
 
-        const entity = this.serializeModel(new IndependienteModel());
-        if (entity.get('numcue') == '') entity.set('numcue', '0');
+        const entity = this.serializeModel(new FacultativoModel());
 
         if (entity.isValid() !== true) {
             target.removeAttr('disabled');
-            this.App.trigger('alert:warning', { message: entity.validationError.join(' ') });
+            $App.trigger('alert:warning', { message: entity.validationError.join(' ') });
             setTimeout(() => $('label.error').text(''), 6000);
             return false;
         }
 
-        // Solicitar la clave de usuario antes de confirmar y guardar
         Swal.fire({
             title: 'Confirmación requerida',
             html: `<p style='font-size:14px;margin-bottom:8px'>Ingrese su clave para confirmar el envío de la información.</p>`,
@@ -192,19 +197,15 @@ export class FormIndependentView extends FormView {
                 target.removeAttr('disabled');
                 return;
             }
-
             const clave = result.value;
-            // Adjuntamos la clave al entity para que viaje al backend
             try {
                 entity.set('clave', clave);
             } catch (e) {
-                // fallback por si entity no es un Backbone.Model estándar
                 if (typeof entity === 'object' && typeof entity.set !== 'function') {
                     entity.clave = clave;
                 }
             }
-
-            this.App.trigger('confirma', {
+            $App.trigger('confirma', {
                 message: 'Confirma que desea guardar los datos del formulario.',
                 callback: (status) => {
                     if (status) {
@@ -217,10 +218,10 @@ export class FormIndependentView extends FormView {
 
                                 if (response) {
                                     if (response.success) {
-                                        this.App.trigger('alert:success', { message: response.msj });
+                                        $App.trigger('alert:success', { message: response.msj });
                                         this.model.set({ id: parseInt(response.data.id) });
                                         if (this.isNew === true) {
-                                            this.App.router.navigate('proceso/' + this.model.get('id'), {
+                                            $App.router.navigate('proceso/' + this.model.get('id'), {
                                                 trigger: true,
                                                 replace: true,
                                             });
@@ -229,7 +230,7 @@ export class FormIndependentView extends FormView {
                                             _tab.show();
                                         }
                                     } else {
-                                        this.App.trigger('alert:error', { message: response.msj });
+                                        $App.trigger('alert:error', { message: response.msj });
                                     }
                                 }
                             },
@@ -246,134 +247,40 @@ export class FormIndependentView extends FormView {
         return this.getInput('#priape') + ' ' + this.getInput('#segape') + ' ' + this.getInput('#prinom') + ' ' + this.getInput('#segnom');
     }
 
-    digver(e) {
+    valideNitkey(e) {
         e.preventDefault();
-        let cedtra = $(e.currentTarget).val();
-        if (cedtra === '') {
-            return false;
-        }
-        this.appController.trigger('form:digit', {
-            cedtra: cedtra,
-            callback: (entity) => {
-                console.log(entity);
-                $('#digver').val(entity.digver);
+        if (!this.isNew) return false;
+
+        let nit = this.$el.find(e.currentTarget).val();
+        if (nit === '' || _.isUndefined(nit)) return false;
+        this.$el.find('#digver').val('0');
+
+        this.trigger('form:find', {
+            data: {
+                nit: nit,
             },
-        });
-    }
-
-    validePk(e) {
-        e.preventDefault();
-        let cedtra = this.$el.find(e.currentTarget).val();
-        if (cedtra === '') return false;
-
-        this.App.trigger('form:find', {
-            cedtra: cedtra,
-            callback: () => {
-                this.actualizaForm();
-                this.$el.find('#cedtra').attr('disabled', true);
-
-                $.each(this.selectores, (index, element) => {
-                    const name = this.model.get(element.name);
-                    if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
-                });
+            callback: (solicitud) => {
+                if (solicitud) {
+                    $App.trigger('confirma', {
+                        message:
+                            'El sistema identifica datos de la empresa en su sistema principal. ¿Desea que se actualice el presente formulario con los datos existentes?.',
+                        callback: (status) => {
+                            if (status) {
+                                solicitud.estado = 'T';
+                                solicitud.fecsol = null;
+                                this.model.set(solicitud);
+                                this.actualizaForm();
+                                $('#nit').attr('disabled', true);
+                            }
+                        },
+                    });
+                }
             },
-        });
-    }
-
-    comfirmarSincronizar(model) {
-        this.model.entity = model;
-
-        $('#codact').val(this.model.entity.get('codact'));
-        $('#calemp').val(this.model.entity.get('calemp'));
-        $('#cedtra').val(this.model.entity.get('cedtra'));
-        $('#direccion').val(this.model.entity.get('direccion'));
-        $('#codciu').val(this.model.entity.get('codciu'));
-        $('#codzon').val(this.model.entity.get('codzon'));
-        $('#telefono').val(this.model.entity.get('telefono'));
-        $('#celular').val(this.model.entity.get('celular'));
-        $('#email').val(this.model.entity.get('email'));
-        $('#prinom').val(this.model.entity.get('prinom'));
-        $('#segnom').val(this.model.entity.get('segnom'));
-        $('#priape').val(this.model.entity.get('priape'));
-        $('#segape').val(this.model.entity.get('segape'));
-        $('#codcaj').val(this.model.entity.get('codcaj'));
-        $('#coddoc').val(this.model.entity.get('tipdoc'));
-
-        this.selectores.trigger('change');
-
-        setTimeout(function () {
-            Swal.fire({
-                html: `<p style='font-size:14px'>El formulario se actualizo de forma correcta</p>`,
-                showConfirmButton: false,
-                timer: 2000,
-            });
-        }, 300);
-    }
-
-    setModelUseEmpresa(empresa) {
-        let nombre;
-        if (empresa.priaperepleg == null) {
-            nombre = empresa.priaperepleg + ' ' + empresa.segaperepleg + ' ' + empresa.prinomrepleg + ' ' + empresa.segnomrepleg;
-        } else {
-            nombre = empresa.priape + ' ' + empresa.segape + ' ' + empresa.prinom + ' ' + empresa.segnom;
-        }
-        this.model.set({
-            cedtra: empresa.nit,
-            tipdoc: empresa.coddoc,
-            priape: empresa.priape,
-            segape: empresa.segape,
-            prinom: empresa.priape,
-            segnom: empresa.segape,
-            direccion: empresa.direccion,
-            codciu: empresa.codciu,
-            telefono: empresa.telefono,
-            email: empresa.email,
-            codzon: empresa.codzon,
-            celular: empresa.telr,
-            coddocrepleg: 'CC',
-        });
-    }
-
-    setModelTrabajador(trabajador) {
-        this.model.set({
-            cedtra: trabajador.cedtra,
-            tipdoc: trabajador.coddoc,
-            priape: trabajador.priape,
-            segape: trabajador.segape,
-            prinom: trabajador.prinom,
-            segnom: trabajador.segnom,
-            direccion: trabajador.direccion,
-            codciu: trabajador.codciu,
-            telefono: trabajador.telefono,
-            email: trabajador.email,
-            codzon: trabajador.codzon,
-            rural: trabajador.rural,
-            cabhog: trabajador.cabhog,
-            captra: trabajador.captra,
-            tipdis: trabajador.tipdis,
-            salario: trabajador.salario,
-            sexo: trabajador.sexo,
-            estciv: trabajador.estciv,
-            vivienda: trabajador.vivienda,
-            nivedu: trabajador.nivedu,
-            vendedor: trabajador.vendedor,
-            tippag: trabajador.tippag,
-            codban: trabajador.codban,
-            numcue: trabajador.numcue,
-            tipcue: trabajador.tipcue,
-            fecnac: trabajador.fecnac,
-            ciunac: trabajador.ciunac,
-            cargo: trabajador.cargo,
-            orisex: trabajador.orisex,
-            facvul: trabajador.facvul,
-            peretn: trabajador.peretn,
-            resguardo_id: trabajador.resguardo_id,
-            pub_indigena_id: trabajador.pub_indigena_id,
         });
     }
 
     changePeretn(e) {
-        let _parent = this.$el.find(e.currentTarget).val();
+        const _parent = this.$el.find(e.currentTarget).val();
         if (_parent == '3') {
             this.$el.find('.show-peretn').removeClass('d-none');
         } else {
@@ -395,7 +302,7 @@ export class FormIndependentView extends FormView {
                 this.selectores.trigger('change');
             }
 
-            IndependienteModel.changeRulesProperty([
+            FacultativoModel.changeRulesProperty([
                 { rule: 'numcue', prop: 'required', value: true },
                 { rule: 'codban', prop: 'required', value: true },
                 { rule: 'tipcue', prop: 'required', value: true },
@@ -409,7 +316,7 @@ export class FormIndependentView extends FormView {
             this.$el.find('#show_codban').addClass('d-none');
             this.$el.find('#show_tipcue').addClass('d-none');
 
-            IndependienteModel.changeRulesProperty([
+            FacultativoModel.changeRulesProperty([
                 { rule: 'numcue', prop: 'required', value: false },
                 { rule: 'codban', prop: 'required', value: false },
                 { rule: 'tipcue', prop: 'required', value: false },

@@ -3,6 +3,7 @@
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.css') }}" />
+    <link rel="stylesheet" href="{{ asset('mercurio/build/Mercurio41.css') }}" />
 @endpush
 
 @section('content')
@@ -60,6 +61,6 @@
         window.ServerController = 'independiente';
     </script>
 
-    <script src="{{ asset('mercurio/build/Independientes.js') }}"></script>
+    <script src="{{ asset('mercurio/build/Mercurio41.js') }}"></script>
 
     @endpush

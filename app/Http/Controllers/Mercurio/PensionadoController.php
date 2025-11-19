@@ -8,11 +8,11 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsPensionado;
 use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
+use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
+use App\Models\Mercurio07;
 use App\Models\Mercurio10;
-use App\Models\Mercurio30;
-use App\Models\Mercurio31;
 use App\Models\Mercurio37;
 use App\Models\Mercurio38;
 use App\Models\Subsi54;
@@ -21,14 +21,12 @@ use App\Services\Entidades\TrabajadorService;
 use App\Services\FormulariosAdjuntos\PensionadoAdjuntoService;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\ChangeCuentaService;
-use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
 use Carbon\Carbon;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Services\Api\ApiSubsidio;
 
 class PensionadoController extends ApplicationController
@@ -65,8 +63,8 @@ class PensionadoController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user =  session('user') ?? null;
+        $this->tipo =  session('tipo') ?? null;
     }
 
     /**
@@ -80,8 +78,8 @@ class PensionadoController extends ApplicationController
             'title' => 'Afiliación Pensionados',
             'calemp' => 'P',
             'tipper' => 'N',
-            'cedtra' => parent::getActUser('documento'),
-            'coddoc' => parent::getActUser('coddoc'),
+            'cedtra' => $this->user['documento'],
+            'coddoc' => $this->user['coddoc'],
         ]);
     }
 
@@ -92,13 +90,12 @@ class PensionadoController extends ApplicationController
      */
     public function actualizar(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $id = $request->input('id');
             $params = $this->serializeData($request);
-            $params['tipo'] = parent::getActUser('tipo');
-            $params['coddoc'] = parent::getActUser('coddoc');
-            $params['documento'] = parent::getActUser('documento');
+            $params['tipo'] = $this->tipo;
+            $params['coddoc'] = $this->user['coddoc'];
+            $params['documento'] = $this->user['documento'];
             $params['estado'] = 'T';
 
             $this->pensionadoService = new PensionadoService;
@@ -131,7 +128,6 @@ class PensionadoController extends ApplicationController
      */
     public function guardar(Request $request)
     {
-        // $this->setResponse("ajax");
         $pensionadoService = new PensionadoService;
         $this->db->begin();
         try {
@@ -264,8 +260,6 @@ class PensionadoController extends ApplicationController
      */
     public function valida(Request $request)
     {
-        $this->setResponse('ajax');
-
         try {
             $cedtra = $request->input('cedrep');
             $solicitud = (new Mercurio38)->findFirst("documento='{$cedtra}' AND estado IN('A','I')");
@@ -317,7 +311,6 @@ class PensionadoController extends ApplicationController
      */
     public function borrarArchivo(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $numero = $this->clp($request, 'id');
             $coddoc = $this->clp($request, 'coddoc');
@@ -526,8 +519,6 @@ class PensionadoController extends ApplicationController
 
     public function params()
     {
-        $this->setResponse('ajax');
-
         try {
             $mtipoDocumentos = new Gener18;
             $tipoDocumentos = [];
@@ -581,9 +572,9 @@ class PensionadoController extends ApplicationController
             $coddoc = $tipoDocumentos;
             $data = [
                 'tipdoc' => $coddoc,
-                'tipper' => (new Mercurio30)->getTipperArray(),
+                'tipper' => tipper_array(),
                 'tipsoc' => $tipsoc,
-                'calemp' => (new Mercurio30)->getCalempArray(),
+                'calemp' => calemp_array(),
                 'codciu' => $codciu,
                 'coddocrepleg' => $coddocrepleg,
                 'codzon' => ParamsPensionado::getZonas(),
@@ -591,36 +582,63 @@ class PensionadoController extends ApplicationController
                 'tipemp' => ParamsPensionado::getTipoEmpresa(),
                 'codcaj' => ParamsPensionado::getCodigoCajas(),
                 'ciupri' => ParamsPensionado::getCiudades(),
-                'sexo' => ParamsTrabajador::getSexos(),
-                'estciv' => ParamsTrabajador::getEstadoCivil(),
-                'cabhog' => ParamsTrabajador::getCabezaHogar(),
-                'captra' => ParamsTrabajador::getCapacidadTrabajar(),
-                'tipdis' => ParamsTrabajador::getTipoDiscapacidad(),
-                'nivedu' => ParamsTrabajador::getNivelEducativo(),
-                'rural' => ParamsTrabajador::getRural(),
-                'tipcon' => ParamsTrabajador::getTipoContrato(),
-                'trasin' => ParamsTrabajador::getSindicalizado(),
-                'vivienda' => ParamsTrabajador::getVivienda(),
+                'sexo' => sexos_array(),
+                'estciv' => estados_civiles_array(),
+                'cabhog' => cabeza_hogar(),
+                'captra' => capacidad_trabajar(),
+                'tipdis' => tipo_discapacidad_array(),
+                'nivedu' => nivel_educativo_array(),
+                'rural' => es_rural(),
+                'tipcon' => tipo_contrato(),
+                'trasin' => es_sindicalizado(),
+                'vivienda' => vivienda_array(),
                 'tipafi' => $tipo_afiliados,
                 'cargo' => ParamsTrabajador::getOcupaciones(),
-                'orisex' => ParamsTrabajador::getOrientacionSexual(),
-                'facvul' => ParamsTrabajador::getVulnerabilidades(),
-                'peretn' => ParamsTrabajador::getPertenenciaEtnicas(),
+                'orisex' => orientacion_sexual_array(),
+                'facvul' => vulnerabilidades_array(),
+                'peretn' => pertenencia_etnica_array(),
                 'ciunac' => ParamsPensionado::getCiudades(),
-                'labora_otra_empresa' => ParamsTrabajador::getLaboraOtraEmpresa(),
-                'tippag' => ParamsTrabajador::getTipoPago(),
+                'labora_otra_empresa' => labora_otra_empresa_array(),
+                'tippag' => tipo_pago_array(),
                 'resguardo_id' => ParamsTrabajador::getResguardos(),
                 'pub_indigena_id' => ParamsTrabajador::getPueblosIndigenas(),
                 'codban' => ParamsTrabajador::getBancos(),
-                'tipsal' => (new Mercurio31)->getTipsalArray(),
-                'tipcue' => ParamsTrabajador::getTipoCuenta(),
-                'ruralt' => ParamsTrabajador::getRural(),
-                'autoriza' => ['S' => 'SI', 'N' => 'NO'],
+                'tipsal' => tipsal_array(),
+                'tipcue' => tipo_cuenta_array(),
+                'ruralt' => es_rural(),
+                'autoriza' => autoriza_array(),
             ];
 
+            $formulario = FormularioDinamico::where('name', 'mercurio38')->first();
+            $componentes = $formulario->componentes()->get();
+            $componentes = $componentes->map(function ($componente) use ($data) {
+                $_componente = $componente->toArray();
+                if (isset($data[$componente->name])) {
+                    $_componente['data_source'] = $data[$componente->name];
+                }
+                $_componente['id'] = $componente->name;
+                return $_componente;
+            });
+
+            $solicitante = Mercurio07::where('documento', $this->user['documento'])
+                ->where('coddoc', $this->user['coddoc'])
+                ->where('tipo', $this->tipo)
+                ->first();
+
+            $hoy = Carbon::now();
+            $componentes['props'] = [
+                'name' => null,
+                'cedtra' => $solicitante->documento,
+                'coddoc' => $solicitante->coddoc,
+                'tipdoc' => $solicitante->coddoc,
+                'tipo' => $solicitante->tipo,
+                'email' => $solicitante->email,
+                'codciu' => $solicitante->codciu,
+                'fecsol' => $hoy->format('Y-m-d'),
+            ];
             $salida = [
                 'success' => true,
-                'data' => $data,
+                'data' => $componentes,
                 'msj' => 'OK',
             ];
         } catch (DebugException $e) {
@@ -630,12 +648,11 @@ class PensionadoController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function searchRequest($id)
     {
-        $this->setResponse('ajax');
         try {
             if (is_null($id)) {
                 throw new DebugException('Error no hay solicitud a buscar', 301);

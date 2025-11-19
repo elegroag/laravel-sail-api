@@ -2,13 +2,14 @@
 
 namespace App\Services\FormulariosAdjuntos;
 
+use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsEmpresa;
-use App\Library\Tcpdf\KumbiaPDF;
+use App\Models\Mercurio07;
 use App\Models\Mercurio16;
-use App\Models\Mercurio32;
 use App\Services\Formularios\FactoryDocuments;
 use App\Services\PreparaFormularios\CifrarDocumento;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Formularios\Generation\DocumentGenerationManager;
 
 class IndependienteAdjuntoService
 {
@@ -28,7 +29,7 @@ class IndependienteAdjuntoService
 
     public function __construct($request)
     {
-        $this->user = session()->has('user') ? session('user') : null;
+        $this->user = session('user') ?? null;
         $this->request = $request;
         $this->initialize();
     }
@@ -55,24 +56,16 @@ class IndependienteAdjuntoService
 
     public function tratamientoDatos()
     {
-        $this->filename = "tratamiento_datos_independiente_{$this->request->getCedtra()}.pdf";
-        KumbiaPDF::setFooterImage(false);
-        KumbiaPDF::setBackgroundImage(false);
-
-        $fabrica = new FactoryDocuments;
-        $documento = $fabrica->crearPolitica('independiente');
-
-        $documento->setParamsInit([
+        $this->filename = 'tratamiento_datos_independiente_' . strtotime('now') . "_{$this->request->cedtra}.pdf";
+        $manager = new DocumentGenerationManager();
+        $manager->generate('api', 'independiente', [
+            'categoria' => 'politica',
+            'output' => $this->filename,
+            'template' => 'politica-trabajador.html',
             'independiente' => $this->request,
-            'firma' => $this->lfirma,
-            'filename' => $this->filename,
-            'background' => false,
-            'rfirma' => false,
+            'solicitante' => $this->getSolicitante()
         ]);
-        $documento->main();
-        $documento->outPut();
         $this->cifrarDocumento();
-
         return $this;
     }
 
@@ -83,7 +76,7 @@ class IndependienteAdjuntoService
             [
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_trabajador',
-                'params' => ['cedtra' => $this->request->getCedtra()],
+                'params' => ['cedtra' => $this->request->cedtra],
             ]
         );
 
@@ -92,7 +85,7 @@ class IndependienteAdjuntoService
         }
 
         $out = $procesadorComando->toArray();
-        $this->filename = "carta_solicitud_independiente_{$this->request->getCedtra()}.pdf";
+        $this->filename = "carta_solicitud_independiente_{$this->request->cedtra}.pdf";
         $background = 'img/form/oficios/oficio_solicitud_afiliacion.jpg';
 
         $fabrica = new FactoryDocuments;
@@ -115,31 +108,31 @@ class IndependienteAdjuntoService
 
     public function formulario()
     {
-        $conyuge = Mercurio32::where([
-            'documento' => $this->request->getDocumento(),
-            'coddoc' => $this->request->getCoddoc(),
-            'cedtra' => $this->request->getCedtra(),
-            'comper' => 'S',
-        ])->first();
+        if (! $this->lfirma) {
+            throw new DebugException('Error no hay firma digital', 501);
+        }
 
-        $this->filename = "formulario_independiente_{$this->request->getCedtra()}.pdf";
-        $background = 'img/form/trabajador/form-001-tra-p01.png';
-
-        $fabrica = new FactoryDocuments;
-        $documento = $fabrica->crearFormulario('independiente');
-        $documento->setParamsInit([
-            'background' => $background,
+        $this->filename = 'formulario-trabajador-' . strtotime('now') . "_{$this->request->cedtra}.pdf";
+        $manager = new DocumentGenerationManager();
+        $manager->generate('api', 'independiente', [
+            'categoria' => 'formulario',
+            'output' => $this->filename,
+            'template' => 'trabajador.html',
             'independiente' => $this->request,
-            'conyuge' => $conyuge,
-            'firma' => $this->lfirma,
-            'filename' => $this->filename,
+            'solicitante' => $this->getSolicitante()
         ]);
 
-        $documento->main();
-        $documento->outPut();
         $this->cifrarDocumento();
-
         return $this;
+    }
+
+    public function getSolicitante()
+    {
+        $solicitante = Mercurio07::where("documento", $this->request->documento)
+            ->where("coddoc", $this->request->coddoc)
+            ->where("tipo", $this->request->tipo)
+            ->first();
+        return $solicitante;
     }
 
     public function cifrarDocumento()

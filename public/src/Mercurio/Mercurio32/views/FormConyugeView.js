@@ -101,7 +101,9 @@ export class FormConyugeView extends FormView {
         }
 
         this.selectores.on('change', (event) => {
-            this.validateChoicesField(event.detail.value, this.#choiceComponents[event.currentTarget.name]);
+            if (event.detail) {
+                this.validateChoicesField(event.detail.value, this.#choiceComponents[event.currentTarget.name]);
+            }
         });
 
         eventsFormControl($el);

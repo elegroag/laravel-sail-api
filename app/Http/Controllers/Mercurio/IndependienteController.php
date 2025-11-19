@@ -9,8 +9,10 @@ use App\Library\Collections\ParamsEmpresa;
 use App\Library\Collections\ParamsIndependiente;
 use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
+use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
+use App\Models\Mercurio07;
 use App\Models\Mercurio10;
 use App\Models\Mercurio30;
 use App\Models\Mercurio31;
@@ -22,7 +24,6 @@ use App\Services\FormulariosAdjuntos\Formularios;
 use App\Services\FormulariosAdjuntos\IndependienteAdjuntoService;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\ChangeCuentaService;
-use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
@@ -291,7 +292,6 @@ class IndependienteController extends ApplicationController
      */
     public function validaPk(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $cedtra = $request->input('cedtra');
             $solicitud = Mercurio41::where('documento', $cedtra)
@@ -344,7 +344,7 @@ class IndependienteController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     /**
@@ -455,9 +455,7 @@ class IndependienteController extends ApplicationController
      */
     public function formulario($id)
     {
-        $this->setResponse('ajax');
         try {
-
             $mercurio41 = Mercurio41::where('id', $id)->first();
             $procesadorComando = new ApiSubsidio();
             $procesadorComando->send(
@@ -492,7 +490,7 @@ class IndependienteController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     public function seguimiento(Request $request)
@@ -544,12 +542,11 @@ class IndependienteController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function params()
     {
-        $this->setResponse('ajax');
         try {
             $mtipoDocumentos = new Gener18;
             $tipoDocumentos = [];
@@ -602,47 +599,74 @@ class IndependienteController extends ApplicationController
 
             $coddoc = $tipoDocumentos;
             $data = [
-                'tipdoc' => $coddoc,
-                'tipper' => (new Mercurio30)->getTipperArray(),
-                'tipsoc' => $tipsoc,
-                'calemp' => (new Mercurio30)->getCalempArray(),
-                'codciu' => $codciu,
-                'coddocrepleg' => $coddocrepleg,
                 'codzon' => ParamsIndependiente::getZonas(),
                 'codact' => ParamsIndependiente::getActividades(),
                 'tipemp' => ParamsIndependiente::getTipoEmpresa(),
                 'codcaj' => ParamsIndependiente::getCodigoCajas(),
                 'ciupri' => ParamsIndependiente::getCiudades(),
-                'sexo' => ParamsTrabajador::getSexos(),
-                'estciv' => ParamsTrabajador::getEstadoCivil(),
-                'cabhog' => ParamsTrabajador::getCabezaHogar(),
-                'captra' => ParamsTrabajador::getCapacidadTrabajar(),
-                'tipdis' => ParamsTrabajador::getTipoDiscapacidad(),
-                'nivedu' => ParamsTrabajador::getNivelEducativo(),
-                'rural' => ParamsTrabajador::getRural(),
-                'tipcon' => ParamsTrabajador::getTipoContrato(),
-                'trasin' => ParamsTrabajador::getSindicalizado(),
-                'vivienda' => ParamsTrabajador::getVivienda(),
-                'tipafi' => $tipo_afiliados,
-                'cargo' => ParamsTrabajador::getOcupaciones(),
-                'orisex' => ParamsTrabajador::getOrientacionSexual(),
-                'facvul' => ParamsTrabajador::getVulnerabilidades(),
-                'peretn' => ParamsTrabajador::getPertenenciaEtnicas(),
-                'ciunac' => ParamsIndependiente::getCiudades(),
-                'labora_otra_empresa' => ParamsTrabajador::getLaboraOtraEmpresa(),
-                'tippag' => ParamsTrabajador::getTipoPago(),
                 'resguardo_id' => ParamsTrabajador::getResguardos(),
                 'pub_indigena_id' => ParamsTrabajador::getPueblosIndigenas(),
                 'codban' => ParamsTrabajador::getBancos(),
-                'tipsal' => (new Mercurio31)->getTipsalArray(),
-                'tipcue' => ParamsTrabajador::getTipoCuenta(),
-                'ruralt' => ParamsTrabajador::getRural(),
-                'autoriza' => ['S' => 'SI', 'N' => 'NO'],
+                'ciunac' => ParamsIndependiente::getCiudades(),
+                'cargo' => ParamsTrabajador::getOcupaciones(),
+                'tipdoc' => $coddoc,
+                'tipper' => tipper_array(),
+                'tipsoc' => $tipsoc,
+                'calemp' => calemp_array(),
+                'codciu' => $codciu,
+                'coddocrepleg' => $coddocrepleg,
+                'sexo' => sexos_array(),
+                'estciv' => estados_civiles_array(),
+                'cabhog' => cabeza_hogar(),
+                'captra' => capacidad_trabajar(),
+                'tipdis' => tipo_discapacidad_array(),
+                'nivedu' => nivel_educativo_array(),
+                'rural' => es_rural(),
+                'tipcon' => tipo_contrato(),
+                'trasin' => es_sindicalizado(),
+                'vivienda' => vivienda_array(),
+                'tipafi' => $tipo_afiliados,
+                'orisex' => orientacion_sexual_array(),
+                'facvul' => vulnerabilidades_array(),
+                'peretn' => pertenencia_etnica_array(),
+                'labora_otra_empresa' => labora_otra_empresa_array(),
+                'tippag' => tipo_pago_array(),
+                'tipsal' => tipsal_array(),
+                'tipcue' => tipo_cuenta_array(),
+                'ruralt' => es_rural(),
+                'autoriza' => autoriza_array(),
             ];
 
+            $formulario = FormularioDinamico::where('name', 'mercurio41')->first();
+            $componentes = $formulario->componentes()->get();
+            $componentes = $componentes->map(function ($componente) use ($data) {
+                $_componente = $componente->toArray();
+                if (isset($data[$componente->name])) {
+                    $_componente['data_source'] = $data[$componente->name];
+                }
+                $_componente['id'] = $componente->name;
+                return $_componente;
+            });
+
+            $solicitante = Mercurio07::where('documento', $this->user['documento'])
+                ->where('coddoc', $this->user['coddoc'])
+                ->where('tipo', $this->tipo)
+                ->first();
+
+            $hoy = Carbon::now();
+            $componentes['props'] = [
+                'name' => null,
+                'cedtra' => $solicitante->documento,
+                'coddoc' => $solicitante->coddoc,
+                'tipdoc' => $solicitante->coddoc,
+                'tipo' => $solicitante->tipo,
+                'email' => $solicitante->email,
+                'codciu' => $solicitante->codciu,
+                'fecsol' => $hoy->format('Y-m-d'),
+            ];
             $salida = [
                 'success' => true,
-                'data' => $data,
+                'data' => $componentes,
                 'msj' => 'OK',
             ];
         } catch (DebugException $e) {
@@ -652,12 +676,11 @@ class IndependienteController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function searchRequest(Request $request, Response $response, int $id)
     {
-        $this->setResponse('ajax');
         try {
             if (is_null($id)) {
                 throw new DebugException('Error no hay solicitud a buscar', 301);
@@ -687,14 +710,12 @@ class IndependienteController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     public function consultaDocumentos(Request $request, Response $response, int $id)
     {
-        $this->setResponse('ajax');
         try {
-
             $documento = $this->user['documento'] ?? '';
             $coddoc = $this->user['coddoc'] ?? '';
             $service = new IndependienteService;
@@ -720,8 +741,7 @@ class IndependienteController extends ApplicationController
                 'msj' => $e->getMessage(),
             ];
         }
-
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     public function cartaSolicitud($archivo = '')
@@ -742,24 +762,28 @@ class IndependienteController extends ApplicationController
 
     public function borrar(Request $request)
     {
-        $this->setResponse('ajax');
-        $generales = new GeneralService;
-        // $generales->startTrans('mercurio41');
         try {
-
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
-
             $id = $request->input('id');
 
-            $m41 = (new Mercurio41)->findFirst("id='{$id}' and documento='{$documento}' and coddoc='{$coddoc}'");
+            $m41 = Mercurio41::where("id", $id)
+                ->where("documento", $documento)
+                ->where("coddoc", $coddoc)
+                ->first();
+
             if ($m41) {
                 if ($m41->getEstado() != 'T') {
-                    (new Mercurio10)->deleteAll("numero='{$id}' AND tipopc='{$this->tipopc}'");
+                    Mercurio10::where("numero", $id)
+                        ->where("tipopc", $this->tipopc)
+                        ->delete();
                 }
             }
-            (new Mercurio41)->deleteAll("id='{$id}' and documento='{$documento}' and coddoc='{$coddoc}'");
-            $generales->finishTrans();
+            Mercurio41::where("id", $id)
+                ->where("documento", $documento)
+                ->where("coddoc", $coddoc)
+                ->delete();
+
             $response = [
                 'success' => true,
                 'msj' => 'Ok',
@@ -771,7 +795,7 @@ class IndependienteController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function administrar_cuenta($id = '')

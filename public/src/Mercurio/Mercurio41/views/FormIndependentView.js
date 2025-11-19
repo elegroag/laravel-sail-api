@@ -1,11 +1,11 @@
-import flatpickr from 'flatpickr';
-import { Spanish } from 'flatpickr/dist/l10n/es';
 import { ComponentModel } from '@/Componentes/Models/ComponentModel';
 import { eventsFormControl } from '@/Core';
 import { FormView } from '@/Mercurio/FormView';
-import { PensionadoModel } from '../models/PensionadoModel';
+import { IndependienteModel } from '@/Mercurio/Mercurio41/models/IndependienteModel';
+import flatpickr from 'flatpickr';
+import { Spanish } from 'flatpickr/dist/l10n/es';
 
-class FormPensionadoView extends FormView {
+export class FormIndependentView extends FormView {
     #choiceComponents = null;
 
     constructor(options = {}) {
@@ -33,27 +33,17 @@ class FormPensionadoView extends FormView {
 
     #afterRender($el = {}) {
         _.each(this.collection, (component) => {
-            if (component.name == 'ruralt') component.type = 'radio';
-            if (component.name == 'rural') component.type = 'radio';
-            if (component.name == 'autoriza') component.type = 'radio';
-
             const view = this.addComponent(
                 new ComponentModel({
-                    disabled: false,
-                    readonly: false,
-                    order: 0,
-                    target: 1,
-                    searchType: 'local',
                     ...component,
                     valor: this.model.get(component.name),
                 }),
-                component.type,
             );
-            this.$el.find('#component_' + component.name).html(view.$el);
+            $el.find('#component_' + component.name).html(view.$el);
         });
 
         this.form.validate({
-            ...PensionadoModel.Rules,
+            ...IndependienteModel.Rules,
             highlight: function (element) {
                 $(element).removeClass('is-valid').addClass('is-invalid');
             },
@@ -62,28 +52,35 @@ class FormPensionadoView extends FormView {
             },
         });
 
-        this.selectores = this.$el.find(
+        if (this.collection.props) {
+            _.each(this.collection.props, (prop, key) => {
+                $el.find('#' + key).val(prop);
+            });
+        }
+        $el.find('#cedtra').attr('readonly', true);
+
+        this.selectores = $el.find(
             '#tipdoc, #tipsoc, #ciupri, #codzon, #codciu, #codact, #coddocrepleg, #ciunac, #cargo, #pub_indigena_id, #resguardo_id',
         );
 
         if (this.model.get('id') !== null) {
             $.each(this.model.toJSON(), (key, valor) => {
-                const inputElement = this.$el.find(`[name="${key}"]`);
+                const inputElement = $el.find(`[name="${key}"]`);
                 if (inputElement.length && valor) {
                     inputElement.val(valor);
                 }
             });
 
             if (this.model.get('tippag') == 'A' || this.model.get('tippag') == 'D') {
-                this.form.find('#show_numcue').removeClass('d-none');
-                this.form.find('#show_codban').removeClass('d-none');
-                this.form.find('#show_tipcue').removeClass('d-none');
+                $el.find('#show_numcue').removeClass('d-none');
+                $el.find('#show_codban').removeClass('d-none');
+                $el.find('#show_tipcue').removeClass('d-none');
             } else {
-                this.$el.find('#numcue').rules('remove', 'required');
-                this.$el.find('#codban').rules('remove', 'required');
-                this.$el.find('#tipcue').rules('remove', 'required');
+                $el.find('#numcue').rules('remove', 'required');
+                $el.find('#codban').rules('remove', 'required');
+                $el.find('#tipcue').rules('remove', 'required');
 
-                PensionadoModel.changeRulesProperty([
+                IndependienteModel.changeRulesProperty([
                     { rule: 'numcue', prop: 'required', value: false },
                     { rule: 'codban', prop: 'required', value: false },
                     { rule: 'tipcue', prop: 'required', value: false },
@@ -91,15 +88,14 @@ class FormPensionadoView extends FormView {
             }
 
             if (this.model.get('peretn') == '3') {
-                this.$el.find('.show-peretn').removeClass('d-none');
+                $el.find('.show-peretn').removeClass('d-none');
             } else {
-                this.$el.find('.show-peretn').addClass('d-none');
-                this.$el.find('#resguardo_id').val('2');
-                this.$el.find('#pub_indigena_id').val('2');
+                $el.find('.show-peretn').addClass('d-none');
+                $el.find('#resguardo_id').val('2');
+                $el.find('#pub_indigena_id').val('2');
             }
 
             this.selectores.trigger('change');
-            this.$el.find('#cedtra').attr('disabled', true);
             setTimeout(() => this.form.valid(), 200);
 
             $.each(this.selectores, (index, element) => {
@@ -108,51 +104,42 @@ class FormPensionadoView extends FormView {
                 if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
             });
         } else {
-            $.each(this.selectores, (index, element) => (this.#choiceComponents[element.name] = new Choices(element)));
+            $.each(
+                this.selectores,
+                (index, element) => (this.#choiceComponents[element.name] = new Choices(element, { silent: true, itemSelectText: '' })),
+            );
         }
 
         this.selectores.on('change', (event) => {
-            this.validateChoicesField(event.detail.value, this.#choiceComponents[event.currentTarget.name]);
+            if (event.detail) {
+                this.validateChoicesField(event.detail.value, this.#choiceComponents[event.currentTarget.name]);
+            }
         });
 
-        eventsFormControl(this.$el);
+        eventsFormControl($el);
 
-        flatpickr(this.$el.find('#fecnac, #fecini'), {
+        flatpickr($el.find('#fecnac, #fecini'), {
             enableTime: false,
             dateFormat: 'Y-m-d',
             locale: Spanish,
         });
-
-        eventsFormControl($el);
     }
 
     changeTipoDocumento(e) {
         let tipdoc = $(e.currentTarget).val();
-        let coddocrepleg = PensionadoModel.changeTipdoc(tipdoc);
+        let coddocrepleg = IndependienteModel.changeTipdoc(tipdoc);
         this.$el.find('#coddocrepleg').val(coddocrepleg);
-    }
-
-    serializeData() {
-        var data;
-        if (this.model.entity instanceof PensionadoModel) {
-            data = this.model.entity.toJSON();
-        }
-        return data;
     }
 
     saveFormData(event) {
         event.preventDefault();
-        var target = this.$el.find(event.currentTarget);
+        const target = this.$el.find(event.currentTarget);
         target.attr('disabled', true);
 
         const _parent = this.$el.find('#peretn').val();
         if (_parent != '3') {
             this.$el.find('#resguardo_id').val('2');
             this.$el.find('#pub_indigena_id').val('2');
-        }
-
-        if (this.$el.find('#tippag').val() == 'T') {
-            this.$el.find('#numcue').val('0');
         }
 
         let _err = 0;
@@ -169,21 +156,17 @@ class FormPensionadoView extends FormView {
 
         this.$el.find('#cedtra').removeAttr('disabled');
 
-        console.log(this.getInput('[name="fecsol"]'));
-
-        const entity = this.serializeModel(new PensionadoModel());
+        const entity = this.serializeModel(new IndependienteModel());
+        if (entity.get('numcue') == '') entity.set('numcue', '0');
 
         if (entity.isValid() !== true) {
-            console.log(entity.validationError);
             target.removeAttr('disabled');
             this.App.trigger('alert:warning', { message: entity.validationError.join(' ') });
             setTimeout(() => $('label.error').text(''), 6000);
             return false;
         }
 
-        entity.set('repleg', this.nameRepleg());
-        this.$el.find('#repleg').val(entity.get('repleg'));
-
+        // Solicitar la clave de usuario antes de confirmar y guardar
         Swal.fire({
             title: 'Confirmación requerida',
             html: `<p style='font-size:14px;margin-bottom:8px'>Ingrese su clave para confirmar el envío de la información.</p>`,
@@ -207,14 +190,18 @@ class FormPensionadoView extends FormView {
                 target.removeAttr('disabled');
                 return;
             }
+
             const clave = result.value;
+            // Adjuntamos la clave al entity para que viaje al backend
             try {
                 entity.set('clave', clave);
             } catch (e) {
+                // fallback por si entity no es un Backbone.Model estándar
                 if (typeof entity === 'object' && typeof entity.set !== 'function') {
                     entity.clave = clave;
                 }
             }
+
             this.App.trigger('confirma', {
                 message: 'Confirma que desea guardar los datos del formulario.',
                 callback: (status) => {
@@ -250,10 +237,7 @@ class FormPensionadoView extends FormView {
                     }
                 },
             });
-
         });
-
-
     }
 
     nameRepleg() {
@@ -279,15 +263,110 @@ class FormPensionadoView extends FormView {
         e.preventDefault();
         let cedtra = this.$el.find(e.currentTarget).val();
         if (cedtra === '') return false;
+
         this.App.trigger('form:find', {
             cedtra: cedtra,
-            callback: (entity) => {
+            callback: () => {
                 this.actualizaForm();
+                this.$el.find('#cedtra').attr('disabled', true);
+
                 $.each(this.selectores, (index, element) => {
                     const name = this.model.get(element.name);
                     if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
                 });
             },
+        });
+    }
+
+    comfirmarSincronizar(model) {
+        this.model.entity = model;
+
+        $('#codact').val(this.model.entity.get('codact'));
+        $('#calemp').val(this.model.entity.get('calemp'));
+        $('#cedtra').val(this.model.entity.get('cedtra'));
+        $('#direccion').val(this.model.entity.get('direccion'));
+        $('#codciu').val(this.model.entity.get('codciu'));
+        $('#codzon').val(this.model.entity.get('codzon'));
+        $('#telefono').val(this.model.entity.get('telefono'));
+        $('#celular').val(this.model.entity.get('celular'));
+        $('#email').val(this.model.entity.get('email'));
+        $('#prinom').val(this.model.entity.get('prinom'));
+        $('#segnom').val(this.model.entity.get('segnom'));
+        $('#priape').val(this.model.entity.get('priape'));
+        $('#segape').val(this.model.entity.get('segape'));
+        $('#codcaj').val(this.model.entity.get('codcaj'));
+        $('#coddoc').val(this.model.entity.get('tipdoc'));
+
+        this.selectores.trigger('change');
+
+        setTimeout(function () {
+            Swal.fire({
+                html: `<p style='font-size:14px'>El formulario se actualizo de forma correcta</p>`,
+                showConfirmButton: false,
+                timer: 2000,
+            });
+        }, 300);
+    }
+
+    setModelUseEmpresa(empresa) {
+        let nombre;
+        if (empresa.priaperepleg == null) {
+            nombre = empresa.priaperepleg + ' ' + empresa.segaperepleg + ' ' + empresa.prinomrepleg + ' ' + empresa.segnomrepleg;
+        } else {
+            nombre = empresa.priape + ' ' + empresa.segape + ' ' + empresa.prinom + ' ' + empresa.segnom;
+        }
+        this.model.set({
+            cedtra: empresa.nit,
+            tipdoc: empresa.coddoc,
+            priape: empresa.priape,
+            segape: empresa.segape,
+            prinom: empresa.priape,
+            segnom: empresa.segape,
+            direccion: empresa.direccion,
+            codciu: empresa.codciu,
+            telefono: empresa.telefono,
+            email: empresa.email,
+            codzon: empresa.codzon,
+            celular: empresa.telr,
+            coddocrepleg: 'CC',
+        });
+    }
+
+    setModelTrabajador(trabajador) {
+        this.model.set({
+            cedtra: trabajador.cedtra,
+            tipdoc: trabajador.coddoc,
+            priape: trabajador.priape,
+            segape: trabajador.segape,
+            prinom: trabajador.prinom,
+            segnom: trabajador.segnom,
+            direccion: trabajador.direccion,
+            codciu: trabajador.codciu,
+            telefono: trabajador.telefono,
+            email: trabajador.email,
+            codzon: trabajador.codzon,
+            rural: trabajador.rural,
+            cabhog: trabajador.cabhog,
+            captra: trabajador.captra,
+            tipdis: trabajador.tipdis,
+            salario: trabajador.salario,
+            sexo: trabajador.sexo,
+            estciv: trabajador.estciv,
+            vivienda: trabajador.vivienda,
+            nivedu: trabajador.nivedu,
+            vendedor: trabajador.vendedor,
+            tippag: trabajador.tippag,
+            codban: trabajador.codban,
+            numcue: trabajador.numcue,
+            tipcue: trabajador.tipcue,
+            fecnac: trabajador.fecnac,
+            ciunac: trabajador.ciunac,
+            cargo: trabajador.cargo,
+            orisex: trabajador.orisex,
+            facvul: trabajador.facvul,
+            peretn: trabajador.peretn,
+            resguardo_id: trabajador.resguardo_id,
+            pub_indigena_id: trabajador.pub_indigena_id,
         });
     }
 
@@ -314,7 +393,7 @@ class FormPensionadoView extends FormView {
                 this.selectores.trigger('change');
             }
 
-            PensionadoModel.changeRulesProperty([
+            IndependienteModel.changeRulesProperty([
                 { rule: 'numcue', prop: 'required', value: true },
                 { rule: 'codban', prop: 'required', value: true },
                 { rule: 'tipcue', prop: 'required', value: true },
@@ -328,7 +407,7 @@ class FormPensionadoView extends FormView {
             this.$el.find('#show_codban').addClass('d-none');
             this.$el.find('#show_tipcue').addClass('d-none');
 
-            PensionadoModel.changeRulesProperty([
+            IndependienteModel.changeRulesProperty([
                 { rule: 'numcue', prop: 'required', value: false },
                 { rule: 'codban', prop: 'required', value: false },
                 { rule: 'tipcue', prop: 'required', value: false },
@@ -347,9 +426,7 @@ class FormPensionadoView extends FormView {
         if (_.size(this.viewComponents) > 0) {
             _.each(this.viewComponents, (view) => view.remove());
         }
-        FormView.prototype.remove.call(this, {});
         $.each(this.#choiceComponents, (choice) => choice.destroy());
+        FormView.prototype.remove.call(this, {});
     }
 }
-
-export { FormPensionadoView };

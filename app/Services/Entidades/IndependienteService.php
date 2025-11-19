@@ -403,8 +403,8 @@ class IndependienteService
             ]
         );
 
-        $paramsPensionado = new ParamsIndependiente;
-        $paramsPensionado->setDatosCaptura($procesadorComando->toArray());
+        $paramsIndependiente = new ParamsIndependiente;
+        $paramsIndependiente->setDatosCaptura($procesadorComando->toArray());
 
         $procesadorComando = new ApiSubsidio();
         $procesadorComando->send(

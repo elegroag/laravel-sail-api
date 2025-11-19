@@ -1,6 +1,3 @@
-@php
-    $fecsol = date('Y-m-d');
-@endphp
 <div class="tab-content" id="pills-tabContent">
     <div class="tab-pane fade show active" id="datos_solicitud" role="tabpanel" aria-labelledby="datos_solicitud-tab">
         <div class="card-body">
@@ -9,13 +6,13 @@
                     <input type="number" name="id" class="d-none"/>
                     <input type="text" name="calemp" class="d-none" value="P" />
                     <input type="text" name="coddocrepleg" class="d-none" value="CC"/>
-                    <input type="text" name="fecsol" id="fecsol" class="d-none" value="{{ $fecsol }}"/>
+                    <input type="text" name="fecsol" id="fecsol" class="d-none"/>
                 </div>
                 <div class="row">
                     <div class="col-12">
                         <fieldset>
                             <legend>Datos afiliado pensionado</legend>
-                            <div class="row">
+                            <div class="row justify-content-around">
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='tipdoc'>
                                         <label for="tipdoc" class="control-label">Tipo documento:</label>
@@ -26,33 +23,33 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='cedtra'>
                                         <label for="cedtra" class="control-label">Identificación:</label>
-                                        <input type="number" name="cedtra" class="form-control" placeholder="Cedula representante" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                        <span id='component_cedtra'></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='priape'>
                                         <label for="priape" class="control-label">Primer apellido:</label>
-                                        <input type="text" name="priape" class="form-control" placeholder="Primer apellido" oninput="this.value = this.value.toUpperCase()">
+                                        <span id='component_priape'></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='segape'>
                                         <label for="segape" class="control-label">Segundo apellido:</label>
-                                        <input type="text" name="segape" class="form-control" placeholder="Segundo apellido" oninput="this.value = this.value.toUpperCase()">
+                                        <span id='component_segape'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='prinom'>
                                         <label for="prinom" class="control-label">Primer nombre:</label>
-                                        <input type="text" name="prinom" class="form-control" placeholder="Primer nombre" oninput="this.value = this.value.toUpperCase()">
+                                        <span id='component_prinom'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='segnom'>
                                         <label for="segnom" class="control-label">Segundo nombre:</label>
-                                        <input type="text" name="segnom" class="form-control" placeholder="Segundo nombre" oninput="this.value = this.value.toUpperCase()">
+                                        <span id='component_segnom'></span>
                                     </div>
                                 </div>
 
@@ -66,18 +63,17 @@
                         </fieldset>
                     </div>
                 </div>
-                <br />
 
-                <div class="row">
+                <div class="row mt-3">
                     <div class="col-12">
                         <fieldset>
                             <legend>Datos trabajador afiliado</legend>
-                            <div class="row">
+                            <div class="row justify-content-around">
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='fecini'>
                                         <label for="fecini" class="control-label">Fecha inicio:</label>
-                                        <input type="date" name="fecini" class="form-control" placeholder="Fecha inicial">
+                                        <span id='component_fecini'></span>
                                     </div>
                                 </div>
 
@@ -91,8 +87,7 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='fecnac'>
                                         <label for="fecnac" class="control-label">Fecha nacimiento</label>
-                                        <input type="date" name="fecnac" class="form-control" placeholder="Fecha de nacimiento">
-                                        <label id="fecnac-error" class="error" for="fecnac"></label>
+                                        <span id='component_fecnac'></span>
                                     </div>
                                 </div>
 
@@ -153,33 +148,23 @@
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='direccion'>
                                         <label for="direccion" class="control-label ">Dirección de residencia</label>
-                                        @component('components/address', [
-                                            'name' => 'direccion', 
-                                            'value' => '',
-                                            'placeholder' => 'Dirección notificación',
-                                            'event' => 'address',
-                                            'label' => 'Dirección notificación'
-                                        ])@endcomponent
+                                        <span id='component_direccion'></span>
+                                      
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='dirlab'>
                                         <label for="dirlab" class="control-label ">Dirección de trabajo</label>
-                                        @component('components/address', [
-                                            'name' => 'dirlab', 
-                                            'value' => '',
-                                            'placeholder' => 'Dirección laboral',
-                                            'event' => 'address',
-                                            'label' => 'Dirección laboral'
-                                        ])@endcomponent
+                                        <span id='component_dirlab'></span>
+                                      
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='salario'>
                                         <label for="salario" class="control-label">Salario</label>
-                                        <input type="number" name="salario" id="salario" class="form-control" placeholder="Salario">
+                                        <span id='component_salario'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -243,7 +228,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
+                                <div class="col-md-6">
                                     <div class="form-group" group-for='cargo'>
                                         <label for="cargo" class="control-label">Cargo</label>
                                         <span id='component_cargo'></span>
@@ -260,7 +245,7 @@
                                 <div class="col-md-3 d-none" id='show_numcue'>
                                     <div class="form-group" group-for='numcue'>
                                         <label for="numcue" class="control-label ">Número de cuenta</label>
-                                        <input type="number" name="numcue" id="numcue" class="form-control" placeholder="Número de cuenta">
+                                        <span id='component_numcue'></span>
                                     </div>
                                 </div>
 
@@ -281,31 +266,30 @@
                         </fieldset>
                     </div>
                 </div>
-                <br />
-
-                <div class="row">
+                
+                <div class="row mt-3">
                     <div class="col-12">
                         <fieldset>
                             <legend>Datos del contacto administrativo</legend>
-                            <div class="row">
+                            <div class="row justify-content-around">
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='email'>
                                         <label for="email" class="control-label">Email notificación</label>
-                                        <input type="email" name="email" id="email" class="form-control" placeholder="Email" oninput="this.value = this.value.toUpperCase()">
+                                        <span id='component_email'></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='telefono'>
                                         <label for="telefono" class="control-label">Telefono notificación con indicativo:</label>
-                                        <input type="number" name="telefono" id="telefono" class="form-control" placeholder="Telefono con Indicativo">
+                                        <span id='component_telefono'></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='celular'>
                                         <label for="celular" class="control-label">Celular notificación</label>
-                                        <input type="number" name="celular" id="celular" class="form-control" placeholder="Celular">
+                                        <span id='component_celular'></span>
                                     </div>
                                 </div>
 
