@@ -3,6 +3,7 @@
 namespace App\Services\Formularios\Api;
 
 use App\Library\Collections\ParamsEmpresa;
+use App\Models\Gener18;
 use App\Services\Api\ApiPython;
 use App\Services\Api\ApiSubsidio;
 
@@ -35,11 +36,23 @@ class ActualizadatosDocuments
         $ciudad_name = $codciu ? ($ciudades[$codciu] ?? $codciu) : null;
         $zona_name = $codzon ? ($zonas[$codzon] ?? $codzon) : null;
 
+        $mtipoDocumentos = Gener18::where('coddoc', $empresaData['tipdoc'])->first();
+        $tipo_documento = ($mtipoDocumentos) ? $mtipoDocumentos->detdoc : 'NIT';
+
+        $coddorepleg = array_flip(tipo_document_repleg_detalle());
+        $representante = [
+            'nombre' => $empresaData['repleg'],
+            'tipo_documento' => ($empresaData['coddorepleg']) ? $coddorepleg[$empresaData['coddorepleg']] : 'CEDULA DE CIUDADANIA',
+            'cedula' => $empresaData['cedrep'],
+        ];
+
         $context = [
-            'empresa' => $empresaData,
-            'campos' => $this->campos,
+            ...$empresaData,
+            ...$this->campos,
             'ciudad_name' => $ciudad_name,
             'zona_name' => $zona_name,
+            'tipo_documento' => $tipo_documento,
+            'representante' => $representante,
         ];
 
         $ps = new ApiPython();

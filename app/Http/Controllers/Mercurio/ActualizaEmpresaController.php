@@ -65,142 +65,156 @@ class ActualizaEmpresaController extends ApplicationController
         $this->db->begin();
         $actualizaEmpresaService = new ActualizaEmpresaService;
         try {
-            $clave_certificado = $request->input('clave');
-            $documento = $this->user['documento'];
-            $coddoc = $this->user['coddoc'];
-            $tipo = $this->tipo;
-            $tipact = 'E';
+            try {
+                $clave_certificado = $request->input('clave');
+                $documento = $this->user['documento'];
+                $coddoc = $this->user['coddoc'];
+                $tipo = $this->tipo;
+                $tipact = 'E';
 
-            $logger = new Logger;
-            $log = $logger->registrarLog(
-                false,
-                'Guarda actualizacion datos empresa',
-                json_encode($request->all())
-            );
+                $logger = new Logger;
+                $log = $logger->registrarLog(
+                    false,
+                    'Guarda actualizacion datos empresa',
+                    json_encode($request->all())
+                );
 
-            $asignarFuncionario = new AsignarFuncionario;
+                $asignarFuncionario = new AsignarFuncionario;
 
-            $id = $request->input('id');
+                $id = $request->input('id');
 
-            $params = [
-                'fecsol' => date('Y-m-d'),
-                'fecest' => date('Y-m-d'),
-                'estado' => 'T',
-                'tipact' => $tipact,
-                'tipo' => $tipo,
-                'coddoc' => $coddoc,
-                'documento' => $documento,
-                'usuario' => $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']),
-            ];
-
-            if (is_null($id) || $id == '') {
-                $solicitud = $actualizaEmpresaService->createByFormData($params);
-            } else {
-                $res = $actualizaEmpresaService->updateByFormData($id, $params);
-                if (! $res) {
-                    throw new DebugException('Error no se actualizo los datos', 301);
-                }
-                $solicitud = $actualizaEmpresaService->findById($id);
-            }
-
-            Mercurio33::where('documento', $documento)
-                ->where('coddoc', $coddoc)
-                ->delete();
-
-            $campos = Mercurio28::where('tipo', $tipo)->get();
-            if ($campos) {
-                foreach ($campos as $mercurio28) {
-                    $valor = $request->input($mercurio28->getCampo());
-                    if ($valor == '') {
-                        continue;
-                    }
-
-                    $mercurio33 = Mercurio33::where('documento', $documento)
-                        ->where('coddoc', $coddoc)
-                        ->where('actualizacion', $solicitud->getId())
-                        ->where('campo', $mercurio28->getCampo())
-                        ->first();
-
-                    if ($mercurio33) {
-                        $mercurio33->valor = $valor;
-                        $mercurio33->save();
-                    } else {
-                        Mercurio33::create(
-                            [
-                                'tipo' => $mercurio28->getTipo(),
-                                'coddoc' => $coddoc,
-                                'documento' => $documento,
-                                'campo' => $mercurio28->getCampo(),
-                                'antval' => $valor,
-                                'valor' => $valor,
-                                'estado' => 'P',
-                                'motivo' => '',
-                                'fecest' => date('Y-m-d'),
-                                'usuario' => $solicitud->getUsuario(),
-                                'actualizacion' => $solicitud->getId(),
-                                'log' => $log
-                            ]
-                        );
-                    }
-                }
-            }
-
-            $data = [];
-            $mercurio33 = Mercurio33::where('documento', $documento)
-                ->where('coddoc', $coddoc)
-                ->where('actualizacion', $id)
-                ->get();
-
-            if ($mercurio33) {
-                foreach ($mercurio33 as $m33) {
-                    $data[$m33->campo] = $m33->valor;
-                }
-            }
-            $data = array_merge($solicitud->toArray(), $data);
-
-            $empresa_sisu = $actualizaEmpresaService->buscarEmpresaSubsidio($documento);
-            if ($empresa_sisu && count($empresa_sisu) > 0) {
-                $empresa = new Mercurio30();
-                $empresa->fill($empresa_sisu);
-            } else {
-                $empresa = new Mercurio30();
-            }
-            $empresa->id = $id;
-
-            $actualizaEmpresaService = new DatosEmpresaService(
-                [
-                    'empresa' => $empresa->toArray(),
-                    'campos' => $data,
-                    'documento' => $documento,
+                $params = [
+                    'fecsol' => date('Y-m-d'),
+                    'fecest' => date('Y-m-d'),
+                    'estado' => 'T',
+                    'tipact' => $tipact,
+                    'tipo' => $tipo,
                     'coddoc' => $coddoc,
-                    'nit' => $documento,
-                ]
-            );
-            $actualizaEmpresaService->setClaveCertificado($clave_certificado);
-            $out = $actualizaEmpresaService->formulario()->getResult();
-            (new GuardarArchivoService(
-                [
-                    'tipopc' => $this->tipopc,
-                    'coddoc' => 27,
-                    'id' => $solicitud->id,
-                ]
-            ))->salvarDatos($out);
+                    'documento' => $documento,
+                    'usuario' => $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']),
+                    'fecapr' => null,
+                    'codest' => '00',
+                ];
 
-            $response = [
-                'success' => true,
-                'msj' => 'Registro completado con éxito',
-                'data' => $data,
-            ];
-            $this->db->commit();
+                if (is_null($id) || $id == '') {
+                    $solicitud = $actualizaEmpresaService->createByFormData($params);
+                } else {
+                    $res = $actualizaEmpresaService->updateByFormData($id, $params);
+                    if (! $res) {
+                        throw new DebugException('Error no se actualizo los datos', 301);
+                    }
+                    $solicitud = $actualizaEmpresaService->findById($id);
+                }
+
+                Mercurio33::where('documento', $documento)
+                    ->where('coddoc', $coddoc)
+                    ->delete();
+
+                $campos = Mercurio28::where('tipo', $tipo)->get();
+                if ($campos) {
+                    foreach ($campos as $mercurio28) {
+                        $valor = $request->input($mercurio28->getCampo());
+                        if ($valor == '') {
+                            continue;
+                        }
+
+                        $mercurio33 = Mercurio33::where('documento', $documento)
+                            ->where('coddoc', $coddoc)
+                            ->where('actualizacion', $solicitud->id)
+                            ->where('campo', $mercurio28->getCampo())
+                            ->first();
+
+                        if ($mercurio33) {
+                            $mercurio33->valor = $valor;
+                            $mercurio33->save();
+                        } else {
+                            Mercurio33::create(
+                                [
+                                    'tipo' => $mercurio28->getTipo(),
+                                    'coddoc' => $coddoc,
+                                    'documento' => $documento,
+                                    'campo' => $mercurio28->getCampo(),
+                                    'antval' => $valor,
+                                    'valor' => $valor,
+                                    'estado' => 'P',
+                                    'motivo' => '',
+                                    'fecest' => date('Y-m-d'),
+                                    'usuario' => $solicitud->usuario,
+                                    'actualizacion' => $solicitud->id,
+                                    'log' => $log
+                                ]
+                            );
+                        }
+                    }
+                }
+
+                $data = [];
+                $mercurio33 = Mercurio33::where('documento', $documento)
+                    ->where('coddoc', $coddoc)
+                    ->where('actualizacion', $solicitud->id)
+                    ->get();
+
+                if ($mercurio33) {
+                    foreach ($mercurio33 as $m33) {
+                        $data[$m33->campo] = $m33->valor;
+                    }
+                }
+                $data = array_merge($solicitud->toArray(), $data);
+
+                $empresa_sisu = $actualizaEmpresaService->buscarEmpresaSubsidio($documento);
+                if ($empresa_sisu && count($empresa_sisu) > 0) {
+                    $empresa = new Mercurio30();
+                    $empresa->fill($empresa_sisu);
+                } else {
+                    $empresa = new Mercurio30();
+                }
+
+                $empresa->id = $id;
+                $empresa->ruuid = $solicitud->ruuid;
+                $actualizaEmpresaService = new DatosEmpresaService(
+                    [
+                        'empresa' => $empresa->toArray(),
+                        'campos' => $data,
+                        'documento' => $documento,
+                        'coddoc' => $coddoc,
+                        'nit' => $documento,
+                    ]
+                );
+
+                $actualizaEmpresaService->setClaveCertificado($clave_certificado);
+                $out = $actualizaEmpresaService->formulario()->getResult();
+                (new GuardarArchivoService(
+                    [
+                        'tipopc' => $this->tipopc,
+                        'coddoc' => 27,
+                        'id' => $solicitud->id,
+                    ]
+                ))->salvarDatos($out);
+
+                $response = [
+                    'success' => true,
+                    'msj' => 'Registro completado con éxito',
+                    'data' => $data,
+                ];
+                $this->db->commit();
+            } catch (\Exception $e) {
+                $response = [
+                    'success' => false,
+                    'msj' => $e->getMessage(),
+                    'trace' => $e->getTrace(),
+                ];
+                $this->db->rollBack();
+            }
         } catch (DebugException $e) {
             $response = [
                 'success' => false,
                 'msj' => $e->getMessage(),
+                'error' => $e->render($request)
             ];
             $this->db->rollBack();
         }
 
-        return $this->renderObject($response);
+        return response()->json($response);
     }
 
     public function params()
@@ -303,6 +317,11 @@ class ActualizaEmpresaController extends ApplicationController
                 $_componente['id'] = $componente->name;
                 return $_componente;
             });
+
+            $componentes['props'] = [
+                'name' => null,
+                'empresa' => $empresa_sisu,
+            ];
 
             $salida = [
                 'success' => true,

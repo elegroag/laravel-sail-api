@@ -3,9 +3,8 @@
         <div class="card-body">
             <form id="formRequest" class="validation_form" autocomplete="off" novalidate>
                 <div class="d-none">
-                    <input type="number" name="id" class="d-none" oninput="this.value=this.value.replace(/[^0-9]/g,'');">
-                    <input type="text" name="codsuc" class="d-none">
-                    <input type="number" name="tipact" class="d-none">
+                    <input type="text" name="id" id="id" class="d-none" />
+                    <input type="text" name="tipact" id="tipact" class="d-none" />
                 </div>
                 <div class="row mb-3">
                     <div class="col-12">

@@ -63,7 +63,7 @@ class ActualizaEmpresaService
                 WHEN solis.estado = 'I' THEN 'Inactiva'
             END) as estado_detalle
             FROM mercurio47 as solis
-            WHERE {$where}
+            WHERE {$where} AND solis.tipact='E'
             ORDER BY solis.id DESC;
         ");
 
@@ -256,10 +256,8 @@ class ActualizaEmpresaService
         if ($empresa != false) {
             $empresa->fill($data);
             $empresa->save();
-
             return $empresa;
         }
-
         return false;
     }
 
@@ -275,11 +273,9 @@ class ActualizaEmpresaService
         $empresa = $this->findById($id);
         if ($empresa) {
             $empresa->fill($data);
-
             return $empresa->save();
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -290,11 +286,9 @@ class ActualizaEmpresaService
      */
     public function createByFormData($data)
     {
-        $data['estado'] = 'T';
-        $data['log'] = '0';
         $solicitud = new Mercurio47($data);
+        $solicitud->estado = 'T';
         $solicitud->save();
-
         return $solicitud;
     }
 

@@ -14,6 +14,10 @@ class Mercurio11Seeder extends Seeder
     {
         $estadosRechazo = [
             [
+                'codest' => '00',
+                'detalle' => 'No se aplica',
+            ],
+            [
                 'codest' => '01',
                 'detalle' => 'Documentación Incompleta',
             ],

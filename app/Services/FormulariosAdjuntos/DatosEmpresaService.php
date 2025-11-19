@@ -2,20 +2,17 @@
 
 namespace App\Services\FormulariosAdjuntos;
 
+use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsEmpresa;
 use App\Library\Tcpdf\KumbiaPDF;
 use App\Models\Mercurio16;
 use App\Services\Formularios\FactoryDocuments;
 use App\Services\PreparaFormularios\CifrarDocumento;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Formularios\Generation\DocumentGenerationManager;
 
 class DatosEmpresaService
 {
-    /**
-     * request variable
-     *
-     * @var array
-     */
     private $request;
 
     private $lfirma;
@@ -32,7 +29,7 @@ class DatosEmpresaService
 
     public function __construct($request)
     {
-        $this->user = session()->has('user') ? session('user') : null;
+        $this->user = session('user') ?? null;
         $this->request = $request;
         $this->initialize();
     }
@@ -58,23 +55,19 @@ class DatosEmpresaService
 
     public function formulario()
     {
-        $this->filename = strtotime('now') . "_{$this->request['nit']}.pdf";
-        KumbiaPDF::setBackgroundImage(public_path('docs/form/empresa/form-empresa.jpg'));
+        if (! $this->lfirma) {
+            throw new DebugException('Error no hay firma digital', 501);
+        }
+        $this->filename = 'formulario-datos-empresa-' . strtotime('now') . "_{$this->request['nit']}.pdf";
+        $manager = new DocumentGenerationManager();
+        $manager->generate('api', 'actualizadatos', [
+            'categoria' => 'formulario',
+            'output' => $this->filename,
+            'template' => 'actualiza-empresa.html',
+            ...$this->request
+        ]);
 
-        $fabrica = new FactoryDocuments;
-        $documento = $fabrica->crearFormulario('actualizadatos');
-        $documento->setParamsInit(
-            [
-                'empresa' => $this->request['empresa'],
-                'campos' => $this->request['campos'],
-                'filename' => $this->filename,
-            ]
-        );
-
-        $documento->main();
-        $documento->outPut();
         $this->cifrarDocumento();
-
         return $this;
     }
 

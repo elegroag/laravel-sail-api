@@ -10,6 +10,11 @@ class Mercurio47 extends ModelBase
 {
     use HasCustomUuid;
 
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
+    }
+
     protected $table = 'mercurio47';
 
     public $timestamps = false;
@@ -26,7 +31,8 @@ class Mercurio47 extends ModelBase
         'tipact',
         'usuario',
         'ruuid',
-        'fecapr'
+        'fecapr',
+        'codest'
     ];
 
     public function setUsuario($usuario)
@@ -219,5 +225,11 @@ class Mercurio47 extends ModelBase
         $data = $this->CamposDisponibles();
 
         return $data["{$campo}"];
+    }
+
+    public function getRuuid()
+    {
+        $this->regenerateUuid();
+        return $this->ruuid;
     }
 }
