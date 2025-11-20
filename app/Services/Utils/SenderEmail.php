@@ -9,7 +9,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 
 class SenderEmail
 {
-    protected $email_pruebas = 'soportesistemas.comfaca@gmail.com';
+    protected $email_pruebas = 'enlinea@comfaca.com';
 
     protected $emisor_email;
 
@@ -23,6 +23,8 @@ class SenderEmail
 
     private function configureSMTP()
     {
+        $this->email_pruebas = env('MAIL_DEV') ?? 'enlinea@comfaca.com';
+
         // Configuración del servidor SMTP (por defecto Gmail)
         $this->mail->isSMTP();
         $this->mail->Host = env('MAIL_HOST', 'smtp.gmail.com');

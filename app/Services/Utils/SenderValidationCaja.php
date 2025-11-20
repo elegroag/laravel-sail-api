@@ -10,26 +10,28 @@ require_once 'SenderEmail.php';
 
 class SenderValidationCaja
 {
-    private $email_pruebas = 'soportesistemas.comfaca@gmail.com';
+    private $email_pruebas = 'enlinea@comfaca.com';
 
     public function __construct() {}
 
     public function send($tipopc, $entity)
     {
-        $mercurio10 = new Mercurio10;
-        $mercurio10->setTipopc($tipopc);
-        $mercurio10->setNumero($entity->id);
-        $mercurio10->setItem($entity->item);
-        $mercurio10->setEstado('P');
-        $mercurio10->setNota('Envío a la Caja para verificación');
-        $mercurio10->setFecsis(date('Y-m-d'));
-        $mercurio10->save();
+        $this->email_pruebas = env('MAIL_DEV') ?? 'enlinea@comfaca.com';
 
-        $mercurio02 = (new Mercurio02)->findFirst();
+        Mercurio10::create([
+            'tipopc' => $tipopc,
+            'numero' => $entity->id,
+            'item' => $entity->item,
+            'estado' => 'P',
+            'nota' => 'Envío a la Caja para verificación',
+            'fecsis' => date('Y-m-d'),
+        ]);
+
+        $mercurio02 = Mercurio02::first();
         $arreglo = [
             'titulo' => "Cordial saludo,<br>Señor@ {$entity->repleg}",
-            'msj' => 'La Caja de Compensación Familiar Comfaca, ha recepcionado una solicitud, por medio del sistema comfaca en línea, '.
-                "emitido por el afiliado: {$entity->razsoc} con identificación: {$entity->nit}.<br>Su solicitud está pendiente de verificación por parte de la CAJA.<br/>".
+            'msj' => 'La Caja de Compensación Familiar Comfaca, ha recepcionado una solicitud, por medio del sistema comfaca en línea, ' .
+                "emitido por el afiliado: {$entity->razsoc} con identificación: {$entity->nit}.<br>Su solicitud está pendiente de verificación por parte de la CAJA.<br/>" .
                 '<br/>Gracias por preferirnos.',
             'rutaImg' => 'https://comfacaenlinea.com.co/public/img/header_reporte_ugpp.png',
             'url_activa' => 'https://comfacaenlinea.com.co/Mercurio/Mercurio/login/ingreso_persona',
@@ -49,7 +51,7 @@ class SenderValidationCaja
 
     public function sendEmail($asunto, $html, $destinatario)
     {
-        $emailCaja = (new Mercurio01)->findFirst();
+        $emailCaja = Mercurio01::first();
         $senderEmail = new SenderEmail;
         $senderEmail->setters(
             "emisor_email: {$emailCaja->getEmail()}",

@@ -9,8 +9,10 @@ use App\Library\Collections\ParamsEmpresa;
 use App\Library\Collections\ParamsFacultativo;
 use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
+use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
+use App\Models\Mercurio07;
 use App\Models\Mercurio10;
 use App\Models\Mercurio30;
 use App\Models\Mercurio31;
@@ -25,6 +27,7 @@ use App\Services\Utils\ChangeCuentaService;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
 use App\Services\Api\ApiSubsidio;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class FacultativoController extends ApplicationController
@@ -527,8 +530,6 @@ class FacultativoController extends ApplicationController
      */
     public function params()
     {
-        $this->setResponse('ajax');
-
         try {
             $mtipoDocumentos = new Gener18;
             $tipoDocumentos = [];
@@ -596,49 +597,76 @@ class FacultativoController extends ApplicationController
                 }
             }
 
-            $coddoc = $tipoDocumentos;
             $data = [
-                'tipdoc' => $coddoc,
-                'tipper' => (new Mercurio30)->getTipperArray(),
-                'tipsoc' => $tipsoc,
-                'calemp' => (new Mercurio30)->getCalempArray(),
-                'codciu' => $codciu,
-                'coddocrepleg' => $coddocrepleg,
+                'resguardo_id' => ParamsTrabajador::getResguardos(),
+                'pub_indigena_id' => ParamsTrabajador::getPueblosIndigenas(),
+                'codban' => ParamsTrabajador::getBancos(),
                 'codzon' => ParamsFacultativo::getZonas(),
                 'codact' => ParamsFacultativo::getActividades(),
                 'tipemp' => ParamsFacultativo::getTipoEmpresa(),
                 'codcaj' => ParamsFacultativo::getCodigoCajas(),
                 'ciupri' => ParamsFacultativo::getCiudades(),
-                'sexo' => ParamsTrabajador::getSexos(),
-                'estciv' => ParamsTrabajador::getEstadoCivil(),
-                'cabhog' => ParamsTrabajador::getCabezaHogar(),
-                'captra' => ParamsTrabajador::getCapacidadTrabajar(),
-                'tipdis' => ParamsTrabajador::getTipoDiscapacidad(),
-                'nivedu' => ParamsTrabajador::getNivelEducativo(),
-                'rural' => ParamsTrabajador::getRural(),
                 'tipcon' => ParamsTrabajador::getTipoContrato(),
-                'trasin' => ParamsTrabajador::getSindicalizado(),
-                'vivienda' => ParamsTrabajador::getVivienda(),
-                'tipafi' => $tipo_afiliados,
                 'cargo' => ParamsTrabajador::getOcupaciones(),
-                'orisex' => ParamsTrabajador::getOrientacionSexual(),
-                'facvul' => ParamsTrabajador::getVulnerabilidades(),
-                'peretn' => ParamsTrabajador::getPertenenciaEtnicas(),
                 'ciunac' => ParamsFacultativo::getCiudades(),
-                'labora_otra_empresa' => ParamsTrabajador::getLaboraOtraEmpresa(),
-                'tippag' => ParamsTrabajador::getTipoPago(),
-                'resguardo_id' => ParamsTrabajador::getResguardos(),
-                'pub_indigena_id' => ParamsTrabajador::getPueblosIndigenas(),
-                'codban' => ParamsTrabajador::getBancos(),
-                'tipsal' => (new Mercurio31)->getTipsalArray(),
-                'tipcue' => ParamsTrabajador::getTipoCuenta(),
-                'ruralt' => ParamsTrabajador::getRural(),
-                'autoriza' => ['S' => 'SI', 'N' => 'NO'],
+                'tipdoc' => $tipoDocumentos,
+                'tipper' => tipper_array(),
+                'tipsoc' => $tipsoc,
+                'calemp' => calemp_array(),
+                'codciu' => $codciu,
+                'coddocrepleg' => $coddocrepleg,
+                'sexo' => sexos_array(),
+                'estciv' => estados_civiles_array(),
+                'cabhog' => cabeza_hogar(),
+                'captra' => capacidad_trabajar(),
+                'tipdis' => tipo_discapacidad_array(),
+                'nivedu' => nivel_educativo_array(),
+                'rural' => es_rural(),
+                'trasin' => es_sindicalizado(),
+                'vivienda' => vivienda_array(),
+                'tipafi' => $tipo_afiliados,
+                'orisex' => orientacion_sexual_array(),
+                'facvul' => vulnerabilidades_array(),
+                'peretn' => pertenencia_etnica_array(),
+                'labora_otra_empresa' => labora_otra_empresa_array(),
+                'tippag' => tipo_pago_array(),
+                'tipsal' => tipsal_array(),
+                'tipcue' => tipo_cuenta_array(),
+                'ruralt' => es_rural(),
+                'autoriza' => autoriza_array(),
+            ];
+
+            $formulario = FormularioDinamico::where('name', 'mercurio36')->first();
+            $componentes = $formulario->componentes()->get();
+            $componentes = $componentes->map(function ($componente) use ($data) {
+                $_componente = $componente->toArray();
+                if (isset($data[$componente->name])) {
+                    $_componente['data_source'] = $data[$componente->name];
+                }
+                $_componente['id'] = $componente->name;
+                return $_componente;
+            });
+
+            $solicitante = Mercurio07::where('documento', $this->user['documento'])
+                ->where('coddoc', $this->user['coddoc'])
+                ->where('tipo', $this->tipo)
+                ->first();
+
+            $hoy = Carbon::now();
+            $componentes['props'] = [
+                'name' => null,
+                'cedtra' => $solicitante->documento,
+                'coddoc' => $solicitante->coddoc,
+                'tipdoc' => $solicitante->coddoc,
+                'tipo' => $solicitante->tipo,
+                'email' => $solicitante->email,
+                'codciu' => $solicitante->codciu,
+                'fecsol' => $hoy->format('Y-m-d'),
             ];
 
             $salida = [
                 'success' => true,
-                'data' => $data,
+                'data' => $componentes,
                 'msj' => 'OK',
             ];
         } catch (DebugException $e) {
@@ -648,7 +676,7 @@ class FacultativoController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function searchRequest($id)

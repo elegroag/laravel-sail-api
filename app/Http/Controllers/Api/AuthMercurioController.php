@@ -170,7 +170,7 @@ class AuthMercurioController extends Controller
                 'delivery_method' => $request->input('delivery_method'),
                 'context' => 'verifyStore',
             ];
-            $token = (new AuthJwt(30))->SimpleToken($claims);
+            $token = (new AuthJwt(430))->SimpleToken($claims);
             // Primero validar existencia en mercurio07 para no romper la FK al insertar/actualizar mercurio19
             $user07 = Mercurio07::where('documento', $request->input('documento'))
                 ->where('coddoc', $request->input('coddoc'))
@@ -316,7 +316,7 @@ class AuthMercurioController extends Controller
                 'delivery_method' => $request->input('delivery_method'),
                 'context' => 'recoverySend',
             ];
-            $token = (new AuthJwt(30))->SimpleToken($claims);
+            $token = (new AuthJwt(430))->SimpleToken($claims);
 
             $codigoVerify = genera_code();
             $inicio = Carbon::now()->format('Y-m-d H:i:s');

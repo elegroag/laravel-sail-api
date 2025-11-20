@@ -6,6 +6,7 @@
                     <input type="number" name="id" id="id" class="d-none" />
                     <input type="text" name="profesion" id="profesion" class="d-none" value="Ninguna" />
                     <input type="text" name="fax" id="fax" class="d-none" value="" />
+                    <span id='component_fecsol' class="d-none"></span>
                 </div>
 
                 <div class="row mb-2">
@@ -13,13 +14,6 @@
                         <fieldset>
                             <legend>Datos empresa y trabajador</legend>
                             <div class="row justify-content-around">
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <label for="fecsol" class="control-label">Fecha solicitud:</label>
-                                        <span id='component_fecsol'></span>
-                                    </div>
-                                </div>
-
                                 <div class="col-md-2">
                                     <div class='form-group' group-for='nit'>
                                         <label for='nit' class='control-label'>NIT</label>

@@ -1,5 +1,5 @@
 import { $App } from '@/App';
-import { langDataTable } from '../../../Core';
+import { langDataTable } from '@/Core';
 
 export default class DatosTrabajadorView extends Backbone.View {
     constructor(options = {}) {

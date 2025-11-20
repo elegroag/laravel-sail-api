@@ -3,6 +3,7 @@
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.css') }}" />
+    <link rel="stylesheet" href="{{ asset('mercurio/build/Mercurio472.css') }}" />
 @endpush
 
 @section('content')
@@ -52,6 +53,6 @@
         window.ServerController = 'actualizadatostra';
     </script>
 
-    <script src="{{ asset('mercurio/build/DatosTrabajador.js') }}"></script>
+    <script src="{{ asset('mercurio/build/Mercurio472.js') }}"></script>
 @endpush
 

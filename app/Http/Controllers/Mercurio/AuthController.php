@@ -209,7 +209,7 @@ class AuthController extends Controller
                 'tipo' => $payload['tipo'],
                 'context' => 'verify',
             ];
-            $token = (new AuthJwt(10))->SimpleToken($claims);
+            $token = (new AuthJwt(430))->SimpleToken($claims);
             // Validar existencia del padre en mercurio07 para evitar romper la FK
             $user07 = Mercurio07::where('documento', $payload['documento'])
                 ->where('coddoc', $payload['coddoc'])
@@ -280,7 +280,7 @@ class AuthController extends Controller
             $coddoc = $request->input('coddoc');
             $tipo = $request->input('tipo');
 
-            $auth_jwt_temporal = new AuthJwt(10);
+            $auth_jwt_temporal = new AuthJwt(430);
             $auth_jwt_temporal->CheckSimpleToken($token);
 
             $code = [
@@ -461,7 +461,7 @@ class AuthController extends Controller
             ];
         }
 
-        $auth_jwt_temporal = new AuthJwt(10);
+        $auth_jwt_temporal = new AuthJwt(430);
         $token = $auth_jwt_temporal->SimpleToken([
             'documento' => $request->input('documento'),
             'coddoc' => $request->input('coddoc'),
