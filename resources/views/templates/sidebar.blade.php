@@ -36,7 +36,7 @@ $array_tipos = [
                                 COMFACA EN LÍNEA<br>
                                 <small class="text-muted">Usuario tipo: <span class="text-info">
                                     {{ isset($array_tipos[$_tipo]) ? htmlspecialchars($array_tipos[$_tipo]) : 'N/A' }}</span></small>
-                                <small class="text-muted">Estado afiliado: <span class="text-info">
+                                <small class="text-muted">Estado: <span class="text-info">
                                     {{ $_estado_afiliado == 'I' ? 'INACTIVO' : 'ACTIVO' }}
                                 </span></small>
                             </span>

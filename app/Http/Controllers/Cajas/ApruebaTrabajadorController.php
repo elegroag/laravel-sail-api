@@ -563,15 +563,16 @@ class ApruebaTrabajadorController extends ApplicationController
             ]
         );
         $out = $ps->toArray();
-
         if ($out['success']) {
             $datos_trabajador = $out['data'];
-            foreach ($datos_trabajador as $key => $value) {
-                if (is_numeric($key)) {
-                    continue;
-                }
-                if ($mercurio31->hasAttribute($key)) {
-                    $mercurio31->$key = $value;
+            if ($datos_trabajador) {
+                foreach ($datos_trabajador as $key => $value) {
+                    if (is_numeric($key)) {
+                        continue;
+                    }
+                    if ($mercurio31->hasAttribute($key)) {
+                        $mercurio31->$key = $value;
+                    }
                 }
             }
         }
