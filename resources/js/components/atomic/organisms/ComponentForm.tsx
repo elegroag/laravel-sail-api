@@ -5,7 +5,7 @@ import ActionButtons from '../molecules/ActionButtons';
 import ErrorMessage from '../atoms/ErrorMessage';
 import type { Componente } from '@/types/cajas';
 
-interface ComponentData {
+export interface ComponentData {
     name: string;
     type: Componente['type'];
     label: string;

@@ -2,37 +2,14 @@ import { useEffect, useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { ComponentForm, ActionButtons } from '@/components/atomic';
-import type { Formulario as FormularioType, Componente } from '@/types/cajas';
+import type { Formulario as FormularioType } from '@/types/cajas';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import type { ComponentData } from '@/components/atomic/organisms/ComponentForm';
 
 interface Props {
     formulario?: Pick<FormularioType, 'id' | 'name' | 'title'>;
     formularios?: Array<Pick<FormularioType, 'id' | 'name' | 'title'>>;
 }
-
-// Tipado local alineado con ComponentForm (estructura esperada)
-type ComponentData = {
-    name: string;
-    type: Componente['type'];
-    label: string;
-    placeholder: string;
-    form_type: Componente['form_type'];
-    group_id: number;
-    order: number;
-    default_value: string;
-    is_disabled: boolean;
-    is_readonly: boolean;
-    data_source: Array<{ value: string; label: string }>;
-    css_classes: string;
-    help_text: string;
-    target: number;
-    event_config: Record<string, string | number | boolean | null>;
-    search_type: string;
-    date_max: string;
-    number_min: number;
-    number_max: number;
-    number_step: number;
-};
 
 export default function Create({ formulario, formularios = [] }: Props) {
     const { props } = usePage<{ flash?: { success?: string; error?: string } }>();

@@ -16,6 +16,7 @@ class AuthCajas
 
     public function autenticar($user, $clave)
     {
+        SessionCookies::destroyIdentity();
         $this->buscarUsuario($user);
         if (! $this->usuario) {
             throw new AuthException('El usuario es requerido para la autenticación. 2', 2);
@@ -86,8 +87,8 @@ class AuthCajas
             throw new AuthException('El usuario no es correcto para continuar con la autenticación. 4', 4);
         }
         if ($this->usuario->getEstado() == 'B') {
-            throw new AuthException('El usuario se encuentra bloqueado, por fallar en la autenticación con más de 3 intentos.'.
-                ' Para poder desbloquear su cuenta puede recuperar la cuenta de usuario o solicitar el desbloqueo de su cuenta, '.
+            throw new AuthException('El usuario se encuentra bloqueado, por fallar en la autenticación con más de 3 intentos.' .
+                ' Para poder desbloquear su cuenta puede recuperar la cuenta de usuario o solicitar el desbloqueo de su cuenta, ' .
                 'al aréa de sistemas, soporte_sistemas@comfaca.com.', 5);
         }
 

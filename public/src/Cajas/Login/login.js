@@ -1,5 +1,4 @@
 import loading from '@/Componentes/Views/Loading';
-import { Utils } from '@/Utils';
 
 const AutenticarCajas = (event) => {
     loading.show();
@@ -23,8 +22,6 @@ const AutenticarCajas = (event) => {
     }
     if (nerr == 0) {
         $('#password').val(_password.trim());
-        const url = Utils.getKumbiaURL('autenticar');
-        document.getElementById('form_autenticar').setAttribute('action', url);
         $('#form_autenticar').submit();
     } else {
         loading.hide();

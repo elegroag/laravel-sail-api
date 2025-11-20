@@ -1,8 +1,8 @@
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import AppLayout from '@/layouts/app-layout';
+import type { Componente, DataSourceItem } from '@/types/cajas';
 import { Link, useForm, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
-import type { Componente, DataSourceItem } from '@/types/cajas';
 
 type Props = { componente: Componente };
 
@@ -64,10 +64,10 @@ export default function Edit({ componente }: Props) {
     useEffect(() => {
         setData({
             name: componente.name || '',
-            type: ((componente.type || 'text').toString().toLowerCase() as Componente['type']),
+            type: (componente.type || 'text').toString().toLowerCase() as Componente['type'],
             label: componente.label || '',
             placeholder: componente.placeholder || '',
-            form_type: ((componente.form_type || 'input').toString().toLowerCase() as Componente['form_type']),
+            form_type: (componente.form_type || 'input').toString().toLowerCase() as Componente['form_type'],
             group_id: componente.group_id || 1,
             order: componente.order || 1,
             default_value: componente.default_value || '',
@@ -103,7 +103,7 @@ export default function Edit({ componente }: Props) {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type, checked } = e.target as HTMLInputElement;
         const vRaw = type === 'checkbox' ? checked : type === 'number' ? Number(value) : value;
-        const v = (name === 'type' && typeof vRaw === 'string') ? (vRaw.toLowerCase() as Componente['type']) : vRaw;
+        const v = name === 'type' && typeof vRaw === 'string' ? (vRaw.toLowerCase() as Componente['type']) : vRaw;
         setData(name as keyof FormState, v as never);
         clearErrors();
     };
@@ -127,8 +127,8 @@ export default function Edit({ componente }: Props) {
 
     const validate = (): Record<string, string> => {
         const v: Record<string, string> = {};
-        const typeAllowed = ['text','number','date','email','phone','hidden'];
-        const form_typeAllowed = ['input','select','textarea','date','dialog','radio', 'checkbox', 'address'];
+        const typeAllowed = ['text', 'number', 'date', 'email', 'phone', 'hidden'];
+        const form_typeAllowed = ['input', 'select', 'textarea', 'date', 'dialog', 'radio', 'checkbox', 'address'];
 
         if (!data.name.trim()) v.name = 'El nombre es obligatorio.';
         if (!data.label.trim()) v.label = 'La etiqueta es obligatoria.';
@@ -152,7 +152,7 @@ export default function Edit({ componente }: Props) {
         }
         // Nota: data_source ya NO es requerido cuando type === 'select'
         if (data.form_type === 'select' && Array.isArray(data.data_source) && data.data_source.length > 0) {
-            const invalid = data.data_source.find(it => !it.value.trim() || !it.label.trim());
+            const invalid = data.data_source.find((it) => !it.value.trim() || !it.label.trim());
             if (invalid) v.data_source = 'Todas las opciones deben tener valor y etiqueta.';
         }
 
@@ -183,13 +183,13 @@ export default function Edit({ componente }: Props) {
             return;
         }
         transform((current) => {
-            const normalizedSearchType = (current.search_type === 'ninguno' || current.search_type === '') ? null : current.search_type;
+            const normalizedSearchType = current.search_type === 'ninguno' || current.search_type === '' ? null : current.search_type;
             return {
                 ...current,
                 search_type: normalizedSearchType,
-                data_source: (current.type === 'select' && normalizedSearchType === 'local') ? current.data_source : null,
+                data_source: current.type === 'select' && normalizedSearchType === 'local' ? current.data_source : null,
                 search_endpoint: normalizedSearchType === 'ajax' ? current.search_endpoint : null,
-                event_config: (current.event_config && Object.keys(current.event_config).length > 0) ? current.event_config : null,
+                event_config: current.event_config && Object.keys(current.event_config).length > 0 ? current.event_config : null,
                 date_max: current.type === 'date' && current.date_max ? current.date_max : null,
                 number_min: current.type === 'number' && current.number_min ? Number(current.number_min) : null,
                 number_max: current.type === 'number' && current.number_max ? Number(current.number_max) : null,
@@ -199,7 +199,8 @@ export default function Edit({ componente }: Props) {
         put(`/cajas/componente-dinamico/${componente.id}`, {
             preserveState: true,
             onSuccess: () => {
-                const msg = (typeof (props?.flash?.success) === 'string' && props.flash.success) ? props.flash.success : 'Componente actualizado correctamente.';
+                const msg =
+                    typeof props?.flash?.success === 'string' && props.flash.success ? props.flash.success : 'Componente actualizado correctamente.';
                 setSuccessMsg(msg);
                 setSuccessOpen(true);
             },
@@ -218,7 +219,7 @@ export default function Edit({ componente }: Props) {
                         <DialogClose asChild>
                             <button
                                 type="button"
-                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                                className="px-4 py-2 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 inline-flex items-center border border-transparent"
                             >
                                 Cerrar
                             </button>
@@ -226,60 +227,59 @@ export default function Edit({ componente }: Props) {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-            <div className="bg-white shadow overflow-hidden sm:rounded-md m-2">
-                <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
+            <div className="bg-white shadow sm:rounded-md m-2 overflow-hidden">
+                <div className="px-4 py-5 sm:px-6 flex items-center justify-between">
                     <div>
-                        <h3 className="text-lg leading-6 font-medium text-gray-900">
-                            Editar Componente Dinámico
-                        </h3>
-                        <p className="mt-1 max-w-2xl text-sm text-gray-500">
-                            Modificar los datos del componente dinámico
-                        </p>
+                        <h3 className="text-lg leading-6 font-medium text-gray-900">Editar Componente Dinámico</h3>
+                        <p className="mt-1 max-w-2xl text-sm text-gray-500">Modificar los datos del componente dinámico</p>
                     </div>
-                    <div className="flex space-x-2">
-                    <Link
-                        href={`/cajas/componente-dinamico?formulario_id=${componente.formulario_id}`}
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-400 hover:bg-indigo-400"
-                    >
-                        Volver con formulario
-                    </Link>
+                    <div className="space-x-2 flex">
+                        <Link
+                            href={`/cajas/componente-dinamico?formulario_id=${componente.formulario_id}`}
+                            className="px-4 py-2 text-sm font-medium rounded-md text-white bg-indigo-400 hover:bg-indigo-400 inline-flex items-center border border-transparent"
+                        >
+                            Volver con formulario
+                        </Link>
 
-                     <Link
-                        href="/cajas/componente-dinamico"
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-                    >
-                        Volver
-                    </Link>
+                        <Link
+                            href="/cajas/componente-dinamico"
+                            className="px-4 py-2 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 inline-flex items-center border border-transparent"
+                        >
+                            Volver
+                        </Link>
                     </div>
-
                 </div>
                 <div className="px-4 py-5 sm:px-6">
                     <form onSubmit={handleSubmit}>
-                        <div className="grid grid-cols-6 gap-6">
+                        <div className="gap-6 grid grid-cols-6">
                             {/* Nombre único */}
-                            <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre único *</label>
+                            <div className="sm:col-span-3 col-span-6">
+                                <label htmlFor="name" className="text-sm font-medium text-gray-700 dark:text-gray-300 block">
+                                    Nombre único *
+                                </label>
                                 <input
                                     type="text"
                                     name="name"
                                     id="name"
                                     required
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.name ? 'border-red-300' : ''}`}
+                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.name ? 'border-red-300' : ''}`}
                                     value={data.name}
                                     onChange={handleChange}
                                 />
-                                {errors.name && (<p className="mt-1 text-sm text-red-600">{errors.name}</p>)}
+                                {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
                                 <p className="mt-1 text-xs text-gray-500">Identificador único para el componente</p>
                             </div>
 
                             {/* Tipo */}
-                            <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="type" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tipo *</label>
+                            <div className="sm:col-span-3 col-span-6">
+                                <label htmlFor="type" className="text-sm font-medium text-gray-700 dark:text-gray-300 block">
+                                    Tipo *
+                                </label>
                                 <select
                                     name="type"
                                     id="type"
                                     required
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2"
+                                    className="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full"
                                     value={data.type}
                                     onChange={handleChange}
                                 >
@@ -293,14 +293,16 @@ export default function Edit({ componente }: Props) {
                                 <p className="mt-1 text-xs text-gray-500">Tipo de componente {data.type}</p>
                             </div>
 
-                             {/* Tipo  form*/}
-                            <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="type" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tipo de formulario *</label>
+                            {/* Tipo  form*/}
+                            <div className="sm:col-span-3 col-span-6">
+                                <label htmlFor="type" className="text-sm font-medium text-gray-700 dark:text-gray-300 block">
+                                    Tipo de formulario *
+                                </label>
                                 <select
                                     name="form_type"
                                     id="form_type"
                                     required
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2"
+                                    className="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full"
                                     value={data.form_type}
                                     onChange={handleChange}
                                 >
@@ -318,12 +320,14 @@ export default function Edit({ componente }: Props) {
 
                             {/* Tipo de búsqueda (solo para type select o dialog) */}
                             {(data.form_type === 'select' || data.form_type === 'dialog') && (
-                                <div className="col-span-6 sm:col-span-3">
-                                    <label htmlFor="search_type" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tipo de búsqueda</label>
+                                <div className="sm:col-span-3 col-span-6">
+                                    <label htmlFor="search_type" className="text-sm font-medium text-gray-700 dark:text-gray-300 block">
+                                        Tipo de búsqueda
+                                    </label>
                                     <select
                                         name="search_type"
                                         id="search_type"
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2"
+                                        className="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full"
                                         value={data.search_type}
                                         onChange={handleChange}
                                     >
@@ -333,7 +337,7 @@ export default function Edit({ componente }: Props) {
                                         <option value="ajax">Ajax</option>
                                         <option value="collection">Collection</option>
                                     </select>
-                                    {errors.search_type && (<p className="mt-1 text-sm text-red-600">{errors.search_type}</p>)}
+                                    {errors.search_type && <p className="mt-1 text-sm text-red-600">{errors.search_type}</p>}
                                     <p className="mt-1 text-xs text-gray-500">Aplica para componentes de tipo select o dialog</p>
                                 </div>
                             )}
@@ -341,45 +345,51 @@ export default function Edit({ componente }: Props) {
                             {/* Endpoint de búsqueda (solo cuando search_type = ajax) */}
                             {(data.type === 'select' || data.type === 'dialog') && data.search_type === 'ajax' && (
                                 <div className="col-span-6">
-                                    <label htmlFor="search_endpoint" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Endpoint de búsqueda (AJAX)</label>
+                                    <label htmlFor="search_endpoint" className="text-sm font-medium text-gray-700 dark:text-gray-300 block">
+                                        Endpoint de búsqueda (AJAX)
+                                    </label>
                                     <input
                                         type="text"
                                         name="search_endpoint"
                                         id="search_endpoint"
                                         minLength={160}
-                                        className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.search_endpoint ? 'border-red-300' : ''}`}
+                                        className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.search_endpoint ? 'border-red-300' : ''}`}
                                         value={data.search_endpoint}
                                         onChange={handleChange}
                                         placeholder="https://api.midominio.com/recurso?param1=... (mínimo 160 caracteres)"
                                     />
-                                    {errors.search_endpoint && (<p className="mt-1 text-sm text-red-600">{errors.search_endpoint}</p>)}
+                                    {errors.search_endpoint && <p className="mt-1 text-sm text-red-600">{errors.search_endpoint}</p>}
                                     <p className="mt-1 text-xs text-gray-500">URL completa a consultar por AJAX. Debe tener mínimo 160 caracteres.</p>
                                 </div>
                             )}
                             {/* Etiqueta */}
-                            <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="label" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Etiqueta *</label>
+                            <div className="sm:col-span-3 col-span-6">
+                                <label htmlFor="label" className="text-sm font-medium text-gray-700 dark:text-gray-300 block">
+                                    Etiqueta *
+                                </label>
                                 <input
                                     type="text"
                                     name="label"
                                     id="label"
                                     required
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.label ? 'border-red-300' : ''}`}
+                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.label ? 'border-red-300' : ''}`}
                                     value={data.label}
                                     onChange={handleChange}
                                 />
-                                {errors.label && (<p className="mt-1 text-sm text-red-600">{errors.label}</p>)}
+                                {errors.label && <p className="mt-1 text-sm text-red-600">{errors.label}</p>}
                                 <p className="mt-1 text-xs text-gray-500">Texto visible del campo</p>
                             </div>
 
                             {/* Placeholder */}
-                            <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="placeholder" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Placeholder</label>
+                            <div className="sm:col-span-3 col-span-6">
+                                <label htmlFor="placeholder" className="text-sm font-medium text-gray-700 dark:text-gray-300 block">
+                                    Placeholder
+                                </label>
                                 <input
                                     type="text"
                                     name="placeholder"
                                     id="placeholder"
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.placeholder ? 'border-red-300' : ''}`}
+                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.placeholder ? 'border-red-300' : ''}`}
                                     value={data.placeholder}
                                     onChange={handleChange}
                                 />
@@ -387,30 +397,34 @@ export default function Edit({ componente }: Props) {
                             </div>
 
                             {/* Grupo y Orden */}
-                            <div className="col-span-6 sm:col-span-2">
-                                <label htmlFor="group_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Grupo *</label>
+                            <div className="sm:col-span-2 col-span-6">
+                                <label htmlFor="group_id" className="text-sm font-medium text-gray-700 dark:text-gray-300 block">
+                                    Grupo *
+                                </label>
                                 <input
                                     type="number"
                                     name="group_id"
                                     id="group_id"
                                     required
                                     min="1"
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.group_id ? 'border-red-300' : ''}`}
+                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.group_id ? 'border-red-300' : ''}`}
                                     value={data.group_id}
                                     onChange={handleChange}
                                 />
                                 <p className="mt-1 text-xs text-gray-500">ID del grupo al que pertenece</p>
                             </div>
 
-                            <div className="col-span-6 sm:col-span-2">
-                                <label htmlFor="order" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Orden *</label>
+                            <div className="sm:col-span-2 col-span-6">
+                                <label htmlFor="order" className="text-sm font-medium text-gray-700 dark:text-gray-300 block">
+                                    Orden *
+                                </label>
                                 <input
                                     type="number"
                                     name="order"
                                     id="order"
                                     required
                                     min="1"
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.order ? 'border-red-300' : ''}`}
+                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.order ? 'border-red-300' : ''}`}
                                     value={data.order}
                                     onChange={handleChange}
                                 />
@@ -418,7 +432,7 @@ export default function Edit({ componente }: Props) {
                             </div>
 
                             {/* Estados */}
-                            <div className="col-span-6 sm:col-span-2">
+                            <div className="sm:col-span-2 col-span-6">
                                 <div className="space-y-3">
                                     <div>
                                         <label className="inline-flex items-center">
@@ -449,14 +463,33 @@ export default function Edit({ componente }: Props) {
                                 </div>
                             </div>
 
+                            {/* Objetivo */}
+                            <div className="sm:col-span-2 col-span-6">
+                                <label htmlFor="target" className="text-sm font-medium text-gray-700 dark:text-gray-300 block">
+                                    Objetivo
+                                </label>
+                                <input
+                                    type="number"
+                                    name="target"
+                                    id="target"
+                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.target ? 'border-red-300' : ''}`}
+                                    value={data.target}
+                                    onChange={handleChange}
+                                />
+                                {errors.target && <p className="mt-1 text-sm text-red-600">{errors.target}</p>}
+                                <p className="mt-1 text-xs text-gray-500">ID del objetivo del componente</p>
+                            </div>
+
                             {/* Valor por defecto */}
-                            <div className="col-span-6 sm:col-span-3">
-                                <label htmlFor="default_value" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Valor por defecto</label>
+                            <div className="sm:col-span-3 col-span-6">
+                                <label htmlFor="default_value" className="text-sm font-medium text-gray-700 dark:text-gray-300 block">
+                                    Valor por defecto
+                                </label>
                                 <input
                                     type="text"
                                     name="default_value"
                                     id="default_value"
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.default_value ? 'border-red-300' : ''}`}
+                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.default_value ? 'border-red-300' : ''}`}
                                     value={data.default_value}
                                     onChange={handleChange}
                                 />
@@ -464,40 +497,59 @@ export default function Edit({ componente }: Props) {
 
                             {/* Texto de ayuda */}
                             <div className="col-span-6">
-                                <label htmlFor="help_text" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Texto de ayuda</label>
+                                <label htmlFor="help_text" className="text-sm font-medium text-gray-700 dark:text-gray-300 block">
+                                    Texto de ayuda
+                                </label>
                                 <textarea
                                     name="help_text"
                                     id="help_text"
                                     rows={2}
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.help_text ? 'border-red-300' : ''}`}
+                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.help_text ? 'border-red-300' : ''}`}
                                     value={data.help_text}
                                     onChange={handleChange}
                                 />
                             </div>
 
+                            {/* Clases CSS */}
+                            <div className="col-span-6">
+                                <label htmlFor="css_classes" className="text-sm font-medium text-gray-700 dark:text-gray-300 block">
+                                    Clases CSS
+                                </label>
+                                <input
+                                    type="text"
+                                    name="css_classes"
+                                    id="css_classes"
+                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.css_classes ? 'border-red-300' : ''}`}
+                                    value={data.css_classes}
+                                    onChange={handleChange}
+                                />
+                                {errors.css_classes && <p className="mt-1 text-sm text-red-600">{errors.css_classes}</p>}
+                                <p className="mt-1 text-xs text-gray-500">Clases CSS adicionales para el componente</p>
+                            </div>
+
                             {/* Data Source para Select (visible cuando search_type = local) */}
-                            {data.form_type === 'select' && (data.search_type === 'local') && (
+                            {data.form_type === 'select' && data.search_type === 'local' && (
                                 <div className="col-span-6">
-                                    <div className="border-t border-gray-200 pt-6">
+                                    <div className="border-gray-200 pt-6 border-t">
                                         <h4 className="text-sm font-medium text-gray-900 mb-4">Opciones del Select</h4>
                                         <div className="space-y-3">
                                             {data.data_source.map((item: DataSourceItem, index: number) => (
-                                                <div key={index} className="flex gap-3 items-end">
+                                                <div key={index} className="gap-3 flex items-end">
                                                     <div className="flex-1">
-                                                        <label className="block text-sm font-medium text-gray-700">Valor</label>
+                                                        <label className="text-sm font-medium text-gray-700 block">Valor</label>
                                                         <input
                                                             type="text"
-                                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+                                                            className="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 block w-full"
                                                             value={item.value}
                                                             onChange={(e) => handleDataSourceChange(index, 'value', e.target.value)}
                                                             placeholder="Valor interno"
                                                         />
                                                     </div>
                                                     <div className="flex-1">
-                                                        <label className="block text-sm font-medium text-gray-700">Etiqueta</label>
+                                                        <label className="text-sm font-medium text-gray-700 block">Etiqueta</label>
                                                         <input
                                                             type="text"
-                                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+                                                            className="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 block w-full"
                                                             value={item.label}
                                                             onChange={(e) => handleDataSourceChange(index, 'label', e.target.value)}
                                                             placeholder="Texto visible"
@@ -506,7 +558,7 @@ export default function Edit({ componente }: Props) {
                                                     <button
                                                         type="button"
                                                         onClick={() => removeDataSourceItem(index)}
-                                                        className="inline-flex items-center h-9 px-3 rounded-md border border-red-300 text-sm font-medium text-red-700 hover:bg-red-50"
+                                                        className="h-9 px-3 rounded-md border-red-300 text-sm font-medium text-red-700 hover:bg-red-50 inline-flex items-center border"
                                                     >
                                                         ✕
                                                     </button>
@@ -515,7 +567,7 @@ export default function Edit({ componente }: Props) {
                                             <button
                                                 type="button"
                                                 onClick={addDataSourceItem}
-                                                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                                                className="px-3 py-2 border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 inline-flex items-center border"
                                             >
                                                 + Agregar Opción
                                             </button>
@@ -526,13 +578,15 @@ export default function Edit({ componente }: Props) {
 
                             {/* Configuración específica por tipo */}
                             {data.form_type === 'date' && (
-                                <div className="col-span-6 sm:col-span-3">
-                                    <label htmlFor="date_max" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha máxima</label>
+                                <div className="sm:col-span-3 col-span-6">
+                                    <label htmlFor="date_max" className="text-sm font-medium text-gray-700 dark:text-gray-300 block">
+                                        Fecha máxima
+                                    </label>
                                     <input
                                         type="date"
                                         name="date_max"
                                         id="date_max"
-                                        className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.date_max ? 'border-red-300' : ''}`}
+                                        className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.date_max ? 'border-red-300' : ''}`}
                                         value={data.date_max}
                                         onChange={handleChange}
                                     />
@@ -541,32 +595,38 @@ export default function Edit({ componente }: Props) {
 
                             {data.form_type === 'input' && data.type === 'number' && (
                                 <>
-                                    <div className="col-span-6 sm:col-span-2">
-                                        <label htmlFor="number_min" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Valor mínimo</label>
+                                    <div className="sm:col-span-2 col-span-6">
+                                        <label htmlFor="number_min" className="text-sm font-medium text-gray-700 dark:text-gray-300 block">
+                                            Valor mínimo
+                                        </label>
                                         <input
                                             type="number"
                                             step="any"
                                             name="number_min"
                                             id="number_min"
-                                            className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.number_min ? 'border-red-300' : ''}`}
+                                            className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.number_min ? 'border-red-300' : ''}`}
                                             value={data.number_min as number | string | undefined}
                                             onChange={handleChange}
                                         />
                                     </div>
-                                    <div className="col-span-6 sm:col-span-2">
-                                        <label htmlFor="number_max" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Valor máximo</label>
+                                    <div className="sm:col-span-2 col-span-6">
+                                        <label htmlFor="number_max" className="text-sm font-medium text-gray-700 dark:text-gray-300 block">
+                                            Valor máximo
+                                        </label>
                                         <input
                                             type="number"
                                             step="any"
                                             name="number_max"
                                             id="number_max"
-                                            className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.number_max ? 'border-red-300' : ''}`}
+                                            className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.number_max ? 'border-red-300' : ''}`}
                                             value={data.number_max as number | string | undefined}
                                             onChange={handleChange}
                                         />
                                     </div>
-                                    <div className="col-span-6 sm:col-span-2">
-                                        <label htmlFor="number_step" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Incremento *</label>
+                                    <div className="sm:col-span-2 col-span-6">
+                                        <label htmlFor="number_step" className="text-sm font-medium text-gray-700 dark:text-gray-300 block">
+                                            Incremento *
+                                        </label>
                                         <input
                                             type="number"
                                             step="any"
@@ -574,7 +634,7 @@ export default function Edit({ componente }: Props) {
                                             id="number_step"
                                             required
                                             min="0.01"
-                                            className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.number_step ? 'border-red-300' : ''}`}
+                                            className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.number_step ? 'border-red-300' : ''}`}
                                             value={data.number_step}
                                             onChange={handleChange}
                                         />
@@ -583,11 +643,11 @@ export default function Edit({ componente }: Props) {
                             )}
                         </div>
 
-                        <div className="flex justify-end pt-6 border-t border-gray-200 mt-6">
+                        <div className="pt-6 border-gray-200 mt-6 flex justify-end border-t">
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="px-4 py-2 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 inline-flex items-center border border-transparent focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 {processing ? 'Actualizando...' : 'Actualizar Componente'}
                             </button>
