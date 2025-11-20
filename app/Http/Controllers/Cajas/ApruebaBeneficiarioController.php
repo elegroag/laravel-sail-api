@@ -6,7 +6,6 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsBeneficiario;
 use App\Models\Adapter\DbBase;
-use App\Models\Gener42;
 use App\Models\Mercurio06;
 use App\Models\Mercurio07;
 use App\Models\Mercurio10;
@@ -20,7 +19,6 @@ use App\Services\Reports\ExcelReportStrategy;
 use App\Services\Reports\ReportGenerator;
 use App\Services\Srequest;
 use App\Services\Utils\AsignarFuncionario;
-use App\Services\Utils\Comman;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
 use App\Services\Api\ApiSubsidio;
@@ -87,7 +85,7 @@ class ApruebaBeneficiarioController extends ApplicationController
         );
 
         set_flashdata('filter_beneficiario', $query, true);
-        set_flashdata('filter_params', $pagination->filters, true);
+        set_flashdata('filter_mercurio34', $pagination->filters, true);
 
         $response = $pagination->render(new BeneficiarioServices);
 
@@ -126,7 +124,7 @@ class ApruebaBeneficiarioController extends ApplicationController
         return view('cajas.aprobacionben.index', [
             ...$params,
             'campo_filtro' => $campo_field,
-            'filters' => get_flashdata_item('filter_params'),
+            'filters' => get_flashdata_item('filter_mercurio34'),
             'title' => 'Aprueba Beneficiario',
             'mercurio11' => Mercurio11::get(),
         ]);
@@ -158,7 +156,7 @@ class ApruebaBeneficiarioController extends ApplicationController
             ])
         );
         if (get_flashdata_item('filter_beneficiario') != false) {
-            $query = $pagination->persistencia(get_flashdata_item('filter_params'));
+            $query = $pagination->persistencia(get_flashdata_item('filter_mercurio34'));
         } else {
             $query = $pagination->filter(
                 $request->input('campo'),
@@ -167,7 +165,7 @@ class ApruebaBeneficiarioController extends ApplicationController
             );
         }
         set_flashdata('filter_beneficiario', $query, true);
-        set_flashdata('filter_params', $pagination->filters, true);
+        set_flashdata('filter_mercurio34', $pagination->filters, true);
 
         $response = $pagination->render(new BeneficiarioServices);
 
@@ -769,12 +767,12 @@ class ApruebaBeneficiarioController extends ApplicationController
     {
         $this->setResponse('ajax');
         set_flashdata('filter_beneficiario', false, true);
-        set_flashdata('filter_params', false, true);
+        set_flashdata('filter_mercurio34', false, true);
 
         return response()->json([
             'success' => true,
             'query' => get_flashdata_item('filter_trabajador'),
-            'filter' => get_flashdata_item('filter_params'),
+            'filter' => get_flashdata_item('filter_mercurio34'),
         ]);
     }
 

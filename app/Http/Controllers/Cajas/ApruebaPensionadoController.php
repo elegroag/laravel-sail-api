@@ -99,7 +99,7 @@ class ApruebaPensionadoController extends ApplicationController
 
         set_flashdata('filter_pensionado', $query, true);
 
-        set_flashdata('filter_params', $pagination->filters, true);
+        set_flashdata('filter_mercurio38', $pagination->filters, true);
 
         $response = $pagination->render(
             new PensionadoServices
@@ -206,7 +206,7 @@ class ApruebaPensionadoController extends ApplicationController
         return view('cajas.aprobacionpen.index', [
             ...$params,
             'campo_filtro' => $campo_field,
-            'filters' => get_flashdata_item('filter_params'),
+            'filters' => get_flashdata_item('filter_mercurio38'),
             'title' => 'Aprueba Pensionado',
             'mercurio11' => Mercurio11::get(),
         ]);
@@ -244,7 +244,7 @@ class ApruebaPensionadoController extends ApplicationController
         if (
             get_flashdata_item('filter_pensionado') != false
         ) {
-            $query = $this->pagination->persistencia(get_flashdata_item('filter_params'));
+            $query = $this->pagination->persistencia(get_flashdata_item('filter_mercurio38'));
         } else {
             $query = $pagination->filter(
                 $request->input('campo'),
@@ -254,7 +254,7 @@ class ApruebaPensionadoController extends ApplicationController
         }
 
         set_flashdata('filter_pensionado', $query, true);
-        set_flashdata('filter_params', $pagination->filters, true);
+        set_flashdata('filter_mercurio38', $pagination->filters, true);
 
         $response = $pagination->render(
             new PensionadoServices
@@ -452,12 +452,12 @@ class ApruebaPensionadoController extends ApplicationController
     {
         $this->setResponse('ajax');
         set_flashdata('filter_pensionado', false, true);
-        set_flashdata('filter_params', false, true);
+        set_flashdata('filter_mercurio38', false, true);
 
         return $this->renderObject([
             'success' => true,
             'query' => get_flashdata_item('filter_pensionado'),
-            'filter' => get_flashdata_item('filter_params'),
+            'filter' => get_flashdata_item('filter_mercurio38'),
         ]);
     }
 
@@ -631,7 +631,7 @@ class ApruebaPensionadoController extends ApplicationController
 
         set_flashdata('filter_pensionado', $query, true);
 
-        set_flashdata('filter_params', $this->pagination->filters, true);
+        set_flashdata('filter_mercurio38', $this->pagination->filters, true);
 
         $response = $this->pagination->getCollection(
             new PensionadoServices

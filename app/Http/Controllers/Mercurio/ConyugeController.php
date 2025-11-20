@@ -562,6 +562,7 @@ class ConyugeController extends ApplicationController
                 $rqs = $procesadorComando->toArray();
                 $empresa_sisu = $rqs['data'];
                 $nit = [$this->user['documento'] => $this->user['documento']];
+                $numero_nit = $this->user['documento'];
             } else {
                 $cedtras[$this->user['documento']] = $this->user['documento'];
                 $empresa_sisu = false;
@@ -570,6 +571,14 @@ class ConyugeController extends ApplicationController
                     return ['cedula' => $row['cedula'], 'nombre_completo' => $row['nombre']];
                 });
                 $nit = collect($mercurio31)->pluck('nit', 'nit');
+                $listAfiliados[] = ['cedula' => $this->user['documento'], 'nombre_completo' => $this->user['nombre']];
+
+                $trabajador_sisu = $trabajadorService->buscarTrabajadorSubsidio($this->user['documento']);
+                if ($trabajador_sisu) {
+                    $numero_nit = $trabajador_sisu['nit'];
+                } else {
+                    $numero_nit = $mercurio31['nit'];
+                }
             }
 
             $coddoc = Gener18::whereNotIn('coddoc', ['7', '5', '2'])->pluck('detdoc', 'coddoc');
@@ -650,6 +659,7 @@ class ConyugeController extends ApplicationController
                 'tipo' => $tipo,
                 'list_afiliados' => $listAfiliados,
                 'empresa_sisu' => $empresa_sisu,
+                'nit' => $numero_nit
             ];
 
             $salida = [

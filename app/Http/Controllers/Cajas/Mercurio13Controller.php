@@ -27,8 +27,8 @@ class Mercurio13Controller extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session('user');
-        $this->tipfun = session('tipfun');
+        $this->user = session('user') ?? null;
+        $this->tipfun = session('tipfun') ?? null;
     }
 
     public function index()
@@ -82,7 +82,7 @@ class Mercurio13Controller extends ApplicationController
         $response['consulta'] = $html;
         $response['paginate'] = $html_paginate;
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function editar(Request $request)
@@ -104,42 +104,38 @@ class Mercurio13Controller extends ApplicationController
                 'msg' => $e->getMessage()
             ];
         }
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function guardar(Request $request)
     {
+        $this->db->begin();
         try {
-            $this->setResponse('ajax');
             $tipopc = $request->input('tipopc');
             $coddoc = $request->input('coddoc');
             $obliga = $request->input('obliga');
             $auto_generado = $request->input('auto_generado');
             $nota = $request->input('nota');
 
-            $this->db->begin();
-
             $mercurio13 = Mercurio13::firstOrNew(['tipopc' => $tipopc, 'coddoc' => $coddoc]);
             $mercurio13->obliga = $obliga;
             $mercurio13->auto_generado = $auto_generado;
             $mercurio13->nota = $nota;
-
-            if (! $mercurio13->save()) {
-                parent::setLogger($mercurio13->getMessages());
-                $this->db->rollback();
-                throw new DebugException('Error no se puede guardar el registro');
-            }
+            $mercurio13->save();
 
             $this->db->commit();
-            $response = parent::successFunc('El registro se completo con éxito.');
-
-            return $this->renderObject($response, false);
+            $response = [
+                'success' => true,
+                'msg' => 'El registro se completo con éxito.'
+            ];
         } catch (DebugException $e) {
             $this->db->rollback();
-            $response = parent::errorFunc($e->getMessage());
-
-            return $this->renderObject($response, false);
+            $response = [
+                'success' => false,
+                'msg' => $e->getMessage()
+            ];
         }
+        return response()->json($response);
     }
 
     public function borrar(Request $request)

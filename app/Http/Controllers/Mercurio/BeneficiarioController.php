@@ -567,6 +567,7 @@ class BeneficiarioController extends ApplicationController
                 $rqs = $procesadorComando->toArray();
                 $empresa_sisu = $rqs['data'];
                 $nit = [$this->user['documento'] => $this->user['documento']];
+                $numero_nit = $this->user['documento'];
             } else {
                 $cedtras[$this->user['documento']] = $this->user['documento'];
                 $empresa_sisu = false;
@@ -575,6 +576,14 @@ class BeneficiarioController extends ApplicationController
                     return ['cedula' => $row['cedula'], 'nombre_completo' => $row['nombre']];
                 });
                 $nit = collect($mercurio31)->pluck('nit', 'nit');
+                $listAfiliados[] = ['cedula' => $this->user['documento'], 'nombre_completo' => $this->user['nombre']];
+
+                $trabajador_sisu = $trabajadorService->buscarTrabajadorSubsidio($this->user['documento']);
+                if ($trabajador_sisu) {
+                    $numero_nit = $trabajador_sisu['nit'];
+                } else {
+                    $numero_nit = $mercurio31['nit'];
+                }
             }
 
             $conyugeService = new ConyugeService;
@@ -587,6 +596,7 @@ class BeneficiarioController extends ApplicationController
                 }
             } else {
                 $conyuges = $conyugeService->findRequestByCedtra($documento);
+                //para tipo trabajador
             }
 
             $codzons = Gener09::where('codzon', '>=', 18000)
@@ -672,6 +682,7 @@ class BeneficiarioController extends ApplicationController
                 'empresa_sisu' => $empresa_sisu,
                 'trabajadores' => $cedtras,
                 'conyuges' => $conyuges,
+                'nit' => $numero_nit,
             ];
 
             $salida = [
@@ -742,17 +753,16 @@ class BeneficiarioController extends ApplicationController
 
     public function valida(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $documento = parent::getActUser('documento');
-            $coddoc = parent::getActUser('coddoc');
-
+            $documento = $this->user['documento'];
+            $coddoc = $this->user['coddoc'];
             $numdoc = $request->input('numdoc');
-            $solicitud_previa = (new Mercurio34)->findFirst(" numdoc='{$numdoc}' and documento='{$documento}' and coddoc='{$coddoc}'");
+
+            $solicitud_previa = Mercurio34::whereRaw("numdoc='{$numdoc}' and documento='{$documento}' and coddoc='{$coddoc}'")->first();
 
             $beneficiario = false;
             if ($solicitud_previa) {
-                $beneficiario = $solicitud_previa->getArray();
+                $beneficiario = $solicitud_previa->toArray();
             }
 
             if (! $beneficiario) {

@@ -95,7 +95,7 @@ class Pagination
                 $data[] = "{$mcampo} {$mcondi} '{$mvalue}'";
             }
         }
-        $this->query = (count($data) > 0) ? $this->query.' AND '.implode(' AND ', $data) : $this->query;
+        $this->query = (count($data) > 0) ? $this->query . ' AND ' . implode(' AND ', $data) : $this->query;
     }
 
     public function converSerialize($str, $indice)
@@ -145,7 +145,7 @@ class Pagination
             ];
         }
 
-        $paginate = Paginate::execute($modelEntity, $this->pagina, $this->cantidadPaginas);
+        $paginate = Paginate::execute($modelEntity, $this->pagina, $this->cantidadPaginas ?? 10);
         $html = $service->showTabla($paginate);
         $html_paginate = view('cajas/layouts/paginate', [
             'paginate' => $paginate,

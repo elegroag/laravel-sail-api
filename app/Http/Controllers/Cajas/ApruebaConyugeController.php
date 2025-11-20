@@ -17,13 +17,11 @@ use App\Services\Reports\CsvReportStrategy;
 use App\Services\Reports\ExcelReportStrategy;
 use App\Services\Reports\ReportGenerator;
 use App\Services\Srequest;
-use App\Services\Utils\Comman;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
 use App\Services\Api\ApiSubsidio;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\View;
 
 class ApruebaConyugeController extends ApplicationController
 {
@@ -97,7 +95,7 @@ class ApruebaConyugeController extends ApplicationController
 
         set_flashdata('filter_conyuge', $query, true);
 
-        set_flashdata('filter_params', $pagination->filters, true);
+        set_flashdata('filter_mercurio32', $pagination->filters, true);
 
         $response = $pagination->render(new ConyugeServices);
 
@@ -204,7 +202,7 @@ class ApruebaConyugeController extends ApplicationController
         return view('cajas.aprobacioncon.index', [
             ...$params,
             'campo_filtro' => $campo_field,
-            'filters' => get_flashdata_item('filter_params'),
+            'filters' => get_flashdata_item('filter_mercurio32'),
             'title' => 'Aprueba Conyuge',
             'buttons' => ['F'],
             'mercurio11' => Mercurio11::get(),
@@ -241,7 +239,7 @@ class ApruebaConyugeController extends ApplicationController
         if (
             get_flashdata_item('filter_conyuge') != false
         ) {
-            $query = $pagination->persistencia(get_flashdata_item('filter_params'));
+            $query = $pagination->persistencia(get_flashdata_item('filter_mercurio32'));
         } else {
             $query = $pagination->filter(
                 $request->input('campo'),
@@ -251,7 +249,7 @@ class ApruebaConyugeController extends ApplicationController
         }
 
         set_flashdata('filter_conyuge', $query, true);
-        set_flashdata('filter_params', $pagination->filters, true);
+        set_flashdata('filter_mercurio32', $pagination->filters, true);
 
         $response = $pagination->render(new ConyugeServices);
 
@@ -821,12 +819,12 @@ class ApruebaConyugeController extends ApplicationController
     {
         $this->setResponse('ajax');
         set_flashdata('filter_conyuge', false, true);
-        set_flashdata('filter_params', false, true);
+        set_flashdata('filter_mercurio32', false, true);
 
         return $this->renderObject([
             'success' => true,
             'query' => get_flashdata_item('filter_conyuge'),
-            'filter' => get_flashdata_item('filter_params'),
+            'filter' => get_flashdata_item('filter_mercurio32'),
         ]);
     }
 

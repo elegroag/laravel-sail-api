@@ -89,11 +89,9 @@ class ApruebaIndependienteController extends ApplicationController
         );
 
         set_flashdata('filter_independiente', $query, true);
-        set_flashdata('filter_params', $pagination->filters, true);
-
+        set_flashdata('filter_mercurio41', $pagination->filters, true);
         $response = $pagination->render(new IndependienteServices);
-
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     /**
@@ -160,7 +158,6 @@ class ApruebaIndependienteController extends ApplicationController
 
     public function index()
     {
-        $this->setParamToView('hide_header', true);
         $campo_field = [
             'cedtra' => 'Cedula',
             'prinom' => 'Nombre',
@@ -174,7 +171,7 @@ class ApruebaIndependienteController extends ApplicationController
         return view('cajas.aprobaindepen.index', [
             ...$params,
             'campo_filtro' => $campo_field,
-            'filters' => get_flashdata_item('filter_params'),
+            'filters' => get_flashdata_item('filter_mercurio41'),
             'title' => 'Aprueba Independientes',
             'mercurio11' => Mercurio11::get(),
         ]);
@@ -250,7 +247,7 @@ class ApruebaIndependienteController extends ApplicationController
         if (
             get_flashdata_item('filter_independiente') != false
         ) {
-            $query = $pagination->persistencia(get_flashdata_item('filter_params'));
+            $query = $pagination->persistencia(get_flashdata_item('filter_mercurio41'));
         } else {
             $query = $pagination->filter(
                 $request->input('campo'),
@@ -260,13 +257,13 @@ class ApruebaIndependienteController extends ApplicationController
         }
 
         set_flashdata('filter_independiente', $query, true);
-        set_flashdata('filter_params', $pagination->filters, true);
+        set_flashdata('filter_mercurio41', $pagination->filters, true);
 
         $response = $pagination->render(
             new IndependienteServices
         );
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     /**
@@ -279,14 +276,14 @@ class ApruebaIndependienteController extends ApplicationController
         $independienteServices = new IndependienteServices;
         $notifyEmailServices = new NotifyEmailServices;
         try {
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $codest = $request->input('codest', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $id = $request->input('id');
+            $codest = $request->input('codest');
             $nota = $request->input('nota');
             $array_corregir = $request->input('campos_corregir');
             $campos_corregir = implode(';', $array_corregir);
 
-            $mercurio41 = (new Mercurio41)->findFirst("id='{$id}'");
-            if ($mercurio41->getEstado() == 'D') {
+            $mercurio41 = Mercurio41::where("id", $id)->first();
+            if ($mercurio41->estado == 'D') {
                 throw new DebugException('El registro ya se encuentra devuelto, no se requiere de repetir la acción.', 201);
             }
 
@@ -953,12 +950,12 @@ class ApruebaIndependienteController extends ApplicationController
         $this->setResponse('ajax');
         $request = request();
         set_flashdata('filter_independiente', false, true);
-        set_flashdata('filter_params', false, true);
+        set_flashdata('filter_mercurio41', false, true);
 
         return $this->renderObject([
             'success' => true,
             'query' => get_flashdata_item('filter_independiente'),
-            'filter' => get_flashdata_item('filter_params'),
+            'filter' => get_flashdata_item('filter_mercurio41'),
         ]);
     }
 

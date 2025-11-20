@@ -1,3 +1,4 @@
+import Logger from '@/Common/Logger';
 import { ComponentModel } from '@/Componentes/Models/ComponentModel';
 import { eventsFormControl } from '@/Core';
 import { FormView } from '@/Mercurio/FormView';
@@ -7,6 +8,7 @@ import { BeneficiarioModel } from '../models/BeneficiarioModel';
 
 export class FormBeneficiarioView extends FormView {
     #choiceComponents = null;
+    #logger;
 
     constructor(options = {}) {
         super({
@@ -15,6 +17,7 @@ export class FormBeneficiarioView extends FormView {
         });
         this.viewComponents = [];
         this.#choiceComponents = [];
+        this.#logger = new Logger();
     }
 
     get events() {
@@ -55,7 +58,7 @@ export class FormBeneficiarioView extends FormView {
             },
         });
 
-        this.selectores = this.$el.find('#tipdoc, #ciunac, #codban, #biocodciu, #resguardo_id, #pub_indigena_id, #peretn, #cedtra');
+        this.selectores = this.$el.find('#tipdoc, #ciunac, #codban, #biocodciu, #resguardo_id, #pub_indigena_id, #peretn');
 
         if (this.model.get('id') !== null) {
             let silent = true;
@@ -121,12 +124,12 @@ export class FormBeneficiarioView extends FormView {
             );
         }
 
-        if (this.collection.props['tipo'] === 'E') {
-            this.setInput('nit', this.collection.props.empresa_sisu['nit']);
-        }
+        this.setInput('nit', this.collection.props.nit);
 
         if (this.collection.props['tipo'] !== 'E') {
             this.setInput('cedtra', this.collection.props.list_afiliados[0]['cedula']);
+        } else {
+            this.#choiceComponents['cedtra'] = new Choices($el.find('#cedtra'), { silent: true, itemSelectText: '' });
         }
 
         this.selectores.on('change', (event) => {

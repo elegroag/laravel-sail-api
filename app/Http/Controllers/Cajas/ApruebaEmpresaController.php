@@ -47,8 +47,8 @@ class ApruebaEmpresaController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session('user');
-        $this->tipfun = session('tipfun');
+        $this->user = session('user') ?? null;
+        $this->tipfun = session('tipfun') ?? null;
     }
 
     /**
@@ -60,7 +60,7 @@ class ApruebaEmpresaController extends ApplicationController
      *
      * @return void
      */
-    public function aplicarFiltro(Request $request, string $estado = 'P')
+    public function aplicarFiltro(Request $request, string $estado = '')
     {
         $cantidad_pagina = $request->input('numero', 10);
         $usuario = $this->user['usuario'];
@@ -81,7 +81,7 @@ class ApruebaEmpresaController extends ApplicationController
         );
 
         set_flashdata('filter_empresa', $query, true);
-        set_flashdata('filter_params', $pagination->filters, true);
+        set_flashdata('filter_mercurio30', $pagination->filters, true);
 
         $response = $pagination->render(new EmpresaServices);
 
@@ -163,7 +163,7 @@ class ApruebaEmpresaController extends ApplicationController
         return view('cajas.aprobacionemp.index', [
             ...$params,
             'campo_filtro' => $campo_field,
-            'filters' => get_flashdata_item('filter_params'),
+            'filters' => get_flashdata_item('filter_mercurio30'),
             'title' => 'Aprueba Empresa',
             'mercurio11' => Mercurio11::get(),
         ]);
@@ -231,7 +231,7 @@ class ApruebaEmpresaController extends ApplicationController
         if (
             get_flashdata_item('filter_empresa') != false
         ) {
-            $query = $pagination->persistencia(get_flashdata_item('filter_params'));
+            $query = $pagination->persistencia(get_flashdata_item('filter_mercurio30'));
         } else {
             $query = $pagination->filter(
                 $request->input('campo'),
@@ -241,7 +241,7 @@ class ApruebaEmpresaController extends ApplicationController
         }
 
         set_flashdata('filter_empresa', $query, true);
-        set_flashdata('filter_params', $pagination->filters, true);
+        set_flashdata('filter_mercurio30', $pagination->filters, true);
 
         $response = $pagination->render(new EmpresaServices);
 
@@ -833,12 +833,12 @@ class ApruebaEmpresaController extends ApplicationController
     public function borrarFiltro()
     {
         set_flashdata('filter_independiente', false, true);
-        set_flashdata('filter_params', false, true);
+        set_flashdata('filter_mercurio30', false, true);
 
         return response()->json([
             'success' => true,
             'query' => get_flashdata_item('filter_independiente'),
-            'filter' => get_flashdata_item('filter_params'),
+            'filter' => get_flashdata_item('filter_mercurio30'),
         ]);
     }
 
