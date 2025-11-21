@@ -138,8 +138,10 @@ class AuthController extends Controller
         } catch (DebugException $e) {
             return Inertia::render('Auth/Login', [
                 'success' => false,
-                'message' => $e->getMessage(),
-                'errors' => $e->render($request)
+                'errors' => [
+                    'message' => $e->getMessage()
+                ],
+                'tracer' => $e->render($request)
             ]);
         }
     }
@@ -180,7 +182,7 @@ class AuthController extends Controller
         ]);
     }
 
-    public function verifyShow(Request $request, $tipo = null, $coddoc = null, $documento = null)
+    public function verifyShow(Request $request, $tipo = null, $coddoc = null, $documento = null, $option_request = null)
     {
         try {
             if ($request->isMethod('post')) {
@@ -188,17 +190,20 @@ class AuthController extends Controller
                     'documento' => 'required|numeric|digits_between:6,18',
                     'coddoc' => 'required|numeric|min:1',
                     'tipo' => 'required|string|size:1',
+                    'option_request' => 'required|string|size:1',
                 ]);
                 $payload = [
                     'documento' => $request->input('documento'),
                     'coddoc' => $request->input('coddoc'),
                     'tipo' => $request->input('tipo'),
+                    'option_request' => $request->input('option_request'),
                 ];
             } else {
                 $payload = [
                     'documento' => $documento,
                     'coddoc' => $coddoc,
                     'tipo' => $tipo,
+                    'option_request' => $option_request,
                 ];
             }
 
@@ -232,6 +237,7 @@ class AuthController extends Controller
                         'documento' => $payload['documento'],
                         'coddoc' => $payload['coddoc'],
                         'tipo' => $payload['tipo'],
+                        'option_request' => $payload['option_request'],
                         'token' => $token,
                         'error' => 'No existe un usuario registrado con los datos ingresados. Por favor verifique o regístrese.',
                     ]);
@@ -273,12 +279,14 @@ class AuthController extends Controller
                 'code_2' => 'required|string|size:1',
                 'code_3' => 'required|string|size:1',
                 'code_4' => 'required|string|size:1',
+                'option_request' => 'required|string|max:40',
             ]);
 
             $token = $request->input('token');
             $documento = $request->input('documento');
             $coddoc = $request->input('coddoc');
             $tipo = $request->input('tipo');
+            $option_request = $request->input('option_request');
 
             $auth_jwt_temporal = new AuthJwt(430);
             $auth_jwt_temporal->CheckSimpleToken($token);
@@ -432,17 +440,23 @@ class AuthController extends Controller
                 throw new DebugException('Error en la autenticación del usuario', 501);
             }
 
-            set_flashdata(
-                'success',
-                [
-                    'type' => 'html',
-                    'msj' => "<p style='font-size:1rem' class='text-left'>El usuario ha realizado el pre-registro de forma correcta</p>" .
-                        "<p style='font-size:1rem' class='text-left'>El registro realizado es de tipo \"Particular\", ahora puedes realizar las afiliaciones de modo seguro.<br/>" .
-                        'Las credenciales de acceso le seran enviadas a la respectiva dirección de correo registrado.<br/></p>',
-                ]
-            );
+            if ($option_request == 'register') {
+                set_flashdata(
+                    'success',
+                    [
+                        'type' => 'html',
+                        'msj' => "<p style='font-size:1rem' class='text-left'>El usuario ha realizado el pre-registro de forma correcta</p>" .
+                            "<p style='font-size:1rem' class='text-left'>El registro realizado es de tipo \"Particular\", ahora puedes realizar las afiliaciones de modo seguro.<br/>" .
+                            'Las credenciales de acceso le seran enviadas a la respectiva dirección de correo registrado.<br/></p>',
+                    ]
+                );
 
-            return Inertia::location(url($url));
+                return Inertia::location(url($url));
+            }
+
+            if ($option_request == 'recovery') {
+                return Inertia::location(url('mercurio/principal/index#change-password'));
+            }
         } catch (ValidationException $e) {
             $payload = [
                 'success' => false,

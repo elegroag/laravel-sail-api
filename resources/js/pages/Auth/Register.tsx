@@ -30,7 +30,11 @@ export default function Register(props: LoginProps){
         <AuthWelcome
           title="REGISTRO"
           tagline="Únete a Comfaca En Línea"
-          description="Crea tu cuenta para acceder a todos los servicios y beneficios que Comfaca tiene para ofrecerte. Un proceso simple y seguro para comenzar tu experiencia."
+          description={
+            <p>
+              Crea tu cuenta para acceder a todos los servicios y beneficios que Comfaca tiene para ofrecerte. Un proceso simple y seguro para comenzar tu experiencia.
+            </p>
+          }
           backHref={route('login')}
           backText="¿Ya tienes cuenta? Inicia sesión"
         />

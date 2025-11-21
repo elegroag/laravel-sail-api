@@ -9,7 +9,7 @@ import type { VerifyEmailProps } from '@/types/auth'
 import useVerifyController from '@/pages/Auth/controllers/use-verify-controller'
 import { DeliveryOptions } from '@/constants/auth'
 
-export default function VerifyEmail({ documento, coddoc, tipo, token, status, errors }: VerifyEmailProps) {
+export default function VerifyEmail({ documento, coddoc, tipo, option_request, token, status, errors }: VerifyEmailProps) {
     const {
         state,
         inputRefs,
@@ -31,7 +31,8 @@ export default function VerifyEmail({ documento, coddoc, tipo, token, status, er
         documento,
         coddoc,
         tipo,
-        errors
+        errors,
+        option_request
     })
 
 

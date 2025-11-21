@@ -1,3 +1,4 @@
+import ChangePasswordModalView from './ChangePasswordModalView';
 import { PrincipalLayout } from './PrincipalLayout';
 import { ServiciosView } from './ServiciosView';
 import { TotalesView } from './TotalesView';
@@ -54,6 +55,39 @@ class ControllerPrincipal {
                 }
             },
             silent: false,
+        });
+    }
+
+    changePassword() {
+        const view = new ChangePasswordModalView();
+
+        this.App.trigger('show:modal', {
+            title: 'Cambio de contraseña',
+            view,
+            options: {
+                size: 'modal-md',
+                centered: true,
+                scrollable: false,
+                autoFocus: '#claant',
+                footer: [
+                    {
+                        text: 'Cancelar',
+                        className: 'd-none',
+                        onClick: (modalView, app) => {
+                            app.trigger('hide:modal', modalView);
+                        },
+                    },
+                    {
+                        text: 'Cambiar clave',
+                        className: 'btn-primary',
+                        onClick: (modalView, app) => {
+                            if (modalView && typeof modalView.submit === 'function') {
+                                modalView.submit(app);
+                            }
+                        },
+                    },
+                ],
+            },
         });
     }
 

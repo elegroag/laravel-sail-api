@@ -15,10 +15,12 @@ import { userTypes } from "@/constants/auth"
 // Principio de Responsabilidad Única: encapsula solo la sección visual de bienvenida
 // Abierto/Cerrado: configurable vía props sin modificar su implementación
 
+import type { ReactNode } from "react"
+
 type AuthWelcomeProps = {
   title: string
   tagline?: string
-  description?: string
+  description?: ReactNode
   backHref: string
   backText: string
 }
@@ -46,7 +48,9 @@ export default function AuthWelcome({
         ) : null}
 
         {description ? (
-          <p className="text-emerald-100 text-sm leading-relaxed mb-6">{description}</p>
+          <div className="text-emerald-100 text-sm leading-relaxed mb-6">
+            {description}
+          </div>
         ) : null}
 
         <TextLink href={backHref} className="inline-flex items-center text-emerald-200 hover:text-white transition-colors text-sm">

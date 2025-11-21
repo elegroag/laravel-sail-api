@@ -59,7 +59,6 @@ class LoginController extends ApplicationController
      */
     public function recuperarClave(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $documento = $request->input('documento');
             $coddoc = $request->input('coddoc');
@@ -99,8 +98,7 @@ class LoginController extends ApplicationController
                     'msj' => $autentica->getMessage(),
                 ];
 
-                return $this->renderObject($response, false);
-                exit;
+                return response()->json($response);
             }
 
             $mercurio07 = $autentica->getAfiliado();
@@ -132,7 +130,7 @@ class LoginController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($response);
+        return response()->json($response);
     }
 
     public function guiaVideos()
@@ -491,23 +489,23 @@ class LoginController extends ApplicationController
 
     public function cambioCorreo(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $documento = $request->input('documento');
+
+            $documento = $request->input('email');
             $coddoc = $request->input('coddoc');
             $tipo = $request->input('tipo');
             $email = $request->input('email');
             $telefono = $request->input('telefono');
             $novedad = $request->input('novedad');
 
-            $notificacion = new NotificacionService;
+            $notificacion = new NotificacionService();
 
-            $user07 = (new Mercurio07)->findFirst(" documento='{$documento}' and coddoc='{$coddoc}' and tipo='{$tipo}'");
+            $user07 = Mercurio07::whereRaw("documento='{$documento}' and coddoc='{$coddoc}' and tipo='{$tipo}'")->first();
             if (! $user07) {
                 throw new DebugException('Error los parametros de acceso no son validos para solicitar token', 301);
             }
 
-            $emailCaja = (new Mercurio01)->findFirst();
+            $emailCaja = Mercurio01::first();
             $html = "Se requiere de actualizar el correo electronico de la cuenta de usuario {$user07->getNombre()}<br/>
             Correo electronico anterior: {$user07->getEmail()}<br/>
             Correo electronico nuevo: {$email}<br/>
@@ -539,7 +537,7 @@ class LoginController extends ApplicationController
                 'E' => 'Empleador',
                 'S' => 'Servicio domestico',
             ];
-            $str_tipo = @$array_tipo[$tipo];
+            $str_tipo = $array_tipo[$tipo];
             $asunto = "Solicitud de cambio de correo {$str_tipo} Documento: {$documento}";
 
             $senderEmail = new SenderEmail;
@@ -568,7 +566,7 @@ class LoginController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     public function autoFirma($documento, $coddoc, $clave)

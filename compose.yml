@@ -1,6 +1,8 @@
 services:
   laravel.test:
     container_name: "sail-enlinea"
+    env_file:
+      - .env
     build:
       context: ./runtimes
       dockerfile: Dockerfile

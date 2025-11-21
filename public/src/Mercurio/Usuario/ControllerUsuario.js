@@ -66,16 +66,7 @@ class ControllerUsuario extends Controller {
     }
 
     __serealizeParams() {
-        const resources = _.keys($App.Collections.formParams);
-        const collection = _.map(resources, (item) => {
-            return {
-                name: item,
-                type: 'select',
-                placeholder: item,
-                search: item,
-            };
-        });
-        return collection;
+        return $App.Collections.formParams;
     }
 
     __savePerfil(transfer) {

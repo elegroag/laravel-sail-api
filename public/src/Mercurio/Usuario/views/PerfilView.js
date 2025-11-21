@@ -28,17 +28,10 @@ class PerfilView extends Backbone.View {
             _.each(this.collection, (component) => {
                 const view = this.addComponent(
                     new ComponentModel({
-                        disabled: false,
-                        readonly: false,
-                        order: 0,
-                        target: 1,
-                        searchType: 'local',
                         ...component,
                         valor: this.model.get(component.name),
                     }),
-                    component.type,
                 );
-
                 this.viewComponents.push(view);
                 this.$el.find('#component_' + component.name).html(view.$el);
             });
@@ -130,7 +123,7 @@ class PerfilView extends Backbone.View {
         Backbone.View.prototype.remove.call(this);
     }
 
-    addComponent(model, type) {
+    addComponent(model = {}) {
         const collection = $App.Collections.formParams;
         let view;
         if (_.size(this.children) > 0) {
@@ -139,28 +132,36 @@ class PerfilView extends Backbone.View {
             }
         }
         if (!view) {
-            switch (type) {
+            switch (model.get('form_type')) {
                 case 'select':
                     view = new SelectComponent({ model, collection });
                     break;
+                case 'input':
+                    view = new InputComponent({ model });
+                    break;
                 case 'radio':
-                    view = new RadioComponent({ model, collection });
+                    view = new RadioComponent({ model });
                     break;
                 case 'date':
-                    view = new RadioComponent({ model, collection });
+                    view = new DateComponent({ model });
                     break;
-                case 'text':
-                    view = new TextComponent({ model, collection });
+                case 'textarea':
+                    view = new TextComponent({ model });
                     break;
                 case 'dialog':
                     view = new DialogComponent({ model, collection });
                     break;
+                case 'address':
+                    view = new AddressComponent({ model });
+                    break;
                 default:
+                    model.set('form_type', 'input');
+                    view = new InputComponent({ model });
                     break;
             }
             this.children[model.get('cid')] = view;
         }
-        view.render();
+        if (view) view.render();
         return view;
     }
 

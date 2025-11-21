@@ -12,7 +12,7 @@ Route::get('/web/login', [AuthController::class, 'index'])->name('login');
 Route::post('/web/login', [AuthController::class, 'authenticate'])->name('login.authenticate');
 Route::get('/web/register', [AuthController::class, 'register'])->name('register');
 Route::get('/web/password/request', [AuthController::class, 'resetPassword'])->name('password.request');
-Route::get('/web/verify/{tipo}/{coddoc}/{documento}', [AuthController::class, 'verifyShow'])->name('verify.show');
+Route::get('/web/verify/{tipo}/{coddoc}/{documento}/{option_request?}', [AuthController::class, 'verifyShow'])->name('verify.show');
 Route::post('/web/verify', [AuthController::class, 'verify'])->name('verify.request');
 Route::post('/web/verify_action', [AuthController::class, 'verify'])->name('verify.action');
 Route::post('/web/load_session', [AuthController::class, 'loadSession'])->name('load.session');
@@ -28,7 +28,7 @@ Route::get('/mercurio/show_registro', [LoginController::class, 'showRegister'])-
 Route::get('/mercurio/fuera_servicio', [LoginController::class, 'fueraServicio']);
 
 Route::post('/mercurio/tokenParticular', [LoginController::class, 'tokenParticular']);
-Route::post('/mercurio/cambio_correo', [LoginController::class, 'cambioCorreo']);
+Route::post('/mercurio/cambio_correo', [LoginController::class, 'cambioCorreo'])->name('mercurio.cambio_correo');
 
 Route::post('/mercurio/valida_email', [LoginController::class, 'validaEmail']);
 Route::get('/mercurio/integracion_servicio', [LoginController::class, 'integracionServicio']);

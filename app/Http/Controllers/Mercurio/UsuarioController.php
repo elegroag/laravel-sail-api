@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Mercurio;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
+use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
 use App\Models\Mercurio07;
@@ -61,15 +62,28 @@ class UsuarioController extends ApplicationController
                 $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
             }
 
-            $tipo = (new Mercurio07)->getArrayTipos();
+            $data = [
+                'coddoc' => $coddoc,
+                'tipo' => $this->tipo,
+                'codciu' => $codciu,
+                'estado' => get_user_estados(),
+            ];
+
+            $formulario = FormularioDinamico::where('name', 'mercurio07')->first();
+            $componentes = $formulario->componentes()->get();
+
+            $componentes = $componentes->map(function ($componente) use ($data) {
+                $_componente = $componente->toArray();
+                $_componente['id'] = $componente->name;
+                if (isset($data[$componente->name])) {
+                    $_componente['data_source'] = $data[$componente->name];
+                }
+                return $_componente;
+            });
+
             $salida = [
                 'success' => true,
-                'data' => [
-                    'coddoc' => $coddoc,
-                    'tipo' => $tipo,
-                    'codciu' => $codciu,
-                    'coddocrepleg' => $coddocrepleg,
-                ],
+                'data' => $componentes,
                 'msj' => 'OK',
             ];
         } catch (DebugException $e) {
