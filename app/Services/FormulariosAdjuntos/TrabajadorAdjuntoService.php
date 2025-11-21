@@ -37,6 +37,17 @@ class TrabajadorAdjuntoService
      */
     protected $lfirma;
 
+    private const DOCUMENTOS = [
+        [
+            'method' => 'formulario',
+            'coddoc' => 1,
+        ],
+        [
+            'method' => 'tratamientoDatos',
+            'coddoc' => 25,
+        ]
+    ];
+
     public function __construct($request)
     {
         $this->user = session('user') ?? null;
@@ -165,6 +176,16 @@ class TrabajadorAdjuntoService
 
     public function setClaveCertificado($clave)
     {
+        if ($this->lfirma->password !== $clave) {
+            throw new DebugException('Error la clave no coincide con la de la firma digital', 501);
+        }
         $this->claveCertificado = $clave;
+    }
+
+    public static function generarAdjuntos($request, string $tipopc, ?string $claveCertificado = null): void
+    {
+        $adjuntoService = new self($request);
+        $adjuntoService->setClaveCertificado($claveCertificado);
+        AdjuntosGenerator::generar($adjuntoService, $tipopc, $request, self::DOCUMENTOS);
     }
 }

@@ -117,11 +117,11 @@ class FacultativoController extends ApplicationController
      */
     public function guardar(Request $request)
     {
-        $this->setResponse('ajax');
-        $facultativoService = new FacultativoService;
         $this->db->begin();
 
         try {
+            $facultativoService = new FacultativoService;
+
             $id = $request->input('id');
             $clave_certificado = $request->input('clave');
             $params = $this->serializeData($request);
@@ -144,53 +144,18 @@ class FacultativoController extends ApplicationController
             }
 
             $facultativoService->paramsApi();
-            $facultativoAdjuntoService = new FacultativoAdjuntoService($facultativo);
-            $facultativoAdjuntoService->setClaveCertificado($clave_certificado);
-
-            $out = $facultativoAdjuntoService->formulario()->getResult();
-            (new GuardarArchivoService(
-                [
-                    'tipopc' => $this->tipopc,
-                    'coddoc' => 1,
-                    'id' => $facultativo->getId(),
-                ]
-            ))->salvarDatos($out);
-
-            $out = $facultativoAdjuntoService->tratamientoDatos()->getResult();
-            (new GuardarArchivoService(
-                [
-                    'tipopc' => $this->tipopc,
-                    'coddoc' => 25,
-                    'id' => $facultativo->getId(),
-                ]
-            ))->salvarDatos($out);
-
-            $out = $facultativoAdjuntoService->cartaSolicitud()->getResult();
-            (new GuardarArchivoService(
-                [
-                    'tipopc' => $this->tipopc,
-                    'coddoc' => 24,
-                    'id' => $facultativo->getId(),
-                ]
-            ))->salvarDatos($out);
-
-            $data = $facultativo->getArray();
-
-            $response = [
+            FacultativoAdjuntoService::generarAdjuntos($facultativo, $this->tipopc, $clave_certificado);
+            $salida = [
                 'success' => true,
                 'msj' => 'Registro completado con éxito',
-                'data' => $data,
+                'data' => $facultativo->toArray(),
             ];
             $this->db->commit();
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
             $this->db->rollBack();
+            $salida = $this->handleException($e, $request);
         }
-
-        return $this->renderObject($response);
+        return response()->json($salida);
     }
 
     /**

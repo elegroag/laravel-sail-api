@@ -463,8 +463,9 @@ class TrabajadorController extends ApplicationController
      */
     public function guardar(Request $request)
     {
-        $trabajadorService = new TrabajadorService;
+        $this->db->begin();
         try {
+            $trabajadorService = new TrabajadorService();
             $clave_certificado = $request->input('clave');
             $id = $request->get('id');
 
@@ -484,45 +485,25 @@ class TrabajadorController extends ApplicationController
             }
 
             $trabajadorService->paramsApi();
-            $trabajadorAdjuntoService = new TrabajadorAdjuntoService($solicitud);
-            $trabajadorAdjuntoService->setClaveCertificado($clave_certificado);
 
-            $out = $trabajadorAdjuntoService->formulario()->getResult();
-            $coddoc_adjunto = 1;
-            (new GuardarArchivoService(
-                [
-                    'tipopc' => $this->tipopc,
-                    'coddoc' => $coddoc_adjunto,
-                    'id' => $solicitud->getId(),
-                ]
-            ))->salvarDatos($out);
+            TrabajadorAdjuntoService::generarAdjuntos(
+                $solicitud,
+                $this->tipopc,
+                $clave_certificado
+            );
 
-            $out = $trabajadorAdjuntoService->tratamientoDatos()->getResult();
-            $coddoc_adjunto = 25;
-            (new GuardarArchivoService(
-                [
-                    'tipopc' => $this->tipopc,
-                    'coddoc' => $coddoc_adjunto,
-                    'id' => $solicitud->getId(),
-                ]
-            ))->salvarDatos($out);
-
-            ob_end_clean();
-
-            $response = [
+            $salida = [
                 'msj' => 'Proceso se ha completado con éxito',
                 'success' => true,
                 'data' => $solicitud->toArray(),
             ];
-        } catch (DebugException $err) {
-            $response = [
-                'success' => false,
-                'msj' => $err->getMessage(),
-                'errrs' => $err->render($request)
-            ];
-        }
 
-        return response()->json($response);
+            $this->db->commit();
+        } catch (\Throwable $e) {
+            $this->db->rollBack();
+            $salida = $this->handleException($e, $request);
+        }
+        return response()->json($salida);
     }
 
     public function serializeData(Request $request)

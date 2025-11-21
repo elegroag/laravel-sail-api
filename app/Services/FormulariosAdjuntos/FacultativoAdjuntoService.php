@@ -26,9 +26,24 @@ class FacultativoAdjuntoService
 
     private $claveCertificado;
 
+    private const DOCUMENTOS = [
+        [
+            'method' => 'formulario',
+            'coddoc' => 1,
+        ],
+        [
+            'method' => 'tratamientoDatos',
+            'coddoc' => 25,
+        ],
+        [
+            'method' => 'cartaSolicitud',
+            'coddoc' => 24
+        ]
+    ];
+
     public function __construct($request)
     {
-        $this->user = session()->has('user') ? session('user') : null;
+        $this->user = session('user') ?? null;
         $this->request = $request;
         $this->initialize();
     }
@@ -167,5 +182,12 @@ class FacultativoAdjuntoService
     public function setClaveCertificado($clave)
     {
         $this->claveCertificado = $clave;
+    }
+
+    public static function generarAdjuntos($request, string $tipopc, ?string $claveCertificado = null): void
+    {
+        $adjuntoService = new self($request);
+        $adjuntoService->setClaveCertificado($claveCertificado);
+        AdjuntosGenerator::generar($adjuntoService, $tipopc, $request, self::DOCUMENTOS);
     }
 }

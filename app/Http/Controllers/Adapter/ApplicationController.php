@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\Adapter;
 
+use App\Exceptions\DebugException;
 use App\Http\Controllers\Controller;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use PDOException;
 
 class ApplicationController extends Controller
 {
@@ -62,11 +65,11 @@ class ApplicationController extends Controller
         $mimes = self::mimeType();
         $mime = (isset($mimes["{$ext}"])) ? $mimes["{$ext}"] : 'application/*.*';
         header("Content-Type: {$mime}; charset=utf-8");
-        header('Content-Disposition: attachment; filename='.basename($filepath).'');
+        header('Content-Disposition: attachment; filename=' . basename($filepath) . '');
         header('Cache-Control: must-revalidate');
         header('Expires: 0');
         header('Pragma: public');
-        header('Content-Length: '.filesize($filepath));
+        header('Content-Length: ' . filesize($filepath));
         ob_clean();
         readfile($filepath);
         exit();
@@ -180,5 +183,21 @@ class ApplicationController extends Controller
     public function setLogger($msg)
     {
         Log::stack(['single', 'slack'])->debug($msg);
+    }
+
+    protected function handleException(\Throwable $e, Request $request): array
+    {
+        if ($e instanceof DebugException) {
+            $debug = $e;
+        } elseif ($e instanceof QueryException || $e instanceof PDOException) {
+            $debug = new DebugException('Error de base de datos (SQL)', 500, $e->getMessage());
+        } else {
+            $debug = new DebugException('Error de sintaxis del sistema', 501, $e->getMessage());
+        }
+        return [
+            'success' => false,
+            'msj' => $debug->getMessage(),
+            'errors' => $debug->render($request)
+        ];
     }
 }

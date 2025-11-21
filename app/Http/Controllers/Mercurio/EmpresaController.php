@@ -38,8 +38,8 @@ class EmpresaController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user') ?? null;
+        $this->tipo = session('tipo') ?? null;
     }
 
     protected $tipopc = '2';
@@ -104,10 +104,11 @@ class EmpresaController extends ApplicationController
      */
     public function guardar(Request $request, Response $response)
     {
-        $service = new EmpresaService;
-        $this->db->begin();
         try {
-            $id = $request->input('id', null);
+            $this->db->begin();
+
+            $service = new EmpresaService();
+            $id = $request->input('id');
             $clave_certificado = $request->input('clave');
             $params = $this->serializeData($request);
 
@@ -123,48 +124,14 @@ class EmpresaController extends ApplicationController
 
             $service->addTrabajadoresNomina(
                 $request->input('tranoms'),
-                $empresa->getId()
+                $empresa->id
             );
 
-            $adjuntoService = new EmpresaAdjuntoService($empresa);
-            $adjuntoService->setClaveCertificado($clave_certificado);
-            $out = $adjuntoService->formulario()->getResult();
-            (new GuardarArchivoService(
-                [
-                    'tipopc' => $this->tipopc,
-                    'coddoc' => 1,
-                    'id' => $empresa->getId(),
-                ]
-            ))->salvarDatos($out);
-
-            $out = $adjuntoService->tratamientoDatos()->getResult();
-            (new GuardarArchivoService(
-                [
-                    'tipopc' => $this->tipopc,
-                    'coddoc' => 25,
-                    'id' => $empresa->getId(),
-                ]
-            ))->salvarDatos($out);
-
-            $out = $adjuntoService->cartaSolicitud()->getResult();
-            (new GuardarArchivoService(
-                [
-                    'tipopc' => $this->tipopc,
-                    'coddoc' => 24,
-                    'id' => $empresa->getId(),
-                ]
-            ))->salvarDatos($out);
-
-            $out = $adjuntoService->trabajadoresNomina()->getResult();
-            (new GuardarArchivoService(
-                [
-                    'tipopc' => $this->tipopc,
-                    'coddoc' => 11,
-                    'id' => $empresa->getId(),
-                ]
-            ))->salvarDatos($out);
-
-            ob_end_clean();
+            EmpresaAdjuntoService::generarAdjuntos(
+                $empresa,
+                $this->tipopc,
+                $clave_certificado
+            );
 
             $salida = [
                 'success' => true,
@@ -173,14 +140,10 @@ class EmpresaController extends ApplicationController
             ];
 
             $this->db->commit();
-        } catch (DebugException $e) {
+        } catch (\Throwable $e) {
             $this->db->rollBack();
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+            $salida = $this->handleException($e, $request);
         }
-
         return response()->json($salida);
     }
 

@@ -2,9 +2,9 @@
 
 namespace App\Services\FormulariosAdjuntos;
 
+use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsBeneficiario;
 use App\Library\Collections\ParamsTrabajador;
-use App\Library\Tcpdf\KumbiaPDF;
 use App\Models\Mercurio07;
 use App\Models\Mercurio16;
 use App\Models\Mercurio31;
@@ -13,7 +13,6 @@ use App\Models\Mercurio36;
 use App\Models\Mercurio38;
 use App\Models\Mercurio41;
 use App\Services\Entidades\TrabajadorService;
-use App\Services\Formularios\FactoryDocuments;
 use App\Services\PreparaFormularios\CifrarDocumento;
 use App\Services\Api\ApiSubsidio;
 use App\Services\Formularios\Generation\DocumentGenerationManager;
@@ -40,6 +39,17 @@ class BeneficiarioAdjuntoService
     private $user;
 
     private $tipo;
+
+    private const DOCUMENTOS = [
+        [
+            'method' => 'formulario',
+            'coddoc' => 1,
+        ],
+        [
+            'method' => 'declaraJurament',
+            'coddoc' => 4,
+        ]
+    ];
 
     public function __construct($request)
     {
@@ -262,6 +272,16 @@ class BeneficiarioAdjuntoService
 
     public function setClaveCertificado($clave)
     {
+        if ($this->lfirma->password !== $clave) {
+            throw new DebugException('Error la clave no coincide con la de la firma digital', 501);
+        }
         $this->claveCertificado = $clave;
+    }
+
+    public static function generarAdjuntos($request, string $tipopc, ?string $claveCertificado = null): void
+    {
+        $adjuntoService = new self($request);
+        $adjuntoService->setClaveCertificado($claveCertificado);
+        AdjuntosGenerator::generar($adjuntoService, $tipopc, $request, self::DOCUMENTOS);
     }
 }

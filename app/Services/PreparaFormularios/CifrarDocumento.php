@@ -67,7 +67,7 @@ class CifrarDocumento
         $keyClavePrivada = null;
         try {
             // Contenido del archivo PDF
-            $contenidoPDF = file_get_contents($this->storagePath.$filename);
+            $contenidoPDF = file_get_contents($this->storagePath . $filename);
             if ($contenidoPDF === false) {
                 throw new DebugException('No se pudo leer el archivo PDF para firmar.', 500);
             }
@@ -102,15 +102,15 @@ class CifrarDocumento
             $firmo = openssl_sign($contenidoPDF, $firmaDigital, $keyClavePrivada, $this->algoritmo);
             if ($firmo === false) {
                 $err = function_exists('openssl_error_string') ? openssl_error_string() : '';
-                throw new DebugException('Fallo al firmar el documento. '.($err ? ('OpenSSL: '.$err) : ''), 500);
+                throw new DebugException('Fallo al firmar el documento. ' . ($err ? ('OpenSSL: ' . $err) : ''), 500);
             }
 
             // Adjuntar la firma digital al archivo PDF
-            $contenidoPDFConFirma = $contenidoPDF.$firmaPrevius.$firmaDigital.'#[num:'.$total_firmas.']';
+            $contenidoPDFConFirma = $contenidoPDF . $firmaPrevius . $firmaDigital . '#[num:' . $total_firmas . ']';
 
             // Guardar el archivo PDF con la firma digital
-            $nombrePdf = strtoupper(uniqid('FSA')).'.pdf';
-            $pathOut = $this->storagePath.$nombrePdf;
+            $nombrePdf = strtoupper(uniqid('FSA')) . '.pdf';
+            $pathOut = $this->storagePath . $nombrePdf;
 
             $ok = file_put_contents($pathOut, $contenidoPDFConFirma);
             if ($ok === false) {
@@ -121,7 +121,7 @@ class CifrarDocumento
 
             return $pathOut;
         } catch (\Throwable $e) {
-            throw new DebugException('Error cifrando/firmando el documento: '.$e->getMessage(), 500, $e);
+            throw new DebugException('Error proceso de cifrado/firmado del documento: ' . $e->getMessage(), 500, $e);
         } finally {
             // Liberar la referencia de la clave privada (openssl_free_key deprecated en PHP 8+)
             $keyClavePrivada = null;
@@ -152,7 +152,7 @@ class CifrarDocumento
         $keyClavePublica = null;
         try {
             // Leer el contenido del archivo PDF
-            $contenidoPDF = file_get_contents($this->storagePath.$filename);
+            $contenidoPDF = file_get_contents($this->storagePath . $filename);
             if ($contenidoPDF === false) {
                 throw new DebugException('No se pudo leer el archivo PDF para verificar.', 500);
             }
@@ -217,7 +217,7 @@ class CifrarDocumento
                 $resultado = openssl_verify($contenidoBase, $firmaDigital, $keyClavePublica, $this->algoritmo);
                 if ($resultado === -1) {
                     $err = function_exists('openssl_error_string') ? openssl_error_string() : '';
-                    throw new DebugException('Error de verificación OpenSSL. '.($err ? ('OpenSSL: '.$err) : ''), 500);
+                    throw new DebugException('Error de verificación OpenSSL. ' . ($err ? ('OpenSSL: ' . $err) : ''), 500);
                 }
                 if ($resultado === 1) {
                     $validaAlguna = 1;
@@ -227,7 +227,7 @@ class CifrarDocumento
 
             return $validaAlguna; // 1 si alguna firma coincide, 0 si ninguna
         } catch (\Throwable $e) {
-            throw new DebugException('Error comprobando/verificando la firma: '.$e->getMessage(), 500, $e);
+            throw new DebugException('Error comprobando/verificando la firma: ' . $e->getMessage(), 500, $e);
         } finally {
             // Liberar la referencia de la clave pública (openssl_free_key deprecated en PHP 8+)
             $keyClavePublica = null;

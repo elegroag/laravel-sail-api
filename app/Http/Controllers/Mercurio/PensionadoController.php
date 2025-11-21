@@ -128,10 +128,11 @@ class PensionadoController extends ApplicationController
      */
     public function guardar(Request $request)
     {
-        $pensionadoService = new PensionadoService;
         $this->db->begin();
         try {
+            $pensionadoService = new PensionadoService();
             $asignarFuncionario = new AsignarFuncionario;
+
             $id = $request->input('id');
             $clave_certificado = $request->input('clave');
             $params = $this->serializeData($request);
@@ -154,48 +155,22 @@ class PensionadoController extends ApplicationController
             // Buscar los parámetros por API
             $pensionadoService->paramsApi();
 
-            $pensionadoAdjuntoService = new PensionadoAdjuntoService($pensionado);
-            $pensionadoAdjuntoService->setClaveCertificado($clave_certificado);
-
-            // Procesar formulario
-            $out = $pensionadoAdjuntoService->formulario()->getResult();
-            (new GuardarArchivoService([
-                'tipopc' => $this->tipopc,
-                'coddoc' => 1,
-                'id' => $pensionado->getId(),
-            ]))->salvarDatos($out);
-
-            // Procesar tratamiento de datos
-            $out = $pensionadoAdjuntoService->tratamientoDatos()->getResult();
-            (new GuardarArchivoService([
-                'tipopc' => $this->tipopc,
-                'coddoc' => 25,
-                'id' => $pensionado->getId(),
-            ]))->salvarDatos($out);
-
-            // Procesar carta de solicitud
-            $out = $pensionadoAdjuntoService->cartaSolicitud()->getResult();
-            (new GuardarArchivoService([
-                'tipopc' => $this->tipopc,
-                'coddoc' => 24,
-                'id' => $pensionado->getId(),
-            ]))->salvarDatos($out);
-
-            $response = [
+            PensionadoAdjuntoService::generarAdjuntos(
+                $pensionado,
+                $this->tipopc,
+                $clave_certificado
+            );
+            $salida = [
                 'success' => true,
                 'msj' => 'Registro completado con éxito',
                 'data' => $pensionado->getArray(),
             ];
             $this->db->commit();
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
             $this->db->rollBack();
+            $salida = $this->handleException($e, $request);
         }
-
-        return $this->renderObject($response);
+        return response()->json($salida);
     }
 
     /**

@@ -126,8 +126,8 @@ class IndependienteController extends ApplicationController
     public function guardar(Request $request)
     {
         $this->db->begin();
-        $independienteService = new IndependienteService;
         try {
+            $independienteService = new IndependienteService();
             $id = $request->input('id');
             $clave_certificado = $request->input('clave');
             $params = $this->serializeData($request);
@@ -143,53 +143,24 @@ class IndependienteController extends ApplicationController
             }
 
             $independienteService->paramsApi();
-            $adjuntoService = new IndependienteAdjuntoService($independiente);
-            $adjuntoService->setClaveCertificado($clave_certificado);
+            IndependienteAdjuntoService::generarAdjuntos(
+                $independiente,
+                $this->tipopc,
+                $clave_certificado
+            );
 
-            $out = $adjuntoService->formulario()->getResult();
-            (new GuardarArchivoService(
-                [
-                    'tipopc' => $this->tipopc,
-                    'coddoc' => 1,
-                    'id' => $independiente->getId(),
-                ]
-            ))->salvarDatos($out);
-
-            $out = $adjuntoService->tratamientoDatos()->getResult();
-            (new GuardarArchivoService(
-                [
-                    'tipopc' => $this->tipopc,
-                    'coddoc' => 25,
-                    'id' => $independiente->getId(),
-                ]
-            ))->salvarDatos($out);
-
-            $out = $adjuntoService->cartaSolicitud()->getResult();
-            (new GuardarArchivoService(
-                [
-                    'tipopc' => $this->tipopc,
-                    'coddoc' => 24,
-                    'id' => $independiente->getId(),
-                ]
-            ))->salvarDatos($out);
-
-            ob_end_clean();
-
-            $response = [
+            $salida = [
                 'success' => true,
                 'msj' => 'Registro completado con éxito',
                 'data' => $independiente->toArray(),
             ];
-            $this->db->commit();
-        } catch (DebugException $e) {
-            $this->db->rollBack();
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
-        }
 
-        return $this->renderObject($response);
+            $this->db->commit();
+        } catch (\Throwable $e) {
+            $this->db->rollBack();
+            $salida = $this->handleException($e, $request);
+        }
+        return response()->json($salida);
     }
 
     public function actualizar(Request $request)

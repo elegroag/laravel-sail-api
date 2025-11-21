@@ -96,12 +96,14 @@ class Mercurio13Controller extends ApplicationController
             }
             $response = [
                 'success' => true,
-                'data' => $mercurio13->toArray()
+                'data' => $mercurio13->toArray(),
+                'msj' => 'El registro se completo con éxito.'
             ];
         } catch (DebugException $e) {
             $response = [
                 'success' => false,
-                'msg' => $e->getMessage()
+                'msj' => $e->getMessage(),
+                'errors' => $e->render($request)
             ];
         }
         return response()->json($response);
@@ -123,45 +125,42 @@ class Mercurio13Controller extends ApplicationController
             $mercurio13->nota = $nota;
             $mercurio13->save();
 
+            $salida = [
+                'success' => true,
+                'msj' => 'El registro se completo con éxito.'
+            ];
+            $this->db->commit();
+        } catch (\Throwable $e) {
+            $this->db->rollBack();
+            $salida = $this->handleException($e, $request);
+        }
+        return response()->json($salida);
+    }
+
+    public function borrar(Request $request)
+    {
+        $this->db->begin();
+        try {
+            $tipopc = $request->input('tipopc');
+            $coddoc = $request->input('coddoc');
+            $deleted = Mercurio13::where('tipopc', $tipopc)->where('coddoc', $coddoc)->delete();
+            if ($deleted == 0) {
+                throw new DebugException('Error no se puede borrar el registro, no está disponible.');
+            }
             $this->db->commit();
             $response = [
                 'success' => true,
-                'msg' => 'El registro se completo con éxito.'
+                'msj' => 'El registro se borro con éxito.'
             ];
         } catch (DebugException $e) {
             $this->db->rollback();
             $response = [
                 'success' => false,
-                'msg' => $e->getMessage()
+                'msj' => $e->getMessage(),
+                'errors' => $e->render($request)
             ];
         }
         return response()->json($response);
-    }
-
-    public function borrar(Request $request)
-    {
-        try {
-            $this->setResponse('ajax');
-            $tipopc = $request->input('tipopc');
-            $coddoc = $request->input('coddoc');
-
-            $this->db->begin();
-            $deleted = Mercurio13::where('tipopc', $tipopc)->where('coddoc', $coddoc)->delete();
-
-            if ($deleted == 0) {
-                throw new DebugException('Error no se puede borrar el registro, no está disponible.');
-            }
-
-            $this->db->commit();
-            $response = parent::successFunc('El registro se borro con éxito.');
-
-            return $this->renderObject($response, false);
-        } catch (DebugException $e) {
-            $this->db->rollback();
-            $response = parent::errorFunc($e->getMessage());
-
-            return $this->renderObject($response, false);
-        }
     }
 
     public function infor(Request $request)
@@ -181,9 +180,10 @@ class Mercurio13Controller extends ApplicationController
         } catch (DebugException $e) {
             $response = [
                 'success' => false,
-                'msg' => $e->getMessage()
+                'msj' => $e->getMessage(),
+                'errors' => $e->render($request)
             ];
         }
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 }

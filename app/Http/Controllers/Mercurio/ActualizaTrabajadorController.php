@@ -280,10 +280,9 @@ class ActualizaTrabajadorController extends ApplicationController
      */
     public function guardar(Request $request)
     {
-        $this->setResponse('ajax');
         $this->db->begin();
-        $datosTrabajadorService = new DatosTrabajadorService;
         try {
+            $datosTrabajadorService = new DatosTrabajadorService;
             $asignarFuncionario = new AsignarFuncionario;
             $id = $request->input('id');
             $tipact = 'T';
@@ -339,23 +338,17 @@ class ActualizaTrabajadorController extends ApplicationController
             }
 
             $solicitud = $datosTrabajadorService->findById($id);
-
-            ob_end_clean();
-            $response = [
+            $salida = [
                 'msj' => 'Proceso se ha completado con éxito',
                 'success' => true,
-                'data' => $solicitud->getArray(),
+                'data' => $solicitud->toArray(),
             ];
             $this->db->commit();
-        } catch (DebugException $e) {
-            $this->db->rollback();
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $this->db->rollBack();
+            $salida = $this->handleException($e, $request);
         }
-
-        return $this->renderObject($response, false);
+        return response()->json($salida);
     }
 
     public function borrar(Request $request)

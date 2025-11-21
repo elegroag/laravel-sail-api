@@ -862,26 +862,11 @@ class BeneficiarioController extends ApplicationController
                 $solicitud = $benefiService->findById($id);
             }
 
-            $beneficiarioAdjuntoService = new BeneficiarioAdjuntoService($solicitud);
-            $beneficiarioAdjuntoService->setClaveCertificado($clave_certificado);
-
-            $out = $beneficiarioAdjuntoService->formulario()->getResult();
-            (new GuardarArchivoService(
-                [
-                    'tipopc' => $this->tipopc,
-                    'coddoc' => 1,
-                    'id' => $solicitud->getId(),
-                ]
-            ))->salvarDatos($out);
-
-            $out = $beneficiarioAdjuntoService->declaraJurament()->getResult();
-            (new GuardarArchivoService(
-                [
-                    'tipopc' => $this->tipopc,
-                    'coddoc' => 4,
-                    'id' => $solicitud->getId(),
-                ]
-            ))->salvarDatos($out);
+            BeneficiarioAdjuntoService::generarAdjuntos(
+                $solicitud,
+                $this->tipopc,
+                $clave_certificado
+            );
 
             $salida = [
                 'msj' => 'Proceso se ha completado con éxito',
@@ -890,14 +875,10 @@ class BeneficiarioController extends ApplicationController
             ];
 
             $this->db->commit();
-        } catch (DebugException $erro) {
-            $salida = [
-                'error' => $erro->getMessage(),
-                'success' => false,
-            ];
+        } catch (\Throwable $e) {
             $this->db->rollBack();
+            $salida = $this->handleException($e, $request);
         }
-
         return response()->json($salida);
     }
 

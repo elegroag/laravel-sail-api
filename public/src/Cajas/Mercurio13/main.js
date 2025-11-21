@@ -47,7 +47,7 @@ $(() => {
                     const tpl = _.template(document.getElementById('tmp_form').innerHTML);
                     $('#captureModalbody').html(tpl(response.data));
                     validatorInit();
-                    
+
                     $.each(response.data, (key, value) => {
                         $('#' + key.toString()).val(value);
                     });
@@ -55,9 +55,8 @@ $(() => {
                     $('#coddoc').attr('disabled', 'true');
                     $('#tipopc').attr('disabled', 'true');
                     $('#tipsoc').attr('disabled', 'true');
-
                 }
-            }
+            },
         });
     });
 
@@ -87,7 +86,7 @@ $(() => {
                 } else {
                     Messages.display(response.msj, 'error');
                 }
-            }
+            },
         });
     });
 
@@ -119,28 +118,30 @@ $(() => {
                         } else {
                             Messages.display(response.msj, 'error');
                         }
-                    }
+                    },
                 });
             }
         });
     });
 
     $(document).on('click', "[data-toggle='header-nuevo']", (e) => {
-		e.preventDefault();
-		$('#form :input').each(function (elem) {
-			$(this).val('');
-			$(this).removeAttr('disabled');
-		});
+        e.preventDefault();
+        $('#form :input').each(function (elem) {
+            $(this).val('');
+            $(this).removeAttr('disabled');
+        });
 
-		const tpl = _.template(document.getElementById('tmp_form').innerHTML);
-		$('#captureModalbody').html(tpl({
-            coddoc: '',
-            tipopc: '',
-            obliga: '',
-            nota: '',
-            auto_generado: '',
-		}));
-		modalCapture.show();
-		validatorInit();
-	});
+        const tpl = _.template(document.getElementById('tmp_form').innerHTML);
+        $('#captureModalbody').html(
+            tpl({
+                coddoc: '',
+                tipopc: '',
+                obliga: '',
+                nota: '',
+                auto_generado: '',
+            }),
+        );
+        modalCapture.show();
+        validatorInit();
+    });
 });

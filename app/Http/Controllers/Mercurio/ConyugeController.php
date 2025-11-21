@@ -387,49 +387,30 @@ class ConyugeController extends ApplicationController
                 $params['id'] = null;
                 $params['estado'] = 'T';
                 $solicitud = $conyugeService->createByFormData($params);
-                $id = $solicitud->getId();
             } else {
                 $res = $conyugeService->updateByFormData($id, $params);
                 if ($res == false) {
                     throw new DebugException('Error no se actualizo los datos', 301);
                 }
+                $solicitud = $conyugeService->findById($id);
             }
 
-            $solicitud = $conyugeService->findById($id);
-
-            $conyugeAdjuntoService = new ConyugeAdjuntoService($solicitud);
-            $conyugeAdjuntoService->setClaveCertificado($clave_certificado);
-            $out = $conyugeAdjuntoService->formulario()->getResult();
-            (new GuardarArchivoService(
-                [
-                    'tipopc' => $this->tipopc,
-                    'coddoc' => 1,
-                    'id' => $solicitud->getId(),
-                ]
-            ))->salvarDatos($out);
-
-            $out = $conyugeAdjuntoService->declaraJurament()->getResult();
-            (new GuardarArchivoService(
-                [
-                    'tipopc' => $this->tipopc,
-                    'coddoc' => 4,
-                    'id' => $solicitud->getId(),
-                ]
-            ))->salvarDatos($out);
+            ConyugeAdjuntoService::generarAdjuntos(
+                $solicitud,
+                $this->tipopc,
+                $clave_certificado
+            );
 
             $salida = [
                 'msj' => 'Proceso se ha completado con éxito',
                 'success' => true,
                 'data' => $solicitud->getArray(),
             ];
+
             $this->db->commit();
-        } catch (DebugException $err) {
-            $this->db->rollback();
-            $salida = [
-                'success' => false,
-                'msj' => $err->getMessage(),
-                'error' => $err->render($request),
-            ];
+        } catch (\Throwable $e) {
+            $this->db->rollBack();
+            $salida = $this->handleException($e, $request);
         }
         return response()->json($salida);
     }

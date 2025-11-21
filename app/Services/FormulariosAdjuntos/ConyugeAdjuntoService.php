@@ -35,6 +35,19 @@ class ConyugeAdjuntoService
 
     private $user;
 
+    private $tipo;
+
+    private const DOCUMENTOS = [
+        [
+            'method' => 'formulario',
+            'coddoc' => 1,
+        ],
+        [
+            'method' => 'declaraJurament',
+            'coddoc' => 4,
+        ]
+    ];
+
     /**
      * lfirma variable
      *
@@ -45,6 +58,7 @@ class ConyugeAdjuntoService
     public function __construct($request)
     {
         $this->user = session('user') ?? null;
+        $this->tipo = session('tipo') ?? null;
         $this->request = $request;
         $this->initialize();
     }
@@ -91,7 +105,7 @@ class ConyugeAdjuntoService
     {
         $trabajador = false;
         $mtrabajador = false;
-        switch (trim($this->request->tipo)) {
+        switch (trim($this->tipo)) {
             case 'I':
                 $mtrabajador = new Mercurio41;
                 break;
@@ -171,6 +185,16 @@ class ConyugeAdjuntoService
 
     public function setClaveCertificado($clave)
     {
+        if ($this->lfirma->password !== $clave) {
+            throw new DebugException('Error la clave no coincide con la de la firma digital', 501);
+        }
         $this->claveCertificado = $clave;
+    }
+
+    public static function generarAdjuntos($request, string $tipopc, ?string $claveCertificado = null): void
+    {
+        $adjuntoService = new self($request);
+        $adjuntoService->setClaveCertificado($claveCertificado);
+        AdjuntosGenerator::generar($adjuntoService, $tipopc, $request, self::DOCUMENTOS);
     }
 }

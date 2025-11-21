@@ -11,6 +11,7 @@ use App\Services\Formularios\FactoryDocuments;
 use App\Services\PreparaFormularios\CifrarDocumento;
 use App\Services\Api\ApiSubsidio;
 use App\Services\Formularios\Generation\DocumentGenerationManager;
+use App\Services\Utils\GuardarArchivoService;
 
 class EmpresaAdjuntoService
 {
@@ -28,6 +29,25 @@ class EmpresaAdjuntoService
 
     private $claveCertificado;
 
+    private const DOCUMENTOS = [
+        [
+            'method' => 'formulario',
+            'coddoc' => 1,
+        ],
+        [
+            'method' => 'tratamientoDatos',
+            'coddoc' => 25,
+        ],
+        [
+            'method' => 'cartaSolicitud',
+            'coddoc' => 24,
+        ],
+        [
+            'method' => 'trabajadoresNomina',
+            'coddoc' => 11,
+        ],
+    ];
+
     public function __construct($request)
     {
         $this->user = session('user') ?? null;
@@ -35,7 +55,7 @@ class EmpresaAdjuntoService
         $this->initialize();
     }
 
-    private function initialize()
+    private function initialize(): void
     {
         $this->lfirma = Mercurio16::where('documento', $this->user['documento'])
             ->where('coddoc', $this->user['coddoc'])
@@ -54,7 +74,7 @@ class EmpresaAdjuntoService
         $paramsEmpresa->setDatosCaptura($datos_captura);
     }
 
-    public function tratamientoDatos()
+    public function tratamientoDatos(): self
     {
         $this->filename = 'tratamiento_datos_empresa_' . strtotime('now') . "_{$this->request->nit}.pdf";
         $manager = new DocumentGenerationManager();
@@ -68,7 +88,7 @@ class EmpresaAdjuntoService
         return $this;
     }
 
-    public function cartaSolicitud()
+    public function cartaSolicitud(): self
     {
         $this->filename = "carta_solicitud_empresa_{$this->request->getNit()}.pdf";
         $background = 'img/form/oficios/oficio_solicitud_empresa.jpg';
@@ -91,7 +111,7 @@ class EmpresaAdjuntoService
         return $this;
     }
 
-    public function formulario()
+    public function formulario(): self
     {
         if (! $this->lfirma) {
             throw new DebugException('Error no hay firma digital', 501);
@@ -109,7 +129,7 @@ class EmpresaAdjuntoService
         return $this;
     }
 
-    public function trabajadoresNomina()
+    public function trabajadoresNomina(): self
     {
         KumbiaPDF::setBackgroundImage(false);
         KumbiaPDF::setFooterImage(false);
@@ -134,7 +154,7 @@ class EmpresaAdjuntoService
         return $this;
     }
 
-    public function cifrarDocumento()
+    public function cifrarDocumento(): void
     {
         $cifrarDocumento = new CifrarDocumento;
         $this->outPdf = $cifrarDocumento->cifrar(
@@ -145,7 +165,7 @@ class EmpresaAdjuntoService
         $this->fhash = $cifrarDocumento->getFhash();
     }
 
-    public function getResult()
+    public function getResult(): array
     {
         return [
             'name' => $this->filename,
@@ -155,8 +175,18 @@ class EmpresaAdjuntoService
         ];
     }
 
-    public function setClaveCertificado($clave)
+    public function setClaveCertificado($clave): void
     {
+        if ($this->lfirma->password !== $clave) {
+            throw new DebugException('Error la clave no coincide con la de la firma digital', 501);
+        }
         $this->claveCertificado = $clave;
+    }
+
+    public static function generarAdjuntos($request, string $tipopc, ?string $claveCertificado = null): void
+    {
+        $adjuntoService = new self($request);
+        $adjuntoService->setClaveCertificado($claveCertificado);
+        AdjuntosGenerator::generar($adjuntoService, $tipopc, $request, self::DOCUMENTOS);
     }
 }
