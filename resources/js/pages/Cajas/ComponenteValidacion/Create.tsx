@@ -232,7 +232,7 @@ export default function Create({ componente, componentes }: Props) {
                     </div>
             {/* Picker de componente */}
             <Dialog open={pickerOpen} onOpenChange={setPickerOpen}>
-                <DialogContent>
+                <DialogContent className="sm:max-w-[500px]">
                     <DialogHeader>
                         <DialogTitle>Seleccionar componente</DialogTitle>
                         <DialogDescription>

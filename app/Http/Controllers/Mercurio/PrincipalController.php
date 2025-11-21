@@ -701,10 +701,8 @@ class PrincipalController extends ApplicationController
         }
     }
 
-    public function estado_actual()
+    public function estado_actual(Request $request)
     {
-        $this->setResponse('ajax');
-
         try {
             $tipo = $this->user['tipo'];
             $documento = $this->user['documento'];
@@ -749,13 +747,46 @@ class PrincipalController extends ApplicationController
                 'msj' => 'Proceso completado con éxito',
                 'data' => $out,
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
+        return response()->json($salida);
+    }
 
-        return $this->renderObject($salida);
+    public function cambioClave(Request $request)
+    {
+        $this->db->begin();
+        try {
+            $clave = $request->input('clave');
+            $clacon = $request->input('clacon');
+            $tipo = $this->tipo;
+            $documento = $this->user['documento'];
+            $coddoc = $this->user['coddoc'];
+
+            if ($clave != $clacon) {
+                throw new DebugException('Las contraseñas no coinciden', 501);
+            }
+
+            $msubsi07 = Mercurio07::where('documento', $documento)
+                ->where('tipo', $tipo)
+                ->where('coddoc', $coddoc)
+                ->first();
+
+            if (strlen($clave) > 5 && strlen($clave) < 80) {
+                $hash = clave_hash($clave);
+                $msubsi07->clave = $hash;
+            }
+
+            $msubsi07->save();
+            $salida = [
+                'msj' => 'Proceso se ha completado con éxito',
+                'success' => true
+            ];
+            $this->db->commit();
+        } catch (\Throwable $e) {
+            $this->db->rollBack();
+            $salida = $this->handleException($e, $request);
+        }
+        return response()->json($salida);
     }
 }

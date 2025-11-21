@@ -3,12 +3,12 @@ import { Building2, GraduationCap, Briefcase, Users, HardHat, User, Mail, Messag
 import type { UserTypeOption, DeliveryMethod } from "@/types/auth"
 
 export const userTypes: UserTypeOption[] = [
-  { id: "empresa", label: "Empresa aportante", icon: <Building2 className="w-8 h-8 text-blue-500" /> },
-  { id: "independiente", label: "Independiente aportante", icon: <GraduationCap className="w-8 h-8 text-green-500" /> },
+  { id: "empresa", label: "Empresa o Empleador", icon: <Building2 className="w-8 h-8 text-blue-500" /> },
+  { id: "independiente", label: "Trabajador Independiente-Aportante", icon: <GraduationCap className="w-8 h-8 text-green-500" /> },
   { id: "facultativo", label: "Facultativo", icon: <Briefcase className="w-8 h-8 text-purple-500" /> },
-  { id: "particular", label: "Particular", icon: <Users className="w-8 h-8 text-orange-500" /> },
-  { id: "trabajador", label: "Trabajador", icon: <HardHat className="w-8 h-8 text-yellow-500" /> },
+  { id: "trabajador", label: "Trabajador Dependiente", icon: <HardHat className="w-8 h-8 text-yellow-500" /> },
   { id: "pensionado", label: "Pensionado", icon: <User className="w-8 h-8 text-pink-500" /> },
+  { id: "particular", label: "Particular", icon: <Users className="w-8 h-8 text-orange-500" /> },
 ]
 
 export const documentTypes = [

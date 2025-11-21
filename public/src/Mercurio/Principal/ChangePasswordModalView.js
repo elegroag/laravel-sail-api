@@ -123,14 +123,14 @@ export default class ChangePasswordModalView extends Backbone.View {
                 return;
             }
             window.App.trigger('syncro', {
-                url: window.App.url('cambio_correo'),
+                url: window.App.url('principal/cambio_clave'),
                 data: {
                     clave,
                     clacon,
                 },
                 callback: (response) => {
                     if (response && response.success) {
-                        const success = response && (response.flag === true || response.success === true || response.success === 'true');
+                        const success = response && response.success === true;
                         const message =
                             (response && (response.msg || response.msj)) ||
                             (success ? 'La clave se actualizó correctamente.' : 'No fue posible cambiar la clave. Intenta nuevamente.');
@@ -141,6 +141,9 @@ export default class ChangePasswordModalView extends Backbone.View {
                         } else {
                             window.App.trigger('alert:error', { message });
                         }
+
+                        this.remove();
+                        window.App.router.navigate('list', { trigger: true, replace: true });
                     } else {
                         console.error('Error al cambiar la clave:', response);
                         window.App.trigger('alert:error', {

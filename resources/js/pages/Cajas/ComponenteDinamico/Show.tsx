@@ -346,7 +346,7 @@ export default function Show({ componente }: Props) {
             </div>
         {/* Modal de confirmación */}
         <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-            <DialogContent>
+            <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
                     <DialogTitle>Confirmar eliminación</DialogTitle>
                     <DialogDescription>

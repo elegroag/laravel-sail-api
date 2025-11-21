@@ -91,7 +91,7 @@ export default function Create({ formulario, formularios = [] }: Props) {
     return (
         <AppLayout title="Crear Componente Dinámico">
             <Dialog open={successOpen} onOpenChange={setSuccessOpen}>
-                <DialogContent>
+                <DialogContent className="sm:max-w-[500px]">
                     <DialogHeader>
                         <DialogTitle>Actualización exitosa</DialogTitle>
                         <DialogDescription>{successMsg || 'Cambios guardados correctamente.'}</DialogDescription>

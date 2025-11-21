@@ -30,6 +30,7 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
         Route::post('/actualiza_estado_solicitudes', [PrincipalController::class, 'actualizaEstadoSolicitudes']);
         Route::post('/establecer_clave_firma', [PrincipalController::class, 'establecerClaveFirma']);
         Route::post('/require_firma', [PrincipalController::class, 'requireFirma']);
+        Route::post('/cambio_clave', [PrincipalController::class, 'cambioClave'])->name('principal.cambio_clave');
     });
 
     Route::prefix('/mercurio/movimientos')->group(function () {

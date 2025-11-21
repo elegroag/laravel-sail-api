@@ -32,7 +32,7 @@ export default function Register(props: LoginProps){
           tagline="Únete a Comfaca En Línea"
           description={
             <p>
-              Crea tu cuenta para acceder a todos los servicios y beneficios que Comfaca tiene para ofrecerte. Un proceso simple y seguro para comenzar tu experiencia.
+              Cree su cuenta y acceda a COMFACA de forma segura y eficiente para la gestión de sus trámites y servicios.
             </p>
           }
           backHref={route('login')}

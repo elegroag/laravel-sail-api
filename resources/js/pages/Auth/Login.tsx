@@ -65,7 +65,7 @@ export default function Login({
           {!selectedUserType ? (
             <AuthUserTypeStep
               title="Iniciar sesión portal"
-              subtitle="en línea"
+              subtitle="Comfaca en línea"
               logoSrc={imageLogo}
               logoAlt="Comfaca Logo"
               userTypes={userTypes}

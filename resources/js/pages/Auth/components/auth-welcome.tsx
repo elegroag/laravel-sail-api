@@ -67,7 +67,7 @@ export default function AuthWelcome({
                 Ver opciones de ingreso
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="sm:max-w-[600px]">
               <DialogHeader>
                 <DialogTitle>Opciones de ingreso</DialogTitle>
                 <DialogDescription>
@@ -83,13 +83,12 @@ export default function AuthWelcome({
                       <p className="text-muted-foreground text-sm">
                         {(
                           {
-                            empresa: "Empresas que realizan aportes como empleadoras.",
-                            independiente: "Personas que realizan aportes de forma independiente.",
-                            facultativo: "Usuarios con vinculación facultativa a servicios.",
-                            particular: "Personas naturales interesadas en servicios particulares.",
-                            domestico: "Empleadores o trabajadores del servicio doméstico.",
-                            trabajador: "Trabajadores afiliados por su empresa.",
-                            pensionado: "Personas pensionadas afiliadas a la caja.",
+                            empresa: "Persona natural o jurídica con trabajadores a su cargo, obligada a realizar aportes y afiliarse al Sistema del Subsidio Familiar, así como a afiliar a sus trabajadores.",
+                            independiente: "Son todos los trabajadores de carácter permanente que prestan sus servicios personales a un empleador, incluidos los trabajadores domésticos y veteranos.",
+                            facultativo: "Son personas que, no encontrándose dentro de las categorías anteriores, pueden tener acceso a los servicios de las Cajas de Compensación Familiar por disposición de la Ley o en desarrollo de Convenios celebrados por las mismas.",
+                            trabajador: "Persona natural sin vínculo laboral que de forma voluntaria realiza aportes y se afilia al Sistema del Subsidio Familiar para acceder a sus servicios.",
+                            pensionado: "Persona pensionada que de forma voluntaria realiza aportes y se afilia al Sistema del Subsidio Familiar para acceder a los servicios.",
+                            particular: "Personas no afiliadas al Sistema del Subsidio Familiar que acceden a servicios de la Caja de Compensación Familiar."
                           } as Record<string, string>
                         )[ut.id] || "Tipo de usuario disponible para el ingreso al portal."}
                       </p>

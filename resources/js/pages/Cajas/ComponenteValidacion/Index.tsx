@@ -512,7 +512,7 @@ export default function Index({ componentes_validaciones }: Props) {
             </div>
             {/* Modal de confirmación de eliminación */}
             <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-                <DialogContent>
+                <DialogContent className="sm:max-w-[500px]">
                     <DialogHeader>
                         <DialogTitle>Confirmar eliminación</DialogTitle>
                         <DialogDescription>

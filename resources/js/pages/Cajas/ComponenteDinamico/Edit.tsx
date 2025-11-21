@@ -210,7 +210,7 @@ export default function Edit({ componente }: Props) {
     return (
         <AppLayout title={`Editar Componente: ${componente.label}`}>
             <Dialog open={successOpen} onOpenChange={setSuccessOpen}>
-                <DialogContent>
+                <DialogContent className="sm:max-w-[500px]">
                     <DialogHeader>
                         <DialogTitle>Actualización exitosa</DialogTitle>
                         <DialogDescription>{successMsg || 'Cambios guardados correctamente.'}</DialogDescription>
