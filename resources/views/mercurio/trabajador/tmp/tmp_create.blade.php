@@ -172,6 +172,20 @@
                                     </div>
                                 </div>
 
+                                <div class="col-md-3  show-peretn">
+                                    <div class='form-group' group-for='trasin'>
+                                        <label for="trasin" class="control-label">Resguardo indigena</label>
+                                        <span id='component_resguardo_id'></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3  show-peretn">
+                                    <div class='form-group' group-for='trasin'>
+                                        <label for="trasin" class="control-label">Pueblo indigena</label>
+                                        <span id='component_pub_indigena_id'></span>
+                                    </div>
+                                </div>
+
                                 <div class="col-md-3">
                                     <div class='form-group' group-for='captra'>
                                         <label for="captra" class="control-label">Capacidad trabajo</label>

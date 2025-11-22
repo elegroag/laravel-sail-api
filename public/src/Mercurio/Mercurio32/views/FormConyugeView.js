@@ -32,6 +32,7 @@ export class FormConyugeView extends FormView {
             'click [data-toggle="address"]': 'openAddress',
             'click #btEnviarRadicado': 'enviarRadicado',
             'change #codocu': 'changeCodocu',
+            'change #peretn': 'changePeretn',
         };
     }
 
@@ -336,6 +337,17 @@ export class FormConyugeView extends FormView {
             this.setInput('salario', '0');
             this.setInput('empresalab', 'NULL');
             this.setInput('fecing', 'NULL');
+        }
+    }
+
+    changePeretn(e) {
+        const _parent = this.$el.find(e.currentTarget).val();
+        if (_parent == '3') {
+            this.$el.find('.show-peretn').removeClass('d-none');
+        } else {
+            this.$el.find('.show-peretn').addClass('d-none');
+            this.$el.find('#resguardo_id').val('');
+            this.$el.find('#pub_indigena_id').val('');
         }
     }
 

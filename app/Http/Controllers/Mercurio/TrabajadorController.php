@@ -18,6 +18,7 @@ use App\Models\Subsi54;
 use App\Services\Entidades\TrabajadorService;
 use App\Services\FormulariosAdjuntos\TrabajadorAdjuntoService;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Entidades\EmpresaService;
 use App\Services\Srequest;
 use App\Services\Tag;
 use App\Services\Utils\AsignarFuncionario;
@@ -54,14 +55,19 @@ class TrabajadorController extends ApplicationController
         }
         $input_nits = null;
 
-        $xempresas = Mercurio30::where('documento', $this->user['documento'])
-            ->where('coddoc', $this->user['coddoc'])
-            ->get();
-
-        foreach ($xempresas as $key => $value) {
-            $nits["{$value->nit}"] = $value->nit;
+        $data = (new EmpresaService)->buscarEmpresaSubsidio($this->user['documento']);
+        if ($data) {
+            $mempresa = new Mercurio30();
+            $mempresa->fill($data);
+        } else {
+            $mempresa = Mercurio30::where('documento', $this->user['documento'])
+                ->where('coddoc', $this->user['coddoc'])
+                ->first();
         }
-        $razsoc = ($xempresas->count() == 1) ? $xempresas[0]->razsoc : '';
+
+        $razsoc = $mempresa->razsoc;
+        $nits = [$mempresa->nit => $mempresa->nit];
+
         $input_nits = Tag::selectStatic(
             new Srequest([
                 'name' => 'nit',

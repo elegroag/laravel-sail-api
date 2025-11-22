@@ -26,6 +26,7 @@ class FormTrabajadorView extends FormView {
             'click [data-toggle="address"]': 'openAddress',
             'click #cancel': 'cancel',
             'blur [data-toggle="is_numeric"]': 'isNumber',
+            'change #peretn': 'changePeretn',
         };
     }
 
@@ -275,6 +276,17 @@ class FormTrabajadorView extends FormView {
                 }
             },
         });
+    }
+
+    changePeretn(e) {
+        const _parent = this.$el.find(e.currentTarget).val();
+        if (_parent == '3') {
+            this.$el.find('.show-peretn').removeClass('d-none');
+        } else {
+            this.$el.find('.show-peretn').addClass('d-none');
+            this.$el.find('#resguardo_id').val('');
+            this.$el.find('#pub_indigena_id').val('');
+        }
     }
 
     /**
