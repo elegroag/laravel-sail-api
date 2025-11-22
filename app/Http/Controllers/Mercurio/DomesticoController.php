@@ -12,7 +12,6 @@ use App\Models\Mercurio13;
 use App\Models\Mercurio37;
 use App\Models\Mercurio40;
 use App\Services\Utils\AsignarFuncionario;
-use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Logger;
 use App\Services\Api\ApiSubsidio;
@@ -87,99 +86,108 @@ class DomesticoController extends ApplicationController
 
     public function index()
     {
-        $help = 'Esta opcion permite manejar los ';
+        try {
+            $help = 'Esta opcion permite manejar los ';
 
-        $ps = new ApiSubsidio();
-        $ps->send(
-            [
-                'servicio' => 'PoblacionAfilia',
-                'metodo' => 'captura_trabajador',
-            ]
-        );
-        $datos_captura = $ps->toArray();
-        if ($datos_captura['success'] == true) {
-            $datos_captura = $datos_captura['data'];
-            $_coddoc = [];
-            foreach ($datos_captura['coddoc'] as $data) {
-                $_coddoc[$data['coddoc']] = $data['detalle'];
+            $ps = new ApiSubsidio();
+            $ps->send(
+                [
+                    'servicio' => 'PoblacionAfilia',
+                    'metodo' => 'captura_trabajador',
+                ]
+            );
+            $datos_captura = $ps->toArray();
+            if ($datos_captura['success'] == true) {
+                $datos_captura = $datos_captura['data'];
+                $_coddoc = [];
+                foreach ($datos_captura['coddoc'] as $data) {
+                    $_coddoc[$data['coddoc']] = $data['detalle'];
+                }
+                $_sexo = [];
+                foreach ($datos_captura['sexo'] as $data) {
+                    $_sexo[$data['sexo']] = $data['detalle'];
+                }
+                $_estciv = [];
+                foreach ($datos_captura['estciv'] as $data) {
+                    $_estciv[$data['estciv']] = $data['detalle'];
+                }
+                $_cabhog = [];
+                foreach ($datos_captura['cabhog'] as $data) {
+                    $_cabhog[$data['cabhog']] = $data['detalle'];
+                }
+                $_codciu = [];
+                foreach ($datos_captura['codciu'] as $data) {
+                    $_codciu[$data['codciu']] = $data['detalle'];
+                }
+                $_codzon = [];
+                foreach ($datos_captura['codzon'] as $data) {
+                    $_codzon[$data['codzon']] = $data['detalle'];
+                }
+                $_captra = [];
+                foreach ($datos_captura['captra'] as $data) {
+                    $_captra[$data['captra']] = $data['detalle'];
+                }
+                $_tipdis = [];
+                foreach ($datos_captura['tipdis'] as $data) {
+                    $_tipdis[$data['tipdis']] = $data['detalle'];
+                }
+                $_nivedu = [];
+                foreach ($datos_captura['nivedu'] as $data) {
+                    $_nivedu[$data['nivedu']] = $data['detalle'];
+                }
+                $_rural = [];
+                foreach ($datos_captura['rural'] as $data) {
+                    $_rural[$data['rural']] = $data['detalle'];
+                }
+                $_vivienda = [];
+                foreach ($datos_captura['vivienda'] as $data) {
+                    $_vivienda[$data['vivienda']] = $data['detalle'];
+                }
+                $_tipafi = [];
+                foreach ($datos_captura['tipafi'] as $data) {
+                    $_tipafi[$data['tipafi']] = $data['detalle'];
+                }
             }
-            $_sexo = [];
-            foreach ($datos_captura['sexo'] as $data) {
-                $_sexo[$data['sexo']] = $data['detalle'];
-            }
-            $_estciv = [];
-            foreach ($datos_captura['estciv'] as $data) {
-                $_estciv[$data['estciv']] = $data['detalle'];
-            }
-            $_cabhog = [];
-            foreach ($datos_captura['cabhog'] as $data) {
-                $_cabhog[$data['cabhog']] = $data['detalle'];
-            }
-            $_codciu = [];
-            foreach ($datos_captura['codciu'] as $data) {
-                $_codciu[$data['codciu']] = $data['detalle'];
-            }
-            $_codzon = [];
-            foreach ($datos_captura['codzon'] as $data) {
-                $_codzon[$data['codzon']] = $data['detalle'];
-            }
-            $_captra = [];
-            foreach ($datos_captura['captra'] as $data) {
-                $_captra[$data['captra']] = $data['detalle'];
-            }
-            $_tipdis = [];
-            foreach ($datos_captura['tipdis'] as $data) {
-                $_tipdis[$data['tipdis']] = $data['detalle'];
-            }
-            $_nivedu = [];
-            foreach ($datos_captura['nivedu'] as $data) {
-                $_nivedu[$data['nivedu']] = $data['detalle'];
-            }
-            $_rural = [];
-            foreach ($datos_captura['rural'] as $data) {
-                $_rural[$data['rural']] = $data['detalle'];
-            }
-            $_vivienda = [];
-            foreach ($datos_captura['vivienda'] as $data) {
-                $_vivienda[$data['vivienda']] = $data['detalle'];
-            }
-            $_tipafi = [];
-            foreach ($datos_captura['tipafi'] as $data) {
-                $_tipafi[$data['tipafi']] = $data['detalle'];
-            }
+
+            return view('mercurio.domestico.index', [
+                'help' => $help,
+                'title' => 'Afiliacion Domestico',
+                'buttons' => ['N'],
+                '_coddoc' => $_coddoc,
+                '_sexo' => $_sexo,
+                '_estciv' => $_estciv,
+                '_cabhog' => $_cabhog,
+                '_codciu' => $_codciu,
+                '_codzon' => $_codzon,
+                '_captra' => $_captra,
+                '_tipdis' => $_tipdis,
+                '_nivedu' => $_nivedu,
+                '_rural' => $_rural,
+                '_vivienda' => $_vivienda,
+                '_tipafi' => $_tipafi,
+                'calemp' => 'S',
+                'codact' => '201010',
+                'cedtra' => parent::getActUser('documento'),
+                'coddoc' => parent::getActUser('coddoc'),
+                'calemp' => 'S',
+                'codact' => '201010',
+                'tipdoc' => parent::getActUser('coddoc'),
+            ]);
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
+            set_flashdata('error', [
+                'msj' => $salida['msj'],
+                'code' => $salida['code'],
+            ]);
+
+            return redirect()->route('principal/index');
         }
-
-        return view('mercurio.domestico.index', [
-            'help' => $help,
-            'title' => 'Afiliacion Domestico',
-            'buttons' => ['N'],
-            '_coddoc' => $_coddoc,
-            '_sexo' => $_sexo,
-            '_estciv' => $_estciv,
-            '_cabhog' => $_cabhog,
-            '_codciu' => $_codciu,
-            '_codzon' => $_codzon,
-            '_captra' => $_captra,
-            '_tipdis' => $_tipdis,
-            '_nivedu' => $_nivedu,
-            '_rural' => $_rural,
-            '_vivienda' => $_vivienda,
-            '_tipafi' => $_tipafi,
-            'calemp' => 'S',
-            'codact' => '201010',
-            'cedtra' => parent::getActUser('documento'),
-            'coddoc' => parent::getActUser('coddoc'),
-            'calemp' => 'S',
-            'codact' => '201010',
-            'tipdoc' => parent::getActUser('coddoc'),
-        ]);
     }
 
     public function buscar(Request $request) {}
 
     public function editar(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $id = $request->input('id');
             $mercurio40 = Mercurio40::where('id', $id)->first();
@@ -188,51 +196,48 @@ class DomesticoController extends ApplicationController
             }
 
             $response = $mercurio40->getArray();
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'error' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
-        $this->renderObject($response);
+
+        return response()->json($response);
     }
 
     public function guardar(Request $request)
     {
         try {
             $generalService = new GeneralService;
-            $this->setResponse('ajax');
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $cedtra = $request->input('cedtra', 'addslaches', 'extraspaces', 'striptags');
-            $tipdoc = $request->input('tipdoc', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $priape = $request->input('priape', 'addslaches', 'extraspaces', 'striptags');
-            $segape = $request->input('segape', 'addslaches', 'extraspaces', 'striptags');
-            $prinom = $request->input('prinom', 'addslaches', 'extraspaces', 'striptags');
-            $segnom = $request->input('segnom', 'addslaches', 'extraspaces', 'striptags');
-            $fecnac = $request->input('fecnac', 'addslaches', 'extraspaces', 'striptags');
-            $ciunac = $request->input('ciunac', 'addslaches', 'extraspaces', 'striptags');
-            $sexo = $request->input('sexo', 'addslaches', 'extraspaces', 'striptags');
-            $estciv = $request->input('estciv', 'addslaches', 'extraspaces', 'striptags');
-            $cabhog = $request->input('cabhog', 'addslaches', 'extraspaces', 'striptags');
-            $codciu = $request->input('codciu', 'addslaches', 'extraspaces', 'striptags');
-            $codzon = $request->input('codzon', 'addslaches', 'extraspaces', 'striptags');
-            $direccion = $request->input('direccion', 'addslaches', 'extraspaces', 'striptags');
-            $barrio = $request->input('barrio', 'addslaches', 'extraspaces', 'striptags');
-            $telefono = $request->input('telefono', 'addslaches', 'extraspaces', 'striptags');
-            $celular = $request->input('celular', 'addslaches', 'extraspaces', 'striptags');
-            $fax = $request->input('fax', 'addslaches', 'extraspaces', 'striptags');
-            $email = $request->input('email', 'addslaches', 'extraspaces', 'striptags');
-            $fecing = $request->input('fecing', 'addslaches', 'extraspaces', 'striptags');
-            $salario = $request->input('salario', 'addslaches', 'extraspaces', 'striptags');
-            $captra = $request->input('captra', 'addslaches', 'extraspaces', 'striptags');
-            $tipdis = $request->input('tipdis', 'addslaches', 'extraspaces', 'striptags');
-            $nivedu = $request->input('nivedu', 'addslaches', 'extraspaces', 'striptags');
-            $rural = $request->input('rural', 'addslaches', 'extraspaces', 'striptags');
-            $vivienda = $request->input('vivienda', 'addslaches', 'extraspaces', 'striptags');
-            $tipafi = $request->input('tipafi', 'addslaches', 'extraspaces', 'striptags');
-            $autoriza = $request->input('autoriza', 'addslaches', 'extraspaces', 'striptags');
-            $calemp = $request->input('calemp', 'addslaches', 'extraspaces', 'striptags');
-            $codact = $request->input('codact', 'addslaches', 'extraspaces', 'striptags');
+            $id = $request->input('id');
+            $cedtra = $request->input('cedtra');
+            $tipdoc = $request->input('tipdoc');
+            $priape = $request->input('priape');
+            $segape = $request->input('segape');
+            $prinom = $request->input('prinom');
+            $segnom = $request->input('segnom');
+            $fecnac = $request->input('fecnac');
+            $ciunac = $request->input('ciunac');
+            $sexo = $request->input('sexo');
+            $estciv = $request->input('estciv');
+            $cabhog = $request->input('cabhog');
+            $codciu = $request->input('codciu');
+            $codzon = $request->input('codzon');
+            $direccion = $request->input('direccion');
+            $barrio = $request->input('barrio');
+            $telefono = $request->input('telefono');
+            $celular = $request->input('celular');
+            $fax = $request->input('fax');
+            $email = $request->input('email');
+            $fecing = $request->input('fecing');
+            $salario = $request->input('salario');
+            $captra = $request->input('captra');
+            $tipdis = $request->input('tipdis');
+            $nivedu = $request->input('nivedu');
+            $rural = $request->input('rural');
+            $vivienda = $request->input('vivienda');
+            $tipafi = $request->input('tipafi');
+            $autoriza = $request->input('autoriza');
+            $calemp = $request->input('calemp');
+            $codact = $request->input('codact');
             $modelos = ['Mercurio20', 'Mercurio40'];
             // $Transaccion = parent::startTrans($modelos);
             // $response = parent::startFunc();
@@ -285,32 +290,28 @@ class DomesticoController extends ApplicationController
             if ($usuario == '') {
                 $response = 'No se puede realizar el registro,Comuniquese con la Atencion al cliente';
 
-                return $this->renderObject($response);
+                return response()->json($response);
             }
 
             $mercurio40->setUsuario($usuario);
-            $mercurio40->setTipo(parent::getActUser('tipo'));
-            $mercurio40->setCoddoc(parent::getActUser('coddoc'));
-            $mercurio40->setDocumento(parent::getActUser('documento'));
+            $mercurio40->setTipo($this->tipo);
+            $mercurio40->setCoddoc($this->user['coddoc']);
+            $mercurio40->setDocumento($this->user['documento']);
             $mercurio40->save();
 
-            // parent::finishTrans();
-            $response = 'Creacion Con Exito';
-
-            return $this->renderText(json_encode($response));
-        } catch (DebugException $e) {
             $response = [
-                'success' => false,
-                'error' => $e->getMessage(),
+                'success' => true,
+                'msj' => 'Creacion Con Exito',
             ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($response);
+        return response()->json($response);
     }
 
     public function validePk(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $cedtra = $request->input('cedtra');
             $l = Mercurio40::where('cedtra', $cedtra)
@@ -325,14 +326,11 @@ class DomesticoController extends ApplicationController
                 'success' => true,
                 'msj' => 'Proceso completado con éxito.',
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'succcess' => true,
-                'error' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($response);
+        return response()->json($response);
     }
 
     public function infor(Request $request)
@@ -408,10 +406,8 @@ class DomesticoController extends ApplicationController
     public function borrarArchivo(Request $request)
     {
         try {
-
-            $this->setResponse('ajax');
-            $numero = $request->input('numero', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $coddoc = $request->input('coddoc', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $numero = $request->input('numero');
+            $coddoc = $request->input('coddoc');
             $modelos = ['mercurio37'];
 
             $mercurio01 = Mercurio01::first();
@@ -431,21 +427,16 @@ class DomesticoController extends ApplicationController
                 'success' => true,
                 'msj' => 'Se borro con Exito el archivo',
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'error' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($response);
+        return response()->json($response);
     }
 
     public function guardarArchivo(Request $request)
     {
         try {
-
-            $this->setResponse('ajax');
             $id = $request->input('id');
             $coddoc = $request->input('coddoc');
 
@@ -478,22 +469,17 @@ class DomesticoController extends ApplicationController
                 'success' => true,
                 'msj' => $response,
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'error' => $e->getMessage(),
-                'msj' => 'No se puede guardar/editar el Registro',
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
-        return $this->renderText($response);
+        return response()->json($response);
     }
 
     public function enviarCaja(Request $request)
     {
         try {
-            $this->setResponse('ajax');
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $id = $request->input('id');
             $today = Carbon::now();
 
             if ((new Mercurio37)->getCount(
@@ -522,14 +508,14 @@ class DomesticoController extends ApplicationController
             $mercurio10->setFecsis($today->format('Y-m-d'));
             $mercurio10->save();
 
-            $response = 'Se envio con Exito';
-        } catch (DebugException $e) {
             $response = [
-                'success' => false,
-                'error' => $e->getMessage(),
+                'success' => true,
+                'msj' => 'Se envio con Exito',
             ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($response);
+        return response()->json($response);
     }
 }

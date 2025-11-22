@@ -6,23 +6,20 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
+use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
 use App\Models\Mercurio01;
-use App\Models\Mercurio07;
 use App\Models\Mercurio10;
 use App\Models\Mercurio12;
 use App\Models\Mercurio13;
 use App\Models\Mercurio28;
-use App\Models\Mercurio30;
-use App\Models\Mercurio31;
 use App\Models\Mercurio33;
 use App\Models\Mercurio37;
 use App\Models\Mercurio47;
 use App\Models\Subsi54;
 use App\Services\Entidades\DatosTrabajadorService;
 use App\Services\Utils\AsignarFuncionario;
-use App\Services\Utils\Comman;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\Logger;
 use App\Services\Utils\SenderValidationCaja;
@@ -50,15 +47,24 @@ class ActualizaTrabajadorController extends ApplicationController
 
     public function index()
     {
-        return view('mercurio.actualizadatostra.index', [
-            'title' => 'Solicitud de actualización de datos',
-            'cedtra' => $this->user['documento'],
-        ]);
+        try {
+            return view('mercurio.actualizadatostra.index', [
+                'title' => 'Solicitud de actualización de datos',
+                'cedtra' => $this->user['documento'],
+            ]);
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
+            set_flashdata('error', [
+                'msj' => $salida['msj'],
+                'code' => $salida['code'],
+            ]);
+
+            return redirect()->route('principal/index');
+        }
     }
 
     public function params()
     {
-        $this->setResponse('ajax');
         try {
             $nit = $this->user['documento'];
 
@@ -135,17 +141,16 @@ class ActualizaTrabajadorController extends ApplicationController
                 }
             }
 
-            $tipafi = (new Mercurio07)->getArrayTipos();
-            $coddoc = $tipoDocumentos;
+            $tipafi = get_array_tipos();
             $data = [
                 'tipafi' => $tipafi,
-                'tipdoc' => $coddoc,
-                'tipper' => (new Mercurio30)->getTipperArray(),
+                'tipdoc' => $tipoDocumentos,
+                'tipper' => tipper_array(),
                 'tipsoc' => $tipsoc,
-                'calemp' => (new Mercurio30)->getCalempArray(),
+                'calemp' => calemp_array(),
                 'codciu' => $codciu,
                 'codzon' => $codciu,
-                'respo_tipdoc' => $coddoc,
+                'respo_tipdoc' => $tipoDocumentos,
                 'sexo' => ParamsTrabajador::getSexos(),
                 'estciv' => ParamsTrabajador::getEstadoCivil(),
                 'cabhog' => ParamsTrabajador::getCabezaHogar(),
@@ -167,7 +172,7 @@ class ActualizaTrabajadorController extends ApplicationController
                 'resguardo_id' => ParamsTrabajador::getResguardos(),
                 'pub_indigena_id' => ParamsTrabajador::getPueblosIndigenas(),
                 'codban' => ParamsTrabajador::getBancos(),
-                'tipsal' => (new Mercurio31)->getTipsalArray(),
+                'tipsal' => tipsal_array(),
                 'tipcue' => ParamsTrabajador::getTipoCuenta(),
                 'ruralt' => ParamsTrabajador::getRural(),
                 'tipjor' => ['C' => 'COMPLETA', 'M' => 'MEDIA', 'P' => 'PARCIAL'],
@@ -177,19 +182,27 @@ class ActualizaTrabajadorController extends ApplicationController
                 'codsuc' => $codsuc,
             ];
 
+            $formulario = FormularioDinamico::where('name', 'mercurio472')->first();
+            $componentes = $formulario->componentes()->get();
+            $componentes = $componentes->map(function ($componente) use ($data) {
+                $_componente = $componente->toArray();
+                if (isset($data[$componente->name])) {
+                    $_componente['data_source'] = $data[$componente->name];
+                }
+                $_componente['id'] = $componente->name;
+                return $_componente;
+            });
+
             $salida = [
                 'success' => true,
-                'data' => $data,
+                'data' => $componentes,
                 'msj' => 'OK',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function buscarSolicitudes($estado = '')
@@ -253,14 +266,11 @@ class ActualizaTrabajadorController extends ApplicationController
                 'data' => $datos,
                 'msj' => 'OK',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     function buscarEmpresaSubsidio($nit)
@@ -353,7 +363,7 @@ class ActualizaTrabajadorController extends ApplicationController
 
     public function borrar(Request $request)
     {
-        $this->setResponse('ajax');
+        $this->db->begin();
         try {
             $id = $request->input('id');
             $solicitud = Mercurio47::where('id', $id)->first();
@@ -372,19 +382,18 @@ class ActualizaTrabajadorController extends ApplicationController
                 'success' => true,
                 'msj' => 'El registro se borro con éxito del sistema.',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+            $this->db->commit();
+        } catch (\Throwable $e) {
+            $this->db->rollBack();
+            $salida = $this->handleException($e, $request);
         }
-        $this->renderText(json_encode($salida, JSON_NUMERIC_CHECK));
+
+        return response()->json($salida);
     }
 
     public function editarSolicitud(Request $request)
     {
-        $this->setResponse('ajax');
-
+        $this->db->begin();
         $logger = new Logger;
         $id_log = $logger->registrarLog(false, 'actualización datos basicos', '');
         try {
@@ -430,20 +439,19 @@ class ActualizaTrabajadorController extends ApplicationController
                     $mercurio33->save();
                 }
             }
-            // parent::finishTrans();
 
             $salida = [
                 'msj' => 'Proceso se ha completado con éxito',
                 'success' => true,
                 'id' => $id,
             ];
-        } catch (DebugException $er) {
-            $salida = [
-                'success' => false,
-                'msj' => $er->getMessage(),
-            ];
+            $this->db->commit();
+        } catch (\Throwable $e) {
+            $this->db->rollBack();
+            $salida = $this->handleException($e, $request);
         }
-        $this->renderText(json_encode($salida));
+
+        return response()->json($salida);
     }
 
     function archivosRequeridos($mercurio47)
@@ -500,9 +508,8 @@ class ActualizaTrabajadorController extends ApplicationController
 
     public function reloadArchivos(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $documento = parent::getActUser('documento');
+            $documento = $this->user['documento'];
             $id = $request->input('id');
             $mercurio47 = Mercurio47::where('id', $id)->where('documento', $documento)->first();
             if (! $mercurio47) {
@@ -513,21 +520,20 @@ class ActualizaTrabajadorController extends ApplicationController
                     'success' => true,
                 ];
             }
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
+            $salida['documentos_adjuntos'] = [];
         }
-        $this->renderText(json_encode($salida, JSON_NUMERIC_CHECK));
+
+        return response()->json($salida);
     }
 
     public function borrarArchivo(Request $request)
     {
-        $this->setResponse('ajax');
+        $this->db->begin();
         try {
-            $numero = $this->clp($request, 'id');
-            $coddoc = $this->clp($request, 'coddoc');
+            $numero = $request->input('id');
+            $coddoc = $request->input('coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
             $filepath = storage_path('temp/' . $mercurio37->getArchivo());
@@ -544,14 +550,13 @@ class ActualizaTrabajadorController extends ApplicationController
                 'success' => true,
                 'msj' => 'El archivo se borro de forma correcta',
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+            $this->db->commit();
+        } catch (\Throwable $e) {
+            $this->db->rollBack();
+            $response = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     /**
@@ -561,10 +566,10 @@ class ActualizaTrabajadorController extends ApplicationController
      */
     public function guardarArchivo(Request $request)
     {
-        $this->setResponse('ajax');
+        $this->db->begin();
         try {
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $coddoc = $request->input('coddoc', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $id = $request->input('id');
+            $coddoc = $request->input('coddoc');
 
             $guardarArchivoService = new GuardarArchivoService(
                 [
@@ -579,14 +584,13 @@ class ActualizaTrabajadorController extends ApplicationController
                 'msj' => 'Ok archivo procesado',
                 'data' => $mercurio37->getArray(),
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+            $this->db->commit();
+        } catch (\Throwable $e) {
+            $this->db->rollBack();
+            $response = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     /**
@@ -596,29 +600,27 @@ class ActualizaTrabajadorController extends ApplicationController
      */
     public function enviarCaja(Request $request)
     {
-        $this->setResponse('ajax');
+        $this->db->begin();
         try {
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $id = $request->input('id');
             $datosService = new DatosTrabajadorService;
-            // $datosService->setTransa();
 
             $asignarFuncionario = new AsignarFuncionario;
             $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
             $datosService->enviarCaja(new SenderValidationCaja, $id, $usuario);
 
-            // $datosService->endTransa();
+
             $salida = [
                 'success' => true,
                 'msj' => 'El envio de la solicitud se ha completado con éxito',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+            $this->db->commit();
+        } catch (\Throwable $e) {
+            $this->db->rollBack();
+            $salida = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     public function getTiposDocumentos()
@@ -644,7 +646,7 @@ class ActualizaTrabajadorController extends ApplicationController
     public function descargarFormulario($id)
     {
         $this->setResponse('view');
-        $documento = parent::getActUser('documento');
+        $documento = $this->user['documento'];
         $mercurio47 = Mercurio47::where('id', $id)->where('documento', $documento)->first();
         if (! $mercurio47) {
         } else {
@@ -791,28 +793,32 @@ class ActualizaTrabajadorController extends ApplicationController
 
     public function renderTable($estado = '')
     {
-        $this->setResponse('view');
-        $datosTrabajadorService = new DatosTrabajadorService;
-        $html = view(
-            'mercurio/actualizadatostra/tmp/solicitudes',
-            [
-                'path' => base_path(),
-                'solicitudes' => $datosTrabajadorService->findAllByEstado($estado),
-            ]
-        )->render();
+        try {
+            $datosTrabajadorService = new DatosTrabajadorService;
+            $html = view(
+                'mercurio/actualizadatostra/tmp/solicitudes',
+                [
+                    'path' => base_path(),
+                    'solicitudes' => $datosTrabajadorService->findAllByEstado($estado),
+                ]
+            )->render();
 
-        return $this->renderText($html);
+            $this->setResponse('view');
+            return $this->renderText($html);
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
+            return response()->json($salida);
+        }
     }
 
     public function searchRequest($id)
     {
-        $this->setResponse('ajax');
         try {
             if (is_null($id)) {
                 throw new DebugException('Error no hay solicitud a buscar', 301);
             }
-            $documento = parent::getActUser('documento');
-            $coddoc = parent::getActUser('coddoc');
+            $documento = $this->user['documento'];
+            $coddoc = $this->user['coddoc'];
 
             $mmercurio47 = Mercurio47::where('id', $id)
                 ->where('documento', $documento)
@@ -833,25 +839,25 @@ class ActualizaTrabajadorController extends ApplicationController
                 'data' => $solicitud,
                 'msj' => 'OK',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function consultaDocumentos($id)
     {
-        $this->setResponse('ajax');
         try {
-            $documento = parent::getActUser('documento');
-            $coddoc = parent::getActUser('coddoc');
+            $documento = $this->user['documento'];
+            $coddoc = $this->user['coddoc'];
 
             $datosTrabajadorService = new DatosTrabajadorService;
-            $mtrabajador = (new Mercurio47)->findFirst(" id='{$id}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND tipact='T'");
+            $mtrabajador = Mercurio47::where('id', $id)
+                ->where('documento', $documento)
+                ->where('coddoc', $coddoc)
+                ->where('tipact', 'T')
+                ->first();
             if ($mtrabajador == false) {
                 throw new DebugException('Error no se puede identificar el propietario de la solicitud', 301);
             }
@@ -861,14 +867,11 @@ class ActualizaTrabajadorController extends ApplicationController
                 'data' => $datosTrabajadorService->dataArchivosRequeridos($mtrabajador),
                 'msj' => 'OK',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function seguimiento(Request $request)
@@ -880,8 +883,8 @@ class ActualizaTrabajadorController extends ApplicationController
                 'success' => true,
                 'data' => $out,
             ];
-        } catch (DebugException $e) {
-            $salida = ['success' => false, 'msj' => $e->getMessage()];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
         return response()->json($salida);
     }

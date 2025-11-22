@@ -14,8 +14,6 @@ use App\Models\Gener09;
 use App\Models\Gener18;
 use App\Models\Mercurio07;
 use App\Models\Mercurio10;
-use App\Models\Mercurio30;
-use App\Models\Mercurio31;
 use App\Models\Mercurio37;
 use App\Models\Mercurio41;
 use App\Models\Subsi54;
@@ -24,10 +22,10 @@ use App\Services\FormulariosAdjuntos\Formularios;
 use App\Services\FormulariosAdjuntos\IndependienteAdjuntoService;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\ChangeCuentaService;
-use App\Services\Utils\GeneralService;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Srequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -71,29 +69,42 @@ class IndependienteController extends ApplicationController
      */
     public function index()
     {
-        return view('mercurio/independiente/index', [
-            'title' => 'Afiliación Independientes',
-            'calemp' => 'I',
-            'tipper' => 'N',
-            'cedtra' => $this->user['documento'],
-            'coddoc' => $this->user['coddoc'],
-        ]);
+        try {
+            return view('mercurio/independiente/index', [
+                'title' => 'Afiliación Independientes',
+                'calemp' => 'I',
+                'tipper' => 'N',
+                'cedtra' => $this->user['documento'],
+                'coddoc' => $this->user['coddoc'],
+            ]);
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
+            set_flashdata('error', [
+                'msj' => $salida['msj'],
+                'code' => $salida['code'],
+            ]);
+
+            return redirect()->route('principal/index');
+        }
     }
 
-    public function renderTable(Request $request, Response $response, string $estado = '')
+    public function renderTable(Request $request, string $estado = '')
     {
-        $this->setResponse('view');
-
-        $independienteService = new IndependienteService;
-        $html = view(
-            'mercurio/independiente/tmp/solicitudes',
-            [
-                'path' => base_path(),
-                'empresas' => $independienteService->findAllByEstado($estado),
-            ]
-        )->render();
-
-        return $this->renderText($html);
+        try {
+            $independienteService = new IndependienteService;
+            $html = view(
+                'mercurio/independiente/tmp/solicitudes',
+                [
+                    'path' => base_path(),
+                    'empresas' => $independienteService->findAllByEstado($estado),
+                ]
+            )->render();
+            $this->setResponse('view');
+            return $this->renderText($html);
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
+            return response()->json($salida);
+        }
     }
 
     /**
@@ -105,16 +116,22 @@ class IndependienteController extends ApplicationController
      */
     public function show(Request $request, Response $response, int $id, int $documento)
     {
-        $mercurio41 = Mercurio41::where('id', $id)->where('documento', $documento)->first();
-        if ($mercurio41 == false) {
-            $mercurio41 = new Mercurio41;
+        try {
+            $mercurio41 = Mercurio41::where('id', $id)->where('documento', $documento)->first();
+            if ($mercurio41 == false) {
+                $mercurio41 = new Mercurio41;
+            }
+            return response()->json(
+                [
+                    'success' => true,
+                    'entity' => $mercurio41->toArray(),
+                ]
+            );
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
+
+            return response()->json($salida);
         }
-        return response()->json(
-            [
-                'success' => true,
-                'entity' => $mercurio41->toArray(),
-            ]
-        );
     }
 
     /**
@@ -165,23 +182,21 @@ class IndependienteController extends ApplicationController
 
     public function actualizar(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $id = $request->input('id');
             $params = $this->serializeData($request);
             $params['id'] = $id;
-            $params['tipo'] = parent::getActUser('tipo');
-            $params['coddoc'] = parent::getActUser('coddoc');
-            $params['documento'] = parent::getActUser('documento');
+            $params['tipo'] = $this->tipo;
+            $params['coddoc'] = $this->user['coddoc'];
+            $params['documento'] = $this->user['documento'];
             $params['estado'] = 'T';
 
-            $this->independienteService = new IndependienteService;
-            $this->asignarFuncionario = new AsignarFuncionario;
-            $params['usuario'] = $this->asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
-            $this->independienteService->updateByFormData($id, $params);
-            // $this->independienteService->endTransa();
+            $independienteService = new IndependienteService;
+            $asignarFuncionario = new AsignarFuncionario;
+            $params['usuario'] = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
+            $independienteService->updateByFormData($id, $params);
 
-            $independiente = $this->independienteService->findById($id);
+            $independiente = $independienteService->findById($id);
             $data = $independiente->getArray();
 
             $response = [
@@ -189,14 +204,11 @@ class IndependienteController extends ApplicationController
                 'msj' => 'Registro completado con éxito',
                 'data' => $data,
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     /**
@@ -308,11 +320,8 @@ class IndependienteController extends ApplicationController
                 'empresa' => $empresa,
                 'trabajador' => $trabajador,
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => "No se pudo validar la información, {$e->getMessage()}",
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -325,10 +334,9 @@ class IndependienteController extends ApplicationController
      */
     public function borrarArchivo(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $numero = $this->clp($request, 'id');
-            $coddoc = $this->clp($request, 'coddoc');
+            $numero = $request->input('id');
+            $coddoc = $request->input('coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
             $filepath = storage_path('temp/' . $mercurio37->getArchivo());
@@ -345,14 +353,11 @@ class IndependienteController extends ApplicationController
                 'success' => true,
                 'msj' => 'El archivo se borro de forma correcta',
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     /**
@@ -379,11 +384,8 @@ class IndependienteController extends ApplicationController
                 'msj' => 'Ok archivo procesado',
                 'data' => $mercurio37->getArray(),
             ];
-        } catch (DebugException $ert) {
-            $response = [
-                'success' => false,
-                'msj' => $ert->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -409,11 +411,8 @@ class IndependienteController extends ApplicationController
                 'success' => true,
                 'msj' => 'El envio de la solicitud se ha completado con éxito',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
         return response()->json($salida);
     }
@@ -454,11 +453,8 @@ class IndependienteController extends ApplicationController
                 'name' => $file,
                 'url' => 'independinte/downloadFile/' . $file,
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -473,8 +469,8 @@ class IndependienteController extends ApplicationController
                 'success' => true,
                 'data' => $out,
             ];
-        } catch (DebugException $e) {
-            $salida = ['success' => false, 'msj' => $e->getMessage()];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
         return response()->json($salida);
     }
@@ -488,8 +484,7 @@ class IndependienteController extends ApplicationController
 
     public function reloadArchivos(Request $request)
     {
-        $this->setResponse('ajax');
-        $this->independienteService = new IndependienteService;
+        $independienteService = new IndependienteService;
         try {
             $cedtra = $request->input('cedtra');
             $id = $request->input('id');
@@ -502,15 +497,12 @@ class IndependienteController extends ApplicationController
                 throw new DebugException('La empresa no está disponible para notificar por email', 501);
             } else {
                 $salida = [
-                    'documentos_adjuntos' => $this->independienteService->archivosRequeridos($mercurio41),
+                    'documentos_adjuntos' => $independienteService->archivosRequeridos($mercurio41),
                     'success' => true,
                 ];
             }
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
 
         return response()->json($salida);
@@ -640,11 +632,8 @@ class IndependienteController extends ApplicationController
                 'data' => $componentes,
                 'msj' => 'OK',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -674,11 +663,8 @@ class IndependienteController extends ApplicationController
                 'data' => $data,
                 'msj' => 'OK',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
 
         return response()->json($salida);
@@ -706,11 +692,8 @@ class IndependienteController extends ApplicationController
                 'data' => $service->dataArchivosRequeridos($sindepe),
                 'msj' => 'OK',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
         return response()->json($salida);
     }
@@ -759,11 +742,8 @@ class IndependienteController extends ApplicationController
                 'success' => true,
                 'msj' => 'Ok',
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -771,19 +751,18 @@ class IndependienteController extends ApplicationController
 
     public function administrar_cuenta($id = '')
     {
-        $this->setResponse('view');
         try {
             if ($id == '') {
                 throw new AuthException('El id del la solicitud no está disponible.', 501);
             }
 
-            $solicitud = (new Mercurio41)->findFirst("id='{$id}' and estado='A'");
-            $request = new Request(
+            $solicitud = Mercurio41::where("id", $id)->where("estado", 'A')->first();
+            $request = new Srequest(
                 [
                     'tipo' => 'I',
-                    'coddoc' => $solicitud->getTipdoc(),
-                    'documento' => $solicitud->getCedtra(),
-                    'usuario' => $solicitud->getPriape() . ' ' . $solicitud->getSegape() . ' ' . $solicitud->getPrinom() . ' ' . $solicitud->getSegnom(),
+                    'coddoc' => $solicitud->tipdoc,
+                    'documento' => $solicitud->cedtra,
+                    'usuario' => $solicitud->priape . ' ' . $solicitud->segape . ' ' . $solicitud->prinom . ' ' . $solicitud->segnom,
                 ]
             );
 
@@ -793,15 +772,16 @@ class IndependienteController extends ApplicationController
                     'msj' => 'La administración de la cuenta se ha inicializado con éxito.',
                     'code' => 200,
                 ]);
-                redirect('principal.index');
+
+                return redirect('principal.index');
             }
-        } catch (AuthException $e) {
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
             set_flashdata('error', [
-                'msj' => $e->getMessage(),
-                'code' => 505,
+                'msj' => $salida['msj'],
+                'code' => $salida['code'],
             ]);
-            redirect('empresa.index');
-            exit;
+            return redirect()->route('principal/index');
         }
     }
 }

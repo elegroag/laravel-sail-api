@@ -123,10 +123,11 @@ class LoginController extends ApplicationController
                 'success' => true,
                 'msj' => 'El proceso se completo con éxito. Se envío un correo a su cuenta con su nueva clave.',
             ];
-        } catch (DebugException $error) {
+        } catch (\Throwable $error) {
+            $salida = $this->handleException($error, request());
             $response = [
                 'success' => false,
-                'msj' => $error->getMessage() . ' ' . $error->getLine(),
+                'msj' => $salida['msj'],
             ];
         }
 
@@ -140,16 +141,12 @@ class LoginController extends ApplicationController
 
     public function validaEmail(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $email = trim(strtoupper($request->input('email')));
             $documento = trim($request->input('documento'));
             $nit = trim($request->input('nit'));
 
-            $l = (new Mercurio30)->getCount(
-                '*',
-                "conditions: UPPER(email)='{$email}' AND documento NOT IN('{$documento}','{$nit}')"
-            );
+            $l = Mercurio30::whereRaw("UPPER(email)='{$email}' AND documento NOT IN('{$documento}','{$nit}')")->count();
             if ($l > 0) {
                 throw new DebugException('Error, ya se encuentra un registro con el email ingresado: ' . mask_email($email), 501);
             }
@@ -157,14 +154,15 @@ class LoginController extends ApplicationController
                 'success' => true,
                 'msj' => 'El email está disponible para el registro',
             ];
-        } catch (DebugException $e) {
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
             $response = [
                 'success' => false,
-                'msj' => $e->getMessage(),
+                'msj' => $salida['msj'],
             ];
         }
 
-        return $this->renderObject($response);
+        return response()->json($response);
     }
 
     public function downloadDocuments(Request $request)
@@ -202,22 +200,29 @@ class LoginController extends ApplicationController
 
     public function integracionServicio()
     {
-        $this->setResponse('ajax');
-
-        return $this->renderObject(
-            [
-                'success' => true,
-                'data' => [
-                    'fuera_servicio' => env('APP_INTEGRATION', false),
-                    'msj' => (env('APP_INTEGRATION', false) == true) ? 'El servicio está suspendido temporalmente.' : 'La ventana de mantenimiento se ha completado con éxito. Muchas gracias por la espera.',
-                ],
-            ]
-        );
+        try {
+            return response()->json(
+                [
+                    'success' => true,
+                    'data' => [
+                        'fuera_servicio' => env('APP_INTEGRATION', false),
+                        'msj' => (env('APP_INTEGRATION', false) == true) ? 'El servicio está suspendido temporalmente.' : 'La ventana de mantenimiento se ha completado con éxito. Muchas gracias por la espera.',
+                    ],
+                ]
+            );
+        } catch (\Throwable $error) {
+            $salida = $this->handleException($error, request());
+            return response()->json(
+                [
+                    'success' => false,
+                    'msj' => $salida['msj'],
+                ]
+            );
+        }
     }
 
     public function paramsLogin(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $tipoDocumentos = [];
 
@@ -291,19 +296,19 @@ class LoginController extends ApplicationController
                 'components' => $components,
                 'msj' => 'Consulta de params OK',
             ];
-        } catch (DebugException $e) {
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
             $salida = [
                 'success' => false,
-                'msj' => $e->getMessage(),
+                'msj' => $salida['msj'],
             ];
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function verify(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $token = $request->input('token');
             $documento = $request->input('documento');
@@ -440,19 +445,19 @@ class LoginController extends ApplicationController
                     'msj' => $error,
                 ];
             }
-        } catch (DebugException $e) {
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
             $salida = [
                 'success' => false,
-                'msj' => $e->getMessage(),
+                'msj' => $salida['msj'],
             ];
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     public function tokenParticular(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $documento = sanetizar($request->input('documento'));
             $coddoc = sanetizar($request->input('coddoc'));
@@ -477,14 +482,15 @@ class LoginController extends ApplicationController
                 'success' => true,
                 'token' => $token,
             ];
-        } catch (DebugException $e) {
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
             $salida = [
                 'success' => false,
-                'msj' => $e->getMessage(),
+                'msj' => $salida['msj'],
             ];
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     public function cambioCorreo(Request $request)
@@ -559,10 +565,11 @@ class LoginController extends ApplicationController
                 'msj' => 'Se ha enviado la solicitud de cambio de correo, pronto se contactara con usted para confirmar el cambio. ' .
                     'Este proceso puede tardar ya que se requiere de la confirmación de la persona que solicita el cambio por seguridad de la informacion.',
             ];
-        } catch (DebugException $e) {
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
             $salida = [
                 'success' => false,
-                'msj' => $e->getMessage(),
+                'msj' => $salida['msj'],
             ];
         }
 

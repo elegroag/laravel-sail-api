@@ -9,7 +9,6 @@ use App\Models\Adapter\DbBase;
 use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
-use App\Models\Mercurio07;
 use App\Models\Mercurio10;
 use App\Models\Mercurio30;
 use App\Models\Mercurio31;
@@ -26,7 +25,6 @@ use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class TrabajadorController extends ApplicationController
 {
@@ -50,50 +48,59 @@ class TrabajadorController extends ApplicationController
      */
     public function index()
     {
-        if ($this->tipo !== 'E') {
-            return redirect()->route('mercurio.index');
+        try {
+            if ($this->tipo !== 'E') {
+                return redirect()->route('mercurio.index');
+            }
+            $input_nits = null;
+
+            $data = (new EmpresaService)->buscarEmpresaSubsidio($this->user['documento']);
+            if ($data) {
+                $mempresa = new Mercurio30();
+                $mempresa->fill($data);
+            } else {
+                $mempresa = Mercurio30::where('documento', $this->user['documento'])
+                    ->where('coddoc', $this->user['coddoc'])
+                    ->first();
+            }
+
+            $razsoc = $mempresa->razsoc;
+            $nits = [$mempresa->nit => $mempresa->nit];
+
+            $input_nits = Tag::selectStatic(
+                new Srequest([
+                    'name' => 'nit',
+                    'class' => 'form-control top',
+                    'id' => 'nit',
+                    'options' => $nits,
+                    'dummyText' => 'Seleccione un nit',
+                ])
+            );
+
+            $input_razsoc = Tag::textUpperField(
+                'name:razsoc',
+                'class:form-control',
+                'id:razsoc',
+                'readonly:1',
+                "value:{$razsoc}"
+            );
+
+            return view('mercurio/trabajador/index', [
+                'tipo' => $this->tipo,
+                'documento' => $this->user['documento'],
+                'coddoc' => $this->user['coddoc'],
+                'title' => 'Afiliación de trabajadores',
+                'input_nits' => $input_nits,
+                'input_razsoc' => $input_razsoc,
+            ]);
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, request());
+            set_flashdata('error', [
+                'msj' => $response['msj'],
+                'code' => $response['code'],
+            ]);
+            return redirect()->route('principal/index');
         }
-        $input_nits = null;
-
-        $data = (new EmpresaService)->buscarEmpresaSubsidio($this->user['documento']);
-        if ($data) {
-            $mempresa = new Mercurio30();
-            $mempresa->fill($data);
-        } else {
-            $mempresa = Mercurio30::where('documento', $this->user['documento'])
-                ->where('coddoc', $this->user['coddoc'])
-                ->first();
-        }
-
-        $razsoc = $mempresa->razsoc;
-        $nits = [$mempresa->nit => $mempresa->nit];
-
-        $input_nits = Tag::selectStatic(
-            new Srequest([
-                'name' => 'nit',
-                'class' => 'form-control top',
-                'id' => 'nit',
-                'options' => $nits,
-                'dummyText' => 'Seleccione un nit',
-            ])
-        );
-
-        $input_razsoc = Tag::textUpperField(
-            'name:razsoc',
-            'class:form-control',
-            'id:razsoc',
-            'readonly:1',
-            "value:{$razsoc}"
-        );
-
-        return view('mercurio/trabajador/index', [
-            'tipo' => $this->tipo,
-            'documento' => $this->user['documento'],
-            'coddoc' => $this->user['coddoc'],
-            'title' => 'Afiliación de trabajadores',
-            'input_nits' => $input_nits,
-            'input_razsoc' => $input_razsoc,
-        ]);
     }
 
     /**
@@ -124,13 +131,12 @@ class TrabajadorController extends ApplicationController
                 $response = ['success' => true, 'msj' => '', 'data' => $datos['data']['razsoc'] ?? null];
             }
 
-            return response()->json($response);
-        } catch (DebugException $e) {
-            return response()->json([
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ]);
+            $salida = $response;
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
+
+        return response()->json($salida);
     }
 
     /**
@@ -157,11 +163,8 @@ class TrabajadorController extends ApplicationController
                 'success' => true,
                 'msj' => 'El archivo se borro de forma correcta',
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -188,8 +191,8 @@ class TrabajadorController extends ApplicationController
                 'msj' => 'Ok archivo procesado',
                 'data' => method_exists($mercurio37, 'getArray') ? $mercurio37->getArray() : null,
             ];
-        } catch (\Exception $e) {
-            $response = ['success' => false, 'msj' => $e->getMessage()];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -200,45 +203,50 @@ class TrabajadorController extends ApplicationController
      */
     public function traerTrabajador(Request $request)
     {
-        $cedtra = $request->input('cedtra');
-        $nit = $request->input('nit');
+        try {
 
-        $datos_trabajador = [];
+            $cedtra = $request->input('cedtra');
+            $nit = $request->input('nit');
 
-        $ps = new ApiSubsidio();
-        $ps->send([
-            'servicio' => 'ComfacaEmpresas',
-            'metodo' => 'informacion_trabajador',
-            'params' => [
-                'cedtra' => $cedtra,
-            ],
-        ]);
+            $datos_trabajador = [];
 
-        $out = $ps->toArray();
-        if (($out['success'] ?? false) && isset($out['data'])) {
-            $datos_trabajador = $out['data'];
+            $ps = new ApiSubsidio();
+            $ps->send([
+                'servicio' => 'ComfacaEmpresas',
+                'metodo' => 'informacion_trabajador',
+                'params' => [
+                    'cedtra' => $cedtra,
+                ],
+            ]);
+
+            $out = $ps->toArray();
+            if (($out['success'] ?? false) && isset($out['data'])) {
+                $datos_trabajador = $out['data'];
+            }
+
+            $mercurio31 = new Mercurio31($datos_trabajador);
+            $mercurio31->setLog('0');
+
+            $response = [];
+            $response['multi'] = false;
+            if ($mercurio31->getNit() != $nit) {
+                $response['multi'] = true;
+            }
+
+            $response['flag'] = true;
+            if ($mercurio31->getNit() == $nit && $mercurio31->getEstado() == 'A') {
+                $response['flag'] = false;
+                $response['msg'] = 'El afiliado ya se encuentra registrado o Activo con la misma empresa.';
+            }
+
+            if ($mercurio31->getCedtra() == '') {
+                $mercurio31 = Mercurio31::where('cedtra', $cedtra)->first() ?: new Mercurio31;
+            }
+
+            $response['data'] = $mercurio31->toArray();
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
-
-        $mercurio31 = new Mercurio31($datos_trabajador);
-        $mercurio31->setLog('0');
-
-        $response = [];
-        $response['multi'] = false;
-        if ($mercurio31->getNit() != $nit) {
-            $response['multi'] = true;
-        }
-
-        $response['flag'] = true;
-        if ($mercurio31->getNit() == $nit && $mercurio31->getEstado() == 'A') {
-            $response['flag'] = false;
-            $response['msg'] = 'El afiliado ya se encuentra registrado o Activo con la misma empresa.';
-        }
-
-        if ($mercurio31->getCedtra() == '') {
-            $mercurio31 = Mercurio31::where('cedtra', $cedtra)->first() ?: new Mercurio31;
-        }
-
-        $response['data'] = $mercurio31->toArray();
 
         return response()->json($response);
     }
@@ -255,8 +263,8 @@ class TrabajadorController extends ApplicationController
             $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
             $trabajadorService->enviarCaja(new SenderValidationCaja, $id, $usuario); // TODO: importar/clase correcta si existe
             $salida = ['success' => true, 'msj' => 'El envio de la solicitud se ha completado con éxito'];
-        } catch (\Exception $e) {
-            $salida = ['success' => false, 'msj' => $e->getMessage()];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
 
         return response()->json($salida);
@@ -272,11 +280,8 @@ class TrabajadorController extends ApplicationController
                 'success' => true,
                 'data' => $out
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage()
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
 
         return response()->json($salida);
@@ -392,11 +397,8 @@ class TrabajadorController extends ApplicationController
                 'data' => $componentes,
                 'msj' => 'OK',
             ];
-        } catch (DebugException $err) {
-            $salida = [
-                'success' => false,
-                'msj' => $err->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
         return response()->json($salida);
     }
@@ -410,17 +412,22 @@ class TrabajadorController extends ApplicationController
      */
     public function renderTable($estado = '')
     {
-        $this->setResponse('view');
-        $trabajadorService = new TrabajadorService;
-        $html = view(
-            'mercurio/trabajador/tmp/solicitudes',
-            [
-                'path' => base_path(),
-                'trabajadores' => $trabajadorService->findAllByEstado($estado),
-            ]
-        )->render();
+        try {
+            $trabajadorService = new TrabajadorService;
+            $html = view(
+                'mercurio/trabajador/tmp/solicitudes',
+                [
+                    'path' => base_path(),
+                    'trabajadores' => $trabajadorService->findAllByEstado($estado),
+                ]
+            )->render();
 
-        return $this->renderText($html);
+            $this->setResponse('view');
+            return $this->renderText($html);
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
+            return response()->json($salida);
+        }
     }
 
     public function searchRequest($id)
@@ -448,11 +455,8 @@ class TrabajadorController extends ApplicationController
                 'data' => $data,
                 'msj' => 'OK',
             ];
-        } catch (DebugException $err) {
-            $salida = [
-                'success' => false,
-                'msj' => $err->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -594,11 +598,8 @@ class TrabajadorController extends ApplicationController
                 'data' => $traService->dataArchivosRequeridos($mtrabajador),
                 'msj' => 'OK',
             ];
-        } catch (DebugException $err) {
-            $salida = [
-                'success' => false,
-                'msj' => $err->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -631,11 +632,8 @@ class TrabajadorController extends ApplicationController
                 'success' => true,
                 'msj' => 'Registro eliminado con exito',
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -688,11 +686,8 @@ class TrabajadorController extends ApplicationController
                 'solicitud_previa' => ($solicitud_previa > 0) ? true : false,
                 'trabajador' => $trabajador,
             ];
-        } catch (DebugException $err) {
-            $response = [
-                'success' => false,
-                'msj' => $err->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -741,12 +736,9 @@ class TrabajadorController extends ApplicationController
                 'success' => true,
                 'data' => $subsi15,
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'flag' => false,
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
+            $salida['flag'] = false;
         }
 
         return response()->json($salida);

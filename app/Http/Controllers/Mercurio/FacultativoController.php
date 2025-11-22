@@ -14,8 +14,6 @@ use App\Models\Gener09;
 use App\Models\Gener18;
 use App\Models\Mercurio07;
 use App\Models\Mercurio10;
-use App\Models\Mercurio30;
-use App\Models\Mercurio31;
 use App\Models\Mercurio36;
 use App\Models\Mercurio37;
 use App\Models\Subsi54;
@@ -57,17 +55,27 @@ class FacultativoController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user') ?? null;
+        $this->tipo = session('tipo') ?? null;
     }
 
     public function index()
     {
-        return view('mercurio/facultativo/index', [
-            'title' => 'Afiliación Facultativos',
-            'tipo' => $this->tipo,
-            'documento' => $this->user['documento'],
-        ]);
+        try {
+            return view('mercurio/facultativo/index', [
+                'title' => 'Afiliación Facultativos',
+                'tipo' => $this->tipo,
+                'documento' => $this->user['documento'],
+            ]);
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
+            set_flashdata('error', [
+                'msj' => $salida['msj'],
+                'code' => $salida['code'],
+            ]);
+
+            return redirect()->route('principal/index');
+        }
     }
 
     public function actualizar(Request $request)
@@ -96,14 +104,11 @@ class FacultativoController extends ApplicationController
                 'msj' => 'Registro completado con éxito',
                 'data' => $data,
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     /**
@@ -221,7 +226,6 @@ class FacultativoController extends ApplicationController
      */
     public function valida(Request $request)
     {
-        $this->setResponse('ajax');
         try {
 
             $cedtra = $request->input('cedtra');
@@ -273,14 +277,11 @@ class FacultativoController extends ApplicationController
                 'empresa' => $empresa,
                 'trabajador' => $trabajador,
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => "No se pudo validar la información, {$e->getMessage()}",
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     /**
@@ -290,10 +291,9 @@ class FacultativoController extends ApplicationController
      */
     public function borrarArchivo(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $numero = $this->clp($request, 'id');
-            $coddoc = $this->clp($request, 'coddoc');
+            $numero = $request->input('id');
+            $coddoc = $request->input('coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
             $filepath = storage_path('temp/' . $mercurio37->getArchivo());
@@ -310,14 +310,11 @@ class FacultativoController extends ApplicationController
                 'success' => true,
                 'msj' => 'El archivo se borro de forma correcta',
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function guardarArchivo(Request $request)
@@ -336,11 +333,8 @@ class FacultativoController extends ApplicationController
                 'msj' => 'Ok archivo procesado',
                 'data' => $mercurio37->getArray(),
             ];
-        } catch (DebugException $ert) {
-            $response = [
-                'success' => false,
-                'msj' => $ert->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
         return response()->json($response);
     }
@@ -353,38 +347,29 @@ class FacultativoController extends ApplicationController
      */
     public function enviarCaja(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $id = $request->input('id');
             $facultativoService = new FacultativoService;
-            // $facultativoService->setTransa();
 
             $asignarFuncionario = new AsignarFuncionario;
             $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
 
             $facultativoService->enviarCaja(new SenderValidationCaja, $id, $usuario);
-            // $facultativoService->endTransa();
 
             $salida = [
                 'success' => true,
                 'msj' => 'El envio de la solicitud se ha completado con éxito',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     public function descargar_formulario($id)
     {
-        // /public/docs/formulario_mercurio/formulario_independiente.png
-        $this->setResponse('ajax');
-
-        $mercurio36 = (new Mercurio36)->findFirst("id='{$id}'");
+        $mercurio36 = Mercurio36::where('id', $id)->first();
 
         $procesadorComando = new ApiSubsidio();
         $procesadorComando->send(
@@ -408,7 +393,7 @@ class FacultativoController extends ApplicationController
             $file
         );
 
-        return $this->renderObject([
+        return response()->json([
             'success' => true,
             'name' => $file,
             'url' => 'facultitivo/downloadFile/' . $file,
@@ -417,31 +402,28 @@ class FacultativoController extends ApplicationController
 
     public function reloadArchivos(Request $request)
     {
-        $this->setResponse('ajax');
-
-        $this->facultativoService = new FacultativoService;
+        $facultativoService = new FacultativoService;
         try {
             $cedtra = $request->input('cedtra');
             $id = $request->input('id');
 
-            $mercurio36 = (new Mercurio36)->findFirst("cedtra='{$cedtra}' and id='{$id}'");
+            $mercurio36 = Mercurio36::where('cedtra', $cedtra)->where('id', $id)->first();
 
             if (! $mercurio36) {
                 throw new DebugException('La empresa no está disponible para notificar por email', 501);
             } else {
 
                 $salida = [
-                    'documentos_adjuntos' => $this->facultativoService->archivosRequeridos($mercurio36),
+                    'documentos_adjuntos' => $facultativoService->archivosRequeridos($mercurio36),
                     'success' => true,
                 ];
             }
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
+            $salida['documentos_adjuntos'] = [];
         }
-        $this->renderText(json_encode($salida, JSON_NUMERIC_CHECK));
+
+        return response()->json($salida);
     }
 
     /**
@@ -452,39 +434,33 @@ class FacultativoController extends ApplicationController
      */
     public function borrar(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $user = $this->user;
             $documento = $user['documento'];
             $coddoc = $user['coddoc'];
 
             $id = $request->input('id');
-            $m36 = (new Mercurio36)->findFirst("id='{$id}' AND documento='{$documento}' and coddoc='{$coddoc}'");
+            $m36 = Mercurio36::where('id', $id)->where('documento', $documento)->where('coddoc', $coddoc)->first();
             if ($m36) {
                 if ($m36->getEstado() != 'T') {
-                    (new Mercurio10)->deleteAll("numero='{$id}' AND tipopc='{$this->tipopc}'");
+                    Mercurio10::where('numero', $id)->where('tipopc', $this->tipopc)->delete();
                 }
-                (new Mercurio36)->deleteAll("id='{$id}'");
+                Mercurio36::where('id', $id)->delete();
             }
             $salida = [
                 'success' => true,
                 'msj' => 'El registro se borro con éxito del sistema.',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function downloadFile($archivo = '')
     {
-        $this->setResponse('view');
         $fichero = 'public/temp/' . $archivo;
-
         return $this->renderFile($fichero);
     }
 
@@ -634,11 +610,8 @@ class FacultativoController extends ApplicationController
                 'data' => $componentes,
                 'msj' => 'OK',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -646,15 +619,15 @@ class FacultativoController extends ApplicationController
 
     public function searchRequest($id)
     {
-        $this->setResponse('ajax');
+
         try {
             if (is_null($id)) {
                 throw new DebugException('Error no hay solicitud a buscar', 301);
             }
-            $documento = parent::getActUser('documento');
-            $coddoc = parent::getActUser('coddoc');
+            $documento = $this->user['documento'];
+            $coddoc = $this->user['coddoc'];
 
-            $solicitud = (new Mercurio36)->findFirst(" id='{$id}' AND documento='{$documento}' AND coddoc='{$coddoc}'");
+            $solicitud = Mercurio36::where('id', $id)->where('documento', $documento)->where('coddoc', $coddoc)->first();
             if ($solicitud == false) {
                 throw new DebugException('Error la solicitud no está disponible para acceder.', 301);
             } else {
@@ -665,25 +638,21 @@ class FacultativoController extends ApplicationController
                 'data' => $data,
                 'msj' => 'OK',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function consultaDocumentos($id)
     {
-        $this->setResponse('ajax');
         try {
-            $documento = parent::getActUser('documento');
-            $coddoc = parent::getActUser('coddoc');
+            $documento = $this->user['documento'];
+            $coddoc = $this->user['coddoc'];
             $facultativoService = new FacultativoService;
 
-            $sindepe = (new Mercurio36)->findFirst("id='{$id}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado NOT IN('I','X')");
+            $sindepe = Mercurio36::where('id', $id)->where('documento', $documento)->where('coddoc', $coddoc)->first();
             if ($sindepe == false) {
                 throw new DebugException('Error no se puede identificar el propietario de la solicitud', 301);
             }
@@ -692,29 +661,33 @@ class FacultativoController extends ApplicationController
                 'data' => $facultativoService->dataArchivosRequeridos($sindepe),
                 'msj' => 'OK',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function renderTable($estado = '')
     {
-        $this->setResponse('view');
-        $this->facultativoService = new FacultativoService;
-        $html = view(
-            'mercurio/facultativo/tmp/solicitudes',
-            [
-                'path' => base_path(),
-                'facultativos' => $this->facultativoService->findAllByEstado($estado),
-            ]
-        )->render();
+        try {
 
-        return $this->renderText($html);
+            $this->facultativoService = new FacultativoService;
+            $html = view(
+                'mercurio/facultativo/tmp/solicitudes',
+                [
+                    'path' => base_path(),
+                    'facultativos' => $this->facultativoService->findAllByEstado($estado),
+                ]
+            )->render();
+
+            $this->setResponse('view');
+            return $this->renderText($html);
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
+
+            return response()->json($salida);
+        }
     }
 
     public function seguimiento(Request $request)
@@ -726,28 +699,26 @@ class FacultativoController extends ApplicationController
                 'success' => true,
                 'data' => $out,
             ];
-        } catch (DebugException $e) {
-            $salida = ['success' => false, 'msj' => $e->getMessage()];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
-
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function administrar_cuenta($id = '')
     {
-        $this->setResponse('view');
         try {
             if ($id == '') {
                 throw new AuthException('El id del la solicitud no está disponible.', 501);
             }
 
-            $solicitud = (new Mercurio36)->findFirst("id='{$id}' and estado='A'");
+            $solicitud = Mercurio36::where('id', $id)->where('estado', 'A')->first();
             $request = new Request(
                 [
                     'tipo' => 'F',
-                    'coddoc' => $solicitud->getTipdoc(),
-                    'documento' => $solicitud->getCedtra(),
-                    'usuario' => $solicitud->getPriape() . ' ' . $solicitud->getSegape() . ' ' . $solicitud->getPrinom() . ' ' . $solicitud->getSegnom(),
+                    'coddoc' => $solicitud->tipdoc,
+                    'documento' => $solicitud->cedtra,
+                    'usuario' => $solicitud->priape . ' ' . $solicitud->segape . ' ' . $solicitud->prinom . ' ' . $solicitud->segnom,
                 ]
             );
 
@@ -760,13 +731,14 @@ class FacultativoController extends ApplicationController
 
                 return redirect('principal.index');
             }
-        } catch (AuthException $e) {
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
             set_flashdata('error', [
-                'msj' => $e->getMessage(),
-                'code' => 505,
+                'msj' => $salida['msj'],
+                'code' => $salida['code'],
             ]);
 
-            return redirect('empresa.index');
+            return redirect()->route('principal/index');
         }
     }
 }

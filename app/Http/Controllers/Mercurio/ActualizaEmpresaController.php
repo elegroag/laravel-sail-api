@@ -10,13 +10,13 @@ use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
 use App\Models\Mercurio01;
-use App\Models\Mercurio07;
+
 use App\Models\Mercurio10;
 use App\Models\Mercurio12;
 use App\Models\Mercurio14;
 use App\Models\Mercurio28;
 use App\Models\Mercurio30;
-use App\Models\Mercurio31;
+
 use App\Models\Mercurio33;
 use App\Models\Mercurio37;
 use App\Models\Mercurio47;
@@ -25,7 +25,7 @@ use App\Services\Entidades\ActualizaEmpresaService;
 use App\Services\FormulariosAdjuntos\DatosEmpresaService;
 use App\Services\FormulariosAdjuntos\Formularios;
 use App\Services\Utils\AsignarFuncionario;
-use App\Services\Utils\Comman;
+
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\Logger;
 use App\Services\Utils\SenderValidationCaja;
@@ -51,13 +51,23 @@ class ActualizaEmpresaController extends ApplicationController
 
     public function index()
     {
-        return view('mercurio.actualizadatos.index', [
-            'title' => 'Solicitud de actualización de datos',
-            'documento' => $this->user['documento'],
-            'coddoc' => $this->user['coddoc'],
-            'codciu' => $this->user['codciu'],
-            'tipo' => $this->tipo,
-        ]);
+        try {
+            return view('mercurio.actualizadatos.index', [
+                'title' => 'Solicitud de actualización de datos',
+                'documento' => $this->user['documento'],
+                'coddoc' => $this->user['coddoc'],
+                'codciu' => $this->user['codciu'],
+                'tipo' => $this->tipo,
+            ]);
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
+            set_flashdata('error', [
+                'msj' => $salida['msj'],
+                'code' => $salida['code'],
+            ]);
+
+            return redirect()->route('principal/index');
+        }
     }
 
     public function guardar(Request $request)
@@ -297,14 +307,11 @@ class ActualizaEmpresaController extends ApplicationController
                 'data' => $componentes,
                 'msj' => 'OK',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function borrar(Request $request)
@@ -323,14 +330,11 @@ class ActualizaEmpresaController extends ApplicationController
                 'success' => true,
                 'msj' => 'El registro se borro con éxito del sistema.',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     public function archivos_requeridos($mercurio47)
@@ -400,14 +404,11 @@ class ActualizaEmpresaController extends ApplicationController
                 'success' => true,
                 'msj' => 'El archivo se borro de forma correcta',
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function guardarArchivo(Request $request)
@@ -427,14 +428,11 @@ class ActualizaEmpresaController extends ApplicationController
                 'msj' => 'Ok archivo procesado',
                 'data' => $mercurio37->getArray(),
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function enviarCaja(Request $request)
@@ -452,14 +450,11 @@ class ActualizaEmpresaController extends ApplicationController
                 'success' => true,
                 'msj' => 'El envio de la solicitud se ha completado con éxito',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     public function formulario($id)
@@ -500,17 +495,22 @@ class ActualizaEmpresaController extends ApplicationController
 
     public function renderTable($estado = '')
     {
-        $this->setResponse('view');
-        $actualizaEmpresaService = new ActualizaEmpresaService;
-        $html = view(
-            'mercurio/actualizadatos/tmp/solicitudes',
-            [
-                'path' => base_path(),
-                'solicitudes' => $actualizaEmpresaService->findAllByEstado($estado),
-            ]
-        )->render();
+        try {
+            $actualizaEmpresaService = new ActualizaEmpresaService;
+            $html = view(
+                'mercurio/actualizadatos/tmp/solicitudes',
+                [
+                    'path' => base_path(),
+                    'solicitudes' => $actualizaEmpresaService->findAllByEstado($estado),
+                ]
+            )->render();
 
-        return $this->renderText($html);
+            $this->setResponse('view');
+            return $this->renderText($html);
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
+            return response()->json($salida);
+        }
     }
 
     public function sucursales()
@@ -536,11 +536,11 @@ class ActualizaEmpresaController extends ApplicationController
                 'msj' => 'Proceso completado con éxito',
                 'data' => $list_sucursales,
             ];
-        } catch (DebugException $e) {
-            $salida = ['success' => false, 'msj' => $e->getMessage()];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function searchRequest($id)
@@ -568,14 +568,11 @@ class ActualizaEmpresaController extends ApplicationController
                 'data' => $solicitud,
                 'msj' => 'OK',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function empresaSisu()
@@ -588,14 +585,11 @@ class ActualizaEmpresaController extends ApplicationController
                 'data' => ($empresa_sisu && count($empresa_sisu) > 0) ? $empresa_sisu : false,
                 'msj' => 'OK',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function consultaDocumentos($id)
@@ -617,14 +611,11 @@ class ActualizaEmpresaController extends ApplicationController
                 'data' => $empresaService->dataArchivosRequeridos($sindepe),
                 'msj' => 'OK',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function seguimiento(Request $request)
@@ -636,8 +627,8 @@ class ActualizaEmpresaController extends ApplicationController
                 'success' => true,
                 'data' => $out,
             ];
-        } catch (DebugException $e) {
-            $salida = ['success' => false, 'msj' => $e->getMessage()];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
         return response()->json($salida);
     }

@@ -52,94 +52,107 @@ class BeneficiarioController extends ApplicationController
 
     public function index()
     {
-        $empresa = null;
-        $documento = $this->user['documento'];
+        try {
+            $empresa = null;
+            $documento = $this->user['documento'];
 
-        if (
-            $this->tipo == 'E' ||
-            $this->tipo == 'I' ||
-            $this->tipo == 'O' ||
-            $this->tipo == 'F'
-        ) {
-            $procesadorComando = new ApiSubsidio();
-            $procesadorComando->send(
-                [
-                    'servicio' => 'ComfacaEmpresas',
-                    'metodo' => 'informacion_empresa',
-                    'params' => ['nit' => $documento],
-                ]
-            );
+            if (
+                $this->tipo == 'E' ||
+                $this->tipo == 'I' ||
+                $this->tipo == 'O' ||
+                $this->tipo == 'F'
+            ) {
+                $procesadorComando = new ApiSubsidio();
+                $procesadorComando->send(
+                    [
+                        'servicio' => 'ComfacaEmpresas',
+                        'metodo' => 'informacion_empresa',
+                        'params' => ['nit' => $documento],
+                    ]
+                );
 
-            $empresa = $procesadorComando->toArray();
-            if (! isset($empresa['data'])) {
-                set_flashdata('error', [
-                    'msj' => 'Error al acceder al servicio de consulta de empresa.',
-                    'code' => 401,
-                ]);
+                $empresa = $procesadorComando->toArray();
+                if (! isset($empresa['data'])) {
+                    set_flashdata('error', [
+                        'msj' => 'Error al acceder al servicio de consulta de empresa.',
+                        'code' => 401,
+                    ]);
 
-                return redirect('principal/index');
+                    return redirect('principal/index');
+                }
+
+                if ($empresa['data']['estado'] === 'I') {
+                    set_flashdata('error', [
+                        'msj' => 'La empresa ya no está activa para realizar afiliación de beneficiarios.',
+                        'code' => 401,
+                    ]);
+
+                    return redirect('principal/index');
+                }
             }
 
-            if ($empresa['data']['estado'] === 'I') {
-                set_flashdata('error', [
-                    'msj' => 'La empresa ya no está activa para realizar afiliación de beneficiarios.',
-                    'code' => 401,
-                ]);
+            return view('mercurio/beneficiario/index', [
+                'tipo' => $this->tipo,
+                'documento' => $documento,
+                'title' => 'Afiliación de beneficiarios',
+                'empresa' => $empresa,
+            ]);
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
+            set_flashdata('error', [
+                'msj' => $salida['msj'],
+                'code' => $salida['code'],
+            ]);
 
-                return redirect('principal/index');
-            }
+            return redirect()->route('principal/index');
         }
-
-        return view('mercurio/beneficiario/index', [
-            'tipo' => $this->tipo,
-            'documento' => $documento,
-            'title' => 'Afiliación de beneficiarios',
-            'empresa' => $empresa,
-        ]);
     }
 
     public function traerConyuges(Request $request)
     {
-        $cedtra = $request->input('cedtra');
+        try {
+            $cedtra = $request->input('cedtra');
 
-        $cedcons = Mercurio32::where('cedtra', $cedtra)
-            ->get(['cedcon', 'priape', 'segape', 'prinom'])
-            ->pluck('cedcon', 'priape', 'segape', 'prinom')
-            ->map(function ($conyuge) {
-                return $conyuge->cedcon . '-' . $conyuge->priape . ' ' . $conyuge->segape . ' ' . $conyuge->prinom;
-            })
-            ->toArray();
+            $cedcons = Mercurio32::where('cedtra', $cedtra)
+                ->get(['cedcon', 'priape', 'segape', 'prinom'])
+                ->pluck('cedcon', 'priape', 'segape', 'prinom')
+                ->map(function ($conyuge) {
+                    return $conyuge->cedcon . '-' . $conyuge->priape . ' ' . $conyuge->segape . ' ' . $conyuge->prinom;
+                })
+                ->toArray();
 
-        $ps = new ApiSubsidio();
-        $ps->send(
-            [
-                'servicio' => 'ComfacaAfilia',
-                'metodo' => 'listar_conyuges_trabajador',
-                'params' => [
-                    'cedtra' => $cedtra,
-                ],
-            ]
-        );
+            $ps = new ApiSubsidio();
+            $ps->send(
+                [
+                    'servicio' => 'ComfacaAfilia',
+                    'metodo' => 'listar_conyuges_trabajador',
+                    'params' => [
+                        'cedtra' => $cedtra,
+                    ],
+                ]
+            );
 
-        $subsi20 = $ps->toArray();
-        if ($subsi20['success'] == true) {
-            $subsi20 = $subsi20['data'];
-            if (count($subsi20) > 0) {
-                foreach ($subsi20 as $msubsi20) {
-                    $cedcons[$msubsi20['cedcon']] = $msubsi20['cedcon'] . '-' . $msubsi20['priape'] . ' ' . $msubsi20['prinom'];
+            $subsi20 = $ps->toArray();
+            if ($subsi20['success'] == true) {
+                $subsi20 = $subsi20['data'];
+                if (count($subsi20) > 0) {
+                    foreach ($subsi20 as $msubsi20) {
+                        $cedcons[$msubsi20['cedcon']] = $msubsi20['cedcon'] . '-' . $msubsi20['priape'] . ' ' . $msubsi20['prinom'];
+                    }
                 }
             }
+
+            $response = Tag::selectStatic(
+                new Srequest([
+                    'cedcon' => $cedcons,
+                    'use_dummy' => true,
+                    'dummyValue' => '',
+                    'class' => 'form-control'
+                ])
+            );
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, request());
         }
-
-        $response = Tag::selectStatic(
-            new Srequest([
-                'cedcon' => $cedcons,
-                'use_dummy' => true,
-                'dummyValue' => '',
-                'class' => 'form-control'
-            ])
-        );
-
         return response()->json($response);
     }
 
@@ -164,12 +177,8 @@ class BeneficiarioController extends ApplicationController
                 'success' => true,
                 'msj' => 'El archivo se borro de forma correcta',
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-                'errors' => $e->render($request)
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -177,6 +186,7 @@ class BeneficiarioController extends ApplicationController
 
     public function enviarCaja(Request $request)
     {
+        $this->db->begin();
         try {
             $id = $request->input('id');
             $beneficiarioService = new BeneficiarioService;
@@ -187,12 +197,10 @@ class BeneficiarioController extends ApplicationController
                 'success' => true,
                 'msj' => 'El envio de la solicitud se ha completado con éxito',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-                'errors' => $e->render($request)
-            ];
+            $this->db->commit();
+        } catch (\Throwable $e) {
+            $this->db->rollBack();
+            $salida = $this->handleException($e, $request);
         }
 
         return response()->json($salida);
@@ -200,27 +208,35 @@ class BeneficiarioController extends ApplicationController
 
     public function traerBeneficiario(Request $request)
     {
-        $numdoc = $request->input('numdoc');
+        try {
+            $numdoc = $request->input('numdoc');
 
-        $datos_beneficiario = [];
+            $datos_beneficiario = [];
 
-        $ps = new ApiSubsidio();
-        $ps->send(
-            [
-                'servicio' => 'ComfacaAfilia',
-                'metodo' => 'beneficiario',
-                'params' => [
-                    'documento' => $numdoc,
-                ],
-            ]
-        );
-        $out = $ps->toArray();
-        if ($out['success'] == true) {
-            $datos_beneficiario = $out['data'];
+            $ps = new ApiSubsidio();
+            $ps->send(
+                [
+                    'servicio' => 'ComfacaAfilia',
+                    'metodo' => 'beneficiario',
+                    'params' => [
+                        'documento' => $numdoc,
+                    ],
+                ]
+            );
+            $out = $ps->toArray();
+            if ($out['success'] == true) {
+                $datos_beneficiario = $out['data'];
+            }
+            $mercurio34 = new Mercurio34($datos_beneficiario);
+            $salida = [
+                'success' => true,
+                'data' => $mercurio34->toArray(),
+            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
-        $mercurio34 = new Mercurio34($datos_beneficiario);
 
-        return response()->json($mercurio34->toArray());
+        return response()->json($salida);
     }
 
     public function borrar(Request $request)
@@ -232,19 +248,14 @@ class BeneficiarioController extends ApplicationController
                 'success' => true,
                 'msj' => 'Borrado Con Exito',
             ];
-            return response()->json($response);
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-                'errors' => $e->render($request)
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
         return response()->json($response);
     }
 
-    public function buscarBeneficiarios($estado)
+    function buscarBeneficiarios($estado)
     {
         $documento = $this->user['documento'];
         $tipo = $this->user['tipo'];
@@ -326,11 +337,8 @@ class BeneficiarioController extends ApplicationController
                 'success' => true,
                 'msj' => 'El registro se borro con éxito del sistema.',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
 
         return $this->renderObject($salida);
@@ -419,18 +427,15 @@ class BeneficiarioController extends ApplicationController
                 'list' => $html,
 
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'list' => '',
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
+            $salida['list'] = '';
         }
 
         return response()->json($salida);
     }
 
-    public function mapper()
+    function mapper()
     {
         return [
             'cedtra' => 'cedula',
@@ -692,12 +697,8 @@ class BeneficiarioController extends ApplicationController
                 'data' => $componentes,
                 'msj' => 'OK',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage() . ' ' . $e->getLine() . ' ' . basename($e->getFile()),
-                'error' => $e->render($request),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
 
         return response()->json($salida);
@@ -705,22 +706,26 @@ class BeneficiarioController extends ApplicationController
 
     public function renderTable($estado = '')
     {
-        $this->setResponse('view');
-        $benService = new BeneficiarioService;
-        $html = view(
-            'mercurio/beneficiario/tmp/solicitudes',
-            [
-                'path' => base_path(),
-                'beneficiarios' => $benService->findAllByEstado($estado),
-            ]
-        )->render();
+        try {
 
-        return $this->renderText($html);
+            $benService = new BeneficiarioService;
+            $html = view(
+                'mercurio/beneficiario/tmp/solicitudes',
+                [
+                    'path' => base_path(),
+                    'beneficiarios' => $benService->findAllByEstado($estado),
+                ]
+            )->render();
+            $this->setResponse('view');
+            return $this->renderText($html);
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
+            return response()->json($salida);
+        }
     }
 
     public function searchRequest($id)
     {
-        $this->setResponse('ajax');
         try {
             if (is_null($id)) {
                 throw new DebugException('Error no hay solicitud a buscar', 301);
@@ -743,11 +748,8 @@ class BeneficiarioController extends ApplicationController
                 'data' => $data,
                 'msj' => 'OK',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -780,11 +782,8 @@ class BeneficiarioController extends ApplicationController
                 'solicitud_previa' => ($solicitud_previa > 0) ? true : false,
                 'beneficiario' => $beneficiario,
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -905,11 +904,8 @@ class BeneficiarioController extends ApplicationController
                 'data' => $benService->dataArchivosRequeridos($sindepe),
                 'msj' => 'OK',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -1096,11 +1092,11 @@ class BeneficiarioController extends ApplicationController
                 ],
                 $file
             )->outFile();
-        } catch (DebugException $e) {
-
-            $msj = $e->getMessage() . ' linea: ' . $e->getLine();
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, request());
             set_flashdata('error', [
-                'msj' => $msj,
+                'msj' => $response['msj'],
+                'code' => $response['code'],
             ]);
 
             return redirect('beneficiario.index');
@@ -1125,11 +1121,8 @@ class BeneficiarioController extends ApplicationController
                 'msj' => 'Ok archivo procesado',
                 'data' => $mercurio37->toArray(),
             ];
-        } catch (DebugException $ert) {
-            $response = [
-                'success' => false,
-                'msj' => $ert->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -1145,8 +1138,8 @@ class BeneficiarioController extends ApplicationController
                 'success' => true,
                 'data' => $out,
             ];
-        } catch (DebugException $e) {
-            $salida = ['success' => false, 'msj' => $e->getMessage()];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
 
         return response()->json($salida);

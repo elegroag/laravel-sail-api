@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers\Mercurio;
 
-use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio02;
 use App\Models\Mercurio07;
-use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Logger;
 use App\Services\Utils\SenderEmail;
@@ -26,8 +24,8 @@ class MovimientosController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user') ?? null;
+        $this->tipo = session('tipo') ?? null;
     }
 
     public function index()
@@ -63,29 +61,30 @@ class MovimientosController extends ApplicationController
 
     public function cambioEmail(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $email = $request->input('email');
-            $user = Mercurio07::where('tipo', $this->tipo)
+
+            Mercurio07::where('tipo', $this->tipo)
                 ->where('documento', $this->user['documento'])
                 ->update(['email' => $email]);
 
             $asunto = 'Cambio de Email';
             $msj = 'acabas de utilizar nuestro servicio de cambio de email de aviso. Te informamos que fue exitoso';
             $generalService = new GeneralService;
-            $generalService->sendEmail($user['email'], $user['nombre'], $asunto, $msj, '');
-
-            $response = 'Cambio de Email de Aviso con Exito';
+            $generalService->sendEmail($email, $this->user['nombre'] ?? '', $asunto, $msj, '');
 
             $logger = new Logger;
             $logger->registrarLog(false, 'Cambio de Email', '');
 
-            return $this->renderText(json_encode($response));
-        } catch (DebugException $e) {
-            $response = 'No se pudo realizar la accion';
+            $response = [
+                'success' => true,
+                'msj' => 'Cambio de Email de Aviso con Exito',
+            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($response);
+        return response()->json($response);
     }
 
     public function cambioClaveView()
@@ -97,7 +96,6 @@ class MovimientosController extends ApplicationController
 
     public function cambioClave(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $claant = $request->input('claant');
             $clave = $request->input('clave');
@@ -112,23 +110,23 @@ class MovimientosController extends ApplicationController
                 ->where('coddoc', $coddoc)
                 ->first();
 
-            $claant = password_hash_old($claant);
-            $claant = md5('' . $claant);
+            $claantHash = clave_hash($claant);
 
-            if ($claant != $mercurio07->getClave()) {
-                $response = 'La clave no coincide con la actual';
-
-                return $this->renderText(json_encode($response));
+            if (! $mercurio07 || $claantHash != $mercurio07->getClave()) {
+                return response()->json([
+                    'success' => false,
+                    'msj' => 'La clave no coincide con la actual',
+                ]);
             }
 
             if ($clave != $clacon) {
-                $response = 'Las claves no coinciden';
-
-                return $this->renderText(json_encode($response));
+                return response()->json([
+                    'success' => false,
+                    'msj' => 'Las claves no coinciden',
+                ]);
             }
 
-            $mclave = password_hash_old($clave);
-            $mclave = md5('' . $mclave);
+            $mclave = clave_hash($clave);
 
             Mercurio07::where('tipo', $tipo)
                 ->where('documento', $documento)
@@ -187,11 +185,14 @@ class MovimientosController extends ApplicationController
             $logger = new Logger;
             $logger->registrarLog(false, 'Cambio de Clave', '');
 
-            $response = 'Cambio de clave se ha realizado con éxito.';
-        } catch (DebugException $e) {
-            $response = 'No se pudo realizar la accion';
+            $response = [
+                'success' => true,
+                'msj' => 'Cambio de clave se ha realizado con éxito.',
+            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($response);
+        return response()->json($response);
     }
 }

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Mercurio;
 
-use App\Exceptions\AuthException;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsPensionado;
@@ -74,13 +73,23 @@ class PensionadoController extends ApplicationController
      */
     public function index()
     {
-        return view('mercurio.pensionado.index', [
-            'title' => 'Afiliación Pensionados',
-            'calemp' => 'P',
-            'tipper' => 'N',
-            'cedtra' => $this->user['documento'],
-            'coddoc' => $this->user['coddoc'],
-        ]);
+        try {
+            return view('mercurio.pensionado.index', [
+                'title' => 'Afiliación Pensionados',
+                'calemp' => 'P',
+                'tipper' => 'N',
+                'cedtra' => $this->user['documento'],
+                'coddoc' => $this->user['coddoc'],
+            ]);
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
+            set_flashdata('error', [
+                'msj' => $salida['msj'],
+                'code' => $salida['code'],
+            ]);
+
+            return redirect()->route('principal/index');
+        }
     }
 
     /**
@@ -111,14 +120,11 @@ class PensionadoController extends ApplicationController
                 'msj' => 'Registro actualizado con éxito',
                 'data' => $data,
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     /**
@@ -269,14 +275,11 @@ class PensionadoController extends ApplicationController
                 'empresa' => $empresa,
                 'trabajador' => $trabajador,
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => 'No se pudo validar la información: ' . $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     /**
@@ -287,8 +290,8 @@ class PensionadoController extends ApplicationController
     public function borrarArchivo(Request $request)
     {
         try {
-            $numero = $this->clp($request, 'id');
-            $coddoc = $this->clp($request, 'coddoc');
+            $numero = $request->input('id');
+            $coddoc = $request->input('coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
             $filepath = storage_path('temp/' . $mercurio37->getArchivo());
@@ -305,14 +308,11 @@ class PensionadoController extends ApplicationController
                 'success' => true,
                 'msj' => 'El archivo se borro de forma correcta',
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     /**
@@ -322,8 +322,6 @@ class PensionadoController extends ApplicationController
      */
     public function guardarArchivo(Request $request)
     {
-        $this->setResponse('ajax');
-
         try {
             $id = $request->input('id');
             $coddoc = $request->input('coddoc');
@@ -346,11 +344,8 @@ class PensionadoController extends ApplicationController
                 'msj' => 'Archivo procesado correctamente',
                 'data' => $mercurio37->getArray(),
             ];
-        } catch (\Exception $e) {
-            $response = [
-                'success' => false,
-                'msj' => 'Error al procesar el archivo: ' . $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -381,24 +376,14 @@ class PensionadoController extends ApplicationController
                 'success' => true,
                 'msj' => 'El envío de la solicitud se ha completado con éxito',
             ];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->db->rollBack();
-            $response = [
-                'success' => false,
-                'msj' => 'Error al enviar a caja: ' . $e->getMessage(),
-            ];
+            $response = $this->handleException($e, $request);
         }
 
         return response()->json($response);
     }
 
-    /**
-     * Obtiene el usuario actual
-     *
-     * @return mixed
-     *
-     * @throws \Exception
-     */
     /**
      * Obtiene el usuario actual
      *
@@ -422,31 +407,27 @@ class PensionadoController extends ApplicationController
 
     public function reloadArchivos(Request $request)
     {
-        $this->setResponse('ajax');
-        $this->pensionadoService = new PensionadoService;
+        $pensionadoService = new PensionadoService;
         try {
             $cedtra = $request->input('cedtra');
             $id = $request->input('id');
 
-            $mercurio38 = (new Mercurio38)->findFirst("cedtra='{$cedtra}' and id='{$id}'");
+            $mercurio38 = Mercurio38::where("cedtra", $cedtra)->where("id", $id)->first();
 
             if (! $mercurio38) {
                 throw new DebugException('La solicitud no está disponible actualizar el documento adjunto', 501);
             } else {
 
                 $salida = [
-                    'documentos_adjuntos' => $this->pensionadoService->archivosRequeridos($mercurio38),
+                    'documentos_adjuntos' => $pensionadoService->archivosRequeridos($mercurio38),
                     'success' => true,
                 ];
             }
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     /**
@@ -456,39 +437,33 @@ class PensionadoController extends ApplicationController
      */
     public function cancelarSolicitud(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $user = $this->user;
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
 
             $id = $request->input('id');
 
-            $m41 = (new Mercurio38)->findFirst("id='{$id}' AND documento='{$documento}' and coddoc='{$coddoc}'");
+            $m41 = Mercurio38::where("id", $id)->where("documento", $documento)->where("coddoc", $coddoc)->first();
             if ($m41) {
                 if ($m41->getEstado() != 'T') {
-                    (new Mercurio10)->deleteAll("numero='{$id}' AND tipopc='{$this->tipopc}'");
+                    Mercurio10::where("numero", $id)->where("tipopc", $this->tipopc)->delete();
                 }
-                (new Mercurio38)->deleteAll("id='{$id}'");
+                Mercurio38::where("id", $id)->delete();
             }
             $salida = [
                 'success' => true,
                 'msj' => 'El registro se borro con éxito del sistema.',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
-        $this->renderObject(json_encode($salida, JSON_NUMERIC_CHECK));
+        return response()->json($salida);
     }
 
     public function downloadFile($archivo = '')
     {
         $this->setResponse('view');
         $fichero = 'public/temp/' . $archivo;
-
         return $this->renderFile($fichero);
     }
 
@@ -616,11 +591,8 @@ class PensionadoController extends ApplicationController
                 'data' => $componentes,
                 'msj' => 'OK',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -632,39 +604,35 @@ class PensionadoController extends ApplicationController
             if (is_null($id)) {
                 throw new DebugException('Error no hay solicitud a buscar', 301);
             }
-            $documento = parent::getActUser('documento');
-            $coddoc = parent::getActUser('coddoc');
+            $documento = $this->user['documento'];
+            $coddoc = $this->user['coddoc'];
 
-            $solicitud = (new Mercurio38)->findFirst(" id='{$id}' AND documento='{$documento}' AND coddoc='{$coddoc}'");
+            $solicitud = Mercurio38::where("id", $id)->where("documento", $documento)->where("coddoc", $coddoc)->first();
             if ($solicitud == false) {
                 throw new DebugException('Error la solicitud no está disponible para acceder.', 301);
             } else {
-                $data = $solicitud->getArray();
+                $data = $solicitud->toArray();
             }
             $salida = [
                 'success' => true,
                 'data' => $data,
                 'msj' => 'OK',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function consultaDocumentos($id)
     {
-        $this->setResponse('ajax');
         try {
-            $documento = parent::getActUser('documento');
-            $coddoc = parent::getActUser('coddoc');
+            $documento = $this->user['documento'];
+            $coddoc = $this->user['coddoc'];
             $pensionadoService = new PensionadoService;
 
-            $sindepe = (new Mercurio38)->findFirst("id='{$id}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado NOT IN('I','X')");
+            $sindepe = Mercurio38::where("id", $id)->where("documento", $documento)->where("coddoc", $coddoc)->where("estado", "NOT IN('I','X')")->first();
             if ($sindepe == false) {
                 throw new DebugException('Error no se puede identificar el propietario de la solicitud', 301);
             }
@@ -673,14 +641,11 @@ class PensionadoController extends ApplicationController
                 'data' => $pensionadoService->dataArchivosRequeridos($sindepe),
                 'msj' => 'OK',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function borrar(Request $request)
@@ -690,45 +655,48 @@ class PensionadoController extends ApplicationController
         $generales->startTrans('mercurio41');
         try {
 
-            $documento = parent::getActUser('documento');
-            $coddoc = parent::getActUser('coddoc');
+            $documento = $this->user['documento'];
+            $coddoc = $this->user['coddoc'];
 
             $id = $request->input('id');
-            $solicitud = (new Mercurio38)->findFirst("id='{$id}' and documento='{$documento}' and coddoc='{$coddoc}'");
+            $solicitud = Mercurio38::where("id", $id)->where("documento", $documento)->where("coddoc", $coddoc)->first();
             if ($solicitud) {
-                if ($solicitud->getEstado() != 'T') {
-                    (new Mercurio10)->deleteAll("numero='{$id}' AND tipopc='{$this->tipopc}'");
+                if ($solicitud->estado != 'T') {
+                    Mercurio10::where("numero", $id)->where("tipopc", $this->tipopc)->delete();
                 }
             }
-            (new Mercurio38)->deleteAll("id='{$id}' and documento='{$documento}' and coddoc='{$coddoc}'");
+            Mercurio38::where("id", $id)->where("documento", $documento)->where("coddoc", $coddoc)->delete();
             $generales->finishTrans();
             $response = [
                 'success' => true,
                 'msj' => 'Ok',
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function renderTable(Request $request, Response $response, string $estado = '')
     {
-        $this->setResponse('view');
-        $pensionadoService = new PensionadoService;
-        $html = view(
-            'mercurio/pensionado/tmp/solicitudes',
-            [
-                'path' => base_path(),
-                'pensionados' => $pensionadoService->findAllByEstado($estado),
-            ]
-        )->render();
+        try {
 
-        return $this->renderText($html);
+            $pensionadoService = new PensionadoService;
+            $html = view(
+                'mercurio/pensionado/tmp/solicitudes',
+                [
+                    'path' => base_path(),
+                    'pensionados' => $pensionadoService->findAllByEstado($estado),
+                ]
+            )->render();
+
+            $this->setResponse('view');
+            return $this->renderText($html);
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
+            return response()->json($salida);
+        }
     }
 
     public function seguimiento(Request $request)
@@ -740,41 +708,13 @@ class PensionadoController extends ApplicationController
                 'success' => true,
                 'data' => $out,
             ];
-        } catch (DebugException $e) {
-            $salida = ['success' => false, 'msj' => $e->getMessage()];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
         return response()->json($salida);
     }
 
-    public function descargar_formulario($id)
-    {
-        $this->setResponse('ajax');
-
-        try {
-            if (! is_numeric($id)) {
-                throw new \InvalidArgumentException('ID de solicitud no válido');
-            }
-
-            $pensionadoService = new PensionadoService;
-            // $formulario = $pensionadoService->descargarFormulario($id);
-
-            if (empty($formulario)) {
-                throw new \RuntimeException('No se pudo generar el formulario');
-            }
-
-            $response = [
-                'success' => true,
-                'formulario' => $formulario,
-            ];
-        } catch (\Exception $e) {
-            $response = [
-                'success' => false,
-                'msj' => 'Error al descargar el formulario: ' . $e->getMessage(),
-            ];
-        }
-
-        return $this->renderObject($response);
-    }
+    public function descargar_formulario($id) {}
 
     /**
      * Administra la cuenta de un pensionado
@@ -786,18 +726,16 @@ class PensionadoController extends ApplicationController
      */
     public function administrar_cuenta($id = '')
     {
-        $this->setResponse('view');
-
         try {
             if (empty($id)) {
-                throw new \InvalidArgumentException('El ID de la solicitud es requerido');
+                throw new DebugException('El ID de la solicitud es requerido');
             }
 
             // Obtener la solicitud
-            $solicitud = (new Mercurio38)->findFirst("id='{$id}' and estado='A'");
+            $solicitud = Mercurio38::where("id", $id)->where("estado", "A")->first();
 
             if (! $solicitud) {
-                throw new \RuntimeException('No se encontró la solicitud solicitada');
+                throw new DebugException('No se encontró la solicitud solicitada');
             }
 
             // Preparar datos del usuario
@@ -821,24 +759,18 @@ class PensionadoController extends ApplicationController
                     'msj' => 'La administración de la cuenta se ha inicializado con éxito.',
                     'code' => 200,
                 ]);
-                redirect('principal/index');
-
-                return;
+                return redirect('principal/index');
             }
 
-            throw new \RuntimeException('No se pudo inicializar la administración de la cuenta');
-        } catch (AuthException $e) {
+            throw new DebugException('No se pudo inicializar la administración de la cuenta', 301);
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
             set_flashdata('error', [
-                'msj' => $e->getMessage(),
-                'code' => $e->getCode() ?: 505,
+                'msj' => $salida['msj'],
+                'code' => $salida['code'],
             ]);
-            redirect('empresa/index');
-        } catch (\Exception $e) {
-            set_flashdata('error', [
-                'msj' => 'Error al procesar la solicitud: ' . $e->getMessage(),
-                'code' => 500,
-            ]);
-            redirect('principal/index');
+
+            return redirect()->route('principal/index');
         }
     }
 }

@@ -38,8 +38,8 @@ class ConsultasEmpresaController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user') ?? null;
+        $this->tipo = session('tipo') ?? null;
     }
 
     public function index()
@@ -104,7 +104,6 @@ class ConsultasEmpresaController extends ApplicationController
 
     public function consultaTrabajadores(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $estado = $request->input('estado');
             $nit = $request->input('nit') ? $request->input('nit') : $this->user['documento'];
@@ -137,14 +136,11 @@ class ConsultasEmpresaController extends ApplicationController
                 'success' => true,
                 'data' => $html,
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage() . ' ' . $e->getLine(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function consultaGiroView()
@@ -188,14 +184,13 @@ class ConsultasEmpresaController extends ApplicationController
                     'data' => $out['data'],
                 ];
             }
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'message' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
+            $response = $salida;
+            $response['message'] = $salida['msj'];
         }
 
-        return $this->renderObject($response);
+        return response()->json($response);
     }
 
     public function consultaNominaView()
@@ -238,14 +233,11 @@ class ConsultasEmpresaController extends ApplicationController
                 'success' => true,
                 'data' => $html,
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage() . ' ' . $e->getLine(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($response);
+        return response()->json($response);
     }
 
     public function consultaAportesView()
@@ -259,9 +251,7 @@ class ConsultasEmpresaController extends ApplicationController
 
     public function consultaAportes(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-
             $perini = $request->input('perini');
             $perfin = $request->input('perfin');
             $nit = $this->user['documento'];
@@ -294,21 +284,28 @@ class ConsultasEmpresaController extends ApplicationController
                 'success' => true,
                 'data' => $html,
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage() . ' ' . $e->getLine(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function consultaMoraPresunta()
     {
-        return view('mercurio/subsidioemp/consulta_mora_presunta', [
-            'title' => 'Consulta Mora Presunta',
-        ]);
+        try {
+            return view('mercurio/subsidioemp/consulta_mora_presunta', [
+                'title' => 'Consulta Mora Presunta',
+            ]);
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
+            set_flashdata('error', [
+                'msj' => $salida['msj'],
+                'code' => $salida['code'],
+            ]);
+
+            return redirect()->route('principal/index');
+        }
     }
 
     public function moraPresunta()
@@ -361,43 +358,49 @@ class ConsultasEmpresaController extends ApplicationController
                     'sucursales' => $sucursales,
                 ],
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function novedadRetiroView()
     {
+        try {
+            $ps = new ApiSubsidio();
+            $ps->send(
+                [
+                    'servicio' => 'ComfacaAfilia',
+                    'metodo' => 'motivosRechazo',
+                    'params' => [],
+                ]
+            );
+            $out = $ps->toArray();
+            if (! $out['success']) {
+                throw new DebugException($out['msj']);
+            }
 
-        $ps = new ApiSubsidio();
-        $ps->send(
-            [
-                'servicio' => 'ComfacaAfilia',
-                'metodo' => 'motivosRechazo',
-                'params' => [],
-            ]
-        );
-        $out = $ps->toArray();
-        if (! $out['success']) {
-            throw new DebugException($out['msj']);
+            $_codest = [];
+            foreach ($out['data'] as $mcodest) {
+                $_codest[$mcodest['codest']] = $mcodest['detalle'];
+            }
+
+            return view('mercurio/subsidioemp/novedad_retiro', [
+                'hide_header' => true,
+                'help' => false,
+                'title' => 'Novedad Retiro',
+                'codest' => $_codest,
+            ]);
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
+            set_flashdata('error', [
+                'msj' => $salida['msj'],
+                'code' => $salida['code'],
+            ]);
+
+            return redirect()->route('principal/index');
         }
-
-        $_codest = [];
-        foreach ($out['data'] as $mcodest) {
-            $_codest[$mcodest['codest']] = $mcodest['detalle'];
-        }
-
-        return view('mercurio/subsidioemp/novedad_retiro', [
-            'hide_header' => true,
-            'help' => false,
-            'title' => 'Novedad Retiro',
-            'codest' => $_codest,
-        ]);
     }
 
     public function buscarTrabajador(Request $request)
@@ -414,48 +417,45 @@ class ConsultasEmpresaController extends ApplicationController
 
             $out = $ps->toArray();
             if (! $out['success']) {
-                return $this->renderObject(['flag' => false, 'success' => false, 'msj' => $out['msj']]);
+                $salida = ['flag' => false, 'success' => false, 'msj' => $out['msj']];
+            } else {
+                $subsi15 = $out['data'];
+                if (count($subsi15) == 0) {
+                    $salida = ['flag' => false, 'success' => false, 'msj' => 'No Existe la cedula dada'];
+                } elseif ($subsi15['nit'] != $this->user['documento']) {
+                    $salida = ['flag' => false, 'success' => false, 'msj' => 'el trabajador no esta registrado a su empresa'];
+                } else {
+                    $salida = ['flag' => true, 'success' => true, 'data' => $subsi15];
+                }
             }
-
-            $subsi15 = $out['data'];
-            if (count($subsi15) == 0) {
-                return $this->renderObject(['flag' => false, 'success' => false, 'msj' => 'No Existe la cedula dada']);
-            }
-
-            if ($subsi15['nit'] != parent::getActUser('documento')) {
-                return $this->renderObject(['flag' => false, 'success' => false, 'msj' => 'el trabajador no esta registrado a su empresa']);
-            }
-
-            return $this->renderObject(['flag' => true, 'success' => true, 'data' => $subsi15]);
-        } catch (DebugException $e) {
-            return $this->renderObject(
-                ['flag' => false, 'success' => false, 'msj' => $e->getMessage()]
-            );
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
+            $salida['flag'] = false;
         }
+
+        return response()->json($salida);
     }
 
     public function novedadRetiro(Request $request)
     {
         try {
-
-            $this->setResponse('ajax');
-            $cedtra = $request->input('cedtra', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $nombre = $request->input('nombre', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $codest = $request->input('codest', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $fecafi = $request->input('fecafi', 'addslaches', 'extraspaces', 'striptags');
-            $fecret = $request->input('fecret', 'addslaches', 'extraspaces', 'striptags');
-            $nota = $request->input('nota', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $cedtra = $request->input('cedtra');
+            $nombre = $request->input('nombre');
+            $codest = $request->input('codest');
+            $fecafi = $request->input('fecafi');
+            $fecret = $request->input('fecret');
+            $nota = $request->input('nota');
             $today = Carbon::now();
 
             if (Carbon::compareDates($fecafi, $fecret) > 0) {
-                $response = 'La fecha de retiro no puede ser menor a la de afiliacion';
+                $salida = ['success' => false, 'msj' => 'La fecha de retiro no puede ser menor a la de afiliacion'];
 
-                return $this->renderObject($response);
+                return response()->json($salida);
             }
             if (Carbon::compareDates($fecret, $today) > 0) {
-                $response = 'La fecha de retiro no puede ser mayor a la de hoy';
+                $salida = ['success' => false, 'msj' => 'La fecha de retiro no puede ser mayor a la de hoy'];
 
-                return $this->renderObject($response);
+                return response()->json($salida);
             }
             $today = Carbon::now();
             $modelos = ['mercurio08', 'mercurio10', 'mercurio20', 'Mercurio35'];
@@ -479,9 +479,9 @@ class ConsultasEmpresaController extends ApplicationController
             $usuario = $asignarFuncionario->asignar('7', $this->user['codciu']);
 
             if ($usuario == '') {
-                $response = 'No se puede realizar el registro,Comuniquese con la Atencion al cliente';
+                $salida = ['success' => false, 'msj' => 'No se puede realizar el registro,Comuniquese con la Atencion al cliente'];
 
-                return $this->renderObject($response);
+                return response()->json($salida);
             }
             $mercurio35->setUsuario($usuario);
             $mercurio35->setTipo($this->tipo);
@@ -528,13 +528,11 @@ class ConsultasEmpresaController extends ApplicationController
 
             // parent::finishTrans();
             $salida = ['success' => true, 'msj' => $response];
-        } catch (DebugException $e) {
-            $salida = ['success' => false, 'msj' => $e->getMessage()];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
 
-        return $this->renderObject(
-            $salida
-        );
+        return response()->json($salida);
     }
 
     /**
@@ -729,33 +727,43 @@ class ConsultasEmpresaController extends ApplicationController
 
     public function certificadoParaTrabajadorView()
     {
-        $ps = new ApiSubsidio();
-        $ps->send(
-            [
-                'servicio' => 'ComfacaAfilia',
-                'metodo' => 'listar_trabajadores',
-                'params' => [
-                    'nit' => $this->user['documento'],
-                    'estado' => 'A',
-                ],
-            ]
-        );
-        $out = $ps->toArray();
-        if (! $out['success']) {
-            throw new DebugException($out['msj']);
-        }
+        try {
+            $ps = new ApiSubsidio();
+            $ps->send(
+                [
+                    'servicio' => 'ComfacaAfilia',
+                    'metodo' => 'listar_trabajadores',
+                    'params' => [
+                        'nit' => $this->user['documento'],
+                        'estado' => 'A',
+                    ],
+                ]
+            );
+            $out = $ps->toArray();
+            if (! $out['success']) {
+                throw new DebugException($out['msj']);
+            }
 
-        $trabajadores = [];
-        $subsi15 = $out['data'];
-        foreach ($subsi15 as $msubsi15) {
-            $trabajadores[$msubsi15['cedtra']] = $msubsi15['nombre'];
-        }
+            $trabajadores = [];
+            $subsi15 = $out['data'];
+            foreach ($subsi15 as $msubsi15) {
+                $trabajadores[$msubsi15['cedtra']] = $msubsi15['nombre'];
+            }
 
-        return view('mercurio/subsidioemp/certificado_para_trabajador', [
-            'title' => 'Certificado Para Trabajador',
-            'document_title' => 'Certificado Para Trabajador',
-            'trabajadores' => $trabajadores,
-        ]);
+            return view('mercurio/subsidioemp/certificado_para_trabajador', [
+                'title' => 'Certificado Para Trabajador',
+                'document_title' => 'Certificado Para Trabajador',
+                'trabajadores' => $trabajadores,
+            ]);
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
+            set_flashdata('error', [
+                'msj' => $salida['msj'],
+                'code' => $salida['code'],
+            ]);
+
+            return redirect()->route('principal/index');
+        }
     }
 
     public function certificadoParaTrabajador(Request $request)
@@ -882,7 +890,6 @@ class ConsultasEmpresaController extends ApplicationController
     public function consultaNucleo(Request $request)
     {
         try {
-            $this->setResponse('ajax');
             $cedtra = $request->input('cedtra');
             $ps = new ApiSubsidio();
             $ps->send(
@@ -967,13 +974,10 @@ class ConsultasEmpresaController extends ApplicationController
                     'params' => $params,
                 ],
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 }

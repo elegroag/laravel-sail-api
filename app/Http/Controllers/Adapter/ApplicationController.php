@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Adapter;
 
+use App\Exceptions\AuthException;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\QueryException;
@@ -191,6 +192,8 @@ class ApplicationController extends Controller
             $debug = $e;
         } elseif ($e instanceof QueryException || $e instanceof PDOException) {
             $debug = new DebugException('Error de base de datos (SQL)', 500, $e->getMessage());
+        } elseif ($e instanceof AuthException) {
+            $debug = new DebugException('Error de autenticación', 501, $e->getMessage());
         } else {
             $debug = new DebugException('Error de sintaxis del sistema', 501, $e->getMessage());
         }

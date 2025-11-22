@@ -8,7 +8,6 @@ use App\Models\Adapter\DbBase;
 use App\Models\Mercurio10;
 use App\Models\Mercurio45;
 use App\Services\Utils\AsignarFuncionario;
-use App\Services\Utils\Comman;
 use App\Services\Utils\Logger;
 use App\Services\Utils\UploadFile;
 use App\Services\Api\ApiSubsidio;
@@ -28,46 +27,56 @@ class CertificadosController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user') ?? null;
+        $this->tipo = session('tipo') ?? null;
     }
 
     public function index()
     {
-        $ps = new ApiSubsidio();
-        $ps->send(
-            [
-                'servicio' => 'Certificados',
-                'metodo' => 'buscarCertificadosBeneficiario',
-                'params' => $this->user['documento'],
-            ]
-        );
+        try {
+            $ps = new ApiSubsidio();
+            $ps->send(
+                [
+                    'servicio' => 'Certificados',
+                    'metodo' => 'buscarCertificadosBeneficiario',
+                    'params' => $this->user['documento'],
+                ]
+            );
 
-        $beneficiarios = false;
-        $certificadosPresentados = false;
-        $out = $ps->toArray();
+            $beneficiarios = false;
+            $certificadosPresentados = false;
+            $out = $ps->toArray();
 
-        if ($out['success']) {
-            $beneficiarios = $out['data'];
-            $certificadosPresentados = [];
-            foreach ($beneficiarios as $ai => $beneficiario) {
-                $has = Mercurio45::where('codben', $beneficiario['codben'])->where('estado', 'P')->count();
-                if ($has) {
-                    $certificadosPresentados = $has;
-                    $beneficiarios[$ai]['certificadoPendiente'] = true;
-                    $beneficiarios[$ai]['certificados'] = $has;
+            if ($out['success']) {
+                $beneficiarios = $out['data'];
+                $certificadosPresentados = [];
+                foreach ($beneficiarios as $ai => $beneficiario) {
+                    $has = Mercurio45::where('codben', $beneficiario['codben'])->where('estado', 'P')->count();
+                    if ($has) {
+                        $certificadosPresentados = $has;
+                        $beneficiarios[$ai]['certificadoPendiente'] = true;
+                        $beneficiarios[$ai]['certificados'] = $has;
+                    }
                 }
             }
-        }
 
-        return view(
-            'mercurio/certificados/index',
-            [
-                'certificadosPresentados' => $certificadosPresentados,
-                'subsi22' => $beneficiarios,
-                'title' => 'Presentación Certificados',
-            ]
-        );
+            return view(
+                'mercurio/certificados/index',
+                [
+                    'certificadosPresentados' => $certificadosPresentados,
+                    'subsi22' => $beneficiarios,
+                    'title' => 'Presentación Certificados',
+                ]
+            );
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
+            set_flashdata('error', [
+                'msj' => $salida['msj'],
+                'code' => $salida['code'],
+            ]);
+
+            return redirect()->route('principal/index');
+        }
     }
 
     public function guardar(Request $request)
@@ -85,13 +94,20 @@ class CertificadosController extends ApplicationController
             $codcer = $request->input('codcer');
             $nomcer = $request->input('nomcer');
 
-            if ((new Mercurio45)->getCount(
-                '*',
-                "conditions: codben='$codben' and codcer='$codcer' and estado <> 'X'"
-            ) > 0) {
-                $message = 'Ya tiene un certificado presentando, por favor espere a su aprobacion';
+            if (
+                Mercurio45::where('codben', $codben)
+                ->where('codcer', $codcer)
+                ->where('estado', '!=', 'X')
+                ->count() > 0
+            ) {
+                $response = [
+                    'success' => false,
+                    'msj' => 'Ya tiene un certificado presentando, por favor espere a su aprobacion',
+                ];
 
-                return $this->renderObject($message);
+                $this->db->rollBack();
+
+                return response()->json($response);
             }
 
             $today = Carbon::now();
@@ -162,14 +178,11 @@ class CertificadosController extends ApplicationController
             ];
 
             $this->db->commit();
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'error' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
             $this->db->rollBack();
+            $response = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($response);
+        return response()->json($response);
     }
 }

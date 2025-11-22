@@ -21,8 +21,8 @@ class ProductosController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user') ?? null;
+        $this->tipo = session('tipo') ?? null;
     }
 
     public function index() {}
@@ -33,34 +33,43 @@ class ProductosController extends ApplicationController
      *
      * @return void
      */
-    public function complementoNutricional()
+    public function complementoNutricional(Request $request)
     {
-        $codser = '27';
-        $cupos_disponibles = ServiciosCupos::where('estado', 'A')
-            ->where('codser', $codser)
-            ->first();
+        try {
+            $codser = '27';
+            $cupos_disponibles = ServiciosCupos::where('estado', 'A')
+                ->where('codser', $codser)
+                ->first();
 
-        if ($cupos_disponibles == false) {
-            set_flashdata('error', [
-                'msj' => 'El servicio no está disponible para el actual periodo.',
-                'code' => '505',
+            if ($cupos_disponibles == false) {
+                set_flashdata('error', [
+                    'msj' => 'El servicio no está disponible para el actual periodo.',
+                    'code' => '505',
+                ]);
+
+                return redirect()->route('principal.index');
+            }
+
+            $cupos_disponibles = ($cupos_disponibles) ? $cupos_disponibles->getCupos() : 0;
+            $cupos = $this->misCuposAplicados($codser);
+            $beneficiarios = $this->afiliadosBeneficiarios($codser);
+
+            return view('mercurio/productos/complemento_nutricional', [
+                'title' => 'Oferta De Productos y Servicios',
+                'hide_header' => true,
+                'cupos_disponibles' => $cupos_disponibles,
+                'cupos' => $cupos,
+                'beneficiarios' => $beneficiarios,
+                'codser' => $codser,
             ]);
-
+        } catch (\Throwable $th) {
+            $salida = $this->handleException($th, $request);
+            set_flashdata('error', [
+                'msj' => $salida['msj'],
+                'code' => $salida['code'],
+            ]);
             return redirect()->route('principal.index');
         }
-
-        $cupos_disponibles = ($cupos_disponibles) ? $cupos_disponibles->getCupos() : 0;
-        $cupos = $this->misCuposAplicados($codser);
-        $beneficiarios = $this->afiliadosBeneficiarios($codser);
-
-        return view('mercurio/productos/complemento_nutricional', [
-            'title' => 'Oferta De Productos y Servicios',
-            'hide_header' => true,
-            'cupos_disponibles' => $cupos_disponibles,
-            'cupos' => $cupos,
-            'beneficiarios' => $beneficiarios,
-            'codser' => $codser,
-        ]);
     }
 
     public function aplicarCupo(Request $request)
@@ -71,16 +80,27 @@ class ProductosController extends ApplicationController
         $cedtra = $this->user['documento'];
 
         try {
-            $pinesAfiliado = new PinesAfiliado;
-            $has = $pinesAfiliado->count('*', "conditions: cedtra='{$cedtra}' and docben='{$docben}' and codser='{$codser}'");
+            // Verificar si ya existe un PIN activo para este trabajador/beneficiario/servicio
+            $has = PinesAfiliado::where('cedtra', $cedtra)
+                ->where('docben', $docben)
+                ->where('codser', $codser)
+                ->count();
             if ($has > 0) {
                 throw new DebugException('El servicio ya está aplicado por el trabajador, no se requiere de más acciones.', 201);
             }
 
-            $afiliadoHabiles = $this->AfiliadoHabil->findFirst(" cedtra='{$cedtra}' and docben='{$docben}' and codser='{$codser}' ");
+            $afiliadoHabiles = AfiliadoHabil::where('cedtra', $cedtra)
+                ->where('docben', $docben)
+                ->where('codser', $codser)
+                ->first();
             if ($afiliadoHabiles) {
-                $serviciosCupos = new ServiciosCupos;
-                $cupos_disponibles = $serviciosCupos->findFirst(" estado='A' and codser='{$codser}'");
+                $cupos_disponibles = ServiciosCupos::where('estado', 'A')
+                    ->where('codser', $codser)
+                    ->first();
+
+                if (! $cupos_disponibles) {
+                    throw new DebugException('El servicio no está disponible para el actual periodo.', 201);
+                }
                 if ($cupos_disponibles->getCupos() == 0) {
                     $cupos_disponibles->setEstado('F');
                     $cupos_disponibles->save();
@@ -98,7 +118,7 @@ class ProductosController extends ApplicationController
                 $pinesAfiliado->setId(null);
                 $pinesAfiliado->setFecha(date('Y-m-d'));
                 $pinesAfiliado->setCodser($codser);
-                $pinesAfiliado->setCedtra(parent::getActUser('documento'));
+                $pinesAfiliado->setCedtra($cedtra);
                 $pinesAfiliado->setDocben($docben);
                 $pinesAfiliado->setEstado('A');
                 $pinesAfiliado->setPin($afiliadoHabiles->getPin());
@@ -119,22 +139,21 @@ class ProductosController extends ApplicationController
             } else {
                 throw new DebugException('El trabajador no dispone de beneficiarios activos para solicitar el producto.', 501);
             }
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-                'beneficiarios' => $this->afiliadosBeneficiarios($codser),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
+            $salida['beneficiarios'] = $this->afiliadosBeneficiarios($codser);
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     public function numeroCuposDisponibles($codser)
     {
-        $cupos_disponibles = (new ServiciosCupos)->findFirst(" estado='A' and codser='{$codser}'");
+        $cupos_disponibles = ServiciosCupos::where('estado', 'A')
+            ->where('codser', $codser)
+            ->first();
 
-        return $this->renderObject(
+        return response()->json(
             [
                 'success' => true,
                 'cupos' => $cupos_disponibles->getCupos(),
@@ -145,8 +164,7 @@ class ProductosController extends ApplicationController
     public function serviciosAplicados($codser)
     {
         $data = $this->afiliadosBeneficiarios($codser);
-
-        return $this->renderObject(
+        return response()->json(
             [
                 'success' => true,
                 'data' => $data,
@@ -168,17 +186,20 @@ class ProductosController extends ApplicationController
 
     public function afiliadosBeneficiarios($codser)
     {
-        $cedtra = parent::getActUser('documento');
-        $afiliadoHabiles = (new AfiliadoHabil)->getFind("cedtra='{$cedtra}' and codser='{$codser}' ");
+        $cedtra = $this->user['documento'];
+        $afiliadoHabiles = AfiliadoHabil::where('cedtra', $cedtra)
+            ->where('codser', $codser)
+            ->get();
         $habiles = [];
         if ($afiliadoHabiles) {
             $ai = 0;
             foreach ($afiliadoHabiles as $habi) {
                 $ai++;
-                $pinActivo = (new PinesAfiliado)->count(
-                    '*',
-                    "cedtra='{$habi->getCedtra()}' and docben='{$habi->getDocben()}' and estado='A' and codser='{$codser}'"
-                );
+                $pinActivo = PinesAfiliado::where('cedtra', $habi->getCedtra())
+                    ->where('docben', $habi->getDocben())
+                    ->where('estado', 'A')
+                    ->where('codser', $codser)
+                    ->count();
                 $habiles[$ai] = $habi->getArray();
                 $habiles[$ai]['hasPin'] = $pinActivo;
             }
@@ -189,16 +210,20 @@ class ProductosController extends ApplicationController
 
     public function buscarCupo(Request $request)
     {
-        $this->setResponse('ajax');
-        $docben = $request->input('docben', 'striptags', 'extraspaces');
-        $codser = $request->input('codser', 'striptags', 'extraspaces');
-        $cedtra = parent::getActUser('documento');
+        try {
 
-        $pines = (new PinesAfiliado)->findFirst("cedtra='{$cedtra}' and docben='{$docben}' and estado='A' and codser='{$codser}'");
-        $pinAfiliado = ($pines) ? $pines->getArray() : false;
+            $docben = $request->input('docben');
+            $codser = $request->input('codser');
+            $cedtra = $this->user['documento'];
 
-        return $this->renderObject(
-            [
+            $pines = PinesAfiliado::where('cedtra', $cedtra)
+                ->where('docben', $docben)
+                ->where('estado', 'A')
+                ->where('codser', $codser)
+                ->first();
+            $pinAfiliado = ($pines) ? $pines->getArray() : false;
+
+            $salida = [
                 'success' => true,
                 'cupo' => $pinAfiliado,
                 'msj' => ($pinAfiliado == false) ? 'No hay un pin activo para realizar el pago respectivo.' :
@@ -209,7 +234,11 @@ class ProductosController extends ApplicationController
                     "<i class='ni ni-single-copy-04 fa-1x'></i>
                     </button>
                 </p>",
-            ]
-        );
+            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
+        }
+
+        return response()->json($salida);
     }
 }

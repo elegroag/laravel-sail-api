@@ -42,6 +42,10 @@
         },
         {
             "path": "public"
+        },
+        {
+            "path": "app/Http/Middleware",
+            "name": "middleware"
         }
     ],
     "settings": {

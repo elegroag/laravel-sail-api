@@ -24,8 +24,8 @@ class NotificacionesController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user') ?? null;
+        $this->tipo = session('tipo') ?? null;
     }
 
     public function index()
@@ -41,7 +41,6 @@ class NotificacionesController extends ApplicationController
 
     public function procesarNotificacion(Request $request, Response $response)
     {
-        $this->setResponse('ajax');
         try {
             $documento = $this->user['documento'];
             $servicio = $request->input('servicio');
@@ -129,14 +128,11 @@ class NotificacionesController extends ApplicationController
                 'success' => true,
 
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage() . ' Linea: ' . $e->getLine() . ' File: ' . basename($e->getFile()),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function leerServicios()

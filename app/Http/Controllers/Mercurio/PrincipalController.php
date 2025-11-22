@@ -76,26 +76,31 @@ class PrincipalController extends ApplicationController
         ]);
     }
 
-    public function requireChangeClave()
+    public function requireChangeClave(Request $request)
     {
-        $documento = $this->user['documento'] ?? null;
-        $coddoc = $this->user['coddoc'] ?? null;
+        try {
+            $documento = $this->user['documento'] ?? null;
+            $coddoc = $this->user['coddoc'] ?? null;
 
-        $requireChangeClave = false;
-        $m07 = Mercurio07::where("documento", $documento)
-            ->where("coddoc", $coddoc)
-            ->where(
-                "tipo",
-                $this->tipo
-            );
-        if ($m07->clave === 'x0x') {
-            $requireChangeClave = true;
+            $requireChangeClave = false;
+            $m07 = Mercurio07::where("documento", $documento)
+                ->where("coddoc", $coddoc)
+                ->where(
+                    "tipo",
+                    $this->tipo
+                );
+            if ($m07->clave === 'x0x') {
+                $requireChangeClave = true;
+            }
+
+            $salida = [
+                'success' => true,
+                'requireChangeClave' => $requireChangeClave
+            ];
+        } catch (\Throwable $th) {
+            $salida = $this->handleException($th, $request);
         }
-
-        return response()->json([
-            'success' => true,
-            'requireChangeClave' => $requireChangeClave
-        ]);
+        return response()->json($salida);
     }
 
     public function dashboardEmpresa()
@@ -157,14 +162,13 @@ class PrincipalController extends ApplicationController
             }
 
             $response['data'] = $data;
-        } catch (\Throwable $th) {
-            $response = [
-                'success' => false,
-                'message' => $th->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
+            $response = $salida;
+            $response['message'] = $salida['msj'];
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function traerCategoriasEmpresa()
@@ -185,7 +189,7 @@ class PrincipalController extends ApplicationController
             );
             $subsi11 = $ps->toArray();
             if (! $subsi11['success']) {
-                return $this->renderObject([
+                return response()->json([
                     'success' => false,
                     'msj' => 'No se pudo traer las categorias',
                 ]);
@@ -201,20 +205,18 @@ class PrincipalController extends ApplicationController
                 'data' => $data,
                 'labels' => $labels,
             ];
-        } catch (\Throwable $th) {
-            $response = [
-                'success' => false,
-                'message' => $th->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
+            $response = $salida;
+            $response['message'] = $salida['msj'];
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function traerGiroEmpresa()
     {
         try {
-            $this->setResponse('ajax');
             $data = [];
             $response['labels'] = [
                 'Enero',
@@ -243,7 +245,7 @@ class PrincipalController extends ApplicationController
             );
             $subsi09 = $ps->toArray();
             if (! $subsi09['success']) {
-                return $this->renderObject([
+                return response()->json([
                     'success' => false,
                     'msj' => 'No se pudo traer el giro',
                 ]);
@@ -253,14 +255,13 @@ class PrincipalController extends ApplicationController
                 $data[] = $msubsi09['valor'];
             }
             $response['data'] = $data;
-        } catch (\Throwable $th) {
-            $response = [
-                'success' => false,
-                'message' => $th->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
+            $response = $salida;
+            $response['message'] = $salida['msj'];
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function fileExisteGlobal(Request $request, Response $response, string $filepath)
@@ -281,13 +282,11 @@ class PrincipalController extends ApplicationController
     public function actualizaEstadoSolicitudes()
     {
         try {
-            $this->setResponse('ajax');
-
             if (get_flashdata_item('Syncron') == true) {
-                return $this->renderObject([
+                return response()->json([
                     'success' => true,
                     'msj' => 'Y se realizo la actualización de las solicitudes',
-                ], false);
+                ]);
             }
             $tipo = $this->tipo;
 
@@ -354,14 +353,11 @@ class PrincipalController extends ApplicationController
             ];
 
             set_flashdata('Syncron', true, true);
-        } catch (DebugException $tf) {
-            $salida = [
-                'success' => false,
-                'msj' => $tf->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     public function up()
@@ -373,26 +369,21 @@ class PrincipalController extends ApplicationController
     public function listaAdress()
     {
         try {
-            $this->setResponse('ajax');
             $adress = $this->db->inQueryAssoc('SELECT * FROM mercurio15 WHERE 1=1');
             $salida = [
                 'success' => true,
                 'data' => $adress,
                 'msj' => 'El proceso de consulta completo con éxito',
             ];
-        } catch (DebugException $tf) {
-            $salida = [
-                'success' => false,
-                'msj' => $tf->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     public function servicios()
     {
-        $this->setResponse('ajax');
         try {
             $tipo = session('tipo');
             switch ($tipo) {
@@ -447,20 +438,15 @@ class PrincipalController extends ApplicationController
                 'data' => $servicios,
                 'totales' => $totales,
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function validaSyncro()
     {
-        $this->setResponse('ajax');
-
         try {
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
@@ -484,14 +470,11 @@ class PrincipalController extends ApplicationController
                     'syncron' => ($interval >= 10) ? true : false,
                 ],
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     public function establecerClaveFirma(Request $request)
@@ -547,11 +530,8 @@ class PrincipalController extends ApplicationController
                 'success' => true,
                 'msj' => 'La clave fue registrada correctamente.',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
 
         return response()->json($salida);
@@ -571,12 +551,10 @@ class PrincipalController extends ApplicationController
             $salida = [
                 'success' => true,
                 'msj' => 'La clave fue registrada correctamente.',
+                'data' => $data,
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
 
         return response()->json($salida);
@@ -594,7 +572,6 @@ class PrincipalController extends ApplicationController
      */
     public function ingresoDirigido(Request $request)
     {
-        $this->setResponse('view');
         try {
             $dataVerify = $request->input('dataVerify');
             $tk = explode('|', base64_decode($dataVerify));
@@ -694,8 +671,12 @@ class PrincipalController extends ApplicationController
             );
 
             return redirect()->to($url);
-        } catch (DebugException $e) {
-            set_flashdata('error', ['msj' => $e->getMessage()]);
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
+            set_flashdata('error', [
+                'msj' => $salida['msj'],
+                'code' => $salida['code'],
+            ]);
 
             return redirect()->to('mercurio/login');
         }

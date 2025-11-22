@@ -22,8 +22,8 @@ class FirmasController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
+        $this->user = session('user') ?? null;
+        $this->tipo = session('tipo') ?? null;
     }
 
     /**
@@ -31,19 +31,27 @@ class FirmasController extends ApplicationController
      */
     public function index()
     {
-        // Acceso a sesión
-        $user = session()->has('user') ? session('user') : [];
-        $documento = $user['documento'] ?? null;
-        $coddoc = $user['coddoc'] ?? null;
+        try {
+            $user = $this->user ?? [];
+            $documento = $user['documento'] ?? null;
+            $coddoc = $user['coddoc'] ?? null;
 
-        $mfirma = (new Mercurio16)->findFirst(" documento='{$documento}' AND coddoc='{$coddoc}'");
-        $content = $mfirma ? $mfirma->getKeypublic() : null;
+            $mfirma = Mercurio16::where('documento', $documento)->where('coddoc', $coddoc)->first();
+            $content = $mfirma ? $mfirma->getKeypublic() : null;
 
-        return view('mercurio.firmas.index', [
-            'hide_header' => true,
-            'title' => 'Firma Dígital',
-            'publicKey' => $content,
-        ]);
+            return view('mercurio.firmas.index', [
+                'hide_header' => true,
+                'title' => 'Firma Dígital',
+                'publicKey' => $content,
+            ]);
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
+            set_flashdata('error', [
+                'msj' => $salida['msj'],
+                'code' => $salida['code'],
+            ]);
+            return redirect()->route('principal/index');
+        }
     }
 
     /**
@@ -51,9 +59,9 @@ class FirmasController extends ApplicationController
      */
     public function guardar(Request $request)
     {
-        $this->setResponse('ajax');
+        $this->db->begin();
         try {
-            $user = session()->has('user') ? session('user') : [];
+            $user = $this->user ?? [];
             $documento = $user['documento'] ?? null;
             $coddoc = $user['coddoc'] ?? null;
             $clave = $user['clave'] ?? null;
@@ -67,7 +75,7 @@ class FirmasController extends ApplicationController
                 'coddoc' => $coddoc,
             ]);
 
-            $usuario = (new Mercurio07)->findFirst(" coddoc='{$coddoc}' and documento='{$documento}'");
+            $usuario = Mercurio07::where('coddoc', $coddoc)->where('documento', $documento)->first();
             if (! $usuario) {
                 throw new DebugException('No fue posible identificar el usuario.', 404);
             }
@@ -81,14 +89,13 @@ class FirmasController extends ApplicationController
             $gestionFirmas->generarClaves($clave);
 
             $salida = ['success' => true, 'msj' => 'Imagen guardada correctamente.'];
-        } catch (\Exception $err) {
-            $salida = [
-                'success' => false,
-                'msj' => $err->getMessage(),
-            ];
+            $this->db->commit();
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
+            $this->db->rollBack();
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     /**
@@ -96,9 +103,8 @@ class FirmasController extends ApplicationController
      */
     public function show()
     {
-        $this->setResponse('ajax');
         try {
-            $user = session()->has('user') ? session('user') : [];
+            $user = $this->user ?? [];
             $documento = $user['documento'] ?? null;
             $coddoc = $user['coddoc'] ?? null;
 
@@ -106,7 +112,7 @@ class FirmasController extends ApplicationController
                 throw new DebugException('Sesión inválida, no se encontró el usuario.', 401);
             }
 
-            $mfirma = (new Mercurio16)->findFirst(" documento='{$documento}' AND coddoc='{$coddoc}'");
+            $mfirma = Mercurio16::where('documento', $documento)->where('coddoc', $coddoc)->first();
             $firma = ($mfirma && method_exists($mfirma, 'getArray')) ? $mfirma->getArray() : ($mfirma ? [] : false);
             $msj = ($mfirma)
                 ? 'OK'
@@ -117,14 +123,11 @@ class FirmasController extends ApplicationController
                 'firma' => $firma,
                 'msj' => $msj,
             ];
-        } catch (\Exception $err) {
-            $salida = [
-                'success' => false,
-                'msj' => $err->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
-        return $this->renderObject($salida, false);
+        return response()->json($salida);
     }
 
     /**
@@ -132,9 +135,9 @@ class FirmasController extends ApplicationController
      */
     public function validaFirma(Request $request)
     {
-        $this->setResponse('ajax');
+        $this->db->begin();
         try {
-            $user = session()->has('user') ? session('user') : [];
+            $user = $this->user ?? [];
             $coddoc = $user['coddoc'] ?? null;
             $documento = $user['documento'] ?? null;
 
@@ -156,7 +159,7 @@ class FirmasController extends ApplicationController
             }
             $file->move($dir, $name);
 
-            $mfirma = (new Mercurio16)->findFirst("documento='{$documento}' AND coddoc='{$coddoc}'");
+            $mfirma = Mercurio16::where('documento', $documento)->where('coddoc', $coddoc)->first();
             if (! $mfirma) {
                 throw new DebugException('No existe firma registrada para el usuario.', 404);
             }
@@ -172,13 +175,12 @@ class FirmasController extends ApplicationController
                     ? 'El documento es válido, se ha comprobado la autenticidad del contenido del documento.'
                     : 'El documento no es válido, el documento se ha modificado y no es auténtico.',
             ];
-        } catch (\Exception $err) {
-            $response = [
-                'success' => false,
-                'msj' => $err->getMessage(),
-            ];
+            $this->db->commit();
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
+            $this->db->rollBack();
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 }

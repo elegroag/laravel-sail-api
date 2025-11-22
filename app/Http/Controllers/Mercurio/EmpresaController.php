@@ -10,17 +10,14 @@ use App\Models\Adapter\DbBase;
 use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
-use App\Models\Mercurio07;
 use App\Models\Mercurio10;
 use App\Models\Mercurio30;
-use App\Models\Mercurio31;
 use App\Models\Mercurio37;
 use App\Models\Subsi54;
 use App\Models\Tranoms;
 use App\Services\Entidades\EmpresaService;
 use App\Services\FormulariosAdjuntos\EmpresaAdjuntoService;
 use App\Services\Utils\AsignarFuncionario;
-use App\Services\Utils\Comman;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
 use App\Services\Api\ApiSubsidio;
@@ -46,28 +43,41 @@ class EmpresaController extends ApplicationController
 
     public function index()
     {
-        return view('mercurio/empresa/index', [
-            'tipo' => $this->tipo,
-            'documento' => $this->user['documento'],
-            'coddoc' => $this->user['coddoc'],
-            'title' => 'Afiliación de empresas',
-        ]);
+        try {
+            return view('mercurio/empresa/index', [
+                'tipo' => $this->tipo,
+                'documento' => $this->user['documento'],
+                'coddoc' => $this->user['coddoc'],
+                'title' => 'Afiliación de empresas',
+            ]);
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
+            set_flashdata('error', [
+                'msj' => $salida['msj'],
+                'code' => $salida['code'],
+            ]);
+            return redirect()->route('principal/index');
+        }
     }
 
     public function renderTable(Request $request, Response $response, string $estado = '')
     {
-        $this->setResponse('view');
-        $empresaService = new EmpresaService;
+        try {
+            $empresaService = new EmpresaService;
+            $html = view(
+                'mercurio/empresa/tmp/solicitudes',
+                [
+                    'path' => base_path(),
+                    'empresas' => $empresaService->findAllByEstado($estado),
+                ]
+            )->render();
 
-        $html = view(
-            'mercurio/empresa/tmp/solicitudes',
-            [
-                'path' => base_path(),
-                'empresas' => $empresaService->findAllByEstado($estado),
-            ]
-        )->render();
-
-        return $this->renderText($html);
+            $this->setResponse('view');
+            return $this->renderText($html);
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
+            return $this->renderText($salida);
+        }
     }
 
     /**
@@ -92,8 +102,8 @@ class EmpresaController extends ApplicationController
                     'data' => $empresa_sisu
                 ];
             }
-        } catch (DebugException $e) {
-            $salida = ['success' => false, 'msj' => $e->getMessage()];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
         return response()->json($salida);
     }
@@ -171,11 +181,8 @@ class EmpresaController extends ApplicationController
                 'success' => true,
                 'msj' => 'El archivo se borro de forma correcta',
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -202,11 +209,8 @@ class EmpresaController extends ApplicationController
                 'msj' => 'Ok archivo procesado',
                 'data' => $mercurio37->toArray(),
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
 
         return response()->json($salida);
@@ -217,7 +221,6 @@ class EmpresaController extends ApplicationController
      */
     public function archivosRequeridos($id)
     {
-        $this->setResponse('ajax');
         try {
             $service = new EmpresaService;
             $solicitud = $service->findById($id);
@@ -226,10 +229,14 @@ class EmpresaController extends ApplicationController
             }
             $data = $service->dataArchivosRequeridos($solicitud);
 
-            return $this->renderObject(['success' => true, 'data' => $data]);
-        } catch (DebugException $e) {
-            return $this->renderObject(['success' => false, 'msj' => $e->getMessage()]);
+            $salida = [
+                'success' => true,
+                'data' => $data,
+            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
+        return response()->json($salida);
     }
 
     /**
@@ -237,7 +244,6 @@ class EmpresaController extends ApplicationController
      */
     public function enviarCaja(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $id = $request->input('id');
             $asignarFuncionario = new AsignarFuncionario;
@@ -250,11 +256,8 @@ class EmpresaController extends ApplicationController
                 'success' => true,
                 'msj' => 'El envío de la solicitud se ha completado con éxito',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
         return response()->json($salida);
     }
@@ -268,11 +271,8 @@ class EmpresaController extends ApplicationController
                 'success' => true,
                 'data' => $out,
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
 
         return response()->json($salida);
@@ -348,11 +348,8 @@ class EmpresaController extends ApplicationController
                 'data' => $componentes,
                 'msj' => 'OK',
             ];
-        } catch (DebugException $err) {
-            $salida = [
-                'success' => false,
-                'msj' => $err->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -368,7 +365,6 @@ class EmpresaController extends ApplicationController
         if (! file_exists($fichero)) {
             throw new DebugException('Archivo no disponible', 404);
         }
-
         return $this->renderFile($fichero);
     }
 
@@ -391,9 +387,8 @@ class EmpresaController extends ApplicationController
      */
     public function digitoVerification(Request $request)
     {
-        $this->setResponse('ajax');
         try {
-            $nit = $this->clp($request, 'nit');
+            $nit = $request->input('nit');
             if (! $nit) {
                 throw new DebugException('El nit es requerido', 422);
             }
@@ -405,14 +400,10 @@ class EmpresaController extends ApplicationController
                 'success' => true,
                 'digver' => $dv,
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
-
-        return $this->renderObject($salida);
+        return response()->json($salida);
     }
 
     /**
@@ -442,11 +433,8 @@ class EmpresaController extends ApplicationController
                 'data' => $data,
                 'msj' => 'OK',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
 
         return $this->renderObject($salida);
@@ -477,11 +465,8 @@ class EmpresaController extends ApplicationController
                 'data' => $service->dataArchivosRequeridos($mempresa),
                 'msj' => 'OK',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
 
         return $this->renderObject($salida);
@@ -492,15 +477,18 @@ class EmpresaController extends ApplicationController
      */
     public function borrar(Request $request)
     {
-        $this->setResponse('ajax');
         try {
             $this->db->begin();
             $documento = $this->user['documento'] ?? '';
             $coddoc = $this->user['coddoc'] ?? '';
 
-            $id = $this->clp($request, 'id');
+            $id = $request->input('id');
 
-            $m30 = (new Mercurio30)->findFirst("id='{$id}' and documento='{$documento}' and coddoc='{$coddoc}'");
+            $m30 = Mercurio30::where('id', $id)
+                ->where('documento', $documento)
+                ->where('coddoc', $coddoc)
+                ->first();
+
             if ($m30) {
                 if ($m30->getEstado() != 'T') {
                     Mercurio10::where('numero', $id)->where('tipopc', $this->tipopc)->delete();
@@ -516,12 +504,9 @@ class EmpresaController extends ApplicationController
                 'success' => true,
                 'msj' => 'Ok',
             ];
-        } catch (DebugException $e) {
+        } catch (\Throwable $e) {
             $this->db->rollBack();
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+            $salida = $this->handleException($e, $request);
         }
         return response()->json($salida);
     }
@@ -542,11 +527,8 @@ class EmpresaController extends ApplicationController
                 'solicitud_previa' => ($solicitud_previa > 0) ? true : false,
                 'empresa' => $empresa,
             ];
-        } catch (DebugException $err) {
-            $response = [
-                'success' => false,
-                'msj' => $err->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
         return response()->json($response);
     }
@@ -599,67 +581,76 @@ class EmpresaController extends ApplicationController
 
     public function miEmpresa()
     {
-        $ps = new ApiSubsidio();
-        $ps->send(
-            [
-                'servicio' => 'ComfacaEmpresas',
-                'metodo' => 'informacion_empresa',
-                'params' => [
-                    'nit' => $this->user['documento'],
-                ],
-            ]
-        );
+        try {
+            $ps = new ApiSubsidio();
+            $ps->send(
+                [
+                    'servicio' => 'ComfacaEmpresas',
+                    'metodo' => 'informacion_empresa',
+                    'params' => [
+                        'nit' => $this->user['documento'],
+                    ],
+                ]
+            );
 
-        $empresa = $ps->toArray();
-        if ($empresa['success'] == false) {
-            set_flashdata('error', [
-                'msj' => 'Error al acceder al servicio de información de la empresa. Verifique que el NIT sea correcto.',
-                'code' => 401,
+            $empresa = $ps->toArray();
+            if ($empresa['success'] == false) {
+                set_flashdata('error', [
+                    'msj' => 'Error al acceder al servicio de información de la empresa. Verifique que el NIT sea correcto.',
+                    'code' => 401,
+                ]);
+
+                return redirect()->route('principal/index');
+            }
+
+            $ps = new ApiSubsidio();
+            $ps->send(
+                [
+                    'servicio' => 'ComfacaAfilia',
+                    'metodo' => 'parametros_empresa',
+                ]
+            );
+            $paramsEmpresa = new ParamsEmpresa;
+            $paramsEmpresa->setDatosCaptura($ps->toArray());
+
+            $params = [
+                'calemp' => ParamsEmpresa::getCalidadEmpresa(),
+                'ciudad' => ParamsEmpresa::getCiudades(),
+                'codzon' => ParamsEmpresa::getZonas(),
+                'codigo_cajas' => ParamsEmpresa::getCodigoCajas(),
+                'coddoc' => ParamsEmpresa::getTipoDocumentos(),
+                'coddocrepleg' => ParamsEmpresa::getCodruaDocumentos(),
+                'tipsoc' => ParamsEmpresa::getTipoSociedades(),
+                'codact' => ParamsEmpresa::getActividades(),
+                'tipper' => ParamsEmpresa::getTipoPersona(),
+                'tipemp' => ParamsEmpresa::getTipoEmpresa(),
+                'departamentos' => ParamsEmpresa::getDepartamentos(),
+                'tipo_duracion' => ParamsEmpresa::getTipoDuracion(),
+                'codind' => ParamsEmpresa::getCodigoIndice(),
+                'paga_mes' => ParamsEmpresa::getPagaMes(),
+                'forma_presentacion' => ParamsEmpresa::getFormaPresentacion(),
+                'pymes' => ParamsEmpresa::getPymes(),
+                'contratista' => ParamsEmpresa::getContratista(),
+                'tipapo' => ParamsEmpresa::getTipoAportante(),
+                'oficina' => ParamsEmpresa::getOficina(),
+                'colegio' => ParamsEmpresa::getColegio(),
+                'estado' => ['A' => 'ACTIVA', 'I' => 'INACTIVA', 'S' => 'SUSPENDIDA', 'D' => 'DESACTUALIZADA'],
+                'autoriza' => ['S' => 'SI', 'N' => 'NO'],
+            ];
+
+            return view('mercurio/empresa/miempresa', [
+                'empresa' => $empresa['data'],
+                'trayectorias' => $empresa['data']['trayectoria'],
+                'sucursales' => $empresa['data']['sucursales'],
+                'parametros' => $params,
             ]);
-
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
+            set_flashdata('error', [
+                'msj' => $salida['msj'],
+                'code' => $salida['code'],
+            ]);
             return redirect()->route('principal/index');
         }
-
-        $ps = new ApiSubsidio();
-        $ps->send(
-            [
-                'servicio' => 'ComfacaAfilia',
-                'metodo' => 'parametros_empresa',
-            ]
-        );
-        $paramsEmpresa = new ParamsEmpresa;
-        $paramsEmpresa->setDatosCaptura($ps->toArray());
-
-        $params = [
-            'calemp' => ParamsEmpresa::getCalidadEmpresa(),
-            'ciudad' => ParamsEmpresa::getCiudades(),
-            'codzon' => ParamsEmpresa::getZonas(),
-            'codigo_cajas' => ParamsEmpresa::getCodigoCajas(),
-            'coddoc' => ParamsEmpresa::getTipoDocumentos(),
-            'coddocrepleg' => ParamsEmpresa::getCodruaDocumentos(),
-            'tipsoc' => ParamsEmpresa::getTipoSociedades(),
-            'codact' => ParamsEmpresa::getActividades(),
-            'tipper' => ParamsEmpresa::getTipoPersona(),
-            'tipemp' => ParamsEmpresa::getTipoEmpresa(),
-            'departamentos' => ParamsEmpresa::getDepartamentos(),
-            'tipo_duracion' => ParamsEmpresa::getTipoDuracion(),
-            'codind' => ParamsEmpresa::getCodigoIndice(),
-            'paga_mes' => ParamsEmpresa::getPagaMes(),
-            'forma_presentacion' => ParamsEmpresa::getFormaPresentacion(),
-            'pymes' => ParamsEmpresa::getPymes(),
-            'contratista' => ParamsEmpresa::getContratista(),
-            'tipapo' => ParamsEmpresa::getTipoAportante(),
-            'oficina' => ParamsEmpresa::getOficina(),
-            'colegio' => ParamsEmpresa::getColegio(),
-            'estado' => ['A' => 'ACTIVA', 'I' => 'INACTIVA', 'S' => 'SUSPENDIDA', 'D' => 'DESACTUALIZADA'],
-            'autoriza' => ['S' => 'SI', 'N' => 'NO'],
-        ];
-
-        return view('mercurio/empresa/miempresa', [
-            'empresa' => $empresa['data'],
-            'trayectorias' => $empresa['data']['trayectoria'],
-            'sucursales' => $empresa['data']['sucursales'],
-            'parametros' => $params,
-        ]);
     }
 }

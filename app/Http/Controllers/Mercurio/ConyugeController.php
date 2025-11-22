@@ -20,7 +20,6 @@ use App\Services\FormulariosAdjuntos\Formularios;
 use App\Services\PreparaFormularios\TrabajadorFormulario;
 use App\Services\Api\ApiSubsidio;
 use App\Services\Utils\AsignarFuncionario;
-use App\Services\Utils\Comman;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
 use Carbon\Carbon;
@@ -49,51 +48,60 @@ class ConyugeController extends ApplicationController
 
     public function index()
     {
-        $tipo = $this->tipo;
-        $empresa = null;
-        if (
-            $tipo == 'E' ||
-            $tipo == 'I' ||
-            $tipo == 'O' ||
-            $tipo == 'F'
-        ) {
-            $procesadorComando = new ApiSubsidio();
-            $procesadorComando->send(
-                [
-                    'servicio' => 'ComfacaEmpresas',
-                    'metodo' => 'informacion_empresa',
-                    'params' => ['nit' => $this->user['documento']],
-                ]
-            );
+        try {
+            $tipo = $this->tipo;
+            $empresa = null;
+            if (
+                $tipo == 'E' ||
+                $tipo == 'I' ||
+                $tipo == 'O' ||
+                $tipo == 'F'
+            ) {
+                $procesadorComando = new ApiSubsidio();
+                $procesadorComando->send(
+                    [
+                        'servicio' => 'ComfacaEmpresas',
+                        'metodo' => 'informacion_empresa',
+                        'params' => ['nit' => $this->user['documento']],
+                    ]
+                );
 
-            $empresa = $procesadorComando->toArray();
-            if (! isset($empresa['data'])) {
-                set_flashdata('error', [
-                    'msj' => 'Error al acceder al servicio de consulta de empresa.',
-                    'code' => 401,
-                ]);
+                $empresa = $procesadorComando->toArray();
+                if (! isset($empresa['data'])) {
+                    set_flashdata('error', [
+                        'msj' => 'Error al acceder al servicio de consulta de empresa.',
+                        'code' => 401,
+                    ]);
 
-                return redirect()->route('principal/index');
-                exit;
+                    return redirect()->route('principal/index');
+                    exit;
+                }
+
+                if ($empresa['data']['estado'] === 'I') {
+                    set_flashdata('error', [
+                        'msj' => 'La empresa ya no está activa para realizar afiliación de beneficiarios.',
+                        'code' => 401,
+                    ]);
+
+                    return redirect()->route('principal/index');
+                    exit;
+                }
             }
 
-            if ($empresa['data']['estado'] === 'I') {
-                set_flashdata('error', [
-                    'msj' => 'La empresa ya no está activa para realizar afiliación de beneficiarios.',
-                    'code' => 401,
-                ]);
-
-                return redirect()->route('principal/index');
-                exit;
-            }
+            return view('mercurio.conyuge.index', [
+                'documento' => $this->user['documento'],
+                'tipo' => $this->tipo,
+                'title' => 'Afiliación de cónyuges',
+                'empresa' => $empresa,
+            ]);
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
+            set_flashdata('error', [
+                'msj' => $salida['msj'],
+                'code' => $salida['code'],
+            ]);
+            return redirect()->route('principal/index');
         }
-
-        return view('mercurio.conyuge.index', [
-            'documento' => $this->user['documento'],
-            'tipo' => $this->tipo,
-            'title' => 'Afiliación de cónyuges',
-            'empresa' => $empresa,
-        ]);
     }
 
     public function borrarArchivo(Request $request)
@@ -117,14 +125,11 @@ class ConyugeController extends ApplicationController
                 'success' => true,
                 'msj' => 'El archivo se borro de forma correcta',
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function guardarArchivo(Request $request)
@@ -145,56 +150,61 @@ class ConyugeController extends ApplicationController
                 'msj' => 'Ok archivo procesado',
                 'data' => $mercurio37->getArray(),
             ];
-        } catch (DebugException $ert) {
-            $response = [
-                'success' => false,
-                'msj' => $ert->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function traerConyugue(Request $request)
     {
-        $cedcon = $request->input('cedcon');
+        try {
+            $cedcon = $request->input('cedcon');
+            $procesadorComando = new ApiSubsidio();
+            $procesadorComando->send(
+                [
+                    'servicio' => 'ComfacaEmpresas',
+                    'metodo' => 'informacion_conyuge',
+                    'params' => [
+                        'cedcon' => $cedcon,
+                    ],
+                ]
+            );
 
-        $procesadorComando = new ApiSubsidio();
-        $procesadorComando->send(
-            [
-                'servicio' => 'ComfacaEmpresas',
-                'metodo' => 'informacion_conyuge',
-                'params' => [
-                    'cedcon' => $cedcon,
-                ],
-            ]
-        );
+            $mercurio32 = new Mercurio32;
+            $out = $procesadorComando->toArray();
+            if ($out['success']) {
+                $datos_conyuge = $out['data'];
+                $mercurio32 = new Mercurio32($datos_conyuge);
+            }
 
-        $mercurio32 = new Mercurio32;
-        $out = $procesadorComando->toArray();
-        if ($out['success']) {
-            $datos_conyuge = $out['data'];
-            $mercurio32 = new Mercurio32($datos_conyuge);
+            $procesadorComando->send(
+                [
+                    'servicio' => 'ComfacaEmpresas',
+                    'metodo' => 'informacion_trabajador',
+                    'params' => [
+                        'cedtra' => $cedcon,
+                    ],
+                ]
+            );
+
+            $out = $procesadorComando->toArray();
+            if ($out['success']) {
+                $datos_trabajador = $out['data'];
+                $mercurio32 = new Mercurio32($datos_trabajador);
+                $mercurio32->setTipdoc($datos_trabajador['coddoc']);
+            }
+
+            $response = [
+                'success' => true,
+                'data' => $mercurio32->toArray(),
+            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
-        $procesadorComando->send(
-            [
-                'servicio' => 'ComfacaEmpresas',
-                'metodo' => 'informacion_trabajador',
-                'params' => [
-                    'cedtra' => $cedcon,
-                ],
-            ]
-        );
-
-        $out = $procesadorComando->toArray();
-        if ($out['success']) {
-            $datos_trabajador = $out['data'];
-            $mercurio32 = new Mercurio32($datos_trabajador);
-            $mercurio32->setTipdoc($datos_trabajador['coddoc']);
-        }
-
-        $this->renderObject($mercurio32->toArray());
+        return response()->json($response);
     }
 
     public function descargarDeclaracion()
@@ -455,42 +465,35 @@ class ConyugeController extends ApplicationController
 
     public function enviarCaja(Request $request)
     {
-        $this->setResponse('ajax');
+        $this->db->begin();
         try {
             $id = $request->input('id');
             $conygueService = new ConyugeService;
-            // $conygueService->setTransa();
-
             $asignarFuncionario = new AsignarFuncionario;
             $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
-
             $conygueService->enviarCaja(new SenderValidationCaja, $id, $usuario);
-            // $conygueService->endTransa();
-
             $salida = [
                 'success' => true,
                 'msj' => 'El envio de la solicitud se ha completado con éxito',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+            $this->db->commit();
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
+            $this->db->rollBack();
         }
-
         return response()->json($salida);
     }
 
     public function borrar(Request $request)
     {
-        $this->setResponse('ajax');
+        $this->db->begin();
         try {
-            $documento = parent::getActUser('documento');
+            $documento = $this->user['documento'];
             $id = $request->input('id');
 
             $m32 = Mercurio32::where('id', $id)->where('documento', $documento)->first();
             if ($m32) {
-                if ($m32->getEstado() != 'T') {
+                if ($m32->estado != 'T') {
                     Mercurio10::where('numero', $id)->where('tipopc', $this->tipopc)->delete();
                 }
                 Mercurio32::where('id', $id)->where('documento', $documento)->delete();
@@ -499,13 +502,11 @@ class ConyugeController extends ApplicationController
                 'success' => true,
                 'msj' => 'El registro se borro con éxito del sistema.',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+            $this->db->commit();
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
+            $this->db->rollBack();
         }
-
         return response()->json($salida);
     }
 
@@ -651,11 +652,8 @@ class ConyugeController extends ApplicationController
                 'data' => $componentes,
                 'msj' => 'OK',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -663,17 +661,22 @@ class ConyugeController extends ApplicationController
 
     public function renderTable(Request $request, Response $response, string $estado = '')
     {
-        $this->setResponse('view');
-        $conyugeService = new ConyugeService;
-        $html = View(
-            'mercurio/conyuge/tmp/solicitudes',
-            [
-                'path' => base_path(),
-                'conyuges' => $conyugeService->findAllByEstado($estado),
-            ]
-        )->render();
+        try {
+            $conyugeService = new ConyugeService;
+            $html = View(
+                'mercurio/conyuge/tmp/solicitudes',
+                [
+                    'path' => base_path(),
+                    'conyuges' => $conyugeService->findAllByEstado($estado),
+                ]
+            )->render();
 
-        return $this->renderText($html);
+            $this->setResponse('view');
+            return $this->renderText($html);
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
+            return response()->json($salida);
+        }
     }
 
     public function valida(Request $request, Response $response)
@@ -718,11 +721,8 @@ class ConyugeController extends ApplicationController
                 'solicitud_previa' => ($solicitud_previa > 0) ? true : false,
                 'conyuge' => $conyuge,
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -753,11 +753,8 @@ class ConyugeController extends ApplicationController
                 'data' => $data,
                 'msj' => 'OK',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
 
         return response()->json($salida);
@@ -785,11 +782,8 @@ class ConyugeController extends ApplicationController
                 'data' => $conService->dataArchivosRequeridos($sindepe),
                 'msj' => 'OK',
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -798,8 +792,8 @@ class ConyugeController extends ApplicationController
     public function formulario($id)
     {
         try {
-            $documento = parent::getActUser('documento');
-            $coddoc = parent::getActUser('coddoc');
+            $documento = $this->user['documento'];
+            $coddoc = $this->user['coddoc'];
 
             $mercurio32 = Mercurio32::where('id', $id)
                 ->where('documento', $documento)
@@ -839,11 +833,8 @@ class ConyugeController extends ApplicationController
                 'name' => $file,
                 'url' => 'conyuge/download_reporte/' . $file,
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $response = $this->handleException($e, request());
         }
 
         return response()->json($response);
@@ -859,8 +850,8 @@ class ConyugeController extends ApplicationController
                 'success' => true,
                 'data' => $out,
             ];
-        } catch (DebugException $e) {
-            $salida = ['success' => false, 'msj' => $e->getMessage()];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
         }
 
         return response()->json($salida);
@@ -908,12 +899,9 @@ class ConyugeController extends ApplicationController
                 'success' => true,
                 'data' => $subsi15,
             ];
-        } catch (DebugException $e) {
-            $salida = [
-                'flag' => false,
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        } catch (\Throwable $e) {
+            $salida = $this->handleException($e, $request);
+            $salida['flag'] = false;
         }
         return response()->json($salida);
     }
