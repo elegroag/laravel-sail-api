@@ -550,9 +550,11 @@ class BeneficiarioController extends ApplicationController
                     $cedtras[$value['cedula']] = $value['cedula'];
                 }
 
-                foreach ($trabajadoresSisu as $value) {
-                    $cedtras[$value['cedtra']] = $value['cedtra'];
+                foreach ($mercurio31 as $value) {
+                    $cedtras[$value['cedula']] = $value['cedula'];
                 }
+
+                $listAfiliados = array_merge($listAfiliados->toArray(), $mercurio31);
 
                 $procesadorComando = new ApiSubsidio();
                 $procesadorComando->send(

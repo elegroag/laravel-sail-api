@@ -99,7 +99,9 @@ export class FormConyugeView extends FormView {
         if (this.collection.props['tipo'] !== 'E') {
             this.setInput('cedtra', this.collection.props.list_afiliados[0]['cedula']);
             this.setInput('nomtra', this.collection.props.list_afiliados[0]['nombre_completo']);
-        } else {
+        }
+
+        if (this.collection.props['tipo'] === 'E') {
             this.#choiceComponents['cedtra'] = new Choices($el.find('#cedtra')[0], { silent: true, itemSelectText: '' });
         }
 

@@ -128,8 +128,10 @@ export class FormBeneficiarioView extends FormView {
 
         if (this.collection.props['tipo'] !== 'E') {
             this.setInput('cedtra', this.collection.props.list_afiliados[0]['cedula']);
-        } else {
-            this.#choiceComponents['cedtra'] = new Choices($el.find('#cedtra'), { silent: true, itemSelectText: '' });
+        }
+
+        if (this.collection.props['tipo'] === 'E') {
+            this.#choiceComponents['cedtra'] = new Choices($el.find('#cedtra')[0], { silent: true, itemSelectText: '' });
         }
 
         this.selectores.on('change', (event) => {
