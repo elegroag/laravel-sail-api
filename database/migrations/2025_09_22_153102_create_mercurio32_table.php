@@ -64,6 +64,7 @@ return new class extends Migration
             $table->char('tipcue', 1)->nullable();
             $table->char('tipdis', 2)->nullable();
             $table->char('peretn', 2)->default('7');
+            $table->char('zoneurbana', 1)->default('N')->comment('Zona urbana: S/N');
 
             $table->date('fecsol')->nullable()->comment('Fecha de solicitud');
             $table->date('fecapr')->nullable()->comment('Fecha de aprobación');

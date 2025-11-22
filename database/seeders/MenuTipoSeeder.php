@@ -877,14 +877,7 @@ class MenuTipoSeeder extends Seeder
                     'is_visible' => '1',
                     'tipo' => 'O',
                     'menu_item' => 196
-                ],
-                [
-                    'id' => 245,
-                    'position' => '7',
-                    'is_visible' => '1',
-                    'tipo' => 'P',
-                    'menu_item' => 195
-                ],
+                ]
             ];
 
             foreach ($menu_mercurio as $item1) {

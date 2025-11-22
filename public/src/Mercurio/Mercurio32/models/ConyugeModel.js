@@ -37,6 +37,7 @@ class ConyugeModel extends Backbone.Model {
             codban: '',
             tippag: '',
             nit: '',
+            zoneurbana: 'N',
         };
     }
 

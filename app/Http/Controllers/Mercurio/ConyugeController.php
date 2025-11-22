@@ -370,6 +370,7 @@ class ConyugeController extends ApplicationController
             'coddoc' => $this->user['coddoc'],
             'documento' => $this->user['documento'],
             'usuario' => $usuario,
+            'zoneurbana' => $request->input('zoneurbana') ?? 'N',
         ];
     }
 
@@ -526,9 +527,11 @@ class ConyugeController extends ApplicationController
                 foreach ($listAfiliados as $value) {
                     $cedtras[$value['cedula']] = $value['cedula'];
                 }
-                foreach ($trabajadoresSisu as $value) {
-                    $cedtras[$value['cedtra']] = $value['cedtra'];
+                foreach ($mercurio31 as $value) {
+                    $cedtras[$value['cedula']] = $value['cedula'];
                 }
+
+                $listAfiliados = array_merge($listAfiliados->toArray(), $mercurio31);
 
                 $procesadorComando = new ApiSubsidio();
                 $procesadorComando->send(

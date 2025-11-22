@@ -389,7 +389,7 @@ class TrabajadorService
      *
      * @param [type] $documento
      * @param [type] $coddoc
-     * @return void
+     * @return array|bool
      */
     public function findRequestByDocumentoCoddoc($documento, $coddoc)
     {
@@ -400,7 +400,7 @@ class TrabajadorService
             'coddoc',
             'tipo',
             'documento',
-            DB::raw("CONCAT_WS('', prinom, segnom, priape, segape) as nombre_completo")
+            DB::raw("CONCAT_WS(' ', prinom, segnom, priape, segape) as nombre_completo")
         )
             ->where([
                 ['documento', $documento],
@@ -424,6 +424,7 @@ class TrabajadorService
                 ],
             ]
         );
+        //dd($procesadorComando->getLineaComando());
         if ($procesadorComando->isJson() == false) {
             throw new DebugException('Error resultado de api', 501, base64_encode($procesadorComando->getLineaComando()));
         }

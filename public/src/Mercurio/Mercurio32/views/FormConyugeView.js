@@ -72,6 +72,7 @@ export class FormConyugeView extends FormView {
             if (this.model.get('tippag') == 'A' || this.model.get('tippag') == 'D') {
                 this.form.find('#show_numcue').removeClass('d-none');
                 this.form.find('#show_codban').removeClass('d-none');
+                this.form.find('#show_tipcue').removeClass('d-none');
             }
 
             if (this.model.get('otra_empresa') == 'N') {
@@ -98,6 +99,8 @@ export class FormConyugeView extends FormView {
         if (this.collection.props['tipo'] !== 'E') {
             this.setInput('cedtra', this.collection.props.list_afiliados[0]['cedula']);
             this.setInput('nomtra', this.collection.props.list_afiliados[0]['nombre_completo']);
+        } else {
+            this.#choiceComponents['cedtra'] = new Choices($el.find('#cedtra')[0], { silent: true, itemSelectText: '' });
         }
 
         this.selectores.on('change', (event) => {
@@ -129,9 +132,11 @@ export class FormConyugeView extends FormView {
         if (target == 'A' || target == 'D') {
             this.$el.find('#show_numcue').removeClass('d-none');
             this.$el.find('#show_codban').removeClass('d-none');
+            this.$el.find('#show_tipcue').removeClass('d-none');
         } else {
             this.$el.find('#show_numcue').addClass('d-none');
             this.$el.find('#show_codban').addClass('d-none');
+            this.$el.find('#show_tipcue').addClass('d-none');
         }
     }
 

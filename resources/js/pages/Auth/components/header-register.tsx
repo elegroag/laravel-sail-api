@@ -3,6 +3,7 @@ import { ChevronLeft } from "lucide-react"
 import type { 
     HeaderRegisterProps 
   } from "@/types/register.d"
+import UserTypeDescription from "@/components/auth/user-type-description"
 
 const HeaderRegister: React.FC<HeaderRegisterProps> = ({
     subtitle, 
@@ -17,6 +18,9 @@ const HeaderRegister: React.FC<HeaderRegisterProps> = ({
         <div>
           <h2 className="text-xl font-semibold text-gray-800">{userTypeLabel}</h2>
           <p className="text-sm text-gray-600">{subtitle ?? "Completa tu información"}</p>
+          {userTypeLabel && (
+            <UserTypeDescription userTypeLabel={userTypeLabel} />
+          )}
         </div>
       </div>
     )

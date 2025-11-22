@@ -10,6 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { userTypes } from "@/constants/auth"
+import UserTypeDescription from "@/components/auth/user-type-description"
 
 // Componente de bienvenida reutilizable para pantallas de autenticación
 // Principio de Responsabilidad Única: encapsula solo la sección visual de bienvenida
@@ -80,18 +81,10 @@ export default function AuthWelcome({
                     <div className="shrink-0">{ut.icon}</div>
                     <div>
                       <p className="font-medium leading-tight">{ut.label}</p>
-                      <p className="text-muted-foreground text-sm">
-                        {(
-                          {
-                            empresa: "Persona natural o jurídica con trabajadores a su cargo, obligada a realizar aportes y afiliarse al Sistema del Subsidio Familiar, así como a afiliar a sus trabajadores.",
-                            independiente: "Son todos los trabajadores de carácter permanente que prestan sus servicios personales a un empleador, incluidos los trabajadores domésticos y veteranos.",
-                            facultativo: "Son personas que, no encontrándose dentro de las categorías anteriores, pueden tener acceso a los servicios de las Cajas de Compensación Familiar por disposición de la Ley o en desarrollo de Convenios celebrados por las mismas.",
-                            trabajador: "Persona natural sin vínculo laboral que de forma voluntaria realiza aportes y se afilia al Sistema del Subsidio Familiar para acceder a sus servicios.",
-                            pensionado: "Persona pensionada que de forma voluntaria realiza aportes y se afilia al Sistema del Subsidio Familiar para acceder a los servicios.",
-                            particular: "Personas no afiliadas al Sistema del Subsidio Familiar que acceden a servicios de la Caja de Compensación Familiar."
-                          } as Record<string, string>
-                        )[ut.id] || "Tipo de usuario disponible para el ingreso al portal."}
-                      </p>
+                      <UserTypeDescription
+                        userTypeId={ut.id}
+                        className="text-muted-foreground text-sm"
+                      />
                     </div>
                   </div>
                 ))}

@@ -72,6 +72,14 @@
                                         <span id='component_direccion'></span>
                                     </div>
                                 </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group" group-for='zoneurbana'>
+                                        <label for="zoneurbana" class="control-label">Zona urbana</label>
+                                        <span id='component_zoneurbana'></span>
+                                    </div>
+                                </div>
+                                
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='nivedu'>
                                         <label for="nivedu" class="control-label">Nivel educación</label>
@@ -132,6 +140,13 @@
                                     <div class="form-group" group-for='numcue'>
                                         <label for="numcue" class="control-label">Número de cuenta</label>
                                         <span id='component_numcue'></span>
+                                    </div>
+                                </div>
+
+                                 <div class="col-md-3 d-none" id='show_tipcue'>
+                                    <div class='form-group' group-for='tipcue'>
+                                        <label for="tipcue" class="control-label">Tipo de cuenta</label>
+                                        <span id='component_tipcue'></span>
                                     </div>
                                 </div>
 
