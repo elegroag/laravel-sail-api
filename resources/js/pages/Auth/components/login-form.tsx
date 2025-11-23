@@ -129,6 +129,13 @@ const LoginForm: React.FC<LoginFormProps> = ({
           <span className="mr-1">🔑</span>
           Crear cuenta
         </TextLink>
+        <TextLink
+          href={route('mercurio.noty_cambio_correo')}
+          className="text-gray-500 hover:text-emerald-600 flex items-center"
+        >
+          <span className="mr-1">📧</span>
+          Solicitar cambio de correo
+        </TextLink>
       </div>
     </>
   )

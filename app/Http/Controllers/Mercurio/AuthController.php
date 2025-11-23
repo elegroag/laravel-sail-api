@@ -16,6 +16,8 @@ use App\Services\Autentications\AutenticaService;
 use App\Services\Srequest;
 use App\Services\Utils\SenderEmail;
 use App\Services\Api\ApiSubsidio;
+use App\Services\CajaServices\NotificacionService;
+use App\Services\Utils\AsignarFuncionario;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -523,6 +525,97 @@ class AuthController extends Controller
         }
 
         return Inertia::location(url($url));
+    }
+
+    public function notyCambioCorreo()
+    {
+        return Inertia::render('Auth/NotyEmail');
+    }
+
+    public function cambioCorreo(Request $request)
+    {
+        try {
+            $documento = $request->input('documento');
+            $coddoc = $request->input('coddoc');
+            $tipo = $request->input('tipo');
+            $email = $request->input('email');
+            $telefono = $request->input('telefono');
+            $novedad = $request->input('novedad');
+
+            $notificacion = new NotificacionService();
+
+            $user07 = Mercurio07::whereRaw("documento='{$documento}' and coddoc='{$coddoc}' and tipo='{$tipo}'")->first();
+            if (! $user07) {
+                throw new DebugException('Error los parametros de acceso no son validos para solicitar token', 301);
+            }
+
+            $emailCaja = Mercurio01::first();
+            $html = "Se requiere de actualizar el correo electronico de la cuenta de usuario {$user07->getNombre()}<br/>
+            Correo electronico anterior: {$user07->getEmail()}<br/>
+            Correo electronico nuevo: {$email}<br/>
+            Novedad: {$novedad}<br/>
+            Telefono: {$telefono}<br/>";
+
+            if ($tipo == 'T') {
+                $to_email = 'afiliacionyregistro@comfaca.com';
+                $funcionario = (new AsignarFuncionario)->asignar('1', $user07->getCodciu());
+            } else {
+                $to_email = 'afiliacionempresas@comfaca.com';
+                $funcionario = (new AsignarFuncionario)->asignar('2', $user07->getCodciu());
+            }
+
+            $notificacion->createNotificacion(
+                [
+                    'titulo' => 'Solicitud de cambio de correo',
+                    'descripcion' => $html,
+                    'user' => $funcionario,
+                ]
+            );
+
+            $array_tipo = [
+                'T' => 'Trabajador',
+                'P' => 'Particular',
+                'O' => 'Pensionado',
+                'F' => 'Facultativo',
+                'I' => 'Independiente',
+                'E' => 'Empleador',
+                'S' => 'Servicio domestico',
+            ];
+            $str_tipo = $array_tipo[$tipo];
+            $asunto = "Solicitud de cambio de correo {$str_tipo} Documento: {$documento}";
+
+            $senderEmail = new SenderEmail;
+            $senderEmail->setters(
+                "emisor_email: {$emailCaja->getEmail()}",
+                "emisor_clave: {$emailCaja->getClave()}",
+                "asunto: {$asunto}"
+            );
+
+            $senderEmail->send(
+                [
+                    $to_email,
+                ],
+                $html
+            );
+
+            $salida = [
+                'success' => true,
+                'msj' => 'Se ha enviado la solicitud de cambio de correo, pronto se contactara con usted para confirmar el cambio. ' .
+                    'Este proceso puede tardar ya que se requiere de la confirmación de la persona que solicita el cambio por seguridad de la informacion.',
+            ];
+        } catch (DebugException $e) {
+            $salida = $e->render($request);
+        }
+
+        return response()->json($salida);
+    }
+
+    public function fueraServicio()
+    {
+        return Inertia::render('Auth/FueraServicio', [
+            'msj' => 'El sistema se encuentra en estado de actualización y mantenimiento.<br/>
+            Con el fin de corregir errores y actualizar a versiones más seguras y óptimas que buscan la satisfacción de sus usuarios.</br>',
+        ]);
     }
 
     public function logout()

@@ -28,6 +28,8 @@ Route::get('/mercurio/show_registro', [LoginController::class, 'showRegister'])-
 Route::get('/mercurio/fuera_servicio', [LoginController::class, 'fueraServicio']);
 
 Route::post('/mercurio/tokenParticular', [LoginController::class, 'tokenParticular']);
+
+Route::post('/mercurio/noty_cambio_correo', [LoginController::class, 'notyCambioCorreo'])->name('mercurio.noty_cambio_correo');
 Route::post('/mercurio/cambio_correo', [LoginController::class, 'cambioCorreo'])->name('mercurio.cambio_correo');
 
 Route::post('/mercurio/valida_email', [LoginController::class, 'validaEmail']);

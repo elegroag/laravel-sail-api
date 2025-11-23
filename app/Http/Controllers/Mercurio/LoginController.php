@@ -187,17 +187,6 @@ class LoginController extends ApplicationController
         }
     }
 
-    public function fueraServicio()
-    {
-        $this->setResponse('empty');
-        $msj = 'El sistema se encuentra en estado de actualización y mantenimiento.<br/>
-        Con el fin de corregir errores y actualizar a versiones más seguras y óptimas que buscan la satisfacción de sus usuarios.</br>';
-        /*
-        $this->setParamToView("hora_inicia", "3:30");
-        $this->setParamToView("hora_finaliza", "4:30");
-        $this->setParamToView("nota", $msj); */
-    }
-
     public function integracionServicio()
     {
         try {
@@ -481,89 +470,6 @@ class LoginController extends ApplicationController
             $salida = [
                 'success' => true,
                 'token' => $token,
-            ];
-        } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
-            $salida = [
-                'success' => false,
-                'msj' => $salida['msj'],
-            ];
-        }
-
-        return response()->json($salida);
-    }
-
-    public function cambioCorreo(Request $request)
-    {
-        try {
-
-            $documento = $request->input('email');
-            $coddoc = $request->input('coddoc');
-            $tipo = $request->input('tipo');
-            $email = $request->input('email');
-            $telefono = $request->input('telefono');
-            $novedad = $request->input('novedad');
-
-            $notificacion = new NotificacionService();
-
-            $user07 = Mercurio07::whereRaw("documento='{$documento}' and coddoc='{$coddoc}' and tipo='{$tipo}'")->first();
-            if (! $user07) {
-                throw new DebugException('Error los parametros de acceso no son validos para solicitar token', 301);
-            }
-
-            $emailCaja = Mercurio01::first();
-            $html = "Se requiere de actualizar el correo electronico de la cuenta de usuario {$user07->getNombre()}<br/>
-            Correo electronico anterior: {$user07->getEmail()}<br/>
-            Correo electronico nuevo: {$email}<br/>
-            Novedad: {$novedad}<br/>
-            Telefono: {$telefono}<br/>";
-
-            if ($tipo == 'T') {
-                $to_email = 'afiliacionyregistro@comfaca.com';
-                $funcionario = (new AsignarFuncionario)->asignar('1', $user07->getCodciu());
-            } else {
-                $to_email = 'afiliacionempresas@comfaca.com';
-                $funcionario = (new AsignarFuncionario)->asignar('2', $user07->getCodciu());
-            }
-
-            $notificacion->createNotificacion(
-                [
-                    'titulo' => 'Solicitud de cambio de correo',
-                    'descripcion' => $html,
-                    'user' => $funcionario,
-                ]
-            );
-
-            $array_tipo = [
-                'T' => 'Trabajador',
-                'P' => 'Particular',
-                'O' => 'Pensionado',
-                'F' => 'Facultativo',
-                'I' => 'Independiente',
-                'E' => 'Empleador',
-                'S' => 'Servicio domestico',
-            ];
-            $str_tipo = $array_tipo[$tipo];
-            $asunto = "Solicitud de cambio de correo {$str_tipo} Documento: {$documento}";
-
-            $senderEmail = new SenderEmail;
-            $senderEmail->setters(
-                "emisor_email: {$emailCaja->getEmail()}",
-                "emisor_clave: {$emailCaja->getClave()}",
-                "asunto: {$asunto}"
-            );
-
-            $senderEmail->send(
-                [
-                    $to_email,
-                ],
-                $html
-            );
-
-            $salida = [
-                'success' => true,
-                'msj' => 'Se ha enviado la solicitud de cambio de correo, pronto se contactara con usted para confirmar el cambio. ' .
-                    'Este proceso puede tardar ya que se requiere de la confirmación de la persona que solicita el cambio por seguridad de la informacion.',
             ];
         } catch (\Throwable $e) {
             $salida = $this->handleException($e, request());
