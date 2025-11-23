@@ -132,6 +132,7 @@ export class FormBeneficiarioView extends FormView {
 
         if (this.collection.props['tipo'] === 'E') {
             this.#choiceComponents['cedtra'] = new Choices($el.find('#cedtra')[0], { silent: true, itemSelectText: '' });
+            $el.find('#nit').attr('readonly', 'true');
         }
 
         this.selectores.on('change', (event) => {

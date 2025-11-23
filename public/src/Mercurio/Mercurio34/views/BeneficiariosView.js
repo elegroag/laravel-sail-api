@@ -73,7 +73,7 @@ class BeneficiariosView extends Backbone.View {
     __initTable() {
         this.tableView = new DataTable(document.getElementById('tb_beneficiario'), {
             paging: true,
-            ordering: false,
+            ordering: true,
             pageLength: 10,
             pagingType: 'numbers',
             info: true,
@@ -81,26 +81,30 @@ class BeneficiariosView extends Backbone.View {
             columnDefs: [
                 {
                     targets: 0,
-                    width: '10%',
+                    width: '5%',
                 },
                 {
                     targets: 1,
-                    width: '30%',
+                    width: '5%',
                 },
                 {
                     targets: 2,
-                    width: '20%',
+                    width: '30%',
                 },
                 {
                     targets: 3,
-                    width: '20%',
+                    width: '30%',
                 },
                 {
                     targets: 4,
+                    width: '20%',
+                },
+                {
+                    targets: 5,
                     width: '10%',
                 },
             ],
-            order: [[3, 'desc']],
+            order: [[1, 'desc']],
             language: langDataTable,
         });
     }

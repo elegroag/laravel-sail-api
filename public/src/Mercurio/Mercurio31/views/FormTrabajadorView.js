@@ -105,6 +105,9 @@ class FormTrabajadorView extends FormView {
             }
         });
 
+        this.setInput('nit', this.collection.props.nit);
+        this.setInput('razsoc', this.collection.props.razsoc);
+
         eventsFormControl($el);
 
         flatpickr($el.find('#fecnac, #fecing'), {

@@ -1,12 +1,12 @@
  <table id='tb_beneficiario' class='table align-items-center mb-0'>
      <thead>
          <tr>
-             <th class='text-uppercase text-primary '>Opciones</th>
-             <th class='text-uppercase text-primary '>Beneficiario</th>
-             <th class='text-uppercase text-primary '>Estado</th>
-             <th class='text-uppercase text-primary '>Evento ultimo generado</th>
-             <th class='text-uppercase text-primary '>Fecha solicitud</th>
-
+            <th>Opciones</th>
+            <th>Radicado</th>
+            <th>Beneficiario</th>
+            <th>Estado</th>
+            <th>Evento ultimo generado</th>
+            <th>Fecha solicitud</th>
          </tr>
      </thead>
      <tbody id='consulta'></tbody>

@@ -376,9 +376,7 @@ class TrabajadorController extends ApplicationController
                 'autoriza' => autoriza_array(),
                 'comision' => comision_array(),
                 'labora_otra_empresa' => labora_otra_empresa_array(),
-                'codsuc' => $codsuc,
-                'nit' => [$nit => $nit],
-                'razsoc' => [$empresa_sisu['razsoc'] => $empresa_sisu['razsoc']],
+                'codsuc' => $codsuc
             ];
 
             $formulario = FormularioDinamico::where('name', 'mercurio31')->first();
@@ -391,6 +389,12 @@ class TrabajadorController extends ApplicationController
                 $_componente['id'] = $componente->name;
                 return $_componente;
             });
+
+            $componentes['props'] = [
+                'name' => null,
+                'nit' => $nit,
+                'razsoc' => $empresa_sisu['razsoc'],
+            ];
 
             $salida = [
                 'success' => true,

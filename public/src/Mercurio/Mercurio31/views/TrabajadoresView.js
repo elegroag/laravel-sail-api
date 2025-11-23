@@ -100,7 +100,7 @@ class TrabajadoresView extends Backbone.View {
                     width: '20%',
                 },
             ],
-            order: [[0, 'desc']],
+            order: [[4, 'desc']],
             language: langDataTable,
         });
     }
