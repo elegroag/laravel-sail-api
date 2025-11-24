@@ -8,6 +8,7 @@
         <td></td>
         <td></td>
         <td></td>
+        <td></td>
     </tr>
 @endif
 
@@ -54,15 +55,15 @@
                 @endif
             </div>
         </td>
+        <td>{{ $solicitud['ruuid'] }}</td>
         <td>{{ $solicitud['cedtra'] }}</td>
         <td>
-            <p style='font-size:0.9rem; margin:0px'> {{ capitalize($solicitud['prinom'] . ' ' . $solicitud['segnom'] . ' ' . $solicitud['priape'] . ' ' . $solicitud['segape']) }}</p>
+            {{ capitalize($solicitud['prinom'] . ' ' . $solicitud['segnom'] . ' ' . $solicitud['priape'] . ' ' . $solicitud['segape']) }}
         </td>
         <td>{{ $solicitud['estado_detalle'] }}</td>
         <td>
-            <p style='font-size:0.9rem; margin:0px'>
                 {{ $solicitud['fecha_ultima_solicitud'] ? $solicitud['fecha_ultima_solicitud'] : "No se ha realizado ningún envío para validación" }}
-                N° {{ $solicitud['cantidad_eventos'] }}</p>
+                N° {{ $solicitud['cantidad_eventos'] }}
         </td>
         <td>{{ $solicitud['fecsol'] }}</td>
     </tr>

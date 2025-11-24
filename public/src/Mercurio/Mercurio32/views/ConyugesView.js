@@ -72,7 +72,7 @@ class ConyugesView extends Backbone.View {
     __initTable() {
         this.tableView = new DataTable(document.getElementById('tb_conyuge'), {
             paging: true,
-            ordering: false,
+            ordering: true,
             pageLength: 10,
             pagingType: 'numbers',
             info: true,
@@ -80,26 +80,30 @@ class ConyugesView extends Backbone.View {
             columnDefs: [
                 {
                     targets: 0,
-                    width: '10%',
+                    width: '5%',
                 },
                 {
                     targets: 1,
-                    width: '35%',
+                    width: '10%',
                 },
                 {
                     targets: 2,
-                    width: '20%',
+                    width: '35%',
                 },
                 {
                     targets: 3,
-                    width: '15%',
+                    width: '10%',
                 },
                 {
                     targets: 4,
+                    width: '25%',
+                },
+                {
+                    targets: 5,
                     width: '20%',
                 },
             ],
-            order: [[3, 'desc']],
+            order: [[1, 'desc']],
             language: langDataTable,
         });
     }

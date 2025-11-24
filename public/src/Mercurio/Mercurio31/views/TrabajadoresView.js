@@ -69,7 +69,7 @@ class TrabajadoresView extends Backbone.View {
     __initTable() {
         this.tableView = new DataTable('#tb_trabajadores', {
             paging: true,
-            ordering: false,
+            ordering: true,
             pageLength: 10,
             pagingType: 'numbers',
             info: true,
@@ -81,26 +81,30 @@ class TrabajadoresView extends Backbone.View {
                 },
                 {
                     targets: 1,
-                    width: '10%',
+                    width: '15%',
                 },
                 {
                     targets: 2,
-                    width: '30%',
-                },
-                {
-                    targets: 3,
                     width: '10%',
                 },
                 {
-                    targets: 4,
+                    targets: 3,
                     width: '30%',
                 },
                 {
+                    targets: 4,
+                    width: '10%',
+                },
+                {
                     targets: 5,
-                    width: '20%',
+                    width: '30%',
+                },
+                {
+                    targets: 6,
+                    width: '15%',
                 },
             ],
-            order: [[4, 'desc']],
+            order: [[1, 'desc']],
             language: langDataTable,
         });
     }

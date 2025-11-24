@@ -13,6 +13,14 @@
                         <fieldset>
                             <legend>Datos relación trabajador - conyuge</legend>
                             <div class="row justify-content-around">
+
+                                <div class="col-md-3">
+                                    <div class='form-group' group-for='nit'>
+                                        <label class='control-label'>NIT</label>
+                                        <span id='component_nit'></span>
+                                    </div>
+                                </div>
+
                                 <div class="col-md-4 col-lg-3">
                                     <div class="form-group" group-for='cedtra'>
                                         <label for="cedtra" class="control-label">Identificación del trabajador</label>
@@ -27,12 +35,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
-                                    <div class='form-group' group-for='nit'>
-                                        <label class='control-label'>NIT</label>
-                                        <span id='component_nit'></span>
-                                    </div>
-                                </div>
+                             
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='comper'>
@@ -82,14 +85,14 @@
                                 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='nivedu'>
-                                        <label for="nivedu" class="control-label">Nivel educación</label>
+                                        <label for="nivedu" class="control-label">Nivel de educación</label>
                                         <span id='component_nivedu'></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='captra'>
-                                        <label for="captra" class="control-label">Capacidad trabajo</label>
+                                        <label for="captra" class="control-label">Capacidad de trabajar</label>
                                         <span id='component_captra'></span>
                                     </div>
                                 </div>
