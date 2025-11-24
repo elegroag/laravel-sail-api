@@ -14,13 +14,12 @@ interface Option {
 }
 
 const tipoAfiliadoOptions: Option[] = [
+    { value: 'E', label: 'Empresa o Empleador' },
     { value: 'T', label: 'Trabajador' },
+    { value: 'I', label: 'Trabajador Independiente' },
     { value: 'P', label: 'Particular' },
     { value: 'O', label: 'Pensionado' },
     { value: 'F', label: 'Facultativo' },
-    { value: 'I', label: 'Independiente' },
-    { value: 'E', label: 'Empleador' },
-    { value: 'S', label: 'Servicio doméstico' },
 ];
 
 const useNotyEmailController = ({ errors }: NotyEmailControllerProps) => {
@@ -87,7 +86,7 @@ const useNotyEmailController = ({ errors }: NotyEmailControllerProps) => {
         setSuccessMessage(null);
 
         try {
-            const response = await fetch(route('mercurio.cambio_correo'), {
+            const response = await fetch(route('web.cambio_correo'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -107,7 +106,10 @@ const useNotyEmailController = ({ errors }: NotyEmailControllerProps) => {
             const data = await response.json();
 
             if (response.ok && data?.success) {
-                setSuccessMessage(data.msj || 'Se ha enviado la solicitud de cambio de correo correctamente.');
+                setSuccessMessage(
+                    data.msj ||
+                        'Tu solicitud de cambio de correo fue registrada correctamente. Nuestro equipo revisará la información y, una vez validada, actualizaremos el correo asociado a tu cuenta.',
+                );
                 // Limpiar algunos campos tras éxito
                 setTelefono('');
                 setNovedad('');
@@ -120,6 +122,19 @@ const useNotyEmailController = ({ errors }: NotyEmailControllerProps) => {
         } finally {
             setProcessing(false);
         }
+    };
+
+    const handleNewRequest = () => {
+        setSuccessMessage(null);
+        setAlertMessage(null);
+        setTipoAfiliado('T');
+        const firstDoc = Object.keys(Coddoc || {})[0];
+        setDocumentType(firstDoc || '');
+        setDocumento('');
+        setNombre('');
+        setTelefono('');
+        setEmail('');
+        setNovedad('');
     };
 
     return {
@@ -143,6 +158,7 @@ const useNotyEmailController = ({ errors }: NotyEmailControllerProps) => {
         documentTypeOptions,
         tipoAfiliadoOptions,
         handleSubmit,
+        handleNewRequest,
     };
 };
 

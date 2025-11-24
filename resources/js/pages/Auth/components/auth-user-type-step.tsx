@@ -65,6 +65,15 @@ const AuthUserTypeStep: React.FC<Props> = ({
           Crear cuenta
         </TextLink>
       </div>
+      <div className="mt-4 flex justify-center space-x-8 text-sm">
+        <TextLink
+          href={route('web.noty_cambio_correo')}
+          className="text-gray-500 hover:text-emerald-600 flex items-center"
+        >
+          <span className="mr-1">📧</span>
+          Solicitar cambio de correo.
+        </TextLink>
+      </div>
     </>
   )
 }

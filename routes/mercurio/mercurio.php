@@ -19,19 +19,14 @@ Route::post('/web/load_session', [AuthController::class, 'loadSession'])->name('
 Route::post('/web/salir', [AuthController::class, 'logout'])->name('login.salir');
 Route::get('/web/salir', [AuthController::class, 'logout'])->name('logout');
 Route::get('/web/params-login', [AuthController::class, 'paramsLogin'])->name('login.params');
+Route::get('/web/noty_cambio_correo', [AuthController::class, 'notyCambioCorreo'])->name('web.noty_cambio_correo');
+Route::post('/web/cambio_correo', [AuthController::class, 'cambioCorreo'])->name('web.cambio_correo');
 
 Route::post('/mercurio/recuperar_clave', [LoginController::class, 'recuperarClave']);
 Route::post('/mercurio/registro', [LoginController::class, 'registro']);
-Route::post('/mercurio/paramsLogin', [LoginController::class, 'paramsLogin']);
-
 Route::get('/mercurio/show_registro', [LoginController::class, 'showRegister'])->name('mercurio.register');
 Route::get('/mercurio/fuera_servicio', [LoginController::class, 'fueraServicio']);
-
 Route::post('/mercurio/tokenParticular', [LoginController::class, 'tokenParticular']);
-
-Route::post('/mercurio/noty_cambio_correo', [LoginController::class, 'notyCambioCorreo'])->name('mercurio.noty_cambio_correo');
-Route::post('/mercurio/cambio_correo', [LoginController::class, 'cambioCorreo'])->name('mercurio.cambio_correo');
-
 Route::post('/mercurio/valida_email', [LoginController::class, 'validaEmail']);
 Route::get('/mercurio/integracion_servicio', [LoginController::class, 'integracionServicio']);
 Route::post('/mercurio/download_docs/{archivo}', [LoginController::class, 'downloadDocuments']);

@@ -26,6 +26,7 @@ export default function NotyEmail({ errors }: any) {
     documentTypeOptions,
     tipoAfiliadoOptions,
     handleSubmit,
+    handleNewRequest,
   } = useNotyEmailController({
     errors,
   });
@@ -66,7 +67,10 @@ export default function NotyEmail({ errors }: any) {
         <AuthBackgroundShapes />
 
         <div className="max-w-md mx-auto w-full space-y-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form
+            onSubmit={handleSubmit}
+            className={`space-y-4 ${successMessage ? 'hidden' : ''}`}
+          >
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Tipo de afiliado
@@ -110,7 +114,7 @@ export default function NotyEmail({ errors }: any) {
                 Documento
               </label>
               <input
-                type="text"
+                type="number"
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                 value={documento}
                 onChange={(e) => setDocumento(e.target.value)}
@@ -137,7 +141,7 @@ export default function NotyEmail({ errors }: any) {
                 Teléfono de contacto
               </label>
               <input
-                type="tel"
+                type="number"
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                 value={telefono}
                 onChange={(e) => setTelefono(e.target.value)}
@@ -189,9 +193,21 @@ export default function NotyEmail({ errors }: any) {
           {successMessage && (
             <div className="mt-4">
               <Alert className="w-100 mx-auto border-emerald-200 bg-emerald-50">
-                <AlertTitle className="text-emerald-800">Solicitud enviada</AlertTitle>
-                <AlertDescription className="text-gray-700">
-                  {successMessage}
+                <AlertTitle className="text-emerald-800">Solicitud registrada</AlertTitle>
+                <AlertDescription className="text-gray-700 space-y-2">
+                  <p>{successMessage}</p>
+                  <p className="text-sm text-gray-600">
+                    Hemos recibido tu solicitud con la siguiente información:<br />
+                    Documento: <span className="font-medium">{documento}</span><br />
+                    Correo reportado: <span className="font-medium">{email}</span>
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleNewRequest}
+                    className="mt-2 inline-flex items-center justify-center rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                  >
+                    Registrar otra solicitud
+                  </button>
                 </AlertDescription>
               </Alert>
             </div>
