@@ -71,7 +71,7 @@ class EmpresasView extends Backbone.View {
     __initTable() {
         this.tableView = this.$el.find('#tb_empresas').DataTable({
             paging: true,
-            ordering: false,
+            ordering: true,
             pageLength: 10,
             pagingType: 'numbers',
             info: true,
@@ -79,15 +79,16 @@ class EmpresasView extends Backbone.View {
             columnDefs: [
                 {
                     targets: 0,
-                    width: '10%',
+                    width: '5%',
+                    orderable: false,
                 },
                 {
                     targets: 1,
-                    width: '40%',
+                    width: '5%',
                 },
                 {
                     targets: 2,
-                    width: '10%',
+                    width: '40%',
                 },
                 {
                     targets: 3,
@@ -97,8 +98,12 @@ class EmpresasView extends Backbone.View {
                     targets: 4,
                     width: '10%',
                 },
+                {
+                    targets: 5,
+                    width: '10%',
+                },
             ],
-            order: [[0, 'desc']],
+            order: [[1, 'desc']],
             language: langDataTable,
         });
     }

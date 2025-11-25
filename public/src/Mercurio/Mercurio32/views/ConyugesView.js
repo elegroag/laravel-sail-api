@@ -81,6 +81,7 @@ class ConyugesView extends Backbone.View {
                 {
                     targets: 0,
                     width: '5%',
+                    orderable: false,
                 },
                 {
                     targets: 1,

@@ -8,6 +8,7 @@
         <td></td>
         <td></td>
         <td></td>
+        <td></td>
     </tr>
 @endif
 
@@ -55,23 +56,22 @@
             </div>
         </td>
         <td>
-            <p class="text-sm  mb-0">
-                Identificación {{ $solicitud['nit'] }}
-                {{ ucfirst($solicitud['razsoc']) }}
-                Empresa {{ $solicitud['tipo_persona'] }} De {{ $solicitud['detalle_zona'] }}
-            </p>
+            {{ $solicitud['ruuid'] }}
         </td>
         <td>
-            <p class="text-sm  mb-0">{{ $solicitud['estado_detalle'] }}</p>
+            Identificación {{ $solicitud['nit'] }}
+            {{ ucfirst($solicitud['razsoc']) }}
+            Empresa {{ $solicitud['tipo_persona'] }} De {{ $solicitud['detalle_zona'] }}
         </td>
         <td>
-            <p class="text-sm  mb-0">
-                {{ $solicitud['fecha_ultima_solicitud'] ?: "<br/>No se ha realizado ningún envío para validación" }}
-                N° {{ $solicitud['cantidad_eventos'] }}
-            </p>
+            {{ $solicitud['estado_detalle'] }}
         </td>
         <td>
-            <p class="text-sm  mb-0">{{ $solicitud['fecest'] ?: $solicitud['fecini'] }}</p>
+            {{ $solicitud['fecha_ultima_solicitud'] ?: "No se ha realizado ningún envío para validación" }}
+            N° {{ $solicitud['cantidad_eventos'] }}
+        </td>
+        <td>
+            {{ $solicitud['fecest'] ?: $solicitud['fecini'] }}
         </td>
     </tr>
 @endforeach

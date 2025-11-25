@@ -1,5 +1,6 @@
 import { $App } from '@/App';
 import { ControllerPrincipal } from './ControllerPrincipal';
+import FormClaveFirma from './FormClaveFirma';
 
 class RouterPrincipal extends Backbone.Router {
     constructor(options = {}) {
@@ -20,10 +21,12 @@ class RouterPrincipal extends Backbone.Router {
 
     listServices() {
         this.currentApp.listServices();
+        FormClaveFirma();
     }
 
     descargaDocumentos() {
         this.currentApp.descargaDocumentos();
+        FormClaveFirma();
     }
 
     changePassword() {
