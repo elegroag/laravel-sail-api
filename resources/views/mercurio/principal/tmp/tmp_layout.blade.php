@@ -50,11 +50,6 @@
             <div class="section-content">
                 <div class="totales-grid" id="show_totales">
                     <!-- Contenido cargado dinámicamente -->
-                    <div class="loading-placeholder">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Cargando...</span>
-                        </div>
-                    </div>
                 </div>
             </div>
         </section>

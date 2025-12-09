@@ -194,6 +194,8 @@
 	display: flex;
 	align-items: center;
 	gap: 0.75rem;
+	width: 100%;
+	box-sizing: border-box;
 	text-decoration: none;
 	font-size: 0.875rem;
 }
@@ -570,8 +572,8 @@
 	background: #37516A;
 	border-radius: .1rem;
 	color: #fff;
-	margin-left:7px;
-	margin-right:7px;
+	margin-left: 0;
+	margin-right: 0;
 }
 
 .sidenav-toggler.active .sidenav-toggler-inner:before {
@@ -1002,9 +1004,22 @@
 		display: block;
 	}
 
-	/* Main content sin margen en móviles */
+	/* Ocultar toggler de sidebar en móviles (se usa solo el botón de cierre) */
+	.sidenav-toggler-desktop {
+		display: none !important;
+	}
+
+	/* Main content sin margen en móviles, siempre a ancho completo */
+	.g-sidenav-pinned .main-content,
+	.g-sidenav-hidden .main-content,
 	.main-content {
 		margin-left: 0 !important;
+		width: 100%;
+	}
+
+	/* Navbar-top ocupa todo el ancho disponible en móviles */
+	.navbar-top {
+		width: 100%;
 	}
 
 	/* Navbar title más pequeño */
@@ -1042,16 +1057,18 @@
 }
 
 /* ============================================
-   MAIN CONTENT ADJUSTMENTS
+   MAIN CONTENT ADJUSTMENTS (ESCRITORIO)
    ============================================ */
-.g-sidenav-pinned .main-content {
-	margin-left: var(--sidenav-width);
-	transition: margin-left var(--sidenav-transition);
-}
+@media (min-width: 1200px) {
+	.g-sidenav-pinned .main-content {
+		margin-left: var(--sidenav-width);
+		transition: margin-left var(--sidenav-transition);
+	}
 
-.g-sidenav-hidden .main-content {
-	margin-left: var(--sidenav-width-collapsed);
-	transition: margin-left var(--sidenav-transition);
+	.g-sidenav-hidden .main-content {
+		margin-left: var(--sidenav-width-collapsed);
+		transition: margin-left var(--sidenav-transition);
+	}
 }
 
 /* ============================================

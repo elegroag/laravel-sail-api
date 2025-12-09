@@ -31,3 +31,16 @@
 		padding-left: 20px;
 	}
 }
+
+/* ============================================
+   RESPONSIVE - MÓVILES (ANCHO COMPLETO)
+   ============================================ */
+@media (max-width: 1199.98px) {
+	.main-content,
+	.g-sidenav-hidden .main-content,
+	.g-sidenav-pinned .main-content,
+	.sidenav.fixed-left .main-content {
+		margin-left: 0 !important;
+		width: 100% !important;
+	}
+}
