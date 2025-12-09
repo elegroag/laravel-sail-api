@@ -1,111 +1,237 @@
+/**
+ * Sidenav.js
+ * Sistema de navegación lateral responsive
+ * Maneja estados en desktop y móviles
+ */
 (function () {
-    function pinSidenav() {
+    'use strict';
+
+    // Constantes
+    var BREAKPOINT_XL = 1200;
+    var TRANSITION_DURATION = 300;
+
+    /**
+     * Verifica si estamos en vista móvil
+     * @returns {boolean}
+     */
+    function isMobile() {
+        return $(window).width() < BREAKPOINT_XL;
+    }
+
+    /**
+     * Verifica si el sidebar está expandido
+     * @returns {boolean}
+     */
+    function isSidenavOpen() {
+        return $('body').hasClass('g-sidenav-pinned') || $('body').hasClass('g-sidenav-show');
+    }
+
+    /**
+     * Abre/Expande el sidenav
+     */
+    function openSidenav() {
+        var $body = $('body');
+
+        // Remover clases de estado oculto
+        $body.removeClass('g-sidenav-hidden g-sidenav-hide');
+
+        // Agregar clases de estado visible
+        $body.addClass('g-sidenav-show g-sidenav-pinned');
+
+        // Actualizar togglers
         $('.sidenav-toggler').addClass('active');
-        $('.sidenav-toggler').data('action', 'sidenav-unpin');
-        $('body').removeClass('g-sidenav-hidden').addClass('g-sidenav-show g-sidenav-pinned');
-        $('body').append('<div class="backdrop d-xl-none" data-action="sidenav-unpin" data-target=' + $('#sidenav-main').data('target') + ' />');
-        // Store the sidenav state in a cookie session
-        Cookies.set('sidenav-state', 'pinned');
+        $('.navbar-toggler-sidenav').addClass('active');
+
+        // Solo guardar estado en desktop
+        if (!isMobile()) {
+            Cookies.set('sidenav-state', 'pinned');
+        }
+
+        // Prevenir scroll del body en móviles
+        if (isMobile()) {
+            $body.css('overflow', 'hidden');
+        }
+
+        console.log('Sidenav abierto');
     }
 
-    function unpinSidenav() {
+    /**
+     * Cierra/Colapsa el sidenav
+     */
+    function closeSidenav() {
+        var $body = $('body');
+
+        // Remover clases de estado visible
+        $body.removeClass('g-sidenav-pinned g-sidenav-show');
+
+        // Agregar clase de transición
+        $body.addClass('g-sidenav-hide');
+
+        // Actualizar togglers
         $('.sidenav-toggler').removeClass('active');
-        $('.sidenav-toggler').data('action', 'sidenav-pin');
-        $('body').removeClass('g-sidenav-pinned').addClass('g-sidenav-hidden');
-        $('body').find('.backdrop').remove();
-        // Store the sidenav state in a cookie session
-        Cookies.set('sidenav-state', 'unpinned');
+        $('.navbar-toggler-sidenav').removeClass('active');
 
-        if (!$('body').hasClass('g-sidenav-pinned')) {
-            $('body').removeClass('g-sidenav-show').addClass('g-sidenav-hide');
+        // Después de la transición, agregar clase hidden
+        setTimeout(function () {
+            $body.removeClass('g-sidenav-hide').addClass('g-sidenav-hidden');
+        }, TRANSITION_DURATION);
 
-            setTimeout(function () {
-                $('body').removeClass('g-sidenav-hide').addClass('g-sidenav-hidden');
-            }, 300);
+        // Solo guardar estado en desktop
+        if (!isMobile()) {
+            Cookies.set('sidenav-state', 'unpinned');
+        }
+
+        // Restaurar scroll del body
+        $body.css('overflow', '');
+
+        console.log('Sidenav cerrado');
+    }
+
+    /**
+     * Alterna el estado del sidenav
+     */
+    function toggleSidenav() {
+        if (isSidenavOpen()) {
+            closeSidenav();
+        } else {
+            openSidenav();
         }
     }
 
-    var $sidenavState = Cookies.get('sidenav-state') ? Cookies.get('sidenav-state') : 'pinned';
+    /**
+     * Inicializa el estado del sidenav según el dispositivo
+     */
+    function initSidenavState() {
+        var $body = $('body');
 
-    if ($(window).width() > 1200) {
-        if ($sidenavState == 'pinned') {
-            pinSidenav();
-        }
+        if (isMobile()) {
+            // En móviles: siempre oculto por defecto
+            $body.removeClass('g-sidenav-show g-sidenav-pinned');
+            $body.addClass('g-sidenav-hidden');
+            $('.sidenav-toggler, .navbar-toggler-sidenav').removeClass('active');
+        } else {
+            // En desktop: respetar la cookie, por defecto abierto
+            var sidenavState = Cookies.get('sidenav-state');
 
-        if (Cookies.get('sidenav-state') == 'unpinned') {
-            unpinSidenav();
+            // Si no hay cookie o es 'pinned', abrir el sidebar
+            if (!sidenavState || sidenavState === 'pinned') {
+                openSidenav();
+            } else {
+                closeSidenav();
+            }
         }
     }
 
-    // Reactivar transiciones después de aplicar el estado inicial, garantizando 1 frame de pintura
-    if (document && document.body) {
+    /**
+     * Maneja el cambio de tamaño de ventana
+     */
+    function handleResize() {
+        var $body = $('body');
+
+        if (isMobile()) {
+            // Al cambiar a móvil: cerrar sidebar
+            if (isSidenavOpen()) {
+                $body.removeClass('g-sidenav-show g-sidenav-pinned');
+                $body.addClass('g-sidenav-hidden');
+                $body.css('overflow', '');
+            }
+        } else {
+            // Al cambiar a desktop: restaurar estado guardado
+            var sidenavState = Cookies.get('sidenav-state');
+
+            if (!sidenavState || sidenavState === 'pinned') {
+                if (!$body.hasClass('g-sidenav-pinned')) {
+                    openSidenav();
+                }
+            }
+        }
+
+        // Ajustar altura mínima del body
+        $('body').css('min-height', '100vh');
+        $('body').css('overflow-x', 'hidden');
+    }
+
+    /**
+     * Inicialización
+     */
+    function init() {
+        console.log('Sidenav: Inicializando...');
+
+        // Aplicar estado inicial sin animación
+        $('body').addClass('no-animate');
+
+        // Inicializar estado del sidenav
+        initSidenavState();
+
+        // Reactivar transiciones después del primer frame de pintura
         requestAnimationFrame(function () {
             requestAnimationFrame(function () {
                 $('body').removeClass('no-animate');
             });
         });
-    } else {
-        setTimeout(function () {
-            $('body').removeClass('no-animate');
-        }, 0);
+
+        // Manejar clicks en botones del sidenav
+        $(document).on('click', '.sidenav-toggler, .navbar-toggler-sidenav, .sidenav-close', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleSidenav();
+        });
+
+        // Manejar click en overlay para cerrar
+        $(document).on('click', '.sidenav-overlay', function (e) {
+            e.preventDefault();
+            if (isMobile() && isSidenavOpen()) {
+                closeSidenav();
+            }
+        });
+
+        // Manejar clicks en data-action para compatibilidad
+        $(document).on('click', '[data-action]', function (e) {
+            var action = $(this).attr('data-action');
+
+            // Solo procesar acciones de sidenav si no es un toggler (ya manejado arriba)
+            if (
+                $(this).hasClass('sidenav-toggler') ||
+                $(this).hasClass('navbar-toggler-sidenav') ||
+                $(this).hasClass('sidenav-close') ||
+                $(this).hasClass('sidenav-overlay')
+            ) {
+                return;
+            }
+
+            switch (action) {
+                case 'sidenav-pin':
+                    e.preventDefault();
+                    openSidenav();
+                    break;
+
+                case 'sidenav-unpin':
+                    e.preventDefault();
+                    closeSidenav();
+                    break;
+            }
+        });
+
+        // Cerrar sidenav al presionar Escape (solo en móviles)
+        $(document).on('keydown', function (e) {
+            if (e.key === 'Escape' && isMobile() && isSidenavOpen()) {
+                closeSidenav();
+            }
+        });
+
+        // Manejar resize de ventana con debounce
+        var resizeTimeout;
+        $(window).on('resize', function () {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(handleResize, 150);
+        });
+
+        // Inicializar altura del body
+        handleResize();
+
+        console.log('Sidenav: Inicialización completa. Estado:', isSidenavOpen() ? 'abierto' : 'cerrado');
     }
 
-    $('body').on('click', '[data-action]', function (e) {
-        e.preventDefault();
-
-        var $this = $(this);
-        var action = $this.data('action');
-        var target = $this.data('target');
-
-        // Manage actions
-
-        switch (action) {
-            case 'sidenav-pin':
-                pinSidenav();
-                break;
-
-            case 'sidenav-unpin':
-                unpinSidenav();
-                break;
-
-            case 'search-show':
-                target = $this.data('target');
-                $('body').removeClass('g-navbar-search-show').addClass('g-navbar-search-showing');
-
-                setTimeout(function () {
-                    $('body').removeClass('g-navbar-search-showing').addClass('g-navbar-search-show');
-                }, 150);
-
-                setTimeout(function () {
-                    $('body').addClass('g-navbar-search-shown');
-                }, 300);
-                break;
-
-            case 'search-close':
-                target = $this.data('target');
-                $('body').removeClass('g-navbar-search-shown');
-
-                setTimeout(function () {
-                    $('body').removeClass('g-navbar-search-show').addClass('g-navbar-search-hiding');
-                }, 150);
-
-                setTimeout(function () {
-                    $('body').removeClass('g-navbar-search-hiding').addClass('g-navbar-search-hidden');
-                }, 300);
-
-                setTimeout(function () {
-                    $('body').removeClass('g-navbar-search-hidden');
-                }, 500);
-                break;
-        }
-    });
-
-    // Make the body full screen size if it has not enough content inside
-    $(window).on('load resize', function () {
-        if ($('body').height() < 800) {
-            $('body').css('min-height', '100%');
-            $('body').css('overflow-x', 'hidden');
-            $('#footer-main').addClass('footer-auto-bottom');
-        }
-    });
+    // Ejecutar inicialización cuando el DOM esté listo
+    $(document).ready(init);
 })();
