@@ -2,32 +2,28 @@
     position: relative;
     margin-left: 62px;
     width: calc(100% - 62px);
-    transition: all .3s ease;
     min-height: calc(100vh - 70px);
-    z-index: 1;
+	transition: all .3s ease;
 }
 
 .g-sidenav-hidden .main-content {
     margin-left: 62px;
     width: calc(100% - 62px);
-	transition: all .3s ease;
 }
 
 .g-sidenav-pinned .main-content {
     margin-left: 250px;
 	width: calc(100% - 250px);
-	transition: all .3s ease;
 }
 
 .sidenav.fixed-left .main-content {
 	margin-left: 62px;
-	transition: all .3s ease;
+	width: calc(100% - 62px);
 }
 
 .main-content .navbar-top {
 	padding: 0;
 }
-
 
 @media (min-width: 768px) {
 	.main-content .container-fluid {

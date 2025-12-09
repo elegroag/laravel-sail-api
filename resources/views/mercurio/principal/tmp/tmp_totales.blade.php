@@ -4,7 +4,8 @@
         <div class="total-affiliations-icon text-info"><span class="fas fa-user"></span></div>
     </div>
     <div class="total-value"><%=temporales %>
-        solicitudes</div>
+        solicitudes
+    </div>
 </div>
 <div class="mb-sm-3 total-affiliations-card">
     <div class="total-affiliations-header">
@@ -12,7 +13,8 @@
         <div class="total-affiliations-icon text-success"><span class="fas fa-user"></span></div>
     </div>
     <div class="total-value"><%=aprobados %>
-        solicitudes</div>
+        solicitudes
+    </div>
 </div>
 <div class="mb-sm-3 total-affiliations-card">
     <div class="total-affiliations-header">
@@ -20,7 +22,8 @@
         <div class="total-affiliations-icon text-yellow"><span class="fas fa-user"></span></div>
     </div>
     <div class="total-value"><%=pendientes %>
-        solicitudes</div>
+        solicitudes
+    </div>
 </div>
 <div class="mb-sm-3 total-affiliations-card">
     <div class="total-affiliations-header">
@@ -28,7 +31,8 @@
         <div class="total-affiliations-icon text-danger"><span class="fas fa-user"></span></div>
     </div>
     <div class="total-value"><%=rechazados %>
-        solicitudes</div>
+        solicitudes
+    </div>
 </div>
 <div class="mb-sm-3 total-affiliations-card">
     <div class="total-affiliations-header">
@@ -36,5 +40,6 @@
         <div class="total-affiliations-icon text-info"><span class="fas fa-user"></span></div>
     </div>
     <div class="total-value"><%=devueltos %>
-        solicitudes</div>
+        solicitudes
+    </div>
 </div>

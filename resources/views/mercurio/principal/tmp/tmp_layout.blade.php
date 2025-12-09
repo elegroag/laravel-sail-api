@@ -1,5 +1,5 @@
-<div class="container-fluid m-3" id="show_totales"></div>
-<div class="container-fluid m-3">
+<div class="col mt-3 mb-3" id="show_totales"></div>
+<div class="col mt-3 mb-5">
     <div class="pb-1">
         <h4 class="font-weight-bold" for='afiliaciones'>Movimientos</h4>
         <p class="text-muted">Gestiona y monitorea todas las solicitudes de afiliación en tiempo real</p>
@@ -20,5 +20,3 @@
         <div class="row justify-content-start mb-2 mt-2" id="show_productos"></div>
     </div>
 </div>
-
-<div class='row mb-5'></div>
