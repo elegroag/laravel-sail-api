@@ -3,6 +3,10 @@ import { PrincipalLayout } from './PrincipalLayout';
 import { ServiciosView } from './ServiciosView';
 import { TotalesView } from './TotalesView';
 
+/**
+ * ControllerPrincipal
+ * Controlador principal con carga dinámica de secciones
+ */
 class ControllerPrincipal {
     constructor(options) {
         this.App = null;
@@ -15,47 +19,138 @@ class ControllerPrincipal {
 
         this.layout = new PrincipalLayout();
         this.listenTo(this.layout, 'form:cancel', this.destroy);
+
+        // Escuchar eventos de sección visible para carga lazy
+        this.listenTo(this.layout, 'section:visible', this.__onSectionVisible);
+
         this.region.show(this.layout);
     }
 
+    /**
+     * Lista los servicios y carga el contenido dinámicamente
+     */
     listServices() {
         this.__validaSyncro();
         this.__buscarServicios({
             callback: (response) => {
                 if (response) {
-                    if (this.App.Collections.afiliacion) {
-                        _.each(this.App.Collections.afiliacion, (item) => {
-                            item.tipo = 'afiliacion';
-                            const view = new ServiciosView({ model: item });
-                            this.layout.getRegion('afiliaciones').append(view);
-                        });
-                    }
+                    // Cargar sección de totales
+                    this.__loadTotalesSection(response.totales);
 
-                    if (this.App.Collections.productos) {
-                        $("[for='productos']").fadeIn();
+                    // Cargar sección de afiliaciones
+                    this.__loadAfiliacionesSection();
 
-                        _.each(this.App.Collections.productos, (item) => {
-                            item.tipo = 'productos';
-                            const view = new ServiciosView({ model: item });
-                            this.layout.getRegion('productos').append(view);
-                        });
-                    }
+                    // Cargar sección de consultas
+                    this.__loadConsultasSection();
 
-                    if (this.App.Collections.consultas) {
-                        $("[for='consultas']").fadeIn();
-                        _.each(this.App.Collections.consultas, (item) => {
-                            item.tipo = 'consultas';
-                            const view = new ServiciosView({ model: item });
-                            this.layout.getRegion('consultas').append(view);
-                        });
-                    }
-
-                    const view = new TotalesView({ model: response.totales });
-                    this.layout.getRegion('totales').append(view);
+                    // Cargar sección de productos
+                    this.__loadProductosSection();
                 }
             },
             silent: false,
         });
+    }
+
+    /**
+     * Carga la sección de totales con animación
+     * @param {Object} totales - Datos de totales
+     */
+    __loadTotalesSection(totales) {
+        if (!totales) return;
+
+        const view = new TotalesView({ model: totales });
+        this.layout.getRegion('totales').append(view);
+
+        // Marcar sección como cargada
+        this.layout.markSectionLoaded('totales');
+    }
+
+    /**
+     * Carga la sección de afiliaciones con animación escalonada
+     */
+    __loadAfiliacionesSection() {
+        if (!this.App.Collections.afiliacion) return;
+
+        const region = this.layout.getRegion('afiliaciones');
+
+        // Cargar cada card con delay para animación escalonada
+        this.App.Collections.afiliacion.forEach((item, index) => {
+            setTimeout(() => {
+                item.tipo = 'afiliacion';
+                const view = new ServiciosView({ model: item });
+                region.append(view);
+            }, index * 100); // 100ms de delay entre cada card
+        });
+
+        // Marcar sección como cargada
+        setTimeout(
+            () => {
+                this.layout.markSectionLoaded('afiliaciones');
+            },
+            this.App.Collections.afiliacion.length * 100 + 100,
+        );
+    }
+
+    /**
+     * Carga la sección de consultas con animación escalonada
+     */
+    __loadConsultasSection() {
+        if (!this.App.Collections.consultas) return;
+
+        const region = this.layout.getRegion('consultas');
+
+        // Cargar cada card con delay para animación escalonada
+        this.App.Collections.consultas.forEach((item, index) => {
+            setTimeout(() => {
+                item.tipo = 'consultas';
+                const view = new ServiciosView({ model: item });
+                region.append(view);
+            }, index * 100);
+        });
+
+        // Marcar sección como cargada
+        setTimeout(
+            () => {
+                this.layout.markSectionLoaded('consultas');
+            },
+            this.App.Collections.consultas.length * 100 + 100,
+        );
+    }
+
+    /**
+     * Carga la sección de productos con animación escalonada
+     */
+    __loadProductosSection() {
+        if (!this.App.Collections.productos) return;
+
+        const region = this.layout.getRegion('productos');
+
+        // Cargar cada card con delay para animación escalonada
+        this.App.Collections.productos.forEach((item, index) => {
+            setTimeout(() => {
+                item.tipo = 'productos';
+                const view = new ServiciosView({ model: item });
+                region.append(view);
+            }, index * 100);
+        });
+
+        // Marcar sección como cargada
+        setTimeout(
+            () => {
+                this.layout.markSectionLoaded('productos');
+            },
+            this.App.Collections.productos.length * 100 + 100,
+        );
+    }
+
+    /**
+     * Callback cuando una sección se hace visible (para carga lazy futura)
+     * @param {Object} data - Datos del evento con la sección visible
+     */
+    __onSectionVisible(data) {
+        // Aquí se puede implementar carga lazy adicional si es necesario
+        // Por ejemplo, cargar datos solo cuando la sección es visible
+        // console.log('Sección visible:', data.section);
     }
 
     changePassword() {

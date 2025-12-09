@@ -7,6 +7,10 @@ class RouterPrincipal extends Backbone.Router {
         super({
             routes: {
                 list: 'listServices',
+                'section-totales': 'listServices',
+                'section-afiliaciones': 'listServices',
+                'section-consultas': 'listServices',
+                'section-productos': 'listServices',
                 doc: 'descargaDocumentos',
                 'change-password': 'changePassword',
             },
