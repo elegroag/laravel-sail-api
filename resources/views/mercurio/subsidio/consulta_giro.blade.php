@@ -23,13 +23,18 @@
         vertical-align: middle;
     }
 </style>
-<link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.min.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.css') }}" />
 @endpush
 
 @push('scripts')
-<script src="{{ asset('assets/datatables.net/js/dataTables.min.js') }}"></script>
-<script src="{{ asset('assets/datatables.net-bs5/js/dataTables.bootstrap5.min.js') }}"></script>
-<script src="{{ asset('mercurio/build/ConsultaGiro.js') }}"></script>
+    <script src="{{ asset('assets/datatables.net/js/dataTables.min.js') }}"></script>
+    <script src="{{ asset('assets/datatables.net.bs5/js/dataTables.bootstrap5.min.js') }}"></script>
+    <script>
+        const _TITULO = "{{ $title }}";
+        window.ServerController = 'subsidio';
+    </script>
+    <script src="{{ asset('mercurio/build/ConsultasTrabajador.js') }}"></script>
 @endpush
 
 @section('content')
@@ -37,23 +42,19 @@
     <div class='p-2 m-0'>
         <p class='m-0'><span><b>Número de Cuotas:</b> <%= cuotas.reduce((total, item) => total + item.numcuo, 0) %></span><br/>
             <span><b>Valor Neto:</b> <%= cuotas.reduce((total, item) => total + item.valor, 0) %></span><br/>
-            <span><b>Valor Credito:</b> <%= cuotas.reduce((total, item) => total + item.valcre, 0) %></span><br/>
-            <span><b>Valor Ajuste:</b> <%= cuotas.reduce((total, item) => total + item.valaju, 0) %></span>
         </p>
     </div>
 
     <table id='dataTable' class='table table-hover align-items-center table-bordered'>
         <thead>
             <tr>
-                <th scope='col'>Periodo Girado</th>
+                <th scope='col'>Periodo girado</th>
                 <th scope='col'>Tipo</th>
-                <th scope='col'>Nombre Responsable</th>
-                <th scope='col'>Nombre Beneficiario</th>
-                <th scope='col'>Forma Pago</th>
-                <th scope='col'>Num. Cuo.</th>
-                <th scope='col'>Valor Neto</th>
-                <th scope='col'>Valor Credito</th>
-                <th scope='col'>Valor Ajuste</th>
+                <th scope='col'>Nombre responsable</th>
+                <th scope='col'>Nombre beneficiario</th>
+                <th scope='col'>Forma pago</th>
+                <th scope='col'>Número cuotas</th>
+                <th scope='col'>Valor neto</th>
             </tr>
         </thead>
         <tbody class='list'>
@@ -71,8 +72,6 @@
                         <td><%= item.tippag %></td>
                         <td><%= item.numcuo %></td>
                         <td><%= item.valor %></td>
-                        <td><%= item.valcre %></td>
-                        <td><%= item.valaju %></td>
                     </tr>
                 <% }) %>
             <% } %>
@@ -83,31 +82,46 @@
 <div class="col-12 mt-3">
     <div class="card mb-0">
         <div class="card-header p-3">
-            <div class="btn-group w-100">
-                <button type="button" class="btn btn-default w-10" id='bt_consulta_giro'><i class="fa fa-search"></i> Consultar</button>
-            </div>
-        </div>
-        <div class="card-body">
             <form id="form" class="validation_form" autocomplete="off" novalidate>
-                <div class="row justify-content-center">
-                    <div class="col-md-4">
+                <div class="row justify-content-center align-items-end">
+                    <div class="col-md-2">
                         <div class="form-group">
                             <label for="perini" class="form-control-label">Periodo Inicial</label>
-                            <input type="date" name="perini" placeholder="Periodo Inicial" class="form-control" value="@php echo date('Y-m-d', strtotime('-3 month')); @endphp">
+                            <input
+                                type="text"
+                                id="perini"
+                                name="perini"
+                                date="month"
+                                class="form-control"
+                                placeholder="Periodo Inicial"
+                                value="{{ date('Ym', strtotime('-3 month')) }}">
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-2">
                         <div class="form-group">
                             <label for="perfin" class="form-control-label">Periodo Final</label>
-                            <input type="date" name="perfin" placeholder="Periodo Final" class="form-control" value="@php echo date('Y-m-d'); @endphp">
+                              <input
+                                type="text"
+                                id="perfin"
+                                name="perfin"
+                                date="month"
+                                class="form-control"
+                                placeholder="Periodo Final"
+                                value="{{ date('Ym') }}">
+                        </div>
+                    </div>
+                    <div class="col-md-auto">
+                        <div class="form-group">
+                            <button type="button" class="btn btn-default" id='bt_consulta_giro'><i class="fa fa-search"></i> Consultar</button>
                         </div>
                     </div>
                 </div>
             </form>
         </div>
+        <div class="card-body">
+            <div id='consulta' class='col table-responsive'></div>
+        </div>
     </div>
 </div>
-
-<div id='consulta' class='table-responsive'></div>
 
 @endsection

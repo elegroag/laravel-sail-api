@@ -6,51 +6,61 @@
 @endpush
 
 @section('content')
-<div class="col-12 mt-3">
-    <div class="card mb-0">
-        <div class="card-header p-3">
-            <div class="nav-wrapper p-0">
-                <ul class="nav nav-pills" id="tabs-icons-text" role="tablist">
-                    <li class="nav-item">
-                        <a class="nav-link mb-sm-3 mb-md-0 active"
-                            id="tabsTrabajadorTab"
-                            data-bs-toggle="tab"
-                            href="#tabsTrabajador"
-                            role="tab"
-                            aria-controls="tabsTrabajador"
-                            aria-selected="true">
-                            <i class="fas fa-user-tie  mr-2"></i>Trabajador
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link mb-sm-3 mb-md-0"
-                            id="tabsConyugeTab"
-                            data-bs-toggle="tab"
-                            href="#tabsConyuge"
-                            role="tab"
-                            aria-controls="tabsConyuge"
-                            aria-selected="false">
-                            <i class="fas fa-user-friends mr-2"></i>Conyuges
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a
-                            class="nav-link mb-sm-3 mb-md-0"
-                            id="tabsBeneficiarioTab"
-                            data-bs-toggle="tab"
-                            href="#tabsBeneficiario"
-                            role="tab"
-                            aria-controls="tabsBeneficiario"
-                            aria-selected="false">
-                            <i class="fas fa-child mr-2"></i>Beneficiarios
-                        </a>
-                    </li>
-                </ul>
+<div class="col-12 col-xl-10 mx-auto mt-3">
+    <div class="card mb-0 shadow-sm border-0">
+        <div class="card-header border-0 pb-2 pb-md-3">
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2">
+                <div>
+                    <h2 class="h5 mb-1">{{ $title ?? 'Consulta núcleo familiar' }}</h2>
+                    <p class="mb-0 text-sm text-muted">
+                        Consulta y gestiona la información del trabajador, cónyuge y beneficiarios en pestañas separadas.
+                    </p>
+                </div>
+                <div class="nav-wrapper p-0">
+                    <ul class="nav nav-pills nav-fill flex-row gap-1" id="tabs-icons-text" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link mb-sm-3 mb-md-0 active d-flex align-items-center gap-2"
+                               id="tabsTrabajadorTab"
+                               data-bs-toggle="tab"
+                               href="#tabsTrabajador"
+                               role="tab"
+                               aria-controls="tabsTrabajador"
+                               aria-selected="true">
+                                <i class="fas fa-user-tie me-2"></i>
+                                <span>Trabajador</span>
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link mb-sm-3 mb-md-0 d-flex align-items-center gap-2"
+                               id="tabsConyugeTab"
+                               data-bs-toggle="tab"
+                               href="#tabsConyuge"
+                               role="tab"
+                               aria-controls="tabsConyuge"
+                               aria-selected="false">
+                                <i class="fas fa-user-friends me-2"></i>
+                                <span>Conyuges</span>
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link mb-sm-3 mb-md-0 d-flex align-items-center gap-2"
+                               id="tabsBeneficiarioTab"
+                               data-bs-toggle="tab"
+                               href="#tabsBeneficiario"
+                               role="tab"
+                               aria-controls="tabsBeneficiario"
+                               aria-selected="false">
+                                <i class="fas fa-child me-2"></i>
+                                <span>Beneficiarios</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
-        <div class="card-body p-0 m-3">
-            <div id="myTabContent"></div>
-        </div>        
+        <div class="card-body pt-3">
+            <div id="myTabContent" class="tab-content"></div>
+        </div>
     </div>
 </div>
 @endsection

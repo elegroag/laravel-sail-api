@@ -194,7 +194,7 @@
 	display: flex;
 	align-items: center;
 	gap: 0.75rem;
-	width: 100%;
+	width: auto;
 	box-sizing: border-box;
 	text-decoration: none;
 	font-size: 0.875rem;
@@ -229,7 +229,7 @@
 .navbar-vertical.navbar-expand-xs .navbar-nav>.nav-item>.nav-link.active {
 	background: var(--sidenav-active-bg);
 	color: var(--sidenav-text-active);
-	border-radius: 8px;
+	border-radius:.1rem;
 	font-weight: 500;
 }
 
@@ -559,6 +559,14 @@
     border-top-left-radius: .1rem;
 	border-top-right-radius: .1rem;
 }
+
+.navbar-vertical.navbar-expand-xs .navbar-nav>.nav-item>.nav-link.active {
+    margin-right: .3rem;
+    margin-left: .3rem;
+    padding-right: 1rem;
+    padding-left: 1rem;
+}
+
 
 .navbar-vertical.navbar-expand-xs .navbar-nav>.nav-item>.nav-link:hover {
 	background: #37516A;

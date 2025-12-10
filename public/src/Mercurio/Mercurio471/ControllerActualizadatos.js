@@ -1,4 +1,3 @@
-import { $App } from '@/App';
 import { ControllerRequest } from '@/Mercurio/ControllerRequest';
 import { ActualizadatosModel } from './models/ActualizadatosModel';
 import { ActualizadatosView } from './views/ActualizadatosView';
@@ -15,7 +14,7 @@ class ControllerActualizadatos extends ControllerRequest {
             headerOptions: {
                 estado: '',
                 tipo: 'E',
-                url_nueva: $App.url('nueva'),
+                url_nueva: window.App.url(window.ServerController + '/nueva'),
                 breadcrumb_menu: 'Crear solicitud',
                 titulo: 'Actualiza datos empresa',
                 url_masivo: null,
@@ -32,8 +31,8 @@ class ControllerActualizadatos extends ControllerRequest {
 
         this.on('params', this.afiService.paramsServer);
 
-        $App.Collections.formParams = null;
-        $App.Collections.firmas = null;
+        this.App.Collections.formParams = null;
+        this.App.Collections.firmas = null;
     }
 
     __empresaSisu(transfer) {

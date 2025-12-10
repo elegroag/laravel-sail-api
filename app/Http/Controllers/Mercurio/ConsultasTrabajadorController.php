@@ -136,10 +136,10 @@ class ConsultasTrabajadorController extends ApplicationController
         }
     }
 
-    public function consultaNucleo()
+    public function consultaNucleo(Request $request)
     {
         try {
-            $cedtra = parent::getActUser('documento');
+            $cedtra = $this->user['documento'];
             $ps = new ApiSubsidio();
             $ps->send(
                 [
@@ -214,7 +214,7 @@ class ConsultasTrabajadorController extends ApplicationController
                         '_trasin' => ParamsTrabajador::getSindicalizado(),
                         '_vivienda' => ParamsTrabajador::getVivienda(),
                         '_tipafi' => ParamsTrabajador::getTipoAfiliado(),
-                        '_estado' => (new Mercurio31)->getEstados(),
+                        '_estado' => get_user_estados(),
                         '_comper' => ParamsConyuge::getCompaneroPermanente(),
                         '_parent' => ParamsBeneficiario::getParentesco(),
                         '_huerfano' => ParamsBeneficiario::getHuerfano(),
@@ -223,12 +223,12 @@ class ConsultasTrabajadorController extends ApplicationController
                         '_huerfano' => ParamsBeneficiario::getHuerfano(),
                         '_tiphij' => ParamsBeneficiario::getTipoHijo(),
                         '_calendario' => ParamsBeneficiario::getCalendario(),
-                        '_codcat' => (new Mercurio31)->getCategoria(),
+                        '_codcat' => categoria_array(),
                     ],
                 ],
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            $salida = $this->handleException($e, $request);
         }
 
         return response()->json($salida);
@@ -247,7 +247,7 @@ class ConsultasTrabajadorController extends ApplicationController
 
             $perini = $request->input('perini');
             $perfin = $request->input('perfin');
-            $params['cedtra'] = parent::getActUser('documento');
+            $params['cedtra'] = $this->user['documento'];
             $params['perini'] = $perini;
             $params['perfin'] = $perfin;
 
@@ -275,9 +275,7 @@ class ConsultasTrabajadorController extends ApplicationController
                 ];
             }
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
-            $response = $salida;
-            $response['message'] = $salida['msj'];
+            $response = $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -351,9 +349,11 @@ class ConsultasTrabajadorController extends ApplicationController
     public function consultaPlanillaTrabajador(Request $request)
     {
         try {
+            $cedtra = $request->input('cedtra', null);
             $perini = $request->input('perini');
             $perfin = $request->input('perfin');
-            $params['cedtra'] = $request->input('cedtra');
+
+            $params['cedtra'] = ($cedtra) ? $cedtra : $this->user['documento'];
             $params['perini'] = $perini;
             $params['perfin'] = $perfin;
 
@@ -367,6 +367,7 @@ class ConsultasTrabajadorController extends ApplicationController
                     ],
                 ]
             );
+
             $out = $ps->toArray();
             if (! $out['success']) {
                 $response = [

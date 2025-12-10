@@ -277,3 +277,17 @@ if (! function_exists('autoriza_array')) {
         ];
     }
 }
+
+
+if (! function_exists('categoria_array')) {
+
+    function categoria_array()
+    {
+        return [
+            'A' => 'A',
+            'B' => 'B',
+            'C' => 'C',
+            'D' => 'D',
+        ];
+    }
+}

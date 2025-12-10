@@ -1,23 +1,20 @@
 @extends('layouts.bone')
 
 @section('content')
-<div class="col-12 mt-3">
-    <div class="nav-wrapper">
-        <ul class="nav nav-pills" id="tabs-icons-text" role="tablist">
-            <li class="nav-item">
-                <a class="nav-link mb-sm-3 mb-md-0 active" id="tabs-icons-text-1-tab" data-bs-toggle="tab" href="#tabs-icons-text-1" role="tab" aria-controls="tabs-icons-text-1" aria-selected="true">
-                    <i class="fas fa-user-tie  mr-2"></i>Saldo Pendiente por Cobrar
-                </a>
-            </li>
-        </ul>
-    </div>
+<div class="col mt-4">
     <div class="card shadow">
-        <div class="card-body pt-0">
-            <div class="tab-content" id="myTabContent">
-                <div class="tab-pane fade show active" id="tabs-icons-text-1" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
+        <div class="card-header">
+            <a class="btn btn-primary btn-sm" id="tabs-icons-text-1-tab" data-bs-toggle="tab" href="#tabs-icons-text-1" role="tab" aria-controls="tabs-icons-text-1" aria-selected="true">
+                <i class="fas fa-search mr-2"></i>SALDO PENDIENTE
+            </a>
+        </div>
+        <div class="card-body">
+           <div class="col">
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" id="tabs-icons-text-1" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
                     <div class="row">
                         <table class="table align-items-center table-bordered">
-                            <thead class="bg-green-blue">
+                            <thead>
                                 <tr>
                                     <th scope="col">Documento</th>
                                     <th scope="col">Quien recibe cuota</th>
@@ -67,8 +64,9 @@
                             </div>
                         </div>
                     </div>
+                    </div>
                 </div>
-            </div>
+           </div>
         </div>
     </div>
 </div>

@@ -28,7 +28,7 @@ export default class FormDatosTrabajador extends FormView {
     }
 
     #afterRender($el = {}) {
-        _.each(this.collection, (component) => {
+        _.each(this.collection.paramsForm, (component) => {
             const view = this.addComponent(
                 new ComponentModel({
                     ...component,

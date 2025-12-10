@@ -9,5 +9,5 @@
             <th>Fecha solicitud</th>
         </tr>
     </thead>
-    <tbody id='consulta'></tbody>
+    <tbody id='consulta' class='list'></tbody>
 </table>

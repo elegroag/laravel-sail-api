@@ -4,7 +4,7 @@
             <form id="formRequest" class="validation_form" autocomplete="off" novalidate>
                 @csrf
                 <div class="d-none">
-                    <input type="number" name="cedtra" class="d-none" value="{{ $cedtra }}" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                    <input type="number" name="cedtra" class="d-none" value="{{ $cedtra }}">
                     <input type="number" name="id" class="d-none">
                     <input type="number" name="tipact" class="d-none" value="T">
                 </div>
@@ -16,87 +16,75 @@
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
                                         <label for="prinom" class="control-label">Primer nombre</label>
-                                        <input type="text" name="prinom" class="form-control" placeholder="Primer Nombre" oninput="this.value = this.value.toUpperCase()">
+                                        <span id='component_prinom'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
                                         <label for="segnom" class="control-label">Segundo nombre</label>
-                                        <input type="text" name="segnom" class="form-control" placeholder="Segundo Nombre" oninput="this.value = this.value.toUpperCase()"/>
+                                        <span id='component_segnom'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
                                         <label for="priape" class="control-label">Primer apellido</label>
-                                        <input type="text" name="priape" class="form-control" placeholder="Primer Apellido" oninput="this.value = this.value.toUpperCase()"/>
+                                        <span id='component_priape'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
                                         <label for="segape" class="control-label">Segundo apellido</label>
-                                        <input type="text" name="segape" class="form-control" placeholder="Segundo Apellido" oninput="this.value = this.value.toUpperCase()"/>
+                                        <span id='component_segape'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
                                         <label for="expedicion" class="control-label top">Fecha expedición documento</label>
-                                        <input type="date" name="expedicion" class="form-control" placeholder="Fecha expedición">
+                                        <span id='component_expedicion'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
                                         <label for="telefono" class="control-label">Teléfono</label>
-                                        <input type="number" name="telefono" class="form-control" placeholder="Telefono" maxlength="10" minlength="10" />
+                                        <span id='component_telefono'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
                                         <label for="celular" class="control-label">Celular</label>
-                                        <input type="number" name="celular" class="form-control" placeholder="Celular" maxlength="10" minlength="10" />
+                                        <span id='component_celular'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
                                         <label for="codciu" class="control-label top">Ciudad residencia</label>
                                         <span id='component_codciu'></span>
-                                        <label id="codciu-error" class="error" for="codciu"></label>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
-                                        @component('components/address', [
-                                            'name' => 'direccion', 
-                                            'value' => '',
-                                            'placeholder' => 'Dirección de residencia',
-                                            'event' => 'address',
-                                            'label' => 'Dirección de residencia'
-                                        ])@endcomponent
+                                        <label for="direccion" class="control-label top">Dirección de residencia</label>
+                                        <span id='component_direccion'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
                                         <label for="codzon" class="control-label top">Zona trabajo</label>
                                         <span id='component_codzon'></span>
-                                        <label id="codzon-error" class="error" for="codzon"></label>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
-                                         @component('components/address', [
-                                            'name' => 'dirlab', 
-                                            'value' => '',
-                                            'placeholder' => 'Dirección laboral',
-                                            'event' => 'address',
-                                            'label' => 'Dirección laboral'
-                                        ])@endcomponent
+                                        <label for="dirlab" class="control-label top">Dirección laboral</label>
+                                        <span id='component_dirlab'></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
                                         <label for="email" class="control-label">Email</label>
-                                        <input type="email" name="email" class="form-control" placeholder="Email" oninput="this.value = this.value.toUpperCase()">
+                                        <span id='component_email'></span>
                                     </div>
                                 </div>
                             </div>
@@ -120,56 +108,56 @@
                                 <div class="col-md-3 col-lg-2">
                                     <div class="form-group form-item">
                                         <label for="cedtra" class="control-label">Número identificación responsable</label>
-                                        <input type="number" name="respo_cedtra" class="form-control" placeholder="Identificación" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                        <span id='component_respo_cedtra'></span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
                                         <label for="respo_prinom" class="control-label">Primer nombre responsable</label>
-                                        <input type="text" name="respo_prinom" class="form-control" placeholder="Primer Nombre" oninput="this.value = this.value.toUpperCase()">
+                                        <span id="component_respo_prinom"></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
                                         <label for="respo_segnom" class="control-label">Segundo nombre responsable</label>
-                                        <input type="text" name="respo_segnom" class="form-control" placeholder="Segundo Nombre" oninput="this.value = this.value.toUpperCase()">
+                                        <span id='component_respo_segnom'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
                                         <label for="respo_priape" class="control-label">Primer apellido responsable</label>
-                                        <input type="text" name="respo_priape" class="form-control" placeholder="Primer Apellido" oninput="this.value = this.value.toUpperCase()">
+                                        <span id='component_respo_priape'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
                                         <label for="respo_segape" class="control-label">Segundo apellido responsable</label>
-                                        <input type="text" name="respo_segape" class="form-control" placeholder="Segundo Apellido" oninput="this.value = this.value.toUpperCase()">
+                                        <span id='component_respo_segape'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
                                         <label for="respo_expedicion" class="control-label">Fecha expedición documento</label>
-                                        <input type="date" name="respo_expedicion" class="form-control" placeholder="Fecha expedición">
+                                        <span id='component_respo_expedicion'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
                                         <label for="respo_telefono" class="control-label">Teléfono</label>
-                                        <input type="number" name="respo_telefono" class="form-control" placeholder="Telefono" maxlength="10" minlength="10" />
+                                        <span id='component_respo_telefono'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
                                         <label for="respo_celular" class="control-label">Celular</label>
-                                        <input type="number" name="respo_celular" class="form-control" placeholder="Celular" maxlength="10" minlength="10" />
+                                        <span id='component_respo_celular'></span>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
                                         <label for="respo_email" class="control-label">Email</label>
-                                        <input type="email" name="respo_email" class="form-control" placeholder="Email" oninput="this.value = this.value.toUpperCase()">
+                                        <span id='component_respo_email'></span>
                                     </div>
                                 </div>
                             </div>
@@ -200,7 +188,7 @@
                                 <div class="col-md-3" id="show_numcue">
                                     <div class="form-group form-item">
                                         <label for="numcue" class="control-label">Número de cuenta</label>
-                                        <input type="number" name="numcue" class="form-control" placeholder="Número de cuenta" />
+                                        <span id='component_numcue'></span>
                                     </div>
                                 </div>
 
