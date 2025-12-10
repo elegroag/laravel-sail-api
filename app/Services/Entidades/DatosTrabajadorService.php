@@ -59,7 +59,7 @@ class DatosTrabajadorService
                 WHEN solis.estado = 'I' THEN 'Inactiva'
             END) as estado_detalle
             FROM mercurio47 as solis
-            WHERE {$where}
+            WHERE {$where} 
             ORDER BY solis.id DESC;
         ");
 
@@ -81,7 +81,7 @@ class DatosTrabajadorService
             }
 
             $mercurio47[$ai]['cantidad_eventos'] = $cantidad_eventos;
-            $mercurio47[$ai]['fecha_ultima_solicitud'] = $trayecto->fecsis;
+            $mercurio47[$ai]['fecha_ultima_solicitud'] = ($trayecto) ? $trayecto->fecsis : null;
             $mercurio47[$ai]['estado_detalle'] = solicitud_estado_detalle($row['estado']);
             $mercurio47[$ai]['tipact_detalle'] = solicitud_tipo_actualizacion_detalle($row['tipact']);
         }
@@ -271,6 +271,10 @@ class DatosTrabajadorService
     public function createByFormData($data)
     {
         $data['estado'] = 'T';
+        if (! isset($data['codest']) || $data['codest'] === null || $data['codest'] === '') {
+            $data['codest'] = '00';
+        }
+
         $trabajador = $this->create($data);
 
         return $trabajador;

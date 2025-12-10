@@ -19,7 +19,8 @@ class GuardarArchivoService
 
     public function __construct($argv)
     {
-        $this->tipopc = $argv['tipopc'];
+        // tipopc se usa en modelos que lo validan como string, por lo que se castea explícitamente
+        $this->tipopc = (string) $argv['tipopc'];
         $this->coddoc = $argv['coddoc'];
         $this->id = $argv['id'];
         $this->db = DbBase::rawConnect();
@@ -31,13 +32,13 @@ class GuardarArchivoService
         if (is_null($_FILES)) {
             throw new DebugException('Error no hay archivos disponibles en servidor', 301);
         }
-        $item = 'archivo_'.$this->id.'_'.$this->coddoc;
+        $item = 'archivo_' . $this->id . '_' . $this->coddoc;
         if (! isset($_FILES[$item])) {
             throw new DebugException('Error no es valido el name del activo', 301);
         }
 
         $extension = explode('.', $_FILES[$item]['name']);
-        $name = $this->tipopc.'_'.$this->id."_{$this->coddoc}_{$time}.".end($extension);
+        $name = $this->tipopc . '_' . $this->id . "_{$this->coddoc}_{$time}." . end($extension);
         $_FILES[$item]['name'] = $name;
 
         $estado = $this->uploadFile($item, 'temp/');
@@ -110,7 +111,7 @@ class GuardarArchivoService
 
             $dir = storage_path($dir ?? 'temp/');
 
-            return move_uploaded_file($_FILES[$name]['tmp_name'], $dir.htmlspecialchars($_FILES[$name]['name']));
+            return move_uploaded_file($_FILES[$name]['tmp_name'], $dir . htmlspecialchars($_FILES[$name]['name']));
         } else {
             return false;
         }

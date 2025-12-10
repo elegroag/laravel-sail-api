@@ -4,7 +4,6 @@
             <form id="formRequest" class="validation_form" autocomplete="off" novalidate>
                 @csrf
                 <div class="d-none">
-                    <input type="number" name="cedtra" class="d-none" value="{{ $cedtra }}">
                     <input type="number" name="id" class="d-none">
                     <input type="number" name="tipact" class="d-none" value="T">
                 </div>
@@ -13,6 +12,18 @@
                         <fieldset>
                             <legend>Datos Basicos Trabajador</legend>
                             <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group form-item">
+                                        <label for="prinom" class="control-label">Cédula trabajador</label>
+                                        <span id='component_cedtra'></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group form-item">
+                                        <label for="prinom" class="control-label">Tipo documento</label>
+                                        <span id='component_tipdoc'></span>
+                                    </div>
+                                </div>
                                 <div class="col-md-3">
                                     <div class="form-group form-item">
                                         <label for="prinom" class="control-label">Primer nombre</label>

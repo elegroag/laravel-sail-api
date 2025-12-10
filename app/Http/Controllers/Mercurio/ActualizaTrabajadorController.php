@@ -30,7 +30,7 @@ use TCPDF;
 
 class ActualizaTrabajadorController extends ApplicationController
 {
-    protected $tipopc = 14;
+    protected $tipopc = '14';
 
     protected $db;
 
@@ -156,27 +156,27 @@ class ActualizaTrabajadorController extends ApplicationController
                 'cabhog' => cabeza_hogar(),
                 'captra' => capacidad_trabajar(),
                 'tipdis' => tipo_discapacidad_array(),
-                'nivedu' => ParamsTrabajador::getNivelEducativo(),
-                'rural' => ParamsTrabajador::getRural(),
-                'tipcon' => ParamsTrabajador::getTipoContrato(),
-                'trasin' => ParamsTrabajador::getSindicalizado(),
-                'vivienda' => ParamsTrabajador::getVivienda(),
-                'cargo' => ParamsTrabajador::getOcupaciones(),
-                'orisex' => ParamsTrabajador::getOrientacionSexual(),
-                'facvul' => ParamsTrabajador::getVulnerabilidades(),
-                'peretn' => ParamsTrabajador::getPertenenciaEtnicas(),
-                'ciunac' => ParamsTrabajador::getCiudades(),
-                'tippag' => ParamsTrabajador::getTipoPago(),
-                'resguardo_id' => ParamsTrabajador::getResguardos(),
-                'pub_indigena_id' => ParamsTrabajador::getPueblosIndigenas(),
-                'codban' => ParamsTrabajador::getBancos(),
+                'nivedu' => nivel_educativo_array(),
+                'rural' => es_rural(),
+                'tipcon' => tipo_contrato(),
+                'trasin' => es_sindicalizado(),
+                'vivienda' => vivienda_array(),
+                'orisex' => orientacion_sexual_array(),
+                'facvul' => vulnerabilidades_array(),
+                'peretn' => pertenencia_etnica_array(),
+                'tippag' => tipo_pago_array(),
                 'tipsal' => tipsal_array(),
-                'tipcue' => ParamsTrabajador::getTipoCuenta(),
-                'ruralt' => ParamsTrabajador::getRural(),
                 'tipjor' => tipo_jornada_array(),
                 'autoriza' => autoriza_array(),
                 'comision' => comision_array(),
                 'labora_otra_empresa' => labora_otra_empresa_array(),
+                'cargo' => ParamsTrabajador::getOcupaciones(),
+                'ciunac' => ParamsTrabajador::getCiudades(),
+                'tipcue' => ParamsTrabajador::getTipoCuenta(),
+                'ruralt' => ParamsTrabajador::getRural(),
+                'resguardo_id' => ParamsTrabajador::getResguardos(),
+                'pub_indigena_id' => ParamsTrabajador::getPueblosIndigenas(),
+                'codban' => ParamsTrabajador::getBancos(),
                 'codsuc' => $codsuc,
             ];
 
@@ -329,6 +329,12 @@ class ActualizaTrabajadorController extends ApplicationController
             $campos = Mercurio28::where('tipo', $this->tipo)->get();
             foreach ($campos as $mercurio28) {
                 $valor = $request->input($mercurio28->campo);
+
+                // Si el campo no viene en el request o viene vacío, no se registra cambio
+                if ($valor === null || $valor === '') {
+                    continue;
+                }
+
                 Mercurio33::create(
                     [
                         'log' => $log,
@@ -336,7 +342,7 @@ class ActualizaTrabajadorController extends ApplicationController
                         'coddoc' => $this->user['coddoc'],
                         'documento' => $this->user['documento'],
                         'campo' => $mercurio28->campo,
-                        'antval' => ($valor) ? $valor : '@',
+                        'antval' => $valor,
                         'valor' => $valor,
                         'estado' => 'P',
                         'usuario' => $usuario,

@@ -53,7 +53,7 @@
         </td>
         <td>
             <p class="text-sm  mb-0">
-                Identificación {{ $solicitud['cedtra'] }} }}
+                Identificación {{ $solicitud['cedtra'] ?? 0 }}
             </p>
         </td>
         <td>

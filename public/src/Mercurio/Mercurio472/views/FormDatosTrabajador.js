@@ -40,7 +40,11 @@ export default class FormDatosTrabajador extends FormView {
 
         _.each(this.collection.dataDefault, (valor, key) => {
             if (!(_.isEmpty(valor) == true || _.isUndefined(valor) == true)) {
-                this.$el.find(`[name="${key}"]`).val(valor);
+                if (key === 'coddoc') {
+                    $el.find(`[name="tipdoc"]`).val(valor);
+                } else {
+                    $el.find(`[name="${key}"]`).val(valor);
+                }
             }
         });
 
@@ -54,19 +58,19 @@ export default class FormDatosTrabajador extends FormView {
             },
         });
 
-        this.selectores = this.$el.find('#codzon, #codciu');
+        this.selectores = $el.find('#codzon, #codciu');
 
         if (this.model.get('id') !== null) {
             _.each(this.model.toJSON(), (valor, key) => {
                 if (!(_.isEmpty(valor) == true || _.isUndefined(valor) == true)) {
-                    this.$el.find(`[name="${key}"]`).val(valor);
+                    $el.find(`[name="${key}"]`).val(valor);
                 }
             });
             if (this.model.get('tippag') == 'T') {
-                this.$el.find('#codban').prop('disabled', true);
-                this.$el.find('#numcue').prop('disabled', true);
-                this.$el.find('#tipcue').prop('disabled', true);
-                this.$el.find('#numcue').prop('disabled', true);
+                $el.find('#codban').prop('disabled', true);
+                $el.find('#numcue').prop('disabled', true);
+                $el.find('#tipcue').prop('disabled', true);
+                $el.find('#numcue').prop('disabled', true);
             }
 
             setTimeout(() => this.form.valid(), 200);
@@ -88,13 +92,16 @@ export default class FormDatosTrabajador extends FormView {
             }
         });
 
-        flatpickr(this.$el.find('#expedicion, #respo_expedicion'), {
+        flatpickr($el.find('#expedicion, #respo_expedicion'), {
             enableTime: false,
             dateFormat: 'Y-m-d',
             locale: Spanish,
         });
 
-        eventsFormControl(this.$el);
+        $el.find(`[name="tipdoc"]`).attr('readonly', true);
+        $el.find(`[name="cedtra"]`).attr('readonly', true);
+
+        eventsFormControl($el);
     }
 
     saveFormData(event) {
