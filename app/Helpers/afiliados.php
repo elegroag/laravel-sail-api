@@ -243,6 +243,17 @@ if (! function_exists('comision_array')) {
     }
 }
 
+if (! function_exists('companero_array')) {
+
+    function companero_array()
+    {
+        return [
+            'S' => 'Sí',
+            'N' => 'No',
+        ];
+    }
+}
+
 
 if (! function_exists('labora_otra_empresa_array')) {
 

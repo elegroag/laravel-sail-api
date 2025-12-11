@@ -9,6 +9,7 @@
         <td></td>
         <td></td>
         <td></td>
+        <td></td>
     </tr>
 @endif
 
@@ -68,5 +69,6 @@
             N° {{ $solicitud['cantidad_eventos'] }}
         </td>
         <td>{{ $solicitud['fecsol'] }}</td>
+        <td>{{ $solicitud['id'] }}</td>
     </tr>
 @endforeach

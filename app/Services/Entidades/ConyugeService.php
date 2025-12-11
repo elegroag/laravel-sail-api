@@ -45,14 +45,15 @@ class ConyugeService
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
 
-        if ((new Mercurio32)->getCount(
-            '*',
-            "conditions: documento='{$documento}' and coddoc='{$coddoc}'"
-        ) == 0) {
+        if (Mercurio32::whereRaw("documento='{$documento}' and coddoc='{$coddoc}'")->count() == 0) {
             return [];
         }
 
-        $conditions = (empty($estado)) ? " AND m32.estado NOT IN('I') " : " AND m32.estado='{$estado}' ";
+        if (empty($estado)) {
+            $conditions = "and m32.estado NOT IN('I') ";
+        } else {
+            $conditions = "and m32.estado='{$estado}' ";
+        }
 
         $sql = "SELECT m32.*,
             (SELECT COUNT(*) FROM mercurio10 as me10 WHERE me10.tipopc='{$this->tipopc}' and m32.id = me10.numero) as 'cantidad_eventos',
@@ -70,7 +71,8 @@ class ConyugeService
             WHERE m32.documento='{$documento}' AND m32.coddoc='{$coddoc}' {$conditions}
             ORDER BY m32.fecsol ASC;";
 
-        return $this->db->inQueryAssoc($sql);
+        $results = DB::select($sql);
+        return json_decode(json_encode($results), true);
     }
 
     /**

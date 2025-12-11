@@ -46,20 +46,23 @@
                         <span>Accesos Rápidos</span>
                     </div>
                     <div class="dropdown-body">
+                        @php 
+                            $action = session('tipo')  == 'T' || session('tipo')  == 'P' ? 'trabajador': 'empresa';
+                        @endphp
                         <div class="shortcuts-grid">
-                            <a href="{{ route('movimientos.historial') }}" class="shortcut-item">
+                            <a href="{{ route("{$action}.historial") }}" class="shortcut-item">
                                 <span class="shortcut-icon bg-gradient-danger">
                                     <i class="ni ni-book-bookmark"></i>
                                 </span>
                                 <span class="shortcut-label">Historial</span>
                             </a>
-                            <a href="{{ route('movimientos.cambio_email_view') }}" class="shortcut-item">
+                            <a href="{{ route("{$action}.cambio_email_view") }}" class="shortcut-item">
                                 <span class="shortcut-icon bg-gradient-warning">
                                     <i class="ni ni-email-83"></i>
                                 </span>
                                 <span class="shortcut-label">Email</span>
                             </a>
-                            <a href="{{ route('movimientos.cambio_clave_view') }}" class="shortcut-item">
+                            <a href="{{ route("{$action}.cambio_clave_view") }}" class="shortcut-item">
                                 <span class="shortcut-icon bg-gradient-info">
                                     <i class="ni ni-key-25"></i>
                                 </span>

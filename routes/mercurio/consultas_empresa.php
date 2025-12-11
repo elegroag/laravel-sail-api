@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Mercurio\ConsultasEmpresaController;
+use App\Http\Controllers\Mercurio\MovimientosController;
 use App\Http\Middleware\EnsureCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
@@ -8,9 +9,9 @@ use Illuminate\Support\Facades\Route;
 Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
     Route::prefix('/mercurio/subsidioemp')->group(function () {
         Route::get('/', function () {
-            return redirect()->route('subsidioemp.historial');
+            return redirect()->route('empresa.historial');
         });
-        Route::get('/historial', [ConsultasEmpresaController::class, 'historial'])->name('subsidioemp.historial');
+        Route::get('/historial', [ConsultasEmpresaController::class, 'historial'])->name('empresa.historial');
         Route::get('/consulta_trabajadores_view', [ConsultasEmpresaController::class, 'consultaTrabajadoresView']);
         Route::get('/consulta_giro_view', [ConsultasEmpresaController::class, 'consultaGiroView']);
         Route::get('/consulta_aportes_view', [ConsultasEmpresaController::class, 'consultaAportesView']);
@@ -26,5 +27,8 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
         Route::post('/mora_presunta', [ConsultasEmpresaController::class, 'moraPresunta']);
         Route::post('/certificado_afiliacion', [ConsultasEmpresaController::class, 'certificadoAfiliacion']);
         Route::post('/certificado_para_trabajador', [ConsultasEmpresaController::class, 'certificadoParaTrabajador']);
+
+        Route::get('/cambio_email_view', [MovimientosController::class, 'cambioEmailView'])->name('empresa.cambio_email_view');
+        Route::get('/cambio_clave_view', [MovimientosController::class, 'cambioClaveView'])->name('empresa.cambio_clave_view');
     });
 });

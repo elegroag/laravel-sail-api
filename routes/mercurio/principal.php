@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Mercurio\CertificadosController;
-use App\Http\Controllers\Mercurio\MovimientosController;
 use App\Http\Controllers\Mercurio\PrincipalController;
 use App\Http\Middleware\EnsureCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
@@ -31,12 +30,6 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
         Route::post('/establecer_clave_firma', [PrincipalController::class, 'establecerClaveFirma']);
         Route::post('/require_firma', [PrincipalController::class, 'requireFirma']);
         Route::post('/cambio_clave', [PrincipalController::class, 'cambioClave'])->name('principal.cambio_clave');
-    });
-
-    Route::prefix('/mercurio/movimientos')->group(function () {
-        Route::get('/historial', [MovimientosController::class, 'historial'])->name('movimientos.historial');
-        Route::get('/cambio_email_view', [MovimientosController::class, 'cambioEmailView'])->name('movimientos.cambio_email_view');
-        Route::get('/cambio_clave_view', [MovimientosController::class, 'cambioClaveView'])->name('movimientos.cambio_clave_view');
     });
 
     Route::get('/mercurio/certificados/index', [CertificadosController::class, 'index']);

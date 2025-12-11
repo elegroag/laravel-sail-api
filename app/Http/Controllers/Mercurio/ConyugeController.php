@@ -513,11 +513,11 @@ class ConyugeController extends ApplicationController
     public function params()
     {
         try {
-            $tipo = $this->tipo;
+
             $trabajadorService = new TrabajadorService;
 
             $mercurio31 = $trabajadorService->findRequestByDocumentoCoddoc($this->user['documento'], $this->user['coddoc']);
-            if ($tipo == 'E') {
+            if ($this->tipo == 'E') {
                 $trabajadoresSisu = $trabajadorService->findApiTrabajadoresByNit($this->user['documento']);
 
                 $listAfiliados = collect($trabajadoresSisu)->map(function ($row) {
@@ -538,7 +538,7 @@ class ConyugeController extends ApplicationController
                 $procesadorComando->send(
                     [
                         'servicio' => 'ComfacaEmpresas',
-                        'metodo' => "informacion_empresa",
+                        'metodo' => "basicas_empresa",
                         'params' => [
                             'nit' => $this->user['documento'],
                         ]
@@ -608,11 +608,11 @@ class ConyugeController extends ApplicationController
                 'pub_indigena_id' => ParamsConyuge::getPueblosIndigenas(),
                 'cargo' => ParamsConyuge::getOcupaciones(),
                 'codban' => ParamsConyuge::getBancos(),
-                'comper' => ParamsConyuge::getCompaneroPermanente(),
+                'comper' => companero_array(),
                 'codocu' => ParamsConyuge::getOcupaciones(),
                 'nit' => $nit,
                 'cedtra' => $cedtras,
-                'tipo' => $tipo,
+                'tipo' => $this->tipo,
             ];
 
             $formulario = FormularioDinamico::where('name', 'mercurio32')->first();
@@ -641,7 +641,7 @@ class ConyugeController extends ApplicationController
 
             $componentes['props'] = [
                 'name' => null,
-                'tipo' => $tipo,
+                'tipo' => $this->tipo,
                 'list_afiliados' => $listAfiliados,
                 'empresa_sisu' => $empresa_sisu,
                 'nit' => $numero_nit
@@ -659,7 +659,7 @@ class ConyugeController extends ApplicationController
         return response()->json($salida);
     }
 
-    public function renderTable(Request $request, Response $response, string $estado = '')
+    public function renderTable(Request $request, string $estado = '')
     {
         try {
             $conyugeService = new ConyugeService;

@@ -103,8 +103,13 @@ class ConyugesView extends Backbone.View {
                     targets: 5,
                     width: '20%',
                 },
+                {
+                    targets: 6,
+                    visible: false,
+                    searchable: false,
+                },
             ],
-            order: [[1, 'desc']],
+            order: [[6, 'desc']],
             language: langDataTable,
         });
     }

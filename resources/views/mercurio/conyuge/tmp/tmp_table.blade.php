@@ -7,6 +7,7 @@
             <th>Estado</th>
             <th>Ultimo cambio</th>
             <th>Fecha solicitud</th>
+            <th>ID</th>
         </tr>
     </thead>
     <tbody id='consulta' class='list'></tbody>

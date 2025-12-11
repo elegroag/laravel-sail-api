@@ -417,8 +417,8 @@ class TrabajadorService
         $procesadorComando = new ApiSubsidio();
         $procesadorComando->send(
             [
-                'servicio' => 'ComfacaAfilia',
-                'metodo' => 'listar_trabajadores',
+                'servicio' => 'ComfacaEmpresas',
+                'metodo' => 'lista_basica_trabajadores',
                 'params' => [
                     'nit' => $nit,
                 ],

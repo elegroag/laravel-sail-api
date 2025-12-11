@@ -565,7 +565,7 @@ class BeneficiarioController extends ApplicationController
                 $procesadorComando->send(
                     [
                         'servicio' => 'ComfacaEmpresas',
-                        'metodo' => "informacion_empresa",
+                        'metodo' => "basicas_empresa",
                         'params' => [
                             'nit' => $this->user['documento'],
                         ]
