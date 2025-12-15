@@ -10,12 +10,12 @@ class LegacyDatabaseService
 {
     protected ?mysqli $connection = null;
 
-    public function __construct()
+    public function __construct($env = 'mercurio')
     {
         // Cargar variables de entorno desde database/seeders/.env
         $dotenvPath = base_path('database/seeders');
-        if (file_exists($dotenvPath . '/.env')) {
-            $dotenv = Dotenv::createImmutable($dotenvPath);
+        if (file_exists($dotenvPath . '/.env.' . $env)) {
+            $dotenv = Dotenv::createImmutable($dotenvPath, '.env.' . $env);
             $dotenv->load();
         }
 

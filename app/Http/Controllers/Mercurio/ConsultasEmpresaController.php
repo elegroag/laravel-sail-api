@@ -24,6 +24,8 @@ use App\Services\Utils\GeneralService;
 use App\Services\Utils\Logger;
 use App\Services\Utils\UploadFile;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Certificados\Certificado;
+use App\Services\Certificados\CertiTrabajador;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -761,11 +763,11 @@ class ConsultasEmpresaController extends ApplicationController
 
     public function certificadoParaTrabajador(Request $request)
     {
-        $logger = new Logger;
-        $tipo = $request->input('tipo');
         $cedtra = $request->input('cedtra');
-        $logger->registrarLog(false, 'Certificado Para Trabajador', "$tipo - $cedtra");
-        header("Location: https://comfacaenlinea.com.co/SYS/Subsidio/subflo/gene_certi_tra/{$tipo}/" . $cedtra);
+        $tipo = $request->input('tipo');
+        $certificado = new Certificado(new CertiTrabajador($cedtra, $tipo));
+        $certificado->generate();
+        return response()->file($certificado->getFilePath());
     }
 
     public function ejemploPlanillaActivacionMasiva()

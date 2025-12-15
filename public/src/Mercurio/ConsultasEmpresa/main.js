@@ -42,8 +42,6 @@ $(() => {
 
     $(document).on('click', '#bt_certificado_afiliacion', CertificadoAfiliacion);
 
-    $(document).on('click', '#bt_certificado_afiliacion', CertificadoAfiliacion);
-
     $(document).on('click', '#bt_activacion_masiva_trabajador', ActivacionMasivaTrabajador);
 
     $(document).on('click', '#bt_actualiza_datos_basicos', ActualizaDatosBasicos);
@@ -53,8 +51,6 @@ $(() => {
     $(document).on('click', '#bt_ejemplo_planilla_masiva', EjemploPlanillaMasiva);
 
     $(document).on('click', '#bt_afilia_masiva_trabajador', AfiliaMasivaTrabajador);
-
-    $(document).on('click', '#bt_certificado_afiliacion', CertificadoAfiliacion);
 
     $(document).on('click', '#bt_novedad_retiro', NovedadRetiro);
 

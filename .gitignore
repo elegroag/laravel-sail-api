@@ -60,3 +60,5 @@ uv
 .venv/
 uv.lock
 GEMINI.md
+.env.mercurio
+.env.comfaca

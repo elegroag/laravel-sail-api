@@ -1,23 +1,30 @@
-@extends('layouts.dash')
+@extends('layouts.bone')
 
 @section('title', 'Certificado de afiliación')
 
 @section('content')
-<div class="pb-3">
+<div class="card m-3">
     <div class="card-body">
-        <form id="form" class="validation_form" action="{{ url('mercurio/subsidioemp/certificado_afiliacion') }}" method="POST" autocomplete="off" novalidate>
-        <div class="row">
-            <p class="text-center">Genera el certificado de afiliación</p>
-            <div class="col-md-auto d-flex m-auto">
-                <button type="button" class="btn btn-icon btn-primary align-self-center" id="bt_certificado_afiliacion">
-                    <span class="btn-inner--icon"><i class="ni ni-paper-diploma"></i></span>
-                    <span class="btn-inner--text">Generar Certificado</span>
-                </button>
+        <div class="text-center mb-4">
+            <h5 class="mb-1">Genera tu certificado de afiliación</h5>
+            <p class="text-muted mb-0">Haz clic en el botón para generar y descargar el documento.</p>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8">
+                <form id="form" class="validation_form" action="{{ url('mercurio/subsidioemp/certificado_afiliacion') }}" method="POST" autocomplete="off" novalidate>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <button type="button" class="btn btn-icon btn-primary" id="bt_certificado_afiliacion">
+                            <span class="btn-inner--icon"><i class="ni ni-paper-diploma"></i></span>
+                            <span class="btn-inner--text">Generar Certificado</span>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
-        </form>
     </div>
 </div>
-
-<script src="{{ asset('mercurio/build/ConsultasEmpresa.js') }}"></script>
 @endsection
+
+@push('scripts')
+<script src="{{ asset('mercurio/build/GeneradorCertificado.js') }}"></script>
+@endpush
