@@ -161,7 +161,10 @@ class PrincipalController extends ApplicationController
                 $data[] = $msubsi11['valcon'];
             }
 
-            $response['data'] = $data;
+            $response = [
+                'success' => true,
+                'data' => $data
+            ];
         } catch (\Throwable $e) {
             $salida = $this->handleException($e, request());
             $response = $salida;
@@ -254,7 +257,10 @@ class PrincipalController extends ApplicationController
             foreach ($subsi09['data'] as $msubsi09) {
                 $data[] = $msubsi09['valor'];
             }
-            $response['data'] = $data;
+            $response = [
+                'success' => true,
+                'data' => $data
+            ];
         } catch (\Throwable $e) {
             $salida = $this->handleException($e, request());
             $response = $salida;

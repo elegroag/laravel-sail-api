@@ -1,11 +1,14 @@
 @extends('layouts.bone')
 
-@section('title', 'Dashboard Trabajador')
+@section('title', 'Estadísticas trabajador')
+
+@push('scripts')
+    <script src="{{ asset('assets/chart/Chart.min.js') }}"></script>
+    <script src="{{ asset('assets/chart/Chart.extension.js') }}"></script>
+    <script src="{{ asset('mercurio/build/DashBoard.js') }}"></script>
+@endpush
 
 @section('content')
-<script src="{{ asset('assets/chart/Chart.min.js') }}" />
-<script src="{{ asset('assets/chart/Chart.extension.js') }}" />
-
 <div class="row">
     <div class="col-xl-8">
         <div class="card bg-default">
@@ -18,9 +21,7 @@
                 </div>
             </div>
             <div class="card-body">
-                <!-- Chart -->
                 <div class="chart">
-                    <!-- Chart wrapper -->
                     <canvas id="chart-xx" class="chart-canvas"></canvas>
                 </div>
             </div>
@@ -38,7 +39,6 @@
                 </div>
             </div>
             <div class="card-body">
-                <!-- Chart -->
                 <div class="chart">
                     <canvas id="chart-bars" class="chart-canvas"></canvas>
                 </div>
@@ -48,7 +48,4 @@
 </div>
 
 <div id='boneLayout'></div>
-
-<script src="{{ asset('mercurio/build/DashBoard.js') }}"></sc>
-
 @endsection

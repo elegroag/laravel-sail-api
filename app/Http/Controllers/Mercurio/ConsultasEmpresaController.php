@@ -317,14 +317,16 @@ class ConsultasEmpresaController extends ApplicationController
                 'servicio' => 'AportesEmpresas',
                 'metodo' => 'mora_presunta_by_nit',
                 'params' => [
-                    'nit' => $nit,
+                    'nit' => $nit
                 ],
             ]);
 
-            $consulta = $ps->toArray();
-            if (! $consulta['success']) {
-                throw new DebugException($consulta['msj']);
+            $out = $ps->toArray();
+            if (! $out['success']) {
+                throw new DebugException($out['msj']);
             }
+            $moras = $out['data']['moras'];
+            $periodos = $out['data']['periodos'];
 
             $ps = new ApiSubsidio();
             $ps->send([
@@ -340,21 +342,12 @@ class ConsultasEmpresaController extends ApplicationController
                 throw new DebugException($out['msj']);
             }
 
-            $sucursales = [];
-            foreach ($out['data'] as $sucursal) {
-                $sucursales[] = [
-                    'codsuc' => $sucursal['codsuc'],
-                    'detalle' => $sucursal['detalle'],
-                    'codzon' => $sucursal['codzon'],
-                ];
-            }
-
-            $data = $consulta['data'];
+            $sucursales = $out['data'];
             $salida = [
                 'success' => true,
                 'data' => [
-                    'cartera' => $data['moras'],
-                    'periodos' => $data['periodos'],
+                    'cartera' => $moras,
+                    'periodos' => $periodos,
                     'sucursales' => $sucursales,
                 ],
             ];
