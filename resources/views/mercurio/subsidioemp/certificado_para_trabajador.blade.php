@@ -6,7 +6,6 @@
 
 @section('title', 'Certificado para Trabajador')
 
-
 @section('content')
 @php 
 $tipo = [

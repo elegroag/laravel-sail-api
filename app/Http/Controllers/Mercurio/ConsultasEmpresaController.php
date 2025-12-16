@@ -24,6 +24,7 @@ use App\Services\Utils\GeneralService;
 use App\Services\Utils\Logger;
 use App\Services\Utils\UploadFile;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Certificados\CertiEmpleador;
 use App\Services\Certificados\Certificado;
 use App\Services\Certificados\CertiTrabajador;
 use Carbon\Carbon;
@@ -708,16 +709,19 @@ class ConsultasEmpresaController extends ApplicationController
     public function certificadoAfiliacionView()
     {
         return view('mercurio/subsidioemp/certificado_afiliacion', [
-            'title' => 'Certificado Afiliacion',
-            'document_title' => 'Certificado Afiliacion',
+            'title' => 'Certificado Afiliacion'
         ]);
     }
 
-    public function certificadoAfiliacion()
+    public function certificadoAfiliacion(Request $request)
     {
-        $this->setResponse('view');
-
-        return header('Location: https://comfacaenlinea.com.co/SYS/Subsidio/subflo/gene_certi_emp/x/' . $this->user['documento']);
+        $nit = $this->user['documento'];
+        $certificado = new Certificado(new CertiEmpleador($nit, 'A'));
+        $certificado->generate();
+        return response()->file($certificado->getFilePath(), [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $certificado->getDownloadName() . '"',
+        ]);
     }
 
     public function certificadoParaTrabajadorView()
@@ -767,7 +771,10 @@ class ConsultasEmpresaController extends ApplicationController
         $tipo = $request->input('tipo');
         $certificado = new Certificado(new CertiTrabajador($cedtra, $tipo));
         $certificado->generate();
-        return response()->file($certificado->getFilePath());
+        return response()->file($certificado->getFilePath(), [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $certificado->getDownloadName() . '"',
+        ]);
     }
 
     public function ejemploPlanillaActivacionMasiva()
