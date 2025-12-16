@@ -63,9 +63,29 @@ class MovimientosController extends ApplicationController
     {
         try {
             $email = $request->input('email');
+            $claant = $request->input('claant');
 
-            Mercurio07::where('tipo', $this->tipo)
-                ->where('documento', $this->user['documento'])
+            $tipo = $this->tipo;
+            $documento = $this->user['documento'];
+            $coddoc = $this->user['coddoc'];
+
+            $mercurio07 = Mercurio07::where('tipo', $tipo)
+                ->where('documento', $documento)
+                ->where('coddoc', $coddoc)
+                ->first();
+
+            $claantHash = clave_hash($claant);
+
+            if (! $mercurio07 || $claantHash != $mercurio07->getClave()) {
+                return response()->json([
+                    'success' => false,
+                    'msj' => 'La clave no coincide con la actual',
+                ]);
+            }
+
+            Mercurio07::where('tipo', $tipo)
+                ->where('documento', $documento)
+                ->where('coddoc', $coddoc)
                 ->update(['email' => $email]);
 
             $asunto = 'Cambio de Email';

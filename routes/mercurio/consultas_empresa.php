@@ -28,7 +28,7 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
         Route::post('/certificado_afiliacion', [ConsultasEmpresaController::class, 'certificadoAfiliacion']);
         Route::post('/certificado_para_trabajador', [ConsultasEmpresaController::class, 'certificadoParaTrabajador']);
 
-        Route::get('/cambio_email_view', [MovimientosController::class, 'cambioEmailView'])->name('empresa.cambio_email_view');
-        Route::get('/cambio_clave_view', [MovimientosController::class, 'cambioClaveView'])->name('empresa.cambio_clave_view');
+        Route::post('/cambio_email', [MovimientosController::class, 'cambioEmail'])->name('empresa.cambio_email');
+        Route::post('/cambio_clave', [MovimientosController::class, 'cambioClave'])->name('empresa.cambio_clave');
     });
 });

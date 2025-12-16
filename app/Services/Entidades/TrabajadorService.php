@@ -509,7 +509,7 @@ class TrabajadorService
                 ],
                 [
                     'name' => 'Consulta nucleo familiar',
-                    'url' => 'subsidio/consulta_nucleo',
+                    'url' => 'subsidio/consulta_nucleo_view',
                     'imagen' => 'conyuges.jpg',
                 ],
                 [

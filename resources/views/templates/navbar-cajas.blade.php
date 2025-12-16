@@ -51,13 +51,13 @@
                                 </span>
                                 <span class="shortcut-label">Historial</span>
                             </a>
-                            <a href="{{ route("{$action}.cambio_email_view") }}" class="shortcut-item">
+                            <a href="#" class="shortcut-item" data-toggle="navbar-change-email" data-url="{{ route("{$action}.cambio_email") }}">
                                 <span class="shortcut-icon bg-gradient-warning">
                                     <i class="ni ni-email-83"></i>
                                 </span>
                                 <span class="shortcut-label">Email</span>
                             </a>
-                            <a href="{{ route("{$action}.cambio_clave_view") }}" class="shortcut-item">
+                            <a href="#" class="shortcut-item" data-toggle="navbar-change-clave" data-url="{{ route("{$action}.cambio_clave") }}">
                                 <span class="shortcut-icon bg-gradient-info">
                                     <i class="ni ni-key-25"></i>
                                 </span>

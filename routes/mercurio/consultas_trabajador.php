@@ -24,7 +24,7 @@ Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
         Route::post('consulta_nucleo', [ConsultasTrabajadorController::class, 'consultaNucleo']);
         Route::get('consulta_tarjeta', [ConsultasTrabajadorController::class, 'consultaTarjeta']);
 
-        Route::get('/cambio_email_view', [MovimientosController::class, 'cambioEmailView'])->name('trabajador.cambio_email_view');
-        Route::get('/cambio_clave_view', [MovimientosController::class, 'cambioClaveView'])->name('trabajador.cambio_clave_view');
+        Route::post('/cambio_email', [MovimientosController::class, 'cambioEmail'])->name('trabajador.cambio_email');
+        Route::post('/cambio_clave', [MovimientosController::class, 'cambioClave'])->name('trabajador.cambio_clave');
     });
 });
