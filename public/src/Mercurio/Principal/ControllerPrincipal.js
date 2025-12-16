@@ -69,12 +69,16 @@ class ControllerPrincipal {
      * Carga la sección de afiliaciones con animación escalonada
      */
     __loadAfiliacionesSection() {
-        if (!this.App.Collections.afiliacion) return;
+        const afiliacion = this.App.Collections.afiliacion;
+        if (!afiliacion || (typeof afiliacion.length === 'number' && afiliacion.length === 0)) {
+            this.layout.markSectionLoaded('afiliaciones');
+            return;
+        }
 
         const region = this.layout.getRegion('afiliaciones');
 
         // Cargar cada card con delay para animación escalonada
-        this.App.Collections.afiliacion.forEach((item, index) => {
+        afiliacion.forEach((item, index) => {
             setTimeout(() => {
                 item.tipo = 'afiliacion';
                 const view = new ServiciosView({ model: item });
@@ -87,7 +91,7 @@ class ControllerPrincipal {
             () => {
                 this.layout.markSectionLoaded('afiliaciones');
             },
-            this.App.Collections.afiliacion.length * 100 + 100,
+            afiliacion.length * 100 + 100,
         );
     }
 
@@ -95,12 +99,16 @@ class ControllerPrincipal {
      * Carga la sección de consultas con animación escalonada
      */
     __loadConsultasSection() {
-        if (!this.App.Collections.consultas) return;
+        const consultas = this.App.Collections.consultas;
+        if (!consultas || (typeof consultas.length === 'number' && consultas.length === 0)) {
+            this.layout.markSectionLoaded('consultas');
+            return;
+        }
 
         const region = this.layout.getRegion('consultas');
 
         // Cargar cada card con delay para animación escalonada
-        this.App.Collections.consultas.forEach((item, index) => {
+        consultas.forEach((item, index) => {
             setTimeout(() => {
                 item.tipo = 'consultas';
                 const view = new ServiciosView({ model: item });
@@ -113,7 +121,7 @@ class ControllerPrincipal {
             () => {
                 this.layout.markSectionLoaded('consultas');
             },
-            this.App.Collections.consultas.length * 100 + 100,
+            consultas.length * 100 + 100,
         );
     }
 
@@ -121,12 +129,16 @@ class ControllerPrincipal {
      * Carga la sección de productos con animación escalonada
      */
     __loadProductosSection() {
-        if (!this.App.Collections.productos) return;
+        const productos = this.App.Collections.productos;
+        if (!productos || (typeof productos.length === 'number' && productos.length === 0)) {
+            this.layout.markSectionLoaded('productos');
+            return;
+        }
 
         const region = this.layout.getRegion('productos');
 
         // Cargar cada card con delay para animación escalonada
-        this.App.Collections.productos.forEach((item, index) => {
+        productos.forEach((item, index) => {
             setTimeout(() => {
                 item.tipo = 'productos';
                 const view = new ServiciosView({ model: item });
@@ -139,7 +151,7 @@ class ControllerPrincipal {
             () => {
                 this.layout.markSectionLoaded('productos');
             },
-            this.App.Collections.productos.length * 100 + 100,
+            productos.length * 100 + 100,
         );
     }
 

@@ -14,6 +14,8 @@ use App\Models\Mercurio34;
 use App\Models\Mercurio45;
 use App\Models\Mercurio47;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Certificados\Certificado;
+use App\Services\Certificados\CertiTrabajador;
 use App\Services\Utils\Logger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -451,8 +453,12 @@ class ConsultasTrabajadorController extends ApplicationController
     public function certificadoAfiliacion(Request $request)
     {
         $tipo = $request->input('tipo');
-        $logger = new Logger;
-        $logger->registrarLog(false, 'Certificado De Afiliacion', $tipo);
-        header("Location: https://comfacaenlinea.com.co/SYS/Subsidio/subflo/gene_certi_tra/$tipo/" . parent::getActUser('documento'));
+        $cedtra = $this->user['documento'];
+        $certificado = new Certificado(new CertiTrabajador($cedtra, $tipo));
+        $certificado->generate();
+        return response()->file($certificado->getFilePath(), [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $certificado->getDownloadName() . '"',
+        ]);
     }
 }

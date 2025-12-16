@@ -20,6 +20,8 @@ class PrincipalLayout extends Layout {
 
         // Referencia a la navegación suave
         this.smoothNav = null;
+
+        this._pendingLoadedSections = new Set();
     }
 
     /**
@@ -49,6 +51,11 @@ class PrincipalLayout extends Layout {
             offset: 80, // Ajustar según el header fijo
         });
 
+        this._pendingLoadedSections.forEach((sectionName) => {
+            this.smoothNav.markSectionLoaded(sectionName);
+        });
+        this._pendingLoadedSections.clear();
+
         // Escuchar eventos de sección visible
         $(document).on('section:visible', (e, data) => {
             this.trigger('section:visible', data);
@@ -70,9 +77,18 @@ class PrincipalLayout extends Layout {
      * @param {string} sectionName - Nombre de la sección
      */
     markSectionLoaded(sectionName) {
+        $(`#section-${sectionName}`)
+            .find('.loading-placeholder')
+            .fadeOut(300, function () {
+                $(this).remove();
+            });
+
         if (this.smoothNav) {
             this.smoothNav.markSectionLoaded(sectionName);
+            return;
         }
+
+        this._pendingLoadedSections.add(sectionName);
     }
 
     /**
