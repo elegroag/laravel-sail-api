@@ -55,3 +55,10 @@ Sistema completo de gestión empresarial desarrollado con Laravel 12, MySQL, Ine
 - **Frontend**: React 18, Inertia.js, Tailwind CSS
 - **Build Tools**: Vite, NPM
 - **Base de Datos**: MySQL 8.0
+
+
+```sh
+rsync -avz /home/edwin-tics/proyectos/comfaca-enlinea/flask-api/ admin@172.168.0.15:/home/admin/contenedores/desarrollo/flask-api
+
+rsync -avz /home/edwin-tics/proyectos/comfaca-enlinea/laravel/ admin@172.168.0.15:/home/admin/contenedores/desarrollo/mercurio
+```

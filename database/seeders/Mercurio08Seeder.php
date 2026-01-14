@@ -30,10 +30,10 @@ class Mercurio08Seeder extends Seeder
      */
     protected function sql(): string
     {
-        $sqlPath = database_path('seeders/dbsql/Mercurio08.sql');
+        $sqlPath = database_path('seeders/dbsql/mercurio08.sql');
 
         if (! File::exists($sqlPath)) {
-            throw new RuntimeException('No se encontró el archivo SQL para el seeder Mercurio08.');
+            throw new RuntimeException('No se encontró el archivo SQL para el seeder mercurio08.');
         }
 
         return File::get($sqlPath);

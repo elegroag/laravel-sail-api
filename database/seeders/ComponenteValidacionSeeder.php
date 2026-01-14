@@ -2,83 +2,49 @@
 
 namespace Database\Seeders;
 
-use App\Models\ComponenteDinamico;
-use App\Models\ComponenteValidacion;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use RuntimeException;
 
 class ComponenteValidacionSeeder extends Seeder
 {
+
+    use WithoutModelEvents;
+
+    private const TABLE = 'componentes_validaciones';
+
     /**
-     * Run the database seeds.
+     * Ejecuta el seeder cargando el SQL externo.
      */
     public function run(): void
     {
-        // Obtener componentes existentes y crear validaciones adicionales si es necesario
-        $componentes = ComponenteDinamico::all();
-
-        foreach ($componentes as $componente) {
-            // Si ya tiene validación, saltar
-            if ($componente->validacion) {
-                continue;
-            }
-            // Crear validaciones por defecto basadas en el tipo
-            $validacionData = $this->getValidacionPorTipo($componente->type);
-            if ($validacionData) {
-                $componente->validacion()->create($validacionData);
-            }
-        }
+        DB::transaction(function (): void {
+            $this->limpiarTabla();
+            DB::unprepared($this->sql());
+        });
     }
 
     /**
-     * Obtener validación por defecto según el tipo de componente
+     * Obtiene el contenido del archivo SQL requerido.
      */
-    private function getValidacionPorTipo(string $type): ?array
+    protected function sql(): string
     {
-        return match ($type) {
-            'input' => [
-                'pattern' => '/^[a-zA-Z0-9\s\-_.]+$/',
-                'max_length' => 255,
-                'is_required' => false,
-                'error_messages' => [
-                    'pattern' => 'Solo se permiten letras, números, espacios y caracteres básicos',
-                    'max_length' => 'El texto no puede exceder 255 caracteres'
-                ]
-            ],
-            'textarea' => [
-                'max_length' => 1000,
-                'is_required' => false,
-                'error_messages' => [
-                    'max_length' => 'El texto no puede exceder 1000 caracteres'
-                ]
-            ],
-            'select' => [
-                'is_required' => false,
-                'error_messages' => [
-                    'required' => 'Debe seleccionar una opción'
-                ]
-            ],
-            'date' => [
-                'is_required' => false,
-                'error_messages' => [
-                    'required' => 'La fecha es obligatoria'
-                ]
-            ],
-            'number' => [
-                'pattern' => '/^\d+(\.\d{1,2})?$/',
-                'is_required' => false,
-                'error_messages' => [
-                    'pattern' => 'Debe ser un número válido con máximo 2 decimales',
-                    'required' => 'El número es obligatorio'
-                ]
-            ],
-            'dialog' => [
-                'is_required' => false,
-                'error_messages' => [
-                    'required' => 'Debe confirmar el diálogo'
-                ]
-            ],
-            default => null
-        };
+        $sqlPath = database_path('seeders/dbsql/componentes_validaciones.sql');
+
+        if (! File::exists($sqlPath)) {
+            throw new RuntimeException('No se encontró el archivo SQL para el seeder componentes_validaciones.');
+        }
+
+        return File::get($sqlPath);
+    }
+
+    /**
+     * Elimina los registros existentes para permitir re-ejecuciones idempotentes.
+     */
+    protected function limpiarTabla(): void
+    {
+        DB::statement(sprintf('DELETE FROM %s', self::TABLE));
     }
 }
