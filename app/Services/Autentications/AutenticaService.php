@@ -140,7 +140,7 @@ class AutenticaService
                     }
                 }
 
-                $this->autoFirma($documento, $coddoc, $clave);
+                //$this->autoFirma($documento, $coddoc, $clave);
 
                 return [
                     false,
@@ -169,7 +169,8 @@ class AutenticaService
         )) {
             throw new DebugException('Error en la autenticación del usuario', 501);
         }
-        $this->autoFirma($documento, $coddoc, $clave);
+
+        //$this->autoFirma($documento, $coddoc, $clave);
 
         return [
             true,
