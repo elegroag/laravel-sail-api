@@ -5,7 +5,6 @@ namespace App\Services\Formularios\Api;
 use App\Library\Collections\ParamsBeneficiario;
 use App\Models\Gener18;
 use App\Services\Api\ApiPython;
-use App\Services\Api\ApiSubsidio;
 use Carbon\Carbon;
 
 class BeneficiariosDocuments
@@ -50,7 +49,10 @@ class BeneficiariosDocuments
         $mtihij = ParamsBeneficiario::getTipoHijo();
         $tipo_hijo = $this->beneficiario->tiphij ? $mtihij[$this->beneficiario->tiphij] : 'Hijo normal';
 
-        $nombre_trabajador = $this->trabajador->prinom . ' ' . $this->trabajador->segnom . ' ' . $this->trabajador->priape . ' ' . $this->trabajador->segape;
+        $nombre_trabajador = $this->trabajador->prinom . ' ' .
+            $this->trabajador->segnom . ' ' .
+            $this->trabajador->priape . ' ' .
+            $this->trabajador->segape;
 
         $context_trabajador = null;
 
@@ -59,25 +61,30 @@ class BeneficiariosDocuments
         $detdoc_rua_trabajador = ($mtipoTrab) ? $mtipoTrab->getCodrua() : 'CC';
 
         $context_trabajador = [
-            'cedtra' => $this->trabajador->cedtra ?? null,
+            'numero_documento' => $this->trabajador->cedtra ?? null,
             'tipo_documento' => $tipo_documento_trabajador,
             'nombre_trabajador' => $nombre_trabajador,
-            'nit' => $this->trabajador->nit ?? null,
-            'detdoc_rua_trabajador' => $detdoc_rua_trabajador,
+            'tipo_documento_siglas' => $detdoc_rua_trabajador,
+            'nit' => $this->trabajador->nit,
             ...$this->trabajador->toArray(),
         ];
 
-
+        $mtipcue = ParamsBeneficiario::getTipoCuenta();
         if (
             $this->beneficiario->tippag == 'T' ||
             $this->beneficiario->tippag  == null ||
             $this->beneficiario->tippag  == ''
         ) {
             $info_bancaria = '';
+            $banco_name = '';
+            $tipo_cuenta = '';
         } else {
             $mbanco = ParamsBeneficiario::getBancos();
             $banco = $this->beneficiario->codban ? $mbanco[$this->beneficiario->codban] : "";
             $tippag_detalle = $this->beneficiario->tippag ? $mtipoPago[$this->beneficiario->tippag] : "";
+
+            $banco_name = $this->beneficiario->codban ? $mbanco[$this->beneficiario->codban] : "";
+            $tipo_cuenta = $this->beneficiario->tipcue ? $mtipcue[$this->beneficiario->tipcue] : "Ahorros";
 
             $info_bancaria = "El afiliado {$nombre_trabajador}, con tipo documento {$tipo_documento_trabajador} y número {$this->beneficiario->cedtra},
                 solicita que el pago del subsidio cuota monetaria se realice a la cuenta {$this->beneficiario->numcue} del banco {$banco},
@@ -85,31 +92,41 @@ class BeneficiariosDocuments
         }
 
 
-        $context_biologico = null;
+        $context_biologico = [];
         if ($this->biologico) {
             $mtidocs = Gener18::where('coddoc', $this->biologico->tipdoc)->first();
             $detdoc = ($mtidocs) ? $mtidocs->detdoc : 'Cedula de ciudadania';
-
             $ciudad_residencia = ($this->biologico->ciures ?? null) ? ($ciudades[$this->biologico->ciures] ?? $this->biologico->ciures) : ' FLORENCIA';
 
             $context_biologico = [
-                'cedcon' => $this->biologico->cedcon,
-                'tipo_documento' => substr(capitalize($detdoc), 0, 44),
+                'numero_documento' => $this->biologico->cedcon,
+                'tipo_documento' => $detdoc,
                 'telefono' => $this->biologico->telefono,
                 'email' => $this->biologico->email,
-                'priape' => $this->biologico->priape,
-                'segape' => $this->biologico->segape,
-                'prinom' => $this->biologico->prinom,
-                'segnom' => $this->biologico->segnom,
+                'primer_apellido' => $this->biologico->priape,
+                'segundo_apellido' => $this->biologico->segape,
+                'primer_nombre' => $this->biologico->prinom,
+                'segundo_nombre' => $this->biologico->segnom,
                 'direccion' => $this->biologico->direccion,
                 'ciudad_residencia' => $ciudad_residencia,
-                'zoneurbana' => $this->biologico->zoneurbana,
+                'zona_urbana' => $this->biologico->zoneurbana,
                 'desconoce_ubicacion' => $this->biologico->biodesco,
+                'sexo' => $this->biologico->sexo,
+                'nombre_completo' => $this->biologico->prinom . ' ' .
+                    $this->biologico->segnom . ' ' .
+                    $this->biologico->priape . ' ' .
+                    $this->biologico->segape,
+                ...$this->biologico->toArray(),
             ];
         }
 
-        $nombre_beneficiario = trim(($this->beneficiario->prinom ?? '') . ' ' . ($this->beneficiario->segnom ?? '') . ' ' . ($this->beneficiario->priape ?? '') . ' ' . ($this->beneficiario->segape ?? ''));
+        $nombre_beneficiario = trim(($this->beneficiario->prinom ?? '') . ' ' .
+            ($this->beneficiario->segnom ?? '') . ' ' .
+            ($this->beneficiario->priape ?? '') . ' ' .
+            ($this->beneficiario->segape ?? ''));
+
         $today = Carbon::now();
+        $puede_trabajar = ($this->beneficiario->captra == 'S') ? $this->beneficiario->captra : 'N';
         $context = [
             'year' => $today->format('Y'),
             'month' => $today->format('m'),
@@ -129,8 +146,14 @@ class BeneficiariosDocuments
             'parentesco' => $parentesco,
             'tipo_hijo' => $tipo_hijo,
             'info_bancaria' => $info_bancaria,
+            'banco_name' => $banco_name,
+            'tipo_cuenta' => $tipo_cuenta,
+            'numero_cuenta' => $this->beneficiario->numcue,
+            'puede_trabajar' => $puede_trabajar,
             ...$this->beneficiario->toArray(),
         ];
+
+        #dd($context);
 
         $ps = new ApiPython();
         $ps->send([
@@ -143,13 +166,10 @@ class BeneficiariosDocuments
             ]
         ]);
 
-        if ($ps->isJson() == false) {
-            return false;
-        }
+        if ($ps->isJson() == false) return false;
+
         $out = $ps->toArray();
-        if ($out['success'] == false) {
-            return false;
-        }
+        if ($out['success'] == false) return false;
 
         sleep(2);
         return true;

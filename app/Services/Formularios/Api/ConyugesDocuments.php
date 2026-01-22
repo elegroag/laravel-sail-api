@@ -55,8 +55,12 @@ class ConyugesDocuments
         $sexos = ParamsConyuge::getSexos();
         $sexo_detalle = ($this->conyuge->sexo) ? $sexos[$this->conyuge->sexo] : 'Indefinido';
 
+        $mtipcue = ParamsConyuge::getTipoCuenta();
+
         $nombre_conyuge = $this->conyuge->prinom . ' ' . $this->conyuge->segnom . ' ' . $this->conyuge->priape . ' ' . $this->conyuge->segape;
 
+        $banco_name = '';
+        $tipo_cuenta = '';
         if (
             $this->conyuge->tippag == 'T' ||
             $this->conyuge->tippag  == null ||
@@ -65,11 +69,11 @@ class ConyugesDocuments
             $info_bancaria = '';
         } else {
             $mbanco = ParamsConyuge::getBancos();
-            $banco = $this->conyuge->codban ? $mbanco[$this->conyuge->codban] : "";
-            $tippag_detalle = $this->conyuge->tippag ? $mtippga[$this->conyuge->tippag] : "";
+            $banco_name = $this->conyuge->codban ? $mbanco[$this->conyuge->codban] : "";
+            $tipo_cuenta = $this->conyuge->tipcue ? $mtipcue[$this->conyuge->tipcue] : "Ahorros";
 
-            $info_bancaria = "El cónyuge {$nombre_conyuge}, con tipo documento {$detdoc_detalle_conyuge} y número {$this->conyuge->cedcon},
-                solicita que el pago del subsidio cuota monetaria se realice a la cuenta {$this->conyuge->numcue} del banco {$banco},
+            $info_bancaria = "El señor(@) " . capitalize($nombre_conyuge) . ", con tipo documento " . capitalize($detdoc_detalle_conyuge) . " y número {$this->conyuge->cedcon},
+                solicita que el pago del subsidio cuota monetaria se realice a la cuenta {$this->conyuge->numcue} del banco {$banco_name},
                 que corresponde al medio de pago {$tippag_detalle}.";
         }
 
@@ -103,6 +107,9 @@ class ConyugesDocuments
             'sexo_detalle' => $sexo_detalle,
             'info_bancaria' => $info_bancaria,
             'has_subsidio' => 'N',
+            'banco_name' => $banco_name,
+            'numero_cuenta' => $this->conyuge->numcue,
+            'tipo_cuenta' => $tipo_cuenta,
             ...$this->conyuge->toArray(),
         ];
 

@@ -195,7 +195,7 @@ class ApplicationController extends Controller
         } elseif ($e instanceof AuthException) {
             $debug = new DebugException('Error de autenticación', 501, $e->getMessage());
         } else {
-            $debug = new DebugException('Error de sintaxis del sistema', 501, $e->getMessage());
+            $debug = new DebugException('Error de sintaxis del sistema', 501, $e->getMessage() . ' ' . $e->getLine() . ' ' . basename($e->getFile()) . ' ' . $e->getTraceAsString());
         }
         return [
             'success' => false,

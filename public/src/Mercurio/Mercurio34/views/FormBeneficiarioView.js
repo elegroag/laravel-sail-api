@@ -375,7 +375,6 @@ export class FormBeneficiarioView extends FormView {
                 { rule: 'biocodciu', prop: 'required', value: true },
                 { rule: 'biodire', prop: 'required', value: true },
                 { rule: 'bioemail', prop: 'required', value: true },
-                { rule: 'bioemail', prop: 'force', value: 'email' },
                 { rule: 'biophone', prop: 'required', value: true },
             ]);
             this.$el.find('.show-biologico').removeClass('d-none');

@@ -127,17 +127,16 @@ class BeneficiarioAdjuntoService
                 break;
         }
 
-        $trabajadorService = new TrabajadorService;
-        $data = $trabajadorService->buscarTrabajadorSubsidio($this->request->cedtra);
-        if ($data) {
-            if ($mtrabajador) {
-                $trabajador = clone $mtrabajador;
-            } else {
-                $trabajador = new Mercurio31;
+        $trabajador = new Mercurio31;
+        if ($mtrabajador) {
+            $trabajador->fill($mtrabajador->toArray());
+        } else {
+            $trabajadorService = new TrabajadorService;
+            $data = $trabajadorService->buscarTrabajadorSubsidio($this->request->cedtra);
+            if ($data) {
                 $trabajador->fill($data);
             }
         }
-
         return $trabajador;
     }
 
@@ -166,8 +165,7 @@ class BeneficiarioAdjuntoService
 
     public function declaraJurament()
     {
-        $parent = $this->request->parent;
-        switch ($parent) {
+        switch (strval($this->request->parent)) {
             case '1':
                 $template = 'declaracion-hijos.html';
                 $this->filename = "declaracion_hijo_{$this->request->numdoc}.pdf";
@@ -205,17 +203,16 @@ class BeneficiarioAdjuntoService
 
     public function getBiologioConyuge()
     {
-        if (! $this->request->cedcon) {
-            return false;
-        }
+        if ($this->request->parent == '3') return false;
 
         $mconyuge = Mercurio32::where('cedcon', $this->request->cedcon)
             ->where('documento', $this->request->documento)
             ->where('coddoc', $this->request->coddoc)
             ->first();
 
+        // si no existe en la base de datos, buscar api externa como conyuge
         if (!$mconyuge && $this->request->biocedu) {
-            $mconyuge = new Mercurio32;
+            $mconyuge = null;
             $ps = new ApiSubsidio();
             $ps->send(
                 [
@@ -236,20 +233,47 @@ class BeneficiarioAdjuntoService
                 $mconyuge->fill($data);
             }
         }
-        if ($this->request->biocedu == $this->request->cedcon) {
-            $mconyuge->cedcon = $this->request->biocedu;
-            $mconyuge->tipdoc = $this->request->biotipdoc;
-            $mconyuge->prinom = $this->request->bioprinom;
-            $mconyuge->segnom = $this->request->biosegnom;
-            $mconyuge->priape = $this->request->biopriape;
-            $mconyuge->segape = $this->request->biosegape;
-            $mconyuge->email = $this->request->bioemail;
-            $mconyuge->telefono = $this->request->biophone;
-            $mconyuge->ciures = $this->request->biocodciu;
-            $mconyuge->direccion = $this->request->biodire;
-            $mconyuge->zoneurbana = $this->request->biourbana;
+
+        // si no existe en la base de datos, buscar api externa como trabajador
+        if (!$mconyuge) {
+            $ps = new ApiSubsidio();
+            $ps->send(
+                [
+                    'servicio' => 'ComfacaEmpresas',
+                    'metodo' => 'informacion_trabajador',
+                    'params' => [
+                        'cedtra' => $this->request->biocedu,
+                    ],
+                ]
+            );
+            $data = false;
+            $out = $ps->toArray();
+            if ($out['success'] == true) {
+                $data = ($out['data']) ? $out['data'] : false;
+            }
+            if ($data) {
+                $mconyuge = new Mercurio32();
+                $mconyuge->fill($data);
+            }
         }
 
+        //Para tipo hijastro o donde se este reportando conyuge biologico.
+        if ((!$mconyuge && $this->request->biocedu) || $this->request->tiphij == '2') {
+            $mconyuge = new Mercurio32();
+            $mconyuge->fill([
+                'cedcon' => $this->request->biocedu,
+                'tipdoc' => $this->request->biotipdoc,
+                'prinom' => $this->request->bioprinom,
+                'segnom' => $this->request->biosegnom,
+                'priape' => $this->request->biopriape,
+                'segape' => $this->request->biosegape,
+                'email' => $this->request->bioemail,
+                'telefono' => $this->request->biophone,
+                'ciures' => $this->request->biocodciu,
+                'direccion' => $this->request->biodire,
+                'zoneurbana' => $this->request->biourbana,
+            ]);
+        }
         return $mconyuge;
     }
 

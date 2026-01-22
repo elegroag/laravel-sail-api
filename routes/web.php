@@ -3,8 +3,12 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/', function () {
+    return redirect('web/login');
+});
+
 Route::get('/web', function () {
-    return redirect()->route('web.login');
+    return redirect('web/login');
 });
 
 require __DIR__ . '/mercurio/mercurio.php';

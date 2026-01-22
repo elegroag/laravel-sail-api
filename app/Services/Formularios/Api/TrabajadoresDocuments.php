@@ -33,6 +33,7 @@ class TrabajadoresDocuments
         $pueblo_name = ($this->trabajador->pub_indigena_id) ? $mpueblos[$this->trabajador->pub_indigena_id] : 'NO APLICA';
 
         $ocupaciones = ParamsTrabajador::getOcupaciones();
+        $cargo_name = ($this->trabajador->cargo) ? $ocupaciones[$this->trabajador->cargo] : 'NO APLICA';
 
         $mtipoDocumentos = Gener18::where('coddoc', $this->trabajador->tipdoc)->first();
         $tipo_documento = ($mtipoDocumentos) ? $mtipoDocumentos->detdoc : 'Cedula de ciudadania';
@@ -43,13 +44,17 @@ class TrabajadoresDocuments
 
         $salario = ($this->trabajador->salario) ? '$' . $this->trabajador->salario : '$0';
 
-        $empresa_labora = ($this->trabajador->empresalab) ? $this->trabajador->empresalab : 'NO APLICA';
+        $empresa_labora = ($this->trabajador->otra_empresa && $this->trabajador->otra_empresa !== '@') ? $this->trabajador->otra_empresa : null;
+        $labora_otra_empresa = ($empresa_labora == null) ? 'N' : 'S';
 
         $mtippga = ParamsTrabajador::getTipoPago();
         $tippag_detalle = ($this->trabajador->tippag) ? $mtippga[$this->trabajador->tippag] : '';
         $nombre_trabajador = ($this->trabajador->prinom . ' ' . $this->trabajador->segnom . ' ' . $this->trabajador->priape . ' ' . $this->trabajador->segape);
 
         $sucursal = 'N° ' . $this->trabajador->codsuc . ' - ' . capitalize($this->empresa->razsoc);
+
+        $mbanco = ParamsTrabajador::getBancos();
+        $banco_name = ($this->trabajador->codban) ? $mbanco[$this->trabajador->codban] : 'NO APLICA';
         $today = Carbon::now();
         $context = [
             'year' => $today->format('Y'),
@@ -61,11 +66,13 @@ class TrabajadoresDocuments
             'resguardo_name' => $resguardo_name,
             'etnica_name' => $etnica_name,
             'pueblo_name' => $pueblo_name,
-            'ocupaciones' => $ocupaciones,
+            'cargo_name' => $cargo_name,
             'tipo_documento' => $tipo_documento,
             'discapacidad_name' => $discapacidad_name,
             'salario' => $salario,
+            'banco_name' => $banco_name,
             'empresa_labora' => $empresa_labora,
+            'labora_otra_empresa' => $labora_otra_empresa,
             'tippag_detalle' => $tippag_detalle,
             'detdoc_rua_trabajador' => $detdoc_rua_trabajador,
             'nombre_trabajador' => $nombre_trabajador,
