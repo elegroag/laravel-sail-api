@@ -60,11 +60,12 @@ class Mercurio31Seeder extends Seeder
 
             unset($data['zoneurbana']);
 
-            $data['ruuid'] = (string) Str::orderedUuid();
-            Mercurio31::updateOrCreate(
+            $model = Mercurio31::updateOrCreate(
                 ['id' => $row['id']],
                 $data
             );
+            $model->regenerateUuid();
+            $model->save();
         }
 
         $legacy->disconnect();

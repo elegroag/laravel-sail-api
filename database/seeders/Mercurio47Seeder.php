@@ -59,12 +59,12 @@ class Mercurio47Seeder extends Seeder
             unset($data['fecha_solicitud']);
             unset($data['tipo_actualizacion']);
 
-            $data['ruuid'] = (string) Str::orderedUuid();
-
-            Mercurio47::updateOrCreate(
+            $model = Mercurio47::updateOrCreate(
                 ['id' => $row['id']],
                 $data
             );
+            $model->regenerateUuid();
+            $model->save();
         }
 
         $legacy->disconnect();

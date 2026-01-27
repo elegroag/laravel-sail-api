@@ -130,39 +130,67 @@ export default class FormDatosTrabajador extends FormView {
             return false;
         }
 
-        $App.trigger('confirma', {
-            message: 'Confirma que desea guardar los datos del formulario.',
-            callback: (status) => {
-                if (status) {
-                    this.trigger('form:save', {
-                        entity: entity,
-                        isNew: this.isNew,
-                        callback: (response) => {
-                            target.removeAttr('disabled');
-                            this.$el.find('#nit').attr('disabled', 'true');
-
-                            if (response) {
-                                if (response.success) {
-                                    $App.trigger('alert:success', { message: response.msj });
-                                    this.model.set({ id: parseInt(response.data.id) });
-                                    if (this.isNew === true) {
-                                        $App.router.navigate('proceso/' + this.model.get('id'), {
-                                            trigger: true,
-                                            replace: true,
-                                        });
-                                    } else {
-                                        const _tab = new bootstrap.Tab('a[href="#documentos_adjuntos"]');
-                                        _tab.show();
-                                    }
-                                } else {
-                                    $App.trigger('alert:error', { message: response.msj });
-                                }
-                            }
-                        },
-                    });
-                } else {
+        this.confirmSend({
+            title: 'Confirmación requerida',
+            message: 'Ingrese su clave numérica de 6 dígitos para confirmar el envío de la información.',
+            inputPlaceholder: '000000',
+            confirmText: 'Continuar',
+            cancelText: 'Cancelar',
+            inputAttributes: {
+                autocapitalize: 'off',
+            },
+            callback: (result) => {
+                if (!result.isConfirmed) {
                     target.removeAttr('disabled');
+                    return;
                 }
+
+                const clave = result.value;
+                // Adjuntamos la clave al entity para que viaje al backend
+                try {
+                    entity.set('clave', clave);
+                } catch (e) {
+                    // fallback por si entity no es un Backbone.Model estándar
+                    if (typeof entity === 'object' && typeof entity.set !== 'function') {
+                        entity.clave = clave;
+                    }
+                }
+
+                $App.trigger('confirma', {
+                    message: 'Confirma que desea guardar los datos del formulario.',
+                    callback: (status) => {
+                        if (status) {
+                            this.trigger('form:save', {
+                                entity: entity,
+                                isNew: this.isNew,
+                                callback: (response) => {
+                                    target.removeAttr('disabled');
+                                    this.$el.find('#nit').attr('disabled', 'true');
+
+                                    if (response) {
+                                        if (response.success) {
+                                            $App.trigger('alert:success', { message: response.msj });
+                                            this.model.set({ id: parseInt(response.data.id) });
+                                            if (this.isNew === true) {
+                                                $App.router.navigate('proceso/' + this.model.get('id'), {
+                                                    trigger: true,
+                                                    replace: true,
+                                                });
+                                            } else {
+                                                const _tab = new bootstrap.Tab('a[href="#documentos_adjuntos"]');
+                                                _tab.show();
+                                            }
+                                        } else {
+                                            $App.trigger('alert:error', { message: response.msj });
+                                        }
+                                    }
+                                },
+                            });
+                        } else {
+                            target.removeAttr('disabled');
+                        }
+                    },
+                });
             },
         });
     }

@@ -9,6 +9,7 @@ import {
     SelectComponent,
     TextComponent,
 } from '@/Componentes/Views/ComponentsView';
+import ConfirmPasswordModalView from '@/Componentes/Views/ConfirmPasswordModalView';
 import { LoadDocumentsView } from '@/Componentes/Views/LoadDocumentsView';
 import { PoliticaModalView } from '@/Componentes/Views/PoliticaModalView';
 import { SeguimientosView } from '@/Componentes/Views/SeguimientosView';
@@ -348,6 +349,57 @@ export class FormView extends Backbone.View {
             containerInner.classList.remove('is-valid');
             containerInner.classList.add('is-invalid');
         }
+    }
+
+    confirmSend({ title = '', message = '', inputPlaceholder = '', confirmText = '', cancelText = '', inputAttributes = {}, callback = () => {} }) {
+        const view = new ConfirmPasswordModalView({
+            title,
+            message,
+            inputPlaceholder,
+            confirmText,
+            cancelText,
+            inputAttributes,
+        });
+
+        this.App.trigger('show:modal', {
+            title,
+            view,
+            options: {
+                size: 'modal-md',
+                scrollable: true,
+                footer: [
+                    {
+                        text: 'Cancelar',
+                        className: 'btn-secondary',
+                        onClick: () => {
+                            this.App.trigger('hide:modal', view);
+                            callback({
+                                isConfirmed: false,
+                            });
+                        },
+                    },
+                    {
+                        text: 'Sí, Confirmo',
+                        className: 'btn-primary',
+                        onClick: () => {
+                            const clave = $('#passwordInput').val();
+                            if (!clave) {
+                                this.App.trigger('alert:error', { message: 'La clave de firma digital es requerida.' });
+                                return callback({
+                                    isConfirmed: false,
+                                });
+                            }
+                            this.App.trigger('hide:modal', view);
+                            view.remove();
+                            callback({
+                                isConfirmed: true,
+                                value: clave,
+                            });
+                        },
+                    },
+                ],
+            },
+        });
     }
 
     remove() {

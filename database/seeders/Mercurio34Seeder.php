@@ -47,12 +47,12 @@ class Mercurio34Seeder extends Seeder
 
             unset($data['celular']);
 
-            $data['ruuid'] = (string) Str::orderedUuid();
-
-            Mercurio34::updateOrCreate(
+            $model = Mercurio34::updateOrCreate(
                 ['id' => $row['id']],
                 $data
             );
+            $model->regenerateUuid();
+            $model->save();
         }
 
         $legacy->disconnect();

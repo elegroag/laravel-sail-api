@@ -36,12 +36,12 @@ class Mercurio38Seeder extends Seeder
                 continue;
             }
 
-            $data['ruuid'] = (string) Str::orderedUuid();
-
-            Mercurio38::updateOrCreate(
+            $model = Mercurio38::updateOrCreate(
                 ['id' => $row['id']],
                 $data
             );
+            $model->regenerateUuid();
+            $model->save();
         }
 
         $legacy->disconnect();

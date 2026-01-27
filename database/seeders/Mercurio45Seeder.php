@@ -28,12 +28,13 @@ class Mercurio45Seeder extends Seeder
             }
 
             // Clave compuesta por cédula, código beneficio y fecha
-            Mercurio45::updateOrCreate(
+            $model = Mercurio45::updateOrCreate(
                 [
-                   'id' => $row['id']
+                    'id' => $row['id']
                 ],
                 $data
             );
+            $model->save();
         }
 
         $legacy->disconnect();

@@ -27,10 +27,11 @@ class Mercurio40Seeder extends Seeder
                 $data[$field] = $row[$field] ?? null;
             }
 
-            Mercurio40::updateOrCreate(
+            $model = Mercurio40::updateOrCreate(
                 ['id' => $row['id']],
                 $data
             );
+            $model->save();
         }
 
         $legacy->disconnect();

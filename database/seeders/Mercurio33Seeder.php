@@ -28,27 +28,29 @@ class Mercurio33Seeder extends Seeder
                 $data[$field] = $row[$field] ?? null;
             }
 
-            if($data['documento'] < 5) continue;
-            if(!is_numeric($data['coddoc'])){
+            if ($data['documento'] < 5) continue;
+            if (!is_numeric($data['coddoc'])) {
                 continue;
             }
-            if(!is_numeric($data['documento'])){
+            if (!is_numeric($data['documento'])) {
                 continue;
             }
-            if($data['tipo'] != null || $data['tipo'] != ''){
+            if ($data['tipo'] != null || $data['tipo'] != '') {
                 continue;
             }
 
-            if(Mercurio47::where('id', $row['actualizacion'])->exists() == false){
+            if (Mercurio47::where('id', $row['actualizacion'])->exists() == false) {
                 continue;
             }
             // Clave compuesta
-            Mercurio33::updateOrCreate(
+            $model = Mercurio33::updateOrCreate(
                 [
                     'id' => $row['id']
                 ],
                 $data
             );
+            $model->regenerateUuid();
+            $model->save();
         }
 
         $legacy->disconnect();

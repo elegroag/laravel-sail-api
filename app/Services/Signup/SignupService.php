@@ -130,7 +130,10 @@ class SignupService
             $solicitud = $signupEntity->getSolicitud();
         }
 
-        $this->autoFirma();
+        /**
+         * Temporalmente deshabilitada la auto firma digital
+         */
+        //$this->autoFirma();
 
         return [
             'success' => true,

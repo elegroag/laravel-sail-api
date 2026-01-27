@@ -64,11 +64,12 @@ class Mercurio32Seeder extends Seeder
                 $data['peretn'] = '7';
             }
 
-            $data['ruuid'] = (string) Str::orderedUuid();
-            Mercurio32::updateOrCreate(
+            $model = Mercurio32::updateOrCreate(
                 ['id' => $row['id']],
                 $data
             );
+            $model->regenerateUuid();
+            $model->save();
         }
 
         $legacy->disconnect();

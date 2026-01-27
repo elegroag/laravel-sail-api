@@ -28,12 +28,14 @@ class Mercurio35Seeder extends Seeder
             }
 
             // Clave compuesta por cédula y fecha retiro
-            Mercurio35::updateOrCreate(
+            $model = Mercurio35::updateOrCreate(
                 [
                     'id' => $row['id']
                 ],
                 $data
             );
+            $model->regenerateUuid();
+            $model->save();
         }
 
         $legacy->disconnect();

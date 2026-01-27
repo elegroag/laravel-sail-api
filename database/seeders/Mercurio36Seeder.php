@@ -36,15 +36,15 @@ class Mercurio36Seeder extends Seeder
                 continue;
             }
 
-            $data['ruuid'] = (string) Str::orderedUuid();
-
             // Clave compuesta por tipo, documento y cédula
-            Mercurio36::updateOrCreate(
+            $model = Mercurio36::updateOrCreate(
                 [
                     'id' => $row['id'],
                 ],
                 $data
             );
+            $model->regenerateUuid();
+            $model->save();
         }
 
         $legacy->disconnect();

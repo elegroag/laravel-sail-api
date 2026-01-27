@@ -15,7 +15,7 @@ class Mercurio37Seeder extends Seeder
     public function run(): void
     {
 
-       if(Mercurio06::count() == 0){
+        if (Mercurio06::count() == 0) {
             $this->call([
                 Mercurio06Seeder::class,
                 Mercurio07Seeder::class,
@@ -38,13 +38,13 @@ class Mercurio37Seeder extends Seeder
                 $data[$field] = $row[$field] ?? null;
             }
 
-            if(!is_numeric($data['coddoc'])){
+            if (!is_numeric($data['coddoc'])) {
                 continue;
             }
-            if(!is_numeric($data['numero'])){
+            if (!is_numeric($data['numero'])) {
                 continue;
             }
-            if($data['tipopc'] == null || $data['tipopc'] == ''){
+            if ($data['tipopc'] == null || $data['tipopc'] == '') {
                 continue;
             }
             // Usar la clave compuesta definida en el modelo

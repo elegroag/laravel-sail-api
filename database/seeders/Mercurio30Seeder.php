@@ -46,12 +46,15 @@ class Mercurio30Seeder extends Seeder
             unset($data['documento_representante_sat']);
             unset($data['numero_transaccion']);
 
-            $data['ruuid'] = (string) Str::orderedUuid();
-
-            Mercurio30::updateOrCreate(
+            // Crear o actualizar el registro
+            $model = Mercurio30::updateOrCreate(
                 ['id' => $row['id']],
                 $data
             );
+
+            // Generar el ruuid usando el trait HasCustomUuid
+            $model->regenerateUuid();
+            $model->save();
         }
 
         $legacy->disconnect();
