@@ -10,9 +10,7 @@ use Illuminate\Validation\ValidationException;
 
 class NucleoFamiliarController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index(): JsonResponse
     {
         try {
@@ -26,14 +24,12 @@ class NucleoFamiliarController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al obtener núcleos familiares: '.$e->getMessage(),
+                'message' => 'Error al obtener núcleos familiares: ' . $e->getMessage(),
             ], 500);
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+
     public function store(Request $request): JsonResponse
     {
         try {
@@ -69,14 +65,12 @@ class NucleoFamiliarController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al crear núcleo familiar: '.$e->getMessage(),
+                'message' => 'Error al crear núcleo familiar: ' . $e->getMessage(),
             ], 500);
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
+
     public function show(string $id): JsonResponse
     {
         try {
@@ -95,9 +89,7 @@ class NucleoFamiliarController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+
     public function update(Request $request, string $id): JsonResponse
     {
         try {
@@ -106,7 +98,7 @@ class NucleoFamiliarController extends Controller
             $validatedData = $request->validate([
                 'nombres' => 'sometimes|required|string|max:255',
                 'apellidos' => 'sometimes|required|string|max:255',
-                'rut' => 'sometimes|required|string|max:255|unique:nucleos_familiares,rut,'.$id,
+                'rut' => 'sometimes|required|string|max:255|unique:nucleos_familiares,rut,' . $id,
                 'fecha_nacimiento' => 'sometimes|required|date',
                 'genero' => 'sometimes|required|in:masculino,femenino,otro',
                 'parentesco' => 'sometimes|required|in:conyuge,hijo,hija,padre,madre,hermano,hermana,otro',
@@ -135,14 +127,12 @@ class NucleoFamiliarController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al actualizar núcleo familiar: '.$e->getMessage(),
+                'message' => 'Error al actualizar núcleo familiar: ' . $e->getMessage(),
             ], 500);
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+
     public function destroy(string $id): JsonResponse
     {
         try {
@@ -156,7 +146,7 @@ class NucleoFamiliarController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al eliminar núcleo familiar: '.$e->getMessage(),
+                'message' => 'Error al eliminar núcleo familiar: ' . $e->getMessage(),
             ], 500);
         }
     }

@@ -19,5 +19,17 @@ Route::prefix('/cajas/componente-dinamico')->group(function () {
     Route::post('/{id}/duplicate', [ComponenteDinamicoController::class, 'duplicate'])->name('componente-dinamico.duplicate');
     Route::get('/{formularioId}/by-formulario', [ComponenteDinamicoController::class, 'byFormulario'])->name('componente-dinamico.by-formulario');
     Route::get('/{formularioId}/listar-por-formulario', [ComponenteDinamicoController::class, 'listarPorFormulario'])->name('componente-dinamico.listar-por-formulario');
+
+    Route::get(
+        'formularios/{formularioId}/componentes',
+        [ComponenteDinamicoController::class, 'byFormulario']
+    )
+        ->name('api.cajas.componentes.by-formulario');
+
+    Route::post(
+        'formularios/{formularioId}/componentes',
+        [ComponenteDinamicoController::class, 'byFormulario']
+    )
+        ->name('api.cajas.componentes.by-formulario.post');
 });
 //});

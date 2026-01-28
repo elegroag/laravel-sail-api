@@ -220,7 +220,7 @@ const useRecoveryController = ({ Coddoc }: ResetPasswordProps) => {
             } else {
                 console.error('Error al enviar el correo de recuperación:', responseJson);
                 setToast({
-                    message: typeof responseJson?.message === 'string' ? responseJson.message : 'No fue posible enviar el correo de recuperación.',
+                    message: typeof responseJson?.msj === 'string' ? responseJson.msj : 'No fue posible enviar el correo de recuperación.',
                     type: 'error',
                 });
             }

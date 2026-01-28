@@ -22,6 +22,9 @@ use App\Services\Utils\SenderEmail;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use App\Services\Entidades\EmpresaService;
+use App\Services\Entidades\TrabajadorService;
+
 
 class AuthMercurioController extends Controller
 {
@@ -31,6 +34,7 @@ class AuthMercurioController extends Controller
     {
         $this->db = DbBase::rawConnect();
     }
+
 
     public function registerAction(Request $request)
     {
@@ -150,6 +154,16 @@ class AuthMercurioController extends Controller
                 'message' => 'Error al crear empresa: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+
+    public function authenticateAction(Request $request)
+    {
+        // Implementación de autenticación
+        return response()->json([
+            'success' => false,
+            'message' => 'Método no implementado aún'
+        ], 501);
     }
 
     public function verifyStore(Request $request)
@@ -306,6 +320,53 @@ class AuthMercurioController extends Controller
                 return response()->json([
                     'success' => false,
                     'msj' => 'No existe un usuario registrado con los datos ingresados. Verifique o regístrese para continuar.',
+                ]);
+            }
+
+
+            if (
+                ($data['tipo'] == 'E' ||
+                    $data['tipo'] == 'P' ||
+                    $data['tipo'] == 'S')  && ($user07->whatsapp == null || $user07->email == null)
+            ) {
+                //consulta a la api externa 
+                $empresa = (new EmpresaService())->buscarEmpresaSubsidio($user07->documento);
+                if ($empresa) {
+                    $user07->whatsapp = $empresa['telr'];
+                    $user07->email = $empresa['email'];
+                    $user07->save();
+                }
+            }
+
+            if (
+                ($data['tipo'] == 'T' ||
+                    $data['tipo'] == 'I' ||
+                    $data['tipo'] == 'F' ||
+                    $data['tipo'] == 'O'
+                )  && ($user07->whatsapp == null || $user07->email == null)
+            ) {
+                //consulta a la api externa 
+                $trabajador = (new TrabajadorService())->buscarTrabajadorSubsidio($user07->documento);
+                if ($trabajador) {
+                    $user07->whatsapp = $trabajador['telefono'];
+                    $user07->email = $trabajador['email'];
+                    $user07->save();
+                }
+            }
+
+            //se valida que el email sea igual al que tiene registrado
+            if ($delivery_method == 'email' && strtolower($user07->email ?? '')  != strtolower($data['email'] ?? '')) {
+                return response()->json([
+                    'success' => false,
+                    'msj' => 'El email ingresado no coincide con el registrado. Verifique o regístrese para continuar.',
+                ]);
+            }
+
+            //se valida que el whatsapp sea igual al que tiene registrado
+            if ($delivery_method == 'whatsapp' && $user07->whatsapp != $data['whatsapp']) {
+                return response()->json([
+                    'success' => false,
+                    'msj' => 'El whatsapp ingresado no coincide con el registrado. Verifique o regístrese para continuar.',
                 ]);
             }
 

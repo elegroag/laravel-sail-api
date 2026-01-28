@@ -13,10 +13,10 @@ class Mercurio10Seeder extends Seeder
      */
     public function run(): void
     {
-        $legacy = new LegacyDatabaseService();  
+        $legacy = new LegacyDatabaseService();
 
         // Leer registros desde la base legada
-        $rows = $legacy->select('SELECT * FROM mercurio10 limit 1000');
+        $rows = $legacy->select('SELECT * FROM mercurio10');
 
         // Campos permitidos del modelo
         $fillable = (new Mercurio10())->getFillable();
@@ -29,8 +29,8 @@ class Mercurio10Seeder extends Seeder
 
             Mercurio10::updateOrCreate(
                 [
-                    'tipopc' => $row['tipopc'], 
-                    'numero' => $row['numero'], 
+                    'tipopc' => $row['tipopc'],
+                    'numero' => $row['numero'],
                     'item' => $row['item']
                 ],
                 $data

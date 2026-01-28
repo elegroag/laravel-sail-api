@@ -10,9 +10,7 @@ use Illuminate\Validation\ValidationException;
 
 class TrabajadorController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index(): JsonResponse
     {
         try {
@@ -26,14 +24,11 @@ class TrabajadorController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al obtener trabajadores: '.$e->getMessage(),
+                'message' => 'Error al obtener trabajadores: ' . $e->getMessage(),
             ], 500);
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request): JsonResponse
     {
         try {
@@ -70,14 +65,12 @@ class TrabajadorController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al crear trabajador: '.$e->getMessage(),
+                'message' => 'Error al crear trabajador: ' . $e->getMessage(),
             ], 500);
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
+
     public function show(string $id): JsonResponse
     {
         try {
@@ -96,9 +89,7 @@ class TrabajadorController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+
     public function update(Request $request, string $id): JsonResponse
     {
         try {
@@ -107,8 +98,8 @@ class TrabajadorController extends Controller
             $validatedData = $request->validate([
                 'nombres' => 'sometimes|required|string|max:255',
                 'apellidos' => 'sometimes|required|string|max:255',
-                'rut' => 'sometimes|required|string|max:255|unique:trabajadores,rut,'.$id,
-                'email' => 'sometimes|required|email|max:255|unique:trabajadores,email,'.$id,
+                'rut' => 'sometimes|required|string|max:255|unique:trabajadores,rut,' . $id,
+                'email' => 'sometimes|required|email|max:255|unique:trabajadores,email,' . $id,
                 'telefono' => 'nullable|string|max:255',
                 'fecha_nacimiento' => 'sometimes|required|date',
                 'genero' => 'sometimes|required|in:masculino,femenino,otro',
@@ -137,14 +128,11 @@ class TrabajadorController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al actualizar trabajador: '.$e->getMessage(),
+                'message' => 'Error al actualizar trabajador: ' . $e->getMessage(),
             ], 500);
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id): JsonResponse
     {
         try {
@@ -158,7 +146,7 @@ class TrabajadorController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al eliminar trabajador: '.$e->getMessage(),
+                'message' => 'Error al eliminar trabajador: ' . $e->getMessage(),
             ], 500);
         }
     }

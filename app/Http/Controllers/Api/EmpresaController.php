@@ -12,9 +12,7 @@ use Illuminate\Validation\ValidationException;
 
 class EmpresaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index(): EmpresaCollection
     {
         $empresas = Empresa::with('trabajadores')->get();
@@ -22,9 +20,6 @@ class EmpresaController extends Controller
         return new EmpresaCollection($empresas);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request): JsonResponse
     {
         try {
@@ -58,14 +53,11 @@ class EmpresaController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al crear empresa: '.$e->getMessage(),
+                'message' => 'Error al crear empresa: ' . $e->getMessage(),
             ], 500);
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id): EmpresaResource
     {
         $empresa = Empresa::with('trabajadores.nucleosFamiliares')->findOrFail($id);
@@ -73,9 +65,7 @@ class EmpresaController extends Controller
         return new EmpresaResource($empresa);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+
     public function update(Request $request, string $id): JsonResponse
     {
         try {
@@ -83,7 +73,7 @@ class EmpresaController extends Controller
 
             $validatedData = $request->validate([
                 'nombre' => 'sometimes|required|string|max:255',
-                'rut' => 'sometimes|required|string|max:255|unique:empresas,rut,'.$id,
+                'rut' => 'sometimes|required|string|max:255|unique:empresas,rut,' . $id,
                 'direccion' => 'sometimes|required|string|max:255',
                 'telefono' => 'nullable|string|max:255',
                 'email' => 'nullable|email|max:255',
@@ -110,14 +100,11 @@ class EmpresaController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al actualizar empresa: '.$e->getMessage(),
+                'message' => 'Error al actualizar empresa: ' . $e->getMessage(),
             ], 500);
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id): JsonResponse
     {
         try {
@@ -131,7 +118,7 @@ class EmpresaController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al eliminar empresa: '.$e->getMessage(),
+                'message' => 'Error al eliminar empresa: ' . $e->getMessage(),
             ], 500);
         }
     }
