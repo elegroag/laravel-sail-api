@@ -6,13 +6,29 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\EmpresaCollection;
 use App\Http\Resources\EmpresaResource;
 use App\Models\Empresa;
+use Dedoc\Scramble\Attributes\Group;
+use Dedoc\Scramble\Attributes\Response;
+use Dedoc\Scramble\Attributes\ResponseFromApiResource;
+use Dedoc\Scramble\Attributes\ResponseFromApiResourceCollection;
+use Dedoc\Scramble\Attributes\Tag;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
+#[Tag('Empresas')]
+#[Group('Empresas')]
 class EmpresaController extends Controller
 {
 
+    /**
+     * Obtener todas las empresas
+     * 
+     * Retorna una lista paginada de todas las empresas registradas en el sistema
+     * con sus trabajadores asociados.
+     * 
+     * @return EmpresaCollection
+     */
+    #[ResponseFromApiResourceCollection(EmpresaResource::class, status: 200)]
     public function index(): EmpresaCollection
     {
         $empresas = Empresa::with('trabajadores')->get();
@@ -20,6 +36,18 @@ class EmpresaController extends Controller
         return new EmpresaCollection($empresas);
     }
 
+    /**
+     * Crear nueva empresa
+     * 
+     * Registra una nueva empresa en el sistema con todos sus datos
+     * básicos y de contacto.
+     * 
+     * @param Request $request
+     * @return JsonResponse
+     */
+    #[Response(status: 201, description: 'Empresa creada exitosamente')]
+    #[Response(status: 422, description: 'Error de validación')]
+    #[Response(status: 500, description: 'Error interno del servidor')]
     public function store(Request $request): JsonResponse
     {
         try {
@@ -58,6 +86,17 @@ class EmpresaController extends Controller
         }
     }
 
+    /**
+     * Obtener empresa específica
+     * 
+     * Retorna los detalles completos de una empresa específica
+     * incluyendo sus trabajadores y núcleos familiares.
+     * 
+     * @param string $id
+     * @return EmpresaResource
+     */
+    #[ResponseFromApiResource(EmpresaResource::class, status: 200)]
+    #[Response(status: 404, description: 'Empresa no encontrada')]
     public function show(string $id): EmpresaResource
     {
         $empresa = Empresa::with('trabajadores.nucleosFamiliares')->findOrFail($id);
@@ -66,6 +105,19 @@ class EmpresaController extends Controller
     }
 
 
+    /**
+     * Actualizar empresa existente
+     * 
+     * Actualiza los datos de una empresa existente en el sistema.
+     * Solo se actualizan los campos proporcionados en la solicitud.
+     * 
+     * @param Request $request
+     * @param string $id
+     * @return JsonResponse
+     */
+    #[Response(status: 200, description: 'Empresa actualizada exitosamente')]
+    #[Response(status: 404, description: 'Empresa no encontrada')]
+    #[Response(status: 422, description: 'Error de validación')]
     public function update(Request $request, string $id): JsonResponse
     {
         try {
@@ -105,6 +157,17 @@ class EmpresaController extends Controller
         }
     }
 
+    /**
+     * Eliminar empresa
+     * 
+     * Elimina permanentemente una empresa del sistema.
+     * Esta acción es irreversible y elimina todos los datos asociados.
+     * 
+     * @param string $id
+     * @return JsonResponse
+     */
+    #[Response(status: 200, description: 'Empresa eliminada exitosamente')]
+    #[Response(status: 404, description: 'Empresa no encontrada')]
     public function destroy(string $id): JsonResponse
     {
         try {

@@ -4,13 +4,27 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Trabajador;
+use Dedoc\Scramble\Attributes\Group;
+use Dedoc\Scramble\Attributes\Response;
+use Dedoc\Scramble\Attributes\Tag;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
+#[Tag('Trabajadores')]
+#[Group('Trabajadores')]
 class TrabajadorController extends Controller
 {
 
+    /**
+     * Obtener todos los trabajadores
+     * 
+     * Retorna una lista de todos los trabajadores registrados en el sistema
+     * con sus empresas y núcleos familiares asociados.
+     * 
+     * @return JsonResponse
+     */
+    #[Response(status: 200, description: 'Lista de trabajadores obtenida exitosamente')]
     public function index(): JsonResponse
     {
         try {
@@ -29,6 +43,18 @@ class TrabajadorController extends Controller
         }
     }
 
+    /**
+     * Crear nuevo trabajador
+     * 
+     * Registra un nuevo trabajador en el sistema con todos sus datos
+     * personales y profesionales.
+     * 
+     * @param Request $request
+     * @return JsonResponse
+     */
+    #[Response(status: 201, description: 'Trabajador creado exitosamente')]
+    #[Response(status: 422, description: 'Error de validación')]
+    #[Response(status: 500, description: 'Error interno del servidor')]
     public function store(Request $request): JsonResponse
     {
         try {
@@ -71,6 +97,17 @@ class TrabajadorController extends Controller
     }
 
 
+    /**
+     * Obtener trabajador específico
+     * 
+     * Retorna los detalles completos de un trabajador específico
+     * incluyendo su empresa y núcleos familiares.
+     * 
+     * @param string $id
+     * @return JsonResponse
+     */
+    #[Response(status: 200, description: 'Trabajador obtenido exitosamente')]
+    #[Response(status: 404, description: 'Trabajador no encontrado')]
     public function show(string $id): JsonResponse
     {
         try {
@@ -90,6 +127,19 @@ class TrabajadorController extends Controller
     }
 
 
+    /**
+     * Actualizar trabajador existente
+     * 
+     * Actualiza los datos de un trabajador existente en el sistema.
+     * Solo se actualizan los campos proporcionados en la solicitud.
+     * 
+     * @param Request $request
+     * @param string $id
+     * @return JsonResponse
+     */
+    #[Response(status: 200, description: 'Trabajador actualizado exitosamente')]
+    #[Response(status: 404, description: 'Trabajador no encontrado')]
+    #[Response(status: 422, description: 'Error de validación')]
     public function update(Request $request, string $id): JsonResponse
     {
         try {
@@ -133,6 +183,17 @@ class TrabajadorController extends Controller
         }
     }
 
+    /**
+     * Eliminar trabajador
+     * 
+     * Elimina permanentemente un trabajador del sistema.
+     * Esta acción es irreversible y elimina todos los datos asociados.
+     * 
+     * @param string $id
+     * @return JsonResponse
+     */
+    #[Response(status: 200, description: 'Trabajador eliminado exitosamente')]
+    #[Response(status: 404, description: 'Trabajador no encontrado')]
     public function destroy(string $id): JsonResponse
     {
         try {

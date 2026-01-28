@@ -4,18 +4,52 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\Entidades\ApiEndpointService;
+use Dedoc\Scramble\Attributes\Group;
+use Dedoc\Scramble\Attributes\Response;
+use Dedoc\Scramble\Attributes\Tag;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador de API para gestión de Endpoints
+ * 
+ * Este controlador maneja las operaciones CRUD para los endpoints
+ * de la API del sistema, incluyendo creación, lectura, actualización
+ * y eliminación de configuraciones de endpoints.
+ * 
+ * @package App\Http\Controllers\Api
+ */
+
+#[Tag('Endpoints')]
+#[Group('Endpoints')]
 class ApiEndpointController extends Controller
 {
+    /** @var ApiEndpointService Servicio de gestión de endpoints */
     protected $apiEndpointService;
 
+    /**
+     * Constructor del controlador
+     * 
+     * Inicializa el controlador con el servicio de endpoints
+     * inyectado mediante dependency injection.
+     * 
+     * @param ApiEndpointService $apiEndpointService Servicio para gestionar endpoints
+     */
     public function __construct(ApiEndpointService $apiEndpointService)
     {
         $this->apiEndpointService = $apiEndpointService;
     }
 
 
+    /**
+     * Obtener todos los endpoints de la API
+     * 
+     * Retorna una lista de todos los endpoints registrados en el sistema
+     * con sus configuraciones y estados.
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
+    #[Response(status: 200, description: 'Lista de endpoints obtenida exitosamente')]
     public function index()
     {
         $endpoints = $this->apiEndpointService->getAllEndpoints();
@@ -24,6 +58,17 @@ class ApiEndpointController extends Controller
     }
 
 
+    /**
+     * Crear nuevo endpoint de API
+     * 
+     * Registra un nuevo endpoint en el sistema con su configuración
+     * de servicio y conexión.
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    #[Response(status: 201, description: 'Endpoint creado exitosamente')]
+    #[Response(status: 422, description: 'Error de validación')]
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -38,6 +83,17 @@ class ApiEndpointController extends Controller
     }
 
 
+    /**
+     * Obtener endpoint específico
+     * 
+     * Retorna los detalles completos de un endpoint específico
+     * incluyendo su configuración y estado.
+     * 
+     * @param mixed $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    #[Response(status: 200, description: 'Endpoint encontrado exitosamente')]
+    #[Response(status: 404, description: 'Endpoint no encontrado')]
     public function show($id)
     {
         $endpoint = $this->apiEndpointService->getEndpointById($id);
@@ -50,6 +106,19 @@ class ApiEndpointController extends Controller
     }
 
 
+    /**
+     * Actualizar endpoint existente
+     * 
+     * Actualiza la configuración de un endpoint existente en el sistema.
+     * Solo se actualizan los campos proporcionados en la solicitud.
+     * 
+     * @param Request $request
+     * @param mixed $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    #[Response(status: 200, description: 'Endpoint actualizado exitosamente')]
+    #[Response(status: 404, description: 'Endpoint no encontrado')]
+    #[Response(status: 422, description: 'Error de validación')]
     public function update(Request $request, $id)
     {
         $endpoint = $this->apiEndpointService->getEndpointById($id);
@@ -70,6 +139,19 @@ class ApiEndpointController extends Controller
     }
 
 
+    /**
+     * Actualizar nombre de conexión por servicio
+     * 
+     * Actualiza el nombre de conexión para todos los endpoints
+     * que pertenecen a un servicio específico.
+     * 
+     * @param Request $request Datos de la solicitud HTTP
+     * @param string $serviceName Nombre del servicio a actualizar
+     * @return \Illuminate\Http\JsonResponse Respuesta JSON con el resultado
+     */
+    #[Response(status: 200, description: 'Nombre de conexión actualizado exitosamente')]
+    #[Response(status: 404, description: 'Endpoint no encontrado')]
+    #[Response(status: 422, description: 'Error de validación')]
     public function updateConnectionName(Request $request, $serviceName)
     {
         $validatedData = $request->validate([
@@ -86,6 +168,17 @@ class ApiEndpointController extends Controller
     }
 
 
+    /**
+     * Eliminar endpoint
+     * 
+     * Elimina permanentemente un endpoint del sistema.
+     * Esta acción es irreversible.
+     * 
+     * @param mixed $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    #[Response(status: 200, description: 'Endpoint eliminado exitosamente')]
+    #[Response(status: 404, description: 'Endpoint no encontrado')]
     public function destroy($id)
     {
         $deleted = $this->apiEndpointService->deleteEndpoint($id);
@@ -98,6 +191,15 @@ class ApiEndpointController extends Controller
     }
 
 
+    /**
+     * Sincronizar endpoints por defecto
+     * 
+     * Sincroniza los endpoints del sistema con los valores por defecto
+     * predefinidos. Esto es útil para restaurar configuraciones base.
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
+    #[Response(status: 200, description: 'Endpoints sincronizados exitosamente')]
     public function syncDefaults()
     {
         $this->apiEndpointService->syncDefaultEndpoints();

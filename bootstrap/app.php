@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\ApiDocumentationAuth;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Application;
@@ -15,10 +16,10 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        commands: __DIR__.'/../routes/console.php',
+        web: __DIR__ . '/../routes/web.php',
+        commands: __DIR__ . '/../routes/console.php',
         health: '/up',
-        api: __DIR__.'/../routes/api.php'
+        api: __DIR__ . '/../routes/api.php'
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
@@ -37,6 +38,11 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->api(append: [
             SubstituteBindings::class,
+        ]);
+
+        // Middleware para documentación de API
+        $middleware->alias([
+            'api.docs.auth' => ApiDocumentationAuth::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

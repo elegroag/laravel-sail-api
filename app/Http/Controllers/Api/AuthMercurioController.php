@@ -20,12 +20,16 @@ use App\Services\Signup\SignupService;
 use App\Services\Srequest;
 use App\Services\Utils\SenderEmail;
 use Carbon\Carbon;
+use Dedoc\Scramble\Attributes\Group;
+use Dedoc\Scramble\Attributes\Response;
+use Dedoc\Scramble\Attributes\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use App\Services\Entidades\EmpresaService;
 use App\Services\Entidades\TrabajadorService;
 
-
+#[Tag('Autenticación')]
+#[Group('Autenticación')]
 class AuthMercurioController extends Controller
 {
     private $db;
@@ -36,6 +40,18 @@ class AuthMercurioController extends Controller
     }
 
 
+    /**
+     * Registrar nuevo usuario en el sistema
+     * 
+     * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
+     * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    #[Response(status: 201, description: 'Usuario registrado exitosamente')]
+    #[Response(status: 422, description: 'Error de validación')]
+    #[Response(status: 500, description: 'Error interno del servidor')]
     public function registerAction(Request $request)
     {
         $this->db->begin();
@@ -157,6 +173,49 @@ class AuthMercurioController extends Controller
     }
 
 
+    /**
+     * Autenticar usuario en el sistema
+     * 
+     * Este endpoint permite la autenticación de usuarios existentes en el sistema CLISISU.
+     * Retorna un token JWT para las solicitudes subsequentes.
+     * 
+     * **Ejemplo de uso:**
+     * ```bash
+     * curl -X POST http://localhost:8000/api/authenticate \
+     *   -H "Content-Type: application/json" \
+     *   -d '{
+     *     "documento": 123456789,
+     *     "password": "password123"
+     *   }'
+     * ```
+     * 
+     * **Respuesta exitosa:**
+     * ```json
+     * {
+     *   "success": true,
+     *   "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+     *   "user": {
+     *     "documento": 123456789,
+     *     "nombre": "Juan Pérez",
+     *     "email": "juan.perez@ejemplo.com"
+     *   }
+     * }
+     * ```
+     * 
+     * **Error de credenciales:**
+     * ```json
+     * {
+     *   "success": false,
+     *   "message": "Credenciales inválidas"
+     * }
+     * ```
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    #[Response(status: 200, description: 'Autenticación exitosa')]
+    #[Response(status: 401, description: 'Credenciales inválidas')]
+    #[Response(status: 422, description: 'Error de validación')]
     public function authenticateAction(Request $request)
     {
         // Implementación de autenticación
@@ -166,6 +225,18 @@ class AuthMercurioController extends Controller
         ], 501);
     }
 
+    /**
+     * Verificar y enviar código de verificación
+     * 
+     * Este endpoint verifica los datos del usuario y envía un código de verificación
+     * por email o WhatsApp para confirmar la identidad.
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    #[Response(status: 201, description: 'Código enviado exitosamente')]
+    #[Response(status: 422, description: 'Error de validación')]
+    #[Response(status: 500, description: 'Error al enviar código')]
     public function verifyStore(Request $request)
     {
         try {
@@ -286,6 +357,18 @@ class AuthMercurioController extends Controller
         }
     }
 
+    /**
+     * Enviar código de recuperación de contraseña
+     * 
+     * Este endpoint envía un código de recuperación de contraseña al usuario
+     * por email o WhatsApp para restablecer su contraseña.
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    #[Response(status: 201, description: 'Código de recuperación enviado exitosamente')]
+    #[Response(status: 422, description: 'Error de validación')]
+    #[Response(status: 500, description: 'Error al enviar código de recuperación')]
     public function recoverySend(Request $request)
     {
         try {
