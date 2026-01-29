@@ -1,91 +1,98 @@
 export interface Componente {
-  id: number;
-  name: string;
-  label: string;
-  type: string;
-  group_id: number;
-  order: number;
-  is_disabled: boolean;
-  is_readonly: boolean;
-  validacion?: {
-    is_required: boolean;
-    pattern: string | null;
-  };
+    id: number;
+    name: string;
+    label: string;
+    type: string;
+    group_id: number;
+    order: number;
+    is_disabled: boolean;
+    is_readonly: boolean;
+    validacion?: {
+        is_required: boolean;
+        pattern: string | null;
+    };
 }
 
 export interface Params {
-  q?: string;
-  page?: number;
-  per_page?: number;
-  type?: string;
-  group_id?: number;
-  has_validation?: boolean | '';
+    q?: string;
+    page?: number;
+    per_page?: number;
+    type?: string;
+    group_id?: number;
+    has_validation?: boolean | '';
 }
 
 interface BackendMeta {
-  current_page: number;
-  last_page: number;
-  per_page: number;
-  total: number;
-  from: number | null;
-  to: number | null;
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number | null;
+    to: number | null;
 }
 
 interface BackendResponse {
-  data: Componente[];
-  meta: BackendMeta;
+    data: Componente[];
+    meta: BackendMeta;
 }
 
 export interface FrontendResponse {
-  data: Componente[];
-  meta: {
-    total_componentes: number;
-    pagination: {
-      current_page: number;
-      last_page: number;
-      per_page: number;
-      from: number | null;
-      to: number | null;
-      total: number;
+    data: Componente[];
+    meta: {
+        total_componentes: number;
+        pagination: {
+            current_page: number;
+            last_page: number;
+            per_page: number;
+            from: number | null;
+            to: number | null;
+            total: number;
+        };
     };
-  };
 }
 
-export async function getByFormulario(
-  formularioId: number | string,
-  params: Partial<Params> = {}
-): Promise<FrontendResponse> {
-  const url = `/api/cajas/formularios/${formularioId}/componentes`;
+export async function getByFormulario(formularioId: number | string, params: Partial<Params> = {}): Promise<FrontendResponse> {
+    // Construir URL con parámetros de consulta para GET
+    const url = `/cajas/componente-dinamico/formularios/${formularioId}/componentes`;
 
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
-    credentials: 'same-origin',
-    body: JSON.stringify(params)
-  });
+    // Convertir parámetros a query string
+    const queryParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== '') {
+            queryParams.append(key, String(value));
+        }
+    });
 
-  if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error(`Error ${res.status}: ${text || res.statusText}`);
-  }
+    const fullUrl = queryParams.toString() ? `${url}?${queryParams.toString()}` : url;
 
-  const json: BackendResponse = await res.json();
+    const res = await fetch(fullUrl, {
+        method: 'GET',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin',
+    });
 
-  return {
-    data: json.data,
-    meta: {
-      total_componentes: json.meta.total,
-      pagination: {
-        current_page: json.meta.current_page,
-        last_page: json.meta.last_page,
-        per_page: json.meta.per_page,
-        from: json.meta.from,
-        to: json.meta.to,
-        total: json.meta.total
-      }
+    if (!res.ok) {
+        const text = await res.text().catch(() => '');
+        throw new Error(`Error ${res.status}: ${text || res.statusText}`);
     }
-  };
+
+    const json: BackendResponse = await res.json();
+
+    return {
+        data: json.data,
+        meta: {
+            total_componentes: json.meta.total,
+            pagination: {
+                current_page: json.meta.current_page,
+                last_page: json.meta.last_page,
+                per_page: json.meta.per_page,
+                from: json.meta.from,
+                to: json.meta.to,
+                total: json.meta.total,
+            },
+        },
+    };
 }

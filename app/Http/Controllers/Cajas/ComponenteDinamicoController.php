@@ -393,4 +393,47 @@ class ComponenteDinamicoController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Almacenar un nuevo componente para un formulario específico
+     */
+    public function storeComponente(Request $request, int $formularioId)
+    {
+        // 1. Validar que el formulario exista
+        $formulario = FormularioDinamico::find($formularioId);
+        if (!$formulario) {
+            return response()->json(['message' => 'El formulario no existe'], 404);
+        }
+
+        // 2. Validar datos de entrada
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'label' => 'required|string|max:255',
+            'type' => 'required|string|max:50',
+            'order' => 'nullable|integer|min:0',
+            'group_id' => 'nullable|integer|min:0',
+            'required' => 'nullable|boolean',
+            'placeholder' => 'nullable|string|max:255',
+            'default_value' => 'nullable|string',
+            'options' => 'nullable|array',
+            'validation_rules' => 'nullable|array'
+        ]);
+
+        // 3. Establecer valores por defecto
+        $validated['formulario_id'] = $formularioId;
+        $validated['order'] = $validated['order'] ?? 0;
+        $validated['required'] = $validated['required'] ?? false;
+
+        // 4. Crear el componente
+        $componente = ComponenteDinamico::create($validated);
+
+        // 5. Cargar relaciones
+        $componente->load(['validacion']);
+
+        // 6. Retornar respuesta
+        return response()->json([
+            'message' => 'Componente creado exitosamente',
+            'data' => $componente
+        ], 201);
+    }
 }

@@ -25,11 +25,5 @@ Route::prefix('/cajas/componente-dinamico')->group(function () {
         [ComponenteDinamicoController::class, 'byFormulario']
     )
         ->name('api.cajas.componentes.by-formulario');
-
-    Route::post(
-        'formularios/{formularioId}/componentes',
-        [ComponenteDinamicoController::class, 'byFormulario']
-    )
-        ->name('api.cajas.componentes.by-formulario.post');
 });
 //});
