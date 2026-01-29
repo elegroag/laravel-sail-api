@@ -27,9 +27,9 @@ if (! function_exists('estados_civiles_array')) {
     }
 }
 
-if (! function_exists('cabeza_hogar')) {
+if (! function_exists('condicionSN')) {
 
-    function cabeza_hogar()
+    function condicionSN()
     {
         return [
             'S' => 'Sí',
@@ -37,18 +37,6 @@ if (! function_exists('cabeza_hogar')) {
         ];
     }
 }
-
-if (! function_exists('capacidad_trabajar')) {
-
-    function capacidad_trabajar()
-    {
-        return [
-            'S' => 'Sí',
-            'N' => 'No',
-        ];
-    }
-}
-
 
 if (! function_exists('tipo_discapacidad_array')) {
 
@@ -90,18 +78,6 @@ if (! function_exists('nivel_educativo_array')) {
 }
 
 
-if (! function_exists('es_rural')) {
-
-    function es_rural()
-    {
-        return [
-            'S' => 'Sí',
-            'N' => 'No',
-        ];
-    }
-}
-
-
 if (! function_exists('tipo_contrato')) {
 
     function tipo_contrato()
@@ -113,25 +89,12 @@ if (! function_exists('tipo_contrato')) {
     }
 }
 
-
-if (! function_exists('es_sindicalizado')) {
-
-    function es_sindicalizado()
-    {
-        return [
-            'S' => 'Sí',
-            'N' => 'No',
-        ];
-    }
-}
-
-
 if (! function_exists('vivienda_array')) {
 
     function vivienda_array()
     {
         return [
-            'N' => 'No',
+            'N' => 'No disponible',
             'F' => 'Familiar',
             'P' => 'Propia',
             'A' => 'Arrendada',
@@ -231,42 +194,6 @@ if (! function_exists('tipo_jornada_array')) {
     }
 }
 
-
-if (! function_exists('comision_array')) {
-
-    function comision_array()
-    {
-        return [
-            'S' => 'Sí',
-            'N' => 'No',
-        ];
-    }
-}
-
-if (! function_exists('companero_array')) {
-
-    function companero_array()
-    {
-        return [
-            'S' => 'Sí',
-            'N' => 'No',
-        ];
-    }
-}
-
-
-if (! function_exists('labora_otra_empresa_array')) {
-
-    function labora_otra_empresa_array()
-    {
-        return [
-            'S' => 'Sí',
-            'N' => 'No',
-        ];
-    }
-}
-
-
 if (! function_exists('parentesco_array')) {
 
     function parentesco_array()
@@ -332,17 +259,6 @@ if (! function_exists('convive_array')) {
             '2' => 'Trabajador',
             '3' => 'No aplica',
             '4' => 'Otras personas',
-        ];
-    }
-}
-
-if (! function_exists('giro_array')) {
-
-    function giro_array()
-    {
-        return [
-            'S' => 'Sí',
-            'N' => 'No',
         ];
     }
 }

@@ -29,7 +29,7 @@ class PensionadosDocuments
 
         $tipo_pago = tipo_pago_array();
         $tipo_cuenta = tipo_cuenta_array();
-        $giro = giro_array();
+        $giro = condicionSN();
 
         // Enriquecimientos
         $ciudad_name = ($this->pensionado->codciu ?? null) ? ($ciudades[$this->pensionado->codciu] ?? $this->pensionado->codciu) : null;

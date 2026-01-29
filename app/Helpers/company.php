@@ -267,18 +267,6 @@ if (! function_exists('tipsal_array')) {
     }
 }
 
-if (! function_exists('autoriza_array')) {
-
-    function autoriza_array()
-    {
-        return [
-            'S' => 'SI',
-            'N' => 'NO',
-        ];
-    }
-}
-
-
 if (! function_exists('categoria_array')) {
 
     function categoria_array()

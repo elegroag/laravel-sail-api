@@ -327,7 +327,7 @@ class EmpresaController extends ApplicationController
                 'ciupri' => ParamsEmpresa::getCiudades(),
                 'ciunac' => ParamsEmpresa::getCiudades(),
                 'tipsal' => tipsal_array(),
-                'autoriza' => autoriza_array(),
+                'autoriza' => condicionSN(),
                 'ciupri' => ParamsEmpresa::getCiudades(),
                 'cartra' => ParamsTrabajador::getOcupaciones()
             ];

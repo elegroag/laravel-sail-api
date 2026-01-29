@@ -638,7 +638,7 @@ class BeneficiarioController extends ApplicationController
                 'biodesco' => $biodesco,
                 'sexo' => sexos_array(),
                 'estciv' => estados_civiles_array(),
-                'captra' => capacidad_trabajar(),
+                'captra' => condicionSN(),
                 'parent' => parentesco_array(),
                 'huerfano' => huerfano_array(),
                 'tiphij' => tipo_hijo_array(),

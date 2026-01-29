@@ -357,13 +357,9 @@ class TrabajadorController extends ApplicationController
                 'coddocrepleg' => $coddocrepleg,
                 'sexo' => sexos_array(),
                 'estciv' => estados_civiles_array(),
-                'cabhog' => cabeza_hogar(),
-                'captra' => capacidad_trabajar(),
                 'tipdis' => tipo_discapacidad_array(),
                 'nivedu' => nivel_educativo_array(),
-                'rural' => es_rural(),
                 'tipcon' => tipo_contrato(),
-                'trasin' => es_sindicalizado(),
                 'vivienda' => vivienda_array(),
                 'orisex' => orientacion_sexual_array(),
                 'facvul' => vulnerabilidades_array(),
@@ -371,12 +367,20 @@ class TrabajadorController extends ApplicationController
                 'tippag' => tipo_pago_array(),
                 'tipsal' => tipsal_array(),
                 'tipcue' => tipo_cuenta_array(),
-                'ruralt' => es_rural(),
                 'tipjor' => tipo_jornada_array(),
-                'autoriza' => autoriza_array(),
-                'comision' => comision_array(),
-                'labora_otra_empresa' => labora_otra_empresa_array(),
-                'codsuc' => $codsuc
+                'codsuc' => $codsuc,
+
+                'empleador' => condicionSN(),
+                'giro' => condicionSN(),
+                'vendedor' => condicionSN(),
+                'labora_otra_empresa' => condicionSN(),
+                'cabhog' => condicionSN(),
+                'rural' => condicionSN(), /* rural laboral */
+                'ruralt' => condicionSN(), /* rural residencia */
+                'trasin' => condicionSN(),
+                'autoriza' => condicionSN(),
+                'comision' => condicionSN(),
+                'captra' => condicionSN(),
             ];
 
             $formulario = FormularioDinamico::where('name', 'mercurio31')->first();
