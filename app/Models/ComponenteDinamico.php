@@ -46,10 +46,6 @@ class ComponenteDinamico extends Model
         'number_step' => 'decimal:2',
     ];
 
-    public function validacion(): HasOne
-    {
-        return $this->hasOne(ComponenteValidacion::class, 'componente_id');
-    }
 
     public function formulario(): BelongsTo
     {

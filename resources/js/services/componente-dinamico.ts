@@ -7,10 +7,6 @@ export interface Componente {
     order: number;
     is_disabled: boolean;
     is_readonly: boolean;
-    validacion?: {
-        is_required: boolean;
-        pattern: string | null;
-    };
 }
 
 export interface Params {
@@ -19,7 +15,6 @@ export interface Params {
     per_page?: number;
     type?: string;
     group_id?: number;
-    has_validation?: boolean | '';
 }
 
 interface BackendMeta {

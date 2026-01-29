@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Http\Controllers\Controller;
 use App\Models\Adapter\DbBase;
+use App\Models\ComponenteDinamico;
 use App\Models\FormularioDinamico;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -259,8 +260,7 @@ class FormularioDinamicoController extends Controller
         $q = trim((string) $request->query('q', ''));
         $perPage = (int) $request->query('per_page', 10);
 
-        $query = \App\Models\ComponenteDinamico::with('validacion')
-            ->where('formulario_id', $formularioId)
+        $query = ComponenteDinamico::where('formulario_id', $formularioId)
             ->when($q !== '', function ($sub) use ($q) {
                 $like = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $q) . '%';
                 $sub->where(function ($s) use ($like) {

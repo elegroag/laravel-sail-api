@@ -81,7 +81,6 @@ require __DIR__ . '/cajas/movile_clasificaciones.php';
 require __DIR__ . '/cajas/reasigna.php';
 require __DIR__ . '/cajas/formularios_dinamicos.php';
 require __DIR__ . '/cajas/componentes_dinamicos.php';
-require __DIR__ . '/cajas/componentes_validaciones.php';
 
 Route::fallback(function (Request $request) {
     $ruta = $request->url();

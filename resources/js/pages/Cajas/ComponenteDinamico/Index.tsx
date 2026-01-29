@@ -16,10 +16,6 @@ interface Componente {
     order: number;
     is_disabled: boolean;
     is_readonly: boolean;
-    validacion?: {
-        is_required: boolean;
-        pattern: string | null;
-    };
 }
 
 interface Props {
@@ -189,9 +185,6 @@ export default function Index({ componentes_dinamicos }: Props) {
         });
     };
 
-    const handleValidations = (id: number) => {
-        router.visit(`/cajas/componente-validacion?componente_id=${id}`);
-    };
 
     const filterOptions = [
         {
@@ -256,8 +249,8 @@ export default function Index({ componentes_dinamicos }: Props) {
                             <div className="text-sm text-gray-500">Total Componentes</div>
                         </div>
                         <div className="text-center">
-                            <div className="text-2xl font-bold text-green-600">{list.data.filter(c => c.validacion?.is_required).length}</div>
-                            <div className="text-sm text-gray-500">Requeridos</div>
+                            <div className="text-2xl font-bold text-green-600">{list.data.length}</div>
+                            <div className="text-sm text-gray-500">Total Componentes</div>
                         </div>
                         <div className="text-center">
                             <div className="text-2xl font-bold text-orange-600">{list.data.filter(c => c.type === 'select').length}</div>
@@ -287,7 +280,6 @@ export default function Index({ componentes_dinamicos }: Props) {
                         onDelete={handleDelete}
                         onShow={handleShow}
                         onDuplicate={handleDuplicate}
-                        onValidations={handleValidations}
                     />
                 </div>
 

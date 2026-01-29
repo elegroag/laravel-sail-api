@@ -1917,43 +1917,6 @@ Define componentes individuales que pueden ser utilizados en formularios dinámi
 
 ### Relaciones
 
-- `componentes_validaciones()`: Validaciones asociadas al componente.
-
 ### Vistas Relacionadas
 
 Utilizado para renderizar componentes individuales en formularios dinámicos.
-
----
-
-## Modelo Componentes Validaciones
-
-### Descripción
-
-Define las reglas de validación para componentes dinámicos, incluyendo patrones, longitudes, rangos y mensajes de error personalizados.
-
-### Campos
-
-| Campo         | Tipo   | Descripción                               |
-| ------------- | ------ | ----------------------------------------- |
-| id            | number | Identificador único (PK)                  |
-| componente_id | number | ID del componente (FK componentes_dinamicos) |
-| pattern       | string | Patrón de validación regex                |
-| default_value | text   | Valor por defecto                         |
-| max_length    | number | Longitud máxima                           |
-| min_length    | number | Longitud mínima                           |
-| numeric_range | string | Rango numérico                            |
-| field_size    | number | Tamaño del campo (default: 42)            |
-| detail_info   | text   | Información detallada                     |
-| is_required   | boolean| Si es requerido (default: false)          |
-| custom_rules  | json   | Reglas personalizadas                     |
-| error_messages| json   | Mensajes de error personalizados          |
-| created_at    | timestamp| Fecha de creación                        |
-| updated_at    | timestamp| Fecha de actualización                   |
-
-### Relaciones
-
-- `componentes_dinamicos()`: Componente al que pertenece la validación.
-
-### Vistas Relacionadas
-
-Utilizado para validar datos en formularios dinámicos del lado cliente y servidor.

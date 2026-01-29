@@ -1,4 +1,4 @@
-// Tipos compartidos para Cajas — Componentes, Validaciones y Formularios
+// Tipos compartidos para Cajas — Componentes y Formularios
 
 export type DataSourceItem = { value: string; label: string };
 
@@ -25,19 +25,6 @@ export type Componente = {
     number_max?: number | null;
     number_step?: number;
     formulario_id?: number;
-};
-
-export type Validacion = {
-    id: number;
-    componente_id: number;
-    is_required: boolean;
-    pattern?: string | null;
-    default_value?: string | null;
-    max_length?: number | null;
-    min_length?: number | null;
-    field_size: number;
-    detail_info?: string | null;
-    numeric_range?: string | null;
 };
 
 export type LayoutConfig = {

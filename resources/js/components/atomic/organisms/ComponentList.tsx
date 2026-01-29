@@ -13,10 +13,6 @@ interface Componente {
     order: number;
     is_disabled: boolean;
     is_readonly: boolean;
-    validacion?: {
-        is_required: boolean;
-        pattern: string | null;
-    };
 }
 
 interface ComponentListProps {
@@ -26,7 +22,6 @@ interface ComponentListProps {
     onDelete?: (id: number) => void;
     onShow?: (id: number) => void;
     onDuplicate?: (id: number) => void;
-    onValidations?: (id: number) => void;
 }
 
 const ComponentList: React.FC<ComponentListProps> = ({
@@ -35,8 +30,7 @@ const ComponentList: React.FC<ComponentListProps> = ({
     onEdit,
     onDelete,
     onShow,
-    onDuplicate,
-    onValidations
+    onDuplicate
 }) => {
     const getTypeColor = (type: string) => {
         switch (type) {
@@ -108,9 +102,6 @@ const ComponentList: React.FC<ComponentListProps> = ({
                                         <Badge variant={getTypeColor(componente.type)}>
                                             {getTypeLabel(componente.type)}
                                         </Badge>
-                                        {componente.validacion?.is_required && (
-                                            <Badge variant="danger" size="sm">Req</Badge>
-                                        )}
                                         {componente.is_disabled && (
                                             <Badge variant="secondary" size="sm">Desh</Badge>
                                         )}
@@ -138,9 +129,6 @@ const ComponentList: React.FC<ComponentListProps> = ({
                                 )}
                                 {onDuplicate && (
                                     <Button variant="secondary" size="sm" onClick={() => onDuplicate(componente.id)}>Duplicar</Button>
-                                )}
-                                {onValidations && (
-                                    <Button variant="primary" size="sm" onClick={() => onValidations(componente.id)}>Validaciones</Button>
                                 )}
                                 {onDelete && (
                                     <Button variant="danger" size="sm" onClick={() => onDelete(componente.id)}>Eliminar</Button>

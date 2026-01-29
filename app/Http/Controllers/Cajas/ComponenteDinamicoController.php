@@ -27,7 +27,7 @@ class ComponenteDinamicoController extends Controller
 
     public function index(Request $request)
     {
-        $query = ComponenteDinamico::with(['validacion'])->withCount('validacion');
+        $query = ComponenteDinamico::query();
 
         $q = trim((string) $request->query('q', ''));
         if ($q !== '') {
@@ -50,14 +50,7 @@ class ComponenteDinamicoController extends Controller
         }
 
         // Filtro: has_validation => '1' (con validación) | '0' (sin validación)
-        $hasValidation = $request->query('has_validation');
-        if ($hasValidation !== null && $hasValidation !== '') {
-            if ((string)$hasValidation === '1') {
-                $query->has('validacion');
-            } elseif ((string)$hasValidation === '0') {
-                $query->doesntHave('validacion');
-            }
-        }
+        // Eliminado: filtro por validación
 
         $groupId = $request->query('group_id');
         if ($groupId !== null && $groupId !== '') {
@@ -143,7 +136,7 @@ class ComponenteDinamicoController extends Controller
 
     public function show(int $id)
     {
-        $componente = ComponenteDinamico::with(['validacion', 'formulario'])->findOrFail($id);
+        $componente = ComponenteDinamico::with(['formulario'])->findOrFail($id);
 
         return Inertia::render('Cajas/ComponenteDinamico/Show', compact('componente'));
     }
@@ -264,7 +257,7 @@ class ComponenteDinamicoController extends Controller
 
     public function duplicate(Request $request, int $id)
     {
-        $original = ComponenteDinamico::with('validacion')->findOrFail($id);
+        $original = ComponenteDinamico::findOrFail($id);
 
         $data = $request->validate([
             'name' => 'required|string|max:255|unique:componentes_dinamicos,name',
@@ -296,21 +289,7 @@ class ComponenteDinamicoController extends Controller
             'number_step' => $original->number_step,
         ]);
 
-        // Duplicar validación si existe
-        if ($original->validacion) {
-            $duplicated->validacion()->create([
-                'pattern' => $original->validacion->pattern,
-                'default_value' => $original->validacion->default_value,
-                'max_length' => $original->validacion->max_length,
-                'min_length' => $original->validacion->min_length,
-                'numeric_range' => $original->validacion->numeric_range,
-                'field_size' => $original->validacion->field_size,
-                'detail_info' => $original->validacion->detail_info,
-                'is_required' => $original->validacion->is_required,
-                'custom_rules' => $original->validacion->custom_rules,
-                'error_messages' => $original->validacion->error_messages,
-            ]);
-        }
+        // Eliminado: duplicación de validación
 
         return redirect()->to('/cajas/componente-dinamico/' . $duplicated->id . '/show');
     }
@@ -343,8 +322,7 @@ class ComponenteDinamicoController extends Controller
         ]);
 
         // 3. Configurar la consulta base
-        $query = ComponenteDinamico::with(['validacion'])
-            ->where('formulario_id', $formularioId);
+        $query = ComponenteDinamico::where('formulario_id', $formularioId);
 
         // 4. Aplicar búsqueda por texto (q)
         $q = trim((string) $request->input('q', ''));
@@ -366,13 +344,7 @@ class ComponenteDinamicoController extends Controller
             $query->where('group_id', $request->group_id);
         }
 
-        if ($request->has('has_validation')) {
-            if ($request->boolean('has_validation')) {
-                $query->has('validacion');
-            } else {
-                $query->doesntHave('validacion');
-            }
-        }
+        // Eliminado: filtro por validación
 
         // 6. Ordenar y paginar
         $perPage = (int) $request->input('per_page', 10);
@@ -427,8 +399,7 @@ class ComponenteDinamicoController extends Controller
         // 4. Crear el componente
         $componente = ComponenteDinamico::create($validated);
 
-        // 5. Cargar relaciones
-        $componente->load(['validacion']);
+        // Eliminado: carga de relación validación
 
         // 6. Retornar respuesta
         return response()->json([

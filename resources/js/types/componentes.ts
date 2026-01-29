@@ -40,35 +40,6 @@ export interface ComponentData {
     updated_at?: string;
 }
 
-export interface ValidationRule {
-    [key: string]: unknown;
-}
-
-export interface ErrorMessage {
-    [key: string]: string;
-}
-
-export interface ValidationData {
-    id?: number;
-    componente_id: number;
-    pattern: string;
-    default_value: string;
-    max_length: number;
-    min_length: number;
-    numeric_range: string;
-    field_size: number;
-    detail_info: string;
-    is_required: boolean;
-    custom_rules: ValidationRule;
-    error_messages: ErrorMessage;
-    created_at?: string;
-    updated_at?: string;
-}
-
-export interface ComponentWithValidation extends ComponentData {
-    validacion?: ValidationData;
-}
-
 export interface FormularioDinamico {
     id: number;
     name: string;
@@ -80,7 +51,7 @@ export interface FormularioDinamico {
     is_active: boolean;
     layout_config: Record<string, unknown>;
     permissions: Record<string, unknown>;
-    componentes?: ComponentWithValidation[];
+    componentes?: ComponentData[];
     created_at: string;
     updated_at: string;
 }
@@ -98,12 +69,7 @@ export interface PaginationMeta {
 }
 
 export interface ComponentesResponse {
-    data: ComponentWithValidation[];
-    meta: PaginationMeta;
-}
-
-export interface ValidationResponse {
-    data: ValidationData[];
+    data: ComponentData[];
     meta: PaginationMeta;
 }
 
@@ -204,23 +170,6 @@ export interface UseComponentFormReturn {
     loading: boolean;
     updateField: (field: keyof ComponentData, value: unknown) => void;
     updateDataSource: (dataSource: DataSourceOption[]) => void;
-    resetForm: () => void;
-    handleSubmit: (e: React.FormEvent) => Promise<void>;
-    isValid: () => boolean;
-    setErrors: (errors: Record<string, string>) => void;
-}
-
-export interface UseValidationFormReturn {
-    formData: ValidationData;
-    errors: Record<string, string>;
-    loading: boolean;
-    updateField: (field: keyof ValidationData, value: unknown) => void;
-    updateCustomRules: (rules: ValidationRule) => void;
-    updateErrorMessages: (messages: ErrorMessage) => void;
-    addCustomRule: (key: string, value: unknown) => void;
-    removeCustomRule: (key: string) => void;
-    addErrorMessage: (key: string, value: string) => void;
-    removeErrorMessage: (key: string) => void;
     resetForm: () => void;
     handleSubmit: (e: React.FormEvent) => Promise<void>;
     isValid: () => boolean;
