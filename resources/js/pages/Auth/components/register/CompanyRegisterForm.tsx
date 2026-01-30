@@ -134,12 +134,11 @@ export default function CompanyRegisterForm({
         )}
 
         {/* Paso 2: Selección responsable de la cuenta */}
-        {step === 2 && (
+        {step === 2 && isJuridica && (
             <AccountResponsibleSelect
               value={values.userRole}
-              onChange={(value) => onChange("userRole", value)}
+              onChange={onChange}
               error={errors.userRole}
-              disabled={isNatural}
               isJuridica={isJuridica}
               onNextStep={onNextStep}
               onPrevStep={onPrevStep}
@@ -158,7 +157,6 @@ export default function CompanyRegisterForm({
             documentTypes={documentTypes}
             cityOptions={cityOptions}
           />
-
         )}
 
         {/* Paso 4 (solo delegado): Datos del delegado */}

@@ -1,12 +1,12 @@
 import React from "react"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import type { RegisterValues } from "@/types/register"
 
 interface AccountResponsibleSelectProps {
   value: string
-  onChange: (value: string) => void
+  onChange: (field: keyof RegisterValues, value: string) => void;
   error?: string
-  disabled?: boolean
   isJuridica?: boolean
   onNextStep?: () => void
   onPrevStep?: () => void
@@ -17,7 +17,6 @@ const AccountResponsibleSelect: React.FC<AccountResponsibleSelectProps> = ({
   value,
   onChange,
   error,
-  disabled = false,
   isJuridica = false,
   onNextStep,
   onPrevStep,
@@ -28,8 +27,8 @@ const AccountResponsibleSelect: React.FC<AccountResponsibleSelectProps> = ({
       <Label htmlFor="userRole" className="text-sm font-medium text-gray-700">
         ¿Eres representante o delegado? *
       </Label>
-      <Select value={value} onValueChange={onChange} disabled={disabled}>
-        <SelectTrigger className={`in-b-form mt-1 ${error ? "border-red-500" : ""} ${disabled ? 'bg-gray-50 text-gray-600' : ''}`}>
+      <Select value={value} onValueChange={(value) => onChange("userRole", value)}>
+        <SelectTrigger className={`in-b-form mt-1 ${error ? "border-red-500" : ""}`}>
           <SelectValue placeholder="Selecciona" />
         </SelectTrigger>
         <SelectContent>

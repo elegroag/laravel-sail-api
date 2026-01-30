@@ -158,7 +158,7 @@ const useRegisterController = ({ Coddoc, Tipsoc, Codciu, errors }: LoginProps) =
     const handleNextStep = () => {
         const isCompany = state.selectedUserType === 'empresa';
         const isWorker = state.selectedUserType === 'trabajador';
-        const maxSteps = isCompany ? (state.userRole === 'delegado' ? 4 : 3) : isWorker ? 3 : 2;
+        const maxSteps = isCompany ? (state.userRole === 'delegado' ? 5 : 4) : isWorker ? 3 : 2;
         if (validateStep()) {
             setStep((prev) => Math.min(prev + 1, maxSteps));
         }
