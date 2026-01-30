@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
+import AppLayout from '@/layouts/AppLayoutTemplate';
 import { ComponentForm, ActionButtons } from '@/components/atomic';
 import type { Formulario as FormularioType } from '@/types/cajas';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';

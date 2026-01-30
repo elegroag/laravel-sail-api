@@ -1,4 +1,4 @@
-import AppLayout from '@/layouts/app-layout';
+import AppLayout from '@/layouts/AppLayoutTemplate';
 import { Link, useForm } from '@inertiajs/react';
 import { useEffect } from 'react';
 

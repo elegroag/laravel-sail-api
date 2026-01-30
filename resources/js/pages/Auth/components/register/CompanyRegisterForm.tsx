@@ -3,7 +3,8 @@ import type { DocumentTypeOption } from "@/types/auth"
 import type {
   PropsCompanyRegisterForm,
 } from "@/types/register.d"
-import HeaderRegister from "../HeaderRegister"
+import HeaderRegister from "./HeaderRegister"
+import AccountResponsibleSelect from "./AccountResponsibleSelect"
 import { 
   DataCompanyRegister, 
   DataDelegadoRegister, 
@@ -81,13 +82,6 @@ export default function CompanyRegisterForm({
   const isNitOption = (opt: DocumentTypeOption) =>
     opt.label.toLowerCase().includes('nit') || opt.value.toLowerCase() === 'nit'
 
-  const filteredDocumentTypes = (documentTypes || []).filter((opt) =>
-    // Jurídica + representante: solo NIT
-    isJuridicaRepresentative ? isNitOption(opt)
-    // Jurídica + delegado o Natural: todo menos NIT
-    : !isNitOption(opt)
-  )
-
   // Forzar selección cuando es Jurídica y limpiar cuando Natural tenga NIT
   useEffect(() => {
     if (isJuridicaRepresentative) {
@@ -139,8 +133,35 @@ export default function CompanyRegisterForm({
           />
         )}
 
-        {/* Paso 2: Datos representante */}
+        {/* Paso 2: Selección responsable de la cuenta */}
         {step === 2 && (
+            <AccountResponsibleSelect
+              value={values.userRole}
+              onChange={(value) => onChange("userRole", value)}
+              error={errors.userRole}
+              disabled={isNatural}
+              isJuridica={isJuridica}
+              onNextStep={onNextStep}
+              onPrevStep={onPrevStep}
+              userRole={values.userRole}
+            />
+        )}
+
+        {/* Paso 3: Datos representante */}
+        {step === 3 && (
+           <DataRepresentanteRegister
+            values={values}
+            errors={errors}
+            onChange={onChange}
+            onNextStep={onNextStep}
+            onPrevStep={onPrevStep}
+            documentTypes={documentTypes}
+          />
+
+        )}
+
+        {/* Paso 4 (solo delegado): Datos del delegado */}
+        {step === 4 && values.userRole === 'delegado' && (
           <DataDelegadoRegister
             values={values}
             errors={errors}
@@ -157,27 +178,15 @@ export default function CompanyRegisterForm({
           />
         )}
 
-        {/* Paso 3 (solo delegado): Datos del representante */}
-        {step === 3 && values.userRole === 'delegado' && (
-          <DataRepresentanteRegister
-            values={values}
-            errors={errors}
-            onChange={onChange}
-            onNextStep={onNextStep}
-            onPrevStep={onPrevStep}
-            documentTypes={documentTypes}
-          />
-        )}
-
-        {/* Paso sesión: paso 3 (no delegado) o paso 4 (delegado) */}
-        {((values.userRole !== 'delegado' && step === 3) || (values.userRole === 'delegado' && step === 4)) && (
+        {/* Paso sesión: paso 4 (no delegado) o paso 5 (delegado) */}
+        {((values.userRole !== 'delegado' && step === 4) || (values.userRole === 'delegado' && step === 5)) && (
           <SessionRegister
             values={values}
             errors={errors}
             onChange={onChange}
             onPrevStep={onPrevStep}
             isJuridicaRepresentative={isJuridicaRepresentative}
-            filteredDocumentTypes={filteredDocumentTypes}
+            documentTypes={documentTypes}
             identificationRef={identificationRef}
             passwordRef={passwordRef}
             showPassword={showPassword}

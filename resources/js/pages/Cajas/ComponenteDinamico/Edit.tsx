@@ -1,5 +1,5 @@
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import AppLayout from '@/layouts/app-layout';
+import AppLayout from '@/layouts/AppLayoutTemplate';
 import type { Componente, DataSourceItem } from '@/types/cajas';
 import { Link, useForm, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';

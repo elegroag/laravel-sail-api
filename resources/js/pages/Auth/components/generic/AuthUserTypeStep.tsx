@@ -1,7 +1,7 @@
 import type React from "react"
 import TextLink from "@/components/text-link"
 import { Button } from "@/components/ui/button"
-import AuthUserTypeSelector from "@/pages/Auth/components/AuthUserTypeSelector"
+import AuthUserTypeSelector from "@/pages/Auth/components/generic/AuthUserTypeSelector"
 
 // Componente presentacional que agrupa el selector de tipo de usuario,
 // el botón de continuar y los enlaces de ayuda/registro.

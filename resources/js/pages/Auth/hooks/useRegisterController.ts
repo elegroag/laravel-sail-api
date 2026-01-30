@@ -1,5 +1,5 @@
 import { TipoFuncionario } from '@/constants/auth';
-import { useRegisterValidation } from '@/hooks/use-register-validation';
+import { useRegisterValidation } from '@/pages/Auth/hooks/useRegisterValidation';
 import type { FormAction, FormState, LoginProps, RegisterPayload, UserType } from '@/types/auth';
 import { router } from '@inertiajs/react';
 import type React from 'react';

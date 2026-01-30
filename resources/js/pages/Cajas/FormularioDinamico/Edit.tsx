@@ -1,4 +1,4 @@
-import AppLayout from '@/layouts/app-layout';
+import AppLayout from '@/layouts/AppLayoutTemplate';
 import { Link, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import type { LayoutConfig, Permissions, Formulario as FormularioType } from '@/types/cajas';

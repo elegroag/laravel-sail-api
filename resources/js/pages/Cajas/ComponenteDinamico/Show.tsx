@@ -1,4 +1,4 @@
-import AppLayout from '@/layouts/app-layout';
+import AppLayout from '@/layouts/AppLayoutTemplate';
 import { Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import type { Componente as ComponenteType, DataSourceItem, Formulario as FormularioType } from '@/types/cajas';

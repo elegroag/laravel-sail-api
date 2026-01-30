@@ -2,12 +2,12 @@ import TextLink from '@/components/text-link';
 import AuthBackgroundShapes from '@/components/ui/auth-background-shapes';
 import { Button } from '@/components/ui/button';
 import { userTypes } from '@/constants/auth';
-import AuthLayout from '@/layouts/auth-layout';
+import AuthLayout from '@/layouts/AuthLayoutTemplate';
 import { CheckCircle } from 'lucide-react';
 import imageLogo from '../../assets/comfaca-logo.png';
-import AuthUserTypeSelector from './components/AuthUserTypeSelector';
-import AuthWelcome from './components/AuthWelcome';
-import ResetPasswordForm from './components/ResetPasswordForm';
+import AuthUserTypeSelector from './components/generic/AuthUserTypeSelector';
+import AuthWelcome from './components/generic/AuthWelcome';
+import ResetPasswordForm from './components/reset_password/ResetPasswordForm';
 import useRecoveryController from './hooks/useRecoveryController';
 
 interface ResetPasswordProps {

@@ -38,6 +38,7 @@ const DataDelegadoRegister: React.FC<DataRepresentative> = ({
       </Select>
       {errors.userRole && <p className="text-red-500 text-xs mt-1">{errors.userRole}</p>}
     </div>
+    
     {values.userRole === 'delegado' && (
       <div>
         <Label htmlFor="position" className="text-sm font-medium text-gray-700">

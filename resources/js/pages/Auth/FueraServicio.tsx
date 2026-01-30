@@ -1,5 +1,5 @@
-import AuthLayout from "@/layouts/auth-layout";
-import AuthWelcome from "@/pages/Auth/components/AuthWelcome";
+import AuthLayout from "@/layouts/AuthLayoutTemplate";
+import AuthWelcome from "@/pages/Auth/components/generic/AuthWelcome";
 import AuthBackgroundShapes from "@/components/ui/auth-background-shapes";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 

@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import type { DocumentTypeOption } from "@/types/auth"
 
 import type {
     DataSession
@@ -13,7 +14,7 @@ const SessionRegister: React.FC<DataSession> = ({
     onChange,
     onPrevStep,
     isJuridicaRepresentative,
-    filteredDocumentTypes,
+    documentTypes,
     identificationRef,
     passwordRef,
     showPassword,
@@ -37,7 +38,7 @@ const SessionRegister: React.FC<DataSession> = ({
               <SelectValue placeholder="Selecciona" />
             </SelectTrigger>
             <SelectContent>
-              {filteredDocumentTypes.map((doc) => (
+              {documentTypes.map((doc: DocumentTypeOption) => (
                 <SelectItem key={doc.value} value={doc.value}>
                   {doc.label}
                 </SelectItem>

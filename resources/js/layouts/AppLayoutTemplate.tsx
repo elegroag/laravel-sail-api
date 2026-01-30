@@ -1,6 +1,6 @@
 import '@/css/app.css';
 import '@/css/global.css';
-import AppLayoutTemplate from '@/layouts/app/app-sidebar-layout';
+import AppLayoutTemplate from '@/layouts/app/AppSidebarLayout';
 import { type BreadcrumbItem } from '@/types';
 import { type ReactNode } from 'react';
 

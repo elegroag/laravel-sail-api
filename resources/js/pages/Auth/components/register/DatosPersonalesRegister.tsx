@@ -9,7 +9,7 @@ import type {
   DataPersonRegister, 
   DataEmpresaRegister
 } from "@/types/register.d"
-import SessionRegister from "./register/SessionRegister"
+import SessionRegister from "./SessionRegister"
 import HeaderRegister from "./HeaderRegister"
 
 

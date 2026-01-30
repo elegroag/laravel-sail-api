@@ -1,8 +1,8 @@
-import AuthLayout from "@/layouts/auth-layout";
-import AuthWelcome from "@/pages/Auth/components/AuthWelcome";
-import AuthUserTypeSelector from "@/pages/Auth/components/AuthUserTypeSelector";
+import AuthLayout from "@/layouts/AuthLayoutTemplate";
+import AuthWelcome from "@/pages/Auth/components/generic/AuthWelcome";
+import AuthUserTypeSelector from "@/pages/Auth/components/generic/AuthUserTypeSelector";
 import CompanyRegisterForm from "@/pages/Auth/components/register/CompanyRegisterForm";
-import PersonRegisterForm from "@/pages/Auth/components/DatosPersonalesRegister";
+import PersonRegisterForm from "@/pages/Auth/components/register/DatosPersonalesRegister";
 import imageLogo from "@/assets/comfaca-logo.png";
 import { userTypes } from "@/constants/auth";
 import type { FormState, LoginProps} from "@/types/auth";
