@@ -3,15 +3,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import type { DataRepresentative } from "@/types/register.d"
+import type { DataDelegado } from "@/types/register.d"
 
-const DataDelegadoRegister: React.FC<DataRepresentative> = ({
+const DataDelegadoRegister: React.FC<DataDelegado> = ({
   values,
   errors,
   onChange,
   onNextStep,
-  isJuridica,
-  isNatural,
   onPrevStep,
   cityOptions,
   firstNameRef,
@@ -22,43 +20,23 @@ const DataDelegadoRegister: React.FC<DataRepresentative> = ({
   return (
   <>
     <div>
-      <Label htmlFor="userRole" className="text-sm font-medium text-gray-700">
-        ¿Eres representante o delegado? *
+      <Label htmlFor="position" className="text-sm font-medium text-gray-700">
+        Cargo u ocupación dentro de la empresa *
       </Label>
-      <Select value={values.userRole} onValueChange={(v) => onChange("userRole", v)} disabled={isNatural}>
-        <SelectTrigger className={`in-b-form mt-1 ${errors.userRole ? "border-red-500" : ""} ${isNatural ? 'bg-gray-50 text-gray-600' : ''}`}>
-          <SelectValue placeholder="Selecciona" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="representante">Representante legal</SelectItem>
-          {isJuridica && (
-            <SelectItem value="delegado">Delegado de la empresa</SelectItem>
-          )}
-        </SelectContent>
-      </Select>
-      {errors.userRole && <p className="text-red-500 text-xs mt-1">{errors.userRole}</p>}
+      <Input
+        id="position"
+        type="text"
+        value={values.position}
+        onChange={(e) => onChange("position", e.target.value)}
+        placeholder="Ej: Coordinador de Talento Humano"
+        className={`in-b-form mt-1 ${errors.position ? "border-red-500" : ""}`}
+      />
+      {errors.position && <p className="text-red-500 text-xs mt-1">{errors.position}</p>}
     </div>
-    
-    {values.userRole === 'delegado' && (
-      <div>
-        <Label htmlFor="position" className="text-sm font-medium text-gray-700">
-          Cargo u ocupación dentro de la empresa *
-        </Label>
-        <Input
-          id="position"
-          type="text"
-          value={values.position}
-          onChange={(e) => onChange("position", e.target.value)}
-          placeholder="Ej: Coordinador de Talento Humano"
-          className={`in-b-form mt-1 ${errors.position ? "border-red-500" : ""}`}
-        />
-        {errors.position && <p className="text-red-500 text-xs mt-1">{errors.position}</p>}
-      </div>
-    )}
     <div className="grid grid-cols-2 gap-4">
       <div>
         <Label htmlFor="firstName" className="text-sm font-medium text-gray-700">
-          {values.userRole === 'delegado' ? 'Nombre delegado *' : 'Nombre representante *'}
+          Nombre delegado *
         </Label>
         <Input
           id="firstName"
@@ -66,14 +44,14 @@ const DataDelegadoRegister: React.FC<DataRepresentative> = ({
           type="text"
           value={values.firstName}
           onChange={(e) => onChange("firstName", e.target.value)}
-          placeholder={values.userRole === 'delegado' ? 'Nombre delegado' : 'Nombre representante'}
+          placeholder="Nombre delegado"
           className={`in-b-form mt-1 ${errors.firstName ? "border-red-500" : ""}`}
         />
         {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
       </div>
       <div>
         <Label htmlFor="lastName" className="text-sm font-medium text-gray-700">
-          {values.userRole === 'delegado' ? 'Apellido delegado *' : 'Apellido representante *'}
+          Apellido delegado *
         </Label>
         <Input
           id="lastName"
@@ -81,7 +59,7 @@ const DataDelegadoRegister: React.FC<DataRepresentative> = ({
           type="text"
           value={values.lastName}
           onChange={(e) => onChange("lastName", e.target.value)}
-          placeholder={values.userRole === 'delegado' ? 'Apellido delegado' : 'Apellido representante'}
+          placeholder="Apellido delegado"
           className={`in-b-form mt-1 ${errors.lastName ? "border-red-500" : ""}`}
         />
         {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
@@ -89,7 +67,7 @@ const DataDelegadoRegister: React.FC<DataRepresentative> = ({
     </div>
     <div>
       <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-        {values.userRole === 'delegado' ? 'Email delegado *' : 'Email representante *'}
+        Email delegado *
       </Label>
       <Input
         id="email"
@@ -97,7 +75,7 @@ const DataDelegadoRegister: React.FC<DataRepresentative> = ({
         type="email"
         value={values.email}
         onChange={(e) => onChange("email", e.target.value)}
-        placeholder="Correo representante"
+        placeholder="Correo delegado"
         className={`in-b-form mt-1 ${errors.email ? "border-red-500" : ""}`}
       />
       {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
@@ -105,7 +83,7 @@ const DataDelegadoRegister: React.FC<DataRepresentative> = ({
     <div className="grid grid-cols-2 gap-4">
       <div>
         <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
-          {values.userRole === 'delegado' ? 'Teléfono delegado' : 'Teléfono representante'}
+          Teléfono delegado
         </Label>
         <Input
           id="phone"
@@ -113,7 +91,7 @@ const DataDelegadoRegister: React.FC<DataRepresentative> = ({
           type="number"
           value={values.phone}
           onChange={(e) => onChange("phone", e.target.value)}
-          placeholder="Teléfono representante"
+          placeholder="Teléfono delegado"
           className="in-b-form mt-1 tel"
         />
       </div>
@@ -141,7 +119,7 @@ const DataDelegadoRegister: React.FC<DataRepresentative> = ({
         Volver a datos de empresa
       </Button>
       <Button type="button" onClick={onNextStep} className="flex-1">
-        {values.userRole === 'delegado' ? 'Siguiente: Datos del representante' : 'Siguiente: Datos de sesión'}
+        Siguiente: Datos de sesión
       </Button>
     </div>
     </>
