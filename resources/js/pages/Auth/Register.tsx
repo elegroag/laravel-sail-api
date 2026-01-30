@@ -1,14 +1,13 @@
 import AuthLayout from "@/layouts/auth-layout";
-import AuthWelcome from "@/pages/Auth/components/auth-welcome";
-import AuthUserTypeSelector from "@/pages/Auth/components/auth-user-type-selector";
-import CompanyRegisterForm from "@/pages/Auth/components/company-register-form";
-import PersonRegisterForm from "@/pages/Auth/components/person-register-form";
+import AuthWelcome from "@/pages/Auth/components/AuthWelcome";
+import AuthUserTypeSelector from "@/pages/Auth/components/AuthUserTypeSelector";
+import CompanyRegisterForm from "@/pages/Auth/components/register/CompanyRegisterForm";
+import PersonRegisterForm from "@/pages/Auth/components/DatosPersonalesRegister";
 import imageLogo from "@/assets/comfaca-logo.png";
 import { userTypes } from "@/constants/auth";
 import type { FormState, LoginProps} from "@/types/auth";
 import AuthBackgroundShapes from "@/components/ui/auth-background-shapes";
-import useRegisterController from "@/pages/Auth/controllers/use-register-controller";
-
+import useRegisterController from "@/pages/Auth/hooks/useRegisterController";
 
 export default function Register(props: LoginProps){
 

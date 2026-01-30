@@ -24,6 +24,7 @@ class Gener02 extends ModelBase
         'estado',
         'cedtra',
         'clave',
+        'intentos'
     ];
 
     public function getClave()

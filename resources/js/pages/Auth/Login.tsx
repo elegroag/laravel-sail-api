@@ -1,13 +1,13 @@
 import imageLogo from "../../assets/comfaca-logo.png";
 import AuthLayout from "@/layouts/auth-layout"
-import AuthWelcome from "@/pages/Auth/components/auth-welcome"
-import LoginForm from "@/pages/Auth/components/login-form"
-import AuthUserTypeStep from "@/pages/Auth/components/auth-user-type-step"
+import AuthWelcome from "@/pages/Auth/components/AuthWelcome"
+import LoginForm from "@/pages/Auth/components/login/LoginForm"
+import AuthUserTypeStep from "@/pages/Auth/components/AuthUserTypeStep"
 import { userTypes } from "@/constants/auth"
 import type { LoginProps, UserType } from "@/types/auth"
 import AuthBackgroundShapes from "@/components/ui/auth-background-shapes"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
-import useLoginController from "./controllers/use-login-controller";
+import useLoginController from "./hooks/useLoginController";
 
 export default function Login({
     errors

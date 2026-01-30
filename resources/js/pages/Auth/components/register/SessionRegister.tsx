@@ -163,7 +163,7 @@ const SessionRegister: React.FC<DataSession> = ({
         </Button>
       </div>
     </>
-    )
-  }
+  )
+}
 
-  export default SessionRegister;
+export default SessionRegister;

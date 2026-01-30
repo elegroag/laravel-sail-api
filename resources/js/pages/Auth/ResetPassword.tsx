@@ -5,10 +5,10 @@ import { userTypes } from '@/constants/auth';
 import AuthLayout from '@/layouts/auth-layout';
 import { CheckCircle } from 'lucide-react';
 import imageLogo from '../../assets/comfaca-logo.png';
-import AuthUserTypeSelector from './components/auth-user-type-selector';
-import AuthWelcome from './components/auth-welcome';
-import ResetPasswordForm from './components/reset-password-form';
-import useRecoveryController from './controllers/use-recovery-controller';
+import AuthUserTypeSelector from './components/AuthUserTypeSelector';
+import AuthWelcome from './components/AuthWelcome';
+import ResetPasswordForm from './components/ResetPasswordForm';
+import useRecoveryController from './hooks/useRecoveryController';
 
 interface ResetPasswordProps {
     Coddoc: Record<string, string>;

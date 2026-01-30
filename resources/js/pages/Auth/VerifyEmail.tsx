@@ -4,9 +4,9 @@ import { LoaderCircle, CheckCircle} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import AuthLayout from '@/layouts/auth-layout'
-import AuthWelcome from './components/auth-welcome'
+import AuthWelcome from './components/AuthWelcome'
 import type { VerifyEmailProps } from '@/types/auth'
-import useVerifyController from '@/pages/Auth/controllers/use-verify-controller'
+import useVerifyController from '@/pages/Auth/hooks/useVerifyController'
 import { DeliveryOptions } from '@/constants/auth'
 
 export default function VerifyEmail({ documento, coddoc, tipo, option_request, token, status, errors }: VerifyEmailProps) {

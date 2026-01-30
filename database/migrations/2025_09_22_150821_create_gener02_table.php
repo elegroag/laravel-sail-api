@@ -29,6 +29,7 @@ return new class extends Migration
             $table->enum('estado', ['A', 'I', 'B'])->default('A');
             $table->bigInteger('cedtra')->nullable(); // bigint(15) NULL
             $table->string('clave', 80)->nullable();
+            $table->integer('intentos')->nullable();
 
             // Índice y FK según SQL
             $table->index('tipfun', 'tipfun');

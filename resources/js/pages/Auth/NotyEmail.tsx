@@ -1,8 +1,8 @@
 import AuthLayout from "@/layouts/auth-layout";
-import AuthWelcome from "@/pages/Auth/components/auth-welcome";
+import AuthWelcome from "@/pages/Auth/components/AuthWelcome";
 import AuthBackgroundShapes from "@/components/ui/auth-background-shapes";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import useNotyEmailController from "./controllers/use-noty-email-controller";
+import useNotyEmailController from "./hooks/useNotyEmailController";
 
 export default function NotyEmail({ errors }: any) {
   const {
