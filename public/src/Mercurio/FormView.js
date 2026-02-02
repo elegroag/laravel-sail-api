@@ -4,13 +4,13 @@ import {
     DateComponent,
     DialogComponent,
     InputComponent,
-    OpenAddress,
     RadioComponent,
     SelectComponent,
     TextComponent,
 } from '@/Componentes/Views/ComponentsView';
 import ConfirmPasswordModalView from '@/Componentes/Views/ConfirmPasswordModalView';
 import { LoadDocumentsView } from '@/Componentes/Views/LoadDocumentsView';
+import OpenAddress from '@/Componentes/Views/OpenAddress';
 import { PoliticaModalView } from '@/Componentes/Views/PoliticaModalView';
 import { SeguimientosView } from '@/Componentes/Views/SeguimientosView';
 import { SubHeaderView } from '@/Componentes/Views/SubHeaderView';
