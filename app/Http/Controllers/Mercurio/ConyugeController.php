@@ -768,10 +768,10 @@ class ConyugeController extends ApplicationController
             $coddoc = parent::getActUser('coddoc');
             $conService = new ConyugeService;
 
-            $sindepe = Mercurio32::where('id', $id)
-                ->where('documento', $documento)
-                ->where('coddoc', $coddoc)
-                ->whereNotIn('estado', ['I', 'X'])
+            $sindepe = Mercurio32::whereRaw(
+                "id =? AND documento=? AND coddoc=? AND estado NOT IN('I','X')",
+                [$id, $documento, $coddoc]
+            )
                 ->first();
 
             if ($sindepe == false) {

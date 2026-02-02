@@ -592,10 +592,11 @@ class TrabajadorController extends ApplicationController
             $coddoc = $this->user['coddoc'];
 
             $traService = new TrabajadorService;
-            $mtrabajador = Mercurio31::where('id', $id)
-                ->where('documento', $documento)
-                ->where('coddoc', $coddoc)
-                ->whereNotIn('estado', ['I', 'X'])->first();
+            $mtrabajador = Mercurio31::whereRaw(
+                "id =? AND documento=? AND coddoc=? AND estado NOT IN('I','X')",
+                [$id, $documento, $coddoc]
+            )
+                ->first();
 
             if ($mtrabajador == false) {
                 throw new DebugException('Error no se puede identificar el propietario de la solicitud', 301);

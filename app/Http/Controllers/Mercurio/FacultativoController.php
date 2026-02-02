@@ -655,7 +655,11 @@ class FacultativoController extends ApplicationController
             $coddoc = $this->user['coddoc'];
             $facultativoService = new FacultativoService;
 
-            $sindepe = Mercurio36::where('id', $id)->where('documento', $documento)->where('coddoc', $coddoc)->first();
+            $sindepe = Mercurio36::whereRaw(
+                "id =? AND documento=? AND coddoc=? AND estado NOT IN('I','X')",
+                [$id, $documento, $coddoc]
+            )
+                ->first();
             if ($sindepe == false) {
                 throw new DebugException('Error no se puede identificar el propietario de la solicitud', 301);
             }

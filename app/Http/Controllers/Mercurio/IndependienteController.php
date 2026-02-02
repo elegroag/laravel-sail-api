@@ -682,10 +682,10 @@ class IndependienteController extends ApplicationController
             $coddoc = $this->user['coddoc'] ?? '';
             $service = new IndependienteService;
 
-            $sindepe = Mercurio41::where('id', $id)
-                ->where('documento', $documento)
-                ->where('coddoc', $coddoc)
-                ->whereNotIn('estado', ['I', 'X'])
+            $sindepe = Mercurio41::whereRaw(
+                "id =? AND documento=? AND coddoc=? AND estado NOT IN('I','X')",
+                [$id, $documento, $coddoc]
+            )
                 ->first();
 
             if ($sindepe == false) {

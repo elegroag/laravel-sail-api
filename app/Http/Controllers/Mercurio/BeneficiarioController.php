@@ -890,10 +890,10 @@ class BeneficiarioController extends ApplicationController
             $coddoc = $this->user['coddoc'];
             $benService = new BeneficiarioService;
 
-            $sindepe = Mercurio34::where('id', $id)
-                ->where('documento', $documento)
-                ->where('coddoc', $coddoc)
-                ->whereNotIn('estado', ['I', 'X'])
+            $sindepe = Mercurio34::whereRaw(
+                "id =? AND documento=? AND coddoc=? AND estado NOT IN('I','X')",
+                [$id, $documento, $coddoc]
+            )
                 ->first();
 
             if ($sindepe == false) {
