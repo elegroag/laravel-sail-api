@@ -3,15 +3,12 @@
 
 <head>
     <meta charset="UTF-8">
-    @php
-        $path = env('APP_URL').':'.env('APP_PORT');
-    @endphp
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta
         name="csrf-token"
         content="{{ csrf_token() }}"
-        path="{{ $path }}"
+        path="{{ config('app.url') }}"
         app="@yield('application')" />
         
     <link rel="icon" href="/favicon.ico" sizes="any">

@@ -42,20 +42,78 @@ class AuthMercurioController extends Controller
 
     /**
      * Registrar nuevo usuario en el sistema
-     * 
      * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
      * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
-     * 
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     #[Response(status: 201, description: 'Usuario registrado exitosamente')]
     #[Response(status: 422, description: 'Error de validación')]
     #[Response(status: 500, description: 'Error interno del servidor')]
-    public function registerAction(Request $request)
+    public function registerEmpresaAction(Request $request)
     {
         $this->db->begin();
         try {
+            $data = $request->all();
+            $request->validate([
+                'rep_nombre' => 'required|string|min:5',
+                'rep_documento' => 'required|integer|digits_between:6,18',
+                'rep_email' => 'required|email',
+                'rep_telefono' => 'required|integer|digits_between:6,10',
+                'rep_coddoc' => 'required|string|min:1',
+                'tipdoc' => 'required|string|min:1',
+                'razsoc' => 'required|string|min:5',
+                'nit' => 'required|integer|digits_between:6,18',
+                'tipsoc' => 'required|string|min:1',
+                'tipper' => 'required|string|min:1',
+                'is_delegado' => 'required|boolean',
+            ]);
+
+            if ($request->boolean('is_delegado')) {
+                $request->validate([
+                    'cargo' => 'required|string|min:5',
+                ]);
+            }
+            $request->merge([
+                'cedrep' => $request->input('rep_documento'),
+                'repleg' => $request->input('rep_nombre'),
+                'coddocrepleg' => $request->input('rep_coddoc'),
+            ]);
+            return $this->performRegister($data, 'E');
+        } catch (ValidationException $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error de validación',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            $this->db->rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error inesperado al procesar el registro.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    /**
+     * Registrar nuevo usuario en el sistema
+     * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
+     * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    #[Response(status: 201, description: 'Usuario registrado exitosamente')]
+    #[Response(status: 422, description: 'Error de validación')]
+    #[Response(status: 500, description: 'Error interno del servidor')]
+    public function registerTrabajadorAction(Request $request)
+    {
+        $this->db->begin();
+        try {
+            $data = $request->all();
             $request->validate([
                 'coddoc' => 'required|string|min:1',
                 'documento' => 'required|integer|digits_between:6,18',
@@ -64,61 +122,254 @@ class AuthMercurioController extends Controller
                 'email' => 'required|email',
                 'telefono' => 'required|integer|digits_between:6,10',
                 'codciu' => 'required|integer|digits:5',
-                'first_name' => 'required|string|min:3',
-                'last_name' => 'required|string|min:3',
+                'tipo' => 'required|string|min:1',
+                'razsoc' => 'required|string|min:5',
+                'nit' => 'required|integer|digits_between:6,18',
+            ]);
+            return $this->performRegister($data, 'T');
+        } catch (ValidationException $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error de validación',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            $this->db->rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error inesperado al procesar el registro.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Registrar nuevo usuario en el sistema
+     * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
+     * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    #[Response(status: 201, description: 'Usuario registrado exitosamente')]
+    #[Response(status: 422, description: 'Error de validación')]
+    #[Response(status: 500, description: 'Error interno del servidor')]
+    public function registerParticularAction(Request $request)
+    {
+        $this->db->begin();
+        try {
+            $data = $request->all();
+            $request->validate([
+                'coddoc' => 'required|string|min:1',
+                'documento' => 'required|integer|digits_between:6,18',
+                'password' => 'required|string|min:8',
+                'nombre' => 'required|string|min:5',
+                'email' => 'required|email',
+                'telefono' => 'required|integer|digits_between:6,10',
+                'codciu' => 'required|integer|digits:5',
                 'tipo' => 'required|string|min:1',
             ]);
+            return $this->performRegister($data, 'P');
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error de validación',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            $this->db->rollBack();
 
+            return response()->json([
+                'success' => false,
+                'message' => 'Error inesperado al procesar el registro.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Registrar nuevo usuario en el sistema
+     * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
+     * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    #[Response(status: 201, description: 'Usuario registrado exitosamente')]
+    #[Response(status: 422, description: 'Error de validación')]
+    #[Response(status: 500, description: 'Error interno del servidor')]
+    public function registerIndependienteAction(Request $request)
+    {
+        $this->db->begin();
+        try {
             $data = $request->all();
-            $data['calemp'] = calemp_use_tipo_value($request->input('selected_user_type'));
+            $request->validate([
+                'coddoc' => 'required|string|min:1',
+                'documento' => 'required|integer|digits_between:6,18',
+                'password' => 'required|string|min:8',
+                'nombre' => 'required|string|min:5',
+                'email' => 'required|email',
+                'telefono' => 'required|integer|digits_between:6,10',
+                'codciu' => 'required|integer|digits:5',
+                'tipo' => 'required|string|min:1',
+                'contribution_rate' => 'required',
+            ]);
+            return $this->performRegister($data, 'I');
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error de validación',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            $this->db->rollBack();
 
-            $esDelegado = $request->boolean('is_delegado');
+            return response()->json([
+                'success' => false,
+                'message' => 'Error inesperado al procesar el registro.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 
-            if ($esDelegado) {
-                $data['cedrep'] = $request->input('rep_documento');
-                $data['repleg'] = $request->input('rep_nombre');
-                $data['coddocrepleg'] = $request->input('rep_coddoc');
-            } else {
-                $data['cedrep'] = $request->input('documento');
-                $data['repleg'] = $request->input('nombre');
-                $data['coddocrepleg'] = $request->input('coddoc');
-            }
+    /**
+     * Registrar nuevo usuario en el sistema
+     * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
+     * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    #[Response(status: 201, description: 'Usuario registrado exitosamente')]
+    #[Response(status: 422, description: 'Error de validación')]
+    #[Response(status: 500, description: 'Error interno del servidor')]
+    public function registerPensionadoAction(Request $request)
+    {
+        $this->db->begin();
+        try {
+            $data = $request->all();
+            $request->validate([
+                'coddoc' => 'required|string|min:1',
+                'documento' => 'required|integer|digits_between:6,18',
+                'password' => 'required|string|min:8',
+                'nombre' => 'required|string|min:5',
+                'email' => 'required|email',
+                'telefono' => 'required|integer|digits_between:6,10',
+                'codciu' => 'required|integer|digits:5',
+                'tipo' => 'required|string|min:1',
+                'contribution_rate' => 'required',
+            ]);
+            return $this->performRegister($data, 'O');
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error de validación',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            $this->db->rollBack();
 
-            if (
-                $request->input('tipo') == 'I' ||
-                $request->input('tipo') == 'O' ||
-                $request->input('tipo') == 'S'
-            ) {
-                $request->validate([
-                    'contribution_rate' => 'required',
-                ]);
-            }
+            return response()->json([
+                'success' => false,
+                'message' => 'Error inesperado al procesar el registro.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 
-            if ($request->input('tipo') == 'T') {
-                $request->validate([
-                    'razsoc' => 'required|string|min:5',
-                    'nit' => 'required|integer|digits_between:6,18',
-                ]);
-            }
+    /**
+     * Registrar nuevo usuario en el sistema
+     * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
+     * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    #[Response(status: 201, description: 'Usuario registrado exitosamente')]
+    #[Response(status: 422, description: 'Error de validación')]
+    #[Response(status: 500, description: 'Error interno del servidor')]
+    public function registerFacultativoAction(Request $request)
+    {
+        $this->db->begin();
+        try {
+            $data = $request->all();
+            $request->validate([
+                'coddoc' => 'required|string|min:1',
+                'documento' => 'required|integer|digits_between:6,18',
+                'password' => 'required|string|min:8',
+                'nombre' => 'required|string|min:5',
+                'email' => 'required|email',
+                'telefono' => 'required|integer|digits_between:6,10',
+                'codciu' => 'required|integer|digits:5',
+                'tipo' => 'required|string|min:1',
+            ]);
+            return $this->performRegister($data, 'F');
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error de validación',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            $this->db->rollBack();
 
-            switch ($request->input('tipo')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error inesperado al procesar el registro.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Registrar nuevo usuario en el sistema
+     * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
+     * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    #[Response(status: 201, description: 'Usuario registrado exitosamente')]
+    #[Response(status: 422, description: 'Error de validación')]
+    #[Response(status: 500, description: 'Error interno del servidor')]
+    public function registerDomesticoAction(Request $request)
+    {
+        $this->db->begin();
+        try {
+            $data = $request->all();
+            $request->validate([
+                'coddoc' => 'required|string|min:1',
+                'documento' => 'required|integer|digits_between:6,18',
+                'password' => 'required|string|min:8',
+                'nombre' => 'required|string|min:5',
+                'email' => 'required|email',
+                'telefono' => 'required|integer|digits_between:6,10',
+                'codciu' => 'required|integer|digits:5',
+                'tipo' => 'required|string|min:1',
+                'contribution_rate' => 'required'
+            ]);
+            return $this->performRegister($data, 'S');
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error de validación',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            $this->db->rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error inesperado al procesar el registro.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    private function performRegister($data, ?string $tipo = null)
+    {
+        try {
+            $data['calemp'] = calemp_use_tipo_value($data['selected_user_type']);
+
+            switch ($tipo) {
                 case 'E':
-                    if ($request->input('is_delegado')) {
-                        $request->validate([
-                            'rep_nombre' => 'required|string|min:5',
-                            'rep_documento' => 'required|integer|digits_between:6,18',
-                            'rep_email' => 'required|email',
-                            'rep_telefono' => 'required|integer|digits_between:6,10',
-                            'rep_coddoc' => 'required|string|min:1',
-                            'cargo' => 'required|string|min:5',
-                            'tipdoc' => 'required|string|min:1',
-                            'razsoc' => 'required|string|min:5',
-                            'nit' => 'required|integer|digits_between:6,18',
-                            'tipsoc' => 'required|string|min:1',
-                            'tipper' => 'required|string|min:1',
-                            'is_delegado' => 'required|boolean',
-                        ]);
-                    }
                     $signupEntity = new SignupEmpresas;
                     break;
                 case 'I':
@@ -131,7 +382,7 @@ class AuthMercurioController extends Controller
                     $signupEntity = new SignupPensionados;
                     break;
                 case 'S':
-                    $signupEntity = new SignupDomestico;
+                    $signupEntity = null;
                     break;
                 case 'T':
                 case 'P':
@@ -154,24 +405,15 @@ class AuthMercurioController extends Controller
                 'message' => 'Registro exitoso',
                 'data' => $response,
             ], 201);
-        } catch (ValidationException $e) {
-            $this->db->rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Error de validación',
-                'errors' => $e->errors(),
-            ], 422);
         } catch (DebugException $e) {
             $this->db->rollBack();
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error al crear empresa: ' . $e->getMessage(),
+                'message' => $e->getMessage()
             ], 500);
         }
     }
-
 
     /**
      * Autenticar usuario en el sistema

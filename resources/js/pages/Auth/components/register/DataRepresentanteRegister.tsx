@@ -3,15 +3,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import type { DataDelegado } from "@/types/register.d"
+import type { DataRepresentative } from "@/types/register.d"
 
-const DataRepresentanteRegister: React.FC<DataDelegado> = ({
+const DataRepresentanteRegister: React.FC<DataRepresentative> = ({
   values,
   errors,
   onChange,
   onNextStep,
   onPrevStep,
-  documentTypes
+  documentTypes,
 }) => {
   return (
     <>
@@ -56,7 +56,7 @@ const DataRepresentanteRegister: React.FC<DataDelegado> = ({
           <Label htmlFor="repIdentification" className="text-sm font-medium text-gray-700">Identificación *</Label>
           <Input
             id="repIdentification"
-            type="text"
+            type="number"
             value={values.repIdentification}
             onChange={(e) => onChange("repIdentification", e.target.value)}
             placeholder="Número de documento"
@@ -68,7 +68,7 @@ const DataRepresentanteRegister: React.FC<DataDelegado> = ({
           <Label htmlFor="repPhone" className="text-sm font-medium text-gray-700">Teléfono *</Label>
           <Input
             id="repPhone"
-            type="tel"
+            type="number"
             value={values.repPhone}
             onChange={(e) => onChange("repPhone", e.target.value)}
             placeholder="Teléfono personal"

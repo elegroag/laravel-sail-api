@@ -26,14 +26,7 @@ export interface DataCompany extends BaseFormProps, WithNextStep {
 }
 
 export interface DataRepresentative extends BaseFormProps, WithNextStep, WithPrevStep {
-    isJuridica: boolean;
-    isNatural: boolean;
-    cityOptions: DocumentTypeOption[];
     documentTypes: DocumentTypeOption[];
-    firstNameRef?: React.Ref<HTMLInputElement>;
-    lastNameRef?: React.Ref<HTMLInputElement>;
-    emailRef?: React.Ref<HTMLInputElement>;
-    phoneRef?: React.Ref<HTMLInputElement>;
 }
 
 export interface DataPersonRegister extends BaseFormProps, WithNextStep {
@@ -62,6 +55,7 @@ export interface DataDelegado extends BaseFormProps, WithNextStep, WithPrevStep 
 export interface DataSession extends BaseFormProps, WithPrevStep {
     isJuridicaRepresentative: boolean;
     documentTypes: DocumentTypeOption[];
+    cityOptions: DocumentTypeOption[];
     identificationRef?: React.Ref<HTMLInputElement>;
     passwordRef?: React.Ref<HTMLInputElement>;
     showPassword: boolean;

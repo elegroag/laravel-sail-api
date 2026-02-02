@@ -70,7 +70,10 @@ export class FormEmpresaView extends FormView {
             });
 
             this.selectores.trigger('change');
-            $el.find('#nit, #cedrep').attr('readonly', true);
+
+            $el.find('#nit').attr('readonly', true);
+            if (this.model.get('tipper') === 'N') $el.find('#cedrep').attr('readonly', true);
+
             setTimeout(() => this.form.valid(), 200);
 
             $.each(this.selectores, (index, element) => {

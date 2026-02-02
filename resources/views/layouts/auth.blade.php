@@ -3,13 +3,10 @@
 
 <head>
     <meta charset="UTF-8">
-    @php
-        $path = env('APP_URL').':'.env('APP_PORT');
-    @endphp
     <meta
         name="csrf-token"
         content="{{ csrf_token() }}"
-        path="{{ $path }}"
+        path="{{ config('app.url') }}"
         app="@yield('application')" />
 
     <title>@yield('title')</title>

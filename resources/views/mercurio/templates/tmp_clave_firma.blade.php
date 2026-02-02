@@ -15,18 +15,19 @@
             <ul class="list">
                 <li class="text-muted">Si olvida su clave de firma digital, no podrá firmar documentos electrónicos.</li>
                 <li class="text-muted">Al no tener su clave de firma digital, no podrá realizar solicitudes de afiliación.</li>
+                <li class="text-muted">Se recomienda que use los ultimos 6 digitos de su cédula como clave de firma digital.</li> 
             </ul>
         </div>
         <form id="formClaveFirma" autocomplete="off">
           <div class="mb-3">
-            <label class="form-label w-100 text-center">Clave (6 dígitos)</label>
+            <label class="form-label w-100 text-center">Nueva Clave (6 dígitos)</label>
             <div class="d-flex justify-content-center align-items-center gap-2">
-              <input class="form-control text-center digit-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Dígito 1" />
-              <input class="form-control text-center digit-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Dígito 2" />
-              <input class="form-control text-center digit-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Dígito 3" />
-              <input class="form-control text-center digit-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Dígito 4" />
-              <input class="form-control text-center digit-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Dígito 5" />
-              <input class="form-control text-center digit-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Dígito 6" />
+              <input class="form-control text-center digit-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Dígito 1" />
+              <input class="form-control text-center digit-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Dígito 2" />
+              <input class="form-control text-center digit-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Dígito 3" />
+              <input class="form-control text-center digit-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Dígito 4" />
+              <input class="form-control text-center digit-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Dígito 5" />
+              <input class="form-control text-center digit-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Dígito 6" />
             </div>
             <div class="form-text text-center mt-2">Debe contener exactamente 6 números.</div>
           </div>
@@ -53,5 +54,11 @@
     .digit-input:focus {
         border-color: #86c1ff;
         box-shadow: 0 0 0 0.2rem rgba(134, 193, 255, 0.1);
+    }
+
+    .text-muted{
+      font-size: 0.875rem;
+      line-height: 1.5;
+      color: #6c757d;
     }
 </style>

@@ -155,7 +155,6 @@ export default function CompanyRegisterForm({
             onNextStep={onNextStep}
             onPrevStep={onPrevStep}
             documentTypes={documentTypes}
-            cityOptions={cityOptions}
           />
         )}
 
@@ -185,6 +184,7 @@ export default function CompanyRegisterForm({
             onPrevStep={onPrevStep}
             isJuridicaRepresentative={isJuridicaRepresentative}
             documentTypes={documentTypes}
+            cityOptions={cityOptions}
             identificationRef={identificationRef}
             passwordRef={passwordRef}
             showPassword={showPassword}

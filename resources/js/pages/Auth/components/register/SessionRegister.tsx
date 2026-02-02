@@ -15,6 +15,7 @@ const SessionRegister: React.FC<DataSession> = ({
     onPrevStep,
     isJuridicaRepresentative,
     documentTypes,
+    cityOptions,
     identificationRef,
     passwordRef,
     showPassword,
@@ -63,6 +64,27 @@ const SessionRegister: React.FC<DataSession> = ({
             className={`in-b-form mt-1 ${errors.identification ? "border-red-500" : ""}`}
           />
           {errors.identification && <p className="text-red-500 text-xs mt-1">{errors.identification}</p>}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4">
+        <div>
+          <Label htmlFor="city" className="text-sm font-medium text-gray-700">
+            Ciudad *
+          </Label>
+          <Select value={values.city} onValueChange={(v) => onChange("city", v)}>
+            <SelectTrigger className={`in-b-form mt-1 ${errors.city ? "border-red-500" : ""}`}>
+              <SelectValue placeholder="Selecciona la ciudad" />
+            </SelectTrigger>
+            <SelectContent>
+              {cityOptions.map((city: DocumentTypeOption) => (
+                <SelectItem key={city.value} value={city.value}>
+                  {city.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
         </div>
       </div>
       <div className="grid grid-cols-2 gap-4">

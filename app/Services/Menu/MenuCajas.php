@@ -33,7 +33,7 @@ class MenuCajas
     private function initialize()
     {
         $this->menuItems = '';
-        $this->path = env('APP_URL') . ':' . env('APP_PORT');
+        $this->path = config('app.url');
     }
 
     private function getMenuItems($parentId)

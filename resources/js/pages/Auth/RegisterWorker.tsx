@@ -1,0 +1,139 @@
+import AuthLayout from "@/layouts/AuthLayoutTemplate";
+import AuthWelcome from "@/pages/Auth/components/generic/AuthWelcome";
+import PersonRegisterForm from "@/pages/Auth/components/register/DatosPersonalesRegister";
+import { userTypes } from "@/constants/auth";
+import type { FormState, LoginProps } from "@/types/auth";
+import AuthBackgroundShapes from "@/components/ui/auth-background-shapes";
+import useRegisterController from "@/pages/Auth/hooks/useRegisterController";
+import { useEffect } from "react";
+import { router } from "@inertiajs/react";
+
+export default function RegisterWorker(props: LoginProps) {
+  const {
+    dispatch,
+    state,
+    collections,
+    events,
+    domRef,
+    toast,
+    setToast,
+    step,
+  } = useRegisterController(props);
+
+  useEffect(() => {
+    if (state.selectedUserType !== "trabajador") {
+      events.handleUserTypeSelect("trabajador");
+    }
+    // Solo se requiere ejecutar al montar
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <>
+      <AuthLayout
+        title="REGISTRO COMFACA EN LÍNEA"
+        description="Crea tu cuenta para acceder a todos los servicios y beneficios que Comfaca tiene para ofrecerte. Un proceso simple y seguro para comenzar tu experiencia."
+      >
+        <div
+          id="welcome"
+          className="lg:w-1/2 bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-700 text-white p-12 flex flex-col justify-center relative overflow-hidden"
+        >
+          <AuthWelcome
+            title="REGISTRO"
+            tagline="Únete a Comfaca En Línea"
+            description={
+              <p>
+                Cree su cuenta y acceda a COMFACA de forma segura y eficiente para la gestión de sus trámites y
+                servicios.
+              </p>
+            }
+            backHref={route("register")}
+            backText="Volver a selección de tipo de usuario"
+          />
+        </div>
+
+        <div
+          id="register"
+          className="p-8 flex flex-col justify-center relative overflow-y-auto max-h-[700px] transition-all duration-500 ease-in-out lg:w-full"
+        >
+          <AuthBackgroundShapes />
+          <div className="max-w-xl mx-auto w-full">
+            <PersonRegisterForm
+              userTypeLabel={userTypes.find((ut) => ut.id === "trabajador")?.label || ""}
+              values={{
+                documentType: state.documentType,
+                identification: state.identification,
+                firstName: state.firstName,
+                lastName: state.lastName,
+                email: state.email,
+                phone: state.phone,
+                password: state.password,
+                confirmPassword: state.confirmPassword,
+                companyName: state.companyName,
+                companyNit: state.companyNit,
+                address: state.address,
+                city: state.city,
+                societyType: state.societyType,
+                companyCategory: state.companyCategory,
+                userRole: state.userRole,
+                position: state.position,
+                repName: state.repName,
+                repIdentification: state.repIdentification,
+                repEmail: state.repEmail,
+                repPhone: state.repPhone,
+                contributionRate: state.contributionRate,
+                documentTypeUser: state.documentTypeUser,
+                documentTypeRep: state.documentTypeRep,
+              }}
+              errors={state.errors}
+              isSubmitting={state.isSubmitting}
+              documentTypes={collections.documentTypeOptions}
+              cityOptions={collections.cityOptions}
+              societyOptions={collections.societyOptions}
+              categoryOptions={collections.companyCategoryOptions}
+              isWorkerType={true}
+              isIndependentType={false}
+              isPensionerType={false}
+              onBack={() => {
+                // En esta pantalla, "volver" regresa a la selección de tipo de usuario
+                router.visit(route("register"));
+              }}
+              onChange={(field, value) =>
+                dispatch({ type: "SET_FIELD", field: field as keyof FormState, value })
+              }
+              onSubmit={events.handleRegister}
+              step={step}
+              onNextStep={events.handleNextStep}
+              onPrevStep={events.handlePrevStep}
+              firstNameRef={domRef.firstNameRef}
+              lastNameRef={domRef.lastNameRef}
+              emailRef={domRef.emailRef}
+              phoneRef={domRef.phoneRef}
+              identificationRef={domRef.identificationRef}
+              passwordRef={domRef.passwordRef}
+              confirmPasswordRef={domRef.confirmPasswordRef}
+              companyNameRef={domRef.companyNameRef}
+              companyNitRef={domRef.companyNitRef}
+              addressRef={domRef.addressRef}
+            />
+          </div>
+        </div>
+      </AuthLayout>
+
+      {toast && (
+        <div
+          className={`fixed bottom-4 right-4 z-50 min-w-[260px] max-w-[360px] px-4 py-3 rounded shadow-lg text-sm transition-all ${toast.type === "success" ? "bg-emerald-600 text-white" : "bg-red-600 text-white"}`}
+        >
+          {toast.message}
+          <button
+            type="button"
+            className="ml-3 underline text-white/90 hover:text-white"
+            onClick={() => setToast(null)}
+          >
+            Cerrar
+          </button>
+        </div>
+      )}
+    </>
+  );
+}

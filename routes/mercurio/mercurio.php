@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/web/login', [AuthController::class, 'index'])->name('login');
 Route::post('/web/login', [AuthController::class, 'authenticate'])->name('login.authenticate');
 Route::get('/web/register', [AuthController::class, 'register'])->name('register');
+Route::get('/web/register/company', [AuthController::class, 'registerCompany'])->name('register.company');
+Route::get('/web/register/worker', [AuthController::class, 'registerWorker'])->name('register.worker');
+
 Route::get('/web/password/request', [AuthController::class, 'resetPassword'])->name('password.request');
 Route::get('/web/verify/{tipo}/{coddoc}/{documento}/{option_request?}', [AuthController::class, 'verifyShow'])->name('verify.show');
 Route::post('/web/verify', [AuthController::class, 'verify'])->name('verify.request');

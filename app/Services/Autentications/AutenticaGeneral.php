@@ -2,8 +2,11 @@
 
 namespace App\Services\Autentications;
 
+use App\Models\Gener09;
+use App\Models\Gener18;
 use App\Models\Mercurio01;
 use App\Models\Mercurio02;
+use App\Models\Subsi54;
 use App\Services\Api\ApiSubsidio;
 use App\Services\Utils\Generales;
 use App\Services\Utils\SenderEmail;
@@ -198,5 +201,48 @@ class AutenticaGeneral
     public function getEstadoAfiliado()
     {
         return $this->estadoAfiliado;
+    }
+
+
+    /**
+     * Obtiene los parámetros necesarios para la autenticación
+     *
+     * @return array
+     */
+    public function paramsAuthentication()
+    {
+        $tipsoc = [];
+        $coddoc = [];
+        $detadoc = [];
+        $codciu = [];
+
+        foreach (Subsi54::all() as $entity) {
+            $tipsoc["{$entity->getTipsoc()}"] = $entity->getDetalle();
+        }
+
+        foreach (Gener18::all() as $entity) {
+            if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') {
+                continue;
+            }
+            $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
+        }
+
+        foreach (Gener18::all() as $entity) {
+            if ($entity->getCodrua() == 'TI' || $entity->getCodrua() == 'RC') {
+                continue;
+            }
+            $detadoc["{$entity->getCodrua()}"] = $entity->getDetdoc();
+        }
+
+        foreach (Gener09::where('codzon', '>=', 18000)->where('codzon', '<=', 19000)->get() as $entity) {
+            $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
+        }
+
+        return [
+            'Coddoc' => $coddoc,
+            'Tipsoc' => $tipsoc,
+            'Codciu' => $codciu,
+            'Detadoc' => $detadoc,
+        ];
     }
 }

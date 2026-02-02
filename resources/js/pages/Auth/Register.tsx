@@ -1,13 +1,13 @@
 import AuthLayout from "@/layouts/AuthLayoutTemplate";
 import AuthWelcome from "@/pages/Auth/components/generic/AuthWelcome";
 import AuthUserTypeSelector from "@/pages/Auth/components/generic/AuthUserTypeSelector";
-import CompanyRegisterForm from "@/pages/Auth/components/register/CompanyRegisterForm";
 import PersonRegisterForm from "@/pages/Auth/components/register/DatosPersonalesRegister";
 import imageLogo from "@/assets/comfaca-logo.png";
 import { userTypes } from "@/constants/auth";
 import type { FormState, LoginProps} from "@/types/auth";
 import AuthBackgroundShapes from "@/components/ui/auth-background-shapes";
 import useRegisterController from "@/pages/Auth/hooks/useRegisterController";
+import { router } from "@inertiajs/react";
 
 export default function Register(props: LoginProps){
 
@@ -48,119 +48,74 @@ export default function Register(props: LoginProps){
               logoSrc={imageLogo}
               logoAlt="Comfaca Logo"
               userTypes={userTypes}
-              onSelect={(id) => events.handleUserTypeSelect(id)}
+              onSelect={(id) => {
+                if (id === 'empresa') {
+                  router.visit(route('register.company'))
+                  return
+                }
+                if (id === 'trabajador') {
+                  router.visit(route('register.worker'))
+                  return
+                }
+                events.handleUserTypeSelect(id)
+              }}
             />
           ) : (
-            state.selectedUserType === 'empresa' ? (
-              <CompanyRegisterForm
-                userTypeLabel={userTypes.find((ut) => ut.id === state.selectedUserType)?.label || ""}
-                values={{
-                  documentType: state.documentType,
-                  identification: state.identification,
-                  firstName: state.firstName,
-                  lastName: state.lastName,
-                  email: state.email,
-                  phone: state.phone,
-                  password: state.password,
-                  confirmPassword: state.confirmPassword,
-                  companyName: state.companyName,
-                  companyNit: state.companyNit,
-                  address: state.address,
-                  city: state.city,
-                  societyType: state.societyType,
-                  companyCategory: state.companyCategory,
-                  userRole: state.userRole,
-                  position: state.position,
-                  contributionRate: state.contributionRate,
-                  repName: state.repName,
-                  repIdentification: state.repIdentification,
-                  repEmail: state.repEmail,
-                  repPhone: state.repPhone,
-                  documentTypeUser: state.documentTypeUser,
-                  documentTypeRep: state.documentTypeRep
-                }}
-                errors={state.errors}
-                isSubmitting={state.isSubmitting}
-                documentTypes={collections.documentTypeOptions}
-                cityOptions={collections.cityOptions}
-                societyOptions={collections.societyOptions}
-                categoryOptions={collections.companyCategoryOptions}
-                onBack={events.handleBack}
-                onChange={(field, value) =>
-                  dispatch({ type: "SET_FIELD", field: field as keyof FormState, value })
-                }
-                onSubmit={events.handleRegister}
-                step={step}
-                onNextStep={events.handleNextStep}
-                onPrevStep={events.handlePrevStep}
-                firstNameRef={domRef.firstNameRef}
-                lastNameRef={domRef.lastNameRef}
-                emailRef={domRef.emailRef}
-                phoneRef={domRef.phoneRef}
-                identificationRef={domRef.identificationRef}
-                passwordRef={domRef.passwordRef}
-                confirmPasswordRef={domRef.confirmPasswordRef}
-                companyNameRef={domRef.companyNameRef}
-                companyNitRef={domRef.companyNitRef}
-                addressRef={domRef.addressRef}
-              />
-            ) : (
-              <PersonRegisterForm
-                userTypeLabel={userTypes.find((ut) => ut.id === state.selectedUserType)?.label || ""}
-                values={{
-                  documentType: state.documentType,
-                  identification: state.identification,
-                  firstName: state.firstName,
-                  lastName: state.lastName,
-                  email: state.email,
-                  phone: state.phone,
-                  password: state.password,
-                  confirmPassword: state.confirmPassword,
-                  companyName: state.companyName,
-                  companyNit: state.companyNit,
-                  address: state.address,
-                  city: state.city,
-                  societyType: state.societyType,
-                  companyCategory: state.companyCategory,
-                  userRole: state.userRole,
-                  position: state.position,
-                  repName: state.repName,
-                  repIdentification: state.repIdentification,
-                  repEmail: state.repEmail,
-                  repPhone: state.repPhone,
-                  contributionRate: state.contributionRate,
-                  documentTypeUser: state.documentTypeUser,
-                  documentTypeRep: state.documentTypeRep
-                }}
-                errors={state.errors}
-                isSubmitting={state.isSubmitting}
-                documentTypes={collections.documentTypeOptions}
-                cityOptions={collections.cityOptions}
-                societyOptions={collections.societyOptions}
-                categoryOptions={collections.companyCategoryOptions}
-                isWorkerType={state.selectedUserType === 'trabajador'}
-                isIndependentType={state.selectedUserType === 'independiente'}
-                isPensionerType={state.selectedUserType === 'pensionado'}
-                onBack={events.handleBack}
-                onChange={(field, value) =>
-                  dispatch({ type: "SET_FIELD", field: field as keyof FormState, value })
-                }
-                onSubmit={events.handleRegister}
-                step={step}
-                onNextStep={events.handleNextStep}
-                onPrevStep={events.handlePrevStep}
-                firstNameRef={domRef.firstNameRef}
-                lastNameRef={domRef.lastNameRef}
-                emailRef={domRef.emailRef}
-                phoneRef={domRef.phoneRef}
-                identificationRef={domRef.identificationRef}
-                passwordRef={domRef.passwordRef}
-                confirmPasswordRef={domRef.confirmPasswordRef}
-                companyNameRef={domRef.companyNameRef}
-                companyNitRef={domRef.companyNitRef}
-                addressRef={domRef.addressRef}
-              />
-            )
+            <PersonRegisterForm
+              userTypeLabel={userTypes.find((ut) => ut.id === state.selectedUserType)?.label || ""}
+              values={{
+                documentType: state.documentType,
+                identification: state.identification,
+                firstName: state.firstName,
+                lastName: state.lastName,
+                email: state.email,
+                phone: state.phone,
+                password: state.password,
+                confirmPassword: state.confirmPassword,
+                companyName: state.companyName,
+                companyNit: state.companyNit,
+                address: state.address,
+                city: state.city,
+                societyType: state.societyType,
+                companyCategory: state.companyCategory,
+                userRole: state.userRole,
+                position: state.position,
+                repName: state.repName,
+                repIdentification: state.repIdentification,
+                repEmail: state.repEmail,
+                repPhone: state.repPhone,
+                contributionRate: state.contributionRate,
+                documentTypeUser: state.documentTypeUser,
+                documentTypeRep: state.documentTypeRep
+              }}
+              errors={state.errors}
+              isSubmitting={state.isSubmitting}
+              documentTypes={collections.documentTypeOptions}
+              cityOptions={collections.cityOptions}
+              societyOptions={collections.societyOptions}
+              categoryOptions={collections.companyCategoryOptions}
+              isWorkerType={state.selectedUserType === 'trabajador'}
+              isIndependentType={state.selectedUserType === 'independiente'}
+              isPensionerType={state.selectedUserType === 'pensionado'}
+              onBack={events.handleBack}
+              onChange={(field, value) =>
+                dispatch({ type: "SET_FIELD", field: field as keyof FormState, value })
+              }
+              onSubmit={events.handleRegister}
+              step={step}
+              onNextStep={events.handleNextStep}
+              onPrevStep={events.handlePrevStep}
+              firstNameRef={domRef.firstNameRef}
+              lastNameRef={domRef.lastNameRef}
+              emailRef={domRef.emailRef}
+              phoneRef={domRef.phoneRef}
+              identificationRef={domRef.identificationRef}
+              passwordRef={domRef.passwordRef}
+              confirmPasswordRef={domRef.confirmPasswordRef}
+              companyNameRef={domRef.companyNameRef}
+              companyNitRef={domRef.companyNitRef}
+              addressRef={domRef.addressRef}
+            />
           )}
         </div>
       </div>

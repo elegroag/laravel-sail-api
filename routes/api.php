@@ -10,6 +10,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('authenticate', [AuthMercurioController::class, 'authenticateAction'])->name('api.authenticate');
 Route::post('register', [AuthMercurioController::class, 'registerAction'])->name('api.register');
+Route::post('register/empresa', [AuthMercurioController::class, 'registerEmpresaAction'])->name('api.register.empresa');
+Route::post('register/trabajador', [AuthMercurioController::class, 'registerTrabajadorAction'])->name('api.register.trabajador');
+Route::post('register/particular', [AuthMercurioController::class, 'registerParticularAction'])->name('api.register.particular');
+Route::post('register/independiente', [AuthMercurioController::class, 'registerIndependienteAction'])->name('api.register.independiente');
+Route::post('register/pensionado', [AuthMercurioController::class, 'registerPensionadoAction'])->name('api.register.pensionado');
+Route::post('register/facultativo', [AuthMercurioController::class, 'registerFacultativoAction'])->name('api.register.facultativo');
+Route::post('register/domestico', [AuthMercurioController::class, 'registerDomesticoAction'])->name('api.register.domestico');
 Route::post('verify_store', [AuthMercurioController::class, 'verifyStore'])->name('api.verify_store');
 Route::post('recovery_send', [AuthMercurioController::class, 'recoverySend'])->name('api.recovery_send');
 

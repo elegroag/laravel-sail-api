@@ -117,6 +117,11 @@ const $App = {
         const { url, data = {}, callback, silent = false } = transfer;
         const csrf = document.querySelector("[name='csrf-token']").getAttribute('content');
 
+        if (!url) {
+            console.error('URL is required');
+            return;
+        }
+
         Backbone.ajax({
             type: 'POST',
             dataType: 'json',
@@ -136,8 +141,7 @@ const $App = {
             },
             success: (response, textStatus, jqXHR) => {
                 if (silent == false) loading.hide();
-                console.log('Status Text:', textStatus);
-                console.log('HTTP Status Code:', jqXHR.status);
+
                 if (jqXHR.status >= 200 && jqXHR.status <= 210) {
                     return callback(response);
                 } else {
@@ -146,9 +150,9 @@ const $App = {
             },
             error: (err, textStatus, jqXHR) => {
                 if (silent == false) loading.hide();
-                console.log('Status Text:', textStatus);
                 console.log('HTTP Status Code:', jqXHR.status);
                 console.log('Response Text:', jqXHR.responseText);
+
                 if (jqXHR.status > 210) {
                     this.trigger('alert:error', { message: jqXHR.responseText });
                 } else {
@@ -200,7 +204,6 @@ const $App = {
             },
         })
             .done((response, textStatus, jqXHR) => {
-                console.log(response);
                 if (silent == false) loading.hide();
                 if (jqXHR.status >= 200 && jqXHR.status <= 210) {
                     return callback(response);

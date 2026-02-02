@@ -324,7 +324,8 @@ export default function PersonRegisterForm({
             onChange={onChange}
             onPrevStep={onPrevStep}
             isJuridicaRepresentative={isJuridicaRepresentative}
-            filteredDocumentTypes={documentTypes}
+            documentTypes={documentTypes}
+            cityOptions={cityOptions}
             identificationRef={identificationRef}
             passwordRef={passwordRef}
             showPassword={showPassword}

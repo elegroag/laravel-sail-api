@@ -16,6 +16,7 @@ use App\Services\Autentications\AutenticaService;
 use App\Services\Srequest;
 use App\Services\Utils\SenderEmail;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Autentications\AutenticaGeneral;
 use App\Services\CajaServices\NotificacionService;
 use App\Services\Utils\AsignarFuncionario;
 use Carbon\Carbon;
@@ -33,39 +34,17 @@ class AuthController extends Controller
 
     public function register()
     {
-        $tipsoc = [];
-        $coddoc = [];
-        $detadoc = [];
-        $codciu = [];
+        return Inertia::render('Auth/Register', (new AutenticaGeneral)->paramsAuthentication());
+    }
 
-        foreach (Subsi54::all() as $entity) {
-            $tipsoc["{$entity->getTipsoc()}"] = $entity->getDetalle();
-        }
+    public function registerCompany()
+    {
+        return Inertia::render('Auth/RegisterCompany', (new AutenticaGeneral)->paramsAuthentication());
+    }
 
-        foreach (Gener18::all() as $entity) {
-            if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') {
-                continue;
-            }
-            $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
-        }
-
-        foreach (Gener18::all() as $entity) {
-            if ($entity->getCodrua() == 'TI' || $entity->getCodrua() == 'RC') {
-                continue;
-            }
-            $detadoc["{$entity->getCodrua()}"] = $entity->getDetdoc();
-        }
-
-        foreach (Gener09::where('codzon', '>=', 18000)->where('codzon', '<=', 19000)->get() as $entity) {
-            $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
-        }
-
-        return Inertia::render('Auth/Register', [
-            'Coddoc' => $coddoc,
-            'Tipsoc' => $tipsoc,
-            'Codciu' => $codciu,
-            'Detadoc' => $detadoc,
-        ]);
+    public function registerWorker()
+    {
+        return Inertia::render('Auth/RegisterWorker', (new AutenticaGeneral)->paramsAuthentication());
     }
 
     public function resetPassword()
@@ -621,7 +600,6 @@ class AuthController extends Controller
     public function logout()
     {
         SessionCookies::destroyIdentity();
-
         return redirect()->to('web/login');
     }
 }
