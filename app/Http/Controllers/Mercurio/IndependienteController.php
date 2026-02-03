@@ -552,26 +552,17 @@ class IndependienteController extends ApplicationController
             $independienteService = new IndependienteService;
             $independienteService->paramsApi();
 
-            $mtipafi = ParamsTrabajador::getTipoAfiliado();
-            $tipo_afiliados = [];
-            foreach ($mtipafi as $key => $tipo) {
-                if ($key == '3' || $key == '65' || $key == '68') {
-                    $tipo_afiliados[$key] = $tipo;
-                }
-            }
-
-            $coddoc = $tipoDocumentos;
             $data = [
                 'codzon' => ParamsIndependiente::getZonas(),
                 'codact' => ParamsIndependiente::getActividades(),
                 'tipemp' => ParamsIndependiente::getTipoEmpresa(),
                 'codcaj' => ParamsIndependiente::getCodigoCajas(),
                 'ciupri' => ParamsIndependiente::getCiudades(),
-                'resguardo_id' => ParamsTrabajador::getResguardos(),
-                'pub_indigena_id' => ParamsTrabajador::getPueblosIndigenas(),
-                'codban' => ParamsTrabajador::getBancos(),
+                'resguardo_id' => ParamsIndependiente::getResguardos(),
+                'pub_indigena_id' => ParamsIndependiente::getPueblosIndigenas(),
+                'codban' => ParamsIndependiente::getBancos(),
                 'ciunac' => ParamsIndependiente::getCiudades(),
-                'cargo' => ParamsTrabajador::getOcupaciones(),
+                'cargo' => ParamsIndependiente::getOcupaciones(),
                 'tipdoc' => $coddoc,
                 'tipper' => tipper_array(),
                 'tipsoc' => $tipsoc,
@@ -584,14 +575,13 @@ class IndependienteController extends ApplicationController
                 'nivedu' => nivel_educativo_array(),
                 'tipcon' => tipo_contrato(),
                 'vivienda' => vivienda_array(),
-                'tipafi' => $tipo_afiliados,
+                'tipafi' =>  ParamsIndependiente::getTipoAfiliado(),
                 'orisex' => orientacion_sexual_array(),
                 'facvul' => vulnerabilidades_array(),
                 'peretn' => pertenencia_etnica_array(),
                 'tippag' => tipo_pago_array(),
                 'tipsal' => tipsal_array(),
                 'tipcue' => tipo_cuenta_array(),
-
                 'empleador' => condicionSN(),
                 'giro' => condicionSN(),
                 'vendedor' => condicionSN(),

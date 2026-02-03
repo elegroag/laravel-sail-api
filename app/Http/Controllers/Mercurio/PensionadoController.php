@@ -511,14 +511,6 @@ class PensionadoController extends ApplicationController
             $pensionadoService = new PensionadoService;
             $pensionadoService->paramsApi();
 
-            $mtipafi = ParamsTrabajador::getTipoAfiliado();
-            $tipo_afiliados = [];
-            foreach ($mtipafi as $key => $tipo) {
-                if ($key == '10' || $key == '64' || $key == '66' || $key == '67') {
-                    $tipo_afiliados[$key] = $tipo;
-                }
-            }
-
             $coddoc = $tipoDocumentos;
             $data = [
                 'tipdoc' => $coddoc,
@@ -538,16 +530,16 @@ class PensionadoController extends ApplicationController
                 'nivedu' => nivel_educativo_array(),
                 'tipcon' => tipo_contrato(),
                 'vivienda' => vivienda_array(),
-                'tipafi' => $tipo_afiliados,
-                'cargo' => ParamsTrabajador::getOcupaciones(),
+                'tipafi' =>  ParamsPensionado::getTipoAfiliado(),
+                'cargo' => ParamsPensionado::getOcupaciones(),
                 'orisex' => orientacion_sexual_array(),
                 'facvul' => vulnerabilidades_array(),
                 'peretn' => pertenencia_etnica_array(),
                 'ciunac' => ParamsPensionado::getCiudades(),
                 'tippag' => tipo_pago_array(),
-                'resguardo_id' => ParamsTrabajador::getResguardos(),
-                'pub_indigena_id' => ParamsTrabajador::getPueblosIndigenas(),
-                'codban' => ParamsTrabajador::getBancos(),
+                'resguardo_id' => ParamsPensionado::getResguardos(),
+                'pub_indigena_id' => ParamsPensionado::getPueblosIndigenas(),
+                'codban' => ParamsPensionado::getBancos(),
                 'tipsal' => tipsal_array(),
                 'tipcue' => tipo_cuenta_array(),
                 'empleador' => condicionSN(),

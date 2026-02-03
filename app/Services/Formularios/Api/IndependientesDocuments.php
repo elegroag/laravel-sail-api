@@ -3,7 +3,6 @@
 namespace App\Services\Formularios\Api;
 
 use App\Library\Collections\ParamsIndependiente;
-use App\Library\Collections\ParamsTrabajador;
 use App\Models\Gener18;
 use App\Services\Api\ApiPython;
 use Carbon\Carbon;
@@ -24,8 +23,8 @@ class IndependientesDocuments
         $ciudades = ParamsIndependiente::getCiudades();
         $zonas = ParamsIndependiente::getZonas();
         $actividades = ParamsIndependiente::getActividades();
-        $bancos = ParamsTrabajador::getBancos();
-        $ocupaciones = ParamsTrabajador::getOcupaciones();
+        $bancos = ParamsIndependiente::getBancos();
+        $ocupaciones = ParamsIndependiente::getOcupaciones();
 
         $nivel_educativo = nivel_educativo_array();
         $estado_civil = estados_civiles_array();

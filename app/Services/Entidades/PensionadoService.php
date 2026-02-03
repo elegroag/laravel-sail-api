@@ -364,26 +364,9 @@ class PensionadoService
     public function paramsApi()
     {
         $procesadorComando = new ApiSubsidio();
-        $procesadorComando->send(
-            [
-                'servicio' => 'ComfacaAfilia',
-                'metodo' => 'parametros_empresa',
-            ]
-        );
-
+        $procesadorComando->send(['servicio' => 'ComfacaAfilia', 'metodo' => 'parametros_pensionado']);
         $paramsPensionado = new ParamsPensionado;
         $paramsPensionado->setDatosCaptura($procesadorComando->toArray());
-
-        $procesadorComando = new ApiSubsidio();
-        $procesadorComando->send(
-            [
-                'servicio' => 'ComfacaAfilia',
-                'metodo' => 'parametros_trabajadores',
-            ]
-        );
-
-        $paramsTrabajador = new ParamsTrabajador;
-        $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
     }
 
     public function buscarTrabajadorSubsidio($cedtra)

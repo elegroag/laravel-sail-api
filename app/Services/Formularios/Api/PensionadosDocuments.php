@@ -23,9 +23,9 @@ class PensionadosDocuments
         $ciudades = ParamsPensionado::getCiudades();
         $zonas = ParamsPensionado::getZonas();
         $departamentos = ParamsPensionado::getDepartamentos();
-        $codigo_giro = ParamsTrabajador::getCodigoGiro();
-        $bancos = ParamsTrabajador::getBancos();
-        $ocupaciones = ParamsTrabajador::getOcupaciones();
+        $codigo_giro = ParamsPensionado::getCodigoGiro();
+        $bancos = ParamsPensionado::getBancos();
+        $ocupaciones = ParamsPensionado::getOcupaciones();
 
         $tipo_pago = tipo_pago_array();
         $tipo_cuenta = tipo_cuenta_array();

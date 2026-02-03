@@ -58,6 +58,52 @@ class ParamsPensionado
 
     public static $codigo_giro;
 
+    public static $tipo_afiliado;
+
+    public static $ocupaciones;
+
+    public static $resguardos;
+
+    public static $pueblos_indigenas;
+
+
+    public static function getOcupaciones()
+    {
+        foreach (self::$datos_captura['ocupaciones'] as $data) {
+            self::$ocupaciones["{$data['codocu']}"] = $data['codocu'] . ' ' . $data['detalle'];
+        }
+
+        return self::$ocupaciones;
+    }
+
+    public static function getResguardos()
+    {
+        foreach (self::$datos_captura['resguardos'] as $data) {
+            self::$resguardos[$data['id']] = $data['detalle'];
+        }
+
+        return self::$resguardos;
+    }
+
+    public static function getPueblosIndigenas()
+    {
+        foreach (self::$datos_captura['pueblos_indigenas'] as $data) {
+            self::$pueblos_indigenas[$data['id']] = $data['detalle'];
+        }
+
+        return self::$pueblos_indigenas;
+    }
+
+
+
+    public static function getTipoAfiliado()
+    {
+        foreach (self::$datos_captura['tipo_cotizantes'] as $data) {
+            self::$tipo_afiliado[$data['tipcot']] = $data['detalle'];
+        }
+        return self::$tipo_afiliado;
+    }
+
     public static function getGiro()
     {
         foreach (self::$datos_captura['giro'] as $data) {
@@ -183,7 +229,7 @@ class ParamsPensionado
     public static function getZonas()
     {
         foreach (self::$datos_captura['zonas'] as $data) {
-            self::$zonas[$data['codzon']] = $data['codzon'].' '.$data['detzon'];
+            self::$zonas[$data['codzon']] = $data['codzon'] . ' ' . $data['detzon'];
         }
 
         return self::$zonas;
@@ -246,7 +292,7 @@ class ParamsPensionado
     public static function getActividades()
     {
         foreach (self::$datos_captura['actividades'] as $data) {
-            self::$actividades["{$data['codact']}"] = $data['codact'].' '.$data['detalle'];
+            self::$actividades["{$data['codact']}"] = $data['codact'] . ' ' . $data['detalle'];
         }
 
         return self::$actividades;

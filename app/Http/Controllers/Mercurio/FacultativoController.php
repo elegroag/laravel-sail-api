@@ -530,25 +530,18 @@ class FacultativoController extends ApplicationController
             $paramsTrabajador = new ParamsTrabajador;
             $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
 
-            $mtipafi = ParamsTrabajador::getTipoAfiliado();
-            $tipo_afiliados = [];
-            foreach ($mtipafi as $key => $tipo) {
-                if ($key == '63') {
-                    $tipo_afiliados[$key] = $tipo;
-                }
-            }
 
             $data = [
-                'resguardo_id' => ParamsTrabajador::getResguardos(),
-                'pub_indigena_id' => ParamsTrabajador::getPueblosIndigenas(),
-                'codban' => ParamsTrabajador::getBancos(),
+                'resguardo_id' => ParamsFacultativo::getResguardos(),
+                'pub_indigena_id' => ParamsFacultativo::getPueblosIndigenas(),
+                'codban' => ParamsFacultativo::getBancos(),
                 'codzon' => ParamsFacultativo::getZonas(),
                 'codact' => ParamsFacultativo::getActividades(),
                 'tipemp' => ParamsFacultativo::getTipoEmpresa(),
                 'codcaj' => ParamsFacultativo::getCodigoCajas(),
                 'ciupri' => ParamsFacultativo::getCiudades(),
-                'tipcon' => ParamsTrabajador::getTipoContrato(),
-                'cargo' => ParamsTrabajador::getOcupaciones(),
+                'tipcon' => ParamsFacultativo::getTipoContrato(),
+                'cargo' => ParamsFacultativo::getOcupaciones(),
                 'ciunac' => ParamsFacultativo::getCiudades(),
                 'tipdoc' => $tipoDocumentos,
                 'tipper' => tipper_array(),
@@ -561,7 +554,7 @@ class FacultativoController extends ApplicationController
                 'tipdis' => tipo_discapacidad_array(),
                 'nivedu' => nivel_educativo_array(),
                 'vivienda' => vivienda_array(),
-                'tipafi' => $tipo_afiliados,
+                'tipafi' => ParamsFacultativo::getTipoAfiliado(),
                 'orisex' => orientacion_sexual_array(),
                 'facvul' => vulnerabilidades_array(),
                 'peretn' => pertenencia_etnica_array(),

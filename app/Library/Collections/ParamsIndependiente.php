@@ -70,10 +70,35 @@ class ParamsIndependiente
 
     public static $codigo_giro;
 
+    public static $resguardos;
+
+    public static $pueblos_indigenas;
+
     public function setDatosCaptura($datos_captura)
     {
         self::$datos_captura = $datos_captura;
     }
+
+
+    public static function getResguardos()
+    {
+        foreach (self::$datos_captura['resguardos'] as $data) {
+            self::$resguardos[$data['id']] = $data['detalle'];
+        }
+
+        return self::$resguardos;
+    }
+
+    public static function getPueblosIndigenas()
+    {
+        foreach (self::$datos_captura['pueblos_indigenas'] as $data) {
+            self::$pueblos_indigenas[$data['id']] = $data['detalle'];
+        }
+
+        return self::$pueblos_indigenas;
+    }
+
+
 
     public static function getNivelEducativo()
     {
@@ -114,7 +139,7 @@ class ParamsIndependiente
     public static function getOcupaciones()
     {
         foreach (self::$datos_captura['ocupaciones'] as $data) {
-            self::$ocupaciones["{$data['codocu']}"] = $data['codocu'].' '.$data['detalle'];
+            self::$ocupaciones["{$data['codocu']}"] = $data['codocu'] . ' ' . $data['detalle'];
         }
 
         return self::$ocupaciones;
@@ -204,7 +229,7 @@ class ParamsIndependiente
     public static function getZonas()
     {
         foreach (self::$datos_captura['zonas'] as $data) {
-            self::$zonas[$data['codzon']] = $data['codzon'].' '.$data['detzon'];
+            self::$zonas[$data['codzon']] = $data['codzon'] . ' ' . $data['detzon'];
         }
 
         return self::$zonas;
@@ -276,7 +301,7 @@ class ParamsIndependiente
     public static function getActividades()
     {
         foreach (self::$datos_captura['actividades'] as $data) {
-            self::$actividades["{$data['codact']}"] = $data['codact'].' '.$data['detalle'];
+            self::$actividades["{$data['codact']}"] = $data['codact'] . ' ' . $data['detalle'];
         }
 
         return self::$actividades;
@@ -312,9 +337,6 @@ class ParamsIndependiente
     public static function getTipoAfiliado()
     {
         foreach (self::$datos_captura['tipo_cotizantes'] as $data) {
-            if (is_null($data['circular'])) {
-                continue;
-            }
             self::$tipo_afiliado[$data['tipcot']] = $data['detalle'];
         }
 
