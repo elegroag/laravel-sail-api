@@ -86,6 +86,7 @@ trait HasCustomUuid
             'Mercurio31' => 'TRA', // trabajador
             'Mercurio32' => 'CON', // conyuges
             'Mercurio34' => 'BEN', // beneficiario
+            'Mercurio35' => 'RET', // retiro
             'Mercurio36' => 'FAC', // facultativo
             'Mercurio38' => 'PEN', // pensionado
             'Mercurio39' => 'MAD', // madres comunitarias

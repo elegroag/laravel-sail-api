@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-ini_set('memory_limit', '512M');
+ini_set('memory_limit', '12024M');
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
