@@ -123,4 +123,5 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'dominio' => env('APP_DOMINIO', 'http://localhost'),
 ];

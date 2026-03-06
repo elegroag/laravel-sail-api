@@ -65,7 +65,7 @@ class EmpresasDocuments
             'actividad_name' => $actividad_name,
             'departamento_name' => $departamento_name,
             'tipo_documento' => $tipo_documento,
-            'cargo' => 'NINGUNO',
+            'cargo' => 'Representante Legal',
             'representante' => $representante,
             ...$this->empresa->toArray(),
         ];

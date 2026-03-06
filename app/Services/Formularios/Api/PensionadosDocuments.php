@@ -2,12 +2,14 @@
 
 namespace App\Services\Formularios\Api;
 
+use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsPensionado;
 use App\Library\Collections\ParamsTrabajador;
 use App\Models\Gener18;
 use App\Services\Api\ApiPython;
 use App\Services\Api\ApiSubsidio;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class PensionadosDocuments
 {
@@ -52,6 +54,13 @@ class PensionadosDocuments
 
         $nombre_pensionado = trim(($this->pensionado->prinom ?? '') . ' ' . ($this->pensionado->segnom ?? '') . ' ' . ($this->pensionado->priape ?? '') . ' ' . ($this->pensionado->segape ?? ''));
 
+        $coddorepleg = array_flip(tipo_document_repleg_detalle());
+        $representante = [
+            'nombre' => $this->pensionado->repleg,
+            'tipo_documento' => ($this->pensionado->coddorepleg) ? $coddorepleg[$this->pensionado->coddorepleg] : 'CEDULA DE CIUDADANIA',
+            'cedula' => $this->pensionado->cedrep,
+        ];
+
         // Contexto para los templates
         $today = Carbon::now();
         $context = [
@@ -75,6 +84,11 @@ class PensionadosDocuments
             'fecnac_day' => substr($this->pensionado->fecnac, 8, 2),
             'empresa' => $this->pensionado->toArray(),
             'solicitante' => $this->solicitante->toArray(),
+            'representante' => $representante,
+            'representante' => $representante,
+            'nombre_trabajador' => $nombre_pensionado,
+            'tipo_documento' => $detdoc_detalle,
+            'cargo_name' => 'TRABAJADOR PENSIONADO',
             ...$this->pensionado->toArray(),
         ];
 
@@ -89,14 +103,26 @@ class PensionadosDocuments
             ]
         ]);
 
-        if ($ps->isJson() == false) {
-            return false;
-        }
+        if ($ps->isJson() == false) return false;
         $out = $ps->toArray();
         if ($out['success'] == false) {
-            return false;
+            throw new DebugException("Error generando el PDF", 501, $out);
         }
-        sleep(2);
+        //el documento ahora llega en base64
+        $data = $out['data'];
+        $api_content = $data['api_content'];
+        $api_filename = $data['api_filename'];
+        //guarda el archivo en storage usar Storage Disk
+        if (
+            $api_content &&
+            $api_filename &&
+            is_string($api_content) &&
+            is_string($api_filename)
+        ) {
+            Storage::disk('temp')->put($api_filename, base64_decode($api_content));
+        } else {
+            throw new DebugException("Error guardando el archivo", 501, $out);
+        }
         return true;
     }
 

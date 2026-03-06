@@ -4,6 +4,7 @@ namespace App\Services\Formularios\Oficios;
 
 use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsEmpresa;
+use App\Models\Gener18;
 use App\Services\Formularios\Documento;
 use Carbon\Carbon;
 
@@ -52,8 +53,10 @@ class SolicitudEmpresa extends Documento
      */
     public function bloqueEmpresa()
     {
+        $tipoDocs = Gener18::pluck('detdoc', 'coddoc');
+
         $_codciu = ParamsEmpresa::getCiudades();
-        $today = Carbon::parse($this->empresa->fecini);
+        $today = Carbon::parse($this->empresa->fecsol);
 
         if ($this->empresa->ciupri == null) {
             $this->empresa->ciupri = $this->empresa->codciu;
@@ -74,19 +77,20 @@ class SolicitudEmpresa extends Documento
          * linia x
          */
         $this->pdf->SetY(90);
-        $this->pdf->SetX(140);
+        $this->pdf->SetX(120);
         $this->pdf->Cell(80, 4, calemp_detalle_value($this->empresa->calemp), 0, 0, 'L');
 
         /**
          * linia x
          */
         $this->pdf->SetY(96.5);
-        $this->pdf->SetX(38);
+        $this->pdf->SetX(28);
         $this->pdf->Cell(80, 4, $this->empresa->razsoc, 0, 0, 'L');
 
         /**
          * linia x
          */
+        $today = Carbon::parse($this->empresa->fecini);
         $this->pdf->SetFont('helvetica', '', 8);
         $this->pdf->SetY(109);
         $this->pdf->SetX(28);
@@ -107,8 +111,7 @@ class SolicitudEmpresa extends Documento
          */
         $this->pdf->SetY(141);
         $this->pdf->SetX(68);
-        $coddorepleg = coddoc_repleg_array();
-        $this->pdf->Cell(180, 4, $coddorepleg[$this->empresa->tipdoc], 0, 0, 'L');
+        $this->pdf->Cell(180, 4, $tipoDocs[$this->empresa->tipdoc], 0, 0, 'L');
         $this->pdf->SetX(117);
         $this->pdf->Cell(180, 4, $this->empresa->nit, 0, 0, 'L');
 
@@ -133,6 +136,14 @@ class SolicitudEmpresa extends Documento
         $this->pdf->SetY(170);
         $this->pdf->SetX(105);
         $this->pdf->Cell(61, 4, (! $this->empresa->codzon) ? 'Florencia' : $_codciu[$this->empresa->codzon], 0, 0, 'L');
+
+        $this->pdf->SetY(186);
+        $this->pdf->SetX(53);
+        $this->pdf->Cell(41, 4, 'X', 0, 0, 'L');
+
+        $this->pdf->SetY(196);
+        $this->pdf->SetX(140);
+        $this->pdf->Cell(41, 4, 'X', 0, 0, 'L');
 
         /**
          * linia x

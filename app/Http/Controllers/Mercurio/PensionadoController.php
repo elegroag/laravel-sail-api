@@ -145,7 +145,6 @@ class PensionadoController extends ApplicationController
             $params['tipo'] = $this->tipo;
             $params['coddoc'] = $this->user['coddoc'];
             $params['documento'] = $this->user['documento'];
-
             $params['usuario'] = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
 
             if (is_null($id) || $id == '') {

@@ -29,12 +29,9 @@ class ApruebaEmpresa
 
     private $solicitud;
 
-    private $dominio;
-
     public function __construct()
     {
         $this->today = Carbon::now();
-        $this->dominio = env('APP_URL', 'http://localhost:8000');
     }
 
     /**
@@ -250,8 +247,10 @@ class ApruebaEmpresa
         $anno = $feccap->format('Y');
 
         $data = $this->solicitud->toArray();
-        $data['membrete'] = "{$this->dominio}Mercurio/public/img/membrete_aprueba.jpg";
-        $data['ruta_firma'] = "{$this->dominio}Mercurio/public/img/Mercurio/firma_jefe_yenny.jpg";
+        $dominio = config('app.dominio');
+
+        $data['membrete'] = "{$dominio}public/img/membrete_aprueba.jpg";
+        $data['ruta_firma'] = "{$dominio}public/img/Mercurio/firma_jefe_yenny.jpg";
         $data['actapr'] = $actapr;
         $data['dia'] = $dia;
         $data['mes'] = $mes;

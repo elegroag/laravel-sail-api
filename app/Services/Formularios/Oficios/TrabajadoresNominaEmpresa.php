@@ -65,7 +65,7 @@ class TrabajadoresNominaEmpresa extends Documento
         $this->pdf->Ln();
         $this->pdf->SetFont('helvetica', '', 12);
         $this->pdf->Write(0, 'Señores', '', 0, 'L', true, 0, false, false, 0);
-        $this->pdf->Write(0, 'Caja de Compensación Familiar del Caquetá COMAFCA', '', 0, 'L', true, 0, false, false, 0);
+        $this->pdf->Write(0, 'Caja de Compensación Familiar del Caquetá COMFACA', '', 0, 'L', true, 0, false, false, 0);
         $this->pdf->Write(0, 'Cra. 11 N° 10 - 34', '', 0, 'L', true, 0, false, false, 0);
         $this->pdf->Write(0, 'Florencia Caquetá', '', 0, 'L', true, 0, false, false, 0);
 

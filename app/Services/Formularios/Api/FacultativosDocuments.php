@@ -2,10 +2,12 @@
 
 namespace App\Services\Formularios\Api;
 
+use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsFacultativo;
 use App\Models\Gener18;
 use App\Services\Api\ApiPython;
 use App\Services\Api\ApiSubsidio;
+use Illuminate\Support\Facades\Storage;
 
 class FacultativosDocuments
 {
@@ -73,15 +75,26 @@ class FacultativosDocuments
             ]
         ]);
 
-        if ($ps->isJson() == false) {
-            return false;
-        }
+        if ($ps->isJson() == false) return false;
         $out = $ps->toArray();
         if ($out['success'] == false) {
-            return false;
+            throw new DebugException("Error generando el PDF", 501, $out);
         }
-
-        sleep(2);
+        //el documento ahora llega en base64
+        $data = $out['data'];
+        $api_content = $data['api_content'];
+        $api_filename = $data['api_filename'];
+        //guarda el archivo en storage usar Storage Disk
+        if (
+            $api_content &&
+            $api_filename &&
+            is_string($api_content) &&
+            is_string($api_filename)
+        ) {
+            Storage::disk('temp')->put($api_filename, base64_decode($api_content));
+        } else {
+            throw new DebugException("Error guardando el archivo", 501, $out);
+        }
         return true;
     }
 
