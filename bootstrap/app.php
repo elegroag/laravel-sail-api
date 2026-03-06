@@ -24,6 +24,12 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
+        // Excluir rutas legacy (Kumbia) de validación CSRF para peticiones AJAX cross-origin.
+        $middleware->validateCsrfTokens(except: [
+            'mercurio/*',
+            'cajas/*',
+        ]);
+
         $middleware->web(append: [
             HandleAppearance::class,
             HandleInertiaRequests::class,
