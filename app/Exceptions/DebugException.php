@@ -47,7 +47,8 @@ class DebugException extends Exception
                     'code' => $this->getCode(),
                     'file' => basename($this->getFile()),
                     'line' => $this->getLine(),
-                ],
+                    'trace' => $this->getTraceAsString(),
+                ]
             ],
             203
         );

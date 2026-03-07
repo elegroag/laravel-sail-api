@@ -38,6 +38,7 @@
         },
         "files": [
             "./legacy/Thiagoprz/CompositeKey/HasCompositeKey.php",
+            "./legacy/Excel/UserReportExcel.php",
             "./app/Helpers/helpers.php",
             "./app/Helpers/files.php",
             "./app/Helpers/hashes.php"

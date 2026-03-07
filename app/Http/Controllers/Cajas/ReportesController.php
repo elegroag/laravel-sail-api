@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Cajas;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use Illuminate\Http\Request;
+use UserReportExcel;
 
 class ReportesController extends ApplicationController
 {
@@ -419,7 +420,10 @@ class ReportesController extends ApplicationController
             $_fields9['codigo'] = ['header' => 'CODIGO', 'size' => 10, 'align' => 'C'];
         }
         $report = new UserReportExcel($title1, $_fields);
-        $report->startReport('EMPLEADOR PRIMERA VEZ');
+        $report->startReport('EMPLEADOR PRIMERA VEZ', [
+            'razsoc' => 'CAJA DE COMPENSACIÓN FAMILIAR DEL CAQUETÁ',
+            'nit' => '891.190.047-2',
+        ]);
         $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
         $msat02 = $this->Sat02->find("numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '1'  )", 'order: numtraccf  ASC ');
         foreach ($msat02 as $sat02) {

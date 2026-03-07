@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
+use App\Http\Resources\ApiResource;
+use App\Http\Resources\ErrorResource;
 use App\Library\Collections\ParamsEmpresa;
 use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
@@ -23,6 +25,7 @@ use App\Services\Utils\GeneralService;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ApruebaEmpresaController extends ApplicationController
@@ -795,7 +798,7 @@ class ApruebaEmpresaController extends ApplicationController
         }
     }
 
-    public function aprueba(Request $request)
+    public function aprueba(Request $request): JsonResponse
     {
         $this->db->begin();
         try {
@@ -812,22 +815,16 @@ class ApruebaEmpresaController extends ApplicationController
 
                 $this->db->commit();
                 $solicitud->enviarMail($request->input('actapr'), $request->input('fecapr'));
-                $salida = [
-                    'success' => true,
-                    'msj' => 'El registro se completo con éxito',
-                ];
+
+                return ApiResource::success([], 'Registro completado con éxito')->response();
             } catch (DebugException $err) {
                 $this->db->rollback();
-                $salida = $err->render($request);
+                return response()->json($err->render($request));
             }
         } catch (\Exception $e) {
             $this->db->rollback();
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+            return ErrorResource::errorResponse($e->getMessage(), $e->getTraceAsString())->response();
         }
-        return response()->json($salida);
     }
 
     public function borrarFiltro()

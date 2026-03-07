@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
+use App\Http\Resources\ApiResource;
+use App\Http\Resources\ErrorResource;
 use App\Library\Collections\ParamsIndependiente;
 use App\Library\Collections\ParamsPensionado;
 use App\Models\Adapter\DbBase;
@@ -24,6 +26,7 @@ use App\Services\Srequest;
 use App\Services\Utils\Comman;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
 
@@ -348,32 +351,30 @@ class ApruebaPensionadoController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function aprueba(Request $request)
+    public function aprueba(Request $request): JsonResponse
     {
         $this->db->begin();
         try {
-            $apruebaSolicitud = new ApruebaSolicitud();
-            $calemp = 'P';
-            $solicitud = $apruebaSolicitud->main(
-                $calemp,
-                $request->input('id'),
-                $request->all()
-            );
-            $solicitud->enviarMail($request->input('actapr'), $request->input('fecapr'));
-            $salida = [
-                'success' => true,
-                'msj' => 'El registro se completo con éxito',
-            ];
-            $this->db->commit();
-        } catch (DebugException $e) {
+            try {
+                $apruebaSolicitud = new ApruebaSolicitud();
+                $calemp = 'P';
+                $solicitud = $apruebaSolicitud->main(
+                    $calemp,
+                    $request->input('id'),
+                    $request->all()
+                );
+                $solicitud->enviarMail($request->input('actapr'), $request->input('fecapr'));
+                $this->db->commit();
+
+                return ApiResource::success([], 'Registro completado con éxito')->response();
+            } catch (DebugException $e) {
+                $this->db->rollback();
+                return response()->json($e->render($request));
+            }
+        } catch (\Exception $e) {
             $this->db->rollback();
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-                'errors' => $e->render($request),
-            ];
+            return ErrorResource::errorResponse($e->getMessage(), $e->getTraceAsString())->response();
         }
-        return response()->json($salida);
     }
 
     public function devolver(Request $request)
