@@ -12,5 +12,6 @@ Route::middleware([CajasCookieAuthenticated::class])->group(function () {
         Route::post('/infor', [ApruebaUpTrabajadorController::class, 'infor']);
         Route::post('/aprueba', [ApruebaUpTrabajadorController::class, 'aprueba']);
         Route::post('/rechazar', [ApruebaUpTrabajadorController::class, 'rechazar']);
+        Route::post('/borrar-filtro', [ApruebaUpTrabajadorController::class, 'borrarFiltro']);
     });
 });

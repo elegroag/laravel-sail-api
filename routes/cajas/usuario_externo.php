@@ -15,5 +15,6 @@ Route::middleware([CajasCookieAuthenticated::class])->group(function () {
         Route::post('/params', [UsuarioController::class, 'params']);
         Route::post('/borrar_usuario', [UsuarioController::class, 'borrarUsuario']);
         Route::post('/guardar', [UsuarioController::class, 'guardar']);
+        Route::post('/borrar-filtro', [UsuarioController::class, 'borrarFiltro']);
     });
 });

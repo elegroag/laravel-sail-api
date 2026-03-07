@@ -13,8 +13,8 @@ Route::middleware([CajasCookieAuthenticated::class])->group(function () {
         Route::post('/aprueba', [ApruebaFacultativoController::class, 'aprueba']);
         Route::post('/devolver', [ApruebaFacultativoController::class, 'devolver']);
         Route::post('/rechazar', [ApruebaFacultativoController::class, 'rechazar']);
-        Route::post('/borrar_filtro', [ApruebaFacultativoController::class, 'borrarFiltro']);
         Route::get('/editar/{id}', [ApruebaFacultativoController::class, 'editarView']);
         Route::post('/editar', [ApruebaFacultativoController::class, 'editaEmpresa']);
+        Route::post('/borrar-filtro', [ApruebaFacultativoController::class, 'borrarFiltro']);
     });
 });

@@ -6,6 +6,10 @@
 @endpush
 
 @push('scripts')
+    <script>
+        window.ServerController = 'usuario';
+    </script>
+    
     <div id='filtroData'></div>
     
     <script id='tmp_filtro' type="text/template">

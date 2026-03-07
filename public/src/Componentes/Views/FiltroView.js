@@ -2,42 +2,76 @@ import { $App } from '@/App';
 import { ModelView } from '@/Common/ModelView';
 
 class FiltroView extends ModelView {
-	constructor(options) {
-		super(options);
-		this.template = _.template(document.getElementById('tmp_filtro').innerHTML);
-	}
+    constructor(options) {
+        super(options);
+        this.template = _.template(document.getElementById('tmp_filtro').innerHTML);
+    }
 
-	get className() {
-		return 'col';
-	}
+    get className() {
+        return 'col';
+    }
 
-	get events() {
-		return {
-			"click [toggle-event='volver']": 'volverLista',
-			"click [data-toggle='filter-close']": 'volverLista',
-			"click [data-toggle='filter-add']": 'addFiltro',
-			"click [data-toggle='filter-remove']": 'borrarFiltro',
-			"click [data-toggle='filter-item-remove']": 'removeFiltro',
-			"click [data-toggle='filter-aplicate']": 'aplicaFiltro',
-		};
-	}
+    get events() {
+        return {
+            "click [toggle-event='volver']": 'volverLista',
+            "click [data-toggle='filter-close']": 'volverLista',
+            "click [data-toggle='filter-add']": 'addFiltro',
+            "click [data-toggle='filter-remove']": 'borrarFiltro',
+            "click [data-toggle='filter-item-remove']": 'removeFiltro',
+            "click [data-toggle='filter-aplicate']": 'aplicaFiltro',
+            "click [toggle-event='remove']": 'removeFiltro',
+        };
+    }
 
-	volverLista(e) {
-		e.preventDefault();
-		this.trigger('load:volver', {});
-	}
+    volverLista(e) {
+        e.preventDefault();
+        this.trigger('load:volver', {});
+    }
 
-	addFiltro(e) {
-		e.preventDefault();
-		let campo = $('#campo-filtro option:selected').text();
-		let condi = $('#condi-filtro option:selected').text();
-		let value = $('#value-filtro').val();
+    addFiltro(e) {
+        e.preventDefault();
+        this.__addFiltro();
+    }
 
-		let vcampo = $('#campo-filtro').val();
-		let vcondi = $('#condi-filtro').val();
+    borrarFiltro(e) {
+        e.preventDefault();
+        $App.trigger('syncro', {
+            url: window.App.url(window.ServerController + '/borrar-filtro'),
+            data: {},
+            silent: false,
+            callback: (response) => {
+                console.log(response);
+                if (response) {
+                    const body = $('#filtro_add').find('tbody');
+                    body.html('');
+                    this.trigger('change:filtro', {});
+                    return;
+                }
+            },
+        });
+    }
 
-		if ($('#value-filtro').val() == '') return false;
-		let _template = _.template(`
+    removeFiltro(e) {
+        e.preventDefault();
+        this.$el.find(e.currentTarget).parent().parent().remove();
+        this.trigger('change:filtro', {});
+    }
+
+    aplicaFiltro(e) {
+        e.preventDefault();
+        this.trigger('change:filtro', {});
+    }
+
+    __addFiltro() {
+        let campo = $('#campo-filtro option:selected').text();
+        let condi = $('#condi-filtro option:selected').text();
+        let value = $('#value-filtro').val();
+
+        let vcampo = $('#campo-filtro').val();
+        let vcondi = $('#condi-filtro').val();
+
+        if ($('#value-filtro').val() == '') return false;
+        let _template = _.template(`
 		<tr>
 			<td>
 				<%= campo %>
@@ -59,41 +93,22 @@ class FiltroView extends ModelView {
 		</tr>
 		`);
 
-		let html = $('#filtro_add').find('tbody');
-		html.append(
-			_template({
-				campo,
-				condi,
-				value,
-				vcampo,
-				vcondi,
-			}),
-		);
-	}
+        let html = $('#filtro_add').find('tbody');
+        html.append(
+            _template({
+                campo,
+                condi,
+                value,
+                vcampo,
+                vcondi,
+            }),
+        );
+    }
 
-	borrarFiltro(e) {
-		e.preventDefault();
-		$.ajax({
-			method: 'GET',
-			dataType: 'JSON',
-			url: $App.url('borrarFiltro'),
-		}).done(() => void 0);
-	}
-
-	removeFiltro(e) {
-		e.preventDefault();
-		this.$el.find(e.currentTarget).parent().parent().remove();
-	}
-
-	aplicaFiltro(e) {
-		e.preventDefault();
-		this.trigger('change:filtro', {});
-	}
-
-	remove() {
-		this.stopListening();
-		Backbone.View.prototype.remove.call(this);
-	}
+    remove() {
+        this.stopListening();
+        Backbone.View.prototype.remove.call(this);
+    }
 }
 
 export { FiltroView };

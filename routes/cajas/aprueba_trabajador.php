@@ -23,5 +23,6 @@ Route::middleware([CajasCookieAuthenticated::class])->group(function () {
         Route::post('/buscar-sisu', [ApruebaTrabajadorController::class, 'buscarSisu']);
         Route::post('/reaprobar', [ApruebaTrabajadorController::class, 'reaprobar']);
         Route::post('/validar-multiafiliacion', [ApruebaTrabajadorController::class, 'validarMultiafiliacion']);
+        Route::post('/borrar-filtro', [ApruebaTrabajadorController::class, 'borrarFiltro']);
     });
 });

@@ -14,5 +14,6 @@ Route::middleware([CajasCookieAuthenticated::class])->group(function () {
         Route::post('/borrar_filtro', [ApruebaComunitariaController::class, 'borrarFiltro']);
         Route::post('/aplicar_filtro/{estado?}', [ApruebaComunitariaController::class, 'aplicarFiltro']);
         Route::post('/buscar/{estado?}', [ApruebaComunitariaController::class, 'buscar']);
+        Route::post('/borrar-filtro', [ApruebaComunitariaController::class, 'borrarFiltro']);
     });
 });

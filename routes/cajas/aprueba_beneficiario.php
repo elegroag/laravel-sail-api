@@ -15,7 +15,7 @@ Route::middleware([CajasCookieAuthenticated::class])->group(function () {
         Route::post('/aprueba', [ApruebaBeneficiarioController::class, 'aprueba']);
         Route::post('/devolver', [ApruebaBeneficiarioController::class, 'devolver']);
         Route::post('/rechazar', [ApruebaBeneficiarioController::class, 'rechazar']);
-        Route::post('/borrar_filtro', [ApruebaBeneficiarioController::class, 'borrarFiltro']);
+        Route::post('/borrar-filtro', [ApruebaBeneficiarioController::class, 'borrarFiltro']);
         Route::post('/infor', [ApruebaBeneficiarioController::class, 'infor']);
         Route::post('/deshacer', [ApruebaBeneficiarioController::class, 'deshacer']);
 

@@ -13,6 +13,6 @@ Route::middleware([CajasCookieAuthenticated::class])->group(function () {
         Route::post('/aprueba', [ApruebaCertificadoController::class, 'aprueba']);
         Route::post('/devolver', [ApruebaCertificadoController::class, 'devolver']);
         Route::post('/rechazar', [ApruebaCertificadoController::class, 'rechazar']);
-        Route::post('/borrar_filtro', [ApruebaCertificadoController::class, 'borrarFiltro']);
+        Route::post('/borrar-filtro', [ApruebaCertificadoController::class, 'borrarFiltro']);
     });
 });

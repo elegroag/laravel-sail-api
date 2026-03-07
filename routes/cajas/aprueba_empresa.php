@@ -25,5 +25,6 @@ Route::middleware([CajasCookieAuthenticated::class])->group(function () {
         Route::post('/aplicar_filtro/{estado?}', [ApruebaEmpresaController::class, 'aplicarFiltro']);
         Route::post('/change_cantidad_pagina/{estado}', [ApruebaEmpresaController::class, 'changeCantidadPagina']);
         Route::post('/aprueba', [ApruebaEmpresaController::class, 'aprueba']);
+        Route::post('/borrar-filtro', [ApruebaEmpresaController::class, 'borrarFiltro']);
     });
 });
