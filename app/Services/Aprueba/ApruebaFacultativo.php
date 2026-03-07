@@ -62,7 +62,16 @@ class ApruebaFacultativo
             throw new Exception('Error, el tipo documento para facultativos no puede ser tipo NIT.', 501);
         }
 
-        $fullname = $this->solicitud->priape . ' ' . $this->solicitud->segape . ' ' . $this->solicitud->prinom . ' ' . $this->solicitud->segnom;
+        $repleg = normalize_spaces($this->solicitud->priape . ' '
+            . $this->solicitud->segape . ' '
+            . $this->solicitud->prinom . ' '
+            . $this->solicitud->segnom);
+
+        $fullname = normalize_spaces($this->solicitud->prinom . ' '
+            . $this->solicitud->segnom . ' '
+            . $this->solicitud->priape . ' '
+            . $this->solicitud->segape);
+
         $tipcot = 63;
 
         $params['tipsoc'] = '06';
@@ -76,10 +85,10 @@ class ApruebaFacultativo
         $params['tipper'] = $tipper;
         $params['celpri'] = $this->solicitud->celular;
         $params['emailpri'] = $this->solicitud->email;
-        $params['repleg'] = $fullname;
-        $params['razsoc'] = $fullname;
+        $params['repleg'] = $repleg;
+        $params['razsoc'] = $repleg;
         $params['fax'] = '0';
-        $params['ofiafi'] = '13';
+        $params['ofiafi'] = '01';
         $params['horas'] = '240';
         $params['calemp'] = 'F';
         $params['tipapo'] = 'F';
@@ -94,7 +103,7 @@ class ApruebaFacultativo
             $params['codlis'] = $params['codsuc'];
         }
         $params['subpla'] = $postData['codsuc'];
-        $params['nomcon'] = substr($this->solicitud->priape . ' ' . $this->solicitud->segape, 0, 39);
+        $params['nomcon'] = substr($fullname, 0, 70);
         $params['codase'] = '1';
         $params['resest'] = null;
         $params['fecmer'] = null;
@@ -131,7 +140,7 @@ class ApruebaFacultativo
         $params['fecsis'] = $hoy;
         $params['horas'] = '240';
         $params['ofiafi'] = '13';
-        $params['detalle'] = $fullname;
+        $params['detalle'] = $repleg;
         $params['fecsal'] = $params['fecafi'];
 
         $params['traapo'] = '0';

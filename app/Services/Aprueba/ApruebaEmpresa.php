@@ -63,6 +63,22 @@ class ApruebaEmpresa
             throw new Exception('Error, el indice de aportes no es valido para empresas aportantes', 501);
         }
 
+        if ($tipper == 'N') {
+            $fullname = normalize_spaces(
+                $mercurio30->prinom . ' ' .
+                    $mercurio30->segnom . ' ' .
+                    $mercurio30->priape . ' ' .
+                    $mercurio30->segape
+            );
+        } else {
+            $fullname = normalize_spaces(
+                $mercurio30->priaperepleg . ' ' .
+                    $mercurio30->segaperepleg . ' ' .
+                    $mercurio30->prinomrepleg . ' ' .
+                    $mercurio30->segnomrepleg
+            );
+        }
+
         $params['estado'] = 'A';
         $params['fecest'] = null;
         $params['codest'] = null;
@@ -75,7 +91,7 @@ class ApruebaEmpresa
         $params['telr'] = $mercurio30->telefono;
         $params['mailr'] = $mercurio30->emailpri;
         $params['calsuc'] = $mercurio30->calemp;
-        $params['nomcon'] = substr($mercurio30->priape . ' ' . $mercurio30->segape, 0, 40);
+        $params['nomcon'] = substr($fullname, 0, 70);
         $params['detalle'] = $mercurio30->razsoc;
         $params['nomemp'] = $mercurio30->razsoc;
         $params['fecapr'] = $postData['fecapr'];

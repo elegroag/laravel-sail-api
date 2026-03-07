@@ -50,7 +50,11 @@ class ApruebaPensionado
         /**
          * buscar registro de la empresa
          */
-        $fullname = $this->solicitud->priape . ' ' . $this->solicitud->segape . ' ' . $this->solicitud->prinom . ' ' . $this->solicitud->segnom;
+        $fullname = normalize_spaces($this->solicitud->prinom . ' ' .
+            $this->solicitud->segnom . ' ' .
+            $this->solicitud->priape . ' ' .
+            $this->solicitud->segape);
+
         $tipper = 'N';
         $params = array_merge($this->solicitud->toArray(), $postData);
 
@@ -95,10 +99,10 @@ class ApruebaPensionado
         $params['celpri'] = $this->solicitud->celular;
         $params['emailpri'] = $this->solicitud->email;
 
-        $repleg = $this->solicitud->priape . ' '
+        $repleg = normalize_spaces($this->solicitud->priape . ' '
             . $this->solicitud->segape . ' '
             . $this->solicitud->prinom . ' '
-            . $this->solicitud->segnom;
+            . $this->solicitud->segnom);
 
         $params['repleg'] = $repleg;
         $params['razsoc'] = $repleg;
@@ -119,7 +123,7 @@ class ApruebaPensionado
             $params['codlis'] = $params['codsuc'];
         }
 
-        $params['nomcon'] = substr($this->solicitud->priape . ' ' . $this->solicitud->segape, 0, 39);
+        $params['nomcon'] = substr($fullname, 0, 70);
         $params['codase'] = '1';
         $params['resest'] = null;
         $params['fecmer'] = null;
@@ -155,7 +159,7 @@ class ApruebaPensionado
         $params['vendedor'] = 'N';
         $params['fecsis'] = $hoy;
         $params['horas'] = '240';
-        $params['ofiafi'] = '13';
+        $params['ofiafi'] = '01';
         $params['detalle'] = $repleg;
         $params['fecsal'] = $params['fecafi'];
 
@@ -165,13 +169,11 @@ class ApruebaPensionado
         $params['tietra'] = '0';
         $params['tratot'] = '0';
         $params['coddiv'] = $params['codciu'];
+        $params['numcue'] = '0';
+        $params['tippag'] = 'T';
+        $params['codban'] = null;
+        $params['tipcue'] = null;
 
-        if (! $params['tippag'] || $params['tippag'] == 'T') {
-            $params['numcue'] = '0';
-            $params['tippag'] = 'T';
-            $params['codban'] = null;
-            $params['tipcue'] = null;
-        }
 
         /**
          * tipo de sociedad por defecto es persona natural para pensionados

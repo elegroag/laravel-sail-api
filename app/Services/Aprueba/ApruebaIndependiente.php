@@ -50,10 +50,10 @@ class ApruebaIndependiente
         /**
          * buscar registro de la empresa
          */
-        $repleg = $this->solicitud->priape . ' '
+        $repleg = normalize_spaces($this->solicitud->priape . ' '
             . $this->solicitud->segape . ' '
             . $this->solicitud->prinom . ' '
-            . $this->solicitud->segnom;
+            . $this->solicitud->segnom);
 
         $tipper = 'N';
         $params = array_merge($this->solicitud->toArray(), $postData);
@@ -77,7 +77,11 @@ class ApruebaIndependiente
             $tipcot = 65;
         }
 
-        $fullname = $this->solicitud->priape . ' ' . $this->solicitud->segape . ' ' . $this->solicitud->prinom . ' ' . $this->solicitud->segnom;
+        $fullname = normalize_spaces($this->solicitud->prinom . ' ' .
+            $this->solicitud->segnom . ' ' .
+            $this->solicitud->priape . ' ' .
+            $this->solicitud->segape);
+
         $params['nit'] = $this->solicitud->cedtra;
         $params['coddoc'] = $this->solicitud->tipdoc;
         $params['estado'] = 'A';
@@ -91,7 +95,7 @@ class ApruebaIndependiente
         $params['repleg'] = $repleg;
         $params['razsoc'] = $params['repleg'];
         $params['fax'] = '0';
-        $params['ofiafi'] = '13';
+        $params['ofiafi'] = '01';
         $params['horas'] = '240';
 
         if (! $params['codsuc']) {
@@ -106,7 +110,7 @@ class ApruebaIndependiente
 
         $params['digver'] = '0';
         $params['tottra'] = '1';
-        $params['nomcon'] = substr($this->solicitud->priape . ' ' . $this->solicitud->segape, 0, 39);
+        $params['nomcon'] = substr($fullname, 0, 70);
         $params['fecsis'] = $hoy; // fecha captura del sistema
         $params['feccam'] = $hoy; // fecha de actualizacion
         $params['codase'] = '1';

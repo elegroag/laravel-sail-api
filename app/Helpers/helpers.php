@@ -60,6 +60,13 @@ if (! function_exists('get_params_destructures')) {
     }
 }
 
+if (! function_exists('normalize_spaces')) {
+    function normalize_spaces(?string $value): string
+    {
+        return preg_replace('/\s+/', ' ', trim((string) $value)) ?? '';
+    }
+}
+
 require_once __DIR__ . '/format.php';
 require_once __DIR__ . '/flash.php';
 require_once __DIR__ . '/files.php';
