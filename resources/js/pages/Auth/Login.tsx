@@ -58,7 +58,7 @@ export default function Login({
       </div>
 
       {/* Right Panel - Login Form */}
-      <div className="lg:w-1/2 p-12 flex flex-col justify-center relative">
+      <div className="lg:w-1/2 p-6 flex flex-col justify-center relative">
         <AuthBackgroundShapes />
 
         <div className="max-w-md mx-auto w-full">

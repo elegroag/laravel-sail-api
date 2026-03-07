@@ -40,7 +40,7 @@ export default function AuthUserTypeSelector<T extends string = string>({
         <p className="text-lg text-gray-600 mb-8 text-center">{subtitle}</p>
       ) : null}
 
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-3 gap-3 mb-6">
         {userTypes.map((userType) => (
           <button
             key={userType.id}
