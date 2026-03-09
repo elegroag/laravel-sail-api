@@ -40,7 +40,6 @@ class AutenticaTrabajador extends AutenticaGeneral
 
         if ($this->procesadorComando->isJson() == false) {
             $this->message = 'Se genero un error al buscar al trabajador usando el servicio CLI-Comando. ';
-
             return false;
         }
 
