@@ -35,7 +35,6 @@ class AutenticaPensionado extends AutenticaGeneral
 
         if ($this->procesadorComando->isJson() == false) {
             $this->message = 'Se genero un error al buscar al afiliado pensionado usando el servicio CLI-Comando.';
-
             return false;
         }
 
