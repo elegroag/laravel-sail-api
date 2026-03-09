@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::post('authenticate', [AuthMercurioController::class, 'authenticateAction'])->name('api.authenticate');
-Route::post('register', [AuthMercurioController::class, 'registerAction'])->name('api.register');
 Route::post('register/empresa', [AuthMercurioController::class, 'registerEmpresaAction'])->name('api.register.empresa');
 Route::post('register/trabajador', [AuthMercurioController::class, 'registerTrabajadorAction'])->name('api.register.trabajador');
 Route::post('register/particular', [AuthMercurioController::class, 'registerParticularAction'])->name('api.register.particular');

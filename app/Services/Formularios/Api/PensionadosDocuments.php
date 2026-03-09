@@ -92,6 +92,8 @@ class PensionadosDocuments
             ...$this->pensionado->toArray(),
         ];
 
+        $context['fecing'] = $this->pensionado->fecini;
+
         $ps = new ApiPython();
         $ps->send([
             'servicio' => 'Python',

@@ -325,10 +325,10 @@ class ApruebaPensionadoController extends ApplicationController
             );
 
             $out = $ps->toArray();
-            if ($out['success']) {
-                $empresa_sisuweb = $out['data'];
-            } else {
-                $empresa_sisuweb = false;
+            $isSuccess = $out['success'] ?? false;
+            $empresa_sisuweb = false;
+            if ($isSuccess) {
+                $empresa_sisuweb = $out['data'] ?? false;
             }
 
             $response = [

@@ -55,6 +55,7 @@ class AuthMercurioController extends Controller
         $this->db->begin();
         try {
             $data = $request->all();
+            $data['selected_user_type'] = 'E'; // Para empresas
             $request->validate([
                 'rep_nombre' => 'required|string|min:5',
                 'rep_documento' => 'required|integer|digits_between:6,18',
@@ -114,6 +115,7 @@ class AuthMercurioController extends Controller
         $this->db->begin();
         try {
             $data = $request->all();
+            $data['selected_user_type'] = 'T'; // Para trabajadores
             $request->validate([
                 'coddoc' => 'required|string|min:1',
                 'documento' => 'required|integer|digits_between:6,18',
@@ -160,6 +162,7 @@ class AuthMercurioController extends Controller
         $this->db->begin();
         try {
             $data = $request->all();
+            $data['selected_user_type'] = 'P'; // Para particulares
             $request->validate([
                 'coddoc' => 'required|string|min:1',
                 'documento' => 'required|integer|digits_between:6,18',
@@ -291,6 +294,7 @@ class AuthMercurioController extends Controller
         $this->db->begin();
         try {
             $data = $request->all();
+            $data['selected_user_type'] = 'F'; // Para facultativos
             $request->validate([
                 'coddoc' => 'required|string|min:1',
                 'documento' => 'required|integer|digits_between:6,18',
@@ -334,6 +338,7 @@ class AuthMercurioController extends Controller
         $this->db->begin();
         try {
             $data = $request->all();
+            $data['selected_user_type'] = 'S'; // Para domésticos
             $request->validate([
                 'coddoc' => 'required|string|min:1',
                 'documento' => 'required|integer|digits_between:6,18',

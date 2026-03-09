@@ -49,7 +49,7 @@ class SolicitudIndependiente extends Documento
     public function bloqueEmpresa()
     {
         $_codciu = ParamsEmpresa::getCiudades();
-        $nombre = capitalize($this->independiente->getPrinom().' '.$this->independiente->getSegnom().' '.$this->independiente->getPriape().' '.$this->independiente->getSegape());
+        $nombre = capitalize($this->independiente->getPrinom() . ' ' . $this->independiente->getSegnom() . ' ' . $this->independiente->getPriape() . ' ' . $this->independiente->getSegape());
 
         $today = Carbon::now();
         $ciudad = ($this->independiente->getCodciu()) ? $_codciu[$this->independiente->getCodciu()] : 'Florencia';
@@ -64,14 +64,14 @@ class SolicitudIndependiente extends Documento
             ['lb' => 'Año', 'texto' => $today->format('Y'), 'x' => 165, 'y' => 38],
             ['lb' => 'Mes', 'texto' => $today->format('m'), 'x' => 174, 'y' => 38],
             ['lb' => 'Dia', 'texto' => $today->format('d'), 'x' => 181, 'y' => 38],
-            ['lb' => 'Tipo afiliacion', 'texto' => 'Trabajador '.capitalize($this->independiente->getCalempDetalle()), 'x' => 118, 'y' => 101],
+            ['lb' => 'Tipo afiliacion', 'texto' => 'Trabajador ' . capitalize($this->independiente->getCalempDetalle()), 'x' => 118, 'y' => 101],
             ['lb' => 'Nombre', 'texto' => capitalize($nombre), 'x' => 22, 'y' => 107],
             ['lb' => 'Dia', 'texto' => $fecini->format('d'), 'x' => 28, 'y' => 119],
             ['lb' => 'Mes', 'texto' => $fecini->format('m'), 'x' => 42, 'y' => 119],
             ['lb' => 'Año', 'texto' => $fecini->format('Y'), 'x' => 54, 'y' => 119],
             $this->posAportes(118),
             ['lb' => 'Tipo', 'texto' => 'Trabajador Independiente', 'x' => 38, 'y' => 141],
-            ['lb' => 'Nombre', 'texto' => 'Nombre Trabajador: '.capitalize($nombre), 'x' => 35, 'y' => 150],
+            ['lb' => 'Nombre', 'texto' => 'Nombre Trabajador: ' . capitalize($nombre), 'x' => 35, 'y' => 150],
             ['lb' => 'Tipo documento', 'texto' => $tipo_documento, 'x' => 68, 'y' => 158],
             ['lb' => 'Cedula', 'texto' => $this->independiente->getCedtra(), 'x' => 118, 'y' => 158],
             ['lb' => 'Dirección', 'texto' => $this->independiente->getDireccion(), 'x' => 65, 'y' => 164],

@@ -583,10 +583,13 @@ class ApruebaIndependienteController extends ApplicationController
                 ]
             );
             $out = $procesadorComando->toArray();
-
-            if ($out['success']) {
-                $this->setParamToView('empresa_sisuweb', $out['data']);
+            $isSuccess = $out['success'] ?? false;
+            $empresa_sisuweb = false;
+            if ($isSuccess) {
+                $empresa_sisuweb = $out['data'] ?? false;
             }
+
+            $this->setParamToView('empresa_sisuweb', $empresa_sisuweb);
             $response = [
                 'success' => true,
                 'data' => $mercurio41->toArray(),

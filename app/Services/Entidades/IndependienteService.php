@@ -399,7 +399,7 @@ class IndependienteService
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
-                'metodo' => 'parametros_empresa',
+                'metodo' => 'parametros_independiente',
             ]
         );
 

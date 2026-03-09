@@ -52,6 +52,13 @@ class IndependientesDocuments
         $nombre_independiente = trim(($this->independiente->prinom ?? '') . ' ' . ($this->independiente->segnom ?? '') . ' ' . ($this->independiente->priape ?? '') . ' ' . ($this->independiente->segape ?? ''));
         $nivel_educativo_detalle = ($this->independiente->nivedu ?? null) ? ($nivel_educativo[$this->independiente->nivedu] ?? null) : null;
 
+        $coddorepleg = array_flip(tipo_document_repleg_detalle());
+        $representante = [
+            'nombre' => $this->independiente->repleg,
+            'tipo_documento' => ($this->independiente->coddorepleg) ? $coddorepleg[$this->independiente->coddorepleg] : 'CEDULA DE CIUDADANIA',
+            'cedula' => $this->independiente->cedrep,
+        ];
+
         // Contexto para los templates
         $today = Carbon::now();
         $context = [
@@ -77,8 +84,13 @@ class IndependientesDocuments
             'fecnac_year' => substr($this->independiente->fecnac, 0, 4),
             'fecnac_month' => substr($this->independiente->fecnac, 5, 2),
             'fecnac_day' => substr($this->independiente->fecnac, 8, 2),
+            'representante' => $representante,
+            'nombre_trabajador' => $nombre_independiente,
+            'tipo_documento' => $detdoc_detalle,
             ...$this->independiente->toArray(),
         ];
+
+        $context['fecing'] = $this->independiente->fecini;
 
         $ps = new ApiPython();
         $ps->send([

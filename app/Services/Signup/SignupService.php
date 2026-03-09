@@ -110,12 +110,12 @@ class SignupService
                         'tipper' => $this->tipper,
                         'telefono' => $this->telefono,
                         'calemp' => $this->calemp,
-                        'tipo' => $this->tipo,
                         'tipsoc' => $this->tipsoc,
                         'coddocrepleg' => $this->coddocrepleg,
                         'razsoc' => $this->razsoc,
                         'usuario' => $usuario,
                         'password' => $this->password,
+                        'tipo' => $this->tipo // usar el tipo real del usuario (I, O, F, etc.)
                     ]
                 )
             );
