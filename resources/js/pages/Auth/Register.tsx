@@ -2,6 +2,7 @@ import AuthLayout from "@/layouts/AuthLayoutTemplate";
 import AuthWelcome from "@/pages/Auth/components/generic/AuthWelcome";
 import AuthUserTypeSelector from "@/pages/Auth/components/generic/AuthUserTypeSelector";
 import PersonRegisterForm from "@/pages/Auth/components/register/DatosPersonalesRegister";
+import LoadingAnimated from "@/components/loading-animated";
 import imageLogo from "@/assets/comfaca-logo.png";
 import { userTypes } from "@/constants/auth";
 import type { FormState, LoginProps} from "@/types/auth";
@@ -120,6 +121,9 @@ export default function Register(props: LoginProps){
         </div>
       </div>
     </AuthLayout>
+
+    {/* Loading animado durante el registro */}
+    <LoadingAnimated show={state.isSubmitting} />
 
     {/* Toast simple */}
     {toast && (

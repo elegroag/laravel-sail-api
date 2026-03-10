@@ -3,6 +3,7 @@ import AuthLayout from "@/layouts/AuthLayoutTemplate"
 import AuthWelcome from "@/pages/Auth/components/generic/AuthWelcome"
 import LoginForm from "@/pages/Auth/components/login/LoginForm"
 import AuthUserTypeStep from "@/pages/Auth/components/generic/AuthUserTypeStep"
+import LoadingAnimated from "@/components/loading-animated"
 import { userTypes } from "@/constants/auth"
 import type { LoginProps, UserType } from "@/types/auth"
 import AuthBackgroundShapes from "@/components/ui/auth-background-shapes"
@@ -103,6 +104,9 @@ export default function Login({
             </div>
           )}
       </div>
+
+      {/* Loading animado durante la autenticación */}
+      <LoadingAnimated show={processing} />
     </AuthLayout>
   )
 }

@@ -61,4 +61,16 @@ Sistema completo de gestión empresarial desarrollado con Laravel 12, MySQL, Ine
 rsync -avz /home/edwin-tics/proyectos/comfaca-enlinea/flask-api/ admin@172.168.0.15:/home/admin/contenedores/desarrollo/flask-api
 
 rsync -avz /home/edwin-tics/proyectos/comfaca-enlinea/laravel/ admin@172.168.0.15:/home/admin/contenedores/desarrollo/mercurio
+
+# Limpiar el log de laravel
+truncate -s 0 storage/logs/laravel.log
+
+# Limpiar cache
+php artisan route:clear && php artisan config:clear && php artisan cache:clear
+
+# Generar swagger
+php artisan l5-swagger:generate
+
+# Consultar  la lista de endpoints de API
+php artisan route:list --path=api
 ```

@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\AuthException;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ApiResource;
+use App\Http\Resources\ErrorResource;
 use App\Library\Auth\AuthJwt;
 use App\Models\Adapter\DbBase;
 use App\Models\Gener02;
@@ -11,6 +14,7 @@ use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio19;
 use App\Services\Api\ApiWhatsapp;
+use App\Services\Autentications\VerifyAuthService;
 use App\Services\Signup\SignupDomestico;
 use App\Services\Signup\SignupEmpresas;
 use App\Services\Signup\SignupFacultativos;
@@ -22,23 +26,26 @@ use App\Services\Utils\SenderEmail;
 use Carbon\Carbon;
 use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\Response;
-use Dedoc\Scramble\Attributes\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use App\Services\Entidades\EmpresaService;
 use App\Services\Entidades\TrabajadorService;
+use Illuminate\Http\JsonResponse;
 
-#[Tag('Autenticación')]
+
 #[Group('Autenticación')]
 class AuthMercurioController extends Controller
 {
     private $db;
+    private SignupService $signupService;
+    private AuthJwt $authJwt;
 
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
+        $this->signupService = new SignupService();
+        $this->authJwt = new AuthJwt(700);
     }
-
 
     /**
      * Registrar nuevo usuario en el sistema
@@ -50,12 +57,10 @@ class AuthMercurioController extends Controller
     #[Response(status: 201, description: 'Usuario registrado exitosamente')]
     #[Response(status: 422, description: 'Error de validación')]
     #[Response(status: 500, description: 'Error interno del servidor')]
-    public function registerEmpresaAction(Request $request)
+    public function registerEmpresaAction(Request $request): JsonResponse
     {
         $this->db->begin();
         try {
-            $data = $request->all();
-            $data['selected_user_type'] = 'E'; // Para empresas
             $request->validate([
                 'rep_nombre' => 'required|string|min:5',
                 'rep_documento' => 'required|integer|digits_between:6,18',
@@ -75,30 +80,27 @@ class AuthMercurioController extends Controller
                     'cargo' => 'required|string|min:5',
                 ]);
             }
-            $request->merge([
+
+            $data = $request->all();
+            $data = array_merge($data, [
                 'cedrep' => $request->input('rep_documento'),
                 'repleg' => $request->input('rep_nombre'),
                 'coddocrepleg' => $request->input('rep_coddoc'),
+                'calemp' => 'E',
             ]);
+
             return $this->performRegister($data, 'E');
         } catch (ValidationException $e) {
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Error de validación',
-                'errors' => $e->errors(),
-            ], 422);
+            return ErrorResource::validationError($e->errors(), 'Error de validación')
+                ->response()
+                ->setStatusCode(422);
         } catch (\Exception $e) {
             $this->db->rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Error inesperado al procesar el registro.',
-                'error' => $e->getMessage()
-            ], 500);
+            return ErrorResource::serverError($e->getMessage(), $e->getTrace())
+                ->response()
+                ->setStatusCode(500);
         }
     }
-
 
     /**
      * Registrar nuevo usuario en el sistema
@@ -110,12 +112,10 @@ class AuthMercurioController extends Controller
     #[Response(status: 201, description: 'Usuario registrado exitosamente')]
     #[Response(status: 422, description: 'Error de validación')]
     #[Response(status: 500, description: 'Error interno del servidor')]
-    public function registerTrabajadorAction(Request $request)
+    public function registerTrabajadorAction(Request $request): JsonResponse
     {
         $this->db->begin();
         try {
-            $data = $request->all();
-            $data['selected_user_type'] = 'T'; // Para trabajadores
             $request->validate([
                 'coddoc' => 'required|string|min:1',
                 'documento' => 'required|integer|digits_between:6,18',
@@ -128,22 +128,20 @@ class AuthMercurioController extends Controller
                 'razsoc' => 'required|string|min:5',
                 'nit' => 'required|integer|digits_between:6,18',
             ]);
+
+            $data = $request->all();
+            $data['calemp'] = null;
+
             return $this->performRegister($data, 'T');
         } catch (ValidationException $e) {
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Error de validación',
-                'errors' => $e->errors(),
-            ], 422);
+            return ErrorResource::validationError($e->errors(), 'Error de validación')
+                ->response()
+                ->setStatusCode(422);
         } catch (\Exception $e) {
             $this->db->rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Error inesperado al procesar el registro.',
-                'error' => $e->getMessage()
-            ], 500);
+            return ErrorResource::serverError($e->getMessage(), $e->getTrace())
+                ->response()
+                ->setStatusCode(500);
         }
     }
 
@@ -157,12 +155,11 @@ class AuthMercurioController extends Controller
     #[Response(status: 201, description: 'Usuario registrado exitosamente')]
     #[Response(status: 422, description: 'Error de validación')]
     #[Response(status: 500, description: 'Error interno del servidor')]
-    public function registerParticularAction(Request $request)
+    public function registerParticularAction(Request $request): JsonResponse
     {
         $this->db->begin();
         try {
-            $data = $request->all();
-            $data['selected_user_type'] = 'P'; // Para particulares
+
             $request->validate([
                 'coddoc' => 'required|string|min:1',
                 'documento' => 'required|integer|digits_between:6,18',
@@ -173,21 +170,19 @@ class AuthMercurioController extends Controller
                 'codciu' => 'required|integer|digits:5',
                 'tipo' => 'required|string|min:1',
             ]);
+            $data = $request->all();
+            $data['calemp'] = null;
+
             return $this->performRegister($data, 'P');
         } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error de validación',
-                'errors' => $e->errors(),
-            ], 422);
+            return ErrorResource::validationError($e->errors(), 'Error de validación')
+                ->response()
+                ->setStatusCode(422);
         } catch (\Exception $e) {
             $this->db->rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Error inesperado al procesar el registro.',
-                'error' => $e->getMessage()
-            ], 500);
+            return ErrorResource::serverError($e->getMessage(), $e->getTrace())
+                ->response()
+                ->setStatusCode(500);
         }
     }
 
@@ -201,11 +196,11 @@ class AuthMercurioController extends Controller
     #[Response(status: 201, description: 'Usuario registrado exitosamente')]
     #[Response(status: 422, description: 'Error de validación')]
     #[Response(status: 500, description: 'Error interno del servidor')]
-    public function registerIndependienteAction(Request $request)
+    public function registerIndependienteAction(Request $request): JsonResponse
     {
         $this->db->begin();
         try {
-            $data = $request->all();
+
             $request->validate([
                 'coddoc' => 'required|string|min:1',
                 'documento' => 'required|integer|digits_between:6,18',
@@ -217,21 +212,19 @@ class AuthMercurioController extends Controller
                 'tipo' => 'required|string|min:1',
                 'contribution_rate' => 'required',
             ]);
+            $data = $request->all();
+            $data['calemp'] = 'I';
+
             return $this->performRegister($data, 'I');
         } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error de validación',
-                'errors' => $e->errors(),
-            ], 422);
+            return ErrorResource::validationError($e->errors(), 'Error de validación')
+                ->response()
+                ->setStatusCode(422);
         } catch (\Exception $e) {
             $this->db->rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Error inesperado al procesar el registro.',
-                'error' => $e->getMessage()
-            ], 500);
+            return ErrorResource::serverError($e->getMessage(), $e->getTrace())
+                ->response()
+                ->setStatusCode(500);
         }
     }
 
@@ -245,11 +238,10 @@ class AuthMercurioController extends Controller
     #[Response(status: 201, description: 'Usuario registrado exitosamente')]
     #[Response(status: 422, description: 'Error de validación')]
     #[Response(status: 500, description: 'Error interno del servidor')]
-    public function registerPensionadoAction(Request $request)
+    public function registerPensionadoAction(Request $request): JsonResponse
     {
         $this->db->begin();
         try {
-            $data = $request->all();
             $request->validate([
                 'coddoc' => 'required|string|min:1',
                 'documento' => 'required|integer|digits_between:6,18',
@@ -261,21 +253,19 @@ class AuthMercurioController extends Controller
                 'tipo' => 'required|string|min:1',
                 'contribution_rate' => 'required',
             ]);
+            $data = $request->all();
+            $data['calemp'] = 'O';
+
             return $this->performRegister($data, 'O');
         } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error de validación',
-                'errors' => $e->errors(),
-            ], 422);
+            return ErrorResource::validationError($e->errors(), 'Error de validación')
+                ->response()
+                ->setStatusCode(422);
         } catch (\Exception $e) {
             $this->db->rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Error inesperado al procesar el registro.',
-                'error' => $e->getMessage()
-            ], 500);
+            return ErrorResource::serverError($e->getMessage(), $e->getTrace())
+                ->response()
+                ->setStatusCode(500);
         }
     }
 
@@ -293,8 +283,6 @@ class AuthMercurioController extends Controller
     {
         $this->db->begin();
         try {
-            $data = $request->all();
-            $data['selected_user_type'] = 'F'; // Para facultativos
             $request->validate([
                 'coddoc' => 'required|string|min:1',
                 'documento' => 'required|integer|digits_between:6,18',
@@ -305,21 +293,20 @@ class AuthMercurioController extends Controller
                 'codciu' => 'required|integer|digits:5',
                 'tipo' => 'required|string|min:1',
             ]);
+
+            $data = $request->all();
+            $data['calemp'] = 'F';
+
             return $this->performRegister($data, 'F');
         } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error de validación',
-                'errors' => $e->errors(),
-            ], 422);
+            return ErrorResource::validationError($e->errors(), 'Error de validación')
+                ->response()
+                ->setStatusCode(422);
         } catch (\Exception $e) {
             $this->db->rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Error inesperado al procesar el registro.',
-                'error' => $e->getMessage()
-            ], 500);
+            return ErrorResource::serverError($e->getMessage(), $e->getTrace())
+                ->response()
+                ->setStatusCode(500);
         }
     }
 
@@ -337,8 +324,6 @@ class AuthMercurioController extends Controller
     {
         $this->db->begin();
         try {
-            $data = $request->all();
-            $data['selected_user_type'] = 'S'; // Para domésticos
             $request->validate([
                 'coddoc' => 'required|string|min:1',
                 'documento' => 'required|integer|digits_between:6,18',
@@ -350,29 +335,26 @@ class AuthMercurioController extends Controller
                 'tipo' => 'required|string|min:1',
                 'contribution_rate' => 'required'
             ]);
+
+            $data = $request->all();
+            $data['calemp'] = 'S'; // Para domésticos
+
             return $this->performRegister($data, 'S');
         } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error de validación',
-                'errors' => $e->errors(),
-            ], 422);
+            return ErrorResource::validationError($e->errors(), 'Error de validación')
+                ->response()
+                ->setStatusCode(422);
         } catch (\Exception $e) {
             $this->db->rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Error inesperado al procesar el registro.',
-                'error' => $e->getMessage()
-            ], 500);
+            return ErrorResource::serverError($e->getMessage(), $e->getTrace())
+                ->response()
+                ->setStatusCode(500);
         }
     }
 
     private function performRegister($data, ?string $tipo = null)
     {
         try {
-            $data['calemp'] = calemp_use_tipo_value($data['selected_user_type']);
-
             switch ($tipo) {
                 case 'E':
                     $signupEntity = new SignupEmpresas;
@@ -387,8 +369,6 @@ class AuthMercurioController extends Controller
                     $signupEntity = new SignupPensionados;
                     break;
                 case 'S':
-                    $signupEntity = null;
-                    break;
                 case 'T':
                 case 'P':
                     $signupEntity = null;
@@ -398,25 +378,20 @@ class AuthMercurioController extends Controller
                     break;
             }
 
-            $response = (new SignupService)->execute(
+            $response = $this->signupService->execute(
                 $signupEntity,
                 new Srequest($data)
             );
 
             $this->db->commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Registro exitoso',
-                'data' => $response,
-            ], 201);
+            return ApiResource::success($response, 'Proceso de registro completado exitosamente')->response();
         } catch (DebugException $e) {
             $this->db->rollBack();
 
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            return ErrorResource::serverError($e->getMessage(), $e->getTrace())
+                ->response()
+                ->setStatusCode(500);
         }
     }
 
@@ -484,124 +459,55 @@ class AuthMercurioController extends Controller
     #[Response(status: 201, description: 'Código enviado exitosamente')]
     #[Response(status: 422, description: 'Error de validación')]
     #[Response(status: 500, description: 'Error al enviar código')]
-    public function verifyStore(Request $request)
+    public function verify(Request $request)
     {
+        $payload = [];
         try {
-            $request->validate([
-                'documento' => 'required|numeric|digits_between:6,18',
-                'coddoc' => 'required|string|min:1|max:2',
-                'tipo' => 'required|string|size:1',
-                'delivery_method' => 'required|string|min:5|max:15',
-                'token' => 'nullable|string|min:40|max:5000',
-            ]);
+            $verifyAuthService = new VerifyAuthService();
 
-            $claims = [
-                'documento' => $request->input('documento'),
-                'coddoc' => $request->input('coddoc'),
-                'tipo' => $request->input('tipo'),
-                'delivery_method' => $request->input('delivery_method'),
-                'context' => 'verifyStore',
-            ];
-            $token = (new AuthJwt(430))->SimpleToken($claims);
-            // Primero validar existencia en mercurio07 para no romper la FK al insertar/actualizar mercurio19
-            $user07 = Mercurio07::where('documento', $request->input('documento'))
-                ->where('coddoc', $request->input('coddoc'))
-                ->where('tipo', $request->input('tipo'))
-                ->first();
+            $request->validate($verifyAuthService->rules());
 
-            if (! $user07) {
-                return response()->json([
-                    'success' => false,
-                    'msj' => 'No existe un usuario registrado con los datos ingresados. Verifique o regístrese para continuar.',
-                ], 422);
-            }
+            $this->authJwt->CheckSimpleToken($request->input('token'));
 
-            $user19 = Mercurio19::where('documento', $request->input('documento'))
-                ->where('coddoc', $request->input('coddoc'))
-                ->where('tipo', $request->input('tipo'))
-                ->first();
+            $rqs = $verifyAuthService->execute($request);
+            if (!$rqs) {
+                $payload = $verifyAuthService->getPayload();
 
-            if ($user19) {
-                $user19->setToken($token);
-                $user19->update();
-            } else {
-                $user19 = new Mercurio19([
-                    'documento' => $request->input('documento'),
-                    'coddoc' => $request->input('coddoc'),
-                    'tipo' => $request->input('tipo'),
-                    'token' => $token,
-                ]);
-                $user19->save();
-            }
-
-            // $user07 ya está validado arriba
-            $codigoVerify = genera_code();
-            $inicio = Carbon::now()->format('Y-m-d H:i:s');
-            $intentos = '0';
-
-            Mercurio19::where('documento', $request->input('documento'))
-                ->where('coddoc', $request->input('coddoc'))
-                ->where('tipo', $request->input('tipo'))
-                ->update([
-                    'inicio' => $inicio,
-                    'intentos' => (int) $intentos,
-                    'codver' => (string) $codigoVerify,
-                ]);
-
-            if ($request->input('delivery_method') == 'email') {
-
-                $html = "Utiliza el siguiente código de verificación, para confirmar el propietario de la dirección de correo:<br/>
-                <span style=\"font-size:16px;color:#333\">CÓDIGO DE VERIFICACIÓN: </span><br/>
-                <span style=\"font-size:30px;color:#11cdef\"><b>{$codigoVerify}</b></span>";
-
-                $asunto = 'Generación nuevo PIN plataforma Comfaca En Línea';
-                $emailCaja = Mercurio01::first();
-                $senderEmail = new SenderEmail;
-                $senderEmail->setters(
-                    "emisor_email: {$emailCaja->getEmail()}",
-                    "emisor_clave: {$emailCaja->getClave()}",
-                    "asunto: {$asunto}"
+                $token = $this->authJwt->SimpleToken(
+                    [
+                        'documento' => $request->input('documento'),
+                        'coddoc' => $request->input('coddoc'),
+                        'tipo' => $request->input('tipo'),
+                        'context' => 'verify.retry',
+                    ]
                 );
-                $senderEmail->send($user07->email, $html);
+                $payload['token'] = $token;
+
+                Mercurio19::where('documento', $request->input('documento'))
+                    ->where('coddoc', $request->input('coddoc'))
+                    ->where('tipo', $request->input('tipo'))
+                    ->update(['token' => (string) $token]);
             } else {
-
-                if (env('API_MODE') == 'development') $user07->setWhatsapp('3157145942');
-
-                if (! $user07->getWhatsapp()) {
-                    throw new DebugException('No se proporcionó número de whatsapp ' . $user07->getWhatsapp(), 501);
-                }
-
-                $html = "> Código de verificación:
-                *{$codigoVerify}*. Generación de PIN plataforma Comfaca En Línea, utiliza el código de verificación para confirmar el propietario de la línea de whatsapp.";
-                $apiWhatsaap = new ApiWhatsapp;
-                $apiWhatsaap->send([
-                    'servicio' => 'Whatsapp',
-                    'metodo' => 'enviar',
-                    'params' => [
-                        'numero' => $user07->getWhatsapp(),
-                        'mensaje' => $html,
-                    ],
-                ]);
+                // caso de exito
+                $url = url($rqs) ?? url('web/auth/login');
+                return ApiResource::success(['url' => $url], "Código enviado exitosamente");
             }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Código de verificación enviado correctamente',
-                'token' => $token,
-            ], 201);
+        } catch (AuthException $e) {
+            $payload = [
+                'success' => false,
+                'message' => 'Error de autenticación: ' . $e->getMessage(),
+                'errors' => [
+                    $e->getMessage()
+                ],
+            ];
         } catch (ValidationException $e) {
-            return response()->json([
+            $payload = [
                 'success' => false,
                 'message' => 'Error de validación',
                 'errors' => $e->errors(),
-            ], 422);
-        } catch (DebugException $e) {
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al enviar el código de verificación: ' . $e->getMessage(),
-            ], 500);
+            ];
         }
+        return Inertia::render('Auth/VerifyEmail', $payload);
     }
 
     /**

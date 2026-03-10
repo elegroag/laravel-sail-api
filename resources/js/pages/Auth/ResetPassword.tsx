@@ -8,6 +8,7 @@ import imageLogo from '../../assets/comfaca-logo.png';
 import AuthUserTypeSelector from './components/generic/AuthUserTypeSelector';
 import AuthWelcome from './components/generic/AuthWelcome';
 import ResetPasswordForm from './components/reset_password/ResetPasswordForm';
+import LoadingAnimated from '@/components/loading-animated';
 import useRecoveryController from './hooks/useRecoveryController';
 
 interface ResetPasswordProps {
@@ -110,6 +111,9 @@ export default function ResetPassword({Coddoc}: ResetPasswordProps) {
                     </button>
                 </div>
             )}
+            
+            {/* Loading animado durante el envío de recuperación */}
+            <LoadingAnimated show={formState.isSubmitting} />
         </AuthLayout>
     );
 }

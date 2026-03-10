@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import AuthLayout from '@/layouts/AuthLayoutTemplate'
 import AuthWelcome from './components/generic/AuthWelcome'
+import LoadingAnimated from '@/components/loading-animated'
 import type { VerifyEmailProps } from '@/types/auth'
 import useVerifyController from '@/pages/Auth/hooks/useVerifyController'
 import { DeliveryOptions } from '@/constants/auth'
@@ -185,6 +186,10 @@ export default function VerifyEmail({ documento, coddoc, tipo, option_request, t
         </div>
       </form>
     </div>
+    
+    {/* Loading animado durante verificación o reenvío */}
+    <LoadingAnimated show={processing || isResending} />
+    
     {toast && (
       <div
         className={`fixed bottom-4 right-4 z-50 min-w-[260px] max-w-[360px] px-4 py-3 rounded shadow-lg text-sm transition-all ${toast.type === 'success' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'}`}

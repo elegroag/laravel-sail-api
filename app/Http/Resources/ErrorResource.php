@@ -49,6 +49,7 @@ class ErrorResource extends JsonResource
             'success' => false,
             'flag' => false,
             'msj' => $error,
+            'message' => $error,
             'error' => $trace ?? $error,
         ];
 
@@ -76,6 +77,7 @@ class ErrorResource extends JsonResource
             'success' => false,
             'flag' => false,
             'msj' => $message,
+            'message' => $message,
             'error' => $trace ?? $message,
             'trace' => $trace
         ]);
@@ -94,6 +96,7 @@ class ErrorResource extends JsonResource
             'success' => false,
             'flag' => false,
             'msj' => $message,
+            'message' => $message,
             'error' => $message,
             'validation_errors' => $errors
         ]);
@@ -141,10 +144,32 @@ class ErrorResource extends JsonResource
             'success' => false,
             'flag' => false,
             'msj' => $message,
+            'message' => $message,
             'error' => $trace ?? $message,
             'trace' => $trace
         ];
 
         return new static($data);
+    }
+
+    /**
+     * Create an exception error response
+     *
+     * @param \Exception $ex
+     * @return static
+     */
+    public static function exception(\Exception $ex)
+    {
+        return new static([
+            'success' => false,
+            'message' => $ex->getMessage(),
+            'msj' => $ex->getMessage() . ' en ' . basename($ex->getFile()) . ' linea ' . $ex->getLine(),
+            'out' => [
+                'code' => $ex->getCode(),
+                'file' => basename($ex->getFile()),
+                'line' => $ex->getLine(),
+                'trace' => $ex->getTraceAsString()
+            ]
+        ]);
     }
 }

@@ -107,6 +107,9 @@ if (! function_exists('calemp_use_tipo_value')) {
             case 'desempleado':
                 return 'D';
                 break;
+            case 'particular':
+                return 'P';
+                break;
             default:
                 return null;
                 break;
