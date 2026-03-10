@@ -514,7 +514,7 @@ class FacultativoController extends ApplicationController
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
-                    'metodo' => 'parametros_empresa',
+                    'metodo' => 'parametros_facultativo',
                 ]
             );
             $paramsFacultativo = new ParamsFacultativo;

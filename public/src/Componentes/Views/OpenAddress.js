@@ -90,8 +90,6 @@ class OpenAddress extends Backbone.View {
             $el.find('#address_nombre_optional').text('Nombre ubicación');
             $el.find('#show_address_two').attr('class', 'col-md-4');
             $el.find('#address_one').removeAttr('disabled');
-
-            new Choices($el.find('#address_one'));
         } else if (valor === 'U') {
             lista = _.filter(this.collection, (row) => {
                 return row.tipo_rural === 'N';
@@ -101,8 +99,6 @@ class OpenAddress extends Backbone.View {
             $el.find('#address_nombre_optional').text('Número ');
             $el.find('#show_address_two').attr('class', 'col-md-2');
             $el.find('#address_one').removeAttr('disabled');
-
-            new Choices($el.find('#address_one'));
         } else {
             lista = [];
             $el.find('#address_one').attr('disabled', 'true');
@@ -110,10 +106,15 @@ class OpenAddress extends Backbone.View {
 
         let html = '';
         const template = _.template(`<option value="<%=estado%>"><%=detalle%></option>`);
-        _.each(lista, (adres) => {
+        $.each(lista, (index, adres) => {
             html += template(adres);
         });
         $el.find('#address_one').html(html);
+
+        new Choices($el.find('#address_one')[0], {
+            silent: true,
+            itemSelectText: null,
+        });
     }
 
     addressOne(event) {

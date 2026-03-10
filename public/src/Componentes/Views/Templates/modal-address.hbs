@@ -8,8 +8,8 @@
 <div class="card-body">
     <label class='mb-3'>Ejemplo CALLE 4 01 CENTRO</label>
     <input type='text' id='tagname' name='tagname' class='d-none'/>
-    <div class="row align-items-center">
-        <div class="col-md-3">
+    <div class="d-flex align-items-center flex-wrap gap-3">
+        <div class="flex-grow-0" style="min-width: 100px;">
             <label class='form-label'>Zona</label>
             <select class="form-control mb-2" id="address_zona" name="address_zona">
                 <option value="">Seleccionar aquí...</option>	
@@ -18,7 +18,7 @@
             </select>
         </div>
         
-        <div class="col-md-4">
+        <div class="flex-grow-1" style="min-width: 250px;">
             <label class='form-label'>Ubicación</label>
             <select class="form-control mb-2" id="address_one" name="address_one" disabled>
                 <% _.each(adress, function(adres){ %>
@@ -28,20 +28,20 @@
             <label id="address_one-error" class="error" for="address_one"></label>
         </div>
 
-        <div class="col-md-2" id="show_address_two">
+        <div class="flex-grow-0" style="min-width: 120px;" id="show_address_two">
             <label class='form-label' id='address_nombre_optional'>Número:</label>
             <div class="input-group mb-2">
                 <input type="text" class="form-control" id="address_two" name="address_two" data-toggle="valida_caracteres">
             </div>
         </div>
         
-        <div class="col-md-2" id="show_address_four">
+        <div class="flex-grow-0" style="min-width: 120px;" id="show_address_four">
             <label class='form-label'>Número:</label>
             <div class="input-group mb-2">	
                 <input type="text" class="form-control" id="address_four" name="address_four" data-toggle="valida_caracteres">
             </div>
         </div>
-        <div class="col-md-3" id="address_barrio" style="display:none">
+        <div class="flex-grow-1" style="max-width:250px; display:none;" id="address_barrio">
             <label class='form-label'>Barrio o Zona:</label>
             <div class="input-group mb-2">
                 <input type="text" class="form-control" id="address_five" name="address_five" data-toggle="valida_caracteres">
