@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Mercurio;
 
+use App\Exceptions\AuthException;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Controller;
 use App\Library\Auth\AuthJwt;
@@ -13,19 +14,26 @@ use App\Models\Mercurio07;
 use App\Models\Mercurio19;
 use App\Models\Subsi54;
 use App\Services\Autentications\AutenticaService;
+use App\Services\Autentications\VerifyAuthService;
 use App\Services\Srequest;
 use App\Services\Utils\SenderEmail;
-use App\Services\Api\ApiSubsidio;
 use App\Services\Autentications\AutenticaGeneral;
 use App\Services\CajaServices\NotificacionService;
 use App\Services\Utils\AsignarFuncionario;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class AuthController extends Controller
 {
+    private AuthJwt $authJwt;
+
+    public function __construct()
+    {
+        $this->authJwt = new AuthJwt(700);
+    }
 
     public function index()
     {
@@ -194,7 +202,8 @@ class AuthController extends Controller
                 'tipo' => $payload['tipo'],
                 'context' => 'verify',
             ];
-            $token = (new AuthJwt(430))->SimpleToken($claims);
+
+            $token = $this->authJwt->SimpleToken($claims);
             // Validar existencia del padre en mercurio07 para evitar romper la FK
             $user07 = Mercurio07::where('documento', $payload['documento'])
                 ->where('coddoc', $payload['coddoc'])
@@ -208,8 +217,9 @@ class AuthController extends Controller
 
             $codigoVerify = genera_code();
             if ($user19) {
-                $user19->token = $token;
-                $user19->update();
+                $user19->update([
+                    'token' => $token,
+                ]);
             } else {
                 // Si no existe el usuario padre en mercurio07, no crear mercurio19 para no violar la FK
                 if (! $user07) {
@@ -222,8 +232,7 @@ class AuthController extends Controller
                         'error' => 'No existe un usuario registrado con los datos ingresados. Por favor verifique o regístrese.',
                     ]);
                 }
-                $user19 = new Mercurio19;
-                $user19->fill([
+                $user19 = Mercurio19::create([
                     'tipo' => $payload['tipo'],
                     'coddoc' => $payload['coddoc'],
                     'documento' => $payload['documento'],
@@ -234,7 +243,6 @@ class AuthController extends Controller
                     'intentos' => '0',
                     'token' => $token,
                 ]);
-                $user19->save();
             }
 
             $payload['token'] = $token;
@@ -249,227 +257,52 @@ class AuthController extends Controller
 
     public function verify(Request $request)
     {
+        $payload = [];
         try {
-            $request->validate([
-                'token' => 'required|string|max:800',
-                'documento' => 'required|numeric|digits_between:6,18',
-                'coddoc' => 'required|string|min:1|max:2',
-                'tipo' => 'required|string|size:1',
-                'code_1' => 'required|string|size:1',
-                'code_2' => 'required|string|size:1',
-                'code_3' => 'required|string|size:1',
-                'code_4' => 'required|string|size:1',
-                'option_request' => 'required|string|max:40',
-            ]);
+            $verifyAuthService = new VerifyAuthService();
 
-            $token = $request->input('token');
-            $documento = $request->input('documento');
-            $coddoc = $request->input('coddoc');
-            $tipo = $request->input('tipo');
-            $option_request = $request->input('option_request');
+            $request->validate($verifyAuthService->rules());
 
-            $auth_jwt_temporal = new AuthJwt(430);
-            $auth_jwt_temporal->CheckSimpleToken($token);
+            $this->authJwt->CheckSimpleToken($request->input('token'));
 
-            $code = [
-                $request->input('code_1'),
-                $request->input('code_2'),
-                $request->input('code_3'),
-                $request->input('code_4'),
+            $rqs = $verifyAuthService->execute($request);
+            if (!$rqs) {
+                $payload = $verifyAuthService->getPayload();
+
+                $token = $this->authJwt->SimpleToken(
+                    [
+                        'documento' => $request->input('documento'),
+                        'coddoc' => $request->input('coddoc'),
+                        'tipo' => $request->input('tipo'),
+                        'context' => 'verify.retry',
+                    ]
+                );
+                $payload['token'] = $token;
+
+                Mercurio19::where('documento', $request->input('documento'))
+                    ->where('coddoc', $request->input('coddoc'))
+                    ->where('tipo', $request->input('tipo'))
+                    ->update(['token' => (string) $token]);
+            } else {
+                // caso de exito
+                $url = url($rqs) ?? url('web/auth/login');
+                return Inertia::location($url);
+            }
+        } catch (AuthException $e) {
+            $payload = [
+                'success' => false,
+                'message' => 'Error de autenticación: ' . $e->getMessage(),
+                'errors' => [
+                    $e->getMessage()
+                ],
             ];
-
-            $user07 = Mercurio07::where('documento', $documento)
-                ->where('coddoc', $coddoc)
-                ->where('tipo', $tipo)
-                ->first();
-
-            if (! $user07) {
-                throw new DebugException('Error no es valido el usuario particular', 301);
-            }
-
-            $error = '';
-            $user19 = Mercurio19::where('documento', $documento)
-                ->where('coddoc', $coddoc)
-                ->where('tipo', $tipo)
-                ->first();
-
-            if ($token != $user19->getToken()) {
-                $error .= "Error el token ya no es valido para continuar. \n";
-            }
-
-            $momento = Carbon::parse($user19->getInicio());
-            // Obtener el momento actual
-            $ahora = Carbon::now();
-            // Calcular la diferencia
-            $diferenciaEnMinutos = $momento->diffInMinutes($ahora);
-
-            // para mas de tres intentos fallidos
-            if ($user19->getIntentos() >= 3 && $diferenciaEnMinutos < 5) {
-                // Verificar si la diferencia es exactamente 10 minutos
-                $error .= "Ha superado el número de intentos permitidos para acceder a la cuenta con PIN de seguridad. Espera un poco más, han pasado {$diferenciaEnMinutos} minutos para poder volver acceder. \n";
-            }
-
-            if (strlen($error) == 0 && $diferenciaEnMinutos >= 5) {
-                // volver a generar PIN
-                $codigoVerify = genera_code();
-                $inicio = Carbon::now()->format('Y-m-d H:i:s');
-                $intentos = '0';
-
-                Mercurio19::where('documento', $documento)
-                    ->where('coddoc', $coddoc)
-                    ->where('tipo', $tipo)
-                    ->update([
-                        'inicio' => $inicio,
-                        'intentos' => (int) $intentos,
-                        'codver' => (string) $codigoVerify,
-                    ]);
-
-                $html = "Utiliza el siguiente código de verificación, para confirmar el propietario de la dirección de correo:<br/>
-                    <span style=\"font-size:16px;color:#333\">CÓDIGO DE VERIFICACIÓN: </span><br/>
-                    <span style=\"font-size:30px;color:#11cdef\"><b>{$codigoVerify}</b></span>";
-
-                $asunto = 'Generación nuevo PIN plataforma Comfaca En Línea';
-                $emailCaja = Mercurio01::first();
-                $senderEmail = new SenderEmail;
-                $senderEmail->setters(
-                    "emisor_email: {$emailCaja->getEmail()}",
-                    "emisor_clave: {$emailCaja->getClave()}",
-                    "asunto: {$asunto}"
-                );
-                $senderEmail->send($user07->getEmail(), $html);
-
-                $error .= 'Ha superado el tiempo de validación y es necesario volver a generar un nuevo PIN, ' .
-                    'y se ha enviado a la dirección de correo registrada en la plataforma. ' .
-                    "Por favor comprobar en el buzon del correo e ingresar el nuevo PIN.\n";
-            }
-
-            if (strlen($error) == 0) {
-                $codver = trim(implode('', $code));
-                if ($codver != trim($user19->getCodver())) {
-                    $inicio = date('Y-m-d H:i:s');
-                    $intentos = $user19->getIntentos() + 1;
-
-                    Mercurio19::where('documento', $documento)
-                        ->where('coddoc', $coddoc)
-                        ->where('tipo', $tipo)
-                        ->update([
-                            'inicio' => $inicio,
-                            'intentos' => (int) $intentos,
-                        ]);
-
-                    $error .= "Error el código no es valido para continuar. {$codver} = {$user19->getCodver()} \n";
-                }
-            }
-
-            $ps = new ApiSubsidio();
-            switch ($tipo) {
-                case 'T':
-                    $url = 'mercurio/principal/index';
-                    $metodo = 'informacion_trabajador';
-                    $params = ['cedtra' => $documento, 'coddoc' => $coddoc];
-                    break;
-                case 'E':
-                    $url = 'mercurio/empresa/index';
-                    $metodo = 'informacion_empresa';
-                    $params = ['nit' => $documento, 'coddoc' => $coddoc];
-                    break;
-                case 'I':
-                    $url = 'mercurio/independiente/index';
-                    $metodo = 'informacion_empresa';
-                    $params = ['nit' => $documento, 'coddoc' => $coddoc];
-                    break;
-                case 'O':
-                    $url = 'mercurio/pensionado/index';
-                    $metodo = 'informacion_empresa';
-                    $params = ['nit' => $documento, 'coddoc' => $coddoc];
-                    break;
-                case 'F':
-                    $url = 'mercurio/facultativo/index';
-                    $metodo = 'informacion_empresa';
-                    $params = ['nit' => $documento, 'coddoc' => $coddoc];
-                    break;
-                default:
-                    $url = 'mercurio/principal/index';
-                    $metodo = 'informacion_empresa';
-                    $params = ['nit' => $documento, 'coddoc' => $coddoc];
-                    break;
-            }
-
-            $ps->send([
-                'servicio' => 'ComfacaEmpresas',
-                'metodo' => $metodo,
-                'params' => $params,
-            ]);
-
-            $out = $ps->toArray();
-            $afiliado = ($out['success'] == true && isset($out['data']) && $out['data'] != false) ? $out['data'] : null;
-            $estadoAfiliado = ($afiliado) ? $afiliado['estado'] : 'I';
-
-            if (! SessionCookies::authenticate(
-                'mercurio',
-                new Srequest(
-                    [
-                        'tipo' => $tipo,
-                        'coddoc' => $coddoc,
-                        'documento' => $documento,
-                        'estado' => 'A',
-                        'estado_afiliado' => $estadoAfiliado,
-                    ]
-                )
-            )) {
-                throw new DebugException('Error en la autenticación del usuario', 501);
-            }
-
-            if ($option_request == 'register') {
-                set_flashdata(
-                    'success',
-                    [
-                        'type' => 'html',
-                        'msj' => "<p style='font-size:1rem' class='text-left'>El usuario ha realizado el pre-registro de forma correcta</p>" .
-                            "<p style='font-size:1rem' class='text-left'>El registro realizado es de tipo \"Particular\", ahora puedes realizar las afiliaciones de modo seguro.<br/>" .
-                            'Las credenciales de acceso le seran enviadas a la respectiva dirección de correo registrado.<br/></p>',
-                    ]
-                );
-
-                return Inertia::location(url($url));
-            }
-
-            if ($option_request == 'recovery') {
-                return Inertia::location(url('mercurio/principal/index#change-password'));
-            }
         } catch (ValidationException $e) {
             $payload = [
                 'success' => false,
                 'message' => 'Error de validación',
                 'errors' => $e->errors(),
             ];
-        } catch (DebugException $e) {
-            $payload = [
-                'success' => false,
-                'message' => 'Error al crear empresa: ' . $e->getMessage(),
-            ];
-        } catch (\Exception $e) {
-            $payload = [
-                'success' => false,
-                'message' => $e->getMessage(),
-            ];
         }
-
-        $auth_jwt_temporal = new AuthJwt(430);
-        $token = $auth_jwt_temporal->SimpleToken([
-            'documento' => $request->input('documento'),
-            'coddoc' => $request->input('coddoc'),
-            'tipo' => $request->input('tipo'),
-            'context' => 'verify.retry',
-        ]);
-
-        Mercurio19::where('documento', $request->input('documento'))
-            ->where('coddoc', $request->input('coddoc'))
-            ->where('tipo', $request->input('tipo'))
-            ->update(['token' => (string) $token]);
-
-        $payload['token'] = $token;
-
         return Inertia::render('Auth/VerifyEmail', $payload);
     }
 

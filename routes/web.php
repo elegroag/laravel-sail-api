@@ -11,6 +11,7 @@ Route::get('/web', function () {
     return redirect('web/login');
 });
 
+require __DIR__ . '/mercurio/auth.php';
 require __DIR__ . '/mercurio/mercurio.php';
 require __DIR__ . '/mercurio/trabajador.php';
 require __DIR__ . '/mercurio/empresa.php';

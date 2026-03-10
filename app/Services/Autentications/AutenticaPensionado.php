@@ -29,36 +29,23 @@ class AutenticaPensionado extends AutenticaGeneral
                 'metodo' => 'informacion_empresa',
                 'params' => [
                     'nit' => $documento,
-                ],
+                ]
             ]
         );
 
-        if ($this->procesadorComando->isJson() == false) {
-            $this->message = 'Se genero un error al buscar al afiliado pensionado usando el servicio CLI-Comando.';
-            return false;
-        }
-
         $out = $this->procesadorComando->toArray();
-        $afiliado = ($out['success'] == true) ? $out['data'] : null;
 
-        $sucurPension = false;
-        $sucursales = $out['sucursales'];
-        if ($sucursales) {
-            foreach ($sucursales as $ai => $sucursal) {
-                if (($sucursal['calsuc'] == 'A' || $sucursal['calsuc'] == 'P')) {
-                    $sucurPension = $sucursal;
-                    break;
-                }
-            }
-        }
-
-        if ($sucurPension == false) {
-            $this->message = 'Error acceso incorrecto. El afiliado pensionado tiene un error de registro en su afiliación, ' .
-                'se debe comunicar a la dirección de correo: <b>afiliacionyregistro@comfaca.com</b> indicando la comprobación del estado afiliado pensionado. ' .
-                'No olvidar el compartir la dirección email, el número de cedula y el nombre del afiliado, para poder identificar al afiliado.';
-
+        if (!is_array($out)) {
+            $this->message = 'Se genero un error al buscar al afiliado pensionado servicio API.';
             return false;
         }
+
+        $isSuccess = $out['success'] ?? false;
+        if (!$isSuccess) {
+            $this->message = 'Se genero un error al buscar al afiliado pensionado en la API.';
+            return false;
+        }
+        $afiliado = $out['data'] ?? null;
 
         if ($coddoc == 3 || $coddoc == 7 || $coddoc == 2) {
             $this->message = 'El tipo documento del afiliado pensionado no es valido, debe solicitar el cambio en tipo documento a la dirección: ' .
@@ -71,22 +58,47 @@ class AutenticaPensionado extends AutenticaGeneral
         /**
          * buscar usuario de empresa en mercurio
          */
-        $usuarioParticular = (new Mercurio07)->findFirst("tipo='P' AND documento='{$documento}' AND coddoc='{$coddoc}'");
+        $usuarioParticular = Mercurio07::where('tipo', 'P')
+            ->where('documento', $documento)
+            ->where('coddoc', $coddoc)
+            ->first();
 
-        $usuarioPensionado = (new Mercurio07)->findFirst("tipo='O' AND documento='{$documento}' AND coddoc='{$coddoc}'");
+        $usuarioPensionado = Mercurio07::where('tipo', 'O')
+            ->where('documento', $documento)
+            ->where('coddoc', $coddoc)
+            ->first();
 
-        if (is_null($afiliado) || $afiliado == false) {
+        if (!$afiliado) {
             // ya no está registrado el afiliado empresa
             if ($usuarioPensionado) {
                 $this->estadoAfiliado = 'I';
-
                 return true;
             } else {
                 $this->message = 'El pensionado no se encuentra registrado en el sistema principal de Subsidio, no dispone de acceso a la plataforma.';
+                return false;
+            }
+        } else {
+
+            $sucurPension = false;
+            $sucursales = $afiliado['sucursales'] ?? null;
+            if ($sucursales) {
+                foreach ($sucursales as $sucursal) {
+                    if (($sucursal['calsuc'] == 'A' || $sucursal['calsuc'] == 'P')) {
+                        $sucurPension = $sucursal;
+                        break;
+                    }
+                }
+            }
+
+            if ($sucurPension == false) {
+                $this->message = 'Error acceso incorrecto. El afiliado pensionado tiene un error de registro en su afiliación, ' .
+                    'se debe comunicar a la dirección de correo: <b>afiliacionyregistro@comfaca.com</b> indicando la comprobación del estado afiliado pensionado. ' .
+                    'No olvidar el compartir la dirección email, el número de cedula y el nombre del afiliado, para poder identificar al afiliado.';
 
                 return false;
             }
         }
+
         $this->estadoAfiliado = ($afiliado['estado'] != 'I') ? 'A' : 'I';
 
         if ($afiliado['coddoc'] != $coddoc) {
@@ -146,42 +158,61 @@ class AutenticaPensionado extends AutenticaGeneral
                  * Si existe el usuario de mercurio, dado que la empresa está inactiva en sisu.
                  * se inactivan todas las solicitudes vigentes, dado que la empresa este inactiva en sisu
                  */
-                $soliPrevias = (new Mercurio30)->findFirst("tipo='I' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado='A'");
+                $soliPrevias = Mercurio30::where('tipo', 'I')
+                    ->where('documento', $documento)
+                    ->where('coddoc', $coddoc)
+                    ->where('estado', 'A')
+                    ->first();
+
                 if ($soliPrevias) {
-                    $soliPrevias->setEstado('I');
-                    $soliPrevias->setFecest(date('Y-m-d'));
+                    $soliPrevias->estado = 'I';
+                    $soliPrevias->fecest = date('Y-m-d');
                     $soliPrevias->save();
                 }
 
-                $soliPrevTraba = (new Mercurio31)->getFind("tipo='I' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado='A'");
+                $soliPrevTraba = Mercurio31::where('tipo', 'I')
+                    ->where('documento', $documento)
+                    ->where('coddoc', $coddoc)
+                    ->where('estado', 'A')
+                    ->get();
+
                 if ($soliPrevTraba) {
                     foreach ($soliPrevTraba as $soli) {
-                        $soli->setEstado('I');
-                        $soli->setFecest(date('Y-m-d'));
+                        $soli->estado = 'I';
+                        $soli->fecest = date('Y-m-d');
                         $soli->save();
                     }
                 }
 
-                $soliPrevCon = (new Mercurio32)->getFind("tipo='I' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado='A'");
+                $soliPrevCon = Mercurio32::where('tipo', 'I')
+                    ->where('documento', $documento)
+                    ->where('coddoc', $coddoc)
+                    ->where('estado', 'A')
+                    ->get();
+
                 if ($soliPrevCon) {
                     foreach ($soliPrevCon as $soli) {
-                        $soli->setEstado('I');
-                        $soli->setFecest(date('Y-m-d'));
+                        $soli->estado = 'I';
+                        $soli->fecest = date('Y-m-d');
                         $soli->save();
                     }
                 }
 
-                $soliPrevBen = (new Mercurio34)->getFind("tipo='I' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado='A'");
+                $soliPrevBen = Mercurio34::where('tipo', 'I')
+                    ->where('documento', $documento)
+                    ->where('coddoc', $coddoc)
+                    ->where('estado', 'A')
+                    ->get();
                 if ($soliPrevBen) {
                     foreach ($soliPrevBen as $soli) {
-                        $soli->setEstado('I');
-                        $soli->setFecest(date('Y-m-d'));
+                        $soli->estado = 'I';
+                        $soli->fecest = date('Y-m-d');
                         $soli->save();
                     }
                 }
 
-                if ($usuarioParticular->getEstado() == 'I') {
-                    $usuarioParticular->setEstado('A');
+                if ($usuarioParticular->estado == 'I') {
+                    $usuarioParticular->estado = 'A';
                     $usuarioParticular->save();
                 }
 
@@ -195,7 +226,7 @@ class AutenticaPensionado extends AutenticaGeneral
              * tampoco puede generar certificados
              */
             if ($usuarioPensionado) {
-                $usuarioPensionado->setEstado('I');
+                $usuarioPensionado->estado = 'I';
                 $usuarioPensionado->save();
             }
 
@@ -205,13 +236,13 @@ class AutenticaPensionado extends AutenticaGeneral
              * La empresa está activa en sisu
              */
             if ($usuarioParticular) {
-                $usuarioParticular->setEstado('A');
+                $usuarioParticular->estado = 'A';
                 $usuarioParticular->save();
             }
 
             if ($usuarioPensionado) {
-                if ($usuarioPensionado->getEstado() == 'I') {
-                    $usuarioPensionado->setEstado('A');
+                if ($usuarioPensionado->estado == 'I') {
+                    $usuarioPensionado->estado = 'A';
                     $usuarioPensionado->save();
                 }
             } else {

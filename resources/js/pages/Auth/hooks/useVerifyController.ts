@@ -185,7 +185,7 @@ export default function useVerifyController({ token, documento, coddoc, tipo, er
             preserveScroll: true,
             onStart: () => setIsSubmitting(true),
             onSuccess: (response) => {
-                console.log(response);
+                console.log('Response verify action:', response);
                 dispatch({ type: 'SET_VERIFIED', verified: true });
             },
             onError: (errors) => {

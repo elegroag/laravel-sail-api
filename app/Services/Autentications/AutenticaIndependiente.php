@@ -33,32 +33,20 @@ class AutenticaIndependiente extends AutenticaGeneral
             ]
         );
 
-        if ($this->procesadorComando->isJson() == false) {
-            $this->message = 'Se genero un error al buscar al afiliado independiente usando el servicio CLI-Comando.';
-            return false;
-        }
-
         $out = $this->procesadorComando->toArray();
-        $afiliado = ($out['success'] == true) ? $out['data'] : null;
 
-        $sucurIndepe = false;
-        $sucursales = $out['sucursales'];
-        if ($sucursales) {
-            foreach ($sucursales as $ai => $sucursal) {
-                if ($sucursal['calsuc'] == 'I') {
-                    $sucurIndepe = $sucursal;
-                    break;
-                }
-            }
-        }
-
-        if ($sucurIndepe == false) {
-            $this->message = 'Error acceso incorrecto. El afiliado independiente tiene un error de registro en su afiliación, ' .
-                'se debe comunicar a la dirección de correo: <b>afiliacionyregistro@comfaca.com</b> indicando la comprobación del estado afiliado independiente. ' .
-                'No olvidar el compartir la dirección email, el número de cedula y el nombre del afiliado, para poder identificar al afiliado.';
-
+        if (!is_array($out)) {
+            $this->message = 'Se genero un error al buscar al afiliado independiente servicio API.';
             return false;
         }
+
+        $isSuccess = $out['success'] ?? false;
+        if (!$isSuccess) {
+            $this->message = 'Se genero un error al buscar al afiliado independiente en la API.';
+            return false;
+        }
+
+        $afiliado = $out['data'] ?? null;
 
         if ($coddoc == 3 || $coddoc == 7 || $coddoc == 2) {
             $this->message = 'El tipo documento de los afiliados independientes no es valido, debe solicitar el cambio en tipo documento a la dirección: ' .
@@ -71,22 +59,48 @@ class AutenticaIndependiente extends AutenticaGeneral
         /**
          * buscar usuario de empresa en mercurio
          */
-        $usuarioParticular = (new Mercurio07)->findFirst("tipo='P' AND documento='{$documento}' AND coddoc='{$coddoc}'");
+        $usuarioParticular = Mercurio07::where('tipo', 'P')
+            ->where('documento', $documento)
+            ->where('coddoc', $coddoc)
+            ->first();
 
-        $usuarioIndependiente = (new Mercurio07)->findFirst("tipo='{$this->tipo}' AND documento='{$documento}' AND coddoc='{$coddoc}'");
+        $usuarioIndependiente = Mercurio07::where('tipo', $this->tipo)
+            ->where('documento', $documento)
+            ->where('coddoc', $coddoc)
+            ->first();
 
-        if (is_null($afiliado) || $afiliado == false) {
-            // ya no está registrado el afiliado empresa
+        if (!$afiliado) {
+            // afiliado no encontrado en sisu
             if ($usuarioIndependiente) {
                 $this->estadoAfiliado = 'I';
-
                 return true;
             } else {
                 $this->message = 'El independiente no se encuentra registrado en el sistema principal de Subsidio, no dispone de acceso a la plataforma.';
+                return false;
+            }
+        } else {
+
+            // debe estar afiliado para validar las sucursales
+            $sucurIndepe = false;
+            $sucursales = $afiliado['sucursales'] ?? null;
+            if ($sucursales) {
+                foreach ($sucursales as $sucursal) {
+                    if ($sucursal['calsuc'] == 'I') {
+                        $sucurIndepe = $sucursal;
+                        break;
+                    }
+                }
+            }
+
+            if ($sucurIndepe == false) {
+                $this->message = 'Error acceso incorrecto. El afiliado independiente tiene un error de registro en su afiliación, ' .
+                    'se debe comunicar a la dirección de correo: <b>afiliacionyregistro@comfaca.com</b> indicando la comprobación del estado afiliado independiente. ' .
+                    'No olvidar el compartir la dirección email, el número de cedula y el nombre del afiliado, para poder identificar al afiliado.';
 
                 return false;
             }
         }
+
         $this->estadoAfiliado = ($afiliado['estado'] != 'I') ? 'A' : 'I';
 
         /**
@@ -138,42 +152,62 @@ class AutenticaIndependiente extends AutenticaGeneral
                  * Si existe el usuario de mercurio, dado que la empresa está inactiva en sisu.
                  * se inactivan todas las solicitudes vigentes, dado que la empresa este inactiva en sisu
                  */
-                $soliPrevias = (new Mercurio30)->findFirst("tipo='{$this->tipo}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado='A'");
+                $soliPrevias = Mercurio30::where('tipo', $this->tipo)
+                    ->where('documento', $documento)
+                    ->where('coddoc', $coddoc)
+                    ->where('estado', 'A')
+                    ->first();
+
                 if ($soliPrevias) {
-                    $soliPrevias->setEstado('I');
-                    $soliPrevias->setFecest(date('Y-m-d'));
+                    $soliPrevias->estado = 'I';
+                    $soliPrevias->fecest = date('Y-m-d');
                     $soliPrevias->save();
                 }
 
-                $soliPrevTraba = (new Mercurio31)->getFind("tipo='{$this->tipo}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado='A'");
+                $soliPrevTraba = Mercurio31::where('tipo', $this->tipo)
+                    ->where('documento', $documento)
+                    ->where('coddoc', $coddoc)
+                    ->where('estado', 'A')
+                    ->get();
+
                 if ($soliPrevTraba) {
                     foreach ($soliPrevTraba as $soli) {
-                        $soli->setEstado('I');
-                        $soli->setFecest(date('Y-m-d'));
+                        $soli->estado = 'I';
+                        $soli->fecest = date('Y-m-d');
                         $soli->save();
                     }
                 }
 
-                $soliPrevCon = (new Mercurio32)->getFind("tipo='{$this->tipo}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado='A'");
+                $soliPrevCon = Mercurio32::where('tipo', $this->tipo)
+                    ->where('documento', $documento)
+                    ->where('coddoc', $coddoc)
+                    ->where('estado', 'A')
+                    ->get();
+
                 if ($soliPrevCon) {
                     foreach ($soliPrevCon as $soli) {
-                        $soli->setEstado('I');
-                        $soli->setFecest(date('Y-m-d'));
+                        $soli->estado = 'I';
+                        $soli->fecest = date('Y-m-d');
                         $soli->save();
                     }
                 }
 
-                $soliPrevBen = (new Mercurio34)->getFind("tipo='{$this->tipo}' AND documento='{$documento}' AND coddoc='{$coddoc}' AND estado='A'");
+                $soliPrevBen = Mercurio34::where('tipo', $this->tipo)
+                    ->where('documento', $documento)
+                    ->where('coddoc', $coddoc)
+                    ->where('estado', 'A')
+                    ->get();
+
                 if ($soliPrevBen) {
                     foreach ($soliPrevBen as $soli) {
-                        $soli->setEstado('I');
-                        $soli->setFecest(date('Y-m-d'));
+                        $soli->estado = 'I';
+                        $soli->fecest = date('Y-m-d');
                         $soli->save();
                     }
                 }
 
-                if ($usuarioParticular->getEstado() == 'I') {
-                    $usuarioParticular->setEstado('A');
+                if ($usuarioParticular->estado == 'I') {
+                    $usuarioParticular->estado = 'A';
                     $usuarioParticular->save();
                 }
 
@@ -187,7 +221,7 @@ class AutenticaIndependiente extends AutenticaGeneral
              * tampoco puede generar certificados
              */
             if ($usuarioIndependiente) {
-                $usuarioIndependiente->setEstado('I');
+                $usuarioIndependiente->estado = 'I';
                 $usuarioIndependiente->save();
             }
 
@@ -197,13 +231,13 @@ class AutenticaIndependiente extends AutenticaGeneral
              * La empresa está activa en sisu
              */
             if ($usuarioParticular) {
-                $usuarioParticular->setEstado('A');
+                $usuarioParticular->estado = 'A';
                 $usuarioParticular->save();
             }
 
             if ($usuarioIndependiente) {
-                if ($usuarioIndependiente->getEstado() == 'I') {
-                    $usuarioIndependiente->setEstado('A');
+                if ($usuarioIndependiente->estado == 'I') {
+                    $usuarioIndependiente->estado = 'A';
                     $usuarioIndependiente->save();
                 }
             } else {

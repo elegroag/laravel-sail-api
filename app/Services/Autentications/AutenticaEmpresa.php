@@ -45,14 +45,21 @@ class AutenticaEmpresa extends AutenticaGeneral
             ]
         );
 
-        if ($this->procesadorComando->isJson() === false) {
-            $this->message = 'Se genero un error al buscar la empresa usando el servicio CLI-Comando. ';
+        $out = $this->procesadorComando->toArray();
 
+        if (!is_array($out)) {
+            $this->message = 'Se genero un error al buscar la empresa servicio API.';
             return false;
         }
 
-        $out = $this->procesadorComando->toArray();
-        $afiliado = ($out['success'] == true && isset($out['data']) && $out['data'] != false) ? $out['data'] : null;
+        $isSuccess = $out['success'] ?? false;
+        if (!$isSuccess) {
+            $this->message = 'Se genero un error al buscar la empresa en la API.';
+            return false;
+        }
+
+        $afiliado = $out['data'] ?? null;
+
         /**
          * buscar usuario de empresa en mercurio
          */

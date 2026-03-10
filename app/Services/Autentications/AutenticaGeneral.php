@@ -30,7 +30,7 @@ class AutenticaGeneral
     public function __construct()
     {
         $this->procesadorComando = new ApiSubsidio();
-        $this->caja = (new Mercurio02)->findFirst();
+        $this->caja = Mercurio02::first();
     }
 
     public function getMessage()

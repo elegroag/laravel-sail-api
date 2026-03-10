@@ -115,12 +115,12 @@ class SignupService
                         'razsoc' => $this->razsoc,
                         'usuario' => $usuario,
                         'password' => $this->password,
-                        'tipo' => $this->tipo // usar el tipo real del usuario (I, O, F, etc.)
+                        'tipo' => $this->tipo
                     ]
                 )
             );
-            $signupParticular->main();
 
+            $signupParticular->main();
             $request->setParam('usuario', $usuario);
             $request->setParam('repleg', $this->repleg);
             $request->setParam('coddocrepleg', $this->coddocrepleg);
@@ -216,7 +216,7 @@ class SignupService
      * buscaEmpresaSisu function
      *
      * @param  int  $nit
-     * @return object
+     * @return array|bool
      */
     public function buscaEmpresaSisu($nit)
     {
@@ -234,11 +234,13 @@ class SignupService
             return false;
         }
         $out = $ps->toArray();
-        if ($out['success'] == false) {
-            return false;
-        }
+        $isSuccess = $out['success'] ?? null;
+        if (!$isSuccess) return false;
 
-        return $out['data'];
+        $data = $out['data'] ?? null;
+        if (!$data) return false;
+
+        return $data;
     }
 
     public function autoFirma()
@@ -262,6 +264,10 @@ class SignupService
         }
     }
 
+    /**
+     * validaTrabajadorEmpresa function
+     * @return array|bool
+     */
     public function validaTrabajadorEmpresa()
     {
         $ps = new ApiSubsidio();
@@ -274,13 +280,11 @@ class SignupService
                 ],
             ]
         );
-        if ($ps->isJson() == false) {
-            return false;
-        }
+        if ($ps->isJson() == false) return false;
+
         $out = $ps->toArray();
-        if ($out['success'] == false) {
-            return false;
-        }
+        $isSuccess = $out['success'] ?? null;
+        if (!$isSuccess) return false;
 
         $ps->send(
             [
@@ -291,14 +295,16 @@ class SignupService
                 ],
             ]
         );
-        if ($ps->isJson() == false) {
-            return false;
-        }
-        $out = $ps->toArray();
-        if ($out['success'] == false) {
-            return false;
-        }
 
-        return ($out['data']['nit'] == $this->nit) ? $out['data'] : false;
+        if ($ps->isJson() == false) return false;
+
+        $out = $ps->toArray();
+        $isSuccess = $out['success'] ?? null;
+        if (!$isSuccess) return false;
+
+        $data = $out['data'] ?? null;
+        if (!$data) return false;
+
+        return ($data['nit'] == $this->nit) ? $data : false;
     }
 }
