@@ -73,4 +73,21 @@ php artisan l5-swagger:generate
 
 # Consultar  la lista de endpoints de API
 php artisan route:list --path=api
+
+
+# Que db se esta usando
+php artisan tinker
+> DB::connection()->getDriverName();
+> DB::connection()->getDatabaseName();
+
+# Tambien se puede usar
+php artisan db:show
+
+
+# Correr el seeder
+php artisan db:seed --class=DatabaseSeeder
+
+
+# Correr las migraciones y el seeder solo para desarrollo
+php artisan migrate:fresh --seed
 ```

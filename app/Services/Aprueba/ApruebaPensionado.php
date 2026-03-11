@@ -60,7 +60,7 @@ class ApruebaPensionado
 
         /**
          * valida indice de aportes
-         * 07 => aportes del 0.2% pensionados
+         * 07 => aportes del 2% pensionados
          * 49 => aportes del 0.6% pensionados
          * 48 => aportes del 0% pensionados
          * 47 => aportes del pensionado Fidelidad
@@ -79,15 +79,23 @@ class ApruebaPensionado
 
         if ($params['codind'] == '07') {
             $tipcot = 10;
+            $calsuc = 'P'; //pensioando del 2%
+            $nomemp = 'PENSIONADO DEL 2%';
         }
         if ($params['codind'] == '47') {
             $tipcot = 66;
+            $calsuc = 'O'; //pensionado fidelidad
+            $nomemp = 'PENSIONADO FIDELIDAD';
         }
         if ($params['codind'] == '48') {
             $tipcot = 67;
+            $calsuc = 'X'; //pensionado del 0%
+            $nomemp = 'PENSIONADO DEL 0%';
         }
         if ($params['codind'] == '49') {
             $tipcot = 64;
+            $calsuc = 'A'; //pensionado del 0.6%
+            $nomemp = 'PENSIONADO DEL 0.6%';
         }
 
         $params['estado'] = 'A';
@@ -95,7 +103,7 @@ class ApruebaPensionado
         $params['codest'] = null;
         $params['tipper'] = $tipper;
         $params['tipapo'] = 'O';
-        $params['calsuc'] = $this->solicitud->calemp;
+        $params['calsuc'] = $calsuc;
         $params['celpri'] = $this->solicitud->celular;
         $params['emailpri'] = $this->solicitud->email;
 
@@ -124,7 +132,6 @@ class ApruebaPensionado
         }
 
         $params['nomcon'] = substr($fullname, 0, 70);
-        $params['codase'] = '1';
         $params['resest'] = null;
         $params['fecmer'] = null;
         $params['feccor'] = null;
@@ -147,11 +154,17 @@ class ApruebaPensionado
         $params['empleador'] = 'N';
         $params['feccer'] = $hoy;
         $params['fecpre'] = $params['fecafi'];
+        $params['codact'] = '0020';
+        $params['codcaj'] = '13';
+        $params['codase'] = '09';
+        $params['tipemp'] = 'N'; //no aplica
+        $params['cedrep'] = $this->solicitud->cedtra;
+        $params['nomemp'] = $repleg . ' - ' . $nomemp;
 
-        $params['giro'] = (isset($params['giro']) && $params['giro'] != '') ? $params['giro'] : 'N';
-        $params['giro2'] = $params['giro'];
-        $params['codgir'] = (isset($params['codgir'])) ? $params['codgir'] : 'NU';
-        $params['codgir2'] = $params['codgir'];
+        $params['giro'] = 'N';
+        $params['giro2'] = 'N';
+        $params['codgir'] = 'NU';
+        $params['codgir2'] = 'NU';
 
         $params['ruaf'] = 'N';
         $params['tipcon'] = 'F';
@@ -173,7 +186,6 @@ class ApruebaPensionado
         $params['tippag'] = 'T';
         $params['codban'] = null;
         $params['tipcue'] = null;
-
 
         /**
          * tipo de sociedad por defecto es persona natural para pensionados

@@ -128,10 +128,16 @@ class ApruebaFacultativo
         $params['feccer'] = $hoy;
         $params['fecpre'] = $params['fecafi'];
 
-        $params['giro'] = (isset($params['giro']) && $params['giro'] != '') ? $params['giro'] : 'N';
-        $params['giro2'] = $params['giro'];
-        $params['codgir'] = (isset($params['codgir'])) ? $params['codgir'] : 'NU';
-        $params['codgir2'] = $params['codgir'];
+        $params['codcaj'] = '13';
+        $params['codase'] = '09';
+        $params['tipemp'] = 'N'; //no aplica
+        $params['cedrep'] = $this->solicitud->cedtra;
+        $params['nomemp'] = $repleg . ' - FACULTATIVO';
+
+        $params['giro'] = 'N';
+        $params['giro2'] = 'N';
+        $params['codgir'] = 'NU';
+        $params['codgir2'] = 'NU';
 
         $params['ruaf'] = 'N';
         $params['tipcon'] = 'F';

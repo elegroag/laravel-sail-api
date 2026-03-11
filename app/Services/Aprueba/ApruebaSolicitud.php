@@ -27,6 +27,9 @@ class ApruebaSolicitud
             case 'UE':
                 $procesoAprobacion = new ApruebaDatosEmpresa;
                 break;
+            case 'UT':
+                $procesoAprobacion = new ApruebaDatosTrabajador;
+                break;
             case 'T':
                 $procesoAprobacion = new ApruebaTrabajador;
                 break;

@@ -351,6 +351,12 @@ class ApruebaPensionadoController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
+    /**
+     * aprueba function
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function aprueba(Request $request): JsonResponse
     {
         $this->db->begin();

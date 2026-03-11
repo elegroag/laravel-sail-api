@@ -93,7 +93,7 @@ class ApruebaEmpresa
         $params['calsuc'] = $mercurio30->calemp;
         $params['nomcon'] = substr($fullname, 0, 70);
         $params['detalle'] = $mercurio30->razsoc;
-        $params['nomemp'] = $mercurio30->razsoc;
+        $params['nomemp'] = $mercurio30->razsoc . ' - EMPRESA APORTANTE';
         $params['fecapr'] = $postData['fecapr'];
         $params['observacion'] = $postData['nota_aprobar'];
         $params['totapo'] = '0';

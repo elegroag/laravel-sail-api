@@ -72,9 +72,11 @@ class ApruebaIndependiente
 
         if ($params['codind'] == '14') {
             $tipcot = 3;
+            $nomemp = 'INDEPENDIENTE 0.2%';
         }
         if ($params['codind'] == '50') {
             $tipcot = 65;
+            $nomemp = 'INDEPENDIENTE 0.6%';
         }
 
         $fullname = normalize_spaces($this->solicitud->prinom . ' ' .
@@ -167,10 +169,16 @@ class ApruebaIndependiente
         $params['tietra'] = '0';
         $params['tratot'] = '0';
 
-        $params['giro'] = (isset($params['giro']) && $params['giro'] != '') ? $params['giro'] : 'N';
-        $params['giro2'] = $params['giro'];
-        $params['codgir'] = (isset($params['codgir'])) ? $params['codgir'] : 'NU';
-        $params['codgir2'] = $params['codgir'];
+        $params['codcaj'] = '13';
+        $params['codase'] = '09';
+        $params['tipemp'] = 'P'; //privada
+        $params['cedrep'] = $this->solicitud->cedtra;
+        $params['nomemp'] = $repleg . ' - ' . $nomemp;
+
+        $params['giro'] = 'N';
+        $params['giro2'] = 'N';
+        $params['codgir'] = 'NU';
+        $params['codgir2'] = 'NU';
 
         if (! $params['tippag'] || $params['tippag'] == 'T') {
             $params['numcue'] = '0';
