@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Mercurio06;
+use App\Models\Mercurio07;
 use App\Models\Mercurio31;
 use App\Services\LegacyDatabaseService;
 use Illuminate\Support\Str;
@@ -43,6 +44,16 @@ class Mercurio31Seeder extends Seeder
                 continue;
             }
             if (!is_numeric($data['documento'])) {
+                continue;
+            }
+
+            $existsInMercurio07 = Mercurio07::where('tipo', $data['tipo'])
+                ->where('coddoc', $data['coddoc'])
+                ->where('documento', $data['documento'])
+                ->exists();
+
+            if (!$existsInMercurio07) {
+                // Si no existe en mercurio07, omitir este registro
                 continue;
             }
 

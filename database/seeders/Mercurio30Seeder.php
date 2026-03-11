@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Mercurio06;
+use App\Models\Mercurio07;
 use App\Models\Mercurio30;
 use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
@@ -45,6 +46,17 @@ class Mercurio30Seeder extends Seeder
             unset($data['fecha_aprobacion_sat']);
             unset($data['documento_representante_sat']);
             unset($data['numero_transaccion']);
+
+            // Verificar que el registro exista en mercurio07 antes de insertar
+            $existsInMercurio07 = Mercurio07::where('tipo', $data['tipo'])
+                ->where('coddoc', $data['coddoc'])
+                ->where('documento', $data['documento'])
+                ->exists();
+
+            if (!$existsInMercurio07) {
+                // Si no existe en mercurio07, omitir este registro
+                continue;
+            }
 
             // Crear o actualizar el registro
             $model = Mercurio30::updateOrCreate(
