@@ -124,4 +124,6 @@ return [
     ],
 
     'dominio' => env('APP_DOMINIO', 'http://localhost'),
+
+    'port' => env('APP_PORT', ''),
 ];

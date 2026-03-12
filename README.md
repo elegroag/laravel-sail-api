@@ -90,4 +90,12 @@ php artisan db:seed --class=DatabaseSeeder
 
 # Correr las migraciones y el seeder solo para desarrollo
 php artisan migrate:fresh --seed
+
+
+# Ejecutar el produccion Docker Compose 
+sed -i 's/^session.sid_length = 26/;session.sid_length = 26/' /usr/local/etc/php/php.ini
+sed -i 's/^session.sid_bits_per_character = 5/;session.sid_bits_per_character = 5/' /usr/local/etc/php/php.ini
+
+mkdir -p /tmp/tcpdf_temp
+chmod 777 /tmp/tcpdf_temp
 ```

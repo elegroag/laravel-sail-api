@@ -72,11 +72,11 @@ class ApruebaIndependiente
 
         if ($params['codind'] == '14') {
             $tipcot = 3;
-            $nomemp = 'INDEPENDIENTE 0.2%';
+            $detalle_nomemp = 'APORTANTE INDEPENDIENTE 2%';
         }
         if ($params['codind'] == '50') {
             $tipcot = 65;
-            $nomemp = 'INDEPENDIENTE 0.6%';
+            $detalle_nomemp = 'APORTANTE INDEPENDIENTE 0.6%';
         }
 
         $fullname = normalize_spaces($this->solicitud->prinom . ' ' .
@@ -121,8 +121,7 @@ class ApruebaIndependiente
         $params['telr'] = $this->solicitud->telefono;
         $params['mailr'] = $this->solicitud->email;
         $params['calsuc'] = $this->solicitud->calemp;
-        $params['detalle'] = $repleg;
-        $params['nomemp'] = $repleg;
+        $params['detalle'] = $repleg . ' / ' . $detalle_nomemp;
         $params['fecapr'] = $postData['fecapr'];
         $params['observacion'] = $postData['nota_aprobar'];
         $params['totapo'] = '0';
@@ -173,7 +172,7 @@ class ApruebaIndependiente
         $params['codase'] = '09';
         $params['tipemp'] = 'P'; //privada
         $params['cedrep'] = $this->solicitud->cedtra;
-        $params['nomemp'] = $repleg . ' - ' . $nomemp;
+        $params['nomemp'] = $repleg;
 
         $params['giro'] = 'N';
         $params['giro2'] = 'N';

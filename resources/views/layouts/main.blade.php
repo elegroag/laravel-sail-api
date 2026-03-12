@@ -8,8 +8,9 @@
     <meta
         name="csrf-token"
         content="{{ csrf_token() }}"
-        path="{{ config('app.url') }}"
-        app="@yield('application')" />
+        path="{{ config('app.url') . (config('app.env') === 'production' ? ':' . config('app.port') : '') }}"
+        app="@yield('application')" 
+    />
         
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">

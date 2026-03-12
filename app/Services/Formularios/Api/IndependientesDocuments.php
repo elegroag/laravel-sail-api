@@ -59,6 +59,9 @@ class IndependientesDocuments
             'cedula' => $this->independiente->cedrep,
         ];
 
+        $ocupaciones = ParamsIndependiente::getOcupaciones();
+        $cargo_name = ($this->independiente->cargo) ? $ocupaciones[$this->independiente->cargo] : 'NO APLICA';
+
         // Contexto para los templates
         $today = Carbon::now();
         $context = [
@@ -87,6 +90,7 @@ class IndependientesDocuments
             'representante' => $representante,
             'nombre_trabajador' => $nombre_independiente,
             'tipo_documento' => $detdoc_detalle,
+            'cargo_name' => $cargo_name,
             ...$this->independiente->toArray(),
         ];
 
