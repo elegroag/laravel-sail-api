@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Mercurio06;
+use App\Models\Mercurio09;
 use App\Models\Mercurio37;
 use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
@@ -47,6 +48,11 @@ class Mercurio37Seeder extends Seeder
             if ($data['tipopc'] == null || $data['tipopc'] == '') {
                 continue;
             }
+            //valida si el tipopc existe en mercurio09
+            if (!Mercurio09::where('tipopc', $data['tipopc'])->exists()) {
+                continue;
+            }
+
             // Usar la clave compuesta definida en el modelo
             Mercurio37::updateOrCreate(
                 [

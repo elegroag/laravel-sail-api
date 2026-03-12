@@ -136,32 +136,14 @@ class AuthController extends Controller
 
     public function paramsLogin()
     {
-        $tipsoc = [];
-        $coddoc = [];
-        $detadoc = [];
-        $codciu = [];
+        $tipsoc = Subsi54::pluck('detalle', 'tipsoc')->toArray();
 
-        foreach (Subsi54::all() as $entity) {
-            $tipsoc["{$entity->getTipsoc()}"] = $entity->getDetalle();
-        }
+        $coddoc = Gener18::whereNotIn('coddoc', ['7', '2'])->pluck('detdoc', 'coddoc')->toArray();
 
-        foreach (Gener18::all() as $entity) {
-            if ($entity->getCoddoc() == '7' || $entity->getCoddoc() == '2') {
-                continue;
-            }
-            $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
-        }
+        $detadoc = Gener18::whereNotIn('codrua', ['TI', 'RC'])->pluck('detdoc', 'codrua')->toArray();
 
-        foreach (Gener18::all() as $entity) {
-            if ($entity->getCodrua() == 'TI' || $entity->getCodrua() == 'RC') {
-                continue;
-            }
-            $detadoc["{$entity->getCodrua()}"] = $entity->getDetdoc();
-        }
+        $codciu = Gener09::whereBetween('codzon', [18000, 19000])->pluck('detzon', 'codzon')->toArray();
 
-        foreach (Gener09::where('codzon', '>=', 18000)->where('codzon', '<=', 19000)->get() as $entity) {
-            $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
-        }
         return response()->json([
             'Coddoc' => $coddoc,
             'Tipsoc' => $tipsoc,

@@ -129,12 +129,12 @@ class DatabaseSeeder extends Seeder
         ];
 
         try {
-            DB::transaction(function () use ($seeders): void {
-                foreach ($seeders as $seederClass) {
+            foreach ($seeders as $seederClass) {
+                DB::transaction(function () use ($seederClass): void {
                     // Ejecutar seeder registrado dentro de la transacción para garantizar rollback
                     $this->call($seederClass);
-                }
-            });
+                });
+            }
         } catch (\Throwable $exception) {
             // Registrar el error y propagarlo para detener el proceso de seeding
             Log::error('Error al ejecutar los seeders principales', [
