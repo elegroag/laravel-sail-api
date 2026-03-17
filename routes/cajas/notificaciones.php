@@ -2,10 +2,9 @@
 
 // Importar facades y controlador necesarios
 use App\Http\Controllers\Cajas\NotificacionesController;
-use App\Http\Middleware\CajasCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware([CajasCookieAuthenticated::class])->group(function () {
+Route::middleware(['cajas.auth'])->group(function () {
     Route::prefix('notificaciones')->group(function () {
         // Definir rutas para el controlador Notificaciones
         Route::get('/', [NotificacionesController::class, 'index'])->name('notificaciones.index'); // Mostrar lista de notificaciones

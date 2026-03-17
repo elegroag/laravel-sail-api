@@ -3,9 +3,8 @@
 // Importar facades y controlador necesarios
 use App\Http\Controllers\Cajas\Mercurio09Controller;
 use Illuminate\Support\Facades\Route;
-use App\Http\Middleware\CajasCookieAuthenticated;
 
-Route::middleware([CajasCookieAuthenticated::class])->group(function () {
+Route::middleware(['cajas.auth'])->group(function () {
     Route::prefix('/cajas/mercurio09')->group(function () {
         Route::get('/index', [Mercurio09Controller::class, 'index']);
         Route::post('/buscar', [Mercurio09Controller::class, 'buscar']);

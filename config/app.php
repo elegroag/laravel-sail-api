@@ -26,7 +26,7 @@ return [
     |
     */
 
-    'env' => env('APP_ENV', 'development'),
+    'env' => env('APP_ENV', 'local'),
 
     /*
     |--------------------------------------------------------------------------
@@ -125,5 +125,5 @@ return [
 
     'dominio' => env('APP_DOMINIO', 'http://localhost'),
 
-    'port' => env('APP_PORT', ''),
+    'port' => env('APP_PORT', '')
 ];

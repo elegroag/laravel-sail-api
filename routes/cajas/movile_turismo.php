@@ -2,10 +2,9 @@
 
 // Importar facades y controlador necesarios
 use App\Http\Controllers\Cajas\Mercurio72Controller;
-use App\Http\Middleware\CajasCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware([CajasCookieAuthenticated::class])->group(function () {
+Route::middleware(['cajas.auth'])->group(function () {
     Route::prefix('/cajas/mercurio72')->group(function () {
         // Definir rutas para el controlador Mercurio72
         Route::get('/index', [Mercurio72Controller::class, 'index'])->name('promociones.turismo.index'); // Mostrar la lista de promociones

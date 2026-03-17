@@ -2,11 +2,10 @@
 
 use App\Http\Controllers\Mercurio\ConsultasTrabajadorController;
 use App\Http\Controllers\Mercurio\MovimientosController;
-use App\Http\Middleware\EnsureCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
 // Subsidio consultas de trabajadores
-Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
+Route::middleware(['mercurio.auth'])->group(function () {
     Route::prefix('mercurio/subsidio')->group(function () {
         Route::get('/', function () {
             return redirect()->route('trabajador.historial');

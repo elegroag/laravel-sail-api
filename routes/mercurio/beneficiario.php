@@ -1,11 +1,10 @@
 <?php
 
 use App\Http\Controllers\Mercurio\BeneficiarioController;
-use App\Http\Middleware\EnsureCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
 //  Beneficiario (migrado desde Kumbia)
-Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
+Route::middleware(['mercurio.auth'])->group(function () {
     Route::prefix('/mercurio/beneficiario')->group(function () {
         Route::get('/', function () {
             return redirect()->route('beneficiario.index');

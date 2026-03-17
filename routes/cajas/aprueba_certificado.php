@@ -1,10 +1,9 @@
 <?php
 
 use App\Http\Controllers\Cajas\ApruebaCertificadoController;
-use App\Http\Middleware\CajasCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware([CajasCookieAuthenticated::class])->group(function () {
+Route::middleware(['cajas.auth'])->group(function () {
     Route::prefix('cajas/aprobacioncer')->group(function () {
         Route::get('/index', [ApruebaCertificadoController::class, 'index']);
         Route::post('/aplicar_filtro/{estado?}', [ApruebaCertificadoController::class, 'aplicarFiltro']);

@@ -4,7 +4,6 @@ use App\Http\Controllers\Mercurio\LoginController;
 use App\Http\Controllers\Mercurio\NotificacionesController;
 use App\Http\Controllers\Mercurio\ParticularController;
 use App\Http\Controllers\Mercurio\PrincipalController;
-use App\Http\Middleware\EnsureCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/mercurio/recuperar_clave', [LoginController::class, 'recuperarClave']);
@@ -19,7 +18,7 @@ Route::post('/mercurio/documentos/ver-pdf', [LoginController::class, 'showPdf'])
 Route::post('/mercurio/principal/ingreso_dirigido', [PrincipalController::class, 'ingresoDirigido']);
 
 // Movimientos
-Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
+Route::middleware(['mercurio.auth'])->group(function () {
     Route::get('/mercurio/notificaciones/index', [NotificacionesController::class, 'index'])->name('mercurio.notificaciones.index');
     Route::post('/mercurio/notificaciones/procesar_notificacion', [NotificacionesController::class, 'procesarNotificacion']);
     Route::get('/mercurio/particular/historial', [ParticularController::class, 'historial'])->name('particular.historial');

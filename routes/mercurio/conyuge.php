@@ -1,11 +1,10 @@
 <?php
 
 use App\Http\Controllers\Mercurio\ConyugeController;
-use App\Http\Middleware\EnsureCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
 // Conyuge (migrado desde Kumbia)
-Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
+Route::middleware(['mercurio.auth'])->group(function () {
     Route::prefix('/mercurio/conyuge')->group(function () {
         Route::get('/', function () {
             return redirect()->route('conyuge.index');

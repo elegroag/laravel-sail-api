@@ -1,11 +1,10 @@
 <?php
 
 use App\Http\Controllers\Mercurio\PensionadoController;
-use App\Http\Middleware\EnsureCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
 // Pensionado (migrado desde Kumbia)
-Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
+Route::middleware(['mercurio.auth'])->group(function () {
     Route::prefix('/mercurio/pensionado')->group(function () {
         Route::get('/', function () {
             return redirect()->route('pensionado.index');

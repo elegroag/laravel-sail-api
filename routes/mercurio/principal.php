@@ -2,11 +2,10 @@
 
 use App\Http\Controllers\Mercurio\CertificadosController;
 use App\Http\Controllers\Mercurio\PrincipalController;
-use App\Http\Middleware\EnsureCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
 // Principal
-Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
+Route::middleware(['mercurio.auth'])->group(function () {
     Route::prefix('/mercurio/principal')->group(function () {
         Route::get('/', function () {
             return redirect()->route('principal.index');

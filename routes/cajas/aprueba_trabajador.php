@@ -1,10 +1,9 @@
 <?php
 
 use App\Http\Controllers\Cajas\ApruebaTrabajadorController;
-use App\Http\Middleware\CajasCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware([CajasCookieAuthenticated::class])->group(function () {
+Route::middleware(['cajas.auth'])->group(function () {
     Route::prefix('cajas/aprobaciontra')->group(function () {
         Route::get('/', function () {
             return redirect('cajas/aprobaciontra/index');

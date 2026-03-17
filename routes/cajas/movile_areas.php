@@ -2,11 +2,10 @@
 
 // Importar facades y controlador necesarios
 use App\Http\Controllers\Cajas\Mercurio56Controller;
-use App\Http\Middleware\CajasCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
 // Rutas para Mercurio56Controller - Áreas
-Route::middleware([CajasCookieAuthenticated::class])->group(function () {
+Route::middleware(['cajas.auth'])->group(function () {
     Route::prefix('/cajas/mercurio55')->group(function () {
         Route::get('/index', [Mercurio56Controller::class, 'index'])->name('mercurio55.index');
         Route::post('/aplicar_filtro', [Mercurio56Controller::class, 'aplicarFiltro'])->name('mercurio55.aplicar_filtro');

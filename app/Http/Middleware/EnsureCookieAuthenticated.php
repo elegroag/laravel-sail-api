@@ -58,8 +58,9 @@ class EnsureCookieAuthenticated
         $user = session()->has('user') ? session('user') : null;
 
         if ($user && $user != null && $tipo && $tipo != null) {
-            $request->attributes->set('mercurio_user', $user);
-            $request->attributes->set('mercurio_tipo', $tipo);
+            $request->attributes->set('user', $user);
+            $request->attributes->set('tipo', $tipo);
+            $request->attributes->set('tipfun', null);
         } else {
             if ($request->expectsJson()) {
                 return response()->json([

@@ -1,11 +1,10 @@
 <?php
 
 use App\Http\Controllers\Mercurio\ActualizaTrabajadorController;
-use App\Http\Middleware\EnsureCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
 // Actualiza datos trabajador  (migrado desde Kumbia)
-Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
+Route::middleware(['mercurio.auth'])->group(function () {
     Route::prefix('mercurio/actualizadatostra')->group(function () {
         Route::get('/', function () {
             return redirect()->route('actualiza_trabajador.index');

@@ -1,10 +1,9 @@
 <?php
 
 use App\Http\Controllers\Cajas\Mercurio11Controller;
-use App\Http\Middleware\CajasCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware([CajasCookieAuthenticated::class])->group(function () {
+Route::middleware(['cajas.auth'])->group(function () {
     Route::prefix('/cajas/mercurio11')->group(function () {
         Route::get('/index', [Mercurio11Controller::class, 'index']);
         Route::post('/buscar', [Mercurio11Controller::class, 'buscar']);

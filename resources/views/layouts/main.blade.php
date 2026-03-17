@@ -8,7 +8,7 @@
     <meta
         name="csrf-token"
         content="{{ csrf_token() }}"
-        path="{{ config('app.url') . (config('app.env') === 'production' ? ':' . config('app.port') : '') }}"
+        path="{{ config('app.url') . (config('app.env') !== 'local' ? ':' . config('app.port') : '') }}"
         app="@yield('application')" 
     />
         

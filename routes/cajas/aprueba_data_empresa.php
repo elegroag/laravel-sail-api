@@ -1,10 +1,9 @@
 <?php
 
 use App\Http\Controllers\Cajas\ApruebaUpEmpresaController;
-use App\Http\Middleware\CajasCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware([CajasCookieAuthenticated::class])->group(function () {
+Route::middleware(['cajas.auth'])->group(function () {
     Route::prefix('/cajas/actualizaemp')->group(function () {
         Route::get('/index', [ApruebaUpEmpresaController::class, 'index']);
         Route::post('/aplicar_filtro/{estado?}', [ApruebaUpEmpresaController::class, 'aplicarFiltro']);

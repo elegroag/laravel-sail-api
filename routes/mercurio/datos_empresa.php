@@ -1,11 +1,10 @@
 <?php
 
 use App\Http\Controllers\Mercurio\ActualizaEmpresaController;
-use App\Http\Middleware\EnsureCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
 // Actualiza datos empresa  (migrado desde Kumbia)
-Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
+Route::middleware(['mercurio.auth'])->group(function () {
     Route::prefix('/mercurio/actualizadatos')->group(function () {
         Route::get('/', function () {
             return redirect()->route('actualiza_empresa.index');

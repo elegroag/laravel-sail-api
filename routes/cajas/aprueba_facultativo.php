@@ -1,10 +1,9 @@
 <?php
 
 use App\Http\Controllers\Cajas\ApruebaFacultativoController;
-use App\Http\Middleware\CajasCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware([CajasCookieAuthenticated::class])->group(function () {
+Route::middleware(['cajas.auth'])->group(function () {
     Route::prefix('/cajas/aprobacionfac')->group(function () {
         Route::get('/index', [ApruebaFacultativoController::class, 'index']);
         Route::post('/aplicar_filtro/{estado?}', [ApruebaFacultativoController::class, 'aplicarFiltro']);

@@ -3,10 +3,9 @@
 // Importar facades y controlador necesarios
 use App\Http\Controllers\Cajas\Mercurio52Controller;
 use Illuminate\Support\Facades\Route;
-use App\Http\Middleware\CajasCookieAuthenticated;
 
 // Rutas para Mercurio52Controller - Menú Móvil
-Route::middleware([CajasCookieAuthenticated::class])->group(function () {
+Route::middleware(['cajas.auth'])->group(function () {
     Route::prefix('/cajas/mercurio52')->group(function () {
         Route::get('/index', [Mercurio52Controller::class, 'index'])->name('mercurio52.index');
         Route::post('/aplicar_filtro', [Mercurio52Controller::class, 'aplicarFiltro'])->name('mercurio52.aplicar_filtro');

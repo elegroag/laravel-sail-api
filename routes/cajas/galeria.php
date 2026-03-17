@@ -3,9 +3,8 @@
 // Importar facades y controlador necesarios
 use App\Http\Controllers\Cajas\Mercurio26Controller;
 use Illuminate\Support\Facades\Route;
-use App\Http\Middleware\CajasCookieAuthenticated;
 
-Route::middleware([CajasCookieAuthenticated::class])->group(function () {
+Route::middleware(['cajas.auth'])->group(function () {
     Route::prefix('/cajas/mercurio26')->group(function () {
 
         // Rutas para Mercurio26Controller - Galería

@@ -1,11 +1,10 @@
 <?php
 
 use App\Http\Controllers\Mercurio\TrabajadorController;
-use App\Http\Middleware\EnsureCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
 // Trabajador (migrado desde Kumbia)
-Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
+Route::middleware(['mercurio.auth'])->group(function () {
     Route::prefix('/mercurio/trabajador')->group(function () {
         Route::get('/', function () {
             return redirect()->route('trabajador.index');

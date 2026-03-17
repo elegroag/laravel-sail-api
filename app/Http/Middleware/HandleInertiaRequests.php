@@ -37,6 +37,12 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        if ($request->is('mercurio/*') || $request->is('cajas/*')) {
+            return [
+                ...parent::share($request),
+            ];
+        }
+
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
         return [
@@ -46,14 +52,14 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
-            'ziggy' => fn (): array => [
+            'ziggy' => fn(): array => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'flash' => [
-                'success' => fn () => $request->session()->get('success'),
-                'error' => fn () => $request->session()->get('error'),
+                'success' => fn() => $request->session()->get('success'),
+                'error' => fn() => $request->session()->get('error'),
             ],
         ];
     }

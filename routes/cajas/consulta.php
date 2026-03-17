@@ -1,11 +1,10 @@
 <?php
 
 // Importar facades y controlador necesarios
-use App\Http\Middleware\CajasCookieAuthenticated;
 use App\Http\Controllers\Cajas\ConsultaController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware([CajasCookieAuthenticated::class])->group(function () {
+Route::middleware(['cajas.auth'])->group(function () {
     Route::prefix('/cajas/consulta')->group(function () {
         Route::get('/masivas', [ConsultaController::class, 'index']);
         Route::get('/carga_laboral', [ConsultaController::class, 'cargaLaboral'])->name('consulta.cargaLaboral');

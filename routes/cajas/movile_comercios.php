@@ -3,9 +3,9 @@
 // Importar facades y controlador necesarios
 use App\Http\Controllers\Cajas\Mercurio65Controller;
 use Illuminate\Support\Facades\Route;
-use App\Http\Middleware\CajasCookieAuthenticated;
 
-Route::middleware([CajasCookieAuthenticated::class])->group(function () {
+
+Route::middleware(['cajas.auth'])->group(function () {
     Route::prefix('cajas/mercurio65')->group(function () {
         // Rutas para Mercurio65Controller - Comercios
         Route::get('/index', [Mercurio65Controller::class, 'index']);

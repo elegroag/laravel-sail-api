@@ -1,12 +1,11 @@
 <?php
 
 use App\Http\Controllers\Cajas\PrincipalController;
-use App\Http\Middleware\CajasCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
 Route::group([
     'prefix' => 'cajas/principal',
-    'middleware' => CajasCookieAuthenticated::class,
+    'middleware' => 'cajas.auth',
 ], function () {
     Route::get('/', [PrincipalController::class, 'index'])->name('cajas.principal');
     Route::get('/index', [PrincipalController::class, 'index'])->name('cajas.principal.index');

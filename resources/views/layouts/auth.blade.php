@@ -6,7 +6,7 @@
     <meta
         name="csrf-token"
         content="{{ csrf_token() }}"
-        path="{{ config('app.url') }}"
+        path="{{ config('app.url') . (config('app.env') !== 'local' ? ':' . config('app.port') : '') }}"
         app="@yield('application')" />
 
     <title>@yield('title')</title>

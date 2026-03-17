@@ -1,11 +1,10 @@
 <?php
 
 // Importar facades y controlador necesarios
-use App\Http\Middleware\CajasCookieAuthenticated;
 use App\Http\Controllers\Cajas\ReasignaController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware([CajasCookieAuthenticated::class])->group(function () {
+Route::middleware(['cajas.auth'])->group(function () {
     Route::prefix('/cajas/reasigna')->group(function () {
         Route::get('/index', [ReasignaController::class, 'index']);
         Route::post('/traer_datos', [ReasignaController::class, 'traerDatos']);

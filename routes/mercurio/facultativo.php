@@ -1,11 +1,10 @@
 <?php
 
 use App\Http\Controllers\Mercurio\FacultativoController;
-use App\Http\Middleware\EnsureCookieAuthenticated;
 use Illuminate\Support\Facades\Route;
 
 // Facultativo (migrado desde Kumbia)
-Route::middleware([EnsureCookieAuthenticated::class])->group(function () {
+Route::middleware(['mercurio.auth'])->group(function () {
     Route::prefix('/mercurio/facultativo')->group(function () {
         Route::get('/', function () {
             return redirect()->route('facultativo.index');
