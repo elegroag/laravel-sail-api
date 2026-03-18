@@ -61,12 +61,19 @@ Sistema completo de gestión empresarial desarrollado con Laravel 12, MySQL, Ine
 rsync -avz /home/edwin-tics/proyectos/comfaca-enlinea/flask-api/ admin@172.168.0.15:/home/admin/contenedores/desarrollo/flask-api
 
 rsync -avz /home/edwin-tics/proyectos/comfaca-enlinea/laravel/ admin@172.168.0.15:/home/admin/contenedores/desarrollo/mercurio
+```
+
+## Otros comandos
+
+```bash
 
 # Limpiar el log de laravel
 truncate -s 0 storage/logs/laravel.log
 
 # Limpiar cache
 php artisan route:clear && php artisan config:clear && php artisan cache:clear
+php artisan optimize:clear
+
 
 # Generar swagger
 php artisan l5-swagger:generate
@@ -91,6 +98,11 @@ php artisan db:seed --class=DatabaseSeeder
 # Correr las migraciones y el seeder solo para desarrollo
 php artisan migrate:fresh --seed
 
+```
+
+## Comandos para Docker Imagen
+
+```bash
 
 # Ejecutar el produccion Docker Compose 
 sed -i 's/^session.sid_length = 26/;session.sid_length = 26/' /usr/local/etc/php/php.ini

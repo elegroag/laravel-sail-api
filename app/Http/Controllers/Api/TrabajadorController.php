@@ -4,15 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Trabajador;
-use Dedoc\Scramble\Attributes\Group;
-use Dedoc\Scramble\Attributes\Response;
-use Dedoc\Scramble\Attributes\Tag;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
-#[Tag('Trabajadores')]
-#[Group('Trabajadores')]
 class TrabajadorController extends Controller
 {
 
@@ -24,7 +19,7 @@ class TrabajadorController extends Controller
      * 
      * @return JsonResponse
      */
-    #[Response(status: 200, description: 'Lista de trabajadores obtenida exitosamente')]
+
     public function index(): JsonResponse
     {
         try {
@@ -52,9 +47,9 @@ class TrabajadorController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    #[Response(status: 201, description: 'Trabajador creado exitosamente')]
-    #[Response(status: 422, description: 'Error de validación')]
-    #[Response(status: 500, description: 'Error interno del servidor')]
+
+
+
     public function store(Request $request): JsonResponse
     {
         try {
@@ -106,8 +101,8 @@ class TrabajadorController extends Controller
      * @param string $id
      * @return JsonResponse
      */
-    #[Response(status: 200, description: 'Trabajador obtenido exitosamente')]
-    #[Response(status: 404, description: 'Trabajador no encontrado')]
+
+
     public function show(string $id): JsonResponse
     {
         try {
@@ -137,9 +132,9 @@ class TrabajadorController extends Controller
      * @param string $id
      * @return JsonResponse
      */
-    #[Response(status: 200, description: 'Trabajador actualizado exitosamente')]
-    #[Response(status: 404, description: 'Trabajador no encontrado')]
-    #[Response(status: 422, description: 'Error de validación')]
+
+
+
     public function update(Request $request, string $id): JsonResponse
     {
         try {
@@ -192,8 +187,8 @@ class TrabajadorController extends Controller
      * @param string $id
      * @return JsonResponse
      */
-    #[Response(status: 200, description: 'Trabajador eliminado exitosamente')]
-    #[Response(status: 404, description: 'Trabajador no encontrado')]
+
+
     public function destroy(string $id): JsonResponse
     {
         try {

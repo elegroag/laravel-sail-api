@@ -62,3 +62,5 @@ uv.lock
 GEMINI.md
 .env.mercurio
 .env.comfaca
+composer.lock
+pnpm-lock.yaml

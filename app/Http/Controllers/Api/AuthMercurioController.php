@@ -9,13 +9,11 @@ use App\Http\Resources\ApiResource;
 use App\Http\Resources\ErrorResource;
 use App\Library\Auth\AuthJwt;
 use App\Models\Adapter\DbBase;
-use App\Models\Gener02;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio19;
 use App\Services\Api\ApiWhatsapp;
 use App\Services\Autentications\VerifyAuthService;
-use App\Services\Signup\SignupDomestico;
 use App\Services\Signup\SignupEmpresas;
 use App\Services\Signup\SignupFacultativos;
 use App\Services\Signup\SignupIndependientes;
@@ -24,8 +22,6 @@ use App\Services\Signup\SignupService;
 use App\Services\Srequest;
 use App\Services\Utils\SenderEmail;
 use Carbon\Carbon;
-use Dedoc\Scramble\Attributes\Group;
-use Dedoc\Scramble\Attributes\Response;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use App\Services\Entidades\EmpresaService;
@@ -33,7 +29,6 @@ use App\Services\Entidades\TrabajadorService;
 use Illuminate\Http\JsonResponse;
 
 
-#[Group('Autenticación')]
 class AuthMercurioController extends Controller
 {
     private $db;
@@ -54,9 +49,9 @@ class AuthMercurioController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    #[Response(status: 201, description: 'Usuario registrado exitosamente')]
-    #[Response(status: 422, description: 'Error de validación')]
-    #[Response(status: 500, description: 'Error interno del servidor')]
+
+
+
     public function registerEmpresaAction(Request $request): JsonResponse
     {
         $this->db->begin();
@@ -109,9 +104,9 @@ class AuthMercurioController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    #[Response(status: 201, description: 'Usuario registrado exitosamente')]
-    #[Response(status: 422, description: 'Error de validación')]
-    #[Response(status: 500, description: 'Error interno del servidor')]
+
+
+
     public function registerTrabajadorAction(Request $request): JsonResponse
     {
         $this->db->begin();
@@ -152,9 +147,9 @@ class AuthMercurioController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    #[Response(status: 201, description: 'Usuario registrado exitosamente')]
-    #[Response(status: 422, description: 'Error de validación')]
-    #[Response(status: 500, description: 'Error interno del servidor')]
+
+
+
     public function registerParticularAction(Request $request): JsonResponse
     {
         $this->db->begin();
@@ -193,9 +188,9 @@ class AuthMercurioController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    #[Response(status: 201, description: 'Usuario registrado exitosamente')]
-    #[Response(status: 422, description: 'Error de validación')]
-    #[Response(status: 500, description: 'Error interno del servidor')]
+
+
+
     public function registerIndependienteAction(Request $request): JsonResponse
     {
         $this->db->begin();
@@ -235,9 +230,9 @@ class AuthMercurioController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    #[Response(status: 201, description: 'Usuario registrado exitosamente')]
-    #[Response(status: 422, description: 'Error de validación')]
-    #[Response(status: 500, description: 'Error interno del servidor')]
+
+
+
     public function registerPensionadoAction(Request $request): JsonResponse
     {
         $this->db->begin();
@@ -276,9 +271,9 @@ class AuthMercurioController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    #[Response(status: 201, description: 'Usuario registrado exitosamente')]
-    #[Response(status: 422, description: 'Error de validación')]
-    #[Response(status: 500, description: 'Error interno del servidor')]
+
+
+
     public function registerFacultativoAction(Request $request)
     {
         $this->db->begin();
@@ -317,9 +312,9 @@ class AuthMercurioController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    #[Response(status: 201, description: 'Usuario registrado exitosamente')]
-    #[Response(status: 422, description: 'Error de validación')]
-    #[Response(status: 500, description: 'Error interno del servidor')]
+
+
+
     public function registerDomesticoAction(Request $request)
     {
         $this->db->begin();
@@ -435,9 +430,9 @@ class AuthMercurioController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    #[Response(status: 200, description: 'Autenticación exitosa')]
-    #[Response(status: 401, description: 'Credenciales inválidas')]
-    #[Response(status: 422, description: 'Error de validación')]
+
+
+
     public function authenticateAction(Request $request)
     {
         // Implementación de autenticación
@@ -456,9 +451,9 @@ class AuthMercurioController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    #[Response(status: 201, description: 'Código enviado exitosamente')]
-    #[Response(status: 422, description: 'Error de validación')]
-    #[Response(status: 500, description: 'Error al enviar código')]
+
+
+
     public function verify(Request $request)
     {
         $payload = [];
@@ -507,7 +502,7 @@ class AuthMercurioController extends Controller
                 'errors' => $e->errors(),
             ];
         }
-        return Inertia::render('Auth/VerifyEmail', $payload);
+        return response()->json($payload);
     }
 
     /**
@@ -519,9 +514,9 @@ class AuthMercurioController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    #[Response(status: 201, description: 'Código de recuperación enviado exitosamente')]
-    #[Response(status: 422, description: 'Error de validación')]
-    #[Response(status: 500, description: 'Error al enviar código de recuperación')]
+
+
+
     public function recoverySend(Request $request)
     {
         try {

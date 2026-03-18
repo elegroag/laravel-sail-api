@@ -4,17 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\NucleoFamiliar;
-use Dedoc\Scramble\Attributes\Group;
-use Dedoc\Scramble\Attributes\Response;
-use Dedoc\Scramble\Attributes\ResponseFromApiResource;
-use Dedoc\Scramble\Attributes\ResponseFromApiResourceCollection;
-use Dedoc\Scramble\Attributes\Tag;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
-#[Tag('Núcleos Familiares')]
-#[Group('Núcleos Familiares')]
 class NucleoFamiliarController extends Controller
 {
 
@@ -26,7 +19,6 @@ class NucleoFamiliarController extends Controller
      * 
      * @return JsonResponse
      */
-    #[Response(status: 200, description: 'Lista de núcleos familiares obtenida exitosamente')]
     public function index(): JsonResponse
     {
         try {
@@ -55,9 +47,6 @@ class NucleoFamiliarController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    #[Response(status: 201, description: 'Núcleo familiar creado exitosamente')]
-    #[Response(status: 422, description: 'Error de validación')]
-    #[Response(status: 500, description: 'Error interno del servidor')]
     public function store(Request $request): JsonResponse
     {
         try {
@@ -108,8 +97,8 @@ class NucleoFamiliarController extends Controller
      * @param string $id
      * @return JsonResponse
      */
-    #[Response(status: 200, description: 'Núcleo familiar obtenido exitosamente')]
-    #[Response(status: 404, description: 'Núcleo familiar no encontrado')]
+
+
     public function show(string $id): JsonResponse
     {
         try {
@@ -139,9 +128,6 @@ class NucleoFamiliarController extends Controller
      * @param string $id
      * @return JsonResponse
      */
-    #[Response(status: 200, description: 'Núcleo familiar actualizado exitosamente')]
-    #[Response(status: 404, description: 'Núcleo familiar no encontrado')]
-    #[Response(status: 422, description: 'Error de validación')]
     public function update(Request $request, string $id): JsonResponse
     {
         try {
@@ -194,8 +180,6 @@ class NucleoFamiliarController extends Controller
      * @param string $id
      * @return JsonResponse
      */
-    #[Response(status: 200, description: 'Núcleo familiar eliminado exitosamente')]
-    #[Response(status: 404, description: 'Núcleo familiar no encontrado')]
     public function destroy(string $id): JsonResponse
     {
         try {

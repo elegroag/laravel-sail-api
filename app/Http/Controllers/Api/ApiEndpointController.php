@@ -4,9 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\Entidades\ApiEndpointService;
-use Dedoc\Scramble\Attributes\Group;
-use Dedoc\Scramble\Attributes\Response;
-use Dedoc\Scramble\Attributes\Tag;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -20,8 +17,6 @@ use Illuminate\Http\Request;
  * @package App\Http\Controllers\Api
  */
 
-#[Tag('Endpoints')]
-#[Group('Endpoints')]
 class ApiEndpointController extends Controller
 {
     /** @var ApiEndpointService Servicio de gestión de endpoints */
@@ -49,7 +44,7 @@ class ApiEndpointController extends Controller
      * 
      * @return \Illuminate\Http\JsonResponse
      */
-    #[Response(status: 200, description: 'Lista de endpoints obtenida exitosamente')]
+    
     public function index()
     {
         $endpoints = $this->apiEndpointService->getAllEndpoints();
@@ -67,8 +62,8 @@ class ApiEndpointController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    #[Response(status: 201, description: 'Endpoint creado exitosamente')]
-    #[Response(status: 422, description: 'Error de validación')]
+    
+    
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -92,8 +87,8 @@ class ApiEndpointController extends Controller
      * @param mixed $id
      * @return \Illuminate\Http\JsonResponse
      */
-    #[Response(status: 200, description: 'Endpoint encontrado exitosamente')]
-    #[Response(status: 404, description: 'Endpoint no encontrado')]
+    
+    
     public function show($id)
     {
         $endpoint = $this->apiEndpointService->getEndpointById($id);
@@ -116,9 +111,9 @@ class ApiEndpointController extends Controller
      * @param mixed $id
      * @return \Illuminate\Http\JsonResponse
      */
-    #[Response(status: 200, description: 'Endpoint actualizado exitosamente')]
-    #[Response(status: 404, description: 'Endpoint no encontrado')]
-    #[Response(status: 422, description: 'Error de validación')]
+    
+    
+    
     public function update(Request $request, $id)
     {
         $endpoint = $this->apiEndpointService->getEndpointById($id);
@@ -149,9 +144,9 @@ class ApiEndpointController extends Controller
      * @param string $serviceName Nombre del servicio a actualizar
      * @return \Illuminate\Http\JsonResponse Respuesta JSON con el resultado
      */
-    #[Response(status: 200, description: 'Nombre de conexión actualizado exitosamente')]
-    #[Response(status: 404, description: 'Endpoint no encontrado')]
-    #[Response(status: 422, description: 'Error de validación')]
+    
+    
+    
     public function updateConnectionName(Request $request, $serviceName)
     {
         $validatedData = $request->validate([
@@ -177,8 +172,8 @@ class ApiEndpointController extends Controller
      * @param mixed $id
      * @return \Illuminate\Http\JsonResponse
      */
-    #[Response(status: 200, description: 'Endpoint eliminado exitosamente')]
-    #[Response(status: 404, description: 'Endpoint no encontrado')]
+    
+    
     public function destroy($id)
     {
         $deleted = $this->apiEndpointService->deleteEndpoint($id);
@@ -199,7 +194,7 @@ class ApiEndpointController extends Controller
      * 
      * @return \Illuminate\Http\JsonResponse
      */
-    #[Response(status: 200, description: 'Endpoints sincronizados exitosamente')]
+    
     public function syncDefaults()
     {
         $this->apiEndpointService->syncDefaultEndpoints();
