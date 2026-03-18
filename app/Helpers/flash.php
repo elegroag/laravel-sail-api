@@ -12,7 +12,7 @@ if (! function_exists('set_flashdata')) {
      * @param  bool|null  $persiste
      * @return void
      */
-    function set_flashdata(string $item = '', $data, ?bool $persiste = null)
+    function set_flashdata(string $item, string|array $data, ?bool $persiste = null)
     {
         if ($persiste) {
             $messages = session('PERSISTE', []);
@@ -31,7 +31,7 @@ if (! function_exists('set_flashdata')) {
 }
 
 if (! function_exists('set_flashnow')) {
-    function set_flashnow(string $item = '', $data)
+    function set_flashnow(string $item, string|array $data)
     {
         $messages = session('FLASH_NOW', []);
         $messages["{$item}"] = $data;
@@ -88,7 +88,7 @@ if (! function_exists('get_flashnow')) {
 }
 
 if (! function_exists('get_flashdata_item')) {
-    function get_flashdata_item($item, ?bool $destroy = null)
+    function get_flashdata_item(string $item, ?bool $destroy = null)
     {
         $messages_flash = session('FLASH', []);
         $message_persiste = session('PERSISTE', []);
