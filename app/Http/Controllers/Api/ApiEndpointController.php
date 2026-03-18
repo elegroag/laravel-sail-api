@@ -44,7 +44,6 @@ class ApiEndpointController extends Controller
      * 
      * @return \Illuminate\Http\JsonResponse
      */
-    
     public function index()
     {
         $endpoints = $this->apiEndpointService->getAllEndpoints();
@@ -62,8 +61,6 @@ class ApiEndpointController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    
-    
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -87,8 +84,6 @@ class ApiEndpointController extends Controller
      * @param mixed $id
      * @return \Illuminate\Http\JsonResponse
      */
-    
-    
     public function show($id)
     {
         $endpoint = $this->apiEndpointService->getEndpointById($id);
@@ -111,9 +106,6 @@ class ApiEndpointController extends Controller
      * @param mixed $id
      * @return \Illuminate\Http\JsonResponse
      */
-    
-    
-    
     public function update(Request $request, $id)
     {
         $endpoint = $this->apiEndpointService->getEndpointById($id);
@@ -144,9 +136,6 @@ class ApiEndpointController extends Controller
      * @param string $serviceName Nombre del servicio a actualizar
      * @return \Illuminate\Http\JsonResponse Respuesta JSON con el resultado
      */
-    
-    
-    
     public function updateConnectionName(Request $request, $serviceName)
     {
         $validatedData = $request->validate([
@@ -172,8 +161,6 @@ class ApiEndpointController extends Controller
      * @param mixed $id
      * @return \Illuminate\Http\JsonResponse
      */
-    
-    
     public function destroy($id)
     {
         $deleted = $this->apiEndpointService->deleteEndpoint($id);
@@ -194,7 +181,6 @@ class ApiEndpointController extends Controller
      * 
      * @return \Illuminate\Http\JsonResponse
      */
-    
     public function syncDefaults()
     {
         $this->apiEndpointService->syncDefaultEndpoints();

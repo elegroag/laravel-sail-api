@@ -49,9 +49,6 @@ class AuthMercurioController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-
-
-
     public function registerEmpresaAction(Request $request): JsonResponse
     {
         $this->db->begin();
@@ -104,9 +101,6 @@ class AuthMercurioController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-
-
-
     public function registerTrabajadorAction(Request $request): JsonResponse
     {
         $this->db->begin();
@@ -147,9 +141,6 @@ class AuthMercurioController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-
-
-
     public function registerParticularAction(Request $request): JsonResponse
     {
         $this->db->begin();
@@ -188,9 +179,6 @@ class AuthMercurioController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-
-
-
     public function registerIndependienteAction(Request $request): JsonResponse
     {
         $this->db->begin();
@@ -230,9 +218,6 @@ class AuthMercurioController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-
-
-
     public function registerPensionadoAction(Request $request): JsonResponse
     {
         $this->db->begin();
@@ -271,9 +256,6 @@ class AuthMercurioController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-
-
-
     public function registerFacultativoAction(Request $request)
     {
         $this->db->begin();
@@ -312,9 +294,6 @@ class AuthMercurioController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-
-
-
     public function registerDomesticoAction(Request $request)
     {
         $this->db->begin();
@@ -391,48 +370,9 @@ class AuthMercurioController extends Controller
     }
 
     /**
-     * Autenticar usuario en el sistema
-     * 
-     * Este endpoint permite la autenticación de usuarios existentes en el sistema CLISISU.
-     * Retorna un token JWT para las solicitudes subsequentes.
-     * 
-     * **Ejemplo de uso:**
-     * ```bash
-     * curl -X POST http://localhost:8000/api/authenticate \
-     *   -H "Content-Type: application/json" \
-     *   -d '{
-     *     "documento": 123456789,
-     *     "password": "password123"
-     *   }'
-     * ```
-     * 
-     * **Respuesta exitosa:**
-     * ```json
-     * {
-     *   "success": true,
-     *   "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
-     *   "user": {
-     *     "documento": 123456789,
-     *     "nombre": "Juan Pérez",
-     *     "email": "juan.perez@ejemplo.com"
-     *   }
-     * }
-     * ```
-     * 
-     * **Error de credenciales:**
-     * ```json
-     * {
-     *   "success": false,
-     *   "message": "Credenciales inválidas"
-     * }
-     * ```
-     * 
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-
-
-
     public function authenticateAction(Request $request)
     {
         // Implementación de autenticación
@@ -451,9 +391,6 @@ class AuthMercurioController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-
-
-
     public function verify(Request $request)
     {
         $payload = [];
@@ -514,9 +451,6 @@ class AuthMercurioController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-
-
-
     public function recoverySend(Request $request)
     {
         try {

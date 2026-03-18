@@ -19,7 +19,6 @@ class TrabajadorController extends Controller
      * 
      * @return JsonResponse
      */
-
     public function index(): JsonResponse
     {
         try {
@@ -47,9 +46,6 @@ class TrabajadorController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-
-
-
     public function store(Request $request): JsonResponse
     {
         try {
@@ -101,8 +97,6 @@ class TrabajadorController extends Controller
      * @param string $id
      * @return JsonResponse
      */
-
-
     public function show(string $id): JsonResponse
     {
         try {
@@ -132,9 +126,6 @@ class TrabajadorController extends Controller
      * @param string $id
      * @return JsonResponse
      */
-
-
-
     public function update(Request $request, string $id): JsonResponse
     {
         try {
@@ -187,8 +178,6 @@ class TrabajadorController extends Controller
      * @param string $id
      * @return JsonResponse
      */
-
-
     public function destroy(string $id): JsonResponse
     {
         try {

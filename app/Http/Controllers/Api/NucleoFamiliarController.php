@@ -97,8 +97,6 @@ class NucleoFamiliarController extends Controller
      * @param string $id
      * @return JsonResponse
      */
-
-
     public function show(string $id): JsonResponse
     {
         try {
