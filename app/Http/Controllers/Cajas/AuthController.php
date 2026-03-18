@@ -55,26 +55,16 @@ class AuthController extends ApplicationController
                         'template' => 'tmp_bienvenida',
                     ]
                 );
+
                 return redirect()->route('cajas.principal');
-            } catch (AuthException $auth_err) {
-
-                $code = $auth_err->getCode();
-                $msj = $auth_err->getMessage();
-
-                // si es diferente a error de captcha
-                if ($code != 1) {
-                    $auth->cargarIntentos($user);
-                    $msj = $auth->getResultado();
-                }
+            } catch (AuthException $err) {
                 set_flashdata('error', [
-                    'msj' => $msj,
-                    'code' => $code,
+                    'msj' => $err->getMessage(),
+                    'code' => $err->getCode(),
                 ]);
-
                 return redirect()->route('cajas.login');
             }
         } catch (Exception $err) {
-
             set_flashdata('error', [
                 'msj' => $err->getMessage() . ' ' . $err->getFile() . ' ' . $err->getLine(),
                 'code' => $err->getCode(),
@@ -88,7 +78,7 @@ class AuthController extends ApplicationController
     {
         $flash = get_flashdata();
         if (! isset($flash['error'])) {
-            $flash = ['error' => ['message' => '', 'code' => 404]];
+            $flash = ['error' => ['msj' => '', 'code' => 404]];
         }
 
         return view('cajas/auth/error_access', [

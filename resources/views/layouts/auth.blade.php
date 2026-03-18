@@ -31,13 +31,13 @@
     <script type="text/javascript" src="{{ asset('assets/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/noty/noty.js') }}"></script>
     @stack('styles')
-    @include('partials.flash')
 </head>
 
 <body class="bg-gray-100 flex items-center justify-center h-screen bg-gradient-primary">
     @include('templates.loading')
     @yield('content')
 
+    @include('partials.flash')
     <script type="text/javascript" src="{{ asset('assets/plugins/js.cookie.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/jquery/jquery.scrollbar.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/jquery/jquery-scrollLock.min.js') }}"></script>

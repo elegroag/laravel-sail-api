@@ -54,6 +54,7 @@
     <script type="text/javascript" src="{{ asset('assets/bootstrap/js/bootstrap-datepicker.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/bootstrap/js/bootstrap-datepicker-es.js') }}"></script>
     
+    @include('partials.flash')
     <script src="{{ asset('assets/validators/messages_es.min.js') }}"></script>
     <script src="{{ asset('theme/js/headroom.js') }}"></script>
     <script src="{{ asset('theme/js/navbarEvents.js') }}"></script>

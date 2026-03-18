@@ -3,15 +3,6 @@
 @section('application', 'cajas')
 
 @push('scripts')
-<script type='text/template' id='tmp_bienvenida'>
-    <div class='col-xs-12'>
-        <h3 class='text-center' style='color:#78b64b'>Seguridad De La Información<br/>(<small>Protección De Datos</small>)</h3><br/>
-        <p class='text-left'><%=mensaje%></p>
-        <p class='text-left'>“Bienvenido a la Caja de Compensación Familiar del Caquetá COMFACA. LA SEGURIDAD Y PRIVACIDAD DE LOS DATOS E INFORMACIÓN ESTÁ EN SUS MANOS, por ello, recuerda en todo momento su compromiso frente a conocer y aplicar las políticas de seguridad de la información y protección de datos personales establecidas en la organización.</p><br/>
-        <p class='text-left'>Con la finalidad de asegurar el debido el cumplimiento de normativas legales y directrices internas o externas, la Caja de Compensación Familiar del Caquetá COMFACA podrá monitorear, supervisar y vigilar en cualquier momento el cumplimiento y adecuada aplicación de las políticas, lineamientos y demás aspectos que hayan sido generados para salvaguardar la seguridad y privacidad de la información. Finalmente, recuerde que un incumplimiento de las políticas y demás lineamientos puede generar sanciones.”</p>
-    </div>
-</script>
-
 <script src="{{ asset('cajas/build/Login.js') }}"></script>
 @endpush
 

@@ -29,7 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'web/*',
             'mercurio/*',
-            'cajas/*',
+            'cajas/autenticar',
             'api/sanctum/csrf-cookie'
         ]);
 

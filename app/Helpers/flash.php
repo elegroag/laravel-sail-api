@@ -7,34 +7,80 @@ if (! function_exists('set_flashdata')) {
      * capitalize
      * dar formato a las palabras que estan en mayusculas
      *
-     * @param  mixed  $string
-     * @return string
+     * @param  string  $item
+     * @param  mixed  $data
+     * @param  bool|null  $persiste
+     * @return void
      */
-    function set_flashdata($item, $data, $persiste = false)
+    function set_flashdata(string $item = '', $data, ?bool $persiste = null)
     {
-        // Almacena datos temporales usando la sesión de Laravel
         if ($persiste) {
-            // Persistente hasta que se elimine manualmente
             $messages = session('PERSISTE', []);
             $messages["{$item}"] = $data;
             Session::put('PERSISTE', $messages);
         } else {
-            // Solo para el próximo request (flash)
-            $messages = session('FLASH', []);
-            $messages["{$item}"] = $data;
-            // flash reemplaza la clave completa, por eso acumulamos antes
-            session()->flash('FLASH', $messages);
+            if (in_array($item, ['error', 'success', 'notify'], true)) {
+                session()->flash($item, $data);
+            } else {
+                $messages = session('FLASH', []);
+                $messages["{$item}"] = $data;
+                session()->flash('FLASH', $messages);
+            }
+        }
+    }
+}
+
+if (! function_exists('set_flashnow')) {
+    function set_flashnow(string $item = '', $data)
+    {
+        $messages = session('FLASH_NOW', []);
+        $messages["{$item}"] = $data;
+        session()->now('FLASH_NOW', $messages);
+
+        if (in_array($item, ['error', 'success', 'notify'], true)) {
+            session()->now($item, $data);
         }
     }
 }
 
 if (! function_exists('get_flashdata')) {
-    function get_flashdata($destroy = false)
+    function get_flashdata(?bool $destroy = null)
     {
         $messages = session('FLASH', []);
+        foreach (['error', 'success', 'notify'] as $key) {
+            $val = session($key);
+            if (! empty($val) && ! isset($messages[$key])) {
+                $messages[$key] = $val;
+            }
+        }
+
         if ($destroy) {
-            // Opcionalmente eliminar inmediatamente (aunque flash expira solo)
             Session::forget('FLASH');
+            foreach (['error', 'success', 'notify'] as $key) {
+                Session::forget($key);
+            }
+        }
+
+        return $messages;
+    }
+}
+
+if (! function_exists('get_flashnow')) {
+    function get_flashnow(?bool $destroy = null)
+    {
+        $messages = session('FLASH_NOW', []);
+        foreach (['error', 'success', 'notify'] as $key) {
+            $val = session($key);
+            if (! empty($val) && ! isset($messages[$key])) {
+                $messages[$key] = $val;
+            }
+        }
+
+        if ($destroy) {
+            Session::forget('FLASH_NOW');
+            foreach (['error', 'success', 'notify'] as $key) {
+                Session::forget($key);
+            }
         }
 
         return $messages;
@@ -42,18 +88,28 @@ if (! function_exists('get_flashdata')) {
 }
 
 if (! function_exists('get_flashdata_item')) {
-    function get_flashdata_item($item, $destroy = false)
+    function get_flashdata_item($item, ?bool $destroy = null)
     {
-        $messages1 = session('FLASH', []);
-        $messages2 = session('PERSISTE', []);
+        $messages_flash = session('FLASH', []);
+        $message_persiste = session('PERSISTE', []);
+
         if ($destroy) {
-            // Mantiene comportamiento previo: elimina ambos contenedores
             Session::forget('FLASH');
             Session::forget('PERSISTE');
         }
-        $msj = isset($messages1["{$item}"]) ? $messages1["{$item}"] : false;
+
+        if (in_array($item, ['error', 'success', 'notify'], true)) {
+            $direct = session($item);
+            Session::forget($item);
+
+            if (! empty($direct)) {
+                return $direct;
+            }
+        }
+
+        $msj = isset($messages_flash["{$item}"]) ? $messages_flash["{$item}"] : false;
         if (empty($msj)) {
-            $msj = isset($messages2["{$item}"]) ? $messages2["{$item}"] : false;
+            $msj = isset($message_persiste["{$item}"]) ? $message_persiste["{$item}"] : false;
         }
 
         return $msj;

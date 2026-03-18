@@ -7,6 +7,15 @@ use Illuminate\Http\Request;
 
 class AuthException extends Exception
 {
+
+    public function __construct(string $message = '', int $code = 0, $extra = null, ?Exception $previous = null)
+    {
+        parent::__construct($message, $code, $previous);
+        $this->extra = $extra;
+    }
+
+    public $extra;
+
     public static $errors = [];
 
     protected $orderId;
@@ -31,7 +40,8 @@ class AuthException extends Exception
                     'file' => basename($this->getFile()),
                     'line' => $this->getLine(),
                 ],
-            ], 205
+            ],
+            205
         );
     }
 }

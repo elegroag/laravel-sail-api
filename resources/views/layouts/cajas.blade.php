@@ -3,7 +3,6 @@
 @section('application', 'cajas')
 
 @section('content-main')
-@include('partials.flash')
 
 @php
 $user = session()->get('user');

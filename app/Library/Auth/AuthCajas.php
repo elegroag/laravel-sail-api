@@ -8,15 +8,13 @@ use App\Services\Srequest;
 
 class AuthCajas
 {
-    private $month_enable = 2;
 
     private $usuario;
 
-    private $resultado = '';
-
-    public function autenticar($user, $clave)
+    public function autenticar($user, $clave): ?bool
     {
         SessionCookies::destroyIdentity();
+
         $this->buscarUsuario($user);
         if (! $this->usuario) {
             throw new AuthException('El usuario es requerido para la autenticación. 2', 2);
@@ -28,12 +26,11 @@ class AuthCajas
         if (! clave_verify($clave, $criptada)) {
             throw new AuthException('La clave no es correcta para continuar con la autenticación. 6', 6);
         }
-        $this->crearSession();
+        return $this->crearSession();
     }
 
-    public function crearSession()
+    public function crearSession(): ?bool
     {
-
         if (! SessionCookies::authenticate(
             'cajas',
             new Srequest([
@@ -45,20 +42,8 @@ class AuthCajas
         )) {
             throw new AuthException('Error acceso incorrecto. No se logra completar la autenticación', 504);
         } else {
-            $msj = 'La autenticación se ha completado con éxito.';
-            $response = [
-                'success' => true,
-                'location' => 'principal/index',
-                'msj' => $msj,
-            ];
+            return true;
         }
-
-        return $response;
-    }
-
-    public function getResultado()
-    {
-        return $this->resultado;
     }
 
     public function cargarIntentos($usuario)
@@ -71,7 +56,7 @@ class AuthCajas
                     'estado' => 'B',
                     'intentos' => $intentos,
                 ]);
-                $this->resultado = 'El usuario se ha bloqueado, por fallar en la autenticación con más de 3 intentos.';
+                throw new AuthException('El usuario se ha bloqueado, por fallar en la autenticación con más de 3 intentos.', 7);
             } else {
                 Gener02::where('usuario', $usuario)->update([
                     'intentos' => $intentos,

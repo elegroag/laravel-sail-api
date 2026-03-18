@@ -28,12 +28,9 @@ class SessionCookies
         session()->regenerate();
         $userData = $session->authenticate($request);
 
-        if (! $userData) {
-            return false;
-        }
+        if (! $userData) return false;
 
         session()->put('user', $userData);
-
         return true;
     }
 

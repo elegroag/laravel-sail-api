@@ -21,8 +21,6 @@ list($menu, $breadcrumbs, $pageTitle) = App\Services\Menu\Menu::showMenu('ME');
     <script src="{{ asset('core/base-source.js') }}"></script>
 @endpush
 
-@include('partials.flash')
-
 @include('templates.sidebar', 
     [
         'menu' => $menu, 

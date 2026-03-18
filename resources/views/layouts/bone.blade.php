@@ -15,8 +15,6 @@ list($menu, $breadcrumbs, $pageTitle) = App\Services\Menu\Menu::showMenu('ME');
     <link rel="stylesheet" href="{{ asset('mercurio/css/mercurio.css') }}" />
 @endpush
 
-@include('partials.flash')
-
 @include('templates.sidebar', 
     [
         'menu' => $menu, 

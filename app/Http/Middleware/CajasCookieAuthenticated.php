@@ -33,11 +33,11 @@ class CajasCookieAuthenticated
             }
 
             set_flashdata('error', [
-                'msj' => 'No autorizado para acceder al modulo. ' .__LINE__ .' '. $this->controller,
+                'msj' => 'No autorizado para acceder al modulo. ' . __LINE__ . ' ' . $this->controller,
                 'code' => 401,
             ]);
 
-            return redirect('cajas/login');
+            return redirect()->route('cajas.login');
         }
 
         if ($this->autorization($request) === false) {
@@ -47,13 +47,13 @@ class CajasCookieAuthenticated
                     'message' => 'No autorizado para acceder al modulo. ' . $this->controller,
                 ], 401);
             }
-            
+
             if (!($this->controller == 'PrincipalController' && $this->actionMethod == 'index')) {
                 set_flashdata('error', [
-                    'msj' => 'No autorizado para acceder al modulo. ' .__LINE__ .' '. $this->controller,
+                    'msj' => 'No autorizado para acceder al modulo. ' . __LINE__ . ' ' . $this->controller,
                     'code' => 401,
                 ]);
-                return redirect('cajas/principal/index');
+                return redirect()->route('cajas.principal');
             }
         }
 
@@ -67,10 +67,10 @@ class CajasCookieAuthenticated
             if (!($this->controller == 'PrincipalController' && $this->actionMethod == 'index')) {
 
                 set_flashdata('error', [
-                    'msj' => 'No autorizado para acceder a la acción. ' .__LINE__ .' '. $this->controller . ' ' . $this->actionMethod,
+                    'msj' => 'No autorizado para acceder a la acción. ' . __LINE__ . ' ' . $this->controller . ' ' . $this->actionMethod,
                     'code' => 401,
                 ]);
-                return redirect('cajas/principal/index');
+                return redirect()->route('cajas.principal');
             }
         }
 
@@ -90,13 +90,18 @@ class CajasCookieAuthenticated
             ]);
 
             // redirigir a la pantalla de login de mercurio
-            return redirect('web/login');
+            return redirect()->route('web.login');
         }
 
         $tipfun = session()->has('tipfun') ? session('tipfun') : null;
         $user = session()->has('user') ? session('user') : null;
 
-        if ($user && $user != null && $tipfun && $tipfun != null) {
+        if (
+            $user &&
+            $user != '' &&
+            $tipfun &&
+            $tipfun != ''
+        ) {
             $request->attributes->set('user', $user);
             $request->attributes->set('tipfun', $tipfun);
         } else {
@@ -110,7 +115,7 @@ class CajasCookieAuthenticated
                 'msj' => 'No autenticado.',
                 'code' => 401,
             ]);
-            return redirect('cajas/login');
+            return redirect()->route('cajas.login');
         }
 
         return $next($request);
