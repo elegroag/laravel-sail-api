@@ -24,6 +24,8 @@ use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
 use Carbon\Carbon;
+use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class TrabajadorController extends ApplicationController
@@ -472,20 +474,17 @@ class TrabajadorController extends ApplicationController
 
     /**
      * guardar function
-     *
      * @changed [2024-03-10]
-     *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @return void
+     * @return JsonResponse
      */
-    public function guardar(Request $request)
+    public function guardar(Request $request): JsonResponse
     {
         $this->db->begin();
         try {
             $trabajadorService = new TrabajadorService();
             $clave_certificado = $request->input('clave');
-            $id = $request->get('id');
+            $id = $request->input('id');
 
             $params = $this->serializeData($request);
             $params['tipo'] = $this->tipo;
@@ -517,7 +516,7 @@ class TrabajadorController extends ApplicationController
             ];
 
             $this->db->commit();
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             $this->db->rollBack();
             $salida = $this->handleException($e, $request);
         }

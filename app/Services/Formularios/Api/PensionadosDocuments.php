@@ -89,6 +89,7 @@ class PensionadosDocuments
             'nombre_trabajador' => $nombre_pensionado,
             'tipo_documento' => $detdoc_detalle,
             'cargo_name' => 'TRABAJADOR PENSIONADO',
+            'calemp_detalle' => "PENSIONADO",
             ...$this->pensionado->toArray(),
         ];
 
@@ -97,9 +98,9 @@ class PensionadosDocuments
         $ps = new ApiPython();
         $ps->send([
             'servicio' => 'Python',
-            'metodo' => 'generate-pdf',
+            'metodo' => 'genera-consolidado-pdf',
             'params' => [
-                'template' => $this->params['template'],
+                'templates' => $this->params['templates'],
                 'output' => $this->params['output'],
                 'context' => $context,
             ]

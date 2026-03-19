@@ -29,21 +29,6 @@ class PensionadoAdjuntoService
 
     private $claveCertificado;
 
-    private const DOCUMENTOS = [
-        [
-            'method' => 'formulario',
-            'coddoc' => 1,
-        ],
-        [
-            'method' => 'tratamientoDatos',
-            'coddoc' => 25,
-        ],
-        [
-            'method' => 'cartaSolicitud',
-            'coddoc' => 24
-        ]
-    ];
-
     public function __construct($request)
     {
         $this->user = session('user') ?? null;
@@ -71,21 +56,6 @@ class PensionadoAdjuntoService
         $paramsEmpresa->setDatosCaptura($datos_captura);
     }
 
-    public function tratamientoDatos()
-    {
-        $this->filename = 'tratamiento_datos_pensionado_' . strtotime('now') . "_{$this->request->cedtra}.pdf";
-        $manager = new DocumentGenerationManager();
-        $manager->generate('api', 'pensionado', [
-            'categoria' => 'politica',
-            'output' => $this->filename,
-            'template' => 'politica-trabajador.html',
-            'pensionado' => $this->request,
-            'solicitante' => $this->getSolicitante()
-        ]);
-        $this->cifrarDocumento();
-        return $this;
-    }
-
     public function getSolicitante()
     {
         $solicitante = Mercurio07::where("documento", $this->request->documento)
@@ -95,39 +65,6 @@ class PensionadoAdjuntoService
         return $solicitante;
     }
 
-    public function cartaSolicitud()
-    {
-        $procesadorComando = new ApiSubsidio();
-        $procesadorComando->send(
-            [
-                'servicio' => 'ComfacaEmpresas',
-                'metodo' => 'informacion_trabajador',
-                'params' => ['cedtra' => $this->request->getCedtra()],
-            ]
-        );
-
-        if ($procesadorComando->isJson() == false) {
-            d('Se genero un error al buscar al trabajador usando el servicio CLI-Comando. ');
-        }
-
-        $out = $procesadorComando->toArray();
-        $this->filename = "carta_solicitud_pensionado_{$this->request->getCedtra()}.pdf";
-        $fabrica = new FactoryDocuments;
-        $documento = $fabrica->crearOficio('pensionado');
-        $documento->setParamsInit([
-            'background' => 'img/form/oficios/oficio_solicitud_afiliacion.jpg',
-            'pensionado' => $this->request,
-            'firma' => $this->lfirma,
-            'filename' => $this->filename,
-            'previus' => $out['success'] ? $out['data'] : null,
-        ]);
-
-        $documento->main();
-        $documento->outPut();
-        $this->cifrarDocumento();
-
-        return $this;
-    }
 
     public function formulario()
     {
@@ -137,13 +74,21 @@ class PensionadoAdjuntoService
 
         $this->filename = 'formulario-trabajador-' . strtotime('now') . "_{$this->request->cedtra}.pdf";
         $manager = new DocumentGenerationManager();
-        $manager->generate('api', 'pensionado', [
-            'categoria' => 'formulario',
-            'output' => $this->filename,
-            'template' => 'trabajador.html',
-            'pensionado' => $this->request,
-            'solicitante' => $this->getSolicitante()
-        ]);
+        $manager->generate(
+            'api',
+            'pensionado',
+            [
+                'categoria' => 'formulario',
+                'output' => $this->filename,
+                'templates' => [
+                    'trabajador.html',
+                    'oficio-empresa.html',
+                    'politica-trabajador.html'
+                ],
+                'pensionado' => $this->request,
+                'solicitante' => $this->getSolicitante()
+            ]
+        );
 
         $this->cifrarDocumento();
         return $this;
@@ -178,6 +123,11 @@ class PensionadoAdjuntoService
     {
         $adjuntoService = new self($request);
         $adjuntoService->setClaveCertificado($claveCertificado);
-        AdjuntosGenerator::generar($adjuntoService, $tipopc, $request, self::DOCUMENTOS);
+        AdjuntosGenerator::generar($adjuntoService, $tipopc, $request, [
+            [
+                'method' => 'formulario',
+                'coddoc' => 1,
+            ]
+        ]);
     }
 }

@@ -118,9 +118,9 @@ class ConyugesDocuments
         $ps = new ApiPython();
         $ps->send([
             'servicio' => 'Python',
-            'metodo' => 'generate-pdf',
+            'metodo' => 'genera-consolidado-pdf',
             'params' => [
-                'template' => $this->params['template'],
+                'templates' => $this->params['templates'],
                 'output' => $this->params['output'],
                 'context' => $context,
             ]

@@ -61,15 +61,16 @@ class FacultativosDocuments
             'giro_name' => $giro_name,
             'codigo_giro_name' => $codigo_giro_name,
             'nombre_facultativo' => $nombre_facultativo,
+            'calemp_detalle' => "FACULTATIVO",
             ...$this->facultativo->toArray(),
         ];
 
         $ps = new ApiPython();
         $ps->send([
             'servicio' => 'Python',
-            'metodo' => 'generate-pdf',
+            'metodo' => 'genera-consolidado-pdf',
             'params' => [
-                'template' => $this->params['template'],
+                'templates' => $this->params['templates'],
                 'output' => $this->params['output'],
                 'context' => $context,
             ]

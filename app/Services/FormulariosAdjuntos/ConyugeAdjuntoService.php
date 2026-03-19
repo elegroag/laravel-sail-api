@@ -37,16 +37,6 @@ class ConyugeAdjuntoService
 
     private $tipo;
 
-    private const DOCUMENTOS = [
-        [
-            'method' => 'formulario',
-            'coddoc' => 1,
-        ],
-        [
-            'method' => 'declaraJurament',
-            'coddoc' => 4,
-        ]
-    ];
 
     /**
      * lfirma variable
@@ -89,14 +79,18 @@ class ConyugeAdjuntoService
 
         $this->filename = 'formulario-conyuge-' . strtotime('now') . "_{$this->request->cedcon}.pdf";
         $manager = new DocumentGenerationManager();
-        $manager->generate('api', 'conyuge', [
-            'categoria' => 'formulario',
-            'output' => $this->filename,
-            'template' => 'adicion-conyuge.html',
-            'conyuge' => $this->request,
-            'trabajador' => $this->getTrabajador(),
-            'solicitante' => $solicitante,
-        ]);
+        $manager->generate(
+            'api',
+            'conyuge',
+            [
+                'categoria' => 'formulario',
+                'output' => $this->filename,
+                'templates' => ['adicion-conyuge.html', 'declaracion-conyuge.html'],
+                'conyuge' => $this->request,
+                'trabajador' => $this->getTrabajador(),
+                'solicitante' => $solicitante,
+            ]
+        );
         $this->cifrarDocumento();
         return $this;
     }
@@ -151,21 +145,6 @@ class ConyugeAdjuntoService
         return $trabajador;
     }
 
-    public function declaraJurament()
-    {
-        $this->filename = 'declaracion-conyuge-' . strtotime('now') . "_{$this->request->cedcon}.pdf";
-        $manager = new DocumentGenerationManager();
-        $manager->generate('api', 'conyuge', [
-            'categoria' => 'declaracion',
-            'conyuge' => $this->request,
-            'trabajador' => $this->getTrabajador(),
-            'template' => 'declaracion-conyuge.html',
-            'output' => $this->filename,
-        ]);
-        $this->cifrarDocumento();
-        return $this;
-    }
-
     public function cifrarDocumento()
     {
         $cifrarDocumento = new CifrarDocumento;
@@ -195,6 +174,11 @@ class ConyugeAdjuntoService
     {
         $adjuntoService = new self($request);
         $adjuntoService->setClaveCertificado($claveCertificado);
-        AdjuntosGenerator::generar($adjuntoService, $tipopc, $request, self::DOCUMENTOS);
+        AdjuntosGenerator::generar($adjuntoService, $tipopc, $request, [
+            [
+                'method' => 'formulario',
+                'coddoc' => 1,
+            ]
+        ]);
     }
 }

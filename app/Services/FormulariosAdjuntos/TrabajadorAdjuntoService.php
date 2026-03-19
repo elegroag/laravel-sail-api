@@ -37,17 +37,6 @@ class TrabajadorAdjuntoService
      */
     protected $lfirma;
 
-    private const DOCUMENTOS = [
-        [
-            'method' => 'formulario',
-            'coddoc' => 1,
-        ],
-        [
-            'method' => 'tratamientoDatos',
-            'coddoc' => 25,
-        ]
-    ];
-
     public function __construct($request)
     {
         $this->user = session('user') ?? null;
@@ -74,23 +63,6 @@ class TrabajadorAdjuntoService
         $paramsEmpresa->setDatosCaptura($datos_captura);
     }
 
-    public function tratamientoDatos()
-    {
-        $this->filename = 'tratamiento_datos_trabajador_' . strtotime('now') . "_{$this->request->cedtra}.pdf";
-        $manager = new DocumentGenerationManager();
-        $manager->generate('api', 'trabajador', [
-            'categoria' => 'politica',
-            'output' => $this->filename,
-            'template' => 'politica-trabajador.html',
-            'trabajador' => $this->request,
-            'conyuge' => $this->getBuscarConyuge(),
-            'solicitante' => $this->getSolicitante(),
-            'empresa' => $this->getBuscarEmpresa(),
-        ]);
-        $this->cifrarDocumento();
-        return $this;
-    }
-
     public function formulario()
     {
         if (! $this->lfirma) {
@@ -99,15 +71,19 @@ class TrabajadorAdjuntoService
 
         $this->filename = 'formulario-trabajador-' . strtotime('now') . "_{$this->request->cedtra}.pdf";
         $manager = new DocumentGenerationManager();
-        $manager->generate('api', 'trabajador', [
-            'categoria' => 'formulario',
-            'output' => $this->filename,
-            'template' => 'trabajador.html',
-            'trabajador' => $this->request,
-            'empresa' => $this->getBuscarEmpresa(),
-            'conyuge' => $this->getBuscarConyuge(),
-            'solicitante' => $this->getSolicitante()
-        ]);
+        $manager->generate(
+            'api',
+            'trabajador',
+            [
+                'categoria' => 'formulario',
+                'output' => $this->filename,
+                'templates' => ['trabajador.html', 'politica-trabajador.html'],
+                'trabajador' => $this->request,
+                'empresa' => $this->getBuscarEmpresa(),
+                'conyuge' => $this->getBuscarConyuge(),
+                'solicitante' => $this->getSolicitante()
+            ]
+        );
 
         $this->cifrarDocumento();
         return $this;
@@ -186,6 +162,9 @@ class TrabajadorAdjuntoService
     {
         $adjuntoService = new self($request);
         $adjuntoService->setClaveCertificado($claveCertificado);
-        AdjuntosGenerator::generar($adjuntoService, $tipopc, $request, self::DOCUMENTOS);
+        AdjuntosGenerator::generar($adjuntoService, $tipopc, $request, [
+            'method' => 'formulario',
+            'coddoc' => 1,
+        ]);
     }
 }

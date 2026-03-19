@@ -40,17 +40,6 @@ class BeneficiarioAdjuntoService
 
     private $tipo;
 
-    private const DOCUMENTOS = [
-        [
-            'method' => 'formulario',
-            'coddoc' => 1,
-        ],
-        [
-            'method' => 'declaraJurament',
-            'coddoc' => 4,
-        ]
-    ];
-
     public function __construct($request)
     {
         $this->user = session('user') ?? null;
@@ -142,6 +131,28 @@ class BeneficiarioAdjuntoService
 
     public function formulario()
     {
+        switch (strval($this->request->parent)) {
+            case '1':
+                $declaracion_template = 'declaracion-hijos.html';
+                $this->filename = "declaracion_hijo_{$this->request->numdoc}.pdf";
+                break;
+            case '4':
+                $declaracion_template = 'declaracion-custodia.html';
+                $this->filename = "declaracion_custodia_{$this->request->numdoc}.pdf";
+                break;
+            case '3': // padre
+            case '2': // hermano
+                $declaracion_template = 'declaracion-padres.html';
+                $this->filename = "declaracion_padres_{$this->request->numdoc}.pdf";
+                break;
+            case '5': // cuidador persona discapacitada
+                $declaracion_template = 'declaracion-cuidador.html';
+                $this->filename = "declaracion_cuidador_{$this->request->numdoc}.pdf";
+                break;
+            default:
+                break;
+        }
+
         $solicitante = Mercurio07::where("documento", $this->request->documento)
             ->where("coddoc", $this->request->coddoc)
             ->where("tipo", $this->request->tipo)
@@ -149,57 +160,24 @@ class BeneficiarioAdjuntoService
 
         $this->filename = 'formulario-beneficiario-' . strtotime('now') . "_{$this->request->numdoc}.pdf";
         $manager = new DocumentGenerationManager();
-        $manager->generate('api', 'beneficiario', [
-            'categoria' => 'formulario',
-            'output' => $this->filename,
-            'template' => 'adicion-beneficiario.html',
-            'beneficiario' => $this->request,
-            'trabajador' => $this->getTrabajador(),
-            'solicitante' => $solicitante,
-            'biologico' => $this->getBiologioConyuge(),
-        ]);
+        $manager->generate(
+            'api',
+            'beneficiario',
+            [
+                'categoria' => 'formulario',
+                'output' => $this->filename,
+                'templates' => ['adicion-beneficiario.html', "{$declaracion_template}"],
+                'beneficiario' => $this->request,
+                'trabajador' => $this->getTrabajador(),
+                'solicitante' => $solicitante,
+                'biologico' => $this->getBiologioConyuge(),
+            ]
+        );
 
         $this->cifrarDocumento();
         return $this;
     }
 
-    public function declaraJurament()
-    {
-        switch (strval($this->request->parent)) {
-            case '1':
-                $template = 'declaracion-hijos.html';
-                $this->filename = "declaracion_hijo_{$this->request->numdoc}.pdf";
-                break;
-            case '4':
-                $template = 'declaracion-custodia.html';
-                $this->filename = "declaracion_custodia_{$this->request->numdoc}.pdf";
-                break;
-            case '3': // padre
-            case '2': // hermano
-                $template = 'declaracion-padres.html';
-                $this->filename = "declaracion_padres_{$this->request->numdoc}.pdf";
-                break;
-            case '5': // cuidador persona discapacitada
-                $template = 'declaracion-cuidador.html';
-                $this->filename = "declaracion_cuidador_{$this->request->numdoc}.pdf";
-                break;
-            default:
-                break;
-        }
-
-        $manager = new DocumentGenerationManager();
-        $manager->generate('api', 'beneficiario', [
-            'categoria' => 'declaracion',
-            'output' => $this->filename,
-            'template' => $template,
-            'beneficiario' => $this->request,
-            'trabajador' => $this->getTrabajador(),
-            'biologico' => $this->getBiologioConyuge(),
-        ]);
-
-        $this->cifrarDocumento();
-        return $this;
-    }
 
     public function getBiologioConyuge()
     {
@@ -306,6 +284,11 @@ class BeneficiarioAdjuntoService
     {
         $adjuntoService = new self($request);
         $adjuntoService->setClaveCertificado($claveCertificado);
-        AdjuntosGenerator::generar($adjuntoService, $tipopc, $request, self::DOCUMENTOS);
+        AdjuntosGenerator::generar($adjuntoService, $tipopc, $request, [
+            [
+                'method' => 'formulario',
+                'coddoc' => 1,
+            ]
+        ]);
     }
 }

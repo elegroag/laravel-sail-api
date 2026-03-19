@@ -29,13 +29,6 @@ class DatosEmpresaService
 
     private $user;
 
-    private const DOCUMENTOS = [
-        [
-            'method' => 'formulario',
-            'coddoc' => 27,
-        ]
-    ];
-
     public function __construct($argv)
     {
         $this->user = session('user') ?? null;
@@ -71,13 +64,17 @@ class DatosEmpresaService
         $nit = $this->empresa->nit;
         $this->filename = 'formulario-datos-empresa-' . strtotime('now') . "_{$nit}.pdf";
         $manager = new DocumentGenerationManager();
-        $manager->generate('api', 'actualizadatos', [
-            'categoria' => 'formulario',
-            'output' => $this->filename,
-            'template' => 'actualiza-empresa.html',
-            'empresa' => $this->empresa,
-            'solicitud' => $this->solicitud,
-        ]);
+        $manager->generate(
+            'api',
+            'actualizadatos',
+            [
+                'categoria' => 'formulario',
+                'output' => $this->filename,
+                'templates' => ['actualiza-empresa.html'],
+                'empresa' => $this->empresa,
+                'solicitud' => $this->solicitud,
+            ]
+        );
 
         $this->cifrarDocumento();
         return $this;
@@ -112,6 +109,11 @@ class DatosEmpresaService
     {
         $adjuntoService = new self($request);
         $adjuntoService->setClaveCertificado($claveCertificado);
-        AdjuntosGenerator::generar($adjuntoService, $tipopc, $request, self::DOCUMENTOS);
+        AdjuntosGenerator::generar($adjuntoService, $tipopc, $request, [
+            [
+                'method' => 'formulario',
+                'coddoc' => 27,
+            ]
+        ]);
     }
 }

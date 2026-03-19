@@ -27,21 +27,6 @@ class IndependienteAdjuntoService
 
     private $user;
 
-    private const DOCUMENTOS = [
-        [
-            'method' => 'formulario',
-            'coddoc' => 1,
-        ],
-        [
-            'method' => 'tratamientoDatos',
-            'coddoc' => 25,
-        ],
-        [
-            'method' => 'cartaSolicitud',
-            'coddoc' => 24
-        ]
-    ];
-
     public function __construct($request)
     {
         $this->user = session('user') ?? null;
@@ -69,58 +54,6 @@ class IndependienteAdjuntoService
         $paramsEmpresa->setDatosCaptura($datos_captura);
     }
 
-    public function tratamientoDatos()
-    {
-        $this->filename = 'tratamiento_datos_independiente_' . strtotime('now') . "_{$this->request->cedtra}.pdf";
-        $manager = new DocumentGenerationManager();
-        $manager->generate('api', 'independiente', [
-            'categoria' => 'politica',
-            'output' => $this->filename,
-            'template' => 'politica-trabajador.html',
-            'independiente' => $this->request,
-            'solicitante' => $this->getSolicitante()
-        ]);
-        $this->cifrarDocumento();
-        return $this;
-    }
-
-    public function cartaSolicitud()
-    {
-        $procesadorComando = new ApiSubsidio();
-        $procesadorComando->send(
-            [
-                'servicio' => 'ComfacaEmpresas',
-                'metodo' => 'informacion_trabajador',
-                'params' => ['cedtra' => $this->request->cedtra],
-            ]
-        );
-
-        if ($procesadorComando->isJson() == false) {
-            d('Se genero un error al buscar al trabajador usando el servicio CLI-Comando. ');
-        }
-
-        $out = $procesadorComando->toArray();
-        $this->filename = "carta_solicitud_independiente_{$this->request->cedtra}.pdf";
-        $background = 'img/form/oficios/oficio_solicitud_afiliacion.jpg';
-
-        $fabrica = new FactoryDocuments;
-        $documento = $fabrica->crearOficio('independiente');
-        $documento->setParamsInit([
-            'background' => $background,
-            'independiente' => $this->request,
-            'firma' => $this->lfirma,
-            'filename' => $this->filename,
-            'previus' => $out['success'] ? $out['data'] : null,
-        ]);
-
-        $documento->main();
-        $documento->outPut();
-
-        $this->cifrarDocumento();
-
-        return $this;
-    }
-
     public function formulario()
     {
         if (! $this->lfirma) {
@@ -129,13 +62,21 @@ class IndependienteAdjuntoService
 
         $this->filename = 'formulario-trabajador-' . strtotime('now') . "_{$this->request->cedtra}.pdf";
         $manager = new DocumentGenerationManager();
-        $manager->generate('api', 'independiente', [
-            'categoria' => 'formulario',
-            'output' => $this->filename,
-            'template' => 'trabajador.html',
-            'independiente' => $this->request,
-            'solicitante' => $this->getSolicitante()
-        ]);
+        $manager->generate(
+            'api',
+            'independiente',
+            [
+                'categoria' => 'formulario',
+                'output' => $this->filename,
+                'templates' => [
+                    'trabajador.html',
+                    'oficio-empresa.html',
+                    'politica-trabajador.html'
+                ],
+                'independiente' => $this->request,
+                'solicitante' => $this->getSolicitante()
+            ]
+        );
 
         $this->cifrarDocumento();
         return $this;
@@ -183,6 +124,11 @@ class IndependienteAdjuntoService
     {
         $adjuntoService = new self($request);
         $adjuntoService->setClaveCertificado($claveCertificado);
-        AdjuntosGenerator::generar($adjuntoService, $tipopc, $request, self::DOCUMENTOS);
+        AdjuntosGenerator::generar($adjuntoService, $tipopc, $request, [
+            [
+                'method' => 'formulario',
+                'coddoc' => 1,
+            ]
+        ]);
     }
 }

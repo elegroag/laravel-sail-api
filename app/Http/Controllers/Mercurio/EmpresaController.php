@@ -21,6 +21,7 @@ use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
 use App\Services\Api\ApiSubsidio;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -348,7 +349,7 @@ class EmpresaController extends ApplicationController
                 'data' => $componentes,
                 'msj' => 'OK',
             ];
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             $salida = $this->handleException($e, request());
         }
 

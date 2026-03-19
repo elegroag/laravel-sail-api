@@ -91,6 +91,7 @@ class IndependientesDocuments
             'nombre_trabajador' => $nombre_independiente,
             'tipo_documento' => $detdoc_detalle,
             'cargo_name' => $cargo_name,
+            'calemp_detalle' => "INDEPENDIENTE",
             ...$this->independiente->toArray(),
         ];
 
@@ -99,9 +100,9 @@ class IndependientesDocuments
         $ps = new ApiPython();
         $ps->send([
             'servicio' => 'Python',
-            'metodo' => 'generate-pdf',
+            'metodo' => 'genera-consolidado-pdf',
             'params' => [
-                'template' => $this->params['template'],
+                'templates' => $this->params['templates'],
                 'output' => $this->params['output'],
                 'context' => $context,
             ]

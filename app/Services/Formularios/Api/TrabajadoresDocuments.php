@@ -89,9 +89,9 @@ class TrabajadoresDocuments
         $ps = new ApiPython();
         $ps->send([
             'servicio' => 'Python',
-            'metodo' => 'generate-pdf',
+            'metodo' => 'genera-consolidado-pdf',
             'params' => [
-                'template' => $this->params['template'],
+                'templates' => $this->params['templates'],
                 'output' => $this->params['output'],
                 'context' => $context,
             ]
@@ -103,9 +103,9 @@ class TrabajadoresDocuments
             throw new DebugException("Error generando el PDF", 501, $out);
         }
         //el documento ahora llega en base64
-        $data = $out['data'];
-        $api_content = $data['api_content'];
-        $api_filename = $data['api_filename'];
+        $data = $out['data'] ?? null;
+        $api_content = $data['api_content'] ?? null;
+        $api_filename = $data['api_filename'] ?? null;
         //guarda el archivo en storage usar Storage Disk
         if (
             $api_content &&

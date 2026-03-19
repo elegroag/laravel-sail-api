@@ -15,6 +15,8 @@ class EmpresasDocuments
 
     private $empresa;
 
+    private $tranoms;
+
     public function main()
     {
         $ciudades = ParamsEmpresa::getCiudades();
@@ -43,6 +45,17 @@ class EmpresasDocuments
             'cedula' => $this->empresa->cedrep,
         ];
 
+        $trabajadores_nomina = [];
+        foreach ($this->tranoms as $tranom) {
+            $trabajadores_nomina[] = [
+                'nombre' => $tranom->getNomtra() . ' ' . $tranom->getApetra(),
+                'cedula' => $tranom->getCedtra(),
+                'salario' => '$ ' . number_format($tranom->getSaltra(), 0, '.', ','),
+                'fecha_inicio' => $tranom->getFectra(),
+                'cargo' => $tranom->getCartra(),
+            ];
+        }
+
         $today = Carbon::now();
         $context = [
             'year' => $today->format('Y'),
@@ -66,16 +79,18 @@ class EmpresasDocuments
             'departamento_name' => $departamento_name,
             'tipo_documento' => $tipo_documento,
             'cargo' => 'Representante Legal',
+            'calemp_detalle' => "EMPRESA APORTANTE",
             'representante' => $representante,
+            'trabajadores_nomina' => $trabajadores_nomina,
             ...$this->empresa->toArray(),
         ];
 
         $ps = new ApiPython();
         $ps->send([
             'servicio' => 'Python',
-            'metodo' => 'generate-pdf',
+            'metodo' => 'genera-consolidado-pdf',
             'params' => [
-                'template' => $this->params['template'],
+                'templates' => $this->params['templates'],
                 'output' => $this->params['output'],
                 'context' => $context,
             ]
@@ -87,10 +102,10 @@ class EmpresasDocuments
             throw new DebugException("Error generando el PDF", 501, $out);
         }
         //el documento ahora llega en base64
-        $data = $out['data'];
-        $api_content = $data['api_content'];
-        $api_filename = $data['api_filename'];
-        //guarda el archivo en storage usar Storage Disk
+        $data = $out['data'] ?? null;
+        $api_content = $data['api_content'] ?? null;
+        $api_filename = $data['api_filename'] ?? null;
+
         if (
             $api_content &&
             $api_filename &&
@@ -108,5 +123,6 @@ class EmpresasDocuments
     {
         $this->params = $params;
         $this->empresa = $params['empresa'];
+        $this->tranoms = $params['tranoms'] ?? [];
     }
 }
