@@ -22,6 +22,7 @@ use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
 use App\Services\Api\ApiSubsidio;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -113,11 +114,10 @@ class EmpresaController extends ApplicationController
      * POST /empresa/guardar
      * Crea o actualiza la solicitud de afiliación de empresa
      */
-    public function guardar(Request $request, Response $response)
+    public function guardar(Request $request): JsonResponse
     {
         try {
             $this->db->begin();
-
             $service = new EmpresaService();
             $id = $request->input('id');
             $clave_certificado = $request->input('clave');
@@ -151,7 +151,7 @@ class EmpresaController extends ApplicationController
             ];
 
             $this->db->commit();
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             $this->db->rollBack();
             $salida = $this->handleException($e, $request);
         }

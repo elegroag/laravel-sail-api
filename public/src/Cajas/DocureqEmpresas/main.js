@@ -2,15 +2,15 @@ import { $App } from '@/App';
 import { LayoutGeneral } from '@/Cajas/LayoutGeneral';
 import { Region } from '@/Common/Region';
 import loading from '@/Componentes/Views/Loading';
-import {  Messages } from '@/Utils';
-import {  aplicarFiltro, EventsPagination } from '../Glob/Glob';
+import { Messages } from '@/Utils';
+import { aplicarFiltro, EventsPagination } from '../Glob/Glob';
 
 window.App = $App;
 let validator;
 
 const validatorInit = () => {
     validator = $('#form').validate({
-    rules: {
+        rules: {
             coddoc: { required: true },
             tipopc: { required: true },
             tipsoc: { required: true },
@@ -29,8 +29,7 @@ $(() => {
     const region = new Region({ el: '#boneLayout' });
     const layout = new LayoutGeneral();
     region.show(layout);
-    
- 
+
     $(document).on('click', "[data-toggle='editar']", (e) => {
         e.preventDefault();
         const coddoc = $(e.currentTarget).attr('data-coddoc');
@@ -55,13 +54,12 @@ $(() => {
                     $.each(data, (key, value) => {
                         $('#' + key.toString()).val(value);
                     });
-                    
+
                     $('#coddoc').attr('disabled', 'true');
                     $('#tipopc').attr('disabled', 'true');
                     $('#tipsoc').attr('disabled', 'true');
-
                 }
-            }
+            },
         });
     });
 
@@ -93,7 +91,7 @@ $(() => {
                 } else {
                     Messages.display(response.msj, 'error');
                 }
-            }
+            },
         });
     });
 
@@ -127,30 +125,31 @@ $(() => {
                         } else {
                             Messages.display(response.msj, 'error');
                         }
-                    }
+                    },
                 });
             }
         });
     });
 
     $(document).on('click', "[data-toggle='header-nuevo']", (e) => {
-		e.preventDefault();
-		$('#form :input').each(function (elem) {
-			$(this).val('');
-			$(this).removeAttr('disabled');
-		});
+        e.preventDefault();
+        $('#form :input').each(function (elem) {
+            $(this).val('');
+            $(this).removeAttr('disabled');
+        });
 
-		const tpl = _.template(document.getElementById('tmp_form').innerHTML);
-		$('#captureModalbody').html(tpl({
-            coddoc: '',
-            tipopc: '',
-            tipsoc: '',
-            obliga: '',
-            nota: '',
-            auto_generado: '',
-		}));
-		modalCapture.show();
-		validatorInit();
-	});
-
+        const tpl = _.template(document.getElementById('tmp_form').innerHTML);
+        $('#captureModalbody').html(
+            tpl({
+                coddoc: '',
+                tipopc: '',
+                tipsoc: '',
+                obliga: '',
+                nota: '',
+                auto_generado: '',
+            }),
+        );
+        modalCapture.show();
+        validatorInit();
+    });
 });

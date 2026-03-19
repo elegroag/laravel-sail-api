@@ -11,7 +11,9 @@ use App\Models\Mercurio14;
 use App\Models\Subsi54;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Paginate;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Js;
 
 class Mercurio14Controller extends ApplicationController
 {
@@ -53,6 +55,7 @@ class Mercurio14Controller extends ApplicationController
 
     public function aplicarFiltro(Request $request)
     {
+        $this->cantidad_pagina = $request->input('numero', 10);
         $consultasOldServices = new GeneralService;
         $this->query = $consultasOldServices->converQuery($request);
 
@@ -160,7 +163,7 @@ class Mercurio14Controller extends ApplicationController
         }
     }
 
-    public function borrar(Request $request)
+    public function borrar(Request $request): JsonResponse
     {
         try {
             $this->setResponse('ajax');
@@ -179,14 +182,18 @@ class Mercurio14Controller extends ApplicationController
             }
 
             $this->db->commit();
-            $response = parent::successFunc('El registro se borro con éxito.');
-
-            return $this->renderObject($response, false);
+            $response = [
+                'success' => true,
+                'msj' => 'El registro se borro con éxito.'
+            ];
         } catch (DebugException $e) {
             $this->db->rollback();
-            $response = parent::errorFunc($e->getMessage());
-
-            return $this->renderObject($response, false);
+            $response = [
+                'success' => false,
+                'msj' => $e->getMessage()
+            ];
         }
+
+        return response()->json($response);
     }
 }

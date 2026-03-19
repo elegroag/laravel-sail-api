@@ -49,6 +49,7 @@ class Mercurio13Controller extends ApplicationController
 
     public function aplicarFiltro(Request $request)
     {
+        $this->cantidad_pagina = $request->input('numero', 10);
         $consultasOldServices = new GeneralService;
         $this->query = $consultasOldServices->converQuery($request);
         return $this->buscar($request);
