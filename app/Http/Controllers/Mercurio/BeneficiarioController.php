@@ -28,6 +28,8 @@ use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
 use Carbon\Carbon;
+use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -531,7 +533,7 @@ class BeneficiarioController extends ApplicationController
         exit;
     }
 
-    public function params(Request $request)
+    public function params(Request $request): JsonResponse
     {
         try {
             $documento = $this->user['documento'];
@@ -697,7 +699,7 @@ class BeneficiarioController extends ApplicationController
                 'data' => $componentes,
                 'msj' => 'OK',
             ];
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             $salida = $this->handleException($e, $request);
         }
 
