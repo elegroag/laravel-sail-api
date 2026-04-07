@@ -109,7 +109,9 @@ class IndependientesDocuments
         ]);
 
 
-        if ($ps->isJson() == false) return false;
+        if ($ps->isJson() == false) {
+            throw new DebugException("Error el response JSON del service PDF no es valido.");
+        }
         $out = $ps->toArray();
 
         if ($out['success'] == false) {

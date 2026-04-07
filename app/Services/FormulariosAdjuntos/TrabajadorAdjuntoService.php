@@ -10,7 +10,8 @@ use App\Models\Mercurio30;
 use App\Models\Mercurio32;
 use App\Services\PreparaFormularios\CifrarDocumento;
 use App\Services\Api\ApiSubsidio;
-use App\Services\Formularios\Generation\DocumentGenerationManager;
+use App\Services\Formularios\Api\TrabajadoresDocuments;
+use App\Services\Utils\GuardarArchivoService;
 
 class TrabajadorAdjuntoService
 {
@@ -70,21 +71,22 @@ class TrabajadorAdjuntoService
         }
 
         $this->filename = 'formulario-trabajador-' . strtotime('now') . "_{$this->request->cedtra}.pdf";
-        $manager = new DocumentGenerationManager();
-        $manager->generate(
-            'api',
-            'trabajador',
+        $generator = new TrabajadoresDocuments();
+        $generator->setParamsInit(
             [
                 'categoria' => 'formulario',
                 'output' => $this->filename,
-                'templates' => ['trabajador.html', 'politica-trabajador.html'],
+                'templates' => [
+                    'trabajador.html',
+                    'politica-trabajador.html'
+                ],
                 'trabajador' => $this->request,
                 'empresa' => $this->getBuscarEmpresa(),
                 'conyuge' => $this->getBuscarConyuge(),
                 'solicitante' => $this->getSolicitante()
             ]
         );
-
+        $generator->main();
         $this->cifrarDocumento();
         return $this;
     }
@@ -162,9 +164,13 @@ class TrabajadorAdjuntoService
     {
         $adjuntoService = new self($request);
         $adjuntoService->setClaveCertificado($claveCertificado);
-        AdjuntosGenerator::generar($adjuntoService, $tipopc, $request, [
-            'method' => 'formulario',
-            'coddoc' => 1,
-        ]);
+        $adjuntoService->formulario();
+        (new GuardarArchivoService(
+            [
+                'tipopc' => $tipopc,
+                'coddoc' => 1,
+                'id' => $request->id,
+            ]
+        ))->salvarDatos($adjuntoService->getResult());
     }
 }

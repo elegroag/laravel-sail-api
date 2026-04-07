@@ -12,6 +12,8 @@ class TokenAuth implements AuthClientInterface
 
     private $credentials;
 
+    public $statusCode;
+
     private $point;
 
     public function __construct($credentials, $host, $point)
@@ -37,9 +39,9 @@ class TokenAuth implements AuthClientInterface
         curl_setopt($cur, CURLOPT_HTTPHEADER, $this->getHeader(1));
 
         $result = curl_exec($cur);
-        $statusCode = curl_getinfo($cur, CURLINFO_HTTP_CODE);
-        dd($statusCode);
-        curl_close($cur);
+        $this->statusCode = curl_getinfo($cur, CURLINFO_HTTP_CODE);
+
+        unset($cur);
         $out = $this->procesaRequest($result);
         if ($out) {
             if ($out['response']['status'] == true) {

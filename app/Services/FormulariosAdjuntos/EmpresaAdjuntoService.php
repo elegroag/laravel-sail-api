@@ -10,7 +10,9 @@ use App\Models\Tranoms;
 use App\Services\Formularios\FactoryDocuments;
 use App\Services\PreparaFormularios\CifrarDocumento;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Formularios\Api\EmpresasDocuments;
 use App\Services\Formularios\Generation\DocumentGenerationManager;
+use App\Services\Utils\GuardarArchivoService;
 
 class EmpresaAdjuntoService
 {
@@ -27,6 +29,7 @@ class EmpresaAdjuntoService
     private $user;
 
     private $claveCertificado;
+
 
     public function __construct($request)
     {
@@ -61,10 +64,8 @@ class EmpresaAdjuntoService
         }
 
         $this->filename = 'formulario-empresa-' . strtotime('now') . "_{$this->request->nit}.pdf";
-        $manager = new DocumentGenerationManager();
-        $manager->generate(
-            'api',
-            'empresa',
+        $generator = new EmpresasDocuments();
+        $generator->setParamsInit(
             [
                 'categoria' => 'formulario',
                 'output' => $this->filename,
@@ -75,10 +76,10 @@ class EmpresaAdjuntoService
                     'relacion-nomina.html'
                 ],
                 'empresa' => $this->request,
-                'tranoms' => Tranoms::where('request', $this->request->getId())->get()
+                'tranoms' => Tranoms::where('request', $this->request->id)->get()
             ]
         );
-
+        $generator->main();
         $this->cifrarDocumento();
         return $this;
     }
@@ -116,11 +117,13 @@ class EmpresaAdjuntoService
     {
         $adjuntoService = new self($request);
         $adjuntoService->setClaveCertificado($claveCertificado);
-        AdjuntosGenerator::generar($adjuntoService, $tipopc, $request, [
+        $adjuntoService->formulario();
+        (new GuardarArchivoService(
             [
-                'method' => 'formulario',
+                'tipopc' => $tipopc,
                 'coddoc' => 1,
+                'id' => $request->id,
             ]
-        ]);
+        ))->salvarDatos($adjuntoService->getResult());
     }
 }

@@ -16,6 +16,7 @@ use App\Services\Entidades\TrabajadorService;
 use App\Services\PreparaFormularios\CifrarDocumento;
 use App\Services\Api\ApiSubsidio;
 use App\Services\Formularios\Generation\DocumentGenerationManager;
+use App\Services\Utils\GuardarArchivoService;
 
 class BeneficiarioAdjuntoService
 {
@@ -284,11 +285,13 @@ class BeneficiarioAdjuntoService
     {
         $adjuntoService = new self($request);
         $adjuntoService->setClaveCertificado($claveCertificado);
-        AdjuntosGenerator::generar($adjuntoService, $tipopc, $request, [
+        $adjuntoService->formulario();
+        (new GuardarArchivoService(
             [
-                'method' => 'formulario',
+                'tipopc' => $tipopc,
                 'coddoc' => 1,
+                'id' => $request->id,
             ]
-        ]);
+        ))->salvarDatos($adjuntoService->getResult());
     }
 }
