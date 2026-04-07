@@ -1,4 +1,4 @@
-import imageLogo from "../../assets/comfaca-logo.png";
+import imageLogo from "@/assets/comfaca-logo.png";
 import AuthLayout from "@/layouts/AuthLayoutTemplate"
 import AuthWelcome from "@/pages/Auth/components/generic/AuthWelcome"
 import LoginForm from "@/pages/Auth/components/login/LoginForm"

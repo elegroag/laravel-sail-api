@@ -43,7 +43,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
   // Sección UI del formulario
   return (
     <>
-      <div className="flex items-center mb-6">
+      <div className="flex mb-6">
         <button onClick={onBack} className="mr-3 p-2 hover:bg-gray-100 rounded-full transition-colors">
           <ChevronLeft className="w-5 h-5 text-gray-600" />
         </button>
