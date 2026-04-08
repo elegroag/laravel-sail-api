@@ -2,7 +2,7 @@ import loading from '@/Componentes/Views/Loading';
 
 const AutenticarCajas = (event) => {
     loading.show();
-    const nerr = 0;
+    let nerr = 0;
     const _password = $('#password').val();
     const _user = $('#user').val();
 
