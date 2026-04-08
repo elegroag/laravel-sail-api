@@ -1,4 +1,3 @@
-import inject from '@rollup/plugin-inject';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
@@ -6,7 +5,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const _name = process.env.MODULE;
 const _app = process.env.APP;
 
-const camelCase = (str) => {
+const CamelCase = (str) => {
     return str.replace(/\b\w/g, (l) => l.toUpperCase());
 };
 
@@ -21,11 +20,16 @@ export default defineConfig({
         outDir: resolve(__dirname, `${_app}/build/`),
         rollupOptions: {
             input: {
-                main: resolve(__dirname, `src/${camelCase(_app)}/${_name}/main.js`),
+                main: resolve(__dirname, `src/${CamelCase(_app)}/${_name}/main.js`),
             },
             output: {
-                entryFileNames: `${camelCase(_name)}.js`,
-                assetFileNames: `${camelCase(_name)}.[ext]`,
+                entryFileNames: `${CamelCase(_name)}.js`,
+                assetFileNames: `${CamelCase(_name)}.[ext]`,
+            },
+            inject: {
+                flatpickr: 'flatpickr',
+                Choices: 'choices.js',
+                Spanish: 'flatpickr/dist/l10n/es',
             },
         },
     },
@@ -42,11 +46,4 @@ export default defineConfig({
             },
         },
     },
-    plugins: [
-        inject({
-            flatpickr: 'flatpickr',
-            Choices: 'choices.js',
-            Spanish: 'flatpickr/dist/l10n/es',
-        }),
-    ],
 });

@@ -82,6 +82,10 @@ class EmpresasDocuments
             'calemp_detalle' => "EMPRESA APORTANTE",
             'representante' => $representante,
             'trabajadores_nomina' => $trabajadores_nomina,
+            'fecini_year' => substr($this->empresa->fecini, 0, 4),
+            'fecini_month' => substr($this->empresa->fecini, 5, 2),
+            'fecini_day' => substr($this->empresa->fecini, 8, 2),
+            'paz_y_salvo' => 'N',
             ...$this->empresa->toArray(),
         ];
 

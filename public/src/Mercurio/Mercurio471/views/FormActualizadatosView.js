@@ -4,6 +4,7 @@ import { eventsFormControl } from '@/Core';
 import { FormView } from '@/Mercurio/FormView';
 import { EmpresaModel } from '@/Mercurio/Mercurio30/models/EmpresaModel';
 import { ActualizadatosModel } from '@/Mercurio/Mercurio471/models/ActualizadatosModel';
+import Choices from 'choices.js';
 
 class FormActualizadatosView extends FormView {
     #choiceComponents = null;

@@ -3,6 +3,7 @@ import { TrabajadorNominaModel } from '@/Componentes/Models/TrabajadorNominaMode
 import { eventsFormControl } from '@/Core';
 import { FormView } from '@/Mercurio/FormView';
 import { TraNomCollection } from '@/Mercurio/Mercurio31/collections/TrabajadoresCollection';
+import Choices from 'choices.js';
 import { EmpresaModel } from '../models/EmpresaModel';
 import { TrabajadoresNominaView } from './TrabajadoresNominaView';
 

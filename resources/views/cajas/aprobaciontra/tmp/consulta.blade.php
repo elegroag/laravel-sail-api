@@ -58,13 +58,13 @@ $msexo = ($trabajador->sexo != 'N') ? $_sexos[$trabajador->sexo] : '';
             <div class="col-md-4 col-lg-3">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Estado civil</label>
-					<div class="form-control bg-light">{{ $trabajador->estciv }}</div>
+					<div class="form-control bg-light">{{ $_estciv[$trabajador->estciv] ?? 'NO REGISTRA' }}</div>
 				</div>
 			</div>
             <div class="col-md-4 col-lg-3">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Cabeza hogar</label>
-					<div class="form-control bg-light">{{ $trabajador->cabhog }}</div>
+					<div class="form-control bg-light">{{ $trabajador->cabhog =='N' ? 'NO' : 'SI' }}</div>
 				</div>
 			</div>
             <div class="col-md-4 col-lg-3">
@@ -130,7 +130,7 @@ $msexo = ($trabajador->sexo != 'N') ? $_sexos[$trabajador->sexo] : '';
             <div class='col-md-4 col-lg-3'>
                 <div class="form-group">
                     <label class="form-label text-muted small mb-1">Capacidad de trabajar</label>
-                    <div class="form-control bg-light">{{ $_captra[$trabajador->captra] }}</div>
+                    <div class="form-control bg-light">{{ $_captra[$trabajador->captra == 'S' ? 'N' : $trabajador->captra] ?? 'NORMAL' }}</div>
                 </div>
             </div>
             <div class='col-md-4 col-lg-3'>

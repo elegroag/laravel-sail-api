@@ -21,6 +21,7 @@ use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
 use App\Services\Api\ApiSubsidio;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 
 class ApruebaConyugeController extends ApplicationController
@@ -931,11 +932,10 @@ class ApruebaConyugeController extends ApplicationController
                 'seguimiento' => $seguimiento,
                 'campos_disponibles' => $campos_disponibles
             ];
-        } catch (DebugException $err) {
+        } catch (Exception $err) {
             $response = [
                 'success' => false,
-                'msj' => $err->getMessage(),
-                'errors' => $err->render($request),
+                'msj' => $err->getMessage() . ' ' . $err->getLine(),
             ];
         }
 

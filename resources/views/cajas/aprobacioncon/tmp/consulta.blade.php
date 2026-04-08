@@ -40,13 +40,13 @@ $codocu = str_pad($conyuge->codocu, 2, '0', STR_PAD_LEFT);
 			<div class="col-md-4 col-lg-3">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Sexo</label>
-					<div class="form-control bg-light">{{ $conyuge->sexo }}</div>
+					<div class="form-control bg-light">{{ $_sexo[$conyuge->sexo] ?? 'NO REGISTRA' }}</div>
 				</div>
 			</div>
 			<div class="col-md-4 col-lg-3">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Estado Civil</label>
-					<div class="form-control bg-light">{{ $conyuge->estciv }}</div>
+					<div class="form-control bg-light">{{ $_estciv[$conyuge->estciv] ?? 'NO REGISTRA' }}</div>
 				</div>
 			</div>
 			<div class="col-md-4 col-lg-3">
@@ -58,7 +58,7 @@ $codocu = str_pad($conyuge->codocu, 2, '0', STR_PAD_LEFT);
 			<div class="col-md-4 col-lg-3">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Ciudad Residencia</label>
-					<div class="form-control bg-light">{{ $_codciu[$conyuge->ciures] }}</div>
+					<div class="form-control bg-light">{{ $_codciu[$conyuge->ciures] ?? 'NO REGISTRA' }}</div>
 				</div>
 			</div>
 			<div class="col-md-4 col-lg-3">
@@ -100,13 +100,13 @@ $codocu = str_pad($conyuge->codocu, 2, '0', STR_PAD_LEFT);
 			<div class="col-md-4 col-lg-3">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Nivel Educacion</label>
-					<div class="form-control bg-light">{{ $conyuge->nivedu }}</div>
+					<div class="form-control bg-light">{{ $_nivedu[$conyuge->nivedu] ?? 'NO REGISTRA' }}</div>
 				</div>
 			</div>
 			<div class="col-md-4 col-lg-3">
 				<div class="form-group">
-					<label class="form-label text-muted small mb-1">Fecha Ingreso</label>
-					<div class="form-control bg-light">{{ $conyuge->fecing }}</div>
+					<label class="form-label text-muted small mb-1">Fecha Solicitud</label>
+					<div class="form-control bg-light">{{ $conyuge->fecsol }}</div>
 				</div>
 			</div>
 			<div class="col-md-4 col-lg-3">

@@ -265,7 +265,7 @@ function handleFiles() {
     if (_el.files.length == 0) return false;
 
     const test = /(\.docx\.doc|\.pdf|\.jpg|\.png|\.jpeg)$/i;
-    const fpath = _el.files[0]['name'];
+    let fpath = _el.files[0]['name'];
     if (!test.exec(fpath)) {
         document.getElementById('name_archivo').textContent = '';
         document.getElementById('remover_archivo').setAttribute('disabled', true);

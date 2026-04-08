@@ -2,6 +2,7 @@ import { $App } from '@/App';
 import { ComponentModel } from '@/Componentes/Models/ComponentModel';
 import { eventsFormControl } from '@/Core';
 import { FormView } from '@/Mercurio/FormView';
+import Choices from 'choices.js';
 import flatpickr from 'flatpickr';
 import { Spanish } from 'flatpickr/dist/l10n/es';
 import { FacultativoModel } from '../models/FacultativoModel';

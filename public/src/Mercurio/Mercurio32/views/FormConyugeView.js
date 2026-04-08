@@ -2,6 +2,7 @@ import Logger from '@/Common/Logger';
 import { ComponentModel } from '@/Componentes/Models/ComponentModel';
 import { eventsFormControl } from '@/Core';
 import { FormView } from '@/Mercurio/FormView';
+import Choices from 'choices.js';
 import flatpickr from 'flatpickr';
 import { Spanish } from 'flatpickr/dist/l10n/es.js';
 import { ConyugeModel } from '../models/ConyugeModel';
@@ -168,6 +169,10 @@ export class FormConyugeView extends FormView {
 
         this.$el.find('#nit').removeAttr('disabled');
         const entity = this.serializeModel(new ConyugeModel());
+        const autoriza = this.$el.find("[name='autoriza']")[0].checked ? 'S' : 'N';
+        const zoneurbana = this.$el.find("[name='zoneurbana']")[0].checked ? 'S' : 'N';
+        entity.set('autoriza', autoriza);
+        entity.set('zoneurbana', zoneurbana);
 
         if (entity.isValid() === false) {
             target.removeAttr('disabled');

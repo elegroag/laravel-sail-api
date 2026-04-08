@@ -24,6 +24,7 @@ use App\Services\Utils\CalculatorDias;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
 use App\Services\Api\ApiSubsidio;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
 
@@ -298,7 +299,6 @@ class ApruebaTrabajadorController extends ApplicationController
                     $trabajador_sisuweb = $rqs['data'];
                 }
             }
-
             $html = view(
                 'cajas.aprobaciontra.tmp.consulta',
                 [
@@ -389,10 +389,10 @@ class ApruebaTrabajadorController extends ApplicationController
                 'componente_codsuc' => $componente_codsuc,
                 'componente_codlis' => $componente_codlis
             ];
-        } catch (DebugException $err) {
+        } catch (Exception $err) {
             $response = [
                 'success' => false,
-                'msj' => $err->getMessage(),
+                'msj' => $err->getMessage() . ' ' . $err->getLine(),
             ];
         }
 

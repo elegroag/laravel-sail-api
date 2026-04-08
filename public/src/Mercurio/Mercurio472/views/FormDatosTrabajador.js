@@ -2,6 +2,7 @@ import { $App } from '@/App';
 import { ComponentModel } from '@/Componentes/Models/ComponentModel';
 import { eventsFormControl } from '@/Core';
 import { FormView } from '@/Mercurio/FormView';
+import Choices from 'choices.js';
 import DatosTrabajadorModel from '../models/DatosTrabajadorModel';
 
 export default class FormDatosTrabajador extends FormView {
