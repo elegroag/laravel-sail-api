@@ -41,7 +41,7 @@ class EnsureCookieAuthenticated
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No autorizado para acceder al modulo. ',
+                    'message' => 'No autorizado para acceder al modulo, tipo: ' . session('tipo') . '. ',
                 ], 401);
             }
 
@@ -81,7 +81,8 @@ class EnsureCookieAuthenticated
 
     public function autorization(Request &$request)
     {
-        $controllerName = $request->route()->getController(); // Esto devolverá una instancia de UserController
+        $controllerName = $request->route()->getController();
+        // Esto devolverá una instancia de UserController
         $controllerClassName = str_replace('App\\Http\\Controllers\\', '', get_class($controllerName));
         $out = explode('\\', $controllerClassName);
         if (count($out) < 2) {
@@ -96,9 +97,7 @@ class EnsureCookieAuthenticated
         $tipo = session('tipo');
         $estado_afiliado = session('estado_afiliado');
 
-        if ($estado_afiliado == 'I') {
-            $tipo = 'P';
-        }
+        if ($estado_afiliado == 'I') $tipo = 'P';
 
         // Verificar si el tipfun tiene permiso para la acción
         $hasPermission = MenuItem::select(
@@ -109,9 +108,8 @@ class EnsureCookieAuthenticated
             ->where('menu_items.codapl', 'ME')
             ->where('menu_tipos.tipo', $tipo);
 
-        if (!$hasPermission->exists()) {
-            return false; // No autorizado
-        }
+        if (!$hasPermission->exists()) return false; // No autorizado
+
         return true; // Autorizado
     }
 }
