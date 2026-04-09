@@ -564,7 +564,7 @@ class ApruebaFacultativoController extends ApplicationController
     public function devolver(Request $request)
     {
         $this->setResponse('ajax');
-        $this->facultativoServices = $this->services->get('facultativoServices');
+        $this->facultativoServices = new FacultativoServices;
         $notifyEmailServices = new NotifyEmailServices;
         try {
             $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');

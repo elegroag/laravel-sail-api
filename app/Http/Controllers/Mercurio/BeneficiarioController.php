@@ -597,11 +597,13 @@ class BeneficiarioController extends ApplicationController
 
             $conyugeService = new ConyugeService;
             if ($this->tipo == 'E') {
-                $conyuges[] = $conyugeService->findRequestByDocumentoCoddoc($documento, $coddoc);
+                $conyuges = $conyugeService->findRequestByDocumentoCoddoc($documento, $coddoc) ?? [];
                 $list = $conyugeService->findApiConyugesByNit($documento);
                 $listConyuges = [];
-                foreach ($list as $row) {
-                    $listConyuges[] = ['cedula' => $row['cedcon'], 'nombre_completo' => $row['nombre']];
+                if ($list) {
+                    foreach ($list as $row) {
+                        $listConyuges[] = ['cedula' => $row['cedcon'], 'nombre_completo' => $row['nombre']];
+                    }
                 }
             } else {
                 $conyuges = $conyugeService->findRequestByCedtra($documento);

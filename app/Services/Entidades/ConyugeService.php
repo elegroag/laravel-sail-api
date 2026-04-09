@@ -366,13 +366,22 @@ class ConyugeService
 
     public function findRequestByDocumentoCoddoc($documento, $coddoc)
     {
-        $datos = Mercurio32::where('documento', $documento)
-            ->where('coddoc', $coddoc)
+        $datos = Mercurio32::select(
+            'cedcon as cedula',
+            'documento',
+            'id',
+            'coddoc',
+            DB::raw("CONCAT_WS(' ', prinom, segnom, priape, segape) as nombre_completo")
+        )
+            ->where([
+                ['documento', $documento],
+                ['coddoc', $coddoc]
+            ])
             ->whereNotIn('estado', ['X', 'I'])
-            ->select('cedcon as cedula', DB::raw("CONCAT_WS('', prinom, segnom, priape, segape) as nombre_completo"))
-            ->get();
+            ->get()
+            ->toArray();
 
-        return $datos->toArray();
+        return (is_array($datos) === true) ? $datos : false;
     }
 
     public function findRequestByCedtra($cedtra)
@@ -385,7 +394,7 @@ class ConyugeService
         return $datos->toArray();
     }
 
-    public function findApiConyugesByNit($nit)
+    public function findApiConyugesByNit($nit): array|null
     {
         $procesadorComando = new ApiSubsidio();
         $procesadorComando->send(
@@ -398,11 +407,11 @@ class ConyugeService
             ]
         );
         $out = $procesadorComando->toArray();
-        if ($out['success'] == false) {
-            return false;
-        } else {
-            return $out['data'];
-        }
+        $isSuccess = $out['success'] ?? false;
+        if (!$isSuccess) return null;
+
+        $data = $out['data'] ?? null;
+        return $data;
     }
 
     public function consultaTipopc(Srequest $request): array|bool

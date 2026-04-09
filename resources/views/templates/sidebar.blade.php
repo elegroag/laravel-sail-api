@@ -65,8 +65,6 @@ $array_tipos = [
                     </div>
                 </div>
 
-                <hr class="sidenav-divider">
-
                 {{-- Menú de Navegación --}}
                 <ul class="navbar-nav sidenav-menu">
                     @php

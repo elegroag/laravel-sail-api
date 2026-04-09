@@ -16,7 +16,7 @@ class TrabajadorServices
 {
     private $orderpag = 'fecsol';
 
-    private $tipopc = 1;
+    private $tipopc = '1';
 
     private $controller_name;
 

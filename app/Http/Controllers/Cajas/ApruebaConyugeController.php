@@ -317,7 +317,7 @@ class ApruebaConyugeController extends ApplicationController
      */
     public function devolver(Request $request)
     {
-        $this->conyugeServices = $this->services->get('ConyugeServices');
+        $this->conyugeServices = new ConyugeServices;
         $notifyEmailServices = new NotifyEmailServices;
 
         $this->setResponse('ajax');

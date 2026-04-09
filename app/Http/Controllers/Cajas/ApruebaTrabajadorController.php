@@ -458,20 +458,19 @@ class ApruebaTrabajadorController extends ApplicationController
      */
     public function devolver(Request $request)
     {
-        $this->trabajadorServices = $this->services->get('TrabajadorServices');
-        $notifyEmailServices = new NotifyEmailServices;
-        $this->setResponse('ajax');
         try {
+            $this->trabajadorServices = new TrabajadorServices;
+            $notifyEmailServices = new NotifyEmailServices;
             $validated = $request->validate([
                 'id' => 'required|integer',
                 'nota' => 'nullable|string|max:5000',
-                'codest' => 'required|string|max:10',
+                'codest' => 'nullable|string|max:10',
                 'campos_corregir' => 'sometimes|array',
                 'campos_corregir.*' => 'string|max:100',
             ]);
             $id = $validated['id'];
             $nota = $validated['nota'] ?? null;
-            $codest = $validated['codest'];
+            $codest = $validated['codest'] ?? null;
             $array_corregir = $validated['campos_corregir'] ?? [];
             $campos_corregir = $array_corregir ? implode(';', $array_corregir) : '';
 
@@ -487,14 +486,13 @@ class ApruebaTrabajadorController extends ApplicationController
                 'success' => true,
                 'msj' => 'El proceso se ha realizado con éxito',
             ];
-        } catch (DebugException $err) {
+        } catch (Exception $err) {
             $salida = [
                 'success' => false,
-                'msj' => $err->getMessage(),
+                'msj' => $err->getMessage() . ' - ' . basename($err->getFile()) . ' - ' . $err->getLine(),
                 'code' => $err->getCode(),
             ];
         }
-
         return response()->json($salida);
     }
 
@@ -511,7 +509,7 @@ class ApruebaTrabajadorController extends ApplicationController
     {
         $this->setResponse('ajax');
         $notifyEmailServices = new NotifyEmailServices;
-        $this->trabajadorServices = $this->services->get('TrabajadorServices');
+        $this->trabajadorServices = new TrabajadorServices;
 
         try {
             $validated = $request->validate([

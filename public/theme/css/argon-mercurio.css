@@ -17459,12 +17459,10 @@ textarea[resize='horizontal'] {
 .navbar-vertical.navbar-expand-xs .navbar-collapse {
 	display: flex;
 	flex-direction: column;
-
 	margin-right: -1.5rem;
 	margin-left: -1.5rem;
 	padding-right: 1.5rem;
 	padding-left: 1.5rem;
-
 	flex: 1 1;
 	align-items: stretch;
 }
@@ -17475,13 +17473,12 @@ textarea[resize='horizontal'] {
 
 .navbar-vertical.navbar-expand-xs .navbar-nav {
 	flex-direction: column;
-
 	margin-right: -1.5rem;
 	margin-left: -1.5rem;
 }
 
 .navbar-vertical.navbar-expand-xs .navbar-nav .nav-link {
-	padding: .675rem 1.5rem;
+	padding: .6rem .5rem;
 }
 
 .navbar-vertical.navbar-expand-xs .navbar-nav>.nav-item {

@@ -512,8 +512,8 @@ export class FormBeneficiarioView extends FormView {
         if (cedcon == '') return false;
 
         let has = false;
-        const afili = this.App.Collections.formParams.list_conyuges;
-        const cedcons = this.App.Collections.formParams.conyuges;
+        const afili = this.collection.props.list_conyuges;
+        const cedcons = this.collection.props.conyuges;
         let list;
 
         if (afili !== false && cedcons !== false) {
@@ -523,7 +523,6 @@ export class FormBeneficiarioView extends FormView {
         } else {
             list = afili;
         }
-
         if (!_.isEmpty(list)) {
             for (const listKey in list) {
                 has = list[listKey].cedula == cedcon ? true : false;

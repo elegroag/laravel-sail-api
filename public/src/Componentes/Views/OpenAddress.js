@@ -1,4 +1,5 @@
 import modal_address from '@/Componentes/Views/Templates/modal-address.hbs?raw';
+import Choices from 'choices.js';
 
 class OpenAddress extends Backbone.View {
     static Modal = null;

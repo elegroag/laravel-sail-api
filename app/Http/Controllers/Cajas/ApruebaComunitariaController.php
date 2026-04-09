@@ -318,7 +318,7 @@ class ApruebaComunitariaController extends ApplicationController
             return $this->renderObject(['success' => false, 'msj' => 'El usuario no dispone de permisos de aprobación'], false);
         }
 
-        $this->apruebaSolicitud = $this->services->get('ApruebaSolicitud', true);
+        $this->apruebaSolicitud = new ApruebaSolicitud;
         try {
             $postData = $request->all();
             $idSolicitud = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');

@@ -197,7 +197,9 @@ class BeneficiarioAdjuntoService
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_conyuge',
-                    'params' => $this->request->biocedu,
+                    'params' => [
+                        'cedcon' => $this->request->biocedu,
+                    ],
                 ]
             );
 
@@ -227,12 +229,17 @@ class BeneficiarioAdjuntoService
             );
             $data = false;
             $out = $ps->toArray();
-            if ($out['success'] == true) {
-                $data = ($out['data']) ? $out['data'] : false;
+
+            if ($out['success'] === true) {
+                $data = $out['data'] ?? false;
             }
             if ($data) {
                 $mconyuge = new Mercurio32();
-                $mconyuge->fill($data);
+                $mconyuge->fill([
+                    ...$data,
+                    'cedcon' => $this->request->biocedu,
+                    'tipdoc' => $this->request->biotipdoc,
+                ]);
             }
         }
 
