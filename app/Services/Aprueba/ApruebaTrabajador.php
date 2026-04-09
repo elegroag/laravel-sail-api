@@ -92,9 +92,9 @@ class ApruebaTrabajador
         $params['estado'] = 'A';
 
         $params['giro'] = (isset($params['giro']) && $params['giro'] != '') ? $params['giro'] : 'N';
-        $params['giro2'] = $params['giro'];
+        $params['giro2'] = $params['giro'] ?? 'N';
         $params['codgir'] = (isset($params['codgir'])) ? $params['codgir'] : 'NU';
-        $params['codgir2'] = $params['codgir'];
+        $params['codgir2'] = $params['codgir'] ?? null;
         /**
          * la empresa se debe registrar con el tipo de documento correspondiente y no con el tipo del registro de solicitud
          */

@@ -25,7 +25,7 @@ export default class TrabajadorInfoView extends FormInfoView {
             }),
         );
 
-        this.afterRender();
+        this.#afterRender();
         return this;
     }
 
@@ -41,7 +41,7 @@ export default class TrabajadorInfoView extends FormInfoView {
         };
     }
 
-    afterRender() {
+    #afterRender() {
         this.__afterRender();
         this.model.set({
             vendedor: 'N',
@@ -66,6 +66,18 @@ export default class TrabajadorInfoView extends FormInfoView {
             this.$el.find('#numcue').prop('disabled', true);
             this.$el.find('#tipcue').prop('disabled', true);
             this.$el.find('#numcue').prop('disabled', true);
+        }
+
+        if (this.collection && this.collection.trabajador_sisu && typeof this.collection.trabajador_sisu === 'object') {
+            if (this.collection.trabajador_sisu.estado === 'A') {
+                $App.trigger('alert:warning', {
+                    message: 'La persona ya tiene una afiliación vigente. Si desea continuar, se creará una multiafiliación.',
+                });
+            } else {
+                $App.trigger('alert:info', {
+                    message: 'La persona tiene una afiliación en estado Inactivo. Si desea continuar, se creará como afiliación principal.',
+                });
+            }
         }
     }
 
