@@ -4,6 +4,8 @@ import { eventsFormControl } from '@/Core';
 import { FormView } from '@/Mercurio/FormView';
 import { TraNomCollection } from '@/Mercurio/Mercurio31/collections/TrabajadoresCollection';
 import Choices from 'choices.js';
+import flatpickr from 'flatpickr';
+import { Spanish } from 'flatpickr/dist/l10n/es';
 import { EmpresaModel } from '../models/EmpresaModel';
 import { TrabajadoresNominaView } from './TrabajadoresNominaView';
 

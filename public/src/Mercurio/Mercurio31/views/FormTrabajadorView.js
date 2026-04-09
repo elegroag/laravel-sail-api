@@ -3,6 +3,8 @@ import { eventsFormControl } from '@/Core';
 import { FormView } from '@/Mercurio/FormView';
 import { TrabajadorModel } from '@/Mercurio/Mercurio31/models/TrabajadorModel';
 import Choices from 'choices.js';
+import flatpickr from 'flatpickr';
+import { Spanish } from 'flatpickr/dist/l10n/es';
 
 class FormTrabajadorView extends FormView {
     #choiceComponents = null;
