@@ -10,6 +10,8 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Middleware\HandleCors;
@@ -29,7 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'web/*',
             'mercurio/*',
-            'cajas/autenticar',
+            'cajas/*',
             'api/sanctum/csrf-cookie'
         ]);
 
@@ -58,5 +60,20 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->render(function (NotFoundHttpException $e, Request $request) {
+            $ruta = $request->path();
+
+            // Detectar si es ruta de cajas
+            if (str_starts_with($ruta, 'cajas')) {
+                return redirect('cajas/login');
+            }
+
+            // Detectar si es ruta de web/mercurio
+            if (str_starts_with($ruta, 'web') || str_starts_with($ruta, 'mercurio')) {
+                return redirect('web/login');
+            }
+
+            // Vista personalizada 404
+            return response()->view('errors.web-unavailable', ['ruta' => $ruta], 404);
+        });
     })->create();
