@@ -454,18 +454,16 @@ class TrabajadorController extends ApplicationController
                 ->where('coddoc', $coddoc)
                 ->first();
 
-            if ($solicitud == false) {
+            if (!$solicitud) {
                 throw new DebugException('Error la solicitud no está disponible para acceder.', 301);
-            } else {
-                $data = $solicitud->toArray();
             }
 
             $salida = [
                 'success' => true,
-                'data' => $data,
+                'data' => $solicitud->toArray(),
                 'msj' => 'OK',
             ];
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             $salida = $this->handleException($e, request());
         }
 

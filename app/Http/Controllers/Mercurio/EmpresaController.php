@@ -29,10 +29,9 @@ use Illuminate\Http\Response;
 class EmpresaController extends ApplicationController
 {
     protected $db;
-
     protected $user;
-
     protected $tipo;
+    protected $tipopc = '2';
 
     public function __construct()
     {
@@ -40,8 +39,6 @@ class EmpresaController extends ApplicationController
         $this->user = session('user') ?? null;
         $this->tipo = session('tipo') ?? null;
     }
-
-    protected $tipopc = '2';
 
     public function index()
     {
