@@ -32,19 +32,19 @@
                     
                     @case('A')
                         <button type="button" class="btn btn-success btn-sm ml-1" data-toggle="event-show" data-cid="{{ $solicitud['id'] }}">
-                            <i class="fas fa-hand-pointer"></i> OK
-                        </button>
-                        <button type="button" class="btn btn-sm btn-primary ml-1" data-toggle="event-cuenta" data-cid="{{ $solicitud['id'] }}">
-                            <i class="fas fa-cog text-white"></i> Administrar
+                            <i class="fas fa-hand-pointer"></i> Aprobada
                         </button>
                         @break
                     
-                    @default
-                        @if($solicitud['estado'] != 'X')
-                            <button type="button" class="btn btn-warning btn-sm ml-1" data-toggle="event-detalle" data-cid="{{ $solicitud['id'] }}">
-                                <i class="fas fa-eye text-white"></i> Seguimiento
-                            </button>
-                        @endif
+                    @case('P')
+                        <button type="button" class="btn btn-warning btn-sm ml-1" data-toggle="event-detalle" data-cid="{{ $solicitud['id'] }}">
+                            <i class="fas fa-eye text-white"></i> Seguimiento
+                        </button>
+                        @break
+                    @default 
+                        <button type="button" class="btn btn-default btn-sm ml-1" disabled>
+                            <i class="fas fa-times text-white"></i> Sin acción
+                        </button>
                 @endswitch
                 
                 {{-- Botón Borrar --}}

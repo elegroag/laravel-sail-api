@@ -420,10 +420,10 @@ class TrabajadorController extends ApplicationController
      * @param  string  $estado
      * @return string
      */
-    public function renderTable($estado = '')
+    public function renderTable(Request $request, ?string $estado = null)
     {
         try {
-            $trabajadorService = new TrabajadorService;
+            $trabajadorService = new TrabajadorService();
             $html = view(
                 'mercurio/trabajador/tmp/solicitudes',
                 [
@@ -435,8 +435,8 @@ class TrabajadorController extends ApplicationController
             $this->setResponse('view');
             return $this->renderText($html);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
-            return response()->json($salida);
+            $salida = $this->handleException($e, $request);
+            return $this->renderText($salida);
         }
     }
 

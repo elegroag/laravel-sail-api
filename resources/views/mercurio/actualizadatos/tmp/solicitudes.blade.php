@@ -34,12 +34,15 @@
                             <i class="fas fa-hand-pointer"></i> OK
                         </button>
                         @break
+                    @case('P')
+                        <button type="button" class="btn btn-warning btn-sm ml-1" data-toggle="event-detalle" data-cid="{{ $solicitud['id'] }}">
+                            <i class="fas fa-eye text-white"></i> Seguimiento
+                        </button>
+                        @break
                     @default
-                        @if($solicitud['estado'] != 'X')
-                            <button type="button" class="btn btn-warning btn-sm ml-1" data-toggle="event-detalle" data-cid="{{ $solicitud['id'] }}">
-                                <i class="fas fa-eye text-white"></i> Seguimiento
-                            </button>
-                        @endif
+                        <button type="button" class="btn btn-default btn-sm ml-1" disabled>
+                            <i class="fas fa-times text-white"></i> Sin acción
+                        </button>
                 @endswitch
                 
                 {{-- Botón Borrar --}}

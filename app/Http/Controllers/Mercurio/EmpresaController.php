@@ -62,7 +62,7 @@ class EmpresaController extends ApplicationController
         }
     }
 
-    public function renderTable(Request $request, Response $response, string $estado = '')
+    public function renderTable(Request $request, ?string $estado = null)
     {
         try {
             $empresaService = new EmpresaService;

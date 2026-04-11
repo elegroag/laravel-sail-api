@@ -50,13 +50,13 @@ class EmpresaService
      * @param  string  $estado
      * @return array
      */
-    public function findAllByEstado($estado = '')
+    public function findAllByEstado(?string $estado = null)
     {
         // usuario empresa, unica solicitud de afiliación
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
 
-        if (empty($estado)) {
+        if (!$estado) {
             $conditions = "and solis.estado NOT IN('I') ";
         } else {
             $conditions = "and solis.estado='{$estado}' ";
@@ -80,9 +80,8 @@ class EmpresaService
             WHERE solis.documento='{$documento}' and solis.coddoc='{$coddoc}' {$conditions}
             ORDER BY solis.fecini ASC;";
 
-        $solicitudes = $this->db->inQueryAssoc($sql);
-
-        return $solicitudes;
+        $results = DB::select($sql);
+        return json_decode(json_encode($results), true);
     }
 
     /**

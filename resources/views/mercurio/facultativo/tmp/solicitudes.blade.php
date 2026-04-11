@@ -15,35 +15,44 @@
     <tr>
         <td>
             <div class="btn-group" role="group">
-                @if ($solicitud['estado'] == 'T')
-                    <span style='margin-left:2px'>
-                        <button type="button" class='btn btn-primary btn-sm' data-toggle="event-proceso" data-cid="{{ $solicitud['id'] }}">
-                            <i class='fas fa-user-edit text-white'></i> Editar
-                        </button>
-                    </span>
-                @elseif ($solicitud['estado'] == 'D')
-                    <span style='margin-left:2px'>
-                        <button type="button" class='btn btn-info btn-sm' data-toggle='event-proceso' data-cid="{{ $solicitud['id'] }}">
-                            <i class='fas fa-eye text-white'></i> Corregir
-                        </button>
-                    </span>
-                @elseif ($solicitud['estado'] == 'A')
-                    <span style='margin-left:2px'>
-                        <button type="button" class='btn btn-success btn-sm' data-toggle='event-show' data-cid="{{ $solicitud['id'] }}">
-                            <i class='fas fa-hand-pointer'></i> OK
-                        </button>
-                    </span>
-                @else
-                    @if ($solicitud['estado'] != 'X')
-                        <span style='margin-left:2px'>
+                @switch($solicitud['estado'])
+                    @case('T')
+                        <span class='ml-2'>
+                            <button type="button" class='btn btn-primary btn-sm' data-toggle="event-proceso" data-cid="{{ $solicitud['id'] }}">
+                                <i class='fas fa-user-edit text-white'></i> Editar
+                            </button>
+                        </span>
+                        @break
+                    @case('D')
+                        <span class='ml-2'>
+                            <button type="button" class='btn btn-info btn-sm' data-toggle='event-proceso' data-cid="{{ $solicitud['id'] }}">
+                                <i class='fas fa-eye text-white'></i> Corregir
+                            </button>
+                        </span>
+                        @break
+                    @case('A')
+                        <span class='ml-2'>
+                            <button type="button" class='btn btn-success btn-sm' data-toggle='event-show' data-cid="{{ $solicitud['id'] }}">
+                                <i class='fas fa-hand-pointer'></i> OK
+                            </button>
+                        </span>
+                        @break
+                    @case('P')
+                        <span class='ml-2'>
                             <button type="button" class='btn btn-warning btn-sm' data-toggle='event-detalle' data-cid="{{ $solicitud['id'] }}">
                                 <i class='fas fa-eye text-white'></i> Seguimiento
                             </button>
                         </span>
-                    @endif
-                @endif
+                        @break
+                    @default
+                        <span class='ml-2'>
+                            <button type="button" class="btn btn-default btn-sm ml-1" disabled>
+                                <i class="fas fa-times text-white"></i> Sin acción
+                            </button>
+                        </span>
+                @endswitch
                 @if ($solicitud['estado'] != 'A')
-                    <span style='margin-left:2px'>
+                    <span class='ml-2'>
                         <button type="button" class='btn btn-danger btn-sm' data-toggle='cancel-solicitud' data-cid="{{ $solicitud['id'] }}">
                             <i class="fas fa-trash"></i>
                             Borrar

@@ -43,7 +43,7 @@ class TrabajadorService
      * @param  string  $estado
      * @return array
      */
-    public function findAllByEstado($estado = '')
+    public function findAllByEstado(?string $estado = null)
     {
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
@@ -52,7 +52,7 @@ class TrabajadorService
             return [];
         }
 
-        if (empty($estado)) {
+        if (!$estado) {
             $conditions = "and m31.estado NOT IN('I') ";
         } else {
             $conditions = "and m31.estado='{$estado}' ";
@@ -68,6 +68,8 @@ class TrabajadorService
                 WHEN m31.estado = 'X' THEN 'Rechazado'
                 WHEN m31.estado = 'P' THEN 'Pendiente De Validación CAJA'
                 WHEN m31.estado = 'I' THEN 'Inactiva'
+                WHEN m31.estado = 'C' THEN 'Cancelada'
+                ELSE 'NO Definido'
             END) as estado_detalle,
             coddoc as tipo_documento
             FROM mercurio31 as m31

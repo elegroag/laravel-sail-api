@@ -16,37 +16,47 @@
     <tr>
         <td>
             <div class="btn-group" role="group">
-                @if($solicitud['estado'] == 'T')
-                    <span style='margin-left:2px'>
-                        <button type="button" class='btn btn-primary btn-sm' data-toggle="event-proceso" data-cid="{{ $solicitud['id'] }}">
-                            <i class='fas fa-user-edit text-white'></i> Editar
+                @switch($solicitud['estado'])
+                    @case('T')
+                        <span style='margin-left:2px'>
+                            <button type="button" class='btn btn-primary btn-sm' data-toggle="event-proceso" data-cid="{{ $solicitud['id'] }}">
+                                <i class='fas fa-user-edit text-white'></i> Editar
+                            </button>
+                        </span>
+                        @break
+                    @case('D')
+                        <span style='margin-left:2px'>
+                            <button type="button" class='btn btn-info btn-sm' data-toggle="event-proceso" data-cid="{{ $solicitud['id'] }}">
+                                <i class='fas fa-eye text-white'></i> Corregir
+                            </button>
+                        </span>
+                        @break
+                    @case('A')
+                        <span style='margin-left:2px'>
+                            <button type="button" class='btn btn-success btn-sm' data-toggle='event-show' data-cid="{{ $solicitud['id'] }}">
+                                <i class='fas fa-hand-pointer-o text-white'></i> OK
+                            </button>
+                        </span>
+                        @break
+                    @case('X')
+                        <span style='margin-left:2px'>
+                            <button type="button" class='btn btn-sm bg-gray text-white' data-toggle="event-proceso" data-cid="{{ $solicitud['id'] }}">
+                                <i class='fas fa-hand-pointer-o text-white'></i> Rechazado
+                            </button>
+                        </span>
+                        @break
+                    @case('P')
+                        <span style='margin-left:2px'>
+                            <button type="button" class='btn btn-warning btn-sm' data-toggle='event-detalle' data-cid="{{ $solicitud['id'] }}">
+                                <i class='fas fa-eye text-white'></i> Seguimiento
+                            </button>
+                        </span>
+                        @break
+                    @default
+                        <button type="button" class="btn btn-default btn-sm ml-1" disabled>
+                            <i class="fas fa-times text-white"></i> Sin acción
                         </button>
-                    </span>
-                @elseif($solicitud['estado'] == 'D')
-                    <span style='margin-left:2px'>
-                        <button type="button" class='btn btn-info btn-sm' data-toggle="event-proceso" data-cid="{{ $solicitud['id'] }}">
-                            <i class='fas fa-eye text-white'></i> Corregir
-                        </button>
-                    </span>
-                @elseif($solicitud['estado'] == 'A')
-                    <span style='margin-left:2px'>
-                        <button type="button" class='btn btn-success btn-sm' data-toggle='event-show' data-cid="{{ $solicitud['id'] }}">
-                            <i class='fas fa-hand-pointer-o text-white'></i> OK
-                        </button>
-                    </span>
-                @elseif($solicitud['estado'] == 'X')
-                    <span style='margin-left:2px'>
-                        <button type="button" class='btn btn-sm bg-gray text-white' data-toggle="event-proceso" data-cid="{{ $solicitud['id'] }}">
-                            <i class='fas fa-hand-pointer-o text-white'></i> Rechazado
-                        </button>
-                    </span>
-                @else
-                    <span style='margin-left:2px'>
-                        <button type="button" class='btn btn-warning btn-sm' data-toggle='event-detalle' data-cid="{{ $solicitud['id'] }}">
-                            <i class='fas fa-eye text-white'></i> Seguimiento
-                        </button>
-                    </span>
-                @endif
+                @endswitch
                 @if($solicitud['estado'] != 'A')
                     <span style='margin-left:2px'>
                         <button type="button" class='btn btn-danger btn-sm' data-toggle='cancel-solicitud' data-cid="{{ $solicitud['id'] }}">Borrar</button>
@@ -58,7 +68,7 @@
             {{ $solicitud['ruuid'] }}
         </td>
         <td>
-            {{ $solicitud['cedtra'] }}, {{ ucwords(strtolower($solicitud['prinom'] . ' ' . $solicitud['segnom'] . ' ' . $solicitud['priape'] . ' ' . $solicitud['segape'])) }}
+            {{ $solicitud['numdoc'] }}, {{ ucwords(strtolower($solicitud['prinom'] . ' ' . $solicitud['segnom'] . ' ' . $solicitud['priape'] . ' ' . $solicitud['segape'])) }}
         </td>
         <td>
             {{ $solicitud['estado_detalle'] }}
