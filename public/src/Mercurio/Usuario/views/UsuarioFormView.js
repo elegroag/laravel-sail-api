@@ -1,4 +1,4 @@
-import { GestionAdjuntoService } from '@/Componentes/Services/GestionAdjuntoService';
+import Logger from '@/Common/Logger';
 import {
     AddressComponent,
     DateComponent,
@@ -9,32 +9,19 @@ import {
     TextComponent,
 } from '@/Componentes/Views/ComponentsView';
 import ConfirmPasswordModalView from '@/Componentes/Views/ConfirmPasswordModalView';
-import { LoadDocumentsView } from '@/Componentes/Views/LoadDocumentsView';
 import OpenAddress from '@/Componentes/Views/OpenAddress';
-import { PoliticaModalView } from '@/Componentes/Views/PoliticaModalView';
-import { SeguimientosView } from '@/Componentes/Views/SeguimientosView';
-import { SubHeaderView } from '@/Componentes/Views/SubHeaderView';
 import { is_numeric } from '@/Core';
 
-function cancelarPolitica() {
-    if (window.App && typeof window.App.trigger === 'function') {
-        window.App.trigger('alert:error', { message: 'Debe aceptar la política para poder utilizar nuestros servicios.' });
-    } else {
-        Swal.fire('Proceso Cancelado', 'Debe aceptar la política para poder utilizar nuestros servicios.', 'error');
-    }
-}
-
-export class FormView extends Backbone.View {
+export class UsuarioFormView extends Backbone.View {
     #onRender = null;
 
     constructor(options = {}) {
         super(options);
         this.children = new Array();
-        this.gestionAdjuntoService = new GestionAdjuntoService();
         this.region = options.region || null;
         this.isNew = options.isNew || false;
-        this.template = '#tmp_create';
-        this.form = null;
+        this.template = options.template || null;
+        this.form = options.form || null;
         this.selectores = {};
         this.address = null;
         this.subHeader = null;
@@ -42,21 +29,15 @@ export class FormView extends Backbone.View {
         _.extend(this, options);
         this.#onRender = options.onRender || null;
         this.App = options.App || window.App;
+        this.logger = new Logger();
     }
 
     render() {
         const data = this.__serializeData();
         const template = this.__compileTemplate();
         this.$el.html(template(data));
-        this.form = typeof this.region == 'string' ? this.$el.find(this.region.form) : this.$el.find(this.form);
-        this.__initSubHeader();
         if (this.#onRender) this.#onRender(this.$el);
         return this;
-    }
-
-    enviarRadicado(event) {
-        event.preventDefault();
-        this.__enviarCaja();
     }
 
     get className() {
@@ -71,67 +52,13 @@ export class FormView extends Backbone.View {
         }
     }
 
-    __initSubHeader() {
-        if (this.subHeader) this.subHeader.remove();
-        this.subHeader = new SubHeaderView({
-            model: this.model,
-            collection: [
-                {
-                    id: 'closeForm',
-                    hidden: false,
-                    label: 'Salir',
-                    icon: 'fa fa-times text-warning',
-                    active: false,
-                    tab: '',
-                },
-                {
-                    id: 'seguimiento-tab',
-                    hidden: this.model.get('id') && this.model.get('estado') !== 'T' ? false : true,
-                    label: 'Seguimiento',
-                    icon: 'fa fas fa-eye text-info',
-                    active: false,
-                    tab: 'seguimiento',
-                },
-                {
-                    id: 'datos_solicitud_tab',
-                    hidden: false,
-                    label: 'Ficha Principal Registro',
-                    icon: 'fa fas fa-edit text-yellow',
-                    active: true,
-                    tab: 'datos_solicitud',
-                },
-                {
-                    id: 'documentos_adjuntos_tab',
-                    hidden: this.model.get('id') ? false : true,
-                    label: 'Documentos Adjuntar',
-                    icon: 'fa fas fa-file text-purple',
-                    active: false,
-                    tab: 'documentos_adjuntos',
-                },
-                {
-                    id: 'enviarCaja',
-                    hidden: this.model.get('id') && (this.model.get('estado') === 'D' || this.model.get('estado') === 'T') ? false : true,
-                    label: 'Enviar Radicado',
-                    icon: 'fa fas fa-upload text-success',
-                    active: false,
-                    tab: 'enviar_radicado',
-                },
-            ],
-        });
-
-        this.listenTo(this.subHeader, 'show:documentos', this.__renderDocumentos);
-        this.listenTo(this.subHeader, 'show:seguimiento', this.__renderSeguimiento);
-        this.listenTo(this.subHeader, 'show:enviar', this.__enviarCaja);
-        this.App.layout.getRegion('subheader').show(this.subHeader);
-    }
-
     isNumber(e) {
         if ($(e.currentTarget).val() == '') return;
         if (!is_numeric($(e.currentTarget).val())) return $(e.currentTarget).val('');
     }
 
     __compileTemplate() {
-        return _.template($(this.template).html());
+        return _.template(this.template);
     }
 
     getInput(selector) {
@@ -219,98 +146,6 @@ export class FormView extends Backbone.View {
                 },
             });
         }
-    }
-
-    __renderDocumentos() {
-        this.App.trigger('syncro', {
-            url: this.App.url('consulta_documentos/' + this.model.get('id'), window.ServerController ?? 'empresa'),
-            data: {},
-            callback: (response) => {
-                if (response.success) {
-                    if (this.viewDocuments != null) this.viewDocuments.remove();
-
-                    this.viewDocuments = new LoadDocumentsView({
-                        model: this.model,
-                        collection: [response.data],
-                    });
-
-                    this.listenTo(this.viewDocuments, 'file:trash', this.gestionAdjuntoService.borrarArchivo);
-                    this.listenTo(this.viewDocuments, 'file:save', this.gestionAdjuntoService.guardarArchivo);
-                    this.listenTo(this.viewDocuments, 'file:prodoc', this.gestionAdjuntoService.processDocument);
-                    //this.listenTo(this.viewDocuments, 'file:firma', this.__findFirmas);
-                    this.listenTo(this.viewDocuments, 'file:reload', this.__renderDocumentos);
-
-                    this.$el.find('#documentos_adjuntos').html(this.viewDocuments.render().el);
-                } else {
-                    this.App.trigger('alert:error', { message: response.msj });
-                }
-            },
-        });
-    }
-
-    __renderSeguimiento() {
-        this.App.trigger('syncro', {
-            url: this.App.url('seguimiento', window.ServerController),
-            data: { id: this.model.get('id') },
-            callback: (response) => {
-                if (response.success) {
-                    const view = new SeguimientosView({
-                        model: this.model,
-                        collection: [
-                            {
-                                campos_disponibles: response.data.campos_disponibles,
-                                estados_detalles: response.data.estados_detalles,
-                                seguimientos: response.data.seguimientos,
-                            },
-                        ],
-                    });
-                    this.$el.find('#seguimiento').html(view.render().el);
-                } else {
-                    this.App.trigger('alert:error', { message: response.msj });
-                }
-            },
-        });
-    }
-
-    __enviarCaja() {
-        const view = new PoliticaModalView();
-
-        this.App.trigger('show:modal', {
-            title: 'Política de Tratamiento de Datos',
-            view,
-            options: {
-                size: 'modal-xl',
-                scrollable: true,
-                footer: [
-                    {
-                        text: 'No Acepto / Cancelar',
-                        className: 'btn-secondary',
-                        onClick: () => {
-                            this.App.trigger('hide:modal', view);
-                            setTimeout(() => {
-                                cancelarPolitica();
-                            }, 300);
-                        },
-                    },
-                    {
-                        text: 'Sí, Acepto la Política',
-                        className: 'btn-primary',
-                        onClick: () => {
-                            this.trigger('form:send', {
-                                model: this.model,
-                                callback: (response) => {
-                                    if (response.success) {
-                                        this.App.trigger('hide:modal', view);
-                                        this.remove();
-                                        this.App.router.navigate('list', { trigger: true });
-                                    }
-                                },
-                            });
-                        },
-                    },
-                ],
-            },
-        });
     }
 
     cancel(e) {

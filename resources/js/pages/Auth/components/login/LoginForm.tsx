@@ -4,9 +4,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ChevronLeft } from "lucide-react"
 import { DocumentTypeOption } from "@/types/auth"
-import UserTypeDescription from "@/components/auth/user-type-description"
+import HeaderLogin from "./HeaderLogin"
 
 // Componente reutilizable para el formulario de login según el tipo de usuario seleccionado
 // Principio SRP: Este componente solo se encarga de mostrar el formulario y manejar los callbacks recibidos por props
@@ -43,24 +42,15 @@ const LoginForm: React.FC<LoginFormProps> = ({
   // Sección UI del formulario
   return (
     <>
-      <div className="flex mb-6">
-        <button onClick={onBack} className="mr-3 p-2 hover:bg-gray-100 rounded-full transition-colors">
-          <ChevronLeft className="w-5 h-5 text-gray-600" />
-        </button>
-        <div>
-          <h2 className="text-xl font-semibold text-gray-800">
-            {userTypes.find((ut) => ut.id === selectedUserType)?.label}
-          </h2>
-          <p className="text-sm text-gray-600">Ingresa tus credenciales</p>
-          {selectedUserType && (
-            <UserTypeDescription userTypeId={selectedUserType} />
-          )}
-        </div>
-      </div>
+      <HeaderLogin
+        userTypes={userTypes}
+        selectedUserType={selectedUserType}
+        onBack={onBack}
+      />
 
-      <form onSubmit={onSubmit} className="space-y-3 items-center justify-center">
-        <div className="w-full md:w-1/2 lg:w-1/3 xl:w-1/4 justify-center">
-          <div className="w-80 mx-auto pt-3">
+      <form onSubmit={onSubmit} className="space-y-3">
+        <div className="w-full max-w-sm mx-auto">
+          <div className="w-full pt-3">
             <Label htmlFor="documentType" className="text-sm font-medium text-gray-700">
               Tipo de documento
             </Label>
@@ -78,7 +68,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             </Select>
           </div>
 
-          <div className="w-80 mx-auto pt-3">
+          <div className="w-full pt-3">
             <Label htmlFor="identification" className="text-sm font-medium text-gray-700">
               Número de identificación
             </Label>
@@ -93,7 +83,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             />
           </div>
 
-          <div className="w-80 mx-auto pt-3 pb-4">
+          <div className="w-full pt-3 pb-4">
             <Label htmlFor="password" className="text-sm font-medium text-gray-700">
               Clave
             </Label>

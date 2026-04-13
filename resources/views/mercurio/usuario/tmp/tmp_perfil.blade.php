@@ -3,34 +3,30 @@
     <div class='row'>
         <div class='col-md-6 border-top border-right mb-1 border-left border-bottom'>
             <label class='form-control-label'>Tipo usuario</label>
-            <% if (isEdit == -1) {%>
             <p class='pl-2 description'><%= tipo_detalle%></p>
-            <%}else{%>
-            <div class="mb-1" id='component_tipo'></div>
-            <%}%>
         </div>
         <div class='col-md-6 border-top border-right mb-1 border-left border-bottom'>
             <label class='form-control-label'>Tipo documento</label>
             <% if (isEdit == -1) {%>
-            <p class='pl-2 description'><%= coddoc_detalle%> </p>
+                <p class='pl-2 description'><%= coddoc_detalle%> </p>
             <%}else{%>
-            <div class="mb-1" id='component_coddoc'></div>
+                <div class="mb-1" id='component_coddoc'></div>
             <%}%>
         </div>
         <div class='col-md-6 border-top border-right mb-1 border-left border-bottom'>
             <label class='form-control-label'>Identificación</label>
             <% if (isEdit == -1) {%>
-            <p class='pl-2 description'><%= documento%> </p>
+                <p class='pl-2 description'><%= documento%> </p>
             <%}else{%>
-            <input class="form-control mb-1" id="documento" name="documento" type="text" value="<%=documento%>" readonly />
+                <input class="form-control mb-1" id="documento" name="documento" type="text" value="<%=documento%>" readonly />
             <%}%>
         </div>
         <div class='col-md-6 border-top border-right mb-1 border-left border-bottom'>
             <label class='form-control-label'>Nombre</label>
             <% if (isEdit == -1) {%>
-            <p class='pl-2 description'><%= nombre%> </p>
+                <p class='pl-2 description'><%= nombre%> </p>
             <%}else{%>
-            <input class="form-control mb-1" id="nombre" name="nombre" type="text" value="<%=nombre%>" style="text-transform: uppercase" />
+                <input class="form-control mb-1" id="nombre" name="nombre" type="text" value="<%=nombre%>" style="text-transform: uppercase" />
             <%}%>
         </div>
         <div class='col-md-8 border-top border-right mb-1 border-left border-bottom'>

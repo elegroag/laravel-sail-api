@@ -88,6 +88,13 @@ export class FormConyugeView extends FormView {
                 const name = this.model.get(element.name);
                 if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
             });
+            if (this.model.get('cedtra')) {
+                const afiliado = this.collection.props.list_afiliados;
+                const has = _.where(afiliado, { cedula: this.model.get('cedtra') });
+                if (has.length > 0) {
+                    this.setInput('nomtra', has[0].nombre_completo);
+                }
+            }
         } else {
             $.each(
                 this.selectores,
@@ -305,7 +312,7 @@ export class FormConyugeView extends FormView {
 
     validoTrabajador(e) {
         e.preventDefault();
-        if (!this.isNew) return null;
+
         const cedtra = this.getInput('[name="cedtra"]');
         if (!cedtra) return null;
 

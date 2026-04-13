@@ -1,31 +1,29 @@
 import { $App } from '@/App';
 import { ComponentModel } from '@/Componentes/Models/ComponentModel';
-import { DialogComponent, RadioComponent, SelectComponent, TextComponent } from '@/Componentes/Views/ComponentsView';
 import { UsuarioModel } from '../models/UsuarioModel';
+import { UsuarioFormView } from './UsuarioFormView';
 
-class PerfilView extends Backbone.View {
+class PerfilView extends UsuarioFormView {
     constructor(options) {
-        super(options);
+        super({
+            ...options,
+            template: document.getElementById('tmp_perfil').innerHTML,
+            onRender: (el = {}) => this.#afterRender(el),
+        });
         this.viewComponents = [];
         this.children = {};
-        this.form = void 0;
     }
 
     get className() {
         return 'mb-3';
     }
 
-    initialize() {
-        this.template = document.getElementById('tmp_perfil').innerHTML;
-    }
-
-    render() {
-        const template = _.template(this.template);
-        this.$el.html(template(this.model.toJSON()));
+    #afterRender() {
         this.form = this.$el.find('#formRequest');
 
         if (this.model.get('isEdit') == 1) {
             _.each(this.collection, (component) => {
+                this.logger.info(this.model.get(component.name));
                 const view = this.addComponent(
                     new ComponentModel({
                         ...component,
@@ -34,6 +32,13 @@ class PerfilView extends Backbone.View {
                 );
                 this.viewComponents.push(view);
                 this.$el.find('#component_' + component.name).html(view.$el);
+            });
+
+            $.each(this.model.toJSON(), (key, valor) => {
+                const inputElement = this.$el.find(`[name="${key}"]`);
+                if (inputElement.length && valor) {
+                    inputElement.val(valor);
+                }
             });
         }
 
@@ -50,7 +55,6 @@ class PerfilView extends Backbone.View {
                 $(element).removeClass('is-invalid').addClass('is-valid');
             },
         });
-        return this;
     }
 
     get events() {
@@ -113,56 +117,8 @@ class PerfilView extends Backbone.View {
 
     crearClave(e) {
         e.preventDefault();
-        const claveGenerada = this.__generarClaveAleatoria();
+        const claveGenerada = this.generarClaveAleatoria();
         this.$el.find('#newclave1').val(claveGenerada);
-    }
-
-    remove() {
-        if (_.size(this.viewComponents) > 0) _.each(this.viewComponents, (view) => view.remove());
-        this.stopListening();
-        Backbone.View.prototype.remove.call(this);
-    }
-
-    addComponent(model = {}) {
-        const collection = $App.Collections.formParams;
-        let view;
-        if (_.size(this.children) > 0) {
-            if (_.indexOf(this.children, model.get('cid')) != -1) {
-                view = this.children[model.get('cid')];
-            }
-        }
-        if (!view) {
-            switch (model.get('form_type')) {
-                case 'select':
-                    view = new SelectComponent({ model, collection });
-                    break;
-                case 'input':
-                    view = new InputComponent({ model });
-                    break;
-                case 'radio':
-                    view = new RadioComponent({ model });
-                    break;
-                case 'date':
-                    view = new DateComponent({ model });
-                    break;
-                case 'textarea':
-                    view = new TextComponent({ model });
-                    break;
-                case 'dialog':
-                    view = new DialogComponent({ model, collection });
-                    break;
-                case 'address':
-                    view = new AddressComponent({ model });
-                    break;
-                default:
-                    model.set('form_type', 'input');
-                    view = new InputComponent({ model });
-                    break;
-            }
-            this.children[model.get('cid')] = view;
-        }
-        if (view) view.render();
-        return view;
     }
 
     saveFormData(event) {
@@ -186,7 +142,7 @@ class PerfilView extends Backbone.View {
         this.$el.find('#clave').removeAttr('disabled');
         this.$el.find('#clave').removeClass('disabled');
 
-        const entity = this.__serializeModel(new UsuarioModel());
+        const entity = this.serializeModel(new UsuarioModel());
 
         if (entity.isValid() !== true) {
             target.removeAttr('disabled');
@@ -243,13 +199,7 @@ class PerfilView extends Backbone.View {
         });
     }
 
-    __serializeModel(entity) {
-        const dataArray = this.form.serializeArray();
-        _.each(dataArray, (item) => entity.set(item.name, item.value));
-        return entity;
-    }
-
-    __generarClaveAleatoria() {
+    generarClaveAleatoria() {
         const caracteresPermitidos = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789$&@*#';
         let clave = '';
         for (let i = 0; i < 8; i++) {
@@ -257,6 +207,11 @@ class PerfilView extends Backbone.View {
             clave += caracteresPermitidos.charAt(indiceAleatorio);
         }
         return clave;
+    }
+
+    remove() {
+        if (_.size(this.viewComponents) > 0) _.each(this.viewComponents, (view) => view.remove());
+        Backbone.View.prototype.remove.call(this);
     }
 }
 

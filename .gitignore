@@ -39,7 +39,6 @@ yarn-error.log
 /legacy/swiftmailer/
 /legacy/phpmailer/
 /bootstrap/cache/
-/public/assets
 /public/node_modules
 /public/theme/fonts
 /resources/mercurio/build
@@ -51,7 +50,9 @@ legacy/Thiagoprz/composer.json
 legacy/Thiagoprz/License.txt
 public/cajas/build
 .pnpm-store/
-resources/js/assets/
+resources/js/assets/*.png
+resources/js/assets/*.svg
+resources/js/assets/media
 database/seeders/dbsql
 storage/app/testing
 .windsurf/

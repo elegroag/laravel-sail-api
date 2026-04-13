@@ -1,5 +1,6 @@
 import { $App } from '@/App';
 import { Controller } from '@/Common/Controller';
+import Logger from '@/Common/Logger';
 import { LayoutView } from '@/Componentes/Views/LayoutView';
 import loading from '@/Componentes/Views/Loading';
 import { UsuarioModel } from './models/UsuarioModel';
@@ -15,6 +16,7 @@ class ControllerUsuario extends Controller {
         $App.layout = new LayoutView();
         this.region.show($App.layout);
         loading.hide();
+        this.logger = new Logger();
     }
 
     renderPerfil() {

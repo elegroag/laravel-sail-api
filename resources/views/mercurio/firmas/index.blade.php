@@ -30,7 +30,7 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('mercurio/build/Firmas.js') }}"></script>
+    <script src="{{ asset('mercurio/build/Firma.js') }}"></script>
 @endpush
 
 @push('styles')
