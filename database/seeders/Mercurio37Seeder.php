@@ -3,7 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\Mercurio06;
+use App\Models\Mercurio07;
 use App\Models\Mercurio09;
+use App\Models\Mercurio11;
 use App\Models\Mercurio37;
 use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
@@ -19,7 +21,15 @@ class Mercurio37Seeder extends Seeder
         if (Mercurio06::count() == 0) {
             $this->call([
                 Mercurio06Seeder::class,
+            ]);
+        }
+        if (Mercurio07::count() == 0) {
+            $this->call([
                 Mercurio07Seeder::class,
+            ]);
+        }
+        if (Mercurio11::count() == 0) {
+            $this->call([
                 Mercurio11Seeder::class,
             ]);
         }

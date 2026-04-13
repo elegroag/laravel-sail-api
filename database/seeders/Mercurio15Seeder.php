@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Mercurio15;
 use Illuminate\Database\Seeder;
 
 class Mercurio15Seeder extends Seeder
@@ -126,7 +127,7 @@ class Mercurio15Seeder extends Seeder
         ];
 
         foreach ($codigosVias as $via) {
-            \App\Models\Mercurio15::updateOrCreate(
+            Mercurio15::updateOrCreate(
                 ['id' => $via['id']],
                 $via
             );
