@@ -54,9 +54,9 @@ class IndependientesDocuments
 
         $coddorepleg = array_flip(tipo_document_repleg_detalle());
         $representante = [
-            'nombre' => $this->independiente->repleg,
+            'nombre' => $nombre_independiente,
             'tipo_documento' => ($this->independiente->coddorepleg) ? $coddorepleg[$this->independiente->coddorepleg] : 'CEDULA DE CIUDADANIA',
-            'cedula' => $this->independiente->cedrep,
+            'cedula' => $this->independiente->cedtra,
         ];
 
         $ocupaciones = ParamsIndependiente::getOcupaciones();
@@ -88,10 +88,17 @@ class IndependientesDocuments
             'fecnac_month' => substr($this->independiente->fecnac, 5, 2),
             'fecnac_day' => substr($this->independiente->fecnac, 8, 2),
             'representante' => $representante,
+            'repleg' => $nombre_independiente,
+            'razsoc' => $nombre_independiente,
+            'cedrep' => $this->independiente->cedtra,
+            'nit' => $this->independiente->cedtra,
             'nombre_trabajador' => $nombre_independiente,
             'tipo_documento' => $detdoc_detalle,
             'cargo_name' => $cargo_name,
             'calemp_detalle' => "INDEPENDIENTE",
+            'fecini_year' => substr($this->independiente->fecini, 0, 4),
+            'fecini_month' => substr($this->independiente->fecini, 5, 2),
+            'fecini_day' => substr($this->independiente->fecini, 8, 2),
             ...$this->independiente->toArray(),
         ];
 

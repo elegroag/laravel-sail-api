@@ -77,9 +77,9 @@ class FormPensionadoView extends FormView {
                 this.form.find('#show_codban').removeClass('d-none');
                 this.form.find('#show_tipcue').removeClass('d-none');
             } else {
-                $el.find('#numcue').rules('remove', 'required');
-                $el.find('#codban').rules('remove', 'required');
-                $el.find('#tipcue').rules('remove', 'required');
+                this.form.find('#numcue').rules('remove', 'required');
+                this.form.find('#codban').rules('remove', 'required');
+                this.form.find('#tipcue').rules('remove', 'required');
 
                 PensionadoModel.changeRulesProperty([
                     { rule: 'numcue', prop: 'required', value: false },

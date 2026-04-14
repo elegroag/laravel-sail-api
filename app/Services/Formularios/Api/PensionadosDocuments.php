@@ -56,10 +56,13 @@ class PensionadosDocuments
 
         $coddorepleg = array_flip(tipo_document_repleg_detalle());
         $representante = [
-            'nombre' => $this->pensionado->repleg,
+            'nombre' => $nombre_pensionado,
             'tipo_documento' => ($this->pensionado->coddorepleg) ? $coddorepleg[$this->pensionado->coddorepleg] : 'CEDULA DE CIUDADANIA',
-            'cedula' => $this->pensionado->cedrep,
+            'cedula' => $this->pensionado->cedtra,
         ];
+
+        $tipo_afiliado = ParamsPensionado::getTipoAfiliado();
+        $calemp_detalle = $tipo_afiliado[$this->pensionado->tipafi] ?? 'PENSIONADO';
 
         // Contexto para los templates
         $today = Carbon::now();
@@ -85,11 +88,17 @@ class PensionadosDocuments
             'empresa' => $this->pensionado->toArray(),
             'solicitante' => $this->solicitante->toArray(),
             'representante' => $representante,
-            'representante' => $representante,
+            'repleg' => $nombre_pensionado,
+            'razsoc' => $nombre_pensionado,
+            'cedrep' => $this->pensionado->cedtra,
+            'nit' => $this->pensionado->cedtra,
             'nombre_trabajador' => $nombre_pensionado,
             'tipo_documento' => $detdoc_detalle,
             'cargo_name' => 'TRABAJADOR PENSIONADO',
-            'calemp_detalle' => "PENSIONADO",
+            'calemp_detalle' => $calemp_detalle,
+            'fecini_year' => substr($this->pensionado->fecini, 0, 4),
+            'fecini_month' => substr($this->pensionado->fecini, 5, 2),
+            'fecini_day' => substr($this->pensionado->fecini, 8, 2),
             ...$this->pensionado->toArray(),
         ];
 

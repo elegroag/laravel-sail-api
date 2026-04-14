@@ -34,7 +34,7 @@ export class FormView extends Backbone.View {
         this.region = options.region || null;
         this.isNew = options.isNew || false;
         this.template = '#tmp_create';
-        this.form = null;
+        this.form = options.form || '#formRequest';
         this.selectores = {};
         this.address = null;
         this.subHeader = null;
