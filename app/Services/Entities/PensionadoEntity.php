@@ -167,7 +167,7 @@ class PensionadoEntity
             'segnom' => ['type' => 'string', 'max' => 40, 'is_null' => true],
             'nomemp' => ['type' => 'string', 'max' => 180, 'is_null' => true],
             'sigla' => ['type' => 'string', 'max' => 30, 'is_null' => true],
-            'cedrep' => ['type' => 'string', 'max' => 13, 'is_null' => true],
+            'cedrep' => ['type' => 'rangelength', 'min' => 1, 'max' => 16, 'is_null' => false],
             'repleg' => ['type' => 'string', 'max' => 140, 'is_null' => true],
             'jefper' => ['type' => 'string', 'max' => 40, 'is_null' => true],
             'cedpro' => ['type' => 'string', 'max' => 13, 'is_null' => true],
