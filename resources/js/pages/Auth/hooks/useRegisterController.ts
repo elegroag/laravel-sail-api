@@ -255,7 +255,7 @@ const useRegisterController = ({ Coddoc, Tipsoc, Codciu, errors }: LoginProps) =
             if (state.userRole === 'delegado') {
                 payload.nombre = `${state.firstName} ${state.lastName}`.trim();
                 payload.email = state.email;
-                payload.telefono = validatePhoneLength(state.phone, 'teléfono');
+                payload.telefono = validatePhoneLength(state.phone, 'celular');
                 payload.codciu = Number(state.city);
 
                 payload.first_name = state.firstName;
@@ -263,7 +263,7 @@ const useRegisterController = ({ Coddoc, Tipsoc, Codciu, errors }: LoginProps) =
             } else {
                 payload.nombre = (state.repName || '').trim();
                 payload.email = state.repEmail;
-                payload.telefono = validatePhoneLength(state.repPhone, 'teléfono');
+                payload.telefono = validatePhoneLength(state.repPhone, 'celular');
                 payload.codciu = Number(state.city);
 
                 const { first, last } = splitNombre(state.repName);
@@ -274,7 +274,7 @@ const useRegisterController = ({ Coddoc, Tipsoc, Codciu, errors }: LoginProps) =
             // Para particulares/trabajador/independiente/etc.
             payload.nombre = `${state.firstName} ${state.lastName}`.trim();
             payload.email = state.email;
-            payload.telefono = validatePhoneLength(state.phone, 'teléfono');
+            payload.telefono = validatePhoneLength(state.phone, 'celular');
             payload.codciu = Number(state.city);
 
             payload.first_name = state.firstName;
@@ -291,7 +291,7 @@ const useRegisterController = ({ Coddoc, Tipsoc, Codciu, errors }: LoginProps) =
             payload.rep_nombre = state.repName || undefined;
             payload.rep_documento = state.repIdentification || undefined;
             payload.rep_email = state.repEmail || undefined;
-            payload.rep_telefono = validatePhoneLength(state.repPhone, 'teléfono del representante') || undefined;
+            payload.rep_telefono = validatePhoneLength(state.repPhone, 'celular del representante') || undefined;
             payload.rep_coddoc = state.documentTypeRep || undefined;
         }
 

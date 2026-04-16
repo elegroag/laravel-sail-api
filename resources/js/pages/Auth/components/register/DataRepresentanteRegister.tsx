@@ -65,13 +65,13 @@ const DataRepresentanteRegister: React.FC<DataRepresentative> = ({
           {errors.repIdentification && <p className="text-red-500 text-xs mt-1">{errors.repIdentification}</p>}
         </div>
         <div>
-          <Label htmlFor="repPhone" className="text-sm font-medium text-gray-700">Teléfono *</Label>
+          <Label htmlFor="repPhone" className="text-sm font-medium text-gray-700">Celular *</Label>
           <Input
             id="repPhone"
             type="number"
             value={values.repPhone}
             onChange={(e) => onChange("repPhone", e.target.value)}
-            placeholder="Teléfono personal"
+            placeholder="Celular personal"
             className={`in-b-form mt-1 ${errors.repPhone ? 'border-red-500' : ''}`}
           />
           {errors.repPhone && <p className="text-red-500 text-xs mt-1">{errors.repPhone}</p>}

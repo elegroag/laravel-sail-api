@@ -83,7 +83,7 @@ const DataDelegadoRegister: React.FC<DataDelegado> = ({
     <div className="grid grid-cols-2 gap-4">
       <div>
         <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
-          Teléfono delegado
+          Celular delegado
         </Label>
         <Input
           id="phone"
@@ -91,7 +91,7 @@ const DataDelegadoRegister: React.FC<DataDelegado> = ({
           type="number"
           value={values.phone}
           onChange={(e) => onChange("phone", e.target.value)}
-          placeholder="Teléfono delegado"
+          placeholder="Celular delegado"
           className="in-b-form mt-1 tel"
         />
       </div>

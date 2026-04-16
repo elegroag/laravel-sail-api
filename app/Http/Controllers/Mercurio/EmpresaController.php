@@ -327,7 +327,9 @@ class EmpresaController extends ApplicationController
                 'tipsal' => tipsal_array(),
                 'autoriza' => condicionSN(),
                 'ciupri' => ParamsEmpresa::getCiudades(),
-                'cartra' => ParamsTrabajador::getOcupaciones()
+                'cartra' => ParamsTrabajador::getOcupaciones(),
+                'indipais' => indicativos_paises_array(),
+                'indidepa' => indicativos_departamentos_array()
             ];
 
             $formulario = FormularioDinamico::where('name', 'mercurio30')->first();

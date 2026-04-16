@@ -86,7 +86,7 @@ function validateCompanyStep(step: number, state: FormState, refs: Refs, dispatc
             isValid = false;
         }
         if (!state.repPhone?.trim()) {
-            dispatch({ type: 'SET_ERROR', field: 'repPhone', error: 'El teléfono del representante es requerido' });
+            dispatch({ type: 'SET_ERROR', field: 'repPhone', error: 'El celular del representante es requerido' });
             isValid = false;
         }
         console.log('state', state, 'paso', step, 'isValid', isValid);
@@ -144,7 +144,7 @@ function validateCompanyStep(step: number, state: FormState, refs: Refs, dispatc
             isValid = false;
         }
         if (!state.repPhone?.trim()) {
-            dispatch({ type: 'SET_ERROR', field: 'repPhone', error: 'El teléfono del representante es requerido' });
+            dispatch({ type: 'SET_ERROR', field: 'repPhone', error: 'El celular del representante es requerido' });
             isValid = false;
         }
         console.log('state', state, 'paso', step);

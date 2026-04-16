@@ -139,14 +139,14 @@ export default function NotyEmail({ errors }: any) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                Teléfono de contacto
+                Celular de contacto
               </label>
               <input
                 type="number"
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                 value={telefono}
                 onChange={(e) => setTelefono(e.target.value)}
-                placeholder="Número de teléfono"
+                placeholder="Número de celular"
                 required
               />
             </div>

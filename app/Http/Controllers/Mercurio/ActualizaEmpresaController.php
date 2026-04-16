@@ -284,6 +284,8 @@ class ActualizaEmpresaController extends ApplicationController
                 'autoriza' => condicionSN(),
                 'ciupri' => ParamsEmpresa::getCiudades(),
                 'codsuc' => $list_sucursales,
+                'indipais' => indicativos_paises_array(),
+                'indidepa' => indicativos_departamentos_array()
             ];
 
             $formulario = FormularioDinamico::where('name', 'mercurio471')->first();

@@ -659,6 +659,8 @@ class BeneficiarioController extends ApplicationController
                 'nit' => $nit,
                 'cedtra' => $cedtras,
                 'tipo' => $this->tipo,
+                'indipais' => indicativos_paises_array(),
+                'indidepa' => indicativos_departamentos_array()
             ];
 
             $formulario = FormularioDinamico::where('name', 'mercurio34')->first();

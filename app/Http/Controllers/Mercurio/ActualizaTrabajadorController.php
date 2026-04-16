@@ -178,6 +178,8 @@ class ActualizaTrabajadorController extends ApplicationController
                 'pub_indigena_id' => ParamsTrabajador::getPueblosIndigenas(),
                 'codban' => ParamsTrabajador::getBancos(),
                 'codsuc' => $codsuc,
+                'indipais' => indicativos_paises_array(),
+                'indidepa' => indicativos_departamentos_array()
             ];
 
             $formulario = FormularioDinamico::where('name', 'mercurio472')->first();

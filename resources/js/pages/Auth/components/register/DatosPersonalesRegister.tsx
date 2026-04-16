@@ -80,7 +80,7 @@ const DatosPersonalesRegister: React.FC<DataPersonRegister> = ({
     </div>
     <div>
       <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
-        Teléfono
+        Celular
       </Label>
       <Input
         id="phone"
@@ -88,7 +88,7 @@ const DatosPersonalesRegister: React.FC<DataPersonRegister> = ({
         type="number"
         value={values.phone}
         onChange={(e) => onChange("phone", e.target.value)}
-        placeholder="Teléfono"
+        placeholder="Celular"
         className="in-b-form mt-1"
       />
     </div>

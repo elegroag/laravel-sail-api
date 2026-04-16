@@ -571,6 +571,8 @@ class FacultativoController extends ApplicationController
                 'autoriza' => condicionSN(),
                 'comision' => condicionSN(),
                 'captra' => condicionSN(),
+                'indipais' => indicativos_paises_array(),
+                'indidepa' => indicativos_departamentos_array()
             ];
 
             $formulario = FormularioDinamico::where('name', 'mercurio36')->first();

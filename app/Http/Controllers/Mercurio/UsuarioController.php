@@ -67,6 +67,8 @@ class UsuarioController extends ApplicationController
                 'tipo' => $this->tipo,
                 'codciu' => $codciu,
                 'estado' => get_user_estados(),
+                'indipais' => indicativos_paises_array(),
+                'indidepa' => indicativos_departamentos_array()
             ];
 
             $formulario = FormularioDinamico::where('name', 'mercurio07')->first();
