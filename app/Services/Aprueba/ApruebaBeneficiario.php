@@ -124,9 +124,7 @@ class ApruebaBeneficiario
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'afilia_beneficiario',
-                'params' => [
-                    'post' => $entity->getData(),
-                ],
+                'params' => $entity->getData()
             ]
         );
 

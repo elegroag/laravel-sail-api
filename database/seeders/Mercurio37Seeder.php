@@ -33,6 +33,11 @@ class Mercurio37Seeder extends Seeder
                 Mercurio11Seeder::class,
             ]);
         }
+        if (Mercurio09::count() == 0) {
+            $this->call([
+                Mercurio09Seeder::class,
+            ]);
+        }
 
 
         $legacy = new LegacyDatabaseService();

@@ -172,9 +172,11 @@ class ApruebaEmpresa
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'afilia_empresa',
-                'params' => [
-                    'post' => array_merge($empresa->getData(), $sucursal->getData(), $listas->getData()),
-                ],
+                'params' => array_merge(
+                    $empresa->getData(),
+                    $sucursal->getData(),
+                    $listas->getData()
+                )
             ]
         );
         if ($ps->isJson() == false) {

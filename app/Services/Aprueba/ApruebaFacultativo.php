@@ -222,9 +222,12 @@ class ApruebaFacultativo
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'afilia_facultativo',
-                'params' => [
-                    'post' => array_merge($entity->getData(), $sucursal->getData(), $listas->getData(), $trabajador->getData()),
-                ],
+                'params' => array_merge(
+                    $entity->getData(),
+                    $sucursal->getData(),
+                    $listas->getData(),
+                    $trabajador->getData()
+                )
             ]
         );
 

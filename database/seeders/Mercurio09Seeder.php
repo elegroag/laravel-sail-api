@@ -15,52 +15,52 @@ class Mercurio09Seeder extends Seeder
         $tiposOperacion = [
             [
                 'tipopc' => '1',
-                'detalle' => 'AFILIACION TRABAJADOR',
+                'detalle' => 'AFILIACIÓN TRABAJADOR',
                 'dias' => 7,
             ],
             [
                 'tipopc' => '10',
-                'detalle' => 'AFILIACION FACULTATIVOS',
+                'detalle' => 'AFILIACIÓN FACULTATIVOS',
                 'dias' => 3,
             ],
             [
                 'tipopc' => '11',
-                'detalle' => 'AFILIACION MADRES COMUNITARIAS',
+                'detalle' => 'AFILIACIÓN MADRES COMUNITARIAS',
                 'dias' => 3,
             ],
             [
                 'tipopc' => '12',
-                'detalle' => 'AFILIACION SERVICIO DOMESTICO',
+                'detalle' => 'AFILIACIÓN SERVICIO DOMESTICO',
                 'dias' => 3,
             ],
             [
                 'tipopc' => '13',
-                'detalle' => 'AFILIACION INDEPENDIENTES',
+                'detalle' => 'AFILIACIÓN INDEPENDIENTES',
                 'dias' => 3,
             ],
             [
                 'tipopc' => '14',
-                'detalle' => 'DATOS BASICOS DE TRABAJADOR',
+                'detalle' => 'DATOS BÁSICOS DE TRABAJADOR',
                 'dias' => 7,
             ],
             [
                 'tipopc' => '2',
-                'detalle' => 'AFILIACION EMPRESA',
+                'detalle' => 'AFILIACIÓN EMPRESA',
                 'dias' => 3,
             ],
             [
                 'tipopc' => '3',
-                'detalle' => 'AFILIACION CONYUGE',
+                'detalle' => 'AFILIACIÓN CÓNYUGE',
                 'dias' => 7,
             ],
             [
                 'tipopc' => '4',
-                'detalle' => 'AFILIACION BENEFICIARIO',
+                'detalle' => 'AFILIACIÓN BENEFICIARIO',
                 'dias' => 7,
             ],
             [
                 'tipopc' => '5',
-                'detalle' => 'DATOS BASICOS DE EMPRESAS',
+                'detalle' => 'DATOS BÁSICOS DE EMPRESAS',
                 'dias' => 5,
             ],
             [
@@ -75,7 +75,7 @@ class Mercurio09Seeder extends Seeder
             ],
             [
                 'tipopc' => '9',
-                'detalle' => 'AFILIACION PENSIONADOS',
+                'detalle' => 'AFILIACIÓN PENSIONADOS',
                 'dias' => 3,
             ],
         ];
@@ -87,6 +87,4 @@ class Mercurio09Seeder extends Seeder
             );
         }
     }
-
-    /* INSERT INTO `mercurio09` VALUES ('1','AFILIACION TRABAJADOR',7),('10','AFILIACION FACULTATIVOS',3),('11','AFILIACION MADRES COMUNITARIAS',3),('12','AFILIACION SERVICIO DOMESTICO',3),('13','AFILIACION INDEPENDIENTES',3),('14','DATOS BASICOS DE TRABAJADOR',7),('2','AFILIACION EMPRESA',3),('3','AFILIACION CONYUGE',7),('4','AFILIACION BENEFICIARIO',7),('5','DATOS BASICOS DE EMPRESAS',5),('7','RETIRO TRABAJADOR',5),('8','CERTIFICADOS',5),('9','AFILIACION PENSIONADOS',3); */
 }

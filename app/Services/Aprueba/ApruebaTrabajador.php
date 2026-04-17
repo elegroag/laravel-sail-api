@@ -116,9 +116,7 @@ class ApruebaTrabajador
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'afilia_trabajador',
-                'params' => [
-                    'post' => $entity->getData(),
-                ],
+                'params' => $entity->getData()
             ]
         );
 

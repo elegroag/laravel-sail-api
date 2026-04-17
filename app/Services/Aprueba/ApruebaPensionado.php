@@ -252,9 +252,12 @@ class ApruebaPensionado
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'afilia_pensionado',
-                'params' => [
-                    'post' => array_merge($entity->getData(), $sucursal->getData(), $listas->getData(), $trabajador->getData()),
-                ],
+                'params' => array_merge(
+                    $entity->getData(),
+                    $sucursal->getData(),
+                    $listas->getData(),
+                    $trabajador->getData()
+                ),
             ]
         );
 

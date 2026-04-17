@@ -99,9 +99,7 @@ class ApruebaConyuge
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'afilia_conyuge',
-                'params' => [
-                    'post' => $params,
-                ],
+                'params' => $entity->getData()
             ]
         );
 

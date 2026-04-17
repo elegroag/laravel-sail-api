@@ -246,11 +246,15 @@ class ApruebaIndependiente
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'afilia_independiente',
-                'params' => [
-                    'post' => array_merge($entity->getData(), $sucursal->getData(), $listas->getData(), $trabajador->getData()),
-                ],
+                'params' => array_merge(
+                    $entity->getData(),
+                    $sucursal->getData(),
+                    $listas->getData(),
+                    $trabajador->getData()
+                ),
             ]
         );
+
         if ($ps->isJson() == false) {
             throw new DebugException('Error, no hay respuesta del servidor para validación del resultado.', 501);
         }
