@@ -38,10 +38,10 @@ class Menu
             return null;
         }
         $this->menuItems = '';
-        if (config('app.env') == 'production') {
-            $this->path = config('app.url') . ':' . config('app.port');
+        if (config('app.env') === 'local') {
+            $this->path = config('app.dominio') . ':' . config('app.port');
         } else {
-            $this->path = config('app.url');
+            $this->path = config('app.dominio');
         }
     }
 

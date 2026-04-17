@@ -67,6 +67,14 @@ if (! function_exists('normalize_spaces')) {
     }
 }
 
+if (! function_exists('get_app_url')) {
+    function get_app_url(): string
+    {
+        $path = config('app.dominio') . (config('app.env') === 'local' ? ':' . config('app.port') : '');
+        return $path;
+    }
+}
+
 require_once __DIR__ . '/format.php';
 require_once __DIR__ . '/flash.php';
 require_once __DIR__ . '/files.php';

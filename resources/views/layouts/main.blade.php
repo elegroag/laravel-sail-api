@@ -8,7 +8,7 @@
     <meta
         name="csrf-token"
         content="{{ csrf_token() }}"
-        path="{{ config('app.url') . (config('app.env') !== 'local' ? ':' . config('app.port') : '') }}"
+        path="{{ get_app_url() }}"
         app="@yield('application')" 
     />
         
@@ -44,6 +44,7 @@
 </head>
 
 <body class="bg-gray-100 flex items-center justify-center h-screen g-sidenav-pinned">
+
     @include('templates.loading')
 
     @yield('content-main')

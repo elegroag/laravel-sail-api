@@ -71,7 +71,7 @@ rsync -avz /home/edwin-tics/proyectos/comfaca-enlinea/laravel/ admin@172.168.0.1
 truncate -s 0 storage/logs/laravel.log
 
 # Limpiar cache
-php artisan route:clear && php artisan config:clear && php artisan cache:clear
+php artisan route:clear && php artisan config:clear && php artisan cache:clear && php artisan view:clear 
 php artisan optimize:clear
 
 
