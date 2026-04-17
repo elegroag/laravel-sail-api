@@ -79,7 +79,7 @@ $array_tipos = [
     <div class="sidebar-status-indicator">
         <div class="sidebar-status-content">
             <div class="status-dot"></div>
-            <span class="status-text">Sistema operativo</span>
+            <span class="status-text">Plataforma Online</span>
         </div>
     </div>
 </nav>

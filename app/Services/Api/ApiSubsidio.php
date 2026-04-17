@@ -12,7 +12,7 @@ class ApiSubsidio extends ApiAbstract
 
     public function __construct()
     {
-        $this->mode = env('API_MODE', 'development');
+        $this->mode = config('app.api_mode', 'development');
     }
 
     public function send($attr)
@@ -41,7 +41,7 @@ class ApiSubsidio extends ApiAbstract
             ];
         }
 
-        $basicAuth = new BasicAuth(env('HOST_API_USER'), env('HOST_API_PASSWORD'));
+        $basicAuth = new BasicAuth(config('app.host_api_user'), config('app.host_api_password'));
 
         if (is_null($metodo) || $metodo === '') {
             throw new DebugException('Error no es valido el metodo de acceso API ', 501);

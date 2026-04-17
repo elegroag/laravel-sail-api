@@ -123,7 +123,13 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
-    'dominio' => env('APP_DOMINIO', 'http://localhost'),
+    'dominio' => "https://www.comfacaenlinea.com.co",  #env('APP_DOMINIO', 'http://localhost'),
 
-    'port' => env('APP_PORT', '')
+    'port' => env('APP_PORT', '443'),
+
+    'api_mode' => env('API_MODE', 'production'),
+
+    'host_api_user' => env('HOST_API_USER', "2"),
+
+    'host_api_password' => env('HOST_API_PASSWORD', null),
 ];

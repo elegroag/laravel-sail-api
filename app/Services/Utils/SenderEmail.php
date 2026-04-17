@@ -84,10 +84,9 @@ class SenderEmail
             $this->mail->setFrom($this->emisor_email, $this->emisor_nombre);
 
             // Destinatarios
-            //if (env('API_MODE') == 'development') {
-            // Pey$nGcy6h5#
-            $to = $this->email_pruebas;
-            //}
+            if (env('API_ENV') === 'local') {
+                $to = $this->email_pruebas;
+            }
 
             if (is_array($to)) {
                 foreach ($to as $address) {

@@ -732,13 +732,12 @@ class ConsultasEmpresaController extends ApplicationController
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'listar_trabajadores',
-                    'params' => [
-                        'nit' => $this->user['documento'],
-                        'estado' => 'A',
-                    ],
+                    'params' => $this->user['documento']
                 ]
             );
+
             $out = $ps->toArray();
+
             if (! $out['success']) {
                 throw new DebugException($out['msj']);
             }

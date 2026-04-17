@@ -156,9 +156,22 @@ class PrincipalController extends ApplicationController
                 ]
             );
 
-            $subsi11 = $ps->toArray();
-            foreach ($subsi11['data'] as $msubsi11) {
-                $data[] = $msubsi11['valcon'];
+            $out = $ps->toArray();
+            $isSuccess = $out['success'] ?? false;
+
+            if (!$isSuccess) {
+                return response()->json([
+                    'success' => false,
+                    'msj' => 'No se pudo traer las categorias',
+                    'message' => 'No se pudo traer el giro',
+                    'flag' => false
+                ]);
+            }
+
+            if ($isSuccess) {
+                foreach ($out['data'] as $item) {
+                    $data[] = $item['valcon'];
+                }
             }
 
             $response = [
@@ -190,17 +203,21 @@ class PrincipalController extends ApplicationController
                     ],
                 ]
             );
-            $subsi11 = $ps->toArray();
-            if (! $subsi11['success']) {
+            $out = $ps->toArray();
+            $isSuccess = $out['success'] ?? false;
+
+            if (!$isSuccess) {
                 return response()->json([
                     'success' => false,
                     'msj' => 'No se pudo traer las categorias',
+                    'message' => 'No se pudo traer el giro',
+                    'flag' => false
                 ]);
             }
 
-            foreach ($subsi11['data'] as $msubsi11) {
-                $data[] = $msubsi11['cantidad'];
-                $labels[] = $msubsi11['codcat'];
+            foreach ($out['data'] as $item) {
+                $data[] = $item['cantidad'];
+                $labels[] = $item['codcat'];
             }
 
             $response = [
@@ -246,16 +263,21 @@ class PrincipalController extends ApplicationController
                     ],
                 ]
             );
-            $subsi09 = $ps->toArray();
-            if (! $subsi09['success']) {
+            $out = $ps->toArray();
+            $isSuccess = $out['success'] ?? false;
+
+            if (!$isSuccess) {
                 return response()->json([
                     'success' => false,
                     'msj' => 'No se pudo traer el giro',
+                    'message' => 'No se pudo traer el giro',
+                    'flag' => false
                 ]);
             }
+            $data = $out['data'] ?? [];
 
-            foreach ($subsi09['data'] as $msubsi09) {
-                $data[] = $msubsi09['valor'];
+            foreach ($data as $item) {
+                $data[] = $item['valor'];
             }
             $response = [
                 'success' => true,
