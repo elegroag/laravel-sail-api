@@ -31,7 +31,7 @@ class ApruebaMadreComuni
     {
         $this->procesadorComando = new ApiSubsidio();
         $this->today = Carbon::now();
-        $this->dominio = env('APP_URL', 'http://localhost:8000');
+        $this->dominio = config('app.dominio', 'http://localhost:8000');
     }
 
     /**

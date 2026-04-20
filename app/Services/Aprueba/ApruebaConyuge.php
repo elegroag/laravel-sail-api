@@ -30,7 +30,7 @@ class ApruebaConyuge
     public function __construct()
     {
         $this->today = Carbon::now();
-        $this->dominio = env('APP_URL', 'http://localhost:8000');
+        $this->dominio = config('app.dominio', 'http://localhost:8000');
     }
 
     /**

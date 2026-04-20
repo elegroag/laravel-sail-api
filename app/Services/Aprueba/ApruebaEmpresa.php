@@ -29,9 +29,12 @@ class ApruebaEmpresa
 
     private $solicitud;
 
+    private $dominio;
+
     public function __construct()
     {
         $this->today = Carbon::now();
+        $this->dominio = config('app.dominio', 'http://localhost:8000');
     }
 
     /**
