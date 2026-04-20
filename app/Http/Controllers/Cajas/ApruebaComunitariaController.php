@@ -25,7 +25,7 @@ use Illuminate\Http\Request;
 
 class ApruebaComunitariaController extends ApplicationController
 {
-    protected $tipopc = 11;
+    protected $tipopc = '11';
 
     protected $db;
 

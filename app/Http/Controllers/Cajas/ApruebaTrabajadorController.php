@@ -30,7 +30,7 @@ use Illuminate\Support\Facades\View;
 
 class ApruebaTrabajadorController extends ApplicationController
 {
-    protected $tipopc = 1;
+    protected $tipopc = '1';
 
     protected $db;
 

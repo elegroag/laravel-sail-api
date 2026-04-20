@@ -17,7 +17,7 @@ use Illuminate\Http\Request;
 
 class ApruebaRetiroController extends ApplicationController
 {
-    protected $tipopc = 7;
+    protected $tipopc = '7';
 
     protected $cantidad_pagina = 10;
 

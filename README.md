@@ -74,6 +74,9 @@ truncate -s 0 storage/logs/laravel.log
 php artisan route:clear && php artisan config:clear && php artisan cache:clear && php artisan view:clear 
 php artisan optimize:clear
 
+php artisan route:cache && php artisan view:cache && php artisan config:cache && php artisan event:cache
+php artisan optimize
+
 
 # Generar swagger
 php artisan l5-swagger:generate

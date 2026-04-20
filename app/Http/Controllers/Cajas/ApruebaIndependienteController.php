@@ -30,7 +30,7 @@ use Illuminate\Http\Request;
 
 class ApruebaIndependienteController extends ApplicationController
 {
-    protected $tipopc = 13;
+    protected $tipopc = '13';
 
     protected $db;
 

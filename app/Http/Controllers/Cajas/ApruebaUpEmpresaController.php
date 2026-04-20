@@ -28,7 +28,7 @@ use Illuminate\Http\Request;
 
 class ApruebaUpEmpresaController extends ApplicationController
 {
-    protected $tipopc = 5;
+    protected $tipopc = '5';
 
     protected $db;
 

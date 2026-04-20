@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\View;
 
 class ApruebaCertificadoController extends ApplicationController
 {
-    protected $tipopc = 8;
+    protected $tipopc = '8';
 
     protected $db;
 

@@ -30,7 +30,7 @@ use Illuminate\Support\Facades\View;
 
 class ApruebaFacultativoController extends ApplicationController
 {
-    protected $tipopc = 10;
+    protected $tipopc = '10';
 
     protected $db;
 

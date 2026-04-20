@@ -32,7 +32,7 @@ use Illuminate\Support\Facades\View;
 
 class ApruebaPensionadoController extends ApplicationController
 {
-    protected $tipopc = 9;
+    protected $tipopc = '9';
 
     protected $db;
 

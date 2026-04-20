@@ -30,7 +30,7 @@ use Illuminate\Http\Request;
 
 class ApruebaEmpresaController extends ApplicationController
 {
-    protected $tipopc = 2;
+    protected $tipopc = '2';
 
     protected $services;
 
