@@ -5,7 +5,7 @@
         "build": "vite build --config vite.config.ts",
         "build:ssr": "vite build --config vite.config.ts && vite build --ssr --config vite.config.ts",
         "dev": "vite --config vite.config.ts",
-        "pro": "vite --config vite.config.ts --host 172.168.0.15 --port 5173",
+        "pro": "vite --config vite.config.ts --host 0.0.0.0 --port 5173",
         "format": "prettier --write resources/",
         "format:check": "prettier --check resources/",
         "lint": "eslint . --fix",

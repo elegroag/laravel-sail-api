@@ -7,7 +7,8 @@ import LoadingAnimated from "@/components/loading-animated"
 import { userTypes } from "@/constants/auth"
 import type { LoginProps, UserType } from "@/types/auth"
 import AuthBackgroundShapes from "@/components/ui/auth-background-shapes"
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
 import useLoginController from "./hooks/useLoginController";
 
 export default function Login({
@@ -21,7 +22,8 @@ export default function Login({
     handleBack,
     handleLogin,
     processing,
-    alertMessage,
+    dialog,
+    setDialog,
     documentType,
     identification,
     password,
@@ -94,19 +96,29 @@ export default function Login({
           )}
         </div>
 
-         {/* Alert de error */}
-          {alertMessage && (
-            <div className="mt-4">
-              <Alert variant="destructive" className="w-100 mx-auto border-red-200" >
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription className="text-gray-500">{alertMessage}</AlertDescription>
-              </Alert>
-            </div>
-          )}
       </div>
 
       {/* Loading animado durante la autenticación */}
       <LoadingAnimated show={processing} />
+
+      {/* Modal dialog para mensajes */}
+      <Dialog open={dialog !== null} onOpenChange={(open) => !open && setDialog(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className={dialog?.type === 'success' ? 'text-emerald-600' : 'text-red-600'}>
+              {dialog?.type === 'success' ? 'Éxito' : 'Error de Autenticación'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-gray-700 whitespace-pre-line">{dialog?.message}</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialog(null)}>
+              Cerrar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AuthLayout>
   )
 }

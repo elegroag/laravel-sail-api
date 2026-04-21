@@ -50,12 +50,9 @@ class ErrorResource extends JsonResource
             'flag' => false,
             'msj' => $error,
             'message' => $error,
-            'error' => $trace ?? $error,
+            'error' => $error,
+            'trace' => $trace,
         ];
-
-        if ($trace !== null) {
-            $data['trace'] = $trace;
-        }
 
         if (!empty($additionalData)) {
             $data = array_merge($data, $additionalData);
@@ -145,7 +142,7 @@ class ErrorResource extends JsonResource
             'flag' => false,
             'msj' => $message,
             'message' => $message,
-            'error' => $trace ?? $message,
+            'error' => $message,
             'trace' => $trace
         ];
 

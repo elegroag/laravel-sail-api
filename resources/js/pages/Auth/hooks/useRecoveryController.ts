@@ -48,7 +48,7 @@ interface ResetPasswordProps {
 
 const useRecoveryController = ({ Coddoc }: ResetPasswordProps) => {
     const [selectedUserType, setSelectedUserType] = useState<UserType | null>(null);
-    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+    const [dialog, setDialog] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
     const documentTypeOptions = useMemo(() => Object.entries(Coddoc || {}).map(([value, label]) => ({ value, label })), [Coddoc]);
 
@@ -204,7 +204,7 @@ const useRecoveryController = ({ Coddoc }: ResetPasswordProps) => {
             const responseJson = await response.json();
 
             if (response.ok && responseJson?.success) {
-                setToast({ message: '¡Correo de recuperación enviado exitosamente! Serás redirigido al login.', type: 'success' });
+                setDialog({ message: '¡Correo de recuperación enviado exitosamente! Serás redirigido al login.', type: 'success' });
                 dispatch({ type: 'RESET_FORM' });
 
                 setTimeout(() => {
@@ -219,13 +219,13 @@ const useRecoveryController = ({ Coddoc }: ResetPasswordProps) => {
                 }, 1500);
             } else {
                 console.error('Error al enviar el correo de recuperación:', responseJson);
-                setToast({
+                setDialog({
                     message: typeof responseJson?.msj === 'string' ? responseJson.msj : 'No fue posible enviar el correo de recuperación.',
                     type: 'error',
                 });
             }
-        } catch (error) {
-            setToast({ message: 'No fue posible completar el envío. Intenta nuevamente.' + error, type: 'error' });
+        } catch {
+            setDialog({ message: 'No fue posible completar el envío. Intenta nuevamente.', type: 'error' });
         } finally {
             dispatch({ type: 'SET_SUBMITTING', payload: false });
         }
@@ -240,8 +240,8 @@ const useRecoveryController = ({ Coddoc }: ResetPasswordProps) => {
         },
         formState,
         selectedUserType,
-        toast,
-        setToast,
+        dialog,
+        setDialog,
         documentTypeOptions,
         domRef: {
             documentTypeRef,

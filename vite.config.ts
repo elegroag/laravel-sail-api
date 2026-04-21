@@ -12,7 +12,7 @@ export default defineConfig({
                 'resources/js/app.tsx'
             ],
             ssr: 'resources/js/ssr.tsx',
-            refresh: true,
+            refresh: process.env.NODE_ENV !== 'production',
         }),
         react(),
         tailwindcss(),

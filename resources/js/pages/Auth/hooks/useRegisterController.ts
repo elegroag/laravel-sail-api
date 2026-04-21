@@ -64,7 +64,7 @@ function formReducer(state: FormState, action: FormAction): FormState {
 const useRegisterController = ({ Coddoc, Tipsoc, Codciu, errors }: LoginProps) => {
     const [state, dispatch] = useReducer(formReducer, initialState);
     const [step, setStep] = useState(1);
-    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+    const [dialog, setDialog] = useState<{ message: string; type: 'success' | 'error'; showLoginButton?: boolean } | null>(null);
 
     const firstNameRef = useRef<HTMLInputElement>(null);
     const lastNameRef = useRef<HTMLInputElement>(null);
@@ -132,7 +132,7 @@ const useRegisterController = ({ Coddoc, Tipsoc, Codciu, errors }: LoginProps) =
             .map(([field, message]) => `${field}: ${message}`)
             .join(' | ');
 
-        setToast({
+        setDialog({
             message: `Se detectaron errores en el registro. ${detalleErrores}`,
             type: 'error',
         });
@@ -359,10 +359,19 @@ const useRegisterController = ({ Coddoc, Tipsoc, Codciu, errors }: LoginProps) =
         documento: string | number;
     };
 
+    type RegisterApiErrorData = {
+        success?: boolean;
+        error?: string;
+        message?: string;
+        msj?: string;
+        timestamp?: string;
+        trace?: unknown;
+    };
+
     type RegisterApiResponse = {
         success?: boolean;
         message?: unknown;
-        data?: RegisterApiSuccessData;
+        data?: RegisterApiSuccessData | RegisterApiErrorData;
         errors?: unknown;
     };
 
@@ -371,27 +380,36 @@ const useRegisterController = ({ Coddoc, Tipsoc, Codciu, errors }: LoginProps) =
     };
 
     const handleRegisterSuccess = (responseJson: RegisterApiResponse) => {
-        setToast({ message: '¡Registro exitoso! Serás redirigido al login.', type: 'success' });
+        setDialog({ message: '¡Registro exitoso! Serás redirigido al login.', type: 'success' });
         dispatch({ type: 'RESET_FORM' });
         setStep(1);
+        const successData = responseJson.data as RegisterApiSuccessData | undefined;
         setTimeout(() => {
             router.visit(
                 route('verify.show', {
-                    tipo: responseJson.data?.tipo,
-                    coddoc: responseJson.data?.coddoc,
-                    documento: responseJson.data?.documento,
+                    tipo: successData?.tipo,
+                    coddoc: successData?.coddoc,
+                    documento: successData?.documento,
                     option_request: 'register',
                 }),
             );
         }, 1000);
     };
 
+    const getErrorMessage = (responseJson: RegisterApiResponse): string => {
+        // Buscar mensaje en data.error, data.message, data.msj (estructura real del server)
+        const data = responseJson.data as RegisterApiErrorData | undefined;
+        return data?.error
+            || data?.message
+            || data?.msj
+            || (typeof responseJson?.message === 'string' ? responseJson.message : '')
+            || 'No fue posible completar el registro.';
+    };
+
     const handleRegisterFailure = (responseJson: RegisterApiResponse) => {
-        console.error('Error al registrar:', responseJson);
-        setToast({
-            message: typeof responseJson?.message === 'string' ? responseJson.message : 'No fue posible completar el registro.',
-            type: 'error',
-        });
+        const errorMessage = getErrorMessage(responseJson);
+        const showLoginButton = errorMessage.includes('ya existe y se encuentra registrado');
+        setDialog({ message: errorMessage, type: 'error', showLoginButton });
     };
 
     const handleRegister = async (e: React.FormEvent) => {
@@ -418,7 +436,7 @@ const useRegisterController = ({ Coddoc, Tipsoc, Codciu, errors }: LoginProps) =
             handleRegisterFailure(safeJson);
         } catch (error) {
             const message = error instanceof Error ? error.message : 'No fue posible completar el registro. Intenta nuevamente.';
-            setToast({ message, type: 'error' });
+            setDialog({ message, type: 'error' });
         } finally {
             dispatch({ type: 'SET_SUBMITTING', payload: false });
         }
@@ -427,8 +445,8 @@ const useRegisterController = ({ Coddoc, Tipsoc, Codciu, errors }: LoginProps) =
     return {
         dispatch,
         state,
-        toast,
-        setToast,
+        dialog,
+        setDialog,
         step,
         validateStep,
         domRef: {

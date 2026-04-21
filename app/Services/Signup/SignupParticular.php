@@ -10,6 +10,7 @@ use App\Services\Utils\CrearUsuario;
 use App\Services\Utils\Generales;
 use App\Services\Utils\SenderEmail;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class SignupParticular
 {
@@ -51,7 +52,7 @@ class SignupParticular
 
     private $codigo_verify;
 
-    private $password;
+    public $password;
 
     public function __construct(?Srequest $params = null)
     {
@@ -61,6 +62,11 @@ class SignupParticular
                     $this->$key = $params->getParam($key);
                 }
             }
+        }
+
+        // Si el password no se asignó por el request, intentar obtenerlo directamente
+        if (empty($this->password) && $params instanceof Srequest) {
+            $this->password = $params->getParam('password');
         }
     }
 
@@ -87,6 +93,7 @@ class SignupParticular
         $this->nombre = ($this->tipper == 'J') ? $this->razsoc : $this->repleg;
         $this->tipdoc = $codeDocumentoRep;
         $this->tipo = $this->tipo; // Usar el tipo real del request en lugar de hardcodear 'P'
+
         $this->createUserMercurio();
 
         return $this;
@@ -99,42 +106,51 @@ class SignupParticular
      */
     public function createUserMercurio()
     {
-        $this->generaCode();
-        $usuarioParticular = Mercurio07::where(['tipo' => $this->tipo, 'coddoc' => $this->coddoc, 'documento' => $this->documento])->first();
+        try {
+            $this->generaCode();
 
-        if ($usuarioParticular == false) {
-            $hash = clave_hash($this->password);
-            $crearUsuario = new CrearUsuario;
-            $crearUsuario->setters(
-                "tipo: {$this->tipo}",
-                "coddoc: {$this->coddoc}",
-                "documento: {$this->documento}",
-                "nombre: {$this->nombre}",
-                "email: {$this->email}",
-                "codciu: {$this->codciu}",
-                "clave: {$hash}"
-            );
-            $usuarioParticular = $crearUsuario->procesar();
-
-            $crearUsuario->crearOpcionesRecuperacion($this->codigo_verify);
-        } else {
-            if ($usuarioParticular->getEstado() == 'A') {
-                throw new DebugException('El usuario ya existe y se encuentra registrado en el sistema. ' .
-                    'La solicitud para afiliación está pendiente de enviar, compruebe las credenciales de acceso en la dirección de correo registrada previamente: ' .
-                    mask_email($usuarioParticular->getEmail()) . '. <br/>' .
-                    ' Y ahora puedes ingresar por la opción "2 Afiliación Pendiente" continua el proceso de afiliación.', 501);
+            if (empty($this->password)) {
+                throw new DebugException('La contraseña no está definida. Valores: tipo=' . $this->tipo . ', coddoc=' . $this->coddoc . ', documento=' . $this->documento, 400);
             }
-            // actualiza y activa la cuenta de la persona solo si el correo es igual al reportado
-        }
-        $this->preparaMail($usuarioParticular, $this->password);
 
-        return $usuarioParticular;
+            $usuarioParticular = Mercurio07::where(['tipo' => $this->tipo, 'coddoc' => $this->coddoc, 'documento' => $this->documento])->first();
+
+            if (!$usuarioParticular) {
+                $hash = clave_hash($this->password);
+                $crearUsuario = new CrearUsuario;
+                $crearUsuario->setters(
+                    "tipo: {$this->tipo}",
+                    "coddoc: {$this->coddoc}",
+                    "documento: {$this->documento}",
+                    "nombre: {$this->nombre}",
+                    "email: {$this->email}",
+                    "codciu: {$this->codciu}",
+                    "clave: {$hash}"
+                );
+                $usuarioParticular = $crearUsuario->procesar();
+
+                $crearUsuario->crearOpcionesRecuperacion($this->codigo_verify);
+            } else {
+                if ($usuarioParticular->getEstado() == 'A') {
+                    throw new DebugException('El usuario ya existe y se encuentra registrado en el sistema. ' .
+                        'La solicitud para afiliación está pendiente de enviar, compruebe las credenciales de acceso en la dirección de correo registrada previamente: ' .
+                        mask_email($usuarioParticular->getEmail()) . '. ' .
+                        ' Y ahora puedes ingresar por la opción "2 Afiliación Pendiente" continua el proceso de afiliación.', 501);
+                }
+                // actualiza y activa la cuenta de la persona solo si el correo es igual al reportado
+            }
+            $this->preparaMail($usuarioParticular, $this->password);
+
+            return $usuarioParticular;
+        } catch (\Exception $e) {
+            throw new DebugException($e->getMessage(), 500);
+        }
     }
 
     public function preparaMail($usuario, $clave)
     {
         $coddoc_detalle = Generales::TipoDocumento($usuario);
-        $url_activa = env('APP_URL');
+        $url_activa = config('app.url');
         $date = Carbon::now();
         $html = view(
             'templates/tmp_register',

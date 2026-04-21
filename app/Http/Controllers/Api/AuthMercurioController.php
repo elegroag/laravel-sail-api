@@ -26,6 +26,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use App\Services\Entidades\EmpresaService;
 use App\Services\Entidades\TrabajadorService;
+use Exception;
 use Illuminate\Http\JsonResponse;
 
 
@@ -86,7 +87,12 @@ class AuthMercurioController extends Controller
             return ErrorResource::validationError($e->errors(), 'Error de validación')
                 ->response()
                 ->setStatusCode(422);
-        } catch (\Exception $e) {
+        } catch (DebugException $e) {
+            $this->db->rollBack();
+            return ErrorResource::errorResponse($e->getMessage(), $e->getTrace())
+                ->response()
+                ->setStatusCode(400);
+        } catch (Exception $e) {
             $this->db->rollBack();
             return ErrorResource::serverError($e->getMessage(), $e->getTrace())
                 ->response()
@@ -126,6 +132,11 @@ class AuthMercurioController extends Controller
             return ErrorResource::validationError($e->errors(), 'Error de validación')
                 ->response()
                 ->setStatusCode(422);
+        } catch (DebugException $e) {
+            $this->db->rollBack();
+            return ErrorResource::errorResponse($e->getMessage(), $e->getTrace())
+                ->response()
+                ->setStatusCode(400);
         } catch (\Exception $e) {
             $this->db->rollBack();
             return ErrorResource::serverError($e->getMessage(), $e->getTrace())
@@ -164,7 +175,12 @@ class AuthMercurioController extends Controller
             return ErrorResource::validationError($e->errors(), 'Error de validación')
                 ->response()
                 ->setStatusCode(422);
-        } catch (\Exception $e) {
+        } catch (DebugException $e) {
+            $this->db->rollBack();
+            return ErrorResource::errorResponse($e->getMessage(), $e->getTrace())
+                ->response()
+                ->setStatusCode(400);
+        } catch (Exception $e) {
             $this->db->rollBack();
             return ErrorResource::serverError($e->getMessage(), $e->getTrace())
                 ->response()
@@ -203,7 +219,12 @@ class AuthMercurioController extends Controller
             return ErrorResource::validationError($e->errors(), 'Error de validación')
                 ->response()
                 ->setStatusCode(422);
-        } catch (\Exception $e) {
+        } catch (DebugException $e) {
+            $this->db->rollBack();
+            return ErrorResource::errorResponse($e->getMessage(), $e->getTrace())
+                ->response()
+                ->setStatusCode(400);
+        } catch (Exception $e) {
             $this->db->rollBack();
             return ErrorResource::serverError($e->getMessage(), $e->getTrace())
                 ->response()
@@ -241,7 +262,12 @@ class AuthMercurioController extends Controller
             return ErrorResource::validationError($e->errors(), 'Error de validación')
                 ->response()
                 ->setStatusCode(422);
-        } catch (\Exception $e) {
+        } catch (DebugException $e) {
+            $this->db->rollBack();
+            return ErrorResource::errorResponse($e->getMessage(), $e->getTrace())
+                ->response()
+                ->setStatusCode(400);
+        } catch (Exception $e) {
             $this->db->rollBack();
             return ErrorResource::serverError($e->getMessage(), $e->getTrace())
                 ->response()
@@ -279,7 +305,12 @@ class AuthMercurioController extends Controller
             return ErrorResource::validationError($e->errors(), 'Error de validación')
                 ->response()
                 ->setStatusCode(422);
-        } catch (\Exception $e) {
+        } catch (DebugException $e) {
+            $this->db->rollBack();
+            return ErrorResource::errorResponse($e->getMessage(), $e->getTrace())
+                ->response()
+                ->setStatusCode(400);
+        } catch (Exception $e) {
             $this->db->rollBack();
             return ErrorResource::serverError($e->getMessage(), $e->getTrace())
                 ->response()
@@ -318,7 +349,12 @@ class AuthMercurioController extends Controller
             return ErrorResource::validationError($e->errors(), 'Error de validación')
                 ->response()
                 ->setStatusCode(422);
-        } catch (\Exception $e) {
+        } catch (DebugException $e) {
+            $this->db->rollBack();
+            return ErrorResource::errorResponse($e->getMessage(), $e->getTrace())
+                ->response()
+                ->setStatusCode(400);
+        } catch (Exception $e) {
             $this->db->rollBack();
             return ErrorResource::serverError($e->getMessage(), $e->getTrace())
                 ->response()
@@ -363,9 +399,9 @@ class AuthMercurioController extends Controller
         } catch (DebugException $e) {
             $this->db->rollBack();
 
-            return ErrorResource::serverError($e->getMessage(), $e->getTrace())
+            return ErrorResource::errorResponse($e->getMessage(), $e->getTrace())
                 ->response()
-                ->setStatusCode(500);
+                ->setStatusCode(400);
         }
     }
 

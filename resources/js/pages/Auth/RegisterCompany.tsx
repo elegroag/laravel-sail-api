@@ -7,6 +7,8 @@ import AuthBackgroundShapes from "@/components/ui/auth-background-shapes";
 import useRegisterController from "@/pages/Auth/hooks/useRegisterController";
 import { useEffect } from "react";
 import { router } from "@inertiajs/react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 export default function RegisterCompany(props: LoginProps) {
   const {
@@ -15,8 +17,8 @@ export default function RegisterCompany(props: LoginProps) {
     collections,
     events,
     domRef,
-    toast,
-    setToast,
+    dialog,
+    setDialog,
     step,
   } = useRegisterController(props);
 
@@ -117,20 +119,35 @@ export default function RegisterCompany(props: LoginProps) {
         </div>
       </AuthLayout>
 
-      {toast && (
-        <div
-          className={`fixed bottom-4 right-4 z-50 min-w-[260px] max-w-[360px] px-4 py-3 rounded shadow-lg text-sm transition-all ${toast.type === "success" ? "bg-emerald-600 text-white" : "bg-red-600 text-white"}`}
-        >
-          {toast.message}
-          <button
-            type="button"
-            className="ml-3 underline text-white/90 hover:text-white"
-            onClick={() => setToast(null)}
-          >
-            Cerrar
-          </button>
-        </div>
-      )}
+      {/* Modal dialog para mensajes */}
+      <Dialog open={dialog !== null} onOpenChange={(open) => !open && setDialog(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className={dialog?.type === 'success' ? 'text-emerald-600' : 'text-red-600'}>
+              {dialog?.type === 'success' ? 'Registro Exitoso' : 'Error en el Registro'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-gray-700 whitespace-pre-line">{dialog?.message}</p>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setDialog(null)}
+            >
+              Cerrar
+            </Button>
+            {dialog?.showLoginButton && (
+              <Button
+                onClick={() => router.visit(route('login'))}
+                className="bg-emerald-600 hover:bg-emerald-700"
+              >
+                Ir al Login
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

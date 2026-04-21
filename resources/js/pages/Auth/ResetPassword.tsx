@@ -10,6 +10,7 @@ import AuthWelcome from './components/generic/AuthWelcome';
 import ResetPasswordForm from './components/reset_password/ResetPasswordForm';
 import LoadingAnimated from '@/components/loading-animated';
 import useRecoveryController from './hooks/useRecoveryController';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 
 interface ResetPasswordProps {
     Coddoc: Record<string, string>;
@@ -21,8 +22,8 @@ export default function ResetPassword({Coddoc}: ResetPasswordProps) {
         selectedUserType, 
         formState, 
         domRef, 
-        toast, 
-        setToast, 
+        dialog, 
+        setDialog, 
         documentTypeOptions 
     } = useRecoveryController({ Coddoc});
 
@@ -100,20 +101,27 @@ export default function ResetPassword({Coddoc}: ResetPasswordProps) {
                     )}
                 </div>
             </div>
-            {/* Toast simple */}
-            {toast && (
-                <div
-                    className={`bottom-4 right-4 px-4 py-3 rounded shadow-lg text-sm fixed z-50 max-w-[360px] min-w-[260px] transition-all ${toast.type === 'success' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'}`}
-                >
-                    {toast.message}
-                    <button type="button" className="ml-3 text-white/90 hover:text-white underline" onClick={() => setToast(null)}>
-                        Cerrar
-                    </button>
-                </div>
-            )}
-            
             {/* Loading animado durante el envío de recuperación */}
             <LoadingAnimated show={formState.isSubmitting} />
+
+            {/* Modal dialog para mensajes */}
+            <Dialog open={dialog !== null} onOpenChange={(open) => !open && setDialog(null)}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className={dialog?.type === 'success' ? 'text-emerald-600' : 'text-red-600'}>
+                            {dialog?.type === 'success' ? 'Recuperación Exitosa' : 'Error de Recuperación'}
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="py-4">
+                        <p className="text-sm text-gray-700 whitespace-pre-line">{dialog?.message}</p>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setDialog(null)}>
+                            Cerrar
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </AuthLayout>
     );
 }

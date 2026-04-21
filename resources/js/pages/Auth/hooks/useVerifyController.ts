@@ -271,11 +271,11 @@ export default function useVerifyController({ token, documento, coddoc, tipo, er
         }
     };
 
-    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+    const [dialog, setDialog] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
     useEffect(() => {
         if (state.error) {
-            setToast({ message: state.error, type: 'error' });
+            setDialog({ message: state.error, type: 'error' });
         }
     }, [state.error]);
 
@@ -293,7 +293,7 @@ export default function useVerifyController({ token, documento, coddoc, tipo, er
         handleResend,
         isResending,
         processing: isSubmitting,
-        toast,
-        setToast,
+        dialog,
+        setDialog,
     };
 }

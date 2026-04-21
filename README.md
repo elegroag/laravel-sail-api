@@ -71,11 +71,11 @@ rsync -avz /home/edwin-tics/proyectos/comfaca-enlinea/laravel/ admin@172.168.0.1
 truncate -s 0 storage/logs/laravel.log
 
 # Limpiar cache
-php artisan route:clear && php artisan config:clear && php artisan cache:clear && php artisan view:clear 
+php artisan route:clear && php artisan config:clear && php artisan cache:clear && php artisan view:clear
+
 php artisan optimize:clear
 
-php artisan route:cache && php artisan view:cache && php artisan config:cache && php artisan event:cache
-php artisan optimize
+php artisan route:cache && php artisan view:cache && php artisan config:cache && php artisan event:cache && php artisan optimize
 
 
 # Generar swagger

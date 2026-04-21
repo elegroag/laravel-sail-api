@@ -9,6 +9,7 @@ import LoadingAnimated from '@/components/loading-animated'
 import type { VerifyEmailProps } from '@/types/auth'
 import useVerifyController from '@/pages/Auth/hooks/useVerifyController'
 import { DeliveryOptions } from '@/constants/auth'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 
 export default function VerifyEmail({ documento, coddoc, tipo, option_request, token, status, errors }: VerifyEmailProps) {
     const {
@@ -25,8 +26,8 @@ export default function VerifyEmail({ documento, coddoc, tipo, option_request, t
         handleResend,
         isResending,
         processing,
-        toast,
-        setToast
+        dialog,
+        setDialog
     } = useVerifyController({
         token,
         documento,
@@ -85,16 +86,6 @@ export default function VerifyEmail({ documento, coddoc, tipo, option_request, t
         </div>
       )}
       <div className="lg:w-1/2 p-8 flex flex-col justify-center relative overflow-y-auto max-h-[700px]">
-      {errors && Object.keys(errors).length > 0 && (
-        <div className="mb-4 rounded-md border border-red-300 bg-red-50 p-3 text-red-700 text-sm">
-          <p className="font-medium">No fue posible validar tu información:</p>
-          <ul className="mt-1 list-disc pl-5">
-            {Object.values(errors).map((err, idx) => (
-              <li key={idx}>{err}</li>
-            ))}
-          </ul>
-        </div>
-      )}
       <form onSubmit={handleVerify} className="mt-4 space-y-6">
         <div className="text-center space-y-2">
           <VerificationChannelIcon className="h-12 w-12 text-emerald-600 mx-auto" />
@@ -190,20 +181,24 @@ export default function VerifyEmail({ documento, coddoc, tipo, option_request, t
     {/* Loading animado durante verificación o reenvío */}
     <LoadingAnimated show={processing || isResending} />
     
-    {toast && (
-      <div
-        className={`fixed bottom-4 right-4 z-50 min-w-[260px] max-w-[360px] px-4 py-3 rounded shadow-lg text-sm transition-all ${toast.type === 'success' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'}`}
-      >
-        {toast.message}
-        <button
-          type="button"
-          className="ml-3 underline text-white/90 hover:text-white"
-          onClick={() => setToast(null)}
-        >
-          Cerrar
-        </button>
-      </div>
-    )}
+    {/* Modal dialog para mensajes */}
+    <Dialog open={dialog !== null} onOpenChange={(open) => !open && setDialog(null)}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className={dialog?.type === 'success' ? 'text-emerald-600' : 'text-red-600'}>
+            {dialog?.type === 'success' ? 'Verificación Exitosa' : 'Error de Verificación'}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="py-4">
+          <p className="text-sm text-gray-700 whitespace-pre-line">{dialog?.message}</p>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setDialog(null)}>
+            Cerrar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
     </AuthLayout>
   )
 }
