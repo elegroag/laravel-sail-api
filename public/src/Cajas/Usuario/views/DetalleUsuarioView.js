@@ -24,8 +24,6 @@ class DetalleUsuarioView extends Backbone.View {
         this.$el.html(template(this.model.toJSON()));
         this.form = this.$el.find('#formRequest');
 
-        console.log(this.collection);
-
         if (this.model.get('isEdit') == 1) {
             _.each(this.collection, (component) => {
                 const view = this.addComponent(
@@ -36,6 +34,13 @@ class DetalleUsuarioView extends Backbone.View {
                 );
                 this.viewComponents.push(view);
                 this.$el.find('#component_' + component.name).html(view.$el);
+            });
+
+            $.each(this.model.toJSON(), (key, valor) => {
+                const inputElement = this.$el.find(`[name="${key}"]`);
+                if (inputElement.length && valor) {
+                    inputElement.val(valor);
+                }
             });
         }
 

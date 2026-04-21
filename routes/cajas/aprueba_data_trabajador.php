@@ -12,5 +12,6 @@ Route::middleware(['cajas.auth'])->group(function () {
         Route::post('/aprueba', [ApruebaUpTrabajadorController::class, 'aprueba']);
         Route::post('/rechazar', [ApruebaUpTrabajadorController::class, 'rechazar']);
         Route::post('/borrar-filtro', [ApruebaUpTrabajadorController::class, 'borrarFiltro']);
+        Route::post('/change_cantidad_pagina/{estado?}', [ApruebaUpTrabajadorController::class, 'changeCantidadPagina']);
     });
 });

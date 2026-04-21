@@ -14,5 +14,6 @@ Route::middleware(['cajas.auth'])->group(function () {
         Route::post('/aplicar_filtro/{estado?}', [ApruebaComunitariaController::class, 'aplicarFiltro']);
         Route::post('/buscar/{estado?}', [ApruebaComunitariaController::class, 'buscar']);
         Route::post('/borrar-filtro', [ApruebaComunitariaController::class, 'borrarFiltro']);
+        Route::post('/change_cantidad_pagina/{estado?}', [ApruebaComunitariaController::class, 'changeCantidadPagina']);
     });
 });

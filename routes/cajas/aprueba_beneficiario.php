@@ -20,5 +20,6 @@ Route::middleware(['cajas.auth'])->group(function () {
 
         Route::post('/aplicar_filtro/{estado?}', [ApruebaBeneficiarioController::class, 'aplicarFiltro']);
         Route::post('/buscar/{estado?}', [ApruebaBeneficiarioController::class, 'buscar']);
+        Route::post('/change_cantidad_pagina/{estado?}', [ApruebaBeneficiarioController::class, 'changeCantidadPagina']);
     });
 });

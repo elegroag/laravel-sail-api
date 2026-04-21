@@ -52,6 +52,7 @@ class ApruebaConyuge
         $params['direccion'] = 'CR';
         $params['fecsal'] = null;
         $params['ruaf'] = 'N';
+        $params['fecrua'] = null;
         $params['salario'] = '0';
 
         if ($this->solicitud->tipdoc == 3) {

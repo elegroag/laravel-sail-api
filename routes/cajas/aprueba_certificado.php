@@ -13,5 +13,6 @@ Route::middleware(['cajas.auth'])->group(function () {
         Route::post('/devolver', [ApruebaCertificadoController::class, 'devolver']);
         Route::post('/rechazar', [ApruebaCertificadoController::class, 'rechazar']);
         Route::post('/borrar-filtro', [ApruebaCertificadoController::class, 'borrarFiltro']);
+        Route::post('/change_cantidad_pagina/{estado?}', [ApruebaCertificadoController::class, 'changeCantidadPagina']);
     });
 });

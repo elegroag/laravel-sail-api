@@ -11,6 +11,7 @@ class ConyugeEntity
     protected $fillable = [
         'cedtra',
         'cedcon',
+        'tipdoc',
         'fecafi',
         'recsub',
         'comper',
@@ -59,6 +60,7 @@ class ConyugeEntity
         return [
             'cedtra' => ['type' => 'string', 'max' => 18, 'is_null' => false],
             'cedcon' => ['type' => 'string', 'max' => 20, 'is_null' => false],
+            'tipdoc' => ['type' => 'string', 'max' => 2, 'is_null' => false],
             'fecafi' => ['type' => 'date', 'is_null' => false],
             'recsub' => ['type' => 'string', 'max' => 1, 'is_null' => false],
             'comper' => ['type' => 'string', 'max' => 1, 'is_null' => false],

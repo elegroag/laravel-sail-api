@@ -23,5 +23,6 @@ Route::middleware(['cajas.auth'])->group(function () {
         Route::post('/reaprobar', [ApruebaTrabajadorController::class, 'reaprobar']);
         Route::post('/validar-multiafiliacion', [ApruebaTrabajadorController::class, 'validarMultiafiliacion']);
         Route::post('/borrar-filtro', [ApruebaTrabajadorController::class, 'borrarFiltro']);
+        Route::post('/change_cantidad_pagina/{estado?}', [ApruebaTrabajadorController::class, 'changeCantidadPagina']);
     });
 });

@@ -18,5 +18,6 @@ Route::middleware(['cajas.auth'])->group(function () {
         Route::post('/editar', [ApruebaPensionadoController::class, 'editaEmpresa']);
         Route::get('/aportes/{id}', [ApruebaPensionadoController::class, 'aportes']);
         Route::post('/deshacer', [ApruebaPensionadoController::class, 'deshacer']);
+        Route::post('/change_cantidad_pagina/{estado?}', [ApruebaPensionadoController::class, 'changeCantidadPagina']);
     });
 });

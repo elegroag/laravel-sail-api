@@ -11,6 +11,7 @@ class BeneficiarioEntity
     protected $fillable = [
         'codben',
         'documento',
+        'tipdoc',
         'coddoc',
         'priape',
         'segape',
@@ -54,6 +55,7 @@ class BeneficiarioEntity
             'codben' => ['type' => 'integer', 'is_null' => true],
             'documento' => ['type' => 'string', 'max' => 20, 'is_null' => false],
             'coddoc' => ['type' => 'string', 'max' => 2, 'is_null' => false],
+            'tipdoc' => ['type' => 'string', 'max' => 2, 'is_null' => false],
             'priape' => ['type' => 'string', 'max' => 20, 'is_null' => true],
             'segape' => ['type' => 'string', 'max' => 20, 'is_null' => true],
             'prinom' => ['type' => 'string', 'max' => 30, 'is_null' => false],

@@ -23,28 +23,28 @@ class SenderEmail
 
     private function configureSMTP()
     {
-        $this->email_pruebas = env('MAIL_DEV') ?? 'enlinea@comfaca.com';
+        $this->email_pruebas = config('mail.dev') ?? 'enlinea@comfaca.com';
 
         // Configuración del servidor SMTP (por defecto Gmail)
         $this->mail->isSMTP();
-        $this->mail->Host = env('MAIL_HOST', 'smtp.gmail.com');
+        $this->mail->Host = config('mail.mailers.smtp.host', 'smtp.gmail.com');
         $this->mail->SMTPAuth = true;
-        $this->mail->Username = env('MAIL_FROM_ADDRESS', $this->emisor_email);
-        $this->mail->Password = env('MAIL_PASSWORD', $this->emisor_clave);
+        $this->mail->Username = config('mail.from.address', $this->emisor_email);
+        $this->mail->Password = config('mail.mailers.smtp.password', $this->emisor_clave);
 
         // Encripción y puerto configurables: tls->587, ssl->465
-        $encryption = strtolower(env('MAIL_ENCRYPTION', 'tls'));
+        $encryption = strtolower(config('mail.mailers.smtp.encryption', 'tls'));
         if (in_array($encryption, ['ssl', 'smtps'])) {
             $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // SSL implícito
-            $this->mail->Port = (int) env('MAIL_PORT', 465);
+            $this->mail->Port = (int) config('mail.mailers.smtp.port', 465);
         } else {
             $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // STARTTLS
-            $this->mail->Port = (int) env('MAIL_PORT', 587);
+            $this->mail->Port = (int) config('mail.mailers.smtp.port', 587);
         }
 
         // Opcionales para entornos restrictivos
         $this->mail->SMTPAutoTLS = true;
-        $this->mail->Timeout = (int) env('MAIL_TIMEOUT', 15);
+        $this->mail->Timeout = (int) config('mail.mailers.smtp.timeout', 15);
         $this->mail->CharSet = 'UTF-8';
     }
 
@@ -84,7 +84,7 @@ class SenderEmail
             $this->mail->setFrom($this->emisor_email, $this->emisor_nombre);
 
             // Destinatarios
-            if (env('API_ENV') === 'local') {
+            if (config('app.env') === 'local') {
                 $to = $this->email_pruebas;
             }
 

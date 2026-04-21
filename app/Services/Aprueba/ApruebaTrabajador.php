@@ -76,6 +76,8 @@ class ApruebaTrabajador
         $params['codest'] = null;
         $params['benef'] = 'S';
         $params['ruaf'] = 'N';
+        $params['fecrua'] = null;
+
         $params['totcon'] = 0;
         $params['tothij'] = 0;
         $params['tother'] = 0;

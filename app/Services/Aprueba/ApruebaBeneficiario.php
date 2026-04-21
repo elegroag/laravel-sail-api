@@ -98,6 +98,7 @@ class ApruebaBeneficiario
         $params['calendario'] = 'N';
         $params['pago'] = 'C';
         $params['ruaf'] = 'N';
+        $params['fecrua'] = null;
         $params['numhij'] = (! $postData['numhij']) ? 0 : $postData['numhij'];
 
         if ($benefi->tipdoc == 3) {
