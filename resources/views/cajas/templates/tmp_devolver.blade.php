@@ -4,7 +4,7 @@
 <div class="col-md-12">
     <div class='form-group pb-2'>
         <label class='label'> Motivo:</label>
-        <select name="codest_devolver" class="form-control">
+        <select name="codest_devolver" id="codest_devolver" class="form-control">
             <option value="">Seleccione un motivo</option>
             @foreach ($mercurio11 as $codest)
                 <option value="{{ $codest->getCodest() }}">{{ $codest->getDetalle() }}</option>

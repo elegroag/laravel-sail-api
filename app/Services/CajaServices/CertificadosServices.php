@@ -17,7 +17,7 @@ class CertificadosServices
 {
     private $orderpag = 'fecha';
 
-    private $tipopc = 8;
+    private $tipopc = '8';
 
     private $controller_name;
 

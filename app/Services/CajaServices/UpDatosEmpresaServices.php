@@ -16,7 +16,7 @@ class UpDatosEmpresaServices
 {
     private $orderpag = 'fecsol';
 
-    private $tipopc = 5;
+    private $tipopc = '5';
 
     /**
      * registroSeguimiento variable

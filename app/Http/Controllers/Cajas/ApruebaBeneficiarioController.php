@@ -404,30 +404,37 @@ class ApruebaBeneficiarioController extends ApplicationController
                 ]
             );
 
+            if ($ps->isJson() == false) {
+                throw new DebugException('Error al buscar la beneficiario en Sisuweb', 501);
+            }
+
             $rqs = $ps->toArray();
+            $isSuccess = $rqs['success'] ?? null;
+
             $relacion_multiple = false;
             $beneficiario_sisuweb = false;
 
-            if ($rqs) {
-                if ($rqs['success']) {
-                    $sys_beneficiario = $rqs['data'];
-                    if ($sys_beneficiario) {
-                        $beneficiario_sisuweb = $sys_beneficiario;
-                        $giro = $sys_beneficiario['giro'];
-                        $vinculo_trabajador = false;
+            if ($isSuccess) {
+                $sys_beneficiario = $rqs['data'] ?? null;
+                if ($sys_beneficiario) {
+                    $beneficiario_sisuweb = $sys_beneficiario;
+                    $giro = $sys_beneficiario['giro'] ?? null;
+                    $vinculo_trabajador = false;
 
-                        if ($rqs['relaciones']) {
-                            $relacion_multiple = $rqs['relaciones'];
-                            foreach ($rqs['relaciones'] as $ai => $relacion) {
-                                if ($relacion['cedtra'] == $solicitud->cedtra) {
-                                    $vinculo_trabajador = true;
-                                    break;
-                                }
+                    $relaciones = $sys_beneficiario['relaciones'] ?? null;
+
+                    if ($relaciones) {
+                        $relacion_multiple = $relaciones;
+                        foreach ($relaciones as $ai => $relacion) {
+                            if ($relacion['cedtra'] == $solicitud->cedtra) {
+                                $vinculo_trabajador = true;
+                                break;
                             }
                         }
                     }
                 }
             }
+
 
             $px = new ApiSubsidio();
             $px->send(
@@ -482,6 +489,12 @@ class ApruebaBeneficiarioController extends ApplicationController
                 'success' => false,
                 'msj' => $err->getMessage(),
                 'errors' => $err->render($request),
+            ];
+        } catch (\Exception $e) {
+            $response = [
+                'success' => false,
+                'msj' => $e->getMessage(),
+                'errors' => $e->getTrace(),
             ];
         }
 

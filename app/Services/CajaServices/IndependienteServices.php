@@ -16,7 +16,7 @@ class IndependienteServices
 {
     private $orderpag = 'fecsol';
 
-    private $tipopc = 13;
+    private $tipopc = '13';
 
     private $tipsoc = '08';
 

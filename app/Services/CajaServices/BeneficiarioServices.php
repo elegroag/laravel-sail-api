@@ -16,7 +16,7 @@ class BeneficiarioServices
 {
     private $orderpag = 'fecsol';
 
-    private $tipopc = 4;
+    private $tipopc = '4';
 
     private $controller_name;
 

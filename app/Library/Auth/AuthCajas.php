@@ -3,7 +3,9 @@
 namespace App\Library\Auth;
 
 use App\Exceptions\AuthException;
+use App\Exceptions\DebugException;
 use App\Models\Gener02;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Srequest;
 
 class AuthCajas
@@ -85,6 +87,22 @@ class AuthCajas
      */
     public function getUsuario()
     {
-        return $this->usuario;
+        $procesadorComando = new ApiSubsidio();
+        $procesadorComando->send(
+            [
+                'servicio' => 'Usuarios',
+                'metodo' => 'trae_usuario',
+                'params' => $this->usuario->getUsuario(),
+            ]
+        );
+
+        if ($procesadorComando->isJson() == false) {
+            throw new DebugException('Error al buscar la beneficiario en Sisuweb', 501);
+        }
+
+        $out = $procesadorComando->toArray();
+        $userSisu = $out['data'];
+
+        return $userSisu;
     }
 }

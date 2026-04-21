@@ -16,7 +16,7 @@ class ConyugeServices
 {
     private $orderpag = 'fecsol';
 
-    private $tipopc = 3;
+    private $tipopc = '3';
 
     private $controller_name;
 

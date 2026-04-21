@@ -46,7 +46,7 @@ class AuthController extends ApplicationController
                 $auth = new AuthCajas;
                 $auth->autenticar($user, $clave);
                 $usuarioServices = new UsuarioServices;
-                $usuarioServices->actualizaUsuario($auth->getUsuario());
+                $usuarioServices->actualizaUsuario((object) $auth->getUsuario());
 
                 set_flashdata(
                     'success',

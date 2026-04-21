@@ -16,7 +16,7 @@ class ServicioDomesticoServices
 {
     private $orderpag = 'fecsol';
 
-    private $tipopc = 12;
+    private $tipopc = '12';
 
     private $tipsoc = '08';
 

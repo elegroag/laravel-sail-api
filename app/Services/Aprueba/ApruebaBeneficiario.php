@@ -90,6 +90,7 @@ class ApruebaBeneficiario
          */
         $params = array_merge($benefi->toArray(), $postData);
         $params['estado'] = 'A';
+        $params['nit'] = $benefi->nit;
         $params['documento'] = $benefi->numdoc;
         $params['coddoc'] = $benefi->tipdoc;
         $params['fecest'] = null;

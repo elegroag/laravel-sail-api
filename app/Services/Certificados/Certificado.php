@@ -121,7 +121,7 @@ class CertificadoPdf extends TCPDF
             $this->Image(
                 $this->signatureImagePath,
                 ($pageWidth - 45) / 2,
-                $this->GetY() + -3,
+                $this->GetY() + -15,
                 40,
                 0,
                 '',

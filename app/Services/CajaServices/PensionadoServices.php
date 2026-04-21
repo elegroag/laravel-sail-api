@@ -16,7 +16,7 @@ class PensionadoServices
 {
     private $orderpag = 'fecsol';
 
-    private $tipopc = 9;
+    private $tipopc = '9';
 
     private $tipsoc = '08';
 

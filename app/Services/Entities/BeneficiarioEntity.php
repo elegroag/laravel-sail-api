@@ -46,7 +46,8 @@ class BeneficiarioEntity
         'fosfec',
         'fecrua',
         'cedacu',
-        'fecsol'
+        'fecsol',
+        'nit'
     ];
 
     protected function getRules()
@@ -55,6 +56,7 @@ class BeneficiarioEntity
             'codben' => ['type' => 'integer', 'is_null' => true],
             'documento' => ['type' => 'string', 'max' => 20, 'is_null' => false],
             'coddoc' => ['type' => 'string', 'max' => 2, 'is_null' => false],
+            'nit' => ['type' => 'rangelength', 'min' => 1, 'max' => 16, 'is_null' => false],
             'tipdoc' => ['type' => 'string', 'max' => 2, 'is_null' => false],
             'priape' => ['type' => 'string', 'max' => 20, 'is_null' => true],
             'segape' => ['type' => 'string', 'max' => 20, 'is_null' => true],

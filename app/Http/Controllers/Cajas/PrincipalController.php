@@ -293,7 +293,11 @@ class PrincipalController extends Controller
                 'Content-Disposition' => 'inline; filename="' . $file . '"',
             ]);
         } else {
-            return response()->json(null);
+            return response()->json([
+                'success' => false,
+                'msj' => 'Archivo no encontrado ' . $archivo,
+                'path' => $fichero
+            ]);
         }
     }
 }

@@ -16,7 +16,7 @@ class FacultativoServices
 {
     private $orderpag = 'fecsol';
 
-    private $tipopc = 10;
+    private $tipopc = '10';
 
     private $tipsoc = '08';
 

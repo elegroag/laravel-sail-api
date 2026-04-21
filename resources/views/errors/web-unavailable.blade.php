@@ -19,9 +19,11 @@
 @endpush
 
 @section('content')
+@if(app()->environment('production'))
 <script>
-    console.log("Ruta error: {{ $ruta ?? request()->url() }}");
+    window.location.href = '{{ route("login") }}';
 </script>
+@endif
 <div class="container py-4">
     <div class="card shadow error-card mx-auto">
         <div class="card-body text-center p-5">

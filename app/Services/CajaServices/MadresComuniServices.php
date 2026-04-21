@@ -16,7 +16,7 @@ class MadresComuniServices
 {
     private $orderpag = 'fecsol';
 
-    private $tipopc = 11;
+    private $tipopc = '11';
 
     private $tipsoc = '08';
 

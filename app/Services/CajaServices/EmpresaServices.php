@@ -17,7 +17,7 @@ class EmpresaServices
 {
     private $orderpag = 'fecini';
 
-    private $tipopc = 2;
+    private $tipopc = '2';
 
     private $controller_name;
 

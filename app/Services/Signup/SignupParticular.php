@@ -133,11 +133,9 @@ class SignupParticular
             } else {
                 if ($usuarioParticular->getEstado() == 'A') {
                     throw new DebugException('El usuario ya existe y se encuentra registrado en el sistema. ' .
-                        'La solicitud para afiliación está pendiente de enviar, compruebe las credenciales de acceso en la dirección de correo registrada previamente: ' .
-                        mask_email($usuarioParticular->getEmail()) . '. ' .
-                        ' Y ahora puedes ingresar por la opción "2 Afiliación Pendiente" continua el proceso de afiliación.', 501);
+                        'Compruebe las credenciales de acceso en la dirección de correo registrada previamente: ' .
+                        mask_email($usuarioParticular->getEmail()) . '. En caso de no poder ingresar puede recuperar su contraseña desde la opción "Olvidé mi clave" en el inicio de sesión.', 501);
                 }
-                // actualiza y activa la cuenta de la persona solo si el correo es igual al reportado
             }
             $this->preparaMail($usuarioParticular, $this->password);
 
