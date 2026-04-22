@@ -609,7 +609,7 @@ class AuthMercurioController extends Controller
                 );
                 $senderEmail->send($user07->email, $html);
             } else {
-                if (env('API_MODE') == 'development') $user07->setWhatsapp('3157145942');
+                if (config('app.api_mode') == 'development') $user07->setWhatsapp('3157145942');
 
                 if (! $user07->whatsapp) {
                     throw new DebugException('No se proporcionó número de whatsapp', 501);

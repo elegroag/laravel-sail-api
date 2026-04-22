@@ -262,3 +262,14 @@ if (! function_exists('convive_array')) {
         ];
     }
 }
+
+if (! function_exists('captra_array')) {
+
+    function captra_array()
+    {
+        return [
+            'N' => 'NINGUNA',
+            'I' => 'DISCAPACIDAD',
+        ];
+    }
+}

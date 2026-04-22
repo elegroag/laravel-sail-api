@@ -11,7 +11,7 @@ class ApiPython extends ApiAbstract
 {
     public function __construct()
     {
-        $this->mode = env('API_MODE', 'development');
+        $this->mode = config('app.api_mode', 'development');
     }
 
     public function send($attr)
@@ -24,15 +24,15 @@ class ApiPython extends ApiAbstract
             throw new DebugException('Error no es valido el metodo de acceso API ', 501);
         }
 
-        $user = env('API_FLASK_USER');
-        $password = env('API_FLASK_PASSWORD');
+        $user = config('app.api_flask_user');
+        $password = config('app.api_flask_password');
 
         $basicAuth = new BasicAuth($user, $password);
         $api_end_point = ApiEndpoint::where('connection_name', 'api-python')
             ->where('service_name', $servicio)
             ->first();
 
-        $hostConnection = env('API_MODE') == 'development' ? $api_end_point->host_dev : $api_end_point->host_pro;
+        $hostConnection = config('app.api_mode') == 'development' ? $api_end_point->host_dev : $api_end_point->host_pro;
         $url = "{$api_end_point->endpoint_name}/{$metodo}";
         $this->setCurlCommand($hostConnection, $url, $params, $basicAuth);
 

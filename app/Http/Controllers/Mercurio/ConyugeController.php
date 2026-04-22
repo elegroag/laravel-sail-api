@@ -593,7 +593,7 @@ class ConyugeController extends ApplicationController
                 'codciu' => $codciu,
                 'sexo' => sexos_array(),
                 'estciv' => estados_civiles_array(),
-                'captra' => condicionSN(),
+                'captra' => captra_array(),
                 'nivedu' => nivel_educativo_array(),
                 'tipviv' => vivienda_array(),
                 'ciunac' => $codciu,

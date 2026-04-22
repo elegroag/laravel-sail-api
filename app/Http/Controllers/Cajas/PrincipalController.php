@@ -20,6 +20,8 @@ use App\Models\Mercurio34;
 use App\Models\Mercurio38;
 use App\Models\Mercurio41;
 use App\Models\Mercurio47;
+use App\Services\SftpTools\SftpClisisu;
+use App\Services\SftpTools\SftpService;
 use App\Services\Utils\GeneralService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -293,11 +295,26 @@ class PrincipalController extends Controller
                 'Content-Disposition' => 'inline; filename="' . $file . '"',
             ]);
         } else {
-            return response()->json([
-                'success' => false,
-                'msj' => 'Archivo no encontrado ' . $archivo,
-                'path' => $fichero
-            ]);
+            $this->buscarArchivoSftp($archivo);
+            if (file_exists($fichero)) {
+                return response()->file($fichero, [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'inline; filename="' . $file . '"',
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'msj' => 'Archivo no encontrado ' . $archivo,
+                    'path' => $fichero
+                ]);
+            }
         }
+    }
+
+    function buscarArchivoSftp($filename)
+    {
+        $file = $filename;
+        $sftp = new SftpService(new SftpClisisu());
+        $sftp->download($file, storage_path('temp/' . $file));
     }
 }

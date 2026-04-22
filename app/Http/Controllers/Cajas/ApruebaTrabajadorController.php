@@ -897,7 +897,7 @@ class ApruebaTrabajadorController extends ApplicationController
                     $background = '#f5b2b2';
                 }
             }
-            $url = env('APP_URL') . 'Cajas/aprobaciontra/info_trabajador/' . $mercurio->getNit() . '/' . $mercurio->getCedtra() . '/' . $mercurio->getId();
+            $url = config('app.url') . 'Cajas/aprobaciontra/info_trabajador/' . $mercurio->getNit() . '/' . $mercurio->getCedtra() . '/' . $mercurio->getId();
             $sat = 'NORMAL';
             $trabajadores[] = [
                 'estado' => $mercurio->getEstadoDetalle(),

@@ -382,8 +382,7 @@ class TrabajadorController extends ApplicationController
                 'trasin' => condicionSN(),
                 'autoriza' => condicionSN(),
                 'comision' => condicionSN(),
-                'captra' => condicionSN(),
-
+                'captra' => captra_array(),
                 'indipais' => indicativos_paises_array(),
                 'indidepa' => indicativos_departamentos_array()
             ];

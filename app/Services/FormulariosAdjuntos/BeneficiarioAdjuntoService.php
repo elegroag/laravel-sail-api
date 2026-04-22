@@ -104,12 +104,9 @@ class BeneficiarioAdjuntoService
                     ->where('coddoc', $this->request->coddoc)
                     ->first();
                 break;
-            case 'T':
-            case 'E':
-                $mtrabajador = Mercurio31::where('cedtra', $this->request->cedtra)->first();
-                break;
             default:
-                $trabajador = Mercurio31::where('cedtra', $this->request->cedtra)
+                //aplica para empresas y trabajadores
+                $mtrabajador = Mercurio31::where('cedtra', $this->request->cedtra)
                     ->where('documento', $this->request->documento)
                     ->where('coddoc', $this->request->coddoc)
                     ->whereIn('estado', ['A', 'P', 'T'])

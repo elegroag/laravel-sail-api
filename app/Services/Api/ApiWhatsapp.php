@@ -11,7 +11,7 @@ class ApiWhatsapp extends ApiAbstract
 {
     public function __construct()
     {
-        $this->mode = env('API_MODE', 'development');
+        $this->mode = config('app.api_mode', 'development');
     }
 
     public function send($attr)
@@ -23,13 +23,13 @@ class ApiWhatsapp extends ApiAbstract
         if (is_null($metodo) || $metodo === '') {
             throw new DebugException('Error no es valido el metodo de acceso API ', 501);
         }
-        $basicAuth = new BasicAuth(env('API_WHATSAPP_USER', '2'), env('API_WHATSAPP_PASSWORD', 'ok'));
+        $basicAuth = new BasicAuth(config('app.api_whatsapp_user', '2'), config('app.api_whatsapp_password'));
 
         $api_end_point = ApiEndpoint::where('connection_name', 'api-whatsapp')
             ->where('service_name', $servicio)
             ->first();
 
-        $hostConnection = env('API_MODE') == 'development' ? $api_end_point->host_dev : $api_end_point->host_pro;
+        $hostConnection = config('app.api_mode') == 'development' ? $api_end_point->host_dev : $api_end_point->host_pro;
         $url = "{$api_end_point->endpoint_name}/{$metodo}";
         $this->lineaComando = $hostConnection . "\n " . $url . "\n " . json_encode($params);
 

@@ -123,7 +123,7 @@ class ApruebaUpEmpresaController extends ApplicationController
                     $background = '#f5b2b2';
                 }
             }
-            $url = env('APP_URL') . 'Cajas/aprobacionemp/info_empresa/' . $mercurio->getId();
+            $url = config('app.url') . 'Cajas/aprobacionemp/info_empresa/' . $mercurio->getId();
             $sat = 'NORMAL';
             if ($mercurio->getDocumentoRepresentanteSat() > 0) {
                 $sat = 'SAT';

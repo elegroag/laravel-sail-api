@@ -17,13 +17,13 @@ class Comman
     public function initEnvironment()
     {
         $this->app = new \stdClass;
-        $this->app->cli = env('USE_CLI', false);
-        $this->app->mode = env('API_MODE', 'development');
-        $this->app->host_portal_dev = env('HOST_PORTAL_DEV', 'http://localhost:8000');
-        $this->app->host_portal_pro = env('HOST_PORTAL_PRO', 'http://localhost:8000');
-        $this->app->portal = env('PORTAL', 'Portal');
-        $this->app->portal_key = env('PORTAL_KEY', 'PortalKey');
-        $this->app->encryption = env('API_ENCRYPTION', 'ApiEncryption');
+        $this->app->cli = config('app.use_cli', false);
+        $this->app->mode = config('app.api_mode', 'development');
+        $this->app->host_portal_dev = config('app.host_portal_dev');
+        $this->app->host_portal_pro = config('app.host_portal_pro');
+        $this->app->portal = config('app.portal');
+        $this->app->portal_key = config('app.portal_key');
+        $this->app->encryption = config('app.encriptation');
     }
 
     public function __construct()

@@ -47,7 +47,7 @@ class NotifyEmailServices
             )
         );
         $senderEmail->send(
-            env('API_MODE') === 'production' ? $mercurio07->getEmail() : $this->email_pruebas,
+            config('app.api_mode') === 'production' ? $mercurio07->getEmail() : $this->email_pruebas,
             $html
         );
     }
@@ -87,7 +87,7 @@ class NotifyEmailServices
             )
         );
 
-        $senderEmail->send(env('API_MODE') === 'production' ? $mercurio07->getEmail() : $this->email_pruebas, $html);
+        $senderEmail->send(config('app.api_mode') === 'production' ? $mercurio07->getEmail() : $this->email_pruebas, $html);
     }
 
     public function emailApruebaEmpresa($correo, $nombre, $asunto, $msj, $file)

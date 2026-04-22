@@ -281,9 +281,9 @@ class EmpresaServices
             }
 
             if ($mercurio->getEstado() == 'A') {
-                $url = env('APP_URL') . '/cajas/' . $this->controller_name . '/infoAprobadoView/' . $mercurio->getId();
+                $url = config('app.url') . '/cajas/' . $this->controller_name . '/infoAprobadoView/' . $mercurio->getId();
             } else {
-                $url = env('APP_URL') . '/cajas/' . $this->controller_name . '/info/' . $mercurio->getId();
+                $url = config('app.url') . '/cajas/' . $this->controller_name . '/info/' . $mercurio->getId();
             }
 
             $sat = 'NORMAL';
@@ -333,7 +333,7 @@ class EmpresaServices
                 $style = '#61b5ff';
             }
             $method = ($row->getEstado() == 'A') ? 'infoAprobadoView' : 'info';
-            $url = env('APP_URL') . '/cajas/' . $this->controller_name . '/' . $method . '/' . $row->getId();
+            $url = config('app.url') . '/cajas/' . $this->controller_name . '/' . $method . '/' . $row->getId();
 
             $sat = ($row->getDocumentoRepresentanteSat() > 0) ? 'SAT' : 'NORMAL';
 

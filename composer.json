@@ -15,6 +15,7 @@
         "laravel/tinker": "^2.10.1",
         "phpmailer/phpmailer": "^6.9",
         "phpoffice/phpspreadsheet": "*",
+        "phpseclib/phpseclib": "~3.0",
         "ramsey/uuid": "^4.9",
         "tecnickcom/tcpdf": "*",
         "tightenco/ziggy": "^2.4",

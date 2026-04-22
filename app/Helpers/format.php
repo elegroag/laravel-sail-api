@@ -497,9 +497,9 @@ if (! function_exists('public_url')) {
     function public_url($resource = '')
     {
         if ($resource == '') {
-            return env('APP_URL') . '/public/';
+            return config('app.url') . '/public/';
         } else {
-            return env('APP_URL') . '/public/' . trim($resource);
+            return config('app.url') . '/public/' . trim($resource);
         }
     }
 }

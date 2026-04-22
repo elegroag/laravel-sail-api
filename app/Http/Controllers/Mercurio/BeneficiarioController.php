@@ -573,8 +573,9 @@ class BeneficiarioController extends ApplicationController
                         ]
                     ]
                 );
+
                 $rqs = $procesadorComando->toArray();
-                $empresa_sisu = $rqs['data'];
+                $empresa_sisu = $rqs['data'] ?? false;
                 $nit = [$this->user['documento'] => $this->user['documento']];
                 $numero_nit = $this->user['documento'];
             } else {
@@ -642,7 +643,7 @@ class BeneficiarioController extends ApplicationController
                 'biodesco' => $biodesco,
                 'sexo' => sexos_array(),
                 'estciv' => estados_civiles_array(),
-                'captra' => condicionSN(),
+                'captra' => captra_array(),
                 'parent' => parentesco_array(),
                 'huerfano' => huerfano_array(),
                 'tiphij' => tipo_hijo_array(),

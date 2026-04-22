@@ -138,6 +138,7 @@ class PerfilView extends UsuarioFormView {
             return false;
         }
 
+        this.$el.find('#tipo').removeAttr('disabled');
         this.$el.find('#documento').removeAttr('disabled');
         this.$el.find('#clave').removeAttr('disabled');
         this.$el.find('#clave').removeClass('disabled');
@@ -166,22 +167,16 @@ class PerfilView extends UsuarioFormView {
 
                             if (response) {
                                 if (response.success) {
-                                    this.remove();
-                                    $App.router.navigate('datos', {
-                                        trigger: true,
-                                        replace: true,
-                                    });
-
                                     Swal.fire({
                                         title: 'RESULTADO OK',
-                                        text: 'Los cambios se han realizado con exito, para continuar se requiere de re-iniciar la sesión.',
+                                        text: 'Los cambios se han realizado con éxito.',
                                         icon: 'success',
                                         showCancelButton: false,
                                         confirmButtonColor: '#2dce89',
                                         cancelButtonColor: '#fc8c72',
-                                        confirmButtonText: 'SI, Continuar!',
+                                        confirmButtonText: 'Continuar',
                                     }).then((result) => {
-                                        window.location.href = $App.url('salir');
+                                        window.location.reload();
                                     });
                                 } else {
                                     $App.trigger('alert:error', { message: response.msj });

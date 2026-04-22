@@ -270,7 +270,7 @@ class PensionadoServices
                 'nombre' => $mercurio->getPrinom() . ' ' . $mercurio->getSegnom() . ' ' . $mercurio->getPriape() . ' ' . $mercurio->getSegape(),
                 'dias_vencidos' => $dias_vencidos,
                 'id' => $mercurio->getId(),
-                'url' => env('APP_URL') . '/cajas/' . $this->controller_name . '/' . $method . '/' . $mercurio->getId(),
+                'url' => config('app.url') . '/cajas/' . $this->controller_name . '/' . $method . '/' . $mercurio->getId(),
                 'fecsol' => $mercurio->getFecsol(),
                 'icon' => "<i class='fas fa-bell fa-2x' style='color:{$color}'> {$dias_vencidos} </i>",
             ];

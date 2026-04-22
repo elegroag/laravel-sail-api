@@ -202,9 +202,9 @@ class ApruebaIndependienteController extends ApplicationController
             }
 
             if ($mercurio->getEstado() == 'A') {
-                $url = env('APP_URL') . 'Cajas/aprobaindepen/infoAprobadoView/' . $mercurio->getId();
+                $url = config('app.url') . 'Cajas/aprobaindepen/infoAprobadoView/' . $mercurio->getId();
             } else {
-                $url = env('APP_URL') . 'Cajas/aprobaindepen/info_empresa/' . $mercurio->getId();
+                $url = config('app.url') . 'Cajas/aprobaindepen/info_empresa/' . $mercurio->getId();
             }
 
             $sat = 'NORMAL';
@@ -901,7 +901,7 @@ class ApruebaIndependienteController extends ApplicationController
             $j++;
         }
         $excels->close();
-        header("location: " . env('APP_URL') . "/{$file}"); */
+        header("location: " . config('app.url') . "/{$file}"); */
     }
 
     /**

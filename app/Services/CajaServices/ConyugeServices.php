@@ -343,7 +343,7 @@ class ConyugeServices
             }
 
             $method = ($mercurio->getEstado() == 'A') ? 'infoAprobadoView' : 'info';
-            $url = env('APP_URL') . '/cajas/' . $this->controller_name . '/' . $method . '/' . $mercurio->getId();
+            $url = config('app.url') . '/cajas/' . $this->controller_name . '/' . $method . '/' . $mercurio->getId();
 
             $sat = 'NORMAL';
             $conyuges[] = [

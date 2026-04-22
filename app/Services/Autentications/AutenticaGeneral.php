@@ -74,7 +74,7 @@ class AutenticaGeneral
         $html = view('emails.send-credentials', [
             'titulo' => "Cordial saludo,<br/>Señor@ {$nombre}",
             'msj' => $msj,
-            'url_activa' => env('APP_URL') . '/Mercurio/Mercurio/login/index',
+            'url_activa' => config('app.url') . '/Mercurio/Mercurio/login/index',
             'fecha' => date('Y-m-d'),
             'nombre' => $nombre,
             'razon' => $nombre,
@@ -133,7 +133,7 @@ class AutenticaGeneral
         $html = view('emails.change-clave', [
             'titulo' => "Cordial saludo, señor@ {$nombre}",
             'msj' => $msj,
-            'url_activa' => env('APP_URL') . '/web/login',
+            'url_activa' => config('app.url') . '/web/login',
             'fecha' => date('Y-m-d'),
             'nombre' => $nombre,
             'razon' => $nombre,

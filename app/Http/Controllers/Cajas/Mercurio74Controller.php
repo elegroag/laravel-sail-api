@@ -37,7 +37,7 @@ class Mercurio74Controller extends ApplicationController
     {
         try {
             $this->setResponse('ajax');
-            $instancePath = env('APP_URL');
+            $instancePath = config('app.url');
             $mercurio01 = Mercurio01::first();
             $response = Mercurio74::select('numrec', 'archivo')
                 ->addSelect(

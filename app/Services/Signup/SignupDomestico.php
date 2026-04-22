@@ -123,7 +123,7 @@ class SignupDomestico
     public function preparaMail($usuario, $clave)
     {
         $coddoc_detalle = Generales::TipoDocumento($usuario);
-        $url_activa = env('APP_URL');
+        $url_activa = config('app.url');
         $date = new \DateTime('now');
         $html = view(
             'login/tmp/mail',

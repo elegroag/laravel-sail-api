@@ -25,7 +25,8 @@ class Mercurio16 extends ModelBase
         'coddoc',
         'keyprivate',
         'keypublic',
-        'password'
+        'password' .
+            'estado'
     ];
 
     protected function rules()
@@ -92,6 +93,11 @@ class Mercurio16 extends ModelBase
         $this->fecha = $fecha;
     }
 
+    public function setEstado($estado)
+    {
+        $this->estado = $estado;
+    }
+
     public function getCoddoc()
     {
         return $this->coddoc;
@@ -110,5 +116,18 @@ class Mercurio16 extends ModelBase
     public function getFecha()
     {
         return $this->fecha;
+    }
+
+    public function getEstado()
+    {
+        return $this->estado;
+    }
+
+    public function estados_array()
+    {
+        return [
+            'A' => 'Activo',
+            'I' => 'Inactivo'
+        ];
     }
 }

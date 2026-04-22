@@ -97,9 +97,10 @@ class ApruebaBeneficiario
         $params['codest'] = null;
         $params['fecsis'] = $hoy;
         $params['calendario'] = 'N';
-        $params['pago'] = 'C';
+        $params['pago'] = $postData['pago'] ?? 'C';
         $params['ruaf'] = 'N';
         $params['fecrua'] = null;
+        $params['captra'] = $benefi->captra ?? 'N';
         $params['numhij'] = (! $postData['numhij']) ? 0 : $postData['numhij'];
 
         if ($benefi->tipdoc == 3) {

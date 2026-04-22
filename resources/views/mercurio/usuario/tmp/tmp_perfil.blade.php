@@ -1,4 +1,5 @@
 <form method="POST" action="#" id='formRequest'>
+    <input class="d-none" id="tipo" name="tipo" type="text" value="<%=tipo%>"/>
     <p>El usuario de la plataforma de comfacaenlinea.com.co, no es el mismo usuario de afiliado de la Caja de Compensación Familiar del Caquetá COMFACA.</p>
     <div class='row'>
         <div class='col-md-6 border-top border-right mb-1 border-left border-bottom'>

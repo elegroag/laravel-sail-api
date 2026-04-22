@@ -19,7 +19,7 @@ class NotificacionesController extends ApplicationController
 
     public function __construct()
     {
-        $this->setParamToView('instancePath', env('APP_URL') . 'Cajas/');
+        $this->setParamToView('instancePath', config('app.url') . 'Cajas/');
         $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;

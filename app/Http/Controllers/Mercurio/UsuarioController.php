@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
+use App\Library\Auth\SessionCookies;
 use App\Models\Adapter\DbBase;
 use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
 use App\Models\Mercurio07;
+use App\Services\Srequest;
 use Illuminate\Http\Request;
 
 class UsuarioController extends ApplicationController
@@ -179,13 +181,26 @@ class UsuarioController extends ApplicationController
             $msubsi07->setNombre($nombre);
             $msubsi07->setCoddoc($coddoc);
 
-            if (strlen($newclave) > 5 && strlen($newclave) < 80) {
+            if ($newclave != '' && strlen($newclave) > 5 && strlen($newclave) < 80) {
                 $hash = clave_hash($newclave);
                 $msubsi07->setClave($hash);
             }
 
             $msubsi07->save();
             $entity = $msubsi07->toArray();
+
+            // Reconstruir la sesión con los datos actualizados
+            SessionCookies::authenticate(
+                'mercurio',
+                new Srequest([
+                    'tipo' => $tipo,
+                    'coddoc' => $coddoc,
+                    'documento' => $documento,
+                    'estado' => $msubsi07->estado,
+                    'estado_afiliado' => 'A',
+                ])
+            );
+
             $response = [
                 'msj' => 'Proceso se ha completado con éxito',
                 'success' => true,

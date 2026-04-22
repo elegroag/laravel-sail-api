@@ -14,10 +14,10 @@ class PortalMercurio extends ApiAbstract
 
     public function __construct()
     {
-        $this->mode = env('API_MODE', 'development');
-        $this->host_portal_dev = env('HOST_PORTAL_DEV');
-        $this->host_portal_pro = env('HOST_PORTAL_PRO');
-        $this->portal = env('PORTAL');
+        $this->mode = config('app.api_mode', 'development');
+        $this->host_portal_dev = config('app.host_portal_dev');
+        $this->host_portal_pro = config('app.host_portal_pro');
+        $this->portal = config('app.portal');
     }
 
     public function send($attr)
@@ -40,7 +40,7 @@ class PortalMercurio extends ApiAbstract
             ];
         }
 
-        $basicAuth = new BasicAuth(env('HOST_API_USER'), env('HOST_API_PASSWORD'));
+        $basicAuth = new BasicAuth(config('app.host_api_user'), config('app.host_api_password'));
         if ($this->mode == 'development') {
             $hostConnection = "{$this->host_portal_dev}/";
         } else {

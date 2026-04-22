@@ -194,8 +194,8 @@ class LoginController extends ApplicationController
                 [
                     'success' => true,
                     'data' => [
-                        'fuera_servicio' => env('APP_INTEGRATION', false),
-                        'msj' => (env('APP_INTEGRATION', false) == true) ? 'El servicio está suspendido temporalmente.' : 'La ventana de mantenimiento se ha completado con éxito. Muchas gracias por la espera.',
+                        'fuera_servicio' => config('app.integration', false),
+                        'msj' => (config('app.integration', false) == true) ? 'El servicio está suspendido temporalmente.' : 'La ventana de mantenimiento se ha completado con éxito. Muchas gracias por la espera.',
                     ],
                 ]
             );

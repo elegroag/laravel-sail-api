@@ -16,7 +16,7 @@ class SenderValidationCaja
 
     public function send($tipopc, $entity)
     {
-        $this->email_pruebas = env('MAIL_DEV') ?? 'enlinea@comfaca.com';
+        $this->email_pruebas = config('mail.dev', 'enlinea@comfaca.com');
 
         Mercurio10::create([
             'tipopc' => $tipopc,
@@ -45,7 +45,7 @@ class SenderValidationCaja
         ];
 
         $html = view('emails/mail-caja', $arreglo)->render();
-        $destinatario = (env('APP_ENV') == 'production') ? $entity->email : $this->email_pruebas;
+        $destinatario = (config('app.env') == 'production') ? $entity->email : $this->email_pruebas;
         $this->sendEmail('Proceso Afiliación Caja de Compensación Familiar COMFACA', $html, $destinatario);
     }
 

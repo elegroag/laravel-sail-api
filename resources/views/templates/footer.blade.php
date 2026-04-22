@@ -16,7 +16,7 @@ $xhost = DB::table('information_schema.SCHEMATA')
                 &copy; 2019 <a href="#" class="ml-1" target="_blank">Sistemas y Soluciones Integradas</a>
                 <span style='margin:2px; margin-left: 10px; color:#444'>
                     DB: {{ $database_name }} - {{ $xhost->hostname }}
-                    Mode API: {{ (env('API_MODE') == 'development') ? 'Desarrollo' : 'Producción' }}
+                    Mode API: {{ (config('app.api_mode') === 'development') ? 'Desarrollo' : 'Producción' }}
                 </span>
             </div>
         </div>

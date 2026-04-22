@@ -35,7 +35,7 @@ class Mercurio73Controller extends ApplicationController
 
     public function galeria()
     {
-        $instancePath = env('APP_URL');
+        $instancePath = config('app.url');
         $mercurio01 = Mercurio01::first();
         $response = Mercurio73::select('numedu', 'archivo')
             ->addSelect(

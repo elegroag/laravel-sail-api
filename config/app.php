@@ -130,6 +130,31 @@ return [
     'api_mode' => env('API_MODE', 'production'),
 
     'host_api_user' => env('HOST_API_USER', "2"),
-
     'host_api_password' => env('HOST_API_PASSWORD', null),
+
+    'integration' => env('APP_INTEGRATION', null),
+
+    'api_flask_user' => env('API_FLASK_USER', null),
+    'api_flask_password' => env('API_FLASK_PASSWORD', null),
+    'api_whatsapp_user' => env('API_WHATSAPP_USER', null),
+    'api_whatsapp_password' => env('API_WHATSAPP_PASSWORD', null),
+
+    'host_portal_dev' => env('HOST_PORTAL_DEV', null),
+    'host_portal_pro' => env('HOST_PORTAL_PRO', null),
+
+    'use_cli' => env('USE_CLI', false),
+    'portal' => env('PORTAL', null),
+    'portal_key' => env('PORTAL_KEY'),
+    'encriptation' => env('API_ENCRYPTION'),
+
+    'sftp_sisu' => [
+        'host' => env('SFTP_SISU_HOST', ''),
+        'username' => env('SFTP_SISU_USERNAME', ''),
+        'password' => env('SFTP_SISU_PASSWORD', ''),
+        'privateKey' => env('SFTP_SISU_PRIVATE_KEY', ''),
+        'privateKeyPassphrase' => env('SFTP_SISU_PRIVATE_KEY_PASSPHRASE', ''),
+        'port' => env('SFTP_SISU_PORT', 22),
+        'timeout' => env('SFTP_SISU_TIMEOUT', 30),
+        'storage' => env('SFTP_SISU_STORAGE', ''),
+    ],
 ];

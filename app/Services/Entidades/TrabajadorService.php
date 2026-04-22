@@ -343,7 +343,11 @@ class TrabajadorService
             ]
         );
         $out = $ps->toArray();
-        return ($out['success'] == true) ? $out['data'] : false;
+        $isSuccess = $out['success'] ?? null;
+        if ($isSuccess) {
+            return $out['data'] ?? false;
+        }
+        return false;
     }
 
     public function consultaSeguimiento($id)

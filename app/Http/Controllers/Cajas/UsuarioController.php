@@ -21,6 +21,8 @@ use App\Services\Srequest;
 use App\Services\Utils\Generales;
 use App\Services\Utils\Pagination;
 use App\Services\Utils\SenderEmail;
+use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -121,7 +123,7 @@ class UsuarioController extends Controller
         return response()->json($response);
     }
 
-    public function guardar(Request $request)
+    public function guardar(Request $request): JsonResponse
     {
         try {
             $tipo = $request->input('tipo');
@@ -150,45 +152,59 @@ class UsuarioController extends Controller
                 ->first();
 
 
-            $hash = clave_hash($newclave);
+            $hash = null;
+            if ($newclave != '') {
+                $hash = clave_hash($newclave);
+            }
 
-            if ($old_coddoc != $coddoc) {
+            if (
+                $old_coddoc != $coddoc &&
+                $old_coddoc != null &&
+                $coddoc != null
+            ) {
                 $hasUsuario = Mercurio07::where('documento', $documento)
                     ->where('tipo', $tipo)
                     ->where('coddoc', $coddoc)
                     ->exists();
 
                 if (!$hasUsuario) {
-                    Mercurio07::create(
-                        [
-                            'documento' => $documento,
-                            'tipo' => $tipo,
-                            'coddoc' => $coddoc,
-                            'nombre' => $nombre,
-                            'email' => $email,
-                            'codciu' => $codciu,
-                            'estado' => $estado,
-                            'fecreg' => date('Y-m-d'),
-                            'feccla' => date('Y-m-d'),
-                            'autoriza' => 'S',
-                            'clave' => $hash,
-                        ]
-                    );
+                    $data = [
+                        'documento' => $documento,
+                        'tipo' => $tipo,
+                        'coddoc' => $coddoc,
+                        'nombre' => $nombre,
+                        'email' => $email,
+                        'codciu' => $codciu,
+                        'estado' => $estado,
+                        'fecreg' => date('Y-m-d'),
+                        'feccla' => date('Y-m-d'),
+                        'autoriza' => 'S',
+                    ];
+                    if ($hash !== null) {
+                        $data['clave'] = $hash;
+                    }
+                    Mercurio07::create($data);
                 }
             } else {
                 // Actualizar usuario existente con las nuevas condiciones
+                $data = [
+                    'tipo' => $tipo,
+                    'email' => $email,
+                    'codciu' => $codciu,
+                    'nombre' => $nombre,
+                    'coddoc' => $coddoc,
+                ];
+                if ($hash !== null) {
+                    $data['clave'] = $hash;
+                }
                 Mercurio07::where('documento', $documento)
                     ->where('tipo', $tipo)
                     ->where('coddoc', $coddoc)
-                    ->update([
-                        'tipo' => $tipo,
-                        'email' => $email,
-                        'codciu' => $codciu,
-                        'nombre' => $nombre,
-                        'coddoc' => $coddoc,
-                        'clave' => $hash,
-                    ]);
-                $this->cambiarClave($newclave, $mercurio07);
+                    ->update($data);
+
+                if ($newclave != '') {
+                    $this->notifyCambiarClave($newclave, $mercurio07);
+                }
             }
 
             $entity = Mercurio07::where("documento", $documento)
@@ -206,12 +222,16 @@ class UsuarioController extends Controller
                 'success' => false,
                 'msj' => $err->getMessage(),
             ];
+        } catch (Exception $e) {
+            $response = [
+                'success' => false,
+                'msj' => $e->getMessage(),
+            ];
         }
-
         return response()->json($response);
     }
 
-    public function cambiarClave(string $clave = '', Mercurio07 $usuario_externo)
+    public function notifyCambiarClave(string $clave = '', Mercurio07 $usuario_externo)
     {
         $nombre = capitalize($usuario_externo->nombre);
         $asunto = 'Cambio de clave - Comfaca En Linea';
