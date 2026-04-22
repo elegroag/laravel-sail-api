@@ -93,7 +93,7 @@ class AutenticaService
                 $codigoVerify = genera_code();
                 $autentica->verificaPin($mercurio07, $codigoVerify);
 
-                $authJwt = new AuthJwt(430);
+                $authJwt = new AuthJwt(730);
                 $token = $authJwt->SimpleToken();
 
                 $user19 = Mercurio19::where(['documento' => $documento, 'coddoc' => $coddoc, 'tipo' => $tipo])->first();

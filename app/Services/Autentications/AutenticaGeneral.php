@@ -92,10 +92,7 @@ class AutenticaGeneral
         );
 
         $senderEmail->send(
-            [[
-                'email' => $usuario->getEmail(),
-                'nombre' => $nombre,
-            ]],
+            $usuario->getEmail(),
             $html
         );
     }

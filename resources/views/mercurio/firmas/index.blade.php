@@ -25,6 +25,31 @@
                 </div>
             </div>
         </div>
+
+        <div class="row mt-4">
+            <div class="col-sm-12 col-md-4">
+                <a href="javascript:void(0)" id="toggleRecoveryForm" class="btn btn-secondary">
+                    <i class='fa fa-eye'></i> Mostrar Recuperación de Firma
+                </a>
+                
+                <div class="card mt-3" id="recoveryFormCard" style="display: none;">
+                    <div class="card-header text-white">
+                        <h5 class="mb-0">Recuperar Firma Digital</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Ingrese su clave del sistema para recuperar su firma digital.</p>
+                        <div class="form-group">
+                            <label for="systemKey">Clave del Sistema</label>
+                            <input type="password" class="form-control" id="systemKey" name="systemKey" placeholder="Ingrese su clave del sistema">
+                        </div>
+                        <button type="button" id="recoverSignatureBtn" class="btn btn-primary mt-2">
+                            <i class="fa fa-key"></i> Recuperar Firma
+                        </button>
+                        <div id="signatureResult" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 @endsection

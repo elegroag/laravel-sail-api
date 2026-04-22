@@ -12,5 +12,7 @@ Route::middleware(['mercurio.auth'])->group(function () {
         Route::get('/index', [FirmasController::class, 'index'])->name('firmas.index');
         Route::post('/guardar', [FirmasController::class, 'guardar'])->name('firmas.guardar');
         Route::get('/show', [FirmasController::class, 'show'])->name('firmas.show');
+        Route::post('/valida_firma', [FirmasController::class, 'validaFirma'])->name('firmas.valida_firma');
+        Route::post('/recuperar_firma', [FirmasController::class, 'recuperarFirma'])->name('firmas.recuperar_firma');
     });
 });

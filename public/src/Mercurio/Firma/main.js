@@ -1,16 +1,16 @@
 import { $App } from '@/App';
 
 (function ($) {
-	var fileUploadCount = 0;
-	var prepareFiles = [];
+    var fileUploadCount = 0;
+    var prepareFiles = [];
 
-	$.fn.fileUpload = function () {
-		return this.each(function () {
-			const fileUploadDiv = $(this);
-			const fileUploadId = `fileUpload-${++fileUploadCount}`;
+    $.fn.fileUpload = function () {
+        return this.each(function () {
+            const fileUploadDiv = $(this);
+            const fileUploadId = `fileUpload-${++fileUploadCount}`;
 
-			// Creates HTML content for the file upload area.
-			const fileDivContent = `
+            // Creates HTML content for the file upload area.
+            const fileDivContent = `
                 <label for="${fileUploadId}" class="file-upload">
                     <div>
                         <b class="material-icons-outlined">Validar Documento</b>
@@ -22,13 +22,13 @@ import { $App } from '@/App';
                 </label>
             `;
 
-			fileUploadDiv.html(fileDivContent).addClass('file-container');
+            fileUploadDiv.html(fileDivContent).addClass('file-container');
 
-			let table = null;
-			let tableBody = null;
-			// Creates a table containing file information.
-			function createTable() {
-				table = $(`
+            let table = null;
+            let tableBody = null;
+            // Creates a table containing file information.
+            function createTable() {
+                table = $(`
                     <table>
                         <thead>
                             <tr>
@@ -44,23 +44,23 @@ import { $App } from '@/App';
                     </table>
                 `);
 
-				tableBody = table.find('tbody');
-				fileUploadDiv.append(table);
-			}
+                tableBody = table.find('tbody');
+                fileUploadDiv.append(table);
+            }
 
-			// Adds the information of uploaded files to table.
-			function handleFiles(files) {
-				if (!table) createTable();
-				tableBody.empty();
+            // Adds the information of uploaded files to table.
+            function handleFiles(files) {
+                if (!table) createTable();
+                tableBody.empty();
 
-				if (files.length > 0) {
-					$.each(files, function (index, file) {
-						if (typeof index == 'number') {
-							prepareFiles[index] = file;
-							let fileName = file.name;
-							let fileSize = (file.size / 1024).toFixed(2) + ' KB';
-							let fileType = file.type;
-							tableBody.append(`
+                if (files.length > 0) {
+                    $.each(files, function (index, file) {
+                        if (typeof index == 'number') {
+                            prepareFiles[index] = file;
+                            let fileName = file.name;
+                            let fileSize = (file.size / 1024).toFixed(2) + ' KB';
+                            let fileType = file.type;
+                            tableBody.append(`
                             <tr>
                                 <td>${index + 1}</td>
                                 <td>${fileName}</td>
@@ -72,65 +72,112 @@ import { $App } from '@/App';
                                 </td>
                             </tr>
                         `);
-						}
-					});
+                        }
+                    });
 
-					tableBody.find('.deleteBtn').click(function () {
-						$(this).closest('tr').remove();
-						if (tableBody.find('tr').length === 0) {
-							tableBody.append(
-								'<tr><td colspan="6" class="no-file">No files selected!</td></tr>',
-							);
-						}
-					});
+                    tableBody.find('.deleteBtn').click(function () {
+                        $(this).closest('tr').remove();
+                        if (tableBody.find('tr').length === 0) {
+                            tableBody.append('<tr><td colspan="6" class="no-file">No files selected!</td></tr>');
+                        }
+                    });
 
-					tableBody.find('.validaBtn').click(function () {
-						const cid = $(this).attr('data-cid');
-						const formData = new FormData();
-						formData.append('file', prepareFiles[cid]);
+                    tableBody.find('.validaBtn').click(function () {
+                        const cid = $(this).attr('data-cid');
+                        const formData = new FormData();
+                        formData.append('file', prepareFiles[cid]);
 
-						$App.trigger('upload', {
-							url: $App.url('validaFirma'),
-							data: formData,
-							callback: (response) => {
-								if (response.success == true) {
-									if (response.isValid == true) {
-										$App.trigger('alert:success', { message: response.msj });
-									} else {
-										$App.trigger('alert:warning', { message: response.msj });
-									}
-								} else {
-									$App.trigger('alert:error', { message: response.msj });
-								}
-							},
-						});
-					});
-				}
-			}
+                        $App.trigger('upload', {
+                            url: $App.url('valida_firma', 'mercurio/firmas'),
+                            data: formData,
+                            callback: (response) => {
+                                if (response.success == true) {
+                                    if (response.isValid == true) {
+                                        $App.trigger('alert:success', { message: response.msj });
+                                    } else {
+                                        $App.trigger('alert:warning', { message: response.msj });
+                                    }
+                                } else {
+                                    $App.trigger('alert:error', { message: response.msj });
+                                }
+                            },
+                        });
+                    });
+                }
+            }
 
-			// Events triggered after dragging files.
-			fileUploadDiv.on({
-				dragover: function (e) {
-					e.preventDefault();
-					fileUploadDiv.toggleClass('dragover', e.type === 'dragover');
-				},
-				drop: function (e) {
-					e.preventDefault();
-					fileUploadDiv.removeClass('dragover');
-					handleFiles(e.originalEvent.dataTransfer.files);
-				},
-			});
+            // Events triggered after dragging files.
+            fileUploadDiv.on({
+                dragover: function (e) {
+                    e.preventDefault();
+                    fileUploadDiv.toggleClass('dragover', e.type === 'dragover');
+                },
+                drop: function (e) {
+                    e.preventDefault();
+                    fileUploadDiv.removeClass('dragover');
+                    handleFiles(e.originalEvent.dataTransfer.files);
+                },
+            });
 
-			// Event triggered when file is selected.
-			fileUploadDiv.find(`#${fileUploadId}`).change(function () {
-				handleFiles(this.files);
-			});
-		});
-	};
+            // Event triggered when file is selected.
+            fileUploadDiv.find(`#${fileUploadId}`).change(function () {
+                handleFiles(this.files);
+            });
+        });
+    };
 })(jQuery);
 
 $(() => {
-	$App.initialize();
+    $App.initialize();
 
-	$('#fileUpload').fileUpload();
+    $('#fileUpload').fileUpload();
+
+    // Toggle mostrar/ocultar formulario de recuperación
+    $('#toggleRecoveryForm').click(function () {
+        const $card = $('#recoveryFormCard');
+        const $btn = $(this);
+
+        if ($card.is(':visible')) {
+            $card.slideUp();
+            $btn.html('<i class="fa fa-eye"></i> Mostrar Recuperación de Firma');
+        } else {
+            $card.slideDown();
+            $btn.html('<i class="fa fa-eye-slash"></i> Ocultar Recuperación de Firma');
+        }
+    });
+
+    // Manejar recuperación de firma digital
+    $('#recoverSignatureBtn').click(function () {
+        const systemKey = $('#systemKey').val().trim();
+
+        if (!systemKey) {
+            $App.trigger('alert:warning', { message: 'Por favor ingrese su clave del sistema' });
+            return;
+        }
+
+        $App.trigger('syncro', {
+            url: $App.url('firmas/recuperar_firma'),
+            data: { systemKey: systemKey },
+            callback: (response) => {
+                if (response.success == true) {
+                    $('#signatureResult').html(`
+                        <div class="alert alert-success pt-3 pb-3">
+                            <h6 class='text-white'>Firma Digital Recuperada:</h6>
+                            <pre>${response.signature}</pre>
+                            <p class="mt-2">
+                            La clave de seguridad para firmar documentos le fue enviada a su correo electrónico. Por favor, guarde esta información en un lugar seguro.</p>
+                        </div>
+                    `);
+                    $App.trigger('alert:success', { message: response.msj });
+                } else {
+                    $('#signatureResult').html(`
+                        <div class="alert alert-danger pt-3 pb-3">
+                            ${response.msj}
+                        </div>
+                    `);
+                    $App.trigger('alert:error', { message: response.msj });
+                }
+            },
+        });
+    });
 });

@@ -123,6 +123,11 @@ class Mercurio16 extends ModelBase
         return $this->estado;
     }
 
+    public function getPassword()
+    {
+        return $this->password;
+    }
+
     public function estados_array()
     {
         return [

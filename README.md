@@ -113,4 +113,7 @@ sed -i 's/^session.sid_bits_per_character = 5/;session.sid_bits_per_character = 
 
 mkdir -p /tmp/tcpdf_temp
 chmod 777 /tmp/tcpdf_temp
+
+# resetear el apache de forma silent
+docker exec -it <nombre_contenedor> apache2ctl graceful
 ```
