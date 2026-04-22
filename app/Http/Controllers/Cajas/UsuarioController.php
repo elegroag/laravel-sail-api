@@ -317,9 +317,9 @@ class UsuarioController extends Controller
         return response()->json($response);
     }
 
-    public function changeCantidadPagina(Request $request)
+    public function changeCantidadPagina(Request $request, ?string $tipo = null)
     {
-        $this->buscar($request->input('tipo'), $request->input('estado'));
+        return $this->buscar($request, $tipo);
     }
 
     /**
@@ -334,20 +334,20 @@ class UsuarioController extends Controller
      *
      * @return void
      */
-    public function buscar(Request $request, string $estado = '')
+    public function buscar(Request $request, ?string $tipo = null)
     {
-        $pagina = ($request->input('pagina')) ? $request->input('pagina') : 1;
-        $cantidad_pagina = ($request->input('numero')) ? $request->input('numero') : 10;
-        $ftipo = ($request->input('tipo') == '') ? ' 1=1 ' : " tipo='{$request->input('tipo')}'";
-        $festado = ($request->input('estado') == '') ? ' 1=1 ' : " estado='{$request->input('estado')}'";
+        $pagina = $request->input('pagina', 1);
+        $cantidad_pagina = $request->input('numero', 10);
+        $ftipo = $request->input('tipo', '');
+        $festado = $request->input('estado', $tipo ?? '');
 
         $this->pagination->setters(
             new Srequest(
                 [
-                    'cantidadPaginas' => $cantidad_pagina,
-                    'pagina' => $pagina,
-                    'query' => $ftipo,
-                    'estado' => $festado,
+                    'cantidadPaginas' => $cantidad_pagina ?? 10,
+                    'pagina' => $pagina ?? 1,
+                    'query' => $ftipo ? " tipo='{$ftipo}'" : "1=1",
+                    'estado' => $festado ?? 'A',
                 ]
             )
         );
@@ -355,6 +355,12 @@ class UsuarioController extends Controller
             get_flashdata_item('filter_usuarios') != false
         ) {
             $query = $this->pagination->persistencia(get_flashdata_item('filter_params'));
+        } else {
+            $query = $this->pagination->filter(
+                $request->input('campo'),
+                $request->input('condi'),
+                $request->input('value')
+            );
         }
         set_flashdata('filter_usuarios', $query, true);
         set_flashdata('filter_params', $this->pagination->filters, true);

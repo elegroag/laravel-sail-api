@@ -102,10 +102,10 @@ class ApruebaCertificadoController extends ApplicationController
         $pagination = new Pagination(
             new Srequest(
                 [
-                    'cantidadPaginas' => $cantidad_pagina,
+                    'cantidadPaginas' => $cantidad_pagina ?? 10,
                     'query' => "usuario='{$usuario}' and estado='{$estado}'",
-                    'estado' => $estado,
-                    'pagina' => $pagina,
+                    'estado' => $estado ?? 'P',
+                    'pagina' => $pagina ?? 1,
                 ]
             )
         );
