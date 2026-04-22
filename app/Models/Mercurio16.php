@@ -25,8 +25,8 @@ class Mercurio16 extends ModelBase
         'coddoc',
         'keyprivate',
         'keypublic',
-        'password' .
-            'estado'
+        'password',
+        'estado'
     ];
 
     protected function rules()

@@ -20,7 +20,7 @@ class GestionFirmas
 
     public function __construct($argv)
     {
-        $this->pathOut = storage_path('temp/'.$argv['documento'].'F'.$argv['coddoc'].'/');
+        $this->pathOut = storage_path('temp/' . $argv['documento'] . 'F' . $argv['coddoc'] . '/');
 
         if (! is_dir($this->pathOut)) {
             mkdir($this->pathOut, 0776, true);
@@ -52,10 +52,10 @@ class GestionFirmas
         $imagen = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $imagenBase64));
 
         // Generar un nombre único para la imagen
-        $nombreImagen = uniqid('FI').'.png';
+        $nombreImagen = uniqid('FI') . '.png';
 
         // Ruta donde se guardarán las imágenes
-        $rutaImagen = storage_path('temp/'.$nombreImagen);
+        $rutaImagen = storage_path('temp/' . $nombreImagen);
 
         // Guardar la imagen en el servidor
         if (file_put_contents($rutaImagen, $imagen)) {
@@ -65,7 +65,7 @@ class GestionFirmas
             $filepath = str_replace(storage_path('temp/'), '', $filepath);
 
             if ($lfirma) {
-                $previus = storage_path('temp/').$lfirma->getFirma();
+                $previus = storage_path('temp/') . $lfirma->getFirma();
                 if (file_exists($previus)) {
                     unlink($previus);
                 }
@@ -136,8 +136,8 @@ class GestionFirmas
         $name = basename($filepath);
 
         $ext = substr(strrchr($name, '.'), 1);
-        $rename = str_replace($ext, '', $name).''.$this->markTime.'.'.$ext;
-        $nuevaRuta = $this->pathOut.''.$rename;
+        $rename = str_replace($ext, '', $name) . '' . $this->markTime . '.' . $ext;
+        $nuevaRuta = $this->pathOut . '' . $rename;
         imagepng($nuevaImagen, $nuevaRuta);
 
         // Liberar memoria
@@ -159,7 +159,7 @@ class GestionFirmas
     public function generarClaves($claveUsuario)
     {
         if ($this->lfirma->getKeyprivate()) {
-            if (file_exists(storage_path('temp/'.$this->lfirma->getKeyprivate()))) {
+            if (file_exists(storage_path('temp/' . $this->lfirma->getKeyprivate()))) {
                 return [
                     'private' => $this->lfirma->getKeyprivate(),
                     'public' => $this->lfirma->getKeypublic(),
@@ -186,22 +186,22 @@ class GestionFirmas
         $informacionClave = openssl_pkey_get_details($claves);
         $clavePublica = $informacionClave['key'];
 
-        $namePrivada = $this->markTime.'_private.pem';
-        $namePublica = $this->markTime.'_public.pem';
+        $namePrivada = $this->markTime . '_private.pem';
+        $namePublica = $this->markTime . '_public.pem';
 
-        file_put_contents($this->pathOut.$namePrivada, $clavePrivada);
-        file_put_contents($this->pathOut.$namePublica, $clavePublica);
+        file_put_contents($this->pathOut . $namePrivada, $clavePrivada);
+        file_put_contents($this->pathOut . $namePublica, $clavePublica);
 
-        $path = str_replace(storage_path('temp/'), '', $this->pathOut.$namePrivada);
+        $path = str_replace(storage_path('temp/'), '', $this->pathOut . $namePrivada);
         $this->lfirma->setKeyprivate($path);
 
-        $path = str_replace(storage_path('temp/'), '', $this->pathOut.$namePublica);
+        $path = str_replace(storage_path('temp/'), '', $this->pathOut . $namePublica);
         $this->lfirma->setKeypublic($path);
         $this->lfirma->save();
 
         return [
-            'private' => $this->pathOut.$namePrivada,
-            'public' => $this->pathOut.$namePublica,
+            'private' => $this->pathOut . $namePrivada,
+            'public' => $this->pathOut . $namePublica,
         ];
     }
 }

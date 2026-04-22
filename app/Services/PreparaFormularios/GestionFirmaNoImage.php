@@ -99,6 +99,7 @@ class GestionFirmaNoImage
                 return [
                     'private' => $this->lfirma->keyprivate,
                     'public' => $this->lfirma->keypublic,
+                    'password' => $this->password
                 ];
             }
         } else {
