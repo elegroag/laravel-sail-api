@@ -42,8 +42,9 @@
     <table class="data-table" width="100%" border="0" cellpadding="2" cellspacing="0">
         <thead>
             <tr>
-                <th width="16%" style="width: 16%; text-align: center;">Identificación</th>
-                <th width="48%" style="width: 48%; text-align: center;">Nombre completo</th>
+                <th width="14%" style="width: 14%; text-align: center;">Identificación</th>
+                <th width="12%" style="width: 12%; text-align: center;">Estado</th>
+                <th width="38%" style="width: 38%; text-align: center;">Nombre completo</th>
                 <th width="18%" style="width: 18%; text-align: center;" class="center">Fecha Afiliación</th>
                 <th width="18%" style="width: 18%; text-align: center;" class="center">Fecha Retiro</th>
             </tr>
@@ -51,14 +52,15 @@
         <tbody>
             @forelse ($conyuges as $conyuge)
             <tr>
-                <td width="16%" style="width: 16%; text-align: center">{{ $conyuge->cedcon ?? $conyuge->cedula ?? 'N/A' }}</td>
-                <td width="48%" style="width: 48%;">{{ $conyuge->nomcony ?? 'N/A' }}</td>
+                <td width="14%" style="width: 14%; text-align: center">{{ $conyuge->cedcon ?? $conyuge->cedula ?? 'N/A' }}</td>
+                <td width="12%" style="width: 12%; text-align: center">{{ $conyuge->estado_detalle ?? 'N/A' }}</td>
+                <td width="38%" style="width: 38%;">{{ $conyuge->nomcony ?? 'N/A' }}</td>
                 <td width="18%" style="width: 18%; text-align: center" class="center">{{ $conyuge->fecafi ?? 'N/A' }}</td>
                 <td width="18%" style="width: 18%; text-align: center" class="center">{{ $conyuge->fecest ?? '-' }}</td>
             </tr>
             @empty
             <tr>
-                <td colspan="4" class="center">No hay conyuges registrados</td>
+                <td colspan="5" class="center">No hay conyuges registrados</td>
             </tr>
             @endforelse
         </tbody>
@@ -70,25 +72,27 @@
     <table class="data-table" width="100%" border="0" cellpadding="2" cellspacing="0">
         <thead>
             <tr>
-                <th width="12%" style="width: 16%; text-align: center;">Parentesco</th>
-                <th width="15%" style="width: 16%; text-align: center;">Identificación</th>
-                <th width="48%" style="width: 48%; text-align: center;">Nombre completo</th>
-                <th width="12%" style="width: 18%; text-align: center;" class="center">Fecha Afiliación</th>
-                <th width="12%" style="width: 18%; text-align: center;" class="center">Fecha Retiro</th>
+                <th width="15%" style="width: 15%; text-align: center;">Parentesco</th>
+                <th width="12%" style="width: 12%; text-align: center;">Estado</th>
+                <th width="15%" style="width: 15%; text-align: center;">Identificación</th>
+                <th width="33%" style="width: 33%; text-align: center;">Nombre completo</th>
+                <th width="12%" style="width: 12%; text-align: center;" class="center">Fecha Afiliación</th>
+                <th width="13%" style="width: 13%; text-align: center;" class="center">Fecha Retiro</th>
             </tr>
         </thead>
         <tbody>
             @forelse ($beneficiarios as $beneficiario)
             <tr>
-                <td width="12%" style="width: 16%; text-align: center">{{ $beneficiario->parent_detalle ?? 'N/A' }}</td>
-                <td width="15%" style="width: 16%; text-align: center">{{ $beneficiario->documento ?? 'N/A' }}</td>
-                <td width="48%" style="width: 48%;">{{ $beneficiario->nomben ?? 'N/A' }}</td>
-                <td width="12%" style="width: 18%; text-align: center" class="center">{{ $beneficiario->fecafi ?? 'N/A' }}</td>
-                <td width="12%" style="width: 18%; text-align: center" class="center">{{ $beneficiario->fecest ?? '-' }}</td>
+                <td width="15%" style="width: 15%; text-align: center">{{ $beneficiario->parent_detalle ?? 'N/A' }}</td>
+                <td width="12%" style="width: 12%; text-align: center">{{ $beneficiario->estado_detalle ?? 'N/A' }}</td>
+                <td width="15%" style="width: 15%; text-align: center">{{ $beneficiario->documento ?? 'N/A' }}</td>
+                <td width="33%" style="width: 33%;">{{ $beneficiario->nomben ?? 'N/A' }}</td>
+                <td width="12%" style="width: 12%; text-align: center" class="center">{{ $beneficiario->fecpre ?? 'N/A' }}</td>
+                <td width="13%" style="width: 13%; text-align: center" class="center">{{ $beneficiario->fecest ?? '-' }}</td>
             </tr>
             @empty
             <tr>
-                <td colspan="5" class="center">No hay beneficiarios registrados</td>
+                <td colspan="6" class="center">No hay beneficiarios registrados</td>
             </tr>
             @endforelse
         </tbody>

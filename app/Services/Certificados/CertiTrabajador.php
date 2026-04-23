@@ -142,20 +142,33 @@ class CertiTrabajador
         WHERE subsi15.cedtra = ?', [$this->cedtra]);
 
         $conyuges = $legacy->select('SELECT subsi20.*, subsi21.fecafi, subsi21.comper,
-        CONCAT_WS(" ", subsi20.prinom, subsi20.segnom, subsi20.priape, subsi20.segape) as nomcony  
+        CONCAT_WS(" ", subsi20.prinom, subsi20.segnom, subsi20.priape, subsi20.segape) as nomcony,
+        CASE
+            WHEN subsi20.estado = "A" THEN "ACTIVO"
+            WHEN subsi20.estado = "B" THEN "INACTIVO"
+            WHEN subsi20.estado = "M" THEN "MUERTO"
+            ELSE "OTRO"
+        END as estado_detalle 
         FROM subsi21 
         INNER JOIN subsi20 ON subsi20.cedcon = subsi21.cedcon 
         WHERE subsi21.cedtra = ? AND subsi21.comper = ? AND subsi20.estado = ?', [$this->cedtra, 'S', 'A']);
 
         $beneficiarios = $legacy->select('SELECT subsi22.*,
         CONCAT_WS(" ", subsi22.prinom, subsi22.segnom, subsi22.priape, subsi22.segape) as nomben,
-        subsi23.fecafi,   
+        subsi23.fecafi, 
+        subsi23.fecpre, 
         CASE
             WHEN subsi22.parent = "1" THEN "HIJO"
             WHEN subsi22.parent = "2" THEN "HERMANO"
             WHEN subsi22.parent = "3" THEN "PADRES"
             ELSE "OTRO"
-        END as parent_detalle
+        END as parent_detalle,
+        CASE
+            WHEN subsi22.estado = "A" THEN "ACTIVO"
+            WHEN subsi22.estado = "B" THEN "INACTIVO"
+            WHEN subsi22.estado = "M" THEN "MUERTO"
+            ELSE "OTRO" 
+        END as estado_detalle 
         FROM subsi23 
         INNER JOIN subsi22 ON subsi22.codben = subsi23.codben 
         WHERE subsi23.cedtra = ? AND subsi22.estado = ?', [$this->cedtra, 'A']);

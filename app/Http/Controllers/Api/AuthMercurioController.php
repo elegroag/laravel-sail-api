@@ -578,20 +578,25 @@ class AuthMercurioController extends Controller
                 'delivery_method' => $request->input('delivery_method'),
                 'context' => 'recoverySend',
             ];
-            $token = (new AuthJwt(430))->SimpleToken($claims);
+            $token = (new AuthJwt(730))->SimpleToken($claims);
 
             $codigoVerify = genera_code();
             $inicio = Carbon::now()->format('Y-m-d H:i:s');
             $intentos = '0';
 
-            Mercurio19::where('documento', $data['documento'])
-                ->where('coddoc', $data['coddoc'])
-                ->where('tipo', $data['tipo'])
-                ->update([
+            Mercurio19::updateOrCreate(
+                [
+                    'documento' => $data['documento'],
+                    'coddoc' => $data['coddoc'],
+                    'tipo' => $data['tipo'],
+                ],
+                [
                     'inicio' => $inicio,
                     'intentos' => (int) $intentos,
                     'codver' => (string) $codigoVerify,
-                ]);
+                    'token' => $token,
+                ]
+            );
 
             if ($request->input('delivery_method') == 'email') {
 
