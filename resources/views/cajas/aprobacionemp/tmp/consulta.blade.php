@@ -37,7 +37,7 @@
 			<div class="col-md-4 col-lg-3">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Calidad Empresa</label>
-					<div class="form-control bg-light">{{ isset($_calemp[$mercurio30->calemp]) ? $_calemp[$mercurio30->calemp] : '' }}</div>
+					<div class="form-control bg-light">{{ $_calemp[$mercurio30->calemp] ?? '' }}</div>
 				</div>
 			</div>
 			<div class="col-md-4 col-lg-3">
@@ -61,13 +61,13 @@
 			<div class="col-md-4 col-lg-3">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Ciudad Notificación</label>
-					<div class="form-control bg-light">{{ isset($_codciu[$mercurio30->codciu]) ? $_codciu[$mercurio30->codciu] : '' }}</div>
+					<div class="form-control bg-light">{{ $_codciu[$mercurio30->codciu] ?? '' }}</div>
 				</div>
 			</div>
 			<div class="col-md-4 col-lg-3">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Ciudad de Labor de Trabajadores</label>
-					<div class="form-control bg-light">{{ isset($_codzon[$mercurio30->codzon]) ? $_codzon[$mercurio30->codzon] : '' }}</div>
+					<div class="form-control bg-light">{{ $_codzon[$mercurio30->codzon] ?? '' }}</div>
 				</div>
 			</div>
 			<div class="col-md-4 col-lg-3">
@@ -91,7 +91,7 @@
 			<div class="col-md-4 col-lg-3">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Actividad</label>
-					<div class="form-control bg-light">{{ isset($_codact[$mercurio30->codact]) ? $_codact[$mercurio30->codact] : '' }}</div>
+					<div class="form-control bg-light">{{ $_codact[$mercurio30->codact] ?? '' }}</div>
 				</div>
 			</div>
 			<div class="col-md-4 col-lg-3">
@@ -127,7 +127,7 @@
 			<div class="col-md-4 col-lg-3">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Ciudad Comercial</label>
-					<div class="form-control bg-light">{{ isset($_codciu[$mercurio30->ciupri]) ? $_codciu[$mercurio30->ciupri] : '' }}</div>
+					<div class="form-control bg-light">{{ $_codciu[$mercurio30->ciupri] ?? '' }}</div>
 				</div>
 			</div>
 			<div class="col-md-4 col-lg-3">

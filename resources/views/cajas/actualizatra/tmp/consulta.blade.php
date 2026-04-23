@@ -67,13 +67,13 @@
             <div class="col-md-6 col-lg-3">
                 <div class="form-group">
                     <label for="codciu" class="form-label text-muted small mb-1">Ciudad residencia</label>
-                    <div class="form-control bg-light">{{ isset($_codciu[$datostra['codciu']]) ? $_codciu[$datostra['codciu']] : '' }}</div>
+                    <div class="form-control bg-light">{{ $_codciu[$datostra['codciu']] ?? '' }}</div>
                 </div>
             </div>
             <div class="col-md-6 col-lg-3">
                 <div class="form-group">
                     <label for="codzon" class="form-label text-muted small mb-1">Zona trabajo</label>
-                    <div class="form-control bg-light">{{ isset($_codzon[$datostra['codzon']]) ? $_codzon[$datostra['codzon']] : '' }}</div>
+                    <div class="form-control bg-light">{{ $_codzon[$datostra['codzon']] ?? '' }}</div>
                 </div>
             </div>
         </div>

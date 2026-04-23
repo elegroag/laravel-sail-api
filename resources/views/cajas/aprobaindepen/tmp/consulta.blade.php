@@ -27,13 +27,13 @@
 			<div class="col-md-4 col-lg-3">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Tipo de Documento</label>
-					<div class="form-control bg-light">{{ isset($_tipdoc[$mercurio41->getTipdoc()]) ? $_tipdoc[$mercurio41->getTipdoc()] : '' }}</div>
+					<div class="form-control bg-light">{{ $_tipdoc[$mercurio41->getTipdoc()] ?? '' }}</div>
 				</div>
 			</div>
 			<div class="col-md-8 col-lg-6">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Cargo</label>
-					<div class="form-control bg-light">{{ isset($_cargos[$mercurio41->getCargo()]) ? $_cargos[$mercurio41->getCargo()] : '' }}</div>
+					<div class="form-control bg-light">{{ $_cargos[$mercurio41->getCargo()] ?? '' }}</div>
 				</div>
 			</div>
 			<div class="col-md-4 col-lg-3">
@@ -63,7 +63,7 @@
 			<div class="col-md-4 col-lg-3">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Estado Civil</label>
-					<div class="form-control bg-light">{{ isset($_estciv[$mercurio41->getEstciv()]) ? $_estciv[$mercurio41->getEstciv()] : '' }}</div>
+					<div class="form-control bg-light">{{ $_estciv[$mercurio41->getEstciv()] ?? '' }}</div>
 				</div>
 			</div>
 			<div class="col-md-4 col-lg-3">
@@ -75,19 +75,19 @@
 			<div class="col-md-4 col-lg-3">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Discapacidad</label>
-					<div class="form-control bg-light">{{ isset($_tipdis[$mercurio41->getTipdis()]) ? $_tipdis[$mercurio41->getTipdis()] : '' }}</div>
+					<div class="form-control bg-light">{{ $_tipdis[$mercurio41->getTipdis()] ?? '' }}</div>
 				</div>
 			</div>
 			<div class="col-md-4 col-lg-3">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Nivel de Educación</label>
-					<div class="form-control bg-light">{{ isset($_nivedu[$mercurio41->getNivedu()]) ? $_nivedu[$mercurio41->getNivedu()] : '' }}</div>
+					<div class="form-control bg-light">{{ $_nivedu[$mercurio41->getNivedu()] ?? '' }}</div>
 				</div>
 			</div>
 			<div class="col-md-4 col-lg-3">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Tipo de Afiliado</label>
-					<div class="form-control bg-light">{{ isset($_tipafi[$mercurio41->getTipafi()]) ? $_tipafi[$mercurio41->getTipafi()] : '' }}</div>
+					<div class="form-control bg-light">{{ $_tipafi[$mercurio41->getTipafi()] ?? '' }}</div>
 				</div>
 			</div>
 			<div class="col-md-4 col-lg-3">
@@ -99,13 +99,13 @@
 			<div class="col-md-4 col-lg-3">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Ciudad Notificaciones</label>
-					<div class="form-control bg-light">{{ isset($_codciu[$mercurio41->getCodciu()]) ? $_codciu[$mercurio41->getCodciu()] : '' }}</div>
+					<div class="form-control bg-light">{{ $_codciu[$mercurio41->getCodciu()] ?? '' }}</div>
 				</div>
 			</div>
 			<div class="col-md-4 col-lg-3">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Ciudad Labor Trabajadores</label>
-					<div class="form-control bg-light">{{ isset($_codzon[$mercurio41->getCodzon()]) ? $_codzon[$mercurio41->getCodzon()] : '' }}</div>
+					<div class="form-control bg-light">{{ $_codzon[$mercurio41->getCodzon()] ?? '' }}</div>
 				</div>
 			</div>
 			<div class="col-md-4 col-lg-3">
@@ -135,7 +135,7 @@
 			<div class="col-md-4 col-lg-3">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Actividad</label>
-					<div class="form-control bg-light">{{ isset($_codact[$mercurio41->getCodact()]) ? $_codact[$mercurio41->getCodact()] : '' }}</div>
+					<div class="form-control bg-light">{{ $_codact[$mercurio41->getCodact()] ?? '' }}</div>
 				</div>
 			</div>
 		</div>

@@ -46,7 +46,7 @@ $msexo = ($trabajador->sexo != 'N') ? $_sexos[$trabajador->sexo] : '';
             <div class="col-md-4 col-lg-3">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Ciudad nacimiento</label>
-					<div class="form-control bg-light">{{ capitalize($_codciu[$trabajador->codciu]) }}</div>
+					<div class="form-control bg-light">{{ capitalize($_codciu[$trabajador->codciu] ?? 'NO REGISTRA') }}</div>
 				</div>
 			</div>
             <div class="col-md-4 col-lg-3">
@@ -70,13 +70,13 @@ $msexo = ($trabajador->sexo != 'N') ? $_sexos[$trabajador->sexo] : '';
             <div class="col-md-4 col-lg-3">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Ciudad</label>
-					<div class="form-control bg-light">{{ capitalize($_codciu[$trabajador->codciu]) }}</div>
+					<div class="form-control bg-light">{{ capitalize($_codciu[$trabajador->codciu] ?? 'NO REGISTRA') }}</div>
 				</div>
 			</div>
             <div class="col-md-4 col-lg-3">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Zona</label>
-					<div class="form-control bg-light">{{ capitalize($_codzon[$trabajador->codzon]) }}</div>
+					<div class="form-control bg-light">{{ capitalize($_codzon[$trabajador->codzon] ?? 'NO REGISTRA') }}</div>
 				</div>
 			</div>
             <div class="col-md-4 col-lg-3">
@@ -106,7 +106,7 @@ $msexo = ($trabajador->sexo != 'N') ? $_sexos[$trabajador->sexo] : '';
             <div class="col-md-8 col-lg-6">
                 <div class="form-group">
                     <label class="form-label text-muted small mb-1">Cargo</label>
-                    <div class="form-control bg-light">{{ $_ocupaciones[$trabajador->cargo] }}</div>
+                    <div class="form-control bg-light">{{ $_ocupaciones[$trabajador->cargo] ?? 'NO REGISTRA' }}</div>
                 </div>
             </div>
             <div class='col-md-4 col-lg-3'>
@@ -130,25 +130,25 @@ $msexo = ($trabajador->sexo != 'N') ? $_sexos[$trabajador->sexo] : '';
             <div class='col-md-4 col-lg-3'>
                 <div class="form-group">
                     <label class="form-label text-muted small mb-1">Capacidad de trabajar</label>
-                    <div class="form-control bg-light">{{ $_captra[$trabajador->captra == 'S' ? 'N' : $trabajador->captra] ?? 'NORMAL' }}</div>
+                    <div class="form-control bg-light">{{ $_captra[$trabajador->captra == 'S' ? 'N' : $trabajador->captra] ?? 'NORMAL' ?? 'NO REGISTRA' }}</div>
                 </div>
             </div>
             <div class='col-md-4 col-lg-3'>
                 <div class="form-group">
                     <label class="form-label text-muted small mb-1">Discapacidad</label>
-                    <div class="form-control bg-light">{{ $_tipdis[$trabajador->tipdis] }}</div>
+                    <div class="form-control bg-light">{{ $_tipdis[$trabajador->tipdis] ?? 'NO REGISTRA' }}</div>
                 </div>
             </div>
             <div class='col-md-4 col-lg-3'>
                 <div class="form-group">
                     <label class="form-label text-muted small mb-1">Nivel Educación</label>
-                    <div class="form-control bg-light">{{ $_nivedu[$trabajador->nivedu] }}</div>
+                    <div class="form-control bg-light">{{ $_nivedu[$trabajador->nivedu] ?? 'NO REGISTRA' }}</div>
                 </div>
             </div>
             <div class='col-md-4 col-lg-3'>
                 <div class="form-group">
                     <label class="form-label text-muted small mb-1">Rural</label>
-                    <div class="form-control bg-light">{{ $_rural[$trabajador->rural] }}</div>
+                    <div class="form-control bg-light">{{ $_rural[$trabajador->rural] ?? 'NO REGISTRA' }}</div>
                 </div>    
             </div>
             <div class='col-md-4 col-lg-3'>
@@ -160,19 +160,19 @@ $msexo = ($trabajador->sexo != 'N') ? $_sexos[$trabajador->sexo] : '';
             <div class='col-md-4 col-lg-3'>
                 <div class="form-group">
                     <label class="form-label text-muted small mb-1">Tipo Contrato</label>
-                    <div class="form-control bg-light">{{ $_tipcon[$trabajador->tipcon] }}</div>
+                    <div class="form-control bg-light">{{ $_tipcon[$trabajador->tipcon] ?? 'NO REGISTRA' }}</div>
                 </div>
             </div>
             <div class='col-md-4 col-lg-3'>
                 <div class="form-group">
                     <label class="form-label text-muted small mb-1">Vivienda</label>
-                    <div class="form-control bg-light">{{ $_vivienda[$trabajador->vivienda] }}</div>
+                    <div class="form-control bg-light">{{ $_vivienda[$trabajador->vivienda] ?? 'NO REGISTRA' }}</div>
                 </div>
             </div>
             <div class='col-md-4 col-lg-3'>
                 <div class="form-group">
                     <label class="form-label text-muted small mb-1">Tipo Afiliado</label>
-                    <div class="form-control bg-light">{{ $_tipafi[$trabajador->tipafi] }}</div>
+                    <div class="form-control bg-light">{{ $_tipafi[$trabajador->tipafi] ?? 'NO REGISTRA' }}</div>
                 </div>
             </div>
             <div class='col-md-4 col-lg-3'>

@@ -19,7 +19,7 @@
 			<div class="col-md-4 col-lg-3">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Calidad Empresa</label>
-					<div class="form-control bg-light">{{ isset($_calemp[$mercurio38->getCalemp()]) ? $_calemp[$mercurio38->getCalemp()] : '' }}</div>
+					<div class="form-control bg-light">{{ $_calemp[$mercurio38->getCalemp()] ?? '' }}</div>
 				</div>
 			</div>
 			<div class="col-md-4 col-lg-3">
@@ -31,13 +31,13 @@
 			<div class="col-md-4 col-lg-3">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Ciudad de Notificación</label>
-					<div class="form-control bg-light">{{ isset($_codciu[$mercurio38->getCodciu()]) ? $_codciu[$mercurio38->getCodciu()] : '' }}</div>
+					<div class="form-control bg-light">{{ $_codciu[$mercurio38->getCodciu()] ?? '' }}</div>
 				</div>
 			</div>
 			<div class="col-md-4 col-lg-3">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Ciudad de Labor de Trabajadores</label>
-					<div class="form-control bg-light">{{ isset($_codzon[$mercurio38->getCodzon()]) ? $_codzon[$mercurio38->getCodzon()] : '' }}</div>
+					<div class="form-control bg-light">{{ $_codzon[$mercurio38->getCodzon()] ?? '' }}</div>
 				</div>
 			</div>
 			<div class="col-md-4 col-lg-3">
@@ -61,7 +61,7 @@
 			<div class="col-md-4 col-lg-3">
 				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Actividad</label>
-					<div class="form-control bg-light">{{ isset($_codact[$mercurio38->getCodact()]) ? $_codact[$mercurio38->getCodact()] : '' }}</div>
+					<div class="form-control bg-light">{{ $_codact[$mercurio38->getCodact()] ?? '' }}</div>
 				</div>
 			</div>
 			<div class="col-md-4 col-lg-3">
