@@ -54,7 +54,7 @@ class CertificadosServices
      */
     public function findPagination($query)
     {
-        return Mercurio45::whereRaw($query)->orderBy($this->orderpag, 'DESC')->get();
+        return Mercurio45::whereRaw($query)->orderBy($this->orderpag, 'asc')->get();
     }
 
     /**

@@ -97,7 +97,7 @@ class EmpresaServices
 
     public function findPagination($query)
     {
-        return Mercurio30::whereRaw($query)->orderBy($this->orderpag, 'DESC')->get();
+        return Mercurio30::whereRaw($query)->orderBy($this->orderpag, 'asc')->get();
     }
 
     public function getTemplateTable()

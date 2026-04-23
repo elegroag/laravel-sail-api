@@ -36,7 +36,7 @@ class SessionCookies
 
     public static function destroyIdentity()
     {
-        session()->forget(['user', 'tipo', 'coddoc', 'documento', 'nombre', 'email', 'id']);
+        session()->forget(['user', 'tipo', 'coddoc', 'documento', 'nombre', 'email', 'id', 'tipfun']);
         session()->invalidate();
         session()->regenerateToken();
     }

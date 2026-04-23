@@ -44,14 +44,6 @@ class ConyugeInfoView extends FormInfoView {
 
     afterRender() {
         this.__afterRender();
-        this.model.set({
-            vendedor: 'N',
-            empleador: 'N',
-            tippag: 'T',
-            giro: 'N',
-            codsuc: '001',
-            codlis: '001',
-        });
 
         this.actualizaForm();
 
@@ -67,7 +59,15 @@ class ConyugeInfoView extends FormInfoView {
             this.$el.find('#codban').prop('disabled', true);
             this.$el.find('#numcue').prop('disabled', true);
             this.$el.find('#tipcue').prop('disabled', true);
-            this.$el.find('#numcue').prop('disabled', true);
+        }
+
+        this.$el.find('#numcue').val(this.model.get('numcue'));
+        if (this.model.get('tipcue')) {
+            this.$el.find('#tipcue').val(this.model.get('tipcue'));
+        } else {
+            if (this.$el.find('#tippag').val() == 'D' || this.$el.find('#tippag').val() == 'A') {
+                this.$el.find('#tipcue').val('A');
+            }
         }
     }
 

@@ -53,7 +53,7 @@ class TrabajadorServices
      */
     public function findPagination($query)
     {
-        return Mercurio31::whereRaw($query)->orderBy($this->orderpag, 'DESC')->get();
+        return Mercurio31::whereRaw($query)->orderBy($this->orderpag, 'asc')->get();
     }
 
     /**

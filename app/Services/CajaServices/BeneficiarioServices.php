@@ -53,7 +53,7 @@ class BeneficiarioServices
      */
     public function findPagination($query)
     {
-        return Mercurio34::whereRaw($query)->orderBy($this->orderpag, 'DESC')->get();
+        return Mercurio34::whereRaw($query)->orderBy($this->orderpag, 'asc')->get();
     }
 
     /**

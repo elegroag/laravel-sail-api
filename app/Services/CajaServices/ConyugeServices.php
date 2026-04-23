@@ -53,7 +53,7 @@ class ConyugeServices
      */
     public function findPagination($query)
     {
-        return Mercurio32::whereRaw($query)->orderBy($this->orderpag, 'DESC')->get();
+        return Mercurio32::whereRaw($query)->orderBy($this->orderpag, 'asc')->get();
     }
 
     /**

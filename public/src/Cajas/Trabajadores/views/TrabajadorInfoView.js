@@ -43,17 +43,19 @@ export default class TrabajadorInfoView extends FormInfoView {
 
     #afterRender() {
         this.__afterRender();
+        this.$el.find('.js-basic-multiple, #codind, #tipsoc, #tipapo, #codban, #codgir').select2();
+
         this.model.set({
             vendedor: 'N',
             empleador: 'N',
             tippag: 'T',
             giro: 'N',
-            codsuc: '001',
-            codlis: '001',
+            codgir: 'NO',
+            codsuc: this.model.get('codsuc') || '001',
+            codlis: this.model.get('codlis') || '001',
         });
 
         this.actualizaForm();
-        this.$el.find('.js-basic-multiple, #codind, #tipsoc, #tipapo, #codban, #codgir').select2();
 
         flatpickr(this.$el.find('#fecafi, #fecapr'), {
             enableTime: false,

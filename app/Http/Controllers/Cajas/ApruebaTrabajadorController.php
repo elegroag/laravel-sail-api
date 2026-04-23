@@ -360,18 +360,22 @@ class ApruebaTrabajadorController extends ApplicationController
             $componente_codsuc = Tag::selectStatic(
                 new Srequest([
                     'name' => 'codsuc',
+                    'id' => 'codsuc',
                     'options' => $_codsuc,
                     'use_dummy' => true,
                     'dummyValue' => '',
                     'class' => 'form-control',
+                    'value' => $mercurio31->codsuc ?? '001',
                 ])
             );
 
             $componente_codlis = Tag::selectStatic(
                 new Srequest([
+                    'id' => 'codlis',
                     'name' => 'codlis',
                     'options' => $_codlis,
                     'class' => 'form-control',
+                    'value' => $mercurio31->codsuc ?? '001',
                 ])
             );
 

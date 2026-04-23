@@ -99,7 +99,7 @@ class ServicioDomesticoServices
 
     public function findPagination($query)
     {
-        return Mercurio40::whereRaw($query)->orderBy($this->orderpag, 'DESC')->get();
+        return Mercurio40::whereRaw($query)->orderBy($this->orderpag, 'asc')->get();
     }
 
     public function getTemplateTable()

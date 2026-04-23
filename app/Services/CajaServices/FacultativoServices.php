@@ -99,7 +99,7 @@ class FacultativoServices
 
     public function findPagination($query)
     {
-        return Mercurio36::whereRaw($query)->orderBy($this->orderpag, 'DESC')->get();
+        return Mercurio36::whereRaw($query)->orderBy($this->orderpag, 'asc')->get();
     }
 
     public function getTemplateTable()

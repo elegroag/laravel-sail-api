@@ -34,7 +34,7 @@ class NotifyEmailServices
             ],
         ];
 
-        $html = view('caja/layouts/rechazar', $params)->render();
+        $html = view('cajas/layouts/rechazar', $params)->render();
         $emailCaja = Mercurio01::first();
 
         $senderEmail = new SenderEmail(

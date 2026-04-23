@@ -99,7 +99,7 @@ class PensionadoServices
 
     public function findPagination($query)
     {
-        return Mercurio38::whereRaw($query)->orderBy($this->orderpag, 'DESC')->get();
+        return Mercurio38::whereRaw($query)->orderBy($this->orderpag, 'asc')->get();
     }
 
     public function getTemplateTable()

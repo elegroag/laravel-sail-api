@@ -99,7 +99,7 @@ class IndependienteServices
 
     public function findPagination($query)
     {
-        return Mercurio41::whereRaw($query)->orderBy($this->orderpag, 'DESC')->get();
+        return Mercurio41::whereRaw($query)->orderBy($this->orderpag, 'asc')->get();
     }
 
     public function getTemplateTable()

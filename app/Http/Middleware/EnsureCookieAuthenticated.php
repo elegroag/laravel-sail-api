@@ -34,7 +34,7 @@ class EnsureCookieAuthenticated
                 'msj' => 'No autenticado.',
                 'code' => 401,
             ]);
-            return redirect('web/login');
+            return redirect('web/salir');
         }
 
         if ($this->autorization($request) === false) {
@@ -57,7 +57,12 @@ class EnsureCookieAuthenticated
         $tipo = session()->has('tipo') ? session('tipo') : null;
         $user = session()->has('user') ? session('user') : null;
 
-        if ($user && $user != null && $tipo && $tipo != null) {
+        if (
+            $user &&
+            $user != '' &&
+            $tipo &&
+            $tipo != ''
+        ) {
             $request->attributes->set('user', $user);
             $request->attributes->set('tipo', $tipo);
             $request->attributes->set('tipfun', null);
@@ -65,15 +70,16 @@ class EnsureCookieAuthenticated
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No autenticado.',
+                    'message' => 'El usuario y tipo no es posible de identificar.',
                 ], 401);
             }
 
             set_flashdata('error', [
-                'msj' => 'No autorizado para acceder al modulo. ',
+                'msj' => 'El usuario y tipo no es posible de identificar.',
                 'code' => 401,
             ]);
-            return redirect('mercurio/principal/index');
+
+            return redirect('web/salir');
         }
 
         return $next($request);
