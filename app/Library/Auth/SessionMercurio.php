@@ -32,8 +32,10 @@ class SessionMercurio
             return false;
         }
 
-        session()->put('tipo', $request->getParam('tipo'));
-        session()->put('estado_afiliado', $request->getParam('estado_afiliado'));
+        session([
+            'tipo' => $request->getParam('tipo'),
+            'estado_afiliado' => $request->getParam('estado_afiliado')
+        ]);
 
         return [
             'documento' => $usuario->documento,

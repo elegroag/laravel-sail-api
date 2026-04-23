@@ -76,77 +76,8 @@ class AutenticaService
             throw new DebugException('Error acceso incorrecto. Los datos no corresponden a un usuario registrado en el sistema.', 501);
         }
 
-        // Validar estado activo si existe campo estado
-        if (method_exists($mercurio07, 'getEstado')) {
-            $estado = $mercurio07->getEstado();
-            if (! empty($estado) && $estado !== 'A') {
-                throw new DebugException('La cuenta no se encuentra activa para iniciar sesión.', 403);
-            }
-        }
-
         if ($clave === 'xxxx') {
-
-            if ($tipo == 'N' || $tipo == 'P') {
-                throw new DebugException('Alerta. El usuario ya posee un registro en plataforma y requiere de ingresar con la clave valida.', 501);
-            } else {
-                // create validation mediante token
-                $codigoVerify = genera_code();
-                $autentica->verificaPin($mercurio07, $codigoVerify);
-
-                $authJwt = new AuthJwt(730);
-                $token = $authJwt->SimpleToken();
-
-                $user19 = Mercurio19::where(['documento' => $documento, 'coddoc' => $coddoc, 'tipo' => $tipo])->first();
-                $inicio = date('Y-m-d H:i:s');
-                if ($user19) {
-                    $momento = new \DateTime($user19->getInicio());
-                    // Obtener el momento actual
-                    $ahora = new \DateTime('now');
-                    // Calcular la diferencia
-                    $diferencia = $momento->diff($ahora);
-                    // Convertir la diferencia a minutos
-                    $diferenciaEnMinutos = ($diferencia->days * 24 * 60) + ($diferencia->h * 60) + $diferencia->i;
-                    if ($diferenciaEnMinutos >= 5) {
-                        $intentos = 0;
-                    } else {
-                        $intentos = $user19->getIntentos() ? $user19->getIntentos() + 1 : 0;
-                    }
-
-                    Mercurio19::where('documento', $documento)
-                        ->where('coddoc', $coddoc)
-                        ->where('tipo', $tipo)
-                        ->update([
-                            'intentos' => (int) $intentos,
-                            'inicio' => $inicio,
-                            'codver' => (string) $codigoVerify,
-                            'token' => (string) $token,
-                        ]);
-                } else {
-                    $user19 = new Mercurio19;
-                    $user19->setTipo($tipo);
-                    $user19->setCoddoc($coddoc);
-                    $user19->setDocumento($documento);
-                    $user19->setIntentos(0);
-                    $user19->setInicio($inicio);
-                    $user19->setCodver($codigoVerify);
-                    $user19->setToken($token);
-                    $user19->setCodigo(1);
-                    if (! $user19->save()) {
-                        $msj = '';
-                        foreach ($user19->getMessages() as $message) {
-                            $msj .= ' ' . $message->getMessage();
-                        }
-                        throw new DebugException("Error al guardar Token Access, {$msj}", 501);
-                    }
-                }
-
-                //$this->autoFirma($documento, $coddoc, $clave);
-
-                return [
-                    false,
-                    'Alerta. El usuario ya posee un registro en plataforma y requiere de ingresar con PIN de validación.',
-                ];
-            }
+            return $this->usuariosActivosSinAcceso($autentica, $mercurio07, $tipo, $coddoc, $documento);
         }
 
         $storedHash = $mercurio07->getClave();
@@ -163,14 +94,12 @@ class AutenticaService
                     'coddoc' => $coddoc,
                     'documento' => $documento,
                     'estado_afiliado' => $estadoAfiliado,
-                    'estado' => 'A',
+                    'estado' => $mercurio07->estado,
                 ]
             )
         )) {
-            throw new DebugException('Error en la autenticación del usuario', 501);
+            throw new DebugException('Error en la autenticación del usuario al crear la sesión', 401);
         }
-
-        //$this->autoFirma($documento, $coddoc, $clave);
 
         return [
             true,
@@ -196,6 +125,72 @@ class AutenticaService
                 $gestionFirmas->guardarFirma();
                 $gestionFirmas->generarClaves();
             }
+        }
+    }
+
+    function usuariosActivosSinAcceso($autentica, $mercurio07, $tipo, $coddoc, $documento)
+    {
+
+        if ($tipo == 'N' || $tipo == 'P') {
+            throw new DebugException('Alerta. El usuario ya posee un registro en plataforma y requiere de ingresar con la clave valida.', 501);
+        } else {
+            // create validation mediante token
+            $codigoVerify = genera_code();
+            $autentica->verificaPin($mercurio07, $codigoVerify);
+
+            $authJwt = new AuthJwt(730);
+            $token = $authJwt->SimpleToken();
+
+            $user19 = Mercurio19::where(['documento' => $documento, 'coddoc' => $coddoc, 'tipo' => $tipo])->first();
+            $inicio = date('Y-m-d H:i:s');
+            if ($user19) {
+                $momento = new \DateTime($user19->getInicio());
+                // Obtener el momento actual
+                $ahora = new \DateTime('now');
+                // Calcular la diferencia
+                $diferencia = $momento->diff($ahora);
+                // Convertir la diferencia a minutos
+                $diferenciaEnMinutos = ($diferencia->days * 24 * 60) + ($diferencia->h * 60) + $diferencia->i;
+                if ($diferenciaEnMinutos >= 5) {
+                    $intentos = 0;
+                } else {
+                    $intentos = $user19->getIntentos() ? $user19->getIntentos() + 1 : 0;
+                }
+
+                Mercurio19::where('documento', $documento)
+                    ->where('coddoc', $coddoc)
+                    ->where('tipo', $tipo)
+                    ->update([
+                        'intentos' => (int) $intentos,
+                        'inicio' => $inicio,
+                        'codver' => (string) $codigoVerify,
+                        'token' => (string) $token,
+                    ]);
+            } else {
+                $user19 = new Mercurio19;
+                $user19->setTipo($tipo);
+                $user19->setCoddoc($coddoc);
+                $user19->setDocumento($documento);
+                $user19->setIntentos(0);
+                $user19->setInicio($inicio);
+                $user19->setCodver($codigoVerify);
+                $user19->setToken($token);
+                $user19->setCodigo(1);
+                if (! $user19->save()) {
+                    $msj = '';
+                    foreach ($user19->getMessages() as $message) {
+                        $msj .= ' ' . $message->getMessage();
+                    }
+                    throw new DebugException("Error al guardar Token Access, {$msj}", 501);
+                }
+            }
+
+            //$this->autoFirma($documento, $coddoc, $clave);
+
+            return [
+                false,
+                'Alerta. El usuario ya posee un registro en plataforma y requiere de ingresar con PIN de validación.',
+            ];
         }
     }
 }

@@ -202,7 +202,7 @@ class AutenticaEmpresa extends AutenticaGeneral
                 $usuarioEmpresa->save();
             }
 
-            return false;
+            return true;
         } else {
             /**
              * La empresa está activa en sisu

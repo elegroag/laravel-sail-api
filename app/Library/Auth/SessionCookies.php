@@ -30,13 +30,13 @@ class SessionCookies
 
         if (! $userData) return false;
 
-        session()->put('user', $userData);
+        session(['user' => $userData]);
         return true;
     }
 
     public static function destroyIdentity()
     {
-        session()->forget(['user', 'tipo', 'coddoc', 'documento', 'nombre', 'email', 'id', 'tipfun']);
+        session()->forget(['user', 'tipo', 'coddoc', 'documento', 'nombre', 'email', 'id', 'tipfun', 'estado_afiliado']);
         session()->invalidate();
         session()->regenerateToken();
     }

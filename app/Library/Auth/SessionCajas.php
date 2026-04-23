@@ -31,7 +31,10 @@ class SessionCajas
             return false;
         }
 
-        session()->put('tipfun', $request->getParam('tipfun'));
+        session([
+            'tipfun' => $request->getParam('tipfun'),
+            'usuario' => $request->getParam('usuario')
+        ]);
 
         return [
             'cedtra' => $usuario->cedtra,
