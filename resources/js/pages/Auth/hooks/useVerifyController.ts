@@ -43,17 +43,15 @@ const verificationReducer = (state: VerificationState, action: VerificationActio
     }
 };
 
-export default function useVerifyController({ token, documento, coddoc, tipo, errors, option_request }: VerifyEmailProps) {
+export default function useVerifyController({ documento, coddoc, tipo, errors, error, option_request }: VerifyEmailProps) {
     const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
     const [state, dispatch] = useReducer(verificationReducer, initialState);
-    const [isResending, setIsResending] = useState(false);
     const formattedCountdown = useMemo(() => formatCountdown(state.resendTimer), [state.resendTimer]);
 
     const deliveryChannelLabel = useMemo(() => (state.deliveryMethod === 'email' ? 'correo electrónico' : 'WhatsApp'), [state.deliveryMethod]);
     const VerificationChannelIcon = useMemo(() => (state.deliveryMethod === 'email' ? Mail : MessageCircle), [state.deliveryMethod]);
 
     const { data, setData } = useForm({
-        token: token ?? '',
         documento: documento ?? '',
         coddoc: coddoc ?? '',
         option_request: option_request ?? '',
@@ -89,12 +87,20 @@ export default function useVerifyController({ token, documento, coddoc, tipo, er
 
     // Mostrar errores iniciales provenientes de props (Inertia)
     useEffect(() => {
+        console.log('useVerifyController - useEffect errors:', errors, 'error:', error);
+        // Errores de validación (formato withErrors)
         if (errors && Object.keys(errors).length > 0) {
             const first = Object.values(errors)[0];
             const message = Array.isArray(first) ? first[0] : String(first);
-            dispatch({ type: 'SET_ERROR', error: message });
+            console.log('useVerifyController - Setting dialog from errors:', message);
+            setDialog({ message, type: 'error' });
         }
-    }, [errors]);
+        // Error general desde el backend (formato Inertia::render con error en payload)
+        if (error) {
+            console.log('useVerifyController - Setting dialog from prop:', error);
+            setDialog({ message: error, type: 'error' });
+        }
+    }, [errors, error]);
 
     const handleInputChange = (index: number, value: string) => {
         if (!/^[0-9]{0,1}$/.test(value)) {
@@ -170,7 +176,6 @@ export default function useVerifyController({ token, documento, coddoc, tipo, er
 
         // Construir payload y enviar con Inertia router.post para evitar condiciones de carrera
         const payload = {
-            token: data.token,
             tipo: data.tipo,
             coddoc: data.coddoc,
             documento: data.documento,
@@ -183,15 +188,18 @@ export default function useVerifyController({ token, documento, coddoc, tipo, er
 
         router.post(route('verify.action'), payload, {
             preserveScroll: true,
+            preserveUrl: true,
             onStart: () => setIsSubmitting(true),
             onSuccess: (response) => {
                 console.log('Response verify action:', response);
                 dispatch({ type: 'SET_VERIFIED', verified: true });
             },
             onError: (errors) => {
+                const firstError = Object.values(errors)[0];
+                const errorMessage = Array.isArray(firstError) ? firstError[0] : String(firstError);
                 dispatch({
                     type: 'SET_ERROR',
-                    error: Object.values(errors)[0] ?? 'No fue posible validar el código. Intenta nuevamente.',
+                    error: errorMessage || 'No fue posible validar el código. Intenta nuevamente.',
                 });
             },
             onFinish: () => {
@@ -202,79 +210,12 @@ export default function useVerifyController({ token, documento, coddoc, tipo, er
         });
     };
 
-    const handleResend = async () => {
-        if (isResending || !state.canResend) {
-            return;
-        }
-
-        setIsResending(true);
-
-        try {
-            const response = await fetch(route('api.verify_store'), {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Accept: 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                },
-                body: JSON.stringify({
-                    documento: data.documento,
-                    coddoc: data.coddoc,
-                    tipo: data.tipo,
-                    delivery_method: data.delivery_method,
-                    option_request: data.option_request,
-                }),
-            });
-
-            let responseBody: { success: boolean } | null = null;
-
-            try {
-                responseBody = await response.json();
-            } catch (parseError) {
-                console.error('No fue posible interpretar la respuesta al reenviar código:', parseError);
-            }
-
-            if (response.ok && responseBody?.success) {
-                dispatch({ type: 'RESET_CODE' });
-                dispatch({ type: 'SET_CAN_RESEND', canResend: false });
-                dispatch({ type: 'SET_RESEND_TIMER', timer: 300 });
-                dispatch({ type: 'SET_ERROR', error: null });
-                inputRefs.current[0]?.focus();
-                return;
-            }
-
-            if (typeof responseBody === 'object' && responseBody !== null && 'errors' in responseBody) {
-                const errorsMap = responseBody.errors as Record<string, string | string[]>;
-                const [firstErrorEntry] = Object.values(errorsMap);
-                const normalizedError = Array.isArray(firstErrorEntry) ? firstErrorEntry[0] : firstErrorEntry;
-                dispatch({ type: 'SET_ERROR', error: normalizedError ?? 'No fue posible reenviar el código. Intenta nuevamente.' });
-                return;
-            }
-
-            dispatch({
-                type: 'SET_ERROR',
-                error:
-                    typeof responseBody === 'object' && responseBody !== null && 'msj' in responseBody
-                        ? String((responseBody as { msj?: unknown }).msj ?? 'No fue posible reenviar el código. Intenta nuevamente.')
-                        : 'No fue posible reenviar el código. Intenta nuevamente.',
-            });
-        } catch (error) {
-            console.error('Error al reenviar código:', error);
-            dispatch({
-                type: 'SET_ERROR',
-                error: 'No fue posible reenviar el código. Intenta nuevamente.',
-            });
-        } finally {
-            setIsResending(false);
-        }
-    };
-
     const [dialog, setDialog] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
     useEffect(() => {
+        console.log('useVerifyController - useEffect state.error:', state.error);
         if (state.error) {
+            console.log('useVerifyController - Setting dialog with error:', state.error);
             setDialog({ message: state.error, type: 'error' });
         }
     }, [state.error]);
@@ -290,8 +231,6 @@ export default function useVerifyController({ token, documento, coddoc, tipo, er
         handleKeyDown,
         handlePaste,
         handleVerify,
-        handleResend,
-        isResending,
         processing: isSubmitting,
         dialog,
         setDialog,

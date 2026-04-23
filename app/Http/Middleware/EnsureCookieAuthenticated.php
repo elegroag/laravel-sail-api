@@ -26,7 +26,8 @@ class EnsureCookieAuthenticated
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No autenticado.',
+                    'message' => 'No autenticado. ',
+                    'request' => $request->all()
                 ], 401);
             }
 

@@ -193,37 +193,21 @@ const useRecoveryController = ({ Coddoc }: ResetPasswordProps) => {
         dispatch({ type: 'SET_SUBMITTING', payload: true });
 
         try {
-            const response = await fetch(route('api.recovery_send'), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+            router.post(route('api.recovery_send'), data, {
+                onSuccess: () => {
+                    // Éxito: Inertia redirigirá automáticamente a verify.show
+                    setDialog({ message: '¡Código de verificación enviado exitosamente!', type: 'success' });
+                    dispatch({ type: 'RESET_FORM' });
                 },
-                body: JSON.stringify(data),
+                onError: (errors) => {
+                    const firstError = Object.values(errors)[0];
+                    const errorMessage = Array.isArray(firstError) ? firstError[0] : String(firstError);
+                    setDialog({
+                        message: errorMessage || 'No fue posible enviar el código de recuperación. Verifica los datos e intenta nuevamente.',
+                        type: 'error',
+                    });
+                },
             });
-            const responseJson = await response.json();
-
-            if (response.ok && responseJson?.success) {
-                setDialog({ message: '¡Correo de recuperación enviado exitosamente! Serás redirigido al login.', type: 'success' });
-                dispatch({ type: 'RESET_FORM' });
-
-                setTimeout(() => {
-                    router.visit(
-                        route('verify.show', {
-                            tipo: responseJson.data.tipo,
-                            coddoc: responseJson.data.coddoc,
-                            documento: responseJson.data.documento,
-                            option_request: 'recovery',
-                        }),
-                    );
-                }, 1500);
-            } else {
-                console.error('Error al enviar el correo de recuperación:', responseJson);
-                setDialog({
-                    message: typeof responseJson?.msj === 'string' ? responseJson.msj : 'No fue posible enviar el correo de recuperación.',
-                    type: 'error',
-                });
-            }
         } catch {
             setDialog({ message: 'No fue posible completar el envío. Intenta nuevamente.', type: 'error' });
         } finally {

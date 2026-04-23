@@ -16,8 +16,6 @@ Route::post('register/independiente', [AuthMercurioController::class, 'registerI
 Route::post('register/pensionado', [AuthMercurioController::class, 'registerPensionadoAction'])->name('api.register.pensionado');
 Route::post('register/facultativo', [AuthMercurioController::class, 'registerFacultativoAction'])->name('api.register.facultativo');
 Route::post('register/domestico', [AuthMercurioController::class, 'registerDomesticoAction'])->name('api.register.domestico');
-Route::post('verify_store', [AuthMercurioController::class, 'verifyStore'])->name('api.verify_store');
-Route::post('recovery_send', [AuthMercurioController::class, 'recoverySend'])->name('api.recovery_send');
 
 // Rutas para Empresas
 Route::apiResource('empresas', EmpresaController::class);

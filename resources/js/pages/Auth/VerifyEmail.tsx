@@ -11,11 +11,10 @@ import useVerifyController from '@/pages/Auth/hooks/useVerifyController'
 import { DeliveryOptions } from '@/constants/auth'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 
-export default function VerifyEmail({ documento, coddoc, tipo, option_request, token, status, errors }: VerifyEmailProps) {
+export default function VerifyEmail({ documento, coddoc, tipo, option_request, status, errors, error }: VerifyEmailProps) {
     const {
         state,
         inputRefs,
-        formattedCountdown,
         deliveryChannelLabel,
         VerificationChannelIcon,
         handleInputChange,
@@ -23,17 +22,15 @@ export default function VerifyEmail({ documento, coddoc, tipo, option_request, t
         handleKeyDown,
         handlePaste,
         handleVerify,
-        handleResend,
-        isResending,
         processing,
         dialog,
         setDialog
     } = useVerifyController({
-        token,
         documento,
         coddoc,
         tipo,
         errors,
+        error,
         option_request
     })
 
@@ -160,26 +157,14 @@ export default function VerifyEmail({ documento, coddoc, tipo, option_request, t
           </Button>
 
           <p className="text-center text-sm text-muted-foreground">
-            ¿No recibiste el código?
-            {state.canResend ? (
-              <button
-                type="button"
-                onClick={handleResend}
-                className="ml-1 font-medium text-emerald-600 hover:text-emerald-700"
-                disabled={processing || isResending}
-              >
-                Reenviar código
-              </button>
-            ) : (
-              <span className="ml-1 text-sm">Podrás volver a solicitarlo en {formattedCountdown}</span>
-            )}
+            Si no recibiste el código, regresa y solicita uno nuevo.
           </p>
         </div>
       </form>
     </div>
-    
-    {/* Loading animado durante verificación o reenvío */}
-    <LoadingAnimated show={processing || isResending} />
+
+    {/* Loading animado durante verificación */}
+    <LoadingAnimated show={processing} />
     
     {/* Modal dialog para mensajes */}
     <Dialog open={dialog !== null} onOpenChange={(open) => !open && setDialog(null)}>

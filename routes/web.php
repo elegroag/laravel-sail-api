@@ -30,6 +30,7 @@ Route::prefix('/web')->group(function () {
     Route::get('/register/company', [MercurioAuthController::class, 'registerCompany'])->name('register.company');
     Route::get('/register/worker', [MercurioAuthController::class, 'registerWorker'])->name('register.worker');
     Route::get('/password/request', [MercurioAuthController::class, 'resetPassword'])->name('password.request');
+    Route::post('/recovery_send', [MercurioAuthController::class, 'recoverySend'])->name('api.recovery_send');
     Route::post('/load_session', [MercurioAuthController::class, 'loadSession'])->name('load.session');
     Route::post('/salir', [MercurioAuthController::class, 'logout'])->name('login.salir');
     Route::get('/salir', [MercurioAuthController::class, 'logout'])->name('logout');

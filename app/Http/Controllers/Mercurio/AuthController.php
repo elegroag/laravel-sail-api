@@ -20,6 +20,9 @@ use App\Services\Utils\SenderEmail;
 use App\Services\Autentications\AutenticaGeneral;
 use App\Services\CajaServices\NotificacionService;
 use App\Services\Utils\AsignarFuncionario;
+use App\Services\Entidades\EmpresaService;
+use App\Services\Entidades\TrabajadorService;
+use App\Services\Api\ApiWhatsapp;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -152,6 +155,62 @@ class AuthController extends Controller
         ]);
     }
 
+    private function generateAndSendVerificationCode($documento, $coddoc, $tipo, $user07, $deliveryMethod = 'email')
+    {
+        $codigoVerify = genera_code();
+        $inicio = Carbon::now()->format('Y-m-d H:i:s');
+        $intentos = '0';
+
+        Mercurio19::updateOrCreate(
+            [
+                'documento' => $documento,
+                'coddoc' => $coddoc,
+                'tipo' => $tipo,
+            ],
+            [
+                'inicio' => $inicio,
+                'intentos' => (int) $intentos,
+                'codver' => (string) $codigoVerify,
+            ]
+        );
+
+        if ($deliveryMethod == 'email') {
+            $html = "Utiliza el siguiente código de verificación, para confirmar el propietario de la dirección de correo:<br/>
+            <span style=\"font-size:16px;color:#333\">CÓDIGO DE VERIFICACIÓN: </span><br/>
+            <span style=\"font-size:30px;color:#11cdef\"><b>{$codigoVerify}</b></span>";
+
+            $asunto = 'Generación nuevo PIN plataforma Comfaca En Línea';
+            $emailCaja = Mercurio01::first();
+            $senderEmail = new SenderEmail;
+            $senderEmail->setters(
+                "emisor_email: {$emailCaja->getEmail()}",
+                "emisor_clave: {$emailCaja->getClave()}",
+                "asunto: {$asunto}"
+            );
+            $senderEmail->send($user07->getEmail(), $html);
+        } else {
+            if (config('app.api_mode') == 'development') $user07->setWhatsapp('3157145942');
+
+            if (! $user07->whatsapp) {
+                throw new DebugException('No se proporcionó número de whatsapp', 501);
+            }
+
+            $html = "Utiliza el siguiente código de verificación, para confirmar el propietario de la línea de whatsapp:<br/>
+            *{$codigoVerify}*. Generación de PIN plataforma Comfaca En Línea, utiliza el código de verificación para confirmar el propietario de la línea de whatsapp.";
+            $apiWhatsaap = new ApiWhatsapp;
+            $apiWhatsaap->send([
+                'servicio' => 'Whatsapp',
+                'metodo' => 'enviar',
+                'params' => [
+                    'numero' => $user07->whatsapp,
+                    'mensaje' => $html,
+                ],
+            ]);
+        }
+
+        return $codigoVerify;
+    }
+
     public function verifyShow(Request $request, $tipo = null, $coddoc = null, $documento = null, $option_request = null)
     {
         try {
@@ -177,115 +236,71 @@ class AuthController extends Controller
                 ];
             }
 
-            // Claims básicos a transportar en el token temporal
-            $claims = [
-                'documento' => $payload['documento'],
-                'coddoc' => $payload['coddoc'],
-                'tipo' => $payload['tipo'],
-                'context' => 'verify',
-            ];
-
-            $token = $this->authJwt->SimpleToken($claims);
             // Validar existencia del padre en mercurio07 para evitar romper la FK
             $user07 = Mercurio07::where('documento', $payload['documento'])
                 ->where('coddoc', $payload['coddoc'])
                 ->where('tipo', $payload['tipo'])
                 ->first();
 
+            if (! $user07) {
+                return Inertia::render('Auth/VerifyEmail', [
+                    'documento' => $payload['documento'],
+                    'coddoc' => $payload['coddoc'],
+                    'tipo' => $payload['tipo'],
+                    'option_request' => $payload['option_request'],
+                    'error' => 'No existe un usuario registrado con los datos ingresados. Por favor verifique o regístrese.',
+                ]);
+            }
+
             $user19 = Mercurio19::where('documento', $payload['documento'])
                 ->where('coddoc', $payload['coddoc'])
                 ->where('tipo', $payload['tipo'])
                 ->first();
 
-            $codigoVerify = genera_code();
-            if ($user19) {
-                $user19->update([
-                    'token' => $token,
-                ]);
-            } else {
-                // Si no existe el usuario padre en mercurio07, no crear mercurio19 para no violar la FK
-                if (! $user07) {
-                    return Inertia::render('Auth/VerifyEmail', [
-                        'documento' => $payload['documento'],
-                        'coddoc' => $payload['coddoc'],
-                        'tipo' => $payload['tipo'],
-                        'option_request' => $payload['option_request'],
-                        'token' => $token,
-                        'error' => 'No existe un usuario registrado con los datos ingresados. Por favor verifique o regístrese.',
-                    ]);
-                }
-                $user19 = Mercurio19::create([
-                    'tipo' => $payload['tipo'],
-                    'coddoc' => $payload['coddoc'],
-                    'documento' => $payload['documento'],
-                    'codigo' => '1',
-                    'codver' => $codigoVerify,
-                    'respuesta' => '',
-                    'inicio' => Carbon::now()->format('Y-m-d H:i:s'),
-                    'intentos' => '0',
-                    'token' => $token,
-                ]);
+            // Solo generar y enviar PIN si no existe un registro previo (caso de registro directo)
+            // Si viene de recoverySend, el PIN ya fue generado y enviado
+            if (! $user19) {
+                $this->generateAndSendVerificationCode($payload['documento'], $payload['coddoc'], $payload['tipo'], $user07);
             }
-
-            $payload['token'] = $token;
 
             return Inertia::render('Auth/VerifyEmail', $payload);
         } catch (\Exception $err) {
-            return Inertia::render('Auth/VerifyEmail', [
-                'error' => $err->getMessage(),
+            return back()->withErrors([
+                'general' => $err->getMessage(),
             ]);
         }
     }
 
     public function verify(Request $request)
     {
-        $payload = [];
         try {
             $verifyAuthService = new VerifyAuthService();
 
             $request->validate($verifyAuthService->rules());
 
-            $this->authJwt->CheckSimpleToken($request->input('token'));
-
             $rqs = $verifyAuthService->execute($request);
             if (!$rqs) {
                 $payload = $verifyAuthService->getPayload();
 
-                $token = $this->authJwt->SimpleToken(
-                    [
-                        'documento' => $request->input('documento'),
-                        'coddoc' => $request->input('coddoc'),
-                        'tipo' => $request->input('tipo'),
-                        'context' => 'verify.retry',
-                    ]
-                );
-                $payload['token'] = $token;
+                // Agregar datos necesarios para renderizar la vista
+                $payload['documento'] = $request->input('documento');
+                $payload['coddoc'] = $request->input('coddoc');
+                $payload['tipo'] = $request->input('tipo');
+                $payload['option_request'] = $request->input('option_request');
 
-                Mercurio19::where('documento', $request->input('documento'))
-                    ->where('coddoc', $request->input('coddoc'))
-                    ->where('tipo', $request->input('tipo'))
-                    ->update(['token' => (string) $token]);
+                return Inertia::render('Auth/VerifyEmail', $payload);
             } else {
                 // caso de exito
                 $url = url($rqs) ?? url('web/auth/login');
                 return Inertia::location($url);
             }
-        } catch (AuthException $e) {
-            $payload = [
-                'success' => false,
-                'message' => 'Error de autenticación: ' . $e->getMessage(),
-                'errors' => [
-                    $e->getMessage()
-                ],
-            ];
         } catch (ValidationException $e) {
-            $payload = [
-                'success' => false,
-                'message' => 'Error de validación',
-                'errors' => $e->errors(),
-            ];
+            return back()->withErrors($e->errors());
+        } catch (AuthException | \Exception $e) {
+            return back()->withErrors([
+                'general' => $e->getMessage(),
+            ]);
         }
-        return Inertia::render('Auth/VerifyEmail', $payload);
     }
 
     public function loadSession(Request $request)
@@ -416,5 +431,118 @@ class AuthController extends Controller
     {
         SessionCookies::destroyIdentity();
         return redirect()->to('web/login');
+    }
+
+    /**
+     * Enviar código de recuperación de contraseña
+     * Este método envía un código de recuperación de contraseña al usuario
+     * por email o WhatsApp para restablecer su contraseña.
+     * @param Request $request
+     * @return \Inertia\Response
+     */
+    public function recoverySend(Request $request)
+    {
+        try {
+            $data = $request->validate([
+                'documento' => 'required|numeric|digits_between:6,18',
+                'coddoc' => 'required|string|min:1|max:2',
+                'tipo' => 'required|string|size:1',
+                'delivery_method' => 'required|string|min:5|max:15'
+            ]);
+
+            $delivery_method = $data['delivery_method'];
+            if ($delivery_method == 'email') {
+                //valida email
+                $request->validate([
+                    'email' => 'required|string|email',
+                ]);
+                $data['email'] = $request->input('email');
+            } else {
+                //valida whatsapp
+                $request->validate([
+                    'whatsapp' => 'required|string|numeric|digits_between:6,18',
+                ]);
+                $data['whatsapp'] = $request->input('whatsapp');
+            }
+
+            $user07 = Mercurio07::where('documento', $data['documento'])
+                ->where('coddoc', $data['coddoc'])
+                ->where('tipo', $data['tipo'])
+                ->first();
+
+            if (! $user07) {
+                return back()->withErrors([
+                    'general' => 'No existe un usuario registrado con los datos ingresados. Verifique o regístrese para continuar.',
+                ]);
+            }
+
+            if (
+                ($data['tipo'] == 'E' ||
+                    $data['tipo'] == 'P' ||
+                    $data['tipo'] == 'S')  && ($user07->whatsapp == null || $user07->email == null)
+            ) {
+                //consulta a la api externa 
+                $empresa = (new EmpresaService())->buscarEmpresaSubsidio($user07->documento);
+                if ($empresa) {
+                    $user07->whatsapp = $empresa['telr'];
+                    $user07->email = $empresa['email'];
+                    $user07->save();
+                }
+            }
+
+            if (
+                ($data['tipo'] == 'T' ||
+                    $data['tipo'] == 'I' ||
+                    $data['tipo'] == 'F' ||
+                    $data['tipo'] == 'O'
+                )  && ($user07->whatsapp == null || $user07->email == null)
+            ) {
+                //consulta a la api externa 
+                $trabajador = (new TrabajadorService())->buscarTrabajadorSubsidio($user07->documento);
+                if ($trabajador) {
+                    $user07->whatsapp = $trabajador['telefono'];
+                    $user07->email = $trabajador['email'];
+                    $user07->save();
+                }
+            }
+
+            //se valida que el email sea igual al que tiene registrado
+            if ($delivery_method == 'email' && strtolower($user07->email ?? '')  != strtolower($data['email'] ?? '')) {
+                return back()->withErrors([
+                    'email' => 'El email ingresado no coincide con el registrado. Verifique o regístrese para continuar.',
+                ]);
+            }
+
+            //se valida que el whatsapp sea igual al que tiene registrado
+            if ($delivery_method == 'whatsapp' && $user07->whatsapp != $data['whatsapp']) {
+                return back()->withErrors([
+                    'whatsapp' => 'El whatsapp ingresado no coincide con el registrado. Verifique o regístrese para continuar.',
+                ]);
+            }
+
+            $this->generateAndSendVerificationCode($data['documento'], $data['coddoc'], $data['tipo'], $user07, $delivery_method);
+
+            //cambiar clave de usuario
+            Mercurio07::where('documento', $data['documento'])
+                ->where('coddoc', $data['coddoc'])
+                ->where('tipo', $data['tipo'])
+                ->update([
+                    'clave' => 'x0x',
+                ]);
+
+            // Redirigir a verifyShow con los datos necesarios
+            return redirect()->route('verify.show', [
+                'tipo' => $data['tipo'],
+                'coddoc' => $data['coddoc'],
+                'documento' => $data['documento'],
+                'option_request' => 'recovery',
+            ]);
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors());
+        } catch (DebugException | \Exception $e) {
+            return back()->withErrors([
+                'general' => $e->getMessage(),
+            ]);
+        }
     }
 }
