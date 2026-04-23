@@ -142,7 +142,7 @@ class LoginController extends ApplicationController
     public function validaEmail(Request $request)
     {
         try {
-            $email = trim(strtoupper($request->input('email')));
+            $email = trim(mb_strtoupper($request->input('email'), 'UTF-8'));
             $documento = trim($request->input('documento'));
             $nit = trim($request->input('nit'));
 

@@ -125,13 +125,17 @@ class ConsultasEmpresaController extends ApplicationController
             );
 
             $out = $ps->toArray();
-            if (! $out['success'] || count($out['data']) == 0) {
+            $isSuccess = $out['success'] ?? null;
+
+            if (! $isSuccess) {
                 throw new DebugException('Error no hay respuesta del servidor SISU', 501);
             }
 
+            $data = $out['data'] ?? null;
+
             $html = view(
                 'mercurio/subsidioemp/tmp/tmp_afiliados',
-                ['trabajadores' => $out['data']]
+                ['trabajadores' => $data]
             )->render();
 
             $response = [
@@ -903,11 +907,16 @@ class ConsultasEmpresaController extends ApplicationController
                 ]
             );
             $salida = $ps->toArray();
-            if (! $salida['success']) {
-                $salida['data'] = [];
+            $isSuccess = $salida['success'] ?? null;
+
+            if (!$isSuccess) {
+                throw new DebugException("No hay respuesta del servicio de nucleo familiar");
             }
-            $conyuges = $salida['data']['conyuges'];
-            $beneficiarios = $salida['data']['beneficiarios'];
+
+            $data = $salida['data'] ?? null;
+
+            $conyuges = $data['conyuges'] ?? [];
+            $beneficiarios = $data['beneficiarios'] ?? [];
 
             $ps = new ApiSubsidio();
             $ps->send(
@@ -955,7 +964,7 @@ class ConsultasEmpresaController extends ApplicationController
                 '_trasin' => ParamsTrabajador::getSindicalizado(),
                 '_vivienda' => ParamsTrabajador::getVivienda(),
                 '_tipafi' => ParamsTrabajador::getTipoAfiliado(),
-                '_estado' => (new Mercurio31)->getEstados(),
+                '_estado' => (new Mercurio31)->getEstadoArray(),
                 '_comper' => ParamsConyuge::getCompaneroPermanente(),
                 '_parent' => ParamsBeneficiario::getParentesco(),
                 '_huerfano' => ParamsBeneficiario::getHuerfano(),
@@ -964,7 +973,7 @@ class ConsultasEmpresaController extends ApplicationController
                 '_huerfano' => ParamsBeneficiario::getHuerfano(),
                 '_tiphij' => ParamsBeneficiario::getTipoHijo(),
                 '_calendario' => ParamsBeneficiario::getCalendario(),
-                '_codcat' => (new Mercurio31)->getCategoria(),
+                '_codcat' => categoria_array(),
             ];
 
             $salida = [
