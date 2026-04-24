@@ -5,6 +5,13 @@ const MODAL_DIALOG_ID = 'size_modal_generic';
 const MODAL_CONTENT_ID = 'show_modal_generic';
 const CERTIFICADO_IFRAME_NAME = 'certificado_modal_iframe';
 
+const isMobileDevice = () => {
+    return (
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+        (window.innerWidth <= 768 && 'ontouchstart' in window)
+    );
+};
+
 const showModal = () => {
     const el = document.getElementById(MODAL_ID);
     if (!el) {
@@ -57,6 +64,16 @@ const submitFormToModalIframe = () => {
         return;
     }
 
+    // Si es dispositivo móvil, descargar el certificado directamente
+    if (isMobileDevice()) {
+        const formEl = $form.get(0);
+        if (formEl) {
+            formEl.submit();
+        }
+        return;
+    }
+
+    // Si es desktop, mostrar en modal con iframe
     const prevTarget = $form.attr('target');
     $form.data('prev-target', prevTarget ?? '');
 

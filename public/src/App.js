@@ -131,6 +131,9 @@ const $App = {
             contentType: 'application/x-www-form-urlencoded',
             processData: true,
             timeout: 52400,
+            xhrFields: {
+                withCredentials: true,
+            },
             beforeSend: (xhr) => {
                 if (silent == false) loading.show();
                 xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
@@ -193,6 +196,9 @@ const $App = {
             processData: false,
             contentType: 'application/x-www-form-urlencoded',
             cache: false,
+            xhrFields: {
+                withCredentials: true,
+            },
             beforeSend: (xhr) => {
                 if (silent == false) loading.show();
                 const csrf = document.querySelector("[name='csrf-token']").getAttribute('content');
@@ -247,6 +253,9 @@ const $App = {
             cache: false,
             contentType: false,
             processData: false,
+            xhrFields: {
+                withCredentials: true,
+            },
             beforeSend: (xhr) => {
                 if (silent == false) loading.show();
                 xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');

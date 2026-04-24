@@ -25,7 +25,6 @@ class SessionCookies
                 break;
         }
 
-        session()->regenerate();
         $userData = $session->authenticate($request);
 
         if (! $userData) return false;

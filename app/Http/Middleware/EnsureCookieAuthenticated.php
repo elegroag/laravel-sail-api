@@ -7,7 +7,8 @@ use App\Models\MenuItem;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Log;
+
 
 class EnsureCookieAuthenticated
 {
@@ -23,22 +24,26 @@ class EnsureCookieAuthenticated
     public function handle(Request $request, Closure $next)
     {
         if (! SessionCookies::check()) {
+
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No autenticado. ',
-                    'request' => $request->all()
+                    'message' => 'No autenticado checkeo de session. ',
+                    'request' => $request->all(),
+                    'user' => session('user'),
+                    'has' => session()->has('user')
                 ], 401);
             }
 
             set_flashdata('error', [
-                'msj' => 'No autenticado.',
+                'msj' => 'No autenticado checkeo de session.',
                 'code' => 401,
             ]);
             return redirect('web/salir');
         }
 
         if ($this->autorization($request) === false) {
+
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
@@ -68,6 +73,7 @@ class EnsureCookieAuthenticated
             $request->attributes->set('tipo', $tipo);
             $request->attributes->set('tipfun', null);
         } else {
+
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
