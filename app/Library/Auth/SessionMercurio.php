@@ -3,29 +3,28 @@
 namespace App\Library\Auth;
 
 use App\Models\Mercurio07;
-use App\Services\Srequest;
 
-class SessionMercurio
+class SessionMercurio implements SessionInterface
 {
-    public function authenticate(Srequest $request)
+    public function authenticate(array $request): array|false
     {
         // Validaciones básicas de parámetros
         if (
-            empty($request->getParam('tipo')) ||
-            empty($request->getParam('coddoc')) ||
-            empty($request->getParam('documento'))
+            empty($request['tipo']) ||
+            empty($request['coddoc']) ||
+            empty($request['documento'])
         ) {
             return false;
         }
 
         $condiciones = [
-            'tipo' => $request->getParam('tipo'),
-            'coddoc' => $request->getParam('coddoc'),
-            'documento' => $request->getParam('documento'),
+            'tipo' => $request['tipo'],
+            'coddoc' => $request['coddoc'],
+            'documento' => $request['documento'],
         ];
 
-        if (! empty($request->getParam('estado'))) {
-            $condiciones['estado'] = $request->getParam('estado');
+        if (! empty($request['estado'])) {
+            $condiciones['estado'] = $request['estado'];
         }
         $usuario = Mercurio07::where($condiciones)->first();
         if (! $usuario) {
@@ -33,8 +32,8 @@ class SessionMercurio
         }
 
         session([
-            'tipo' => $request->getParam('tipo'),
-            'estado_afiliado' => $request->getParam('estado_afiliado')
+            'tipo' => $request['tipo'],
+            'estado_afiliado' => $request['estado_afiliado']
         ]);
 
         return [

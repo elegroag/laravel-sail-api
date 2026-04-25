@@ -5,6 +5,7 @@ namespace App\Services\Autentications;
 use App\Exceptions\DebugException;
 use App\Library\Auth\AuthJwt;
 use App\Library\Auth\SessionCookies;
+use App\Library\Auth\SessionMercurio;
 use App\Models\Mercurio07;
 use App\Models\Mercurio19;
 use App\Services\PreparaFormularios\GestionFirmaNoImage;
@@ -87,16 +88,14 @@ class AutenticaService
 
         $estadoAfiliado = $autentica->getEstadoAfiliado();
         if (! SessionCookies::authenticate(
-            'mercurio',
-            new Srequest(
-                [
-                    'tipo' => $tipo,
-                    'coddoc' => $coddoc,
-                    'documento' => $documento,
-                    'estado_afiliado' => $estadoAfiliado,
-                    'estado' => $mercurio07->estado,
-                ]
-            )
+            new SessionMercurio(),
+            [
+                'tipo' => $tipo,
+                'coddoc' => $coddoc,
+                'documento' => $documento,
+                'estado_afiliado' => $estadoAfiliado,
+                'estado' => $mercurio07->estado,
+            ]
         )) {
             throw new DebugException('Error en la autenticación del usuario al crear la sesión', 401);
         }

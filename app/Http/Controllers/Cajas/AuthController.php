@@ -6,7 +6,6 @@ use App\Exceptions\AuthException;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Auth\AuthCajas;
-use App\Library\Auth\AuthJwt;
 use App\Library\Auth\SessionCookies;
 use App\Models\Adapter\DbBase;
 use App\Services\CajaServices\UsuarioServices;
@@ -14,7 +13,6 @@ use App\Services\Utils\SenderEmail;
 use App\Services\View as ServicesView;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends ApplicationController
@@ -243,42 +241,9 @@ class AuthController extends ApplicationController
         for ($i = 0; $i < $long; $i++) {
             $password .= substr($str, rand(0, 62), 1);
         }
-
         return $password;
     }
 
-    public function token()
-    {
-        $request = request();
-        $this->setResponse('ajax');
-        try {
-            $db = DbBase::rawConnect();
-            $usuario = $request->input('usuario');
-            $clave = $request->input('password');
-            $client_id = $request->input('client_id');
-            $client_secret = $request->input('client_secret');
-            $grant_type = $request->input('grant_type');
-
-            $auth_jwt = new AuthJwt;
-            $auth_jwt->AuthHttp($db, $clave, $usuario, $client_id, $grant_type);
-            $token = $auth_jwt->getToken();
-            $servicio_url = false;
-            $salida = [
-                'access_token' => $token,
-                'token_type' => 'bearer',
-                'expires_in' => 1199,
-                'url' => "http://186.119.116.228:8091/{$servicio_url}",
-            ];
-        } catch (Exception $err) {
-            $salida = [
-                'message' => 'Error ' . $err->getMessage() . ' ' . basename($err->getFile()) . ' ' . $err->getLine(),
-                'code' => 500,
-            ];
-            http_response_code(500);
-        }
-
-        return $this->renderObject($salida, false);
-    }
 
     public function fueraServicio()
     {

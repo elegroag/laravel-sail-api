@@ -4,6 +4,7 @@ namespace App\Services\Autentications;
 
 use App\Exceptions\DebugException;
 use App\Library\Auth\SessionCookies;
+use App\Library\Auth\SessionMercurio;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio19;
@@ -132,32 +133,32 @@ class VerifyAuthService
 
             switch ($tipo) {
                 case 'T':
-                    $url = 'mercurio/principal/index';
+                    $url = '/mercurio/principal/index';
                     $metodo = 'informacion_trabajador';
                     $params = ['cedtra' => $documento, 'coddoc' => $coddoc];
                     break;
                 case 'E':
-                    $url = 'mercurio/empresa/index';
+                    $url = '/mercurio/empresa/index';
                     $metodo = 'informacion_empresa';
                     $params = ['nit' => $documento, 'coddoc' => $coddoc];
                     break;
                 case 'I':
-                    $url = 'mercurio/independiente/index';
+                    $url = '/mercurio/independiente/index';
                     $metodo = 'informacion_empresa';
                     $params = ['nit' => $documento, 'coddoc' => $coddoc];
                     break;
                 case 'O':
-                    $url = 'mercurio/pensionado/index';
+                    $url = '/mercurio/pensionado/index';
                     $metodo = 'informacion_empresa';
                     $params = ['nit' => $documento, 'coddoc' => $coddoc];
                     break;
                 case 'F':
-                    $url = 'mercurio/facultativo/index';
+                    $url = '/mercurio/facultativo/index';
                     $metodo = 'informacion_empresa';
                     $params = ['nit' => $documento, 'coddoc' => $coddoc];
                     break;
                 default:
-                    $url = 'mercurio/principal/index';
+                    $url = '/mercurio/principal/index';
                     $metodo = 'informacion_empresa';
                     $params = ['nit' => $documento, 'coddoc' => $coddoc];
                     break;
@@ -179,16 +180,14 @@ class VerifyAuthService
             $estadoAfiliado = ($afiliado) ? $afiliado['estado'] : 'I';
 
             if (! SessionCookies::authenticate(
-                'mercurio',
-                new Srequest(
-                    [
-                        'tipo' => $tipo,
-                        'coddoc' => $coddoc,
-                        'documento' => $documento,
-                        'estado' => $user07->estado ?? 'I',
-                        'estado_afiliado' => $estadoAfiliado,
-                    ]
-                )
+                new SessionMercurio(),
+                [
+                    'tipo' => $tipo,
+                    'coddoc' => $coddoc,
+                    'documento' => $documento,
+                    'estado' => $user07->estado ?? 'I',
+                    'estado_afiliado' => $estadoAfiliado,
+                ]
             )) {
                 throw new DebugException('Error en la autenticación del usuario', 501);
             }
@@ -206,7 +205,7 @@ class VerifyAuthService
             }
 
             if ($option_request == 'recovery') {
-                $url = 'mercurio/principal/index#change-password';
+                $url = '/mercurio/principal/index#change-password';
             }
         } catch (DebugException $e) {
             $this->payload = [

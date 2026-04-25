@@ -22,6 +22,8 @@ export default function VerifyEmail({ documento, coddoc, tipo, option_request, s
         handleKeyDown,
         handlePaste,
         handleVerify,
+        handleResendCode,
+        formattedCountdown,
         processing,
         dialog,
         setDialog
@@ -156,9 +158,22 @@ export default function VerifyEmail({ documento, coddoc, tipo, option_request, s
             )}
           </Button>
 
-          <p className="text-center text-sm text-muted-foreground">
-            Si no recibiste el código, regresa y solicita uno nuevo.
-          </p>
+          <div className="text-center">
+            {state.canResend ? (
+              <button
+                type="button"
+                onClick={handleResendCode}
+                disabled={processing}
+                className="text-sm text-emerald-600 hover:text-emerald-700 font-medium underline-offset-2 hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {processing ? 'Reenviando...' : '¿No recibiste el código? Reenviar código'}
+              </button>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Podrás reenviar el código en <span className="font-medium">{formattedCountdown}</span>
+              </p>
+            )}
+          </div>
         </div>
       </form>
     </div>

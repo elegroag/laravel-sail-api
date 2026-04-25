@@ -4,8 +4,8 @@ use App\Http\Controllers\Mercurio\EmpresaController;
 use Illuminate\Support\Facades\Route;
 
 // Empresa (migrado desde Kumbia)
-Route::middleware(['mercurio.auth'])->group(function () {
-    Route::prefix('/mercurio/empresa')->group(function () {
+Route::prefix('/mercurio/empresa')->group(function () {
+    Route::middleware(['mercurio.auth'])->group(function () {
         Route::get('/', function () {
             return redirect()->route('empresa.index');
         });

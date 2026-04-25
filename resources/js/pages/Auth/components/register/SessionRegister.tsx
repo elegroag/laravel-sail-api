@@ -1,6 +1,8 @@
+import React from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { ArrowLeft, Eye, EyeOff } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { DocumentTypeOption } from "@/types/auth"
 
@@ -174,8 +176,8 @@ const SessionRegister: React.FC<DataSession> = ({
       </div>
 
       <div className="flex gap-3 mt-4">
-        <Button type="button" variant="secondary" onClick={onPrevStep}>
-          Volver
+        <Button type="button" variant="secondary" onClick={onPrevStep} className="bg-purple-100 hover:bg-purple-200 text-purple-900 border-purple-300 px-3">
+          <ArrowLeft className="h-4 w-4" />
         </Button>
         <Button
           type="submit"

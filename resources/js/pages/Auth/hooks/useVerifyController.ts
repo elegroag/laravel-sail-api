@@ -220,6 +220,38 @@ export default function useVerifyController({ documento, coddoc, tipo, errors, e
         }
     }, [state.error]);
 
+    const handleResendCode = () => {
+        if (!state.canResend) {
+            return;
+        }
+
+        const payload = {
+            documento: data.documento,
+            coddoc: data.coddoc,
+            tipo: data.tipo,
+            delivery_method: state.deliveryMethod,
+        };
+
+        router.post(route('verify.resend'), payload, {
+            preserveScroll: true,
+            preserveState: true,
+            onStart: () => setIsSubmitting(true),
+            onSuccess: () => {
+                // Reiniciar temporizador después de reenviar
+                dispatch({ type: 'SET_CAN_RESEND', canResend: false });
+                dispatch({ type: 'SET_RESEND_TIMER', timer: 300 });
+                dispatch({ type: 'RESET_CODE' });
+                setDialog({ message: 'Código reenviado exitosamente. Revisa tu ' + deliveryChannelLabel + '.', type: 'success' });
+            },
+            onError: (errors) => {
+                const firstError = Object.values(errors)[0];
+                const errorMessage = Array.isArray(firstError) ? firstError[0] : String(firstError);
+                setDialog({ message: errorMessage || 'No fue posible reenviar el código.', type: 'error' });
+            },
+            onFinish: () => setIsSubmitting(false),
+        });
+    };
+
     return {
         state,
         inputRefs,
@@ -231,6 +263,7 @@ export default function useVerifyController({ documento, coddoc, tipo, errors, e
         handleKeyDown,
         handlePaste,
         handleVerify,
+        handleResendCode,
         processing: isSubmitting,
         dialog,
         setDialog,

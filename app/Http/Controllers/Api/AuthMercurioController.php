@@ -2,477 +2,308 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Exceptions\AuthException;
-use App\Exceptions\DebugException;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\ApiResource;
-use App\Http\Resources\ErrorResource;
 use App\Library\Auth\AuthJwt;
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
-use App\Models\Mercurio19;
 use App\Services\Api\ApiWhatsapp;
-use App\Services\Autentications\VerifyAuthService;
-use App\Services\Signup\SignupEmpresas;
-use App\Services\Signup\SignupFacultativos;
-use App\Services\Signup\SignupIndependientes;
-use App\Services\Signup\SignupPensionados;
-use App\Services\Signup\SignupService;
-use App\Services\Srequest;
 use App\Services\Utils\SenderEmail;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class AuthMercurioController extends Controller
 {
-    private $db;
-    private SignupService $signupService;
-    private AuthJwt $authJwt;
-
-    public function __construct()
-    {
-        $this->db = DbBase::rawConnect();
-        $this->signupService = new SignupService();
-        $this->authJwt = new AuthJwt(700);
-    }
 
     /**
-     * Registrar nuevo usuario en el sistema
-     * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
-     * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * Autenticación para dispositivos móviles
+     * Valida credenciales contra Mercurio07
+     *
+     * @param  Request  $request
+     * @return JsonResponse
      */
-    public function registerEmpresaAction(Request $request): JsonResponse
+    public function authenticateMovile(Request $request): JsonResponse
     {
-        $this->db->begin();
         try {
             $request->validate([
-                'rep_nombre' => 'required|string|min:5',
-                'rep_documento' => 'required|integer|digits_between:6,18',
-                'rep_email' => 'required|email',
-                'rep_telefono' => 'required|integer|digits_between:6,10',
-                'rep_coddoc' => 'required|string|min:1',
-                'tipdoc' => 'required|string|min:1',
-                'razsoc' => 'required|string|min:5',
-                'nit' => 'required|integer|digits_between:6,18',
-                'tipsoc' => 'required|string|min:1',
-                'tipper' => 'required|string|min:1',
-                'is_delegado' => 'required|boolean',
+                'tipo' => 'required|string',
+                'coddoc' => 'required|string',
+                'documento' => 'required|string',
+                'clave' => 'required|string',
             ]);
 
-            if ($request->boolean('is_delegado')) {
-                $request->validate([
-                    'cargo' => 'required|string|min:5',
-                ]);
+            $tipo = $request->input('tipo');
+            $coddoc = $request->input('coddoc');
+            $documento = $request->input('documento');
+            $clave = $request->input('clave');
+
+            // Buscar usuario en Mercurio07
+            $usuario = Mercurio07::where('tipo', $tipo)
+                ->where('coddoc', $coddoc)
+                ->where('documento', $documento)
+                ->where('estado', 'A')
+                ->first();
+
+            if (!$usuario) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuario no encontrado o inactivo',
+                ], 404);
             }
 
-            $data = $request->all();
-            $data = array_merge($data, [
-                'cedrep' => $request->input('rep_documento'),
-                'repleg' => $request->input('rep_nombre'),
-                'coddocrepleg' => $request->input('rep_coddoc'),
-                'calemp' => 'E',
-            ]);
-
-            return $this->performRegister($data, 'E');
-        } catch (ValidationException $e) {
-            return ErrorResource::validationError($e->errors(), 'Error de validación')
-                ->response()
-                ->setStatusCode(422);
-        } catch (DebugException $e) {
-            $this->db->rollBack();
-            return ErrorResource::errorResponse($e->getMessage(), $e->getTrace())
-                ->response()
-                ->setStatusCode(400);
-        } catch (Exception $e) {
-            $this->db->rollBack();
-            return ErrorResource::serverError($e->getMessage(), $e->getTrace())
-                ->response()
-                ->setStatusCode(500);
-        }
-    }
-
-    /**
-     * Registrar nuevo usuario en el sistema
-     * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
-     * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function registerTrabajadorAction(Request $request): JsonResponse
-    {
-        $this->db->begin();
-        try {
-            $request->validate([
-                'coddoc' => 'required|string|min:1',
-                'documento' => 'required|integer|digits_between:6,18',
-                'password' => 'required|string|min:8',
-                'nombre' => 'required|string|min:5',
-                'email' => 'required|email',
-                'telefono' => 'required|integer|digits_between:6,10',
-                'codciu' => 'required|integer|digits:5',
-                'tipo' => 'required|string|min:1',
-                'razsoc' => 'required|string|min:5',
-                'nit' => 'required|integer|digits_between:6,18',
-            ]);
-
-            $data = $request->all();
-            $data['calemp'] = null;
-
-            return $this->performRegister($data, 'T');
-        } catch (ValidationException $e) {
-            return ErrorResource::validationError($e->errors(), 'Error de validación')
-                ->response()
-                ->setStatusCode(422);
-        } catch (DebugException $e) {
-            $this->db->rollBack();
-            return ErrorResource::errorResponse($e->getMessage(), $e->getTrace())
-                ->response()
-                ->setStatusCode(400);
-        } catch (\Exception $e) {
-            $this->db->rollBack();
-            return ErrorResource::serverError($e->getMessage(), $e->getTrace())
-                ->response()
-                ->setStatusCode(500);
-        }
-    }
-
-    /**
-     * Registrar nuevo usuario en el sistema
-     * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
-     * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function registerParticularAction(Request $request): JsonResponse
-    {
-        $this->db->begin();
-        try {
-
-            $request->validate([
-                'coddoc' => 'required|string|min:1',
-                'documento' => 'required|integer|digits_between:6,18',
-                'password' => 'required|string|min:8',
-                'nombre' => 'required|string|min:5',
-                'email' => 'required|email',
-                'telefono' => 'required|integer|digits_between:6,10',
-                'codciu' => 'required|integer|digits:5',
-                'tipo' => 'required|string|min:1',
-            ]);
-            $data = $request->all();
-            $data['calemp'] = null;
-
-            return $this->performRegister($data, 'P');
-        } catch (ValidationException $e) {
-            return ErrorResource::validationError($e->errors(), 'Error de validación')
-                ->response()
-                ->setStatusCode(422);
-        } catch (DebugException $e) {
-            $this->db->rollBack();
-            return ErrorResource::errorResponse($e->getMessage(), $e->getTrace())
-                ->response()
-                ->setStatusCode(400);
-        } catch (Exception $e) {
-            $this->db->rollBack();
-            return ErrorResource::serverError($e->getMessage(), $e->getTrace())
-                ->response()
-                ->setStatusCode(500);
-        }
-    }
-
-    /**
-     * Registrar nuevo usuario en el sistema
-     * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
-     * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function registerIndependienteAction(Request $request): JsonResponse
-    {
-        $this->db->begin();
-        try {
-
-            $request->validate([
-                'coddoc' => 'required|string|min:1',
-                'documento' => 'required|integer|digits_between:6,18',
-                'password' => 'required|string|min:8',
-                'nombre' => 'required|string|min:5',
-                'email' => 'required|email',
-                'telefono' => 'required|integer|digits_between:6,10',
-                'codciu' => 'required|integer|digits:5',
-                'tipo' => 'required|string|min:1',
-                'contribution_rate' => 'required',
-            ]);
-            $data = $request->all();
-            $data['calemp'] = 'I';
-
-            return $this->performRegister($data, 'I');
-        } catch (ValidationException $e) {
-            return ErrorResource::validationError($e->errors(), 'Error de validación')
-                ->response()
-                ->setStatusCode(422);
-        } catch (DebugException $e) {
-            $this->db->rollBack();
-            return ErrorResource::errorResponse($e->getMessage(), $e->getTrace())
-                ->response()
-                ->setStatusCode(400);
-        } catch (Exception $e) {
-            $this->db->rollBack();
-            return ErrorResource::serverError($e->getMessage(), $e->getTrace())
-                ->response()
-                ->setStatusCode(500);
-        }
-    }
-
-    /**
-     * Registrar nuevo usuario en el sistema
-     * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
-     * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function registerPensionadoAction(Request $request): JsonResponse
-    {
-        $this->db->begin();
-        try {
-            $request->validate([
-                'coddoc' => 'required|string|min:1',
-                'documento' => 'required|integer|digits_between:6,18',
-                'password' => 'required|string|min:8',
-                'nombre' => 'required|string|min:5',
-                'email' => 'required|email',
-                'telefono' => 'required|integer|digits_between:6,10',
-                'codciu' => 'required|integer|digits:5',
-                'tipo' => 'required|string|min:1',
-                'contribution_rate' => 'required',
-            ]);
-            $data = $request->all();
-            $data['calemp'] = 'O';
-
-            return $this->performRegister($data, 'O');
-        } catch (ValidationException $e) {
-            return ErrorResource::validationError($e->errors(), 'Error de validación')
-                ->response()
-                ->setStatusCode(422);
-        } catch (DebugException $e) {
-            $this->db->rollBack();
-            return ErrorResource::errorResponse($e->getMessage(), $e->getTrace())
-                ->response()
-                ->setStatusCode(400);
-        } catch (Exception $e) {
-            $this->db->rollBack();
-            return ErrorResource::serverError($e->getMessage(), $e->getTrace())
-                ->response()
-                ->setStatusCode(500);
-        }
-    }
-
-    /**
-     * Registrar nuevo usuario en el sistema
-     * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
-     * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function registerFacultativoAction(Request $request)
-    {
-        $this->db->begin();
-        try {
-            $request->validate([
-                'coddoc' => 'required|string|min:1',
-                'documento' => 'required|integer|digits_between:6,18',
-                'password' => 'required|string|min:8',
-                'nombre' => 'required|string|min:5',
-                'email' => 'required|email',
-                'telefono' => 'required|integer|digits_between:6,10',
-                'codciu' => 'required|integer|digits:5',
-                'tipo' => 'required|string|min:1',
-            ]);
-
-            $data = $request->all();
-            $data['calemp'] = 'F';
-
-            return $this->performRegister($data, 'F');
-        } catch (ValidationException $e) {
-            return ErrorResource::validationError($e->errors(), 'Error de validación')
-                ->response()
-                ->setStatusCode(422);
-        } catch (DebugException $e) {
-            $this->db->rollBack();
-            return ErrorResource::errorResponse($e->getMessage(), $e->getTrace())
-                ->response()
-                ->setStatusCode(400);
-        } catch (Exception $e) {
-            $this->db->rollBack();
-            return ErrorResource::serverError($e->getMessage(), $e->getTrace())
-                ->response()
-                ->setStatusCode(500);
-        }
-    }
-
-    /**
-     * Registrar nuevo usuario en el sistema
-     * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
-     * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function registerDomesticoAction(Request $request)
-    {
-        $this->db->begin();
-        try {
-            $request->validate([
-                'coddoc' => 'required|string|min:1',
-                'documento' => 'required|integer|digits_between:6,18',
-                'password' => 'required|string|min:8',
-                'nombre' => 'required|string|min:5',
-                'email' => 'required|email',
-                'telefono' => 'required|integer|digits_between:6,10',
-                'codciu' => 'required|integer|digits:5',
-                'tipo' => 'required|string|min:1',
-                'contribution_rate' => 'required'
-            ]);
-
-            $data = $request->all();
-            $data['calemp'] = 'S'; // Para domésticos
-
-            return $this->performRegister($data, 'S');
-        } catch (ValidationException $e) {
-            return ErrorResource::validationError($e->errors(), 'Error de validación')
-                ->response()
-                ->setStatusCode(422);
-        } catch (DebugException $e) {
-            $this->db->rollBack();
-            return ErrorResource::errorResponse($e->getMessage(), $e->getTrace())
-                ->response()
-                ->setStatusCode(400);
-        } catch (Exception $e) {
-            $this->db->rollBack();
-            return ErrorResource::serverError($e->getMessage(), $e->getTrace())
-                ->response()
-                ->setStatusCode(500);
-        }
-    }
-
-    private function performRegister($data, ?string $tipo = null)
-    {
-        try {
-            switch ($tipo) {
-                case 'E':
-                    $signupEntity = new SignupEmpresas;
-                    break;
-                case 'I':
-                    $signupEntity = new SignupIndependientes;
-                    break;
-                case 'F':
-                    $signupEntity = new SignupFacultativos;
-                    break;
-                case 'O':
-                    $signupEntity = new SignupPensionados;
-                    break;
-                case 'S':
-                case 'T':
-                case 'P':
-                    $signupEntity = null;
-                    break;
-                default:
-                    throw new DebugException('Error el tipo de afiliación es requerido', 1);
-                    break;
+            // Validar clave
+            if (!Hash::check($clave, $usuario->getClave())) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Credenciales inválidas',
+                ], 401);
             }
 
-            $response = $this->signupService->execute(
-                $signupEntity,
-                new Srequest($data)
-            );
+            // Generar token JWT
+            $auth_jwt = new AuthJwt();
+            $token = $auth_jwt->SimpleToken([
+                'documento' => $documento,
+                'coddoc' => $coddoc,
+                'tipo' => $tipo,
+                'nombre' => $usuario->getNombre(),
+                'email' => $usuario->getEmail(),
+            ]);
 
-            $this->db->commit();
-
-            return ApiResource::success($response, 'Proceso de registro completado exitosamente')->response();
-        } catch (DebugException $e) {
-            $this->db->rollBack();
-
-            return ErrorResource::errorResponse($e->getMessage(), $e->getTrace())
-                ->response()
-                ->setStatusCode(400);
-        }
-    }
-
-    /**
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function authenticateAction(Request $request)
-    {
-        // Implementación de autenticación
-        return response()->json([
-            'success' => false,
-            'message' => 'Método no implementado aún'
-        ], 501);
-    }
-
-    /**
-     * Verificar y enviar código de verificación
-     * 
-     * Este endpoint verifica los datos del usuario y envía un código de verificación
-     * por email o WhatsApp para confirmar la identidad.
-     * 
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function verify(Request $request)
-    {
-        $payload = [];
-        try {
-            $verifyAuthService = new VerifyAuthService();
-
-            $request->validate($verifyAuthService->rules());
-
-            $this->authJwt->CheckSimpleToken($request->input('token'));
-
-            $rqs = $verifyAuthService->execute($request);
-            if (!$rqs) {
-                $payload = $verifyAuthService->getPayload();
-
-                $token = $this->authJwt->SimpleToken(
-                    [
-                        'documento' => $request->input('documento'),
-                        'coddoc' => $request->input('coddoc'),
-                        'tipo' => $request->input('tipo'),
-                        'context' => 'verify.retry',
-                    ]
-                );
-                $payload['token'] = $token;
-
-                Mercurio19::where('documento', $request->input('documento'))
-                    ->where('coddoc', $request->input('coddoc'))
-                    ->where('tipo', $request->input('tipo'))
-                    ->update(['token' => (string) $token]);
-            } else {
-                // caso de exito
-                $url = url($rqs) ?? url('web/auth/login');
-                return ApiResource::success(['url' => $url], "Código enviado exitosamente");
-            }
-        } catch (AuthException $e) {
-            $payload = [
-                'success' => false,
-                'message' => 'Error de autenticación: ' . $e->getMessage(),
-                'errors' => [
-                    $e->getMessage()
+            return response()->json([
+                'success' => true,
+                'message' => 'Autenticación exitosa',
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+                'expires_in' => 7200,
+                'user' => [
+                    'documento' => $documento,
+                    'coddoc' => $coddoc,
+                    'tipo' => $tipo,
+                    'nombre' => $usuario->getNombre(),
+                    'email' => $usuario->getEmail(),
                 ],
-            ];
+            ], 200);
         } catch (ValidationException $e) {
-            $payload = [
+            return response()->json([
                 'success' => false,
                 'message' => 'Error de validación',
                 'errors' => $e->errors(),
-            ];
+            ], 422);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error en autenticación: ' . $e->getMessage(),
+            ], 500);
         }
-        return response()->json($payload);
+    }
+
+    /**
+     * Cambio de contraseña para dispositivos móviles
+     * Genera nueva clave y la envía por correo
+     *
+     * @param  Request  $request
+     * @return JsonResponse
+     */
+    public function changePasswordMovile(Request $request): JsonResponse
+    {
+        try {
+            $request->validate([
+                'documento' => 'required|string',
+                'coddoc' => 'required|string',
+                'tipo' => 'required|string',
+            ]);
+
+            $documento = $request->input('documento');
+            $coddoc = $request->input('coddoc');
+            $tipo = $request->input('tipo');
+
+            // Buscar usuario en Mercurio07
+            $usuario = Mercurio07::where('tipo', $tipo)
+                ->where('coddoc', $coddoc)
+                ->where('documento', $documento)
+                ->where('estado', 'A')
+                ->first();
+
+            if (!$usuario) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuario no encontrado o inactivo',
+                ], 404);
+            }
+
+            // Generar nueva clave aleatoria
+            $nuevaClave = Str::random(10);
+            $claveHasheada = Hash::make($nuevaClave);
+
+            // Actualizar clave en Mercurio07
+            $usuario->setClave($claveHasheada);
+            $usuario->save();
+
+            // Enviar correo con nueva clave
+            $email = $usuario->getEmail();
+            if (!$email) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El usuario no tiene correo electrónico registrado',
+                ], 400);
+            }
+
+            $emailCaja = Mercurio01::first();
+
+            $senderEmail = new SenderEmail();
+            $senderEmail->setters(
+                "emisor_email: {$emailCaja->getEmail()}",
+                "emisor_clave: {$emailCaja->getClave()}",
+                "asunto: Nueva contraseña - COMFACA En Línea"
+            );
+
+            $body = "
+                <html>
+                <head>
+                    <title>Nueva Contraseña</title>
+                </head>
+                <body>
+                    <h2>Estimado/a {$usuario->getNombre()},</h2>
+                    <p>Su contraseña ha sido restablecida exitosamente.</p>
+                    <p><strong>Su nueva contraseña es: {$nuevaClave}</strong></p>
+                    <p>Por seguridad, le recomendamos cambiar esta contraseña la próxima vez que ingrese al sistema.</p>
+                    <p>Si no solicitó este cambio, por favor contáctenos inmediatamente.</p>
+                    <br>
+                    <p>Saludos,<br>Equipo COMFACA En Línea</p>
+                </body>
+                </html>
+            ";
+
+            $senderEmail->send($email, $body);
+
+            // Enviar por WhatsApp si el usuario tiene número válido
+            $whatsapp = $usuario->getWhatsapp();
+            if ($whatsapp) {
+                // Validar longitud del número (mínimo 10 dígitos para Colombia)
+                $whatsappNumerico = preg_replace('/[^0-9]/', '', $whatsapp);
+                if (strlen($whatsappNumerico) >= 10) {
+                    $mensaje = "Su contraseña ha sido restablecida exitosamente. Su nueva contraseña es: *{$nuevaClave}*. Por seguridad, le recomendamos cambiar esta contraseña la próxima vez que ingrese al sistema. COMFACA En Línea";
+
+                    $apiWhatsapp = new ApiWhatsapp();
+                    $apiWhatsapp->send([
+                        'servicio' => 'Whatsapp',
+                        'metodo' => 'enviar',
+                        'params' => [
+                            'numero' => $whatsapp,
+                            'mensaje' => $mensaje,
+                        ],
+                    ]);
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Nueva contraseña enviada al correo electrónico',
+            ], 200);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error de validación',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al cambiar contraseña: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Solicita un token para autenticación
+     *
+     * @param  Request  $request
+     * @return JsonResponse
+     */
+    public function solicitarToken(Request $request): JsonResponse
+    {
+        try {
+            $usuario = $request->input('usuario');
+            $clave = $request->input('password');
+
+            $auth_jwt = new AuthJwt();
+            $auth_jwt->AuthHttp($clave, $usuario);
+            $token = $auth_jwt->getToken();
+
+            $salida = [
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+                'expires_in' => 1199,
+                'url' => config('app.dominio') . "/api",
+            ];
+            return response()->json($salida, 201);
+        } catch (Exception $err) {
+            $salida = [
+                'message' => 'Error ' . $err->getMessage() . ' ' . basename($err->getFile()) . ' ' . $err->getLine(),
+                'code' => 500,
+            ];
+            return response()->json($salida, 500);
+        }
+    }
+
+    /**
+     * Validar token JWT
+     *
+     * @param  Request  $request
+     * @return JsonResponse
+     */
+    public function validateToken(Request $request): JsonResponse
+    {
+        try {
+            $token = $request->input('token');
+
+            if (!$token) {
+                $token = $this->extractTokenFromHeader($request);
+            }
+
+            if (!$token) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Token no proporcionado',
+                ], 401);
+            }
+
+            $auth_jwt = new AuthJwt();
+            $auth_jwt->CheckSimpleToken($token);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Token válido',
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Token inválido o expirado: ' . $e->getMessage(),
+            ], 401);
+        }
+    }
+
+    /**
+     * Extraer token del header Authorization
+     *
+     * @param  Request  $request
+     * @return string|null
+     */
+    private function extractTokenFromHeader(Request $request): ?string
+    {
+        $authorization = $request->header('Authorization');
+
+        if (!$authorization) {
+            return null;
+        }
+
+        if (preg_match('/^Bearer\s+(.+)$/i', $authorization, $matches)) {
+            return $matches[1];
+        }
+
+        return null;
     }
 }

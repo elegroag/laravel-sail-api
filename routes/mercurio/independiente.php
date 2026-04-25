@@ -4,8 +4,8 @@ use App\Http\Controllers\Mercurio\IndependienteController;
 use Illuminate\Support\Facades\Route;
 
 // Independiente (migrado desde Kumbia)
-Route::middleware(['mercurio.auth'])->group(function () {
-    Route::prefix('/mercurio/independiente')->group(function () {
+Route::prefix('/mercurio/independiente')->group(function () {
+    Route::middleware(['mercurio.auth'])->group(function () {
         Route::get('/', function () {
             return redirect()->route('independiente.index');
         });

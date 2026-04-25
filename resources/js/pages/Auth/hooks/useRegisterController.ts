@@ -179,14 +179,14 @@ const useRegisterController = ({ Coddoc, Tipsoc, Codciu, errors }: LoginProps) =
     };
 
     type RegisterRouteName =
-        | 'api.register'
-        | 'api.register.empresa'
-        | 'api.register.trabajador'
-        | 'api.register.particular'
-        | 'api.register.independiente'
-        | 'api.register.pensionado'
-        | 'api.register.facultativo'
-        | 'api.register.domestico';
+        | 'register'
+        | 'register.empresa'
+        | 'register.trabajador'
+        | 'register.particular'
+        | 'register.independiente'
+        | 'register.pensionado'
+        | 'register.facultativo'
+        | 'register.domestico';
 
     const splitNombre = (fullName: string) => {
         const cleaned = (fullName || '').trim().replace(/\s+/g, ' ');
@@ -317,40 +317,48 @@ const useRegisterController = ({ Coddoc, Tipsoc, Codciu, errors }: LoginProps) =
     const resolveRegisterRouteName = (tipo: RegisterPayload['tipo']): RegisterRouteName => {
         switch (tipo) {
             case 'E':
-                return 'api.register.empresa';
+                return 'register.empresa';
             case 'T':
-                return 'api.register.trabajador';
+                return 'register.trabajador';
             case 'P':
-                return 'api.register.particular';
+                return 'register.particular';
             case 'I':
-                return 'api.register.independiente';
+                return 'register.independiente';
             case 'O':
-                return 'api.register.pensionado';
+                return 'register.pensionado';
             case 'F':
-                return 'api.register.facultativo';
+                return 'register.facultativo';
             case 'S':
-                return 'api.register.domestico';
+                return 'register.domestico';
             default:
-                return 'api.register';
+                return 'register';
         }
     };
 
-    const postRegister = async (routeName: RegisterRouteName, payload: RegisterPayload) => {
-        const response = await fetch(route(routeName), {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-            },
-            body: JSON.stringify(payload),
+    const postRegister = (routeName: RegisterRouteName, payload: RegisterPayload) => {
+        return new Promise<{ success: boolean; data?: RegisterApiSuccessData; message?: string }>((resolve) => {
+            const data = payload as unknown as Record<string, string | number | boolean>;
+            router.post(route(routeName), data, {
+                preserveScroll: true,
+                preserveState: true,
+                replace: true,
+                onSuccess: (page) => {
+                    const props = page.props as { success?: boolean; message?: string; data?: RegisterApiSuccessData };
+                    resolve({
+                        success: props.success ?? true,
+                        data: props.data,
+                        message: props.message,
+                    });
+                },
+                onError: (errors) => {
+                    const errorMessage = Object.values(errors).flat().join(', ') || 'Error de validación';
+                    resolve({
+                        success: false,
+                        message: errorMessage,
+                    });
+                },
+            });
         });
-
-        const responseJson: unknown = await response.json();
-
-        return {
-            response,
-            responseJson,
-        };
     };
 
     type RegisterApiSuccessData = {
@@ -375,10 +383,6 @@ const useRegisterController = ({ Coddoc, Tipsoc, Codciu, errors }: LoginProps) =
         errors?: unknown;
     };
 
-    const isRegisterApiResponse = (value: unknown): value is RegisterApiResponse => {
-        return typeof value === 'object' && value !== null;
-    };
-
     const handleRegisterSuccess = (responseJson: RegisterApiResponse) => {
         setDialog({ message: '¡Registro exitoso! Serás redirigido al login.', type: 'success' });
         dispatch({ type: 'RESET_FORM' });
@@ -396,18 +400,8 @@ const useRegisterController = ({ Coddoc, Tipsoc, Codciu, errors }: LoginProps) =
         }, 1000);
     };
 
-    const getErrorMessage = (responseJson: RegisterApiResponse): string => {
-        // Buscar mensaje en data.error, data.message, data.msj (estructura real del server)
-        const data = responseJson.data as RegisterApiErrorData | undefined;
-        return data?.error
-            || data?.message
-            || data?.msj
-            || (typeof responseJson?.message === 'string' ? responseJson.message : '')
-            || 'No fue posible completar el registro.';
-    };
-
-    const handleRegisterFailure = (responseJson: RegisterApiResponse) => {
-        const errorMessage = getErrorMessage(responseJson);
+    const handleRegisterFailure = (message?: string) => {
+        const errorMessage = message || 'No fue posible completar el registro.';
         const showLoginButton = errorMessage.includes('ya existe y se encuentra registrado');
         setDialog({ message: errorMessage, type: 'error', showLoginButton });
     };
@@ -424,16 +418,14 @@ const useRegisterController = ({ Coddoc, Tipsoc, Codciu, errors }: LoginProps) =
             console.debug('Payload de registro (previo a envío):', payload);
 
             const registerRouteName = resolveRegisterRouteName(payload.tipo);
-            const { response, responseJson } = await postRegister(registerRouteName, payload);
+            const result = await postRegister(registerRouteName, payload);
 
-            const safeJson: RegisterApiResponse = isRegisterApiResponse(responseJson) ? responseJson : {};
-
-            if (response.ok && safeJson?.success) {
-                handleRegisterSuccess(safeJson);
+            if (result.success) {
+                handleRegisterSuccess({ success: true, data: result.data, message: result.message });
                 return;
             }
 
-            handleRegisterFailure(safeJson);
+            handleRegisterFailure(result.message);
         } catch (error) {
             const message = error instanceof Error ? error.message : 'No fue posible completar el registro. Intenta nuevamente.';
             setDialog({ message, type: 'error' });

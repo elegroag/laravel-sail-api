@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Mercurio;
 use App\Exceptions\AuthException;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Controller;
-use App\Library\Auth\AuthJwt;
 use App\Library\Auth\SessionCookies;
+use App\Models\Adapter\DbBase;
 use App\Models\Gener09;
 use App\Models\Gener18;
 use App\Models\Mercurio01;
@@ -15,6 +15,11 @@ use App\Models\Mercurio19;
 use App\Models\Subsi54;
 use App\Services\Autentications\AutenticaService;
 use App\Services\Autentications\VerifyAuthService;
+use App\Services\Signup\SignupEmpresas;
+use App\Services\Signup\SignupFacultativos;
+use App\Services\Signup\SignupIndependientes;
+use App\Services\Signup\SignupPensionados;
+use App\Services\Signup\SignupService;
 use App\Services\Srequest;
 use App\Services\Utils\SenderEmail;
 use App\Services\Autentications\AutenticaGeneral;
@@ -31,11 +36,13 @@ use Inertia\Inertia;
 
 class AuthController extends Controller
 {
-    private AuthJwt $authJwt;
+    private $db;
+    private SignupService $signupService;
 
     public function __construct()
     {
-        $this->authJwt = new AuthJwt(700);
+        $this->db = DbBase::rawConnect();
+        $this->signupService = new SignupService();
     }
 
     public function index()
@@ -56,6 +63,378 @@ class AuthController extends Controller
     public function registerWorker()
     {
         return Inertia::render('Auth/RegisterWorker', (new AutenticaGeneral)->paramsAuthentication());
+    }
+
+    /**
+     * Registrar nuevo usuario en el sistema
+     * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
+     * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
+     * @param Request $request
+     * @return \Inertia\Response
+     */
+    public function registerEmpresaAction(Request $request)
+    {
+        $this->db->begin();
+        try {
+            $request->validate([
+                'rep_nombre' => 'required|string|min:5',
+                'rep_documento' => 'required|integer|digits_between:6,18',
+                'rep_email' => 'required|email',
+                'rep_telefono' => 'required|integer|digits_between:6,10',
+                'rep_coddoc' => 'required|string|min:1',
+                'tipdoc' => 'required|string|min:1',
+                'razsoc' => 'required|string|min:5',
+                'nit' => 'required|integer|digits_between:6,18',
+                'tipsoc' => 'required|string|min:1',
+                'tipper' => 'required|string|min:1',
+                'is_delegado' => 'required|boolean',
+            ]);
+
+            if ($request->boolean('is_delegado')) {
+                $request->validate([
+                    'cargo' => 'required|string|min:5',
+                ]);
+            }
+
+            $data = $request->all();
+            $data = array_merge($data, [
+                'cedrep' => $request->input('rep_documento'),
+                'repleg' => $request->input('rep_nombre'),
+                'coddocrepleg' => $request->input('rep_coddoc'),
+                'calemp' => 'E',
+            ]);
+
+            $response = $this->performRegister($data, 'E');
+            $this->db->commit();
+
+            // Usar los datos de la respuesta (documento del representante, no NIT)
+            return redirect()->route('verify.show', [
+                'tipo' => $response['tipo'],
+                'coddoc' => $response['coddoc'],
+                'documento' => $response['documento'],
+                'option_request' => 'register',
+            ])->with('success', $response['msj']);
+        } catch (ValidationException $e) {
+            $this->db->rollBack();
+            return back()->withErrors($e->errors())->withInput();
+        } catch (DebugException $e) {
+            $this->db->rollBack();
+            return back()->withErrors(['general' => $e->getMessage()])->withInput();
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            return back()->withErrors(['general' => 'Error del servidor'])->withInput();
+        }
+    }
+
+    /**
+     * Registrar nuevo usuario en el sistema
+     * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
+     * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
+     * @param Request $request
+     * @return \Inertia\Response
+     */
+    public function registerTrabajadorAction(Request $request)
+    {
+        $this->db->begin();
+        try {
+            $request->validate([
+                'coddoc' => 'required|string|min:1',
+                'documento' => 'required|integer|digits_between:6,18',
+                'password' => 'required|string|min:8',
+                'nombre' => 'required|string|min:5',
+                'email' => 'required|email',
+                'telefono' => 'required|integer|digits_between:6,10',
+                'codciu' => 'required|integer|digits:5',
+                'tipo' => 'required|string|min:1',
+                'razsoc' => 'required|string|min:5',
+                'nit' => 'required|integer|digits_between:6,18',
+            ]);
+
+            $data = $request->all();
+            $data['calemp'] = null;
+
+            $response = $this->performRegister($data, 'T');
+            $this->db->commit();
+
+            return redirect()->route('verify.show', [
+                'tipo' => $response['tipo'],
+                'coddoc' => $response['coddoc'],
+                'documento' => $response['documento'],
+                'option_request' => 'register',
+            ])->with('success', $response['msj']);
+        } catch (ValidationException $e) {
+            $this->db->rollBack();
+            return back()->withErrors($e->errors())->withInput();
+        } catch (DebugException $e) {
+            $this->db->rollBack();
+            return back()->withErrors(['general' => $e->getMessage()])->withInput();
+        } catch (\Exception $e) {
+            $this->db->rollBack();
+            return back()->withErrors(['general' => 'Error del servidor'])->withInput();
+        }
+    }
+
+    /**
+     * Registrar nuevo usuario en el sistema
+     * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
+     * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
+     * @param Request $request
+     * @return \Inertia\Response
+     */
+    public function registerParticularAction(Request $request)
+    {
+        $this->db->begin();
+        try {
+            $request->validate([
+                'coddoc' => 'required|string|min:1',
+                'documento' => 'required|integer|digits_between:6,18',
+                'password' => 'required|string|min:8',
+                'nombre' => 'required|string|min:5',
+                'email' => 'required|email',
+                'telefono' => 'required|integer|digits_between:6,10',
+                'codciu' => 'required|integer|digits:5',
+                'tipo' => 'required|string|min:1',
+            ]);
+            $data = $request->all();
+            $data['calemp'] = null;
+
+            $response = $this->performRegister($data, 'P');
+            $this->db->commit();
+
+            return redirect()->route('verify.show', [
+                'tipo' => $response['tipo'],
+                'coddoc' => $response['coddoc'],
+                'documento' => $response['documento'],
+                'option_request' => 'register',
+            ])->with('success', $response['msj']);
+        } catch (ValidationException $e) {
+            $this->db->rollBack();
+            return back()->withErrors($e->errors())->withInput();
+        } catch (DebugException $e) {
+            $this->db->rollBack();
+            return back()->withErrors(['general' => $e->getMessage()])->withInput();
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            return back()->withErrors(['general' => 'Error del servidor'])->withInput();
+        }
+    }
+
+    /**
+     * Registrar nuevo usuario en el sistema
+     * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
+     * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
+     * @param Request $request
+     * @return \Inertia\Response
+     */
+    public function registerIndependienteAction(Request $request)
+    {
+        $this->db->begin();
+        try {
+            $request->validate([
+                'coddoc' => 'required|string|min:1',
+                'documento' => 'required|integer|digits_between:6,18',
+                'password' => 'required|string|min:8',
+                'nombre' => 'required|string|min:5',
+                'email' => 'required|email',
+                'telefono' => 'required|integer|digits_between:6,10',
+                'codciu' => 'required|integer|digits:5',
+                'tipo' => 'required|string|min:1',
+                'contribution_rate' => 'required',
+            ]);
+            $data = $request->all();
+            $data['calemp'] = 'I';
+
+            $response = $this->performRegister($data, 'I');
+            $this->db->commit();
+
+            return redirect()->route('verify.show', [
+                'tipo' => $response['tipo'],
+                'coddoc' => $response['coddoc'],
+                'documento' => $response['documento'],
+                'option_request' => 'register',
+            ])->with('success', $response['msj']);
+        } catch (ValidationException $e) {
+            $this->db->rollBack();
+            return back()->withErrors($e->errors())->withInput();
+        } catch (DebugException $e) {
+            $this->db->rollBack();
+            return back()->withErrors(['general' => $e->getMessage()])->withInput();
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            return back()->withErrors(['general' => 'Error del servidor'])->withInput();
+        }
+    }
+
+    /**
+     * Registrar nuevo usuario en el sistema
+     * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
+     * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
+     * @param Request $request
+     * @return \Inertia\Response
+     */
+    public function registerPensionadoAction(Request $request)
+    {
+        $this->db->begin();
+        try {
+            $request->validate([
+                'coddoc' => 'required|string|min:1',
+                'documento' => 'required|integer|digits_between:6,18',
+                'password' => 'required|string|min:8',
+                'nombre' => 'required|string|min:5',
+                'email' => 'required|email',
+                'telefono' => 'required|integer|digits_between:6,10',
+                'codciu' => 'required|integer|digits:5',
+                'tipo' => 'required|string|min:1',
+                'contribution_rate' => 'required',
+            ]);
+            $data = $request->all();
+            $data['calemp'] = 'O';
+
+            $response = $this->performRegister($data, 'O');
+            $this->db->commit();
+
+            return redirect()->route('verify.show', [
+                'tipo' => $response['tipo'],
+                'coddoc' => $response['coddoc'],
+                'documento' => $response['documento'],
+                'option_request' => 'register',
+            ])->with('success', $response['msj']);
+        } catch (ValidationException $e) {
+            $this->db->rollBack();
+            return back()->withErrors($e->errors())->withInput();
+        } catch (DebugException $e) {
+            $this->db->rollBack();
+            return back()->withErrors(['general' => $e->getMessage()])->withInput();
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            return back()->withErrors(['general' => 'Error del servidor'])->withInput();
+        }
+    }
+
+    /**
+     * Registrar nuevo usuario en el sistema
+     * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
+     * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
+     * @param Request $request
+     * @return \Inertia\Response
+     */
+    public function registerFacultativoAction(Request $request)
+    {
+        $this->db->begin();
+        try {
+            $request->validate([
+                'coddoc' => 'required|string|min:1',
+                'documento' => 'required|integer|digits_between:6,18',
+                'password' => 'required|string|min:8',
+                'nombre' => 'required|string|min:5',
+                'email' => 'required|email',
+                'telefono' => 'required|integer|digits_between:6,10',
+                'codciu' => 'required|integer|digits:5',
+                'tipo' => 'required|string|min:1',
+            ]);
+
+            $data = $request->all();
+            $data['calemp'] = 'F';
+
+            $response = $this->performRegister($data, 'F');
+            $this->db->commit();
+
+            return redirect()->route('verify.show', [
+                'tipo' => $response['tipo'],
+                'coddoc' => $response['coddoc'],
+                'documento' => $response['documento'],
+                'option_request' => 'register',
+            ])->with('success', $response['msj']);
+        } catch (ValidationException $e) {
+            $this->db->rollBack();
+            return back()->withErrors($e->errors())->withInput();
+        } catch (DebugException $e) {
+            $this->db->rollBack();
+            return back()->withErrors(['general' => $e->getMessage()])->withInput();
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            return back()->withErrors(['general' => 'Error del servidor'])->withInput();
+        }
+    }
+
+    /**
+     * Registrar nuevo usuario en el sistema
+     * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
+     * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
+     * @param Request $request
+     * @return \Inertia\Response
+     */
+    public function registerDomesticoAction(Request $request)
+    {
+        $this->db->begin();
+        try {
+            $request->validate([
+                'coddoc' => 'required|string|min:1',
+                'documento' => 'required|integer|digits_between:6,18',
+                'password' => 'required|string|min:8',
+                'nombre' => 'required|string|min:5',
+                'email' => 'required|email',
+                'telefono' => 'required|integer|digits_between:6,10',
+                'codciu' => 'required|integer|digits:5',
+                'tipo' => 'required|string|min:1',
+                'contribution_rate' => 'required'
+            ]);
+
+            $data = $request->all();
+            $data['calemp'] = 'S'; // Para domésticos
+
+            $response = $this->performRegister($data, 'S');
+            $this->db->commit();
+
+            return redirect()->route('verify.show', [
+                'tipo' => $response['tipo'],
+                'coddoc' => $response['coddoc'],
+                'documento' => $response['documento'],
+                'option_request' => 'register',
+            ])->with('success', $response['msj']);
+        } catch (ValidationException $e) {
+            $this->db->rollBack();
+            return back()->withErrors($e->errors())->withInput();
+        } catch (DebugException $e) {
+            $this->db->rollBack();
+            return back()->withErrors(['general' => $e->getMessage()])->withInput();
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            return back()->withErrors(['general' => 'Error del servidor'])->withInput();
+        }
+    }
+
+    private function performRegister($data, ?string $tipo = null)
+    {
+        switch ($tipo) {
+            case 'E':
+                $signupEntity = new SignupEmpresas;
+                break;
+            case 'I':
+                $signupEntity = new SignupIndependientes;
+                break;
+            case 'F':
+                $signupEntity = new SignupFacultativos;
+                break;
+            case 'O':
+                $signupEntity = new SignupPensionados;
+                break;
+            case 'S':
+            case 'T':
+            case 'P':
+                $signupEntity = null;
+                break;
+            default:
+                throw new DebugException('Error el tipo de afiliación es requerido', 1);
+                break;
+        }
+
+        $response = $this->signupService->execute(
+            $signupEntity,
+            new Srequest($data)
+        );
+
+        return $response;
     }
 
     public function resetPassword()
@@ -209,6 +588,49 @@ class AuthController extends Controller
         }
 
         return $codigoVerify;
+    }
+
+    /**
+     * Reenviar código de verificación
+     * Este método regenera y reenvía el código PIN al usuario
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function resendVerificationCode(Request $request)
+    {
+        try {
+            $data = $request->validate([
+                'documento' => 'required|numeric|digits_between:6,18',
+                'coddoc' => 'required|string|min:1',
+                'tipo' => 'required|string|size:1',
+                'delivery_method' => 'required|string|in:email,whatsapp',
+            ]);
+
+            $user07 = Mercurio07::where('documento', $data['documento'])
+                ->where('coddoc', $data['coddoc'])
+                ->where('tipo', $data['tipo'])
+                ->first();
+
+            if (! $user07) {
+                return back()->withErrors([
+                    'general' => 'No existe un usuario registrado con los datos ingresados.',
+                ]);
+            }
+
+            $this->generateAndSendVerificationCode(
+                $data['documento'],
+                $data['coddoc'],
+                $data['tipo'],
+                $user07,
+                $data['delivery_method']
+            );
+
+            return back()->with('status', 'verification-link-sent');
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors());
+        } catch (\Exception $e) {
+            return back()->withErrors(['general' => 'No fue posible reenviar el código. Intenta nuevamente.']);
+        }
     }
 
     public function verifyShow(Request $request, $tipo = null, $coddoc = null, $documento = null, $option_request = null)

@@ -1,5 +1,6 @@
 import React from "react"
 import { Label } from "@/components/ui/label"
+import { ArrowLeft } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { RegisterValues } from "@/types/register"
 
@@ -44,9 +45,9 @@ const AccountResponsibleSelect: React.FC<AccountResponsibleSelectProps> = ({
         <button
           type="button"
           onClick={onPrevStep}
-          className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+          className="px-3 py-2 text-purple-900 bg-purple-100 border border-purple-300 rounded-md hover:bg-purple-200"
         >
-          Volver a datos de empresa
+          <ArrowLeft className="h-4 w-4" />
         </button>
         <button
           type="button"

@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
-class CajasCookieAuthenticated
+class CajasAuthenticated
 {
 
     protected $controller;
@@ -37,7 +37,7 @@ class CajasCookieAuthenticated
                 'code' => 401,
             ]);
 
-            return redirect()->route('cajas.login');
+            return redirect()->route('cajas.salir');
         }
 
         if ($this->autorization($request) === false) {

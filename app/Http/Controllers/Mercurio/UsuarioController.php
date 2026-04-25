@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Mercurio;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Auth\SessionCookies;
+use App\Library\Auth\SessionMercurio;
 use App\Models\Adapter\DbBase;
 use App\Models\FormularioDinamico;
 use App\Models\Gener09;
@@ -191,14 +192,14 @@ class UsuarioController extends ApplicationController
 
             // Reconstruir la sesión con los datos actualizados
             SessionCookies::authenticate(
-                'mercurio',
-                new Srequest([
+                new SessionMercurio(),
+                [
                     'tipo' => $tipo,
                     'coddoc' => $coddoc,
                     'documento' => $documento,
                     'estado' => $msubsi07->estado,
                     'estado_afiliado' => 'A',
-                ])
+                ]
             );
 
             $response = [

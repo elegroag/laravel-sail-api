@@ -3,8 +3,9 @@
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\ApiDocumentationAuth;
-use App\Http\Middleware\CajasCookieAuthenticated;
-use App\Http\Middleware\EnsureCookieAuthenticated;
+use App\Http\Middleware\ApiAuthMiddleware;
+use App\Http\Middleware\CajasAuthenticated;
+use App\Http\Middleware\MercurioAuthenticated;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Application;
@@ -32,7 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'web/*',
             'mercurio/*',
             'cajas/*',
-            'api/sanctum/csrf-cookie'
+            'api/*'
         ]);
 
         $middleware->web(append: [
@@ -55,8 +56,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Middleware para documentación de API
         $middleware->alias([
             'api.docs.auth' => ApiDocumentationAuth::class,
-            'mercurio.auth' => EnsureCookieAuthenticated::class,
-            'cajas.auth' => CajasCookieAuthenticated::class,
+            'api.auth' => ApiAuthMiddleware::class,
+            'mercurio.auth' => MercurioAuthenticated::class,
+            'cajas.auth' => CajasAuthenticated::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

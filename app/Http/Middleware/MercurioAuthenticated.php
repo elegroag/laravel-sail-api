@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 
-class EnsureCookieAuthenticated
+class MercurioAuthenticated
 {
     protected $controller;
     protected $actionMethod;
@@ -39,7 +39,8 @@ class EnsureCookieAuthenticated
                 'msj' => 'No autenticado checkeo de session.',
                 'code' => 401,
             ]);
-            return redirect('web/salir');
+            dd("Error no autenticado");
+            return redirect()->route('web.salir');
         }
 
         if ($this->autorization($request) === false) {

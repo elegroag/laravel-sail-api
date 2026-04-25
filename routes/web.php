@@ -41,6 +41,16 @@ Route::prefix('/web')->group(function () {
     Route::get('/verify/{tipo}/{coddoc}/{documento}/{option_request?}', [MercurioAuthController::class, 'verifyShow'])->name('verify.show');
     Route::post('/verify', [MercurioAuthController::class, 'verify'])->name('verify.request');
     Route::post('/verify_action', [MercurioAuthController::class, 'verify'])->name('verify.action');
+    Route::post('/verify/resend', [MercurioAuthController::class, 'resendVerificationCode'])->name('verify.resend');
+
+    // Rutas POST para registro
+    Route::post('/register/empresa', [MercurioAuthController::class, 'registerEmpresaAction'])->name('register.empresa');
+    Route::post('/register/trabajador', [MercurioAuthController::class, 'registerTrabajadorAction'])->name('register.trabajador');
+    Route::post('/register/particular', [MercurioAuthController::class, 'registerParticularAction'])->name('register.particular');
+    Route::post('/register/independiente', [MercurioAuthController::class, 'registerIndependienteAction'])->name('register.independiente');
+    Route::post('/register/pensionado', [MercurioAuthController::class, 'registerPensionadoAction'])->name('register.pensionado');
+    Route::post('/register/facultativo', [MercurioAuthController::class, 'registerFacultativoAction'])->name('register.facultativo');
+    Route::post('/register/domestico', [MercurioAuthController::class, 'registerDomesticoAction'])->name('register.domestico');
 });
 
 Route::prefix('/cajas')->group(function () {

@@ -2,8 +2,6 @@
 
 namespace App\Library\Auth;
 
-use App\Services\Srequest;
-
 class SessionCookies
 {
     /**
@@ -11,20 +9,8 @@ class SessionCookies
      *
      * @return bool
      */
-    public static function authenticate(string $useApp, Srequest $request)
+    public static function authenticate(SessionInterface $session, array $request)
     {
-        switch ($useApp) {
-            case 'mercurio':
-                $session = new SessionMercurio;
-                break;
-            case 'cajas':
-                $session = new SessionCajas;
-                break;
-            default:
-                return false;
-                break;
-        }
-
         $userData = $session->authenticate($request);
 
         if (! $userData) return false;

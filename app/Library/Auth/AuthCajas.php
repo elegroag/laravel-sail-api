@@ -6,7 +6,7 @@ use App\Exceptions\AuthException;
 use App\Exceptions\DebugException;
 use App\Models\Gener02;
 use App\Services\Api\ApiSubsidio;
-use App\Services\Srequest;
+
 
 class AuthCajas
 {
@@ -34,13 +34,13 @@ class AuthCajas
     public function crearSession(): ?bool
     {
         if (! SessionCookies::authenticate(
-            'cajas',
-            new Srequest([
+            new SessionCajas(),
+            [
                 'tipfun' => $this->usuario->getTipfun(),
                 'usuario' => $this->usuario->getUsuario(),
                 'estado' => $this->usuario->getEstado(),
                 'cedtra' => $this->usuario->getCedtra(),
-            ])
+            ]
         )) {
             throw new AuthException('Error acceso incorrecto. No se logra completar la autenticación', 504);
         } else {

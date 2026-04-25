@@ -4,9 +4,12 @@ use App\Http\Controllers\Mercurio\CertificadosController;
 use App\Http\Controllers\Mercurio\PrincipalController;
 use Illuminate\Support\Facades\Route;
 
+
+Route::post('/mercurio/principal/ingreso_dirigido', [PrincipalController::class, 'ingresoDirigido']);
+
 // Principal
-Route::middleware(['mercurio.auth'])->group(function () {
-    Route::prefix('/mercurio/principal')->group(function () {
+Route::prefix('/mercurio/principal')->group(function () {
+    Route::middleware(['mercurio.auth'])->group(function () {
         Route::get('/', function () {
             return redirect()->route('principal.index');
         });
@@ -30,7 +33,10 @@ Route::middleware(['mercurio.auth'])->group(function () {
         Route::post('/require_firma', [PrincipalController::class, 'requireFirma']);
         Route::post('/cambio_clave', [PrincipalController::class, 'cambioClave'])->name('principal.cambio_clave');
     });
-
-    Route::get('/mercurio/certificados/index', [CertificadosController::class, 'index']);
-    Route::post('/mercurio/certificados/guardar', [CertificadosController::class, 'guardar']);
 });
+
+Route::get('/mercurio/certificados/index', [CertificadosController::class, 'index'])
+    ->middleware(['mercurio.auth']);
+
+Route::post('/mercurio/certificados/guardar', [CertificadosController::class, 'guardar'])
+    ->middleware(['mercurio.auth']);

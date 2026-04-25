@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Mercurio;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Auth\SessionCookies;
+use App\Library\Auth\SessionMercurio;
 use App\Models\Adapter\DbBase;
 use App\Models\Mercurio07;
 use App\Models\Mercurio16;
@@ -674,16 +675,14 @@ class PrincipalController extends ApplicationController
             }
 
             if (! SessionCookies::authenticate(
-                'mercurio',
-                new Srequest(
-                    [
-                        'tipo' => $token->tipo,
-                        'coddoc' => $token->coddoc,
-                        'documento' => $token->documento,
-                        'estado' => 'A',
-                        'estado_afiliado' => 'I',
-                    ]
-                )
+                new SessionMercurio(),
+                [
+                    'tipo' => $token->tipo,
+                    'coddoc' => $token->coddoc,
+                    'documento' => $token->documento,
+                    'estado' => 'A',
+                    'estado_afiliado' => 'I',
+                ]
             )) {
                 throw new DebugException('Error en la autenticación del usuario', 501);
             }

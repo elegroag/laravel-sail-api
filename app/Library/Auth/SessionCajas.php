@@ -3,28 +3,27 @@
 namespace App\Library\Auth;
 
 use App\Models\Gener02;
-use App\Services\Srequest;
 
-class SessionCajas
+class SessionCajas implements SessionInterface
 {
-    public function authenticate(Srequest $request)
+    public function authenticate(array $request): array|false
     {
         if (
-            empty($request->getParam('tipfun')) ||
-            empty($request->getParam('usuario')) ||
-            empty($request->getParam('estado'))
+            empty($request['tipfun']) ||
+            empty($request['usuario']) ||
+            empty($request['estado'])
         ) {
             return false;
         }
 
         $condiciones = [
-            'tipfun' => $request->getParam('tipfun'),
-            'usuario' => $request->getParam('usuario'),
-            'estado' => $request->getParam('estado'),
+            'tipfun' => $request['tipfun'],
+            'usuario' => $request['usuario'],
+            'estado' => $request['estado'],
         ];
 
-        if (! empty($request->getParam('estado'))) {
-            $condiciones['estado'] = $request->getParam('estado');
+        if (! empty($request['estado'])) {
+            $condiciones['estado'] = $request['estado'];
         }
         $usuario = Gener02::where($condiciones)->first();
         if (! $usuario) {
@@ -32,8 +31,8 @@ class SessionCajas
         }
 
         session([
-            'tipfun' => $request->getParam('tipfun'),
-            'usuario' => $request->getParam('usuario')
+            'tipfun' => $request['tipfun'],
+            'usuario' => $request['usuario']
         ]);
 
         return [
