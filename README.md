@@ -116,4 +116,17 @@ chmod 777 /tmp/tcpdf_temp
 
 # resetear el apache de forma silent
 docker exec -it <nombre_contenedor> apache2ctl graceful
+
+
+# Aumentar límite de archivos abiertos temporalmente en el server principal
+ulimit -n 65536
+
+# Verificar que se aplicó
+ulimit -n
+
+# tambien al ejecutar en el server principal para hacerlo permanente
+sudo bash -c 'cat >> /etc/security/limits.conf << EOF
+* soft nofile 65536
+* hard nofile 65536
+EOF'
 ```
