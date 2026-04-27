@@ -8,7 +8,7 @@
                 toggle-event='change'>
                 <option value=''>Seleccionar aquí</option>
                 @foreach([10, 20, 30, 50, 100] as $num)
-                    <option value='{{ $num }}'>{{ $num }}</option>
+                    <option value='{{ $num }}' {{ (isset($cantidadPaginas) && $cantidadPaginas == $num) ? 'selected' : '' }}>{{ $num }}</option>
                 @endforeach
             </select> registros
         </label>

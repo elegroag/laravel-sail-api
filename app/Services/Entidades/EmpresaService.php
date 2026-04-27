@@ -19,6 +19,7 @@ use App\Models\Tranoms;
 use App\Services\Srequest;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Api\ApiSubsidio;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class EmpresaService
@@ -369,6 +370,7 @@ class EmpresaService
         Mercurio30::where('id', $id)->update([
             'usuario' => $usuario,
             'estado' => 'P',
+            'fecsol' => Carbon::now()->format('Y-m-d'),
         ]);
 
         $ai = Mercurio10::where('tipopc', $this->tipopc)

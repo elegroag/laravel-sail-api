@@ -152,6 +152,7 @@ class Pagination
             'estado' => $this->estado,
             'event' => "buscar_pagina(this, '{$this->estado}')",
             'event_pagina' => "cambiar_pagina(this, '{$this->estado}')",
+            'cantidadPaginas' => $this->cantidadPaginas ?? 10,
         ])->render();
 
         return [

@@ -18,6 +18,7 @@ use App\Models\Mercurio45;
 use App\Models\Mercurio47;
 use App\Services\Srequest;
 use App\Services\Api\ApiSubsidio;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class TrabajadorService
@@ -301,6 +302,7 @@ class TrabajadorService
         Mercurio31::where('id', $id)->update([
             'usuario' => $usuario,
             'estado' => 'P',
+            'fecsol' => Carbon::now()->format('Y-m-d'),
         ]);
 
         $ai = Mercurio10::where('tipopc', $this->tipopc)

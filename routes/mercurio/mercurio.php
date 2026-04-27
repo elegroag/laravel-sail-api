@@ -1,8 +1,12 @@
 <?php
 
+use App\Http\Controllers\Mercurio\DocumentosController;
 use App\Http\Controllers\Mercurio\NotificacionesController;
 use App\Http\Controllers\Mercurio\ParticularController;
 use Illuminate\Support\Facades\Route;
+
+Route::post('/mercurio/documentos/ver-pdf', [DocumentosController::class, 'verPdf']);
+Route::post('/mercurio/download_docs/{archivo}', [DocumentosController::class, 'downloadDocuments']);
 
 Route::prefix('/mercurio/notificaciones')->group(function () {
     Route::middleware(['mercurio.auth'])->group(function () {

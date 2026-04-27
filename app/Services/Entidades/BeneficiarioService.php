@@ -13,6 +13,7 @@ use App\Models\Mercurio34;
 use App\Models\Mercurio37;
 use App\Services\Srequest;
 use App\Services\Api\ApiSubsidio;
+use Carbon\Carbon;
 
 class BeneficiarioService
 {
@@ -260,6 +261,7 @@ class BeneficiarioService
         Mercurio34::where('id', $id)
             ->update([
                 'usuario' => (string) $usuario,
+                'fecsol' => Carbon::now()->format('Y-m-d'),
                 'estado' => 'P',
             ]);
 

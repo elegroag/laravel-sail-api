@@ -14,6 +14,7 @@ use App\Models\Mercurio32;
 use App\Models\Mercurio37;
 use App\Services\Srequest;
 use App\Services\Api\ApiSubsidio;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class ConyugeService
@@ -295,6 +296,7 @@ class ConyugeService
         Mercurio32::where('id', $id)->update([
             'usuario' => $usuario,
             'estado' => 'P',
+            'fecsol' => Carbon::now()->format('Y-m-d'),
         ]);
 
         $ai = Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->max('item') + 1;
