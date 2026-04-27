@@ -6,7 +6,7 @@ use App\Exceptions\AuthException;
 use App\Exceptions\DebugException;
 use App\Models\Gener02;
 use App\Services\Api\ApiSubsidio;
-
+use App\Services\CajaServices\UsuarioServices;
 
 class AuthCajas
 {
@@ -16,6 +16,10 @@ class AuthCajas
     public function autenticar($user, $clave): ?bool
     {
         SessionCookies::destroyIdentity();
+
+        $dataUser = $this->getUsuario($user);
+        $usuarioServices = new UsuarioServices();
+        $usuarioServices->actualizaUsuario((object) $dataUser);
 
         $this->buscarUsuario($user);
         if (! $this->usuario) {
@@ -85,14 +89,14 @@ class AuthCajas
     /**
      * Obtener el usuario actual después de la autenticación
      */
-    public function getUsuario()
+    public function getUsuario(?string $usuario = null)
     {
         $procesadorComando = new ApiSubsidio();
         $procesadorComando->send(
             [
                 'servicio' => 'Usuarios',
                 'metodo' => 'trae_usuario',
-                'params' => $this->usuario->getUsuario(),
+                'params' => $usuario ?? $this->usuario->getUsuario(),
             ]
         );
 
