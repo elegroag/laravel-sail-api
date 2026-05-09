@@ -67,7 +67,7 @@ export class FormBeneficiarioView extends FormView {
 
             this.$el.find('#cedtra').attr('disabled', 'true');
             this.$el.find('#numdoc').attr('disabled', 'true');
-            this.$el.find('#parent').attr('disabled', 'true');
+            /* this.$el.find('#parent').attr('disabled', 'true'); */
 
             if (this.model.get('parent') == '1') this.$el.find('#show_mother').removeClass('d-none');
             this.__hasBiologico(this.model.get('parent') == '1' || this.model.get('parent') == '4');
@@ -318,12 +318,50 @@ export class FormBeneficiarioView extends FormView {
         if (parent == '1' || parent == '4') {
             this.$el.find('#show_mother').removeClass('d-none');
             this.__hasBiologico(true);
-            this.__changeTipHijo(parent == 4);
+            this.__changeTipHijo(true);
+            this.__enableNormal(parent == '1');
+            this.__enableCustodia(parent == '4');
         } else {
             this.$el.find('#show_mother').addClass('d-none');
             this.__hasBiologico(false);
             if (parent == '5') this.__changeCustodia(true);
             if (parent == '2' || parent == '3') this.__changePadres(true);
+        }
+    }
+
+    __enableNormal(status) {
+        if (status) {
+            this.$el.find('#tiphij option[value="1"]').prop('disabled', false);
+            this.$el.find('#tiphij option[value="2"]').prop('disabled', false);
+            this.$el.find('#tiphij option[value="3"]').prop('disabled', true);
+            this.$el.find('#tiphij option[value="4"]').prop('disabled', true);
+            this.$el.find('#tiphij option[value="5"]').prop('disabled', true);
+            this.$el.find('#tiphij option[value="6"]').prop('disabled', true);
+        } else {
+            this.$el.find('#tiphij option[value="1"]').prop('disabled', true);
+            this.$el.find('#tiphij option[value="2"]').prop('disabled', true);
+            this.$el.find('#tiphij option[value="3"]').prop('disabled', false);
+            this.$el.find('#tiphij option[value="4"]').prop('disabled', false);
+            this.$el.find('#tiphij option[value="5"]').prop('disabled', false);
+            this.$el.find('#tiphij option[value="6"]').prop('disabled', false);
+        }
+    }
+
+    __enableCustodia(status) {
+        if (status) {
+            this.$el.find('#tiphij option[value="1"]').prop('disabled', true);
+            this.$el.find('#tiphij option[value="2"]').prop('disabled', true);
+            this.$el.find('#tiphij option[value="3"]').prop('disabled', false);
+            this.$el.find('#tiphij option[value="4"]').prop('disabled', false);
+            this.$el.find('#tiphij option[value="5"]').prop('disabled', false);
+            this.$el.find('#tiphij option[value="6"]').prop('disabled', true);
+        } else {
+            this.$el.find('#tiphij option[value="1"]').prop('disabled', false);
+            this.$el.find('#tiphij option[value="2"]').prop('disabled', false);
+            this.$el.find('#tiphij option[value="3"]').prop('disabled', true);
+            this.$el.find('#tiphij option[value="4"]').prop('disabled', true);
+            this.$el.find('#tiphij option[value="5"]').prop('disabled', true);
+            this.$el.find('#tiphij option[value="6"]').prop('disabled', false);
         }
     }
 
@@ -388,6 +426,8 @@ export class FormBeneficiarioView extends FormView {
 
     __changeTipHijo(status) {
         if (status) {
+            this.$el.find('#tiphij option[value="1"]').prop('disabled', false);
+            this.$el.find('#tiphij option[value="2"]').prop('disabled', false);
             this.$el.find('#tiphij option[value="3"]').prop('disabled', false);
             this.$el.find('#tiphij option[value="4"]').prop('disabled', false);
             this.$el.find('#tiphij option[value="5"]').prop('disabled', false);

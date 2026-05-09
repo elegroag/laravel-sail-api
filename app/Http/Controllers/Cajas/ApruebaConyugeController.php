@@ -75,7 +75,6 @@ class ApruebaConyugeController extends ApplicationController
      */
     public function aplicarFiltro(Request $request, string $estado = 'P')
     {
-        $this->setResponse('ajax');
         $cantidad_pagina = $request->input('numero', 10);
         $usuario = $this->user['usuario'];
         $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
@@ -222,39 +221,46 @@ class ApruebaConyugeController extends ApplicationController
      */
     public function buscar(Request $request, $estado = 'P')
     {
-        $this->setResponse('ajax');
-        $pagina = $request->input('pagina', 1);
-        $cantidad_pagina = $request->input('numero', 10);
-        $usuario = parent::getActUser();
-        $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
+        try {
+            $this->setResponse('ajax');
+            $pagina = ($request->input('pagina')) ? $request->input('pagina') : 1;
+            $cantidad_pagina = ($request->input('numero')) ? $request->input('numero') : 10;
+            $usuario = $this->user['usuario'];
+            $query_str = ($estado == 'T') ? " estado='{$estado}'" : "usuario='{$usuario}' and estado='{$estado}'";
 
-        $pagination = new Pagination(
-            new Srequest([
-                'cantidadPaginas' => $cantidad_pagina,
-                'query' => $query_str,
-                'estado' => $estado,
-                'pagina' => $pagina,
-            ])
-        );
-
-        if (
-            get_flashdata_item('filter_conyuge') != false
-        ) {
-            $query = $pagination->persistencia(get_flashdata_item('filter_mercurio32'));
-        } else {
-            $query = $pagination->filter(
-                $request->input('campo'),
-                $request->input('condi'),
-                $request->input('value')
+            $pagination = new Pagination(
+                new Srequest([
+                    'cantidadPaginas' => $cantidad_pagina,
+                    'query' => $query_str,
+                    'estado' => $estado,
+                    'pagina' => $pagina,
+                ])
             );
+
+            if (
+                get_flashdata_item('filter_conyuge') != false
+            ) {
+                $query = $pagination->persistencia(get_flashdata_item('filter_mercurio32'));
+            } else {
+                $query = $pagination->filter(
+                    $request->input('campo'),
+                    $request->input('condi'),
+                    $request->input('value')
+                );
+            }
+
+            set_flashdata('filter_conyuge', $query, true);
+            set_flashdata('filter_mercurio32', $pagination->filters, true);
+
+            $response = $pagination->render(new ConyugeServices);
+
+            return $this->renderObject($response);
+        } catch (\Throwable $th) {
+            return $this->renderObject([
+                'success' => false,
+                'msj' => $th->getMessage(),
+            ]);
         }
-
-        set_flashdata('filter_conyuge', $query, true);
-        set_flashdata('filter_mercurio32', $pagination->filters, true);
-
-        $response = $pagination->render(new ConyugeServices);
-
-        return $this->renderObject($response, false);
     }
 
     /**

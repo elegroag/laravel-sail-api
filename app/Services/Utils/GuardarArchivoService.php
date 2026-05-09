@@ -2,6 +2,9 @@
 
 namespace App\Services\Utils;
 
+ini_set('upload_max_filesize', '200M');
+ini_set('post_max_size', '250M');
+
 use App\Exceptions\DebugException;
 use App\Models\Adapter\DbBase;
 use App\Models\Mercurio10;
@@ -28,6 +31,7 @@ class GuardarArchivoService
 
     public function main()
     {
+
         $time = strtotime('now');
         if (is_null($_FILES)) {
             throw new DebugException('Error no hay archivos disponibles en servidor', 301);

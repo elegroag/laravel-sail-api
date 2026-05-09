@@ -85,7 +85,7 @@ class APIClient
                 break;
         }
 
-        curl_setopt($ch, CURLOPT_TIMEOUT_MS, 50000);
+        curl_setopt($ch, CURLOPT_TIMEOUT_MS, 250000);
         $result = curl_exec($ch);
 
         $this->statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
