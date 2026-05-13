@@ -434,11 +434,7 @@ class ApruebaTrabajadorController extends ApplicationController
             } catch (DebugException $err) {
 
                 $this->db->rollback();
-                $salida = [
-                    'success' => false,
-                    'msj' => $err->getMessage(),
-                    'erros' => $err->render($request),
-                ];
+                return $err->render($request);
             }
         } catch (\Exception $e) {
             $this->db->rollback();
@@ -539,11 +535,7 @@ class ApruebaTrabajadorController extends ApplicationController
                 'msj' => 'Movimiento Realizado Con Exito',
             ];
         } catch (DebugException $err) {
-            $salida = [
-                'success' => false,
-                'msj' => $err->getMessage(),
-                'code' => $err->getCode(),
-            ];
+            return $err->render($request);
         }
 
         return response()->json($salida);
@@ -872,12 +864,7 @@ class ApruebaTrabajadorController extends ApplicationController
                 ],
             );
         } catch (DebugException $err) {
-            return response()->json(
-                [
-                    'success' => false,
-                    'msj' => $err->getMessage(),
-                ]
-            );
+            return $err->render($request);
         }
     }
 
@@ -958,11 +945,8 @@ class ApruebaTrabajadorController extends ApplicationController
                 'success' => true,
                 'msj' => 'Movimiento realizado con éxito',
             ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => 'No se pudo realizar el movimiento ' . "\n" . $e->getMessage() . "\n " . $e->getLine(),
-            ];
+        } catch (DebugException $err) {
+            return $err->render($request);
         }
         return response()->json($response);
     }
@@ -992,10 +976,8 @@ class ApruebaTrabajadorController extends ApplicationController
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
-                    'metodo' => 'parametros_trabajadores',
-                    'params' => true,
-                ],
-                false
+                    'metodo' => 'parametros_trabajadores'
+                ]
             );
 
             $datos_captura = $procesadorComando->toArray();

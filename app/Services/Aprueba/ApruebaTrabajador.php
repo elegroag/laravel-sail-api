@@ -123,7 +123,7 @@ class ApruebaTrabajador
         );
 
         if ($ps->isJson() == false) {
-            throw new DebugException('Error, no hay respuesta del servidor para validación del resultado.', 501);
+            throw new DebugException('Error, no hay respuesta del servidor para validación del resultado.', 501, $ps->toArray());
         }
 
         $out = $ps->toArray();
