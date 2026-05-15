@@ -104,7 +104,7 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='fecini'>
-                                        <label for="fecini" class="control-label">Fecha inicio:</label>
+                                        <label for="fecini" class="control-label">Fecha inicia: <br />En la PILA, la fecha de inicio o renovación del pago de aportes corresponde al momento en que el aportante comienza un nuevo período de cotización o continúa pagando mes a mes sus aportes al sistema de seguridad social.:</label>
                                         <span id='component_fecini'></span>
                                     </div>
                                 </div>
@@ -310,7 +310,8 @@
 
                                 <div class="col-md-6">
                                     <div class="form-group" group-for='fectra'>
-                                        <label for="fectra" class="control-label">Fecha inicia labores:</label>
+                                        <label for="fectra" class="control-label">Fecha inicia labores:<br />
+                                            En la PILA, la fecha de inicio o renovación del pago de aportes corresponde al momento en que el aportante comienza un nuevo período de cotización o continúa pagando mes a mes sus aportes al sistema de seguridad social por el trabajador.</label>
                                         <span id="component_fectra"></span>
                                     </div>
                                 </div>

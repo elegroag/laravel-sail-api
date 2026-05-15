@@ -14,7 +14,7 @@ class ApiPython extends ApiAbstract
         $this->mode = config('app.api_mode', 'development');
     }
 
-    public function send($attr)
+    public function send(array $attr)
     {
         $servicio = isset($attr['servicio']) ? $attr['servicio'] : null;
         $metodo = isset($attr['metodo']) ? $attr['metodo'] : null;
@@ -46,8 +46,12 @@ class ApiPython extends ApiAbstract
         return $this;
     }
 
-    public function setCurlCommand($hostConnection, $url, $params, $basicAuth)
-    {
+    public function setCurlCommand(
+        string $hostConnection,
+        string $url,
+        array $params,
+        BasicAuth $basicAuth
+    ) {
         $token = $basicAuth->authenticate();
         $this->lineaComando = "curl -X POST {$hostConnection}/{$url} \"" .
             " -H 'Content-Type: application/json' " .

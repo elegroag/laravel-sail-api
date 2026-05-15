@@ -8,9 +8,9 @@ use App\Library\APIClient\BasicAuth;
 class PortalMercurio extends ApiAbstract
 {
 
-    private $host_portal_dev;
-    private $host_portal_pro;
-    private $portal;
+    private string $host_portal_dev;
+    private string $host_portal_pro;
+    private string $portal;
 
     public function __construct()
     {
@@ -20,7 +20,7 @@ class PortalMercurio extends ApiAbstract
         $this->portal = config('app.portal');
     }
 
-    public function send($attr)
+    public function send(array $attr)
     {
         $servicio = $attr['servicio'];
         $params = isset($attr['params']) ? $attr['params'] : null;
@@ -60,7 +60,7 @@ class PortalMercurio extends ApiAbstract
         return $this;
     }
 
-    public function setCurlCommand($hostConnection, $url, $params, $basicAuth)
+    public function setCurlCommand(string $hostConnection, string $url, array $params, BasicAuth $basicAuth)
     {
         $token = $basicAuth->authenticate();
         $this->lineaComando = "curl -X POST {$hostConnection}/{$url} \"" .

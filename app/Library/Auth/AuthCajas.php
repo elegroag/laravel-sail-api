@@ -105,6 +105,11 @@ class AuthCajas
         }
 
         $out = $procesadorComando->toArray();
+
+        if (! isset($out['data'])) {
+            throw new DebugException('Error al buscar el beneficiario en Sisuweb: respuesta inválida', 501);
+        }
+
         $userSisu = $out['data'];
 
         return $userSisu;

@@ -65,3 +65,5 @@ GEMINI.md
 .env.comfaca
 composer.lock
 pnpm-lock.yaml
+AGENTS.md
+/.kilo

@@ -14,7 +14,7 @@ class ApiWhatsapp extends ApiAbstract
         $this->mode = config('app.api_mode', 'development');
     }
 
-    public function send($attr)
+    public function send(array $attr)
     {
         $servicio = isset($attr['servicio']) ? $attr['servicio'] : null;
         $metodo = isset($attr['metodo']) ? $attr['metodo'] : null;

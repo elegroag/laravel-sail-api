@@ -4,7 +4,7 @@ namespace App\Services\Api;
 
 abstract class ApiAbstract
 {
-    protected $mode;
+    protected string $mode;
 
     protected $app;
 
@@ -12,11 +12,11 @@ abstract class ApiAbstract
 
     protected $output = [];
 
-    protected $lineaComando;
+    protected string $lineaComando;
 
     public function __construct() {}
 
-    abstract public function send($attr);
+    abstract public function send(array $attr);
 
     public function getLineaComando()
     {
