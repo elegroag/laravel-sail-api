@@ -66,4 +66,5 @@ GEMINI.md
 composer.lock
 pnpm-lock.yaml
 AGENTS.md
-/.kilo
+.kilo/
+.hermes/

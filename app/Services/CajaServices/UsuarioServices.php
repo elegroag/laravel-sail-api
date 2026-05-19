@@ -31,7 +31,7 @@ class UsuarioServices
         $ngener21 = Gener21::where('tipfun', $datos->tipfun);
         if ($ngener21->exists()) {
             $ngener21->update([
-                'detalle' => $datos->tipfun_detalle,
+                'detalle' => $datos->tipfun_detalle
             ]);
         } else {
             $gener21 = new Gener21;
@@ -50,6 +50,7 @@ class UsuarioServices
                 'criptada' => $datos->criptada,
                 'cedtra' => $datos->cedtra,
                 'estado' => $datos->estado,
+                'intentos' => '0'
             ]);
         } else {
             $gener02 = new Gener02;
