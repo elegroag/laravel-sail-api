@@ -18,23 +18,21 @@ use App\Models\Mercurio45;
 use App\Models\Mercurio47;
 use App\Services\Srequest;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Utils\SenderValidationCaja;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class TrabajadorService
 {
-    private $tipopc = '1';
-
-    private $user;
-
-    private $db;
-
-    private $tipo;
+    private string $tipopc = '1';
+    private DbBase $db;
+    private ?array $user;
+    private ?string $tipo;
 
     public function __construct()
     {
-        $this->user = session('user');
-        $this->tipo = session('tipo');
+        $this->user = session('user') ?? null;
+        $this->tipo = session('tipo') ?? null;
         $this->db = DbBase::rawConnect();
     }
 
@@ -85,7 +83,7 @@ class TrabajadorService
      * buscarEmpresaSubsidio function
      * buscar empresa en subsidio sin importar el estado
      *
-     * @param [type] $nit
+     * @param string $nit
      * @return void
      */
     public function buscarEmpresaSubsidio($nit)
@@ -94,11 +92,9 @@ class TrabajadorService
         return $empresaService->buscarEmpresaSubsidio($nit);
     }
 
-    public function archivosRequeridos($solicitud)
+    public function archivosRequeridos(?Mercurio31 $solicitud)
     {
-        if ($solicitud == false) {
-            return false;
-        }
+        if (!$solicitud) return false;
         $archivos = [];
         $mercurio10 = Mercurio10::where('numero', $solicitud->getId())
             ->where('tipopc', $this->tipopc)
@@ -149,12 +145,9 @@ class TrabajadorService
         return $html;
     }
 
-    public function dataArchivosRequeridos($solicitud)
+    public function dataArchivosRequeridos(?Mercurio31 $solicitud)
     {
-
-        if ($solicitud == false) {
-            return false;
-        }
+        if (!$solicitud) return false;
         $archivos = [];
 
         $mercurio10 = Mercurio10::where('numero', $solicitud->getId())
@@ -273,11 +266,10 @@ class TrabajadorService
      *
      * @param  SenderValidationCaja  $senderValidationCaja
      * @param  int  $id
-     * @param  int  $documento
-     * @param  int  $coddoc
+     * @param  string  $usuario
      * @return void
      */
-    public function enviarCaja($senderValidationCaja, $id, $usuario)
+    public function enviarCaja(SenderValidationCaja $senderValidationCaja, $id, $usuario)
     {
         $solicitud = $this->findById($id);
 
@@ -329,7 +321,7 @@ class TrabajadorService
      *
      * @author elegroag <elegroag@ibero.edu.co>
      *
-     * @param [type] $cedtra
+     * @param string $cedtra
      * @return array|bool
      */
     public function buscarTrabajadorSubsidio($cedtra)
@@ -352,7 +344,7 @@ class TrabajadorService
         return false;
     }
 
-    public function consultaSeguimiento($id)
+    public function consultaSeguimiento(int $id)
     {
         $seguimientos = Mercurio10::where('numero', $id)
             ->where('tipopc', $this->tipopc)
@@ -380,8 +372,7 @@ class TrabajadorService
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_trabajadores',
-            ],
-            false
+            ]
         );
         $paramsTrabajador = new ParamsTrabajador;
         $paramsTrabajador->setDatosCaptura($ps->toArray());
@@ -395,8 +386,8 @@ class TrabajadorService
      *
      * @author elegroag <elegroag@ibero.edu.co>
      *
-     * @param [type] $documento
-     * @param [type] $coddoc
+     * @param string $documento
+     * @param string $coddoc
      * @return array|bool
      */
     public function findRequestByDocumentoCoddoc($documento, $coddoc)
@@ -420,7 +411,7 @@ class TrabajadorService
         return (is_array($datos) === true) ? $datos : false;
     }
 
-    public function findApiTrabajadoresByNit($nit)
+    public function findApiTrabajadoresByNit(string $nit)
     {
         $procesadorComando = new ApiSubsidio();
         $procesadorComando->send(

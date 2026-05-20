@@ -3,42 +3,29 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Refresh\NoRefreshDatabase;
 use Tests\TestCase;
 
+/**
+ * Password confirmation tests.
+ *
+ * Note: The project does not have a /confirm-password route.
+ * The MercurioAuthController uses PIN-based verification via
+ * /web/verify/{tipo}/{coddoc}/{documento} instead of Laravel's
+ * standard email verification flow.
+ */
 class PasswordConfirmationTest extends TestCase
 {
-    use RefreshDatabase;
+    use NoRefreshDatabase;
 
-    public function test_confirm_password_screen_can_be_rendered()
+    public function test_confirm_password_route_does_not_exist()
     {
+        // The /confirm-password route does not exist in this project.
+        // The system uses PIN-based password recovery via /web/password/request
+        // and /web/recovery_send endpoints instead.
         $user = User::factory()->create();
 
         $response = $this->actingAs($user)->get('/confirm-password');
-
-        $response->assertStatus(200);
-    }
-
-    public function test_password_can_be_confirmed()
-    {
-        $user = User::factory()->create();
-
-        $response = $this->actingAs($user)->post('/confirm-password', [
-            'password' => 'password',
-        ]);
-
-        $response->assertRedirect();
-        $response->assertSessionHasNoErrors();
-    }
-
-    public function test_password_is_not_confirmed_with_invalid_password()
-    {
-        $user = User::factory()->create();
-
-        $response = $this->actingAs($user)->post('/confirm-password', [
-            'password' => 'wrong-password',
-        ]);
-
-        $response->assertSessionHasErrors();
+        $response->assertStatus(404);
     }
 }

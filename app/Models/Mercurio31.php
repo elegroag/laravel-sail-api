@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\Validator;
 use App\Models\Adapter\HasCustomUuid;
 use App\Models\Adapter\ModelBase;
 use Carbon\Carbon;
@@ -93,7 +94,36 @@ class Mercurio31 extends ModelBase
         'sat_numtra',
     ];
 
-    public function setFecafi($fecafi)
+    public function rulesValiation()
+    {
+        return [
+            "nit"     => "required|max:13",
+            "segape"  => "max:45",
+            "horas"   => "required",
+            "fecsol"  => "date"
+        ];
+    }
+
+    public function isValid(?array $rules)
+    {
+        $rules = (!$rules) ? $this->rulesValiation() : $rules;
+
+        $validator = Validator::make($this->attributes, $rules, [
+            'required' => 'El :attribute campo es requirido.',
+            'same'     => 'El :attribute and :other must match.',
+            'size'     => 'El :attribute must be exactly :size.',
+            'between'  => 'El :attribute valor :input no esta entre :min - :max.',
+            'in'       => 'El :attribute must be one of the following types: :values',
+            'email.required' => 'Se requiere la dirección de email!',
+        ]);
+
+        if ($validator->fails()) return $validator->errors();
+
+        return true;
+    }
+
+
+    public function setFecafi(string $fecafi)
     {
         $this->fecafi = $fecafi;
     }
@@ -103,7 +133,7 @@ class Mercurio31 extends ModelBase
         return $this->fecafi;
     }
 
-    public function setResguardo_id($resguardo_id)
+    public function setResguardo_id(string $resguardo_id)
     {
         $this->resguardo_id = $resguardo_id;
     }
@@ -113,7 +143,7 @@ class Mercurio31 extends ModelBase
         return $this->resguardo_id;
     }
 
-    public function setPub_indigena_id($pub_indigena_id)
+    public function setPub_indigena_id(string $pub_indigena_id)
     {
         $this->pub_indigena_id = $pub_indigena_id;
     }
@@ -123,7 +153,7 @@ class Mercurio31 extends ModelBase
         return $this->pub_indigena_id;
     }
 
-    public function setTipcue($tipcue)
+    public function setTipcue(string $tipcue)
     {
         $this->tipcue = $tipcue;
     }
@@ -133,7 +163,7 @@ class Mercurio31 extends ModelBase
         return $this->tipcue;
     }
 
-    public function setCodban($codban)
+    public function setCodban(string $codban)
     {
         $this->codban = $codban;
     }
@@ -148,7 +178,7 @@ class Mercurio31 extends ModelBase
         return $this->resguardo_id;
     }
 
-    public function setResguardoId($id)
+    public function setResguardoId(int $id)
     {
         $this->resguardo_id = $id;
     }
@@ -158,7 +188,7 @@ class Mercurio31 extends ModelBase
         return $this->pub_indigena_id;
     }
 
-    public function setPubIndigenaId($id)
+    public function setPubIndigenaId(int $id)
     {
         $this->pub_indigena_id = $id;
     }
@@ -168,7 +198,7 @@ class Mercurio31 extends ModelBase
         return $this->fecha_giro;
     }
 
-    public function setFechaGiro($fecha)
+    public function setFechaGiro(string $fecha)
     {
         $this->fecha_giro = $fecha;
     }
@@ -178,7 +208,7 @@ class Mercurio31 extends ModelBase
         return $this->otra_empresa;
     }
 
-    public function setOtraEmpresa($otra)
+    public function setOtraEmpresa(string $otra)
     {
         $this->otra_empresa = $otra;
     }
@@ -188,7 +218,7 @@ class Mercurio31 extends ModelBase
         return $this->tippag;
     }
 
-    public function setTippag($tippag)
+    public function setTippag(string $tippag)
     {
         $this->tippag = $tippag;
     }
@@ -198,7 +228,7 @@ class Mercurio31 extends ModelBase
         return $this->numcue;
     }
 
-    public function setNumcue($numcue)
+    public function setNumcue(string $numcue)
     {
         $this->numcue = $numcue;
     }
@@ -208,47 +238,47 @@ class Mercurio31 extends ModelBase
         return $this->codsuc;
     }
 
-    public function setCodsuc($codsuc)
+    public function setCodsuc(string $codsuc)
     {
         $this->codsuc = $codsuc;
     }
 
-    public function setId($id)
+    public function setId(?int $id = null)
     {
         $this->id = $id;
     }
 
-    public function setPeretn($peretn)
+    public function setPeretn(string $peretn)
     {
         $this->peretn = $peretn;
     }
 
-    public function setCiulab($ciulab)
+    public function setCiulab(string $ciulab)
     {
         $this->ciulab = $ciulab;
     }
 
-    public function setTipjor($tipjor)
+    public function setTipjor(string $tipjor)
     {
         $this->tipjor = $tipjor;
     }
 
-    public function setFacvul($facvul)
+    public function setFacvul(string $facvul)
     {
         $this->facvul = $facvul;
     }
 
-    public function setDirlab($dirlab)
+    public function setDirlab(string $dirlab)
     {
         $this->dirlab = $dirlab;
     }
 
-    public function setRuralt($ruralt)
+    public function setRuralt(string $ruralt)
     {
         $this->ruralt = $ruralt;
     }
 
-    public function setComision($comision)
+    public function setComision(string $comision)
     {
         $this->comision = $comision;
     }
@@ -343,7 +373,7 @@ class Mercurio31 extends ModelBase
         $this->segnom = $segnom;
     }
 
-    public function setFecnac($fecnac)
+    public function setFecnac(string $fecnac)
     {
         $this->fecnac = $fecnac;
     }
@@ -368,7 +398,7 @@ class Mercurio31 extends ModelBase
         $this->sexo = $sexo;
     }
 
-    public function setOrisex($orisex)
+    public function setOrisex(string $orisex)
     {
         $this->orisex = $orisex;
     }
@@ -473,7 +503,7 @@ class Mercurio31 extends ModelBase
         $this->email = $email;
     }
 
-    public function setFecsol($fecsol)
+    public function setFecsol(string $fecsol)
     {
         $this->fecsol = $fecsol;
     }
@@ -481,7 +511,7 @@ class Mercurio31 extends ModelBase
     /**
      * Metodo para establecer el valor del campo fecing
      */
-    public function setFecing($fecing)
+    public function setFecing(string $fecing)
     {
         $this->fecing = $fecing;
     }
@@ -556,7 +586,7 @@ class Mercurio31 extends ModelBase
         $this->tipcon = $tipcon;
     }
 
-    public function setTrasin($trasin)
+    public function setTrasin(string $trasin)
     {
         $this->trasin = $trasin;
     }
@@ -654,7 +684,7 @@ class Mercurio31 extends ModelBase
     /**
      * Metodo para establecer el valor del campo fecest
      */
-    public function setFecest($fecest)
+    public function setFecest(string $fecest)
     {
         $this->fecest = $fecest;
     }
@@ -1150,7 +1180,7 @@ class Mercurio31 extends ModelBase
         return trim($this->tipsal);
     }
 
-    public function setTipsal($tipsal)
+    public function setTipsal(string $tipsal)
     {
         $this->tipsal = $tipsal;
     }
@@ -1211,10 +1241,9 @@ class Mercurio31 extends ModelBase
         return $data;
     }
 
-    public function CamposDisponibleDetalle($campo)
+    public function CamposDisponibleDetalle(string $campo)
     {
         $data = $this->CamposDisponibles();
-
         return $data["{$campo}"];
     }
 

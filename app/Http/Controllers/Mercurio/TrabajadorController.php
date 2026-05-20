@@ -30,13 +30,13 @@ use Illuminate\Http\Request;
 
 class TrabajadorController extends ApplicationController
 {
-    protected $db;
+    protected DbBase $db;
 
-    protected $user;
+    protected ?array $user;
 
-    protected $tipo;
+    protected ?string $tipo;
 
-    protected $tipopc = '1';
+    protected string $tipopc = '1';
 
     public function __construct()
     {
@@ -48,7 +48,7 @@ class TrabajadorController extends ApplicationController
     /**
      * GET /mercurio/trabajador/index
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
             if ($this->tipo !== 'E') {
@@ -96,7 +96,7 @@ class TrabajadorController extends ApplicationController
                 'input_razsoc' => $input_razsoc,
             ]);
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, request());
+            $response = $this->handleException($e, $request);
             set_flashdata('error', [
                 'msj' => $response['msj'],
                 'code' => $response['code'],
@@ -442,7 +442,7 @@ class TrabajadorController extends ApplicationController
         }
     }
 
-    public function searchRequest($id)
+    public function searchRequest(Request $request, string $id)
     {
         try {
             if (is_null($id)) {
@@ -466,7 +466,7 @@ class TrabajadorController extends ApplicationController
                 'msj' => 'OK',
             ];
         } catch (Exception $e) {
-            $salida = $this->handleException($e, request());
+            $salida = $this->handleException($e, $request);
         }
 
         return response()->json($salida);
@@ -538,7 +538,7 @@ class TrabajadorController extends ApplicationController
             'segape' => mb_strtoupper($request->input('segape'), 'UTF-8'),
             'prinom' => mb_strtoupper($request->input('prinom'), 'UTF-8'),
             'segnom' => mb_strtoupper($request->input('segnom'), 'UTF-8'),
-            'fecnac' => $request->input('fecnac', 'addslaches', 'extraspaces', 'striptags'),
+            'fecnac' => $request->input('fecnac'),
             'ciunac' => $request->input('ciunac'),
             'sexo' => $request->input('sexo'),
             'estciv' => $request->input('estciv'),
@@ -584,7 +584,7 @@ class TrabajadorController extends ApplicationController
         ];
     }
 
-    public function consultaDocumentos($id)
+    public function consultaDocumentos(string $id)
     {
         try {
             $documento = $this->user['documento'];
