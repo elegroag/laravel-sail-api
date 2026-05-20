@@ -1015,7 +1015,6 @@ class Mercurio32 extends ModelBase
     public function isValid(?array $rules = null)
     {
         $rules = $rules ?? $this->rulesValiation();
-
         $messages = [
             'required' => 'El campo :attribute es requerido.',
             'email'    => 'El correo electrónico no es válido.',
@@ -1026,12 +1025,6 @@ class Mercurio32 extends ModelBase
             'min'      => 'El valor de :attribute debe ser al menos :min.',
         ];
 
-        $validator = Validator::make($this->attributes, $rules, $messages);
-
-        if ($validator->fails()) {
-            return $validator->errors();
-        }
-
-        return true;
+        return Validator::make($this->attributes, $rules, $messages);
     }
 }

@@ -114,9 +114,9 @@ class Table
     {
         $colgroup = '<colgroup>';
         foreach ($colg as $value) {
-            $colgroup .= '<col span="1" width="'.$value.'">';
+            $colgroup .= '<col span="1" width="' . $value . '">';
         }
-        $this->colgroup = $colgroup.'</colgroup>';
+        $this->colgroup = $colgroup . '</colgroup>';
 
         return $this;
     }
@@ -259,34 +259,34 @@ class Table
 
         // Build the table!
 
-        $out = $this->template['table_open'].$this->newline;
+        $out = $this->template['table_open'] . $this->newline;
 
         // Add any caption here
         if ($this->caption) {
-            $out .= '<caption>'.$this->caption.'</caption>'.$this->newline;
+            $out .= '<caption>' . $this->caption . '</caption>' . $this->newline;
         }
 
         // Is there a table heading to display?
         if (! empty($this->heading)) {
-            $out .= $this->template['thead_open'].$this->newline.$this->template['heading_row_start'].$this->newline;
+            $out .= $this->template['thead_open'] . $this->newline . $this->template['heading_row_start'] . $this->newline;
             foreach ($this->heading as $heading) {
                 $temp = $this->template['heading_cell_start'];
 
                 foreach ($heading as $key => $val) {
                     if ($key !== 'data') {
-                        $temp = str_replace('<th', '<th '.$key.'="'.$val.'"', $temp);
+                        $temp = str_replace('<th', '<th ' . $key . '="' . $val . '"', $temp);
                     }
                 }
 
-                $out .= $temp.(isset($heading['data']) ? $heading['data'] : '').$this->template['heading_cell_end'];
+                $out .= $temp . (isset($heading['data']) ? $heading['data'] : '') . $this->template['heading_cell_end'];
             }
 
-            $out .= $this->template['heading_row_end'].$this->newline.$this->template['thead_close'].$this->newline;
+            $out .= $this->template['heading_row_end'] . $this->newline . $this->template['thead_close'] . $this->newline;
         }
 
         // Build the table rows
         if (! empty($this->rows)) {
-            $out .= $this->template['tbody_open'].$this->newline;
+            $out .= $this->template['tbody_open'] . $this->newline;
             $i = 1;
             foreach ($this->rows as $row) {
                 if (! is_array($row)) {
@@ -296,14 +296,14 @@ class Table
                 // We use modulus to alternate the row colors
                 $name = fmod($i++, 2) ? '' : 'alt_';
 
-                $out .= $this->template['row_'.$name.'start'].$this->newline;
+                $out .= $this->template['row_' . $name . 'start'] . $this->newline;
 
                 foreach ($row as $cell) {
-                    $temp = $this->template['cell_'.$name.'start'];
+                    $temp = $this->template['cell_' . $name . 'start'];
 
                     foreach ($cell as $key => $val) {
                         if ($key !== 'data') {
-                            $temp = str_replace('<td', '<td '.$key.'="'.$val.'"', $temp);
+                            $temp = str_replace('<td', '<td ' . $key . '="' . $val . '"', $temp);
                         }
                     }
 
@@ -320,13 +320,13 @@ class Table
                         $out .= $cell;
                     }
 
-                    $out .= $this->template['cell_'.$name.'end'];
+                    $out .= $this->template['cell_' . $name . 'end'];
                 }
 
-                $out .= $this->template['row_'.$name.'end'].$this->newline;
+                $out .= $this->template['row_' . $name . 'end'] . $this->newline;
             }
 
-            $out .= $this->template['tbody_close'].$this->newline;
+            $out .= $this->template['tbody_close'] . $this->newline;
         }
 
         $out .= $this->template['table_close'];
@@ -437,7 +437,7 @@ class Table
         ];
     }
 
-    public static function TmpGeneral()
+    public static function TmpGeneral(): array
     {
         return [
             'table_open' => '<table border="0" cellpadding="0" cellspacing="0" class="table table-bordered">',

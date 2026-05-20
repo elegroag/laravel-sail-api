@@ -13,16 +13,17 @@ use App\Models\Mercurio10;
 use App\Models\Mercurio31;
 use App\Models\Mercurio32;
 use App\Models\Mercurio37;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Entidades\ConyugeService;
 use App\Services\Entidades\TrabajadorService;
 use App\Services\FormulariosAdjuntos\ConyugeAdjuntoService;
 use App\Services\FormulariosAdjuntos\Formularios;
 use App\Services\PreparaFormularios\TrabajadorFormulario;
-use App\Services\Api\ApiSubsidio;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -57,7 +58,7 @@ class ConyugeController extends ApplicationController
                 $tipo == 'O' ||
                 $tipo == 'F'
             ) {
-                $procesadorComando = new ApiSubsidio();
+                $procesadorComando = new ApiSubsidio;
                 $procesadorComando->send(
                     [
                         'servicio' => 'ComfacaEmpresas',
@@ -98,20 +99,21 @@ class ConyugeController extends ApplicationController
             $salida = $this->captureException($e, request());
             set_flashdata('error', [
                 'msj' => $salida['msj'],
-                'code' => 501
+                'code' => 501,
             ]);
+
             return redirect()->route('principal/index');
         }
     }
 
-    public function borrarArchivo(Request $request)
+    public function borrarArchivo(Request $request): JsonResponse
     {
         try {
             $numero = $request->input('id');
             $coddoc = $request->input('coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
+            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -132,7 +134,7 @@ class ConyugeController extends ApplicationController
         return response()->json($response);
     }
 
-    public function guardarArchivo(Request $request)
+    public function guardarArchivo(Request $request): JsonResponse
     {
         try {
             $id = $request->input('id');
@@ -157,11 +159,11 @@ class ConyugeController extends ApplicationController
         return response()->json($response);
     }
 
-    public function traerConyugue(Request $request)
+    public function traerConyugue(Request $request): JsonResponse
     {
         try {
             $cedcon = $request->input('cedcon');
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -211,7 +213,7 @@ class ConyugeController extends ApplicationController
     {
         $this->setResponse('view');
         $archivo = 'declaracion_juramentada_nueva.pdf';
-        $fichero = 'public/docs/formulario_mercurio/' . $archivo;
+        $fichero = 'public/docs/formulario_mercurio/'.$archivo;
         $ext = substr(strrchr($archivo, '.'), 1);
         header('Content-Description: File Transfer');
         header("Content-Type: application/{$ext}");
@@ -219,7 +221,7 @@ class ConyugeController extends ApplicationController
         header('Cache-Control: must-revalidate');
         header('Expires: 0');
         header('Pragma: public');
-        header('Content-Length: ' . filesize($fichero));
+        header('Content-Length: '.filesize($fichero));
         ob_clean();
         readfile($fichero);
         exit;
@@ -227,7 +229,7 @@ class ConyugeController extends ApplicationController
 
     public function downloadDocumentos($archivo = '')
     {
-        $fichero = 'public/docs/formulario_mercurio/' . $archivo;
+        $fichero = 'public/docs/formulario_mercurio/'.$archivo;
         $ext = substr(strrchr($archivo, '.'), 1);
         if (file_exists($fichero)) {
             header('Content-Description: File Transfer');
@@ -236,7 +238,7 @@ class ConyugeController extends ApplicationController
             header('Cache-Control: must-revalidate');
             header('Expires: 0');
             header('Pragma: public');
-            header('Content-Length: ' . filesize($fichero));
+            header('Content-Length: '.filesize($fichero));
             ob_clean();
             readfile($fichero);
             exit;
@@ -248,7 +250,7 @@ class ConyugeController extends ApplicationController
 
     public function downloadReporte($archivo = '')
     {
-        $fichero = 'public/temp/' . $archivo;
+        $fichero = 'public/temp/'.$archivo;
         if (file_exists($fichero)) {
             header('Content-Description: File Transfer');
             header('Content-Type: application/csv');
@@ -256,7 +258,7 @@ class ConyugeController extends ApplicationController
             header('Cache-Control: must-revalidate');
             header('Expires: 0');
             header('Pragma: public');
-            header('Content-Length: ' . filesize($fichero));
+            header('Content-Length: '.filesize($fichero));
             ob_clean();
             readfile($fichero);
             exit;
@@ -266,7 +268,7 @@ class ConyugeController extends ApplicationController
         }
     }
 
-    public function buscarConyugues($db, $estado = '')
+    public function buscarConyugues(string $db, string $estado = ''): array
     {
         $documento = $this->user['documento'];
         $tipo = $this->user['tipo'];
@@ -330,7 +332,7 @@ class ConyugeController extends ApplicationController
         return $conyuges;
     }
 
-    public function serializeData(Request $request)
+    public function serializeData(Request $request): array
     {
         $asignarFuncionario = new AsignarFuncionario;
         $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
@@ -384,7 +386,7 @@ class ConyugeController extends ApplicationController
         ];
     }
 
-    public function guardar(Request $request)
+    public function guardar(Request $request): JsonResponse
     {
         $this->db->begin();
         try {
@@ -421,12 +423,14 @@ class ConyugeController extends ApplicationController
             $this->db->commit();
         } catch (\Throwable $e) {
             $this->db->rollBack();
+
             return $this->handleException($e, $request);
         }
+
         return response()->json($salida);
     }
 
-    public function mapper()
+    public function mapper(): array
     {
         return [
             'cedtra' => 'cedula',
@@ -463,7 +467,7 @@ class ConyugeController extends ApplicationController
         ];
     }
 
-    public function enviarCaja(Request $request)
+    public function enviarCaja(Request $request): JsonResponse
     {
         $this->db->begin();
         try {
@@ -479,12 +483,14 @@ class ConyugeController extends ApplicationController
             $this->db->commit();
         } catch (\Throwable $e) {
             $this->db->rollBack();
+
             return $this->handleException($e, $request);
         }
+
         return response()->json($salida);
     }
 
-    public function borrar(Request $request)
+    public function borrar(Request $request): JsonResponse
     {
         $this->db->begin();
         try {
@@ -505,12 +511,14 @@ class ConyugeController extends ApplicationController
             $this->db->commit();
         } catch (\Throwable $e) {
             $this->db->rollBack();
+
             return $this->handleException($e, $request);
         }
+
         return response()->json($salida);
     }
 
-    public function params()
+    public function params(): JsonResponse
     {
         try {
 
@@ -534,14 +542,14 @@ class ConyugeController extends ApplicationController
 
                 $listAfiliados = array_merge($listAfiliados->toArray(), $mercurio31);
 
-                $procesadorComando = new ApiSubsidio();
+                $procesadorComando = new ApiSubsidio;
                 $procesadorComando->send(
                     [
                         'servicio' => 'ComfacaEmpresas',
-                        'metodo' => "basicas_empresa",
+                        'metodo' => 'basicas_empresa',
                         'params' => [
                             'nit' => $this->user['documento'],
-                        ]
+                        ],
                     ]
                 );
                 $rqs = $procesadorComando->toArray();
@@ -571,12 +579,12 @@ class ConyugeController extends ApplicationController
             unset($coddocrepleg['RC']);
             unset($coddocrepleg['TI']);
 
-            $codzon = Gener09::where("codzon", '>=', 18000)
-                ->where("codzon", "<=", 19000)
+            $codzon = Gener09::where('codzon', '>=', 18000)
+                ->where('codzon', '<=', 19000)
                 ->pluck('detzon', 'codzon');
 
             $codciu = Gener09::all()->pluck('detzon', 'codzon');
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -614,7 +622,7 @@ class ConyugeController extends ApplicationController
                 'cedtra' => $cedtras,
                 'tipo' => $this->tipo,
                 'indipais' => indicativos_paises_array(),
-                'indidepa' => indicativos_departamentos_array()
+                'indidepa' => indicativos_departamentos_array(),
             ];
 
             $formulario = FormularioDinamico::where('name', 'mercurio32')->first();
@@ -630,7 +638,7 @@ class ConyugeController extends ApplicationController
 
                 if ($data['tipo'] === 'E' && ($componente->name == 'nit' || $componente->name == 'cedtra')) {
                     $_componente['form_type'] = 'select';
-                    $_componente['search_type'] = "collection";
+                    $_componente['search_type'] = 'collection';
                     $_componente['type'] = 'text';
                 }
 
@@ -646,7 +654,7 @@ class ConyugeController extends ApplicationController
                 'tipo' => $this->tipo,
                 'list_afiliados' => $listAfiliados,
                 'empresa_sisu' => $empresa_sisu,
-                'nit' => $numero_nit
+                'nit' => $numero_nit,
             ];
 
             $salida = [
@@ -674,22 +682,23 @@ class ConyugeController extends ApplicationController
             )->render();
 
             $this->setResponse('view');
+
             return $this->renderText($html);
         } catch (\Throwable $e) {
             return $this->handleException($e, $request);
         }
     }
 
-    public function valida(Request $request, Response $response)
+    public function valida(Request $request, Response $response): JsonResponse
     {
         try {
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
             $cedcon = $request->input('cedcon');
 
-            $solicitud_previa = Mercurio32::where("cedcon", $cedcon)
-                ->where("documento", $documento)
-                ->where("coddoc", $coddoc)
+            $solicitud_previa = Mercurio32::where('cedcon', $cedcon)
+                ->where('documento', $documento)
+                ->where('coddoc', $coddoc)
                 ->first();
 
             $conyuge = false;
@@ -698,7 +707,7 @@ class ConyugeController extends ApplicationController
             }
 
             if (! $conyuge) {
-                $procesadorComando = new ApiSubsidio();
+                $procesadorComando = new ApiSubsidio;
                 $procesadorComando->send(
                     [
                         'servicio' => 'ComfacaEmpresas',
@@ -722,13 +731,14 @@ class ConyugeController extends ApplicationController
                 'solicitud_previa' => ($solicitud_previa > 0) ? true : false,
                 'conyuge' => $conyuge,
             ];
+
             return response()->json($salida);
         } catch (\Throwable $e) {
             return $this->handleException($e, $request);
         }
     }
 
-    public function searchRequest(Request $request, Response $response, string $id)
+    public function searchRequest(Request $request, Response $response, int $id): JsonResponse
     {
         $this->setResponse('ajax');
         try {
@@ -753,13 +763,14 @@ class ConyugeController extends ApplicationController
                 'data' => $data,
                 'msj' => 'OK',
             ];
+
             return response()->json($salida);
         } catch (\Throwable $e) {
             return $this->handleException($e, $request);
         }
     }
 
-    public function consultaDocumentos(string $id)
+    public function consultaDocumentos(int $id): JsonResponse
     {
         $this->setResponse('ajax');
         try {
@@ -781,13 +792,14 @@ class ConyugeController extends ApplicationController
                 'data' => $conService->dataArchivosRequeridos($sindepe),
                 'msj' => 'OK',
             ];
+
             return response()->json($salida);
         } catch (\Throwable $e) {
             return $this->handleException($e, request());
         }
     }
 
-    public function formulario(string $id)
+    public function formulario(int $id): JsonResponse
     {
         try {
             $documento = $this->user['documento'];
@@ -825,15 +837,16 @@ class ConyugeController extends ApplicationController
             $response = [
                 'success' => true,
                 'name' => $file,
-                'url' => 'conyuge/download_reporte/' . $file,
+                'url' => 'conyuge/download_reporte/'.$file,
             ];
+
             return response()->json($response);
         } catch (\Throwable $e) {
             return $this->handleException($e, request());
         }
     }
 
-    public function seguimiento(Request $request)
+    public function seguimiento(Request $request): JsonResponse
     {
         try {
             $id = $request->input('id');
@@ -850,11 +863,11 @@ class ConyugeController extends ApplicationController
         return response()->json($salida);
     }
 
-    public function buscarTrabajador(Request $request)
+    public function buscarTrabajador(Request $request): JsonResponse
     {
         try {
             $cedtra = $request->input('cedtra');
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send([
                 'servicio' => 'PoblacionAfiliada',
                 'metodo' => 'datosTrabajador',
@@ -896,6 +909,7 @@ class ConyugeController extends ApplicationController
             $salida = $this->captureException($e, $request);
             $salida['flag'] = false;
         }
+
         return response()->json($salida);
     }
 }

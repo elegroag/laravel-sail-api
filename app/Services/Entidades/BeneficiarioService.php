@@ -11,19 +11,20 @@ use App\Models\Mercurio12;
 use App\Models\Mercurio13;
 use App\Models\Mercurio34;
 use App\Models\Mercurio37;
-use App\Services\Srequest;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Srequest;
+use App\Services\Utils\SenderValidationCaja;
 use Carbon\Carbon;
 
 class BeneficiarioService
 {
-    private $tipopc = '4';
+    private string $tipopc = '4';
 
-    private $user;
+    private ?array $user;
 
-    private $tipo;
+    private ?string $tipo;
 
-    private $db;
+    private DbBase $db;
 
     public function __construct()
     {
@@ -34,11 +35,8 @@ class BeneficiarioService
 
     /**
      * findAllByEstado function
-     *
-     * @param  string  $estado
-     * @return array
      */
-    public function findAllByEstado($estado = '')
+    public function findAllByEstado(?string $estado = null): array
     {
         // usuario empresa, unica solicitud de afiliación
         $documento = $this->user['documento'];
@@ -80,7 +78,8 @@ class BeneficiarioService
      */
     public function buscarEmpresaSubsidio($nit)
     {
-        $empresaService = new EmpresaService();
+        $empresaService = new EmpresaService;
+
         return $empresaService->buscarEmpresaSubsidio($nit);
     }
 
@@ -166,16 +165,16 @@ class BeneficiarioService
 
     /**
      * updateByFormData function
-     *
-     * @param  int  $id
-     * @param  array  $data
-     * @return bool
      */
-    public function updateByFormData($id, $data)
+    public function updateByFormData(int $id, array $data): bool
     {
         $solicitud = $this->findById($id);
         if ($solicitud) {
             $solicitud->fill($data);
+            $validator = $solicitud->isValid();
+            if ($validator->fails()) {
+                throw new DebugException('No cumple con los datos necesarios proceso de validación de datos.', 501, $validator->errors());
+            }
 
             return $solicitud->save();
         } else {
@@ -185,11 +184,8 @@ class BeneficiarioService
 
     /**
      * create function
-     *
-     * @param  array  $data
-     * @return Mercurio34
      */
-    public function create($data)
+    public function create(array $data): Mercurio34
     {
         $beneficiario = new Mercurio34($data);
         $beneficiario->save();
@@ -203,26 +199,30 @@ class BeneficiarioService
 
     /**
      * createByFormData function
-     *
-     * @param  array  $data
-     * @return Mercurio34
      */
-    public function createByFormData($data)
+    public function createByFormData(array $data): Mercurio34
     {
+        $data['log'] = 0;
         $data['estado'] = 'T';
-        $data['log'] = '0';
-        $beneficiario = $this->create($data);
+        $beneficiario = new Mercurio34($data);
+        $beneficiario->regenerateUuid();
+        $validator = $beneficiario->isValid();
+        if ($validator->fails()) {
+            throw new DebugException('No cumple con los datos necesarios proceso de validación de datos.', 501, $validator->errors());
+        }
+        $beneficiario->save();
+
+        $id = $beneficiario->getId();
+        Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
+        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
 
         return $beneficiario;
     }
 
     /**
      * findById function
-     *
-     * @param  int  $id
-     * @return Mercurio34
      */
-    public function findById($id)
+    public function findById(int $id): ?Mercurio34
     {
         return Mercurio34::where('id', $id)->first();
     }
@@ -230,13 +230,10 @@ class BeneficiarioService
     /**
      * enviarCaja function
      *
-     * @param  SenderValidationCaja  $senderValidationCaja
-     * @param  int  $id
      * @param  int  $documento
      * @param  int  $coddoc
-     * @return void
      */
-    public function enviarCaja($senderValidationCaja, $id, $usuario)
+    public function enviarCaja(SenderValidationCaja $senderValidationCaja, int $id, string $usuario): void
     {
         $solicitud = $this->findById($id);
 
@@ -282,7 +279,7 @@ class BeneficiarioService
 
     public function buscarBeneficiarioSubsidio($numdoc)
     {
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
@@ -356,7 +353,7 @@ class BeneficiarioService
         ];
     }
 
-    public function consultaSeguimiento($id)
+    public function consultaSeguimiento(int $id): array
     {
         $seguimientos = Mercurio10::where('numero', $id)
             ->where('tipopc', $this->tipopc)
@@ -387,7 +384,7 @@ class BeneficiarioService
 
         switch ($tipo_consulta) {
             case 'all':
-                $response["datos"] = Mercurio34::query()
+                $response['datos'] = Mercurio34::query()
                     ->join('mercurio10', function ($join) use ($tipopc) {
                         $join->on('mercurio34.id', '=', 'mercurio10.numero')
                             ->where('mercurio10.tipopc', '=', $tipopc);
@@ -398,36 +395,45 @@ class BeneficiarioService
                         'mercurio10.fecsis as fecest',
                     ])
                     ->when($condi_extra, function ($q) use ($condi_extra) {
-                        if (is_array($condi_extra)) $q->where($condi_extra);
-                        if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
+                        if (is_array($condi_extra)) {
+                            $q->where($condi_extra);
+                        }
+                        if (is_string($condi_extra) && strlen($condi_extra) > 0) {
+                            $q->whereRaw($condi_extra);
+                        }
                     })
                     ->get();
                 break;
             case 'alluser':
-                $response["datos"] = Mercurio34::whereRaw("usuario='{$usuario}' and estado='P'")->get();
+                $response['datos'] = Mercurio34::whereRaw("usuario='{$usuario}' and estado='P'")->get();
                 break;
             case 'count':
-                $res = Mercurio34::where("mercurio34.usuario", $usuario)
+                $res = Mercurio34::where('mercurio34.usuario', $usuario)
                     ->when($condi_extra, function ($q) use ($condi_extra) {
-                        if (is_array($condi_extra)) $q->where($condi_extra);
-                        if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
+                        if (is_array($condi_extra)) {
+                            $q->where($condi_extra);
+                        }
+                        if (is_string($condi_extra) && strlen($condi_extra) > 0) {
+                            $q->whereRaw($condi_extra);
+                        }
                     })
                     ->get();
 
-                $response["count"] = $res->count();
-                $response["all"] = $res;
+                $response['count'] = $res->count();
+                $response['all'] = $res;
                 break;
             case 'one':
-                $response["datos"] = Mercurio34::whereRaw("id='$numero' and estado='P'")->first();
+                $response['datos'] = Mercurio34::whereRaw("id='$numero' and estado='P'")->first();
                 break;
             case 'info':
-                $mercurio = Mercurio34::where("id", $numero)->first();
-                $response["consulta"] = $this->buscarBeneficiarioSubsidio($mercurio->getNumdoc());
+                $mercurio = Mercurio34::where('id', $numero)->first();
+                $response['consulta'] = $this->buscarBeneficiarioSubsidio($mercurio->getNumdoc());
                 break;
             default:
                 $response = false;
                 break;
         }
+
         return $response;
     }
 }

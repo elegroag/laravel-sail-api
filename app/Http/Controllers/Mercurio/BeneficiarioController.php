@@ -880,11 +880,11 @@ class BeneficiarioController extends ApplicationController
             ];
 
             $this->db->commit();
+            return response()->json($salida);
         } catch (\Throwable $e) {
             $this->db->rollBack();
             return $this->handleException($e, $request);
         }
-        return response()->json($salida);
     }
 
     public function consultaDocumentos($id)

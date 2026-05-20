@@ -10,25 +10,22 @@ use App\Models\Mercurio07;
 use App\Models\Mercurio10;
 use App\Models\Mercurio12;
 use App\Models\Mercurio13;
-use App\Models\Mercurio31;
-use App\Models\Mercurio32;
-use App\Models\Mercurio34;
 use App\Models\Mercurio37;
 use App\Models\Mercurio45;
-use App\Models\Mercurio47;
-use App\Services\Srequest;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Srequest;
+use App\Services\Utils\SenderValidationCaja;
 use Illuminate\Support\Facades\DB;
 
 class CertificadoService
 {
-    private $tipopc = '8';
+    private string $tipopc = '8';
 
-    private $user;
+    private ?array $user;
 
-    private $db;
+    private DbBase $db;
 
-    private $tipo;
+    private ?string $tipo;
 
     public function __construct()
     {
@@ -39,11 +36,8 @@ class CertificadoService
 
     /**
      * findAllByEstado function
-     *
-     * @param  string  $estado
-     * @return array
      */
-    public function findAllByEstado($estado = '')
+    public function findAllByEstado(?string $estado = null): array
     {
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
@@ -89,10 +83,10 @@ class CertificadoService
      */
     public function buscarEmpresaSubsidio($nit)
     {
-        $empresaService = new EmpresaService();
+        $empresaService = new EmpresaService;
+
         return $empresaService->buscarEmpresaSubsidio($nit);
     }
-
 
     public function dataArchivosRequeridos($solicitud)
     {
@@ -140,6 +134,7 @@ class CertificadoService
 
         $mercurio01 = Mercurio01::first();
         $archivos_descargar = [];
+
         return [
             'disponibles' => $archivos_descargar,
             'archivos' => $archivos,
@@ -150,30 +145,28 @@ class CertificadoService
 
     /**
      * updateByFormData function
-     *
-     * @param  int  $id
-     * @param  array  $data
-     * @return bool
      */
-    public function updateByFormData($id, $data)
+    public function updateByFormData(int $id, array $data): bool
     {
         $solicitud = $this->findById($id);
         if ($solicitud) {
             $solicitud->fill($data);
 
+            $validator = $solicitud->isValid();
+            if ($validator->fails()) {
+                throw new DebugException('No cumple con los datos necesarios proceso de validación de datos.', 501, $validator->errors());
+            }
+
             return $solicitud->save();
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     /**
      * create function
-     *
-     * @param  array  $data
-     * @return Mercurio45
      */
-    public function create($data)
+    public function create(array $data): Mercurio45
     {
         $trabajador = new Mercurio45($data);
         $trabajador->save();
@@ -187,26 +180,32 @@ class CertificadoService
 
     /**
      * createByFormData function
-     *
-     * @param  array  $data
-     * @return Mercurio45
      */
-    public function createByFormData($data)
+    public function createByFormData(array $data): Mercurio45
     {
         $data['log'] = 0;
         $data['estado'] = 'T';
-        $trabajador = $this->create($data);
+        $trabajador = new Mercurio45($data);
+        $trabajador->regenerateUuid();
+
+        $validator = $trabajador->isValid();
+        if ($validator->fails()) {
+            throw new DebugException('No cumple con los datos necesarios proceso de validación de datos.', 501, $validator->errors());
+        }
+
+        $trabajador->save();
+        $id = $trabajador->getId();
+
+        Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
+        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
 
         return $trabajador;
     }
 
     /**
      * findById function
-     *
-     * @param  int  $id
-     * @return Mercurio45
      */
-    public function findById($id)
+    public function findById(int $id): ?Mercurio45
     {
         return Mercurio45::where('id', $id)->first();
     }
@@ -214,13 +213,10 @@ class CertificadoService
     /**
      * enviarCaja function
      *
-     * @param  SenderValidationCaja  $senderValidationCaja
-     * @param  int  $id
      * @param  int  $documento
      * @param  int  $coddoc
-     * @return void
      */
-    public function enviarCaja($senderValidationCaja, $id, $usuario)
+    public function enviarCaja(SenderValidationCaja $senderValidationCaja, int $id, string $usuario): void
     {
         $solicitud = $this->findById($id);
 
@@ -276,7 +272,7 @@ class CertificadoService
      */
     public function buscarTrabajadorSubsidio($cedtra)
     {
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
@@ -312,9 +308,9 @@ class CertificadoService
         ];
     }
 
-    public function paramsApi()
+    public function paramsApi(): void
     {
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -355,7 +351,7 @@ class CertificadoService
 
     public function findApiTrabajadoresByNit($nit)
     {
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -373,7 +369,6 @@ class CertificadoService
         return ($out->success == true) ? $out->data : false;
     }
 
-
     public function consultaTipopc(Srequest $request): array|bool
     {
         $tipo_consulta = $request->getParam('tipo_consulta');
@@ -384,7 +379,7 @@ class CertificadoService
 
         switch ($tipo_consulta) {
             case 'all':
-                $response["datos"] = Mercurio45::query()
+                $response['datos'] = Mercurio45::query()
                     ->join('mercurio10', function ($join) use ($tipopc) {
                         $join->on('Mercurio45.id', '=', 'mercurio10.numero')
                             ->where('mercurio10.tipopc', '=', $tipopc);
@@ -395,36 +390,45 @@ class CertificadoService
                         'mercurio10.fecsis as fecest',
                     ])
                     ->when($condi_extra, function ($q) use ($condi_extra) {
-                        if (is_array($condi_extra)) $q->where($condi_extra);
-                        if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
+                        if (is_array($condi_extra)) {
+                            $q->where($condi_extra);
+                        }
+                        if (is_string($condi_extra) && strlen($condi_extra) > 0) {
+                            $q->whereRaw($condi_extra);
+                        }
                     })
                     ->get();
                 break;
             case 'alluser':
-                $response["datos"] = Mercurio45::whereRaw("usuario='{$usuario}' and estado='P'")->get();
+                $response['datos'] = Mercurio45::whereRaw("usuario='{$usuario}' and estado='P'")->get();
                 break;
             case 'count':
-                $res = Mercurio45::where("mercurio45.usuario", $usuario)
+                $res = Mercurio45::where('mercurio45.usuario', $usuario)
                     ->when($condi_extra, function ($q) use ($condi_extra) {
-                        if (is_array($condi_extra)) $q->where($condi_extra);
-                        if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
+                        if (is_array($condi_extra)) {
+                            $q->where($condi_extra);
+                        }
+                        if (is_string($condi_extra) && strlen($condi_extra) > 0) {
+                            $q->whereRaw($condi_extra);
+                        }
                     })
                     ->get();
 
-                $response["all"] = $res;
-                $response["count"] = $res->count();
+                $response['all'] = $res;
+                $response['count'] = $res->count();
                 break;
             case 'one':
-                $response["datos"] = Mercurio45::whereRaw("id='$numero' and estado='P'")->first();
+                $response['datos'] = Mercurio45::whereRaw("id='$numero' and estado='P'")->first();
                 break;
             case 'info':
-                $mercurio = Mercurio45::where("id", $numero)->first();
-                $response["consulta"] = $this->buscarTrabajadorSubsidio($mercurio->getCedtra());
+                $mercurio = Mercurio45::where('id', $numero)->first();
+                $response['consulta'] = $this->buscarTrabajadorSubsidio($mercurio->getCedtra());
                 break;
             default:
                 $response = false;
                 break;
         }
+
         return $response;
     }
 }

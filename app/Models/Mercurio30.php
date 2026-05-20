@@ -3,9 +3,10 @@
 namespace App\Models;
 
 use App\Models\Adapter\DbBase;
-use App\Models\Adapter\ModelBase;
 use App\Models\Adapter\HasCustomUuid;
+use App\Models\Adapter\ModelBase;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
 
 class Mercurio30 extends ModelBase
 {
@@ -74,8 +75,89 @@ class Mercurio30 extends ModelBase
         'fecsol',
         'ruuid',
         'barnotif',
-        'barcomer'
+        'barcomer',
     ];
+
+    public function rulesValiation()
+    {
+        return [
+            // integer
+            'log' => 'required|integer|min:0',
+            'usuario' => 'required|integer|min:0',
+            'tottra' => 'nullable|integer|min:0',
+            'valnom' => 'nullable|integer|min:0',
+            // uuid
+            'ruuid' => 'required|min:10',
+            // date — required
+            'fecini' => 'required|date',
+            // date — nullable
+            'fecest' => 'nullable|date',
+            'fecapr' => 'nullable|date',
+            'fecsol' => 'nullable|date',
+            'sat_fecapr' => 'nullable|date',
+            // char(N) — required
+            'nit' => 'required|max:15',
+            'tipdoc' => 'required|max:2',
+            'razsoc' => 'required|max:100',
+            'sigla' => 'nullable|max:40',
+            'digver' => 'nullable|max:2',
+            'calemp' => 'nullable|max:3',
+            'cedrep' => 'nullable|max:15',
+            'repleg' => 'nullable|max:80',
+            'codciu' => 'nullable|max:5',
+            'codzon' => 'nullable|max:9',
+            'telefono' => 'nullable|max:13',
+            'celular' => 'nullable|max:20',
+            'fax' => 'nullable|max:13',
+            'codact' => 'nullable|max:4',
+            'tipsoc' => 'nullable|max:1',
+            'estado' => 'required|max:1',
+            'codest' => 'nullable|max:2',
+            'motivo' => 'nullable|max:500',
+            'dirpri' => 'nullable|max:120',
+            'ciupri' => 'nullable|max:5',
+            'telpri' => 'nullable|max:13',
+            'celpri' => 'nullable|max:20',
+            'emailpri' => 'nullable|max:100',
+            'tipo' => 'required|max:2',
+            'coddoc' => 'required|max:2',
+            'documento' => 'required|max:15',
+            'tipemp' => 'nullable|max:2',
+            'tipper' => 'nullable|max:1',
+            'prinom' => 'nullable|max:20',
+            'segnom' => 'nullable|max:20',
+            'priape' => 'nullable|max:20',
+            'segape' => 'nullable|max:20',
+            'matmer' => 'nullable|max:12',
+            'coddocrepleg' => 'nullable|max:2',
+            'priaperepleg' => 'nullable|max:20',
+            'segaperepleg' => 'nullable|max:20',
+            'prinomrepleg' => 'nullable|max:20',
+            'segnomrepleg' => 'nullable|max:20',
+            'codcaj' => 'nullable|max:10',
+            'sat_cedrep' => 'nullable|max:18',
+            'sat_numtra' => 'nullable|max:100',
+            // string — nullable
+            'direccion' => 'nullable|max:120',
+            'barcomer' => 'nullable|max:80',
+            'barnotif' => 'nullable|max:80',
+            'email' => 'nullable|email|max:100',
+        ];
+    }
+
+    public function isValid(?array $rules = null)
+    {
+        $rules = (! $rules) ? $this->rulesValiation() : $rules;
+
+        return Validator::make($this->attributes, $rules, [
+            'required' => 'El :attribute campo es requirido.',
+            'same' => 'El :attribute and :other must match.',
+            'size' => 'El :attribute must be exactly :size.',
+            'between' => 'El :attribute valor :input no esta entre :min - :max.',
+            'in' => 'El :attribute must be one of the following types: :values',
+            'email.required' => 'Se requiere la dirección de email!',
+        ]);
+    }
 
     public function getFecsol()
     {

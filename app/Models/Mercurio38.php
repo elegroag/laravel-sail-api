@@ -3,9 +3,10 @@
 namespace App\Models;
 
 use App\Models\Adapter\DbBase;
+use App\Models\Adapter\HasCustomUuid;
 use App\Models\Adapter\ModelBase;
 use Carbon\Carbon;
-use App\Models\Adapter\HasCustomUuid;
+use Illuminate\Support\Facades\Validator;
 
 class Mercurio38 extends ModelBase
 {
@@ -75,8 +76,93 @@ class Mercurio38 extends ModelBase
         'numcue',
         'fecsol',
         'ruuid',
-        'fecapr'
+        'fecapr',
     ];
+
+    public function rulesValiation()
+    {
+        return [
+            // integer
+            'log' => 'required|integer|min:0',
+            'salario' => 'required|integer|min:0',
+            'usuario' => 'required|integer|min:0',
+            'numcue' => 'nullable|integer|min:0',
+            // uuid
+            'ruuid' => 'required|min:10',
+            // date — required
+            'fecnac' => 'required|date',
+            'fecing' => 'required|date',
+            // date — nullable
+            'fecest' => 'nullable|date',
+            'fecsol' => 'nullable|date',
+            'fecapr' => 'nullable|date',
+            'fecini' => 'nullable|date',
+            // char(N) — required
+            'tipo' => 'required|max:2',
+            'coddoc' => 'required|max:2',
+            'documento' => 'required|max:15',
+            'nit' => 'required|max:15',
+            'calemp' => 'required|max:1',
+            'cedtra' => 'required|max:15',
+            'tipdoc' => 'required|max:2',
+            'priape' => 'required|max:20',
+            'prinom' => 'required|max:20',
+            'ciunac' => 'required|max:5',
+            'sexo' => 'required|max:1',
+            'cabhog' => 'required|max:1',
+            'rural' => 'required|max:1',
+            'vivienda' => 'required|max:4',
+            'tipafi' => 'required|max:2',
+            'estado' => 'required|max:1',
+            // char(N) — nullable
+            'segape' => 'nullable|max:20',
+            'segnom' => 'nullable|max:20',
+            'codciu' => 'nullable|max:5',
+            'codzon' => 'nullable|max:9',
+            'telefono' => 'nullable|max:13',
+            'celular' => 'nullable|max:20',
+            'email' => 'nullable|email|max:100',
+            'captra' => 'nullable|max:1',
+            'tipdis' => 'nullable|max:2',
+            'nivedu' => 'nullable|max:3',
+            'autoriza' => 'nullable|max:1',
+            'codest' => 'nullable|max:2',
+            'motivo' => 'nullable|max:500',
+            'codact' => 'nullable|max:4',
+            'orisex' => 'nullable|max:1',
+            'tipsoc' => 'nullable|max:1',
+            'tipemp' => 'nullable|max:2',
+            'coddocrepleg' => 'nullable|max:2',
+            'codcaj' => 'nullable|max:10',
+            'tipper' => 'nullable|max:1',
+            'facvul' => 'nullable|max:2',
+            'peretn' => 'nullable|max:2',
+            'codban' => 'nullable|max:4',
+            'tipcue' => 'nullable|max:1',
+            'tippag' => 'nullable|max:1',
+            'cargo' => 'nullable|max:9',
+            'resguardo_id' => 'nullable|max:5',
+            'pub_indigena_id' => 'nullable|max:3',
+            'estciv' => 'nullable|max:2',
+            // string — nullable
+            'direccion' => 'nullable|max:120',
+            'barrio' => 'nullable|max:48',
+        ];
+    }
+
+    public function isValid(?array $rules = null)
+    {
+        $rules = (! $rules) ? $this->rulesValiation() : $rules;
+
+        return Validator::make($this->attributes, $rules, [
+            'required' => 'El :attribute campo es requirido.',
+            'same' => 'El :attribute and :other must match.',
+            'size' => 'El :attribute must be exactly :size.',
+            'between' => 'El :attribute valor :input no esta entre :min - :max.',
+            'in' => 'El :attribute must be one of the following types: :values',
+            'email.required' => 'Se requiere la dirección de email!',
+        ]);
+    }
 
     public function getFecsol()
     {
@@ -1199,6 +1285,6 @@ class Mercurio38 extends ModelBase
 
     public function getNombreCompleto()
     {
-        return $this->priape . ' ' . $this->segape . ' ' . $this->prinom . ' ' . $this->segnom;
+        return $this->priape.' '.$this->segape.' '.$this->prinom.' '.$this->segnom;
     }
 }

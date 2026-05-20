@@ -16,21 +16,22 @@ use App\Models\Mercurio34;
 use App\Models\Mercurio37;
 use App\Models\Mercurio47;
 use App\Models\Tranoms;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Srequest;
 use App\Services\Utils\AsignarFuncionario;
-use App\Services\Api\ApiSubsidio;
+use App\Services\Utils\SenderValidationCaja;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class EmpresaService
 {
-    private $tipopc = '2';  // tipo de solicitud
+    private string $tipopc = '2';
 
-    private $user;
+    private ?array $user;
 
-    private $tipo;
+    private ?string $tipo;
 
-    private $db;
+    private DbBase $db;
 
     /**
      * __construct function
@@ -47,17 +48,14 @@ class EmpresaService
 
     /**
      * findAllByEstado function
-     *
-     * @param  string  $estado
-     * @return array
      */
-    public function findAllByEstado(?string $estado = null)
+    public function findAllByEstado(?string $estado = null): array
     {
         // usuario empresa, unica solicitud de afiliación
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
 
-        if (!$estado) {
+        if (! $estado) {
             $conditions = "and solis.estado NOT IN('I') ";
         } else {
             $conditions = "and solis.estado='{$estado}' ";
@@ -82,6 +80,7 @@ class EmpresaService
             ORDER BY solis.fecini ASC;";
 
         $results = DB::select($sql);
+
         return json_decode(json_encode($results), true);
     }
 
@@ -94,10 +93,10 @@ class EmpresaService
      */
     public function buscarEmpresaSubsidio($nit)
     {
-        if (!$nit) {
+        if (! $nit) {
             return false;
         }
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
@@ -255,27 +254,25 @@ class EmpresaService
 
     /**
      * updateByFormData function
-     *
-     * @param  int  $id
-     * @param  array  $data
-     * @return bool
      */
-    public function updateByFormData($id, $data)
+    public function updateByFormData(int $id, array $data): bool
     {
         $empresa = $this->findById($id);
         if ($empresa != false) {
-            // Usar asignación masiva para actualizar los atributos
             $empresa->fill($data);
-            // Establecer el representante legal
-            $empresa->repleg = $data['priape'] . ' ' . $data['segape'] . ' ' . $data['prinom'] . ' ' . $data['segnom'];
-            // Asignar funcionario
+            $empresa->repleg = $data['priape'].' '.$data['segape'].' '.$data['prinom'].' '.$data['segnom'];
             $empresa->usuario = (new AsignarFuncionario)->asignar($this->tipopc, $this->user['codciu']);
-            $empresa->tipo = session('tipo');
+            $empresa->tipo = $this->tipo;
             $empresa->coddoc = $this->user['coddoc'];
             $empresa->documento = $this->user['documento'];
-            // Establecer estado y fecha de solicitud
             $empresa->estado = 'T';
-            $empresa->fecsol = date('Y-m-d');
+            $empresa->fecsol = Carbon::now()->format('Y-m-d');
+
+            $validator = $empresa->isValid();
+            if ($validator->fails()) {
+                throw new DebugException('No cumple con los datos necesarios proceso de validación de datos.', 501, $validator->errors());
+            }
+
             return $empresa->save();
         } else {
             return false;
@@ -284,15 +281,12 @@ class EmpresaService
 
     /**
      * create function
-     *
-     * @param  array  $data
-     * @return Mercurio30
      */
-    public function create($data)
+    public function create(array $data): Mercurio30
     {
-        $empresa = new Mercurio30();
+        $empresa = new Mercurio30;
         $empresa->fill($data);
-        $empresa->repleg = $data['priape'] . ' ' . $data['segape'] . ' ' . $data['prinom'] . ' ' . $data['segnom'];
+        $empresa->repleg = $data['priape'].' '.$data['segape'].' '.$data['prinom'].' '.$data['segnom'];
         $empresa->usuario = (new AsignarFuncionario)->asignar($this->tipopc, $this->user['codciu']);
         $empresa->tipo = session('tipo');
         $empresa->coddoc = $this->user['coddoc'];
@@ -311,24 +305,39 @@ class EmpresaService
 
     /**
      * create function
-     *
-     * @param  array  $data
-     * @return Mercurio30
      */
-    public function createByFormData($data)
+    public function createByFormData(array $data): Mercurio30
     {
-        $empresa = $this->create($data);
+        $empresa = new Mercurio30($data);
+        $empresa->regenerateUuid();
+        $empresa->repleg = $data['priape'].' '.$data['segape'].' '.$data['prinom'].' '.$data['segnom'];
+        $empresa->usuario = (new AsignarFuncionario)->asignar($this->tipopc, $this->user['codciu']);
+        $empresa->tipo = $this->tipo;
+        $empresa->coddoc = $this->user['coddoc'];
+        $empresa->documento = $this->user['documento'];
+        $empresa->matmer = substr($data['matmer'], 0, 12);
+        $empresa->fax = $data['fax'] ?? '180001';
+        $empresa->estado = 'T';
+        $empresa->log = '0';
+
+        $validator = $empresa->isValid();
+        if ($validator->fails()) {
+            throw new DebugException('No cumple con los datos necesarios proceso de validación de datos.', 501, $validator->errors());
+        }
+
         $empresa->save();
+
+        Mercurio37::where('tipopc', $this->tipopc)->where('numero', $empresa->id)->delete();
+        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $empresa->id)->delete();
+        Tranoms::where('request', $empresa->id)->delete();
+
         return $empresa;
     }
 
     /**
      * findById function
-     *
-     * @param  int  $id
-     * @return Mercurio30
      */
-    public function findById($id)
+    public function findById(int $id): ?Mercurio30
     {
         return Mercurio30::where('id', $id)->first();
     }
@@ -336,13 +345,10 @@ class EmpresaService
     /**
      * enviarCaja function
      *
-     * @param  SenderValidationCaja  $senderValidationCaja
-     * @param  int  $id
      * @param  int  $documento
      * @param  int  $coddoc
-     * @return void
      */
-    public function enviarCaja($senderValidationCaja, $id, $usuario)
+    public function enviarCaja(SenderValidationCaja $senderValidationCaja, int $id, string $usuario): void
     {
         $solicitud = $this->findById($id);
         $tipsoc = $solicitud->getTipsoc();
@@ -381,7 +387,7 @@ class EmpresaService
         $senderValidationCaja->send($this->tipopc, $solicitud);
     }
 
-    public function consultaSeguimiento($id)
+    public function consultaSeguimiento(int $id): array
     {
         $seguimientos = Mercurio10::where('numero', $id)
             ->where('tipopc', $this->tipopc)
@@ -418,7 +424,7 @@ class EmpresaService
         return $retorno;
     }
 
-    public function addTrabajadoresNomina($tranoms, $id)
+    public function addTrabajadoresNomina(array $tranoms, int $id): void
     {
         if (! $tranoms) {
             throw new DebugException('Error no hay trabajadores en nomina', 301);
@@ -462,9 +468,9 @@ class EmpresaService
             ->delete();
     }
 
-    public function paramsApi()
+    public function paramsApi(): void
     {
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -573,7 +579,7 @@ class EmpresaService
 
         switch ($tipo_consulta) {
             case 'all':
-                $response["datos"] = Mercurio30::query()
+                $response['datos'] = Mercurio30::query()
                     ->join('mercurio10', function ($join) use ($tipopc) {
                         $join->on('mercurio30.id', '=', 'mercurio10.numero')
                             ->where('mercurio10.tipopc', '=', $tipopc);
@@ -584,36 +590,45 @@ class EmpresaService
                         'mercurio10.fecsis as fecest',
                     ])
                     ->when($condi_extra, function ($q) use ($condi_extra) {
-                        if (is_array($condi_extra)) $q->where($condi_extra);
-                        if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
+                        if (is_array($condi_extra)) {
+                            $q->where($condi_extra);
+                        }
+                        if (is_string($condi_extra) && strlen($condi_extra) > 0) {
+                            $q->whereRaw($condi_extra);
+                        }
                     })
                     ->get();
                 break;
             case 'alluser':
-                $response["datos"] = Mercurio30::where("usuario", $usuario)->where("estado", 'P')->get();
+                $response['datos'] = Mercurio30::where('usuario', $usuario)->where('estado', 'P')->get();
                 break;
             case 'count':
-                $res = Mercurio30::where("mercurio30.usuario", $usuario)
+                $res = Mercurio30::where('mercurio30.usuario', $usuario)
                     ->when($condi_extra, function ($q) use ($condi_extra) {
-                        if (is_array($condi_extra)) $q->where($condi_extra);
-                        if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
+                        if (is_array($condi_extra)) {
+                            $q->where($condi_extra);
+                        }
+                        if (is_string($condi_extra) && strlen($condi_extra) > 0) {
+                            $q->whereRaw($condi_extra);
+                        }
                     })
                     ->get();
 
-                $response["count"] = $res->count();
-                $response["all"] = $res;
+                $response['count'] = $res->count();
+                $response['all'] = $res;
                 break;
             case 'one':
-                $response["datos"] = Mercurio30::where("id", $numero)->where("estado", 'P')->first();
+                $response['datos'] = Mercurio30::where('id', $numero)->where('estado', 'P')->first();
                 break;
             case 'info':
-                $mercurio = Mercurio30::where("id", $numero)->first();
-                $response["consulta"] = $this->buscarEmpresaSubsidio($mercurio->getNit());
+                $mercurio = Mercurio30::where('id', $numero)->first();
+                $response['consulta'] = $this->buscarEmpresaSubsidio($mercurio->getNit());
                 break;
             default:
                 $response = false;
                 break;
         }
+
         return $response;
     }
 }

@@ -3,7 +3,7 @@
 namespace App\Services\Entidades;
 
 use App\Exceptions\DebugException;
-use App\Library\Collections\ParamsTrabajador;
+use App\Library\Collections\ParamsConyuge;
 use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
@@ -12,17 +12,20 @@ use App\Models\Mercurio12;
 use App\Models\Mercurio13;
 use App\Models\Mercurio32;
 use App\Models\Mercurio37;
-use App\Services\Srequest;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Srequest;
 use App\Services\Utils\SenderValidationCaja;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class ConyugeService
 {
-    private $tipopc = '3';
+    private string $tipopc = '3';
+
     private ?array $user;
+
     private ?string $tipo;
+
     private DbBase $db;
 
     public function __construct()
@@ -34,11 +37,8 @@ class ConyugeService
 
     /**
      * findAllByEstado function
-     *
-     * @param  string  $estado
-     * @return array
      */
-    public function findAllByEstado($estado = '')
+    public function findAllByEstado(?string $estado = null): array
     {
         // usuario empresa, unica solicitud de afiliación
         $documento = $this->user['documento'];
@@ -71,6 +71,7 @@ class ConyugeService
             ORDER BY m32.fecsol ASC;";
 
         $results = DB::select($sql);
+
         return json_decode(json_encode($results), true);
     }
 
@@ -78,12 +79,12 @@ class ConyugeService
      * buscarEmpresaSubsidio function
      * buscar empresa en subsidio sin importar el estado
      *
-     * @param string $nit
      * @return void
      */
     public function buscarEmpresaSubsidio(string $nit)
     {
-        $empresaService = new EmpresaService();
+        $empresaService = new EmpresaService;
+
         return $empresaService->buscarEmpresaSubsidio($nit);
     }
 
@@ -200,16 +201,16 @@ class ConyugeService
 
     /**
      * updateByFormData function
-     *
-     * @param  int  $id
-     * @param  array  $data
-     * @return bool
      */
-    public function updateByFormData($id, $data)
+    public function updateByFormData(int $id, array $data): bool
     {
         $solicitud = $this->findById($id);
         if ($solicitud) {
             $solicitud->fill($data);
+            $validator = $solicitud->isValid();
+            if ($validator->fails()) {
+                throw new DebugException('No cumple con los datos necesarios proceso de validación de datos.', 501, $validator->errors());
+            }
 
             return $solicitud->save();
         } else {
@@ -219,11 +220,8 @@ class ConyugeService
 
     /**
      * create function
-     *
-     * @param  array  $data
-     * @return Mercurio32
      */
-    public function create($data)
+    public function create(array $data): Mercurio32
     {
         $conyuge = new Mercurio32($data);
         $conyuge->save();
@@ -237,25 +235,30 @@ class ConyugeService
 
     /**
      * createByFormData function
-     *
-     * @param  array  $data
-     * @return Mercurio32
      */
-    public function createByFormData($data)
+    public function createByFormData(array $data): Mercurio32
     {
+        $data['log'] = 0;
         $data['estado'] = 'T';
-        $conyuge = $this->create($data);
+        $conyuge = new Mercurio32($data);
+        $conyuge->regenerateUuid();
+        $validator = $conyuge->isValid();
+        if ($validator->fails()) {
+            throw new DebugException('No cumple con los datos necesarios proceso de validación de datos.', 501, $validator->errors());
+        }
+        $conyuge->save();
+
+        $id = $conyuge->getId();
+        Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
+        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
 
         return $conyuge;
     }
 
     /**
      * findById function
-     *
-     * @param  int  $id
-     * @return Mercurio32
      */
-    public function findById($id)
+    public function findById(int $id): ?Mercurio32
     {
         return Mercurio32::where('id', $id)->first();
     }
@@ -263,12 +266,9 @@ class ConyugeService
     /**
      * enviarCaja function
      *
-     * @param  SenderValidationCaja  $senderValidationCaja
-     * @param  int  $id
-     * @param  array $usuario
-     * @return void
+     * @param  array  $usuario
      */
-    public function enviarCaja(SenderValidationCaja $senderValidationCaja, $id, $usuario)
+    public function enviarCaja(SenderValidationCaja $senderValidationCaja, int $id, string $usuario): void
     {
         $solicitud = $this->findById($id);
 
@@ -313,7 +313,7 @@ class ConyugeService
 
     public function buscarConyugeSubsidio(string $cedcon)
     {
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
@@ -329,7 +329,7 @@ class ConyugeService
         }
     }
 
-    public function consultaSeguimiento(int $id)
+    public function consultaSeguimiento(int $id): array
     {
         $seguimientos = Mercurio10::where('numero', $id)
             ->where('tipopc', $this->tipopc)
@@ -350,20 +350,20 @@ class ConyugeService
         ];
     }
 
-    public function paramsApi()
+    public function paramsApi(): void
     {
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'parametros_conyuges',
             ]
         );
-        $paramsTrabajador = new ParamsTrabajador;
-        $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
+        $paramsConyuge = new ParamsConyuge;
+        $paramsConyuge->setDatosCaptura($procesadorComando->toArray());
     }
 
-    public function findRequestByDocumentoCoddoc(string $documento, string $coddoc)
+    public function findRequestByDocumentoCoddoc(string $documento, string $coddoc): array|false
     {
         $datos = Mercurio32::select(
             'cedcon as cedula',
@@ -374,7 +374,7 @@ class ConyugeService
         )
             ->where([
                 ['documento', $documento],
-                ['coddoc', $coddoc]
+                ['coddoc', $coddoc],
             ])
             ->whereNotIn('estado', ['X', 'I'])
             ->get()
@@ -383,7 +383,7 @@ class ConyugeService
         return (is_array($datos) === true) ? $datos : false;
     }
 
-    public function findRequestByCedtra(string $cedtra)
+    public function findRequestByCedtra(string $cedtra): array
     {
         $datos = Mercurio32::where('cedtra', $cedtra)
             ->whereNotIn('estado', ['X', 'I'])
@@ -393,9 +393,9 @@ class ConyugeService
         return $datos->toArray();
     }
 
-    public function findApiConyugesByNit(string $nit): array|null
+    public function findApiConyugesByNit(string $nit): ?array
     {
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -407,9 +407,12 @@ class ConyugeService
         );
         $out = $procesadorComando->toArray();
         $isSuccess = $out['success'] ?? false;
-        if (!$isSuccess) return null;
+        if (! $isSuccess) {
+            return null;
+        }
 
         $data = $out['data'] ?? null;
+
         return $data;
     }
 
@@ -423,7 +426,7 @@ class ConyugeService
 
         switch ($tipo_consulta) {
             case 'all':
-                $response["datos"] = Mercurio32::query()
+                $response['datos'] = Mercurio32::query()
                     ->join('mercurio10', function ($join) use ($tipopc) {
                         $join->on('mercurio31.id', '=', 'mercurio10.numero')
                             ->where('mercurio10.tipopc', '=', $tipopc);
@@ -434,36 +437,45 @@ class ConyugeService
                         'mercurio10.fecsis as fecest',
                     ])
                     ->when($condi_extra, function ($q) use ($condi_extra) {
-                        if (is_array($condi_extra)) $q->where($condi_extra);
-                        if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
+                        if (is_array($condi_extra)) {
+                            $q->where($condi_extra);
+                        }
+                        if (is_string($condi_extra) && strlen($condi_extra) > 0) {
+                            $q->whereRaw($condi_extra);
+                        }
                     })
                     ->get();
                 break;
             case 'alluser':
-                $response["datos"] = Mercurio32::whereRaw("usuario='{$usuario}' and estado='P'")->get();
+                $response['datos'] = Mercurio32::whereRaw("usuario='{$usuario}' and estado='P'")->get();
                 break;
             case 'count':
-                $res = Mercurio32::where("mercurio32.usuario", $usuario)
+                $res = Mercurio32::where('mercurio32.usuario', $usuario)
                     ->when($condi_extra, function ($q) use ($condi_extra) {
-                        if (is_array($condi_extra)) $q->where($condi_extra);
-                        if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
+                        if (is_array($condi_extra)) {
+                            $q->where($condi_extra);
+                        }
+                        if (is_string($condi_extra) && strlen($condi_extra) > 0) {
+                            $q->whereRaw($condi_extra);
+                        }
                     })
                     ->get();
 
-                $response["count"] = $res->count();
-                $response["all"] = $res;
+                $response['count'] = $res->count();
+                $response['all'] = $res;
                 break;
             case 'one':
-                $response["datos"] = Mercurio32::whereRaw("id='$numero' and estado='P'")->first();
+                $response['datos'] = Mercurio32::whereRaw("id='$numero' and estado='P'")->first();
                 break;
             case 'info':
-                $mercurio = Mercurio32::where("id", $numero)->first();
-                $response["consulta"] = $this->buscarConyugeSubsidio($mercurio->getCedcon());
+                $mercurio = Mercurio32::where('id', $numero)->first();
+                $response['consulta'] = $this->buscarConyugeSubsidio($mercurio->getCedcon());
                 break;
             default:
                 $response = false;
                 break;
         }
+
         return $response;
     }
 }

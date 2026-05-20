@@ -46,9 +46,9 @@ class RegistroSeguimiento
      *
      * @param  int  $tipopc
      * @param  object  $mercurio
-     * @return void
+     * @return string
      */
-    public function consultaSeguimiento($tipopc, $mercurio)
+    public function consultaSeguimiento($tipopc, $mercurio): string
     {
         $mercurio10 = Mercurio10::where('tipopc', $tipopc)
             ->where('numero', $mercurio->getId())

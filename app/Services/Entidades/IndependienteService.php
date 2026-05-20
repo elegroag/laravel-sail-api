@@ -16,21 +16,22 @@ use App\Models\Mercurio34;
 use App\Models\Mercurio37;
 use App\Models\Mercurio41;
 use App\Models\Mercurio47;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Srequest;
 use App\Services\Utils\AsignarFuncionario;
-use App\Services\Api\ApiSubsidio;
+use App\Services\Utils\SenderValidationCaja;
 
 class IndependienteService
 {
-    private $tipopc = '13';
+    private string $tipopc = '13';
 
-    private $tipsoc = '08';
+    private string $tipsoc = '08';
 
-    private $user;
+    private ?array $user;
 
-    private $tipo;
+    private ?string $tipo;
 
-    private $db;
+    private DbBase $db;
 
     /**
      * __construct function
@@ -47,11 +48,8 @@ class IndependienteService
 
     /**
      * findAllByEstado function
-     *
-     * @param  string  $estado
-     * @return array
      */
-    public function findAllByEstado($estado = '')
+    public function findAllByEstado(?string $estado = null): array
     {
         // usuario empresa, unica solicitud de afiliación
         $documento = $this->user['documento'];
@@ -100,7 +98,8 @@ class IndependienteService
      */
     public function buscarEmpresaSubsidio($nit)
     {
-        $empresaService = new EmpresaService();
+        $empresaService = new EmpresaService;
+
         return $empresaService->buscarEmpresaSubsidio($nit);
     }
 
@@ -253,17 +252,18 @@ class IndependienteService
 
     /**
      * updateByFormData function
-     *
-     * @param  int  $id
-     * @param  array  $data
-     * @return bool
      */
-    public function updateByFormData($id, $data)
+    public function updateByFormData(int $id, array $data): bool
     {
         $independiente = $this->findById($id);
         if ($independiente) {
             $independiente->fill($data);
             $independiente->setUsuario((new AsignarFuncionario)->asignar($this->tipopc, $this->user['codciu']));
+
+            $validator = $independiente->isValid();
+            if ($validator->fails()) {
+                throw new DebugException('No cumple con los datos necesarios proceso de validación de datos.', 501, $validator->errors());
+            }
 
             return $independiente->save();
         }
@@ -273,11 +273,8 @@ class IndependienteService
 
     /**
      * create function
-     *
-     * @param  array  $data
-     * @return Mercurio41
      */
-    public function create($data)
+    public function create(array $data): Mercurio41
     {
         $independiente = new Mercurio41($data);
         $independiente->setCoddoc($this->user['coddoc']);
@@ -294,26 +291,35 @@ class IndependienteService
 
     /**
      * createByFormData function
-     *
-     * @param  array  $data
-     * @return Mercurio41
      */
-    public function createByFormData($data)
+    public function createByFormData(array $data): Mercurio41
     {
+        $data['log'] = 0;
         $data['estado'] = 'T';
-        $data['log'] = '0';
-        $independiente = $this->create($data);
+        $independiente = new Mercurio41($data);
+        $independiente->regenerateUuid();
+        $independiente->setCoddoc($this->user['coddoc']);
+        $independiente->setDocumento($this->user['documento']);
+        $independiente->setUsuario((new AsignarFuncionario)->asignar($this->tipopc, $this->user['codciu']));
+
+        $validator = $independiente->isValid();
+        if ($validator->fails()) {
+            throw new DebugException('No cumple con los datos necesarios proceso de validación de datos.', 501, $validator->errors());
+        }
+
+        $independiente->save();
+        $id = $independiente->getId();
+
+        Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
+        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
 
         return $independiente;
     }
 
     /**
      * findById function
-     *
-     * @param  int  $id
-     * @return Mercurio41
      */
-    public function findById($id)
+    public function findById(int $id): ?Mercurio41
     {
         return Mercurio41::where('id', $id)->first();
     }
@@ -340,13 +346,10 @@ class IndependienteService
     /**
      * enviarCaja function
      *
-     * @param  SenderValidationCaja  $senderValidationCaja
-     * @param  int  $id
      * @param  int  $documento
      * @param  int  $coddoc
-     * @return void
      */
-    public function enviarCaja($senderValidationCaja, $id, $usuario)
+    public function enviarCaja(SenderValidationCaja $senderValidationCaja, int $id, string $usuario): void
     {
         $mercurio41 = $this->findById($id);
 
@@ -393,9 +396,9 @@ class IndependienteService
         $senderValidationCaja->send($this->tipopc, $mercurio41);
     }
 
-    public function paramsApi()
+    public function paramsApi(): void
     {
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -406,7 +409,7 @@ class IndependienteService
         $paramsIndependiente = new ParamsIndependiente;
         $paramsIndependiente->setDatosCaptura($procesadorComando->toArray());
 
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -494,14 +497,17 @@ class IndependienteService
 
     /**
      * buscarTrabajadorSubsidio function
+     *
      * @changed [2023-12-00]
+     *
      * @author elegroag <elegroag@ibero.edu.co>
+     *
      * @param [type] $cedtra
      * @return array|bool
      */
     public function buscarTrabajadorSubsidio($cedtra)
     {
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
@@ -512,6 +518,7 @@ class IndependienteService
             ]
         );
         $out = $procesadorComando->toArray();
+
         return ($out['success'] == true) ? $out['data'] : false;
     }
 
@@ -525,7 +532,7 @@ class IndependienteService
 
         switch ($tipo_consulta) {
             case 'all':
-                $response["datos"] = Mercurio41::query()
+                $response['datos'] = Mercurio41::query()
                     ->join('mercurio10', function ($join) use ($tipopc) {
                         $join->on('mercurio41.id', '=', 'mercurio10.numero')
                             ->where('mercurio10.tipopc', '=', $tipopc);
@@ -536,36 +543,45 @@ class IndependienteService
                         'mercurio10.fecsis as fecest',
                     ])
                     ->when($condi_extra, function ($q) use ($condi_extra) {
-                        if (is_array($condi_extra)) $q->where($condi_extra);
-                        if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
+                        if (is_array($condi_extra)) {
+                            $q->where($condi_extra);
+                        }
+                        if (is_string($condi_extra) && strlen($condi_extra) > 0) {
+                            $q->whereRaw($condi_extra);
+                        }
                     })
                     ->get();
                 break;
             case 'alluser':
-                $response["datos"] = Mercurio41::whereRaw("usuario='{$usuario}' and estado='P'")->get();
+                $response['datos'] = Mercurio41::whereRaw("usuario='{$usuario}' and estado='P'")->get();
                 break;
             case 'count':
-                $res = Mercurio41::where("mercurio41.usuario", $usuario)
+                $res = Mercurio41::where('mercurio41.usuario', $usuario)
                     ->when($condi_extra, function ($q) use ($condi_extra) {
-                        if (is_array($condi_extra)) $q->where($condi_extra);
-                        if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
+                        if (is_array($condi_extra)) {
+                            $q->where($condi_extra);
+                        }
+                        if (is_string($condi_extra) && strlen($condi_extra) > 0) {
+                            $q->whereRaw($condi_extra);
+                        }
                     })
                     ->get();
 
-                $response["all"] = $res;
-                $response["count"] = $res->count();
+                $response['all'] = $res;
+                $response['count'] = $res->count();
                 break;
             case 'one':
-                $response["datos"] = Mercurio41::whereRaw("id='{$numero}' and estado='P'")->first();
+                $response['datos'] = Mercurio41::whereRaw("id='{$numero}' and estado='P'")->first();
                 break;
             case 'info':
-                $mercurio = Mercurio41::where("id", $numero)->first();
-                $response["consulta"] = $this->buscarTrabajadorSubsidio($mercurio->getCedtra());
+                $mercurio = Mercurio41::where('id', $numero)->first();
+                $response['consulta'] = $this->buscarTrabajadorSubsidio($mercurio->getCedtra());
                 break;
             default:
                 $response = false;
                 break;
         }
+
         return $response;
     }
 }

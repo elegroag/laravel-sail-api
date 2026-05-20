@@ -798,11 +798,10 @@ class Mercurio34 extends ModelBase
         ];
     }
 
-    public function isValid(?array $rules)
+    public function isValid(?array $rules = null)
     {
         $rules = (!$rules) ? $this->rulesValiation() : $rules;
-
-        $validator = Validator::make($this->attributes, $rules, [
+        return Validator::make($this->attributes, $rules, [
             'required' => 'El :attribute campo es requirido.',
             'same'     => 'El :attribute and :other must match.',
             'size'     => 'El :attribute must be exactly :size.',
@@ -810,9 +809,5 @@ class Mercurio34 extends ModelBase
             'in'       => 'El :attribute must be one of the following types: :values.',
             'email.required' => 'Se requiere la dirección de email!',
         ]);
-
-        if ($validator->fails()) return $validator->errors();
-
-        return true;
     }
 }

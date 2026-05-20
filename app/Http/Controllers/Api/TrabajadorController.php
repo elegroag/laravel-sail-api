@@ -10,14 +10,11 @@ use Illuminate\Validation\ValidationException;
 
 class TrabajadorController extends Controller
 {
-
     /**
      * Obtener todos los trabajadores
-     * 
+     *
      * Retorna una lista de todos los trabajadores registrados en el sistema
      * con sus empresas y núcleos familiares asociados.
-     * 
-     * @return JsonResponse
      */
     public function index(): JsonResponse
     {
@@ -32,19 +29,16 @@ class TrabajadorController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al obtener trabajadores: ' . $e->getMessage(),
+                'message' => 'Error al obtener trabajadores: '.$e->getMessage(),
             ], 500);
         }
     }
 
     /**
      * Crear nuevo trabajador
-     * 
+     *
      * Registra un nuevo trabajador en el sistema con todos sus datos
      * personales y profesionales.
-     * 
-     * @param Request $request
-     * @return JsonResponse
      */
     public function store(Request $request): JsonResponse
     {
@@ -82,22 +76,18 @@ class TrabajadorController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al crear trabajador: ' . $e->getMessage(),
+                'message' => 'Error al crear trabajador: '.$e->getMessage(),
             ], 500);
         }
     }
 
-
     /**
      * Obtener trabajador específico
-     * 
+     *
      * Retorna los detalles completos de un trabajador específico
      * incluyendo su empresa y núcleos familiares.
-     * 
-     * @param string $id
-     * @return JsonResponse
      */
-    public function show(string $id): JsonResponse
+    public function show(int $id): JsonResponse
     {
         try {
             $trabajador = Trabajador::with(['empresa', 'nucleosFamiliares'])->findOrFail($id);
@@ -115,18 +105,13 @@ class TrabajadorController extends Controller
         }
     }
 
-
     /**
      * Actualizar trabajador existente
-     * 
+     *
      * Actualiza los datos de un trabajador existente en el sistema.
      * Solo se actualizan los campos proporcionados en la solicitud.
-     * 
-     * @param Request $request
-     * @param string $id
-     * @return JsonResponse
      */
-    public function update(Request $request, string $id): JsonResponse
+    public function update(Request $request, int $id): JsonResponse
     {
         try {
             $trabajador = Trabajador::findOrFail($id);
@@ -134,8 +119,8 @@ class TrabajadorController extends Controller
             $validatedData = $request->validate([
                 'nombres' => 'sometimes|required|string|max:255',
                 'apellidos' => 'sometimes|required|string|max:255',
-                'rut' => 'sometimes|required|string|max:255|unique:trabajadores,rut,' . $id,
-                'email' => 'sometimes|required|email|max:255|unique:trabajadores,email,' . $id,
+                'rut' => 'sometimes|required|string|max:255|unique:trabajadores,rut,'.$id,
+                'email' => 'sometimes|required|email|max:255|unique:trabajadores,email,'.$id,
                 'telefono' => 'nullable|string|max:255',
                 'fecha_nacimiento' => 'sometimes|required|date',
                 'genero' => 'sometimes|required|in:masculino,femenino,otro',
@@ -164,21 +149,18 @@ class TrabajadorController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al actualizar trabajador: ' . $e->getMessage(),
+                'message' => 'Error al actualizar trabajador: '.$e->getMessage(),
             ], 500);
         }
     }
 
     /**
      * Eliminar trabajador
-     * 
+     *
      * Elimina permanentemente un trabajador del sistema.
      * Esta acción es irreversible y elimina todos los datos asociados.
-     * 
-     * @param string $id
-     * @return JsonResponse
      */
-    public function destroy(string $id): JsonResponse
+    public function destroy(int $id): JsonResponse
     {
         try {
             $trabajador = Trabajador::findOrFail($id);
@@ -191,7 +173,7 @@ class TrabajadorController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al eliminar trabajador: ' . $e->getMessage(),
+                'message' => 'Error al eliminar trabajador: '.$e->getMessage(),
             ], 500);
         }
     }

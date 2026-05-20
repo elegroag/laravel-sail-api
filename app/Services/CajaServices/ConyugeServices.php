@@ -11,28 +11,20 @@ use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\Table;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ConyugeServices
 {
-    private $orderpag = 'fecsol';
+    private string $orderpag = 'fecsol';
 
-    private $tipopc = '3';
+    private string $tipopc = '3';
 
-    private $controller_name;
+    private string $controller_name;
 
-    /**
-     * registroSeguimiento variable
-     *
-     * @var RegistroSeguimiento
-     */
-    private $registroSeguimiento;
+    private RegistroSeguimiento $registroSeguimiento;
 
-    /**
-     * table variable
-     *
-     * @var Table
-     */
-    private $table;
+    private Table $table;
 
     public function __construct()
     {
@@ -51,7 +43,7 @@ class ConyugeServices
      * @param [type] $query
      * @return void
      */
-    public function findPagination($query)
+    public function findPagination(string $query): Collection
     {
         return Mercurio32::whereRaw($query)->orderBy($this->orderpag, 'asc')->get();
     }
@@ -66,7 +58,7 @@ class ConyugeServices
      * @param  object  $paginate
      * @return void
      */
-    public function showTabla($paginate)
+    public function showTabla(LengthAwarePaginator $paginate): string
     {
         $this->table->set_template($this->getTemplateTable());
         $this->table->set_heading(
@@ -126,7 +118,7 @@ class ConyugeServices
      *
      * @return void
      */
-    public function getTemplateTable()
+    public function getTemplateTable(): array
     {
         return Table::TmpGeneral();
     }
@@ -137,11 +129,8 @@ class ConyugeServices
      * @changed [2023-12-19]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param  Mercurio32  $mercurio32
-     * @return void
      */
-    public function loadDisplay($mercurio32)
+    public function loadDisplay(Mercurio32 $mercurio32): void
     {
         Tag::displayTo('tipdoc', $mercurio32->getTipdoc());
         Tag::displayTo('cedtra', $mercurio32->getCedtra());
@@ -171,7 +160,7 @@ class ConyugeServices
      * @param [type] $codest
      * @return void
      */
-    public function rechazar($mercurio32, $nota, $codest)
+    public function rechazar(Mercurio32 $mercurio32, string $nota, string $codest): bool
     {
         $today = Carbon::now();
         $id = $mercurio32->getId();
@@ -212,10 +201,9 @@ class ConyugeServices
      * @param [type] $mercurio32
      * @param [type] $nota
      * @param [type] $codest
-     * @param  string  $campos_corregir
      * @return void
      */
-    public function devolver($mercurio32, $nota, $codest, $campos_corregir = '')
+    public function devolver(Mercurio32 $mercurio32, string $nota, string $codest, string $campos_corregir = ''): bool
     {
         $today = Carbon::now();
         $id = $mercurio32->getId();
@@ -259,7 +247,7 @@ class ConyugeServices
      * @param [type] $nota
      * @return void
      */
-    public function msjDevolver($mercurio32, $nota)
+    public function msjDevolver(Mercurio32 $mercurio32, string $nota): string
     {
         return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, ' .
             "emitida por el trabajador: {$mercurio32->getPrinom()} {$mercurio32->getSegnom()} {$mercurio32->getPriape()} {$mercurio32->getSegape()} con identificación: {$mercurio32->getCedtra()}.<br/>" .
@@ -279,7 +267,7 @@ class ConyugeServices
      * @param [type] $nota
      * @return void
      */
-    public function msjRechazar($mercurio32, $nota)
+    public function msjRechazar(Mercurio32 $mercurio32, string $nota): string
     {
         return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, ' .
             "emitida por el trabajador:  {$mercurio32->getPrinom()} {$mercurio32->getSegnom()} {$mercurio32->getPriape()} {$mercurio32->getSegape()} con identificación: {$mercurio32->getCedtra()}.<br/>" .
@@ -298,7 +286,7 @@ class ConyugeServices
      * @param [type] $mercurio32
      * @return void
      */
-    public function adjuntos($mercurio32)
+    public function adjuntos(Mercurio32 $mercurio32): string
     {
         return $this->registroSeguimiento->loadAdjuntos($this->tipopc, $mercurio32);
     }
@@ -313,7 +301,7 @@ class ConyugeServices
      * @param [type] $mercurio32
      * @return void
      */
-    public function seguimiento($mercurio32)
+    public function seguimiento(Mercurio32 $mercurio32): string
     {
         return $this->registroSeguimiento->consultaSeguimiento($this->tipopc, $mercurio32);
     }
@@ -328,7 +316,7 @@ class ConyugeServices
      * @param  array  $mercurio30
      * @return void
      */
-    public function dataOptional($mercurio32, $estado = 'P')
+    public function dataOptional(Collection $mercurio32, string $estado = 'P'): array
     {
         $conyuges = [];
         foreach ($mercurio32 as $ai => $mercurio) {

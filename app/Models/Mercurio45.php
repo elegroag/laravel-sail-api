@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Adapter\ModelBase;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
 
 class Mercurio45 extends ModelBase
 {
@@ -30,8 +31,50 @@ class Mercurio45 extends ModelBase
         'tipo',
         'coddoc',
         'documento',
-        'fecsol'
+        'fecsol',
     ];
+
+    public function rulesValiation()
+    {
+        return [
+            // integer
+            'log' => 'required|integer|min:0',
+            'codben' => 'nullable|integer|min:0',
+            'usuario' => 'required|integer|min:0',
+            // date — nullable
+            'fecest' => 'nullable|date',
+            'fecsol' => 'nullable|date',
+            'fecha' => 'nullable|date',
+            // char(N) — required
+            'cedtra' => 'required|max:15',
+            'codcer' => 'required|max:5',
+            'estado' => 'required|max:1',
+            'tipo' => 'required|max:2',
+            'coddoc' => 'required|max:2',
+            'documento' => 'required|max:15',
+            // char(N) — nullable
+            'codest' => 'nullable|max:2',
+            'motivo' => 'nullable|max:500',
+            // string — nullable
+            'nombre' => 'nullable|max:100',
+            'nomcer' => 'nullable|max:100',
+            'archivo' => 'nullable|max:255',
+        ];
+    }
+
+    public function isValid(?array $rules = null)
+    {
+        $rules = (! $rules) ? $this->rulesValiation() : $rules;
+
+        return Validator::make($this->attributes, $rules, [
+            'required' => 'El :attribute campo es requirido.',
+            'same' => 'El :attribute and :other must match.',
+            'size' => 'El :attribute must be exactly :size.',
+            'between' => 'El :attribute valor :input no esta entre :min - :max.',
+            'in' => 'El :attribute must be one of the following types: :values',
+            'email.required' => 'Se requiere la dirección de email!',
+        ]);
+    }
 
     /**
      * Metodo para establecer el valor del campo id
