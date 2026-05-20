@@ -122,7 +122,7 @@ class AuthController extends Controller
             return back()->withErrors(['general' => $e->getMessage()])->withInput();
         } catch (Exception $e) {
             $this->db->rollBack();
-            return back()->withErrors(['general' => 'Error del servidor'])->withInput();
+            return back()->withErrors(['general' => 'Error del servidor ' . $e->getMessage()])->withInput();
         }
     }
 

@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Throwable;
 
@@ -10,12 +11,16 @@ class DebugException extends Exception
 {
     public static $errors = [];
 
-    protected $extra = null;
+    protected array|string|null $extra = null;
 
-    protected $orderId;
+    protected int $orderId;
 
-    public function __construct(string $message = '', int $code = 0, $extra = null, ?Throwable $previous = null)
-    {
+    public function __construct(
+        string $message = '',
+        int $code = 0,
+        array|string|null $extra = null,
+        ?Throwable $previous = null
+    ) {
         parent::__construct($message, $code, $previous);
         $this->extra = $extra;
     }
@@ -33,33 +38,39 @@ class DebugException extends Exception
         $this->addMessage('archivo', $this->getFile());
     }
 
-    public function render(Request $request)
+    public function errors(?Request $request = null)
     {
-        return response()->json(
-            [
-                'success' => false,
-                'exception' => 1,
-                'message' => $this->getMessage(),
-                'msj' => $this->getMessage(),
-                'request' => $request,
-                'extra' => $this->extra,
-                'out' => [
-                    'code' => $this->getCode(),
-                    'file' => basename($this->getFile()),
-                    'line' => $this->getLine(),
-                    'trace' => $this->getTraceAsString(),
-                ]
-            ],
-            203
-        );
+        $data = [
+            'success' => false,
+            'flag' => false,
+            'exception' => 1,
+            'message' => $this->getMessage(),
+            'msj' => $this->getMessage(),
+            'extra' => json_decode($this->extra)
+        ];
+        if (config('app.debug') == 'local') {
+            $data['out'] = [
+                'code' => $this->getCode(),
+                'file' => basename($this->getFile()),
+                'line' => $this->getLine(),
+                'trace' => $this->getTraceAsString(),
+            ];
+            $data['request'] = $request->all() ?? [];
+        }
+        return $data;
     }
 
-    public static function add($key, $collect)
+    public function render(Request $request): JsonResponse
+    {
+        return response()->json($this->errors($request), 203);
+    }
+
+    public static function add(string $key, array $collect)
     {
         self::$errors[$key] = $collect;
     }
 
-    public static function item($key)
+    public static function item(string $key)
     {
         return (isset(self::$errors[$key])) ? self::$errors[$key] : '';
     }

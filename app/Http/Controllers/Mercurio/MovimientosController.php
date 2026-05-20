@@ -101,7 +101,7 @@ class MovimientosController extends ApplicationController
                 'msj' => 'Cambio de Email de Aviso con Exito',
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -210,7 +210,7 @@ class MovimientosController extends ApplicationController
                 'msj' => 'Cambio de clave se ha realizado con éxito.',
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);

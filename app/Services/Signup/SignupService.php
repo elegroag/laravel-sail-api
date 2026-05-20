@@ -177,6 +177,7 @@ class SignupService
                 $empresaSisuweb['tipo'] = $request->getParam('tipo');
                 $empresaSisuweb['usuario'] = $request->getParam('usuario');
                 $empresaSisuweb['tipdoc'] = $request->getParam('tipdoc');
+                $empresaSisuweb['email'] = $empresaSisuweb['email'] ?? $request->getParam('email');
 
                 $signupEntity->createSignupService($empresaSisuweb);
             } else {

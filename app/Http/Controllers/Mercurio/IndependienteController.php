@@ -78,10 +78,10 @@ class IndependienteController extends ApplicationController
                 'coddoc' => $this->user['coddoc'],
             ]);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            $salida = $this->captureException($e, request());
             set_flashdata('error', [
                 'msj' => $salida['msj'],
-                'code' => $salida['code'],
+                'code' => $e->getCode()
             ]);
 
             return redirect()->route('principal/index');
@@ -102,8 +102,7 @@ class IndependienteController extends ApplicationController
             $this->setResponse('view');
             return $this->renderText($html);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
-            return response()->json($salida);
+            return $this->handleException($e, $request);
         }
     }
 
@@ -128,9 +127,7 @@ class IndependienteController extends ApplicationController
                 ]
             );
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
-
-            return response()->json($salida);
+            return $this->handleException($e, $request);
         }
     }
 
@@ -175,9 +172,8 @@ class IndependienteController extends ApplicationController
             $this->db->commit();
         } catch (\Throwable $e) {
             $this->db->rollBack();
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
-        return response()->json($salida);
     }
 
     public function actualizar(Request $request)
@@ -205,7 +201,7 @@ class IndependienteController extends ApplicationController
                 'data' => $data,
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -321,7 +317,7 @@ class IndependienteController extends ApplicationController
                 'trabajador' => $trabajador,
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -354,7 +350,7 @@ class IndependienteController extends ApplicationController
                 'msj' => 'El archivo se borro de forma correcta',
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -385,7 +381,7 @@ class IndependienteController extends ApplicationController
                 'data' => $mercurio37->getArray(),
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -412,7 +408,7 @@ class IndependienteController extends ApplicationController
                 'msj' => 'El envio de la solicitud se ha completado con éxito',
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
         return response()->json($salida);
     }
@@ -445,8 +441,7 @@ class IndependienteController extends ApplicationController
             $formularios->independientesAfiliacion(
                 [
                     'empresa' => $mercurio41,
-                ],
-                $file
+                ]
             );
             $salida = [
                 'success' => true,
@@ -454,7 +449,7 @@ class IndependienteController extends ApplicationController
                 'url' => 'independinte/downloadFile/' . $file,
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            return $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -470,7 +465,7 @@ class IndependienteController extends ApplicationController
                 'data' => $out,
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
         return response()->json($salida);
     }
@@ -502,7 +497,7 @@ class IndependienteController extends ApplicationController
                 ];
             }
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($salida);
@@ -630,7 +625,7 @@ class IndependienteController extends ApplicationController
                 'msj' => 'OK',
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            return $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -661,7 +656,7 @@ class IndependienteController extends ApplicationController
                 'msj' => 'OK',
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($salida);
@@ -690,7 +685,7 @@ class IndependienteController extends ApplicationController
                 'msj' => 'OK',
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
         return response()->json($salida);
     }
@@ -740,7 +735,7 @@ class IndependienteController extends ApplicationController
                 'msj' => 'Ok',
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -769,14 +764,14 @@ class IndependienteController extends ApplicationController
                     'msj' => 'La administración de la cuenta se ha inicializado con éxito.',
                     'code' => 200,
                 ]);
-
-                return redirect('principal.index');
             }
+
+            return redirect('principal.index');
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            $excep = $this->captureException($e);
             set_flashdata('error', [
-                'msj' => $salida['msj'],
-                'code' => $salida['code'],
+                'msj' => $excep['msj'],
+                'code' => $e->getCode()
             ]);
             return redirect()->route('principal/index');
         }

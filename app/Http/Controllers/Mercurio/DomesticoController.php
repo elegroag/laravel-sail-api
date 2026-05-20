@@ -169,17 +169,14 @@ class DomesticoController extends ApplicationController
                 'codact' => '201010',
                 'cedtra' => parent::getActUser('documento'),
                 'coddoc' => parent::getActUser('coddoc'),
-                'calemp' => 'S',
-                'codact' => '201010',
                 'tipdoc' => parent::getActUser('coddoc'),
             ]);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            $salida = $this->captureException($e);
             set_flashdata('error', [
                 'msj' => $salida['msj'],
-                'code' => $salida['code'],
+                'code' => $e->getCode()
             ]);
-
             return redirect()->route('principal/index');
         }
     }
@@ -197,7 +194,7 @@ class DomesticoController extends ApplicationController
 
             $response = $mercurio40->getArray();
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -304,7 +301,7 @@ class DomesticoController extends ApplicationController
                 'msj' => 'Creacion Con Exito',
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -327,7 +324,7 @@ class DomesticoController extends ApplicationController
                 'msj' => 'Proceso completado con éxito.',
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -428,7 +425,7 @@ class DomesticoController extends ApplicationController
                 'msj' => 'Se borro con Exito el archivo',
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -470,7 +467,7 @@ class DomesticoController extends ApplicationController
                 'msj' => $response,
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -513,7 +510,7 @@ class DomesticoController extends ApplicationController
                 'msj' => 'Se envio con Exito',
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);

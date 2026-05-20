@@ -53,7 +53,7 @@ class ActualizaTrabajadorController extends ApplicationController
                 'cedtra' => $this->user['documento'],
             ]);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            $salida = $this->captureException($e, request());
             set_flashdata('error', [
                 'msj' => $salida['msj'],
                 'code' => $salida['code'],
@@ -199,7 +199,7 @@ class ActualizaTrabajadorController extends ApplicationController
                 'msj' => 'OK',
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            return $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -267,7 +267,7 @@ class ActualizaTrabajadorController extends ApplicationController
                 'msj' => 'OK',
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            return $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -360,11 +360,12 @@ class ActualizaTrabajadorController extends ApplicationController
                 'data' => $solicitud->toArray(),
             ];
             $this->db->commit();
+
+            return response()->json($salida);
         } catch (\Throwable $e) {
             $this->db->rollBack();
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
-        return response()->json($salida);
     }
 
     public function borrar(Request $request)
@@ -389,12 +390,11 @@ class ActualizaTrabajadorController extends ApplicationController
                 'msj' => 'El registro se borro con éxito del sistema.',
             ];
             $this->db->commit();
+            return response()->json($salida);
         } catch (\Throwable $e) {
             $this->db->rollBack();
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e);
         }
-
-        return response()->json($salida);
     }
 
     public function editarSolicitud(Request $request)
@@ -452,12 +452,11 @@ class ActualizaTrabajadorController extends ApplicationController
                 'id' => $id,
             ];
             $this->db->commit();
+            return response()->json($salida);
         } catch (\Throwable $e) {
             $this->db->rollBack();
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e);
         }
-
-        return response()->json($salida);
     }
 
     function archivosRequeridos($mercurio47)
@@ -514,6 +513,7 @@ class ActualizaTrabajadorController extends ApplicationController
 
     public function reloadArchivos(Request $request)
     {
+        $salida = null;
         try {
             $documento = $this->user['documento'];
             $id = $request->input('id');
@@ -527,10 +527,8 @@ class ActualizaTrabajadorController extends ApplicationController
                 ];
             }
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
-            $salida['documentos_adjuntos'] = [];
+            return $this->handleException($e, $request);
         }
-
         return response()->json($salida);
     }
 
@@ -559,7 +557,7 @@ class ActualizaTrabajadorController extends ApplicationController
             $this->db->commit();
         } catch (\Throwable $e) {
             $this->db->rollBack();
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -593,7 +591,7 @@ class ActualizaTrabajadorController extends ApplicationController
             $this->db->commit();
         } catch (\Throwable $e) {
             $this->db->rollBack();
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -621,12 +619,11 @@ class ActualizaTrabajadorController extends ApplicationController
                 'msj' => 'El envio de la solicitud se ha completado con éxito',
             ];
             $this->db->commit();
+            return response()->json($salida);
         } catch (\Throwable $e) {
             $this->db->rollBack();
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
-
-        return response()->json($salida);
     }
 
     public function getTiposDocumentos()
@@ -812,8 +809,7 @@ class ActualizaTrabajadorController extends ApplicationController
             $this->setResponse('view');
             return $this->renderText($html);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
-            return response()->json($salida);
+            return $this->handleException($e, request());
         }
     }
 
@@ -846,7 +842,7 @@ class ActualizaTrabajadorController extends ApplicationController
                 'msj' => 'OK',
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            return $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -874,7 +870,7 @@ class ActualizaTrabajadorController extends ApplicationController
                 'msj' => 'OK',
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            return $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -890,8 +886,9 @@ class ActualizaTrabajadorController extends ApplicationController
                 'data' => $out,
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
+
         return response()->json($salida);
     }
 }

@@ -125,17 +125,17 @@ class Mercurio13Controller extends ApplicationController
             $mercurio13->auto_generado = $auto_generado;
             $mercurio13->nota = $nota;
             $mercurio13->save();
+            $this->db->commit();
 
             $salida = [
                 'success' => true,
                 'msj' => 'El registro se completo con éxito.'
             ];
-            $this->db->commit();
+            return response()->json($salida);
         } catch (\Throwable $e) {
             $this->db->rollBack();
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
-        return response()->json($salida);
     }
 
     public function borrar(Request $request)

@@ -6,9 +6,11 @@ use App\Exceptions\AuthException;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\QueryException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use PDOException;
+use Throwable;
 
 class ApplicationController extends Controller
 {
@@ -186,7 +188,7 @@ class ApplicationController extends Controller
         Log::stack(['single', 'slack'])->debug($msg);
     }
 
-    protected function handleException(\Throwable $e, Request $request): array
+    protected function getDebug(Throwable $e)
     {
         if ($e instanceof DebugException) {
             $debug = $e;
@@ -195,12 +197,25 @@ class ApplicationController extends Controller
         } elseif ($e instanceof AuthException) {
             $debug = new DebugException('Error de autenticación', 501, $e->getMessage());
         } else {
-            $debug = new DebugException('Error de sintaxis del sistema', 501, $e->getMessage() . ' ' . $e->getLine() . ' ' . basename($e->getFile()) . ' ' . $e->getTraceAsString());
+            $debug = new DebugException('Error de sintaxis del sistema', 501, [
+                $e->getMessage(),
+                $e->getLine(),
+                basename($e->getFile()),
+                $e->getTraceAsString()
+            ]);
         }
-        return [
-            'success' => false,
-            'msj' => $debug->getMessage(),
-            'errors' => $debug->render($request)
-        ];
+        return $debug;
+    }
+
+    protected function handleException(\Throwable $e, ?Request $request = null): JsonResponse
+    {
+        $debug = $this->getDebug($e);
+        return $debug->render($request);
+    }
+
+    protected function captureException(\Throwable $e, ?Request $request = null): array
+    {
+        $debug = $this->getDebug($e);
+        return $debug->errors($request);
     }
 }

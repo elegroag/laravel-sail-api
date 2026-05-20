@@ -95,11 +95,11 @@ class TrabajadorController extends ApplicationController
                 'input_nits' => $input_nits,
                 'input_razsoc' => $input_razsoc,
             ]);
-        } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+        } catch (Exception $e) {
+            $response = $this->captureException($e, $request);
             set_flashdata('error', [
                 'msj' => $response['msj'],
-                'code' => $response['code'],
+                'code' => $e->getCode(),
             ]);
             return redirect()->route('principal/index');
         }
@@ -132,13 +132,10 @@ class TrabajadorController extends ApplicationController
             } else {
                 $response = ['success' => true, 'msj' => '', 'data' => $datos['data']['razsoc'] ?? null];
             }
-
-            $salida = $response;
+            return response()->json($response);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
-
-        return response()->json($salida);
     }
 
     /**
@@ -165,11 +162,10 @@ class TrabajadorController extends ApplicationController
                 'success' => true,
                 'msj' => 'El archivo se borro de forma correcta',
             ];
+            return response()->json($response);
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
-
-        return response()->json($response);
     }
 
     /**
@@ -193,11 +189,10 @@ class TrabajadorController extends ApplicationController
                 'msj' => 'Ok archivo procesado',
                 'data' => method_exists($mercurio37, 'getArray') ? $mercurio37->getArray() : null,
             ];
+            return response()->json($response);
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
-
-        return response()->json($response);
     }
 
     /**
@@ -246,11 +241,10 @@ class TrabajadorController extends ApplicationController
             }
 
             $response['data'] = $mercurio31->toArray();
+            return response()->json($response);
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
-
-        return response()->json($response);
     }
 
     /**
@@ -265,11 +259,10 @@ class TrabajadorController extends ApplicationController
             $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
             $trabajadorService->enviarCaja(new SenderValidationCaja, $id, $usuario); // TODO: importar/clase correcta si existe
             $salida = ['success' => true, 'msj' => 'El envio de la solicitud se ha completado con éxito'];
+            return response()->json($salida);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
-
-        return response()->json($salida);
     }
 
     public function seguimiento(Request $request)
@@ -282,14 +275,13 @@ class TrabajadorController extends ApplicationController
                 'success' => true,
                 'data' => $out
             ];
+            return response()->json($salida);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
-
-        return response()->json($salida);
     }
 
-    public function params()
+    public function params(Request $request)
     {
         try {
             $nit = $this->user['documento'];
@@ -409,10 +401,11 @@ class TrabajadorController extends ApplicationController
                 'data' => $componentes,
                 'msj' => 'OK',
             ];
+
+            return response()->json($salida);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            return $this->handleException($e, $request);
         }
-        return response()->json($salida);
     }
 
     /**
@@ -437,8 +430,7 @@ class TrabajadorController extends ApplicationController
             $this->setResponse('view');
             return $this->renderText($html);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
-            return $this->renderText($salida);
+            return $this->renderText($this->handleException($e, $request));
         }
     }
 
@@ -465,11 +457,11 @@ class TrabajadorController extends ApplicationController
                 'data' => $solicitud->toArray(),
                 'msj' => 'OK',
             ];
-        } catch (Exception $e) {
-            $salida = $this->handleException($e, $request);
-        }
 
-        return response()->json($salida);
+            return response()->json($salida);
+        } catch (Exception $e) {
+            return $this->handleException($e, $request);
+        }
     }
 
     /**
@@ -514,13 +506,13 @@ class TrabajadorController extends ApplicationController
                 'success' => true,
                 'data' => $solicitud->toArray(),
             ];
-
             $this->db->commit();
+
+            return response()->json($salida);
         } catch (Exception $e) {
             $this->db->rollBack();
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
-        return response()->json($salida);
     }
 
     public function serializeData(Request $request)
@@ -584,7 +576,7 @@ class TrabajadorController extends ApplicationController
         ];
     }
 
-    public function consultaDocumentos(string $id)
+    public function consultaDocumentos(Request $request, string $id)
     {
         try {
             $documento = $this->user['documento'];
@@ -606,20 +598,19 @@ class TrabajadorController extends ApplicationController
                 'data' => $traService->dataArchivosRequeridos($mtrabajador),
                 'msj' => 'OK',
             ];
-        } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            return response()->json($salida);
+        } catch (Exception $e) {
+            return $this->handleException($e, $request);
         }
-
-        return response()->json($salida);
     }
 
     public function borrar(Request $request)
     {
         try {
-            if (!$request->get('id')) {
+            if (!$request->input('id')) {
                 throw new DebugException('Error no se puede identificar el propietario de la solicitud', 301);
             }
-            $id = $request->get('id');
+            $id = $request->input('id');
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
 
@@ -640,11 +631,11 @@ class TrabajadorController extends ApplicationController
                 'success' => true,
                 'msj' => 'Registro eliminado con exito',
             ];
-        } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
-        }
 
-        return response()->json($response);
+            return response()->json($response);
+        } catch (Exception $e) {
+            return $this->handleException($e, $request);
+        }
     }
 
     public function valida(Request $request)
@@ -694,11 +685,10 @@ class TrabajadorController extends ApplicationController
                 'solicitud_previa' => ($solicitud_previa > 0) ? true : false,
                 'trabajador' => $trabajador,
             ];
+            return response()->json($response);
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
-
-        return response()->json($response);
     }
 
     public function buscarTrabajador(Request $request)
@@ -744,11 +734,11 @@ class TrabajadorController extends ApplicationController
                 'success' => true,
                 'data' => $subsi15,
             ];
+            return response()->json($salida);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            $salida = $this->captureException($e, $request);
             $salida['flag'] = false;
+            return response()->json($salida);
         }
-
-        return response()->json($salida);
     }
 }

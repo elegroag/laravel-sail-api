@@ -14,18 +14,16 @@ use App\Models\Mercurio32;
 use App\Models\Mercurio37;
 use App\Services\Srequest;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Utils\SenderValidationCaja;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class ConyugeService
 {
     private $tipopc = '3';
-
-    private $user;
-
-    private $tipo;
-
-    private $db;
+    private ?array $user;
+    private ?string $tipo;
+    private DbBase $db;
 
     public function __construct()
     {
@@ -80,16 +78,16 @@ class ConyugeService
      * buscarEmpresaSubsidio function
      * buscar empresa en subsidio sin importar el estado
      *
-     * @param [type] $nit
+     * @param string $nit
      * @return void
      */
-    public function buscarEmpresaSubsidio($nit)
+    public function buscarEmpresaSubsidio(string $nit)
     {
         $empresaService = new EmpresaService();
         return $empresaService->buscarEmpresaSubsidio($nit);
     }
 
-    public function archivosRequeridos($solicitud)
+    public function archivosRequeridos(Mercurio32 $solicitud)
     {
         $archivos = [];
         $mercurio13 = Mercurio13::where('tipopc', $this->tipopc)->orderBy('auto_generado', 'desc')->get();
@@ -145,7 +143,7 @@ class ConyugeService
         return $html;
     }
 
-    public function dataArchivosRequeridos($solicitud)
+    public function dataArchivosRequeridos(Mercurio32 $solicitud)
     {
         if ($solicitud == false) {
             return false;
@@ -267,11 +265,10 @@ class ConyugeService
      *
      * @param  SenderValidationCaja  $senderValidationCaja
      * @param  int  $id
-     * @param  int  $documento
-     * @param  int  $coddoc
+     * @param  array $usuario
      * @return void
      */
-    public function enviarCaja($senderValidationCaja, $id, $usuario)
+    public function enviarCaja(SenderValidationCaja $senderValidationCaja, $id, $usuario)
     {
         $solicitud = $this->findById($id);
 
@@ -314,7 +311,7 @@ class ConyugeService
         $senderValidationCaja->send($this->tipopc, $solicitud);
     }
 
-    public function buscarConyugeSubsidio($cedcon)
+    public function buscarConyugeSubsidio(string $cedcon)
     {
         $procesadorComando = new ApiSubsidio();
         $procesadorComando->send(
@@ -332,7 +329,7 @@ class ConyugeService
         }
     }
 
-    public function consultaSeguimiento($id)
+    public function consultaSeguimiento(int $id)
     {
         $seguimientos = Mercurio10::where('numero', $id)
             ->where('tipopc', $this->tipopc)
@@ -366,7 +363,7 @@ class ConyugeService
         $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
     }
 
-    public function findRequestByDocumentoCoddoc($documento, $coddoc)
+    public function findRequestByDocumentoCoddoc(string $documento, string $coddoc)
     {
         $datos = Mercurio32::select(
             'cedcon as cedula',
@@ -386,7 +383,7 @@ class ConyugeService
         return (is_array($datos) === true) ? $datos : false;
     }
 
-    public function findRequestByCedtra($cedtra)
+    public function findRequestByCedtra(string $cedtra)
     {
         $datos = Mercurio32::where('cedtra', $cedtra)
             ->whereNotIn('estado', ['X', 'I'])
@@ -396,7 +393,7 @@ class ConyugeService
         return $datos->toArray();
     }
 
-    public function findApiConyugesByNit($nit): array|null
+    public function findApiConyugesByNit(string $nit): array|null
     {
         $procesadorComando = new ApiSubsidio();
         $procesadorComando->send(

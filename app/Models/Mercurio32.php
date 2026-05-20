@@ -6,6 +6,7 @@ use App\Models\Adapter\DbBase;
 use App\Models\Adapter\HasCustomUuid;
 use App\Models\Adapter\ModelBase;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
 
 class Mercurio32 extends ModelBase
 {
@@ -944,5 +945,93 @@ class Mercurio32 extends ModelBase
     public function solicitante()
     {
         return $this->belongsTo(Mercurio07::class, 'documento', 'documento');
+    }
+
+    public function rulesValiation()
+    {
+        return [
+            // integer — required
+            "log"        => "required|integer|min:0",
+            "usuario"    => "required|integer|min:0",
+            // integer — nullable
+            "tiecon"     => "integer|min:0",
+            "salario"    => "integer|min:0",
+            "codben"     => "integer|min:0",
+            // unsignedBigInteger
+            "numcue"     => "integer|min:0",
+            // uuid — nullable
+            "ruuid"      => "uuid",
+            // date — required
+            "fecnac"     => "required|date",
+            "fecing"     => "required|date",
+            // date — nullable
+            "fecest"     => "date",
+            "fecsol"     => "date",
+            "fecapr"     => "date",
+            // string
+            "barrio"     => "max:45",
+            "motivo"     => "max:500",
+            // char(N) — required
+            "cedtra"     => "required|max:15",
+            "priape"     => "required|max:20",
+            "prinom"     => "required|max:20",
+            "direccion"  => "required|max:45",
+            "telefono"   => "required|max:13",
+            "email"      => "required|email|max:45",
+            "estado"     => "required|max:1",
+            "tipo"       => "required|max:2",
+            "coddoc"     => "required|max:2",
+            "documento"  => "required|max:15",
+            // char(N) — nullable
+            "cedcon"     => "max:15",
+            "tipdoc"     => "max:2",
+            "segape"     => "max:20",
+            "segnom"     => "max:20",
+            "ciunac"     => "max:5",
+            "sexo"       => "max:1",
+            "estciv"     => "max:2",
+            "comper"     => "max:1",
+            "ciures"     => "max:5",
+            "codzon"     => "max:9",
+            "tipviv"     => "max:2",
+            "nivedu"     => "max:3",
+            "codocu"     => "max:5",
+            "tipsal"     => "max:1",
+            "captra"     => "max:1",
+            "codest"     => "max:2",
+            "tippag"     => "max:1",
+            "codban"     => "max:4",
+            "resguardo_id"       => "integer|min:0",
+            "pub_indigena_id"   => "integer|min:0",
+            "tipcue"     => "max:1",
+            "tipdis"     => "max:2",
+            "peretn"     => "max:2",
+            "zoneurbana" => "max:1",
+            "celular"    => "max:10",
+            "empresalab" => "max:100",
+        ];
+    }
+
+    public function isValid(?array $rules = null)
+    {
+        $rules = $rules ?? $this->rulesValiation();
+
+        $messages = [
+            'required' => 'El campo :attribute es requerido.',
+            'email'    => 'El correo electrónico no es válido.',
+            'integer'  => 'El campo :attribute debe ser un entero.',
+            'numeric'  => 'El campo :attribute debe ser un número.',
+            'date'     => 'El campo :attribute no es una fecha válida.',
+            'uuid'     => 'El campo :attribute debe ser un UUID válido.',
+            'min'      => 'El valor de :attribute debe ser al menos :min.',
+        ];
+
+        $validator = Validator::make($this->attributes, $rules, $messages);
+
+        if ($validator->fails()) {
+            return $validator->errors();
+        }
+
+        return true;
     }
 }

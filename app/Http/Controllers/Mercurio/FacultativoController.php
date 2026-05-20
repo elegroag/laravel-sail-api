@@ -68,10 +68,10 @@ class FacultativoController extends ApplicationController
                 'documento' => $this->user['documento'],
             ]);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            $exception = $this->captureException($e, request());
             set_flashdata('error', [
-                'msj' => $salida['msj'],
-                'code' => $salida['code'],
+                'msj' => $exception['msj'],
+                'code' => $e->getCode(),
             ]);
 
             return redirect()->route('principal/index');
@@ -105,7 +105,7 @@ class FacultativoController extends ApplicationController
                 'data' => $data,
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -158,7 +158,7 @@ class FacultativoController extends ApplicationController
             $this->db->commit();
         } catch (\Throwable $e) {
             $this->db->rollBack();
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
         return response()->json($salida);
     }
@@ -278,7 +278,7 @@ class FacultativoController extends ApplicationController
                 'trabajador' => $trabajador,
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -311,7 +311,7 @@ class FacultativoController extends ApplicationController
                 'msj' => 'El archivo se borro de forma correcta',
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -334,7 +334,7 @@ class FacultativoController extends ApplicationController
                 'data' => $mercurio37->getArray(),
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
         return response()->json($response);
     }
@@ -361,7 +361,7 @@ class FacultativoController extends ApplicationController
                 'msj' => 'El envio de la solicitud se ha completado con éxito',
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($salida);
@@ -419,8 +419,7 @@ class FacultativoController extends ApplicationController
                 ];
             }
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
-            $salida['documentos_adjuntos'] = [];
+            return response()->json(array_merge($this->captureException($e), ['documentos_adjuntos' => []]));
         }
 
         return response()->json($salida);
@@ -452,7 +451,7 @@ class FacultativoController extends ApplicationController
                 'msj' => 'El registro se borro con éxito del sistema.',
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($salida);
@@ -609,7 +608,7 @@ class FacultativoController extends ApplicationController
                 'msj' => 'OK',
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            return $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -637,7 +636,7 @@ class FacultativoController extends ApplicationController
                 'msj' => 'OK',
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            return $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -664,7 +663,7 @@ class FacultativoController extends ApplicationController
                 'msj' => 'OK',
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            return $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -686,9 +685,7 @@ class FacultativoController extends ApplicationController
             $this->setResponse('view');
             return $this->renderText($html);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
-
-            return response()->json($salida);
+            return $this->handleException($e, request());
         }
     }
 
@@ -702,7 +699,7 @@ class FacultativoController extends ApplicationController
                 'data' => $out,
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
         return response()->json($salida);
     }
@@ -734,10 +731,10 @@ class FacultativoController extends ApplicationController
                 return redirect('principal.index');
             }
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            $exception = $this->captureException($e, request());
             set_flashdata('error', [
-                'msj' => $salida['msj'],
-                'code' => $salida['code'],
+                'msj' => $exception['msj'],
+                'code' => $e->getCode(),
             ]);
 
             return redirect()->route('principal/index');

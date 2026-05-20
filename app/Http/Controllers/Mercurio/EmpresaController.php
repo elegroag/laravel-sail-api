@@ -50,10 +50,10 @@ class EmpresaController extends ApplicationController
                 'title' => 'Afiliación de empresas',
             ]);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            $salida = $this->captureException($e, request());
             set_flashdata('error', [
                 'msj' => $salida['msj'],
-                'code' => $salida['code'],
+                'code' => $e->getCode()
             ]);
             return redirect()->route('principal/index');
         }
@@ -74,8 +74,7 @@ class EmpresaController extends ApplicationController
             $this->setResponse('view');
             return $this->renderText($html);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
-            return $this->renderText($salida);
+            return $this->renderText($this->captureException($e));
         }
     }
 
@@ -102,7 +101,7 @@ class EmpresaController extends ApplicationController
                 ];
             }
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
         return response()->json($salida);
     }
@@ -148,11 +147,11 @@ class EmpresaController extends ApplicationController
             ];
 
             $this->db->commit();
+            return response()->json($salida);
         } catch (Exception $e) {
             $this->db->rollBack();
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
-        return response()->json($salida);
     }
 
     /**
@@ -179,11 +178,10 @@ class EmpresaController extends ApplicationController
                 'success' => true,
                 'msj' => 'El archivo se borro de forma correcta',
             ];
+            return response()->json($response);
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
-
-        return response()->json($response);
     }
 
     /**
@@ -207,11 +205,10 @@ class EmpresaController extends ApplicationController
                 'msj' => 'Ok archivo procesado',
                 'data' => $mercurio37->toArray(),
             ];
+            return response()->json($salida);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
-
-        return response()->json($salida);
     }
 
     /**
@@ -231,10 +228,10 @@ class EmpresaController extends ApplicationController
                 'success' => true,
                 'data' => $data,
             ];
+            return response()->json($salida);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            return $this->handleException($e, request());
         }
-        return response()->json($salida);
     }
 
     /**
@@ -254,10 +251,10 @@ class EmpresaController extends ApplicationController
                 'success' => true,
                 'msj' => 'El envío de la solicitud se ha completado con éxito',
             ];
+            return response()->json($salida);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
-        return response()->json($salida);
     }
 
     public function seguimiento(Request $request)
@@ -269,11 +266,10 @@ class EmpresaController extends ApplicationController
                 'success' => true,
                 'data' => $out,
             ];
+            return response()->json($salida);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
-
-        return response()->json($salida);
     }
 
     public function params()
@@ -326,7 +322,6 @@ class EmpresaController extends ApplicationController
                 'ciunac' => ParamsEmpresa::getCiudades(),
                 'tipsal' => tipsal_array(),
                 'autoriza' => condicionSN(),
-                'ciupri' => ParamsEmpresa::getCiudades(),
                 'cartra' => ParamsTrabajador::getOcupaciones(),
                 'indipais' => indicativos_paises_array(),
                 'indidepa' => indicativos_departamentos_array()
@@ -348,11 +343,10 @@ class EmpresaController extends ApplicationController
                 'data' => $componentes,
                 'msj' => 'OK',
             ];
+            return response()->json($salida);
         } catch (Exception $e) {
-            $salida = $this->handleException($e, request());
+            return $this->handleException($e, request());
         }
-
-        return response()->json($salida);
     }
 
     /**
@@ -400,10 +394,10 @@ class EmpresaController extends ApplicationController
                 'success' => true,
                 'digver' => $dv,
             ];
+            return response()->json($salida);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
-        return response()->json($salida);
     }
 
     /**
@@ -433,11 +427,10 @@ class EmpresaController extends ApplicationController
                 'data' => $data,
                 'msj' => 'OK',
             ];
+            return response()->json($salida);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->renderObject($this->captureException($e, $request));
         }
-
-        return $this->renderObject($salida);
     }
 
     /**
@@ -465,11 +458,10 @@ class EmpresaController extends ApplicationController
                 'data' => $service->dataArchivosRequeridos($mempresa),
                 'msj' => 'OK',
             ];
+            return response()->json($salida);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->renderObject($this->captureException($e, $request));
         }
-
-        return $this->renderObject($salida);
     }
 
     /**
@@ -504,11 +496,11 @@ class EmpresaController extends ApplicationController
                 'success' => true,
                 'msj' => 'Ok',
             ];
+            return response()->json($salida);
         } catch (\Throwable $e) {
             $this->db->rollBack();
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
-        return response()->json($salida);
     }
 
     public function valida(Request $request)
@@ -522,15 +514,15 @@ class EmpresaController extends ApplicationController
             if ($empresa_sisu) {
                 $empresa = (count($empresa_sisu) > 0) ? $empresa_sisu : false;
             }
-            $response = [
+            $salida = [
                 'success' => true,
                 'solicitud_previa' => ($solicitud_previa > 0) ? true : false,
                 'empresa' => $empresa,
             ];
+            return response()->json($salida);
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
-        return response()->json($response);
     }
 
     public function serializeData(Request $request)
@@ -645,10 +637,10 @@ class EmpresaController extends ApplicationController
                 'parametros' => $params,
             ]);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            $salida = $this->captureException($e, request());
             set_flashdata('error', [
                 'msj' => $salida['msj'],
-                'code' => $salida['code'],
+                'code' => $e->getCode(),
             ]);
             return redirect()->route('principal/index');
         }

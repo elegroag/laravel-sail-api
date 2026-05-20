@@ -100,10 +100,10 @@ class BeneficiarioController extends ApplicationController
                 'empresa' => $empresa,
             ]);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            $salida = $this->captureException($e);
             set_flashdata('error', [
                 'msj' => $salida['msj'],
-                'code' => $salida['code'],
+                'code' => $e->getMessage(),
             ]);
 
             return redirect()->route('principal/index');
@@ -153,7 +153,7 @@ class BeneficiarioController extends ApplicationController
                 ])
             );
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, request());
+            return $this->handleException($e, request());
         }
         return response()->json($response);
     }
@@ -180,7 +180,7 @@ class BeneficiarioController extends ApplicationController
                 'msj' => 'El archivo se borro de forma correcta',
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -202,7 +202,7 @@ class BeneficiarioController extends ApplicationController
             $this->db->commit();
         } catch (\Throwable $e) {
             $this->db->rollBack();
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($salida);
@@ -235,7 +235,7 @@ class BeneficiarioController extends ApplicationController
                 'data' => $mercurio34->toArray(),
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($salida);
@@ -251,7 +251,7 @@ class BeneficiarioController extends ApplicationController
                 'msj' => 'Borrado Con Exito',
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -340,7 +340,7 @@ class BeneficiarioController extends ApplicationController
                 'msj' => 'El registro se borro con éxito del sistema.',
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return $this->renderObject($salida);
@@ -430,8 +430,7 @@ class BeneficiarioController extends ApplicationController
 
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
-            $salida['list'] = '';
+            return $this->handleException($e, $request);
         }
 
         return response()->json($salida);
@@ -705,7 +704,7 @@ class BeneficiarioController extends ApplicationController
                 'msj' => 'OK',
             ];
         } catch (Exception $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($salida);
@@ -714,7 +713,6 @@ class BeneficiarioController extends ApplicationController
     public function renderTable($estado = '')
     {
         try {
-
             $benService = new BeneficiarioService;
             $html = view(
                 'mercurio/beneficiario/tmp/solicitudes',
@@ -726,8 +724,7 @@ class BeneficiarioController extends ApplicationController
             $this->setResponse('view');
             return $this->renderText($html);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
-            return response()->json($salida);
+            return $this->handleException($e, request());
         }
     }
 
@@ -756,7 +753,7 @@ class BeneficiarioController extends ApplicationController
                 'msj' => 'OK',
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            return $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -790,7 +787,7 @@ class BeneficiarioController extends ApplicationController
                 'beneficiario' => $beneficiario,
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -885,7 +882,7 @@ class BeneficiarioController extends ApplicationController
             $this->db->commit();
         } catch (\Throwable $e) {
             $this->db->rollBack();
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
         return response()->json($salida);
     }
@@ -912,7 +909,7 @@ class BeneficiarioController extends ApplicationController
                 'msj' => 'OK',
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            return $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -1096,14 +1093,13 @@ class BeneficiarioController extends ApplicationController
                     'adicionPersonaCargo' => $adicionPersonaCargo,
                     'conyuge' => $mercurio32,
                     'beneficiarios' => $beneficiariosTodos,
-                ],
-                $file
+                ]
             )->outFile();
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, request());
+            $response = $this->captureException($e);
             set_flashdata('error', [
                 'msj' => $response['msj'],
-                'code' => $response['code'],
+                'code' => $e->getCode()
             ]);
 
             return redirect('beneficiario.index');
@@ -1129,7 +1125,7 @@ class BeneficiarioController extends ApplicationController
                 'data' => $mercurio37->toArray(),
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -1146,7 +1142,7 @@ class BeneficiarioController extends ApplicationController
                 'data' => $out,
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($salida);

@@ -12,11 +12,9 @@ use Illuminate\Http\Request;
 
 class ProductosController extends ApplicationController
 {
-    protected $db;
-
-    protected $user;
-
-    protected $tipo;
+    protected DbBase $db;
+    protected ?array $user;
+    protected ?string $tipo;
 
     public function __construct()
     {
@@ -63,10 +61,10 @@ class ProductosController extends ApplicationController
                 'codser' => $codser,
             ]);
         } catch (\Throwable $th) {
-            $salida = $this->handleException($th, $request);
+            $salida = $this->captureException($th, $request);
             set_flashdata('error', [
                 'msj' => $salida['msj'],
-                'code' => $salida['code'],
+                'code' => $th->getCode()
             ]);
             return redirect()->route('principal.index');
         }
@@ -74,6 +72,7 @@ class ProductosController extends ApplicationController
 
     public function aplicarCupo(Request $request)
     {
+        $salida = null;
         $habilId = $request->input('id');
         $docben = $request->input('docben');
         $codser = $request->input('codser');
@@ -140,14 +139,13 @@ class ProductosController extends ApplicationController
                 throw new DebugException('El trabajador no dispone de beneficiarios activos para solicitar el producto.', 501);
             }
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
-            $salida['beneficiarios'] = $this->afiliadosBeneficiarios($codser);
+            return $this->handleException($e, request());
         }
 
         return response()->json($salida);
     }
 
-    public function numeroCuposDisponibles($codser)
+    public function numeroCuposDisponibles(string $codser)
     {
         $cupos_disponibles = ServiciosCupos::where('estado', 'A')
             ->where('codser', $codser)
@@ -161,7 +159,7 @@ class ProductosController extends ApplicationController
         );
     }
 
-    public function serviciosAplicados($codser)
+    public function serviciosAplicados(string $codser)
     {
         $data = $this->afiliadosBeneficiarios($codser);
         return response()->json(
@@ -172,7 +170,7 @@ class ProductosController extends ApplicationController
         );
     }
 
-    public function misCuposAplicados($codser)
+    public function misCuposAplicados(string $codser)
     {
         $pinesAfiliados = PinesAfiliado::where('cedtra', $this->user['documento'])
             ->where('codser', $codser);
@@ -184,7 +182,7 @@ class ProductosController extends ApplicationController
         return [];
     }
 
-    public function afiliadosBeneficiarios($codser)
+    public function afiliadosBeneficiarios(string $codser)
     {
         $cedtra = $this->user['documento'];
         $afiliadoHabiles = AfiliadoHabil::where('cedtra', $cedtra)
@@ -236,7 +234,7 @@ class ProductosController extends ApplicationController
                 </p>",
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, request());
         }
 
         return response()->json($salida);

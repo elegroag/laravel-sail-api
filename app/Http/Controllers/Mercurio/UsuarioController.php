@@ -41,6 +41,7 @@ class UsuarioController extends ApplicationController
 
     public function params()
     {
+        $salida = null;
         try {
             $mtipoDocumentos = new Gener18;
             $coddoc = [];
@@ -92,7 +93,7 @@ class UsuarioController extends ApplicationController
                 'msj' => 'OK',
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            return $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -100,6 +101,7 @@ class UsuarioController extends ApplicationController
 
     public function showPerfil()
     {
+        $salida = null;
         try {
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
@@ -140,7 +142,7 @@ class UsuarioController extends ApplicationController
                 'msj' => 'OK',
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            return $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -148,6 +150,7 @@ class UsuarioController extends ApplicationController
 
     public function guardar(Request $request)
     {
+        $response = null;
         try {
             $tipo = $request->input('tipo');
             $coddoc = $request->input('coddoc');
@@ -207,10 +210,9 @@ class UsuarioController extends ApplicationController
                 'success' => true,
                 'data' => $entity,
             ];
+            return response()->json($response);
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, request());
+            return $this->handleException($e, request());
         }
-
-        return response()->json($response);
     }
 }

@@ -69,10 +69,10 @@ class CertificadosController extends ApplicationController
                 ]
             );
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            $salida = $this->captureException($e);
             set_flashdata('error', [
                 'msj' => $salida['msj'],
-                'code' => $salida['code'],
+                'code' => $e->getCode(),
             ]);
 
             return redirect()->route('principal/index');
@@ -180,7 +180,7 @@ class CertificadosController extends ApplicationController
             $this->db->commit();
         } catch (\Throwable $e) {
             $this->db->rollBack();
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);

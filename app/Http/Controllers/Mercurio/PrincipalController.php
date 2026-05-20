@@ -98,10 +98,10 @@ class PrincipalController extends ApplicationController
                 'success' => true,
                 'requireChangeClave' => $requireChangeClave
             ];
+            return response()->json($salida);
         } catch (\Throwable $th) {
-            $salida = $this->handleException($th, $request);
+            return $this->handleException($th);
         }
-        return response()->json($salida);
     }
 
     public function dashboardEmpresa()
@@ -179,10 +179,9 @@ class PrincipalController extends ApplicationController
                 'success' => true,
                 'data' => $data
             ];
+            return response()->json($response);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
-            $response = $salida;
-            $response['message'] = $salida['msj'];
+            return $this->handleException($e);
         }
 
         return response()->json($response);
@@ -226,13 +225,10 @@ class PrincipalController extends ApplicationController
                 'data' => $data,
                 'labels' => $labels,
             ];
+            return response()->json($response);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
-            $response = $salida;
-            $response['message'] = $salida['msj'];
+            return $this->handleException($e);
         }
-
-        return response()->json($response);
     }
 
     public function traerGiroEmpresa()
@@ -284,13 +280,11 @@ class PrincipalController extends ApplicationController
                 'success' => true,
                 'data' => $data
             ];
-        } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
-            $response = $salida;
-            $response['message'] = $salida['msj'];
-        }
 
-        return response()->json($response);
+            return response()->json($response);
+        } catch (\Throwable $e) {
+            return $this->handleException($e);
+        }
     }
 
     public function fileExisteGlobal(Request $request, Response $response, string $filepath)
@@ -382,11 +376,10 @@ class PrincipalController extends ApplicationController
             ];
 
             set_flashdata('Syncron', true, true);
+            return response()->json($salida);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            return $this->handleException($e);
         }
-
-        return response()->json($salida);
     }
 
     public function up()
@@ -405,7 +398,7 @@ class PrincipalController extends ApplicationController
                 'msj' => 'El proceso de consulta completo con éxito',
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            return $this->handleException($e);
         }
 
         return response()->json($salida);
@@ -414,6 +407,7 @@ class PrincipalController extends ApplicationController
     public function servicios()
     {
         try {
+            $mservice = null;
             $tipo = session('tipo');
             switch ($tipo) {
                 case 'E':
@@ -438,7 +432,11 @@ class PrincipalController extends ApplicationController
                 $mservice = new ParticularService;
             }
 
-            $servicios = $mservice->resumenServicios();
+            if ($mservice) {
+                $servicios = $mservice->resumenServicios();
+            } else {
+                throw new DebugException("El servicio no está disponible.", 501);
+            }
             // Totales por estados de afiliación
             $totales = [
                 'pendientes' => 0,
@@ -468,7 +466,7 @@ class PrincipalController extends ApplicationController
                 'totales' => $totales,
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            return $this->handleException($e);
         }
 
         return response()->json($salida);
@@ -500,7 +498,7 @@ class PrincipalController extends ApplicationController
                 ],
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            return $this->handleException($e);
         }
 
         return response()->json($salida);
@@ -560,7 +558,7 @@ class PrincipalController extends ApplicationController
                 'msj' => 'La clave fue registrada correctamente.',
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e);
         }
 
         return response()->json($salida);
@@ -583,7 +581,7 @@ class PrincipalController extends ApplicationController
                 'data' => $data,
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e);
         }
 
         return response()->json($salida);
@@ -593,10 +591,7 @@ class PrincipalController extends ApplicationController
      * ingresoDirigido function
      * aplica para los particulares que hacen su primer registro al sistema
      *
-     * @param  string  $id
-     * @param  string  $documento
-     * @param  string  $coddoc
-     * @param  string  $calemp
+     * @param  Request  $request
      * @return void
      */
     public function ingresoDirigido(Request $request)
@@ -699,10 +694,10 @@ class PrincipalController extends ApplicationController
 
             return redirect()->to($url);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            $salida = $this->captureException($e, $request);
             set_flashdata('error', [
                 'msj' => $salida['msj'],
-                'code' => $salida['code'],
+                'code' => $e->getCode()
             ]);
 
             return redirect()->to('mercurio/login');
@@ -756,7 +751,7 @@ class PrincipalController extends ApplicationController
                 'data' => $out,
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e);
         }
         return response()->json($salida);
     }
@@ -793,7 +788,7 @@ class PrincipalController extends ApplicationController
             $this->db->commit();
         } catch (\Throwable $e) {
             $this->db->rollBack();
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e);
         }
         return response()->json($salida);
     }

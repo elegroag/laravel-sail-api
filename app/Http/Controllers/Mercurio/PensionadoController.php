@@ -82,10 +82,10 @@ class PensionadoController extends ApplicationController
                 'coddoc' => $this->user['coddoc'],
             ]);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            $exception = $this->captureException($e, request());
             set_flashdata('error', [
-                'msj' => $salida['msj'],
-                'code' => $salida['code'],
+                'msj' => $exception['msj'],
+                'code' => $e->getCode(),
             ]);
 
             return redirect()->route('principal/index');
@@ -121,7 +121,7 @@ class PensionadoController extends ApplicationController
                 'data' => $data,
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -172,9 +172,9 @@ class PensionadoController extends ApplicationController
             ];
             $this->db->commit();
         } catch (\Throwable $e) {
-            $this->db->rollBack();
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
+
         return response()->json($salida);
     }
 
@@ -275,7 +275,7 @@ class PensionadoController extends ApplicationController
                 'trabajador' => $trabajador,
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -308,7 +308,7 @@ class PensionadoController extends ApplicationController
                 'msj' => 'El archivo se borro de forma correcta',
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -344,7 +344,7 @@ class PensionadoController extends ApplicationController
                 'data' => $mercurio37->getArray(),
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -377,7 +377,7 @@ class PensionadoController extends ApplicationController
             ];
         } catch (\Throwable $e) {
             $this->db->rollBack();
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -423,7 +423,7 @@ class PensionadoController extends ApplicationController
                 ];
             }
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($salida);
@@ -454,7 +454,7 @@ class PensionadoController extends ApplicationController
                 'msj' => 'El registro se borro con éxito del sistema.',
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
         return response()->json($salida);
     }
@@ -588,7 +588,7 @@ class PensionadoController extends ApplicationController
                 'msj' => 'OK',
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            return $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -615,7 +615,7 @@ class PensionadoController extends ApplicationController
                 'msj' => 'OK',
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            return $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -643,7 +643,7 @@ class PensionadoController extends ApplicationController
                 'msj' => 'OK',
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            return $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -673,7 +673,7 @@ class PensionadoController extends ApplicationController
                 'msj' => 'Ok',
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -695,8 +695,7 @@ class PensionadoController extends ApplicationController
             $this->setResponse('view');
             return $this->renderText($html);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
-            return response()->json($salida);
+            return $this->handleException($e, $request);
         }
     }
 
@@ -710,7 +709,7 @@ class PensionadoController extends ApplicationController
                 'data' => $out,
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
         return response()->json($salida);
     }
@@ -765,10 +764,10 @@ class PensionadoController extends ApplicationController
 
             throw new DebugException('No se pudo inicializar la administración de la cuenta', 301);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            $exception = $this->captureException($e, request());
             set_flashdata('error', [
-                'msj' => $salida['msj'],
-                'code' => $salida['code'],
+                'msj' => $exception['msj'],
+                'code' => $e->getCode()
             ]);
 
             return redirect()->route('principal/index');

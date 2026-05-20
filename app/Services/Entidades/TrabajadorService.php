@@ -207,11 +207,14 @@ class TrabajadorService
      */
     public function updateByFormData($id, $data)
     {
-        $solicitud = $this->findById($id);
-        if ($solicitud) {
-            $solicitud->fill($data);
-
-            return $solicitud->save();
+        $trabajador = $this->findById($id);
+        if ($trabajador) {
+            $trabajador->fill($data);
+            $validator = $trabajador->isValid();
+            if ($validator->fails()) {
+                throw new DebugException("No cumple con los datos necesarios proceso de validación de datos.", 501, $validator->errors());
+            }
+            return $trabajador->save();
         } else {
             return false;
         }
@@ -245,8 +248,17 @@ class TrabajadorService
     {
         $data['log'] = 0;
         $data['estado'] = 'T';
-        $trabajador = $this->create($data);
+        $trabajador = new Mercurio31($data);
+        $trabajador->regenerateUuid();
+        $validator = $trabajador->isValid();
+        if ($validator->fails()) {
+            throw new DebugException("No cumple con los datos necesarios proceso de validación de datos.", 501, $validator->errors());
+        }
+        $trabajador->save();
 
+        $id = $trabajador->getId();
+        Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
+        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
         return $trabajador;
     }
 
@@ -256,7 +268,7 @@ class TrabajadorService
      * @param  int  $id
      * @return Mercurio31
      */
-    public function findById($id)
+    public function findById($id): Mercurio31
     {
         return Mercurio31::where('id', $id)->first();
     }

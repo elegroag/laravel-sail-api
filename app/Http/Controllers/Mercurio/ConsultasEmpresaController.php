@@ -144,7 +144,7 @@ class ConsultasEmpresaController extends ApplicationController
                 'data' => $html,
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -192,9 +192,7 @@ class ConsultasEmpresaController extends ApplicationController
                 ];
             }
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
-            $response = $salida;
-            $response['message'] = $salida['msj'];
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -241,7 +239,7 @@ class ConsultasEmpresaController extends ApplicationController
                 'data' => $html,
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -292,7 +290,7 @@ class ConsultasEmpresaController extends ApplicationController
                 'data' => $html,
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -305,10 +303,10 @@ class ConsultasEmpresaController extends ApplicationController
                 'title' => 'Consulta Mora Presunta',
             ]);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            $salida = $this->captureException($e);
             set_flashdata('error', [
                 'msj' => $salida['msj'],
-                'code' => $salida['code'],
+                'code' => $e->getCode()
             ]);
 
             return redirect()->route('principal/index');
@@ -350,19 +348,17 @@ class ConsultasEmpresaController extends ApplicationController
             }
 
             $sucursales = $out['data'];
-            $salida = [
+            return response()->json([
                 'success' => true,
                 'data' => [
                     'cartera' => $moras,
                     'periodos' => $periodos,
                     'sucursales' => $sucursales,
                 ],
-            ];
+            ]);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            return $this->handleException($e, request());
         }
-
-        return response()->json($salida);
     }
 
     public function novedadRetiroView()
@@ -393,13 +389,7 @@ class ConsultasEmpresaController extends ApplicationController
                 'codest' => $_codest,
             ]);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
-            set_flashdata('error', [
-                'msj' => $salida['msj'],
-                'code' => $salida['code'],
-            ]);
-
-            return redirect()->route('principal/index');
+            return $this->handleException($e, request());
         }
     }
 
@@ -428,12 +418,10 @@ class ConsultasEmpresaController extends ApplicationController
                     $salida = ['flag' => true, 'success' => true, 'data' => $subsi15];
                 }
             }
+            return response()->json($salida);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
-            $salida['flag'] = false;
+            return $this->handleException($e, $request);
         }
-
-        return response()->json($salida);
     }
 
     public function novedadRetiro(Request $request)
@@ -527,12 +515,10 @@ class ConsultasEmpresaController extends ApplicationController
             $generalService->sendEmail(parent::getActUser('email'), parent::getActUser('nombre'), $asunto, $msj, '');
 
             // parent::finishTrans();
-            $salida = ['success' => true, 'msj' => $response];
+            return response()->json(['success' => true, 'msj' => $response]);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
-
-        return response()->json($salida);
     }
 
     /**
@@ -758,12 +744,11 @@ class ConsultasEmpresaController extends ApplicationController
                 'trabajadores' => $trabajadores,
             ]);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            $salida = $this->captureException($e);
             set_flashdata('error', [
                 'msj' => $salida['msj'],
-                'code' => $salida['code'],
+                'code' => $e->getCode()
             ]);
-
             return redirect()->route('principal/index');
         }
     }
@@ -970,9 +955,6 @@ class ConsultasEmpresaController extends ApplicationController
                 '_huerfano' => ParamsBeneficiario::getHuerfano(),
                 '_tiphij' => ParamsBeneficiario::getTipoHijo(),
                 '_calendario' => ParamsBeneficiario::getCalendario(),
-                '_huerfano' => ParamsBeneficiario::getHuerfano(),
-                '_tiphij' => ParamsBeneficiario::getTipoHijo(),
-                '_calendario' => ParamsBeneficiario::getCalendario(),
                 '_codcat' => categoria_array(),
             ];
 
@@ -985,7 +967,7 @@ class ConsultasEmpresaController extends ApplicationController
                 ],
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($salida);

@@ -4,13 +4,13 @@ if (! function_exists('clave_hash')) {
     /**
      * password_hash
      *
-     * @return void
+     * @return string
      */
-    function clave_hash($password, $cost = 10)
+    function clave_hash(string $password, ?int $cost = 10)
     {
         $salt = substr(base64_encode(openssl_random_pseudo_bytes(17)), 0, 22);
         $salt = str_replace('+', '.', $salt);
-        $param = '$'.implode('$', [
+        $param = '$' . implode('$', [
             '2y', // select the most secure version of blowfish (>=PHP 5.3.7)
             str_pad($cost, 2, '0', STR_PAD_LEFT), // add the cost in two digits
             $salt, // add the salt

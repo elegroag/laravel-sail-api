@@ -7,6 +7,7 @@ use App\Models\Adapter\HasCustomUuid;
 use App\Models\Adapter\ModelBase;
 // Agregado
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
 
 class Mercurio34 extends ModelBase
 {
@@ -732,5 +733,86 @@ class Mercurio34 extends ModelBase
     public function solicitante()
     {
         return $this->belongsTo(Mercurio07::class, 'documento', 'documento');
+    }
+
+    public function rulesValiation()
+    {
+        return [
+            // integer
+            "log"               => "required|integer|min:0",
+            "usuario"           => "required|integer|min:0",
+            "codben"            => "integer|min:0",
+            // char
+            "nit"               => "max:15",
+            "cedtra"            => "required|max:15",
+            "cedcon"            => "max:15",
+            "numdoc"            => "required|max:15",
+            "tipdoc"            => "required|max:2",
+            "priape"            => "required|max:20",
+            "prinom"            => "required|max:20",
+            "segape"            => "max:20",
+            "segnom"            => "max:20",
+            "ciunac"            => "required|max:5",
+            "sexo"              => "required|max:1",
+            "parent"            => "required|max:13",
+            "huerfano"          => "required|max:1",
+            "tiphij"            => "max:1",
+            "nivedu"            => "max:3",
+            "captra"            => "max:1",
+            "tipdis"            => "max:2",
+            "calendario"        => "max:1",
+            "estado"            => "required|max:1",
+            "codest"            => "max:2",
+            "tipo"              => "required|max:2",
+            "coddoc"            => "required|max:2",
+            "documento"         => "required|max:15",
+            "cedacu"            => "max:20",
+            "resguardo_id"      => "max:4",
+            "pub_indigena_id"   => "max:4",
+            "peretn"            => "max:2",
+            "codban"            => "max:4",
+            "tipcue"            => "max:1",
+            "tippag"            => "max:1",
+            "biocedu"           => "max:18",
+            "biotipdoc"         => "max:3",
+            "biophone"          => "max:12",
+            "biocodciu"         => "max:5",
+            "biourbana"         => "max:1",
+            "biodesco"          => "max:1",
+            // unsignedBigInteger
+            "numcue"            => "integer|min:0",
+            // string
+            "bioprinom"         => "max:34",
+            "biosegnom"         => "max:34",
+            "biopriape"         => "max:34",
+            "biosegape"         => "max:34",
+            "bioemail"          => "email|max:142",
+            "biodire"           => "max:142",
+            // date
+            "fecnac"            => "required|date",
+            "fecest"            => "date",
+            "fecsol"            => "date",
+            "fecapr"            => "date",
+            // uuid
+            "ruuid"             => "required|uuid",
+        ];
+    }
+
+    public function isValid(?array $rules)
+    {
+        $rules = (!$rules) ? $this->rulesValiation() : $rules;
+
+        $validator = Validator::make($this->attributes, $rules, [
+            'required' => 'El :attribute campo es requirido.',
+            'same'     => 'El :attribute and :other must match.',
+            'size'     => 'El :attribute must be exactly :size.',
+            'between'  => 'El :attribute valor :input no esta entre :min - :max.',
+            'in'       => 'El :attribute must be one of the following types: :values.',
+            'email.required' => 'Se requiere la dirección de email!',
+        ]);
+
+        if ($validator->fails()) return $validator->errors();
+
+        return true;
     }
 }

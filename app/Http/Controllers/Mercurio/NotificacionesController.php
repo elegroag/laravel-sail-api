@@ -129,7 +129,7 @@ class NotificacionesController extends ApplicationController
 
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($salida);

@@ -47,11 +47,12 @@ class FirmasController extends ApplicationController
                 'publicKey' => $content,
             ]);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            $salida = $this->captureException($e, request());
             set_flashdata('error', [
                 'msj' => $salida['msj'],
                 'code' => $salida['code'],
             ]);
+
             return redirect()->route('principal/index');
         }
     }
@@ -93,8 +94,7 @@ class FirmasController extends ApplicationController
             $salida = ['success' => true, 'msj' => 'Imagen guardada correctamente.'];
             $this->db->commit();
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
-            $this->db->rollBack();
+            return $this->handleException($e, $request);
         }
 
         return response()->json($salida);
@@ -126,7 +126,7 @@ class FirmasController extends ApplicationController
                 'msj' => $msj,
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            return $this->handleException($e, request());
         }
 
         return response()->json($salida);
@@ -179,8 +179,8 @@ class FirmasController extends ApplicationController
             ];
             $this->db->commit();
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
             $this->db->rollBack();
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -215,7 +215,10 @@ class FirmasController extends ApplicationController
                 throw new DebugException('Error el valor de la clave no es válido.', 401);
             }
 
-            $mfirma = Mercurio16::where('documento', $documento)->where('coddoc', $coddoc)->first();
+            $mfirma = Mercurio16::where('documento', $documento)
+                ->where('coddoc', $coddoc)
+                ->whereNotNull('password')
+                ->first();
             if (! $mfirma) {
                 throw new DebugException('No existe firma registrada para el usuario.', 404);
             }
@@ -234,35 +237,30 @@ class FirmasController extends ApplicationController
                 'signature' => json_encode($signature),
                 'msj' => 'Firma digital recuperada exitosamente. Se ha enviado un correo con sus credenciales.',
             ];
-        } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
-        }
 
-        return response()->json($response);
+            return response()->json($response);
+        } catch (\Throwable $e) {
+            return $this->handleException($e, $request);
+        }
     }
 
-
-    function sendMailFirmaDigital($usuario, $hash, $passwordNumerico)
+    public function sendMailFirmaDigital($usuario, $hash, $passwordNumerico)
     {
         $nombre = capitalize($usuario->getNombre());
-        $asunto = 'Recuperación de Firma Digital - Comfaca En Línea';
-        $html = "Estimado(a) {$nombre},<br/><br/>
-        Hemos recibido su solicitud de recuperación de firma digital en el portal de Comfaca En Línea.<br/><br/>
-        A continuación le enviamos sus credenciales de firma digital:<br/><br/>
-        <strong>FIRMA DIGITAL:</strong><br/>
-        {$hash}<br/><br/>
-        <strong>CLAVE DE SEGURIDAD PARA FIRMA DIGITAL:</strong><br/>
-        {$passwordNumerico}<br/><br/>
-        <em>Por motivos de seguridad, le recomendamos guardar esta información en un lugar seguro y no compartirla con terceros.</em><br/><br/>
-        Si no realizó esta solicitud, por favor contáctese de inmediato con nuestra central de atención al afiliado al 606 3600 Ext. 1220.";
 
-        $emailCaja = (new Mercurio01())->findFirst();
+        $html = view('emails.firma-digital-recuperacion', [
+            'nombre' => $nombre,
+            'hash' => $hash,
+            'password' => $passwordNumerico,
+        ])->render();
 
-        $senderEmail = new SenderEmail();
+        $emailCaja = (new Mercurio01)->findFirst();
+
+        $senderEmail = new SenderEmail;
         $senderEmail->setters(
             "emisor_email: {$emailCaja->getEmail()}",
             "emisor_clave: {$emailCaja->getClave()}",
-            "asunto: {$asunto}"
+            'asunto: Recuperación de Firma Digital - Comfaca En Línea'
         );
 
         $senderEmail->send(

@@ -170,10 +170,10 @@ class ComunitariaController extends ApplicationController
                 'buttons' => ['N'],
             ]);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            $salida = $this->captureException($e, request());
             set_flashdata('error', [
                 'msj' => $salida['msj'],
-                'code' => $salida['code'],
+                'code' => 501,
             ]);
 
             return redirect()->route('principal/index');
@@ -288,7 +288,7 @@ class ComunitariaController extends ApplicationController
                 'msj' => 'Creacion Con Exito',
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -311,7 +311,7 @@ class ComunitariaController extends ApplicationController
                 'msj' => 'Proceso completado con éxito.',
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -416,7 +416,7 @@ class ComunitariaController extends ApplicationController
                 'msj' => 'Se borro con Exito el archivo',
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -462,7 +462,7 @@ class ComunitariaController extends ApplicationController
                 'msj' => $msj,
             ];
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -510,7 +510,7 @@ class ComunitariaController extends ApplicationController
                 ];
             }
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);

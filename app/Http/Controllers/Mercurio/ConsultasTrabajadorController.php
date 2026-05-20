@@ -104,10 +104,10 @@ class ConsultasTrabajadorController extends ApplicationController
 
             ]);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            $salida = $this->captureException($e, request());
             set_flashdata('error', [
                 'msj' => $salida['msj'],
-                'code' => $salida['code'],
+                'code' => $e->getCode()
             ]);
 
             return redirect()->route('principal/index');
@@ -128,10 +128,10 @@ class ConsultasTrabajadorController extends ApplicationController
                 'cedtra' => $cedtra,
             ]);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            $salida = $this->captureException($e);
             set_flashdata('error', [
                 'msj' => $salida['msj'],
-                'code' => $salida['code'],
+                'code' => $e->getCode(),
             ]);
 
             return redirect()->route('principal/index');
@@ -222,15 +222,12 @@ class ConsultasTrabajadorController extends ApplicationController
                         '_huerfano' => ParamsBeneficiario::getHuerfano(),
                         '_tiphij' => ParamsBeneficiario::getTipoHijo(),
                         '_calendario' => ParamsBeneficiario::getCalendario(),
-                        '_huerfano' => ParamsBeneficiario::getHuerfano(),
-                        '_tiphij' => ParamsBeneficiario::getTipoHijo(),
-                        '_calendario' => ParamsBeneficiario::getCalendario(),
                         '_codcat' => categoria_array(),
                     ],
                 ],
             ];
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($salida);
@@ -277,7 +274,7 @@ class ConsultasTrabajadorController extends ApplicationController
                 ];
             }
         } catch (\Throwable $e) {
-            $response = $this->handleException($e, $request);
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -290,10 +287,10 @@ class ConsultasTrabajadorController extends ApplicationController
                 'title' => 'Consulta No Giro',
             ]);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            $salida = $this->captureException($e, request());
             set_flashdata('error', [
                 'msj' => $salida['msj'],
-                'code' => $salida['code'],
+                'code' => $e->getCode()
             ]);
 
             return redirect()->route('principal/index');
@@ -333,9 +330,7 @@ class ConsultasTrabajadorController extends ApplicationController
                 ];
             }
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
-            $response = $salida;
-            $response['message'] = $salida['msj'];
+            return $this->handleException($e, $request);
         }
 
         return response()->json($response);
@@ -383,11 +378,8 @@ class ConsultasTrabajadorController extends ApplicationController
                 ];
             }
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, $request);
-            $response = $salida;
-            $response['message'] = $salida['msj'];
+            return $this->handleException($e, $request);
         }
-
         return response()->json($response);
     }
 
@@ -417,10 +409,10 @@ class ConsultasTrabajadorController extends ApplicationController
                 'saldo_pendiente' => 0,
             ]);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            $salida = $this->captureException($e, request());
             set_flashdata('error', [
                 'msj' => $salida['msj'],
-                'code' => $salida['code'],
+                'code' => $e->getCode()
             ]);
 
             return redirect()->route('principal/index');
@@ -440,10 +432,10 @@ class ConsultasTrabajadorController extends ApplicationController
                 ],
             ]);
         } catch (\Throwable $e) {
-            $salida = $this->handleException($e, request());
+            $salida = $this->captureException($e, request());
             set_flashdata('error', [
                 'msj' => $salida['msj'],
-                'code' => $salida['code'],
+                'code' => $e->getCode(),
             ]);
 
             return redirect()->route('principal/index');
