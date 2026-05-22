@@ -59,6 +59,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'api.auth' => ApiAuthMiddleware::class,
             'mercurio.auth' => MercurioAuthenticated::class,
             'cajas.auth' => CajasAuthenticated::class,
+            'inertia' => HandleInertiaRequests::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

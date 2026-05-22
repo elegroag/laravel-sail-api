@@ -33,7 +33,7 @@ import UserMenuContent from '@/components/UserMenuContent.vue';
 import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-vue-next';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import { getInitials } from '@/composables/useInitials';
-import type { BreadcrumbItem, NavItem } from '@/types';
+import type { BreadcrumbItem, NavItem, Auth } from '@/types';
 
 type Props = {
     breadcrumbs?: BreadcrumbItem[];
@@ -44,7 +44,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const page = usePage();
-const auth = computed(() => page.props.auth);
+const auth = computed<Auth>(() => page.props.auth as Auth);
 const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
 
 const activeItemStyles =

@@ -1,26 +1,20 @@
 <!DOCTYPE html>
-<html lang="es">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
-        <title inertia>{{ config('app.name', 'Laravel') }}</title>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
-        <link rel="icon" href="/favicon.ico" sizes="any">
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title inertia>{{ config('app.name', 'Laravel') }}</title>
+    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+    @routes
+    @vite(['resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
+    <x-inertia::head>
+        <title>{{ config('app.name', 'Laravel') }}</title>
+    </x-inertia::head>
+</head>
 
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+<body class="font-sans antialiased">
+    <x-inertia::app />
+</body>
 
-        @routes
-        @if(app()->isLocal())
-            @viteReactRefresh
-        @endif
-        @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
-        @inertiaHead
-    </head>
-    <body class="font-sans antialiased">
-        @inertia
-    </body>
 </html>

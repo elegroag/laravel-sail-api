@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { useInitials } from '@/composables/useInitials';
+import { getInitials } from '@/composables/useInitials';
 import type { User } from '@/types';
 
 type Props = {
@@ -11,8 +11,6 @@ type Props = {
 withDefaults(defineProps<Props>(), {
     showEmail: false,
 });
-
-const { getInitials } = useInitials();
 </script>
 
 <template>

@@ -88,7 +88,7 @@ export interface InputFormFieldProps extends BaseFormFieldProps {
     type: 'input';
     inputType?: 'text' | 'email' | 'password' | 'number' | 'date' | 'url';
     value?: string | number;
-    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onChange?: (value: string | number) => void;
     placeholder?: string;
 }
 
@@ -96,14 +96,14 @@ export interface SelectFormFieldProps extends BaseFormFieldProps {
     type: 'select';
     options: DataSourceOption[];
     value?: string | number;
-    onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+    onChange?: (e: Event) => void;
     placeholder?: string;
 }
 
 export interface TextAreaFormFieldProps extends BaseFormFieldProps {
     type: 'textarea';
     value?: string;
-    onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+    onChange?: (e: Event) => void;
     placeholder?: string;
     rows?: number;
     showCounter?: boolean;
@@ -113,7 +113,7 @@ export interface TextAreaFormFieldProps extends BaseFormFieldProps {
 export interface CheckboxFormFieldProps extends BaseFormFieldProps {
     type: 'checkbox';
     checked?: boolean;
-    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onChange?: (value: string | number) => void;
 }
 
 export interface ExtendedFormFieldProps {
@@ -171,7 +171,7 @@ export interface UseComponentFormReturn {
     updateField: (field: keyof ComponentData, value: unknown) => void;
     updateDataSource: (dataSource: DataSourceOption[]) => void;
     resetForm: () => void;
-    handleSubmit: (e: React.FormEvent) => Promise<void>;
+    handleSubmit: (e: Event) => Promise<void>;
     isValid: () => boolean;
     setErrors: (errors: Record<string, string>) => void;
 }
