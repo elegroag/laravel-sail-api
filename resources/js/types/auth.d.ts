@@ -1,12 +1,12 @@
 // Tipos compartidos para el flujo de registro (mantener SOLID y reutilización)
-import type React from 'react';
+import type { Component } from 'vue'
 
 export type UserType = 'empresa' | 'independiente' | 'facultativo' | 'particular' | 'domestico' | 'trabajador' | 'pensionado';
 
 export interface UserTypeOption {
     id: UserType;
     label: string;
-    icon: React.ReactNode;
+    icon: Component;
 }
 
 export interface FormBasic {

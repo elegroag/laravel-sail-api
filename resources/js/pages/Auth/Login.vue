@@ -4,7 +4,6 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import LoadingAnimated from '@/components/loading-animated';
-import AuthBackgroundShapes from '@/components/ui/auth-background-shapes';
 import {
   Dialog,
   DialogContent,

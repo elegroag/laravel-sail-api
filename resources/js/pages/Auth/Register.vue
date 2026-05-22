@@ -4,7 +4,6 @@ import { Link, router } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 import { ChevronLeft } from 'lucide-vue-next'
 import AppLogoIcon from '@/components/AppLogoIcon.vue'
-import AuthBackgroundShapes from '@/components/ui/auth-background-shapes'
 import { useRegisterController } from '@/composables/useRegisterController'
 import { userTypes } from '@/constants/auth'
 
