@@ -2,6 +2,8 @@
 import AppLayout from '@/layouts/AppLayoutTemplate.vue'
 import { Link, router } from '@inertiajs/vue3'
 import { ref } from 'vue'
+import { SelectRadix } from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
 
 type SelectOption = {
     id?: string | number
@@ -65,39 +67,33 @@ const handleSubmit = (e: Event) => {
         <div class="space-y-4">
           <div>
             <label for="menu_item" class="block text-sm font-medium text-gray-700">Item del Menú</label>
-            <select
-              id="menu_item"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white text-gray-600 p-2"
+            <SelectRadix
               v-model="formData.menu_item"
+              :options="menuItemOptions"
+              placeholder="-- Seleccione un item --"
+              class="mt-1 w-full"
               required
-            >
-              <option value="">-- Seleccione un item --</option>
-              <option v-for="option in menuItemOptions" :key="option.value" :value="option.value">{{ option.label }}</option>
-            </select>
+            />
             <p v-if="props.errors.menu_item" class="mt-1 text-xs text-red-600">{{ props.errors.menu_item }}</p>
           </div>
 
           <div>
             <label for="tipfun" class="block text-sm font-medium text-gray-700">Tipo de Funcionario</label>
-            <select
-              id="tipfun"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white text-gray-600 p-2"
+            <SelectRadix
               v-model="formData.tipfun"
+              :options="tipFunOptions"
+              placeholder="-- Seleccione un tipo --"
+              class="mt-1 w-full"
               required
-            >
-              <option value="">-- Seleccione un tipo --</option>
-              <option v-for="option in tipFunOptions" :key="option.value" :value="option.value">{{ option.label }}</option>
-            </select>
+            />
             <p v-if="props.errors.tipfun" class="mt-1 text-xs text-red-600">{{ props.errors.tipfun }}</p>
           </div>
 
           <div>
             <label for="opciones" class="block text-sm font-medium text-gray-700">Opciones Adicionales</label>
-            <input
-              id="opciones"
-              type="text"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-600 p-2"
+            <Input
               v-model="formData.opciones"
+              class="mt-1 w-full"
             />
             <p v-if="props.errors.opciones" class="mt-1 text-xs text-red-600">{{ props.errors.opciones }}</p>
           </div>

@@ -2,6 +2,8 @@
 import AppLayout from '@/layouts/AppLayoutTemplate.vue'
 import { router, usePage } from '@inertiajs/vue3'
 import { ref, onMounted } from 'vue'
+import { Input } from '@/components/ui/input'
+import { SelectRadix } from '@/components/ui/select'
 
 type Props = {
     formulario?: { id: number; name: string; title: string }
@@ -23,6 +25,27 @@ const rows = ref<Array<{ id: number; name: string; title: string }>>(props.formu
 const loadingPicker = ref(false)
 const page = ref(1)
 const pager = ref<{ current_page: number; last_page: number; per_page: number; total: number } | null>(null)
+
+const typeOptions = [
+    { value: 'input', label: 'Input' },
+    { value: 'select', label: 'Select' },
+    { value: 'textarea', label: 'Textarea' },
+    { value: 'checkbox', label: 'Checkbox' },
+    { value: 'radio', label: 'Radio' },
+    { value: 'date', label: 'Date' },
+    { value: 'number', label: 'Number' },
+    { value: 'email', label: 'Email' },
+    { value: 'password', label: 'Password' },
+]
+
+const formTypeOptions = [
+    { value: 'text', label: 'Text' },
+    { value: 'email', label: 'Email' },
+    { value: 'number', label: 'Number' },
+    { value: 'password', label: 'Password' },
+    { value: 'date', label: 'Date' },
+    { value: 'tel', label: 'Telephone' },
+]
 
 onMounted(() => {
     const flash = (pageProps.value as any)?.flash
@@ -100,60 +123,43 @@ const handleCancel = () => {
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label for="name" class="block text-sm font-medium text-gray-700">Nombre *</label>
-              <input type="text" id="name" v-model="formData.name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2" />
+              <Input id="name" v-model="formData.name" class="mt-1 w-full" required />
               <p v-if="errors.name" class="mt-1 text-xs text-red-600">{{ errors.name }}</p>
             </div>
             <div>
               <label for="label" class="block text-sm font-medium text-gray-700">Etiqueta *</label>
-              <input type="text" id="label" v-model="formData.label" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2" />
+              <Input id="label" v-model="formData.label" class="mt-1 w-full" required />
               <p v-if="errors.label" class="mt-1 text-xs text-red-600">{{ errors.label }}</p>
             </div>
             <div>
               <label for="type" class="block text-sm font-medium text-gray-700">Tipo</label>
-              <select id="type" v-model="formData.type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2">
-                <option value="input">Input</option>
-                <option value="select">Select</option>
-                <option value="textarea">Textarea</option>
-                <option value="checkbox">Checkbox</option>
-                <option value="radio">Radio</option>
-                <option value="date">Date</option>
-                <option value="number">Number</option>
-                <option value="email">Email</option>
-                <option value="password">Password</option>
-              </select>
+              <SelectRadix v-model="formData.type" :options="typeOptions" class="mt-1 w-full" />
             </div>
             <div>
               <label for="form_type" class="block text-sm font-medium text-gray-700">Tipo de Formulario</label>
-              <select id="form_type" v-model="formData.form_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2">
-                <option value="text">Text</option>
-                <option value="email">Email</option>
-                <option value="number">Number</option>
-                <option value="password">Password</option>
-                <option value="date">Date</option>
-                <option value="tel">Telephone</option>
-              </select>
+              <SelectRadix v-model="formData.form_type" :options="formTypeOptions" class="mt-1 w-full" />
             </div>
             <div>
               <label for="placeholder" class="block text-sm font-medium text-gray-700">Placeholder</label>
-              <input type="text" id="placeholder" v-model="formData.placeholder" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2" />
+              <Input id="placeholder" v-model="formData.placeholder" class="mt-1 w-full" />
             </div>
             <div>
               <label for="default_value" class="block text-sm font-medium text-gray-700">Valor por Defecto</label>
-              <input type="text" id="default_value" v-model="formData.default_value" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2" />
+              <Input id="default_value" v-model="formData.default_value" class="mt-1 w-full" />
             </div>
             <div>
               <label for="group_id" class="block text-sm font-medium text-gray-700">Grupo</label>
-              <input type="number" id="group_id" v-model="formData.group_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2" />
+              <Input id="group_id" v-model="formData.group_id" type="number" class="mt-1 w-full" />
             </div>
             <div>
               <label for="order" class="block text-sm font-medium text-gray-700">Orden</label>
-              <input type="number" id="order" v-model="formData.order" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2" />
+              <Input id="order" v-model="formData.order" type="number" class="mt-1 w-full" />
             </div>
           </div>
 
           <div>
             <label for="help_text" class="block text-sm font-medium text-gray-700">Texto de Ayuda</label>
-            <input type="text" id="help_text" v-model="formData.help_text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2" />
+            <Input id="help_text" v-model="formData.help_text" class="mt-1 w-full" />
           </div>
 
           <div class="flex items-center gap-6">

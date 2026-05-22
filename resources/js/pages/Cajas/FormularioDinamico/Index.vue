@@ -3,6 +3,8 @@ import AppLayout from '@/layouts/AppLayoutTemplate.vue'
 import { Link, router } from '@inertiajs/vue3'
 import { ref, computed, onMounted } from 'vue'
 import { X } from 'lucide-vue-next'
+import { Input } from '@/components/ui/input'
+import { SelectRadix } from '@/components/ui/select'
 
 type Props = {
     formularios_dinamicos: {
@@ -38,6 +40,10 @@ const selectedChildId = ref('')
 const searchOption = ref('')
 const attaching = ref(false)
 const toast = ref<{ type: 'success' | 'error'; message: string } | null>(null)
+
+const childOptions = computed(() =>
+  options.value.map(opt => ({ value: String(opt.id), label: `${opt.title} (${opt.module})` }))
+)
 
 const searchParams = new URLSearchParams(window.location.search)
 const q = ref(searchParams.get('q') || '')
@@ -223,23 +229,21 @@ const changePage = (page: number) => {
         <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
           <div class="sm:col-span-2">
             <label for="q" class="block text-sm font-medium text-gray-700">Buscar</label>
-            <input
+            <Input
               id="q"
-              type="text"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-600 p-2"
-              placeholder="Nombre, título, descripción..."
               v-model="q"
+              class="mt-1 w-full"
+              placeholder="Nombre, título, descripción..."
               @keydown.enter="applyFilters"
             />
           </div>
           <div>
             <label for="module" class="block text-sm font-medium text-gray-700">Módulo</label>
-            <input
+            <Input
               id="module"
-              type="text"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-600 p-2"
-              placeholder="Ej: auth, creditos"
               v-model="module"
+              class="mt-1 w-full"
+              placeholder="Ej: auth, creditos"
             />
           </div>
           <div class="flex items-end gap-2">
@@ -379,16 +383,23 @@ const changePage = (page: number) => {
             <div>
               <label class="block text-sm font-medium text-gray-700">Buscar componentes</label>
               <div class="mt-1 flex gap-2">
-                <input type="text" class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-600" placeholder="Nombre, etiqueta, tipo..." v-model="searchOption" @keydown.enter="loadOptions(searchOption)" />
+                <Input
+                  v-model="searchOption"
+                  class="flex-1"
+                  placeholder="Nombre, etiqueta, tipo..."
+                  @keydown.enter="loadOptions(searchOption)"
+                />
                 <button @click="loadOptions(searchOption)" class="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:border-indigo-300">Buscar</button>
               </div>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700">Seleccionar componente</label>
-              <select class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-600 p-2" v-model="selectedChildId">
-                <option value="">— Selecciona —</option>
-                <option v-for="opt in options" :key="opt.id" :value="opt.id">{{ opt.title }} ({{ opt.module }})</option>
-              </select>
+              <SelectRadix
+                v-model="selectedChildId"
+                :options="childOptions"
+                placeholder="— Selecciona —"
+                class="mt-1 w-full"
+              />
               <p v-if="optionsLoading" class="mt-1 text-xs text-gray-500">Cargando componentes…</p>
               <p v-if="optionsError" class="mt-1 text-xs text-red-600">{{ optionsError }}</p>
             </div>

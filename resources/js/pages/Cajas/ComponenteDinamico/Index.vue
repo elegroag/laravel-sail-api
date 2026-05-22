@@ -2,6 +2,8 @@
 import AppLayout from '@/layouts/AppLayoutTemplate.vue'
 import { router, Link } from '@inertiajs/vue3'
 import { ref, computed, onMounted } from 'vue'
+import { Input } from '@/components/ui/input'
+import { SelectRadix } from '@/components/ui/select'
 
 type Componente = {
   id: number
@@ -55,6 +57,24 @@ const from = computed(() => props.componentes_dinamicos.meta.pagination.from)
 const to = computed(() => props.componentes_dinamicos.meta.pagination.to)
 
 const list = ref(props.componentes_dinamicos)
+
+const typeFilterOptions = [
+  { value: '', label: 'Todos los tipos' },
+  { value: 'input', label: 'Campo de Texto' },
+  { value: 'select', label: 'Lista Desplegable' },
+  { value: 'textarea', label: 'Área de Texto' },
+  { value: 'date', label: 'Campo de Fecha' },
+  { value: 'number', label: 'Campo Numérico' },
+  { value: 'dialog', label: 'Diálogo' },
+]
+
+const perPageOptions = [
+  { value: '10', label: '10' },
+  { value: '15', label: '15' },
+  { value: '25', label: '25' },
+  { value: '50', label: '50' },
+  { value: '100', label: '100' },
+]
 
 const filterOptions = [
   {
@@ -261,16 +281,10 @@ onMounted(() => {
           <div class="p-4">
             <div class="flex items-center space-x-4">
               <div class="flex-1 relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                <input
-                  type="text"
-                  class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder="Buscar..."
+                <Input
                   v-model="searchValue"
+                  class="pl-10 pr-3 py-2"
+                  placeholder="Buscar..."
                   @keydown.enter="performSearch"
                 />
               </div>
@@ -280,19 +294,12 @@ onMounted(() => {
               >
                 Buscar
               </button>
-              <select
+              <SelectRadix
                 v-model="filters.type"
-                @change="handleFilterChange('type', filters.type)"
-                class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-              >
-                <option value="">Todos los tipos</option>
-                <option value="input">Campo de Texto</option>
-                <option value="select">Lista Desplegable</option>
-                <option value="textarea">Área de Texto</option>
-                <option value="date">Campo de Fecha</option>
-                <option value="number">Campo Numérico</option>
-                <option value="dialog">Diálogo</option>
-              </select>
+                :options="typeFilterOptions"
+                placeholder="Todos los tipos"
+                class="w-40"
+              />
               <button
                 v-if="hasActiveFilters"
                 @click="clearFilters"
@@ -384,14 +391,12 @@ onMounted(() => {
             </div>
             <div class="flex items-center gap-2">
               <label for="per_page" class="text-sm text-gray-600">Por página</label>
-              <select
-                id="per_page"
-                class="rounded-md border border-gray-300 px-2 py-1 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                :value="perPage"
-                @change="handlePerPageChange(Number(($event.target as HTMLSelectElement).value))"
-              >
-                <option v-for="n in [10, 15, 25, 50, 100]" :key="n" :value="n">{{ n }}</option>
-              </select>
+              <SelectRadix
+                :modelValue="String(perPage)"
+                @update:modelValue="handlePerPageChange(Number($event))"
+                :options="perPageOptions"
+                class="w-20"
+              />
             </div>
           </div>
           <div class="inline-flex items-center gap-2">

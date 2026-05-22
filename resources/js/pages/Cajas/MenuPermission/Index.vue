@@ -2,6 +2,8 @@
 import AppLayout from '@/layouts/AppLayoutTemplate.vue'
 import { Link, router } from '@inertiajs/vue3'
 import { ref, computed, onMounted } from 'vue'
+import { SelectRadix } from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
 
 type MenuItem = {
     id: number
@@ -87,6 +89,19 @@ const clearFilters = () => {
     codapl.value = ''
     router.get('/cajas/menu-permission', { per_page: perPage.value, page: 1 }, { preserveState: true, preserveScroll: true })
 }
+
+const tipoOptions = [
+    { value: 'A', label: 'Administrador' },
+    { value: 'E', label: 'Empresa' },
+    { value: 'P', label: 'Particular' },
+    { value: 'T', label: 'Trabajador' },
+    { value: 'F', label: 'Foniñez' },
+]
+
+const codaplOptions = [
+    { value: 'CA', label: 'CA' },
+    { value: 'ME', label: 'ME' },
+]
 
 const handleSelectItem = async (item: MenuItem) => {
     selectedItem.value = item
@@ -181,41 +196,31 @@ const savePermissions = async () => {
         <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
           <div class="sm:col-span-2">
             <label for="q" class="block text-sm font-medium text-gray-700">Buscar Item</label>
-            <input
+            <Input
               id="q"
-              type="text"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-600 p-2"
-              placeholder="Título, controller, action..."
               v-model="q"
+              class="mt-1 w-full"
+              placeholder="Título, controller, action..."
               @keydown.enter="applyFilters"
             />
           </div>
           <div>
             <label for="tipo" class="block text-sm font-medium text-gray-700">Tipo Menú</label>
-            <select
-              id="tipo"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white text-gray-600 p-2"
+            <SelectRadix
               v-model="tipo"
-            >
-              <option value="">Todos</option>
-              <option value="A">Administrador</option>
-              <option value="E">Empresa</option>
-              <option value="P">Particular</option>
-              <option value="T">Trabajador</option>
-              <option value="F">Foniñez</option>
-            </select>
+              :options="tipoOptions"
+              placeholder="Todos"
+              class="mt-1 w-full"
+            />
           </div>
           <div>
             <label for="codapl" class="block text-sm font-medium text-gray-700">Aplicación</label>
-            <select
-              id="codapl"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white text-gray-600 p-2"
+            <SelectRadix
               v-model="codapl"
-            >
-              <option value="">Todas</option>
-              <option value="CA">CA</option>
-              <option value="ME">ME</option>
-            </select>
+              :options="codaplOptions"
+              placeholder="Todas"
+              class="mt-1 w-full"
+            />
           </div>
           <div class="flex items-end gap-2">
             <button @click="applyFilters" class="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">Filtrar</button>

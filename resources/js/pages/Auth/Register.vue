@@ -4,6 +4,8 @@ import { Link, router } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 import { ChevronLeft } from 'lucide-vue-next'
 import AppLogoIcon from '@/components/AppLogoIcon.vue'
+import { Input } from '@/components/ui/input'
+import { SelectRadix } from '@/components/ui/select'
 import { useRegisterController } from '@/composables/useRegisterController'
 import { userTypes } from '@/constants/auth'
 
@@ -67,9 +69,9 @@ function handleFieldChange(field: string, value: any) {
         <div class="absolute top-1/2 left-0 w-20 h-20 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-full opacity-30 -translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
         <!-- Content layer -->
-        <div class="relative z-10 flex flex-col justify-center h-full p-10 text-white">
-          <Link :href="route('login')" class="flex items-center text-lg font-medium mb-8">
-            <AppLogoIcon class="mr-2 size-50 fill-current text-white" />
+        <div class="relative z-10 flex flex-col justify-center h-full p-5 text-white max-w-md mx-auto items-center">
+          <Link :href="route('login')" class="flex items-center justify-center text-lg font-medium mb-2">
+            <AppLogoIcon class="size-100 fill-current text-white" />
           </Link>
 
           <h1 class="text-4xl font-bold mb-2">REGISTRO</h1>
@@ -137,92 +139,73 @@ function handleFieldChange(field: string, value: any) {
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">Nombre de la empresa *</label>
-                <input
-                  type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.companyName"
-                  @input="handleFieldChange('companyName', ($event.target as HTMLInputElement).value)"
+                <Input
+                  :modelValue="state.companyName"
+                  @update:modelValue="(v) => handleFieldChange('companyName', String(v))"
+                  class="mt-1 w-full"
                 />
                 <p v-if="state.errors.companyName" class="mt-1 text-sm text-red-600">{{ state.errors.companyName }}</p>
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">NIT *</label>
-                <input
-                  type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.companyNit"
-                  @input="handleFieldChange('companyNit', ($event.target as HTMLInputElement).value)"
+                <Input
+                  :modelValue="state.companyNit"
+                  @update:modelValue="(v) => handleFieldChange('companyNit', String(v))"
+                  class="mt-1 w-full"
                 />
                 <p v-if="state.errors.companyNit" class="mt-1 text-sm text-red-600">{{ state.errors.companyNit }}</p>
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">Tipo de documento</label>
-                <select
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.companyDocumentType"
-                  @change="handleFieldChange('companyDocumentType', ($event.target as HTMLSelectElement).value)"
-                >
-                  <option value="">Seleccione...</option>
-                  <option
-                    v-for="(label, value) in documentTypeOptions"
-                    :key="value"
-                    :value="value"
-                  >
-                    {{ label }}
-                  </option>
-                </select>
+                <SelectRadix
+                  :modelValue="state.companyDocumentType"
+                  @update:modelValue="(v) => handleFieldChange('companyDocumentType', String(v))"
+                  :options="documentTypeOptions"
+                  placeholder="Seleccione..."
+                  class="mt-1 w-full"
+                />
                 <p v-if="state.errors.companyDocumentType" class="mt-1 text-sm text-red-600">{{ state.errors.companyDocumentType }}</p>
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">No. Documento *</label>
-                <input
-                  type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.companyDocument"
-                  @input="handleFieldChange('companyDocument', ($event.target as HTMLInputElement).value)"
+                <Input
+                  :modelValue="state.companyDocument"
+                  @update:modelValue="(v) => handleFieldChange('companyDocument', String(v))"
+                  class="mt-1 w-full"
                 />
                 <p v-if="state.errors.companyDocument" class="mt-1 text-sm text-red-600">{{ state.errors.companyDocument }}</p>
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">Ciudad</label>
-                <select
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.companyCity"
-                  @change="handleFieldChange('companyCity', ($event.target as HTMLSelectElement).value)"
-                >
-                  <option value="">Seleccione...</option>
-                  <option
-                    v-for="(label, value) in cityOptions"
-                    :key="value"
-                    :value="value"
-                  >
-                    {{ label }}
-                  </option>
-                </select>
+                <SelectRadix
+                  :modelValue="state.companyCity"
+                  @update:modelValue="(v) => handleFieldChange('companyCity', String(v))"
+                  :options="cityOptions"
+                  placeholder="Seleccione..."
+                  class="mt-1 w-full"
+                />
                 <p v-if="state.errors.companyCity" class="mt-1 text-sm text-red-600">{{ state.errors.companyCity }}</p>
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">Dirección</label>
-                <input
-                  type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.companyAddress"
-                  @input="handleFieldChange('companyAddress', ($event.target as HTMLInputElement).value)"
+                <Input
+                  :modelValue="state.companyAddress"
+                  @update:modelValue="(v) => handleFieldChange('companyAddress', String(v))"
+                  class="mt-1 w-full"
                 />
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">Teléfono</label>
-                <input
-                  type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.companyPhone"
-                  @input="handleFieldChange('companyPhone', ($event.target as HTMLInputElement).value)"
+                <Input
+                  :modelValue="state.companyPhone"
+                  @update:modelValue="(v) => handleFieldChange('companyPhone', String(v))"
+                  class="mt-1 w-full"
                 />
               </div>
             </div>
@@ -232,52 +215,42 @@ function handleFieldChange(field: string, value: any) {
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">Tipo de documento *</label>
-                <select
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.documentType"
-                  @change="handleFieldChange('documentType', ($event.target as HTMLSelectElement).value)"
-                >
-                  <option value="">Seleccione...</option>
-                  <option
-                    v-for="(label, value) in documentTypeOptions"
-                    :key="value"
-                    :value="value"
-                  >
-                    {{ label }}
-                  </option>
-                </select>
+                <SelectRadix
+                  :modelValue="state.documentType"
+                  @update:modelValue="(v) => handleFieldChange('documentType', String(v))"
+                  :options="documentTypeOptions"
+                  placeholder="Seleccione..."
+                  class="mt-1 w-full"
+                />
                 <p v-if="state.errors.documentType" class="mt-1 text-sm text-red-600">{{ state.errors.documentType }}</p>
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">No. Documento *</label>
-                <input
-                  type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.documentNumber"
-                  @input="handleFieldChange('documentNumber', ($event.target as HTMLInputElement).value)"
+                <Input
+                  :modelValue="state.documentNumber"
+                  @update:modelValue="(v) => handleFieldChange('documentNumber', String(v))"
+                  class="mt-1 w-full"
                 />
                 <p v-if="state.errors.documentNumber" class="mt-1 text-sm text-red-600">{{ state.errors.documentNumber }}</p>
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">Primer nombre *</label>
-                <input
-                  type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.firstName"
-                  @input="handleFieldChange('firstName', ($event.target as HTMLInputElement).value)"
+                <Input
+                  :modelValue="state.firstName"
+                  @update:modelValue="(v) => handleFieldChange('firstName', String(v))"
+                  class="mt-1 w-full"
                 />
                 <p v-if="state.errors.firstName" class="mt-1 text-sm text-red-600">{{ state.errors.firstName }}</p>
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">Segundo nombre</label>
-                <input
-                  type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.secondName"
-                  @input="handleFieldChange('secondName', ($event.target as HTMLInputElement).value)"
+                <Input
+                  :modelValue="state.secondName"
+                  @update:modelValue="(v) => handleFieldChange('secondName', String(v))"
+                  class="mt-1 w-full"
                 />
               </div>
 
@@ -304,20 +277,13 @@ function handleFieldChange(field: string, value: any) {
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">Ciudad</label>
-                <select
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.city"
-                  @change="handleFieldChange('city', ($event.target as HTMLSelectElement).value)"
-                >
-                  <option value="">Seleccione...</option>
-                  <option
-                    v-for="(label, value) in cityOptions"
-                    :key="value"
-                    :value="value"
-                  >
-                    {{ label }}
-                  </option>
-                </select>
+                <SelectRadix
+                  :modelValue="state.city"
+                  @update:modelValue="(v) => handleFieldChange('city', String(v))"
+                  :options="cityOptions"
+                  placeholder="Seleccione..."
+                  class="mt-1 w-full"
+                />
                 <p v-if="state.errors.city" class="mt-1 text-sm text-red-600">{{ state.errors.city }}</p>
               </div>
             </div>
@@ -327,73 +293,61 @@ function handleFieldChange(field: string, value: any) {
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">Tipo de documento *</label>
-                <select
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.documentType"
-                  @change="handleFieldChange('documentType', ($event.target as HTMLSelectElement).value)"
-                >
-                  <option value="">Seleccione...</option>
-                  <option
-                    v-for="(label, value) in documentTypeOptions"
-                    :key="value"
-                    :value="value"
-                  >
-                    {{ label }}
-                  </option>
-                </select>
+                <SelectRadix
+                  :modelValue="state.documentType"
+                  @update:modelValue="(v) => handleFieldChange('documentType', String(v))"
+                  :options="documentTypeOptions"
+                  placeholder="Seleccione..."
+                  class="mt-1 w-full"
+                />
                 <p v-if="state.errors.documentType" class="mt-1 text-sm text-red-600">{{ state.errors.documentType }}</p>
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">No. Documento *</label>
-                <input
-                  type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.documentNumber"
-                  @input="handleFieldChange('documentNumber', ($event.target as HTMLInputElement).value)"
+                <Input
+                  :modelValue="state.documentNumber"
+                  @update:modelValue="(v) => handleFieldChange('documentNumber', String(v))"
+                  class="mt-1 w-full"
                 />
                 <p v-if="state.errors.documentNumber" class="mt-1 text-sm text-red-600">{{ state.errors.documentNumber }}</p>
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">Primer nombre *</label>
-                <input
-                  type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.firstName"
-                  @input="handleFieldChange('firstName', ($event.target as HTMLInputElement).value)"
+                <Input
+                  :modelValue="state.firstName"
+                  @update:modelValue="(v) => handleFieldChange('firstName', String(v))"
+                  class="mt-1 w-full"
                 />
                 <p v-if="state.errors.firstName" class="mt-1 text-sm text-red-600">{{ state.errors.firstName }}</p>
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">Segundo nombre</label>
-                <input
-                  type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.secondName"
-                  @input="handleFieldChange('secondName', ($event.target as HTMLInputElement).value)"
+                <Input
+                  :modelValue="state.secondName"
+                  @update:modelValue="(v) => handleFieldChange('secondName', String(v))"
+                  class="mt-1 w-full"
                 />
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">Primer apellido *</label>
-                <input
-                  type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.lastName"
-                  @input="handleFieldChange('lastName', ($event.target as HTMLInputElement).value)"
+                <Input
+                  :modelValue="state.lastName"
+                  @update:modelValue="(v) => handleFieldChange('lastName', String(v))"
+                  class="mt-1 w-full"
                 />
                 <p v-if="state.errors.lastName" class="mt-1 text-sm text-red-600">{{ state.errors.lastName }}</p>
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">Segundo apellido</label>
-                <input
-                  type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.secondLastName"
-                  @input="handleFieldChange('secondLastName', ($event.target as HTMLInputElement).value)"
+                <Input
+                  :modelValue="state.secondLastName"
+                  @update:modelValue="(v) => handleFieldChange('secondLastName', String(v))"
+                  class="mt-1 w-full"
                 />
               </div>
             </div>
@@ -403,48 +357,33 @@ function handleFieldChange(field: string, value: any) {
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">Categoría</label>
-                <select
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.companyCategory"
-                  @change="handleFieldChange('companyCategory', ($event.target as HTMLSelectElement).value)"
-                >
-                  <option value="">Seleccione...</option>
-                  <option
-                    v-for="(label, value) in companyCategoryOptions"
-                    :key="value"
-                    :value="value"
-                  >
-                    {{ label }}
-                  </option>
-                </select>
+                <SelectRadix
+                  :modelValue="state.companyCategory"
+                  @update:modelValue="(v) => handleFieldChange('companyCategory', String(v))"
+                  :options="companyCategoryOptions"
+                  placeholder="Seleccione..."
+                  class="mt-1 w-full"
+                />
                 <p v-if="state.errors.companyCategory" class="mt-1 text-sm text-red-600">{{ state.errors.companyCategory }}</p>
               </div>
 
               <div v-if="!isNatural">
                 <label class="block text-sm font-medium text-gray-700">Tipo de empresa</label>
-                <select
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.companyType"
-                  @change="handleFieldChange('companyType', ($event.target as HTMLSelectElement).value)"
-                >
-                  <option value="">Seleccione...</option>
-                  <option
-                    v-for="(label, value) in societyOptions"
-                    :key="value"
-                    :value="value"
-                  >
-                    {{ label }}
-                  </option>
-                </select>
+                <SelectRadix
+                  :modelValue="state.companyType"
+                  @update:modelValue="(v) => handleFieldChange('companyType', String(v))"
+                  :options="societyOptions"
+                  placeholder="Seleccione..."
+                  class="mt-1 w-full"
+                />
               </div>
 
               <div v-if="!isNatural">
                 <label class="block text-sm font-medium text-gray-700">NIT de la empresa principal (si aplica)</label>
-                <input
-                  type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.mainCompanyNit"
-                  @input="handleFieldChange('mainCompanyNit', ($event.target as HTMLInputElement).value)"
+                <Input
+                  :modelValue="state.mainCompanyNit"
+                  @update:modelValue="(v) => handleFieldChange('mainCompanyNit', String(v))"
+                  class="mt-1 w-full"
                 />
               </div>
             </div>
@@ -454,42 +393,33 @@ function handleFieldChange(field: string, value: any) {
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">Empresa donde labora *</label>
-                <input
-                  type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.companyName"
-                  @input="handleFieldChange('companyName', ($event.target as HTMLInputElement).value)"
+                <Input
+                  :modelValue="state.companyName"
+                  @update:modelValue="(v) => handleFieldChange('companyName', String(v))"
+                  class="mt-1 w-full"
                 />
                 <p v-if="state.errors.companyName" class="mt-1 text-sm text-red-600">{{ state.errors.companyName }}</p>
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">NIT de la empresa *</label>
-                <input
-                  type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.companyNit"
-                  @input="handleFieldChange('companyNit', ($event.target as HTMLInputElement).value)"
+                <Input
+                  :modelValue="state.companyNit"
+                  @update:modelValue="(v) => handleFieldChange('companyNit', String(v))"
+                  class="mt-1 w-full"
                 />
                 <p v-if="state.errors.companyNit" class="mt-1 text-sm text-red-600">{{ state.errors.companyNit }}</p>
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">Ciudad</label>
-                <select
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.city"
-                  @change="handleFieldChange('city', ($event.target as HTMLSelectElement).value)"
-                >
-                  <option value="">Seleccione...</option>
-                  <option
-                    v-for="(label, value) in cityOptions"
-                    :key="value"
-                    :value="value"
-                  >
-                    {{ label }}
-                  </option>
-                </select>
+                <SelectRadix
+                  :modelValue="state.city"
+                  @update:modelValue="(v) => handleFieldChange('city', String(v))"
+                  :options="cityOptions"
+                  placeholder="Seleccione..."
+                  class="mt-1 w-full"
+                />
                 <p v-if="state.errors.city" class="mt-1 text-sm text-red-600">{{ state.errors.city }}</p>
               </div>
             </div>
@@ -499,20 +429,13 @@ function handleFieldChange(field: string, value: any) {
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">Ciudad</label>
-                <select
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.city"
-                  @change="handleFieldChange('city', ($event.target as HTMLSelectElement).value)"
-                >
-                  <option value="">Seleccione...</option>
-                  <option
-                    v-for="(label, value) in cityOptions"
-                    :key="value"
-                    :value="value"
-                  >
-                    {{ label }}
-                  </option>
-                </select>
+                <SelectRadix
+                  :modelValue="state.city"
+                  @update:modelValue="(v) => handleFieldChange('city', String(v))"
+                  :options="cityOptions"
+                  placeholder="Seleccione..."
+                  class="mt-1 w-full"
+                />
                 <p v-if="state.errors.city" class="mt-1 text-sm text-red-600">{{ state.errors.city }}</p>
               </div>
             </div>
@@ -522,14 +445,13 @@ function handleFieldChange(field: string, value: any) {
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">¿Es usted mismo el beneficiario? *</label>
-                <select
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.isSelfBeneficiary"
-                  @change="handleFieldChange('isSelfBeneficiary', ($event.target as HTMLSelectElement).value)"
-                >
-                  <option value="si">Sí</option>
-                  <option value="no">No</option>
-                </select>
+                <SelectRadix
+                  :modelValue="state.isSelfBeneficiary"
+                  @update:modelValue="(v) => handleFieldChange('isSelfBeneficiary', String(v))"
+                  :options="[{ value: 'si', label: 'Sí' }, { value: 'no', label: 'No' }]"
+                  placeholder="Seleccione..."
+                  class="mt-1 w-full"
+                />
               </div>
             </div>
 
@@ -560,11 +482,10 @@ function handleFieldChange(field: string, value: any) {
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">Celular</label>
-                <input
-                  type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.cellphone"
-                  @input="handleFieldChange('cellphone', ($event.target as HTMLInputElement).value)"
+                <Input
+                  :modelValue="state.cellphone"
+                  @update:modelValue="(v) => handleFieldChange('cellphone', String(v))"
+                  class="mt-1 w-full"
                 />
                 <p v-if="state.errors.cellphone" class="mt-1 text-sm text-red-600">{{ state.errors.cellphone }}</p>
               </div>
@@ -575,52 +496,42 @@ function handleFieldChange(field: string, value: any) {
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">Nombres completos *</label>
-                <input
-                  type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.firstName"
-                  @input="handleFieldChange('firstName', ($event.target as HTMLInputElement).value)"
+                <Input
+                  :modelValue="state.firstName"
+                  @update:modelValue="(v) => handleFieldChange('firstName', String(v))"
+                  class="mt-1 w-full"
                 />
                 <p v-if="state.errors.firstName" class="mt-1 text-sm text-red-600">{{ state.errors.firstName }}</p>
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">Apellidos completos *</label>
-                <input
-                  type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.lastName"
-                  @input="handleFieldChange('lastName', ($event.target as HTMLInputElement).value)"
+                <Input
+                  :modelValue="state.lastName"
+                  @update:modelValue="(v) => handleFieldChange('lastName', String(v))"
+                  class="mt-1 w-full"
                 />
                 <p v-if="state.errors.lastName" class="mt-1 text-sm text-red-600">{{ state.errors.lastName }}</p>
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">Tipo de documento *</label>
-                <select
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.documentType"
-                  @change="handleFieldChange('documentType', ($event.target as HTMLSelectElement).value)"
-                >
-                  <option value="">Seleccione...</option>
-                  <option
-                    v-for="(label, value) in documentTypeOptions"
-                    :key="value"
-                    :value="value"
-                  >
-                    {{ label }}
-                  </option>
-                </select>
+                <SelectRadix
+                  :modelValue="state.documentType"
+                  @update:modelValue="(v) => handleFieldChange('documentType', String(v))"
+                  :options="documentTypeOptions"
+                  placeholder="Seleccione..."
+                  class="mt-1 w-full"
+                />
                 <p v-if="state.errors.documentType" class="mt-1 text-sm text-red-600">{{ state.errors.documentType }}</p>
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">No. Documento *</label>
-                <input
-                  type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2"
-                  :value="state.documentNumber"
-                  @input="handleFieldChange('documentNumber', ($event.target as HTMLInputElement).value)"
+                <Input
+                  :modelValue="state.documentNumber"
+                  @update:modelValue="(v) => handleFieldChange('documentNumber', String(v))"
+                  class="mt-1 w-full"
                 />
                 <p v-if="state.errors.documentNumber" class="mt-1 text-sm text-red-600">{{ state.errors.documentNumber }}</p>
               </div>

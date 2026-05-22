@@ -153,12 +153,12 @@ onMounted(() => {
         <div class="absolute top-1/2 left-0 w-20 h-20 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-full opacity-30 -translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
         <!-- Content layer -->
-        <div class="relative z-10 flex flex-col justify-center h-full p-10 text-white">
-          <Link :href="route('login')" class="flex items-center text-lg font-medium mb-8">
-            <AppLogoIcon class="mr-2 size-50 fill-current text-white" />
+        <div class="relative z-10 flex flex-col justify-center h-full p-5 text-white max-w-md mx-auto items-center">
+          <Link :href="route('login')" class="flex items-center justify-center text-lg font-medium mb-8">
+            <AppLogoIcon class="fill-current text-white" />
           </Link>
 
-          <h1 class="text-4xl font-bold mb-2">BIENVENIDO</h1>
+          <h1 class="text-4xl font-bold mb-4">BIENVENIDO</h1>
           <div class="w-16 h-0.5 bg-white mb-6" />
           <p class="text-emerald-100 text-lg mb-6">Comfaca En Línea</p>
 

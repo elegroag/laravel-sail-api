@@ -3,6 +3,8 @@ import AppLayout from '@/layouts/AppLayoutTemplate.vue'
 import { Link, router, usePage } from '@inertiajs/vue3'
 import { ref, onMounted, computed } from 'vue'
 import { X } from 'lucide-vue-next'
+import { Input } from '@/components/ui/input'
+import { SelectRadix } from '@/components/ui/select'
 
 type DataSourceItem = { value: string; label: string }
 
@@ -69,6 +71,34 @@ const processing = ref(false)
 const errors = ref<Record<string, string>>({})
 const successOpen = ref(false)
 const successMsg = ref('')
+
+const typeOptions = [
+    { value: 'text', label: 'Texto' },
+    { value: 'number', label: 'Número' },
+    { value: 'date', label: 'Fecha' },
+    { value: 'hidden', label: 'Oculto' },
+    { value: 'phone', label: 'Teléfono' },
+    { value: 'email', label: 'Email' },
+]
+
+const formTypeOptions = [
+    { value: 'input', label: 'Input' },
+    { value: 'select', label: 'Select' },
+    { value: 'textarea', label: 'Textarea' },
+    { value: 'date', label: 'Date' },
+    { value: 'dialog', label: 'Dialog' },
+    { value: 'radio', label: 'Radio' },
+    { value: 'checkbox', label: 'Checkbox' },
+    { value: 'address', label: 'Dirección' },
+]
+
+const searchTypeOptions = [
+    { value: '', label: 'Seleccione' },
+    { value: 'ninguno', label: 'Ninguno' },
+    { value: 'local', label: 'Local' },
+    { value: 'ajax', label: 'Ajax' },
+    { value: 'collection', label: 'Collection' },
+]
 
 const showSearchType = computed(() =>
   formData.value.form_type === 'select' || formData.value.form_type === 'dialog'
@@ -284,14 +314,12 @@ const handleSubmit = async () => {
               <label for="name" class="text-sm font-medium text-gray-700 block">
                 Nombre único *
               </label>
-              <input
-                type="text"
+              <Input
                 name="name"
                 id="name"
-                required
-                :class="['mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white text-gray-900 p-2 block w-full', errors.name ? 'border-red-300' : '']"
                 v-model="formData.name"
-                @input="handleChange"
+                :class="['mt-1 w-full', errors.name ? 'border-red-300' : '']"
+                required
               />
               <p v-if="errors.name" class="mt-1 text-sm text-red-600">{{ errors.name }}</p>
               <p class="mt-1 text-xs text-gray-500">Identificador único para el componente</p>
@@ -301,63 +329,33 @@ const handleSubmit = async () => {
               <label for="type" class="text-sm font-medium text-gray-700 block">
                 Tipo *
               </label>
-              <select
-                name="type"
-                id="type"
-                required
-                class="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white text-gray-900 p-2 block w-full"
+              <SelectRadix
                 v-model="formData.type"
-                @change="handleChange"
-              >
-                <option value="text">Texto</option>
-                <option value="number">Número</option>
-                <option value="date">Fecha</option>
-                <option value="hidden">Oculto</option>
-                <option value="phone">Teléfono</option>
-                <option value="email">Email</option>
-              </select>
+                :options="typeOptions"
+                class="mt-1 w-full"
+              />
             </div>
 
             <div class="sm:col-span-3 col-span-6">
               <label for="form_type" class="text-sm font-medium text-gray-700 block">
                 Tipo de formulario *
               </label>
-              <select
-                name="form_type"
-                id="form_type"
-                required
-                class="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white text-gray-900 p-2 block w-full"
+              <SelectRadix
                 v-model="formData.form_type"
-                @change="handleChange"
-              >
-                <option value="input">Input</option>
-                <option value="select">Select</option>
-                <option value="textarea">Textarea</option>
-                <option value="date">Date</option>
-                <option value="dialog">Dialog</option>
-                <option value="radio">Radio</option>
-                <option value="checkbox">Checkbox</option>
-                <option value="address">Dirección</option>
-              </select>
+                :options="formTypeOptions"
+                class="mt-1 w-full"
+              />
             </div>
 
             <div v-if="showSearchType" class="sm:col-span-3 col-span-6">
               <label for="search_type" class="text-sm font-medium text-gray-700 block">
                 Tipo de búsqueda
               </label>
-              <select
-                name="search_type"
-                id="search_type"
-                class="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white text-gray-900 p-2 block w-full"
+              <SelectRadix
                 v-model="formData.search_type"
-                @change="handleChange"
-              >
-                <option value="">Seleccione</option>
-                <option value="ninguno">Ninguno</option>
-                <option value="local">Local</option>
-                <option value="ajax">Ajax</option>
-                <option value="collection">Collection</option>
-              </select>
+                :options="searchTypeOptions"
+                class="mt-1 w-full"
+              />
               <p v-if="errors.search_type" class="mt-1 text-sm text-red-600">{{ errors.search_type }}</p>
             </div>
 
@@ -365,15 +363,13 @@ const handleSubmit = async () => {
               <label for="search_endpoint" class="text-sm font-medium text-gray-700 block">
                 Endpoint de búsqueda (AJAX)
               </label>
-              <input
-                type="text"
+              <Input
                 name="search_endpoint"
                 id="search_endpoint"
-                minLength="160"
-                :class="['mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white text-gray-900 p-2 block w-full', errors.search_endpoint ? 'border-red-300' : '']"
                 v-model="formData.search_endpoint"
-                @input="handleChange"
+                :class="['mt-1 w-full', errors.search_endpoint ? 'border-red-300' : '']"
                 placeholder="https://api.midominio.com/recurso?param1=... (mínimo 160 caracteres)"
+                minLength="160"
               />
               <p v-if="errors.search_endpoint" class="mt-1 text-sm text-red-600">{{ errors.search_endpoint }}</p>
             </div>
@@ -382,14 +378,12 @@ const handleSubmit = async () => {
               <label for="label" class="text-sm font-medium text-gray-700 block">
                 Etiqueta *
               </label>
-              <input
-                type="text"
+              <Input
                 name="label"
                 id="label"
-                required
-                :class="['mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white text-gray-900 p-2 block w-full', errors.label ? 'border-red-300' : '']"
                 v-model="formData.label"
-                @input="handleChange"
+                :class="['mt-1 w-full', errors.label ? 'border-red-300' : '']"
+                required
               />
               <p v-if="errors.label" class="mt-1 text-sm text-red-600">{{ errors.label }}</p>
             </div>
@@ -398,13 +392,11 @@ const handleSubmit = async () => {
               <label for="placeholder" class="text-sm font-medium text-gray-700 block">
                 Placeholder
               </label>
-              <input
-                type="text"
+              <Input
                 name="placeholder"
                 id="placeholder"
-                class="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white text-gray-900 p-2 block w-full"
                 v-model="formData.placeholder"
-                @input="handleChange"
+                class="mt-1 w-full"
               />
             </div>
 
@@ -412,15 +404,14 @@ const handleSubmit = async () => {
               <label for="group_id" class="text-sm font-medium text-gray-700 block">
                 Grupo *
               </label>
-              <input
+              <Input
                 type="number"
                 name="group_id"
                 id="group_id"
-                required
-                min="1"
-                :class="['mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white text-gray-900 p-2 block w-full', errors.group_id ? 'border-red-300' : '']"
                 v-model.number="formData.group_id"
-                @input="handleChange"
+                :class="['mt-1 w-full', errors.group_id ? 'border-red-300' : '']"
+                min="1"
+                required
               />
               <p v-if="errors.group_id" class="mt-1 text-sm text-red-600">{{ errors.group_id }}</p>
             </div>
@@ -429,15 +420,14 @@ const handleSubmit = async () => {
               <label for="order" class="text-sm font-medium text-gray-700 block">
                 Orden *
               </label>
-              <input
+              <Input
                 type="number"
                 name="order"
                 id="order"
-                required
-                min="1"
-                :class="['mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white text-gray-900 p-2 block w-full', errors.order ? 'border-red-300' : '']"
                 v-model.number="formData.order"
-                @input="handleChange"
+                :class="['mt-1 w-full', errors.order ? 'border-red-300' : '']"
+                min="1"
+                required
               />
               <p v-if="errors.order" class="mt-1 text-sm text-red-600">{{ errors.order }}</p>
             </div>
@@ -475,13 +465,12 @@ const handleSubmit = async () => {
               <label for="target" class="text-sm font-medium text-gray-700 block">
                 Objetivo
               </label>
-              <input
+              <Input
                 type="number"
                 name="target"
                 id="target"
-                class="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white text-gray-900 p-2 block w-full"
                 v-model.number="formData.target"
-                @input="handleChange"
+                class="mt-1 w-full"
               />
             </div>
 
@@ -489,13 +478,11 @@ const handleSubmit = async () => {
               <label for="default_value" class="text-sm font-medium text-gray-700 block">
                 Valor por defecto
               </label>
-              <input
-                type="text"
+              <Input
                 name="default_value"
                 id="default_value"
-                class="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white text-gray-900 p-2 block w-full"
                 v-model="formData.default_value"
-                @input="handleChange"
+                class="mt-1 w-full"
               />
             </div>
 
@@ -517,13 +504,11 @@ const handleSubmit = async () => {
               <label for="css_classes" class="text-sm font-medium text-gray-700 block">
                 Clases CSS
               </label>
-              <input
-                type="text"
+              <Input
                 name="css_classes"
                 id="css_classes"
-                class="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white text-gray-900 p-2 block w-full"
                 v-model="formData.css_classes"
-                @input="handleChange"
+                class="mt-1 w-full"
               />
             </div>
 
@@ -534,20 +519,18 @@ const handleSubmit = async () => {
                   <div v-for="(item, index) in formData.data_source" :key="index" class="gap-3 flex items-end">
                     <div class="flex-1">
                       <label class="text-sm font-medium text-gray-700 block">Valor</label>
-                      <input
-                        type="text"
-                        class="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 block w-full"
-                        :value="item.value"
-                        @input="handleDataSourceChange(index, 'value', ($event.target as HTMLInputElement).value)"
+                      <Input
+                        :modelValue="item.value"
+                        @update:modelValue="handleDataSourceChange(index, 'value', String($event))"
+                        class="mt-1 w-full"
                       />
                     </div>
                     <div class="flex-1">
                       <label class="text-sm font-medium text-gray-700 block">Etiqueta</label>
-                      <input
-                        type="text"
-                        class="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 block w-full"
-                        :value="item.label"
-                        @input="handleDataSourceChange(index, 'label', ($event.target as HTMLInputElement).value)"
+                      <Input
+                        :modelValue="item.label"
+                        @update:modelValue="handleDataSourceChange(index, 'label', String($event))"
+                        class="mt-1 w-full"
                       />
                     </div>
                     <button
@@ -573,13 +556,12 @@ const handleSubmit = async () => {
               <label for="date_max" class="text-sm font-medium text-gray-700 block">
                 Fecha máxima
               </label>
-              <input
+              <Input
                 type="date"
                 name="date_max"
                 id="date_max"
-                :class="['mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white text-gray-900 p-2 block w-full', errors.date_max ? 'border-red-300' : '']"
                 v-model="formData.date_max"
-                @input="handleChange"
+                :class="['mt-1 w-full', errors.date_max ? 'border-red-300' : '']"
               />
               <p v-if="errors.date_max" class="mt-1 text-sm text-red-600">{{ errors.date_max }}</p>
             </div>
@@ -589,14 +571,13 @@ const handleSubmit = async () => {
                 <label for="number_min" class="text-sm font-medium text-gray-700 block">
                   Valor mínimo
                 </label>
-                <input
+                <Input
                   type="number"
                   step="any"
                   name="number_min"
                   id="number_min"
-                  :class="['mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white text-gray-900 p-2 block w-full', errors.number_min ? 'border-red-300' : '']"
                   v-model="formData.number_min"
-                  @input="handleChange"
+                  :class="['mt-1 w-full', errors.number_min ? 'border-red-300' : '']"
                 />
                 <p v-if="errors.number_min" class="mt-1 text-sm text-red-600">{{ errors.number_min }}</p>
               </div>
@@ -604,14 +585,13 @@ const handleSubmit = async () => {
                 <label for="number_max" class="text-sm font-medium text-gray-700 block">
                   Valor máximo
                 </label>
-                <input
+                <Input
                   type="number"
                   step="any"
                   name="number_max"
                   id="number_max"
-                  :class="['mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white text-gray-900 p-2 block w-full', errors.number_max ? 'border-red-300' : '']"
                   v-model="formData.number_max"
-                  @input="handleChange"
+                  :class="['mt-1 w-full', errors.number_max ? 'border-red-300' : '']"
                 />
                 <p v-if="errors.number_max" class="mt-1 text-sm text-red-600">{{ errors.number_max }}</p>
               </div>
@@ -619,16 +599,15 @@ const handleSubmit = async () => {
                 <label for="number_step" class="text-sm font-medium text-gray-700 block">
                   Incremento *
                 </label>
-                <input
+                <Input
                   type="number"
                   step="any"
                   name="number_step"
                   id="number_step"
-                  required
-                  min="0.01"
-                  :class="['mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white text-gray-900 p-2 block w-full', errors.number_step ? 'border-red-300' : '']"
                   v-model.number="formData.number_step"
-                  @input="handleChange"
+                  :class="['mt-1 w-full', errors.number_step ? 'border-red-300' : '']"
+                  min="0.01"
+                  required
                 />
                 <p v-if="errors.number_step" class="mt-1 text-sm text-red-600">{{ errors.number_step }}</p>
               </div>

@@ -2,6 +2,8 @@
 import AppLayout from '@/layouts/AppLayoutTemplate.vue'
 import { Link, router } from '@inertiajs/vue3'
 import { ref } from 'vue'
+import { Input } from '@/components/ui/input'
+import { SelectRadix } from '@/components/ui/select'
 
 const formData = ref({
     name: '',
@@ -24,6 +26,14 @@ const formData = ref({
 
 const errors = ref<Record<string, string>>({})
 const processing = ref(false)
+
+const methodOptions = [
+    { value: 'GET', label: 'GET' },
+    { value: 'POST', label: 'POST' },
+    { value: 'PUT', label: 'PUT' },
+    { value: 'PATCH', label: 'PATCH' },
+    { value: 'DELETE', label: 'DELETE' },
+]
 
 const handleChange = (e: Event) => {
     const target = e.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -92,14 +102,12 @@ const handleSubmit = async (event: Event) => {
           <div class="grid grid-cols-6 gap-6">
             <div class="col-span-6 sm:col-span-3">
               <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre único *</label>
-              <input
-                type="text"
+              <Input
                 name="name"
                 id="name"
-                required
-                :class="['mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2', errors.name ? 'border-red-300' : '']"
                 v-model="formData.name"
-                @input="handleChange"
+                :class="['mt-1 w-full', errors.name ? 'border-red-300' : '']"
+                required
               />
               <p v-if="errors.name" class="mt-1 text-sm text-red-600">{{ errors.name }}</p>
               <p class="mt-1 text-xs text-gray-500">Identificador único para el formulario</p>
@@ -107,14 +115,12 @@ const handleSubmit = async (event: Event) => {
 
             <div class="col-span-6 sm:col-span-3">
               <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Título *</label>
-              <input
-                type="text"
+              <Input
                 name="title"
                 id="title"
-                required
-                :class="['mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2', errors.title ? 'border-red-300' : '']"
                 v-model="formData.title"
-                @input="handleChange"
+                :class="['mt-1 w-full', errors.title ? 'border-red-300' : '']"
+                required
               />
               <p v-if="errors.title" class="mt-1 text-sm text-red-600">{{ errors.title }}</p>
             </div>
@@ -134,47 +140,35 @@ const handleSubmit = async (event: Event) => {
 
             <div class="col-span-6 sm:col-span-2">
               <label for="module" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Módulo *</label>
-              <input
-                type="text"
+              <Input
                 name="module"
                 id="module"
-                required
-                :class="['mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2', errors.module ? 'border-red-300' : '']"
                 v-model="formData.module"
-                @input="handleChange"
+                :class="['mt-1 w-full', errors.module ? 'border-red-300' : '']"
+                required
               />
               <p v-if="errors.module" class="mt-1 text-sm text-red-600">{{ errors.module }}</p>
             </div>
 
             <div class="col-span-6 sm:col-span-2">
               <label for="endpoint" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Endpoint *</label>
-              <input
-                type="text"
+              <Input
                 name="endpoint"
                 id="endpoint"
-                required
-                :class="['mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2', errors.endpoint ? 'border-red-300' : '']"
                 v-model="formData.endpoint"
-                @input="handleChange"
+                :class="['mt-1 w-full', errors.endpoint ? 'border-red-300' : '']"
+                required
               />
               <p v-if="errors.endpoint" class="mt-1 text-sm text-red-600">{{ errors.endpoint }}</p>
             </div>
 
             <div class="col-span-6 sm:col-span-2">
               <label for="method" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Método HTTP *</label>
-              <select
-                name="method"
-                id="method"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2"
+              <SelectRadix
                 v-model="formData.method"
-                @change="handleChange"
-              >
-                <option value="GET">GET</option>
-                <option value="POST">POST</option>
-                <option value="PUT">PUT</option>
-                <option value="PATCH">PATCH</option>
-                <option value="DELETE">DELETE</option>
-              </select>
+                :options="methodOptions"
+                class="mt-1 w-full"
+              />
             </div>
 
             <div class="col-span-6 sm:col-span-3">

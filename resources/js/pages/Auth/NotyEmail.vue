@@ -3,6 +3,8 @@ import { Link } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 import { ChevronLeft } from 'lucide-vue-next'
 import AppLogoIcon from '@/components/AppLogoIcon.vue'
+import { Input } from '@/components/ui/input'
+import { SelectRadix } from '@/components/ui/select'
 import { useNotyEmailController } from '@/composables/useNotyEmailController'
 
 const props = defineProps<{
@@ -48,9 +50,9 @@ const {
         <div class="absolute top-1/2 left-0 w-20 h-20 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-full opacity-30 -translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
         <!-- Content layer -->
-        <div class="relative z-10 flex flex-col justify-center h-full p-10 text-white">
-          <Link :href="route('register')" class="flex items-center text-lg font-medium mb-8">
-            <AppLogoIcon class="mr-2 size-50 fill-current text-white" />
+        <div class="relative z-10 flex flex-col justify-center h-full p-5 text-white max-w-md mx-auto items-center">
+          <Link :href="route('register')" class="flex items-center justify-center text-lg font-medium mb-2">
+            <AppLogoIcon class="size-100 fill-current text-white" />
           </Link>
 
           <h1 class="text-4xl font-bold mb-2">CAMBIO DE CORREO</h1>
@@ -84,41 +86,34 @@ const {
           <form @submit="handleSubmit" class="space-y-4" :class="{ 'hidden': successMessage }">
             <div>
               <label class="block text-sm font-medium text-gray-700">Tipo de afiliado</label>
-              <select
-                class="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                :value="tipoAfiliado"
-                @change="setTipoAfiliado(($event.target as HTMLSelectElement).value as any)"
+              <SelectRadix
+                :modelValue="tipoAfiliado"
+                @update:modelValue="(v) => setTipoAfiliado(v as any)"
+                :options="tipoAfiliadoOptions"
+                placeholder="Seleccione una opción"
+                class="mt-1 w-full"
                 required
-              >
-                <option value="">Seleccione una opción</option>
-                <option v-for="opt in tipoAfiliadoOptions" :key="opt.value" :value="opt.value">
-                  {{ opt.label }}
-                </option>
-              </select>
+              />
             </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700">Tipo de documento</label>
-              <select
-                class="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                :value="documentType"
-                @change="setDocumentType(($event.target as HTMLSelectElement).value)"
+              <SelectRadix
+                :modelValue="documentType"
+                @update:modelValue="(v) => setDocumentType(String(v))"
+                :options="documentTypeOptions"
+                placeholder="Seleccione una opción"
+                class="mt-1 w-full"
                 required
-              >
-                <option value="">Seleccione una opción</option>
-                <option v-for="opt in documentTypeOptions" :key="opt.value" :value="opt.value">
-                  {{ opt.label }}
-                </option>
-              </select>
+              />
             </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700">Documento</label>
-              <input
-                type="number"
-                class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                :value="documento"
-                @input="setDocumento(($event.target as HTMLInputElement).value)"
+              <Input
+                :modelValue="documento"
+                @update:modelValue="setDocumento"
+                class="mt-1 w-full"
                 placeholder="Número de documento"
                 required
               />
@@ -126,22 +121,20 @@ const {
 
             <div>
               <label class="block text-sm font-medium text-gray-700">Nombre completo</label>
-              <input
-                type="text"
-                class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                :value="nombre"
-                @input="setNombre(($event.target as HTMLInputElement).value)"
+              <Input
+                :modelValue="nombre"
+                @update:modelValue="setNombre"
+                class="mt-1 w-full"
                 placeholder="Nombre y apellidos"
               />
             </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700">Celular de contacto</label>
-              <input
-                type="number"
-                class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                :value="telefono"
-                @input="setTelefono(($event.target as HTMLInputElement).value)"
+              <Input
+                :modelValue="telefono"
+                @update:modelValue="setTelefono"
+                class="mt-1 w-full"
                 placeholder="Número de celular"
                 required
               />
@@ -149,11 +142,10 @@ const {
 
             <div>
               <label class="block text-sm font-medium text-gray-700">Correo electrónico actual / real</label>
-              <input
-                type="email"
-                class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                :value="email"
-                @input="setEmail(($event.target as HTMLInputElement).value)"
+              <Input
+                :modelValue="email"
+                @update:modelValue="setEmail"
+                class="mt-1 w-full"
                 placeholder="correo@ejemplo.com"
                 required
               />

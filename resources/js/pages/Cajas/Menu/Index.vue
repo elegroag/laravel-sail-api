@@ -3,6 +3,8 @@ import AppLayout from '@/layouts/AppLayoutTemplate.vue'
 import { Link, router } from '@inertiajs/vue3'
 import { ref, computed, onMounted } from 'vue'
 import { X } from 'lucide-vue-next'
+import { Input } from '@/components/ui/input'
+import { SelectRadix } from '@/components/ui/select'
 
 type MenuItem = {
   id: number
@@ -52,6 +54,10 @@ const searchOption = ref('')
 const attaching = ref(false)
 const toast = ref<{ type: 'success' | 'error'; message: string } | null>(null)
 
+const childOptions = computed(() =>
+  options.value.map(opt => ({ value: String(opt.id), label: opt.title }))
+)
+
 const searchParams = new URLSearchParams(window.location.search)
 const q = ref(searchParams.get('q') || '')
 const tipo = ref(searchParams.get('tipo') || '')
@@ -83,6 +89,26 @@ const clearFilters = () => {
   codapl.value = ''
   router.get('/cajas/menu', { per_page: perPage.value, page: 1 }, { preserveState: true, preserveScroll: true })
 }
+
+const tipoOptions = [
+  { value: 'A', label: 'Administrador' },
+  { value: 'E', label: 'Empresa' },
+  { value: 'P', label: 'Particular' },
+  { value: 'T', label: 'Trabajador' },
+  { value: 'F', label: 'Foniñez' },
+]
+
+const codaplOptions = [
+  { value: 'CA', label: 'CA' },
+  { value: 'ME', label: 'ME' },
+]
+
+const perPageOptions = [
+  { value: '10', label: '10' },
+  { value: '25', label: '25' },
+  { value: '50', label: '50' },
+  { value: '100', label: '100' },
+]
 
 const handleDelete = async (_id: number, title: string) => {
   if (!confirm(`¿Estás seguro de que deseas eliminar el menu "${title}"? Esta acción no se puede deshacer.`)) {
@@ -231,41 +257,31 @@ const changePerPage = (value: number) => {
         <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
           <div class="sm:col-span-2">
             <label for="q" class="block text-sm font-medium text-gray-700">Buscar</label>
-            <input
+            <Input
               id="q"
-              type="text"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-600 p-2"
-              placeholder="Título, controller, action, URL..."
               v-model="q"
+              class="mt-1 w-full"
+              placeholder="Título, controller, action, URL..."
               @keydown.enter="applyFilters"
             />
           </div>
           <div>
             <label for="tipo" class="block text-sm font-medium text-gray-700">Tipo</label>
-            <select
-              id="tipo"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white text-gray-600 p-2"
+            <SelectRadix
               v-model="tipo"
-            >
-              <option value="">Todos</option>
-              <option value="A">Administrador</option>
-              <option value="E">Empresa</option>
-              <option value="P">Particular</option>
-              <option value="T">Trabajador</option>
-              <option value="F">Foniñez</option>
-            </select>
+              :options="tipoOptions"
+              placeholder="Todos"
+              class="mt-1 w-full"
+            />
           </div>
           <div>
             <label for="codapl" class="block text-sm font-medium text-gray-700">Aplicación</label>
-            <select
-              id="codapl"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white text-gray-600 p-2"
+            <SelectRadix
               v-model="codapl"
-            >
-              <option value="">Todas</option>
-              <option value="CA">CA</option>
-              <option value="ME">ME</option>
-            </select>
+              :options="codaplOptions"
+              placeholder="Todas"
+              class="mt-1 w-full"
+            />
           </div>
           <div class="flex items-end gap-2">
             <button @click="applyFilters" class="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">Filtrar</button>
@@ -444,11 +460,10 @@ const changePerPage = (value: number) => {
             <div>
               <label class="block text-sm font-medium text-gray-700">Buscar</label>
               <div class="mt-1 flex gap-2">
-                <input
-                  type="text"
-                  class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-600"
-                  placeholder="Título, controller, action"
+                <Input
                   v-model="searchOption"
+                  class="flex-1"
+                  placeholder="Título, controller, action"
                   @keydown.enter="loadOptions(searchOption)"
                 />
                 <button @click="loadOptions(searchOption)" class="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:border-indigo-300">Buscar</button>
@@ -456,15 +471,12 @@ const changePerPage = (value: number) => {
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700">Seleccionar item</label>
-              <select
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-600 p-2"
+              <SelectRadix
                 v-model="selectedChildId"
-              >
-                <option value="">— Selecciona —</option>
-                <option v-for="opt in options" :key="opt.id" :value="opt.id">
-                  {{ opt.title }}
-                </option>
-              </select>
+                :options="childOptions"
+                placeholder="— Selecciona —"
+                class="mt-1 w-full"
+              />
               <p v-if="optionsLoading" class="mt-1 text-xs text-gray-500">Cargando opciones…</p>
               <p v-if="optionsError" class="mt-1 text-xs text-red-600">{{ optionsError }}</p>
             </div>
@@ -500,14 +512,12 @@ const changePerPage = (value: number) => {
           </div>
           <div class="text-sm text-gray-700 flex items-center gap-2">
             <label for="per_page" class="text-gray-600">Por página</label>
-            <select
-              id="per_page"
-              class="rounded-md border border-gray-300 px-2 py-1 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              :value="meta.pagination.per_page"
-              @change="changePerPage(Number(($event.target as HTMLSelectElement).value))"
-            >
-              <option v-for="n in [10,25,50,100]" :key="n" :value="n">{{ n }}</option>
-            </select>
+            <SelectRadix
+              :modelValue="String(meta.pagination.per_page)"
+              @update:modelValue="changePerPage(Number($event))"
+              :options="perPageOptions"
+              class="rounded-md border border-gray-300 px-2 py-1 text-sm w-auto"
+            />
           </div>
         </div>
         <div class="inline-flex items-center gap-2">

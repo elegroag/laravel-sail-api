@@ -4,6 +4,8 @@ import { Link, router } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 import { ChevronLeft } from 'lucide-vue-next'
 import AppLogoIcon from '@/components/AppLogoIcon.vue'
+import { Input } from '@/components/ui/input'
+import { SelectRadix } from '@/components/ui/select'
 import { useRecoveryController } from '@/composables/useRecoveryController'
 import { userTypes } from '@/constants/auth'
 
@@ -38,9 +40,9 @@ const showDeliveryFields = computed(() => formState.delivery_method === 'email' 
         <div class="absolute top-1/2 left-0 w-20 h-20 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-full opacity-30 -translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
         <!-- Content layer -->
-        <div class="relative z-10 flex flex-col justify-center h-full p-10 text-white">
-          <Link href="/" class="flex items-center text-lg font-medium mb-8">
-            <AppLogoIcon class="mr-2 size-50 fill-current text-white" />
+        <div class="relative z-10 flex flex-col justify-center h-full p-5 text-white max-w-md mx-auto items-center">
+          <Link href="/" class="flex items-center justify-center text-lg font-medium mb-2">
+            <AppLogoIcon class="size-100 fill-current text-white" />
           </Link>
 
           <h1 class="text-4xl font-bold mb-2">RECUPERAR</h1>
@@ -102,27 +104,23 @@ const showDeliveryFields = computed(() => formState.delivery_method === 'email' 
 
             <div>
               <label class="block text-sm font-medium text-gray-700">Tipo de documento</label>
-              <select
-                class="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                :value="formState.documentType"
-                @change="handleFieldChange('documentType', ($event.target as HTMLSelectElement).value)"
+              <SelectRadix
+                :modelValue="formState.documentType"
+                @update:modelValue="(v) => handleFieldChange('documentType', String(v))"
+                :options="documentTypeOptions"
+                placeholder="Seleccione"
+                class="mt-1 w-full"
                 required
-              >
-                <option value="">Seleccione</option>
-                <option v-for="opt in documentTypeOptions" :key="opt.value" :value="opt.value">
-                  {{ opt.label }}
-                </option>
-              </select>
+              />
               <p v-if="formState.errors.documentType" class="mt-1 text-sm text-red-600">{{ formState.errors.documentType }}</p>
             </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700">Número de identificación</label>
-              <input
-                type="number"
-                class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                :value="formState.identification"
-                @input="handleFieldChange('identification', ($event.target as HTMLInputElement).value)"
+              <Input
+                :modelValue="formState.identification"
+                @update:modelValue="(v) => handleFieldChange('identification', String(v))"
+                class="mt-1 w-full"
                 placeholder="Ingresa tu número de identificación"
                 required
               />
@@ -131,23 +129,21 @@ const showDeliveryFields = computed(() => formState.delivery_method === 'email' 
 
             <div>
               <label class="block text-sm font-medium text-gray-700">Método de entrega</label>
-              <select
-                class="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                :value="formState.delivery_method"
-                @change="handleFieldChange('delivery_method', ($event.target as HTMLSelectElement).value)"
-              >
-                <option value="email">Correo electrónico</option>
-                <option value="whatsapp">WhatsApp</option>
-              </select>
+              <SelectRadix
+                :modelValue="formState.delivery_method"
+                @update:modelValue="(v) => handleFieldChange('delivery_method', String(v))"
+                :options="[{ value: 'email', label: 'Correo electrónico' }, { value: 'whatsapp', label: 'WhatsApp' }]"
+                placeholder="Seleccione"
+                class="mt-1 w-full"
+              />
             </div>
 
             <div v-if="formState.delivery_method === 'email'">
               <label class="block text-sm font-medium text-gray-700">Correo electrónico</label>
-              <input
-                type="email"
-                class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                :value="formState.email"
-                @input="handleFieldChange('email', ($event.target as HTMLInputElement).value)"
+              <Input
+                :modelValue="formState.email"
+                @update:modelValue="(v) => handleFieldChange('email', String(v))"
+                class="mt-1 w-full"
                 placeholder="correo@ejemplo.com"
                 required
               />
@@ -156,11 +152,10 @@ const showDeliveryFields = computed(() => formState.delivery_method === 'email' 
 
             <div v-if="formState.delivery_method === 'whatsapp'">
               <label class="block text-sm font-medium text-gray-700">WhatsApp</label>
-              <input
-                type="tel"
-                class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                :value="formState.whatsapp"
-                @input="handleFieldChange('whatsapp', ($event.target as HTMLInputElement).value)"
+              <Input
+                :modelValue="formState.whatsapp"
+                @update:modelValue="(v) => handleFieldChange('whatsapp', String(v))"
+                class="mt-1 w-full"
                 placeholder="+57 300 123 4567"
                 required
               />
