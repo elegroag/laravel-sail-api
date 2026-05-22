@@ -1,29 +1,28 @@
+import inertia from '@inertiajs/vite';
 import tailwindcss from '@tailwindcss/vite';
-import react from '@vitejs/plugin-react';
+import vue from '@vitejs/plugin-vue';
 import laravel from 'laravel-vite-plugin';
-import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+    define: command === 'serve' ? { __PROJECT_ROOT__: JSON.stringify(process.cwd()) } : {},
+    build: {
+        minify: false,
+    },
     plugins: [
         laravel({
-            input: [
-                'resources/js/assets/css/global.css',
-                'resources/js/app.tsx'
-            ],
-            ssr: 'resources/js/ssr.tsx',
-            refresh: process.env.NODE_ENV !== 'production',
+            input: ['resources/js/app.ts'],
+            refresh: true,
         }),
-        react(),
+        inertia(),
         tailwindcss(),
+        vue({
+            template: {
+                transformAssetUrls: {
+                    base: null,
+                    includeAbsolute: false,
+                },
+            },
+        }),
     ],
-    esbuild: {
-        jsx: 'automatic',
-    },
-    resolve: {
-        alias: {
-            'ziggy-js': resolve(__dirname, 'vendor/tightenco/ziggy'),
-            '@/': resolve(__dirname, 'resources/js'),
-        },
-    },
-});
+}));
