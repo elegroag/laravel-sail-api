@@ -1,21 +1,21 @@
+import './bootstrap';
+import '../css/app.css';
+
 import { createInertiaApp } from '@inertiajs/vue3';
-import { resolvePageComponent } from '@inertiajs/vite/helpers';
-import { createSSRApp, h } from 'vue';
-import { renderToString } from '@vue/server-renderer';
-import { App } from '@inertiajs/vue3';
-import '@/assets/css/global.css';
+import { ZiggyVue } from 'ziggy-js';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
-    title: (title) => title ? `${title} - ${appName}` : appName,
-    resolve: (name) => {
-        return resolvePageComponent(`./pages/${name}.vue`, import.meta.glob('./pages/**/*.vue'));
+    title: (title) => (title ? `${title} - ${appName}` : appName),
+    defaults: {
+        visitOptions: (href, options) => ({
+            preserveScroll: options?.preserveScroll ?? 'errors',
+            ...options,
+        }),
     },
-    setup({ el, App, props }) {
-        return createSSRApp({ render: () => h(App, props) });
-    },
-    progress: {
-        color: '#4B5563',
+    withApp(app) {
+        app.use(ZiggyVue);
     },
 });

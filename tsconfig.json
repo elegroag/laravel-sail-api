@@ -1,28 +1,62 @@
 {
-    "compilerOptions": {
-        "target": "ESNext",
-        "module": "ESNext",
-        "moduleResolution": "bundler",
-        "allowJs": true,
-        "noEmit": true,
-        "isolatedModules": true,
-        "esModuleInterop": true,
-        "forceConsistentCasingInFileNames": true,
-        "strict": true,
-        "noImplicitAny": true,
-        "skipLibCheck": true,
-        "baseUrl": ".",
-        "paths": {
-            "@/*": ["./resources/js/*"],
-            "ziggy-js": ["./vendor/tightenco/ziggy"]
-        },
-        "types": ["node", "vite/client"],
-        "jsx": "preserve"
-    },
-    "include": [
-        "resources/js/**/*.ts",
-        "resources/js/**/*.d.ts",
-        "resources/js/**/*.vue",
-        "resources/js/**/*.tsx"
-    ]
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "jsx": "preserve",
+    "lib": [
+      "ESNext",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "types": [
+      "vite/client",
+      "node"
+    ],
+    "skipLibCheck": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "resources/js/*"
+      ],
+      "~/*": [
+        "resources/js/*"
+      ],
+      "~~/*": [
+        "./*"
+      ],
+      "@assets/*": [
+        "resources/js/assets/*"
+      ],
+      "@components/*": [
+        "resources/js/components/*"
+      ],
+      "@pages/*": [
+        "resources/js/pages/*"
+      ],
+      "@shared/*": [
+        "resources/js/shared/*"
+      ],
+      "@composables/*": [
+        "resources/js/composables/*"
+      ]
+    }
+  },
+  "include": [
+    "resources/js/**/*.ts",
+    "resources/js/**/*.d.ts",
+    "resources/js/**/*.vue",
+    "resources/js/shared/types/ziggy.d.ts",
+    "vite.config.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "public"
+  ]
 }
