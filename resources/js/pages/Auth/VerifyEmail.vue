@@ -57,9 +57,8 @@ const DeliveryOptions = [
       <div class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-emerald-800 to-emerald-600 rounded-full translate-y-12 -translate-x-12 opacity-40" />
       <div class="absolute top-1/2 left-0 w-16 h-16 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-full -translate-x-8 opacity-30" />
 
-      <Link href="/login" class="relative z-20 flex items-center text-lg font-medium mb-8">
-        <AppLogoIcon class="mr-2 size-8 fill-current text-white" />
-        COMFACA
+      <Link :href="route('login')" class="relative z-20 flex items-center text-lg font-medium mb-8">
+        <AppLogoIcon class="mr-2 size-50 fill-current text-white" />
       </Link>
 
       <div class="relative z-10 flex-1 flex flex-col justify-center">
@@ -71,7 +70,7 @@ const DeliveryOptions = [
           <p>Te enviamos un código de 4 dígitos para asegurar que eres el propietario del correo registrado.</p>
         </div>
 
-        <Link href="/login" class="inline-flex items-center text-emerald-200 hover:text-white transition-colors text-sm">
+        <Link :href="route('login')" class="inline-flex items-center text-emerald-200 hover:text-white transition-colors text-sm">
           ← ¿Ya tienes cuenta? Inicia sesión
         </Link>
       </div>

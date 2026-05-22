@@ -40,8 +40,7 @@ const showDeliveryFields = computed(() => formState.delivery_method === 'email' 
         <!-- Content layer -->
         <div class="relative z-10 flex flex-col justify-center h-full p-10 text-white">
           <Link href="/" class="flex items-center text-lg font-medium mb-8">
-            <AppLogoIcon class="mr-2 size-8 fill-current text-white" />
-            COMFACA
+            <AppLogoIcon class="mr-2 size-50 fill-current text-white" />
           </Link>
 
           <h1 class="text-4xl font-bold mb-2">RECUPERAR</h1>
