@@ -42,7 +42,7 @@ return new class extends Migration
             $table->char('celular', 10)->nullable();
             $table->char('email', 45);
             $table->char('nivedu', 3)->nullable();
-            $table->date('fecing');
+            $table->date('fecing')->nullable();
             $table->char('codocu', 5)->nullable();
             $table->integer('salario');
             $table->char('tipsal', 1)->nullable();

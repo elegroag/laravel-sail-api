@@ -35,6 +35,7 @@ export class FormBeneficiarioView extends FormView {
             'click #btEnviarRadicado': 'enviarRadicado',
             'focusout #cedtra': 'validaTrabajador',
             'focusout #cedcon': 'validaMother',
+            'change [name="captra"]': "changeCaptra"
         };
     }
 
@@ -67,13 +68,22 @@ export class FormBeneficiarioView extends FormView {
 
             this.$el.find('#cedtra').attr('disabled', 'true');
             this.$el.find('#numdoc').attr('disabled', 'true');
-            /* this.$el.find('#parent').attr('disabled', 'true'); */
+
+            if(this.model.get('captra') === 'N'){
+                this.form.find('#captra2').prop('checked', true);
+            }else{
+                this.form.find('#captra1').prop('checked', true);
+            }
+
+            if(this.model.get('biodesco') == 'S'){
+                this.form.find('#biodesco').prop('checked', true);
+                this.$el.find('.s-bio-desco').addClass('d-none');
+            }else{
+                this.$el.find('.s-bio-desco').removeClass('d-none');
+            }
 
             if (this.model.get('parent') == '1') this.$el.find('#show_mother').removeClass('d-none');
             this.__hasBiologico(this.model.get('parent') == '1' || this.model.get('parent') == '4');
-
-            this.$el.find("[name='biodesco'][value='N']").attr('checked', this.model.get('biodesco') != 'S');
-            this.$el.find("[name='biodesco'][value='S']").attr('checked', this.model.get('biodesco') == 'S');
 
             this.$el.find("[name='biourbana'][value='N']").attr('checked', this.model.get('biourbana') == 'N');
             this.$el.find("[name='biourbana'][value='S']").attr('checked', this.model.get('biourbana') != 'N');
@@ -119,6 +129,13 @@ export class FormBeneficiarioView extends FormView {
         } else {
             this.$el.find("[name='biodesco'][value='N']").attr('checked', 'true');
             this.$el.find("[name='biourbana'][value='S']").attr('checked', 'true');
+            this.$el.find('#peretn').val('7');
+            this.$el.find('.show-peretn').addClass('d-none');
+            this.$el.find('#captra2').prop('checked', true);
+            this.$el.find('#show_tipdis').addClass('d-none');
+            this.$el.find('#numcue').val('0');
+            this.$el.find('#huerfano').val('0');
+            this.$el.find('#tiphij').val('0');
             $.each(
                 this.selectores,
                 (index, element) => (this.#choiceComponents[element.name] = new Choices(element, { silent: true, itemSelectText: '' })),
@@ -133,7 +150,7 @@ export class FormBeneficiarioView extends FormView {
 
         if (this.collection.props['tipo'] === 'E') {
             this.#choiceComponents['cedtra'] = new Choices($el.find('#cedtra')[0], { silent: true, itemSelectText: '' });
-            $el.find('#nit').attr('readonly', 'true');
+            this.$el.find('#nit').attr('readonly', 'true');
         }
 
         this.selectores.on('change', (event) => {
@@ -143,12 +160,80 @@ export class FormBeneficiarioView extends FormView {
         });
 
         eventsFormControl(this.$el);
-
-        flatpickr(this.$el.find('#fecnac, #fecing'), {
+      
+        flatpickr(this.$el.find('#fecnac'), {
             enableTime: false,
             dateFormat: 'Y-m-d',
             locale: Spanish,
+            maxDate: 'today',
+            minDate: '1900-01-01',
+            allowInput: true
         });
+
+        flatpickr(this.$el.find('#fecing'), {
+            enableTime: false,
+            dateFormat: 'Y-m-d',
+            locale: Spanish,
+            maxDate: 'today',
+            minDate: '1970-01-01',
+            allowInput: true
+        });
+    }
+
+    changeCaptra(e){
+        const captra = this.$el.find("[name='captra']")[0].checked ? 'S' : 'N';
+        if(captra === 'S'){
+            this.$el.find('#show_tipdis').removeClass('d-none');
+            this.$el.find('#tipdis').val('00');
+        }else{
+            this.$el.find('#show_tipdis').addClass('d-none');
+        }
+    }
+
+    calculateAge(fecnac) {
+        if (!fecnac) return null;
+        const birthDate = new Date(fecnac);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age;
+    }
+
+    validateAge() {
+        const captra = this.$el.find("[name='captra']")[0].checked ? 'S' : 'N';
+        if (captra === 'S') return true;
+
+        const parent = this.getInput('#parent');
+        const fecnac = this.model.get('fecnac');
+
+        if (!fecnac) return true;
+
+        const age = this.calculateAge(fecnac);
+
+        if (age === null) return true;
+
+        if (parent == '1' || parent == '4') {
+            if (age < 18) {
+                this.App.trigger('alert:warning', {
+                    message: 'Para parentesco Hijo/Beneficiario, la edad debe ser mayor o igual a 18 años.',
+                });
+                return false;
+            }
+        }
+
+        if (parent == '3') {
+            if (age < 60) {
+                this.App.trigger('alert:warning', {
+                    message: 'Para parentesco Padres, la edad debe ser mayor o igual a 60 años.',
+                });
+                return false;
+            }
+        }
+
+        return true;
     }
 
     serializeData() {
@@ -166,6 +251,7 @@ export class FormBeneficiarioView extends FormView {
 
         let _err = 0;
         if (this.form.valid() == false) _err++;
+        if (this.validateAge() === false) _err++;
 
         if (_err > 0) {
             target.removeAttr('disabled');
@@ -241,7 +327,15 @@ export class FormBeneficiarioView extends FormView {
                                             _tab.show();
                                         }
                                     } else {
-                                        this.App.trigger('alert:error', { message: response.msj });
+                                        if(response.errors){
+                                            let msj ='';
+                                            $.each(response.errors, (key, items) => {
+                                                if(items !== undefined) msj+="<p>"+items+"</p>";
+                                            });
+                                            this.App.trigger('alert:error', { message: msj });
+                                        } else {
+                                            this.App.trigger('alert:error', { message: response.msj });
+                                        }
                                     }
                                 },
                             });
@@ -292,7 +386,7 @@ export class FormBeneficiarioView extends FormView {
         const cedcon = this.$el.find('#cedcon').val();
         const cedtra = this.$el.find('#cedtra').val();
 
-        let opts = ['', cedcon, cedtra, '@'];
+        let opts = ['', cedcon, cedtra];
         if (convive == 3) {
             $('#cedacu').attr('placeholder', 'No aplica');
             $('#cedacu').val('');

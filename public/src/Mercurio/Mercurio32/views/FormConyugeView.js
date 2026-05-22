@@ -8,17 +8,15 @@ import { Spanish } from 'flatpickr/dist/l10n/es.js';
 import { ConyugeModel } from '../models/ConyugeModel';
 
 export class FormConyugeView extends FormView {
-    #choiceComponents = null;
-    #logger;
-
+    
     constructor(options = {}) {
         super({
             ...options,
             onRender: (el = {}) => this.#afterRender(el),
         });
         this.viewComponents = [];
-        this.#choiceComponents = [];
-        this.#logger = new Logger();
+        this.choiceComponents = [];
+        this.logger = new Logger();
     }
 
     get events() {
@@ -34,6 +32,7 @@ export class FormConyugeView extends FormView {
             'click #btEnviarRadicado': 'enviarRadicado',
             'change #codocu': 'changeCodocu',
             'change #peretn': 'changePeretn',
+            'change [name="captra"]': "changeCaptra"
         };
     }
 
@@ -68,9 +67,18 @@ export class FormConyugeView extends FormView {
                 }
             });
 
+            if(this.model.get('comper') === 'S'){
+                this.form.find('#comper1').prop('checked', true);
+            }else{
+                this.form.find('#comper2').prop('checked', true);
+            }
+            
             this.form.find('#nit').attr('disabled', 'true');
 
-            if (this.model.get('tippag') == 'A' || this.model.get('tippag') == 'D') {
+            if (
+                this.model.get('tippag') == 'A' || 
+                this.model.get('tippag') == 'D') 
+            {
                 this.form.find('#show_numcue').removeClass('d-none');
                 this.form.find('#show_codban').removeClass('d-none');
                 this.form.find('#show_tipcue').removeClass('d-none');
@@ -84,10 +92,11 @@ export class FormConyugeView extends FormView {
             setTimeout(() => $('label.error').text(''), 3000);
 
             $.each(this.selectores, (index, element) => {
-                this.#choiceComponents[element.name] = new Choices(element);
+                this.choiceComponents[element.name] = new Choices(element);
                 const name = this.model.get(element.name);
-                if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
+                if (name) this.choiceComponents[element.name].setChoiceByValue(name);
             });
+            
             if (this.model.get('cedtra')) {
                 const afiliado = this.collection.props.list_afiliados;
                 const has = _.where(afiliado, { cedula: this.model.get('cedtra') });
@@ -98,10 +107,18 @@ export class FormConyugeView extends FormView {
         } else {
             $.each(
                 this.selectores,
-                (index, element) => (this.#choiceComponents[element.name] = new Choices(element, { silent: true, itemSelectText: '' })),
+                (index, element) => (this.choiceComponents[element.name] = new Choices(element, { silent: true, itemSelectText: '' })),
             );
+            this.form.find('#salario').val('0');
+            this.form.find('#peretn').val('7');
+            this.$el.find('.show-peretn').addClass('d-none');
+            this.form.find('#comper1').prop('checked', true);
+            this.form.find('#zoneurbana1').prop('checked', true);
+            this.form.find('#captra2').prop('checked', true);
+            this.$el.find('#show_tipdis').addClass('d-none');
         }
 
+        this.form.find('#autoriza1').prop('checked', true);
         this.setInput('nit', this.collection.props.nit);
 
         if (this.collection.props['tipo'] !== 'E') {
@@ -110,21 +127,36 @@ export class FormConyugeView extends FormView {
         }
 
         if (this.collection.props['tipo'] === 'E') {
-            this.#choiceComponents['cedtra'] = new Choices($el.find('#cedtra')[0], { silent: true, itemSelectText: '' });
+            this.choiceComponents['cedtra'] = new Choices($el.find('#cedtra')[0], { silent: true, itemSelectText: '' });
         }
 
         this.selectores.on('change', (event) => {
             if (event.detail) {
-                this.validateChoicesField(event.detail.value, this.#choiceComponents[event.currentTarget.name]);
+                this.validateChoicesField(event.detail.value, this.choiceComponents[event.currentTarget.name]);
             }
         });
 
         eventsFormControl($el);
 
-        flatpickr($el.find('#fecnac, #fecing'), {
+        let fechaPasada = new Date();
+        fechaPasada.setDate(fechaPasada.getDate() - 5110);
+
+        flatpickr($el.find('#fecnac'), {
             enableTime: false,
             dateFormat: 'Y-m-d',
             locale: Spanish,
+            maxDate: fechaPasada,
+            minDate: '1850-01-01',
+            allowInput: true
+        });
+
+        flatpickr($el.find('#fecing'), {
+            enableTime: false,
+            dateFormat: 'Y-m-d',
+            locale: Spanish,
+            maxDate: 'today',
+            minDate: '1970-01-01',
+            allowInput: true
         });
     }
 
@@ -134,6 +166,16 @@ export class FormConyugeView extends FormView {
             this.form.find('#show_otra_empresa').removeClass('d-none');
         } else {
             this.$el.find('#show_otra_empresa').addClass('d-none');
+        }
+    }
+
+    changeCaptra(e){
+        const captra = this.$el.find("[name='captra']")[0].checked ? 'S' : 'N';
+        if(captra === 'S'){
+            this.$el.find('#show_tipdis').removeClass('d-none');
+            this.$el.find('#tipdis').val('00');
+        }else{
+            this.$el.find('#show_tipdis').addClass('d-none');
         }
     }
 
@@ -239,7 +281,15 @@ export class FormConyugeView extends FormView {
                                                 _tab.show();
                                             }
                                         } else {
-                                            this.App.trigger('alert:error', { message: response.msj });
+                                            if(response.errors){
+                                                let msj ='';
+                                                $.each(response.errors, (key, items) => {
+                                                    if(items !== undefined) msj+="<p>"+items+"</p>";
+                                                });
+                                                this.App.trigger('alert:error', { message: msj });
+                                            } else {
+                                                this.App.trigger('alert:error', { message: response.msj });
+                                            }
                                         }
                                     }
                                 },
@@ -259,13 +309,14 @@ export class FormConyugeView extends FormView {
         if (cedcon === '') return false;
 
         this.App.trigger('syncro', {
+            silent: true,
             url: this.App.url(window.ServerController + '/valida'),
             data: {
                 cedcon: cedcon,
             },
             callback: (solicitud) => {
                 if (solicitud) {
-                    const conyuge = solicitud.conyuge || {};
+                    const conyuge = solicitud.conyuge || false;
                     if (conyuge !== false) {
                         this.App.trigger('confirma', {
                             message:
@@ -280,7 +331,7 @@ export class FormConyugeView extends FormView {
 
                                     $.each(this.selectores, (index, element) => {
                                         const name = this.model.get(element.name);
-                                        if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
+                                        if (name) this.choiceComponents[element.name].setChoiceByValue(name);
                                     });
                                 }
                             },
@@ -346,8 +397,8 @@ export class FormConyugeView extends FormView {
             this.$el.find('#show_fecing').addClass('d-none');
             this.$el.find('#show_salario').addClass('d-none');
             this.setInput('salario', '0');
-            this.setInput('empresalab', 'NULL');
-            this.setInput('fecing', 'NULL');
+            this.setInput('empresalab', '');
+            this.setInput('fecing', '');
         }
     }
 
@@ -369,7 +420,7 @@ export class FormConyugeView extends FormView {
         if (_.size(this.viewComponents) > 0) {
             _.each(this.viewComponents, (view) => view.remove());
         }
-        $.each(this.#choiceComponents, (choice) => choice.destroy());
+        $.each(this.choiceComponents, (choice) => choice.destroy());
         FormView.prototype.remove.call(this, {});
     }
 }

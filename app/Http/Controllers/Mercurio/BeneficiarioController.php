@@ -35,15 +35,15 @@ use Illuminate\Support\Facades\DB;
 
 class BeneficiarioController extends ApplicationController
 {
-    protected $tipopc = '4';
+    protected string $tipopc = '4';
 
-    protected $db;
+    protected DbBase $db;
 
-    protected $user;
+    protected ?array $user;
 
-    protected $tipo;
+    protected ?string $tipo;
 
-    protected $codciu;
+    protected ?string $codciu;
 
     public function __construct()
     {
@@ -257,7 +257,7 @@ class BeneficiarioController extends ApplicationController
         return response()->json($response);
     }
 
-    function buscarBeneficiarios($estado)
+    function buscarBeneficiarios(string $estado)
     {
         $documento = $this->user['documento'];
         $tipo = $this->user['tipo'];
@@ -728,7 +728,7 @@ class BeneficiarioController extends ApplicationController
         }
     }
 
-    public function searchRequest($id)
+    public function searchRequest(?string $id = null)
     {
         try {
             if (is_null($id)) {
@@ -887,7 +887,7 @@ class BeneficiarioController extends ApplicationController
         }
     }
 
-    public function consultaDocumentos($id)
+    public function consultaDocumentos(string $id)
     {
         try {
             $documento = $this->user['documento'];
@@ -915,7 +915,7 @@ class BeneficiarioController extends ApplicationController
         return response()->json($salida);
     }
 
-    public function formulario($id)
+    public function formulario(string $id)
     {
         try {
             $paramsTrabajador = new ParamsTrabajador;

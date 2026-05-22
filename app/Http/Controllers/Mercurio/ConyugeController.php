@@ -113,7 +113,7 @@ class ConyugeController extends ApplicationController
             $coddoc = $request->input('coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
+            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -213,7 +213,7 @@ class ConyugeController extends ApplicationController
     {
         $this->setResponse('view');
         $archivo = 'declaracion_juramentada_nueva.pdf';
-        $fichero = 'public/docs/formulario_mercurio/'.$archivo;
+        $fichero = 'public/docs/formulario_mercurio/' . $archivo;
         $ext = substr(strrchr($archivo, '.'), 1);
         header('Content-Description: File Transfer');
         header("Content-Type: application/{$ext}");
@@ -221,7 +221,7 @@ class ConyugeController extends ApplicationController
         header('Cache-Control: must-revalidate');
         header('Expires: 0');
         header('Pragma: public');
-        header('Content-Length: '.filesize($fichero));
+        header('Content-Length: ' . filesize($fichero));
         ob_clean();
         readfile($fichero);
         exit;
@@ -229,7 +229,7 @@ class ConyugeController extends ApplicationController
 
     public function downloadDocumentos($archivo = '')
     {
-        $fichero = 'public/docs/formulario_mercurio/'.$archivo;
+        $fichero = 'public/docs/formulario_mercurio/' . $archivo;
         $ext = substr(strrchr($archivo, '.'), 1);
         if (file_exists($fichero)) {
             header('Content-Description: File Transfer');
@@ -238,7 +238,7 @@ class ConyugeController extends ApplicationController
             header('Cache-Control: must-revalidate');
             header('Expires: 0');
             header('Pragma: public');
-            header('Content-Length: '.filesize($fichero));
+            header('Content-Length: ' . filesize($fichero));
             ob_clean();
             readfile($fichero);
             exit;
@@ -250,7 +250,7 @@ class ConyugeController extends ApplicationController
 
     public function downloadReporte($archivo = '')
     {
-        $fichero = 'public/temp/'.$archivo;
+        $fichero = 'public/temp/' . $archivo;
         if (file_exists($fichero)) {
             header('Content-Description: File Transfer');
             header('Content-Type: application/csv');
@@ -258,7 +258,7 @@ class ConyugeController extends ApplicationController
             header('Cache-Control: must-revalidate');
             header('Expires: 0');
             header('Pragma: public');
-            header('Content-Length: '.filesize($fichero));
+            header('Content-Length: ' . filesize($fichero));
             ob_clean();
             readfile($fichero);
             exit;
@@ -337,7 +337,7 @@ class ConyugeController extends ApplicationController
         $asignarFuncionario = new AsignarFuncionario;
         $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
         $fecsol = Carbon::now();
-
+        $fecing = $request->input('fecing', null);
         return [
             'fecsol' => $fecsol->format('Y-m-d'),
             'cedtra' => $request->input('cedtra'),
@@ -359,7 +359,7 @@ class ConyugeController extends ApplicationController
             'telefono' => $request->input('telefono'),
             'celular' => $request->input('celular'),
             'email' => mb_strtoupper($request->input('email'), 'UTF-8'),
-            'fecing' => (is_null($request->input('fecing')) || $request->input('fecing') == '') ? date('Y-m-d') : $request->input('fecing'),
+            'fecing' => $fecing,
             'salario' => ($request->input('salario')) ? $request->input('salario') : '0',
             'captra' => $request->input('captra'),
             'tipdis' => $request->input('tipdis'),
@@ -376,8 +376,8 @@ class ConyugeController extends ApplicationController
             'codban' => $request->input('codban'),
             'empresalab' => $request->input('empresalab'),
             'peretn' => $request->input('peretn'),
-            'resguardo_id' => $request->input('resguardo_id'),
-            'pub_indigena_id' => $request->input('pub_indigena_id'),
+            'resguardo_id' => $request->input('resguardo_id') ?? '2',
+            'pub_indigena_id' => $request->input('pub_indigena_id') ?? '2',
             'tipo' => $this->tipo,
             'coddoc' => $this->user['coddoc'],
             'documento' => $this->user['documento'],
@@ -837,7 +837,7 @@ class ConyugeController extends ApplicationController
             $response = [
                 'success' => true,
                 'name' => $file,
-                'url' => 'conyuge/download_reporte/'.$file,
+                'url' => 'conyuge/download_reporte/' . $file,
             ];
 
             return response()->json($response);

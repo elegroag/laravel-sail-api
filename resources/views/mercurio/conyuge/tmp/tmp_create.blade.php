@@ -12,7 +12,7 @@
                     <div class="col">
                         <fieldset>
                             <legend>Datos relación trabajador - conyuge</legend>
-                            <div class="row justify-content-around">
+                            <div class="row justify-content-start">
 
                                 <div class="col-md-3">
                                     <div class='form-group' group-for='nit'>
@@ -35,7 +35,7 @@
                                     </div>
                                 </div>
 
-                             
+
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='comper'>
@@ -82,7 +82,7 @@
                                         <span id='component_zoneurbana'></span>
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='nivedu'>
                                         <label for="nivedu" class="control-label">Nivel de educación</label>
@@ -92,12 +92,12 @@
 
                                 <div class="col-md-3">
                                     <div class="form-group" group-for='captra'>
-                                        <label for="captra" class="control-label">Capacidad de trabajar</label>
+                                        <label for="captra" class="control-label">Tiene discapacidad</label>
                                         <span id='component_captra'></span>
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
+                                <div class="col-md-3" id='show_tipdis'>
                                     <div class="form-group" group-for='tipdis'>
                                         <label for="tipdis" class="control-label">Tipo discapacidad</label>
                                         <span id='component_tipdis'></span>
@@ -146,7 +146,7 @@
                                     </div>
                                 </div>
 
-                                 <div class="col-md-3 d-none" id='show_tipcue'>
+                                <div class="col-md-3 d-none" id='show_tipcue'>
                                     <div class='form-group' group-for='tipcue'>
                                         <label for="tipcue" class="control-label">Tipo de cuenta</label>
                                         <span id='component_tipcue'></span>
@@ -175,7 +175,7 @@
                     <div class="col">
                         <fieldset>
                             <legend>Datos basicos conyuge</legend>
-                            <div class="row justify-content-around">
+                            <div class="row justify-content-start">
                                 <div class="w-25">
                                     <div class="form-group" group-for='tipdoc'>
                                         <label for="tipdoc" class="control-label">Tipo documento conyuge</label>
@@ -292,13 +292,13 @@
 
             <div class="card-footer">
                 <% if (estado == 'T' || estado == 'D' || estado == void 0) { %>
-                    <div class="row justify-content-center">
-                        <div class="col">
-                            <button type="button" class="btn btn-primary" id='guardar_ficha'>
-                                <i class="fas fa-save"></i> Guardar y continuar
-                            </button>
-                        </div>
+                <div class="row justify-content-center">
+                    <div class="col">
+                        <button type="button" class="btn btn-primary" id='guardar_ficha'>
+                            <i class="fas fa-save"></i> Guardar y continuar
+                        </button>
                     </div>
+                </div>
                 <% } %>
             </div>
         </div>

@@ -46,7 +46,7 @@ class UsuarioModel extends Backbone.Model {
 		) {
 			_err.push(erro);
 		} else {
-			if (attr.coddoc == '@') {
+			if (attr.coddoc == '') {
 				_err.push('El tipo de documento es requerido.');
 			}
 		}

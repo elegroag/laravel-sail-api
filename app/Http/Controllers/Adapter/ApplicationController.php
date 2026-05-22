@@ -14,7 +14,7 @@ use Throwable;
 
 class ApplicationController extends Controller
 {
-    private $models = [];
+    private array $models = [];
 
     public function __get(string $name = '')
     {
@@ -29,7 +29,7 @@ class ApplicationController extends Controller
         return false;
     }
 
-    public function setResponse($type)
+    public function setResponse(string $type)
     {
         switch ($type) {
             case 'ajax':
@@ -52,14 +52,12 @@ class ApplicationController extends Controller
         return null;
     }
 
-    public function renderObject($object, ?bool $format = null)
+    public function renderObject(array|object $object)
     {
-        header('Content-Type: application/json; charset=utf-8');
-        if (! $format) {
-            echo json_encode($object);
-        } else {
-            echo json_encode($object, JSON_NUMERIC_CHECK);
-        }
+        return response()->json($object, 203, [
+            'Content-Type' => 'application/json',
+            'Charset' => 'utf-8'
+        ]);
     }
 
     protected function renderFile(string $filepath = '')
@@ -127,7 +125,7 @@ class ApplicationController extends Controller
         return $user[$key] ?? null;
     }
 
-    public function renderText($html)
+    public function renderText(string $html)
     {
         header('Content-Type: text/html; charset=utf-8');
         echo $html;
@@ -153,9 +151,6 @@ class ApplicationController extends Controller
         return $input;
     }
 
-    /**
-     * Helper para limpiar entrada similar a clp() de Kumbia
-     */
     protected function clp(Request $request, string $name, $default = '')
     {
         return $this->cleanInput($request->input($name, $default));
@@ -163,7 +158,7 @@ class ApplicationController extends Controller
 
     public function setParamToView($name, $value) {}
 
-    public function errorFunc($msg, ?int $code = null)
+    public function errorFunc(string $msg, ?int $code = null)
     {
         set_flashdata('error', [
             'msj' => $msg,
@@ -173,7 +168,7 @@ class ApplicationController extends Controller
         return ['flag' => false, 'msg' => $msg];
     }
 
-    public function successFunc($msg, ?string $template = null)
+    public function successFunc(string $msg, ?string $template = null)
     {
         set_flashdata('success', [
             'msj' => $msg,
@@ -183,7 +178,7 @@ class ApplicationController extends Controller
         return ['flag' => true, 'msg' => $msg];
     }
 
-    public function setLogger($msg)
+    public function setLogger(string $msg)
     {
         Log::stack(['single', 'slack'])->debug($msg);
     }
@@ -216,6 +211,6 @@ class ApplicationController extends Controller
     protected function captureException(\Throwable $e, ?Request $request = null): array
     {
         $debug = $this->getDebug($e);
-        return $debug->errors($request);
+        return $debug->getErrors($request);
     }
 }

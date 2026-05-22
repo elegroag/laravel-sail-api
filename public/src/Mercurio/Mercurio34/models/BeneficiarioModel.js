@@ -35,6 +35,7 @@ class BeneficiarioModel extends Backbone.Model {
             biodire: '',
             bioemail: '',
             biophone: '',
+            ciunac:''
         };
     }
 
@@ -69,6 +70,7 @@ class BeneficiarioModel extends Backbone.Model {
             numcue: { required: false },
             tipcue: { required: false },
             codban: { required: false },
+            ciunac: { required: true }
         },
         messages: {
             tipdoc: { required: 'Se requiere del campo tipo documento' },
@@ -101,6 +103,7 @@ class BeneficiarioModel extends Backbone.Model {
             numcue: { required: 'Se requiere del campo número cuenta' },
             tipcue: { required: 'Se requiere del campo tipo cuenta' },
             codban: { required: 'Se requiere del campo banco' },
+            ciunac: { required: 'Se requiere del campo ciudad de nacimiento' },
         },
     };
 

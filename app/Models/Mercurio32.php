@@ -70,7 +70,7 @@ class Mercurio32 extends ModelBase
         'fecapr'
     ];
 
-    public function setZoneurbana($zoneurbana)
+    public function setZoneurbana(string $zoneurbana)
     {
         $this->zoneurbana = $zoneurbana;
     }
@@ -85,12 +85,12 @@ class Mercurio32 extends ModelBase
         return $this->peretn;
     }
 
-    public function setPeretn($peretn)
+    public function setPeretn(string $peretn)
     {
         $this->peretn = $peretn;
     }
 
-    public function setTipdis($tipdis)
+    public function setTipdis(string $tipdis)
     {
         $this->tipdis = $tipdis;
     }
@@ -100,7 +100,7 @@ class Mercurio32 extends ModelBase
         return $this->tipdis;
     }
 
-    public function setTipcue($tipcue)
+    public function setTipcue(string $tipcue)
     {
         $this->tipcue = $tipcue;
     }
@@ -110,7 +110,7 @@ class Mercurio32 extends ModelBase
         return $this->tipcue;
     }
 
-    public function setCodban($codban)
+    public function setCodban(string $codban)
     {
         $this->codban = $codban;
     }
@@ -959,11 +959,10 @@ class Mercurio32 extends ModelBase
             "codben"     => "integer|min:0",
             // unsignedBigInteger
             "numcue"     => "integer|min:0",
-            // uuid — nullable
-            "ruuid"      => "uuid",
+            "ruuid"      => "required|min:10",
             // date — required
             "fecnac"     => "required|date",
-            "fecing"     => "required|date",
+            "fecing"     => "nullable|date",
             // date — nullable
             "fecest"     => "date",
             "fecsol"     => "date",
@@ -1001,8 +1000,8 @@ class Mercurio32 extends ModelBase
             "codest"     => "max:2",
             "tippag"     => "max:1",
             "codban"     => "max:4",
-            "resguardo_id"       => "integer|min:0",
-            "pub_indigena_id"   => "integer|min:0",
+            "resguardo_id" => "min:1",
+            "pub_indigena_id" => "min:1",
             "tipcue"     => "max:1",
             "tipdis"     => "max:2",
             "peretn"     => "max:2",

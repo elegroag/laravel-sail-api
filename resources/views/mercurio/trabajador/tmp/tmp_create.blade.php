@@ -13,7 +13,7 @@
                     <div class="col-12">
                         <fieldset>
                             <legend>Datos empresa y trabajador</legend>
-                            <div class="row justify-content-around">
+                            <div class="row justify-content-start">
                                 <div class="col-md-2">
                                     <div class='form-group' group-for='nit'>
                                         <label for='nit' class='control-label'>NIT</label>
@@ -114,7 +114,7 @@
                     <div class="col-12">
                         <fieldset>
                             <legend>Datos basicos trabajador</legend>
-                            <div class="row justify-content-around">
+                            <div class="row justify-content-start">
 
                                 <div class="col-md-2">
                                     <div class='form-group' group-for='fecnac'>
@@ -188,12 +188,12 @@
 
                                 <div class="col-md-3">
                                     <div class='form-group' group-for='captra'>
-                                        <label for="captra" class="control-label">Capacidad trabajo</label>
+                                        <label for="captra" class="control-label">Tiene discapacidad</label>
                                         <span id='component_captra'></span>
                                     </div>
                                 </div>
 
-                                <div class="col-md-4">
+                                <div class="col-md-4" id='show_tipdis'>
                                     <div class='form-group' group-for='tipdis'>
                                         <label for="tipdis" class="control-label">Tipo discapacidad</label>
                                         <span id='component_tipdis'></span>
@@ -251,7 +251,7 @@
                     <div class="col-12">
                         <fieldset>
                             <legend>Datos requeridos afiliación</legend>
-                            <div class="row justify-content-around">
+                            <div class="row justify-content-start">
                                 <div class="col-md-3">
                                     <div class='form-group' group-for='tipafi'>
                                         <label for="tipafi" class="control-label">Tipo afiliados</label>
@@ -330,7 +330,7 @@
                     <div class="col-12">
                         <fieldset>
                             <legend>Datos de contacto</legend>
-                            <div class="row justify-content-around">
+                            <div class="row justify-content-start">
                                 <div class="col-md-3 ">
                                     <div class='form-group' group-for='telefono'>
                                         <label for="telefono" class="control-label">Teléfono</label>

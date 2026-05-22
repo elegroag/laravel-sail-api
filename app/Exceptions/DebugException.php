@@ -9,20 +9,18 @@ use Throwable;
 
 class DebugException extends Exception
 {
-    public static $errors = [];
 
-    protected array|string|null $extra = null;
-
+    protected array|string|null $errors = null;
     protected int $orderId;
 
     public function __construct(
         string $message = '',
         int $code = 0,
-        array|string|null $extra = null,
+        array|string|null $errors = null,
         ?Throwable $previous = null
     ) {
         parent::__construct($message, $code, $previous);
-        $this->extra = $extra;
+        $this->errors = $errors;
     }
 
     public function context()
@@ -38,7 +36,7 @@ class DebugException extends Exception
         $this->addMessage('archivo', $this->getFile());
     }
 
-    public function errors(?Request $request = null)
+    public function getErrors(?Request $request = null)
     {
         $data = [
             'success' => false,
@@ -46,7 +44,7 @@ class DebugException extends Exception
             'exception' => 1,
             'message' => $this->getMessage(),
             'msj' => $this->getMessage(),
-            'extra' => json_decode($this->extra)
+            'errors' => is_array($this->errors) || is_object($this->errors) ?  $this->errors : json_decode($this->errors)
         ];
         if (config('app.debug') == 'local') {
             $data['out'] = [
@@ -62,17 +60,17 @@ class DebugException extends Exception
 
     public function render(Request $request): JsonResponse
     {
-        return response()->json($this->errors($request), 203);
+        return response()->json($this->getErrors($request), 203);
     }
 
-    public static function add(string $key, array $collect)
+    public function add(string $key, array $collect)
     {
-        self::$errors[$key] = $collect;
+        $this->errors[$key] = $collect;
     }
 
-    public static function item(string $key)
+    public function item(string $key)
     {
-        return (isset(self::$errors[$key])) ? self::$errors[$key] : '';
+        return $this->errors[$key] ?? '';
     }
 
     public function addMessage($item, $value) {}

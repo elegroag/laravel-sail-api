@@ -741,7 +741,7 @@ class Mercurio34 extends ModelBase
             // integer
             "log"               => "required|integer|min:0",
             "usuario"           => "required|integer|min:0",
-            "codben"            => "integer|min:0",
+            "codben"            => "nullable|min:0",
             // char
             "nit"               => "max:15",
             "cedtra"            => "required|max:15",
@@ -780,21 +780,21 @@ class Mercurio34 extends ModelBase
             "biourbana"         => "max:1",
             "biodesco"          => "max:1",
             // unsignedBigInteger
-            "numcue"            => "integer|min:0",
+            "numcue"            => "nullable|min:0",
             // string
             "bioprinom"         => "max:34",
             "biosegnom"         => "max:34",
             "biopriape"         => "max:34",
             "biosegape"         => "max:34",
-            "bioemail"          => "email|max:142",
+            "bioemail"          => "nullable|email|max:142",
             "biodire"           => "max:142",
             // date
             "fecnac"            => "required|date",
-            "fecest"            => "date",
+            "fecest"            => "nullable|date",
             "fecsol"            => "date",
-            "fecapr"            => "date",
+            "fecapr"            => "nullable|date",
             // uuid
-            "ruuid"             => "required|uuid",
+            "ruuid"             => "required",
         ];
     }
 

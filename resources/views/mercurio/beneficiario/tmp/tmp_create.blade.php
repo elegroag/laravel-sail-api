@@ -13,14 +13,14 @@
                     <div class="col-12">
                         <fieldset>
                             <legend>Datos relación beneficiario - trabajador</legend>
-                            <div class="row justify-content-around">
+                            <div class="row justify-content-start">
                                 <div class="col-md-3">
                                     <div class='form-group' group-for='nit'>
                                         <label class='control-label'>NIT empresa</label>
                                         <span id='component_nit'></span>
                                     </div>
                                 </div>
-                            
+
                                 <div class="col-md-3">
                                     <div class='form-group' group-for='parent'>
                                         <label for="parent" class="control-label">Parentesco con trabajador</label>
@@ -28,7 +28,7 @@
                                     </div>
                                 </div>
 
-              
+
                                 <div class="col-md-3">
                                     <div class='form-group' group-for='cedtra'>
                                         <label for="cedtra" class="control-label">Cedula trabajador</label>
@@ -100,7 +100,7 @@
                     <div class="col-12">
                         <fieldset>
                             <legend>Datos basicos beneficiario</legend>
-                            <div class="row justify-content-around">
+                            <div class="row justify-content-start">
                                 <div class="col-md-3">
                                     <div class='form-group' group-for='tipdoc'>
                                         <label for="tipdoc" class="control-label">Tipo documento beneficiario</label>
@@ -173,12 +173,12 @@
 
                                 <div class="col-md-3">
                                     <div class='form-group' group-for='captra'>
-                                        <label for="captra" class="control-label">Capacidad de trabajar:</label>
+                                        <label for="captra" class="control-label">Tiene discapacidad:</label>
                                         <span id='component_captra'></span>
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
+                                <div class="col-md-3" id='show_tipdis'>
                                     <div class='form-group' group-for='tipdis'>
                                         <label for="tipdis" class="control-label">Tipo discapacidad:</label>
                                         <span id='component_tipdis'></span>
@@ -200,17 +200,10 @@
                                 En caso tal que el trabajador sea el papá del menor y este disponga la custodia legal del hijo o hijastro tambien puede acceder al beneficio.<br />
                                 Los siguientes datos permiten comprobar si el beneficiario tiene derecho al beneficio de Subsidio de cuota monetaria.</p>
 
-                            <div class="row show-biologico justify-content-around">
+                            <div class="row show-biologico justify-content-start">
                                 <div class="col-12">
                                     <label>Datos de padre/madre biológico diferente al trabajador:</label>
                                 </div>
-                                <div class="col-12">
-                                    <div class='form-group' group-for='biodesco' style="display:inline-block;">
-                                        <label class='label' style="display:inline-block;">¿Desconoce ubicación padre/madre biológico ?</label>
-                                        <span style="display:inline-block;" id='component_biodesco'></span>
-                                    </div>
-                                </div>
-
                                 <div class="col-md-3">
                                     <div class='form-group' group-for='biocedu'>
                                         <label class='control-label'>Cedula padre/madre biológico</label>
@@ -251,6 +244,28 @@
                                     <div class='form-group' group-for='biosegape'>
                                         <label class='control-label'>Segundo apellido padre/madre biológico</label>
                                         <span id='component_biosegape'></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class='form-group' group-for='biodesco' style="display:inline-block;">
+                                        <div class="form-check form-check-inline mt-2">
+                                            <label class="form-check-label mt-0 mr-3" for="flexRadioDefault1">
+                                                Marcar sí desconoce la ubicación padre/madre biológico?
+                                            </label>
+                                            <input
+                                                id="biodesco1"
+                                                name="biodesco"
+                                                toggle-entity="entitie_form"
+                                                target="-1"
+                                                class="form-check-input mt-0 highlight-checkbox"
+                                                toggle-event=""
+                                                type="checkbox"
+                                                value="S"
+                                                style="accent-color: #0d6efd; box-shadow: 0 0 8px rgba(13, 110, 253, 0.6); transform: scale(1.3); cursor: pointer;">
+                                        </div>
+                                        <label toggle-error="biodesco" id="biodesco-error" class="error" for="biodesco" style="display: none;"></label>
+
                                     </div>
                                 </div>
 
@@ -297,7 +312,7 @@
                     <div class="col-12">
                         <fieldset>
                             <legend>Datos de medio de pago subsidio cuota monetaria</legend>
-                            <div class="row justify-content-around">
+                            <div class="row justify-content-start">
                                 <div class="col-12">
                                     <h6>¡Tenga encuenta por favor!</h6>
                                     <p>El medio de pago y cuenta relacionada, debe estar subscrito al trabajador o conyuge madre del menor, quien posee el beneficio y derecho al subsidio de cuota monetaria.</p>
@@ -340,13 +355,13 @@
 
         <div class="card-footer">
             <% if (estado == 'T' || estado == 'D' || estado == void 0) { %>
-                <div class="row justify-content-center">
-                    <div class="col">
-                        <button type="button" class="btn btn-primary" id='guardar_ficha'>
-                            <i class="fas fa-save"></i> Guardar y continuar
-                        </button>
-                    </div>
+            <div class="row justify-content-center">
+                <div class="col">
+                    <button type="button" class="btn btn-primary" id='guardar_ficha'>
+                        <i class="fas fa-save"></i> Guardar y continuar
+                    </button>
                 </div>
+            </div>
             <% } %>
         </div>
     </div>

@@ -1,3 +1,4 @@
+import Logger from '@/Common/Logger';
 import { ComponentModel } from '@/Componentes/Models/ComponentModel';
 import { eventsFormControl } from '@/Core';
 import { FormView } from '@/Mercurio/FormView';
@@ -7,15 +8,15 @@ import flatpickr from 'flatpickr';
 import { Spanish } from 'flatpickr/dist/l10n/es';
 
 class FormTrabajadorView extends FormView {
-    #choiceComponents = null;
-
+    
     constructor(options = {}) {
         super({
             ...options,
             onRender: (el = {}) => this.#afterRender(el),
         });
         this.viewComponents = [];
-        this.#choiceComponents = [];
+        this.choiceComponents = [];
+        this.logger = new Logger();
     }
 
     get events() {
@@ -30,6 +31,7 @@ class FormTrabajadorView extends FormView {
             'click #cancel': 'cancel',
             'blur [data-toggle="is_numeric"]': 'isNumber',
             'change #peretn': 'changePeretn',
+            'change [name="captra"]': "changeCaptra"
         };
     }
 
@@ -64,7 +66,7 @@ class FormTrabajadorView extends FormView {
                 if (inputElement.length && valor) {
                     inputElement.val(valor);
                 } else {
-                    inputElement.val('@');
+                    inputElement.val('');
                 }
             });
 
@@ -91,20 +93,29 @@ class FormTrabajadorView extends FormView {
             setTimeout(() => $('label.error').text(''), 3000);
 
             $.each(this.selectores, (index, element) => {
-                this.#choiceComponents[element.name] = new Choices(element);
+                this.choiceComponents[element.name] = new Choices(element);
                 const name = this.model.get(element.name);
-                if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
+                if (name) this.choiceComponents[element.name].setChoiceByValue(name);
             });
         } else {
             $.each(
                 this.selectores,
-                (index, element) => (this.#choiceComponents[element.name] = new Choices(element, { silent: true, itemSelectText: '' })),
+                (index, element) => (this.choiceComponents[element.name] = new Choices(element, { silent: true, itemSelectText: '' })),
             );
+            this.form.find('#salario').val('0');
+            this.form.find('#peretn').val('7');
+            this.$el.find('.show-peretn').addClass('d-none');
+            this.form.find('#captra2').prop('checked', true);
+            this.$el.find('#show_tipdis').addClass('d-none');
+            this.$el.find('#facvul').val('12');
+            this.$el.find('#cabhog').val('S');
         }
+
+        this.form.find('#autoriza1').prop('checked', true);
 
         this.selectores.on('change', (event) => {
             if (event.detail) {
-                this.validateChoicesField(event.detail.value, this.#choiceComponents[event.currentTarget.name]);
+                this.validateChoicesField(event.detail.value, this.choiceComponents[event.currentTarget.name]);
             }
         });
 
@@ -113,11 +124,36 @@ class FormTrabajadorView extends FormView {
 
         eventsFormControl($el);
 
-        flatpickr($el.find('#fecnac, #fecing'), {
+        let fechaPasada = new Date();
+        fechaPasada.setDate(fechaPasada.getDate() - 5110);
+
+        flatpickr($el.find('#fecnac'), {
             enableTime: false,
             dateFormat: 'Y-m-d',
             locale: Spanish,
+            maxDate: fechaPasada,
+            minDate: '1850-01-01',
+            allowInput: true
         });
+
+        flatpickr($el.find('#fecing'), {
+            enableTime: false,
+            dateFormat: 'Y-m-d',
+            locale: Spanish,
+            maxDate: 'today',
+            minDate: '1970-01-01',
+            allowInput: true
+        });
+    }
+
+    changeCaptra(e){
+        const captra = this.$el.find("[name='captra']")[0].checked ? 'S' : 'N';
+        if(captra === 'S'){
+            this.$el.find('#show_tipdis').removeClass('d-none');
+            this.$el.find('#tipdis').val('00');
+        }else{
+            this.$el.find('#show_tipdis').addClass('d-none');
+        }
     }
 
     changeOtraEmpresa(e) {
@@ -227,7 +263,15 @@ class FormTrabajadorView extends FormView {
                                                 _tab.show();
                                             }
                                         } else {
-                                            this.App.trigger('alert:error', { message: response.msj });
+                                            if(response.errors){
+                                                let msj ='';
+                                                $.each(response.errors, (key, items) => {
+                                                    if(items !== undefined) msj+="<p>"+items+"</p>";
+                                                });
+                                                this.App.trigger('alert:error', { message: msj });
+                                            } else {
+                                                this.App.trigger('alert:error', { message: response.msj });
+                                            }
                                         }
                                     }
                                 },
@@ -266,7 +310,7 @@ class FormTrabajadorView extends FormView {
 
                                 $.each(this.selectores, (index, element) => {
                                     const name = this.model.get(element.name);
-                                    if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
+                                    if (name) this.choiceComponents[element.name].setChoiceByValue(name);
                                 });
                             }
                         },
@@ -294,7 +338,7 @@ class FormTrabajadorView extends FormView {
         if (_.size(this.viewComponents) > 0) {
             _.each(this.viewComponents, (view) => view.remove());
         }
-        $.each(this.#choiceComponents, (choice) => choice.destroy());
+        $.each(this.choiceComponents, (choice) => choice.destroy());
         FormView.prototype.remove.call(this, {});
     }
 }
