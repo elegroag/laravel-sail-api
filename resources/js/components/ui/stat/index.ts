@@ -1,0 +1,1 @@
+export { default as StatPill } from './StatPill.vue'

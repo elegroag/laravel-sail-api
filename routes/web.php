@@ -80,6 +80,8 @@ require __DIR__ . '/mercurio/consultas_empresa.php';
 require __DIR__ . '/mercurio/consultas_trabajador.php';
 require __DIR__ . '/mercurio/usuario.php';
 
+require __DIR__ . '/mercurio-v2/web.php';
+
 require __DIR__ . '/cajas/menu.php';
 require __DIR__ . '/cajas/menu_permission.php';
 require __DIR__ . '/cajas/principal.php';

@@ -43,7 +43,7 @@ class MercurioAuthenticated
             return redirect()->route('web.salir');
         }
 
-        if ($this->autorization($request) === false) {
+        if (config('mode') === 'production' && $this->autorization($request) === false) {
 
             if ($request->expectsJson()) {
                 return response()->json([

@@ -1,0 +1,32 @@
+@import 'tailwindcss';
+
+/* ── Reset mínimo ─────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body, #app { height: 100%; margin: 0; padding: 0; }
+
+/* ── Custom scrollbar ─────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+
+/* ── Transición de rutas ──────────────────────────── */
+.fade-enter-active, .fade-leave-active { transition: opacity .18s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+
+/* ── Sidebar collapse ─────────────────────────────── */
+.sidebar-expanded  { width: 220px; }
+.sidebar-collapsed { width: 56px; }
+.sidebar-transition { transition: width .25s cubic-bezier(.4,0,.2,1); }
+
+/* ── Etiqueta de texto en el sidebar ─────────────── */
+.nav-label {
+  overflow: hidden;
+  white-space: nowrap;
+  transition: max-width .25s ease, opacity .2s ease;
+}
+.sidebar-collapsed .nav-label { max-width: 0; opacity: 0; }
+.sidebar-expanded  .nav-label { max-width: 160px; opacity: 1; }
+
+@theme inline {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}

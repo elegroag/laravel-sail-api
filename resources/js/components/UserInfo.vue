@@ -4,7 +4,7 @@ import { getInitials } from '@/composables/useInitials';
 import type { User } from '@/types';
 
 type Props = {
-    user: User;
+    user: User | null;
     showEmail?: boolean;
 };
 
@@ -14,16 +14,14 @@ withDefaults(defineProps<Props>(), {
 </script>
 
 <template>
-    <Avatar class="h-8 w-8 overflow-hidden rounded-lg">
+    <Avatar v-if="user" class="h-8 w-8 overflow-hidden rounded-lg">
         <AvatarFallback class="rounded-lg text-black dark:text-white">
-            {{ getInitials(user.name) }}
+            {{ getInitials(user.nombre ?? '') }}
         </AvatarFallback>
     </Avatar>
 
     <div class="grid flex-1 text-left text-sm leading-tight">
-        <span class="truncate font-medium">{{ user.name }}</span>
-        <span v-if="showEmail" class="truncate text-xs text-muted-foreground">{{
-            user.email
-        }}</span>
+        <span class="truncate font-medium">{{ user?.nombre ?? 'Usuario' }}</span>
+        <span v-if="showEmail && user" class="truncate text-xs text-muted-foreground">{{ user.email }}</span>
     </div>
 </template>

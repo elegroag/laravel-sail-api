@@ -1,0 +1,1 @@
+export { default as PlaceholderView } from './PlaceholderView.vue'

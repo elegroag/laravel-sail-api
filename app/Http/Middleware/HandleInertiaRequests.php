@@ -37,9 +37,12 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        if ($request->is('mercurio/*') || $request->is('cajas/*')) {
+        if ($request->is('mercurio/*') || $request->is('mercurio-v2/*') || $request->is('cajas/*')) {
             return [
                 ...parent::share($request),
+                'auth' => [
+                    'user' => session('user'),
+                ],
             ];
         }
 

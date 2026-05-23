@@ -30,6 +30,7 @@ use App\Services\Entidades\TrabajadorService;
 use App\Services\Api\ApiWhatsapp;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -516,7 +517,7 @@ class AuthController extends Controller
         }
     }
 
-    public function paramsLogin()
+    public function paramsLogin(): JsonResponse
     {
         $tipsoc = Subsi54::pluck('detalle', 'tipsoc')->toArray();
 
@@ -903,7 +904,7 @@ class AuthController extends Controller
                     $data['tipo'] == 'P' ||
                     $data['tipo'] == 'S')  && ($user07->whatsapp == null || $user07->email == null)
             ) {
-                //consulta a la api externa 
+                //consulta a la api externa
                 $empresa = (new EmpresaService())->buscarEmpresaSubsidio($user07->documento);
                 if ($empresa) {
                     $user07->whatsapp = $empresa['telr'];
@@ -919,7 +920,7 @@ class AuthController extends Controller
                     $data['tipo'] == 'O'
                 )  && ($user07->whatsapp == null || $user07->email == null)
             ) {
-                //consulta a la api externa 
+                //consulta a la api externa
                 $trabajador = (new TrabajadorService())->buscarTrabajadorSubsidio($user07->documento);
                 if ($trabajador) {
                     $user07->whatsapp = $trabajador['telefono'];
