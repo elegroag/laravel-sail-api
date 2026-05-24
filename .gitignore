@@ -68,3 +68,13 @@ pnpm-lock.yaml
 AGENTS.md
 .kilo/
 .hermes/
+.agents
+.claude
+.cursor
+.kiro
+.pi
+.tra*
+.opencode
+.gemini
+.codex
+CLAUDE.md
