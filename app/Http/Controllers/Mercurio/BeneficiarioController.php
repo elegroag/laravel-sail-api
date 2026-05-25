@@ -819,7 +819,7 @@ class BeneficiarioController extends ApplicationController
             'tiphij' => $request->input('tiphij'),
             'nivedu' => $request->input('nivedu'),
             'captra' => $request->input('captra'),
-            'tipdis' => $request->input('tipdis'),
+            'tipdis' => $request->input('captra') == 'N' ? '00' :  $request->input('tipdis'),
             'calendario' => $request->input('calendario'),
             'cedacu' => $request->input('cedacu'),
             'biocedu' => $request->input('biocedu'),

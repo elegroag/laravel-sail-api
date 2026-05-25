@@ -98,10 +98,7 @@ class FormTrabajadorView extends FormView {
                 if (name) this.choiceComponents[element.name].setChoiceByValue(name);
             });
         } else {
-            $.each(
-                this.selectores,
-                (index, element) => (this.choiceComponents[element.name] = new Choices(element, { silent: true, itemSelectText: '' })),
-            );
+            
             this.form.find('#salario').val('0');
             this.form.find('#peretn').val('7');
             this.$el.find('.show-peretn').addClass('d-none');
@@ -109,6 +106,12 @@ class FormTrabajadorView extends FormView {
             this.$el.find('#show_tipdis').addClass('d-none');
             this.$el.find('#facvul').val('12');
             this.$el.find('#cabhog').val('S');
+            this.$el.find('#tipdis').val('00');
+
+            $.each(
+                this.selectores,
+                (index, element) => (this.choiceComponents[element.name] = new Choices(element, { silent: true, itemSelectText: '' })),
+            );
         }
 
         this.form.find('#autoriza1').prop('checked', true);

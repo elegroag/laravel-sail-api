@@ -547,7 +547,7 @@ class TrabajadorController extends ApplicationController
             'salario' => $request->input('salario'),
             'tipsal' => $request->input('tipsal'),
             'captra' => $request->input('captra'),
-            'tipdis' => $request->input('tipdis'),
+            'tipdis' => $request->input('captra') == 'N' ? '00' :  $request->input('tipdis'),
             'nivedu' => $request->input('nivedu'),
             'rural' => $request->input('rural'),
             'horas' => $request->input('horas'),

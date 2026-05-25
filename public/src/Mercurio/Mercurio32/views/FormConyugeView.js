@@ -105,10 +105,7 @@ export class FormConyugeView extends FormView {
                 }
             }
         } else {
-            $.each(
-                this.selectores,
-                (index, element) => (this.choiceComponents[element.name] = new Choices(element, { silent: true, itemSelectText: '' })),
-            );
+            
             this.form.find('#salario').val('0');
             this.form.find('#peretn').val('7');
             this.$el.find('.show-peretn').addClass('d-none');
@@ -116,6 +113,11 @@ export class FormConyugeView extends FormView {
             this.form.find('#zoneurbana1').prop('checked', true);
             this.form.find('#captra2').prop('checked', true);
             this.$el.find('#show_tipdis').addClass('d-none');
+            this.$el.find('#tipdis').val('00');
+            $.each(
+                this.selectores,
+                (index, element) => (this.choiceComponents[element.name] = new Choices(element, { silent: true, itemSelectText: '' })),
+            );
         }
 
         this.form.find('#autoriza1').prop('checked', true);

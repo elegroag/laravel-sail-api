@@ -22,6 +22,7 @@
                 <p class="p-1 text-gray">El adjunto que posee firma digital no se puede cambiar o borrar.
                     Para modificar la información del mismo, puede editar la "Ficha Principal De Registro". El sistema realiza la tarea de borrar el documento existente y crear uno nuevo con la respectiva firma.</p>
                     <img src="{{ asset('img/Mercurio/firma_digital.png') }}" class="img-responsive" style="width:200px" />
+                    <p class="p-1 text-danger fw-bold mt-2">A partir de ahora, solo se admiten documentos en formato PDF. No se aceptan imágenes (JPG, PNG, etc.).</p>
             </div>
         </fieldset>
     </div>

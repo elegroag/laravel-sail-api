@@ -136,6 +136,7 @@ export class FormBeneficiarioView extends FormView {
             this.$el.find('#numcue').val('0');
             this.$el.find('#huerfano').val('0');
             this.$el.find('#tiphij').val('0');
+            this.$el.find('#tipdis').val('00');
             $.each(
                 this.selectores,
                 (index, element) => (this.#choiceComponents[element.name] = new Choices(element, { silent: true, itemSelectText: '' })),

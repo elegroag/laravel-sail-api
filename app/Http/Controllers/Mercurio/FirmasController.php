@@ -15,11 +15,11 @@ use Illuminate\Http\Request;
 
 class FirmasController extends ApplicationController
 {
-    protected $db;
+    protected DbBase $db;
 
-    protected $user;
+    protected ?array $user;
 
-    protected $tipo;
+    protected ?string $tipo;
 
     public function __construct()
     {
@@ -31,7 +31,7 @@ class FirmasController extends ApplicationController
     /**
      * GET /firmas/index
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
             $user = $this->user ?? [];
@@ -47,7 +47,7 @@ class FirmasController extends ApplicationController
                 'publicKey' => $content,
             ]);
         } catch (\Throwable $e) {
-            $salida = $this->captureException($e, request());
+            $salida = $this->captureException($e, $request);
             set_flashdata('error', [
                 'msj' => $salida['msj'],
                 'code' => $salida['code'],
@@ -195,6 +195,7 @@ class FirmasController extends ApplicationController
             $user = $this->user ?? [];
             $coddoc = $user['coddoc'] ?? null;
             $documento = $user['documento'] ?? null;
+            $tipo = $this->tipo ?? null;
             $systemKey = $request->input('systemKey');
 
             if (! $documento || ! $coddoc) {
@@ -205,14 +206,18 @@ class FirmasController extends ApplicationController
                 throw new DebugException('La clave del sistema es requerida.', 422);
             }
 
-            $usuario = Mercurio07::where('coddoc', $coddoc)->where('documento', $documento)->first();
+            $usuario = Mercurio07::where('tipo', $tipo)
+                ->where('documento', $documento)
+                ->where('coddoc', $coddoc)
+                ->first();
+
             if (! $usuario) {
                 throw new DebugException('No fue posible identificar el usuario.', 404);
             }
 
             $storedHash = $usuario->getClave();
-            if (! clave_verify($systemKey, $storedHash)) {
-                throw new DebugException('Error el valor de la clave no es válido.', 401);
+            if (! clave_verify(trim($systemKey), $storedHash)) {
+                throw new DebugException('Error el valor de la clave no es válida.', 503);
             }
 
             $mfirma = Mercurio16::where('documento', $documento)
@@ -244,7 +249,7 @@ class FirmasController extends ApplicationController
         }
     }
 
-    public function sendMailFirmaDigital($usuario, $hash, $passwordNumerico)
+    public function sendMailFirmaDigital(Mercurio07 $usuario, string $hash, string $passwordNumerico)
     {
         $nombre = capitalize($usuario->getNombre());
 

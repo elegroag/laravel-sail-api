@@ -147,6 +147,13 @@ class LoadDocumentsView extends Backbone.View {
         let files = document.getElementById(target.attr('id')).files;
         if (files.length == 0) return;
         let archivo = files[0];
+
+        if (archivo.type !== 'application/pdf') {
+            $App.trigger('alert:error', { message: 'Solo se permiten documentos en formato PDF. No se aceptan imágenes.' });
+            target.val('');
+            return;
+        }
+
         this.$el.find('.toogle-show-name[data-code="' + coddoc + '"]').html(archivo.name);
     }
 

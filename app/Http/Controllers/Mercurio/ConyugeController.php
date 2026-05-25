@@ -362,7 +362,7 @@ class ConyugeController extends ApplicationController
             'fecing' => $fecing,
             'salario' => ($request->input('salario')) ? $request->input('salario') : '0',
             'captra' => $request->input('captra'),
-            'tipdis' => $request->input('tipdis'),
+            'tipdis' => $request->input('captra') == 'N' ? '00' :  $request->input('tipdis'),
             'nivedu' => $request->input('nivedu'),
             'autoriza' => $request->input('autoriza'),
             'numcue' => ($request->input('numcue') == null || $request->input('numcue') == '') ? '0' : $request->input('numcue'),
