@@ -81,14 +81,6 @@ use App\Services\Utils\CalculatorDias;
             <td>{{$extra}}</td>
             @endif
             <td>{{$mmercurio->getEstadoDetalle()}}</td>
-            <td class='table-actions'>
-                <a href='#!'
-                    class='table-action btn btn-xs btn-primary'
-                    title='Info'
-                    onclick="info('$tipopc','{{$mmercurio->getId()}}')">
-                    <i class='fas fa-info'></i>
-                </a>
-            </td>
         </tr>
         @endforeach
     </table>

@@ -37,7 +37,9 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body p-0 m-3">
-                    <form id="form" action="{{route('auditoria.reporte')}}" class="validation_form" autocomplete="off" novalidate>
+                    <form id="form" action="{{route('auditoria.reporte')}}" method="POST" target="_blank" autocomplete="off" novalidate>
+                        @csrf
+                        <input type="hidden" name="format" value="xlsx">
                         <div class="row justify-content-between">
                             <div class="col-md-3 ml-auto">
                                 <div class="form-group">
