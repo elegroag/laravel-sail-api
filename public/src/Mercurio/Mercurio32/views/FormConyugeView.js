@@ -72,6 +72,13 @@ export class FormConyugeView extends FormView {
             }else{
                 this.form.find('#comper2').prop('checked', true);
             }
+
+            if(this.model.get('captra') === 'N'){
+                this.form.find('#captra2').prop('checked', true);
+                this.$el.find('#tipdis').val('00');
+            }else{
+                this.form.find('#captra1').prop('checked', true);
+            }
             
             this.form.find('#nit').attr('disabled', 'true');
 

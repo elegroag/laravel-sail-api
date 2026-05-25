@@ -71,6 +71,7 @@ export class FormBeneficiarioView extends FormView {
 
             if(this.model.get('captra') === 'N'){
                 this.form.find('#captra2').prop('checked', true);
+                this.$el.find('#tipdis').val('00');
             }else{
                 this.form.find('#captra1').prop('checked', true);
             }
@@ -214,10 +215,12 @@ export class FormBeneficiarioView extends FormView {
 
         const age = this.calculateAge(fecnac);
 
+        console.log(age);
+
         if (age === null) return true;
 
         if (parent == '1' || parent == '4') {
-            if (age < 18) {
+            if (age > 18) {
                 this.App.trigger('alert:warning', {
                     message: 'Para parentesco Hijo/Beneficiario, la edad debe ser mayor o igual a 18 años.',
                 });
@@ -253,6 +256,8 @@ export class FormBeneficiarioView extends FormView {
         let _err = 0;
         if (this.form.valid() == false) _err++;
         if (this.validateAge() === false) _err++;
+
+        console.log(this.form.valid());
 
         if (_err > 0) {
             target.removeAttr('disabled');

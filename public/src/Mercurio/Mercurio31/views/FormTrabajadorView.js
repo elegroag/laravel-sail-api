@@ -73,6 +73,13 @@ class FormTrabajadorView extends FormView {
             $('#nit').removeAttr('disabled');
             $('#razsoc').removeAttr('disabled');
 
+            if(this.model.get('captra') === 'N'){
+                this.form.find('#captra2').prop('checked', true);
+                this.$el.find('#tipdis').val('00');
+            }else{
+                this.form.find('#captra1').prop('checked', true);
+            }
+
             if (this.model.get('tippag') == 'A' || this.model.get('tippag') == 'D') {
                 $el.find('#show_numcue').removeClass('d-none');
                 $el.find('#show_codban').removeClass('d-none');
