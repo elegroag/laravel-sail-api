@@ -379,13 +379,15 @@ class CertificadoService
 
         switch ($tipo_consulta) {
             case 'all':
+                $page = (int) $request->getParam('page', 1);
+                $perPage = 50;
                 $response['datos'] = Mercurio45::query()
                     ->join('mercurio10', function ($join) use ($tipopc) {
-                        $join->on('Mercurio45.id', '=', 'mercurio10.numero')
+                        $join->on('mercurio45.id', '=', 'mercurio10.numero')
                             ->where('mercurio10.tipopc', '=', $tipopc);
                     })
                     ->select([
-                        'Mercurio45.*',
+                        'mercurio45.*',
                         'mercurio10.estado as estado',
                         'mercurio10.fecsis as fecest',
                     ])
@@ -397,7 +399,17 @@ class CertificadoService
                             $q->whereRaw($condi_extra);
                         }
                     })
-                    ->get();
+                    ->orderBy('mercurio10.fecsis', 'desc')
+                    ->paginate($perPage);
+
+                $response['paginate'] = [
+                    'total' => $response['datos']->total(),
+                    'per_page' => $response['datos']->perPage(),
+                    'current_page' => $response['datos']->currentPage(),
+                    'last_page' => $response['datos']->lastPage(),
+                    'from' => $response['datos']->firstItem(),
+                    'to' => $response['datos']->lastItem(),
+                ];
                 break;
             case 'alluser':
                 $response['datos'] = Mercurio45::whereRaw("usuario='{$usuario}' and estado='P'")->get();

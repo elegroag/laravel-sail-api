@@ -1,3 +1,5 @@
+import flatpickr from 'flatpickr';
+import { Spanish } from 'flatpickr/dist/l10n/es';
 import { $App } from '@/App';
 import { Messages } from '@/Utils';
 
@@ -22,6 +24,15 @@ const validatorInit = () => {
 
 
 $(() => {
+    flatpickr('.datepicker', {
+        dateFormat: 'Y-m-d',
+        locale: Spanish,
+        allowInput: true,
+        disableTouchKeyboard: true,
+        altInput: true,
+        altFormat: 'd/m/Y',
+    });
+
 	window.App.initialize();
 	const modalCapture = new bootstrap.Modal(document.getElementById('captureModal'));
 

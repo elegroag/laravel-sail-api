@@ -543,7 +543,9 @@ class TrabajadorService
 
         switch ($tipo_consulta) {
             case 'all':
-                $response["datos"] = Mercurio31::query()
+                $page = (int) $request->getParam('page', 1);
+                $perPage = 50;
+                $paginator = Mercurio31::query()
                     ->join('mercurio10', function ($join) use ($tipopc) {
                         $join->on('mercurio31.id', '=', 'mercurio10.numero')
                             ->where('mercurio10.tipopc', '=', $tipopc);
@@ -557,7 +559,14 @@ class TrabajadorService
                         if (is_array($condi_extra)) $q->where($condi_extra);
                         if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
                     })
-                    ->get();
+                    ->paginate($perPage, ['*'], 'page', $page);
+                $response["datos"] = $paginator->items();
+                $response["paginate"] = [
+                    'current_page' => $paginator->currentPage(),
+                    'per_page' => $paginator->perPage(),
+                    'total' => $paginator->total(),
+                    'last_page' => $paginator->lastPage(),
+                ];
                 break;
             case 'alluser':
                 $response["datos"] = Mercurio31::where("usuario", $usuario)->where("estado", 'P')->get();

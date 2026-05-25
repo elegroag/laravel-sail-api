@@ -54,14 +54,31 @@ class AuditoriaController extends ApplicationController
         $tipopc = $request->input('tipopc');
         $fecini = $request->input('fecini');
         $fecfin = $request->input('fecfin');
+        $page = (int) $request->input('page', 1);
+
+        // Validar fechas requeridas
+        if (empty($fecini) || empty($fecfin)) {
+            $html = '<div class="alert alert-warning">Debe ingresar fecha inicial y final.</div>';
+            return $this->renderText($html);
+        }
+
         $condi = " mercurio10.fecsis>='$fecini' and mercurio10.fecsis<='$fecfin' ";
-        $mercurio = $this->consultaTipopc($tipopc, 'all', '', '', $condi);
+        $mercurio = $this->consultaTipopc($tipopc, 'all', '', '', $condi, $page);
+
+        // Pre-cargar gener02 y mercurio20 para la vista (evita $this-> en Blade)
+        $usuarios = collect($mercurio['datos'] ?? [])->pluck('usuario')->unique();
+        $logs = collect($mercurio['datos'] ?? [])->pluck('log')->unique();
+        $gener02Map = Gener02::whereIn('usuario', $usuarios)->get()->keyBy('usuario');
+        $mercurio20Map = Mercurio20::whereIn('log', $logs)->get()->keyBy('log');
 
         $html = view('cajas.auditoria._consulta', [
             'tipopc' => $tipopc,
             'fecini' => $fecini,
             'fecfin' => $fecfin,
             'mercurio' => $mercurio,
+            'gener02Map' => $gener02Map,
+            'mercurio20Map' => $mercurio20Map,
+            'paginate' => $mercurio['paginate'] ?? null,
         ])->render();
 
         return $this->renderText($html);
@@ -158,7 +175,7 @@ class AuditoriaController extends ApplicationController
         return $this->renderObject($response);
     }
 
-    public function consultaTipopc($tipopc, $tipo_consulta, $numero = "", $usuario = "", $condi = "")
+    public function consultaTipopc($tipopc, $tipo_consulta, $numero = "", $usuario = "", $condi = "", $page = 1)
     {
         $condi_extra = "";
         if ($condi != "") $condi_extra = " $condi";
@@ -168,45 +185,34 @@ class AuditoriaController extends ApplicationController
             'numero' => $numero,
             'usuario' => $usuario,
             'condi_extra' => $condi_extra,
+            'page' => $page,
         ];
 
-        if ($tipopc == "1") {
-            $entityService = new TrabajadorService();
-        }
-        if ($tipopc == "2") {
-            $entityService = new EmpresaService();
-        }
-        if ($tipopc == "3") {
-            $entityService = new ConyugeService();
-        }
-        if ($tipopc == "4") {
-            $entityService = new BeneficiarioService();
-        }
-        if ($tipopc == "5") {
-            $entityService = new ActualizaEmpresaService();
-        }
-        if ($tipopc == "6") {
-            $entityService = new DatosTrabajadorService();
-        }
-        if ($tipopc == "7") {
-            $entityService = new RetiroService();
-        }
-        if ($tipopc == "8") {
-            $entityService = new CertificadoService();
-        }
-        if ($tipopc == "10") {
-            $entityService = new FacultativoService();
-        }
-        if ($tipopc == "9") {
-            $entityService = new PensionadoService();
-        }
-        if ($tipopc == "11") {
-            $entityService = new EmpresaService();
-            //Mercurio39
-        }
-        if ($tipopc == "12") {
-            //Mercurio40
-            $entityService = new EmpresaService();
+        $entityService = match (true) {
+            $tipopc == "1" => new TrabajadorService(),
+            $tipopc == "2" => new EmpresaService(),
+            $tipopc == "3" => new ConyugeService(),
+            $tipopc == "4" => new BeneficiarioService(),
+            $tipopc == "5" => new ActualizaEmpresaService(),
+            $tipopc == "6" => new DatosTrabajadorService(),
+            $tipopc == "7" => new RetiroService(),
+            $tipopc == "8" => new CertificadoService(),
+            $tipopc == "9" => new PensionadoService(),
+            $tipopc == "10" => new FacultativoService(),
+            $tipopc == "11" => new EmpresaService(),
+            $tipopc == "12" => new EmpresaService(),
+            default => null,
+        };
+
+        if ($entityService === null) {
+            return [
+                'datos' => [],
+                'consulta' => '',
+                'campos' => [],
+                'count' => 0,
+                'paginate' => null,
+                'all' => [],
+            ];
         }
 
         $out = $entityService->consultaTipopc(
@@ -218,6 +224,7 @@ class AuditoriaController extends ApplicationController
             'consulta' => ($out['consulta'] ?? ''),
             'campos' => ($out['campos'] ?? []),
             'count' => ($out['count'] ?? 0),
+            'paginate' => ($out['paginate'] ?? null),
             'all' => ($out['all'] ?? []),
         ];
         return $response;

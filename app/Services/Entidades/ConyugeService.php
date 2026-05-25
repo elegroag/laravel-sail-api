@@ -428,11 +428,11 @@ class ConyugeService
             case 'all':
                 $response['datos'] = Mercurio32::query()
                     ->join('mercurio10', function ($join) use ($tipopc) {
-                        $join->on('mercurio31.id', '=', 'mercurio10.numero')
+                        $join->on('mercurio32.id', '=', 'mercurio10.numero')
                             ->where('mercurio10.tipopc', '=', $tipopc);
                     })
                     ->select([
-                        'mercurio31.*',
+                        'mercurio32.*',
                         'mercurio10.estado as estado',
                         'mercurio10.fecsis as fecest',
                     ])
@@ -444,7 +444,21 @@ class ConyugeService
                             $q->whereRaw($condi_extra);
                         }
                     })
-                    ->get();
+                    ->paginate(50);
+
+                $page = $request->getParam('page', 1);
+                if ($page > 1) {
+                    $response['datos'] = $response['datos']->setPageUrl('all', $response['datos']->setPageUrl('all', $page));
+                }
+
+                $response['paginate'] = [
+                    'total' => $response['datos']->total(),
+                    'per_page' => $response['datos']->perPage(),
+                    'current_page' => $response['datos']->currentPage(),
+                    'last_page' => $response['datos']->lastPage(),
+                    'from' => $response['datos']->firstItem(),
+                    'to' => $response['datos']->lastItem(),
+                ];
                 break;
             case 'alluser':
                 $response['datos'] = Mercurio32::whereRaw("usuario='{$usuario}' and estado='P'")->get();

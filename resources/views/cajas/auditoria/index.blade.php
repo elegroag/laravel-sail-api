@@ -3,6 +3,7 @@
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/flatpickr/flatpickr.min.css') }}" />
 @endpush
 
 @push('scripts')
@@ -52,13 +53,13 @@
                             <div class="col-md-3 ml-auto">
                                 <div class="form-group">
                                     <label for="fecini" class="form-control-label">Fecha Inicial</label>
-                                    <input type="date" id="fecini" name="fecini" class="form-control">
+                                    <input type="text" id="fecini" name="fecini" class="form-control datepicker" placeholder="YYYY-MM-DD" autocomplete="off">
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="fecfin" class="form-control-label">Fecha Final</label>
-                                    <input type="date" id="fecfin" name="fecfin" class="form-control">
+                                    <input type="text" id="fecfin" name="fecfin" class="form-control datepicker" placeholder="YYYY-MM-DD" autocomplete="off">
                                 </div>
                             </div>
                         </div>

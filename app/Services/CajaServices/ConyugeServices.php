@@ -12,7 +12,6 @@ use App\Services\Utils\Table;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 class ConyugeServices
 {
@@ -58,7 +57,7 @@ class ConyugeServices
      * @param  object  $paginate
      * @return void
      */
-    public function showTabla(LengthAwarePaginator $paginate): string
+    public function showTabla(object $paginate): string
     {
         $this->table->set_template($this->getTemplateTable());
         $this->table->set_heading(
