@@ -5,8 +5,8 @@ import ComfacaLogo from '@/components/ComfacaLogo';
 
 const navLinks = [
     { title: 'Nosotros', href: '/web/about' },
-    { title: 'Productos', href: '/web/products' },
-    { title: 'Documentación', href: '/web/documentation' },
+    { title: 'Servicios', href: '/web/products' },
+    { title: 'Tutoriales', href: '/web/documentation' },
     { title: 'Contáctenos', href: '/web/contact' },
 ];
 

@@ -32,7 +32,7 @@ export default function Documentation({ videos, manuales }: Props) {
             <section className="bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-700 text-white py-20">
                 <div className="container mx-auto px-4 md:max-w-7xl">
                     <div className="max-w-3xl">
-                        <h1 className="text-4xl md:text-5xl font-bold mb-4">Documentación y Guías</h1>
+                        <h1 className="text-4xl md:text-5xl font-bold mb-4">Tutoriales y Manuales</h1>
                         <p className="text-lg text-emerald-100">
                             Videos tutoriales y manuales para aprovechar al máximo el portal COMFACA En Línea
                         </p>
