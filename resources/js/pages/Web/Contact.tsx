@@ -1,20 +1,29 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useForm } from '@inertiajs/react';
 import WebLayout from './WebLayout';
 
-interface ContactFormData {
-    name: string;
-    email: string;
-    subject: string;
-    message: string;
-}
-
 export default function Contact() {
+    const { data, setData, post, processing, errors } = useForm({
+        name: '',
+        email: '',
+        subject: '',
+        message: '',
+    });
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // TODO: implementar envío de formulario via Inertia router.post
-        alert('Formulario en construcción. Puede contactarnos por los medios indicados abajo.');
+        post('/web/contact/send', {
+            onSuccess: () => {
+                alert('Mensaje enviado correctamente.');
+                setData({ name: '', email: '', subject: '', message: '' });
+            },
+            onError: (err) => {
+                const msg = Object.values(err).join(', ');
+                alert('Error al enviar: ' + msg);
+            },
+        });
     };
 
     return (
@@ -46,7 +55,7 @@ export default function Contact() {
                                     </div>
                                     <div>
                                         <h3 className="font-medium text-gray-900">Dirección</h3>
-                                        <p className="text-gray-500 text-sm">Cra. 14 #11-45, Florencia, Caquetá, Colombia</p>
+                                        <p className="text-gray-500 text-sm">Cra. 11 #10-34,Florencia, Caquetá, Colombia</p>
                                     </div>
                                 </div>
 
@@ -56,7 +65,7 @@ export default function Contact() {
                                     </div>
                                     <div>
                                         <h3 className="font-medium text-gray-900">Teléfono</h3>
-                                        <p className="text-gray-500 text-sm">(608) 432 7400</p>
+                                        <p className="text-gray-500 text-sm">(608) 436 6300 EXT 1061</p>
                                     </div>
                                 </div>
 
@@ -66,7 +75,7 @@ export default function Contact() {
                                     </div>
                                     <div>
                                         <h3 className="font-medium text-gray-900">Correo electrónico</h3>
-                                        <p className="text-gray-500 text-sm">atencionalcliente@comfaca.com</p>
+                                        <p className="text-gray-500 text-sm">afiliacionyregistro@comfaca.com</p>
                                     </div>
                                 </div>
 
@@ -99,15 +108,36 @@ export default function Contact() {
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div>
                                     <Label htmlFor="name">Nombre completo</Label>
-                                    <Input id="name" type="text" placeholder="Su nombre" required />
+                                    <Input
+                                        id="name"
+                                        type="text"
+                                        placeholder="Su nombre"
+                                        value={data.name}
+                                        onChange={(e) => setData('name', e.target.value)}
+                                    />
+                                    {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
                                 </div>
                                 <div>
                                     <Label htmlFor="email">Correo electrónico</Label>
-                                    <Input id="email" type="email" placeholder="correo@ejemplo.com" required />
+                                    <Input
+                                        id="email"
+                                        type="email"
+                                        placeholder="correo@ejemplo.com"
+                                        value={data.email}
+                                        onChange={(e) => setData('email', e.target.value)}
+                                    />
+                                    {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                                 </div>
                                 <div>
                                     <Label htmlFor="subject">Asunto</Label>
-                                    <Input id="subject" type="text" placeholder="Asunto del mensaje" required />
+                                    <Input
+                                        id="subject"
+                                        type="text"
+                                        placeholder="Asunto del mensaje"
+                                        value={data.subject}
+                                        onChange={(e) => setData('subject', e.target.value)}
+                                    />
+                                    {errors.subject && <p className="text-red-500 text-sm mt-1">{errors.subject}</p>}
                                 </div>
                                 <div>
                                     <Label htmlFor="message">Mensaje</Label>
@@ -116,11 +146,13 @@ export default function Contact() {
                                         rows={5}
                                         className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                         placeholder="Escriba su mensaje aquí..."
-                                        required
+                                        value={data.message}
+                                        onChange={(e) => setData('message', e.target.value)}
                                     />
+                                    {errors.message && <p className="text-red-500 text-sm mt-1">{errors.message}</p>}
                                 </div>
-                                <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700">
-                                    Enviar mensaje
+                                <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700" disabled={processing}>
+                                    {processing ? 'Enviando...' : 'Enviar mensaje'}
                                 </Button>
                             </form>
                         </div>

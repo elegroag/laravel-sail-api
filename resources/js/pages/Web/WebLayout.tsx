@@ -54,9 +54,9 @@ export default function WebLayout({ children }: { children: React.ReactNode }) {
                         <div>
                             <h3 className="font-semibold text-gray-900 mb-3">Contáctenos</h3>
                             <ul className="space-y-2 text-sm text-gray-500">
-                                <li>📍 Cra. 14 #11-45, Florencia, Caquetá</li>
-                                <li>📞 (608) 432 7400</li>
-                                <li>✉️ atencionalcliente@comfaca.com</li>
+                                <li>📍 Cra. 11 #10-34,Florencia, Caquetá</li>
+                                <li>📞 (608) 436 6300 EXT 1061</li>
+                                <li>✉️ afiliacionyregistro@comfaca.com</li>
                             </ul>
                         </div>
                     </div>

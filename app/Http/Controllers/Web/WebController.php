@@ -3,6 +3,11 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ContactFormMail;
+use App\Models\Gener02;
+use App\Models\Notificaciones;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 
 class WebController extends Controller
@@ -26,32 +31,32 @@ class WebController extends Controller
     {
         $videos = [
             [
-                'id' => 'afiliacion-empresa',
-                'title' => 'Cómo afiliar una empresa',
-                'description' => 'Guía paso a paso para registrar su empresa y afiliar trabajadores en el portal COMFACA En Línea.',
-                'video' => '/videos/afiliacion-empresa.mp4',
-                'duration' => '5:30',
+                'id' => 'registro-empresas',
+                'title' => 'Registro de empresas',
+                'description' => 'Guía paso a paso para registrar su empresa en el portal COMFACA En Línea.',
+                'video' => '/videos/registro-empresas.mp4',
+                'duration' => null,
             ],
             [
-                'id' => 'afiliacion-trabajador',
-                'title' => 'Afiliación de trabajador dependiente',
+                'id' => 'afiliacion-trabajadores',
+                'title' => 'Afiliación de trabajadores',
                 'description' => 'Aprenda cómo afiliar a sus empleados de forma rápida y sencilla.',
-                'video' => '/videos/afiliacion-trabajador.mp4',
-                'duration' => '4:15',
+                'video' => '/videos/afiliacion-trabajadores.mp4',
+                'duration' => null,
             ],
             [
-                'id' => 'novedades',
-                'title' => 'Reportar novedades',
-                'description' => 'Tutorial para reportar novedades de suspension, retiro o reinicio de empleados.',
-                'video' => '/videos/novedades.mp4',
-                'duration' => '3:45',
+                'id' => 'afiliacion-beneficiario',
+                'title' => 'Afiliación de beneficiarios',
+                'description' => 'Tutorial para afiliar beneficiarios de empleados registrados.',
+                'video' => '/videos/afiliacion-beneficiario.mp4',
+                'duration' => null,
             ],
             [
-                'id' => 'consultas',
-                'title' => 'Consultar información de afiliados',
-                'description' => 'Cómo consultar el estado de sus afiliados, novedad reportadas y pagos.',
-                'video' => '/videos/consultas.mp4',
-                'duration' => '3:00',
+                'id' => 'afiliacion-conyuge',
+                'title' => 'Afiliación de compañero(a) permanente',
+                'description' => 'Cómo afiliar al compañero(a) permanente de un trabajador.',
+                'video' => '/videos/afiliacion-conyuge.mp4',
+                'duration' => null,
             ],
         ];
 
@@ -62,6 +67,7 @@ class WebController extends Controller
                 'description' => 'Guía completa para la gestión de empresa, afiliación de trabajadores y novedades.',
                 'file' => '/manuales/manual-empresa.pdf',
                 'size' => '2.4 MB',
+                'disabled' => true,
             ],
             [
                 'id' => 'manual-trabajador',
@@ -69,6 +75,7 @@ class WebController extends Controller
                 'description' => 'Información sobre afiliados, consulta de estado y servicios disponibles.',
                 'file' => '/manuales/manual-trabajador.pdf',
                 'size' => '1.8 MB',
+                'disabled' => true,
             ],
             [
                 'id' => 'manual-pensionado',
@@ -76,13 +83,15 @@ class WebController extends Controller
                 'description' => 'Guía para pensionados afiliados a COMFACA y acceso a servicios.',
                 'file' => '/manuales/manual-pensionado.pdf',
                 'size' => '1.5 MB',
+                'disabled' => true,
             ],
             [
                 'id' => 'guia-rapida',
                 'title' => 'Guía Rápida de Uso',
                 'description' => 'Resumen de las funciones principales del portal COMFACA En Línea.',
-                'file' => '/manuales/guia-rapida.pdf',
-                'size' => '950 KB',
+                'file' => '/manuales/guía-afiliaciones.pdf',
+                'size' => null,
+                'disabled' => false,
             ],
         ];
 
@@ -90,5 +99,49 @@ class WebController extends Controller
             'videos' => $videos,
             'manuales' => $manuales,
         ]);
+    }
+
+    public function sendContact(Request $request)
+    {
+        $validated = $request->validate([
+            'name'    => 'required|string|max:255',
+            'email'   => 'required|email|max:255',
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string|max:2000',
+        ]);
+
+        // Enviar correo a afiliacionyregistro@comfaca.com
+        Mail::to('afiliacionyregistro@comfaca.com')
+            ->send(new ContactFormMail(
+                $validated['name'],
+                $validated['email'],
+                $validated['subject'],
+                $validated['message']
+            ));
+
+        // Notificar a 1 admin aleatorio (SAFI o UIS)
+        $adminId = $this->getAdminUserId();
+        if ($adminId) {
+            Notificaciones::create([
+                'titulo'  => 'Nuevo mensaje de contacto web',
+                'descri'  => "Nombre: {$validated['name']}\nCorreo: {$validated['email']}\nAsunto: {$validated['subject']}",
+                'user'    => $adminId,
+                'estado'  => 'P',
+                'result'  => null,
+                'dia'     => now()->toDateString(),
+                'hora'    => now()->toTimeString(),
+            ]);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Mensaje enviado correctamente.']);
+    }
+
+    private function getAdminUserId(): ?int
+    {
+        $admin = Gener02::whereIn('tipfun', ['SAFI', 'UIS'])
+            ->inRandomOrder()
+            ->first();
+
+        return $admin?->id;
     }
 }

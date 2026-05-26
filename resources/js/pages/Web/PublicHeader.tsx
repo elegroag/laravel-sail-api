@@ -12,6 +12,7 @@ const navLinks = [
 
 export default function PublicHeader() {
     const page = usePage();
+    const isLoginPage = page.url === '/web/login';
 
     return (
         <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
@@ -43,17 +44,19 @@ export default function PublicHeader() {
                 {/* CTA */}
                 <div className="flex items-center gap-3">
                     <Link
-                        href="/web/products"
+                        href="/web/register"
                         className="hidden md:inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
                     >
                         Afiliarse
                     </Link>
-                    <Link
-                        href="/web/login"
-                        className="text-sm font-medium text-gray-600 hover:text-emerald-600 transition-colors"
-                    >
-                        Iniciar sesión
-                    </Link>
+                    {!isLoginPage && (
+                        <Link
+                            href="/web/login"
+                            className="text-sm font-medium text-gray-600 hover:text-emerald-600 transition-colors"
+                        >
+                            Iniciar sesión
+                        </Link>
+                    )}
                 </div>
             </div>
         </header>

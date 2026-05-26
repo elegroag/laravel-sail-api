@@ -24,6 +24,7 @@ Route::fallback(function (Request $request) {
 Route::prefix('/web')->group(function () {
     Route::get('/about', [WebController::class, 'about'])->name('web.about');
     Route::get('/contact', [WebController::class, 'contact'])->name('web.contact');
+    Route::post('/contact/send', [WebController::class, 'sendContact'])->name('web.contact.send');
     Route::get('/products', [WebController::class, 'products'])->name('web.products');
     Route::get('/documentation', [WebController::class, 'documentation'])->name('web.documentation');
 });
