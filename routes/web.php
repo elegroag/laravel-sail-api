@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Mercurio\AuthController as MercurioAuthController;
+use App\Http\Controllers\Web\WebController;
 use App\Http\Controllers\Cajas\AuthController as CajasAuthController;
 
 Route::fallback(function (Request $request) {
@@ -18,6 +19,15 @@ Route::fallback(function (Request $request) {
 
     return response()->view('errors.web-unavailable', ['ruta' => $ruta], 404);
 });
+
+// ── Rutas públicas de landing / marketing ──
+Route::prefix('/web')->group(function () {
+    Route::get('/about', [WebController::class, 'about'])->name('web.about');
+    Route::get('/contact', [WebController::class, 'contact'])->name('web.contact');
+    Route::get('/products', [WebController::class, 'products'])->name('web.products');
+    Route::get('/documentation', [WebController::class, 'documentation'])->name('web.documentation');
+});
+// ──────────────────────────────────────────────
 
 Route::prefix('/web')->group(function () {
     Route::get('/', function () {

@@ -198,10 +198,30 @@ class BeneficiarioService
     }
 
     /**
+     * Cuenta las solicitudes pendientes (estado 'P') para un beneficiario.
+     */
+    private function countSolicitudesPendientes(string $numdoc): int
+    {
+        return Mercurio34::where('numdoc', $numdoc)
+            ->where('estado', 'P')
+            ->count();
+    }
+
+    /**
      * createByFormData function
      */
     public function createByFormData(array $data): Mercurio34
     {
+        // ── Validación: máximo 2 solicitudes pendientes por beneficiario ──
+        $numdoc = $data['numdoc'] ?? null;
+        if ($numdoc && $this->countSolicitudesPendientes($numdoc) >= 2) {
+            throw new DebugException(
+                'Este beneficiario ya tiene 2 solicitudes pendientes. No es posible crear una nueva hasta que las solicitudes existentes sean procesadas.',
+                422
+            );
+        }
+        // ──────────────────────────────────────────────────────────────────
+
         $data['log'] = 0;
         $data['estado'] = 'T';
         $beneficiario = new Mercurio34($data);
