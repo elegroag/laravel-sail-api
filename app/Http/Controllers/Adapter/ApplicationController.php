@@ -125,7 +125,7 @@ class ApplicationController extends Controller
         return $user[$key] ?? null;
     }
 
-    public function renderText(string $html)
+    public function renderText(?string $html = null)
     {
         header('Content-Type: text/html; charset=utf-8');
         echo $html;

@@ -28,10 +28,10 @@ use Illuminate\Http\Response;
 
 class EmpresaController extends ApplicationController
 {
-    protected $db;
-    protected $user;
-    protected $tipo;
-    protected $tipopc = '2';
+    protected DbBase $db;
+    protected ?array $user;
+    protected ?string $tipo;
+    protected string $tipopc = '2';
 
     public function __construct()
     {
@@ -74,7 +74,7 @@ class EmpresaController extends ApplicationController
             $this->setResponse('view');
             return $this->renderText($html);
         } catch (\Throwable $e) {
-            return $this->renderText($this->captureException($e));
+            return $this->renderObject($this->captureException($e));
         }
     }
 
@@ -214,7 +214,7 @@ class EmpresaController extends ApplicationController
     /**
      * GET /empresa/archivos_requeridos/{id}
      */
-    public function archivosRequeridos($id)
+    public function archivosRequeridos(string $id)
     {
         try {
             $service = new EmpresaService;
@@ -305,6 +305,7 @@ class EmpresaController extends ApplicationController
             $coddocrepleg = tipo_document_repleg_detalle();
             unset($coddocrepleg['RC']);
             unset($coddocrepleg['TI']);
+            unset($coddocrepleg['NI']);
 
             $data = [
                 'tipafi' => get_array_tipos(),

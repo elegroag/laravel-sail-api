@@ -110,7 +110,7 @@ class Mercurio30 extends ModelBase
             'celular' => 'nullable|max:20',
             'fax' => 'nullable|max:13',
             'codact' => 'nullable|max:4',
-            'tipsoc' => 'nullable|max:1',
+            'tipsoc' => 'nullable|max:3',
             'estado' => 'required|max:1',
             'codest' => 'nullable|max:2',
             'motivo' => 'nullable|max:500',

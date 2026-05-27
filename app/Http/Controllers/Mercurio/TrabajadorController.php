@@ -289,6 +289,7 @@ class TrabajadorController extends ApplicationController
             $coddocrepleg = tipo_document_repleg_detalle();
             unset($coddocrepleg['RC']);
             unset($coddocrepleg['TI']);
+            unset($coddocrepleg['NI']);
 
             $tipsoc = Subsi54::all()->pluck('detalle', 'tipsoc');
             $codzon = Gener09::where("codzon", '>=', 18000)
@@ -349,6 +350,7 @@ class TrabajadorController extends ApplicationController
                 'codciu' => $codciu,
                 'codzon' => $codzon,
                 'coddocrepleg' => $coddocrepleg,
+                'codsuc' => $codsuc,
                 'sexo' => sexos_array(),
                 'estciv' => estados_civiles_array(),
                 'tipdis' => tipo_discapacidad_array(),
@@ -362,8 +364,6 @@ class TrabajadorController extends ApplicationController
                 'tipsal' => tipsal_array(),
                 'tipcue' => tipo_cuenta_array(),
                 'tipjor' => tipo_jornada_array(),
-                'codsuc' => $codsuc,
-
                 'empleador' => condicionSN(),
                 'giro' => condicionSN(),
                 'vendedor' => condicionSN(),
@@ -403,7 +403,7 @@ class TrabajadorController extends ApplicationController
             ];
 
             return response()->json($salida);
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             return $this->handleException($e, $request);
         }
     }

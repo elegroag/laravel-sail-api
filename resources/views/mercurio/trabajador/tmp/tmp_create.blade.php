@@ -77,21 +77,21 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class='form-group' group-for='codzon'>
                                         <label for="codzon" class="control-label">Zona trabajo</label>
                                         <span id='component_codzon'></span>
                                     </div>
                                 </div>
 
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class='form-group' group-for='dirlab'>
                                         <label for="dirlab" class="control-label">Dirección de trabajo</label>
                                         <span id='component_dirlab'></span>
                                     </div>
                                 </div>
 
-                                <div class="col-md-3 ">
+                                <div class="col-md-2">
                                     <div class='form-group' group-for='ruralt'>
                                         <label for="ruralt" class="control-label">Labor rural</label>
                                         <span id='component_ruralt'></span>
@@ -151,14 +151,14 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class='form-group' group-for='estciv'>
                                         <label for="estciv" class="control-label">Estado civil</label>
                                         <span id='component_estciv'></span>
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class='form-group' group-for='cabhog'>
                                         <label for="cabhog" class="control-label">Cabeza hogar</label>
                                         <span id='component_cabhog'></span>
@@ -186,7 +186,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class='form-group' group-for='captra'>
                                         <label for="captra" class="control-label">Tiene discapacidad</label>
                                         <span id='component_captra'></span>
@@ -228,7 +228,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class='form-group' group-for='trasin'>
                                         <label for="trasin" class="control-label">Sindicalizado</label>
                                         <span id='component_trasin'></span>
@@ -352,7 +352,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class='form-group' group-for='direccion'>
                                         <label for="direccion" class="control-label">Dirección de residencia</label>
                                         <span id='component_direccion'></span>
@@ -373,7 +373,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-3 ">
+                                <div class="col-md-2">
                                     <div class='form-group' group-for='rural'>
                                         <label for="rural" class="control-label">Residencia rural</label>
                                         <span id='component_rural'></span>
@@ -387,7 +387,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-4">
+                                <div class="col-md-2">
                                     <div class='form-group' group-for='autoriza'>
                                         <label for="autoriza" class="control-label">Autoriza el tratamiento de datos personales</label>
                                         <span id='component_autoriza'></span>

@@ -100,6 +100,7 @@ export class FormEmpresaView extends FormView {
             enableTime: false,
             dateFormat: 'Y-m-d',
             locale: Spanish,
+            maxDate: 'today',
         });
 
         eventsFormControl($el);
@@ -227,7 +228,15 @@ export class FormEmpresaView extends FormView {
                                                 _tab.show();
                                             }, 1000);
                                         } else {
-                                            this.App.trigger('alert:error', { message: response.msj });
+                                            if(response.errors){
+                                                let msj ='';
+                                                $.each(response.errors, (key, items) => {
+                                                    if(items !== undefined) msj+="<p>"+items+"</p>";
+                                                });
+                                                this.App.trigger('alert:error', { message: msj });
+                                            } else {
+                                                this.App.trigger('alert:error', { message: response.msj });
+                                            }
                                         }
                                     }
                                 },
@@ -378,6 +387,12 @@ export class FormEmpresaView extends FormView {
         this.setInput('saltra', '');
         this.setInput('fectra', '');
         this.setInput('cartra', '');
+
+        // Limpiar Choices.js para cartra
+        if (this.#choiceComponents && this.#choiceComponents['cartra']) {
+            this.#choiceComponents['cartra'].removeActiveItems();
+            this.#choiceComponents['cartra'].setChoiceByValue('');
+        }
     }
 
     cleanFormTra(e) {
