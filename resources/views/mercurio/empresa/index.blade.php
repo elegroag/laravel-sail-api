@@ -20,6 +20,10 @@
         @include('mercurio/templates.tmp_layout')
     </script>
 
+    <script type="text/template" id="tmp_breadcrumb">
+        @include('templates.tmp_breadcrumb')
+    </script>
+
     <script type="text/template" id='tmp_subheader'>
         @include('mercurio/templates.tmp_subheader')
     </script>
@@ -63,6 +67,7 @@
     <script>
         const _TITULO = "{{ $title }}";
         window.ServerController = 'empresa';
+        window.BREADCRUMB_TITLE = "{{ $title }}";
     </script>
 
     <script src="{{ asset('mercurio/build/Mercurio30.js') }}"></script>

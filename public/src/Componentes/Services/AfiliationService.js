@@ -1,5 +1,6 @@
 import { $App } from '@/App';
 import { HeaderView } from '@/Componentes/Views/HeaderView';
+import { BreadcrumbView } from '@/Componentes/Views/BreadcrumbView';
 
 class AfiliationService {
     constructor() {
@@ -109,6 +110,16 @@ class AfiliationService {
         });
 
         $App.layout.getRegion('header').show(this.headerView);
+
+        // Breadcrumb dinámico
+        const breadcrumbView = new BreadcrumbView();
+        const breadcrumbItems = [
+            { title: 'Inicio', url: '#' },
+            { title: options.breadcrumb_menu || '', is_active: true },
+        ];
+        $App.layout.getRegion('breadcrumb').show(breadcrumbView);
+        breadcrumbView.renderBreadcrumb(breadcrumbItems);
+
         $("[data-toggle='linkFilter'][data-valor='" + options.estado + "']").addClass('active');
     }
 

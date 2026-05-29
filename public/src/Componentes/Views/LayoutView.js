@@ -7,10 +7,11 @@ class LayoutView extends Layout {
 			...options,
 			template: '#tmp_layout',
 			tagRegions: options.regions || {
-				header: '#header_group_button',
-				subheader: '#render_subeader',
-				body: '#app',
-			},
+						header: '#header_group_button',
+						subheader: '#render_subeader',
+						body: '#app',
+						breadcrumb: '#breadcrumb-bar',
+					},
 		});
 	}
 

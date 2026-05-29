@@ -2,37 +2,16 @@
 <nav class="navbar navbar-top navbar-expand-lg navbar-dark bg-gradient-primary" id="navbar-main">
     <div class="container-fluid">
         {{-- Botón hamburguesa para abrir sidebar en móviles --}}
-        <button class="navbar-toggler-sidenav d-xl-none" 
-                type="button" 
+        <button class="navbar-toggler-sidenav d-xl-none"
+                type="button"
                 aria-label="Abrir menú">
             <span class="navbar-toggler-icon-bar"></span>
             <span class="navbar-toggler-icon-bar"></span>
             <span class="navbar-toggler-icon-bar"></span>
         </button>
 
-        {{-- Título y Breadcrumbs --}}
-        <div class="navbar-header">
-            <h1 class="navbar-title">{{ $pageTitle }}</h1>
-            <nav aria-label="breadcrumb" class="navbar-breadcrumb d-none d-md-block">
-                <ol class="breadcrumb">
-                    @if(!empty($breadcrumbs) && is_array($breadcrumbs))
-                        @foreach($breadcrumbs as $crumb)
-                            <li class="breadcrumb-item {{ !empty($crumb['is_active']) ? 'active' : '' }}" 
-                                @if(!empty($crumb['is_active'])) aria-current="page" @endif>
-                                @if(!empty($crumb['icon']))
-                                    <i class="{{ $crumb['icon'] }} me-1"></i>
-                                @endif
-                                @if(!empty($crumb['is_active']))
-                                    <span>{{ $crumb['title'] ?? '' }}</span>
-                                @else
-                                    <a href="{{ $crumb['url'] ?? '#' }}">{{ $crumb['title'] ?? '' }}</a>
-                                @endif
-                            </li>
-                        @endforeach
-                    @endif
-                </ol>
-            </nav>
-        </div>
+        {{-- Título --}}
+        <h1 class="navbar-title mb-0">{{ $pageTitle }}</h1>
 
         {{-- Acciones del Navbar (derecha) --}}
         <ul class="navbar-nav navbar-actions ms-auto align-items-center">
