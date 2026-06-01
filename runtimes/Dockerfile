@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM ubuntu:24.04
 
 LABEL maintainer="Taylor Otwell"
 ARG WWWGROUP
@@ -17,7 +17,7 @@ RUN echo "Acquire::http::Pipeline-Depth 0;" > /etc/apt/apt.conf.d/99custom && \
 RUN mkdir -p /etc/apt/keyrings
 RUN apt-get update && apt-get upgrade -y
 
-RUN apt-get install -y gnupg gosu curl ca-certificates zip unzip git supervisor sqlite3 libcap2-bin libpng-dev libcairo2 libssl-dev \
+RUN apt-get install -y gnupg curl ca-certificates zip unzip git supervisor sqlite3 libcap2-bin libpng-dev libcairo2 libssl-dev \
     libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf-2.0-0 shared-mime-info fonts-dejavu-core fonts-liberation python3 python3-pip \
     dnsutils librsvg2-bin fswatch ffmpeg nano vim \
     && curl -sS 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xb8dc7e53946656efbce4c1dd71daeaab4ad4cab6' | gpg --dearmor | tee /etc/apt/keyrings/ppa_ondrej_php.gpg > /dev/null \
@@ -55,7 +55,8 @@ RUN curl -sLS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/
     && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_VERSION.x nodistro main" > /etc/apt/sources.list.d/nodesource.list \
     && apt-get update \
     && apt-get install -y nodejs \
-    && npm install -g npm \
+    && npm cache clean --force \
+    && curl -fsSL https://www.npmjs.com/get-npm.sh | bash \
     && npm install -g pnpm \
     && npm install -g bun
 
@@ -63,21 +64,18 @@ RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | tee /etc
     && echo "deb [signed-by=/etc/apt/keyrings/yarn.gpg] https://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.list.d/yarn.list \
     && apt-get update \
     && apt-get install -y yarn \
-    && apt-get install -y mysql-client \
-    && apt-get -y autoremove \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    && apt-get install -y mysql-client
 
 RUN setcap "cap_net_bind_service=+ep" /usr/bin/php8.4
 
-RUN userdel -r ubuntu
-RUN groupadd --force -g $WWWGROUP sail
-RUN useradd -ms /bin/bash --no-user-group -g $WWWGROUP -u 1337 sail
+RUN userdel -r ubuntu || true
 
 COPY start-container /usr/local/bin/start-container
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY php.ini /etc/php/8.4/cli/conf.d/99-sail.ini
 RUN chmod +x /usr/local/bin/start-container
+
+RUN mkdir -p /tmp/php_temp && chmod 777 /tmp/php_temp
 
 EXPOSE 80/tcp
 EXPOSE 5173/tcp

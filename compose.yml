@@ -1,25 +1,25 @@
 services:
   laravel.test:
-    container_name: "sail-enlinea"
+    container_name: enlinea
     env_file:
       - .env
     build:
       context: ./runtimes
       dockerfile: Dockerfile
       args:
-        WWWGROUP: "${WWWGROUP}"
-    image: sail-8.4/api
+        WWWGROUP: '${WWWGROUP}'
+    image: sail-8.4/enlinea
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - 'host.docker.internal:host-gateway'
     ports:
-      - "${APP_PORT:-80}:80"
-      - "${VITE_PORT:-5173}:${VITE_PORT:-5173}"
+      - '${APP_PORT:-9043}:80'
+      - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
     environment:
-      WWWUSER: "${WWWUSER}"
+      WWWUSER: '${WWWUSER}'
       LARAVEL_SAIL: 1
-      XDEBUG_MODE: "${SAIL_XDEBUG_MODE:-off}"
-      XDEBUG_CONFIG: "${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}"
-      IGNITION_LOCAL_SITES_PATH: "${PWD}"
+      XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
+      XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
+      IGNITION_LOCAL_SITES_PATH: '${PWD}'
     volumes:
       - type: bind
         source: ./
@@ -27,7 +27,6 @@ services:
         consistency: z
     networks:
       - wslnet
-
 networks:
   wslnet:
     driver: bridge
