@@ -3,15 +3,19 @@
 namespace App\Library\APIClient;
 
 use App\Exceptions\DebugException;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class APIClient
 {
     private AuthClientInterface $auth;
+
     private string $hostConnection;
+
     private string $apiUrl;
+
     private string $statusCode;
-    private bool $curlHeader = false;
-    private bool $curlVerbose = false;
+
     private bool $typeJson = true;
 
     public function __construct(AuthClientInterface $auth, string $host, string $url)
@@ -21,85 +25,71 @@ class APIClient
         $this->hostConnection = $host;
     }
 
-    public function consumeAPI(string $method, ?array $request = null)
+    public function consumeAPI(string $method, ?array $request = null): object|array
     {
-        // Aquí va el código para consumir la API
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, trim($this->hostConnection . '/' . $this->apiUrl));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_HEADER, $this->curlHeader);
-        curl_setopt($ch, CURLOPT_VERBOSE, $this->curlVerbose);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        $url = rtrim($this->hostConnection, '/') . '/' . ltrim($this->apiUrl, '/');
+        $headers = [];
 
         if ($this->auth instanceof BasicAuth) {
             $this->auth->authenticate();
-            // Colocar headers solo en caso de usar json Request
-            if ($this->typeJson === true) {
-                curl_setopt($ch, CURLOPT_HTTPHEADER, $this->auth->getHeader());
+            if ($this->typeJson) {
+                $headers = $this->auth->getHeader();
             }
         }
 
         if ($this->auth instanceof TokenAuth) {
             $this->auth->authenticate();
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $this->auth->getHeader());
+            $headers = $this->auth->getHeader();
         }
 
-        switch ($method) {
-            case 'POST':
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $this->typeJson ? json_encode($request) : $request);
-                break;
-            case 'PUT':
-                curl_setopt($ch, CURLOPT_PUT, true);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $this->typeJson ? json_encode($request) : $request);
-                break;
-            case 'GET':
-                curl_setopt($ch, CURLOPT_POST, false);
-                break;
-            case 'DELETE':
-                curl_setopt($ch, CURLOPT_POST, false);
-                break;
-            default:
-                throw new DebugException('Error no está definido el metodo http', 1);
-                break;
+        $body = $request ?? [];
+
+        #Log::info('ApiSubsidio body' . json_encode($body));
+        #Log::info('ApiSubsidio url' . json_encode($url));
+
+        $response = match ($method) {
+            'POST' => Http::withHeaders($headers)
+                ->timeout(30)
+                ->withoutVerifying()
+                ->post($url, $body),
+            'GET' => Http::withHeaders($headers)
+                ->timeout(30)
+                ->withoutVerifying()
+                ->get($url, $body),
+            'PUT' => Http::withHeaders($headers)
+                ->timeout(30)
+                ->withoutVerifying()
+                ->put($url, $body),
+            'DELETE' => Http::withHeaders($headers)
+                ->timeout(30)
+                ->withoutVerifying()
+                ->delete($url, $body),
+            default => throw new DebugException('Error no está definido el metodo http', 1),
+        };
+
+        $this->statusCode = $response->status();
+        $bodyResponse = $response->body();
+
+        #Log::info('ApiSubsidio response status' . $this->statusCode);
+        #Log::info('ApiSubsidio response body' . $bodyResponse);
+
+        if ($response->failed()) {
+            throw new DebugException('Error access api', 501, $bodyResponse);
         }
 
-        curl_setopt($ch, CURLOPT_TIMEOUT_MS, 250000);
-        $result = curl_exec($ch);
-
-        $this->statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-        if (is_null($result) || $this->statusCode >= 400) {
-            $error = curl_error($ch);
-            unset($ch);
-            if ($error) {
-                throw new DebugException('Error access api', 501, $error);
-            }
-        } else {
-            unset($ch);
-            if ($this->auth instanceof AuthClientInterface) {
-                return $this->auth->procesaRequest($result);
-            } else {
-                return json_decode($result, true);
-            }
+        if ($this->auth instanceof AuthClientInterface) {
+            return $this->auth->procesaRequest($bodyResponse);
         }
+
+        return json_decode($bodyResponse, true);
     }
 
-    /**
-     * setTypeJson function
-     *
-     * @param  bool  $value
-     * @return void
-     */
-    public function setTypeJson($value)
+    public function setTypeJson(?bool $value = null): void
     {
         $this->typeJson = $value;
     }
 
-    public function getStatusCode()
+    public function getStatusCode(): string
     {
         return $this->statusCode;
     }

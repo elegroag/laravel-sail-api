@@ -36,7 +36,7 @@ use Inertia\Inertia;
 
 class AuthController extends Controller
 {
-    private $db;
+    private DbBase $db;
     private SignupService $signupService;
 
     public function __construct()

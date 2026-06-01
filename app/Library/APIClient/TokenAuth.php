@@ -3,13 +3,18 @@
 namespace App\Library\APIClient;
 
 use App\Exceptions\AuthException;
+use Illuminate\Support\Facades\Http;
 
 class TokenAuth implements AuthClientInterface
 {
     private string $token;
+
     private string $host;
+
     private ?array $credentials;
+
     public string $statusCode;
+
     private string $point;
 
     public function __construct(
@@ -24,47 +29,41 @@ class TokenAuth implements AuthClientInterface
 
     public function authenticate()
     {
-        return $this->newToken($this->host . '' . $this->point);
+        return $this->newToken($this->host.''.$this->point);
     }
 
     public function newToken(string $endpoint)
     {
-        $cur = curl_init();
-        $cadena = http_build_query($this->credentials);
-        curl_setopt($cur, CURLOPT_URL, $endpoint);
-        curl_setopt($cur, CURLOPT_POST, 1);
-        curl_setopt($cur, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($cur, CURLOPT_POSTFIELDS, $cadena);
-        curl_setopt($cur, CURLOPT_HTTPHEADER, $this->getHeader(1));
+        $response = Http::asForm()
+            ->withHeaders($this->getHeader(1))
+            ->post($endpoint, $this->credentials);
 
-        $result = curl_exec($cur);
-        $this->statusCode = curl_getinfo($cur, CURLINFO_HTTP_CODE);
+        $this->statusCode = $response->status();
+        $out = $this->procesaRequest($response->body());
 
-        unset($cur);
-        $out = $this->procesaRequest($result);
         if ($out) {
             if ($out['response']['status'] == true) {
-                $this->token = (isset($out['response']['access_token']) ? $out['response']['access_token'] : $out['response']['token']);
+                $this->token = $out['response']['access_token'] ?? $out['response']['token'];
 
                 return $this->token;
-            } else {
-                throw new AuthException('Error ' . $out['response']['message'], 1);
             }
-        } else {
-            throw new AuthException('Error, no es posible generar el token para el servicio', 1);
+
+            throw new AuthException('Error '.$out['response']['message'], 1);
         }
+
+        throw new AuthException('Error, no es posible generar el token para el servicio', 1);
     }
 
     public function getHeader($autenticar = 0)
     {
         if ($autenticar == true) {
-            return ['Content-Type: application/x-www-form-urlencoded'];
-        } else {
-            return [
-                'Content-Type: application/json',
-                "Authorization: Bearer {$this->token}",
-            ];
+            return ['Content-Type' => 'application/x-www-form-urlencoded'];
         }
+
+        return [
+            'Content-Type' => 'application/json',
+            'Authorization' => "Bearer {$this->token}",
+        ];
     }
 
     public function procesaRequest(?string $result = null)
@@ -86,6 +85,7 @@ class TokenAuth implements AuthClientInterface
             if (is_array($decoded)) {
                 return $decoded;
             }
+
             return [
                 'success' => true,
                 'response' => $decoded,

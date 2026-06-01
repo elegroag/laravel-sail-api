@@ -8,6 +8,8 @@ use App\Models\Mercurio31;
 use App\Models\Mercurio32;
 use App\Models\Mercurio34;
 use App\Services\Utils\CrearUsuario;
+use Illuminate\Support\Facades\Log;
+use Exception;
 
 class AutenticaEmpresa extends AutenticaGeneral
 {
@@ -24,28 +26,27 @@ class AutenticaEmpresa extends AutenticaGeneral
      * comprobar que la empresa este registrada en SISU
      * comprueba que este el usuario de la empresa en mercurio
      * hace los registro de forma automatica
-     *
-     * @param [type] $documento
-     * @param [type] $coddoc
      * @return bool
      */
-    public function comprobarSISU($documento, $coddoc)
+    public function comprobarSISU(string $documento, string $coddoc)
     {
-        /**
-         * buscar empresa en sisu
-         */
-        $this->procesadorComando->send(
-            [
-                'servicio' => 'ComfacaEmpresas',
-                'metodo' => 'informacion_empresa',
-                'params' => [
-                    'nit' => $documento,
-                    'coddoc' => $coddoc,
-                ],
-            ]
-        );
+        $out = null;
+        try {
+            $this->procesadorComando->send(
+                [
+                    'servicio' => 'ComfacaEmpresas',
+                    'metodo' => 'informacion_empresa',
+                    'params' => [
+                        'nit' => $documento,
+                        'coddoc' => $coddoc,
+                    ],
+                ]
+            );
 
-        $out = $this->procesadorComando->toArray();
+            $out = $this->procesadorComando->toArray();
+        } catch (Exception $err) {
+            Log::info('ApiSubsidio ' . $err->getMessage());
+        }
 
         if (!is_array($out)) {
             $this->message = 'Se genero un error al buscar la empresa servicio API.';

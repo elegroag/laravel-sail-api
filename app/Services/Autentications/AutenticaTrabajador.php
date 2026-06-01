@@ -4,6 +4,8 @@ namespace App\Services\Autentications;
 
 use App\Models\Mercurio07;
 use App\Services\Utils\CrearUsuario;
+use Illuminate\Support\Facades\Log;
+use Exception;
 
 class AutenticaTrabajador extends AutenticaGeneral
 {
@@ -20,23 +22,24 @@ class AutenticaTrabajador extends AutenticaGeneral
      * comprobar que la trabajador este registrada en SISU
      * comprueba que este el usuario de la trabajador en mercurio
      * hace los registro de forma automatica
-     *
-     * @param [type] $documento
-     * @param [type] $coddoc
      * @return bool
      */
-    public function comprobarSISU($documento, $coddoc)
+    public function comprobarSISU(string $documento, string $coddoc)
     {
-        $this->procesadorComando->send(
-            [
-                'servicio' => 'ComfacaEmpresas',
-                'metodo' => 'informacion_trabajador',
-                'params' => [
-                    'cedtra' => $documento,
-                    'coddoc' => $coddoc,
-                ],
-            ]
-        );
+        try {
+            $this->procesadorComando->send(
+                [
+                    'servicio' => 'ComfacaEmpresas',
+                    'metodo' => 'informacion_trabajador',
+                    'params' => [
+                        'cedtra' => $documento,
+                        'coddoc' => $coddoc,
+                    ],
+                ]
+            );
+        } catch (Exception $err) {
+            Log::info('ApiSubsidio ' . $err->getMessage());
+        }
 
         if ($this->procesadorComando->isJson() == false) {
             $this->message = 'Se genero un error al buscar al trabajador usando el servicio CLI-Comando. ';

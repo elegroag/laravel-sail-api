@@ -5,7 +5,9 @@ namespace App\Library\APIClient;
 class BasicAuth implements AuthClientInterface
 {
     private string $username;
+
     private string $password;
+
     private string $token;
 
     public function __construct(string $username, string $password)
@@ -29,6 +31,7 @@ class BasicAuth implements AuthClientInterface
     public function authenticate()
     {
         $this->token = base64_encode("$this->username:$this->password");
+
         return $this->token;
     }
 
@@ -51,6 +54,7 @@ class BasicAuth implements AuthClientInterface
             if (is_array($decoded)) {
                 return $decoded;
             }
+
             return [
                 'success' => true,
                 'response' => $decoded,
@@ -68,13 +72,13 @@ class BasicAuth implements AuthClientInterface
     public function getHeader($autenticar = 0)
     {
         if ($autenticar == true) {
-            return ['Content-Type: application/x-www-form-urlencoded'];
-        } else {
-            return [
-                'Content-Type: application/json',
-                "Authorization: Basic {$this->token}",
-            ];
+            return ['Content-Type' => 'application/x-www-form-urlencoded'];
         }
+
+        return [
+            'Content-Type' => 'application/json',
+            'Authorization' => "Basic {$this->token}",
+        ];
     }
 
     public function getToken()
