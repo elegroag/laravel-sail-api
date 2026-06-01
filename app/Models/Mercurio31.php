@@ -103,7 +103,7 @@ class Mercurio31 extends ModelBase
             "horas"           => "required|integer|min:0",
             "usuario"         => "required|integer|min:0",
             // unsignedBigInteger
-            "numcue"          => "integer|min:0",
+            "numcue"          => "nullable|min:0",
             // uuid
             "ruuid"           => "required|min:10",
             // date — required

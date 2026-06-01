@@ -92,6 +92,13 @@
         misCompras: "{{ route('servicios.mis-compras') }}",
     };
 
+    // CSRF token para todas las peticiones AJAX
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+
     function formatearValor(valor) {
         var num = parseFloat(valor) || 0;
         return '$' + num.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
@@ -237,7 +244,7 @@
         }).done(function(response) {
             ocultarLoader('loader_compras');
 
-            if (response.flag) {
+            if (response.success) {
                 var data = response.data;
 
                 if (Array.isArray(data)) {
@@ -260,7 +267,7 @@
                 $('#contenido_compras').fadeIn();
                 renderizarPagina();
             } else {
-                $('#error_mensaje').text(response.msg || 'Error al cargar las compras');
+                $('#error_mensaje').text(response.message || 'Error al cargar las compras');
                 $('#error_compras').fadeIn();
             }
         }).fail(function(err) {

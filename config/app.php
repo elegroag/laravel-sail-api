@@ -157,4 +157,9 @@ return [
         'timeout' => env('SFTP_SISU_TIMEOUT', 30),
         'storage' => env('SFTP_SISU_STORAGE', ''),
     ],
+    'epayco' => [
+        'mode' => env('EPAYCO_MODE'),
+        'public_key' => env('EPAYCO_PUBLIC_KEY'),
+        'private_key' => env('EPAYCO_PRIVATE_KEY')
+    ]
 ];

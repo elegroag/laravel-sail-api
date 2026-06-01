@@ -81,7 +81,7 @@ class Mercurio36 extends ModelBase
             'log' => 'required|integer|min:0',
             'salario' => 'required|integer|min:0',
             'usuario' => 'required|integer|min:0',
-            'numcue' => 'nullable|integer|min:0',
+            'numcue' => 'nullable|min:0',
             // uuid
             'ruuid' => 'required|min:10',
             // date — required
@@ -1202,6 +1202,6 @@ class Mercurio36 extends ModelBase
 
     public function getNombreCompleto()
     {
-        return $this->priape.' '.$this->segape.' '.$this->prinom.' '.$this->segnom;
+        return $this->priape . ' ' . $this->segape . ' ' . $this->prinom . ' ' . $this->segnom;
     }
 }

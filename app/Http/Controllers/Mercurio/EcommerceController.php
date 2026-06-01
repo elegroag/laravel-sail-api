@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Mercurio;
 
 use App\Http\Controllers\Adapter\ApplicationController;
+use App\Services\Api\ApiEpayco;
 use App\Services\Api\ApiSubsidio;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,9 +22,12 @@ class EcommerceController extends ApplicationController
 {
     protected ApiSubsidio $api;
 
-    public function __construct()
+    protected ApiEpayco $epayco;
+
+    public function __construct(ApiEpayco $epayco)
     {
         $this->api = new ApiSubsidio();
+        $this->epayco = $epayco;
     }
 
     /**
@@ -32,16 +36,15 @@ class EcommerceController extends ApplicationController
      */
     public function index()
     {
-        $EPAYCO_PUBLIC_KEY = '5700c4372a4369500c22efede64aa3f3';
-        $EPAYCO_TEST = 'true';
-        $documento = self::getActUser('documento');
-
-        return view('mercurio/ecommerce/index', [
-            'EPAYCO_PUBLIC_KEY' => $EPAYCO_PUBLIC_KEY,
-            'EPAYCO_TEST' => $EPAYCO_TEST,
-            'documento' => $documento,
-            'title' => 'Compra de Servicio',
-        ]);
+        return view(
+            'mercurio/ecommerce/index',
+            [
+                'EPAYCO_PUBLIC_KEY' => config('app.epayco.public_key'),
+                'EPAYCO_TEST' => config('app.epayco.mode') === 'development' ? 'true' : 'false',
+                'documento' => self::getActUser('documento'),
+                'title' => 'Compra de Servicio',
+            ]
+        );
     }
 
     /**
@@ -67,20 +70,27 @@ class EcommerceController extends ApplicationController
             $cedtra = $request->input('cedtra');
 
             if (empty(trim($cedtra))) {
-                return response()->json($this->errorFunc('Debe ingresar una cedula valida'));
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'Debe ingresar una cedula valida'
+                    ]
+                );
             }
 
             $this->api->send([
-                'servicio' => 'movil',
+                'servicio' => 'Movil',
                 'metodo' => 'identifica-trabajador',
                 'params' => ['cedtra' => $cedtra],
             ]);
 
             $resultado = $this->api->toArray();
 
-            if (! ($resultado['flag'] ?? true)) {
-                $msg = $resultado['msg'] ?? 'Trabajador no encontrado';
-                return response()->json($this->errorFunc($msg));
+            if (! ($resultado['success'] ?? false)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $resultado['message'] ?? 'Trabajador no encontrado'
+                ]);
             }
 
             $data = $resultado['data'] ?? [];
@@ -96,10 +106,20 @@ class EcommerceController extends ApplicationController
                 ];
             }
 
-            return response()->json($this->successFunc('Trabajador encontrado', $data));
+            return response()->json([
+                'success' => true,
+                'data' => $data,
+                'message' => 'Trabajador encontrado'
+            ]);
         } catch (\Throwable $e) {
             $this->setLogger($e->getMessage());
-            return response()->json($this->errorFunc('Error al buscar el trabajador: ' . $e->getMessage()));
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Error al buscar el trabajador',
+                    'errors' => $e->getMessage()
+                ]
+            );
         }
     }
 
@@ -111,21 +131,32 @@ class EcommerceController extends ApplicationController
     {
         try {
             $this->api->send([
-                'servicio' => 'movil',
+                'servicio' => 'Movil',
                 'metodo' => 'listar-servicios',
             ]);
 
             $resultado = $this->api->toArray();
 
-            if (! ($resultado['flag'] ?? true)) {
-                $msg = $resultado['msg'] ?? 'Error al cargar servicios';
-                return response()->json($this->errorFunc($msg));
+            if (! ($resultado['success'] ?? false)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $resultado['message'] ?? 'Error al cargar servicios'
+                ]);
             }
 
-            return response()->json($this->successFunc('', $resultado['data'] ?? []));
+            return response()->json([
+                'success' => true,
+                'data' => $resultado['data'] ?? [],
+                'message' => 'Proceso completado con éxito'
+            ]);
         } catch (\Throwable $e) {
             $this->setLogger($e->getMessage());
-            return response()->json($this->errorFunc('Error al cargar servicios: ' . $e->getMessage()));
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Error al cargar servicios: ' . $e->getMessage()
+                ]
+            );
         }
     }
 
@@ -142,7 +173,10 @@ class EcommerceController extends ApplicationController
             $codben = $request->input('codben');
 
             if (empty($codser)) {
-                return response()->json($this->errorFunc('Debe seleccionar un servicio'));
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Debe seleccionar un servicio'
+                ]);
             }
 
             $params = [
@@ -153,22 +187,34 @@ class EcommerceController extends ApplicationController
             ];
 
             $this->api->send([
-                'servicio' => 'movil',
+                'servicio' => 'Movil',
                 'metodo' => 'validar-tarifas',
                 'params' => $params,
             ]);
 
             $resultado = $this->api->toArray();
 
-            if (! ($resultado['flag'] ?? true)) {
-                $msg = $resultado['msg'] ?? 'Error al validar tarifa';
-                return response()->json($this->errorFunc($msg));
+            if (! ($resultado['success'] ?? false)) {
+                $msg = $resultado['message'] ?? 'Error al validar tarifa';
+                return response()->json([
+                    'success' => false,
+                    'message' => $msg
+                ]);
             }
 
-            return response()->json($this->successFunc('Tarifa obtenida', $resultado['data'] ?? []));
+            return response()->json([
+                'success' => true,
+                'data' => $resultado['data'] ?? [],
+                'message' => 'Tarifa obtenida'
+            ]);
         } catch (\Throwable $e) {
             $this->setLogger($e->getMessage());
-            return response()->json($this->errorFunc('Error al validar tarifa: ' . $e->getMessage()));
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Error al validar tarifa: ' . $e->getMessage()
+                ]
+            );
         }
     }
 
@@ -187,65 +233,37 @@ class EcommerceController extends ApplicationController
             $ref_payco = $request->input('ref_payco');
 
             if (empty(trim($ref_payco))) {
-                return response()->json($this->errorFunc('Referencia de pago no proporcionada'));
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Referencia de pago no proporcionada'
+                ]);
             }
 
-            $url = 'https://secure.epayco.co/validation/v1/reference/' . urlencode($ref_payco);
+            $resultado = $this->epayco->validarReferencia($ref_payco);
 
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Content-Type: application/json',
-                'Accept: application/json',
+            if (! $resultado['success']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $resultado['errors'] ?? 'Error al validar referencia'
+                ]);
+            }
+
+            $data = $resultado['data'];
+            $msg = $data['aprobado'] ? 'Pago aprobado' : 'Pago no aprobado';
+
+            return response()->json([
+                'success' => true,
+                'data' => $data,
+                'message' => $msg
             ]);
-
-            $result = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            $curlError = curl_error($ch);
-            curl_close($ch);
-
-            if ($curlError) {
-                return response()->json($this->errorFunc('Error al consultar ePayco: ' . $curlError));
-            }
-
-            if ($httpCode != 200) {
-                return response()->json($this->errorFunc('ePayco respondio con codigo HTTP: ' . $httpCode));
-            }
-
-            $epaycoData = json_decode($result, true);
-
-            if (! $epaycoData || ! isset($epaycoData['data'])) {
-                return response()->json($this->errorFunc('Respuesta invalida de ePayco'));
-            }
-
-            $txData = $epaycoData['data'];
-            $codEstado = isset($txData['x_cod_transaction_state']) ? intval($txData['x_cod_transaction_state']) : 0;
-            $respuesta = $txData['x_response'] ?? 'Sin respuesta';
-            $motivo = $txData['x_response_reason_text'] ?? '';
-            $monto = $txData['x_amount'] ?? '0';
-            $refPaycoConfirmado = $txData['x_ref_payco'] ?? $ref_payco;
-
-            $pagoAprobado = ($codEstado == 1);
-
-            $data = [
-                'aprobado' => $pagoAprobado,
-                'cod_estado' => $codEstado,
-                'respuesta' => $respuesta,
-                'motivo' => $motivo,
-                'monto' => $monto,
-                'ref_payco' => $refPaycoConfirmado,
-            ];
-
-            $msg = $pagoAprobado ? 'Pago aprobado' : 'Pago no aprobado';
-
-            return response()->json($this->successFunc($msg, $data));
         } catch (\Throwable $e) {
             $this->setLogger($e->getMessage());
-            return response()->json($this->errorFunc('Error al validar pago: ' . $e->getMessage()));
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Error al validar pago: ' . $e->getMessage()
+                ]
+            );
         }
     }
 
@@ -273,25 +291,37 @@ class EcommerceController extends ApplicationController
             ];
 
             $this->api->send([
-                'servicio' => 'movil',
+                'servicio' => 'Movil',
                 'metodo' => 'guardar-venta',
                 'params' => $params,
             ]);
 
             $resultado = $this->api->toArray();
 
-            if (! ($resultado['flag'] ?? true)) {
-                $msg = $resultado['msg'] ?? 'Error al guardar la venta';
-                return response()->json($this->errorFunc($msg));
+            if (! ($resultado['success'] ?? false)) {
+                $msg = $resultado['message'] ?? 'Error al guardar la venta';
+                return response()->json([
+                    'success' => false,
+                    'message' => $msg
+                ]);
             }
 
             $codbenLog = ! empty($codben) ? $codben : $cedtra;
             $this->setLogger("Venta Servicio - cedtra: $cedtra, codben: $codbenLog, codser: $codser, refpago: $refpago");
 
-            return response()->json($this->successFunc('Venta guardada exitosamente', $resultado['data'] ?? []));
+            return response()->json([
+                'success' => true,
+                'data' => $resultado['data'] ?? [],
+                'message' => 'Venta guardada exitosamente'
+            ]);
         } catch (\Throwable $e) {
             $this->setLogger($e->getMessage());
-            return response()->json($this->errorFunc('Error al guardar la venta: ' . $e->getMessage()));
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Error al guardar la venta: ' . $e->getMessage()
+                ]
+            );
         }
     }
 
@@ -305,7 +335,10 @@ class EcommerceController extends ApplicationController
             $cedtra = $request->input('cedtra');
 
             if (empty(trim($cedtra))) {
-                return response()->json($this->errorFunc('Debe ingresar una cedula valida'));
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Debe ingresar una cedula valida'
+                ]);
             }
 
             $params = [
@@ -314,22 +347,34 @@ class EcommerceController extends ApplicationController
             ];
 
             $this->api->send([
-                'servicio' => 'movil',
+                'servicio' => 'Movil',
                 'metodo' => 'mis-compras',
                 'params' => $params,
             ]);
 
             $resultado = $this->api->toArray();
 
-            if (! ($resultado['flag'] ?? true)) {
-                $msg = $resultado['msg'] ?? 'Error al cargar compras';
-                return response()->json($this->errorFunc($msg));
+            if (! ($resultado['success'] ?? false)) {
+                $msg = $resultado['message'] ?? 'Error al cargar compras';
+                return response()->json([
+                    'success' => false,
+                    'message' => $msg
+                ]);
             }
 
-            return response()->json($this->successFunc('', $resultado['data'] ?? []));
+            return response()->json([
+                'success' => true,
+                'data' => $resultado['data'] ?? [],
+                'message' => ''
+            ]);
         } catch (\Throwable $e) {
             $this->setLogger($e->getMessage());
-            return response()->json($this->errorFunc('Error al cargar compras: ' . $e->getMessage()));
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Error al cargar compras: ' . $e->getMessage()
+                ]
+            );
         }
     }
 }

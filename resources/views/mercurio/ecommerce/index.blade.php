@@ -279,6 +279,13 @@
         guardarVenta: "{{ route('servicios.guardar-venta') }}",
     };
 
+    // CSRF token para todas las peticiones AJAX
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+
     // ================================================
     // Funciones utilitarias
     // ================================================
@@ -353,7 +360,7 @@
             cache: false,
             data: { ref_payco: refPayco }
         }).done(function(response) {
-            if (response.flag && response.data) {
+            if (response.success && response.data) {
                 var datos = response.data;
                 var codEstado = parseInt(datos.cod_estado) || 0;
                 var estadoTexto = obtenerTextoEstadoEpayco(codEstado);
@@ -405,7 +412,7 @@
             } else {
                 Swal.fire({
                     title: 'No se pudo verificar el pago',
-                    html: '<p>' + (response.msg || 'Error al consultar ePayco') + '</p>' +
+                    html: '<p>' + (response.message || 'Error al consultar ePayco') + '</p>' +
                         '<p>Referencia: ' + refPayco + '</p>' +
                         '<hr><p class="text-info">Se registrara la venta de todas formas.</p>',
                     icon: 'warning',
@@ -456,7 +463,7 @@
         }).done(function(response) {
             ocultarLoader('loader_trabajador');
 
-            if (response.flag) {
+            if (response.success) {
                 var rawTrabajador = response.data.trabajador || response.data;
                 if (rawTrabajador && rawTrabajador.trabajador && !rawTrabajador.cedtra) {
                     nucleoFamiliar = rawTrabajador.nucleo_familiar || [];
@@ -470,7 +477,7 @@
                 $('#formulario_servicio').fadeIn();
                 cargarServicios();
             } else {
-                $('#error_mensaje').text(response.msg || 'Trabajador no encontrado');
+                $('#error_mensaje').text(response.message || 'Trabajador no encontrado');
                 $('#error_trabajador').fadeIn();
             }
         }).fail(function(err) {
@@ -531,7 +538,7 @@
         }).done(function(response) {
             ocultarLoader('loader_servicios');
 
-            if (response.flag) {
+            if (response.success) {
                 serviciosData = response.data;
                 var select = $('#sel_servicio');
                 select.empty();
@@ -552,7 +559,7 @@
             } else {
                 Swal.fire({
                     title: 'Error',
-                    text: response.msg || 'No se pudieron cargar los servicios',
+                    text: response.message || 'No se pudieron cargar los servicios',
                     icon: 'error',
                     showConfirmButton: false,
                     timer: 5000
@@ -597,7 +604,7 @@
         }).done(function(response) {
             ocultarLoader('loader_tarifa');
 
-            if (response.flag) {
+            if (response.success) {
                 var data = response.data;
                 $('#txt_valor').val(formatearValor(data.valser));
                 $('#hid_valor_raw').val(data.valser);
@@ -606,7 +613,7 @@
                 $('#txt_tarifa_cupos').val(data.cupos_disponibles || '0');
                 $('#detalle_tarifa').fadeIn();
             } else {
-                $('#error_tarifa_msg').text(response.msg || 'No se pudo validar la tarifa');
+                $('#error_tarifa_msg').text(response.message || 'No se pudo validar la tarifa');
                 $('#error_tarifa').fadeIn();
             }
         }).fail(function(err) {
@@ -649,10 +656,10 @@
             cache: false,
             data: { cedtra, codser, numero, refpago, nota, codben }
         }).done(function(response) {
-            if (response.flag) {
+            if (response.success) {
                 Swal.fire({
                     title: 'Compra exitosa',
-                    html: '<p style="font-size:1em">' + (response.msg || 'Venta guardada exitosamente') + '</p>',
+                    html: '<p style="font-size:1em">' + (response.message || 'Venta guardada exitosamente') + '</p>',
                     icon: 'success',
                     showConfirmButton: false,
                     timer: 5000
@@ -665,7 +672,7 @@
             } else {
                 Swal.fire({
                     title: 'Error',
-                    text: response.msg || 'Error al guardar la venta',
+                    text: response.message || 'Error al guardar la venta',
                     icon: 'error',
                     showConfirmButton: false,
                     timer: 5000

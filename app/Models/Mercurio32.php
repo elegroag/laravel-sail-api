@@ -958,7 +958,7 @@ class Mercurio32 extends ModelBase
             "salario"    => "integer|min:0",
             "codben"     => "integer|min:0",
             // unsignedBigInteger
-            "numcue"     => "integer|min:0",
+            "numcue"     => "nullable|min:0",
             "ruuid"      => "required|min:10",
             // date — required
             "fecnac"     => "required|date",
