@@ -4,19 +4,17 @@ namespace App\Library\APIClient;
 
 class BasicAuth implements AuthClientInterface
 {
-    private $username;
+    private string $username;
+    private string $password;
+    private string $token;
 
-    private $password;
-
-    private $token;
-
-    public function __construct($username, $password)
+    public function __construct(string $username, string $password)
     {
         $this->username = $username;
         $this->password = $password;
     }
 
-    public function encript($encryption, $portal_clave)
+    public function encript(string $encryption, string $portal_clave)
     {
         $iv = '';
         $seed = str_split('1234567890123456');
@@ -34,13 +32,7 @@ class BasicAuth implements AuthClientInterface
         return $this->token;
     }
 
-    /**
-     * procesaRequest function
-     *
-     * @param [string] $result
-     * @return array
-     */
-    public function procesaRequest($result)
+    public function procesaRequest(?string $result = null)
     {
         if ($result === '' || is_null($result)) {
             return [

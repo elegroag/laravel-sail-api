@@ -6,40 +6,22 @@ use App\Exceptions\DebugException;
 
 class APIClient
 {
-    /**
-     * auth variable
-     *
-     * @var [AuthInterface]
-     */
-    private $auth;
+    private AuthClientInterface $auth;
+    private string $hostConnection;
+    private string $apiUrl;
+    private string $statusCode;
+    private bool $curlHeader = false;
+    private bool $curlVerbose = false;
+    private bool $typeJson = true;
 
-    private $hostConnection;
-
-    private $apiUrl;
-
-    private $statusCode;
-
-    private $curlHeader = false; // '1L'
-
-    private $curlVerbose = false; // true
-
-    private $typeJson = true;
-
-    /**
-     * __construct function
-     *
-     * @param  AuthClientInterface  $auth
-     * @param [type] $app
-     * @param [type] $url
-     */
-    public function __construct($auth, $host, $url)
+    public function __construct(AuthClientInterface $auth, string $host, string $url)
     {
         $this->auth = $auth;
         $this->apiUrl = $url;
         $this->hostConnection = $host;
     }
 
-    public function consumeAPI($method, $request)
+    public function consumeAPI(string $method, ?array $request = null)
     {
         // Aquí va el código para consumir la API
         $ch = curl_init();

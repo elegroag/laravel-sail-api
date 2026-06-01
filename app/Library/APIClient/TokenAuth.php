@@ -6,18 +6,17 @@ use App\Exceptions\AuthException;
 
 class TokenAuth implements AuthClientInterface
 {
-    private $token;
+    private string $token;
+    private string $host;
+    private ?array $credentials;
+    public string $statusCode;
+    private string $point;
 
-    private $host;
-
-    private $credentials;
-
-    public $statusCode;
-
-    private $point;
-
-    public function __construct($credentials, $host, $point)
-    {
+    public function __construct(
+        ?array $credentials,
+        string $host,
+        string $point
+    ) {
         $this->credentials = $credentials;
         $this->host = $host;
         $this->point = $point;
@@ -28,7 +27,7 @@ class TokenAuth implements AuthClientInterface
         return $this->newToken($this->host . '' . $this->point);
     }
 
-    public function newToken($endpoint)
+    public function newToken(string $endpoint)
     {
         $cur = curl_init();
         $cadena = http_build_query($this->credentials);
@@ -68,13 +67,7 @@ class TokenAuth implements AuthClientInterface
         }
     }
 
-    /**
-     * procesaRequest function
-     *
-     * @param [string] $result
-     * @return array
-     */
-    public function procesaRequest($result)
+    public function procesaRequest(?string $result = null)
     {
         if ($result === '' || is_null($result)) {
             return [

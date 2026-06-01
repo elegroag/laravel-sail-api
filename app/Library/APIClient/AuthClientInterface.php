@@ -6,13 +6,7 @@ interface AuthClientInterface
 {
     public function authenticate();
 
-    /**
-     * procesaRequest function
-     *
-     * @param [string] $result
-     * @return array
-     */
-    public function procesaRequest($result);
+    public function procesaRequest(?string $result = null);
 
     public function getHeader($autenticar = 0);
 }
