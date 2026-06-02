@@ -67,7 +67,7 @@ class ApiSubsidio extends ApiAbstract
             $params
         );
 
-        #log::info('[ApiSubsidio] Respuesta API:', is_string($this->output) ? [$this->output] : (array) $this->output);
+        log::info('[ApiSubsidio] Respuesta API:', is_string($this->output) ? [$this->output] : (array) $this->output);
 
         return $this;
     }

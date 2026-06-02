@@ -86,7 +86,7 @@ class EcommerceController extends ApplicationController
 
             $resultado = $this->api->toArray();
 
-            if (! ($resultado['success'] ?? false)) {
+            if (! ($resultado['flag'] ?? false)) {
                 return response()->json([
                     'success' => false,
                     'message' => $resultado['message'] ?? 'Trabajador no encontrado'
@@ -94,17 +94,6 @@ class EcommerceController extends ApplicationController
             }
 
             $data = $resultado['data'] ?? [];
-
-            if (isset($data['trabajador'])) {
-                if (! isset($data['nucleo_familiar'])) {
-                    $data['nucleo_familiar'] = [];
-                }
-            } else {
-                $data = [
-                    'trabajador' => $data,
-                    'nucleo_familiar' => $resultado['nucleo_familiar'] ?? [],
-                ];
-            }
 
             return response()->json([
                 'success' => true,
@@ -137,7 +126,7 @@ class EcommerceController extends ApplicationController
 
             $resultado = $this->api->toArray();
 
-            if (! ($resultado['success'] ?? false)) {
+            if (! ($resultado['flag'] ?? false)) {
                 return response()->json([
                     'success' => false,
                     'message' => $resultado['message'] ?? 'Error al cargar servicios'
@@ -194,7 +183,7 @@ class EcommerceController extends ApplicationController
 
             $resultado = $this->api->toArray();
 
-            if (! ($resultado['success'] ?? false)) {
+            if (! ($resultado['flag'] ?? false)) {
                 $msg = $resultado['message'] ?? 'Error al validar tarifa';
                 return response()->json([
                     'success' => false,
@@ -298,7 +287,7 @@ class EcommerceController extends ApplicationController
 
             $resultado = $this->api->toArray();
 
-            if (! ($resultado['success'] ?? false)) {
+            if (! ($resultado['flag'] ?? false)) {
                 $msg = $resultado['message'] ?? 'Error al guardar la venta';
                 return response()->json([
                     'success' => false,
@@ -354,7 +343,7 @@ class EcommerceController extends ApplicationController
 
             $resultado = $this->api->toArray();
 
-            if (! ($resultado['success'] ?? false)) {
+            if (! ($resultado['flag'] ?? false)) {
                 $msg = $resultado['message'] ?? 'Error al cargar compras';
                 return response()->json([
                     'success' => false,

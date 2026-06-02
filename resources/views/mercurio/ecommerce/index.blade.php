@@ -1,12 +1,13 @@
-@extends('layouts.dash')
+@extends('layouts.bone')
 
 @section('content')
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <!-- Epayco Standard Checkout JS -->
 <script src="https://checkout.epayco.co/checkout.js"></script>
 
 <div class="col mt-2">
     <div class="card">
-        <div class="card-header py-2" style="background-color: #3f51b5; color: white;">
+        <div class="card-header py-2 bg-blue-400 text-white">
             <b>Compra de Servicio</b>
         </div>
 
@@ -100,7 +101,7 @@
 
                     <!-- Seleccion de beneficiario (nucleo familiar) -->
                     <div class="card mb-3">
-                        <div class="card-header text-white py-2" style="background-color: #3F51B5">
+                        <div class="card-header py-2 bg-blue-400 text-white">
                             <b>Seleccionar Beneficiario</b>
                         </div>
                         <div class="card-body py-2">

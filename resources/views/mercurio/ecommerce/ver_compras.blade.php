@@ -1,9 +1,9 @@
-@extends('layouts.dash')
+@extends('layouts.bone')
 
 @section('content')
 <div class="col mt-2">
     <div class="card">
-        <div class="card-header py-2" style="background-color: #3f51b5; color: white;">
+        <div class="card-header py-2 bg-blue-400 text-white">
             <b>Mis Compras</b>
         </div>
 
