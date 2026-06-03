@@ -964,9 +964,9 @@ class Mercurio32 extends ModelBase
             "fecnac"     => "required|date",
             "fecing"     => "nullable|date",
             // date — nullable
-            "fecest"     => "date",
+            "fecest"     => "nullable|date",
             "fecsol"     => "date",
-            "fecapr"     => "date",
+            "fecapr"     => "nullable|date",
             // string
             "barrio"     => "max:45",
             "motivo"     => "max:500",
@@ -976,7 +976,7 @@ class Mercurio32 extends ModelBase
             "prinom"     => "required|max:20",
             "direccion"  => "required|max:45",
             "telefono"   => "required|max:13",
-            "email"      => "required|email|max:45",
+            "email"      => "required|email|max:100",
             "estado"     => "required|max:1",
             "tipo"       => "required|max:2",
             "coddoc"     => "required|max:2",
