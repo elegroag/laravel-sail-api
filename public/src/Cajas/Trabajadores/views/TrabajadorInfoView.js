@@ -57,10 +57,16 @@ export default class TrabajadorInfoView extends FormInfoView {
 
         this.actualizaForm();
 
+        let fechaPasada = new Date();
+        fechaPasada.setDate(fechaPasada.getDate() - 60);
+
         flatpickr(this.$el.find('#fecafi, #fecapr'), {
             enableTime: false,
             dateFormat: 'Y-m-d',
             locale: Spanish,
+            allowInput: true,
+            maxDate: 'today',
+            minDate: fechaPasada,
         });
 
         if (this.model.get('tippag') == 'T') {

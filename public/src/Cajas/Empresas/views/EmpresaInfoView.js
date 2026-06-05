@@ -22,7 +22,7 @@ export default class EmpresaInfoView extends FormInfoView {
 				model: this.model,
 			}),
 		);
-		this.afterRender();
+		this.#afterRender();
 		return this;
 	}
 
@@ -37,7 +37,7 @@ export default class EmpresaInfoView extends FormInfoView {
 		};
 	}
 
-	afterRender() {
+	#afterRender() {
 		this.__afterRender();
 		this.model.set({
 			codind: '03',
@@ -55,11 +55,17 @@ export default class EmpresaInfoView extends FormInfoView {
 		this.actualizaForm();
 		this.$el.find('#codind, #tipsoc, #tipapo, .js-basic-multiple').select2();
 		
-		flatpickr(this.$el.find('#fecafi, #fecapr'), {
-			enableTime: false,
-			dateFormat: 'Y-m-d',
-			locale: Spanish,
-		});
+		let fechaPasada = new Date();
+        fechaPasada.setDate(fechaPasada.getDate() - 60);
+
+        flatpickr(this.$el.find('#fecafi, #fecapr'), {
+            enableTime: false,
+            dateFormat: 'Y-m-d',
+            locale: Spanish,
+            allowInput: true,
+            maxDate: 'today',
+            minDate: fechaPasada,
+        });
 	}
 
 	aprobarSolicitud(e) {

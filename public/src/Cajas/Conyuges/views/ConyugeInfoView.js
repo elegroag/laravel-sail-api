@@ -26,7 +26,7 @@ class ConyugeInfoView extends FormInfoView {
                 model: this.model,
             }),
         );
-        this.afterRender();
+        this.#afterRender();
         return this;
     }
 
@@ -42,15 +42,21 @@ class ConyugeInfoView extends FormInfoView {
         };
     }
 
-    afterRender() {
+    #afterRender() {
         this.__afterRender();
 
         this.actualizaForm();
+
+        let fechaPasada = new Date();
+        fechaPasada.setDate(fechaPasada.getDate() - 60);
 
         flatpickr(this.$el.find('#fecafi, #fecapr'), {
             enableTime: false,
             dateFormat: 'Y-m-d',
             locale: Spanish,
+            allowInput: true,
+            maxDate: 'today',
+            minDate: fechaPasada,
         });
 
         this.$el.find('.js-basic-multiple, #codind, #tipsoc, #tipapo, #codban, #codgir').select2();
