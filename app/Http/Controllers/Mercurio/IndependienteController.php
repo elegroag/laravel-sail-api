@@ -27,6 +27,7 @@ use App\Services\Utils\SenderValidationCaja;
 use App\Services\Api\ApiSubsidio;
 use App\Services\Srequest;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -170,7 +171,8 @@ class IndependienteController extends ApplicationController
             ];
 
             $this->db->commit();
-        } catch (\Throwable $e) {
+            return response()->json($salida);
+        } catch (Exception $e) {
             $this->db->rollBack();
             return $this->handleException($e, $request);
         }

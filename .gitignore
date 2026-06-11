@@ -78,3 +78,5 @@ AGENTS.md
 .gemini
 .codex
 CLAUDE.md
+.deploy.sh
+deploy.sh
