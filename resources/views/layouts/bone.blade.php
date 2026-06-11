@@ -24,7 +24,6 @@ list($menu, $breadcrumbs, $pageTitle) = App\Services\Menu\Menu::showMenu('ME');
 
 <div class="main-content" id="panel">
 @include('templates.navbar', ['user_name' => capitalize($user['nombre']), 'pageTitle'=> $pageTitle])
-    <div id="breadcrumb-bar"></div>
     @yield('content')
 @include('templates.footer')
 </div>

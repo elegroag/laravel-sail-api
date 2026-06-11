@@ -113,7 +113,7 @@ class AfiliationService {
 
         // Breadcrumb dinámico
         const breadcrumbItems = [
-            { title: 'Inicio', url: '#' },
+            { title: 'Inicio', url: '#list' },
             { title: options.breadcrumb_menu || '', is_active: true },
         ];
         const breadcrumbView = new BreadcrumbView({ model: { breadcrumbs: breadcrumbItems } });
