@@ -16,6 +16,7 @@ use App\Services\Utils\GeneralService;
 use App\Services\Utils\Paginate;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class Mercurio04Controller extends ApplicationController
 {
@@ -23,17 +24,17 @@ class Mercurio04Controller extends ApplicationController
 
     protected $cantidad_pagina = 10;
 
-    protected $db;
+    protected ?DbBase $db = null;
 
-    protected $user;
+    protected ?array $user = null;
 
-    protected $tipfun;
+    protected ?string $tipfun = null;
 
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session('user');
-        $this->tipfun = session('tipfun');
+        $this->user = session('user')  ?? null;
+        $this->tipfun = session('tipfun') ?? null;
     }
 
     public function showTabla($paginate)
@@ -58,43 +59,64 @@ class Mercurio04Controller extends ApplicationController
 
     public function index()
     {
-        $campo_field = [
-            'codofi' => 'Codigo',
-            'detalle' => 'Detalle',
-        ];
-        $ps = new ApiSubsidio();
-        $ps->send(
-            [
-                'servicio' => 'ComfacaAfilia',
-                'metodo' => 'listar_ciudades_departamentos',
-                'params' => false,
-            ]
-        );
-        $out = $ps->toArray();
-        $_codciu = [];
-        foreach ($out['ciudades'] as $mcodciu) {
-            $_codciu[$mcodciu['codciu']] = $mcodciu['detciu'];
-        }
+        Log::info('Mercurio04Controller@index - Iniciando carga de vista oficinas');
 
-        $out = Gener02::where('estado', 'A')->get();
-        foreach ($out as $usuario) {
-            $usuarios[$usuario->usuario] = $usuario->nombre;
-        }
+        try {
+            $campo_field = [
+                'codofi' => 'Codigo',
+                'detalle' => 'Detalle',
+            ];
 
-        $out = Mercurio09::all();
-        foreach ($out as $tipopc) {
-            $tipopcs[$tipopc->tipopc] = $tipopc->detalle;
-        }
+            Log::info('Mercurio04Controller@index - Llamando ApiSubsidio::send');
 
-        return view('cajas.mercurio04.index', [
-            'campo_filtro' => $campo_field,
-            'title' => 'Oficinas',
-            'ciudades' => $_codciu,
-            'principal' => ['S' => 'Sí', 'N' => 'No'],
-            'estados' => ['A' => 'Activo', 'I' => 'Inactivo'],
-            'usuarios' => $usuarios,
-            'tipopcs' => $tipopcs,
-        ]);
+            $ps = new ApiSubsidio();
+            $ps->send(
+                [
+                    'servicio' => 'ComfacaAfilia',
+                    'metodo' => 'listar_ciudades_departamentos',
+                    'params' => false,
+                ]
+            );
+            $out = $ps->toArray();
+            Log::info('Mercurio04Controller@index - Respuesta ApiSubsidio', ['ciudades_count' => count($out['ciudades'] ?? [])]);
+
+            $_codciu = [];
+            foreach ($out['ciudades'] as $mcodciu) {
+                $_codciu[$mcodciu['codciu']] = $mcodciu['detciu'];
+            }
+
+            Log::info('Mercurio04Controller@index - Consultando Gener02');
+
+            $out = Gener02::where('estado', 'A')->get();
+            foreach ($out as $usuario) {
+                $usuarios[$usuario->usuario] = $usuario->nombre;
+            }
+
+            Log::info('Mercurio04Controller@index - Consultando Mercurio09');
+
+            $out = Mercurio09::all();
+            foreach ($out as $tipopc) {
+                $tipopcs[$tipopc->tipopc] = $tipopc->detalle;
+            }
+
+            Log::info('Mercurio04Controller@index - Renderizando vista');
+
+            return view('cajas.mercurio04.index', [
+                'campo_filtro' => $campo_field,
+                'title' => 'Oficinas',
+                'ciudades' => $_codciu,
+                'principal' => ['S' => 'Sí', 'N' => 'No'],
+                'estados' => ['A' => 'Activo', 'I' => 'Inactivo'],
+                'usuarios' => $usuarios,
+                'tipopcs' => $tipopcs,
+            ]);
+        } catch (Exception $e) {
+            Log::error('Mercurio04Controller@index - Error 500', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            throw $e;
+        }
     }
 
     public function buscar(Request $request)
@@ -137,28 +159,35 @@ class Mercurio04Controller extends ApplicationController
 
     public function borrar(Request $request)
     {
+        $this->db->begin();
         try {
             try {
                 $this->setResponse('ajax');
                 $codofi = $request->input('codofi');
 
-                $response = $this->db->begin();
                 Mercurio04::whereRaw("codofi = '$codofi'")->delete();
                 $this->db->commit();
-                $response = 'Borrado Con Exito';
+                $response = [
+                    'success' => true,
+                    'msj' => 'Borrado Con Exito'
+                ];
 
-                return $this->renderObject($response, false);
+                return $this->renderObject($response);
             } catch (DebugException $e) {
                 $this->db->rollback();
             }
         } catch (DebugException $e) {
-            $response = 'No se puede Borrar el Registro ' . $e->getMessage();
-            return $this->renderObject($response, false);
+            $response = [
+                'success' => false,
+                'msj' => 'No se puede Borrar el Registro ' . $e->getMessage()
+            ];
+            return $this->renderObject($response);
         }
     }
 
     public function guardar(Request $request)
     {
+        $this->db->begin();
         try {
             try {
                 $this->setResponse('ajax');
@@ -166,8 +195,6 @@ class Mercurio04Controller extends ApplicationController
                 $detalle = $request->input('detalle');
                 $principal = $request->input('principal');
                 $estado = $request->input('estado');
-
-                $response = $this->db->begin();
                 $mercurio04 = new Mercurio04;
 
                 $mercurio04->setCodofi($codofi);
@@ -178,15 +205,21 @@ class Mercurio04Controller extends ApplicationController
                     $this->db->rollback();
                 }
                 $this->db->commit();
-                $response = 'Creacion Con Exito';
+                $response = [
+                    'success' => true,
+                    'msj' => 'Creacion Con Exito'
+                ];
 
-                return $this->renderObject($response, false);
+                return $this->renderObject($response);
             } catch (DebugException $e) {
                 $this->db->rollback();
             }
         } catch (DebugException $e) {
-            $response = 'No se puede guardar/editar el Registro ' . $e->getMessage();
-            return $this->renderObject($response, false);
+            $response = [
+                'success' => false,
+                'msj' => 'No se puede guardar/editar el Registro ' . $e->getMessage()
+            ];
+            return $this->renderObject($response);
         }
     }
 
@@ -201,11 +234,16 @@ class Mercurio04Controller extends ApplicationController
                 $response = 'El Registro ya se encuentra Digitado';
             }
 
-            return $this->renderObject($response, false);
+            return $this->renderObject([
+                'success' => true,
+                'msj' => $response
+            ]);
         } catch (DebugException $e) {
-            $response = 'No se pudo validar la informacion ' . $e->getMessage();
-
-            return $this->renderObject($response, false);
+            $response = [
+                'success' => false,
+                'msj' => 'No se pudo validar la informacion ' . $e->getMessage()
+            ];
+            return $this->renderObject($response);
         }
     }
 
@@ -220,7 +258,11 @@ class Mercurio04Controller extends ApplicationController
         $consultasOldServices = new GeneralService;
         $file = $consultasOldServices->createReport('mercurio04', $_fields, $this->query, 'Oficinas', $format);
 
-        return $this->renderObject($file, false);
+        return $this->renderObject([
+            'success' => true,
+            'msj' => 'Reporte generado con éxito',
+            'file' => $file
+        ]);
     }
 
     public function validePkCiudad(Request $request)
@@ -235,10 +277,15 @@ class Mercurio04Controller extends ApplicationController
                 $response = 'El Registro ya se encuentra Digitado';
             }
 
-            return $this->renderObject($response, false);
+            return $this->renderObject([
+                'success' => true,
+                'msj' => $response
+            ]);
         } catch (DebugException $e) {
-            $response = 'No se pudo validar la informacion ' . $e->getMessage();
-            return $this->renderObject($response, false);
+            return $this->renderObject([
+                'success' => false,
+                'msj' => 'No se pudo validar la informacion ' . $e->getMessage()
+            ]);
         }
     }
 
@@ -257,7 +304,7 @@ class Mercurio04Controller extends ApplicationController
                 'msj' => $e->getMessage()
             ];
         }
-        return $this->renderObject($response, false);
+        return $this->renderObject($response);
     }
 
     public function guardarCiudad(Request $request)
@@ -268,7 +315,7 @@ class Mercurio04Controller extends ApplicationController
             $codofi = $request->input('codofi');
             $codciu = $request->input('codciu');
 
-            $response = $this->db->begin();
+            $this->db->begin();
             $mercurio05 = new Mercurio05;
 
             $mercurio05->setCodofi($codofi);
@@ -277,13 +324,22 @@ class Mercurio04Controller extends ApplicationController
                 $this->db->rollback();
             }
             $this->db->commit();
-            $response = 'Movimiento Realizado Con Exito';
-
-            return $this->renderObject($response, false);
+            $response = [
+                'success' => true,
+                'msj' => 'Movimiento Realizado Con Exito'
+            ];
+            $response = [
+                'success' => true,
+                'msj' => $response
+            ];
+            return $this->renderObject($response);
         } catch (DebugException $e) {
-            $response = 'No se pudo realizar el movimiento ' . $e->getMessage();
+            $response = [
+                'success' => false,
+                'msj' => 'No se pudo realizar el movimiento ' . $e->getMessage()
+            ];
 
-            return $this->renderObject($response, false);
+            return $this->renderObject($response);
         }
     }
 
@@ -295,20 +351,22 @@ class Mercurio04Controller extends ApplicationController
                 $codofi = $request->input('codofi');
                 $codciu = $request->input('codciu');
 
-                $response = $this->db->begin();
+                $this->db->begin();
                 $mercurio05 = Mercurio05::whereRaw("codofi='$codofi' and codciu = '$codciu'")->first();
                 if ($mercurio05 == false) {
                     $mercurio05 = new Mercurio05;
                 }
 
-                return $this->renderObject($mercurio05->toArray(), false);
+                return $this->renderObject($mercurio05->toArray());
             } catch (DebugException $e) {
                 $this->db->rollback();
             }
         } catch (DebugException $e) {
-            $response = 'No se pudo realizar el movimiento ' . $e->getMessage();
 
-            return $this->renderObject($response, false);
+            return $this->renderObject([
+                'success' => false,
+                'msj' => 'No se pudo realizar el movimiento ' . $e->getMessage()
+            ]);
         }
     }
 
@@ -320,19 +378,25 @@ class Mercurio04Controller extends ApplicationController
                 $codofi = $request->input('codofi');
                 $codciu = $request->input('codciu');
 
-                $response = $this->db->begin();
+                $this->db->begin();
                 Mercurio05::whereRaw("codofi='$codofi' and codciu='$codciu'")->delete();
                 $this->db->commit();
                 $response = 'Movimiento Realizado Con Exito';
 
-                return $this->renderObject($response, false);
+                return $this->renderObject([
+                    'success' => true,
+                    'msj' => 'Movimiento Realizado Con Exito'
+                ]);
             } catch (DebugException $e) {
                 $this->db->rollback();
             }
         } catch (DebugException $e) {
-            $response = 'No se pudo realizar el movimiento ' . $e->getMessage();
+            $response = [
+                'success' => false,
+                'msj' => 'No se pudo realizar el movimiento ' . $e->getMessage()
+            ];
 
-            return $this->renderObject($response, false);
+            return $this->renderObject($response);
         }
     }
 
@@ -383,13 +447,13 @@ class Mercurio04Controller extends ApplicationController
                 'success' => true,
                 'data' => $data->toArray()
             ];
-            return $this->renderObject($response, false);
+            return $this->renderObject($response);
         } catch (DebugException $e) {
             $response = [
                 'success' => false,
                 'msj' => $e->getMessage()
             ];
-            return $this->renderObject($response, false);
+            return $this->renderObject($response);
         }
     }
 
@@ -399,7 +463,7 @@ class Mercurio04Controller extends ApplicationController
             $codofi = $request->input('codofi');
             $tipopc = $request->input('tipopc');
             $usuario = $request->input('usuario');
-            $response = $this->db->begin();
+            $this->db->begin();
 
             $mercurio08 = Mercurio08::whereRaw("codofi='{$codofi}' and tipopc='{$tipopc}' and usuario='{$usuario}'")->first();
             if ($mercurio08 == false) {
@@ -446,7 +510,7 @@ class Mercurio04Controller extends ApplicationController
                 $tipopc = $request->input('tipopc');
                 $usuario = $request->input('usuario');
 
-                $response = $this->db->begin();
+                $this->db->begin();
                 Mercurio08::whereRaw("codofi='$codofi' and tipopc='$tipopc' and usuario='$usuario'")->delete();
                 $this->db->commit();
                 $response = [
@@ -466,6 +530,6 @@ class Mercurio04Controller extends ApplicationController
                 'msj' => 'No se pudo realizar el movimiento ' . $e->getMessage()
             ];
         }
-        return response()->json($response);
+        return $this->renderObject($response);
     }
 }

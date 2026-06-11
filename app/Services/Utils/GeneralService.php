@@ -157,7 +157,10 @@ class GeneralService
         ])->render();
     }
 
-    public function createReport($model, $_fields, $query = '1=1', $title = 'Reporte', $format = 'P') {}
+    public function createReport($model, $_fields, $query = '1=1', $title = 'Reporte', $format = 'P'): ?string
+    {
+        return null;
+    }
 
     public function webService($funcion, $params)
     {
