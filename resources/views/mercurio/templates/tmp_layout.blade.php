@@ -1,3 +1,5 @@
+<div id="breadcrumb-bar"></div>
+
 <div class="header bg-gradient-primary pb-9">
     <div class="container-fluid">
         <div class="header-body p-4">
