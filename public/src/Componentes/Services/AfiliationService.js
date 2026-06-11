@@ -112,13 +112,12 @@ class AfiliationService {
         $App.layout.getRegion('header').show(this.headerView);
 
         // Breadcrumb dinámico
-        const breadcrumbView = new BreadcrumbView();
         const breadcrumbItems = [
             { title: 'Inicio', url: '#' },
             { title: options.breadcrumb_menu || '', is_active: true },
         ];
+        const breadcrumbView = new BreadcrumbView({ model: { breadcrumbs: breadcrumbItems } });
         $App.layout.getRegion('breadcrumb').show(breadcrumbView);
-        breadcrumbView.renderBreadcrumb(breadcrumbItems);
 
         $("[data-toggle='linkFilter'][data-valor='" + options.estado + "']").addClass('active');
     }
