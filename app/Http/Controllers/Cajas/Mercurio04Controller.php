@@ -78,11 +78,15 @@ class Mercurio04Controller extends ApplicationController
                 ]
             );
             $out = $ps->toArray();
-            Log::info('Mercurio04Controller@index - Respuesta ApiSubsidio', ['ciudades_count' => count($out['ciudades'] ?? [])]);
 
             $_codciu = [];
-            foreach ($out['ciudades'] as $mcodciu) {
-                $_codciu[$mcodciu['codciu']] = $mcodciu['detciu'];
+            if (!empty($out['success']) && !empty($out['ciudades'])) {
+                Log::info('Mercurio04Controller@index - Respuesta ApiSubsidio', ['ciudades_count' => count($out['ciudades'])]);
+                foreach ($out['ciudades'] as $mcodciu) {
+                    $_codciu[$mcodciu['codciu']] = $mcodciu['detciu'];
+                }
+            } else {
+                Log::warning('Mercurio04Controller@index - ApiSubsidio falló o sin ciudades', ['response' => $out]);
             }
 
             Log::info('Mercurio04Controller@index - Consultando Gener02');
