@@ -125,7 +125,7 @@ class DatabaseSeeder extends Seeder
             Mercurio84Seeder::class,
             Mercurio85Seeder::class,
             FormularioDinamicoSeeder::class,
-            ComponenteDinamicoSeeder::class
+            ComponenteDinamicoSeeder::class,
         ];
 
         try {
