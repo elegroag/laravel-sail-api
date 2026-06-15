@@ -12,8 +12,6 @@ class Gener42Seeder extends Seeder
     public function run(): void
     {
         $legacy = new LegacyDatabaseService();
-
-        // Leer registros desde la base legada
         $rows = $legacy->select('SELECT * FROM gener42');
 
         $fillable = (new Gener42())->getFillable();

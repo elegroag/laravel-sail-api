@@ -14,32 +14,31 @@ class Mercurio19Seeder extends Seeder
         // Conexión a la base de datos legada (puedes mover estos datos a .env si lo prefieres)
         $legacyDb = new LegacyDatabaseService();
         // Obtener datos de la base legada
-
-        $legacyModel = $legacyDb->select('SELECT * FROM mercurio19');
+        $legacyModel = $legacyDb->select('SELECT * FROM mercurio19 LIMIT 1000');
 
         $fillable = (new Mercurio19())->getFillable();
 
         // Insertar en la nueva base usando Eloquent (solo escritura en la base actual de Laravel)
         foreach ($legacyModel as $model) {
-             $data = [];
+            $data = [];
             foreach ($fillable as $field) {
                 $data[$field] = $model[$field] ?? null;
             }
 
-            if($data['intentos'] == null) $data['intentos'] = 0;
-            if($data['documento'] < 5) continue;
-            if(!is_numeric($data['coddoc'])){
+            if ($data['intentos'] == null) $data['intentos'] = 0;
+            if ($data['documento'] < 5) continue;
+            if (!is_numeric($data['coddoc'])) {
                 continue;
             }
-            if(!is_numeric($data['documento'])){
+            if (!is_numeric($data['documento'])) {
                 continue;
             }
-            if(!is_numeric($data['tipo'])){
+            if (!is_numeric($data['tipo'])) {
                 continue;
             }
             //existe en mercurio7
             $mercurio7 = Mercurio07::where('documento', $model['documento'])->where('coddoc', $model['coddoc'])->where('tipo', $model['tipo']);
-            if($mercurio7->exists() == false){
+            if ($mercurio7->exists() == false) {
                 continue;
             }
 

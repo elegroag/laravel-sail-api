@@ -3,27 +3,31 @@
 namespace Database\Seeders;
 
 use App\Models\Xml4b070;
+use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
 
 class Xml4b070Seeder extends Seeder
 {
-    /**
-     * Ejecuta las semillas de la base de datos.
-     */
     public function run(): void
     {
-        $jornadas = [
-            ['tipjor' => 1, 'nombre' => 'MAÑANA'],
-            ['tipjor' => 2, 'nombre' => 'TARDE'],
-            ['tipjor' => 3, 'nombre' => 'NOCTURNA'],
-            ['tipjor' => 4, 'nombre' => 'JORNADA UNICA'],
-        ];
+        $legacy = new LegacyDatabaseService();
 
-        foreach ($jornadas as $jornada) {
+        $rows = $legacy->select('SELECT * FROM xml4b070 LIMIT 1000');
+
+        $fillable = (new Xml4b070())->getFillable();
+
+        foreach ($rows as $row) {
+            $data = [];
+            foreach ($fillable as $field) {
+                $data[$field] = $row[$field] ?? null;
+            }
+
             Xml4b070::updateOrCreate(
-                ['tipjor' => $jornada['tipjor']],
-                $jornada
+                ['tipjor' => $row['tipjor']],
+                $data
             );
         }
+
+        $legacy->disconnect();
     }
 }

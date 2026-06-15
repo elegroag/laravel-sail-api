@@ -14,7 +14,7 @@ class Mercurio16Seeder extends Seeder
         $legacyDb = new LegacyDatabaseService();
         // Obtener datos de la base legada
 
-        $legacyModel = $legacyDb->select('SELECT * FROM mercurio16');
+        $legacyModel = $legacyDb->select('SELECT * FROM mercurio16 LIMIT 1000');
 
         // Insertar en la nueva base usando Eloquent (solo escritura en la base actual de Laravel)
         foreach ($legacyModel as $model) {

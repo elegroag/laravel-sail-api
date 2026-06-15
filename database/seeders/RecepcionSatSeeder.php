@@ -8,7 +8,7 @@ use Illuminate\Database\Seeder;
 
 class RecepcionSatSeeder extends Seeder
 {
-   /**
+    /**
      * Ejecuta las semillas de la base de datos.
      */
     public function run(): void
@@ -16,7 +16,7 @@ class RecepcionSatSeeder extends Seeder
         $legacy = new LegacyDatabaseService();
 
         // Leer registros desde la base legada
-        $rows = $legacy->select('SELECT * FROM recepcionsat');
+        $rows = $legacy->select('SELECT * FROM recepcionsat LIMIT 1000');
 
         // Campos permitidos del modelo
         $fillable = (new RecepcionSat())->getFillable();

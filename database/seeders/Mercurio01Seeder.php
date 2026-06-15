@@ -3,24 +3,30 @@
 namespace Database\Seeders;
 
 use App\Models\Mercurio01;
+use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
 
 class Mercurio01Seeder extends Seeder
 {
-    /**
-     * Ejecuta las semillas de la base de datos.
-     */
     public function run(): void
     {
-        $aplicaciones = [
-            ['codapl' => 'ME', 'email' => 'enlinea@comfaca.com', 'clave' => 'lqoj eqrx cgiq ajec', 'path' => 'public/temp/', 'ftpserver' => 'dd', 'pathserver' => 'ddd', 'userserver' => 'dddd', 'passserver' => 'ddddd'],
-        ];
+        $legacy = new LegacyDatabaseService();
+        $rows = $legacy->select('SELECT * FROM mercurio01');
 
-        foreach ($aplicaciones as $aplicacion) {
+        $fillable = (new Mercurio01())->getFillable();
+
+        foreach ($rows as $row) {
+            $data = [];
+            foreach ($fillable as $field) {
+                $data[$field] = $row[$field] ?? null;
+            }
+
             Mercurio01::updateOrCreate(
-                ['codapl' => $aplicacion['codapl']],
-                $aplicacion
+                ['codapl' => $row['codapl']],
+                $data
             );
         }
+
+        $legacy->disconnect();
     }
 }

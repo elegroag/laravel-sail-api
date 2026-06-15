@@ -16,7 +16,7 @@ class Xml4b091Seeder extends Seeder
         $legacy = new LegacyDatabaseService();
 
         // Leer registros desde la base legada
-        $rows = $legacy->select('SELECT * FROM xml4b091');
+        $rows = $legacy->select('SELECT * FROM xml4b091 LIMIT 1000');
 
         // Campos permitidos del modelo
         $fillable = (new Xml4b091())->getFillable();

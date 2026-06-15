@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Mercurio70;
 use App\Services\LegacyDatabaseService;
-use Illuminate\Database\Seeder; 
+use Illuminate\Database\Seeder;
 
 class Mercurio70Seeder extends Seeder
 {
@@ -16,7 +16,7 @@ class Mercurio70Seeder extends Seeder
         $legacy = new LegacyDatabaseService();
 
         // Leer registros desde la base legada
-        $rows = $legacy->select('SELECT * FROM mercurio70');
+        $rows = $legacy->select('SELECT * FROM mercurio70 LIMIT 1000');
 
         // Campos permitidos del modelo
         $fillable = (new Mercurio70())->getFillable();

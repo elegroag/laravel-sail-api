@@ -3,51 +3,30 @@
 namespace Database\Seeders;
 
 use App\Models\Mercurio11;
+use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
 
 class Mercurio11Seeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $estadosRechazo = [
-            [
-                'codest' => '00',
-                'detalle' => 'No se aplica',
-            ],
-            [
-                'codest' => '01',
-                'detalle' => 'Documentación Incompleta',
-            ],
-            [
-                'codest' => '02',
-                'detalle' => 'Falta de Firmas',
-            ],
-            [
-                'codest' => '03',
-                'detalle' => 'Datos Incompletos',
-            ],
-            [
-                'codest' => '04',
-                'detalle' => 'Datos Inconsistentes para la Afiliación',
-            ],
-            [
-                'codest' => '05',
-                'detalle' => 'Ya existe un registro activo en nuestra base',
-            ],
-            [
-                'codest' => '06',
-                'detalle' => 'Anulación de Afiliación',
-            ],
-        ];
+        $legacy = new LegacyDatabaseService();
+        $rows = $legacy->select('SELECT * FROM mercurio11 LIMIT 1000');
 
-        foreach ($estadosRechazo as $estado) {
+        $fillable = (new Mercurio11())->getFillable();
+
+        foreach ($rows as $row) {
+            $data = [];
+            foreach ($fillable as $field) {
+                $data[$field] = $row[$field] ?? null;
+            }
+
             Mercurio11::updateOrCreate(
-                ['codest' => $estado['codest']],
-                $estado
+                ['codest' => $row['codest']],
+                $data
             );
         }
+
+        $legacy->disconnect();
     }
 }

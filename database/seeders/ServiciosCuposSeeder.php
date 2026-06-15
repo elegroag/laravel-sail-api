@@ -3,25 +3,31 @@
 namespace Database\Seeders;
 
 use App\Models\ServiciosCupos;
+use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
 
 class ServiciosCuposSeeder extends Seeder
 {
-    /**
-     * Ejecuta las semillas de la base de datos.
-     */
     public function run(): void
     {
-        $servicios = [
-            ['id' => 1, 'codser' => 'F', 'cupos' => '27', 'servicio' => 'Complemento Nutricional', 'estado' => 1, 'url' => 'https://portalpagos.davivienda.com/#/comercio/5910/'],
-            ['id' => 2, 'codser' => 'A', 'cupos' => '40', 'servicio' => 'Reserva boletas celebración 50 años de COMFACA', 'estado' => 1000, 'url' => 'https://comfacaenlinea.com.co/recervar.php'],
-        ];
+        $legacy = new LegacyDatabaseService();
 
-        foreach ($servicios as $servicio) {
+        $rows = $legacy->select('SELECT * FROM servicios_cupos LIMIT 1000');
+
+        $fillable = (new ServiciosCupos())->getFillable();
+
+        foreach ($rows as $row) {
+            $data = [];
+            foreach ($fillable as $field) {
+                $data[$field] = $row[$field] ?? null;
+            }
+
             ServiciosCupos::updateOrCreate(
-                ['id' => $servicio['id']],
-                $servicio
+                ['id' => $row['id']],
+                $data
             );
         }
+
+        $legacy->disconnect();
     }
 }

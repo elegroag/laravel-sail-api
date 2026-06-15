@@ -13,7 +13,7 @@ class Mercurio54Seeder extends Seeder
         $legacy = new LegacyDatabaseService();
 
         // Leer registros desde la base legada
-        $rows = $legacy->select('SELECT * FROM mercurio54');
+        $rows = $legacy->select('SELECT * FROM mercurio54 LIMIT 1000');
 
         // Campos permitidos del modelo
         $fillable = (new Mercurio54())->getFillable();
@@ -26,8 +26,8 @@ class Mercurio54Seeder extends Seeder
 
             Mercurio54::updateOrCreate(
                 [
-                    'tipo' => $row['tipo'], 
-                    'coddoc' => $row['coddoc'], 
+                    'tipo' => $row['tipo'],
+                    'coddoc' => $row['coddoc'],
                     'documento' => $row['documento']
                 ],
                 $data
@@ -35,5 +35,5 @@ class Mercurio54Seeder extends Seeder
         }
 
         $legacy->disconnect();
-    }   
+    }
 }

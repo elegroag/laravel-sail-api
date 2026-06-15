@@ -14,9 +14,7 @@ class Mercurio10Seeder extends Seeder
     public function run(): void
     {
         $legacy = new LegacyDatabaseService();
-
-        // Leer registros desde la base legada
-        $rows = $legacy->select('SELECT * FROM mercurio10');
+        $rows = $legacy->select('SELECT * FROM mercurio10 LIMIT 1000');
 
         // Campos permitidos del modelo
         $fillable = (new Mercurio10())->getFillable();

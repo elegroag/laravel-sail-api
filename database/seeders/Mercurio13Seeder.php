@@ -2,48 +2,34 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Mercurio13;
+use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
-use RuntimeException;
 
 class Mercurio13Seeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    private const TABLE = 'mercurio13';
-
-    /**
-     * Ejecuta el seeder cargando el SQL externo.
-     */
     public function run(): void
     {
-        DB::transaction(function (): void {
-            $this->limpiarTabla();
-            DB::unprepared($this->sql());
-        });
-    }
+        $legacy = new LegacyDatabaseService();
+        $rows = $legacy->select('SELECT * FROM mercurio13');
 
-    /**
-     * Obtiene el contenido del archivo SQL requerido.
-     */
-    protected function sql(): string
-    {
-        $sqlPath = database_path('seeders/dbsql/mercurio13.sql');
+        $fillable = (new Mercurio13())->getFillable();
 
-        if (! File::exists($sqlPath)) {
-            throw new RuntimeException('No se encontró el archivo SQL para el seeder mercurio13.');
+        foreach ($rows as $row) {
+            $data = [];
+            foreach ($fillable as $field) {
+                $data[$field] = $row[$field] ?? null;
+            }
+
+            Mercurio13::updateOrCreate(
+                [
+                    'tipopc' => $row['tipopc'],
+                    'coddoc' => $row['coddoc'],
+                ],
+                $data
+            );
         }
 
-        return File::get($sqlPath);
-    }
-
-    /**
-     * Elimina los registros existentes para permitir re-ejecuciones idempotentes.
-     */
-    protected function limpiarTabla(): void
-    {
-        DB::statement(sprintf('DELETE FROM %s', self::TABLE));
+        $legacy->disconnect();
     }
 }

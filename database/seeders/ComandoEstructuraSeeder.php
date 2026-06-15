@@ -2,48 +2,31 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\ComandoEstructuras;
+use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
-use RuntimeException;
 
 class ComandoEstructuraSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    private const TABLE = 'comando_estructuras';
-
-    /**
-     * Ejecuta el seeder cargando el SQL externo.
-     */
     public function run(): void
     {
-        DB::transaction(function (): void {
-            $this->limpiarTabla();
-            DB::unprepared($this->sql());
-        });
-    }
+        $legacy = new LegacyDatabaseService();
+        $rows = $legacy->select('SELECT * FROM comando_estructuras');
 
-    /**
-     * Obtiene el contenido del archivo SQL requerido.
-     */
-    protected function sql(): string
-    {
-        $sqlPath = database_path('seeders/dbsql/comando_estructuras.sql');
+        $fillable = (new ComandoEstructuras())->getFillable();
 
-        if (! File::exists($sqlPath)) {
-            throw new RuntimeException('No se encontró el archivo SQL para el seeder comando_estructuras.');
+        foreach ($rows as $row) {
+            $data = [];
+            foreach ($fillable as $field) {
+                $data[$field] = $row[$field] ?? null;
+            }
+
+            ComandoEstructuras::updateOrCreate(
+                ['id' => $row['id']],
+                $data
+            );
         }
 
-        return File::get($sqlPath);
-    }
-
-    /**
-     * Elimina los registros existentes para permitir re-ejecuciones idempotentes.
-     */
-    protected function limpiarTabla(): void
-    {
-        DB::statement(sprintf('DELETE FROM %s', self::TABLE));
+        $legacy->disconnect();
     }
 }

@@ -16,7 +16,7 @@ class Mercurio84Seeder extends Seeder
         $legacy = new LegacyDatabaseService();
 
         // Leer registros desde la base legada
-        $rows = $legacy->select('SELECT * FROM mercurio84');
+        $rows = $legacy->select('SELECT * FROM mercurio84 LIMIT 1000');
 
         // Campos permitidos del modelo
         $fillable = (new Mercurio84())->getFillable();

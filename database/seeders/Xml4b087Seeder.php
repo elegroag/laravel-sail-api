@@ -3,31 +3,31 @@
 namespace Database\Seeders;
 
 use App\Models\Xml4b087;
+use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
 
 class Xml4b087Seeder extends Seeder
 {
-    /**
-     * Ejecuta las semillas de la base de datos.
-     */
     public function run(): void
     {
-        $poblaciones = [
-            ['codpob' => 1, 'nombre' => 'VICTIMAS DEL CONFLICTO ARMADO'],
-            ['codpob' => 2, 'nombre' => 'EN CONDICION DE DESPLAZAMIENTO'],
-            ['codpob' => 3, 'nombre' => 'EN CONDICION DE DISCAPACIDAD FISICA'],
-            ['codpob' => 4, 'nombre' => 'VICTIMAS DEL CONFLICTO ARMADO Y EN CONDICION DE DESPLAZAMIENTO'],
-            ['codpob' => 5, 'nombre' => 'VICTIMAS DEL CONFLICTO ARMADO Y EN CONDICION DE DISCAPACIDAD FISICA'],
-            ['codpob' => 6, 'nombre' => 'VICTIMAS DEL CONFLICTO ARMADO EN CONDICION DE DESPLAZAMIENTO Y EN CONDICION DE DISCAPACIDAD FISICA'],
-            ['codpob' => 7, 'nombre' => 'EN CONDICION DE DESPLAZAMIENTO Y EN CONDICION DE DISCAPACIDAD FISICA'],
-            ['codpob' => 8, 'nombre' => 'NO APLICA'],
-        ];
+        $legacy = new LegacyDatabaseService();
 
-        foreach ($poblaciones as $poblacion) {
+        $rows = $legacy->select('SELECT * FROM xml4b087 LIMIT 1000');
+
+        $fillable = (new Xml4b087())->getFillable();
+
+        foreach ($rows as $row) {
+            $data = [];
+            foreach ($fillable as $field) {
+                $data[$field] = $row[$field] ?? null;
+            }
+
             Xml4b087::updateOrCreate(
-                ['codpob' => $poblacion['codpob']],
-                $poblacion
+                ['codpob' => $row['codpob']],
+                $data
             );
         }
+
+        $legacy->disconnect();
     }
 }

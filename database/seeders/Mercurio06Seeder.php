@@ -3,33 +3,30 @@
 namespace Database\Seeders;
 
 use App\Models\Mercurio06;
+use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
 
 class Mercurio06Seeder extends Seeder
 {
-    /**
-     * Ejecuta las semillas de la base de datos.
-     */
     public function run(): void
     {
-        $tipos = [
-            ['tipo' => 'B', 'detalle' => 'BENEFICIARIO'],
-            ['tipo' => 'C', 'detalle' => 'CONYUGE'],
-            ['tipo' => 'E', 'detalle' => 'EMPRESA'],
-            ['tipo' => 'F', 'detalle' => 'FACULTATIVO'],
-            ['tipo' => 'I', 'detalle' => 'INDEPENDIENTE'],
-            ['tipo' => 'N', 'detalle' => 'FONIÑEZ'],
-            ['tipo' => 'O', 'detalle' => 'PENSIONADO'],
-            ['tipo' => 'P', 'detalle' => 'PARTICULAR'],
-            ['tipo' => 'S', 'detalle' => 'SERVICIO DOMESTICO'],
-            ['tipo' => 'T', 'detalle' => 'TRABAJADOR'],
-        ];
+        $legacy = new LegacyDatabaseService();
+        $rows = $legacy->select('SELECT * FROM mercurio06');
 
-        foreach ($tipos as $tipo) {
+        $fillable = (new Mercurio06())->getFillable();
+
+        foreach ($rows as $row) {
+            $data = [];
+            foreach ($fillable as $field) {
+                $data[$field] = $row[$field] ?? null;
+            }
+
             Mercurio06::updateOrCreate(
-                ['tipo' => $tipo['tipo']],
-                $tipo
+                ['tipo' => $row['tipo']],
+                $data
             );
         }
+
+        $legacy->disconnect();
     }
 }

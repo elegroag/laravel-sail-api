@@ -14,8 +14,6 @@ class Gener09Seeder extends Seeder
     public function run(): void
     {
         $legacy = new LegacyDatabaseService();
-
-        // Leer registros desde la base legada
         $rows = $legacy->select('SELECT * FROM gener09');
 
         // Campos permitidos del modelo

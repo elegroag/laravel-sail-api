@@ -3,24 +3,33 @@
 namespace Database\Seeders;
 
 use App\Models\Mercurio05;
+use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
 
 class Mercurio05Seeder extends Seeder
 {
-    /**
-     * Ejecuta las semillas de la base de datos.
-     */
     public function run(): void
     {
-        $oficinasCiudad = [
-            ['codofi' => '01', 'codciu' => '18001'],
-        ];
+        $legacy = new LegacyDatabaseService();
+        $rows = $legacy->select('SELECT * FROM mercurio05');
 
-        foreach ($oficinasCiudad as $oficinaCiudad) {
+        $fillable = (new Mercurio05())->getFillable();
+
+        foreach ($rows as $row) {
+            $data = [];
+            foreach ($fillable as $field) {
+                $data[$field] = $row[$field] ?? null;
+            }
+
             Mercurio05::updateOrCreate(
-                ['codofi' => $oficinaCiudad['codofi'], 'codciu' => $oficinaCiudad['codciu']],
-                $oficinaCiudad
+                [
+                    'codofi' => $row['codofi'],
+                    'codciu' => $row['codciu'],
+                ],
+                $data
             );
         }
+
+        $legacy->disconnect();
     }
 }

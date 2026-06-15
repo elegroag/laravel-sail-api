@@ -16,7 +16,7 @@ class Mercurio50Seeder extends Seeder
         $legacy = new LegacyDatabaseService();
 
         // Leer registros desde la base legada
-        $rows = $legacy->select('SELECT * FROM mercurio50');
+        $rows = $legacy->select('SELECT * FROM mercurio50 LIMIT 1000');
 
         foreach ($rows as $row) {
             $data = [];

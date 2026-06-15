@@ -18,7 +18,7 @@ class Mercurio62Seeder extends Seeder
 
         $fillable = (new Mercurio62())->getFillable();
 
-        $rows = $legacy->select('SELECT * FROM mercurio62');
+        $rows = $legacy->select('SELECT * FROM mercurio62 LIMIT 1000');
 
         foreach ($rows as $row) {
             // Construir payload limitado a fillable/columns
@@ -27,14 +27,14 @@ class Mercurio62Seeder extends Seeder
                 $data[$field] = $row[$field] ?? null;
             }
 
-            if($data['documento'] < 5) continue;
-            if(!is_numeric($data['coddoc'])){
+            if ($data['documento'] < 5) continue;
+            if (!is_numeric($data['coddoc'])) {
                 continue;
             }
-            if(!is_numeric($data['documento'])){
+            if (!is_numeric($data['documento'])) {
                 continue;
             }
-            if(!is_numeric($data['tipo'])){
+            if (!is_numeric($data['tipo'])) {
                 continue;
             }
 

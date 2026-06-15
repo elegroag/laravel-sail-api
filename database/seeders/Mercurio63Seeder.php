@@ -12,7 +12,7 @@ class Mercurio63Seeder extends Seeder
     {
         $legacy = new LegacyDatabaseService();
 
-        $rows = $legacy->select('SELECT * FROM mercurio63');
+        $rows = $legacy->select('SELECT * FROM mercurio63 LIMIT 1000');
 
         $fillable = (new Mercurio63())->getFillable();
 

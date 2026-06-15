@@ -3,27 +3,31 @@
 namespace Database\Seeders;
 
 use App\Models\Xml4b005;
+use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
 
 class Xml4b005Seeder extends Seeder
 {
-    /**
-     * Ejecuta las semillas de la base de datos.
-     */
     public function run(): void
     {
-        $generos = [
-            ['tipgen' => 1, 'nombre' => 'HOMBRE', 'codsex' => null],
-            ['tipgen' => 2, 'nombre' => 'MUJER', 'codsex' => null],
-            ['tipgen' => 3, 'nombre' => 'NO APLICA', 'codsex' => null],
-            ['tipgen' => 4, 'nombre' => 'INDETERMINADO', 'codsex' => null],
-        ];
+        $legacy = new LegacyDatabaseService();
 
-        foreach ($generos as $genero) {
+        $rows = $legacy->select('SELECT * FROM xml4b005 LIMIT 1000');
+
+        $fillable = (new Xml4b005())->getFillable();
+
+        foreach ($rows as $row) {
+            $data = [];
+            foreach ($fillable as $field) {
+                $data[$field] = $row[$field] ?? null;
+            }
+
             Xml4b005::updateOrCreate(
-                ['tipgen' => $genero['tipgen']],
-                $genero
+                ['tipgen' => $row['tipgen']],
+                $data
             );
         }
+
+        $legacy->disconnect();
     }
 }

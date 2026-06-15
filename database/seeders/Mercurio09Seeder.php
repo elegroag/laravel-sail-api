@@ -3,88 +3,30 @@
 namespace Database\Seeders;
 
 use App\Models\Mercurio09;
+use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
 
 class Mercurio09Seeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $tiposOperacion = [
-            [
-                'tipopc' => '1',
-                'detalle' => 'AFILIACIÓN TRABAJADOR',
-                'dias' => 7,
-            ],
-            [
-                'tipopc' => '10',
-                'detalle' => 'AFILIACIÓN FACULTATIVOS',
-                'dias' => 3,
-            ],
-            [
-                'tipopc' => '11',
-                'detalle' => 'AFILIACIÓN MADRES COMUNITARIAS',
-                'dias' => 3,
-            ],
-            [
-                'tipopc' => '12',
-                'detalle' => 'AFILIACIÓN SERVICIO DOMESTICO',
-                'dias' => 3,
-            ],
-            [
-                'tipopc' => '13',
-                'detalle' => 'AFILIACIÓN INDEPENDIENTES',
-                'dias' => 3,
-            ],
-            [
-                'tipopc' => '14',
-                'detalle' => 'DATOS BÁSICOS DE TRABAJADOR',
-                'dias' => 7,
-            ],
-            [
-                'tipopc' => '2',
-                'detalle' => 'AFILIACIÓN EMPRESA',
-                'dias' => 3,
-            ],
-            [
-                'tipopc' => '3',
-                'detalle' => 'AFILIACIÓN CÓNYUGE',
-                'dias' => 7,
-            ],
-            [
-                'tipopc' => '4',
-                'detalle' => 'AFILIACIÓN BENEFICIARIO',
-                'dias' => 7,
-            ],
-            [
-                'tipopc' => '5',
-                'detalle' => 'DATOS BÁSICOS DE EMPRESAS',
-                'dias' => 5,
-            ],
-            [
-                'tipopc' => '7',
-                'detalle' => 'RETIRO TRABAJADOR',
-                'dias' => 5,
-            ],
-            [
-                'tipopc' => '8',
-                'detalle' => 'CERTIFICADOS',
-                'dias' => 5,
-            ],
-            [
-                'tipopc' => '9',
-                'detalle' => 'AFILIACIÓN PENSIONADOS',
-                'dias' => 3,
-            ],
-        ];
+        $legacy = new LegacyDatabaseService();
+        $rows = $legacy->select('SELECT * FROM mercurio09');
 
-        foreach ($tiposOperacion as $tipo) {
+        $fillable = (new Mercurio09())->getFillable();
+
+        foreach ($rows as $row) {
+            $data = [];
+            foreach ($fillable as $field) {
+                $data[$field] = $row[$field] ?? null;
+            }
+
             Mercurio09::updateOrCreate(
-                ['tipopc' => $tipo['tipopc']],
-                $tipo
+                ['tipopc' => $row['tipopc']],
+                $data
             );
         }
+
+        $legacy->disconnect();
     }
 }

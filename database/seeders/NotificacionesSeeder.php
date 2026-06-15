@@ -14,7 +14,7 @@ class NotificacionesSeeder extends Seeder
     public function run(): void
     {
         $legacy = new LegacyDatabaseService();
-        $rows = $legacy->select('SELECT * FROM notificaciones');
+        $rows = $legacy->select('SELECT * FROM notificaciones LIMIT 1000');
 
         // Campos permitidos del modelo
         $fillable = (new Notificaciones())->getFillable();

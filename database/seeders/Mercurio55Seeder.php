@@ -14,7 +14,7 @@ class Mercurio55Seeder extends Seeder
     public function run(): void
     {
         $legacy = new LegacyDatabaseService();
-        $rows = $legacy->select('SELECT * FROM mercurio55');
+        $rows = $legacy->select('SELECT * FROM mercurio55 LIMIT 1000');
 
         $fillable = (new Mercurio55())->getFillable();
 

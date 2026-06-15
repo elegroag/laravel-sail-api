@@ -14,7 +14,7 @@ class TranomsSeeder extends Seeder
     public function run(): void
     {
         $legacy = new LegacyDatabaseService();
-        $rows = $legacy->select('SELECT * FROM tranoms');
+        $rows = $legacy->select('SELECT * FROM tranoms LIMIT 1000');
 
         // Campos permitidos del modelo
         $fillable = (new Tranoms())->getFillable();

@@ -3,33 +3,30 @@
 namespace Database\Seeders;
 
 use App\Models\Mercurio18;
+use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
 
 class Mercurio18Seeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $preguntasSeguridad = [
-            [
-                'codigo' => '1',
-                'detalle' => 'SU CIUDAD FAVORITA',
-            ],
-            [
-                'codigo' => '2',
-                'detalle' => 'NOMBRE DE MEJOR AMIGO DE INFANCIA',
-            ],
-        ];
+        $legacy = new LegacyDatabaseService();
+        $rows = $legacy->select('SELECT * FROM mercurio18');
 
-        foreach ($preguntasSeguridad as $pregunta) {
+        $fillable = (new Mercurio18())->getFillable();
+
+        foreach ($rows as $row) {
+            $data = [];
+            foreach ($fillable as $field) {
+                $data[$field] = $row[$field] ?? null;
+            }
+
             Mercurio18::updateOrCreate(
-                ['codigo' => $pregunta['codigo']],
-                $pregunta
+                ['codigo' => $row['codigo']],
+                $data
             );
         }
-    }
 
-    /* INSERT INTO `mercurio18` VALUES ('1','SU CIUDAD FAVORITA'),('2','NOMBRE DE MEJOR AMIGO DE INFANCIA'); */
+        $legacy->disconnect();
+    }
 }

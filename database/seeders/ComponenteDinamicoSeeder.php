@@ -2,48 +2,31 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\ComponenteDinamico;
+use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
-use RuntimeException;
 
 class ComponenteDinamicoSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    private const TABLE = 'componentes_dinamicos';
-
-    /**
-     * Ejecuta el seeder cargando el SQL externo.
-     */
     public function run(): void
     {
-        DB::transaction(function (): void {
-            $this->limpiarTabla();
-            DB::unprepared($this->sql());
-        });
-    }
+        $legacy = new LegacyDatabaseService();
+        $rows = $legacy->select('SELECT * FROM componentes_dinamicos');
 
-    /**
-     * Obtiene el contenido del archivo SQL requerido.
-     */
-    protected function sql(): string
-    {
-        $sqlPath = database_path('seeders/dbsql/componentes_dinamicos.sql');
+        $fillable = (new ComponenteDinamico())->getFillable();
 
-        if (! File::exists($sqlPath)) {
-            throw new RuntimeException('No se encontró el archivo SQL para el seeder componentes_dinamicos.');
+        foreach ($rows as $row) {
+            $data = [];
+            foreach ($fillable as $field) {
+                $data[$field] = $row[$field] ?? null;
+            }
+
+            ComponenteDinamico::updateOrCreate(
+                ['id' => $row['id']],
+                $data
+            );
         }
 
-        return File::get($sqlPath);
-    }
-
-    /**
-     * Elimina los registros existentes para permitir re-ejecuciones idempotentes.
-     */
-    protected function limpiarTabla(): void
-    {
-        DB::statement(sprintf('DELETE FROM %s', self::TABLE));
+        $legacy->disconnect();
     }
 }

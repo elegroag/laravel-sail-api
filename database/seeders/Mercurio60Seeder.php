@@ -16,7 +16,7 @@ class Mercurio60Seeder extends Seeder
         $legacy = new LegacyDatabaseService();
 
         // Leer registros desde la base legada
-        $rows = $legacy->select('SELECT * FROM mercurio60');
+        $rows = $legacy->select('SELECT * FROM mercurio60 LIMIT 1000');
 
         // Campos permitidos del modelo
         $fillable = (new Mercurio60())->getFillable();
@@ -27,14 +27,14 @@ class Mercurio60Seeder extends Seeder
                 $data[$field] = $row[$field] ?? null;
             }
 
-            if($data['documento'] < 5) continue;
-            if(!is_numeric($data['coddoc'])){
+            if ($data['documento'] < 5) continue;
+            if (!is_numeric($data['coddoc'])) {
                 continue;
             }
-            if(!is_numeric($data['documento'])){
+            if (!is_numeric($data['documento'])) {
                 continue;
             }
-            
+
             Mercurio60::updateOrCreate(
                 ['id' => $row['id']],
                 $data
