@@ -1,6 +1,7 @@
-import AppLayout from '@/layouts/AppLayoutTemplate';
+import AppLayout from '@/layouts/AppLayout';
+import { useFetch } from '@/hooks/useFetch';
 import { Link, router } from '@inertiajs/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 type Props = {
     menu_items: {
@@ -18,6 +19,18 @@ type Props = {
             };
         };
     };
+};
+
+type ChildrenResponse = {
+    success: boolean;
+    data: any[];
+    message: string;
+};
+
+type OptionsResponse = {
+    success: boolean;
+    data: Array<{ id: number; title: string; controller: string | null; action: string | null }>;
+    message: string;
 };
 
 export default function Index({ menu_items }: Props) {
@@ -45,6 +58,11 @@ export default function Index({ menu_items }: Props) {
     const [codapl, setCodapl] = useState<string>(searchParams.get('codapl') || '');
     const perPage = meta.pagination?.per_page || 10;
 
+    // Hooks para fetching
+    const fetchChildren = useFetch<ChildrenResponse>({ method: 'post' });
+    const fetchOptions = useFetch<OptionsResponse>({ method: 'post' });
+    const fetchAttach = useFetch<{ message: string }>();
+
     useEffect(() => {
         // Si cambia la URL por navegación, mantener filtros en el estado (básico)
         const sp = new URLSearchParams(window.location.search);
@@ -53,6 +71,57 @@ export default function Index({ menu_items }: Props) {
         setCodapl(sp.get('codapl') || '');
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [window.location.search]);
+
+    useEffect(() => {
+        if (fetchChildren.data) {
+            setChildren(Array.isArray(fetchChildren.data.data) ? fetchChildren.data.data : []);
+        }
+        if (fetchChildren.error) {
+            setChildren([]);
+            setChildrenError(fetchChildren.error);
+        }
+        if (!fetchChildren.loading) {
+            setLoadingChildren(false);
+        }
+    }, [fetchChildren.data, fetchChildren.loading, fetchChildren.error]);
+
+    useEffect(() => {
+        if (fetchOptions.data) {
+            setOptions(Array.isArray(fetchOptions.data.data) ? fetchOptions.data.data : []);
+        }
+        if (fetchOptions.error) {
+            setOptionsError(fetchOptions.error);
+        }
+        if (!fetchOptions.loading) {
+            setOptionsLoading(false);
+        }
+    }, [fetchOptions.data, fetchOptions.loading, fetchOptions.error]);
+
+    const handleDetail = useCallback(async (menu_item: any) => {
+        setSelectedId(menu_item.id);
+        setLoadingChildren(true);
+        setChildrenError(null);
+        await fetchChildren.execute(`/cajas/menu/children`, {
+            id: menu_item.id,
+            tipo: menu_item.tipo,
+            codapl: menu_item.codapl,
+        });
+    }, [fetchChildren]);
+
+    useEffect(() => {
+        if (fetchAttach.data) {
+            setAttaching(false);
+            handleDetail({ id: selectedId, tipo, codapl });
+            setAddOpen(false);
+            setSelectedChildId('');
+            setSearchOption('');
+            setToast({ type: 'success', message: fetchAttach.data.message || 'Hijo agregado correctamente' });
+        }
+        if (fetchAttach.error) {
+            setAttaching(false);
+            setToast({ type: 'error', message: fetchAttach.error });
+        }
+    }, [fetchAttach.data, fetchAttach.error, handleDetail, selectedId, tipo, codapl]);
 
     const currentFilterParams = useMemo(() => ({ q: q || undefined, tipo: tipo || undefined, codapl: codapl || undefined, per_page: perPage }), [q, tipo, codapl, perPage]);
 
@@ -87,35 +156,6 @@ export default function Index({ menu_items }: Props) {
         }
     };
 
-    const handleDetail = async (_id: number) => {
-        try {
-            setSelectedId(_id);
-            setLoadingChildren(true);
-            setChildrenError(null);
-            const res = await fetch(`/cajas/menu/children`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-                },
-                credentials: 'same-origin',
-                method: 'POST',
-                body: JSON.stringify({ id: _id, tipo: tipo, codapl:codapl })
-            });
-            if (!res.ok) {
-                throw new Error('No fue posible cargar los items hijos');
-            }
-            const json = await res.json();
-            setChildren(Array.isArray(json.data) ? json.data : []);
-        } catch (e: any) {
-            setChildren([]);
-            setChildrenError(e?.message || 'Error desconocido');
-        } finally {
-            setLoadingChildren(false);
-        }
-    };
-
     const openAddChild = async () => {
         if (!selectedId) return;
         setAddOpen(true);
@@ -124,66 +164,22 @@ export default function Index({ menu_items }: Props) {
 
     const loadOptions = async (q: string) => {
         if (!selectedId) return;
-        try {
-            setOptionsLoading(true);
-            setOptionsError(null);
-            const url = new URL(window.location.origin + `/cajas/menu/options`);
-            if (q) url.searchParams.set('q', q);
-
-            const res = await fetch(
-                url.toString(), {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-                },
-                credentials: 'same-origin',
-                method: 'POST',
-                body: JSON.stringify({ q,  id: selectedId, tipo, codapl }),
-            });
-            if (!res.ok) throw new Error('No fue posible cargar opciones');
-            const json = await res.json();
-            setOptions(Array.isArray(json.data) ? json.data : []);
-        } catch (e: any) {
-            setOptions([]);
-            setOptionsError(e?.message || 'Error desconocido');
-        } finally {
-            setOptionsLoading(false);
-        }
+        setOptionsLoading(true);
+        setOptionsError(null);
+        const url = new URL(window.location.origin + `/cajas/menu/options`);
+        if (q) url.searchParams.set('q', q);
+        await fetchOptions.execute(url.toString(), { q, id: selectedId, tipo, codapl });
     };
 
     const attachChild = async () => {
         if (!selectedId || !selectedChildId) return;
-        try {
-            setAttaching(true);
-            const res = await fetch(`/cajas/menu/attach-child`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-                },
-                credentials: 'same-origin',
-                body: JSON.stringify({ id: selectedId, child_id: Number(selectedChildId), tipo, codapl })
-            });
-            if (!res.ok) {
-                const err = await res.json().catch(() => ({}));
-                throw new Error(err.message || 'No fue posible agregar el hijo');
-            }
-            // Refrescar hijos
-            await handleDetail(selectedId);
-            // Cerrar modal y limpiar
-            setAddOpen(false);
-            setSelectedChildId('');
-            setSearchOption('');
-            setToast({ type: 'success', message: 'Hijo agregado correctamente' });
-        } catch (e: any) {
-            setToast({ type: 'error', message: e?.message || 'Error desconocido al agregar' });
-        } finally {
-            setAttaching(false);
-        }
+        setAttaching(true);
+        await fetchAttach.execute(`/cajas/menu/attach-child`, {
+            id: selectedId,
+            child_id: Number(selectedChildId),
+            tipo,
+            codapl,
+        });
     };
 
 
@@ -274,80 +270,91 @@ export default function Index({ menu_items }: Props) {
 
                 {/* Lista de items + detalle lateral */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    {/* Lista de items */}
                     <div className="lg:col-span-2">
                         <ul className="divide-y divide-gray-200">
                             {data.map((menu_item) => (
                                 <li key={menu_item.id}>
-                                    <div className="px-4 py-4 sm:px-6">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center">
-                                        <div className="flex-shrink-0">
-                                            <div className="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center" onClick={() => handleDetail(menu_item.id)}>
-                                                <span className="text-sm font-medium text-white">
-                                                    {menu_item.title.charAt(0).toUpperCase()}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div className="ml-4">
-                                            <div className="flex items-center">
-                                                <div className="text-sm font-medium text-gray-900">
-                                                    {menu_item.title} 
+                                    <div className="px-4 py-4 sm:px-6 space-y-3">
+                                        {/* Fila principal */}
+                                        <div className="flex items-center justify-between gap-4">
+                                            {/* Info izquierda */}
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <button
+                                                    className="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center hover:bg-indigo-600 transition-colors"
+                                                    onClick={() => handleDetail(menu_item)}
+                                                >
+                                                    <span className="text-sm font-medium text-white">
+                                                        {menu_item.title.charAt(0).toUpperCase()}
+                                                    </span>
+                                                </button>
+                                                <div className="min-w-0">
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <span className="text-sm font-medium text-gray-900 truncate">
+                                                            {menu_item.title}
+                                                        </span>
+                                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium shrink-0 ${
+                                                            menu_item.codapl === 'CA'
+                                                                ? 'bg-green-100 text-green-800'
+                                                                : 'bg-red-100 text-red-800'
+                                                        }`}>
+                                                            {menu_item.codapl}
+                                                        </span>
+                                                    </div>
+                                                    <div className="text-xs text-gray-500 mt-0.5">
+                                                        {menu_item.controller} | {menu_item.action}
+                                                    </div>
                                                 </div>
-                                                <span className={`ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                                    menu_item.codapl === 'CA'
-                                                        ? 'bg-green-100 text-green-800'
-                                                        : 'bg-red-100 text-red-800'
-                                                }`}>
-                                                    {menu_item.codapl} 
-                                                </span>
                                             </div>
-                                            <div className="text-sm text-gray-500">
-                                                TIPO: {menu_item.tipo}
-                                            </div>
-                                            <div className="text-sm text-gray-500">
-                                                {menu_item.controller} | {menu_item.action}
+
+                                            {/* Info derecha */}
+                                            <div className="flex items-center gap-4 shrink-0">
+                                                <div className="text-right hidden sm:block">
+                                                    <div className="text-xs font-medium text-gray-700">
+                                                        {menu_item.is_visible ? 'Visible' : 'Oculto'}
+                                                    </div>
+                                                    <div className="text-xs text-gray-400">
+                                                        Pos: {menu_item.position}
+                                                    </div>
+                                                </div>
+
+                                                {/* Acciones */}
+                                                <div className="flex items-center gap-1">
+                                                    <Link
+                                                        href={`/cajas/menu/${menu_item.id}/show`}
+                                                        className="px-3 py-1.5 text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded transition-colors"
+                                                    >
+                                                        Ver
+                                                    </Link>
+                                                    <Link
+                                                        href={`/cajas/menu/${menu_item.id}/edit`}
+                                                        className="px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded transition-colors"
+                                                    >
+                                                        Editar
+                                                    </Link>
+                                                    <button
+                                                        onClick={() => handleDelete(menu_item.id, menu_item.title)}
+                                                        className="px-3 py-1.5 text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
+                                                    >
+                                                        Eliminar
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <div className="text-right">
-                                            <div className="text-sm font-medium text-gray-900">
-                                                {menu_item.is_visible} Es visible
+
+                                        {/* Fila inferior */}
+                                        <div className="flex items-center justify-between gap-4 pl-[3.25rem]">
+                                            <div className="flex items-center gap-3 text-xs text-gray-500">
+                                                <span className="font-medium">Tipo:</span>
+                                                <span>{menu_item.tipo || 'N/A'}</span>
                                             </div>
-                                            <div className="text-sm text-gray-500">
-                                                {menu_item.position} Posición
-                                            </div>
-                                        </div>
-                                        <div className="flex space-x-2">
-                                            <Link
-                                                href={`/cajas/menu/${menu_item.id}/show`}
-                                                className="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
-                                            >
-                                                Ver
-                                            </Link>
-                                            <Link
-                                                href={`/cajas/menu/${menu_item.id}/edit`}
-                                                className="text-gray-600 hover:text-gray-900 text-sm font-medium"
-                                            >
-                                                Editar
-                                            </Link>
-                                            <button
-                                                onClick={() => handleDelete(menu_item.id, menu_item.title)}
-                                                className="text-red-600 hover:text-red-900 text-sm font-medium"
-                                            >
-                                                Eliminar
-                                            </button>
+                                            {menu_item.default_url && (
+                                                <p className="text-xs text-gray-400 truncate">{menu_item.default_url}</p>
+                                            )}
                                         </div>
                                     </div>
-                                </div>
-                                {menu_item.default_url && (
-                                    <div className="mt-2">
-                                        <p className="text-sm text-gray-600">{menu_item.default_url}</p>
-                                    </div>
-                                )}
-                            </div>
-                        </li>
-                    ))}
+                                </li>
+                            ))}
                         </ul>
                     </div>
 

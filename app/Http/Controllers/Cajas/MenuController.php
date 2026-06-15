@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers\Cajas;
 
-use App\Http\Controllers\Controller;
 use App\Exceptions\DebugException;
+use App\Http\Controllers\Controller;
 use App\Models\Adapter\DbBase;
-use App\Models\Gener02;
-use App\Models\Gener40;
 use App\Models\Gener42;
 use App\Models\MenuItem;
 use App\Models\MenuTipo;
@@ -16,12 +14,11 @@ use Inertia\Inertia;
 
 class MenuController extends Controller
 {
+    protected ?DbBase $db;
 
-    protected $db;
+    protected mixed $user;
 
-    protected $user;
-
-    protected $tipfun;
+    protected mixed $tipfun;
 
     public function __construct()
     {
@@ -127,6 +124,7 @@ class MenuController extends Controller
     public function edit(int $id)
     {
         $menu_item = MenuItem::findOrFail($id);
+
         return Inertia::render('Cajas/Menu/Edit', compact('menu_item'));
     }
 
@@ -154,14 +152,22 @@ class MenuController extends Controller
     {
         $item = MenuItem::findOrFail($id);
         $item->delete();
+
         return redirect()->to('/cajas/menu');
     }
 
     public function children(Request $request)
     {
-        $id = $request->input('id');
-        $codapl = $request->input('codapl');
-        $tipo = $request->input('tipo');
+        $validated = $request->validate([
+            'id' => ['required', 'integer', 'exists:menu_items,id'],
+            'codapl' => ['required', 'string', 'max:5'],
+            'tipo' => ['required', 'string', 'max:5'],
+        ]);
+
+        $id = (int) $validated['id'];
+        $codapl = $validated['codapl'];
+        $tipo = $validated['tipo'];
+
         $children = MenuItem::select(
             DB::raw('menu_items.*'),
             'menu_tipos.is_visible',
@@ -177,7 +183,9 @@ class MenuController extends Controller
             ->get();
 
         return response()->json([
+            'success' => true,
             'data' => $children,
+            'message' => 'Items hijos cargados correctamente',
         ]);
     }
 
@@ -192,7 +200,7 @@ class MenuController extends Controller
             ->where('id', '!=', $id)
             ->whereIn('id', $alreadyChildrenIds)
             ->when($q !== '', function ($query) use ($q) {
-                $like = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $q) . '%';
+                $like = '%' . str_replace(['%', '_'], ['\%', '\_'], $q) . '%';
                 $query->where(function ($sub) use ($like) {
                     $sub->where('title', 'like', $like)
                         ->orWhere('controller', 'like', $like)
@@ -238,7 +246,7 @@ class MenuController extends Controller
         }
 
         $childParent = MenuItem::where('id', $childId)->where('parent_id', $id)->first();
-        if (!$childParent) {
+        if (! $childParent) {
             $childParent = MenuItem::create(
                 [
                     'parent_id' => $parent->id,
@@ -249,7 +257,7 @@ class MenuController extends Controller
                     'default_url' => $child->default_url,
                     'icon' => $child->icon,
                     'color' => $child->color,
-                    'nota' => $child->nota
+                    'nota' => $child->nota,
                 ]
             );
         }
@@ -259,10 +267,10 @@ class MenuController extends Controller
             return response()->json(['message' => 'El hijo no tiene configuración para el tipo seleccionado.'], 422);
         }
 
-        //crea el tipo para el hijo si no existe
+        // crea el tipo para el hijo si no existe
         $menuTipo = MenuTipo::where('menu_item', $childParent->id)->where('tipo', $tipo)->first();
         if (! $menuTipo) {
-            $menuTipo = new MenuTipo();
+            $menuTipo = new MenuTipo;
             $menuTipo->menu_item = $childParent->id;
             $menuTipo->tipo = $tipo;
             $menuTipo->is_visible = true;
@@ -283,10 +291,12 @@ class MenuController extends Controller
             $permisos = $request->input('permisos');
             $permisos = explode(';', $permisos);
 
-            $response = $this->db->begin();
+            $this->db->begin();
             if ($tipo == 'A') {
                 foreach ($permisos as $permiso) {
-                    if (empty($permiso)) continue;
+                    if (empty($permiso)) {
+                        continue;
+                    }
 
                     $table = new Gener42;
                     $table->setUsuario($usuario);
@@ -298,28 +308,32 @@ class MenuController extends Controller
             }
             if ($tipo == 'E') {
                 foreach ($permisos as $permiso) {
-                    if (empty($permiso)) continue;
+                    if (empty($permiso)) {
+                        continue;
+                    }
                     Gener42::whereRaw("usuario='{$usuario}' and permiso='{$permiso}'")->delete();
                 }
             }
             $this->db->commit();
             $response = [
                 'flag' => true,
-                'msg' => 'Operación realizada correctamente'
+                'msg' => 'Operación realizada correctamente',
             ];
         } catch (DebugException $e) {
             $this->db->rollback();
             $response = [
                 'flag' => false,
-                'msg' => $e->getMessage()
+                'msg' => $e->getMessage(),
             ];
         }
+
         return response()->json($response);
     }
 
     public function borrar(Request $request)
     {
         $this->db->begin();
+        $response = null;
         try {
             $tipo = $request->input('tipo');
             $usuario = $request->input('usuario');
@@ -329,9 +343,10 @@ class MenuController extends Controller
             $this->db->rollback();
             $response = [
                 'flag' => false,
-                'msg' => $e->getMessage()
+                'msg' => $e->getMessage(),
             ];
         }
+
         return response()->json($response);
     }
 }
