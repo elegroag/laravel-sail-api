@@ -37,9 +37,35 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        if ($request->is('mercurio/*')) {
+            $authUser = $request->user();
+        } elseif ($request->is('cajas/*')) {
+            $sessionUser = $request->session()->get('user');
+            $authUser = $sessionUser ? (object) [
+                'id' => $sessionUser['id'] ?? null,
+                'name' => trim(($sessionUser['nombre'] ?? '').' '.($sessionUser['apellido'] ?? '')) ?: ($sessionUser['name'] ?? 'Usuario'),
+                'email' => $sessionUser['email'] ?? null,
+                'avatar' => null,
+            ] : null;
+        } else {
+            $authUser = $request->user();
+        }
+
         if ($request->is('mercurio/*') || $request->is('cajas/*')) {
             return [
                 ...parent::share($request),
+                'auth' => [
+                    'user' => $authUser,
+                ],
+                'ziggy' => fn (): array => [
+                    ...(new Ziggy)->toArray(),
+                    'location' => $request->url(),
+                ],
+                'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+                'flash' => [
+                    'success' => fn () => $request->session()->get('success'),
+                    'error' => fn () => $request->session()->get('error'),
+                ],
             ];
         }
 
@@ -50,16 +76,16 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
-                'user' => $request->user(),
+                'user' => $authUser,
             ],
-            'ziggy' => fn(): array => [
+            'ziggy' => fn (): array => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'flash' => [
-                'success' => fn() => $request->session()->get('success'),
-                'error' => fn() => $request->session()->get('error'),
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
             ],
         ];
     }
