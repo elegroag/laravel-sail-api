@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Mercurio07;
 use App\Models\Mercurio36;
 use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
@@ -16,10 +17,8 @@ class Mercurio36Seeder extends Seeder
     {
         $legacy = new LegacyDatabaseService();
 
-        // Leer registros desde la base legada
-        $rows = $legacy->select('SELECT * FROM mercurio36 LIMIT 1000');
+        $rows = $legacy->select('SELECT * FROM mercurio36');
 
-        // Campos permitidos del modelo
         $fillable = (new Mercurio36())->getFillable();
 
         foreach ($rows as $row) {
@@ -36,11 +35,18 @@ class Mercurio36Seeder extends Seeder
                 continue;
             }
 
-            // Clave compuesta por tipo, documento y cédula
+            // Validar FK: el registro padre debe existir en mercurio07
+            $existsInMercurio07 = Mercurio07::where('tipo', $data['tipo'])
+                ->where('coddoc', $data['coddoc'])
+                ->where('documento', $data['documento'])
+                ->exists();
+
+            if (!$existsInMercurio07) {
+                continue;
+            }
+
             $model = Mercurio36::updateOrCreate(
-                [
-                    'id' => $row['id'],
-                ],
+                ['id' => $row['id']],
                 $data
             );
             $model->regenerateUuid();

@@ -2,13 +2,13 @@
 
 namespace Database\Seeders;
 
+use App\Models\Mercurio06;
+use App\Models\Mercurio07;
+use App\Models\Mercurio11;
 use App\Models\Mercurio47;
 use App\Services\LegacyDatabaseService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
-use App\Models\Mercurio06;
-use App\Models\Mercurio07;
-use App\Models\Mercurio11;
 
 class Mercurio47Seeder extends Seeder
 {
@@ -35,10 +35,8 @@ class Mercurio47Seeder extends Seeder
 
         $legacy = new LegacyDatabaseService();
 
-        // Leer registros desde la base legada
-        $rows = $legacy->select('SELECT * FROM mercurio47 LIMIT 1000');
+        $rows = $legacy->select('SELECT * FROM mercurio47');
 
-        // Usar fillable del modelo para construir los datos
         $fillable = (new Mercurio47())->getFillable();
 
         foreach ($rows as $row) {
@@ -57,6 +55,16 @@ class Mercurio47Seeder extends Seeder
             if ($data['documento'] < 5) continue;
 
             if ($data['tipo'] != null || $data['tipo'] != '') {
+                continue;
+            }
+
+            // Validar FK: el registro padre debe existir en mercurio07
+            $existsInMercurio07 = Mercurio07::where('tipo', $data['tipo'])
+                ->where('coddoc', $data['coddoc'])
+                ->where('documento', $data['documento'])
+                ->exists();
+
+            if (!$existsInMercurio07) {
                 continue;
             }
 

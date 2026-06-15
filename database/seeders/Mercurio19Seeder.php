@@ -14,7 +14,7 @@ class Mercurio19Seeder extends Seeder
         // Conexión a la base de datos legada (puedes mover estos datos a .env si lo prefieres)
         $legacyDb = new LegacyDatabaseService();
         // Obtener datos de la base legada
-        $legacyModel = $legacyDb->select('SELECT * FROM mercurio19 LIMIT 1000');
+        $legacyModel = $legacyDb->select('SELECT * FROM mercurio19');
 
         $fillable = (new Mercurio19())->getFillable();
 

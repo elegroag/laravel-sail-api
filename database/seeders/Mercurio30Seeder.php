@@ -31,7 +31,7 @@ class Mercurio30Seeder extends Seeder
         }
         $legacy = new LegacyDatabaseService();
 
-        $rows = $legacy->select('SELECT * FROM mercurio30 LIMIT 1000');
+        $rows = $legacy->select('SELECT * FROM mercurio30');
 
         $fillable = (new Mercurio30())->getFillable();
 
@@ -48,9 +48,9 @@ class Mercurio30Seeder extends Seeder
             if (!is_numeric($data['documento'])) {
                 continue;
             }
-            $data['sat_fecapr'] = $row['fecha_aprobacion_sat'];
-            $data['sat_cedrep'] = $row['documento_representante_sat'];
-            $data['sat_numtra'] = $row['numero_transaccion'];
+            $data['sat_fecapr'] = $row['sat_fecapr'] ?? $row['fecha_aprobacion_sat'] ?? null;
+            $data['sat_cedrep'] = $row['sat_cedrep'] ?? $row['documento_representante_sat'] ?? null;
+            $data['sat_numtra'] = $row['sat_numtra'] ?? $row['numero_transaccion'] ?? null;
 
             unset($data['fecha_aprobacion_sat']);
             unset($data['documento_representante_sat']);

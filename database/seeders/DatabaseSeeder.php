@@ -120,7 +120,6 @@ class DatabaseSeeder extends Seeder
             Mercusat02Seeder::class,
             Mercurio70Seeder::class,
             Mercurio80Seeder::class,
-            Mercurio81Seeder::class,
             Mercurio82Seeder::class,
             Mercurio84Seeder::class,
             Mercurio85Seeder::class,
