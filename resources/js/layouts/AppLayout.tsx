@@ -9,14 +9,15 @@ import { type PropsWithChildren } from 'react';
 interface AppLayoutProps {
     variant?: 'sidebar' | 'header';
     title?: string;
+    description?: string;
     breadcrumbs?: BreadcrumbItem[];
 }
 
-export default function AppLayout({ variant = 'sidebar', breadcrumbs = [], children }: PropsWithChildren<AppLayoutProps>) {
+export default function AppLayout({ variant = 'sidebar', title, description, breadcrumbs = [], children }: PropsWithChildren<AppLayoutProps>) {
     if (variant === 'header') {
         return (
             <AppShell variant="header">
-                <AppHeader breadcrumbs={breadcrumbs} />
+                <AppHeader breadcrumbs={breadcrumbs} title={title} description={description} />
                 <AppContent variant="header">{children}</AppContent>
             </AppShell>
         );
@@ -26,7 +27,7 @@ export default function AppLayout({ variant = 'sidebar', breadcrumbs = [], child
         <AppShell variant="sidebar">
             <AppSidebar />
             <AppContent variant="sidebar" className="overflow-x-hidden bg-[rgb(250,244,232)]">
-                <AppSidebarHeader breadcrumbs={breadcrumbs} />
+                <AppSidebarHeader breadcrumbs={breadcrumbs} title={title} description={description} />
                 {children}
             </AppContent>
         </AppShell>

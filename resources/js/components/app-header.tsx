@@ -6,7 +6,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/compon
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList, navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { UserInfo } from '@/components/user-info';
 import { UserMenuContent } from '@/components/userMenuContent';
 import { useInitials } from '@/hooks/useInitials';
 import { cn } from '@/lib/utils';
@@ -41,9 +40,11 @@ const activeItemStyles = 'text-neutral-900 dark:bg-neutral-800 dark:text-neutral
 
 interface AppHeaderProps {
     breadcrumbs?: BreadcrumbItem[];
+    title?: string;
+    description?: string;
 }
 
-export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
+export function AppHeader({ breadcrumbs = [], title, description }: AppHeaderProps) {
     const page = usePage<SharedData>();
     const { auth } = page.props;
     const getInitials = useInitials();
@@ -98,6 +99,13 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                     <Link href="/dashboard" prefetch className="flex items-center space-x-2">
                         <AppLogo />
                     </Link>
+
+                    {title && (
+                        <div className="ml-4 flex items-center gap-3 min-w-0 border-l border-neutral-300 dark:border-neutral-700 pl-4">
+                            <h1 className="text-base font-semibold text-neutral-800 dark:text-neutral-100 truncate">{title}</h1>
+                            {description && <p className="hidden md:block text-sm text-white truncate">{description}</p>}
+                        </div>
+                    )}
 
                     {/* Desktop Navigation */}
                     <div className="ml-6 hidden h-full items-center space-x-6 lg:flex">

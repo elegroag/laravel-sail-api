@@ -43,7 +43,7 @@ export default function Index({ menu_items }: Props) {
 
     // Modal agregar hijo
     const [addOpen, setAddOpen] = useState(false);
-    const [options, setOptions] = useState<Array<{id:number; title:string; controller:string|null; action:string|null}>>([]);
+    const [options, setOptions] = useState<Array<{ id: number; title: string; controller: string | null; action: string | null }>>([]);
     const [optionsLoading, setOptionsLoading] = useState(false);
     const [optionsError, setOptionsError] = useState<string | null>(null);
     const [selectedChildId, setSelectedChildId] = useState<string>('');
@@ -184,27 +184,10 @@ export default function Index({ menu_items }: Props) {
 
 
     return (
-        <AppLayout title="Menu">
-            <div className="bg-white shadow overflow-hidden sm:rounded-md m-2" key={meta.pagination?.current_page}>
-                <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
-                    <div>
-                        <h3 className="text-lg leading-6 font-medium text-gray-900">
-                            Menu Registrado
-                        </h3>
-                        <p className="mt-1 max-w-2xl text-sm text-gray-500">
-                            Lista de todos los menu en el sistema
-                        </p>
-                    </div>
-                    <Link
-                        href="/cajas/menu/create"
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-                    >
-                        Nuevo item Menu
-                    </Link>
-                </div>
-
+        <AppLayout title="Menu Items" description="Lista de todos los menu en el sistema">
+            <div className="shadow overflow-hidden sm:rounded-md m-2" key={meta.pagination?.current_page}>
                 {/* Filtros */}
-                <div className="px-4 sm:px-6 pb-4">
+                <div className="m-2 px-4 sm:px-6 pb-4 bg-white border border-gray-200 rounded-lg flex justify-between items-center">
                     <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
                         <div className="sm:col-span-2">
                             <label htmlFor="q" className="block text-sm font-medium text-gray-700">Buscar</label>
@@ -252,6 +235,14 @@ export default function Index({ menu_items }: Props) {
                             <button onClick={clearFilters} className="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500">Limpiar</button>
                         </div>
                     </div>
+                    <div className="px-4 py-5 sm:px-6 flex justify-end items-center">
+                        <Link
+                            href="/cajas/menu/create"
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                        >
+                            Nuevo item Menu
+                        </Link>
+                    </div>
                 </div>
 
                 {/* Lista de items + detalle lateral */}
@@ -279,11 +270,10 @@ export default function Index({ menu_items }: Props) {
                                                         <span className="text-sm font-medium text-gray-900 truncate">
                                                             {menu_item.title}
                                                         </span>
-                                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium shrink-0 ${
-                                                            menu_item.codapl === 'CA'
+                                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium shrink-0 ${menu_item.codapl === 'CA'
                                                                 ? 'bg-green-100 text-green-800'
                                                                 : 'bg-red-100 text-red-800'
-                                                        }`}>
+                                                            }`}>
                                                             {menu_item.codapl}
                                                         </span>
                                                     </div>
@@ -331,6 +321,79 @@ export default function Index({ menu_items }: Props) {
                                 </li>
                             ))}
                         </ul>
+
+                        {meta.pagination && (
+                            <div className="bg-white px-4 py-3 border-t border-gray-200 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-2">
+                                <div className="flex items-center gap-4">
+                                    <div className="text-sm text-gray-700">
+                                        Mostrando {meta.pagination.from || 0}–{meta.pagination.to || 0} de {meta.pagination.total}
+                                    </div>
+                                    <div className="text-sm text-gray-700 flex items-center gap-2">
+                                        <label htmlFor="per_page" className="text-gray-600">Por página</label>
+                                        <select
+                                            id="per_page"
+                                            className="rounded-md border border-gray-300 px-2 py-1 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                            value={meta.pagination.per_page}
+                                            onChange={(e) => router.get('/cajas/menu', { page: 1, per_page: Number(e.target.value), ...currentFilterParams }, { preserveScroll: true })}
+                                        >
+                                            {[5, 10, 25, 50, 100].map(n => (
+                                                <option key={n} value={n}>{n}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="inline-flex items-center gap-2">
+                                    <button
+                                        onClick={() => router.get('/cajas/menu', { page: 1, per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                        disabled={meta.pagination.current_page === 1}
+                                        className="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        Primera
+                                    </button>
+                                    <button
+                                        onClick={() => router.get('/cajas/menu', { page: Math.max(1, meta.pagination!.current_page - 1), per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                        disabled={meta.pagination.current_page === 1}
+                                        className="px-3 py-1 border rounded disabled:opacity-50 text-gray-600 hover:text-gray-900"
+                                    >
+                                        Anterior
+                                    </button>
+                                    {/* Numeración de páginas (ventana de 5) */}
+                                    {(() => {
+                                        const p = meta.pagination!;
+                                        const start = Math.max(1, p.current_page - 2);
+                                        const end = Math.min(p.last_page, p.current_page + 2);
+                                        const pages = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+                                        return (
+                                            <div className="inline-flex gap-1">
+                                                {pages.map((num) => (
+                                                    <button
+                                                        key={num}
+                                                        onClick={() => router.get('/cajas/menu', { page: num, per_page: p.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                                        className={`inline-flex items-center h-9 px-3 rounded-md border text-sm font-medium ${num === p.current_page ? 'bg-indigo-600 text-gray border-indigo-600' : 'text-gray-700 border-gray-300 hover:bg-indigo-50 hover:border-indigo-300'} focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                                                    >
+                                                        {num}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        );
+                                    })()}
+                                    <button
+                                        onClick={() => router.get('/cajas/menu', { page: Math.min(meta.pagination!.last_page, meta.pagination!.current_page + 1), per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                        disabled={meta.pagination.current_page === meta.pagination.last_page}
+                                        className="px-3 py-1 border rounded disabled:opacity-50 text-gray-600 hover:text-gray-900"
+                                    >
+                                        Siguiente
+                                    </button>
+                                    <button
+                                        onClick={() => router.get('/cajas/menu', { page: meta.pagination!.last_page, per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                        disabled={meta.pagination.current_page === meta.pagination.last_page}
+                                        className="px-3 py-1 border rounded disabled:opacity-50 text-gray-600 hover:text-gray-900"
+                                    >
+                                        Última
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Panel lateral de detalle de hijos */}
@@ -494,78 +557,7 @@ export default function Index({ menu_items }: Props) {
                     </div>
                 )}
 
-                {meta.pagination && (
-                    <div className="bg-white px-4 py-3 border-t border-gray-200 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="flex items-center gap-4">
-                            <div className="text-sm text-gray-700">
-                                Mostrando {meta.pagination.from || 0}–{meta.pagination.to || 0} de {meta.pagination.total}
-                            </div>
-                            <div className="text-sm text-gray-700 flex items-center gap-2">
-                                <label htmlFor="per_page" className="text-gray-600">Por página</label>
-                                <select
-                                    id="per_page"
-                                    className="rounded-md border border-gray-300 px-2 py-1 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                    value={meta.pagination.per_page}
-                                    onChange={(e) => router.get('/cajas/menu', { page: 1, per_page: Number(e.target.value), ...currentFilterParams }, { preserveScroll: true })}
-                                >
-                                    {[5,10,25,50,100].map(n => (
-                                        <option key={n} value={n}>{n}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-                        <div className="inline-flex items-center gap-2">
-                            <button
-                                onClick={() => router.get('/cajas/menu', { page: 1, per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
-                                disabled={meta.pagination.current_page === 1}
-                                className="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                Primera
-                            </button>
-                            <button
-                                onClick={() => router.get('/cajas/menu', { page: Math.max(1, meta.pagination!.current_page - 1), per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
-                                disabled={meta.pagination.current_page === 1}
-                                className="px-3 py-1 border rounded disabled:opacity-50 text-gray-600 hover:text-gray-900"
-                            >
-                                Anterior
-                            </button>
-                            {/* Numeración de páginas (ventana de 5) */}
-                            {(() => {
-                                const p = meta.pagination!;
-                                const start = Math.max(1, p.current_page - 2);
-                                const end = Math.min(p.last_page, p.current_page + 2);
-                                const pages = Array.from({ length: end - start + 1 }, (_, i) => start + i);
-                                return (
-                                    <div className="inline-flex gap-1">
-                                        {pages.map((num) => (
-                                            <button
-                                                key={num}
-                                                onClick={() => router.get('/cajas/menu', { page: num, per_page: p.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
-                                                className={`inline-flex items-center h-9 px-3 rounded-md border text-sm font-medium ${num === p.current_page ? 'bg-indigo-600 text-gray border-indigo-600' : 'text-gray-700 border-gray-300 hover:bg-indigo-50 hover:border-indigo-300'} focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-                                            >
-                                                {num}
-                                            </button>
-                                        ))}
-                                    </div>
-                                );
-                            })()}
-                            <button
-                                onClick={() => router.get('/cajas/menu', { page: Math.min(meta.pagination!.last_page, meta.pagination!.current_page + 1), per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
-                                disabled={meta.pagination.current_page === meta.pagination.last_page}
-                                className="px-3 py-1 border rounded disabled:opacity-50 text-gray-600 hover:text-gray-900"
-                            >
-                                Siguiente
-                            </button>
-                            <button
-                                onClick={() => router.get('/cajas/menu', { page: meta.pagination!.last_page, per_page: meta.pagination!.per_page, ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
-                                disabled={meta.pagination.current_page === meta.pagination.last_page}
-                                className="px-3 py-1 border rounded disabled:opacity-50 text-gray-600 hover:text-gray-900"
-                            >
-                                Última
-                            </button>
-                        </div>
-                    </div>
-                )}
+
 
                 {data.length === 0 && (
                     <div className="text-center py-12">
