@@ -123,10 +123,10 @@ export default function Index({ menu_items }: Props) {
         }
     }, [fetchAttach.data, fetchAttach.error, handleDetail, selectedId, tipo, codapl]);
 
-    const currentFilterParams = useMemo(() => ({ q: q || undefined, tipo: tipo || undefined, codapl: codapl || undefined, per_page: perPage }), [q, tipo, codapl, perPage]);
+    const currentFilterParams = useMemo(() => ({ q: q || undefined, tipo: tipo || undefined, codapl: codapl || undefined }), [q, tipo, codapl]);
 
     const applyFilters = () => {
-        router.get('/cajas/menu', { ...currentFilterParams, page: 1 }, { preserveState: true, preserveScroll: true });
+        router.get('/cajas/menu', { ...currentFilterParams, page: 1, per_page: perPage }, { preserveScroll: true });
     };
 
     const clearFilters = () => {
@@ -185,7 +185,7 @@ export default function Index({ menu_items }: Props) {
 
     return (
         <AppLayout title="Menu">
-            <div className="bg-white shadow overflow-hidden sm:rounded-md m-2">
+            <div className="bg-white shadow overflow-hidden sm:rounded-md m-2" key={meta.pagination?.current_page}>
                 <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
                     <div>
                         <h3 className="text-lg leading-6 font-medium text-gray-900">
@@ -254,25 +254,11 @@ export default function Index({ menu_items }: Props) {
                     </div>
                 </div>
 
-                {/* Estadísticas */}
-                <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-                        <div className="text-center">
-                            <div className="text-2xl font-bold text-indigo-600">{meta.total_menu_items}</div>
-                            <div className="text-sm text-gray-500">Total Menu</div>
-                        </div>
-                        <div className="text-center">
-                            <div className="text-2xl font-bold text-green-600">{meta.menu_permisos.length}</div>
-                            <div className="text-sm text-gray-500">Permisos</div>
-                        </div>
-                    </div>
-                </div>
-
                 {/* Lista de items + detalle lateral */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                     {/* Lista de items */}
-                    <div className="lg:col-span-2">
-                        <ul className="divide-y divide-gray-200">
+                    <div className="lg:col-span-2 p-2">
+                        <ul className="divide-y divide-gray-200 border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
                             {data.map((menu_item) => (
                                 <li key={menu_item.id}>
                                     <div className="px-4 py-4 sm:px-6 space-y-3">
@@ -281,7 +267,7 @@ export default function Index({ menu_items }: Props) {
                                             {/* Info izquierda */}
                                             <div className="flex items-center gap-3 min-w-0">
                                                 <button
-                                                    className="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center hover:bg-indigo-600 transition-colors"
+                                                    className="shrink-0 h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center hover:bg-indigo-600 transition-colors"
                                                     onClick={() => handleDetail(menu_item)}
                                                 >
                                                     <span className="text-sm font-medium text-white">
@@ -302,55 +288,44 @@ export default function Index({ menu_items }: Props) {
                                                         </span>
                                                     </div>
                                                     <div className="text-xs text-gray-500 mt-0.5">
-                                                        {menu_item.controller} | {menu_item.action}
+                                                        {menu_item.controller || 'Menu Padre'} | {menu_item.action || '#'}
                                                     </div>
                                                 </div>
                                             </div>
 
                                             {/* Info derecha */}
-                                            <div className="flex items-center gap-4 shrink-0">
-                                                <div className="text-right hidden sm:block">
-                                                    <div className="text-xs font-medium text-gray-700">
+                                            <div className="flex items-center gap-3 shrink-0">
+                                                {/* Metadatos */}
+                                                <div className="hidden sm:flex items-center gap-2 text-xs text-gray-500 divide-x divide-gray-200">
+                                                    <span className={menu_item.is_visible ? 'text-green-600 font-medium' : 'text-red-500'}>
                                                         {menu_item.is_visible ? 'Visible' : 'Oculto'}
-                                                    </div>
-                                                    <div className="text-xs text-gray-400">
-                                                        Pos: {menu_item.position}
-                                                    </div>
+                                                    </span>
+                                                    <span className="pl-2">Pos: {menu_item.position}</span>
+                                                    <span className="pl-2">Tipo: {menu_item.tipo || 'N/A'}</span>
                                                 </div>
 
                                                 {/* Acciones */}
-                                                <div className="flex items-center gap-1">
+                                                <div className="flex items-center gap-1 border-l border-gray-200 pl-3">
                                                     <Link
                                                         href={`/cajas/menu/${menu_item.id}/show`}
-                                                        className="px-3 py-1.5 text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded transition-colors"
+                                                        className="px-2 py-1 text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded transition-colors"
                                                     >
                                                         Ver
                                                     </Link>
                                                     <Link
                                                         href={`/cajas/menu/${menu_item.id}/edit`}
-                                                        className="px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded transition-colors"
+                                                        className="px-2 py-1 text-xs font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded transition-colors"
                                                     >
                                                         Editar
                                                     </Link>
                                                     <button
                                                         onClick={() => handleDelete(menu_item.id, menu_item.title)}
-                                                        className="px-3 py-1.5 text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
+                                                        className="px-2 py-1 text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
                                                     >
                                                         Eliminar
                                                     </button>
                                                 </div>
                                             </div>
-                                        </div>
-
-                                        {/* Fila inferior */}
-                                        <div className="flex items-center justify-between gap-4 pl-[3.25rem]">
-                                            <div className="flex items-center gap-3 text-xs text-gray-500">
-                                                <span className="font-medium">Tipo:</span>
-                                                <span>{menu_item.tipo || 'N/A'}</span>
-                                            </div>
-                                            {menu_item.default_url && (
-                                                <p className="text-xs text-gray-400 truncate">{menu_item.default_url}</p>
-                                            )}
                                         </div>
                                     </div>
                                 </li>
@@ -531,9 +506,9 @@ export default function Index({ menu_items }: Props) {
                                     id="per_page"
                                     className="rounded-md border border-gray-300 px-2 py-1 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                     value={meta.pagination.per_page}
-                                    onChange={(e) => router.get('/cajas/menu', { page: 1, per_page: Number(e.target.value), ...currentFilterParams }, { preserveState: true, preserveScroll: true })}
+                                    onChange={(e) => router.get('/cajas/menu', { page: 1, per_page: Number(e.target.value), ...currentFilterParams }, { preserveScroll: true })}
                                 >
-                                    {[10,25,50,100].map(n => (
+                                    {[5,10,25,50,100].map(n => (
                                         <option key={n} value={n}>{n}</option>
                                     ))}
                                 </select>

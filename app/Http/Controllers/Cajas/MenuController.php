@@ -40,7 +40,7 @@ class MenuController extends Controller
         $q = trim((string) $request->query('q', ''));
         if ($q !== '') {
             $query->where(function ($sub) use ($q) {
-                $like = '%' . str_replace(['%', '_'], ['\%', '\_'], $q) . '%';
+                $like = '%'.str_replace(['%', '_'], ['\%', '\_'], $q).'%';
                 $sub->where('menu_items.title', 'like', $like)
                     ->orWhere('menu_items.controller', 'like', $like)
                     ->orWhere('menu_items.action', 'like', $like)
@@ -60,7 +60,7 @@ class MenuController extends Controller
 
         $query->orderBy('menu_tipos.position', 'ASC');
 
-        $perPage = 5;
+        $perPage = (int) $request->query('per_page', 5);
         $items = $query->paginate($perPage)->appends($request->only(['q', 'tipo', 'codapl', 'per_page']));
 
         $menu_items = [
@@ -103,7 +103,7 @@ class MenuController extends Controller
 
         $item = MenuItem::create($data);
 
-        return redirect()->to('/cajas/menu/' . $item->id . '/show');
+        return redirect()->to('/cajas/menu/'.$item->id.'/show');
     }
 
     public function show(int $id)
@@ -145,7 +145,7 @@ class MenuController extends Controller
         $item = MenuItem::findOrFail($id);
         $item->update($data);
 
-        return redirect()->to('/cajas/menu/' . $item->id . '/show');
+        return redirect()->to('/cajas/menu/'.$item->id.'/show');
     }
 
     public function destroy(int $id)
@@ -200,7 +200,7 @@ class MenuController extends Controller
             ->where('id', '!=', $id)
             ->whereIn('id', $alreadyChildrenIds)
             ->when($q !== '', function ($query) use ($q) {
-                $like = '%' . str_replace(['%', '_'], ['\%', '\_'], $q) . '%';
+                $like = '%'.str_replace(['%', '_'], ['\%', '\_'], $q).'%';
                 $query->where(function ($sub) use ($like) {
                     $sub->where('title', 'like', $like)
                         ->orWhere('controller', 'like', $like)
