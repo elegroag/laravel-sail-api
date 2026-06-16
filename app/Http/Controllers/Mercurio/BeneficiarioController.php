@@ -619,8 +619,7 @@ class BeneficiarioController extends ApplicationController
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
-                    'metodo' => 'parametros_beneficiarios',
-                    'params' => false
+                    'metodo' => 'parametros_beneficiarios'
                 ]
             );
 
