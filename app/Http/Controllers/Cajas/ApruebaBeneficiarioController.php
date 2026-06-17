@@ -400,7 +400,7 @@ class ApruebaBeneficiarioController extends ApplicationController
                 [
                     'servicio' => 'ComfacaEmpresas',
                     'metodo' => 'informacion_beneficiario',
-                    'params' => $solicitud->numdoc,
+                    'params' => ['numdoc' => $solicitud->numdoc],
                 ]
             );
 
@@ -466,7 +466,6 @@ class ApruebaBeneficiarioController extends ApplicationController
                     '_ciunac' => ParamsBeneficiario::getCiudades(),
                     '_huerfano' => ParamsBeneficiario::getHuerfano(),
                     '_tiphij' => ParamsBeneficiario::getTipoHijo(),
-                    '_nivedu' => ParamsBeneficiario::getNivelEducativo(),
                     '_calendario' => ParamsBeneficiario::getCalendario(),
                     '_codgir' => ParamsBeneficiario::getCodigoGiro(),
                 ]
