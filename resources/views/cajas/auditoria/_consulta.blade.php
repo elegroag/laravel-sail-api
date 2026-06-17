@@ -7,6 +7,7 @@
             <td>Fecha</td>
             <td>Fecsol</td>
             <td>Fecapr</td>
+            <td>Radicado</td>
             <td>Dias</td>
             @if ($tipopc == '8' || $tipopc == '5')
                 <td></td>
@@ -94,6 +95,7 @@ $formatFecha = function($m, $field) {
             <td>{{$mmercurio->getFecest()}}</td>
             <td>{{$formatFecha($mmercurio, 'fecsol')}}</td>
             <td>{{$formatFecha($mmercurio, 'fecapr')}}</td>
+            <td>{{$mmercurio->ruuid ?? ''}}</td>
             <td>{{$dias_vencidos}}</td>
             @if ($tipopc == '8' || $tipopc == '5')
             <td>{{$extra}}</td>

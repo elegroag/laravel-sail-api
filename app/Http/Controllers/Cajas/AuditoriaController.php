@@ -57,6 +57,7 @@ class AuditoriaController extends ApplicationController
                 'fecha' => Carbon::parse($mmercurio->getFecest())->format('Y-m-d'),
                 'fecsol' => $this->formatFecha($mmercurio, 'fecsol'),
                 'fecapr' => $mmercurio->getEstado() === 'A' ? $this->formatFecha($mmercurio, 'fecapr') ?? Carbon::parse($mmercurio->getFecest())->format('Y-m-d') : "",
+                'radicado' => $mmercurio->ruuid ?? null,
                 'dias_vencidos' => $dias_vencidos,
                 'extra' => $hasExtra ? $this->getExtra($mmercurio, $tipopc) : null,
                 'estado' => $mmercurio->getEstadoDetalle(),
@@ -134,7 +135,7 @@ class AuditoriaController extends ApplicationController
         $mercurio = $consultasOldServices->consultaTipopc($tipopc, 'all', '', '', $condi);
 
         $hasExtra = in_array($tipopc, ['8', '5']);
-        $headers = ['Documento', 'Nombre', 'Responsable', 'Fecha', 'Fecsol', 'Fecapr', 'Dias'];
+        $headers = ['Documento', 'Nombre', 'Responsable', 'Fecha', 'Fecsol', 'Fecapr', 'Radicado', 'Dias'];
         if ($hasExtra) {
             $headers[] = 'Extra';
         }
@@ -150,6 +151,7 @@ class AuditoriaController extends ApplicationController
                 $mmercurio->getFecest(),
                 $this->formatFecha($mmercurio, 'fecsol'),
                 $this->formatFecha($mmercurio, 'fecapr'),
+                $mmercurio->ruuid ?? '',
                 $dias_vencidos,
             ];
             if ($hasExtra) {
