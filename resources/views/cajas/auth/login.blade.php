@@ -66,6 +66,15 @@
                                     </div>
                                 </div>
 
+                                <p class='error_captcha error'></p>
+                                <div class="form-group mb-3 captcha-box">
+                                    <img src="{{ route('cajas.captcha.image') }}?v={{ time() }}" id="captcha_image" alt="Codigo de verificacion" aria-label="Codigo captcha">
+                                    <a href="#" id="reload_captcha" title="Generar nuevo codigo" aria-label="Recargar codigo captcha">
+                                        <i class="fa fa-refresh"></i>
+                                    </a>
+                                    <input class="form-control pl-1" id="captcha" name="captcha" placeholder="Codigo" type="text" autocomplete="off" required maxlength="8" aria-label="Ingresar codigo captcha">
+                                </div>
+
                                 <div class="form-group md-3">
                                     <button type='button' class='btn btn-md btn-primary my-4 btn-submit btn-block' id='bt_autenticar'>Autenticar</button>
                                 </div>

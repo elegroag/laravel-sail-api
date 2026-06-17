@@ -10,18 +10,20 @@ use App\Library\Auth\SessionCookies;
 use App\Models\Adapter\DbBase;
 use App\Services\CajaServices\UsuarioServices;
 use App\Services\Utils\SenderEmail;
+use App\Services\CaptchaService;
 use App\Services\View as ServicesView;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends ApplicationController
 {
-    protected $db;
+    protected ?DbBase $db = null;
 
-    protected $user;
+    protected ?array $user = null;
 
-    protected $tipo;
+    protected ?string $tipo = null;
 
     public function __construct()
     {
@@ -39,8 +41,13 @@ class AuthController extends ApplicationController
     {
         $user = $request->input('user');
         $clave = $request->input('password');
+        $captcha = $request->input('captcha');
         try {
             try {
+                if (! CaptchaService::verify($captcha)) {
+                    throw new AuthException('El codigo captcha es incorrecto o ha expirado.', 10);
+                }
+
                 $auth = new AuthCajas;
                 $auth->autenticar($user, $clave);
 
@@ -87,7 +94,7 @@ class AuthController extends ApplicationController
         $this->setResponse('ajax');
         $flash = get_flashdata();
         if (isset($flash['error'])) {
-            return $this->renderObject($flash['error'], false);
+            return $this->renderObject($flash['error']);
         }
         http_response_code($flash['error']['code']);
     }
@@ -96,14 +103,12 @@ class AuthController extends ApplicationController
     {
         $request = request();
         try {
-            $db = DbBase::rawConnect();
-
             $fecha = now()->format('Y-m-d H:i:s');
             $cedula = $request->input('recovery_cedula');
             $captcha = $request->input('captcha');
             $_usuario = $request->input('recovery_usuario');
 
-            $gener02 = $db->fetchOne("SELECT * FROM gener02 WHERE cedtra='{$cedula}' AND usuario='{$_usuario}' AND estado IN('A','B') LIMIT 1");
+            $gener02 = $this->db->fetchOne("SELECT * FROM gener02 WHERE cedtra='{$cedula}' AND usuario='{$_usuario}' AND estado IN('A','B') LIMIT 1");
 
             if (! $gener02) {
                 throw new AuthException('El usuario no se encuentra registrado en el sistema. No se puede continuar el proceso de recuperación de la cuenta.', 1);

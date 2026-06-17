@@ -252,3 +252,43 @@ p.decripcion {
 	color: #333 !important;
 	font-weight: 700;
 }
+
+.captcha-box {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.captcha-box #captcha_image {
+	height: 38px;
+	width: auto;
+	min-width: 100px;
+	border: 1px solid #ccc;
+	border-radius: 3px;
+	background: #fff;
+}
+
+.captcha-box #reload_captcha {
+	color: #599c34;
+	font-size: 1.1rem;
+	padding: 4px 6px;
+	text-decoration: none;
+	display: inline-flex;
+	align-items: center;
+}
+
+.captcha-box #reload_captcha:hover,
+.captcha-box #reload_captcha:focus {
+	color: #78b64b;
+}
+
+.captcha-box #captcha {
+	flex: 1 1 100px;
+	min-width: 100px;
+}
+
+p.error_captcha {
+	min-height: 1rem;
+	margin: 4px 0 6px 0;
+}

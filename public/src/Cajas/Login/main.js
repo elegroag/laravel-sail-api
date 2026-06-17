@@ -1,4 +1,4 @@
-import { AutenticarCajas } from './login';
+import { AutenticarCajas, reloadCaptchaImage, clearCaptchaError } from './login';
 
 $(() => {
     const toggle = document.getElementById('btnToggle');
@@ -29,4 +29,17 @@ $(() => {
             document.getElementById('bt_autenticar').click();
         }
     });
+
+    const captchaInput = document.getElementById('captcha');
+    if (captchaInput) {
+        captchaInput.addEventListener('input', clearCaptchaError);
+    }
+
+    const reloadBtn = document.getElementById('reload_captcha');
+    if (reloadBtn) {
+        reloadBtn.addEventListener('click', (event) => {
+            event.preventDefault();
+            reloadCaptchaImage();
+        });
+    }
 });

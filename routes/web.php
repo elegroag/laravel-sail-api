@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Mercurio\AuthController as MercurioAuthController;
 use App\Http\Controllers\Web\WebController;
 use App\Http\Controllers\Cajas\AuthController as CajasAuthController;
+use App\Http\Controllers\Cajas\CaptchaController as CajasCaptchaController;
 
 Route::fallback(function (Request $request) {
     $ruta = $request->path();
@@ -70,6 +71,7 @@ Route::prefix('/cajas')->group(function () {
     });
     Route::get('/salir', [CajasAuthController::class, 'logout'])->name('cajas.salir');
     Route::get('/login', [CajasAuthController::class, 'index'])->name('cajas.login');
+    Route::get('/captcha', [CajasCaptchaController::class, 'image'])->name('cajas.captcha.image');
     Route::post('/autenticar', [CajasAuthController::class, 'authenticate'])->name('cajas.autenticar');
     Route::post('/cambio_correo', [CajasAuthController::class, 'cambioCorreo'])->name('cajas.cambio_correo');
 });
