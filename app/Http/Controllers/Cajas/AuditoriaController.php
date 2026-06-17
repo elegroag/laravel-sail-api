@@ -126,6 +126,30 @@ class AuditoriaController extends ApplicationController
 
     public function reporteAuditoria(Request $request)
     {
+        $headers = [];
+        $rows = [];
+        $this->buildReporte($request, $headers, $rows);
+
+        $fecha = new \DateTime;
+        $filename = 'reporte_auditoria_' . $fecha->format('Ymd') . '.xlsx';
+
+        return OptimizedXlsxProduct::streamFromArray($headers, $rows, $filename);
+    }
+
+    public function exportarExcel(Request $request)
+    {
+        $headers = [];
+        $rows = [];
+        $this->buildReporte($request, $headers, $rows);
+
+        $fecha = new \DateTime;
+        $filename = 'auditoria_export_' . $fecha->format('Ymd_His') . '.xlsx';
+
+        return OptimizedXlsxProduct::streamFromArray($headers, $rows, $filename);
+    }
+
+    private function buildReporte(Request $request, array &$headers, array &$rows): void
+    {
         $tipopc = $request->input('tipopc');
         $fecini = $request->input('fecini');
         $fecfin = $request->input('fecfin');
@@ -160,11 +184,6 @@ class AuditoriaController extends ApplicationController
             $fila[] = $mmercurio->getEstadoDetalle();
             $rows[] = $fila;
         }
-
-        $fecha = new \DateTime;
-        $filename = 'reporte_auditoria_' . $fecha->format('Ymd') . '.xlsx';
-
-        return OptimizedXlsxProduct::streamFromArray($headers, $rows, $filename);
     }
 
     public function info(Request $request, $id)

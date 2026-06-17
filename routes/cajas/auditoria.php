@@ -9,6 +9,7 @@ Route::middleware(['cajas.auth'])->group(function () {
         Route::get('/index', [AuditoriaController::class, 'index'])->name('auditoria.index');
         Route::post('/consulta', [AuditoriaController::class, 'consultaAuditoria'])->name('auditoria.consulta');
         Route::post('/reporte', [AuditoriaController::class, 'reporteAuditoria'])->name('auditoria.reporte');
+        Route::post('/exportar', [AuditoriaController::class, 'exportarExcel'])->name('auditoria.exportar');
         Route::post('/infor', [AuditoriaController::class, 'infor'])->name('auditoria.infor');
     });
 });

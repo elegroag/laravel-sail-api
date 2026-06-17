@@ -54,7 +54,31 @@ const buildAuditoriaTable = (data, hasExtra) => {
         return '<tr>' + cells.map(c => `<td>${c ?? ''}</td>`).join('') + '</tr>';
     }).join('');
 
+    const csrfToken = document.querySelector("[name='csrf-token']")
+        ? document.querySelector("[name='csrf-token']").getAttribute('content')
+        : '';
+
+    const exportUrl = $('#consulta').data('export-url') || `${window.ServerController}/exportar`;
+
+    const exportForm = `
+<form id="form_exportar_auditoria" action="${exportUrl}" method="POST" target="_blank" class="d-inline-block">
+    <input type="hidden" name="_token" value="${csrfToken}">
+    <input type="hidden" name="tipopc" value="${$('#tipopc').val()}">
+    <input type="hidden" name="fecini" value="${$('#fecini').val()}">
+    <input type="hidden" name="fecfin" value="${$('#fecfin').val()}">
+    <input type="hidden" name="format" value="xlsx">
+    <button type="submit" class="btn btn-success btn-sm">
+        <i class="fa fa-file-excel-o"></i> Exportar Excel
+    </button>
+</form>`;
+
+    const toolbar = `
+<div class="d-flex justify-content-end mt-2 mb-2">
+    ${exportForm}
+</div>`;
+
     return `<div class="table-responsive mt-2">
+${toolbar}
 <table class="table table-striped table-bordered datatable-auditoria" id="tabla-auditoria">
 ${thead}
 <tbody>${rows}</tbody>

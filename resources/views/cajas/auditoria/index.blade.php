@@ -70,7 +70,7 @@
                             <button type="button" class="btn btn-danger align-self-center" data-toggle="reporte">Reporte</button>
                         </div>
                     </form>
-                    <div id='consulta' class='table-responsive'></div>
+                    <div id='consulta' class='table-responsive' data-export-url="{{ route('auditoria.exportar') }}"></div>
                 </div>
             </div>
         </div>
