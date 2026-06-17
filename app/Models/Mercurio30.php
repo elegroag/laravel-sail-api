@@ -169,6 +169,20 @@ class Mercurio30 extends ModelBase
         $this->fecsol = $fecsol;
     }
 
+    public function getFecapr()
+    {
+        if ($this->fecapr) {
+            return Carbon::parse($this->fecapr);
+        }
+
+        return null;
+    }
+
+    public function setFecapr($fecapr)
+    {
+        $this->fecapr = $fecapr;
+    }
+
     public function getNumero_transaccion()
     {
         return $this->numero_transaccion;

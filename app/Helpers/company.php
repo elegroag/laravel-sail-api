@@ -137,7 +137,9 @@ if (! function_exists('estado_detalle_value')) {
         if ($estado == 'X') {
             $return = 'Rechazado';
         }
-
+        if ($estado == 'P') {
+            $return = 'Pendiente';
+        }
         return $return;
     }
 }

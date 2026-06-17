@@ -1025,6 +1025,15 @@ class Mercurio31 extends ModelBase
         return Carbon::parse($this->fecsol);
     }
 
+    public function getFecapr()
+    {
+        if ($this->fecapr == '' || $this->fecapr == null) {
+            return null;
+        }
+
+        return Carbon::parse($this->fecapr);
+    }
+
     public function getFecing()
     {
         return Carbon::parse($this->fecing);

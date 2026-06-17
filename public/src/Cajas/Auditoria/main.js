@@ -23,7 +23,7 @@ const validatorInit = () => {
 };
 
 const buildAuditoriaTable = (data, hasExtra) => {
-    let headers = ['Documento', 'Nombre', 'Responsable', 'Fecha', 'Días'];
+    let headers = ['Documento', 'Nombre', 'Responsable', 'Fecha', 'Fecsol', 'Fecapr', 'Días'];
     if (hasExtra) {
         headers.push('Extra');
     }
@@ -41,6 +41,8 @@ const buildAuditoriaTable = (data, hasExtra) => {
             item.nombre,
             item.responsable,
             item.fecha,
+            item.fecsol,
+            item.fecapr,
             item.dias_vencidos,
         ];
         if (hasExtra && item.extra) {

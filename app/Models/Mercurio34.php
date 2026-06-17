@@ -701,6 +701,15 @@ class Mercurio34 extends ModelBase
         return $this->fecsol;
     }
 
+    public function getFecapr()
+    {
+        if ($this->fecapr) {
+            return Carbon::parse($this->fecapr);
+        }
+
+        return null;
+    }
+
     public function getConvive()
     {
         return convive_array();

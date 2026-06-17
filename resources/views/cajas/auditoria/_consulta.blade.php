@@ -5,6 +5,8 @@
             <td>Nombre</td>
             <td>Responsable</td>
             <td>Fecha</td>
+            <td>Fecsol</td>
+            <td>Fecapr</td>
             <td>Dias</td>
             @if ($tipopc == '8' || $tipopc == '5')
                 <td></td>
@@ -15,6 +17,20 @@
 use App\Models\Gener02;
 use App\Models\Mercurio20;
 use App\Services\Utils\CalculatorDias;
+use Carbon\Carbon;
+
+$formatFecha = function($m, $field) {
+    $getter = 'get' . ucfirst($field);
+    $value = method_exists($m, $getter) ? $m->$getter() : ($m->{$field} ?? null);
+    if (empty($value)) {
+        return '';
+    }
+    try {
+        return Carbon::parse($value)->format('Y-m-d');
+    } catch (\Exception $e) {
+        return '';
+    }
+};
 @endphp
         @foreach ($mercurio['datos'] as $mmercurio)
             @if ($tipopc == 1 || $tipopc == 9 || $tipopc == 10)
@@ -76,6 +92,8 @@ use App\Services\Utils\CalculatorDias;
             <td>{{ is_callable($nombre) ? $nombre($mmercurio) : $mmercurio->$nombre() }}</td>
             <td>{{$gener02->getNombre()}}</td>
             <td>{{$mmercurio->getFecest()}}</td>
+            <td>{{$formatFecha($mmercurio, 'fecsol')}}</td>
+            <td>{{$formatFecha($mmercurio, 'fecapr')}}</td>
             <td>{{$dias_vencidos}}</td>
             @if ($tipopc == '8' || $tipopc == '5')
             <td>{{$extra}}</td>

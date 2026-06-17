@@ -535,6 +535,18 @@ class Mercurio32 extends ModelBase
     }
 
     /**
+     * Devuelve el valor del campo fecapr
+     */
+    public function getFecapr()
+    {
+        if ($this->fecapr) {
+            return Carbon::parse($this->fecapr);
+        }
+
+        return null;
+    }
+
+    /**
      * Devuelve el valor del campo id
      *
      * @return int

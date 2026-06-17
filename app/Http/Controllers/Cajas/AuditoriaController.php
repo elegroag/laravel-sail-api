@@ -9,6 +9,7 @@ use App\Models\Mercurio09;
 use App\Services\ReportGenerator\Products\OptimizedXlsxProduct;
 use App\Services\Utils\CalculatorDias;
 use App\Services\Utils\GeneralService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class AuditoriaController extends ApplicationController
@@ -53,7 +54,9 @@ class AuditoriaController extends ApplicationController
                 'documento' => $this->getDocumento($mmercurio, $tipopc),
                 'nombre' => $this->getNombre($mmercurio, $tipopc),
                 'responsable' => $this->getResponsable($mmercurio),
-                'fecha' => $mmercurio->getFecest(),
+                'fecha' => Carbon::parse($mmercurio->getFecest())->format('Y-m-d'),
+                'fecsol' => $this->formatFecha($mmercurio, 'fecsol'),
+                'fecapr' => $mmercurio->getEstado() === 'A' ? $this->formatFecha($mmercurio, 'fecapr') ?? Carbon::parse($mmercurio->getFecest())->format('Y-m-d') : "",
                 'dias_vencidos' => $dias_vencidos,
                 'extra' => $hasExtra ? $this->getExtra($mmercurio, $tipopc) : null,
                 'estado' => $mmercurio->getEstadoDetalle(),
@@ -98,10 +101,26 @@ class AuditoriaController extends ApplicationController
     private function getExtra($mmercurio, string $tipopc): string
     {
         if ($tipopc == '5') {
-            return $mmercurio->getCampoDetalle().' - '.$mmercurio->getAntval().' - '.$mmercurio->getValor();
+            return $mmercurio->getCampoDetalle() . ' - ' . $mmercurio->getAntval() . ' - ' . $mmercurio->getValor();
         }
 
         return $mmercurio->getNomcer();
+    }
+
+    private function formatFecha($mmercurio, string $field): ?string
+    {
+        $getter = 'get' . ucfirst($field);
+        $value = method_exists($mmercurio, $getter) ? $mmercurio->$getter() : ($mmercurio->{$field} ?? null);
+
+        if (empty($value)) {
+            return null;
+        }
+
+        try {
+            return Carbon::parse($value)->format('Y-m-d');
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
     public function reporteAuditoria(Request $request)
@@ -115,7 +134,7 @@ class AuditoriaController extends ApplicationController
         $mercurio = $consultasOldServices->consultaTipopc($tipopc, 'all', '', '', $condi);
 
         $hasExtra = in_array($tipopc, ['8', '5']);
-        $headers = ['Documento', 'Nombre', 'Responsable', 'Fecha', 'Dias'];
+        $headers = ['Documento', 'Nombre', 'Responsable', 'Fecha', 'Fecsol', 'Fecapr', 'Dias'];
         if ($hasExtra) {
             $headers[] = 'Extra';
         }
@@ -129,6 +148,8 @@ class AuditoriaController extends ApplicationController
                 $this->getNombre($mmercurio, $tipopc),
                 $this->getResponsable($mmercurio),
                 $mmercurio->getFecest(),
+                $this->formatFecha($mmercurio, 'fecsol'),
+                $this->formatFecha($mmercurio, 'fecapr'),
                 $dias_vencidos,
             ];
             if ($hasExtra) {
@@ -139,7 +160,7 @@ class AuditoriaController extends ApplicationController
         }
 
         $fecha = new \DateTime;
-        $filename = 'reporte_auditoria_'.$fecha->format('Ymd').'.xlsx';
+        $filename = 'reporte_auditoria_' . $fecha->format('Ymd') . '.xlsx';
 
         return OptimizedXlsxProduct::streamFromArray($headers, $rows, $filename);
     }
