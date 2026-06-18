@@ -91,6 +91,7 @@ const appModules = {
         'Indicadores',
         'Auditoria',
         'OportunidadAfiliacion',
+        'ReporteSolicitudes',
     ],
 };
 

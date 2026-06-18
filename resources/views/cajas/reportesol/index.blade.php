@@ -2,6 +2,7 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/flatpickr/flatpickr.min.css') }}" />
 @endpush
 
 @section('content')
@@ -41,12 +42,12 @@
 
                                 <div class="form-group">
                                     <label for="fecha_solicitud">Fecha de envío</label>
-                                    <input type="date" id="fecha_solicitud" name="fecha_solicitud" class="form-control">
+                                    <input type="text" id="fecha_solicitud" name="fecha_solicitud" class="form-control datepicker" placeholder="YYYY-MM-DD">
                                 </div>
 
                                 <div class="form-group">
                                     <label for="fecha_aprueba">Fecha de aprobación</label>
-                                    <input type="date" id="fecha_aprueba" name="fecha_aprueba" class="form-control">
+                                    <input type="text" id="fecha_aprueba" name="fecha_aprueba" class="form-control datepicker" placeholder="YYYY-MM-DD">
                                 </div>
 
                                 <div class="form-group text-center mt-2">
@@ -66,17 +67,5 @@
     <script>
         window.ServerController = 'reportesol';
     </script>
-    <script type="text/javascript">
-        $(document).ready(function () {
-            const $form = $('#form_reportesol');
-            $form.validate({
-                rules: {
-                    tipo: { required: true },
-                },
-                submitHandler: function (form) {
-                    form.submit();
-                },
-            });
-        });
-    </script>
+    <script src="{{ asset('cajas/build/ReporteSolicitudes.js') }}"></script>
 @endpush
