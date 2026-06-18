@@ -56,7 +56,7 @@ export default class EmpresaInfoView extends FormInfoView {
 		this.$el.find('#codind, #tipsoc, #tipapo, .js-basic-multiple').select2();
 		
 		let fechaPasada = new Date();
-        fechaPasada.setDate(fechaPasada.getDate() - 60);
+        fechaPasada.setDate(fechaPasada.getDate() - 8110);
 
         flatpickr(this.$el.find('#fecafi, #fecapr'), {
             enableTime: false,

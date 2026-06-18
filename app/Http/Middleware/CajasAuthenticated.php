@@ -4,18 +4,16 @@ namespace App\Http\Middleware;
 
 use App\Library\Auth\SessionCookies;
 use App\Models\MenuItem;
-use App\Models\MenuPermission;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Route;
 
 class CajasAuthenticated
 {
 
-    protected $controller;
-    protected $actionMethod;
-    protected $application;
+    protected string $controller;
+    protected string $actionMethod;
+    protected ?string $application;
 
     /**
      * Manejar una solicitud entrante.
@@ -33,7 +31,7 @@ class CajasAuthenticated
             }
 
             set_flashdata('error', [
-                'msj' => 'No autorizado para acceder al modulo. ' . __LINE__ . ' ' . $this->controller,
+                'msj' => 'No autenticado para acceder al modulo. ' . __LINE__ . ' ' . $this->controller,
                 'code' => 401,
             ]);
 
@@ -93,15 +91,10 @@ class CajasAuthenticated
             return redirect()->route('web.login');
         }
 
-        $tipfun = session()->has('tipfun') ? session('tipfun') : null;
-        $user = session()->has('user') ? session('user') : null;
+        $tipfun = session('tipfun') ?? null;
+        $user = session('user') ?? null;
 
-        if (
-            $user &&
-            $user != '' &&
-            $tipfun &&
-            $tipfun != ''
-        ) {
+        if ($user && $tipfun) {
             $request->attributes->set('user', $user);
             $request->attributes->set('tipfun', $tipfun);
         } else {
@@ -121,7 +114,7 @@ class CajasAuthenticated
         return $next($request);
     }
 
-    public function autorization(Request &$request)
+    public function autorization(Request &$request): bool
     {
         $controllerName = $request->route()->getController(); // Esto devolverá una instancia de UserController
         $controllerClassName = str_replace('App\\Http\\Controllers\\', '', get_class($controllerName));
@@ -148,11 +141,12 @@ class CajasAuthenticated
         if (!$hasPermission->exists()) {
             return false; // No autorizado
         }
-        $request->attributes->set('opciones', json_decode($hasPermission->first()->opciones), true);
+        $permisos = $hasPermission->first();
+        $request->attributes->set('opciones', json_decode($permisos->opciones ?? '{}', true));
         return true; // Autorizado
     }
 
-    public function validOption(Request $request)
+    public function validOption(Request $request): bool
     {
         $opciones = $request->attributes->get('opciones');
         if (is_array($opciones)) {

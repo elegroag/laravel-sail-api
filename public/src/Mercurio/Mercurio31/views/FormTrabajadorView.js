@@ -135,7 +135,7 @@ class FormTrabajadorView extends FormView {
         eventsFormControl($el);
 
         let fechaPasada = new Date();
-        fechaPasada.setDate(fechaPasada.getDate() - 5110);
+        fechaPasada.setDate(fechaPasada.getDate() - 8110);
 
         flatpickr($el.find('#fecnac'), {
             enableTime: false,

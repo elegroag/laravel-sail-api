@@ -6,502 +6,498 @@ use App\Models\Mercurio30;
 use App\Models\Mercurio31;
 use App\Models\Mercurio32;
 use App\Models\Mercurio34;
-use App\Services\FactoryReportes\ExcelReportFactory;
 use App\Services\Srequest;
 
 class ReporteSolicitudes
 {
     /**
-     * main function
+     * Devuelve el dataset (cabeceras + filas) para un reporte de solicitudes
+     * segun el tipo indicado. El controlador se encarga de serializar el
+     * resultado a un archivo descargable.
      *
-     * @param [type] $recurso
-     * @return string
+     * @return array{title: string, headers: array<int, string>, rows: array<int, array<int, mixed>>}|null
      */
-    public function main(Srequest $request)
+    public function buildDataset(Srequest $request): ?array
+    {
+        $models = $this->queryModels($request);
+
+        return match ($request->getParam('tipo')) {
+            '1' => $this->datasetMercurio31($models),
+            '2' => $this->datasetMercurio30($models),
+            '3' => $this->datasetMercurio32($models),
+            '4' => $this->datasetMercurio34($models),
+            default => null,
+        };
+    }
+
+    public function titleFor(?string $tipo): string
+    {
+        return match ($tipo) {
+            '1' => 'Listado De Solicitudes Trabajadores',
+            '2' => 'Listado De Solicitudes Empresas',
+            '3' => 'Listado De Solicitudes Conyuges',
+            '4' => 'Listado De Solicitudes Beneficiarios',
+            default => 'Listado De Solicitudes',
+        };
+    }
+
+    /**
+     * Construye el WHERE crudo compartido por los cuatro modelos.
+     * Acepta estado, fecha_solicitud y fecha_aprueba opcionales.
+     */
+    private function queryModels(Srequest $request)
     {
         $estado = $request->getParam('estado');
         $fecha_solicitud = $request->getParam('fecha_solicitud');
         $fecha_aprueba = $request->getParam('fecha_aprueba');
 
-        $query = '1=1 ';
+        $query = '1 = 1';
+        $bindings = [];
+
         if ($estado) {
-            $query .= " AND estado = '{$estado}' ";
+            $query .= ' AND estado = ?';
+            $bindings[] = $estado;
         }
         if ($fecha_solicitud) {
-            $query .= " AND fecsol >= '{$fecha_solicitud}' ";
+            $query .= ' AND fecsol >= ?';
+            $bindings[] = $fecha_solicitud;
         }
         if ($fecha_aprueba) {
-            $query .= " AND fecest <= '{$fecha_aprueba}' ";
+            $query .= ' AND fecest <= ?';
+            $bindings[] = $fecha_aprueba;
         }
-        switch ($request->getParam('tipo')) {
-            case '1':
-                $models = Mercurio31::whereRaw("{$query}")->get();
-                return $this->tableMercurio31($models);
-                break;
-            case '2':
-                $models = Mercurio30::whereRaw("{$query}")->get();
-                return $this->tableMercurio30($models);
-                break;
-            case '3':
-                $models = Mercurio32::whereRaw("{$query}")->get();
-                return $this->tableMercurio32($models);
-                break;
-            case '4':
-                $models = Mercurio34::whereRaw("{$query}")->get();
-                return $this->tableMercurio34($models);
-                break;
+
+        $modelClass = match ($request->getParam('tipo')) {
+            '1' => Mercurio31::class,
+            '2' => Mercurio30::class,
+            '3' => Mercurio32::class,
+            '4' => Mercurio34::class,
+            default => null,
+        };
+
+        if ($modelClass === null) {
+            return collect();
         }
+
+        return $modelClass::whereRaw($query, $bindings)->get();
     }
 
     /**
-     * tableMercurio30 function
-     *
-     * @param [type] $models
-     * @return string
+     * @return array{title: string, headers: array<int, string>, rows: array<int, array<int, mixed>>}
      */
-    public function tableMercurio30($models)
+    private function datasetMercurio30($models): array
     {
-        $fields = [
-            ['Estado', 1, 1, 15],
-            ['Fecha solicitud', 2, 2, 18],
-            ['Nit', 3, 4, 30],
-            ['Tipo documento empresa', 4, 4, 30],
-            ['Razon social', 5, 5, 30],
-            ['Sigla', 6, 6, 8],
-            ['Digito verificador', 7, 7, 8],
-            ['Calidad empresa', 8, 8, 30],
-            ['Cedula representante', 9, 9, 30],
-            ['Representante legal', 10, 10, 30],
-            ['Direccion', 11, 11, 30],
-            ['Ciudad', 12, 12, 10],
-            ['Zona', 13, 13, 10],
-            ['Telefono', 14, 14, 10],
-            ['Celular', 15, 15, 10],
-            ['Email', 16, 16, 30],
-            ['Code actividad económica', 17, 17, 30],
-            ['Fecha inicio', 18, 18, 15],
-            ['Total trabajadores', 19, 19, 30],
-            ['Valor nomina', 20, 20, 30],
-            ['Tipo sociedad', 21, 21, 30],
-            ['Code estado', 22, 22, 30],
-            ['Motivo', 23, 23, 30],
-            ['Fecha aprobacion', 24, 24, 30],
-            ['Usuario', 25, 25, 30],
-            ['Direccion principal', 26, 26, 30],
-            ['Ciudad principal', 27, 27, 30],
-            ['Telefono principal', 28, 28, 30],
-            ['Celular principal', 29, 29, 30],
-            ['Email principal', 30, 30, 30],
-            ['Tipo representante', 31, 31, 30],
-            ['Tipo documento representante', 32, 32, 30],
-            ['Apellido paterno representante', 33, 33, 30],
-            ['Apellido materno representante', 34, 34, 30],
-            ['Nombre representante', 35, 35, 30],
-            ['Priape', 36, 36, 30],
-            ['Segape', 37, 37, 30],
-            ['Prinom', 38, 38, 30],
-            ['Segnom', 39, 39, 30],
-            ['Matricula', 40, 40, 30],
-            ['Tipo empresa', 41, 41, 30],
+        $headers = [
+            'Estado',
+            'Fecha solicitud',
+            'Nit',
+            'Tipo documento empresa',
+            'Razon social',
+            'Sigla',
+            'Digito verificador',
+            'Calidad empresa',
+            'Cedula representante',
+            'Representante legal',
+            'Direccion',
+            'Ciudad',
+            'Zona',
+            'Telefono',
+            'Celular',
+            'Email',
+            'Codigo actividad economica',
+            'Fecha inicio',
+            'Total trabajadores',
+            'Valor nomina',
+            'Tipo sociedad',
+            'Codigo estado',
+            'Motivo',
+            'Fecha aprobacion',
+            'Usuario',
+            'Direccion principal',
+            'Ciudad principal',
+            'Telefono principal',
+            'Celular principal',
+            'Email principal',
+            'Tipo representante',
+            'Tipo documento representante',
+            'Apellido paterno representante',
+            'Apellido materno representante',
+            'Nombre representante',
+            'Priape',
+            'Segape',
+            'Prinom',
+            'Segnom',
+            'Matricula',
+            'Tipo empresa',
         ];
 
-        $factory = new ExcelReportFactory;
-        $generator = $factory->createReportGenerator();
-        $generator->generateReport('Listado De Solicitudes Empresas', 'reporte_solicitudes', $fields);
+        $rows = $models->map(fn($m) => [
+            $m->getEstado(),
+            $m->getFecsol(),
+            $m->getNit(),
+            $m->getTipdoc(),
+            $m->getRazsoc(),
+            $m->getSigla(),
+            $m->getDigver(),
+            $m->getCalemp(),
+            $m->getCedrep(),
+            $m->getRepleg(),
+            $m->getDireccion(),
+            $m->getCodciu(),
+            $m->getCodzon(),
+            $m->getTelefono(),
+            $m->getCelular(),
+            $m->getEmail(),
+            $m->getCodact(),
+            $m->getFecini(),
+            $m->getTottra(),
+            $m->getValnom(),
+            $m->getTipsoc(),
+            $m->getCodest(),
+            $m->getMotivo(),
+            $m->getFecest(),
+            $m->getUsuario(),
+            $m->getDirpri(),
+            $m->getCiupri(),
+            $m->getTelpri(),
+            $m->getCelpri(),
+            $m->getEmailpri(),
+            $m->getTipper(),
+            $m->getCoddocrepleg(),
+            $m->getPriaperepleg(),
+            $m->getSegaperepleg(),
+            $m->getPrinomrepleg(),
+            $m->getSegnomrepleg(),
+            $m->getPriape(),
+            $m->getSegape(),
+            $m->getPrinom(),
+            $m->getSegnom(),
+            $m->getMatmer(),
+            $m->getTipemp(),
+        ])->all();
 
-        foreach ($models as $model) {
-            $datos = [
-                $model->getEstado(),
-                $model->getFecsol(),
-                $model->getNit(),
-                $model->getTipdoc(),
-                $model->getRazsoc(),
-                $model->getSigla(),
-                $model->getDigver(),
-                $model->getCalemp(),
-                $model->getCedrep(),
-                $model->getRepleg(),
-                $model->getDireccion(),
-                $model->getCodciu(),
-                $model->getCodzon(),
-                $model->getTelefono(),
-                $model->getCelular(),
-                $model->getEmail(),
-                $model->getCodact(),
-                $model->getFecini(),
-                $model->getTottra(),
-                $model->getValnom(),
-                $model->getTipsoc(),
-                $model->getCodest(),
-                $model->getMotivo(),
-                $model->getFecest(),
-                $model->getUsuario(),
-                $model->getDirpri(),
-                $model->getCiupri(),
-                $model->getTelpri(),
-                $model->getCelpri(),
-                $model->getEmailpri(),
-                $model->getTipper(),
-                $model->getCoddocrepleg(),
-                $model->getPriaperepleg(),
-                $model->getSegaperepleg(),
-                $model->getPrinomrepleg(),
-                $model->getSegnomrepleg(),
-                $model->getPriape(),
-                $model->getSegape(),
-                $model->getPrinom(),
-                $model->getSegnom(),
-                $model->getMatmer(),
-                $model->getTipemp(),
-            ];
-            $generator->addLine($datos, 9);
-        }
-
-        $out = $generator->outFile();
-
-        return $out;
+        return [
+            'title' => 'Listado De Solicitudes Empresas',
+            'headers' => $headers,
+            'rows' => $rows,
+        ];
     }
 
     /**
-     * Undocumented function
-     *
-     * @param [type] $models
-     * @return void
+     * @return array{title: string, headers: array<int, string>, rows: array<int, array<int, mixed>>}
      */
-    public function tableMercurio32($models)
+    private function datasetMercurio31($models): array
     {
-        $fields = [
-            ['id', 1, 1, 15],
-            ['cedtra', 2, 2, 15],
-            ['cedcon', 3, 3, 15],
-            ['tipdoc', 4, 4, 15],
-            ['priape', 5, 5, 15],
-            ['segape', 6, 6, 15],
-            ['prinom', 7, 7, 15],
-            ['segnom', 8, 8, 15],
-            ['fecnac', 9, 9, 15],
-            ['ciunac', 10, 10, 15],
-            ['sexo', 11, 11, 15],
-            ['estciv', 12, 12, 15],
-            ['comper', 13, 13, 15],
-            ['ciures', 14, 14, 15],
-            ['codzon', 15, 15, 15],
-            ['tipviv', 16, 16, 15],
-            ['direccion', 17, 17, 15],
-            ['barrio', 18, 18, 15],
-            ['telefono', 19, 19, 15],
-            ['celular', 20, 20, 15],
-            ['email', 21, 21, 15],
-            ['nivedu', 22, 22, 15],
-            ['fecing', 23, 23, 15],
-            ['codocu', 24, 24, 15],
-            ['salario', 25, 25, 15],
-            ['captra', 26, 26, 15],
-            ['usuario', 27, 27, 15],
-            ['estado', 28, 28, 15],
-            ['codest', 29, 29, 15],
-            ['motivo', 30, 30, 15],
-            ['fecest', 31, 31, 15],
-            ['tipo', 32, 32, 15],
-            ['coddoc', 33, 33, 15],
-            ['documento', 34, 34, 15],
-            ['tiecon', 35, 35, 15],
-            ['tipsal', 36, 36, 15],
-            ['fecsol', 37, 37, 15],
-            ['tippag', 38, 38, 15],
-            ['numcue', 39, 39, 15],
-            ['empresalab', 40, 40, 15],
+        $headers = [
+            'Estado',
+            'Nit',
+            'Razon social',
+            'Cedula trabajador',
+            'Tipo documento',
+            'Priape',
+            'Segape',
+            'Prinom',
+            'Segnom',
+            'Fecha nacimiento',
+            'Ciudad nacimiento',
+            'Sexo',
+            'Orientacion sexual',
+            'Estado civil',
+            'Cabeza de hogar',
+            'Ciudad',
+            'Zona',
+            'Direccion',
+            'Barrio',
+            'Telefono',
+            'Celular',
+            'Fax',
+            'Email',
+            'Fecha solicitud',
+            'Fecha ingreso',
+            'Salario',
+            'Captra',
+            'Tipo discapacidad',
+            'Nivel educacion',
+            'Rural',
+            'Horas',
+            'Tipo contrato',
+            'Traslado sindicato',
+            'Vivienda',
+            'Tipo afiliado',
+            'Profesion',
+            'Cargo',
+            'Autoriza',
+            'Usuario',
+            'Estado',
+            'Codigo estado',
+            'Motivo',
+            'Fecha estado',
+            'Tipo',
+            'Codigo documento',
+            'Documento',
+            'Factor vulnerabilidad',
+            'Pertenencia etnica',
+            'Direccion laboral',
+            'Ciudad laboral',
+            'Rural trabajo',
+            'Comision',
+            'Tipo jornada',
+            'Codigo sucursal',
+            'Tipo salario',
+            'Tipo pago',
+            'Numero cuenta',
+            'Codigo banco',
+            'Tipo cuenta',
         ];
 
-        $factory = new ExcelReportFactory;
-        $generator = $factory->createReportGenerator();
-        $generator->generateReport('Listado De Solicitudes Conyuges', 'reporte_solicitudes', $fields);
+        $rows = $models->map(fn($m) => [
+            $m->getEstado(),
+            $m->getNit(),
+            $m->getRazsoc(),
+            $m->getCedtra(),
+            $m->getTipdoc(),
+            $m->getPriape(),
+            $m->getSegape(),
+            $m->getPrinom(),
+            $m->getSegnom(),
+            $m->getFecnac(),
+            $m->getCiunac(),
+            $m->getSexo(),
+            $m->getOrisex(),
+            $m->getEstciv(),
+            $m->getCabhog(),
+            $m->getCodciu(),
+            $m->getCodzon(),
+            $m->getDireccion(),
+            $m->getBarrio(),
+            $m->getTelefono(),
+            $m->getCelular(),
+            $m->getFax(),
+            $m->getEmail(),
+            $m->getFecsol(),
+            $m->getFecing(),
+            $m->getSalario(),
+            $m->getCaptra(),
+            $m->getTipdis(),
+            $m->getNivedu(),
+            $m->getRural(),
+            $m->getHoras(),
+            $m->getTipcon(),
+            $m->getTrasin(),
+            $m->getVivienda(),
+            $m->getTipafi(),
+            $m->getProfesion(),
+            $m->getCargo(),
+            $m->getAutoriza(),
+            $m->getUsuario(),
+            $m->getEstado(),
+            $m->getCodest(),
+            $m->getMotivo(),
+            $m->getFecest(),
+            $m->getTipo(),
+            $m->getCoddoc(),
+            $m->getDocumento(),
+            $m->getFacvul(),
+            $m->getPeretn(),
+            $m->getDirlab(),
+            $m->getCiulab(),
+            $m->getRuralt(),
+            $m->getComision(),
+            $m->getTipjor(),
+            $m->getCodsuc(),
+            $m->getTipsal(),
+            $m->getTippag(),
+            $m->getNumcue(),
+            $m->getCodban(),
+            $m->getTipcue(),
+        ])->all();
 
-        foreach ($models as $model) {
-            $datos = [
-                $model->getEstado(),
-                $model->getId(),
-                $model->getCedtra(),
-                $model->getCedcon(),
-                $model->getTipdoc(),
-                $model->getPriape(),
-                $model->getSegape(),
-                $model->getPrinom(),
-                $model->getSegnom(),
-                $model->getFecnac(),
-                $model->getCiunac(),
-                $model->getSexo(),
-                $model->getEstciv(),
-                $model->getComper(),
-                $model->getCiures(),
-                $model->getCodzon(),
-                $model->getTipviv(),
-                $model->getDireccion(),
-                $model->getBarrio(),
-                $model->getTelefono(),
-                $model->getCelular(),
-                $model->getEmail(),
-                $model->getNivedu(),
-                $model->getFecing(),
-                $model->getCodocu(),
-                $model->getSalario(),
-                $model->getCaptra(),
-                $model->getUsuario(),
-                $model->getEstado(),
-                $model->getCodest(),
-                $model->getMotivo(),
-                $model->getFecest(),
-                $model->getTipo(),
-                $model->getCoddoc(),
-                $model->getDocumento(),
-                $model->getTiecon(),
-                $model->getTipsal(),
-                $model->getFecsol(),
-                $model->getTippag(),
-                $model->getNumcue(),
-                $model->getEmpresalab(),
-            ];
-            $generator->addLine($datos, 9);
-        }
-
-        $out = $generator->outFile();
-
-        return $out;
+        return [
+            'title' => 'Listado De Solicitudes Trabajadores',
+            'headers' => $headers,
+            'rows' => $rows,
+        ];
     }
 
     /**
-     * Undocumented function
-     *
-     * @param [type] $models
-     * @return void
+     * @return array{title: string, headers: array<int, string>, rows: array<int, array<int, mixed>>}
      */
-    public function tableMercurio34($models)
+    private function datasetMercurio32($models): array
     {
-        $fields = [
-            ['Estado', 1, 1, 15],
-            ['id', 2, 2, 15],
-            ['log', 3, 3, 15],
-            ['nit', 4, 4, 15],
-            ['cedtra', 5, 5, 15],
-            ['cedcon', 6, 6, 15],
-            ['numdoc', 7, 7, 15],
-            ['tipdoc', 8, 8, 15],
-            ['priape', 9, 9, 15],
-            ['segape', 10, 10, 15],
-            ['prinom', 11, 11, 15],
-            ['segnom', 12, 12, 15],
-            ['fecnac', 13, 13, 15],
-            ['ciunac', 14, 14, 15],
-            ['sexo', 15, 15, 15],
-            ['parent', 16, 16, 15],
-            ['huerfano', 17, 17, 15],
-            ['tiphij', 18, 18, 15],
-            ['nivedu', 19, 19, 15],
-            ['captra', 20, 20, 15],
-            ['tipdis', 21, 21, 15],
-            ['calendario', 22, 22, 15],
-            ['usuario', 23, 23, 15],
-            ['estado', 24, 24, 15],
-            ['codest', 25, 25, 15],
-            ['motivo', 26, 26, 15],
-            ['fecest', 27, 27, 15],
-            ['codben', 28, 28, 15],
-            ['tipo', 29, 29, 15],
-            ['coddoc', 30, 30, 15],
-            ['documento', 31, 31, 15],
-            ['cedacu', 32, 32, 15],
-            ['fecsol', 33, 33, 15],
+        $headers = [
+            'Id',
+            'Cedula trabajador',
+            'Cedula conyuge',
+            'Tipo documento',
+            'Priape',
+            'Segape',
+            'Prinom',
+            'Segnom',
+            'Fecha nacimiento',
+            'Ciudad nacimiento',
+            'Sexo',
+            'Estado civil',
+            'Compania permanente',
+            'Ciudad residencia',
+            'Zona',
+            'Tipo vivienda',
+            'Direccion',
+            'Barrio',
+            'Telefono',
+            'Celular',
+            'Email',
+            'Nivel educacion',
+            'Fecha ingreso',
+            'Codigo ocupacion',
+            'Salario',
+            'Captra',
+            'Usuario',
+            'Estado',
+            'Codigo estado',
+            'Motivo',
+            'Fecha estado',
+            'Tipo',
+            'Codigo documento',
+            'Documento',
+            'Tiempo convivencia',
+            'Tipo salario',
+            'Fecha solicitud',
+            'Tipo pago',
+            'Numero cuenta',
+            'Empresa labora',
         ];
 
-        $factory = new ExcelReportFactory;
-        $generator = $factory->createReportGenerator();
-        $generator->generateReport('Listado De Solicitudes Beneficiarios', 'reporte_solicitudes', $fields);
+        $rows = $models->map(fn($m) => [
+            $m->getId(),
+            $m->getCedtra(),
+            $m->getCedcon(),
+            $m->getTipdoc(),
+            $m->getPriape(),
+            $m->getSegape(),
+            $m->getPrinom(),
+            $m->getSegnom(),
+            $m->getFecnac(),
+            $m->getCiunac(),
+            $m->getSexo(),
+            $m->getEstciv(),
+            $m->getComper(),
+            $m->getCiures(),
+            $m->getCodzon(),
+            $m->getTipviv(),
+            $m->getDireccion(),
+            $m->getBarrio(),
+            $m->getTelefono(),
+            $m->getCelular(),
+            $m->getEmail(),
+            $m->getNivedu(),
+            $m->getFecing(),
+            $m->getCodocu(),
+            $m->getSalario(),
+            $m->getCaptra(),
+            $m->getUsuario(),
+            $m->getEstado(),
+            $m->getCodest(),
+            $m->getMotivo(),
+            $m->getFecest(),
+            $m->getTipo(),
+            $m->getCoddoc(),
+            $m->getDocumento(),
+            $m->getTiecon(),
+            $m->getTipsal(),
+            $m->getFecsol(),
+            $m->getTippag(),
+            $m->getNumcue(),
+            $m->getEmpresalab(),
+        ])->all();
 
-        foreach ($models as $model) {
-            $datos = [
-                $model->getEstado(),
-                $model->getId(),
-                $model->getLog(),
-                $model->getNit(),
-                $model->getCedtra(),
-                $model->getCedcon(),
-                $model->getNumdoc(),
-                $model->getTipdoc(),
-                $model->getPriape(),
-                $model->getSegape(),
-                $model->getPrinom(),
-                $model->getSegnom(),
-                $model->getFecnac(),
-                $model->getCiunac(),
-                $model->getSexo(),
-                $model->getParent(),
-                $model->getHuerfano(),
-                $model->getTiphij(),
-                $model->getNivedu(),
-                $model->getCaptra(),
-                $model->getTipdis(),
-                $model->getCalendario(),
-                $model->getUsuario(),
-                $model->getEstado(),
-                $model->getCodest(),
-                $model->getMotivo(),
-                $model->getFecest(),
-                $model->getCodben(),
-                $model->getTipo(),
-                $model->getCoddoc(),
-                $model->getDocumento(),
-                $model->getCedacu(),
-                $model->getFecsol(),
-            ];
-            $generator->addLine($datos, 9);
-        }
-
-        $out = $generator->outFile();
-
-        return $out;
+        return [
+            'title' => 'Listado De Solicitudes Conyuges',
+            'headers' => $headers,
+            'rows' => $rows,
+        ];
     }
 
     /**
-     * Undocumented function
-     *
-     * @param [type] $models
-     * @return void
+     * @return array{title: string, headers: array<int, string>, rows: array<int, array<int, mixed>>}
      */
-    public function tableMercurio31($models)
+    private function datasetMercurio34($models): array
     {
-        $fields = [
-            ['Estado', 1, 1, 15],
-            ['nit', 2, 2, 25],
-            ['razsoc', 3, 3, 25],
-            ['cedtra', 4, 4, 25],
-            ['tipdoc', 5, 5, 25],
-            ['priape', 6, 6, 25],
-            ['segape', 7, 7, 25],
-            ['prinom', 8, 8, 25],
-            ['segnom', 9, 9, 25],
-            ['fecnac', 10, 10, 25],
-            ['ciunac', 11, 11, 25],
-            ['sexo', 12, 12, 25],
-            ['orisex', 13, 13, 25],
-            ['estciv', 14, 14, 25],
-            ['cabhog', 15, 15, 25],
-            ['codciu', 16, 16, 25],
-            ['codzon', 17, 17, 25],
-            ['direccion', 18, 18, 25],
-            ['barrio', 19, 19, 25],
-            ['telefono', 20, 20, 25],
-            ['celular', 21, 21, 25],
-            ['fax', 22, 22, 25],
-            ['email', 23, 23, 25],
-            ['fecsol', 24, 24, 25],
-            ['fecing', 25, 25, 25],
-            ['salario', 26, 26, 25],
-            ['captra', 27, 27, 25],
-            ['tipdis', 28, 28, 25],
-            ['nivedu', 29, 29, 25],
-            ['rural', 30, 30, 25],
-            ['horas', 31, 31, 25],
-            ['tipcon', 32, 32, 25],
-            ['trasin', 33, 33, 25],
-            ['vivienda', 34, 34, 25],
-            ['tipafi', 35, 35, 25],
-            ['profesion', 36, 36, 25],
-            ['cargo', 37, 37, 25],
-            ['autoriza', 38, 38, 25],
-            ['usuario', 39, 39, 25],
-            ['estado', 40, 40, 25],
-            ['codest', 41, 41, 25],
-            ['motivo', 42, 42, 25],
-            ['fecest', 43, 43, 25],
-            ['tipo', 44, 44, 25],
-            ['coddoc', 45, 45, 25],
-            ['documento', 46, 46, 25],
-            ['facvul', 47, 47, 25],
-            ['peretn', 48, 48, 25],
-            ['dirlab', 49, 49, 25],
-            ['ciulab', 50, 50, 25],
-            ['ruralt', 51, 51, 25],
-            ['comision', 52, 52, 25],
-            ['tipjor', 53, 53, 25],
-            ['codsuc', 54, 54, 25],
-            ['tipsal', 55, 55, 25],
-            ['tippag', 56, 56, 25],
-            ['numcue', 57, 57, 25],
-            ['codban', 58, 58, 25],
-            ['tipcue', 59, 59, 25],
+        $headers = [
+            'Estado',
+            'Id',
+            'Log',
+            'Nit',
+            'Cedula trabajador',
+            'Cedula conyuge',
+            'Numero documento',
+            'Tipo documento',
+            'Priape',
+            'Segape',
+            'Prinom',
+            'Segnom',
+            'Fecha nacimiento',
+            'Ciudad nacimiento',
+            'Sexo',
+            'Parentesco',
+            'Huerfano',
+            'Tipo hijo',
+            'Nivel educacion',
+            'Captra',
+            'Tipo discapacidad',
+            'Calendario',
+            'Usuario',
+            'Estado',
+            'Codigo estado',
+            'Motivo',
+            'Fecha estado',
+            'Codigo beneficiario',
+            'Tipo',
+            'Codigo documento',
+            'Documento',
+            'Cedula acude',
+            'Fecha solicitud',
         ];
 
-        $factory = new ExcelReportFactory;
-        $generator = $factory->createReportGenerator();
-        $generator->generateReport('Listado De Solicitudes Trabajadores', 'reporte_solicitudes', $fields);
+        $rows = $models->map(fn($m) => [
+            $m->getEstado(),
+            $m->getId(),
+            $m->getLog(),
+            $m->getNit(),
+            $m->getCedtra(),
+            $m->getCedcon(),
+            $m->getNumdoc(),
+            $m->getTipdoc(),
+            $m->getPriape(),
+            $m->getSegape(),
+            $m->getPrinom(),
+            $m->getSegnom(),
+            $m->getFecnac(),
+            $m->getCiunac(),
+            $m->getSexo(),
+            $m->getParent(),
+            $m->getHuerfano(),
+            $m->getTiphij(),
+            $m->getNivedu(),
+            $m->getCaptra(),
+            $m->getTipdis(),
+            $m->getCalendario(),
+            $m->getUsuario(),
+            $m->getEstado(),
+            $m->getCodest(),
+            $m->getMotivo(),
+            $m->getFecest(),
+            $m->getCodben(),
+            $m->getTipo(),
+            $m->getCoddoc(),
+            $m->getDocumento(),
+            $m->getCedacu(),
+            $m->getFecsol(),
+        ])->all();
 
-        foreach ($models as $model) {
-            $datos = [
-                $model->getEstado(),
-                $model->getNit(),
-                $model->getRazsoc(),
-                $model->getCedtra(),
-                $model->getTipdoc(),
-                $model->getPriape(),
-                $model->getSegape(),
-                $model->getPrinom(),
-                $model->getSegnom(),
-                $model->getFecnac(),
-                $model->getCiunac(),
-                $model->getSexo(),
-                $model->getOrisex(),
-                $model->getEstciv(),
-                $model->getCabhog(),
-                $model->getCodciu(),
-                $model->getCodzon(),
-                $model->getDireccion(),
-                $model->getBarrio(),
-                $model->getTelefono(),
-                $model->getCelular(),
-                $model->getFax(),
-                $model->getEmail(),
-                $model->getFecsol(),
-                $model->getFecing(),
-                $model->getSalario(),
-                $model->getCaptra(),
-                $model->getTipdis(),
-                $model->getNivedu(),
-                $model->getRural(),
-                $model->getHoras(),
-                $model->getTipcon(),
-                $model->getTrasin(),
-                $model->getVivienda(),
-                $model->getTipafi(),
-                $model->getProfesion(),
-                $model->getCargo(),
-                $model->getAutoriza(),
-                $model->getUsuario(),
-                $model->getEstado(),
-                $model->getCodest(),
-                $model->getMotivo(),
-                $model->getFecest(),
-                $model->getTipo(),
-                $model->getCoddoc(),
-                $model->getDocumento(),
-                $model->getFacvul(),
-                $model->getPeretn(),
-                $model->getDirlab(),
-                $model->getCiulab(),
-                $model->getRuralt(),
-                $model->getComision(),
-                $model->getTipjor(),
-                $model->getCodsuc(),
-                $model->getTipsal(),
-                $model->getTippag(),
-                $model->getNumcue(),
-                $model->getCodban(),
-                $model->getTipcue(),
-            ];
-            $generator->addLine($datos, 9);
-        }
-
-        $out = $generator->outFile();
-
-        return $out;
+        return [
+            'title' => 'Listado De Solicitudes Beneficiarios',
+            'headers' => $headers,
+            'rows' => $rows,
+        ];
     }
 }

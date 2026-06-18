@@ -37,6 +37,7 @@ class DatabaseSeeder extends Seeder
             Gener42Seeder::class,
 
             MenuPermissionSeeder::class,
+            MenuReporteOportunidadSeeder::class,
 
             // Tablas Mercurio
             Mercurio01Seeder::class,

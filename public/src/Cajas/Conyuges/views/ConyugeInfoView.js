@@ -48,7 +48,7 @@ class ConyugeInfoView extends FormInfoView {
         this.actualizaForm();
 
         let fechaPasada = new Date();
-        fechaPasada.setDate(fechaPasada.getDate() - 60);
+        fechaPasada.setDate(fechaPasada.getDate() - 8110);
 
         flatpickr(this.$el.find('#fecafi, #fecapr'), {
             enableTime: false,

@@ -89,7 +89,8 @@ const appModules = {
         'Mercurio74',
         'Reasigna',
         'Indicadores',
-        'Auditoria'
+        'Auditoria',
+        'OportunidadAfiliacion',
     ],
 };
 
