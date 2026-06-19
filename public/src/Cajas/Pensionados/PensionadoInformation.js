@@ -67,7 +67,19 @@ export default class PensionadoInformation extends ControllerValidation {
 		this.listenTo(this.headerView, 'load:editar', this.__editarRequest);
 		this.listenTo(this.headerView, 'load:aportes', this.__aportesInformation);
 		this.listenTo(this.headerView, 'load:notificar', this.__notificarRequest);
+		this.listenTo(this.headerView, 'load:deshacer', this.deshacerSolicitud);
+		this.listenTo(this.headerView, 'load:reaprobar', this.reaprobarSolicitud);
 
 		this.layout.getRegion('subheader').show(this.headerView);
+	}
+
+	deshacerSolicitud() {
+		const id = this.solicitudModel.get('id');
+		this.App.router.navigate('deshacer/' + id, { trigger: true, replace: true });
+	}
+
+	reaprobarSolicitud() {
+		const id = this.solicitudModel.get('id');
+		this.App.router.navigate('reaprobar/' + id, { trigger: true, replace: true });
 	}
 }
