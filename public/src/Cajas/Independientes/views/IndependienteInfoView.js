@@ -6,6 +6,8 @@ import { Spanish } from 'flatpickr/dist/l10n/es';
 import IndependienteAprobarModel from '../models/IndependienteAprobarModel';
 
 export default class IndependienteInfoView extends FormInfoView {
+    reaprobarTipo = 'I';
+
     constructor(options = {}) {
         super({
             ...options,

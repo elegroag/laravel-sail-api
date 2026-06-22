@@ -35,6 +35,7 @@ class ControllerEmpresas extends Controller {
                     app.infoRequest({
                         solicitud: new EmpresaModel(response.data),
                         empresa_sisuweb: response.empresa_sisuweb,
+                        api_afiliation_status: response.api_afiliation_status,
                         mercurio11: response.mercurio11,
                         consulta: response.consulta_empresa,
                         adjuntos: response.adjuntos,

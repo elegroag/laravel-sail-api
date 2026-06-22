@@ -79,6 +79,18 @@
 				aria-selected="false">Rechazar
 			</button>
 			<% } %>
+			<% if($scope.solicitud.get('estado') != 'A' && $scope.api_afiliation_status === true) { %>
+			<button
+				class="nav-link border-0 ml-2"
+				id="nav-reaprobar-tab"
+				data-bs-toggle='tab'
+				role='tab'
+				data-bs-target="#nav-reaprobar"
+				type="button"
+				aria-controls="nav-reaprobar"
+				aria-selected="false">Re-aprobar
+			</button>
+			<% } %>
 		</div>
 	</div>
 	<div class='col-12'>
@@ -105,6 +117,10 @@
 
 			<div class='tab-pane fade pt-3' id='nav-rechazar' role='tabpanel' aria-labelledby='nav-rechazar-tab'>
 				<div id='renderRechazar'></div>
+			</div>
+
+			<div class='tab-pane fade pt-3' id='nav-reaprobar' role='tabpanel' aria-labelledby='nav-reaprobar-tab'>
+				<div id='renderReaprobar'></div>
 			</div>
 		</div>
 	</div>

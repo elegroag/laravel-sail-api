@@ -4,14 +4,18 @@ import { HeaderInfoView } from '@/Cajas/HeaderInfoView';
 import { DevolverView } from '@/Componentes/Views/DevolverView';
 import { RechazarView } from '@/Componentes/Views/RechazarView';
 import { AprobarView } from '@/Componentes/Views/AprobarView';
+import ReaprobarView from '@/Componentes/Views/ReaprobarView';
 import { HeaderCajasView } from './HeaderCajasView';
 
 class FormInfoView extends Backbone.View {
+	reaprobarTipo = null;
+
 	constructor(options = {}) {
 		super(options);
 		this.headerView = undefined;
 		this.devolverView = undefined;
 		this.rechazarView = undefined;
+		this.reaprobarView = undefined;
 		this.headerMain = undefined;
 		this.form = undefined;
 		this.titulo = undefined;
@@ -228,6 +232,17 @@ class FormInfoView extends Backbone.View {
 		});
 		this.$el.find('#renderRechazar').html(this.rechazarView.render().el);
 
+		const reaprobarContainer = this.$el.find('#renderReaprobar');
+		if (reaprobarContainer.length > 0) {
+			this.reaprobarView = new ReaprobarView({
+				model: {
+					id: this.solicitudAprobar.get('id'),
+					tipo: this.reaprobarTipo,
+				},
+			});
+			reaprobarContainer.html(this.reaprobarView.render().el);
+		}
+
 		this.$el.find('#nota_aprobar, #nota_rechazar, #nota_devolver').summernote({
 			lang: 'es-ES',
 			placeholder: '',
@@ -394,6 +409,7 @@ class FormInfoView extends Backbone.View {
 		if (this.headerView) this.headerView.remove();
 		if (this.devolverView) this.devolverView.remove();
 		if (this.rechazarView) this.rechazarView.remove();
+		if (this.reaprobarView) this.reaprobarView.remove();
 		if (this.headerMain) this.headerMain.remove();
 		this.stopListening();
 		Backbone.View.prototype.remove.call(this);

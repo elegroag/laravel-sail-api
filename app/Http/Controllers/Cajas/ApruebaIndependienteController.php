@@ -11,6 +11,7 @@ use App\Models\Mercurio01;
 use App\Models\Mercurio02;
 use App\Models\Mercurio06;
 use App\Models\Mercurio07;
+use App\Models\Mercurio10;
 use App\Models\Mercurio11;
 use App\Models\Mercurio37;
 use App\Models\Mercurio41;
@@ -26,44 +27,31 @@ use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
+use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ApruebaIndependienteController extends ApplicationController
 {
     protected $tipopc = '13';
 
-    protected $db;
+    protected ?DbBase $db;
 
-    protected $user;
+    protected ?array $user;
 
-    protected $tipfun;
+    protected ?string $tipfun;
 
-    /**
-     * services variable
-     *
-     * @var Services
-     */
-    protected $services;
+    protected mixed $services;
 
-    /**
-     * independienteServices variable
-     *
-     * @var IndependienteServices
-     */
-    protected $independienteServices;
+    protected ?IndependienteServices $independienteServices;
 
-    /**
-     * apruebaSolicitud variable
-     *
-     * @var ApruebaSolicitud
-     */
-    protected $apruebaSolicitud;
+    protected ?ApruebaSolicitud $apruebaSolicitud;
 
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session('user');
-        $this->tipfun = session('tipfun');
+        $this->user = session('user') ?? null;
+        $this->tipfun = session('tipfun') ?? null;
     }
 
     public function aplicarFiltro(Request $request, $estado = 'P')
@@ -350,6 +338,47 @@ class ApruebaIndependienteController extends ApplicationController
         return $this->renderObject($salida, false);
     }
 
+    public function reaprobar(Request $request)
+    {
+        try {
+            $id = $request->input('id');
+            $nota = $request->input('nota');
+            $today = Carbon::now();
+
+            Mercurio41::where("id", $id)->update([
+                'estado' => 'A',
+                'fecest' => $today->format('Y-m-d'),
+            ]);
+
+            $item = Mercurio10::where("tipopc", $this->tipopc)->where("numero", $id)->max('item') + 1;
+            $mercurio10 = new Mercurio10;
+            $mercurio10->tipopc = $this->tipopc;
+            $mercurio10->numero = $id;
+            $mercurio10->item = $item;
+            $mercurio10->estado = 'A';
+            $mercurio10->nota = $nota;
+            $mercurio10->fecsis = $today->format('Y-m-d');
+            $mercurio10->save();
+
+            $response = [
+                'success' => true,
+                'msj' => 'Movimiento realizado con éxito',
+            ];
+        } catch (DebugException $e) {
+            $response = [
+                'success' => false,
+                'msj' => 'No se pudo realizar el movimiento ' . "\n" . $e->getMessage() . "\n " . $e->getLine(),
+            ];
+        } catch (\Exception $e) {
+            $response = [
+                'success' => false,
+                'msj' => 'No se pudo realizar el movimiento ' . "\n" . $e->getMessage() . "\n " . $e->getLine(),
+            ];
+        }
+
+        return response()->json($response);
+    }
+
     /**
      * pendiente_email function
      * metodo vista
@@ -522,16 +551,16 @@ class ApruebaIndependienteController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida, false);
+        return $this->renderObject($salida);
     }
 
     /**
      * infor function
      * mostrar la ficha de afiliación de la empresa
      *
-     * @return void
+     * @return JsonResponse
      */
-    public function infor(Request $request)
+    public function infor(Request $request): JsonResponse
     {
         try {
             $independienteServices = new IndependienteServices;
@@ -589,6 +618,12 @@ class ApruebaIndependienteController extends ApplicationController
                 $empresa_sisuweb = $out['data'] ?? false;
             }
 
+            if ($isSuccess && $empresa_sisuweb) {
+                $api_afiliation_status = $empresa_sisuweb['estado'] == 'A' ? true : false;
+            } else {
+                $api_afiliation_status = false;
+            }
+
             $this->setParamToView('empresa_sisuweb', $empresa_sisuweb);
             $response = [
                 'success' => true,
@@ -598,6 +633,7 @@ class ApruebaIndependienteController extends ApplicationController
                 'adjuntos' => $independienteServices->adjuntos($mercurio41),
                 'seguimiento' => $independienteServices->seguimiento($mercurio41),
                 'campos_disponibles' => $mercurio41->CamposDisponibles(),
+                'api_afiliation_status' => $api_afiliation_status,
             ];
         } catch (DebugException $err) {
             $response = [
@@ -606,7 +642,7 @@ class ApruebaIndependienteController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function loadParametrosView()

@@ -7,6 +7,8 @@ import { Spanish } from 'flatpickr/dist/l10n/es';
 import { BeneficiarioAprobarModel } from '../models/BeneficiarioAprobarModel';
 
 class BeneficiarioInfoView extends FormInfoView {
+    reaprobarTipo = 'B';
+
     constructor(options = {}) {
         super({
             ...options,

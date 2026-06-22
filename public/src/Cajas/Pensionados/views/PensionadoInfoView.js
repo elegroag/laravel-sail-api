@@ -6,6 +6,8 @@ import { PensionadoAprobarModel } from '../models/PensionadoAprobarModel';
 import { ValidaTipoPago } from '@/Cajas/ValidaTipoPago';
 
 class PensionadoInfoView extends FormInfoView {
+	reaprobarTipo = 'P';
+
 	constructor(options = {}) {
 		super({
 			...options,

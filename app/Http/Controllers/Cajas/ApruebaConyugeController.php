@@ -21,32 +21,24 @@ use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
 use App\Services\Api\ApiSubsidio;
 use Carbon\Carbon;
+use DB;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ApruebaConyugeController extends ApplicationController
 {
     protected $tipopc = '3';
 
-    protected $db;
+    protected ?DbBase $db;
 
-    protected $user;
+    protected ?array $user;
 
-    protected $tipfun;
+    protected ?string $tipfun;
 
-    /**
-     * services variable
-     *
-     * @var Services
-     */
-    protected $services;
+    protected mixed $services;
 
-    /**
-     * trabajadorServices variable
-     *
-     * @var ConyugeServices
-     */
-    protected $conyugeServices;
+    protected ?ConyugeServices $conyugeServices;
 
     /**
      * initialize function
@@ -60,20 +52,17 @@ class ApruebaConyugeController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session('user');
-        $this->tipfun = session('tipfun');
+        $this->user = session('user') ?? null;
+        $this->tipfun = session('tipfun') ?? null;
     }
 
     /**
      * aplicarFiltro function
-     *
      * @changed [2023-12-20]
-     *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @return void
+     * @return JsonResponse
      */
-    public function aplicarFiltro(Request $request, string $estado = 'P')
+    public function aplicarFiltro(Request $request, ?string $estado = 'P'): JsonResponse
     {
         $cantidad_pagina = $request->input('numero', 10);
         $usuario = $this->user['usuario'];
@@ -99,7 +88,7 @@ class ApruebaConyugeController extends ApplicationController
 
         $response = $pagination->render(new ConyugeServices);
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     /**
@@ -176,13 +165,8 @@ class ApruebaConyugeController extends ApplicationController
 
     /**
      * index function
-     *
      * @changed [2023-12-20]
-     *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param  string  $estado
-     * @return void
      */
     public function index()
     {
@@ -216,10 +200,10 @@ class ApruebaConyugeController extends ApplicationController
      *
      * @author elegroag <elegroag@ibero.edu.co>
      *
-     * @param  string  $estado
-     * @return void
+     * @param string|null  $estado
+     * @return JsonResponse
      */
-    public function buscar(Request $request, $estado = 'P')
+    public function buscar(Request $request, ?string $estado = 'P'): JsonResponse
     {
         try {
             $this->setResponse('ajax');
@@ -326,9 +310,8 @@ class ApruebaConyugeController extends ApplicationController
         $this->conyugeServices = new ConyugeServices;
         $notifyEmailServices = new NotifyEmailServices;
 
-        $this->setResponse('ajax');
-        $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-        $codest = $request->input('codest', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+        $id = $request->input('id');
+        $codest = $request->input('codest');
         $nota = sanetizar($request->input('nota'));
 
         $array_corregir = $request->input('campos_corregir');
@@ -352,7 +335,7 @@ class ApruebaConyugeController extends ApplicationController
             $response = $err->getMessage();
         }
 
-        return $this->renderObject($response, false);
+        return $this->renderObject($response);
     }
 
     public function rechazar(Request $request)
@@ -360,9 +343,9 @@ class ApruebaConyugeController extends ApplicationController
         $notifyEmailServices = new NotifyEmailServices;
         $this->conyugeServices = new ConyugeServices;
         $this->setResponse('ajax');
-        $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+        $id = $request->input('id');
         $nota = sanetizar($request->input('nota'));
-        $codest = $request->input('codest', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+        $codest = $request->input('codest');
         try {
             $mercurio32 = Mercurio32::where("id", $id)->first();
             $this->conyugeServices->rechazar($mercurio32, $nota, $codest);
@@ -382,16 +365,19 @@ class ApruebaConyugeController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($response, false);
+        return $this->renderObject($response);
     }
 
-    public function info(Request $request)
+    public function info(Request $request): JsonResponse
     {
         try {
             $id = $request->input('id');
             if (! $id) {
-                return redirect('aprobacioncon/index');
-                exit;
+                return response()->json([
+                    'success' => false,
+                    'msj' => 'El id es requerido',
+                    'code' => 400,
+                ]);
             }
             $this->conyugeServices = new ConyugeServices;
 
@@ -402,8 +388,11 @@ class ApruebaConyugeController extends ApplicationController
                     'code' => 500,
                 ]);
 
-                return redirect('aprobacioncon/index');
-                exit;
+                return response()->json([
+                    'success' => false,
+                    'msj' => 'La solicitud de afiliación de conyugue no es valida.',
+                    'code' => 500,
+                ]);
             }
 
             $trabajador_sisu = false;
@@ -526,7 +515,7 @@ class ApruebaConyugeController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function loadParametrosView()
@@ -588,10 +577,9 @@ class ApruebaConyugeController extends ApplicationController
      * empresaSisuweb function
      * Datos de la empresa en sisuweb, si ya está registrada. pruebas 98588506
      *
-     * @param [type] $nit
-     * @return void
+     * @param  int  $id
      */
-    public function buscarEnSisuView($id)
+    public function buscarEnSisuView(int $id)
     {
         $mercurio32 = Mercurio32::where("id", $id)->first();
         if (! $mercurio32) {
@@ -601,7 +589,6 @@ class ApruebaConyugeController extends ApplicationController
             ]);
 
             return redirect('aprobacioncon/index');
-            exit;
         }
 
         $procesadorComando = new ApiSubsidio();
@@ -623,7 +610,6 @@ class ApruebaConyugeController extends ApplicationController
             ]);
 
             return redirect('aprobacioncon/index');
-            exit();
         }
         $relaciones = [];
         if ($rqs['success'] == true) {
@@ -631,20 +617,25 @@ class ApruebaConyugeController extends ApplicationController
             $relaciones = $rqs['data']['relaciones'];
         }
 
-        $this->setParamToView('id', $id);
-        $this->setParamToView('cedcon', $mercurio32->getCedcon());
-        $this->setParamToView('cedtra', $mercurio32->getCedtra());
-        $this->setParamToView('conyuge', $conyuge);
-        $this->setParamToView('relaciones', $relaciones);
-        $this->setParamToView('title', "Conyuge SisuWeb - {$mercurio32->getCedcon()}");
+        return view(
+            'cajas.aprobacioncon.tmp.tmp_sisu',
+            [
+                'cedtra' => $mercurio32->getCedtra(),
+                'id' => $id,
+                'cedcon' => $mercurio32->getCedcon(),
+                'conyuge' => $conyuge,
+                'relaciones' => $relaciones,
+                'title' => "Conyuge SisuWeb - {$mercurio32->getCedcon()}",
+            ]
+        )->render();
     }
 
     public function editarSolicitud(Request $request)
     {
         $this->setResponse('ajax');
         try {
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $cedcon = $request->input('cedcon', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $id = $request->input('id');
+            $cedcon = $request->input('cedcon');
 
             $mercurio32 = Mercurio32::where("id", $id)->where("cedcon", $cedcon)->first();
             if (! $mercurio32) {
@@ -704,16 +695,15 @@ class ApruebaConyugeController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($salida, false);
+        return $this->renderObject($salida);
     }
 
-    public function editarView($id = '')
+    public function editarView(int $id)
     {
         $this->setParamToView('hide_header', true);
 
         if (empty($id)) {
             return redirect('aprobacioncon/index');
-            exit;
         }
         $conyuge = Mercurio32::where("id", $id)->first();
         $trabajador = Mercurio31::where("cedtra", $conyuge->getCedtra())->first();
@@ -752,8 +742,7 @@ class ApruebaConyugeController extends ApplicationController
 
     public function reaprobar(Request $request)
     {
-        $this->setResponse('ajax');
-        $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+        $id = $request->input('id');
         $nota = sanetizar($request->input('nota'));
         $today = Carbon::now();
 
@@ -819,7 +808,7 @@ class ApruebaConyugeController extends ApplicationController
             ];
         }
 
-        return $this->renderObject($response, false);
+        return response()->json($response);
     }
 
     public function borrarFiltro()
@@ -839,10 +828,10 @@ class ApruebaConyugeController extends ApplicationController
      * infoAprobadoView function
      * datos del solicitud aprobada en sisu
      *
-     * @param [type] $id
-     * @return void
+     * @param  Request  $request
+     * @return JsonResponse
      */
-    public function infor(Request $request)
+    public function infor(Request $request): JsonResponse
     {
         try {
             $conyugeServices =  new ConyugeServices();
@@ -884,7 +873,14 @@ class ApruebaConyugeController extends ApplicationController
             }
 
             $out = $px->toArray();
-            $beneSisu = $out['data'];
+            $isSuccess = $out['success'] ?? false;
+            $beneSisu = $out['data'] ?? null;
+
+            if ($isSuccess && $beneSisu) {
+                $api_afiliation_status = $beneSisu['estado'] == 'A' ? true : false;
+            } else {
+                $api_afiliation_status = false;
+            }
 
             if ($beneSisu) {
                 $conyuge = new Mercurio32;
@@ -936,7 +932,8 @@ class ApruebaConyugeController extends ApplicationController
                 "consulta" => $html,
                 'adjuntos' => $adjuntos,
                 'seguimiento' => $seguimiento,
-                'campos_disponibles' => $campos_disponibles
+                'campos_disponibles' => $campos_disponibles,
+                'api_afiliation_status' => $api_afiliation_status
             ];
         } catch (Exception $err) {
             $response = [
@@ -952,12 +949,11 @@ class ApruebaConyugeController extends ApplicationController
      * deshacerAprobado function
      * metodo para deshacer una afilación, dado que se presente algun error por parte de los analistas encargados
      *
-     * @param [type] $id
-     * @return void
+     * @param  Request  $request
+     * @return JsonResponse
      */
     public function deshacer(Request $request)
     {
-        $this->setResponse('ajax');
         $action = $request->input('action');
         $codest = $request->input('codest');
         $sendEmail = $request->input('send_email');

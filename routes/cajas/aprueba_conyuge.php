@@ -16,6 +16,7 @@ Route::middleware(['cajas.auth'])->group(function () {
         Route::post('/aprueba', [ApruebaConyugeController::class, 'aprueba']);
         Route::post('/devolver', [ApruebaConyugeController::class, 'devolver']);
         Route::post('/rechazar', [ApruebaConyugeController::class, 'rechazar']);
+        Route::post('/reaprobar', [ApruebaConyugeController::class, 'reaprobar']);
         Route::post('/infor', [ApruebaConyugeController::class, 'infor']);
         Route::post('/valida_conyuge', [ApruebaConyugeController::class, 'validaConyuge']);
         Route::post('/borrar-filtro', [ApruebaConyugeController::class, 'borrarFiltro']);

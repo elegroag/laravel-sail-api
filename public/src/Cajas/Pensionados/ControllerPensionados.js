@@ -26,23 +26,24 @@ class ControllerPensionados extends Controller {
 			data: {
 				id
 			},
-			callback: (response) => {
-				if (response) {
-					app.infoRequest({
-						solicitud: new PensionadoModel(response.data),
-						empresa_sisuweb: response.empresa_sisuweb,
-						mercurio11: response.mercurio11,
-						consulta: response.consulta_empresa,
-						adjuntos: response.adjuntos,
-						seguimiento: response.seguimiento,
-						campos_disponibles: response.campos_disponibles,
-					});
-				}
-			},
-		});
-	}
+            callback: (response) => {
+                if (response) {
+                    app.infoRequest({
+                        solicitud: new PensionadoModel(response.data),
+                        empresa_sisuweb: response.empresa_sisuweb,
+                        mercurio11: response.mercurio11,
+                        consulta: response.consulta_empresa,
+                        adjuntos: response.adjuntos,
+                        seguimiento: response.seguimiento,
+                        campos_disponibles: response.campos_disponibles,
+                        api_afiliation_status: response.api_afiliation_status,
+                    });
+                }
+            },
+        });
+    }
 
-	aportesRequest(id = 0) {
+    aportesRequest(id = 0) {
 		const app = this.startController(PensionadoAportes);
 		const url = this.App.url('aportes/' + id);
 		this.App.trigger('syncro', {

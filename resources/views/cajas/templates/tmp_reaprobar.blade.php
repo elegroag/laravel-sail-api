@@ -13,11 +13,11 @@
 					</div>
 				</div>
 			</div>
-			<div class="row mb-3" style="display: none;" id="renderByTrabajador">
+			<div class="row mb-3" id="renderByTrabajador">
 				<div class="col-md-4">
 					<div class="form-group">
-						<label for='codigo_giro' class='form-label'>Código giro</label>
-						<input type="text" class="form-control" id="codigo_giro">
+						<label for='codgir' class='form-label'>Código giro</label>
+						<input type="text" class="form-control" id="codgir">
 					</div>
 				</div>
 				<div class="col-md-4">

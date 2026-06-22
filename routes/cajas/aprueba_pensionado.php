@@ -12,6 +12,7 @@ Route::middleware(['cajas.auth'])->group(function () {
         Route::post('/aprueba', [ApruebaPensionadoController::class, 'aprueba']);
         Route::post('/devolver', [ApruebaPensionadoController::class, 'devolver']);
         Route::post('/rechazar', [ApruebaPensionadoController::class, 'rechazar']);
+        Route::post('/reaprobar', [ApruebaPensionadoController::class, 'reaprobar']);
         Route::post('/borrar-filtro', [ApruebaPensionadoController::class, 'borrarFiltro']);
         Route::get('/buscar-en-sisu/{id}/{nit}', [ApruebaPensionadoController::class, 'buscarEnSisuView']);
         Route::get('/editar/{id}', [ApruebaPensionadoController::class, 'editarView']);

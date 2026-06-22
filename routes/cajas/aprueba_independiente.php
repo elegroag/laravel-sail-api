@@ -13,6 +13,7 @@ Route::middleware(['cajas.auth'])->group(function () {
         Route::post('/aprueba', [ApruebaIndependienteController::class, 'aprueba']);
         Route::post('/devolver', [ApruebaIndependienteController::class, 'devolver']);
         Route::post('/rechazar', [ApruebaIndependienteController::class, 'rechazar']);
+        Route::post('/reaprobar', [ApruebaIndependienteController::class, 'reaprobar']);
         Route::post('/pendiente-email', [ApruebaIndependienteController::class, 'pendienteEmail']);
         Route::post('/rezago-correo', [ApruebaIndependienteController::class, 'rezagoCorreo']);
         Route::post('/empresa-search', [ApruebaIndependienteController::class, 'empresaSearch']);

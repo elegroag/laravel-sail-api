@@ -12,6 +12,7 @@ use App\Models\Adapter\DbBase;
 use App\Models\Gener42;
 use App\Models\Mercurio01;
 use App\Models\Mercurio06;
+use App\Models\Mercurio10;
 use App\Models\Mercurio11;
 use App\Models\Mercurio31;
 use App\Models\Mercurio37;
@@ -26,6 +27,7 @@ use App\Services\Srequest;
 use App\Services\Utils\Comman;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
@@ -34,38 +36,23 @@ class ApruebaPensionadoController extends ApplicationController
 {
     protected $tipopc = '9';
 
-    protected $db;
+    protected ?DbBase $db;
 
-    protected $user;
+    protected ?array $user;
 
-    protected $tipfun;
+    protected ?string $tipfun;
 
-    /**
-     * services variable
-     *
-     * @var Services
-     */
-    protected $services;
+    protected mixed $services;
 
-    /**
-     * pensionadoServices variable
-     *
-     * @var PensionadoServices
-     */
-    protected $pensionadoServices;
+    protected ?PensionadoServices $pensionadoServices;
 
-    /**
-     * apruebaSolicitud variable
-     *
-     * @var ApruebaSolicitud
-     */
-    protected $apruebaSolicitud;
+    protected ?ApruebaSolicitud $apruebaSolicitud;
 
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session('user');
-        $this->tipfun = session('tipfun');
+        $this->user = session('user') ?? null;
+        $this->tipfun = session('tipfun') ?? null;
     }
 
     /**
@@ -331,6 +318,12 @@ class ApruebaPensionadoController extends ApplicationController
                 $empresa_sisuweb = $out['data'] ?? false;
             }
 
+            if ($isSuccess && $empresa_sisuweb) {
+                $api_afiliation_status = $empresa_sisuweb['estado'] == 'A' ? true : false;
+            } else {
+                $api_afiliation_status = false;
+            }
+
             $response = [
                 'success' => true,
                 'data' => $mercurio38->toArray(),
@@ -340,6 +333,7 @@ class ApruebaPensionadoController extends ApplicationController
                 'seguimiento' => $pensionadoServices->seguimiento($mercurio38),
                 'campos_disponibles' => $mercurio38->CamposDisponibles(),
                 'empresa_sisuweb' => $empresa_sisuweb,
+                'api_afiliation_status' => $api_afiliation_status,
             ];
         } catch (DebugException $err) {
             $response = [
@@ -453,6 +447,47 @@ class ApruebaPensionadoController extends ApplicationController
         }
 
         return $this->renderObject($salida, false);
+    }
+
+    public function reaprobar(Request $request)
+    {
+        try {
+            $id = $request->input('id');
+            $nota = $request->input('nota');
+            $today = Carbon::now();
+
+            Mercurio38::where("id", $id)->update([
+                'estado' => 'A',
+                'fecest' => $today->format('Y-m-d'),
+            ]);
+
+            $item = Mercurio10::where("tipopc", $this->tipopc)->where("numero", $id)->max('item') + 1;
+            $mercurio10 = new Mercurio10;
+            $mercurio10->tipopc = $this->tipopc;
+            $mercurio10->numero = $id;
+            $mercurio10->item = $item;
+            $mercurio10->estado = 'A';
+            $mercurio10->nota = $nota;
+            $mercurio10->fecsis = $today->format('Y-m-d');
+            $mercurio10->save();
+
+            $response = [
+                'success' => true,
+                'msj' => 'Movimiento realizado con éxito',
+            ];
+        } catch (DebugException $e) {
+            $response = [
+                'success' => false,
+                'msj' => 'No se pudo realizar el movimiento ' . "\n" . $e->getMessage() . "\n " . $e->getLine(),
+            ];
+        } catch (\Exception $e) {
+            $response = [
+                'success' => false,
+                'msj' => 'No se pudo realizar el movimiento ' . "\n" . $e->getMessage() . "\n " . $e->getLine(),
+            ];
+        }
+
+        return response()->json($response);
     }
 
     public function borrarFiltro(Request $request)

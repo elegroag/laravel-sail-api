@@ -29,25 +29,15 @@ class ApruebaBeneficiarioController extends ApplicationController
 {
     protected $tipopc = '4';
 
-    protected $db;
+    protected ?DbBase $db;
 
-    protected $user;
+    protected ?array $user;
 
-    protected $tipfun;
+    protected ?string $tipfun;
 
-    /**
-     * services variable
-     *
-     * @var Services
-     */
-    protected $services;
+    protected mixed $services;
 
-    /**
-     * trabajadorServices variable
-     *
-     * @var BeneficiarioServices
-     */
-    protected $beneficiarioServices;
+    protected ?BeneficiarioServices $beneficiarioServices;
 
     public function __construct()
     {
@@ -89,7 +79,7 @@ class ApruebaBeneficiarioController extends ApplicationController
 
         $response = $pagination->render(new BeneficiarioServices);
 
-        return $this->renderObject($response, false);
+        return $this->renderObject($response);
     }
 
     public function changeCantidadPagina(Request $request, string $estado = 'P')
@@ -410,26 +400,31 @@ class ApruebaBeneficiarioController extends ApplicationController
 
             $rqs = $ps->toArray();
             $isSuccess = $rqs['success'] ?? null;
+            $sys_beneficiario = $rqs['data'] ?? null;
 
             $relacion_multiple = false;
             $beneficiario_sisuweb = false;
 
-            if ($isSuccess) {
-                $sys_beneficiario = $rqs['data'] ?? null;
-                if ($sys_beneficiario) {
-                    $beneficiario_sisuweb = $sys_beneficiario;
-                    $giro = $sys_beneficiario['giro'] ?? null;
-                    $vinculo_trabajador = false;
 
-                    $relaciones = $sys_beneficiario['relaciones'] ?? null;
+            if ($isSuccess && $sys_beneficiario) {
+                $api_afiliation_status = $sys_beneficiario['estado'] == 'A' ? true : false;
+            } else {
+                $api_afiliation_status = false;
+            }
 
-                    if ($relaciones) {
-                        $relacion_multiple = $relaciones;
-                        foreach ($relaciones as $ai => $relacion) {
-                            if ($relacion['cedtra'] == $solicitud->cedtra) {
-                                $vinculo_trabajador = true;
-                                break;
-                            }
+            if ($isSuccess && $sys_beneficiario) {
+                $beneficiario_sisuweb = $sys_beneficiario;
+                $giro = $sys_beneficiario['giro'] ?? null;
+                $vinculo_trabajador = false;
+
+                $relaciones = $sys_beneficiario['relaciones'] ?? null;
+
+                if ($relaciones) {
+                    $relacion_multiple = $relaciones;
+                    foreach ($relaciones as $ai => $relacion) {
+                        if ($relacion['cedtra'] == $solicitud->cedtra) {
+                            $vinculo_trabajador = true;
+                            break;
                         }
                     }
                 }
@@ -482,6 +477,7 @@ class ApruebaBeneficiarioController extends ApplicationController
                 'relacion_multiple' => $relacion_multiple,
                 'trabajador' => $trabajador,
                 'beneficiario_sisuweb' => $beneficiario_sisuweb,
+                'api_afiliation_status' => $api_afiliation_status,
             ];
         } catch (DebugException $err) {
             $response = [

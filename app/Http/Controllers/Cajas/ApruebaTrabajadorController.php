@@ -25,6 +25,7 @@ use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
 use App\Services\Api\ApiSubsidio;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
 
@@ -32,25 +33,17 @@ class ApruebaTrabajadorController extends ApplicationController
 {
     protected $tipopc = '1';
 
-    protected $db;
+    protected ?DbBase $db;
 
-    protected $user;
+    protected ?array $user;
 
-    protected $tipfun;
+    protected ?string $tipfun;
 
-    /**
-     * services variable
-     *
-     * @var Services
-     */
-    protected $services;
+    protected mixed $services;
 
-    /**
-     * trabajadorServices variable
-     *
-     * @var TrabajadorServices
-     */
-    protected $trabajadorServices;
+    protected ?TrabajadorServices $trabajadorServices;
+
+    protected ?ApruebaTrabajador $apruebaTrabajador;
 
     public function __construct()
     {
@@ -66,9 +59,9 @@ class ApruebaTrabajadorController extends ApplicationController
      *
      * @author elegroag <elegroag@ibero.edu.co>
      *
-     * @return void
+     * @return JsonResponse
      */
-    public function aplicarFiltro(Request $request, string $estado = 'P')
+    public function aplicarFiltro(Request $request, string $estado = 'P'): JsonResponse
     {
         $cantidad_pagina = $request->input('numero', 10);
         $usuario = $this->user['usuario'];
@@ -163,13 +156,8 @@ class ApruebaTrabajadorController extends ApplicationController
 
     /**
      * index function
-     *
      * @changed [2023-12-00]
-     *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param  string  $estado
-     * @return void
      */
     public function index()
     {
@@ -195,7 +183,7 @@ class ApruebaTrabajadorController extends ApplicationController
         ]);
     }
 
-    public function buscar(Request $request, string $estado = 'P')
+    public function buscar(Request $request, string $estado = 'P'): JsonResponse
     {
         $this->setResponse('ajax');
         $pagina = ($request->input('pagina')) ? $request->input('pagina') : 1;
@@ -234,17 +222,11 @@ class ApruebaTrabajadorController extends ApplicationController
 
     /**
      * infor function
-     *
      * @changed [2023-12-19]
-     *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param  string  $nit
-     * @param  string  $cedtra
-     * @param  string  $id
-     * @return void
+     * @return JsonResponse
      */
-    public function infor(Request $request)
+    public function infor(Request $request): JsonResponse
     {
         try {
             $validated = $request->validate([
@@ -299,6 +281,13 @@ class ApruebaTrabajadorController extends ApplicationController
                     $trabajador_sisuweb = $rqs['data'];
                 }
             }
+
+            if ($rqs && $rqs['success'] && $trabajador_sisuweb) {
+                $api_afiliation_status = $trabajador_sisuweb['estado'] == 'A' ? true : false;
+            } else {
+                $api_afiliation_status = false;
+            }
+
             $html = view(
                 'cajas.aprobaciontra.tmp.consulta',
                 [
@@ -391,7 +380,8 @@ class ApruebaTrabajadorController extends ApplicationController
                 'campos_disponibles' => $campos_disponibles,
                 'empresa_sisu' => $empresa_sisu,
                 'componente_codsuc' => $componente_codsuc,
-                'componente_codlis' => $componente_codlis
+                'componente_codlis' => $componente_codlis,
+                'api_afiliation_status' => $api_afiliation_status,
             ];
         } catch (Exception $err) {
             $response = [
@@ -410,9 +400,9 @@ class ApruebaTrabajadorController extends ApplicationController
      *
      * @author elegroag <elegroag@ibero.edu.co>
      *
-     * @return void
+     * @return JsonResponse
      */
-    public function aprueba(Request $request)
+    public function aprueba(Request $request): JsonResponse
     {
         $this->db->begin();
         try {
@@ -421,8 +411,8 @@ class ApruebaTrabajadorController extends ApplicationController
                 $apruebaSolicitud = new ApruebaTrabajador;
                 $idSolicitud = $request->input('id');
 
-                $solicitud = $apruebaSolicitud->findSolicitud($idSolicitud);
-                $apruebaSolicitud->findSolicitante($solicitud);
+                $apruebaSolicitud->findSolicitud($idSolicitud);
+                $apruebaSolicitud->findSolicitante();
                 $apruebaSolicitud->procesar($request->all());
 
                 $apruebaSolicitud->enviarMail($request->input('actapr'), $request->input('fecapr'));

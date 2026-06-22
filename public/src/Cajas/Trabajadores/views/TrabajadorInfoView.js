@@ -7,6 +7,8 @@ import { Spanish } from 'flatpickr/dist/l10n/es';
 import TrabajadorAprobarModel from '../models/TrabajadorAprobarModel';
 
 export default class TrabajadorInfoView extends FormInfoView {
+    reaprobarTipo = 'T';
+
     constructor(options = {}) {
         super({
             ...options,

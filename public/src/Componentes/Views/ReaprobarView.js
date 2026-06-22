@@ -46,12 +46,6 @@ export default class ReaprobarView extends ModelView {
 				},
 			},
 		});
-
-		if (this.model.tipo == 'T') {
-			this.$el.find('#renderByTrabajador').fadeIn();
-		} else {
-			this.$el.find('#renderByTrabajador').fadeOut();
-		}
 	}
 
 	reaprobarSolicitud(e) {

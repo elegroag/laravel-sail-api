@@ -7,6 +7,8 @@ import { Spanish } from 'flatpickr/dist/l10n/es';
 import { ConyugeAprobarModel } from '../models/ConyugeAprobarModel';
 
 class ConyugeInfoView extends FormInfoView {
+    reaprobarTipo = 'C';
+
     constructor(options = {}) {
         super({
             ...options,

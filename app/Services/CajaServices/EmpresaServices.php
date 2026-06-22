@@ -233,8 +233,8 @@ class EmpresaServices
      *
      * @author elegroag <elegroag@ibero.edu.co>
      *
-     * @param [type] $mercurio30
-     * @return void
+     * @param  Mercurio30  $mercurio30
+     * @return mixed
      */
     public function adjuntos($mercurio30)
     {
@@ -248,8 +248,8 @@ class EmpresaServices
      *
      * @author elegroag <elegroag@ibero.edu.co>
      *
-     * @param [type] $mercurio30
-     * @return void
+     * @param  Mercurio30  $mercurio30
+     * @return mixed
      */
     public function seguimiento($mercurio30)
     {

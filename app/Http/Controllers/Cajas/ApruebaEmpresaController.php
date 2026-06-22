@@ -508,13 +508,22 @@ class ApruebaEmpresaController extends ApplicationController
             );
 
             $out = $procesadorComando->toArray();
-            $empresa_sisuweb = ($out['success']) ? $out['data'] : false;
+            $isSuccess = $out['success'] ?? false;
+            $empresa_sisuweb = $out['data'] ?? false;
+            if ($isSuccess && $empresa_sisuweb) {
+                $api_afiliation_status = $empresa_sisuweb['estado'] == 'A' ||
+                    $empresa_sisuweb['estado'] == 'S' ||
+                    $empresa_sisuweb['estado'] == 'D' ? true : false;
+            } else {
+                $api_afiliation_status = false;
+            }
 
             $campos_disponibles = $mercurio30->CamposDisponibles();
             $response = [
                 'success' => true,
                 'data' => $mercurio30->toArray(),
                 'empresa_sisuweb' => $empresa_sisuweb,
+                'api_afiliation_status' => $api_afiliation_status,
                 'mercurio11' => Mercurio11::all(),
                 'consulta_empresa' => $htmlEmpresa,
                 'adjuntos' => $adjuntos,

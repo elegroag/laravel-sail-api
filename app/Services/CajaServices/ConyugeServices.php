@@ -282,8 +282,8 @@ class ConyugeServices
      *
      * @author elegroag <elegroag@ibero.edu.co>
      *
-     * @param [type] $mercurio32
-     * @return void
+     * @param  Mercurio32  $mercurio32
+     * @return mixed
      */
     public function adjuntos(Mercurio32 $mercurio32): string
     {
@@ -297,8 +297,8 @@ class ConyugeServices
      *
      * @author elegroag <elegroag@ibero.edu.co>
      *
-     * @param [type] $mercurio32
-     * @return void
+     * @param  Mercurio32  $mercurio32
+     * @return mixed
      */
     public function seguimiento(Mercurio32 $mercurio32): string
     {
@@ -312,8 +312,8 @@ class ConyugeServices
      *
      * @author elegroag <elegroag@ibero.edu.co>
      *
-     * @param  array  $mercurio30
-     * @return void
+     * @param  Collection  $mercurio32
+     * @return array
      */
     public function dataOptional(Collection $mercurio32, string $estado = 'P'): array
     {

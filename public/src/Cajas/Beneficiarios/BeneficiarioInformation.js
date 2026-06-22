@@ -40,6 +40,7 @@ export default class BeneficiarioInformation extends ControllerValidation {
 				empresa_sisu: collection.empresa_sisu,
 				componente_codsuc: collection.componente_codsuc,
 				componente_codlis: collection.componente_codlis,
+				api_afiliation_status: collection.api_afiliation_status,
 			},
 		});
 

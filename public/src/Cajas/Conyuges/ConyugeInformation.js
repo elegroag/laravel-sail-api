@@ -50,6 +50,7 @@ export default class ConyugeInformation extends ControllerValidation {
                 adjuntos: collection.adjuntos,
                 seguimiento: collection.seguimiento,
                 campos_disponibles: collection.campos_disponibles,
+                api_afiliation_status: collection.api_afiliation_status,
             },
         });
 

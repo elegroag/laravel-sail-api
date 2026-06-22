@@ -15,6 +15,7 @@ Route::middleware(['cajas.auth'])->group(function () {
 
         Route::post('/devolver', [ApruebaEmpresaController::class, 'devolver']);
         Route::post('/rechazar', [ApruebaEmpresaController::class, 'rechazar']);
+        Route::post('/reaprobar', [ApruebaEmpresaController::class, 'reaprobar']);
         Route::get('/opcional', [ApruebaEmpresaController::class, 'opcional']);
         Route::post('/infor', [ApruebaEmpresaController::class, 'infor']);
         Route::get('/editar/{id}', [ApruebaEmpresaController::class, 'editarView']);

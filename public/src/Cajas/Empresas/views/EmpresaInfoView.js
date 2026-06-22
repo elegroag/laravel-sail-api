@@ -5,6 +5,8 @@ import EmpresaAprobarModel from '../models/EmpresaAprobarModel';
 import { $App } from '@/App';
 
 export default class EmpresaInfoView extends FormInfoView {
+	reaprobarTipo = 'E';
+
 	constructor(options = {}) {
 		super({
 			...options,
