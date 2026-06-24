@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Mercurio;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsPensionado;
-use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
 use App\Models\FormularioDinamico;
 use App\Models\Gener09;
@@ -24,9 +23,10 @@ use App\Services\Utils\GeneralService;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
 use Carbon\Carbon;
-use GuzzleHttp\Psr7\Response;
 use Illuminate\Http\Request;
 use App\Services\Api\ApiSubsidio;
+use Exception;
+use Illuminate\Http\JsonResponse;
 
 class PensionadoController extends ApplicationController
 {
@@ -53,11 +53,11 @@ class PensionadoController extends ApplicationController
 
     protected $tipopc = '9';
 
-    protected $db;
+    protected ?DbBase $db;
 
-    protected $user;
+    protected ?array $user;
 
-    protected $tipo;
+    protected ?string $tipo;
 
     public function __construct()
     {
@@ -97,7 +97,7 @@ class PensionadoController extends ApplicationController
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function actualizar(Request $request)
+    public function actualizar(Request $request): JsonResponse
     {
         try {
             $id = $request->input('id');
@@ -120,7 +120,7 @@ class PensionadoController extends ApplicationController
                 'msj' => 'Registro actualizado con éxito',
                 'data' => $data,
             ];
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             return $this->handleException($e, $request);
         }
 
@@ -132,7 +132,7 @@ class PensionadoController extends ApplicationController
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function guardar(Request $request)
+    public function guardar(Request $request): JsonResponse
     {
         $this->db->begin();
         try {
@@ -171,7 +171,7 @@ class PensionadoController extends ApplicationController
                 'data' => $pensionado->getArray(),
             ];
             $this->db->commit();
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             return $this->handleException($e, $request);
         }
 
@@ -183,7 +183,7 @@ class PensionadoController extends ApplicationController
      *
      * @return array
      */
-    protected function serializeData(Request $request)
+    protected function serializeData(Request $request): array
     {
         $fecsol = Carbon::now();
 
@@ -238,7 +238,7 @@ class PensionadoController extends ApplicationController
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function valida(Request $request)
+    public function valida(Request $request): JsonResponse
     {
         try {
             $cedtra = $request->input('cedrep');
@@ -274,7 +274,7 @@ class PensionadoController extends ApplicationController
                 'empresa' => $empresa,
                 'trabajador' => $trabajador,
             ];
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             return $this->handleException($e, $request);
         }
 
@@ -286,7 +286,7 @@ class PensionadoController extends ApplicationController
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function borrarArchivo(Request $request)
+    public function borrarArchivo(Request $request): JsonResponse
     {
         try {
             $numero = $request->input('id');
@@ -307,7 +307,7 @@ class PensionadoController extends ApplicationController
                 'success' => true,
                 'msj' => 'El archivo se borro de forma correcta',
             ];
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             return $this->handleException($e, $request);
         }
 
@@ -319,7 +319,7 @@ class PensionadoController extends ApplicationController
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function guardarArchivo(Request $request)
+    public function guardarArchivo(Request $request): JsonResponse
     {
         try {
             $id = $request->input('id');
@@ -343,7 +343,7 @@ class PensionadoController extends ApplicationController
                 'msj' => 'Archivo procesado correctamente',
                 'data' => $mercurio37->getArray(),
             ];
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             return $this->handleException($e, $request);
         }
 
@@ -355,7 +355,7 @@ class PensionadoController extends ApplicationController
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function enviarCaja(Request $request)
+    public function enviarCaja(Request $request): JsonResponse
     {
         $this->db->begin();
         try {
@@ -375,7 +375,7 @@ class PensionadoController extends ApplicationController
                 'success' => true,
                 'msj' => 'El envío de la solicitud se ha completado con éxito',
             ];
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             $this->db->rollBack();
             return $this->handleException($e, $request);
         }
@@ -404,7 +404,7 @@ class PensionadoController extends ApplicationController
         );
     }
 
-    public function reloadArchivos(Request $request)
+    public function reloadArchivos(Request $request): JsonResponse
     {
         $pensionadoService = new PensionadoService;
         try {
@@ -422,7 +422,7 @@ class PensionadoController extends ApplicationController
                     'success' => true,
                 ];
             }
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             return $this->handleException($e, $request);
         }
 
@@ -434,7 +434,7 @@ class PensionadoController extends ApplicationController
      *
      * @return void
      */
-    public function cancelarSolicitud(Request $request)
+    public function cancelarSolicitud(Request $request): JsonResponse
     {
         try {
             $documento = $this->user['documento'];
@@ -453,7 +453,7 @@ class PensionadoController extends ApplicationController
                 'success' => true,
                 'msj' => 'El registro se borro con éxito del sistema.',
             ];
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             return $this->handleException($e, $request);
         }
         return response()->json($salida);
@@ -466,7 +466,7 @@ class PensionadoController extends ApplicationController
         return $this->renderFile($fichero);
     }
 
-    public function params()
+    public function params(): JsonResponse
     {
         try {
             $mtipoDocumentos = new Gener18;
@@ -587,14 +587,14 @@ class PensionadoController extends ApplicationController
                 'data' => $componentes,
                 'msj' => 'OK',
             ];
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             return $this->handleException($e, request());
         }
 
         return response()->json($salida);
     }
 
-    public function searchRequest($id)
+    public function searchRequest(?string $id = null): JsonResponse
     {
         try {
             if (is_null($id)) {
@@ -614,14 +614,14 @@ class PensionadoController extends ApplicationController
                 'data' => $data,
                 'msj' => 'OK',
             ];
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             return $this->handleException($e, request());
         }
 
         return response()->json($salida);
     }
 
-    public function consultaDocumentos($id)
+    public function consultaDocumentos(?string $id = null): JsonResponse
     {
         try {
             $documento = $this->user['documento'];
@@ -642,14 +642,14 @@ class PensionadoController extends ApplicationController
                 'data' => $pensionadoService->dataArchivosRequeridos($sindepe),
                 'msj' => 'OK',
             ];
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             return $this->handleException($e, request());
         }
 
         return response()->json($salida);
     }
 
-    public function borrar(Request $request)
+    public function borrar(Request $request): JsonResponse
     {
         $this->setResponse('ajax');
         $generales = new GeneralService;
@@ -672,14 +672,14 @@ class PensionadoController extends ApplicationController
                 'success' => true,
                 'msj' => 'Ok',
             ];
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             return $this->handleException($e, $request);
         }
 
         return response()->json($response);
     }
 
-    public function renderTable(Request $request, Response $response, string $estado = '')
+    public function renderTable(Request $request, ?string $estado = null)
     {
         try {
 
@@ -694,12 +694,12 @@ class PensionadoController extends ApplicationController
 
             $this->setResponse('view');
             return $this->renderText($html);
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             return $this->handleException($e, $request);
         }
     }
 
-    public function seguimiento(Request $request)
+    public function seguimiento(Request $request): JsonResponse
     {
         try {
             $pensionadoService = new PensionadoService;
@@ -708,7 +708,7 @@ class PensionadoController extends ApplicationController
                 'success' => true,
                 'data' => $out,
             ];
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             return $this->handleException($e, $request);
         }
         return response()->json($salida);
@@ -724,10 +724,10 @@ class PensionadoController extends ApplicationController
      *
      * @throws \Exception
      */
-    public function administrar_cuenta($id = '')
+    public function administrar_cuenta(?string $id = null)
     {
         try {
-            if (empty($id)) {
+            if (is_null($id)) {
                 throw new DebugException('El ID de la solicitud es requerido');
             }
 
@@ -743,12 +743,12 @@ class PensionadoController extends ApplicationController
                 'id' => $id,
                 'cedtra' => $solicitud->cedtra,
                 'tipopc' => $this->tipopc,
-                'codciu' => $this->getActUser('codciu'),
-                'codusu' => $this->getActUser('codusu'),
-                'codpai' => $this->getActUser('codpai'),
-                'codemp' => $this->getActUser('codemp'),
-                'codofi' => $this->getActUser('codofi'),
-                'codrol' => $this->getActUser('codrol'),
+                'codciu' => $this->user['codciu'],
+                'codusu' => $this->user['codusu'],
+                'codpai' => $this->user['codpai'],
+                'codemp' => $this->user['codemp'],
+                'codofi' => $this->user['codofi'],
+                'codrol' => $this->user['codrol'],
             ];
 
             $request = new Request($userData);
@@ -763,7 +763,7 @@ class PensionadoController extends ApplicationController
             }
 
             throw new DebugException('No se pudo inicializar la administración de la cuenta', 301);
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             $exception = $this->captureException($e, request());
             set_flashdata('error', [
                 'msj' => $exception['msj'],

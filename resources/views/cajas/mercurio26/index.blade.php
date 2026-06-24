@@ -20,7 +20,7 @@
                                 <div class="form-group">
                                     <label for="archivo" class="form-control-label">Archivo</label>
                                     <div class="custom-file">
-                                        <input type="file" class="custom-file-input" id="archivo" name="archivo" lang="es">
+                                        <input type="file" class="custom-file-input" id="archivo" name="archivo" accept="image/jpeg,image/png,image/jpg,video/mp4" lang="es">
                                         <label class="custom-file-label" for="archivo">Seleccione un archivo</label>
                                     </div>
                                 </div>

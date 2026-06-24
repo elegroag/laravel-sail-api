@@ -5,25 +5,52 @@ let validator;
 window.App = $App;
 
 const validatorInit = () => {
-     validator = $('#form').validate({
+    validator = $('#form').validate({
         rules: {
             archivo: { required: true },
+            tipo: { required: true },
+        },
+        messages: {
+            archivo: 'El archivo es requerido',
+            tipo: 'El tipo es requerido',
         },
     });
 };
 
+const resetForm = () => {
+    $('#form')[0].reset();
+    $('#archivo').next('.custom-file-label').text('Seleccione un archivo');
+    $('#form :input').prop('disabled', false);
+};
+
+const detectTipoFromFile = (fileName) => {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    if (extension === 'mp4') {
+        return 'V';
+    }
+    if (['jpg', 'jpeg', 'png'].includes(extension)) {
+        return 'F';
+    }
+    return '';
+};
+
 $(() => {
     window.App.initialize();
+    validatorInit();
     const modalZoom = new bootstrap.Modal(document.getElementById('zoomModal'));
+    const $guardarBtn = $("[data-toggle='guardar']");
 
     const galeria = () => {
         window.App.trigger('syncro', {
             url: window.App.url(window.ServerController + '/galeria'),
             callback: (response) => {
-                if(!response) return Messages.display('No se pudieron cargar los datos', 'error');
+                if (!response || response.flag !== true) {
+                    return Messages.display(response?.msg || 'No se pudieron cargar los datos', 'error');
+                }
+
                 let html = '';
                 const tmp = _.template(document.getElementById('tmp_galeria').innerHTML);
-                $.each(response.data, function (key, value) {
+                $.each(response.data || [], function (key, value) {
                     html += tmp({ value });
                 });
                 $('#galeria').html(html);
@@ -32,7 +59,7 @@ $(() => {
                 Messages.display('Error al cargar la galería: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
             },
         });
-    }
+    };
 
     $(document).on({
         mouseenter: function () {
@@ -62,6 +89,23 @@ $(() => {
     '.thumbnail',
     );
 
+    $(document).on('change', '#archivo', (e) => {
+        const file = e.target.files?.[0];
+        const label = $(e.target).next('.custom-file-label');
+
+        if (!file) {
+            label.text('Seleccione un archivo');
+            return;
+        }
+
+        label.text(file.name);
+
+        const tipo = detectTipoFromFile(file.name);
+        if (tipo) {
+            $('#tipo').val(tipo);
+        }
+    });
+
     galeria();
 
     $(document).on('click', "[data-toggle='borrar']", (e) => {
@@ -82,45 +126,43 @@ $(() => {
                     url: window.App.url(window.ServerController + '/borrar'),
                     data: { numero },
                     callback: (response) => {
-                        if (response['flag'] == true) {
+                        if (response?.flag === true) {
                             galeria();
-                            Messages.display(response['msg'], 'success');
+                            Messages.display(response.msg, 'success');
                         } else {
-                            Messages.display(response['msg'], 'error');
+                            Messages.display(response?.msg || 'Error al borrar', 'error');
                         }
                     },
                     error: (xhr) => {
                         Messages.display('Error al borrar: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
-                    }
+                    },
                 });
             }
         });
     });
 
     $(document).on('click', "[data-toggle='guardar']", (e) => {
+        e.preventDefault();
         if (!validator.valid()) return;
-        $.ajax({
-            type: 'POST',
+
+        const formData = new FormData($('#form')[0]);
+        $guardarBtn.prop('disabled', true);
+
+        window.App.trigger('upload', {
             url: window.App.url(window.ServerController + '/guardar'),
-            data: new FormData($('#form')[0]),
-            processData: false,
-            contentType: false,
-        })
-            .done(function (response) {
-                if (response['flag'] == true) {
-                    Messages.display(response['msg'], 'success');
-                    $('#form :input').each(function () {
-                        $(this).val('');
-                        $(this).removeAttr('disabled');
-                    });
+            data: formData,
+            callback: (response) => {
+                $guardarBtn.prop('disabled', false);
+
+                if (response?.flag === true) {
+                    Messages.display(response.msg, 'success');
+                    resetForm();
                     galeria();
                 } else {
-                    Messages.display(response['msg'], 'error');
+                    Messages.display(response?.msg || 'Error al guardar', 'error');
                 }
-            })
-            .fail(function (jqXHR) {
-                Messages.display('Error al guardar: ' + (jqXHR.responseJSON?.message || jqXHR.statusText), 'error');
-            });
+            },
+        });
     });
 
     $(document).on('click', "[data-toggle='arriba']", (e) => {
@@ -130,16 +172,16 @@ $(() => {
             url: window.App.url(window.ServerController + '/arriba'),
             data: { numero },
             callback: (response) => {
-                if (response['flag'] == true) {
-                    Messages.display(response['msg'], 'success');
+                if (response?.flag === true) {
+                    Messages.display(response.msg, 'success');
                     galeria();
                 } else {
-                    Messages.display(response['msg'], 'error');
+                    Messages.display(response?.msg || 'Error al reordenar', 'error');
                 }
             },
             error: (xhr) => {
                 Messages.display('Error al reordenar: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
-            }
+            },
         });
     });
 
@@ -150,16 +192,16 @@ $(() => {
             url: window.App.url(window.ServerController + '/abajo'),
             data: { numero },
             callback: (response) => {
-                if (response['flag'] == true) {
-                    Messages.display(response['msg'], 'success');
+                if (response?.flag === true) {
+                    Messages.display(response.msg, 'success');
                     galeria();
                 } else {
-                    Messages.display(response['msg'], 'error');
+                    Messages.display(response?.msg || 'Error al reordenar', 'error');
                 }
             },
             error: (xhr) => {
                 Messages.display('Error al reordenar: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
-            }
+            },
         });
     });
 

@@ -188,7 +188,7 @@ class ApplicationController extends Controller
         if ($e instanceof DebugException) {
             $debug = $e;
         } elseif ($e instanceof QueryException || $e instanceof PDOException) {
-            $debug = new DebugException('Error de base de datos (SQL)', 500, $e->getMessage());
+            $debug = new DebugException('Error de base de datos (SQL) ' . $e->getMessage(), 500);
         } elseif ($e instanceof AuthException) {
             $debug = new DebugException('Error de autenticación', 501, $e->getMessage());
         } else {

@@ -22,7 +22,6 @@ class Mercurio38 extends ModelBase
         'tipo',
         'coddoc',
         'documento',
-        'nit',
         'log',
         'cedtra',
         'tipdoc',
@@ -101,7 +100,6 @@ class Mercurio38 extends ModelBase
             'tipo' => 'required|max:2',
             'coddoc' => 'required|max:2',
             'documento' => 'required|max:15',
-            'nit' => 'required|max:15',
             'calemp' => 'required|max:1',
             'cedtra' => 'required|max:15',
             'tipdoc' => 'required|max:2',
@@ -1208,16 +1206,6 @@ class Mercurio38 extends ModelBase
     public function getDocumento()
     {
         return $this->documento;
-    }
-
-    public function setNit($nit)
-    {
-        $this->nit = $nit;
-    }
-
-    public function getNit()
-    {
-        return $this->nit;
     }
 
     public function CamposDisponibles()

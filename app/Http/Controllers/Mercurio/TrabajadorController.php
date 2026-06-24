@@ -285,7 +285,7 @@ class TrabajadorController extends ApplicationController
     {
         try {
             $nit = $this->user['documento'];
-            $coddoc = Gener18::whereNotIn('coddoc', ['7', '5', '2'])->pluck('detdoc', 'coddoc');
+            $coddoc = Gener18::whereNotIn('coddoc', ['7', '5'])->pluck('detdoc', 'coddoc');
             $coddocrepleg = tipo_document_repleg_detalle();
             unset($coddocrepleg['RC']);
             unset($coddocrepleg['TI']);

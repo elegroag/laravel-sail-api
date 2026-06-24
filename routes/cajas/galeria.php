@@ -14,7 +14,5 @@ Route::middleware(['cajas.auth'])->group(function () {
         Route::post('/arriba', [Mercurio26Controller::class, 'arriba'])->name('mercurio26.arriba');
         Route::post('/abajo', [Mercurio26Controller::class, 'abajo'])->name('mercurio26.abajo');
         Route::post('/borrar', [Mercurio26Controller::class, 'borrar'])->name('mercurio26.borrar');
-        Route::post('/aplicar_filtro', [Mercurio26Controller::class, 'aplicarFiltro']);
-        Route::post('/change_cantidad_pagina', [Mercurio26Controller::class, 'changeCantidadPagina']);
     });
 });
