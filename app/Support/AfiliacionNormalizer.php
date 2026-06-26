@@ -124,7 +124,17 @@ class AfiliacionNormalizer
     {
         $getter = 'get'.ucfirst($field);
         if (method_exists($model, $getter)) {
-            return $model->{$getter}();
+            try {
+                $value = $model->{$getter}();
+            } catch (\Throwable) {
+                return null;
+            }
+
+            if ($value instanceof \DateTimeInterface) {
+                return $value;
+            }
+
+            return $value;
         }
 
         return $model->{$field} ?? null;
@@ -134,6 +144,10 @@ class AfiliacionNormalizer
     {
         if ($value === null || $value === '') {
             return null;
+        }
+
+        if ($value instanceof \DateTimeInterface) {
+            return Carbon::instance($value)->format('Y-m-d');
         }
 
         try {

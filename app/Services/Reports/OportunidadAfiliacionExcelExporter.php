@@ -9,6 +9,7 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
 
 class OportunidadAfiliacionExcelExporter
 {
@@ -20,59 +21,74 @@ class OportunidadAfiliacionExcelExporter
     {
         return new StreamedResponse(
             static function () use ($headers, $rows): void {
-                $spreadsheet = new Spreadsheet;
-                $sheet = $spreadsheet->getActiveSheet();
-                $rowIndex = 1;
+                try {
+                    $spreadsheet = new Spreadsheet;
+                    $sheet = $spreadsheet->getActiveSheet();
+                    $rowIndex = 1;
 
-                foreach ($headers as $i => $head) {
-                    $col = Coordinate::stringFromColumnIndex($i + 1);
-                    $sheet->setCellValue($col.$rowIndex, $head);
-                }
-
-                $headerRange = 'A1:'.Coordinate::stringFromColumnIndex(count($headers)).'1';
-                $sheet->getStyle($headerRange)->applyFromArray([
-                    'font' => ['bold' => true],
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'startColor' => ['rgb' => 'D9E1F2'],
-                    ],
-                    'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_CENTER,
-                        'vertical' => Alignment::VERTICAL_CENTER,
-                    ],
-                    'borders' => [
-                        'allBorders' => ['borderStyle' => Border::BORDER_THIN],
-                    ],
-                ]);
-
-                $rowIndex++;
-
-                foreach ($rows as $row) {
-                    foreach ($row as $i => $value) {
+                    foreach ($headers as $i => $head) {
                         $col = Coordinate::stringFromColumnIndex($i + 1);
-                        $sheet->setCellValue($col.$rowIndex, $value);
+                        $sheet->setCellValue($col.$rowIndex, $head);
                     }
-                    $rowIndex++;
-                }
 
-                if ($rowIndex > 2) {
-                    $dataRange = 'A2:'.Coordinate::stringFromColumnIndex(count($headers)).($rowIndex - 1);
-                    $sheet->getStyle($dataRange)->applyFromArray([
+                    $headerRange = 'A1:'.Coordinate::stringFromColumnIndex(count($headers)).'1';
+                    $sheet->getStyle($headerRange)->applyFromArray([
+                        'font' => ['bold' => true],
+                        'fill' => [
+                            'fillType' => Fill::FILL_SOLID,
+                            'startColor' => ['rgb' => 'D9E1F2'],
+                        ],
+                        'alignment' => [
+                            'horizontal' => Alignment::HORIZONTAL_CENTER,
+                            'vertical' => Alignment::VERTICAL_CENTER,
+                        ],
                         'borders' => [
                             'allBorders' => ['borderStyle' => Border::BORDER_THIN],
                         ],
                     ]);
+
+                    $rowIndex++;
+
+                    foreach ($rows as $row) {
+                        try {
+                            $values = array_pad((array) $row, count($headers), '');
+                            foreach ($values as $i => $value) {
+                                $col = Coordinate::stringFromColumnIndex($i + 1);
+                                $sheet->setCellValue($col.$rowIndex, $value);
+                            }
+                        } catch (Throwable $e) {
+                            $col = Coordinate::stringFromColumnIndex(1);
+                            $sheet->setCellValue($col.$rowIndex, 'Fila omitida por error: '.$e->getMessage());
+                        }
+                        $rowIndex++;
+                    }
+
+                    if ($rowIndex > 2) {
+                        $dataRange = 'A2:'.Coordinate::stringFromColumnIndex(count($headers)).($rowIndex - 1);
+                        $sheet->getStyle($dataRange)->applyFromArray([
+                            'borders' => [
+                                'allBorders' => ['borderStyle' => Border::BORDER_THIN],
+                            ],
+                        ]);
+                    }
+
+                    for ($c = 1; $c <= count($headers); $c++) {
+                        $sheet->getColumnDimensionByColumn($c)->setAutoSize(true);
+                    }
+
+                    $writer = new Xlsx($spreadsheet);
+                    $writer->save('php://output');
+
+                    $spreadsheet->disconnectWorksheets();
+                    unset($spreadsheet);
+                } catch (Throwable $e) {
+                    if (ob_get_level() > 0) {
+                        ob_end_clean();
+                    }
+                    header('Content-Type: text/plain; charset=utf-8');
+                    http_response_code(500);
+                    echo 'Error generando el reporte: '.$e->getMessage();
                 }
-
-                for ($c = 1; $c <= count($headers); $c++) {
-                    $sheet->getColumnDimensionByColumn($c)->setAutoSize(true);
-                }
-
-                $writer = new Xlsx($spreadsheet);
-                $writer->save('php://output');
-
-                $spreadsheet->disconnectWorksheets();
-                unset($spreadsheet);
             },
             200,
             [

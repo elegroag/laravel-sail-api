@@ -4,7 +4,9 @@ namespace App\Services\Reports;
 
 use App\Services\Utils\CalculatorDias;
 use App\Support\AfiliacionNormalizer;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class OportunidadAfiliacionService
 {
@@ -28,7 +30,10 @@ class OportunidadAfiliacionService
             $dateField = $this->resolveDateField($campoFecha, $config);
 
             if ($fecini && $fecfin) {
-                $query->whereBetween($dateField, [$fecini, $fecfin]);
+                $query->whereBetween($dateField, [
+                    $fecini.' 00:00:00',
+                    Carbon::parse($fecfin)->endOfDay()->format('Y-m-d H:i:s'),
+                ]);
             }
 
             if (! empty($estados)) {
@@ -48,7 +53,13 @@ class OportunidadAfiliacionService
                 });
             }
 
-            foreach ($query->orderBy('nit')->orderBy('id')->cursor() as $model) {
+            $query->orderBy('id');
+
+            if ($this->hasColumn($config['model'], 'nit')) {
+                $query->orderBy('nit');
+            }
+
+            foreach ($query->cursor() as $model) {
                 $record = AfiliacionNormalizer::normalize($model, (int) $tipopc, $config);
                 $record['dias_vencidos'] = CalculatorDias::calcular(
                     (string) $tipopc,
@@ -138,5 +149,25 @@ class OportunidadAfiliacionService
         }
 
         return $campoFecha;
+    }
+
+    /**
+     * Verifica si la tabla del modelo tiene la columna indicada,
+     * para evitar SQL errores al ordenar por columnas inexistentes
+     * (Mercurio36/38/39 no tienen `nit`).
+     *
+     * @param  class-string<Model>  $modelClass
+     */
+    private function hasColumn(string $modelClass, string $column): bool
+    {
+        try {
+            $instance = new $modelClass;
+            $table = $instance->getTable();
+            $schema = $instance->getConnection()->getSchemaBuilder();
+
+            return $schema->hasColumn($table, $column);
+        } catch (\Throwable) {
+            return false;
+        }
     }
 }

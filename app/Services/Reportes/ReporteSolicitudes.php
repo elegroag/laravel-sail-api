@@ -7,6 +7,8 @@ use App\Models\Mercurio31;
 use App\Models\Mercurio32;
 use App\Models\Mercurio34;
 use App\Services\Srequest;
+use Carbon\Carbon;
+use DateTimeInterface;
 
 class ReporteSolicitudes
 {
@@ -88,6 +90,7 @@ class ReporteSolicitudes
     private function datasetMercurio30($models): array
     {
         $headers = [
+            'Radicado',
             'Estado',
             'Fecha solicitud',
             'Nit',
@@ -110,8 +113,8 @@ class ReporteSolicitudes
             'Valor nomina',
             'Tipo sociedad',
             'Codigo estado',
-            'Motivo',
             'Fecha aprobacion',
+            'Tiempo de respuesta',
             'Usuario',
             'Direccion principal',
             'Ciudad principal',
@@ -131,9 +134,10 @@ class ReporteSolicitudes
             'Tipo empresa',
         ];
 
-        $rows = $models->map(fn($m) => [
+        $rows = $models->map(fn ($m) => [
+            $m->ruuid,
             $m->getEstado(),
-            $m->getFecsol(),
+            $this->formatFecha($m->getFecsol()),
             $m->getNit(),
             $m->getTipdoc(),
             $m->getRazsoc(),
@@ -149,13 +153,13 @@ class ReporteSolicitudes
             $m->getCelular(),
             $m->getEmail(),
             $m->getCodact(),
-            $m->getFecini(),
+            $this->formatFecha($m->getFecini()),
             $m->getTottra(),
             $m->getValnom(),
             $m->getTipsoc(),
             $m->getCodest(),
-            $m->getMotivo(),
-            $m->getFecest(),
+            $this->fechaAprobacion($m),
+            $this->tiempoRespuesta($this->formatFecha($m->getFecsol()), $this->fechaAprobacion($m)),
             $m->getUsuario(),
             $m->getDirpri(),
             $m->getCiupri(),
@@ -189,6 +193,7 @@ class ReporteSolicitudes
     private function datasetMercurio31($models): array
     {
         $headers = [
+            'Radicado',
             'Estado',
             'Nit',
             'Razon social',
@@ -210,9 +215,10 @@ class ReporteSolicitudes
             'Barrio',
             'Telefono',
             'Celular',
-            'Fax',
             'Email',
             'Fecha solicitud',
+            'Fecha aprobacion',
+            'Tiempo de respuesta',
             'Fecha ingreso',
             'Salario',
             'Captra',
@@ -224,13 +230,11 @@ class ReporteSolicitudes
             'Traslado sindicato',
             'Vivienda',
             'Tipo afiliado',
-            'Profesion',
             'Cargo',
             'Autoriza',
             'Usuario',
             'Estado',
             'Codigo estado',
-            'Motivo',
             'Fecha estado',
             'Tipo',
             'Codigo documento',
@@ -238,7 +242,6 @@ class ReporteSolicitudes
             'Factor vulnerabilidad',
             'Pertenencia etnica',
             'Direccion laboral',
-            'Ciudad laboral',
             'Rural trabajo',
             'Comision',
             'Tipo jornada',
@@ -250,7 +253,8 @@ class ReporteSolicitudes
             'Tipo cuenta',
         ];
 
-        $rows = $models->map(fn($m) => [
+        $rows = $models->map(fn ($m) => [
+            $m->ruuid,
             $m->getEstado(),
             $m->getNit(),
             $m->getRazsoc(),
@@ -260,7 +264,7 @@ class ReporteSolicitudes
             $m->getSegape(),
             $m->getPrinom(),
             $m->getSegnom(),
-            $m->getFecnac(),
+            $this->formatFecha($m->getFecnac()),
             $m->getCiunac(),
             $m->getSexo(),
             $m->getOrisex(),
@@ -272,10 +276,11 @@ class ReporteSolicitudes
             $m->getBarrio(),
             $m->getTelefono(),
             $m->getCelular(),
-            $m->getFax(),
             $m->getEmail(),
-            $m->getFecsol(),
-            $m->getFecing(),
+            $this->formatFecha($m->getFecsol()),
+            $this->fechaAprobacion($m),
+            $this->tiempoRespuesta($this->formatFecha($m->getFecsol()), $this->fechaAprobacion($m)),
+            $this->formatFecha($m->getFecing()),
             $m->getSalario(),
             $m->getCaptra(),
             $m->getTipdis(),
@@ -286,21 +291,18 @@ class ReporteSolicitudes
             $m->getTrasin(),
             $m->getVivienda(),
             $m->getTipafi(),
-            $m->getProfesion(),
             $m->getCargo(),
             $m->getAutoriza(),
             $m->getUsuario(),
             $m->getEstado(),
             $m->getCodest(),
-            $m->getMotivo(),
-            $m->getFecest(),
+            $this->formatFecha($m->getFecest()),
             $m->getTipo(),
             $m->getCoddoc(),
             $m->getDocumento(),
             $m->getFacvul(),
             $m->getPeretn(),
             $m->getDirlab(),
-            $m->getCiulab(),
             $m->getRuralt(),
             $m->getComision(),
             $m->getTipjor(),
@@ -325,6 +327,7 @@ class ReporteSolicitudes
     private function datasetMercurio32($models): array
     {
         $headers = [
+            'Radicado',
             'Id',
             'Cedula trabajador',
             'Cedula conyuge',
@@ -354,7 +357,6 @@ class ReporteSolicitudes
             'Usuario',
             'Estado',
             'Codigo estado',
-            'Motivo',
             'Fecha estado',
             'Tipo',
             'Codigo documento',
@@ -362,12 +364,15 @@ class ReporteSolicitudes
             'Tiempo convivencia',
             'Tipo salario',
             'Fecha solicitud',
+            'Fecha aprobacion',
+            'Tiempo de respuesta',
             'Tipo pago',
             'Numero cuenta',
             'Empresa labora',
         ];
 
-        $rows = $models->map(fn($m) => [
+        $rows = $models->map(fn ($m) => [
+            $m->ruuid,
             $m->getId(),
             $m->getCedtra(),
             $m->getCedcon(),
@@ -376,7 +381,7 @@ class ReporteSolicitudes
             $m->getSegape(),
             $m->getPrinom(),
             $m->getSegnom(),
-            $m->getFecnac(),
+            $this->formatFecha($m->getFecnac()),
             $m->getCiunac(),
             $m->getSexo(),
             $m->getEstciv(),
@@ -390,21 +395,22 @@ class ReporteSolicitudes
             $m->getCelular(),
             $m->getEmail(),
             $m->getNivedu(),
-            $m->getFecing(),
+            $this->formatFecha($m->getFecing()),
             $m->getCodocu(),
             $m->getSalario(),
             $m->getCaptra(),
             $m->getUsuario(),
             $m->getEstado(),
             $m->getCodest(),
-            $m->getMotivo(),
-            $m->getFecest(),
+            $this->formatFecha($m->getFecest()),
             $m->getTipo(),
             $m->getCoddoc(),
             $m->getDocumento(),
             $m->getTiecon(),
             $m->getTipsal(),
-            $m->getFecsol(),
+            $this->formatFecha($m->getFecsol()),
+            $this->fechaAprobacion($m),
+            $this->tiempoRespuesta($this->formatFecha($m->getFecsol()), $this->fechaAprobacion($m)),
             $m->getTippag(),
             $m->getNumcue(),
             $m->getEmpresalab(),
@@ -423,6 +429,7 @@ class ReporteSolicitudes
     private function datasetMercurio34($models): array
     {
         $headers = [
+            'Radicado',
             'Estado',
             'Id',
             'Log',
@@ -448,7 +455,6 @@ class ReporteSolicitudes
             'Usuario',
             'Estado',
             'Codigo estado',
-            'Motivo',
             'Fecha estado',
             'Codigo beneficiario',
             'Tipo',
@@ -456,9 +462,12 @@ class ReporteSolicitudes
             'Documento',
             'Cedula acude',
             'Fecha solicitud',
+            'Fecha aprobacion',
+            'Tiempo de respuesta',
         ];
 
-        $rows = $models->map(fn($m) => [
+        $rows = $models->map(fn ($m) => [
+            $m->ruuid,
             $m->getEstado(),
             $m->getId(),
             $m->getLog(),
@@ -471,7 +480,7 @@ class ReporteSolicitudes
             $m->getSegape(),
             $m->getPrinom(),
             $m->getSegnom(),
-            $m->getFecnac(),
+            $this->formatFecha($m->getFecnac()),
             $m->getCiunac(),
             $m->getSexo(),
             $m->getParent(),
@@ -484,14 +493,15 @@ class ReporteSolicitudes
             $m->getUsuario(),
             $m->getEstado(),
             $m->getCodest(),
-            $m->getMotivo(),
-            $m->getFecest(),
+            $this->formatFecha($m->getFecest()),
             $m->getCodben(),
             $m->getTipo(),
             $m->getCoddoc(),
             $m->getDocumento(),
             $m->getCedacu(),
-            $m->getFecsol(),
+            $this->formatFecha($m->getFecsol()),
+            $this->fechaAprobacion($m),
+            $this->tiempoRespuesta($this->formatFecha($m->getFecsol()), $this->fechaAprobacion($m)),
         ])->all();
 
         return [
@@ -499,5 +509,59 @@ class ReporteSolicitudes
             'headers' => $headers,
             'rows' => $rows,
         ];
+    }
+
+    /**
+     * Devuelve la fecha de aprobacion de una solicitud en formato `Y-m-d`.
+     * Si `fecapr` esta vacia, recurre a `fecest` (fecha del ultimo cambio de estado).
+     */
+    private function fechaAprobacion(object $model): ?string
+    {
+        $fecapr = method_exists($model, 'getFecapr') ? $model->getFecapr() : null;
+        if ($this->formatFecha($fecapr) !== null) {
+            return $this->formatFecha($fecapr);
+        }
+
+        $fecest = method_exists($model, 'getFecest') ? $model->getFecest() : null;
+
+        return $this->formatFecha($fecest);
+    }
+
+    /**
+     * Diferencia en dias entre la fecha de solicitud y la fecha de aprobacion.
+     * Devuelve `null` si alguna de las dos fechas no esta disponible.
+     */
+    private function tiempoRespuesta(?string $fecsol, ?string $fecapr): ?int
+    {
+        if ($fecsol === null || $fecapr === null) {
+            return null;
+        }
+
+        try {
+            return Carbon::parse($fecapr)->diffInDays(Carbon::parse($fecsol));
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
+     * Normaliza cualquier valor de fecha a string `Y-m-d`.
+     * Devuelve `null` si el valor es vacio o no se puede parsear.
+     */
+    private function formatFecha(mixed $value): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if ($value instanceof DateTimeInterface) {
+            return Carbon::instance($value)->format('Y-m-d');
+        }
+
+        try {
+            return Carbon::parse($value)->format('Y-m-d');
+        } catch (\Throwable) {
+            return null;
+        }
     }
 }
