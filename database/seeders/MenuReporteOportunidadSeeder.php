@@ -28,8 +28,8 @@ class MenuReporteOportunidadSeeder extends Seeder
 
         $opciones = json_encode([
             'index' => true,
-            'exportarpaporaportante' => true,
-            'exportarportrabajador' => true,
+            'previsualizar' => true,
+            'exportar' => true,
         ]);
 
         foreach (['01', '02'] as $tipfun) {

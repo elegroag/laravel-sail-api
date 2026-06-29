@@ -2,8 +2,9 @@
 
 namespace App\Services\Reports;
 
-use App\Services\Utils\CalculatorDias;
+use App\Models\Mercurio31;
 use App\Support\AfiliacionNormalizer;
+use App\Support\DiasHabilesCalculator;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -17,20 +18,22 @@ class OportunidadAfiliacionService
     {
         $tipos = $this->resolveTipos($filtros['tipafis'] ?? null);
         $estados = $this->normalizeEstados($filtros['estado'] ?? null);
-        $campoFecha = $filtros['campo_fecha'] ?? 'fecsol';
         $fecini = $filtros['fecini'] ?? null;
         $fecfin = $filtros['fecfin'] ?? null;
         $nit = isset($filtros['nit']) ? trim((string) $filtros['nit']) : '';
         $cedtra = isset($filtros['cedtra']) ? trim((string) $filtros['cedtra']) : '';
+        $soloVencidos = filter_var($filtros['solo_vencidos'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $soloPendientes = filter_var($filtros['solo_pendientes'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $umbral = (int) config('reportes.oportunidad_umbral_dias', 3);
 
+        $titularesIndex = $this->buildTitularesIndex();
         $dataset = [];
 
         foreach ($tipos as $tipopc => $config) {
             $query = $config['model']::query();
-            $dateField = $this->resolveDateField($campoFecha, $config);
 
             if ($fecini && $fecfin) {
-                $query->whereBetween($dateField, [
+                $query->whereBetween('fecsol', [
                     $fecini.' 00:00:00',
                     Carbon::parse($fecfin)->endOfDay()->format('Y-m-d H:i:s'),
                 ]);
@@ -53,43 +56,112 @@ class OportunidadAfiliacionService
                 });
             }
 
-            $query->orderBy('id');
-
-            if ($this->hasColumn($config['model'], 'nit')) {
-                $query->orderBy('nit');
+            if ($soloPendientes && $this->hasColumn($config['model'], 'fecapr')) {
+                $this->aplicarFiltroSinFechaAprobacion($query);
             }
 
+            $query->orderBy('fecsol')->orderBy('id');
+
             foreach ($query->cursor() as $model) {
-                $record = AfiliacionNormalizer::normalize($model, (int) $tipopc, $config);
-                $record['dias_vencidos'] = CalculatorDias::calcular(
-                    (string) $tipopc,
-                    (int) $record['id'],
-                    $record['fecsol'] ?? ''
+                $record = AfiliacionNormalizer::normalize($model, (int) $tipopc, $config, $titularesIndex);
+
+                $fin = $record['fecha_cierre'];
+                $record['dias_habiles'] = DiasHabilesCalculator::between($record['fecsol'], $fin);
+                $record['estado_oportunidad'] = $this->resolverEstadoOportunidad(
+                    $record['fecapr'],
+                    $record['dias_habiles'],
+                    $umbral
                 );
+
+                if ($soloVencidos && $record['estado_oportunidad'] !== 'VENCIDO') {
+                    continue;
+                }
+
                 $dataset[] = $record;
             }
         }
+
+        usort($dataset, function (array $a, array $b): int {
+            $fechaCompare = strcmp((string) ($a['fecsol'] ?? ''), (string) ($b['fecsol'] ?? ''));
+
+            return $fechaCompare !== 0 ? $fechaCompare : ((int) $a['id'] <=> (int) $b['id']);
+        });
 
         return $dataset;
     }
 
     /**
-     * @return array<int, array<string, mixed>>
+     * @return array{total: int, en_termino: int, vencido: int, en_tramite: int}
      */
-    public function buildDatasetGroupedByAportante(array $filtros = []): array
+    public function buildResumen(array $filtros = []): array
     {
         $dataset = $this->buildDataset($filtros);
 
-        usort($dataset, function (array $a, array $b): int {
-            $nitCompare = strcmp($a['nit'] ?: $a['razsoc'], $b['nit'] ?: $b['razsoc']);
-            if ($nitCompare !== 0) {
-                return $nitCompare;
-            }
+        $resumen = [
+            'total' => count($dataset),
+            'en_termino' => 0,
+            'vencido' => 0,
+            'en_tramite' => 0,
+        ];
 
-            return strcmp($a['razsoc'], $b['razsoc']) ?: ($a['id'] <=> $b['id']);
+        foreach ($dataset as $row) {
+            $estado = $row['estado_oportunidad'] ?? '';
+            match ($estado) {
+                'EN_TERMINO' => $resumen['en_termino']++,
+                'VENCIDO' => $resumen['vencido']++,
+                'EN_TRAMITE' => $resumen['en_tramite']++,
+                default => null,
+            };
+        }
+
+        return $resumen;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function buildTitularesIndex(): array
+    {
+        return Mercurio31::query()
+            ->select(['cedtra', 'priape', 'segape', 'prinom', 'segnom'])
+            ->get()
+            ->mapWithKeys(function (Mercurio31 $trabajador): array {
+                $cedtra = trim((string) $trabajador->getCedtra());
+                if ($cedtra === '') {
+                    return [];
+                }
+
+                $nombre = trim(implode(' ', array_filter([
+                    $trabajador->getPriape(),
+                    $trabajador->getSegape(),
+                    $trabajador->getPrinom(),
+                    $trabajador->getSegnom(),
+                ])));
+
+                return [$cedtra => $nombre];
+            })
+            ->all();
+    }
+
+    private function aplicarFiltroSinFechaAprobacion(Builder $query): void
+    {
+        $query->where(function (Builder $builder): void {
+            $builder->whereNull('fecapr')
+                ->orWhere('fecapr', '0000-00-00');
         });
+    }
 
-        return $dataset;
+    private function resolverEstadoOportunidad(?string $fecapr, ?int $diasHabiles, int $umbral): string
+    {
+        if ($diasHabiles === null) {
+            return 'EN_TRAMITE';
+        }
+
+        if ($fecapr === null || $fecapr === '' || $fecapr === '0000-00-00') {
+            return $diasHabiles > $umbral ? 'VENCIDO' : 'EN_TRAMITE';
+        }
+
+        return $diasHabiles > $umbral ? 'VENCIDO' : 'EN_TERMINO';
     }
 
     /**
@@ -136,26 +208,6 @@ class OportunidadAfiliacionService
     }
 
     /**
-     * @param  array<string, mixed>  $config
-     */
-    private function resolveDateField(string $campoFecha, array $config): string
-    {
-        if ($campoFecha === 'sat_fecapr' && ! ($config['has_sat_fecapr'] ?? false)) {
-            return 'fecapr';
-        }
-
-        if (! in_array($campoFecha, ['fecsol', 'sat_fecapr', 'fecapr'], true)) {
-            return 'fecsol';
-        }
-
-        return $campoFecha;
-    }
-
-    /**
-     * Verifica si la tabla del modelo tiene la columna indicada,
-     * para evitar SQL errores al ordenar por columnas inexistentes
-     * (Mercurio36/38/39 no tienen `nit`).
-     *
      * @param  class-string<Model>  $modelClass
      */
     private function hasColumn(string $modelClass, string $column): bool

@@ -6,18 +6,33 @@ use Carbon\Carbon;
 
 class AfiliacionNormalizer
 {
-    public static function normalize(object $model, int $tipopc, array $config): array
+    /**
+     * @param  array<string, string>  $titularesIndex  cedtra => nombre
+     */
+    public static function normalize(object $model, int $tipopc, array $config, array $titularesIndex = []): array
     {
         $tipdoc = self::tipdoc($model);
         $documento = self::documento($model, $tipopc, $config);
+        $titularField = $config['titular_field'] ?? null;
+        $cedtraTitular = $titularField ? trim((string) self::value($model, $titularField)) : '';
+
+        $fecaprRaw = self::value($model, $config['afiliacion_field'] ?? 'fecapr');
+        $fecestRaw = self::value($model, 'fecest');
+        $estadoCodigo = strtoupper(trim((string) self::value($model, 'estado')));
+        $esPendiente = in_array($estadoCodigo, ['P', 'T', 'D'], true);
+
+        $fecaprFmt = self::formatFecha($fecaprRaw);
+        $fecestFmt = self::formatFecha($fecestRaw);
+        $fechaCierre = $esPendiente ? null : ($fecaprFmt ?? $fecestFmt);
 
         return [
             'tipopc' => $tipopc,
             'label' => $config['label'],
             'id' => self::value($model, 'id'),
             'fecsol' => self::formatFecha(self::value($model, 'fecsol')),
-            'fecapr' => self::fechaAfiliacion($model, $config),
-            'sat_fecapr' => self::fechaRegistroSisu($model, $config),
+            'fecapr' => $esPendiente ? null : $fecaprFmt,
+            'fecest' => $esPendiente ? null : $fecestFmt,
+            'fecha_cierre' => $fechaCierre,
             'estado' => self::estadoDetalle($model),
             'estado_codigo' => self::value($model, 'estado'),
             'tipdoc' => $tipdoc,
@@ -29,6 +44,8 @@ class AfiliacionNormalizer
             'razsoc' => self::razsoc($model),
             'cedtra' => self::value($model, 'cedtra'),
             'cedcon' => self::value($model, 'cedcon'),
+            'cedtra_titular' => $cedtraTitular,
+            'nombre_titular' => $cedtraTitular !== '' ? ($titularesIndex[$cedtraTitular] ?? '') : '',
             'ruuid' => self::value($model, 'ruuid'),
         ];
     }
@@ -99,16 +116,19 @@ class AfiliacionNormalizer
     {
         $field = $config['afiliacion_field'] ?? 'fecapr';
 
-        return self::formatFecha(self::value($model, $field));
-    }
-
-    public static function fechaRegistroSisu(object $model, array $config): ?string
-    {
-        if (! ($config['has_sat_fecapr'] ?? false)) {
-            return self::formatFecha(self::value($model, 'fecapr'));
+        $value = self::value($model, $field);
+        $fecha = self::formatFecha($value);
+        if ($fecha !== null) {
+            return $fecha;
         }
 
-        return self::formatFecha(self::value($model, 'sat_fecapr') ?: self::value($model, 'fecapr'));
+        $fecest = self::value($model, 'fecest');
+        $fechaEst = self::formatFecha($fecest);
+        if ($fechaEst !== null) {
+            return $fechaEst;
+        }
+
+        return null;
     }
 
     public static function estadoDetalle(object $model): string
@@ -117,7 +137,12 @@ class AfiliacionNormalizer
             return (string) $model->getEstadoDetalle();
         }
 
-        return (string) (self::value($model, 'estado') ?? '');
+        $estado = self::value($model, 'estado');
+        if (function_exists('estado_detalle_value') && is_string($estado) && $estado !== '') {
+            return (string) (estado_detalle_value($estado) ?? $estado);
+        }
+
+        return (string) ($estado ?? '');
     }
 
     private static function value(object $model, string $field): mixed

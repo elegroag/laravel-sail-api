@@ -9,11 +9,11 @@ Route::middleware(['cajas.auth'])->group(function () {
         Route::get('/index', [ReporteOportunidadAfiliacionController::class, 'index'])
             ->name('cajas.reporte-oportunidad.index');
 
-        Route::post('/por-aportante', [ReporteOportunidadAfiliacionController::class, 'exportarPorAportante'])
-            ->name('cajas.reporte-oportunidad.por-aportante');
+        Route::get('/previsualizar', [ReporteOportunidadAfiliacionController::class, 'previsualizar'])
+            ->name('cajas.reporte-oportunidad.previsualizar');
 
-        Route::post('/por-trabajador', [ReporteOportunidadAfiliacionController::class, 'exportarPorTrabajador'])
-            ->name('cajas.reporte-oportunidad.por-trabajador');
+        Route::post('/exportar', [ReporteOportunidadAfiliacionController::class, 'exportar'])
+            ->name('cajas.reporte-oportunidad.exportar');
     });
 
     Route::get('/cajas/reportesol/index', [ReportesolController::class, 'index'])

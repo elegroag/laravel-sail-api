@@ -19,13 +19,13 @@ class ReporteOportunidadAfiliacionRequest extends FormRequest
         return [
             'fecini' => ['required', 'date_format:Y-m-d'],
             'fecfin' => ['required', 'date_format:Y-m-d', 'after_or_equal:fecini'],
-            'campo_fecha' => ['nullable', 'in:fecsol,sat_fecapr,fecapr'],
             'tipafis' => ['nullable', 'array'],
             'tipafis.*' => ['integer', 'in:1,2,3,4,9,10,11'],
             'estado' => ['nullable'],
             'nit' => ['nullable', 'string', 'max:20'],
             'cedtra' => ['nullable', 'string', 'max:20'],
-            'modalidad' => ['nullable', 'in:aportante,trabajador'],
+            'solo_vencidos' => ['nullable', 'boolean'],
+            'solo_pendientes' => ['nullable', 'boolean'],
         ];
     }
 
@@ -37,9 +37,10 @@ class ReporteOportunidadAfiliacionRequest extends FormRequest
             ]);
         }
 
-        if (! $this->filled('campo_fecha')) {
-            $this->merge(['campo_fecha' => 'fecsol']);
-        }
+        $this->merge([
+            'solo_vencidos' => filter_var($this->input('solo_vencidos', false), FILTER_VALIDATE_BOOLEAN),
+            'solo_pendientes' => filter_var($this->input('solo_pendientes', false), FILTER_VALIDATE_BOOLEAN),
+        ]);
     }
 
     /**
