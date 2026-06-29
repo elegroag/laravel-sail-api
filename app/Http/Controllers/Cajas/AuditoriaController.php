@@ -78,22 +78,58 @@ class AuditoriaController extends ApplicationController
     private function getDocumento($mmercurio, string $tipopc): string
     {
         return match ($tipopc) {
-            '1', '9', '10', '11', '12' => $mmercurio->getCedtra(),
-            '2' => $mmercurio->getNit(),
-            '3' => $mmercurio->getCedcon(),
-            default => $mmercurio->getDocumento(),
+            '1', '9', '10', '11', '12', '13' => $this->callGetter($mmercurio, 'getCedtra'),
+            '2' => $this->callGetter($mmercurio, 'getNit'),
+            '3' => $this->callGetter($mmercurio, 'getCedcon'),
+            '4' => $this->callGetter($mmercurio, 'getNumdoc'),
+            default => $this->callGetter($mmercurio, 'getDocumento'),
         };
     }
 
     private function getNombre($mmercurio, string $tipopc): string
     {
         return match ($tipopc) {
-            '1', '3', '8', '9', '10' => $mmercurio->getNombre(),
-            '2' => $mmercurio->getRazsoc(),
-            '5' => $mmercurio->getDocumentoDetalle(),
-            '7' => $mmercurio->getNomtra(),
-            default => $mmercurio->getNombre(),
+            '2' => $this->callGetter($mmercurio, 'getRazsoc'),
+            '5' => $this->callGetter($mmercurio, 'getDocumentoDetalle'),
+            '7' => $this->callGetter($mmercurio, 'getNomtra'),
+            '8' => $this->callGetter($mmercurio, 'getNombre'),
+            default => $this->resolveNombrePersona($mmercurio),
         };
+    }
+
+    private function resolveNombrePersona($mmercurio): string
+    {
+        if (method_exists($mmercurio, 'getNombre')) {
+            $nombre = trim((string) $mmercurio->getNombre());
+            if ($nombre !== '') {
+                return $nombre;
+            }
+        }
+
+        if (method_exists($mmercurio, 'getNombreCompleto')) {
+            $nombre = trim((string) $mmercurio->getNombreCompleto());
+            if ($nombre !== '') {
+                return $nombre;
+            }
+        }
+
+        return trim(implode(' ', array_filter([
+            $this->callGetter($mmercurio, 'getPrinom'),
+            $this->callGetter($mmercurio, 'getSegnom'),
+            $this->callGetter($mmercurio, 'getPriape'),
+            $this->callGetter($mmercurio, 'getSegape'),
+        ], fn ($part) => $part !== '')));
+    }
+
+    private function callGetter($mmercurio, string $getter): string
+    {
+        if (! method_exists($mmercurio, $getter)) {
+            return '';
+        }
+
+        $value = $mmercurio->{$getter}();
+
+        return trim((string) ($value ?? ''));
     }
 
     private function getResponsable($mmercurio): string
