@@ -2,7 +2,7 @@
 
 if (! function_exists('sexos_array')) {
 
-    function sexos_array()
+    function sexos_array(): array
     {
         return [
             'M' => 'Masculino',
@@ -14,7 +14,7 @@ if (! function_exists('sexos_array')) {
 
 if (! function_exists('estados_civiles_array')) {
 
-    function estados_civiles_array()
+    function estados_civiles_array(): array
     {
         return [
             '1' => 'Soltero',
@@ -29,7 +29,7 @@ if (! function_exists('estados_civiles_array')) {
 
 if (! function_exists('condicionSN')) {
 
-    function condicionSN()
+    function condicionSN(): array
     {
         return [
             'S' => 'Sí',
@@ -40,7 +40,7 @@ if (! function_exists('condicionSN')) {
 
 if (! function_exists('tipo_discapacidad_array')) {
 
-    function tipo_discapacidad_array()
+    function tipo_discapacidad_array(): array
     {
         return [
             '00' => 'Ninguna',
@@ -58,7 +58,7 @@ if (! function_exists('tipo_discapacidad_array')) {
 
 if (! function_exists('nivel_educativo_array')) {
 
-    function nivel_educativo_array()
+    function nivel_educativo_array(): array
     {
         return [
             '1' => 'Preescolar',
@@ -80,7 +80,7 @@ if (! function_exists('nivel_educativo_array')) {
 
 if (! function_exists('tipo_contrato')) {
 
-    function tipo_contrato()
+    function tipo_contrato(): array
     {
         return [
             'F' => 'Fijo',
@@ -91,7 +91,7 @@ if (! function_exists('tipo_contrato')) {
 
 if (! function_exists('vivienda_array')) {
 
-    function vivienda_array()
+    function vivienda_array(): array
     {
         return [
             'N' => 'No disponible',
@@ -105,7 +105,7 @@ if (! function_exists('vivienda_array')) {
 
 if (! function_exists('orientacion_sexual_array')) {
 
-    function orientacion_sexual_array()
+    function orientacion_sexual_array(): array
     {
         return [
             '1' => 'Heterosexual',
@@ -119,7 +119,7 @@ if (! function_exists('orientacion_sexual_array')) {
 
 if (! function_exists('vulnerabilidades_array')) {
 
-    function vulnerabilidades_array()
+    function vulnerabilidades_array(): array
     {
         return [
             '1' => 'Desplazado',
@@ -142,7 +142,7 @@ if (! function_exists('vulnerabilidades_array')) {
 
 if (! function_exists('pertenencia_etnica_array')) {
 
-    function pertenencia_etnica_array()
+    function pertenencia_etnica_array(): array
     {
         return [
             '1' => 'Afrocolombiano',
@@ -160,7 +160,7 @@ if (! function_exists('pertenencia_etnica_array')) {
 
 if (! function_exists('tipo_pago_array')) {
 
-    function tipo_pago_array()
+    function tipo_pago_array(): array
     {
         return [
             'T' => 'Pendiente forma de pago',
@@ -173,7 +173,7 @@ if (! function_exists('tipo_pago_array')) {
 
 if (! function_exists('tipo_cuenta_array')) {
 
-    function tipo_cuenta_array()
+    function tipo_cuenta_array(): array
     {
         return [
             'A' => 'Ahorros',
@@ -184,7 +184,7 @@ if (! function_exists('tipo_cuenta_array')) {
 
 if (! function_exists('tipo_jornada_array')) {
 
-    function tipo_jornada_array()
+    function tipo_jornada_array(): array
     {
         return [
             'C' => 'Completa',
@@ -196,7 +196,7 @@ if (! function_exists('tipo_jornada_array')) {
 
 if (! function_exists('parentesco_array')) {
 
-    function parentesco_array()
+    function parentesco_array(): array
     {
         return [
             "1" => "Hijo",
@@ -211,7 +211,7 @@ if (! function_exists('parentesco_array')) {
 
 if (! function_exists('huerfano_array')) {
 
-    function huerfano_array()
+    function huerfano_array(): array
     {
         return [
             "0" => "No aplica",
@@ -223,7 +223,7 @@ if (! function_exists('huerfano_array')) {
 
 if (! function_exists('tipo_hijo_array')) {
 
-    function tipo_hijo_array()
+    function tipo_hijo_array(): array
     {
         return [
             "0" => "No aplica",
@@ -239,7 +239,7 @@ if (! function_exists('tipo_hijo_array')) {
 
 if (! function_exists('calendario_array')) {
 
-    function calendario_array()
+    function calendario_array(): array
     {
         return [
             "A" => "A",
@@ -252,7 +252,7 @@ if (! function_exists('calendario_array')) {
 
 if (! function_exists('convive_array')) {
 
-    function convive_array()
+    function convive_array(): array
     {
         return [
             '1' => 'Conyuge',
@@ -265,7 +265,7 @@ if (! function_exists('convive_array')) {
 
 if (! function_exists('captra_array')) {
 
-    function captra_array()
+    function captra_array(): array
     {
         return [
             'N' => 'NINGUNA',

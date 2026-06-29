@@ -1,10 +1,7 @@
 <?php
 
 if (! function_exists('calemp_array')) {
-    /**
-     * @return array
-     */
-    function calemp_array()
+    function calemp_array(): array
     {
         return [
             'E' => 'Empresa',
@@ -17,10 +14,7 @@ if (! function_exists('calemp_array')) {
 }
 
 if (! function_exists('coddoc_repleg_array')) {
-    /**
-     * @return array
-     */
-    function coddoc_repleg_array()
+    function coddoc_repleg_array(): array
     {
         return [
             1 => 'CC',
@@ -42,10 +36,7 @@ if (! function_exists('coddoc_repleg_array')) {
 }
 
 if (! function_exists('tipper_array')) {
-    /**
-     * @return array
-     */
-    function tipper_array()
+    function tipper_array(): array
     {
         return [
             'N' => 'Natural',
@@ -55,11 +46,7 @@ if (! function_exists('tipper_array')) {
 }
 
 if (! function_exists('calemp_detalle_value')) {
-    /**
-     * @param  string  $calemp
-     * @return string|null
-     */
-    function calemp_detalle_value($calemp)
+    function calemp_detalle_value(string $calemp): ?string
     {
         switch ($calemp) {
             case 'E':
@@ -81,15 +68,16 @@ if (! function_exists('calemp_detalle_value')) {
                 return null;
                 break;
         }
+        return null;
     }
 }
 
 if (! function_exists('calemp_use_tipo_value')) {
     /**
      * @param  string  $detalle
-     * @return string|null
+     * @return string
      */
-    function calemp_use_tipo_value($detalle)
+    function calemp_use_tipo_value(string $detalle): ?string
     {
         switch (strtolower($detalle)) {
             case 'empresa':
@@ -114,17 +102,14 @@ if (! function_exists('calemp_use_tipo_value')) {
                 return null;
                 break;
         }
+        return null;
     }
 }
 
 if (! function_exists('estado_detalle_value')) {
-    /**
-     * @param  string  $estado
-     * @return string
-     */
-    function estado_detalle_value($estado)
+    function estado_detalle_value(string $estado): ?string
     {
-        $return = '';
+        $return = null;
         if ($estado == 'T') {
             $return = 'Temporal';
         }
@@ -140,12 +125,21 @@ if (! function_exists('estado_detalle_value')) {
         if ($estado == 'P') {
             $return = 'Pendiente';
         }
+        if ($estado == 'I') {
+            $return = 'Inactivo';
+        }
+        if ($estado == 'M') {
+            $return = 'Muerto';
+        }
+        if ($estado == 'B') {
+            $return = 'Bloqueado';
+        }
         return $return;
     }
 }
 
 if (! function_exists('get_array_tipos')) {
-    function get_array_tipos()
+    function get_array_tipos(): array
     {
         return [
             'P' => 'Particular',
@@ -160,7 +154,7 @@ if (! function_exists('get_array_tipos')) {
 }
 
 if (! function_exists('get_tipo_detalle')) {
-    function get_tipo_detalle($tipo)
+    function get_tipo_detalle(string $tipo): ?string
     {
         switch ($tipo) {
             case 'P':
@@ -185,12 +179,12 @@ if (! function_exists('get_tipo_detalle')) {
                 return 'Servicio domestico';
                 break;
         }
-        return false;
+        return null;
     }
 }
 
 if (! function_exists('get_user_estados')) {
-    function get_user_estados()
+    function get_user_estados(): array
     {
         return [
             'A' => 'Activo',
@@ -202,7 +196,7 @@ if (! function_exists('get_user_estados')) {
 }
 
 if (! function_exists('get_user_estado_detalle')) {
-    function get_user_estado_detalle($estado)
+    function get_user_estado_detalle(string $estado): ?string
     {
         switch ($estado) {
             case 'A':
@@ -218,27 +212,21 @@ if (! function_exists('get_user_estado_detalle')) {
                 return 'Bloqueado';
                 break;
         }
-        return false;
+        return null;
     }
 }
 
 
 if (! function_exists('coddoc_repleg_detalle')) {
-    /**
-     * @return array
-     */
-    function coddoc_repleg_detalle($coddoc)
+    function coddoc_repleg_detalle(int $coddoc): string
     {
-        return coddoc_repleg_array()[$coddoc] ?? false;
+        return coddoc_repleg_array()[$coddoc] ?? '';
     }
 }
 
 
 if (! function_exists('tipo_document_repleg_detalle')) {
-    /**
-     * @return array
-     */
-    function tipo_document_repleg_detalle()
+    function tipo_document_repleg_detalle(): array
     {
         return [
             'CC' => 'Cedula de ciudadania',
@@ -262,7 +250,7 @@ if (! function_exists('tipo_document_repleg_detalle')) {
 
 if (! function_exists('tipsal_array')) {
 
-    function tipsal_array()
+    function tipsal_array(): array
     {
         return [
             'F' => 'FIJO',
@@ -274,7 +262,7 @@ if (! function_exists('tipsal_array')) {
 
 if (! function_exists('categoria_array')) {
 
-    function categoria_array()
+    function categoria_array(): array
     {
         return [
             'A' => 'A',

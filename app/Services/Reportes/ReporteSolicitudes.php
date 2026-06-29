@@ -2,6 +2,8 @@
 
 namespace App\Services\Reportes;
 
+use App\Models\Gener02;
+use App\Models\Gener18;
 use App\Models\Mercurio30;
 use App\Models\Mercurio31;
 use App\Models\Mercurio32;
@@ -12,6 +14,12 @@ use DateTimeInterface;
 
 class ReporteSolicitudes
 {
+    /** @var array<string, string>|null */
+    private ?array $tiposDocumentoCache = null;
+
+    /** @var array<string, string>|null */
+    private ?array $usuariosCache = null;
+
     /**
      * Devuelve el dataset (cabeceras + filas) para un reporte de solicitudes
      * segun el tipo indicado. El controlador se encarga de serializar el
@@ -134,16 +142,16 @@ class ReporteSolicitudes
             'Tipo empresa',
         ];
 
-        $rows = $models->map(fn ($m) => [
+        $rows = $models->map(fn($m) => [
             $m->ruuid,
-            $m->getEstado(),
+            $this->lookupEstado($m->getEstado()),
             $this->formatFecha($m->getFecsol()),
             $m->getNit(),
-            $m->getTipdoc(),
+            $this->lookup($this->catalogoTiposDocumento(), $m->getTipdoc()),
             $m->getRazsoc(),
             $m->getSigla(),
             $m->getDigver(),
-            $m->getCalemp(),
+            $this->lookup(calemp_array(), $m->getCalemp()),
             $m->getCedrep(),
             $m->getRepleg(),
             $m->getDireccion(),
@@ -160,14 +168,14 @@ class ReporteSolicitudes
             $m->getCodest(),
             $this->fechaAprobacion($m),
             $this->tiempoRespuesta($this->formatFecha($m->getFecsol()), $this->fechaAprobacion($m)),
-            $m->getUsuario(),
+            $this->lookup($this->catalogoUsuarios(), $m->getUsuario()),
             $m->getDirpri(),
             $m->getCiupri(),
             $m->getTelpri(),
             $m->getCelpri(),
             $m->getEmailpri(),
-            $m->getTipper(),
-            $m->getCoddocrepleg(),
+            $this->lookup(tipper_array(), $m->getTipper()),
+            $this->lookup(coddoc_repleg_array(), $m->getCoddocrepleg()),
             $m->getPriaperepleg(),
             $m->getSegaperepleg(),
             $m->getPrinomrepleg(),
@@ -177,7 +185,7 @@ class ReporteSolicitudes
             $m->getPrinom(),
             $m->getSegnom(),
             $m->getMatmer(),
-            $m->getTipemp(),
+            $this->lookup(get_array_tipos(), $m->getTipemp()),
         ])->all();
 
         return [
@@ -236,9 +244,9 @@ class ReporteSolicitudes
             'Estado',
             'Codigo estado',
             'Fecha estado',
-            'Tipo',
-            'Codigo documento',
-            'Documento',
+            'Tipo solicitante',
+            'Tipo documento solicitante',
+            'Documento solicitante',
             'Factor vulnerabilidad',
             'Pertenencia etnica',
             'Direccion laboral',
@@ -253,23 +261,23 @@ class ReporteSolicitudes
             'Tipo cuenta',
         ];
 
-        $rows = $models->map(fn ($m) => [
+        $rows = $models->map(fn($m) => [
             $m->ruuid,
-            $m->getEstado(),
+            $this->lookupEstado($m->getEstado()),
             $m->getNit(),
             $m->getRazsoc(),
             $m->getCedtra(),
-            $m->getTipdoc(),
+            $this->lookup($this->catalogoTiposDocumento(), $m->getTipdoc()),
             $m->getPriape(),
             $m->getSegape(),
             $m->getPrinom(),
             $m->getSegnom(),
             $this->formatFecha($m->getFecnac()),
             $m->getCiunac(),
-            $m->getSexo(),
-            $m->getOrisex(),
-            $m->getEstciv(),
-            $m->getCabhog(),
+            $this->lookup(sexos_array(), $m->getSexo()),
+            $this->lookup(orientacion_sexual_array(), $m->getOrisex()),
+            $this->lookup(estados_civiles_array(), $m->getEstciv()),
+            $this->lookup(condicionSN(), $m->getCabhog()),
             $m->getCodciu(),
             $m->getCodzon(),
             $m->getDireccion(),
@@ -282,36 +290,36 @@ class ReporteSolicitudes
             $this->tiempoRespuesta($this->formatFecha($m->getFecsol()), $this->fechaAprobacion($m)),
             $this->formatFecha($m->getFecing()),
             $m->getSalario(),
-            $m->getCaptra(),
-            $m->getTipdis(),
-            $m->getNivedu(),
-            $m->getRural(),
+            $this->lookup(captra_array(), $m->getCaptra()),
+            $this->lookup(tipo_discapacidad_array(), $m->getTipdis()),
+            $this->lookup(nivel_educativo_array(), $m->getNivedu()),
+            $this->lookup(condicionSN(), $m->getRural()),
             $m->getHoras(),
-            $m->getTipcon(),
-            $m->getTrasin(),
-            $m->getVivienda(),
+            $this->lookup(tipo_contrato(), $m->getTipcon()),
+            $this->lookup(condicionSN(), $m->getTrasin()),
+            $this->lookup(vivienda_array(), $m->getVivienda()),
             $m->getTipafi(),
             $m->getCargo(),
-            $m->getAutoriza(),
-            $m->getUsuario(),
-            $m->getEstado(),
+            $this->lookup(condicionSN(), $m->getAutoriza()),
+            $this->lookup($this->catalogoUsuarios(), $m->getUsuario()),
+            $this->lookupEstado($m->getEstado()),
             $m->getCodest(),
             $this->formatFecha($m->getFecest()),
-            $m->getTipo(),
-            $m->getCoddoc(),
+            $this->lookup(solicitud_tipo_actualizacion_array(), $m->getTipo()),
+            $this->lookup($this->catalogoTiposDocumento(), $m->getCoddoc()),
             $m->getDocumento(),
-            $m->getFacvul(),
-            $m->getPeretn(),
+            $this->lookup(vulnerabilidades_array(), $m->getFacvul()),
+            $this->lookup(pertenencia_etnica_array(), $m->getPeretn()),
             $m->getDirlab(),
-            $m->getRuralt(),
+            $this->lookup(condicionSN(), $m->getRuralt()),
             $m->getComision(),
-            $m->getTipjor(),
+            $this->lookup(tipo_jornada_array(), $m->getTipjor()),
             $m->getCodsuc(),
-            $m->getTipsal(),
-            $m->getTippag(),
+            $this->lookup(tipsal_array(), $m->getTipsal()),
+            $this->lookup(tipo_pago_array(), $m->getTippag()),
             $m->getNumcue(),
             $m->getCodban(),
-            $m->getTipcue(),
+            $this->lookup(tipo_cuenta_array(), $m->getTipcue()),
         ])->all();
 
         return [
@@ -371,47 +379,47 @@ class ReporteSolicitudes
             'Empresa labora',
         ];
 
-        $rows = $models->map(fn ($m) => [
+        $rows = $models->map(fn($m) => [
             $m->ruuid,
             $m->getId(),
             $m->getCedtra(),
             $m->getCedcon(),
-            $m->getTipdoc(),
+            $this->lookup($this->catalogoTiposDocumento(), $m->getTipdoc()),
             $m->getPriape(),
             $m->getSegape(),
             $m->getPrinom(),
             $m->getSegnom(),
             $this->formatFecha($m->getFecnac()),
             $m->getCiunac(),
-            $m->getSexo(),
-            $m->getEstciv(),
-            $m->getComper(),
+            $this->lookup(sexos_array(), $m->getSexo()),
+            $this->lookup(estados_civiles_array(), $m->getEstciv()),
+            $this->lookup(convive_array(), $m->getComper()),
             $m->getCiures(),
             $m->getCodzon(),
-            $m->getTipviv(),
+            $this->lookup(vivienda_array(), $m->getTipviv()),
             $m->getDireccion(),
             $m->getBarrio(),
             $m->getTelefono(),
             $m->getCelular(),
             $m->getEmail(),
-            $m->getNivedu(),
+            $this->lookup(nivel_educativo_array(), $m->getNivedu()),
             $this->formatFecha($m->getFecing()),
             $m->getCodocu(),
             $m->getSalario(),
-            $m->getCaptra(),
-            $m->getUsuario(),
-            $m->getEstado(),
+            $this->lookup(captra_array(), $m->getCaptra()),
+            $this->lookup($this->catalogoUsuarios(), $m->getUsuario()),
+            $this->lookupEstado($m->getEstado()),
             $m->getCodest(),
             $this->formatFecha($m->getFecest()),
-            $m->getTipo(),
-            $m->getCoddoc(),
+            $this->lookup(solicitud_tipo_actualizacion_array(), $m->getTipo()),
+            $this->lookup($this->catalogoTiposDocumento(), $m->getCoddoc()),
             $m->getDocumento(),
             $m->getTiecon(),
-            $m->getTipsal(),
+            $this->lookup(tipsal_array(), $m->getTipsal()),
             $this->formatFecha($m->getFecsol()),
             $this->fechaAprobacion($m),
             $this->tiempoRespuesta($this->formatFecha($m->getFecsol()), $this->fechaAprobacion($m)),
-            $m->getTippag(),
+            $this->lookup(tipo_pago_array(), $m->getTippag()),
             $m->getNumcue(),
             $m->getEmpresalab(),
         ])->all();
@@ -466,37 +474,37 @@ class ReporteSolicitudes
             'Tiempo de respuesta',
         ];
 
-        $rows = $models->map(fn ($m) => [
+        $rows = $models->map(fn($m) => [
             $m->ruuid,
-            $m->getEstado(),
+            $this->lookupEstado($m->getEstado()),
             $m->getId(),
             $m->getLog(),
             $m->getNit(),
             $m->getCedtra(),
             $m->getCedcon(),
             $m->getNumdoc(),
-            $m->getTipdoc(),
+            $this->lookup($this->catalogoTiposDocumento(), $m->getTipdoc()),
             $m->getPriape(),
             $m->getSegape(),
             $m->getPrinom(),
             $m->getSegnom(),
             $this->formatFecha($m->getFecnac()),
             $m->getCiunac(),
-            $m->getSexo(),
-            $m->getParent(),
-            $m->getHuerfano(),
-            $m->getTiphij(),
-            $m->getNivedu(),
-            $m->getCaptra(),
-            $m->getTipdis(),
-            $m->getCalendario(),
-            $m->getUsuario(),
-            $m->getEstado(),
+            $this->lookup(sexos_array(), $m->getSexo()),
+            $this->lookup(parentesco_array(), $m->getParent()),
+            $this->lookup(huerfano_array(), $m->getHuerfano()),
+            $this->lookup(tipo_hijo_array(), $m->getTiphij()),
+            $this->lookup(nivel_educativo_array(), $m->getNivedu()),
+            $this->lookup(captra_array(), $m->getCaptra()),
+            $this->lookup(tipo_discapacidad_array(), $m->getTipdis()),
+            $this->lookup(calendario_array(), $m->getCalendario()),
+            $this->lookup($this->catalogoUsuarios(), $m->getUsuario()),
+            $this->lookupEstado($m->getEstado()),
             $m->getCodest(),
             $this->formatFecha($m->getFecest()),
             $m->getCodben(),
-            $m->getTipo(),
-            $m->getCoddoc(),
+            $this->lookup(solicitud_tipo_actualizacion_array(), $m->getTipo()),
+            $this->lookup($this->catalogoTiposDocumento(), $m->getCoddoc()),
             $m->getDocumento(),
             $m->getCedacu(),
             $this->formatFecha($m->getFecsol()),
@@ -538,7 +546,7 @@ class ReporteSolicitudes
         }
 
         try {
-            return Carbon::parse($fecapr)->diffInDays(Carbon::parse($fecsol));
+            return (int) abs(Carbon::parse($fecapr)->diffInDays(Carbon::parse($fecsol)));
         } catch (\Throwable) {
             return null;
         }
@@ -563,5 +571,71 @@ class ReporteSolicitudes
         } catch (\Throwable) {
             return null;
         }
+    }
+
+    /**
+     * Resuelve un codigo contra un catalogo de clave => descripcion.
+     * Si no hay equivalencia, conserva el valor original.
+     */
+    private function lookup(array $catalogo, mixed $valor): mixed
+    {
+        if ($valor === null || $valor === '') {
+            return $valor;
+        }
+
+        $clave = (string) $valor;
+
+        if (array_key_exists($clave, $catalogo)) {
+            return $catalogo[$clave];
+        }
+
+        if (is_numeric($clave) && array_key_exists((int) $clave, $catalogo)) {
+            return $catalogo[(int) $clave];
+        }
+
+        return $valor;
+    }
+
+    /**
+     * Catalogo de tipos de documento (gener18: coddoc => detdoc).
+     *
+     * @return array<string, string>
+     */
+    private function catalogoTiposDocumento(): array
+    {
+        if ($this->tiposDocumentoCache === null) {
+            $this->tiposDocumentoCache = Gener18::query()
+                ->pluck('detdoc', 'coddoc')
+                ->all();
+        }
+
+        return $this->tiposDocumentoCache;
+    }
+
+    /**
+     * Catalogo de usuarios (gener02: usuario => nombre).
+     *
+     * @return array<string, string>
+     */
+    private function catalogoUsuarios(): array
+    {
+        if ($this->usuariosCache === null) {
+            $this->usuariosCache = Gener02::query()
+                ->pluck('nombre', 'usuario')
+                ->all();
+        }
+
+        return $this->usuariosCache;
+    }
+
+    /**
+     * Resuelve el estado de una solicitud usando el catalogo de solicitudes.
+     */
+    private function lookupEstado(mixed $valor): mixed
+    {
+        return $this->lookup(array_merge(
+            solicitud_estados_array(),
+            ['T' => 'Temporal', 'C' => 'Cancelar']
+        ), $valor);
     }
 }
