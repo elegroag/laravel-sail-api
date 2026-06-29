@@ -11,6 +11,8 @@ if (! function_exists('solicitud_estados_array')) {
             'X' => 'Rechazado',
             'P' => 'Pendiente',
             'D' => 'Devuelto',
+            'I' => 'Inactivo',
+            'C' => 'Cancelado',
         ];
     }
 }
@@ -20,7 +22,7 @@ if (! function_exists('solicitud_estado_detalle')) {
     /**
      * @return string
      */
-    function solicitud_estado_detalle($estado)
+    function solicitud_estado_detalle(string $estado): string
     {
         switch ($estado) {
             case 'T':
@@ -39,7 +41,10 @@ if (! function_exists('solicitud_estado_detalle')) {
                 return 'Pendiente';
                 break;
             case 'C':
-                return 'Cancelar';
+                return 'Cancelado';
+                break;
+            case 'I':
+                return 'Inactivo';
                 break;
             default:
                 return 'Sin estado';
