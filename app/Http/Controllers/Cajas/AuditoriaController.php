@@ -9,6 +9,9 @@ use App\Models\Mercurio09;
 use App\Services\ReportGenerator\Products\OptimizedXlsxProduct;
 use App\Services\Utils\CalculatorDias;
 use App\Services\Utils\GeneralService;
+use App\Services\Utils\RegistroSeguimiento;
+use App\Support\AuditoriaSolicitudFieldsBuilder;
+use App\Support\AuditoriaSolicitudResolver;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -51,12 +54,13 @@ class AuditoriaController extends ApplicationController
         foreach ($mercurio['datos'] ?? [] as $mmercurio) {
             $dias_vencidos = CalculatorDias::calcular($tipopc, $mmercurio->getId());
             $result[] = [
+                'id' => $mmercurio->getId(),
                 'documento' => $this->getDocumento($mmercurio, $tipopc),
                 'nombre' => $this->getNombre($mmercurio, $tipopc),
                 'responsable' => $this->getResponsable($mmercurio),
                 'fecha' => Carbon::parse($mmercurio->getFecest())->format('Y-m-d'),
                 'fecsol' => $this->formatFecha($mmercurio, 'fecsol'),
-                'fecapr' => $mmercurio->getEstado() === 'A' ? $this->formatFecha($mmercurio, 'fecapr') ?? Carbon::parse($mmercurio->getFecest())->format('Y-m-d') : "",
+                'fecapr' => $mmercurio->getEstado() === 'A' ? $this->formatFecha($mmercurio, 'fecapr') ?? Carbon::parse($mmercurio->getFecest())->format('Y-m-d') : '',
                 'radicado' => $mmercurio->ruuid ?? null,
                 'dias_vencidos' => $dias_vencidos,
                 'extra' => $hasExtra ? $this->getExtra($mmercurio, $tipopc) : null,
@@ -102,7 +106,7 @@ class AuditoriaController extends ApplicationController
     private function getExtra($mmercurio, string $tipopc): string
     {
         if ($tipopc == '5') {
-            return $mmercurio->getCampoDetalle() . ' - ' . $mmercurio->getAntval() . ' - ' . $mmercurio->getValor();
+            return $mmercurio->getCampoDetalle().' - '.$mmercurio->getAntval().' - '.$mmercurio->getValor();
         }
 
         return $mmercurio->getNomcer();
@@ -110,7 +114,7 @@ class AuditoriaController extends ApplicationController
 
     private function formatFecha($mmercurio, string $field): ?string
     {
-        $getter = 'get' . ucfirst($field);
+        $getter = 'get'.ucfirst($field);
         $value = method_exists($mmercurio, $getter) ? $mmercurio->$getter() : ($mmercurio->{$field} ?? null);
 
         if (empty($value)) {
@@ -131,7 +135,7 @@ class AuditoriaController extends ApplicationController
         $this->buildReporte($request, $headers, $rows);
 
         $fecha = new \DateTime;
-        $filename = 'reporte_auditoria_' . $fecha->format('Ymd') . '.xlsx';
+        $filename = 'reporte_auditoria_'.$fecha->format('Ymd').'.xlsx';
 
         return OptimizedXlsxProduct::streamFromArray($headers, $rows, $filename);
     }
@@ -143,7 +147,7 @@ class AuditoriaController extends ApplicationController
         $this->buildReporte($request, $headers, $rows);
 
         $fecha = new \DateTime;
-        $filename = 'auditoria_export_' . $fecha->format('Ymd_His') . '.xlsx';
+        $filename = 'auditoria_export_'.$fecha->format('Ymd_His').'.xlsx';
 
         return OptimizedXlsxProduct::streamFromArray($headers, $rows, $filename);
     }
@@ -194,6 +198,67 @@ class AuditoriaController extends ApplicationController
         $response = $this->consultaTipopc($tipopc, 'info', $id);
 
         return $this->renderObject($response);
+    }
+
+    public function infor(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'tipopc' => 'required|string',
+                'id' => 'required|integer',
+            ]);
+
+            $tipopc = $validated['tipopc'];
+            $id = (int) $validated['id'];
+
+            $solicitud = AuditoriaSolicitudResolver::resolve($tipopc, $id);
+            if ($solicitud === null) {
+                return response()->json([
+                    'success' => false,
+                    'msj' => 'Solicitud no encontrada',
+                ]);
+            }
+
+            $hasExtra = in_array($tipopc, ['5', '8'], true);
+            $tipoDetalle = Mercurio09::where('tipopc', $tipopc)->value('detalle') ?? $tipopc;
+
+            $fields = [
+                'Tipo de opción' => $tipoDetalle,
+                'ID' => $solicitud->getId(),
+                'Documento' => $this->getDocumento($solicitud, $tipopc),
+                'Nombre' => $this->getNombre($solicitud, $tipopc),
+                'Responsable' => $this->getResponsable($solicitud),
+                'Estado' => method_exists($solicitud, 'getEstadoDetalle') ? $solicitud->getEstadoDetalle() : ($solicitud->estado ?? ''),
+                'Fecha solicitud' => $this->formatFecha($solicitud, 'fecsol'),
+                'Fecha estado' => $this->formatFecha($solicitud, 'fecest'),
+                'Fecha aprobación' => $this->formatFecha($solicitud, 'fecapr'),
+                'Radicado' => $solicitud->ruuid ?? '',
+                'Días vencidos' => CalculatorDias::calcular($tipopc, $id),
+            ];
+
+            if ($hasExtra) {
+                $fields['Extra'] = $this->getExtra($solicitud, $tipopc);
+            }
+
+            $seguimientoHtml = (new RegistroSeguimiento)->consultaSeguimiento($tipopc, $solicitud);
+            $extraFields = (new AuditoriaSolicitudFieldsBuilder)->build($tipopc, $solicitud);
+
+            $html = view('cajas.auditoria._detalle', [
+                'fields' => $fields,
+                'extraFields' => $extraFields,
+                'seguimientoHtml' => $seguimientoHtml,
+            ])->render();
+
+            return response()->json([
+                'success' => true,
+                'html' => $html,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'msj' => $e->getMessage(),
+            ]);
+        }
     }
 
     public function consultaTipopc($tipopc, $tipo_consulta, $numero = '', $usuario = '', $condi = '', $page = 1)

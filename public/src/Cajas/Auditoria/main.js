@@ -28,12 +28,15 @@ const buildAuditoriaTable = (data, hasExtra) => {
         headers.push('Extra');
     }
     headers.push('Estado');
+    headers.push('Acciones');
 
     let thead = '<thead><tr>';
     for (const h of headers) {
         thead += `<th>${h}</th>`;
     }
     thead += '</tr></thead>';
+
+    const tipopc = $('#tipopc').val();
 
     let rows = data.map(item => {
         let cells = [
@@ -50,6 +53,14 @@ const buildAuditoriaTable = (data, hasExtra) => {
             cells.push(item.extra);
         }
         cells.push(item.estado);
+        cells.push(`
+            <button type="button"
+                class="btn btn-info btn-sm btn-detail"
+                data-toggle="audit-detail"
+                data-id="${item.id}"
+                data-tipopc="${tipopc}">
+                <i class="fa fa-eye"></i> Ver detalle
+            </button>`);
 
         return '<tr>' + cells.map(c => `<td>${c ?? ''}</td>`).join('') + '</tr>';
     }).join('');
@@ -131,6 +142,7 @@ $(() => {
 
     window.App.initialize();
     const modalCapture = new bootstrap.Modal(document.getElementById('captureModal'));
+    const auditDetailModal = new bootstrap.Modal(document.getElementById('auditDetailModal'));
 
     $(document).on('click', "[data-toggle='consulta']", (e) => {
         e.preventDefault();
@@ -140,6 +152,35 @@ $(() => {
     $(document).on('click', "[data-toggle='reporte']", (e) => {
         e.preventDefault();
         reporte_auditoria();
+    });
+
+    $(document).on('click', '[data-toggle="audit-detail"]', (e) => {
+        e.preventDefault();
+        const btn = e.currentTarget;
+        const id = btn.dataset.id;
+        const tipopc = btn.dataset.tipopc;
+
+        $('#auditDetailModalbody').html('<div class="p-4 text-center text-muted">Cargando...</div>');
+        auditDetailModal.show();
+
+        window.App.trigger('ajax', {
+            url: `${window.ServerController}/infor`,
+            data: { tipopc, id },
+            callback: (response) => {
+                if (response && response.success === true) {
+                    $('#auditDetailModalbody').html(response.html || '<div class="alert alert-info m-3">Sin información disponible.</div>');
+                } else {
+                    $('#auditDetailModalbody').html(
+                        `<div class="alert alert-danger m-3">${response?.msj || 'No fue posible cargar el detalle.'}</div>`
+                    );
+                }
+            },
+            error: () => {
+                $('#auditDetailModalbody').html(
+                    '<div class="alert alert-danger m-3">No fue posible cargar el detalle.</div>'
+                );
+            },
+        });
     });
 
 });

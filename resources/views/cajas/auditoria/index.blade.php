@@ -27,6 +27,13 @@
         "btnShowModal" => 'btCaptureModal',
         "idModal" => 'captureModal'])
 
+    @include("partials.modal_generic", [
+        "titulo" => 'Detalle de la solicitud',
+        "contenido" => '',
+        "hideFooter" => true,
+        "btnShowModal" => 'auditDetailShow',
+        "idModal" => 'auditDetailModal'])
+
     <script src="{{ asset('cajas/build/Auditoria.js') }}"></script>
 @endpush
 
