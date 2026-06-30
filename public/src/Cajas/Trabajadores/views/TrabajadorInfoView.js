@@ -45,7 +45,20 @@ export default class TrabajadorInfoView extends FormInfoView {
 
     #afterRender() {
         this.__afterRender();
-        this.$el.find('.js-basic-multiple, #codind, #tipsoc, #tipapo, #codban, #codgir').select2();
+        // Inicializa Select2 sobre los <select> propios del template
+        // (#tippag, #codban, #tipcue, #giro, #codgir) y sobre cualquier
+        // <select class="js-basic-multiple"> que se haya inyectado desde
+        // sub-vistas (por ejemplo el de tmp_devolver.blade.php).
+        //
+        // Se delega al wrapper del tema (window.Select2.init) porque ese
+        // wrapper detecta selects con `multiple` o `data-tags` y, si los hay,
+        // carga dinámicamente `select2.full.min.js` (que incluye los módulos
+        // `select2/compat/inputData` y `select2/compat/multipleSelection`
+        // que la versión core no trae). Así evitamos el error
+        // `No select2/compat/inputData` al inicializar un <select multiple>.
+        if (typeof window !== 'undefined' && typeof window.Select2?.init === 'function') {
+            window.Select2.init(this.$el);
+        }
 
         this.model.set({
             vendedor: 'N',

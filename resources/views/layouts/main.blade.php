@@ -36,7 +36,7 @@
     <script type="text/javascript" src="{{ asset('assets/bootstrap/js/popper.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/noty/noty.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('assets/select2/js/select2.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('assets/select2/js/select2.full.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('theme/js/select2.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/validators/jquery.validate.js') }}"></script>
 

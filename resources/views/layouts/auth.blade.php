@@ -47,6 +47,7 @@
     <script src="{{ asset('assets/validators/messages_es.min.js') }}"></script>
 
     <script src="{{ asset('theme/js/headroom.js') }}"></script>
+    <script src="{{ asset('assets/select2/js/select2.full.min.js') }}" type="text/javascript"></script>
     <script src="{{ asset('theme/js/select2.js') }}"></script>
     @stack('scripts')
 </body>
