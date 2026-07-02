@@ -7,88 +7,76 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Tablas objetivo: el campo ruuid se almacena como radicado de texto
-     * (formato XXX-YYYY-NNNNN = 15 caracteres) generado por el trait
-     * App\Models\Adapter\HasCustomUuid. Las migraciones originales lo
-     * declararon como uuid() -> CHAR(36), lo que desperdicia espacio
-     * y no refleja el tipo real del dato.
+     * Convierte columnas de radicado de texto a VARCHAR(20).
      *
-     * Esta migración convierte ruuid de CHAR(36) a VARCHAR(20) en
-     * cada tabla afectada, conservando todos los datos.
+     * - mercurio*: ruuid (originalmente CHAR(36) por uuid())
+     * - radicados: radicado (originalmente CHAR(15))
+     *
+     * Formato del valor: XXX-YYYY-NNNNN (15 caracteres), generado por
+     * App\Models\Adapter\HasCustomUuid.
+     *
+     * @var array<string, array{column: string, revert: string}>
      */
     protected array $tables = [
-        'mercurio30',
-        'mercurio31',
-        'mercurio32',
-        'mercurio34',
-        'mercurio35',
-        'mercurio36',
-        'mercurio38',
-        'mercurio39',
-        'mercurio40',
-        'mercurio41',
-        'mercurio47',
+        'mercurio30' => ['column' => 'ruuid', 'revert' => 'CHAR(36)'],
+        'mercurio31' => ['column' => 'ruuid', 'revert' => 'CHAR(36)'],
+        'mercurio32' => ['column' => 'ruuid', 'revert' => 'CHAR(36)'],
+        'mercurio34' => ['column' => 'ruuid', 'revert' => 'CHAR(36)'],
+        'mercurio35' => ['column' => 'ruuid', 'revert' => 'CHAR(36)'],
+        'mercurio36' => ['column' => 'ruuid', 'revert' => 'CHAR(36)'],
+        'mercurio38' => ['column' => 'ruuid', 'revert' => 'CHAR(36)'],
+        'mercurio39' => ['column' => 'ruuid', 'revert' => 'CHAR(36)'],
+        'mercurio40' => ['column' => 'ruuid', 'revert' => 'CHAR(36)'],
+        'mercurio41' => ['column' => 'ruuid', 'revert' => 'CHAR(36)'],
+        'mercurio47' => ['column' => 'ruuid', 'revert' => 'CHAR(36)'],
+        'radicados' => ['column' => 'radicado', 'revert' => 'CHAR(15)'],
     ];
 
     public function up(): void
     {
-        foreach ($this->tables as $table) {
-            if (! Schema::hasTable($table)) {
-                continue;
-            }
-
-            $column = DB::selectOne(
-                'SELECT COLUMN_TYPE AS column_type
-                   FROM information_schema.columns
-                  WHERE TABLE_SCHEMA = DATABASE()
-                    AND TABLE_NAME   = ?
-                    AND COLUMN_NAME  = ?',
-                [$table, 'ruuid']
-            );
-
-            if (! $column) {
-                continue;
-            }
-
-            $currentType = strtoupper($column->column_type);
-
-            // Si ya es VARCHAR(20) (o menor) dejamos la tabla como está
-            if (preg_match('/^VARCHAR\((\d+)\)$/', $currentType, $m) && (int) $m[1] <= 20) {
-                continue;
-            }
-
-            // ALTER en línea: no bloquea lecturas/escrituras en MySQL 8.0
-            DB::statement("ALTER TABLE `{$table}` MODIFY `ruuid` VARCHAR(20), ALGORITHM=INPLACE, LOCK=NONE");
+        foreach ($this->tables as $table => $config) {
+            $this->modifyColumn($table, $config['column'], 'VARCHAR(20)');
         }
     }
 
     public function down(): void
     {
-        foreach ($this->tables as $table) {
-            if (! Schema::hasTable($table)) {
-                continue;
-            }
-
-            $column = DB::selectOne(
-                'SELECT COLUMN_TYPE AS column_type
-                   FROM information_schema.columns
-                  WHERE TABLE_SCHEMA = DATABASE()
-                    AND TABLE_NAME   = ?
-                    AND COLUMN_NAME  = ?',
-                [$table, 'ruuid']
-            );
-
-            if (! $column) {
-                continue;
-            }
-
-            $currentType = strtoupper($column->column_type);
-
-            if ($currentType === 'CHAR(36)') {
-                continue;
-            }
-
-            DB::statement("ALTER TABLE `{$table}` MODIFY `ruuid` CHAR(36), ALGORITHM=INPLACE, LOCK=NONE");
+        foreach ($this->tables as $table => $config) {
+            $this->modifyColumn($table, $config['column'], $config['revert']);
         }
+    }
+
+    private function modifyColumn(string $table, string $column, string $targetType): void
+    {
+        if (! Schema::hasTable($table)) {
+            return;
+        }
+
+        $current = DB::selectOne(
+            'SELECT COLUMN_TYPE AS column_type
+               FROM information_schema.columns
+              WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME   = ?
+                AND COLUMN_NAME  = ?',
+            [$table, $column]
+        );
+
+        if (! $current) {
+            return;
+        }
+
+        $currentType = strtoupper($current->column_type);
+        $targetTypeUpper = strtoupper($targetType);
+
+        if ($currentType === $targetTypeUpper) {
+            return;
+        }
+
+        if ($targetTypeUpper === 'VARCHAR(20)' && preg_match('/^VARCHAR\((\d+)\)$/', $currentType, $m) && (int) $m[1] <= 20) {
+            return;
+        }
+
+        // Cambio CHAR → VARCHAR requiere reconstrucción de tabla (ALGORITHM=COPY en MySQL 8).
+        DB::statement("ALTER TABLE `{$table}` MODIFY `{$column}` {$targetType}");
     }
 };

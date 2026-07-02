@@ -10,9 +10,9 @@ trait HasCustomUuid
     /**
      * Boot the trait.
      */
-    protected static function bootHasCustomUuid()
+    protected static function bootHasCustomUuid(): void
     {
-        static::creating(function ($model) {
+        static::creating(function (mixed $model) {
             $uuidColumn = $model->getCustomUuidColumn();
 
             // Verifica si la columna 'ruuid' (o la definida) no está establecida
@@ -46,7 +46,7 @@ trait HasCustomUuid
     /**
      * Genera un radicado y crea el registro en la tabla radicado con control de concurrencia.
      */
-    protected static function generateRadicadoForModel($model): string
+    protected static function generateRadicadoForModel(mixed $model): string
     {
         $tipo = static::mapModelToTipo($model);
         $vigencia = (int) now()->year;
@@ -78,7 +78,7 @@ trait HasCustomUuid
     /**
      * Mapea el nombre de la clase del modelo al tipo de radicado requerido.
      */
-    protected static function mapModelToTipo($model): string
+    protected static function mapModelToTipo(mixed $model): string
     {
         $name = class_basename($model);
         return match ($name) {
