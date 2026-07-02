@@ -74,7 +74,7 @@ return new class extends Migration
 
             $table->date('fecsol')->nullable()->comment('Fecha de solicitud');
             $table->date('fecapr')->nullable()->comment('Fecha apobación resolucion');
-            $table->uuid('ruuid');
+            $table->string('ruuid', 20);
 
             // Índice y FK compuesta
             $table->index(['tipo', 'coddoc', 'documento'], 'mercurio38_FK');

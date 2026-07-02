@@ -27,7 +27,7 @@ return new class extends Migration
 
             $table->date('fecsol')->nullable()->comment('Fecha de solicitud');
             $table->date('fecapr')->nullable()->comment('Fecha apobación resolucion');
-            $table->uuid('ruuid');
+            $table->string('ruuid', 20);
 
             $table->index('ruuid', 'fk_mercurio47_ruuid');
             $table->unique('ruuid', 'unique_mercurio47_ruuid');

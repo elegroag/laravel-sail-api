@@ -75,7 +75,7 @@ return new class extends Migration
 
             $table->date('fecsol')->nullable()->comment('Fecha de solicitud');
             $table->date('fecapr')->nullable()->comment('Fecha de aprobación resolucion');
-            $table->uuid('ruuid');
+            $table->string('ruuid', 20);
 
             // Índices
             $table->index('log', 'log');
