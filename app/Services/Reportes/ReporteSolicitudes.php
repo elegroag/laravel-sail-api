@@ -180,10 +180,6 @@ class ReporteSolicitudes
             $m->getSegaperepleg(),
             $m->getPrinomrepleg(),
             $m->getSegnomrepleg(),
-            $m->getPriape(),
-            $m->getSegape(),
-            $m->getPrinom(),
-            $m->getSegnom(),
             $m->getMatmer(),
             $this->lookup(get_array_tipos(), $m->getTipemp()),
         ])->all();
