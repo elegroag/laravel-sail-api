@@ -12,6 +12,7 @@ use App\Models\Mercurio10;
 use App\Models\Mercurio11;
 use App\Models\Mercurio31;
 use App\Models\Mercurio34;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Aprueba\ApruebaBeneficiario;
 use App\Services\CajaServices\BeneficiarioServices;
 use App\Services\Reports\CsvReportStrategy;
@@ -21,7 +22,6 @@ use App\Services\Srequest;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
-use App\Services\Api\ApiSubsidio;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -127,7 +127,6 @@ class ApruebaBeneficiarioController extends ApplicationController
      *
      * @author elegroag <elegroag@ibero.edu.co>
      *
-     * @param  string  $estado
      * @return void
      */
     public function buscar(Request $request, string $estado = 'P')
@@ -170,7 +169,7 @@ class ApruebaBeneficiarioController extends ApplicationController
     {
         try {
             $format = $request->query('format', 'csv');
-            $strategy = $format === 'excel' ? new ExcelReportStrategy() : new CsvReportStrategy();
+            $strategy = $format === 'excel' ? new ExcelReportStrategy : new CsvReportStrategy;
             $ext = $format === 'excel' ? 'xlsx' : 'csv';
 
             // Base del filtro igual que en buscar/aplicarFiltro
@@ -193,8 +192,8 @@ class ApruebaBeneficiarioController extends ApplicationController
             // Columnas de Mercurio34
             $columns = [
                 'Identificación' => 'numdoc',
-                'Nombres' => fn($r) => trim(($r->prinom ?? '') . ' ' . ($r->segnom ?? '')),
-                'Apellidos' => fn($r) => trim(($r->priape ?? '') . ' ' . ($r->segape ?? '')),
+                'Nombres' => fn ($r) => trim(($r->prinom ?? '').' '.($r->segnom ?? '')),
+                'Apellidos' => fn ($r) => trim(($r->priape ?? '').' '.($r->segape ?? '')),
                 'Cédula Trabajador' => 'cedtra',
                 'Estado' => 'estado',
                 'Fecha Solicitud' => 'fecsol',
@@ -204,7 +203,7 @@ class ApruebaBeneficiarioController extends ApplicationController
             $gen = (new ReportGenerator($strategy))
                 ->for(Mercurio34::query())
                 ->columns($columns)
-                ->filename('mercurio34_' . now()->format('Ymd_His') . '.' . $ext)
+                ->filename('mercurio34_'.now()->format('Ymd_His').'.'.$ext)
                 ->filter(function ($q) use ($filtro) {
                     if (is_string($filtro) && trim($filtro) !== '') {
                         $q->whereRaw($filtro);
@@ -284,7 +283,7 @@ class ApruebaBeneficiarioController extends ApplicationController
             $codest = $validated['codest'];
             $array_corregir = $validated['campos_corregir'] ?? [];
             $campos_corregir = $array_corregir ? implode(';', $array_corregir) : '';
-            $mercurio34 = Mercurio34::where("id", $id)->first();
+            $mercurio34 = Mercurio34::where('id', $id)->first();
 
             $this->beneficiarioServices->devolver($mercurio34, $nota, $codest, $campos_corregir);
             $notifyEmailServices->emailDevolver(
@@ -303,6 +302,7 @@ class ApruebaBeneficiarioController extends ApplicationController
                 'errors' => $err->render($request),
             ];
         }
+
         return response()->json($response);
     }
 
@@ -320,7 +320,7 @@ class ApruebaBeneficiarioController extends ApplicationController
             $nota = $validated['nota'] ?? null;
             $codest = $validated['codest'];
 
-            $mercurio34 = Mercurio34::where("id", $id)->first();
+            $mercurio34 = Mercurio34::where('id', $id)->first();
             $this->beneficiarioServices->rechazar($mercurio34, $nota, $codest);
             $notifyEmailServices->emailRechazar(
                 $mercurio34,
@@ -338,13 +338,17 @@ class ApruebaBeneficiarioController extends ApplicationController
                 'errors' => $e->render($request),
             ];
         }
+
         return response()->json($response);
     }
 
     /**
      * infor function
+     *
      * @changed [2023-12-20]
+     *
      * @author elegroag <elegroag@ibero.edu.co
+     *
      * @return void
      */
     public function infor(Request $request)
@@ -356,13 +360,13 @@ class ApruebaBeneficiarioController extends ApplicationController
             $id = $validated['id'];
 
             $beneficiarioServices = new BeneficiarioServices;
-            $solicitud = Mercurio34::where("id", $id)->first();
+            $solicitud = Mercurio34::where('id', $id)->first();
             if ($solicitud == false) {
                 throw new DebugException('La solicitud de afiliación de beneficiario no es valida.', 501);
             }
 
             $trabajador_sisu = false;
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -378,14 +382,16 @@ class ApruebaBeneficiarioController extends ApplicationController
 
             $trabajador = new \stdClass;
             if (! $trabajador_sisu) {
-                $tr = Mercurio31::where("cedtra", $solicitud->cedtra)->where("estado", 'A')->first();
-                if (!$tr) $trabajador->estado = 'I';
+                $tr = Mercurio31::where('cedtra', $solicitud->cedtra)->where('estado', 'A')->first();
+                if (! $tr) {
+                    $trabajador->estado = 'I';
+                }
             } else {
                 $trabajador = new Mercurio31;
                 $trabajador->fill($trabajador_sisu);
             }
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -404,7 +410,6 @@ class ApruebaBeneficiarioController extends ApplicationController
 
             $relacion_multiple = false;
             $beneficiario_sisuweb = false;
-
 
             if ($isSuccess && $sys_beneficiario) {
                 $api_afiliation_status = $sys_beneficiario['estado'] == 'A' ? true : false;
@@ -430,8 +435,7 @@ class ApruebaBeneficiarioController extends ApplicationController
                 }
             }
 
-
-            $px = new ApiSubsidio();
+            $px = new ApiSubsidio;
             $px->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -447,7 +451,7 @@ class ApruebaBeneficiarioController extends ApplicationController
                 'cajas.aprobacionben.tmp.consulta',
                 [
                     'beneficiario' => $solicitud,
-                    'detTipo' => Mercurio06::where("tipo", $solicitud->tipo)->first()->detalle,
+                    'detTipo' => Mercurio06::where('tipo', $solicitud->tipo)->first()->detalle,
                     '_coddoc' => ParamsBeneficiario::getTiposDocumentos(),
                     '_codciu' => ParamsBeneficiario::getCiudades(),
                     '_sexo' => ParamsBeneficiario::getSexos(),
@@ -498,7 +502,7 @@ class ApruebaBeneficiarioController extends ApplicationController
 
     public function loadParametrosView()
     {
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -555,11 +559,11 @@ class ApruebaBeneficiarioController extends ApplicationController
             $id = $validated['id'];
             $numdoc = $validated['numdoc'];
 
-            $mercurio34 = Mercurio34::where("id", $id)->where("numdoc", $numdoc)->first();
+            $mercurio34 = Mercurio34::where('id', $id)->where('numdoc', $numdoc)->first();
             if (! $mercurio34) {
                 throw new DebugException('El beneficiario no está disponible para notificar por email', 501);
             } else {
-                $mercurio07 = Mercurio07::where("documento", $mercurio34->getDocumento())->where("coddoc", $mercurio34->getCoddoc())->first();
+                $mercurio07 = Mercurio07::where('documento', $mercurio34->getDocumento())->where('coddoc', $mercurio34->getCoddoc())->first();
                 if (! $mercurio07) {
                     throw new DebugException('El usuario no está disponible para notificar por email', 501);
                 }
@@ -589,13 +593,12 @@ class ApruebaBeneficiarioController extends ApplicationController
                     'cedacu' => $validated['cedacu'] ?? null,
                 ];
                 $data = array_filter($data, function ($v) {
-                    return !is_null($v) && $v !== '';
+                    return ! is_null($v) && $v !== '';
                 });
 
                 Mercurio34::where('id', $id)
                     ->where('numdoc', $numdoc)
                     ->update($data);
-
 
                 $salida = [
                     'msj' => 'Proceso se ha completado con éxito',
@@ -629,7 +632,7 @@ class ApruebaBeneficiarioController extends ApplicationController
             exit;
         }
 
-        $mercurio34 = Mercurio34::where("id", $id)->first();
+        $mercurio34 = Mercurio34::where('id', $id)->first();
 
         if (! $mercurio34) {
             set_flashdata('error', [
@@ -641,7 +644,7 @@ class ApruebaBeneficiarioController extends ApplicationController
             exit;
         }
 
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
@@ -678,9 +681,9 @@ class ApruebaBeneficiarioController extends ApplicationController
 
     public function opcional($estado = 'P')
     {
-        $collection = Mercurio34::where("estado", $estado)
-            ->where("usuario", $this->user['usuario'])
-            ->orderBy("fecsol", 'ASC')
+        $collection = Mercurio34::where('estado', $estado)
+            ->where('usuario', $this->user['usuario'])
+            ->orderBy('fecsol', 'ASC')
             ->get();
 
         $beneficiarioServices = new BeneficiarioServices;
@@ -700,19 +703,15 @@ class ApruebaBeneficiarioController extends ApplicationController
         try {
             $validated = $request->validate([
                 'id' => 'required|integer',
-                'giro' => 'required|string|max:1',
-                'codgir' => 'nullable|string|max:10',
                 'nota' => 'nullable|string|max:5000',
             ]);
             $id = $validated['id'];
-            $giro = $validated['giro'];
-            $codgir = $validated['codgir'] ?? null;
             $nota = $validated['nota'] ?? null;
             $today = Carbon::now();
 
-            Mercurio34::where("id", $id)->update([
-                "estado" => "A",
-                "fecest" => $today->format('Y-m-d H:i:s'),
+            Mercurio34::where('id', $id)->update([
+                'estado' => 'A',
+                'fecest' => $today->format('Y-m-d H:i:s'),
             ]);
 
             $item = Mercurio10::whereRaw("tipopc='{$this->tipopc}' and numero='{$id}'")->max('item') + 1;
@@ -726,9 +725,9 @@ class ApruebaBeneficiarioController extends ApplicationController
             $mercurio10->fecsis = $today->format('Y-m-d H:i:s');
             $mercurio10->save();
 
-            $beneficiario = Mercurio34::where("id", $id)->first();
+            $beneficiario = Mercurio34::where('id', $id)->first();
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -739,8 +738,6 @@ class ApruebaBeneficiarioController extends ApplicationController
                             'prinom' => $beneficiario->getPrinom(),
                             'segnom' => $beneficiario->getSegnom(),
                             'priape' => $beneficiario->getPriape(),
-                            'giro' => $giro,
-                            'codgir' => $codgir,
                         ],
                     ],
                 ]
@@ -763,11 +760,12 @@ class ApruebaBeneficiarioController extends ApplicationController
         } catch (DebugException $e) {
             $response = [
                 'success' => false,
-                'msj' => 'No se pudo realizar el movimiento ' . "\n" . $e->getMessage() . "\n " . $e->getLine(),
+                'msj' => 'No se pudo realizar el movimiento '."\n".$e->getMessage()."\n ".$e->getLine(),
                 'comando' => $comando,
                 'errors' => $e->render($request),
             ];
         }
+
         return response()->json($response);
     }
 
@@ -795,12 +793,12 @@ class ApruebaBeneficiarioController extends ApplicationController
     {
         $this->tipopc = '1';
         try {
-            $mercurio34 = Mercurio34::where("id", $id)->where("estado", 'A')->first();
+            $mercurio34 = Mercurio34::where('id', $id)->where('estado', 'A')->first();
             if (! $mercurio34) {
                 throw new DebugException('Error al buscar la beneficiario', 501);
             }
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -812,7 +810,7 @@ class ApruebaBeneficiarioController extends ApplicationController
             $paramsBeneficiario = new ParamsBeneficiario;
             $paramsBeneficiario->setDatosCaptura($datos_captura);
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -836,7 +834,7 @@ class ApruebaBeneficiarioController extends ApplicationController
                 'cajas/aprobacionben/tmp/consulta',
                 [
                     'beneficiario' => $beneficiario,
-                    'detTipo' => Mercurio06::where("tipo", $beneficiario->getTipo())->first()->getDetalle(),
+                    'detTipo' => Mercurio06::where('tipo', $beneficiario->getTipo())->first()->getDetalle(),
                     '_coddoc' => ParamsBeneficiario::getTiposDocumentos(),
                     '_codciu' => ParamsBeneficiario::getCiudades(),
                     '_sexo' => ParamsBeneficiario::getSexos(),
@@ -874,6 +872,7 @@ class ApruebaBeneficiarioController extends ApplicationController
                 'msj' => $err->getMessage(),
                 'code' => 201,
             ]);
+
             return redirect('aprobacionben/index');
         }
     }
@@ -889,7 +888,7 @@ class ApruebaBeneficiarioController extends ApplicationController
     {
         $comando = '';
         try {
-            $beneficiarioServices = new BeneficiarioServices();
+            $beneficiarioServices = new BeneficiarioServices;
             $notifyEmailServices = new NotifyEmailServices;
 
             $validated = $request->validate([
@@ -906,12 +905,12 @@ class ApruebaBeneficiarioController extends ApplicationController
             $nota = $validated['nota'] ?? null;
             $id = $validated['id'];
 
-            $mercurio34 = Mercurio34::where("id", $id)->where("estado", "A")->first();
+            $mercurio34 = Mercurio34::where('id', $id)->where('estado', 'A')->first();
             if (! $mercurio34) {
                 throw new DebugException('Los datos del beneficiario no son validos para procesar.', 501);
             }
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -992,7 +991,7 @@ class ApruebaBeneficiarioController extends ApplicationController
         } catch (DebugException $err) {
             $salida = [
                 'success' => false,
-                'msj' => 'Error no se pudo realizar el movimiento, ' . $err->getMessage(),
+                'msj' => 'Error no se pudo realizar el movimiento, '.$err->getMessage(),
                 'comando' => $comando,
                 'file' => $err->getFile(),
                 'line' => $err->getLine(),

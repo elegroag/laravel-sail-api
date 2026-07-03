@@ -18,7 +18,6 @@ use App\Models\Mercurio34;
 use App\Models\Mercurio36;
 use App\Services\CajaServices\UsuarioServices;
 use App\Services\Srequest;
-use App\Services\Utils\Generales;
 use App\Services\Utils\Pagination;
 use App\Services\Utils\SenderEmail;
 use Exception;
@@ -61,6 +60,7 @@ class UsuarioController extends Controller
             'tipo' => 'Tipo usuario',
             'email' => 'Email',
         ];
+
         return view('cajas.usuario.index', [
             'campo_filtro' => $campo_field,
             'filters' => get_flashdata_item('filter_params'),
@@ -72,7 +72,7 @@ class UsuarioController extends Controller
     /**
      * Obtiene los parámetros necesarios para el formulario de usuarios
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function params()
     {
@@ -104,6 +104,7 @@ class UsuarioController extends Controller
                 if (isset($data[$componente->name])) {
                     $_componente['data_source'] = $data[$componente->name];
                 }
+
                 return $_componente;
             });
 
@@ -112,10 +113,10 @@ class UsuarioController extends Controller
                 'data' => $componentes,
                 'msj' => 'Parámetros obtenidos correctamente',
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $response = [
                 'success' => false,
-                'msj' => 'Error al obtener los parámetros: ' . $e->getMessage(),
+                'msj' => 'Error al obtener los parámetros: '.$e->getMessage(),
                 'trace' => config('app.debug') ? $e->getTraceAsString() : null,
             ];
         }
@@ -135,6 +136,7 @@ class UsuarioController extends Controller
             $documento = $request->input('documento');
             $old_coddoc = $request->input('old_coddoc');
             $estado = $request->input('estado');
+            $whatsapp = $request->input('whatsapp');
 
             // Verificar si existe el usuario con las condiciones anteriores
             $hasUsuario = Mercurio07::where('documento', $documento)
@@ -142,15 +144,14 @@ class UsuarioController extends Controller
                 ->where('coddoc', $old_coddoc)
                 ->exists();
 
-            if (!$hasUsuario) {
+            if (! $hasUsuario) {
                 throw new DebugException('Error el registro de usuario no existe registrado', 501);
             }
 
-            $mercurio07 = Mercurio07::where("documento", $documento)
-                ->where("tipo", $tipo)
-                ->where("coddoc", $old_coddoc)
+            $mercurio07 = Mercurio07::where('documento', $documento)
+                ->where('tipo', $tipo)
+                ->where('coddoc', $old_coddoc)
                 ->first();
-
 
             $hash = null;
             if ($newclave != '') {
@@ -167,7 +168,7 @@ class UsuarioController extends Controller
                     ->where('coddoc', $coddoc)
                     ->exists();
 
-                if (!$hasUsuario) {
+                if (! $hasUsuario) {
                     $data = [
                         'documento' => $documento,
                         'tipo' => $tipo,
@@ -176,6 +177,7 @@ class UsuarioController extends Controller
                         'email' => $email,
                         'codciu' => $codciu,
                         'estado' => $estado,
+                        'whatsapp' => $whatsapp,
                         'fecreg' => date('Y-m-d'),
                         'feccla' => date('Y-m-d'),
                         'autoriza' => 'S',
@@ -193,6 +195,8 @@ class UsuarioController extends Controller
                     'codciu' => $codciu,
                     'nombre' => $nombre,
                     'coddoc' => $coddoc,
+                    'estado' => $estado,
+                    'whatsapp' => $whatsapp,
                 ];
                 if ($hash !== null) {
                     $data['clave'] = $hash;
@@ -207,9 +211,9 @@ class UsuarioController extends Controller
                 }
             }
 
-            $entity = Mercurio07::where("documento", $documento)
-                ->where("tipo", $tipo)
-                ->where("coddoc", $coddoc)
+            $entity = Mercurio07::where('documento', $documento)
+                ->where('tipo', $tipo)
+                ->where('coddoc', $coddoc)
                 ->first();
 
             $response = [
@@ -228,14 +232,15 @@ class UsuarioController extends Controller
                 'msj' => $e->getMessage(),
             ];
         }
+
         return response()->json($response);
     }
 
-    public function notifyCambiarClave(string $clave = '', Mercurio07 $usuario_externo)
+    public function notifyCambiarClave(string $clave, Mercurio07 $usuario_externo)
     {
         $nombre = capitalize($usuario_externo->nombre);
         $asunto = 'Cambio de clave - Comfaca En Linea';
-        $msj = 'En respuesta a la solicitud de recuperación de cuenta, se ha realiza el cambio automatico de la clave para el inicio de sesión. ' .
+        $msj = 'En respuesta a la solicitud de recuperación de cuenta, se ha realiza el cambio automatico de la clave para el inicio de sesión. '.
             "A continuación enviamos las credenciales de acceso.<br/><br/>
             Credenciales:<br/>
             <b>USUARIO {$usuario_externo->documento}</b><br/>
@@ -346,7 +351,7 @@ class UsuarioController extends Controller
                 [
                     'cantidadPaginas' => $cantidad_pagina ?? 10,
                     'pagina' => $pagina ?? 1,
-                    'query' => $ftipo ? " tipo='{$ftipo}'" : "1=1",
+                    'query' => $ftipo ? " tipo='{$ftipo}'" : '1=1',
                     'estado' => $festado ?? 'A',
                 ]
             )
@@ -472,7 +477,7 @@ class UsuarioController extends Controller
                 'success' => false,
                 'msj' => $err->getMessage(),
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Catch potential transaction failures
             $response = [
                 'success' => false,

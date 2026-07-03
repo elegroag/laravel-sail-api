@@ -9,28 +9,29 @@ class UsuarioModel extends Backbone.Model {
 		return 'documento';
 	}
 
-	get defaults() {
-		return {
-			documento: void 0,
-			tipo: void 0,
-			clave: void 0,
-			coddoc: void 0,
-			nombre: '',
-			email: '',
-			feccla: '',
-			autoriza: '',
-			codciu: '',
-			fecreg: '',
-			estado: '',
-			fecha_syncron: '',
-			coddoc_detalle: '',
-			tipo_detalle: '',
-			codciu_detalle: '',
-			estado_detalle: '',
-			isEdit: -1,
-			newclave: void 0,
-		};
-	}
+    get defaults() {
+        return {
+            documento: void 0,
+            tipo: void 0,
+            clave: void 0,
+            coddoc: void 0,
+            nombre: '',
+            email: '',
+            feccla: '',
+            autoriza: '',
+            codciu: '',
+            fecreg: '',
+            estado: '',
+            fecha_syncron: '',
+            coddoc_detalle: '',
+            tipo_detalle: '',
+            codciu_detalle: '',
+            estado_detalle: '',
+            isEdit: -1,
+            newclave: void 0,
+            whatsapp: '',
+        };
+    }
 
 	validate(attr = {}, options = void 0) {
 		let _err = [];

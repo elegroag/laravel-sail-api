@@ -75,12 +75,10 @@ export default class ReaprobarView extends ModelView {
 		}
 
 		$App.trigger('syncro', {
-			url: $App.url('reaprobar'),
+			url: 'reaprobar',
 			data: {
 				id: this.model.id,
 				nota: _nota_reaprobar,
-				giro: this.$el.find('#giro').val(),
-				codgir: this.$el.find('#codgir').val(),
 			},
 			silent: true,
 			callback: (response) => {
@@ -89,19 +87,16 @@ export default class ReaprobarView extends ModelView {
 						title: 'Notificación',
 						message: response.msj,
 					});
-					_target.removeAttr('disabled');
-					setTimeout(function () {
-						$('label.error').text('');
-						_target.removeAttr('disabled');
-					}, 5000);
+					setTimeout(() => {
+						$App.router.navigate('list', { trigger: true, replace: true });
+					}, 3000);
 					return false;
-				} else {
-					$App.trigger('alert:error', {
-						title: 'Notificación Alerta',
-						message: response.msj,
-					});
-					_target.removeAttr('disabled');
 				}
+				$App.trigger('alert:error', {
+					title: 'Notificación Alerta',
+					message: response.msj,
+				});
+				_target.removeAttr('disabled');
 			},
 		});
 	}

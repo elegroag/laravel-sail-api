@@ -13,24 +13,6 @@
 					</div>
 				</div>
 			</div>
-			<div class="row mb-3" id="renderByTrabajador">
-				<div class="col-md-4">
-					<div class="form-group">
-						<label for='codgir' class='form-label'>Código giro</label>
-						<input type="text" class="form-control" id="codgir">
-					</div>
-				</div>
-				<div class="col-md-4">
-					<div class="form-group">
-						<label for='giro' class='form-label'>Giro</label>
-						<select class="form-control" id="giro">
-							<option value="">Seleccione</option>
-							<option value="S">SI</option>
-							<option value="N">NO</option>
-						</select>
-					</div>
-				</div>
-			</div>
 			<button type='button' class='btn btn-success' id='procesarReaprobar'>Re-aprobar</button>
 		</form>
 	</div>

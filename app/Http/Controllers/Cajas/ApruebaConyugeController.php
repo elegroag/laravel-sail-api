@@ -11,6 +11,7 @@ use App\Models\Mercurio10;
 use App\Models\Mercurio11;
 use App\Models\Mercurio31;
 use App\Models\Mercurio32;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Aprueba\ApruebaConyuge;
 use App\Services\CajaServices\ConyugeServices;
 use App\Services\Reports\CsvReportStrategy;
@@ -19,9 +20,7 @@ use App\Services\Reports\ReportGenerator;
 use App\Services\Srequest;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
-use App\Services\Api\ApiSubsidio;
 use Carbon\Carbon;
-use DB;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -58,9 +57,10 @@ class ApruebaConyugeController extends ApplicationController
 
     /**
      * aplicarFiltro function
+     *
      * @changed [2023-12-20]
+     *
      * @author elegroag <elegroag@ibero.edu.co>
-     * @return JsonResponse
      */
     public function aplicarFiltro(Request $request, ?string $estado = 'P'): JsonResponse
     {
@@ -99,7 +99,7 @@ class ApruebaConyugeController extends ApplicationController
     {
         try {
             $format = $request->query('format', 'csv');
-            $strategy = $format === 'excel' ? new ExcelReportStrategy() : new CsvReportStrategy();
+            $strategy = $format === 'excel' ? new ExcelReportStrategy : new CsvReportStrategy;
             $ext = $format === 'excel' ? 'xlsx' : 'csv';
 
             // Base del filtro igual que en buscar/aplicarFiltro
@@ -122,8 +122,8 @@ class ApruebaConyugeController extends ApplicationController
             // Columnas de Mercurio32
             $columns = [
                 'Cédula Cónyuge' => 'cedcon',
-                'Nombres' => fn($r) => trim(($r->prinom ?? '') . ' ' . ($r->segnom ?? '')),
-                'Apellidos' => fn($r) => trim(($r->priape ?? '') . ' ' . ($r->segape ?? '')),
+                'Nombres' => fn ($r) => trim(($r->prinom ?? '').' '.($r->segnom ?? '')),
+                'Apellidos' => fn ($r) => trim(($r->priape ?? '').' '.($r->segape ?? '')),
                 'Cédula Trabajador' => 'cedtra',
                 'Estado' => 'estado',
                 'Fecha Solicitud' => 'fecsol',
@@ -133,7 +133,7 @@ class ApruebaConyugeController extends ApplicationController
             $gen = (new ReportGenerator($strategy))
                 ->for(Mercurio32::query())
                 ->columns($columns)
-                ->filename('mercurio32_' . now()->format('Ymd_His') . '.' . $ext)
+                ->filename('mercurio32_'.now()->format('Ymd_His').'.'.$ext)
                 ->filter(function ($q) use ($filtro) {
                     if (is_string($filtro) && trim($filtro) !== '') {
                         $q->whereRaw($filtro);
@@ -165,7 +165,9 @@ class ApruebaConyugeController extends ApplicationController
 
     /**
      * index function
+     *
      * @changed [2023-12-20]
+     *
      * @author elegroag <elegroag@ibero.edu.co>
      */
     public function index()
@@ -199,9 +201,6 @@ class ApruebaConyugeController extends ApplicationController
      * @changed [2023-12-00]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param string|null  $estado
-     * @return JsonResponse
      */
     public function buscar(Request $request, ?string $estado = 'P'): JsonResponse
     {
@@ -285,7 +284,7 @@ class ApruebaConyugeController extends ApplicationController
                     'errors' => $err->render($request),
                 ];
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $salida = [
                 'success' => false,
                 'msj' => $e->getMessage(),
@@ -318,7 +317,7 @@ class ApruebaConyugeController extends ApplicationController
         try {
             $campos_corregir = implode(';', $array_corregir);
 
-            $mercurio32 = Mercurio32::where("id", $id)->first();
+            $mercurio32 = Mercurio32::where('id', $id)->first();
 
             $this->conyugeServices->devolver($mercurio32, $nota, $codest, $campos_corregir);
 
@@ -347,7 +346,7 @@ class ApruebaConyugeController extends ApplicationController
         $nota = sanetizar($request->input('nota'));
         $codest = $request->input('codest');
         try {
-            $mercurio32 = Mercurio32::where("id", $id)->first();
+            $mercurio32 = Mercurio32::where('id', $id)->first();
             $this->conyugeServices->rechazar($mercurio32, $nota, $codest);
             $notifyEmailServices->emailRechazar(
                 $mercurio32,
@@ -381,7 +380,7 @@ class ApruebaConyugeController extends ApplicationController
             }
             $this->conyugeServices = new ConyugeServices;
 
-            $solicitud = Mercurio32::where("id", $id)->first();
+            $solicitud = Mercurio32::where('id', $id)->first();
             if ($solicitud == false) {
                 set_flashdata('error', [
                     'msj' => 'La solicitud de afiliación de conyugue no es valida.',
@@ -396,7 +395,7 @@ class ApruebaConyugeController extends ApplicationController
             }
 
             $trabajador_sisu = false;
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -419,7 +418,7 @@ class ApruebaConyugeController extends ApplicationController
                 }
             }
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -459,7 +458,7 @@ class ApruebaConyugeController extends ApplicationController
                 $numcue = ($solicitud->getNumcue()) ? $solicitud->getNumcue() : $numcue;
             }
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -473,7 +472,7 @@ class ApruebaConyugeController extends ApplicationController
                 'cajas/aprobacioncon/tmp/consulta',
                 [
                     'conyuge' => $solicitud,
-                    'detTipo' => Mercurio06::where("tipo", $solicitud->getTipo())->first()->getDetalle(),
+                    'detTipo' => Mercurio06::where('tipo', $solicitud->getTipo())->first()->getDetalle(),
                     '_coddoc' => ParamsConyuge::getTiposDocumentos(),
                     '_codciu' => ParamsConyuge::getCiudades(),
                     '_sexo' => ParamsConyuge::getSexos(),
@@ -524,7 +523,7 @@ class ApruebaConyugeController extends ApplicationController
         $_ciunac = [];
         $_ciures = [];
 
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -576,12 +575,10 @@ class ApruebaConyugeController extends ApplicationController
     /**
      * empresaSisuweb function
      * Datos de la empresa en sisuweb, si ya está registrada. pruebas 98588506
-     *
-     * @param  int  $id
      */
     public function buscarEnSisuView(int $id)
     {
-        $mercurio32 = Mercurio32::where("id", $id)->first();
+        $mercurio32 = Mercurio32::where('id', $id)->first();
         if (! $mercurio32) {
             set_flashdata('error', [
                 'msj' => 'El conyuge no se encuentra registrado.',
@@ -591,7 +588,7 @@ class ApruebaConyugeController extends ApplicationController
             return redirect('aprobacioncon/index');
         }
 
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
@@ -637,7 +634,7 @@ class ApruebaConyugeController extends ApplicationController
             $id = $request->input('id');
             $cedcon = $request->input('cedcon');
 
-            $mercurio32 = Mercurio32::where("id", $id)->where("cedcon", $cedcon)->first();
+            $mercurio32 = Mercurio32::where('id', $id)->where('cedcon', $cedcon)->first();
             if (! $mercurio32) {
                 throw new DebugException('La cónyuge no está disponible para editar', 501);
             } else {
@@ -677,7 +674,7 @@ class ApruebaConyugeController extends ApplicationController
                     }
                 }
                 $setters = trim($setters, ',');
-                Mercurio32::where("id", $id)->where("cedcon", $cedcon)->update($data);
+                Mercurio32::where('id', $id)->where('cedcon', $cedcon)->update($data);
 
                 $db = DbBase::rawConnect();
 
@@ -705,10 +702,10 @@ class ApruebaConyugeController extends ApplicationController
         if (empty($id)) {
             return redirect('aprobacioncon/index');
         }
-        $conyuge = Mercurio32::where("id", $id)->first();
-        $trabajador = Mercurio31::where("cedtra", $conyuge->getCedtra())->first();
+        $conyuge = Mercurio32::where('id', $id)->first();
+        $trabajador = Mercurio31::where('cedtra', $conyuge->getCedtra())->first();
 
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -731,7 +728,7 @@ class ApruebaConyugeController extends ApplicationController
         $this->setParamToView('hide_header', true);
         $this->setParamToView('title', 'Aprobación Conyuge');
 
-        $collection = Mercurio32::where("estado", $estado)->where("usuario", $this->user['usuario'])->orderBy("fecsol", "ASC")->get();
+        $collection = Mercurio32::where('estado', $estado)->where('usuario', $this->user['usuario'])->orderBy('fecsol', 'ASC')->get();
         $conyugeServices = new ConyugeServices;
         $data = $conyugeServices->dataOptional($collection, $estado);
 
@@ -747,9 +744,9 @@ class ApruebaConyugeController extends ApplicationController
         $today = Carbon::now();
 
         try {
-            Mercurio32::where("id", $id)->update([
-                "estado" => "A",
-                "fecest" => $today->format('Y-m-d H:i:s'),
+            Mercurio32::where('id', $id)->update([
+                'estado' => 'A',
+                'fecest' => $today->format('Y-m-d H:i:s'),
             ]);
 
             $item = Mercurio10::whereRaw("tipopc='{$this->tipopc}' and numero='{$id}'")->max('item');
@@ -762,9 +759,9 @@ class ApruebaConyugeController extends ApplicationController
             $mercurio10->setNota($nota);
             $mercurio10->setFecsis($today->format('Y-m-d H:i:s'));
             $mercurio10->save();
-            $mercurio32 = Mercurio32::where("id", $id)->first();
+            $mercurio32 = Mercurio32::where('id', $id)->first();
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -782,7 +779,7 @@ class ApruebaConyugeController extends ApplicationController
             $params['fecafi'] = ($fecsol) ? $fecsol : $fecafi;
             $params['recsub'] = 'N';
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -802,9 +799,11 @@ class ApruebaConyugeController extends ApplicationController
                 'out' => $out,
             ];
         } catch (DebugException $e) {
+            return $e->render($request);
+        } catch (Exception $err) {
             $response = [
                 'success' => false,
-                'msj' => 'No se pudo realizar el movimiento ' . "\n" . $e->getMessage() . "\n " . $e->getLine(),
+                'msj' => 'No se pudo realizar el movimiento '."\n".$err->getMessage()."\n ".$err->getLine(),
             ];
         }
 
@@ -827,29 +826,26 @@ class ApruebaConyugeController extends ApplicationController
     /**
      * infoAprobadoView function
      * datos del solicitud aprobada en sisu
-     *
-     * @param  Request  $request
-     * @return JsonResponse
      */
     public function infor(Request $request): JsonResponse
     {
         try {
-            $conyugeServices =  new ConyugeServices();
+            $conyugeServices = new ConyugeServices;
             $validated = $request->validate([
                 'id' => 'required|integer',
             ]);
             $id = $validated['id'];
 
-            $mercurio32 = Mercurio32::where("id", $id)->first();
+            $mercurio32 = Mercurio32::where('id', $id)->first();
             if (! $mercurio32) {
                 throw new DebugException('Error al buscar la beneficiario', 501);
             }
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
-                    'metodo' => 'parametros_conyuges'
+                    'metodo' => 'parametros_conyuges',
                 ]
             );
 
@@ -857,7 +853,7 @@ class ApruebaConyugeController extends ApplicationController
             $paramsConyuge = new ParamsConyuge;
             $paramsConyuge->setDatosCaptura($datos_captura);
 
-            $px = new ApiSubsidio();
+            $px = new ApiSubsidio;
             $px->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -895,7 +891,7 @@ class ApruebaConyugeController extends ApplicationController
                 'cajas.aprobacioncon.tmp.consulta',
                 [
                     'conyuge' => $conyuge,
-                    'detTipo' => Mercurio06::where("tipo", $conyuge->tipo)->first()->getDetalle(),
+                    'detTipo' => Mercurio06::where('tipo', $conyuge->tipo)->first()->getDetalle(),
                     '_coddoc' => ParamsConyuge::getTiposDocumentos(),
                     '_codciu' => ParamsConyuge::getCiudades(),
                     '_sexo' => ParamsConyuge::getSexos(),
@@ -929,16 +925,16 @@ class ApruebaConyugeController extends ApplicationController
                 'success' => true,
                 'data' => $mercurio32->toArray(),
                 'mercurio11' => $code_estados,
-                "consulta" => $html,
+                'consulta' => $html,
                 'adjuntos' => $adjuntos,
                 'seguimiento' => $seguimiento,
                 'campos_disponibles' => $campos_disponibles,
-                'api_afiliation_status' => $api_afiliation_status
+                'api_afiliation_status' => $api_afiliation_status,
             ];
         } catch (Exception $err) {
             $response = [
                 'success' => false,
-                'msj' => $err->getMessage() . ' ' . $err->getLine(),
+                'msj' => $err->getMessage().' '.$err->getLine(),
             ];
         }
 
@@ -949,7 +945,6 @@ class ApruebaConyugeController extends ApplicationController
      * deshacerAprobado function
      * metodo para deshacer una afilación, dado que se presente algun error por parte de los analistas encargados
      *
-     * @param  Request  $request
      * @return JsonResponse
      */
     public function deshacer(Request $request)
@@ -965,12 +960,12 @@ class ApruebaConyugeController extends ApplicationController
         try {
             $id = $request->input('id');
 
-            $mercurio32 = Mercurio32::where("id", $id)->where("estado", 'A')->first();
+            $mercurio32 = Mercurio32::where('id', $id)->where('estado', 'A')->first();
             if (! $mercurio32) {
                 throw new DebugException('Los datos del cónyuge no son validos para procesar.', 501);
             }
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -1052,7 +1047,7 @@ class ApruebaConyugeController extends ApplicationController
         } catch (DebugException $err) {
             $salida = [
                 'success' => false,
-                'msj' => 'Error no se pudo realizar el movimiento, ' . $err->getMessage(),
+                'msj' => 'Error no se pudo realizar el movimiento, '.$err->getMessage(),
                 'comando' => $comando,
                 'file' => $err->getFile(),
                 'line' => $err->getLine(),
@@ -1071,7 +1066,7 @@ class ApruebaConyugeController extends ApplicationController
             $cedtra = $request->input('cedtra');
             $coddoc = $request->input('tipdoc');
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',

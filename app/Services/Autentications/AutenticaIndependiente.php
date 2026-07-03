@@ -8,6 +8,8 @@ use App\Models\Mercurio31;
 use App\Models\Mercurio32;
 use App\Models\Mercurio34;
 use App\Services\Utils\CrearUsuario;
+use Exception;
+use Illuminate\Support\Facades\Log;
 
 class AutenticaIndependiente extends AutenticaGeneral
 {
@@ -18,27 +20,39 @@ class AutenticaIndependiente extends AutenticaGeneral
         $this->tipoName = 'Independiente';
     }
 
-    public function comprobarSISU($documento, $coddoc)
+    /**
+     * comprobarSISU function
+     * autenticar independiente, en sesion consulta y gestion,
+     * comprobar que el independiente este registrada en SISU
+     * comprueba que este el usuario de la independiente en mercurio
+     * hace los registro de forma automatica
+     * @return bool
+     */
+    public function comprobarSISU(string $documento, string $coddoc): bool
     {
-        /**
-         * buscar empresa en sisu
-         */
-        $this->procesadorComando->send(
-            [
-                'servicio' => 'ComfacaEmpresas',
-                'metodo' => 'informacion_empresa',
-                'params' => [
-                    'nit' => $documento,
-                ],
-            ]
-        );
+        try {
+            /**
+             * buscar empresa en sisu
+             */
+            $this->procesadorComando->send(
+                [
+                    'servicio' => 'ComfacaEmpresas',
+                    'metodo' => 'informacion_empresa',
+                    'params' => [
+                        'nit' => $documento,
+                    ],
+                ]
+            );
+        } catch (Exception $err) {
+            Log::info('ApiSubsidio ' . $err->getMessage());
+        }
 
-        $out = $this->procesadorComando->toArray();
-
-        if (!is_array($out)) {
-            $this->message = 'Se genero un error al buscar al afiliado independiente servicio API.';
+        if ($this->procesadorComando->isJson() == false) {
+            $this->message = 'Se genero un error al buscar al trabajador usando el servicio CLI-Comando. ';
             return false;
         }
+
+        $out = $this->procesadorComando->toArray();
 
         $isSuccess = $out['success'] ?? false;
         if (!$isSuccess) {
@@ -225,7 +239,8 @@ class AutenticaIndependiente extends AutenticaGeneral
                 $usuarioIndependiente->save();
             }
 
-            return false;
+            //retorna true ya que puede ingresar a la plataforma en estado inactivo
+            return true;
         } else {
             /**
              * La empresa está activa en sisu

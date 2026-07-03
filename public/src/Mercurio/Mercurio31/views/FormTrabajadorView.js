@@ -146,11 +146,14 @@ class FormTrabajadorView extends FormView {
             allowInput: true
         });
 
+        let fechaMaximaIngreso = new Date();
+        fechaMaximaIngreso.setDate(fechaMaximaIngreso.getDate() + 3);
+
         flatpickr($el.find('#fecing'), {
             enableTime: false,
             dateFormat: 'Y-m-d',
             locale: Spanish,
-            maxDate: 'today',
+            maxDate: fechaMaximaIngreso,
             minDate: '1970-01-01',
             allowInput: true
         });

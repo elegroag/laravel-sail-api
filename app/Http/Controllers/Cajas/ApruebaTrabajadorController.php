@@ -13,6 +13,7 @@ use App\Models\Mercurio10;
 use App\Models\Mercurio11;
 use App\Models\Mercurio30;
 use App\Models\Mercurio31;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Aprueba\ApruebaTrabajador;
 use App\Services\CajaServices\TrabajadorServices;
 use App\Services\Reports\CsvReportStrategy;
@@ -23,7 +24,7 @@ use App\Services\Tag;
 use App\Services\Utils\CalculatorDias;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
-use App\Services\Api\ApiSubsidio;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -58,8 +59,6 @@ class ApruebaTrabajadorController extends ApplicationController
      * @changed [2023-12-19]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @return JsonResponse
      */
     public function aplicarFiltro(Request $request, string $estado = 'P'): JsonResponse
     {
@@ -99,7 +98,7 @@ class ApruebaTrabajadorController extends ApplicationController
     {
         try {
             $format = $request->query('format', 'csv');
-            $strategy = $format === 'excel' ? new ExcelReportStrategy() : new CsvReportStrategy();
+            $strategy = $format === 'excel' ? new ExcelReportStrategy : new CsvReportStrategy;
             $ext = $format === 'excel' ? 'xlsx' : 'csv';
 
             // Base del filtro igual que en buscar/aplicarFiltro
@@ -122,8 +121,8 @@ class ApruebaTrabajadorController extends ApplicationController
             // Columnas de Mercurio31
             $columns = [
                 'Cédula' => 'cedtra',
-                'Nombres' => fn($r) => trim(($r->prinom ?? '') . ' ' . ($r->segnom ?? '')),
-                'Apellidos' => fn($r) => trim(($r->priape ?? '') . ' ' . ($r->segape ?? '')),
+                'Nombres' => fn ($r) => trim(($r->prinom ?? '').' '.($r->segnom ?? '')),
+                'Apellidos' => fn ($r) => trim(($r->priape ?? '').' '.($r->segape ?? '')),
                 'Nit Empresa' => 'nit',
                 'Estado' => 'estado',
                 'Fecha Solicitud' => 'fecsol',
@@ -133,7 +132,7 @@ class ApruebaTrabajadorController extends ApplicationController
             $gen = (new ReportGenerator($strategy))
                 ->for(Mercurio31::query())
                 ->columns($columns)
-                ->filename('mercurio31_' . now()->format('Ymd_His') . '.' . $ext)
+                ->filename('mercurio31_'.now()->format('Ymd_His').'.'.$ext)
                 ->filter(function ($q) use ($filtro) {
                     if (is_string($filtro) && trim($filtro) !== '') {
                         $q->whereRaw($filtro);
@@ -156,7 +155,9 @@ class ApruebaTrabajadorController extends ApplicationController
 
     /**
      * index function
+     *
      * @changed [2023-12-00]
+     *
      * @author elegroag <elegroag@ibero.edu.co>
      */
     public function index()
@@ -222,9 +223,10 @@ class ApruebaTrabajadorController extends ApplicationController
 
     /**
      * infor function
+     *
      * @changed [2023-12-19]
+     *
      * @author elegroag <elegroag@ibero.edu.co>
-     * @return JsonResponse
      */
     public function infor(Request $request): JsonResponse
     {
@@ -235,9 +237,9 @@ class ApruebaTrabajadorController extends ApplicationController
 
             $id = $validated['id'];
             $trabajadorServices = new TrabajadorServices;
-            $mercurio31 = Mercurio31::where("id", $id)->first();
+            $mercurio31 = Mercurio31::where('id', $id)->first();
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -248,7 +250,7 @@ class ApruebaTrabajadorController extends ApplicationController
             $paramsTrabajador = new ParamsTrabajador;
             $paramsTrabajador->setDatosCaptura($ps->toArray());
 
-            $px = new ApiSubsidio();
+            $px = new ApiSubsidio;
             $px->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -263,7 +265,7 @@ class ApruebaTrabajadorController extends ApplicationController
                 $empresa_sisu = ($datos_captura['success']) ? $datos_captura['data'] : false;
             }
 
-            $pt = new ApiSubsidio();
+            $pt = new ApiSubsidio;
             $pt->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -312,7 +314,7 @@ class ApruebaTrabajadorController extends ApplicationController
                 ]
             )->render();
 
-            $pr = new ApiSubsidio();
+            $pr = new ApiSubsidio;
             $pr->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -325,11 +327,11 @@ class ApruebaTrabajadorController extends ApplicationController
             $_codsuc = [];
             if ($sucursales['success']) {
                 foreach ($sucursales['data'] as $data) {
-                    $_codsuc["{$data['codsuc']}"] = $data['codsuc'] . ' ' . $data['detalle'];
+                    $_codsuc["{$data['codsuc']}"] = $data['codsuc'].' '.$data['detalle'];
                 }
             }
 
-            $pl = new ApiSubsidio();
+            $pl = new ApiSubsidio;
             $pl->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -374,7 +376,7 @@ class ApruebaTrabajadorController extends ApplicationController
                 'data' => $mercurio31->toArray(),
                 'trabajador_sisu' => $trabajador_sisuweb,
                 'mercurio11' => Mercurio11::all(),
-                "consulta" => $html,
+                'consulta' => $html,
                 'adjuntos' => $trabajadorServices->adjuntos($mercurio31),
                 'seguimiento' => $trabajadorServices->seguimiento($mercurio31),
                 'campos_disponibles' => $campos_disponibles,
@@ -386,7 +388,7 @@ class ApruebaTrabajadorController extends ApplicationController
         } catch (Exception $err) {
             $response = [
                 'success' => false,
-                'msj' => $err->getMessage() . ' ' . $err->getLine(),
+                'msj' => $err->getMessage().' '.$err->getLine(),
             ];
         }
 
@@ -399,8 +401,6 @@ class ApruebaTrabajadorController extends ApplicationController
      * @changed [2023-12-19]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @return JsonResponse
      */
     public function aprueba(Request $request): JsonResponse
     {
@@ -424,9 +424,10 @@ class ApruebaTrabajadorController extends ApplicationController
             } catch (DebugException $err) {
 
                 $this->db->rollback();
+
                 return $err->render($request);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->db->rollback();
             $salida = [
                 'success' => false,
@@ -464,7 +465,7 @@ class ApruebaTrabajadorController extends ApplicationController
             $array_corregir = $validated['campos_corregir'] ?? [];
             $campos_corregir = $array_corregir ? implode(';', $array_corregir) : '';
 
-            $mercurio31 = Mercurio31::where("id", $id)->first();
+            $mercurio31 = Mercurio31::where('id', $id)->first();
             $this->trabajadorServices->devolver($mercurio31, $nota, $codest, $campos_corregir);
 
             $notifyEmailServices->emailDevolver(
@@ -479,10 +480,11 @@ class ApruebaTrabajadorController extends ApplicationController
         } catch (Exception $err) {
             $salida = [
                 'success' => false,
-                'msj' => $err->getMessage() . ' - ' . basename($err->getFile()) . ' - ' . $err->getLine(),
+                'msj' => $err->getMessage().' - '.basename($err->getFile()).' - '.$err->getLine(),
                 'code' => $err->getCode(),
             ];
         }
+
         return response()->json($salida);
     }
 
@@ -511,7 +513,7 @@ class ApruebaTrabajadorController extends ApplicationController
             $nota = $validated['nota'] ?? null;
             $codest = $validated['codest'];
 
-            $mercurio31 = Mercurio31::where("id", $id)->first();
+            $mercurio31 = Mercurio31::where('id', $id)->first();
 
             $this->trabajadorServices->rechazar($mercurio31, $nota, $codest);
 
@@ -534,11 +536,11 @@ class ApruebaTrabajadorController extends ApplicationController
     public function validarMultiafiliacion(Request $request)
     {
         $id = $request->input('id');
-        $mercurio31 = Mercurio31::where("id", $id)->first();
+        $mercurio31 = Mercurio31::where('id', $id)->first();
         $nit = $mercurio31->nit;
         $cedtra = $mercurio31->cedtra;
 
-        $ps = new ApiSubsidio();
+        $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'ComfacaEmpresas',
@@ -639,7 +641,7 @@ class ApruebaTrabajadorController extends ApplicationController
 
     public function loadParametrosView()
     {
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -704,10 +706,10 @@ class ApruebaTrabajadorController extends ApplicationController
             return redirect('aprobaciontra/index');
             exit;
         }
-        $trabajador = Mercurio31::where("id", $id)->first();
-        $empresa = Mercurio30::where("nit", $trabajador->getNit())->first();
+        $trabajador = Mercurio31::where('id', $id)->first();
+        $empresa = Mercurio30::where('nit', $trabajador->getNit())->first();
 
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -827,7 +829,7 @@ class ApruebaTrabajadorController extends ApplicationController
                 throw new DebugException('Error el trabajador no se encuentra registrado', 501);
             }
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -849,7 +851,7 @@ class ApruebaTrabajadorController extends ApplicationController
                         'solicitud' => $mercurio31->getArray(),
                         'trayectorias' => $out['data']['trayectoria'] ?? [],
                         'salarios' => $out['data']['salarios'] ?? [],
-                        'title' => 'Trabajador SisuWeb ' . $mercurio31->getCedtra(),
+                        'title' => 'Trabajador SisuWeb '.$mercurio31->getCedtra(),
                     ],
                 ],
             );
@@ -878,7 +880,7 @@ class ApruebaTrabajadorController extends ApplicationController
                     $background = '#f5b2b2';
                 }
             }
-            $url = config('app.url') . 'Cajas/aprobaciontra/info_trabajador/' . $mercurio->getNit() . '/' . $mercurio->getCedtra() . '/' . $mercurio->getId();
+            $url = config('app.url').'Cajas/aprobaciontra/info_trabajador/'.$mercurio->getNit().'/'.$mercurio->getCedtra().'/'.$mercurio->getId();
             $sat = 'NORMAL';
             $trabajadores[] = [
                 'estado' => $mercurio->getEstadoDetalle(),
@@ -912,7 +914,7 @@ class ApruebaTrabajadorController extends ApplicationController
         ]);
         $id = $validated['id'];
         $nota = sanetizar($validated['nota'] ?? '');
-        $today = new \DateTime;
+        $today = Carbon::now();
         try {
             Mercurio31::where('id', $id)->update([
                 'estado' => 'A',
@@ -937,7 +939,13 @@ class ApruebaTrabajadorController extends ApplicationController
             ];
         } catch (DebugException $err) {
             return $err->render($request);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'msj' => 'Error no se pudo realizar el movimiento, '.$e->getMessage(),
+            ]);
         }
+
         return response()->json($response);
     }
 
@@ -962,11 +970,11 @@ class ApruebaTrabajadorController extends ApplicationController
             if (! $mercurio31) {
                 throw new DebugException('El trabajador no se encuentra aprobado para consultar sus datos.', 501);
             }
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
-                    'metodo' => 'parametros_trabajadores'
+                    'metodo' => 'parametros_trabajadores',
                 ]
             );
 
@@ -974,7 +982,7 @@ class ApruebaTrabajadorController extends ApplicationController
             $paramsTrabajador = new ParamsTrabajador;
             $paramsTrabajador->setDatosCaptura($datos_captura);
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -1029,7 +1037,7 @@ class ApruebaTrabajadorController extends ApplicationController
             $this->setParamToView('hide_header', true);
             $this->setParamToView('idModel', $id);
             $this->setParamToView('cedtra', $mercurio31->getCedtra());
-            $this->setParamToView('title', 'Trabajador Aprobada ' . $mercurio31->getCedtra());
+            $this->setParamToView('title', 'Trabajador Aprobada '.$mercurio31->getCedtra());
         } catch (DebugException $err) {
             set_flashdata('error', [
                 'msj' => $err->getMessage(),
@@ -1067,7 +1075,7 @@ class ApruebaTrabajadorController extends ApplicationController
                 throw new DebugException('Los datos del trabajador no son validos para procesar.', 501);
             }
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaTrabajadores',
@@ -1081,7 +1089,7 @@ class ApruebaTrabajadorController extends ApplicationController
             $out = $ps->toArray();
             $trabajadorSisu = $out['data'];
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -1148,7 +1156,7 @@ class ApruebaTrabajadorController extends ApplicationController
         } catch (DebugException $err) {
             $salida = [
                 'success' => false,
-                'msj' => 'Error no se pudo realizar el movimiento, ' . $err->getMessage(),
+                'msj' => 'Error no se pudo realizar el movimiento, '.$err->getMessage(),
                 'comando' => $comando,
                 'file' => $err->getFile(),
                 'line' => $err->getLine(),
@@ -1177,7 +1185,7 @@ class ApruebaTrabajadorController extends ApplicationController
                     throw new DebugException('La empresa no se encuentra registrada.', 201);
                 }
 
-                $procesadorComando = new ApiSubsidio();
+                $procesadorComando = new ApiSubsidio;
                 $procesadorComando->send(
                     [
                         'servicio' => 'AportesEmpresas',
@@ -1198,7 +1206,7 @@ class ApruebaTrabajadorController extends ApplicationController
         } catch (DebugException $err) {
             $salida = [
                 'success' => false,
-                'msj' => 'No se pudo realizar el movimiento ' . "\n" . $err->getMessage() . "\n " . $err->getLine(),
+                'msj' => 'No se pudo realizar el movimiento '."\n".$err->getMessage()."\n ".$err->getLine(),
             ];
         }
 

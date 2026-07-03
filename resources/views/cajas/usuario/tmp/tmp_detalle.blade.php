@@ -45,6 +45,14 @@
 			<p class="description">Usa una dirección de email a la cual pueda acceder de forma recurrente, para consultar las notificaciones de procesos de afiliación.</p>
 		</div>
 		<div class='col-md-6 border-top border-right mb-1 border-left border-bottom'>
+			<label class='form-control-label'>Teléfono / WhatsApp</label>
+			<% if (isEdit == -1) {%>
+            <p class='pl-2 description'><%= whatsapp%> </p>
+            <%}else{%>
+            <input class="form-control mb-1" id="whatsapp" name="whatsapp" type="text" value="<%=whatsapp%>" maxlength="10" />
+            <%}%>
+		</div>
+		<div class='col-md-6 border-top border-right mb-1 border-left border-bottom'>
 			<label class='form-control-label'>Fecha registro del usuario</label>
 			<p class='pl-2 description'><%= fecreg%> </p>
         </div>

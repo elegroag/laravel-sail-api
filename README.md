@@ -56,7 +56,6 @@ Sistema completo de gestión empresarial desarrollado con Laravel 12, MySQL, Ine
 - **Build Tools**: Vite, NPM
 - **Base de Datos**: MySQL 8.0
 
-
 ```sh
 rsync -avz /home/edwin-tics/proyectos/comfaca-enlinea/flask-api/ admin@172.168.0.15:/home/admin/contenedores/desarrollo/flask-api
 
@@ -107,7 +106,7 @@ php artisan migrate:fresh --seed
 
 ```bash
 
-# Ejecutar el produccion Docker Compose 
+# Ejecutar el produccion Docker Compose
 sed -i 's/^session.sid_length = 26/;session.sid_length = 26/' /usr/local/etc/php/php.ini
 sed -i 's/^session.sid_bits_per_character = 5/;session.sid_bits_per_character = 5/' /usr/local/etc/php/php.ini
 
@@ -130,8 +129,19 @@ sudo bash -c 'cat >> /etc/security/limits.conf << EOF
 * hard nofile 65536
 EOF'
 
-
-## Habilitar memoria 
+## Habilitar memoria
 sed -i 's/upload_max_filesize = 2M/upload_max_filesize = 50M/' /usr/local/etc/php/php.ini
 sed -i 's/post_max_size = 8M/post_max_size = 55M/' /usr/local/etc/php/php.ini
+
+# Entrar al contenedor y borrar la caché (ej. en Node.js, PHP, Symfony o Composer)
+docker compose exec mercurio <comando_de_limpieza>
+
+# Por ejemplo, para vaciar la caché de un proyecto Laravel/Composer en el servicio 'app':
+docker compose exec mercurio php artisan cache:clear
+
+# Por ejemplo, para limpiar npm/yarn en un servicio web:
+docker compose exec mercurio npm cache clean --force
+# Por ejemplo, para limpiar pnpm en un servicio web:
+docker compose exec mercurio pnpm cache delete
+docker compose exec mercurio pnpm store prune
 ```
