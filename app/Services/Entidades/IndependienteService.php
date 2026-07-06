@@ -17,6 +17,7 @@ use App\Models\Mercurio37;
 use App\Models\Mercurio41;
 use App\Models\Mercurio47;
 use App\Services\Api\ApiSubsidio;
+use App\Services\FormulariosAdjuntos\IndependienteAdjuntoService;
 use App\Services\Srequest;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\SenderValidationCaja;
@@ -394,6 +395,9 @@ class IndependienteService
         $mercurio41->email = $solicitante->getEmail();
 
         $senderValidationCaja->send($this->tipopc, $mercurio41);
+
+        $mercurio41 = $this->findById($id);
+        IndependienteAdjuntoService::generarComprobanteRadicacion($mercurio41);
     }
 
     public function paramsApi(): void

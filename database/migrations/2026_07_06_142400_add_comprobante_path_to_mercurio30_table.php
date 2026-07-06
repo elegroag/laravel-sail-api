@@ -1,0 +1,22 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('mercurio30', function (Blueprint $table) {
+            $table->string('comprobante_path')->nullable()->after('ruuid');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('mercurio30', function (Blueprint $table) {
+            $table->dropColumn('comprobante_path');
+        });
+    }
+};

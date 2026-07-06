@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Mercurio\DocumentosController;
 use App\Http\Controllers\Mercurio\EmpresaController;
 use Illuminate\Support\Facades\Route;
 
@@ -12,6 +13,7 @@ Route::prefix('/mercurio/empresa')->group(function () {
         Route::get('/index', [EmpresaController::class, 'index'])->name('empresa.index');
         Route::get('/download_temp/{archivo}', [EmpresaController::class, 'downloadFile']);
         Route::get('/download_docs/{archivo}', [EmpresaController::class, 'downloadDocs']);
+        Route::get('/comprobante/{id}', [DocumentosController::class, 'descargarComprobanteRadicacion']);
         Route::get('/miempresa', [EmpresaController::class, 'miEmpresa'])->name('empresa.miempresa');
 
         Route::post('/buscar_empresa', [EmpresaController::class, 'buscarEmpresa']);

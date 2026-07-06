@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Mercurio\DocumentosController;
 use App\Http\Controllers\Mercurio\PensionadoController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +21,7 @@ Route::middleware(['mercurio.auth'])->group(function () {
         Route::post('/params', [PensionadoController::class, 'params']);
         Route::get('/download_temp/{archivo}', [PensionadoController::class, 'downloadFile']);
         Route::get('/download_docs/{archivo}', [PensionadoController::class, 'downloadDocs']);
+        Route::get('/comprobante/{id}', [DocumentosController::class, 'descargarComprobantePensionado']);
 
         Route::post('/search_request/{id}', [PensionadoController::class, 'searchRequest']);
         Route::post('/consulta_documentos/{id}', [PensionadoController::class, 'consultaDocumentos']);

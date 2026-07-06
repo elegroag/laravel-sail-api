@@ -13,6 +13,7 @@ use App\Models\Mercurio14;
 use App\Models\Mercurio37;
 use App\Models\Mercurio38;
 use App\Services\Api\ApiSubsidio;
+use App\Services\FormulariosAdjuntos\PensionadoAdjuntoService;
 use App\Services\Srequest;
 use App\Services\Utils\SenderValidationCaja;
 
@@ -278,6 +279,9 @@ class PensionadoService
         $solicitud->email = $solicitante->getEmail();
 
         $senderValidationCaja->send($this->tipopc, $solicitud);
+
+        $solicitud = $this->findById($id);
+        PensionadoAdjuntoService::generarComprobanteRadicacion($solicitud);
     }
 
     public function consultaSeguimiento($id)

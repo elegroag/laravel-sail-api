@@ -13,13 +13,12 @@ use App\Models\Mercurio30;
 use App\Models\Mercurio36;
 use App\Models\Mercurio38;
 use App\Models\Mercurio41;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Entidades\EmpresaService;
 use App\Services\Entidades\IndependienteService;
 use App\Services\Entidades\ParticularService;
 use App\Services\Entidades\TrabajadorService;
 use App\Services\PreparaFormularios\GestionFirmaNoImage;
-use App\Services\Srequest;
-use App\Services\Api\ApiSubsidio;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -48,7 +47,7 @@ class PrincipalController extends ApplicationController
         return view('mercurio/principal/index', [
             'tipo' => $this->tipo,
             'documento' => $this->user['documento'],
-            'nombre' => $this->user['nombre']
+            'nombre' => $this->user['nombre'],
         ]);
     }
 
@@ -57,12 +56,11 @@ class PrincipalController extends ApplicationController
         $documento = $this->user['documento'] ?? null;
         $coddoc = $this->user['coddoc'] ?? null;
 
-
         $requireFirma = false;
         if ($documento && $coddoc) {
             $mfirma = Mercurio16::whereRaw("documento='{$documento}' AND coddoc='{$coddoc}'")->first();
             // Se considera que tiene firma cuando existe registro y algún recurso asociado (imagen de firma o clave pública)
-            if (!$mfirma) {
+            if (! $mfirma) {
                 $requireFirma = true;
             } else {
                 if (empty($mfirma->firma) && empty($mfirma->keypublic)) {
@@ -84,10 +82,10 @@ class PrincipalController extends ApplicationController
             $coddoc = $this->user['coddoc'] ?? null;
 
             $requireChangeClave = false;
-            $m07 = Mercurio07::where("documento", $documento)
-                ->where("coddoc", $coddoc)
+            $m07 = Mercurio07::where('documento', $documento)
+                ->where('coddoc', $coddoc)
                 ->where(
-                    "tipo",
+                    'tipo',
                     $this->tipo
                 );
             if ($m07->clave === 'x0x') {
@@ -96,8 +94,9 @@ class PrincipalController extends ApplicationController
 
             $salida = [
                 'success' => true,
-                'requireChangeClave' => $requireChangeClave
+                'requireChangeClave' => $requireChangeClave,
             ];
+
             return response()->json($salida);
         } catch (\Throwable $th) {
             return $this->handleException($th);
@@ -145,7 +144,7 @@ class PrincipalController extends ApplicationController
             ];
             $data = [];
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'AportesEmpresas',
@@ -160,12 +159,12 @@ class PrincipalController extends ApplicationController
             $out = $ps->toArray();
             $isSuccess = $out['success'] ?? false;
 
-            if (!$isSuccess) {
+            if (! $isSuccess) {
                 return response()->json([
                     'success' => false,
                     'msj' => 'No se pudo traer las categorias',
                     'message' => 'No se pudo traer el giro',
-                    'flag' => false
+                    'flag' => false,
                 ]);
             }
 
@@ -177,8 +176,9 @@ class PrincipalController extends ApplicationController
 
             $response = [
                 'success' => true,
-                'data' => $data
+                'data' => $data,
             ];
+
             return response()->json($response);
         } catch (\Throwable $e) {
             return $this->handleException($e);
@@ -193,7 +193,7 @@ class PrincipalController extends ApplicationController
             $data = [];
             $labels = [];
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'PoblacionAfiliada',
@@ -206,12 +206,12 @@ class PrincipalController extends ApplicationController
             $out = $ps->toArray();
             $isSuccess = $out['success'] ?? false;
 
-            if (!$isSuccess) {
+            if (! $isSuccess) {
                 return response()->json([
                     'success' => false,
                     'msj' => 'No se pudo traer las categorias',
                     'message' => 'No se pudo traer el giro',
-                    'flag' => false
+                    'flag' => false,
                 ]);
             }
 
@@ -225,6 +225,7 @@ class PrincipalController extends ApplicationController
                 'data' => $data,
                 'labels' => $labels,
             ];
+
             return response()->json($response);
         } catch (\Throwable $e) {
             return $this->handleException($e);
@@ -250,7 +251,7 @@ class PrincipalController extends ApplicationController
                 'Diciembre',
             ];
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'CuotaMonetaria',
@@ -263,12 +264,12 @@ class PrincipalController extends ApplicationController
             $out = $ps->toArray();
             $isSuccess = $out['success'] ?? false;
 
-            if (!$isSuccess) {
+            if (! $isSuccess) {
                 return response()->json([
                     'success' => false,
                     'msj' => 'No se pudo traer el giro',
                     'message' => 'No se pudo traer el giro',
-                    'flag' => false
+                    'flag' => false,
                 ]);
             }
             $data = $out['data'] ?? [];
@@ -278,7 +279,7 @@ class PrincipalController extends ApplicationController
             }
             $response = [
                 'success' => true,
-                'data' => $data
+                'data' => $data,
             ];
 
             return response()->json($response);
@@ -291,7 +292,7 @@ class PrincipalController extends ApplicationController
     {
         $archivo = base64_decode($filepath);
         if (preg_match('/(storage)(\/)(temp)/i', $archivo) == false) {
-            $fichero = storage_path('temp/' . $archivo);
+            $fichero = storage_path('temp/'.$archivo);
         } else {
             $fichero = storage_path($archivo);
         }
@@ -316,7 +317,7 @@ class PrincipalController extends ApplicationController
             $coddoc = $this->user['coddoc'];
             $documento = $this->user['documento'];
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -327,7 +328,7 @@ class PrincipalController extends ApplicationController
             $out = $procesadorComando->toArray();
             $salida_empresas = $out;
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -338,7 +339,7 @@ class PrincipalController extends ApplicationController
             $out = $procesadorComando->toArray();
             $salida_trabajadores = $out;
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -349,7 +350,7 @@ class PrincipalController extends ApplicationController
             $out = $procesadorComando->toArray();
             $salida_conyuges = $out;
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -376,6 +377,7 @@ class PrincipalController extends ApplicationController
             ];
 
             set_flashdata('Syncron', true, true);
+
             return response()->json($salida);
         } catch (\Throwable $e) {
             return $this->handleException($e);
@@ -435,7 +437,7 @@ class PrincipalController extends ApplicationController
             if ($mservice) {
                 $servicios = $mservice->resumenServicios();
             } else {
-                throw new DebugException("El servicio no está disponible.", 501);
+                throw new DebugException('El servicio no está disponible.', 501);
             }
             // Totales por estados de afiliación
             $totales = [
@@ -511,7 +513,7 @@ class PrincipalController extends ApplicationController
             $coddoc = $this->user['coddoc'];
 
             $clave = $request->input('clave');
-            if (!preg_match('/^\d{6}$/', (string)$clave)) {
+            if (! preg_match('/^\d{6}$/', (string) $clave)) {
                 throw new DebugException('La clave debe ser un número de 6 dígitos.', 422);
             }
             // Validación: no permitir secuencias consecutivas (ascendente o descendente)
@@ -527,7 +529,7 @@ class PrincipalController extends ApplicationController
                 if ($curr - $prev !== -1) {
                     $dec = false;
                 }
-                if (!$inc && !$dec) {
+                if (! $inc && ! $dec) {
                     break;
                 }
             }
@@ -556,12 +558,53 @@ class PrincipalController extends ApplicationController
             $salida = [
                 'success' => true,
                 'msj' => 'La clave fue registrada correctamente.',
+                'redirect_url' => $this->resolveTemporalSolicitudRedirect(),
             ];
         } catch (\Throwable $e) {
             return $this->handleException($e);
         }
 
         return response()->json($salida);
+    }
+
+    private function resolveTemporalSolicitudRedirect(): ?string
+    {
+        $documento = $this->user['documento'] ?? null;
+        $coddoc = $this->user['coddoc'] ?? null;
+
+        if (! $documento || ! $coddoc) {
+            return null;
+        }
+
+        $solicitud = match ($this->tipo) {
+            'E' => Mercurio30::where('documento', $documento)
+                ->where('coddoc', $coddoc)
+                ->where('estado', 'T')
+                ->orderByDesc('id')
+                ->first(),
+            'I' => Mercurio41::where('documento', $documento)
+                ->where('coddoc', $coddoc)
+                ->where('estado', 'T')
+                ->orderByDesc('id')
+                ->first(),
+            'O' => Mercurio38::where('documento', $documento)
+                ->where('coddoc', $coddoc)
+                ->where('estado', 'T')
+                ->orderByDesc('id')
+                ->first(),
+            default => null,
+        };
+
+        if (! $solicitud) {
+            return null;
+        }
+
+        return match ($this->tipo) {
+            'E' => url("mercurio/empresa/index#proceso/{$solicitud->id}"),
+            'I' => url("mercurio/independiente/index#proceso/{$solicitud->id}"),
+            'O' => url("mercurio/pensionado/index#proceso/{$solicitud->id}"),
+            default => null,
+        };
     }
 
     public function changeClave(Request $request)
@@ -591,7 +634,6 @@ class PrincipalController extends ApplicationController
      * ingresoDirigido function
      * aplica para los particulares que hacen su primer registro al sistema
      *
-     * @param  Request  $request
      * @return void
      */
     public function ingresoDirigido(Request $request)
@@ -670,7 +712,7 @@ class PrincipalController extends ApplicationController
             }
 
             if (! SessionCookies::authenticate(
-                new SessionMercurio(),
+                new SessionMercurio,
                 [
                     'tipo' => $token->tipo,
                     'coddoc' => $token->coddoc,
@@ -686,8 +728,8 @@ class PrincipalController extends ApplicationController
                 'success',
                 [
                     'type' => 'html',
-                    'msj' => "<p style='font-size:1rem' class='text-left'>El usuario ha realizado el pre-registro de forma correcta</p>" .
-                        "<p style='font-size:1rem' class='text-left'>El registro realizado es de tipo \"Particular\", ahora puedes realizar las afiliaciones de modo seguro.<br/>" .
+                    'msj' => "<p style='font-size:1rem' class='text-left'>El usuario ha realizado el pre-registro de forma correcta</p>".
+                        "<p style='font-size:1rem' class='text-left'>El registro realizado es de tipo \"Particular\", ahora puedes realizar las afiliaciones de modo seguro.<br/>".
                         'Las credenciales de acceso le seran enviadas a la respectiva dirección de correo registrado.<br/></p>',
                 ]
             );
@@ -697,7 +739,7 @@ class PrincipalController extends ApplicationController
             $salida = $this->captureException($e, $request);
             set_flashdata('error', [
                 'msj' => $salida['msj'],
-                'code' => $e->getCode()
+                'code' => $e->getCode(),
             ]);
 
             return redirect()->to('mercurio/login');
@@ -712,7 +754,7 @@ class PrincipalController extends ApplicationController
 
             switch ($tipo) {
                 case 'T':
-                    $procesadorComando = new ApiSubsidio();
+                    $procesadorComando = new ApiSubsidio;
                     $procesadorComando->send(
                         [
                             'servicio' => 'ComfacaEmpresas',
@@ -728,7 +770,7 @@ class PrincipalController extends ApplicationController
                 case 'I':
                 case 'F':
                 case 'O':
-                    $procesadorComando = new ApiSubsidio();
+                    $procesadorComando = new ApiSubsidio;
                     $procesadorComando->send(
                         [
                             'servicio' => 'ComfacaEmpresas',
@@ -753,6 +795,7 @@ class PrincipalController extends ApplicationController
         } catch (\Throwable $e) {
             return $this->handleException($e);
         }
+
         return response()->json($salida);
     }
 
@@ -783,13 +826,15 @@ class PrincipalController extends ApplicationController
             $msubsi07->save();
             $salida = [
                 'msj' => 'Proceso se ha completado con éxito',
-                'success' => true
+                'success' => true,
             ];
             $this->db->commit();
         } catch (\Throwable $e) {
             $this->db->rollBack();
+
             return $this->handleException($e);
         }
+
         return response()->json($salida);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Services\Formularios;
 
 use App\Exceptions\DebugException;
+use App\Services\Formularios\Afiliacion\ComprobanteRadicacionEmpresa;
 use App\Services\Formularios\Afiliacion\FormularioActualizadatos;
 use App\Services\Formularios\Afiliacion\FormularioBeneficiario;
 use App\Services\Formularios\Afiliacion\FormularioConyuge;
@@ -52,6 +53,9 @@ class FactoryDocuments
                 break;
             case 'beneficiario':
                 return new FormularioBeneficiario;
+                break;
+            case 'comprobante':
+                return new ComprobanteRadicacionEmpresa;
                 break;
             default:
                 throw new DebugException("Tipo de documento no soportado {$tipo} ".__METHOD__);

@@ -6,28 +6,28 @@ use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsEmpresa;
 use App\Models\Mercurio07;
 use App\Models\Mercurio16;
-use App\Services\Formularios\FactoryDocuments;
-use App\Services\PreparaFormularios\CifrarDocumento;
+use App\Models\Mercurio41;
 use App\Services\Api\ApiSubsidio;
 use App\Services\Formularios\Generation\DocumentGenerationManager;
+use App\Services\PreparaFormularios\CifrarDocumento;
 
 class IndependienteAdjuntoService
 {
-    private $request;
+    private ?object $request;
 
-    private $lfirma;
+    private ?Mercurio16 $lfirma;
 
-    private $filename;
+    private ?string $filename;
 
-    private $outPdf;
+    private ?string $outPdf;
 
-    private $fhash;
+    private ?string $fhash;
 
-    private $claveCertificado;
+    private ?string $claveCertificado;
 
-    private $user;
+    private ?array $user;
 
-    public function __construct($request)
+    public function __construct(object $request)
     {
         $this->user = session('user') ?? null;
         $this->request = $request;
@@ -41,7 +41,7 @@ class IndependienteAdjuntoService
             'coddoc' => $this->user['coddoc'],
         ])->first();
 
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -60,8 +60,8 @@ class IndependienteAdjuntoService
             throw new DebugException('Error no hay firma digital', 501);
         }
 
-        $this->filename = 'formulario-trabajador-' . strtotime('now') . "_{$this->request->cedtra}.pdf";
-        $manager = new DocumentGenerationManager();
+        $this->filename = 'formulario-trabajador-'.strtotime('now')."_{$this->request->cedtra}.pdf";
+        $manager = new DocumentGenerationManager;
         $manager->generate(
             'api',
             'independiente',
@@ -71,23 +71,25 @@ class IndependienteAdjuntoService
                 'templates' => [
                     'trabajador.html',
                     'oficio-empresa.html',
-                    'politica-trabajador.html'
+                    'politica-trabajador.html',
                 ],
                 'independiente' => $this->request,
-                'solicitante' => $this->getSolicitante()
+                'solicitante' => $this->getSolicitante(),
             ]
         );
 
         $this->cifrarDocumento();
+
         return $this;
     }
 
     public function getSolicitante()
     {
-        $solicitante = Mercurio07::where("documento", $this->request->documento)
-            ->where("coddoc", $this->request->coddoc)
-            ->where("tipo", $this->request->tipo)
+        $solicitante = Mercurio07::where('documento', $this->request->documento)
+            ->where('coddoc', $this->request->coddoc)
+            ->where('tipo', $this->request->tipo)
             ->first();
+
         return $solicitante;
     }
 
@@ -112,7 +114,7 @@ class IndependienteAdjuntoService
         ];
     }
 
-    public function setClaveCertificado($clave)
+    public function setClaveCertificado(string $clave): void
     {
         if ($this->lfirma->password !== $clave) {
             throw new DebugException('Error la clave no coincide con la de la firma digital', 501);
@@ -120,7 +122,7 @@ class IndependienteAdjuntoService
         $this->claveCertificado = $clave;
     }
 
-    public static function generarAdjuntos($request, string $tipopc, ?string $claveCertificado = null): void
+    public static function generarAdjuntos(object $request, string $tipopc, ?string $claveCertificado = null): void
     {
         $adjuntoService = new self($request);
         $adjuntoService->setClaveCertificado($claveCertificado);
@@ -128,7 +130,26 @@ class IndependienteAdjuntoService
             [
                 'method' => 'formulario',
                 'coddoc' => 1,
-            ]
+            ],
         ]);
+    }
+
+    public static function generarComprobanteRadicacion(Mercurio41 $mercurio41): string
+    {
+        $filename = 'comprobante-independiente-'.$mercurio41->ruuid.'.pdf';
+        $manager = new DocumentGenerationManager;
+        $documento = $manager->generate('local', 'comprobante', [
+            'categoria' => 'formulario',
+            'filename' => $filename,
+            'tipo' => 'independiente',
+            'solicitud' => $mercurio41,
+        ]);
+        $filePath = $documento->outPut();
+
+        Mercurio41::where('id', $mercurio41->id)->update([
+            'comprobante_path' => basename($filePath),
+        ]);
+
+        return basename($filePath);
     }
 }

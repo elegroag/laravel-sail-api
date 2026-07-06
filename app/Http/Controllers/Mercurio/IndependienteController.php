@@ -7,7 +7,6 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsEmpresa;
 use App\Library\Collections\ParamsIndependiente;
-use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
 use App\Models\FormularioDinamico;
 use App\Models\Gener09;
@@ -17,15 +16,15 @@ use App\Models\Mercurio10;
 use App\Models\Mercurio37;
 use App\Models\Mercurio41;
 use App\Models\Subsi54;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Entidades\IndependienteService;
 use App\Services\FormulariosAdjuntos\Formularios;
 use App\Services\FormulariosAdjuntos\IndependienteAdjuntoService;
+use App\Services\Srequest;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\ChangeCuentaService;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
-use App\Services\Api\ApiSubsidio;
-use App\Services\Srequest;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -82,7 +81,7 @@ class IndependienteController extends ApplicationController
             $salida = $this->captureException($e, request());
             set_flashdata('error', [
                 'msj' => $salida['msj'],
-                'code' => $e->getCode()
+                'code' => $e->getCode(),
             ]);
 
             return redirect()->route('principal/index');
@@ -101,6 +100,7 @@ class IndependienteController extends ApplicationController
                 ]
             )->render();
             $this->setResponse('view');
+
             return $this->renderText($html);
         } catch (\Throwable $e) {
             return $this->handleException($e, $request);
@@ -121,6 +121,7 @@ class IndependienteController extends ApplicationController
             if ($mercurio41 == false) {
                 $mercurio41 = new Mercurio41;
             }
+
             return response()->json(
                 [
                     'success' => true,
@@ -134,15 +135,18 @@ class IndependienteController extends ApplicationController
 
     /**
      * guardar function
+     *
      * @changed [2023-12-01]
+     *
      * @author elegroag <elegroag@ibero.edu.co>
+     *
      * @return void
      */
     public function guardar(Request $request)
     {
         $this->db->begin();
         try {
-            $independienteService = new IndependienteService();
+            $independienteService = new IndependienteService;
             $id = $request->input('id');
             $clave_certificado = $request->input('clave');
             $params = $this->serializeData($request);
@@ -171,9 +175,11 @@ class IndependienteController extends ApplicationController
             ];
 
             $this->db->commit();
+
             return response()->json($salida);
         } catch (Exception $e) {
             $this->db->rollBack();
+
             return $this->handleException($e, $request);
         }
     }
@@ -284,7 +290,7 @@ class IndependienteController extends ApplicationController
                 $solicitudPrevia = $solicitud->getArray();
             }
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -298,7 +304,7 @@ class IndependienteController extends ApplicationController
             $out = $procesadorComando->toArray();
             $empresa = (count($out['data']) > 0) ? $out['data'] : false;
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -337,7 +343,7 @@ class IndependienteController extends ApplicationController
             $coddoc = $request->input('coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
+            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -408,10 +414,12 @@ class IndependienteController extends ApplicationController
             $salida = [
                 'success' => true,
                 'msj' => 'El envio de la solicitud se ha completado con éxito',
+                'comprobante_url' => url("/mercurio/independiente/comprobante/{$id}"),
             ];
         } catch (\Throwable $e) {
             return $this->handleException($e, $request);
         }
+
         return response()->json($salida);
     }
 
@@ -425,7 +433,7 @@ class IndependienteController extends ApplicationController
     {
         try {
             $mercurio41 = Mercurio41::where('id', $id)->first();
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -448,7 +456,7 @@ class IndependienteController extends ApplicationController
             $salida = [
                 'success' => true,
                 'name' => $file,
-                'url' => 'independinte/downloadFile/' . $file,
+                'url' => 'independinte/downloadFile/'.$file,
             ];
         } catch (\Throwable $e) {
             return $this->handleException($e, request());
@@ -469,13 +477,15 @@ class IndependienteController extends ApplicationController
         } catch (\Throwable $e) {
             return $this->handleException($e, $request);
         }
+
         return response()->json($salida);
     }
 
     public function downloadFile($archivo = '')
     {
         $this->setResponse('view');
-        $fichero = 'public/temp/' . $archivo;
+        $fichero = 'public/temp/'.$archivo;
+
         return $this->renderFile($fichero);
     }
 
@@ -572,7 +582,7 @@ class IndependienteController extends ApplicationController
                 'nivedu' => nivel_educativo_array(),
                 'tipcon' => tipo_contrato(),
                 'vivienda' => vivienda_array(),
-                'tipafi' =>  ParamsIndependiente::getTipoAfiliado(),
+                'tipafi' => ParamsIndependiente::getTipoAfiliado(),
                 'orisex' => orientacion_sexual_array(),
                 'facvul' => vulnerabilidades_array(),
                 'peretn' => pertenencia_etnica_array(),
@@ -591,7 +601,7 @@ class IndependienteController extends ApplicationController
                 'comision' => condicionSN(),
                 'captra' => condicionSN(),
                 'indipais' => indicativos_paises_array(),
-                'indidepa' => indicativos_departamentos_array()
+                'indidepa' => indicativos_departamentos_array(),
             ];
 
             $formulario = FormularioDinamico::where('name', 'mercurio41')->first();
@@ -602,6 +612,7 @@ class IndependienteController extends ApplicationController
                     $_componente['data_source'] = $data[$componente->name];
                 }
                 $_componente['id'] = $componente->name;
+
                 return $_componente;
             });
 
@@ -689,13 +700,14 @@ class IndependienteController extends ApplicationController
         } catch (\Throwable $e) {
             return $this->handleException($e, $request);
         }
+
         return response()->json($salida);
     }
 
     public function cartaSolicitud($archivo = '')
     {
         $this->setResponse('view');
-        $fichero = 'public/docs/formulario_mercurio/' . $archivo;
+        $fichero = 'public/docs/formulario_mercurio/'.$archivo;
 
         return $this->renderFile($fichero);
     }
@@ -703,7 +715,7 @@ class IndependienteController extends ApplicationController
     public function tratamientoDatos($archivo = '')
     {
         $this->setResponse('view');
-        $fichero = 'public/docs/formulario_mercurio/' . $archivo;
+        $fichero = 'public/docs/formulario_mercurio/'.$archivo;
 
         return $this->renderFile($fichero);
     }
@@ -715,21 +727,21 @@ class IndependienteController extends ApplicationController
             $coddoc = $this->user['coddoc'];
             $id = $request->input('id');
 
-            $m41 = Mercurio41::where("id", $id)
-                ->where("documento", $documento)
-                ->where("coddoc", $coddoc)
+            $m41 = Mercurio41::where('id', $id)
+                ->where('documento', $documento)
+                ->where('coddoc', $coddoc)
                 ->first();
 
             if ($m41) {
                 if ($m41->getEstado() != 'T') {
-                    Mercurio10::where("numero", $id)
-                        ->where("tipopc", $this->tipopc)
+                    Mercurio10::where('numero', $id)
+                        ->where('tipopc', $this->tipopc)
                         ->delete();
                 }
             }
-            Mercurio41::where("id", $id)
-                ->where("documento", $documento)
-                ->where("coddoc", $coddoc)
+            Mercurio41::where('id', $id)
+                ->where('documento', $documento)
+                ->where('coddoc', $coddoc)
                 ->delete();
 
             $response = [
@@ -750,13 +762,13 @@ class IndependienteController extends ApplicationController
                 throw new AuthException('El id del la solicitud no está disponible.', 501);
             }
 
-            $solicitud = Mercurio41::where("id", $id)->where("estado", 'A')->first();
+            $solicitud = Mercurio41::where('id', $id)->where('estado', 'A')->first();
             $request = new Srequest(
                 [
                     'tipo' => 'I',
                     'coddoc' => $solicitud->tipdoc,
                     'documento' => $solicitud->cedtra,
-                    'usuario' => $solicitud->priape . ' ' . $solicitud->segape . ' ' . $solicitud->prinom . ' ' . $solicitud->segnom,
+                    'usuario' => $solicitud->priape.' '.$solicitud->segape.' '.$solicitud->prinom.' '.$solicitud->segnom,
                 ]
             );
 
@@ -773,8 +785,9 @@ class IndependienteController extends ApplicationController
             $excep = $this->captureException($e);
             set_flashdata('error', [
                 'msj' => $excep['msj'],
-                'code' => $e->getCode()
+                'code' => $e->getCode(),
             ]);
+
             return redirect()->route('principal/index');
         }
     }

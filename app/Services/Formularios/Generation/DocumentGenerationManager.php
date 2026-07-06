@@ -3,19 +3,17 @@
 namespace App\Services\Formularios\Generation;
 
 use App\Exceptions\DebugException;
-
 // Factory para generación local (formularios)
-use App\Services\Formularios\FactoryDocuments;
-
+use App\Services\Formularios\Api\ActualizadatosDocuments;
 // API
-use App\Services\Formularios\Api\TrabajadoresDocuments;
-use App\Services\Formularios\Api\EmpresasDocuments;
 use App\Services\Formularios\Api\BeneficiariosDocuments;
+use App\Services\Formularios\Api\ConyugesDocuments;
+use App\Services\Formularios\Api\EmpresasDocuments;
+use App\Services\Formularios\Api\FacultativosDocuments;
 use App\Services\Formularios\Api\IndependientesDocuments;
 use App\Services\Formularios\Api\PensionadosDocuments;
-use App\Services\Formularios\Api\FacultativosDocuments;
-use App\Services\Formularios\Api\ConyugesDocuments;
-use App\Services\Formularios\Api\ActualizadatosDocuments;
+use App\Services\Formularios\Api\TrabajadoresDocuments;
+use App\Services\Formularios\FactoryDocuments;
 
 class DocumentGenerationManager
 {
@@ -30,6 +28,7 @@ class DocumentGenerationManager
             'conyuge' => true,
             'beneficiario' => true,
             'actualizadatos' => true,
+            'comprobante' => true,
         ],
         'api' => [
             'trabajador' => TrabajadoresDocuments::class,
@@ -48,11 +47,11 @@ class DocumentGenerationManager
         $canal = strtolower(trim($canal));
         $tipo = strtolower(trim($tipo));
 
-        if (!isset($this->map[$canal])) {
+        if (! isset($this->map[$canal])) {
             throw new DebugException("Canal no soportado {$canal}");
         }
         // Para canal local, la validación detallada la delegamos a FactoryDocuments según la categoría
-        if ($canal !== 'local' && !isset($this->map[$canal][$tipo])) {
+        if ($canal !== 'local' && ! isset($this->map[$canal][$tipo])) {
             throw new DebugException("Tipo de documento no soportado {$tipo} para canal {$canal}");
         }
 
@@ -61,7 +60,7 @@ class DocumentGenerationManager
             // Usar la fábrica existente para todas las categorías locales
             // categorias soportadas por FactoryDocuments: formulario|oficio|politica|declaracion
             $categoria = strtolower(trim($params['categoria'] ?? 'formulario'));
-            $factory = new FactoryDocuments();
+            $factory = new FactoryDocuments;
             switch ($categoria) {
                 case 'formulario':
                     return $factory->crearFormulario($tipo);
@@ -78,14 +77,21 @@ class DocumentGenerationManager
 
         // Canal API: instanciación directa de la clase mapeada
         $class = $this->map[$canal][$tipo];
-        return new $class();
+
+        return new $class;
     }
 
+    /**
+     * Genera un documento
+     *
+     * @return mixed
+     */
     public function generate(string $canal, string $tipo, array $params)
     {
         $generator = $this->getGenerator($canal, $tipo, $params);
         // Ambos mundos exponen setParamsInit y main, por lo que no requerimos adaptadores
         $generator->setParamsInit($params);
+
         return $generator->main();
     }
 
@@ -100,11 +106,12 @@ class DocumentGenerationManager
         foreach ($items as $idx => $item) {
             $tipo = $item['tipo'] ?? null;
             $params = $item['params'] ?? [];
-            if (!$tipo || !is_array($params)) {
+            if (! $tipo || ! is_array($params)) {
                 $results[$idx] = [
                     'success' => false,
-                    'error' => 'Item inválido: requiere keys tipo (string) y params (array)'
+                    'error' => 'Item inválido: requiere keys tipo (string) y params (array)',
                 ];
+
                 continue;
             }
 

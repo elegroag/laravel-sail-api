@@ -17,6 +17,7 @@ use App\Models\Mercurio37;
 use App\Models\Mercurio47;
 use App\Models\Tranoms;
 use App\Services\Api\ApiSubsidio;
+use App\Services\FormulariosAdjuntos\EmpresaAdjuntoService;
 use App\Services\Srequest;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\SenderValidationCaja;
@@ -385,6 +386,9 @@ class EmpresaService
 
         $solicitud->item = $ai;
         $senderValidationCaja->send($this->tipopc, $solicitud);
+
+        $solicitud = $this->findById($id);
+        EmpresaAdjuntoService::generarComprobanteRadicacion($solicitud);
     }
 
     public function consultaSeguimiento(int $id): array

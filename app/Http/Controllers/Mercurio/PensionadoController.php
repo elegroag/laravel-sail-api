@@ -14,6 +14,7 @@ use App\Models\Mercurio10;
 use App\Models\Mercurio37;
 use App\Models\Mercurio38;
 use App\Models\Subsi54;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Entidades\PensionadoService;
 use App\Services\Entidades\TrabajadorService;
 use App\Services\FormulariosAdjuntos\PensionadoAdjuntoService;
@@ -23,10 +24,10 @@ use App\Services\Utils\GeneralService;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
-use App\Services\Api\ApiSubsidio;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class PensionadoController extends ApplicationController
 {
@@ -62,14 +63,14 @@ class PensionadoController extends ApplicationController
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user =  session('user') ?? null;
-        $this->tipo =  session('tipo') ?? null;
+        $this->user = session('user') ?? null;
+        $this->tipo = session('tipo') ?? null;
     }
 
     /**
      * indexfunction
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function index()
     {
@@ -94,8 +95,6 @@ class PensionadoController extends ApplicationController
 
     /**
      * actualizar function
-     *
-     * @return \Illuminate\Http\JsonResponse
      */
     public function actualizar(Request $request): JsonResponse
     {
@@ -129,14 +128,12 @@ class PensionadoController extends ApplicationController
 
     /**
      * guardar function
-     *
-     * @return \Illuminate\Http\JsonResponse
      */
     public function guardar(Request $request): JsonResponse
     {
         $this->db->begin();
         try {
-            $pensionadoService = new PensionadoService();
+            $pensionadoService = new PensionadoService;
             $asignarFuncionario = new AsignarFuncionario;
 
             $id = $request->input('id');
@@ -180,8 +177,6 @@ class PensionadoController extends ApplicationController
 
     /**
      * serializeData function
-     *
-     * @return array
      */
     protected function serializeData(Request $request): array
     {
@@ -235,8 +230,6 @@ class PensionadoController extends ApplicationController
 
     /**
      * valida function
-     *
-     * @return \Illuminate\Http\JsonResponse
      */
     public function valida(Request $request): JsonResponse
     {
@@ -247,7 +240,7 @@ class PensionadoController extends ApplicationController
             $solicitudPrevia = $solicitud ? $solicitud->getArray() : false;
 
             // Obtener información de la empresa
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send([
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',
@@ -258,7 +251,7 @@ class PensionadoController extends ApplicationController
             $empresa = ! empty($empresa['data']) ? $empresa['data'] : false;
 
             // Obtener información del trabajador
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send([
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_trabajador',
@@ -283,8 +276,6 @@ class PensionadoController extends ApplicationController
 
     /**
      * borrarArchivo function
-     *
-     * @return \Illuminate\Http\JsonResponse
      */
     public function borrarArchivo(Request $request): JsonResponse
     {
@@ -293,7 +284,7 @@ class PensionadoController extends ApplicationController
             $coddoc = $request->input('coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
+            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -316,8 +307,6 @@ class PensionadoController extends ApplicationController
 
     /**
      * guardarArchivo function
-     *
-     * @return \Illuminate\Http\JsonResponse
      */
     public function guardarArchivo(Request $request): JsonResponse
     {
@@ -335,7 +324,7 @@ class PensionadoController extends ApplicationController
             $mercurio37 = (new Mercurio37)->findFirst("tipopc='{$this->tipopc}' AND numero='{$id}' AND coddoc='{$coddoc}'");
 
             if (! $mercurio37) {
-                throw new \Exception('No se pudo encontrar el archivo guardado');
+                throw new Exception('No se pudo encontrar el archivo guardado');
             }
 
             $response = [
@@ -352,8 +341,6 @@ class PensionadoController extends ApplicationController
 
     /**
      * enviarCaja function
-     *
-     * @return \Illuminate\Http\JsonResponse
      */
     public function enviarCaja(Request $request): JsonResponse
     {
@@ -364,7 +351,7 @@ class PensionadoController extends ApplicationController
             $asignarFuncionario = new AsignarFuncionario;
             $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
             if (! $usuario) {
-                throw new \Exception('No se pudo obtener la información del usuario actual');
+                throw new Exception('No se pudo obtener la información del usuario actual');
             }
             $pensionadoService = new PensionadoService;
             $pensionadoService->enviarCaja(new SenderValidationCaja, $id, $usuario);
@@ -374,9 +361,11 @@ class PensionadoController extends ApplicationController
             $response = [
                 'success' => true,
                 'msj' => 'El envío de la solicitud se ha completado con éxito',
+                'comprobante_url' => url("/mercurio/pensionado/comprobante/{$id}"),
             ];
         } catch (Exception $e) {
             $this->db->rollBack();
+
             return $this->handleException($e, $request);
         }
 
@@ -388,7 +377,7 @@ class PensionadoController extends ApplicationController
      *
      * @return mixed
      *
-     * @throws \Exception
+     * @throws Exception
      */
     protected function getCurrentUser()
     {
@@ -411,7 +400,7 @@ class PensionadoController extends ApplicationController
             $cedtra = $request->input('cedtra');
             $id = $request->input('id');
 
-            $mercurio38 = Mercurio38::where("cedtra", $cedtra)->where("id", $id)->first();
+            $mercurio38 = Mercurio38::where('cedtra', $cedtra)->where('id', $id)->first();
 
             if (! $mercurio38) {
                 throw new DebugException('La solicitud no está disponible actualizar el documento adjunto', 501);
@@ -442,12 +431,12 @@ class PensionadoController extends ApplicationController
 
             $id = $request->input('id');
 
-            $m41 = Mercurio38::where("id", $id)->where("documento", $documento)->where("coddoc", $coddoc)->first();
+            $m41 = Mercurio38::where('id', $id)->where('documento', $documento)->where('coddoc', $coddoc)->first();
             if ($m41) {
                 if ($m41->getEstado() != 'T') {
-                    Mercurio10::where("numero", $id)->where("tipopc", $this->tipopc)->delete();
+                    Mercurio10::where('numero', $id)->where('tipopc', $this->tipopc)->delete();
                 }
-                Mercurio38::where("id", $id)->delete();
+                Mercurio38::where('id', $id)->delete();
             }
             $salida = [
                 'success' => true,
@@ -456,13 +445,15 @@ class PensionadoController extends ApplicationController
         } catch (Exception $e) {
             return $this->handleException($e, $request);
         }
+
         return response()->json($salida);
     }
 
     public function downloadFile($archivo = '')
     {
         $this->setResponse('view');
-        $fichero = 'public/temp/' . $archivo;
+        $fichero = 'public/temp/'.$archivo;
+
         return $this->renderFile($fichero);
     }
 
@@ -529,7 +520,7 @@ class PensionadoController extends ApplicationController
                 'nivedu' => nivel_educativo_array(),
                 'tipcon' => tipo_contrato(),
                 'vivienda' => vivienda_array(),
-                'tipafi' =>  ParamsPensionado::getTipoAfiliado(),
+                'tipafi' => ParamsPensionado::getTipoAfiliado(),
                 'cargo' => ParamsPensionado::getOcupaciones(),
                 'orisex' => orientacion_sexual_array(),
                 'facvul' => vulnerabilidades_array(),
@@ -552,7 +543,7 @@ class PensionadoController extends ApplicationController
                 'comision' => condicionSN(),
                 'captra' => condicionSN(),
                 'indipais' => indicativos_paises_array(),
-                'indidepa' => indicativos_departamentos_array()
+                'indidepa' => indicativos_departamentos_array(),
             ];
 
             $formulario = FormularioDinamico::where('name', 'mercurio38')->first();
@@ -563,6 +554,7 @@ class PensionadoController extends ApplicationController
                     $_componente['data_source'] = $data[$componente->name];
                 }
                 $_componente['id'] = $componente->name;
+
                 return $_componente;
             });
 
@@ -603,7 +595,7 @@ class PensionadoController extends ApplicationController
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
 
-            $solicitud = Mercurio38::where("id", $id)->where("documento", $documento)->where("coddoc", $coddoc)->first();
+            $solicitud = Mercurio38::where('id', $id)->where('documento', $documento)->where('coddoc', $coddoc)->first();
             if ($solicitud == false) {
                 throw new DebugException('Error la solicitud no está disponible para acceder.', 301);
             } else {
@@ -660,13 +652,13 @@ class PensionadoController extends ApplicationController
             $coddoc = $this->user['coddoc'];
 
             $id = $request->input('id');
-            $solicitud = Mercurio38::where("id", $id)->where("documento", $documento)->where("coddoc", $coddoc)->first();
+            $solicitud = Mercurio38::where('id', $id)->where('documento', $documento)->where('coddoc', $coddoc)->first();
             if ($solicitud) {
                 if ($solicitud->estado != 'T') {
-                    Mercurio10::where("numero", $id)->where("tipopc", $this->tipopc)->delete();
+                    Mercurio10::where('numero', $id)->where('tipopc', $this->tipopc)->delete();
                 }
             }
-            Mercurio38::where("id", $id)->where("documento", $documento)->where("coddoc", $coddoc)->delete();
+            Mercurio38::where('id', $id)->where('documento', $documento)->where('coddoc', $coddoc)->delete();
             $generales->finishTrans();
             $response = [
                 'success' => true,
@@ -693,6 +685,7 @@ class PensionadoController extends ApplicationController
             )->render();
 
             $this->setResponse('view');
+
             return $this->renderText($html);
         } catch (Exception $e) {
             return $this->handleException($e, $request);
@@ -711,6 +704,7 @@ class PensionadoController extends ApplicationController
         } catch (Exception $e) {
             return $this->handleException($e, $request);
         }
+
         return response()->json($salida);
     }
 
@@ -722,7 +716,7 @@ class PensionadoController extends ApplicationController
      * @param  string  $id  ID de la solicitud
      * @return mixed
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function administrar_cuenta(?string $id = null)
     {
@@ -732,7 +726,7 @@ class PensionadoController extends ApplicationController
             }
 
             // Obtener la solicitud
-            $solicitud = Mercurio38::where("id", $id)->where("estado", "A")->first();
+            $solicitud = Mercurio38::where('id', $id)->where('estado', 'A')->first();
 
             if (! $solicitud) {
                 throw new DebugException('No se encontró la solicitud solicitada');
@@ -759,6 +753,7 @@ class PensionadoController extends ApplicationController
                     'msj' => 'La administración de la cuenta se ha inicializado con éxito.',
                     'code' => 200,
                 ]);
+
                 return redirect('principal/index');
             }
 
@@ -767,7 +762,7 @@ class PensionadoController extends ApplicationController
             $exception = $this->captureException($e, request());
             set_flashdata('error', [
                 'msj' => $exception['msj'],
-                'code' => $e->getCode()
+                'code' => $e->getCode(),
             ]);
 
             return redirect()->route('principal/index');

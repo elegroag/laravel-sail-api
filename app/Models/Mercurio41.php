@@ -77,6 +77,7 @@ class Mercurio41 extends ModelBase
         'ciulab',
         'tipper',
         'ruuid',
+        'comprobante_path',
     ];
 
     public function rulesValiation()
@@ -792,6 +793,16 @@ class Mercurio41 extends ModelBase
 
     public function getNombreCompleto()
     {
-        return $this->priape . ' ' . $this->segape . ' ' . $this->prinom . ' ' . $this->segnom;
+        return $this->priape.' '.$this->segape.' '.$this->prinom.' '.$this->segnom;
+    }
+
+    public function getComprobantePath()
+    {
+        return $this->comprobante_path;
+    }
+
+    public function setComprobantePath($comprobantePath)
+    {
+        $this->comprobante_path = $comprobantePath;
     }
 }

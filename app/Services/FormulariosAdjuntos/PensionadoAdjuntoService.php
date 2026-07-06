@@ -4,46 +4,44 @@ namespace App\Services\FormulariosAdjuntos;
 
 use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsPensionado;
-use App\Library\Tcpdf\KumbiaPDF;
 use App\Models\Mercurio07;
 use App\Models\Mercurio16;
-use App\Models\Mercurio32;
-use App\Services\Formularios\FactoryDocuments;
-use App\Services\PreparaFormularios\CifrarDocumento;
+use App\Models\Mercurio38;
 use App\Services\Api\ApiSubsidio;
 use App\Services\Formularios\Generation\DocumentGenerationManager;
+use App\Services\PreparaFormularios\CifrarDocumento;
 
 class PensionadoAdjuntoService
 {
-    private $request;
+    private ?object $request;
 
-    private $lfirma;
+    private ?Mercurio16 $lfirma;
 
-    private $filename;
+    private ?string $filename;
 
-    private $outPdf;
+    private ?string $outPdf;
 
-    private $fhash;
+    private ?string $fhash;
 
-    private $user;
+    private ?array $user;
 
-    private $claveCertificado;
+    private ?string $claveCertificado;
 
-    public function __construct($request)
+    public function __construct(object $request)
     {
         $this->user = session('user') ?? null;
         $this->request = $request;
         $this->initialize();
     }
 
-    private function initialize()
+    private function initialize(): void
     {
         $this->lfirma = Mercurio16::where([
             'documento' => $this->user['documento'],
             'coddoc' => $this->user['coddoc'],
         ])->first();
 
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -58,13 +56,13 @@ class PensionadoAdjuntoService
 
     public function getSolicitante()
     {
-        $solicitante = Mercurio07::where("documento", $this->request->documento)
-            ->where("coddoc", $this->request->coddoc)
-            ->where("tipo", $this->request->tipo)
+        $solicitante = Mercurio07::where('documento', $this->request->documento)
+            ->where('coddoc', $this->request->coddoc)
+            ->where('tipo', $this->request->tipo)
             ->first();
+
         return $solicitante;
     }
-
 
     public function formulario()
     {
@@ -72,8 +70,8 @@ class PensionadoAdjuntoService
             throw new DebugException('Error no hay firma digital', 501);
         }
 
-        $this->filename = 'formulario-trabajador-' . strtotime('now') . "_{$this->request->cedtra}.pdf";
-        $manager = new DocumentGenerationManager();
+        $this->filename = 'formulario-trabajador-'.strtotime('now')."_{$this->request->cedtra}.pdf";
+        $manager = new DocumentGenerationManager;
         $manager->generate(
             'api',
             'pensionado',
@@ -83,14 +81,15 @@ class PensionadoAdjuntoService
                 'templates' => [
                     'trabajador.html',
                     'oficio-empresa.html',
-                    'politica-trabajador.html'
+                    'politica-trabajador.html',
                 ],
                 'pensionado' => $this->request,
-                'solicitante' => $this->getSolicitante()
+                'solicitante' => $this->getSolicitante(),
             ]
         );
 
         $this->cifrarDocumento();
+
         return $this;
     }
 
@@ -111,7 +110,7 @@ class PensionadoAdjuntoService
         ];
     }
 
-    public function setClaveCertificado($clave)
+    public function setClaveCertificado(string $clave): void
     {
         if ($this->lfirma->password !== $clave) {
             throw new DebugException('Error la clave no coincide con la de la firma digital', 501);
@@ -119,7 +118,7 @@ class PensionadoAdjuntoService
         $this->claveCertificado = $clave;
     }
 
-    public static function generarAdjuntos($request, string $tipopc, ?string $claveCertificado = null): void
+    public static function generarAdjuntos(object $request, string $tipopc, ?string $claveCertificado = null): void
     {
         $adjuntoService = new self($request);
         $adjuntoService->setClaveCertificado($claveCertificado);
@@ -127,7 +126,26 @@ class PensionadoAdjuntoService
             [
                 'method' => 'formulario',
                 'coddoc' => 1,
-            ]
+            ],
         ]);
+    }
+
+    public static function generarComprobanteRadicacion(Mercurio38 $mercurio38): string
+    {
+        $filename = 'comprobante-pensionado-'.$mercurio38->ruuid.'.pdf';
+        $manager = new DocumentGenerationManager;
+        $documento = $manager->generate('local', 'comprobante', [
+            'categoria' => 'formulario',
+            'filename' => $filename,
+            'tipo' => 'pensionado',
+            'solicitud' => $mercurio38,
+        ]);
+        $filePath = $documento->outPut();
+
+        Mercurio38::where('id', $mercurio38->id)->update([
+            'comprobante_path' => basename($filePath),
+        ]);
+
+        return basename($filePath);
     }
 }

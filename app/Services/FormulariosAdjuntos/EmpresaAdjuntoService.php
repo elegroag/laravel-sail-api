@@ -4,34 +4,32 @@ namespace App\Services\FormulariosAdjuntos;
 
 use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsEmpresa;
-use App\Library\Tcpdf\KumbiaPDF;
 use App\Models\Mercurio16;
+use App\Models\Mercurio30;
 use App\Models\Tranoms;
-use App\Services\Formularios\FactoryDocuments;
-use App\Services\PreparaFormularios\CifrarDocumento;
 use App\Services\Api\ApiSubsidio;
 use App\Services\Formularios\Api\EmpresasDocuments;
 use App\Services\Formularios\Generation\DocumentGenerationManager;
+use App\Services\PreparaFormularios\CifrarDocumento;
 use App\Services\Utils\GuardarArchivoService;
 
 class EmpresaAdjuntoService
 {
-    private $request;
+    private ?object $request;
 
-    private $lfirma;
+    private ?Mercurio16 $lfirma;
 
-    private $filename;
+    private ?string $filename;
 
-    private $outPdf;
+    private ?string $outPdf;
 
-    private $fhash;
+    private ?string $fhash;
 
-    private $user;
+    private ?array $user;
 
-    private $claveCertificado;
+    private ?string $claveCertificado;
 
-
-    public function __construct($request)
+    public function __construct(object $request)
     {
         $this->user = session('user') ?? null;
         $this->request = $request;
@@ -44,7 +42,7 @@ class EmpresaAdjuntoService
             ->where('coddoc', $this->user['coddoc'])
             ->first();
 
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -63,8 +61,8 @@ class EmpresaAdjuntoService
             throw new DebugException('Error no hay firma digital', 501);
         }
 
-        $this->filename = 'formulario-empresa-' . strtotime('now') . "_{$this->request->nit}.pdf";
-        $generator = new EmpresasDocuments();
+        $this->filename = 'formulario-empresa-'.strtotime('now')."_{$this->request->nit}.pdf";
+        $generator = new EmpresasDocuments;
         $generator->setParamsInit(
             [
                 'categoria' => 'formulario',
@@ -73,14 +71,15 @@ class EmpresaAdjuntoService
                     'empresa.html',
                     'oficio-empresa.html',
                     'politica-empresa.html',
-                    'relacion-nomina.html'
+                    'relacion-nomina.html',
                 ],
                 'empresa' => $this->request,
-                'tranoms' => Tranoms::where('request', $this->request->id)->get()
+                'tranoms' => Tranoms::where('request', $this->request->id)->get(),
             ]
         );
         $generator->main();
         $this->cifrarDocumento();
+
         return $this;
     }
 
@@ -105,7 +104,7 @@ class EmpresaAdjuntoService
         ];
     }
 
-    public function setClaveCertificado($clave): void
+    public function setClaveCertificado(string $clave): void
     {
         if ($this->lfirma->password !== $clave) {
             throw new DebugException('Error la clave no coincide con la de la firma digital', 501);
@@ -113,7 +112,7 @@ class EmpresaAdjuntoService
         $this->claveCertificado = $clave;
     }
 
-    public static function generarAdjuntos($request, string $tipopc, ?string $claveCertificado = null): void
+    public static function generarAdjuntos(object $request, string $tipopc, ?string $claveCertificado = null): void
     {
         $adjuntoService = new self($request);
         $adjuntoService->setClaveCertificado($claveCertificado);
@@ -125,5 +124,25 @@ class EmpresaAdjuntoService
                 'id' => $request->id,
             ]
         ))->salvarDatos($adjuntoService->getResult());
+    }
+
+    public static function generarComprobanteRadicacion(Mercurio30 $mercurio30): string
+    {
+        $filename = 'comprobante-empresa-'.$mercurio30->ruuid.'.pdf';
+        $manager = new DocumentGenerationManager;
+        $documento = $manager->generate('local', 'comprobante', [
+            'categoria' => 'formulario',
+            'filename' => $filename,
+            'tipo' => 'empresa',
+            'solicitud' => $mercurio30,
+            'empresa' => $mercurio30,
+        ]);
+        $filePath = $documento->outPut();
+
+        Mercurio30::where('id', $mercurio30->id)->update([
+            'comprobante_path' => basename($filePath),
+        ]);
+
+        return basename($filePath);
     }
 }

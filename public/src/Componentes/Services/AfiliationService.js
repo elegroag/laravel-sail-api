@@ -67,6 +67,28 @@ class AfiliationService {
             callback: (response) => {
                 if (response) {
                     if (response.success) {
+                        const comprobanteUrl =
+                            typeof response.comprobante_url === 'string'
+                                ? response.comprobante_url.trim()
+                                : '';
+
+                        if (comprobanteUrl) {
+                            Swal.fire({
+                                title: 'Notificación',
+                                html: response.msj,
+                                icon: 'success',
+                                showCancelButton: true,
+                                confirmButtonText: 'Descargar comprobante de radicación',
+                                cancelButtonText: 'Continuar',
+                                confirmButtonColor: '#2dce89',
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.open(comprobanteUrl, '_blank');
+                                }
+                                return callback(response);
+                            });
+                            return;
+                        }
                         $App.trigger('alert:success', { message: response.msj });
                         return callback(response);
                     } else {

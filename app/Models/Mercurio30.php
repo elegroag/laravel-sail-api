@@ -74,6 +74,7 @@ class Mercurio30 extends ModelBase
         'fecapr',
         'fecsol',
         'ruuid',
+        'comprobante_path',
         'barnotif',
         'barcomer',
     ];
@@ -753,5 +754,15 @@ class Mercurio30 extends ModelBase
     public function solicitante()
     {
         return $this->belongsTo(Mercurio07::class, 'documento', 'documento');
+    }
+
+    public function getComprobantePath()
+    {
+        return $this->comprobante_path;
+    }
+
+    public function setComprobantePath($comprobantePath)
+    {
+        $this->comprobante_path = $comprobantePath;
     }
 }

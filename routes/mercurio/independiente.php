@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Mercurio\DocumentosController;
 use App\Http\Controllers\Mercurio\IndependienteController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +21,7 @@ Route::prefix('/mercurio/independiente')->group(function () {
         Route::post('/params', [IndependienteController::class, 'params']);
         Route::get('/download_temp/{archivo}', [IndependienteController::class, 'downloadFile']);
         Route::get('/download_docs/{archivo}', [IndependienteController::class, 'downloadDocs']);
+        Route::get('/comprobante/{id}', [DocumentosController::class, 'descargarComprobanteIndependiente']);
 
         Route::post('/search_request/{id}', [IndependienteController::class, 'searchRequest']);
         Route::post('/consulta_documentos/{id}', [IndependienteController::class, 'consultaDocumentos']);

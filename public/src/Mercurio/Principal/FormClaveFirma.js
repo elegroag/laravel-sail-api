@@ -97,8 +97,12 @@ const ModalClaveFirma = (requireFirma) => {
                         if (response && response.success) {
                             window.App.trigger('alert:success', { message: response.msj });
                             modal.hide();
-                            // Redirigir a crear firma si aún no existe
-                            window.location.reload();
+                            const redirectUrl = typeof response.redirect_url === 'string' ? response.redirect_url.trim() : '';
+                            if (redirectUrl) {
+                                window.location.href = redirectUrl;
+                            } else {
+                                window.location.reload();
+                            }
                         } else {
                             const msj = (response && response.msj) || 'No fue posible registrar la clave.';
                             window.App.trigger('alert:error', { message: msj });

@@ -15,12 +15,12 @@ use App\Models\Mercurio30;
 use App\Models\Mercurio37;
 use App\Models\Subsi54;
 use App\Models\Tranoms;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Entidades\EmpresaService;
 use App\Services\FormulariosAdjuntos\EmpresaAdjuntoService;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
-use App\Services\Api\ApiSubsidio;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -29,8 +29,11 @@ use Illuminate\Http\Response;
 class EmpresaController extends ApplicationController
 {
     protected DbBase $db;
+
     protected ?array $user;
+
     protected ?string $tipo;
+
     protected string $tipopc = '2';
 
     public function __construct()
@@ -53,8 +56,9 @@ class EmpresaController extends ApplicationController
             $salida = $this->captureException($e, request());
             set_flashdata('error', [
                 'msj' => $salida['msj'],
-                'code' => $e->getCode()
+                'code' => $e->getCode(),
             ]);
+
             return redirect()->route('principal/index');
         }
     }
@@ -72,6 +76,7 @@ class EmpresaController extends ApplicationController
             )->render();
 
             $this->setResponse('view');
+
             return $this->renderText($html);
         } catch (\Throwable $e) {
             return $this->renderObject($this->captureException($e));
@@ -92,17 +97,18 @@ class EmpresaController extends ApplicationController
 
             $service = new EmpresaService;
             $empresa_sisu = $service->buscarEmpresaSubsidio($nit);
-            if (!$empresa_sisu || count($empresa_sisu) == 0) {
-                throw new DebugException("No se encontró la empresa en subsidio", 500);
+            if (! $empresa_sisu || count($empresa_sisu) == 0) {
+                throw new DebugException('No se encontró la empresa en subsidio', 500);
             } else {
                 $salida = [
                     'success' => true,
-                    'data' => $empresa_sisu
+                    'data' => $empresa_sisu,
                 ];
             }
         } catch (\Throwable $e) {
             return $this->handleException($e, $request);
         }
+
         return response()->json($salida);
     }
 
@@ -114,7 +120,7 @@ class EmpresaController extends ApplicationController
     {
         try {
             $this->db->begin();
-            $service = new EmpresaService();
+            $service = new EmpresaService;
             $id = $request->input('id');
             $clave_certificado = $request->input('clave');
             $params = $this->serializeData($request);
@@ -147,9 +153,11 @@ class EmpresaController extends ApplicationController
             ];
 
             $this->db->commit();
+
             return response()->json($salida);
         } catch (Exception $e) {
             $this->db->rollBack();
+
             return $this->handleException($e, $request);
         }
     }
@@ -164,7 +172,7 @@ class EmpresaController extends ApplicationController
             $coddoc = $request->input('coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
+            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -178,6 +186,7 @@ class EmpresaController extends ApplicationController
                 'success' => true,
                 'msj' => 'El archivo se borro de forma correcta',
             ];
+
             return response()->json($response);
         } catch (\Throwable $e) {
             return $this->handleException($e, $request);
@@ -205,6 +214,7 @@ class EmpresaController extends ApplicationController
                 'msj' => 'Ok archivo procesado',
                 'data' => $mercurio37->toArray(),
             ];
+
             return response()->json($salida);
         } catch (\Throwable $e) {
             return $this->handleException($e, $request);
@@ -228,6 +238,7 @@ class EmpresaController extends ApplicationController
                 'success' => true,
                 'data' => $data,
             ];
+
             return response()->json($salida);
         } catch (\Throwable $e) {
             return $this->handleException($e, request());
@@ -250,7 +261,9 @@ class EmpresaController extends ApplicationController
             $salida = [
                 'success' => true,
                 'msj' => 'El envío de la solicitud se ha completado con éxito',
+                'comprobante_url' => url("/mercurio/empresa/comprobante/{$id}"),
             ];
+
             return response()->json($salida);
         } catch (\Throwable $e) {
             return $this->handleException($e, $request);
@@ -266,6 +279,7 @@ class EmpresaController extends ApplicationController
                 'success' => true,
                 'data' => $out,
             ];
+
             return response()->json($salida);
         } catch (\Throwable $e) {
             return $this->handleException($e, $request);
@@ -277,11 +291,11 @@ class EmpresaController extends ApplicationController
         try {
             $coddoc = Gener18::whereNotIn('coddoc', ['7', '5', '2'])->pluck('detdoc', 'coddoc');
             $tipsoc = Subsi54::where('tipsoc', '!=', '08')->pluck('detalle', 'tipsoc');
-            $codciu = Gener09::where("codzon", '>=', 18000)
-                ->where("codzon", "<=", 19000)
+            $codciu = Gener09::where('codzon', '>=', 18000)
+                ->where('codzon', '<=', 19000)
                 ->pluck('detzon', 'codzon');
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -292,7 +306,7 @@ class EmpresaController extends ApplicationController
             $paramsEmpresa = new ParamsEmpresa;
             $paramsEmpresa->setDatosCaptura($procesadorComando->toArray());
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -325,7 +339,7 @@ class EmpresaController extends ApplicationController
                 'autoriza' => condicionSN(),
                 'cartra' => ParamsTrabajador::getOcupaciones(),
                 'indipais' => indicativos_paises_array(),
-                'indidepa' => indicativos_departamentos_array()
+                'indidepa' => indicativos_departamentos_array(),
             ];
 
             $formulario = FormularioDinamico::where('name', 'mercurio30')->first();
@@ -336,6 +350,7 @@ class EmpresaController extends ApplicationController
                     $_componente['data_source'] = $data[$componente->name];
                 }
                 $_componente['id'] = $componente->name;
+
                 return $_componente;
             });
 
@@ -344,6 +359,7 @@ class EmpresaController extends ApplicationController
                 'data' => $componentes,
                 'msj' => 'OK',
             ];
+
             return response()->json($salida);
         } catch (Exception $e) {
             return $this->handleException($e, request());
@@ -356,10 +372,11 @@ class EmpresaController extends ApplicationController
     public function downloadFile($archivo = '')
     {
         $this->setResponse('view');
-        $fichero = public_path('temp/' . $archivo);
+        $fichero = public_path('temp/'.$archivo);
         if (! file_exists($fichero)) {
             throw new DebugException('Archivo no disponible', 404);
         }
+
         return $this->renderFile($fichero);
     }
 
@@ -369,7 +386,7 @@ class EmpresaController extends ApplicationController
     public function downloadDocs($archivo = '')
     {
         $this->setResponse('view');
-        $fichero = public_path('docs/formulario_mercurio/' . $archivo);
+        $fichero = public_path('docs/formulario_mercurio/'.$archivo);
         if (! file_exists($fichero)) {
             throw new DebugException('Documento no disponible', 404);
         }
@@ -395,6 +412,7 @@ class EmpresaController extends ApplicationController
                 'success' => true,
                 'digver' => $dv,
             ];
+
             return response()->json($salida);
         } catch (\Throwable $e) {
             return $this->handleException($e, $request);
@@ -428,6 +446,7 @@ class EmpresaController extends ApplicationController
                 'data' => $data,
                 'msj' => 'OK',
             ];
+
             return response()->json($salida);
         } catch (\Throwable $e) {
             return $this->renderObject($this->captureException($e, $request));
@@ -459,6 +478,7 @@ class EmpresaController extends ApplicationController
                 'data' => $service->dataArchivosRequeridos($mempresa),
                 'msj' => 'OK',
             ];
+
             return response()->json($salida);
         } catch (\Throwable $e) {
             return $this->renderObject($this->captureException($e, $request));
@@ -497,9 +517,11 @@ class EmpresaController extends ApplicationController
                 'success' => true,
                 'msj' => 'Ok',
             ];
+
             return response()->json($salida);
         } catch (\Throwable $e) {
             $this->db->rollBack();
+
             return $this->handleException($e, $request);
         }
     }
@@ -508,7 +530,7 @@ class EmpresaController extends ApplicationController
     {
         try {
             $nit = $request->input('nit');
-            $solicitud_previa = Mercurio30::whereIn("estado", ['P', 'T', 'D'])->where("nit", $nit)->count();
+            $solicitud_previa = Mercurio30::whereIn('estado', ['P', 'T', 'D'])->where('nit', $nit)->count();
             $empresa = false;
             $empresaService = new EmpresaService;
             $empresa_sisu = $empresaService->buscarEmpresaSubsidio($nit);
@@ -520,6 +542,7 @@ class EmpresaController extends ApplicationController
                 'solicitud_previa' => ($solicitud_previa > 0) ? true : false,
                 'empresa' => $empresa,
             ];
+
             return response()->json($salida);
         } catch (\Throwable $e) {
             return $this->handleException($e, $request);
@@ -575,7 +598,7 @@ class EmpresaController extends ApplicationController
     public function miEmpresa()
     {
         try {
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -596,7 +619,7 @@ class EmpresaController extends ApplicationController
                 return redirect()->route('principal/index');
             }
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -643,6 +666,7 @@ class EmpresaController extends ApplicationController
                 'msj' => $salida['msj'],
                 'code' => $e->getCode(),
             ]);
+
             return redirect()->route('principal/index');
         }
     }
