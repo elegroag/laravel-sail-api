@@ -78,12 +78,22 @@ class AfiliationService {
                                 html: response.msj,
                                 icon: 'success',
                                 showCancelButton: true,
+                                showCloseButton: false,
                                 confirmButtonText: 'Descargar comprobante de radicación',
                                 cancelButtonText: 'Continuar',
                                 confirmButtonColor: '#2dce89',
+                                allowOutsideClick: false,
+                                allowEscapeKey: false,
+                                allowEnterKey: false,
                             }).then((result) => {
                                 if (result.isConfirmed) {
-                                    window.open(comprobanteUrl, '_blank');
+                                    const link = document.createElement('a');
+                                    link.href = comprobanteUrl;
+                                    link.target = '_blank';
+                                    link.rel = 'noopener noreferrer';
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
                                 }
                                 return callback(response);
                             });

@@ -10,18 +10,16 @@ use Illuminate\Support\Facades\DB;
 
 class MercurioAuthenticated
 {
-    protected $controller;
+    protected ?string $controller;
 
-    protected $actionMethod;
+    protected ?string $actionMethod;
 
-    protected $application;
+    protected ?string $application;
 
     /**
      * Manejar una solicitud entrante.
-     *
-     * @return mixed
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): mixed
     {
         if (! SessionCookies::check()) {
 
@@ -40,7 +38,7 @@ class MercurioAuthenticated
                 'code' => 401,
             ]);
 
-            return redirect()->route('web.salir');
+            return redirect('web/salir');
         }
 
         if ($this->autorization($request) === false) {
@@ -93,7 +91,7 @@ class MercurioAuthenticated
         return $next($request);
     }
 
-    public function autorization(Request &$request)
+    public function autorization(Request &$request): bool
     {
         $controllerName = $request->route()->getController();
         // Esto devolverá una instancia de UserController
@@ -108,6 +106,17 @@ class MercurioAuthenticated
         }
 
         $this->actionMethod = $request->route()->getActionMethod();
+
+        $comprobanteActions = [
+            'descargarComprobanteRadicacion',
+            'descargarComprobanteIndependiente',
+            'descargarComprobantePensionado',
+        ];
+
+        if ($this->controller === 'DocumentosController' && in_array($this->actionMethod, $comprobanteActions, true)) {
+            return true;
+        }
+
         $tipo = session('tipo');
         $estado_afiliado = session('estado_afiliado');
 

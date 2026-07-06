@@ -51,11 +51,11 @@ class ComprobanteRadicacionEmpresa extends Documento
     private function renderEncabezado(string $intro): void
     {
         $this->pdf->SetFont('helvetica', 'B', 14);
-        $this->pdf->Cell(0, 12, 'Comprobante de Radicación de Solicitud de Afiliación', 0, 1, 'C');
+        $this->pdf->Cell(0, 12, 'Comprobante de Radicación de Solicitud de Afiliación', 0, 1, 'L');
         $this->pdf->Ln(4);
 
         $this->pdf->SetFont('helvetica', '', 9);
-        $this->pdf->MultiCell(0, 5, $intro, 0, 'J');
+        $this->pdf->MultiCell(0, 5, $intro, 0, 'L');
         $this->pdf->Ln(6);
     }
 
@@ -76,12 +76,12 @@ class ComprobanteRadicacionEmpresa extends Documento
             4,
             'Este documento es una constancia de radicación de la solicitud. No constituye aprobación de la afiliación. La solicitud quedará sujeta a verificación por parte de COMFACA.',
             0,
-            'J'
+            'L'
         );
 
         $this->pdf->Ln(4);
         $this->pdf->SetFont('helvetica', '', 8);
-        $this->pdf->Cell(0, 4, 'Generado el '.Carbon::now()->format('d/m/Y H:i'), 0, 1, 'R');
+        $this->pdf->Cell(0, 4, 'Generado el '.Carbon::now()->format('d/m/Y H:i'), 0, 1, 'L');
     }
 
     private function renderEmpresa($empresa): void
