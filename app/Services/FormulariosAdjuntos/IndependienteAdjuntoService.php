@@ -3,7 +3,7 @@
 namespace App\Services\FormulariosAdjuntos;
 
 use App\Exceptions\DebugException;
-use App\Library\Collections\ParamsEmpresa;
+use App\Library\Collections\ParamsIndependiente;
 use App\Models\Mercurio07;
 use App\Models\Mercurio16;
 use App\Models\Mercurio41;
@@ -50,7 +50,7 @@ class IndependienteAdjuntoService
         );
 
         $datos_captura = $procesadorComando->toArray();
-        $paramsEmpresa = new ParamsEmpresa;
+        $paramsEmpresa = new ParamsIndependiente;
         $paramsEmpresa->setDatosCaptura($datos_captura);
     }
 
@@ -60,7 +60,7 @@ class IndependienteAdjuntoService
             throw new DebugException('Error no hay firma digital', 501);
         }
 
-        $this->filename = 'formulario-trabajador-'.strtotime('now')."_{$this->request->cedtra}.pdf";
+        $this->filename = 'formulario-trabajador-' . strtotime('now') . "_{$this->request->cedtra}.pdf";
         $manager = new DocumentGenerationManager;
         $manager->generate(
             'api',
@@ -136,7 +136,15 @@ class IndependienteAdjuntoService
 
     public static function generarComprobanteRadicacion(Mercurio41 $mercurio41): string
     {
-        $filename = 'comprobante-independiente-'.$mercurio41->ruuid.'.pdf';
+        $procesadorComando = new ApiSubsidio;
+        $procesadorComando->send([
+            'servicio' => 'ComfacaAfilia',
+            'metodo' => 'parametros_independiente',
+        ]);
+        $paramsIndependiente = new ParamsIndependiente;
+        $paramsIndependiente->setDatosCaptura($procesadorComando->toArray());
+
+        $filename = 'comprobante-independiente-' . $mercurio41->ruuid . '.pdf';
         $manager = new DocumentGenerationManager;
         $documento = $manager->generate('local', 'comprobante', [
             'categoria' => 'formulario',

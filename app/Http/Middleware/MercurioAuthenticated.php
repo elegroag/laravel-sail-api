@@ -7,13 +7,13 @@ use App\Models\MenuItem;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-
 
 class MercurioAuthenticated
 {
     protected $controller;
+
     protected $actionMethod;
+
     protected $application;
 
     /**
@@ -31,7 +31,7 @@ class MercurioAuthenticated
                     'message' => 'No autenticado checkeo de session. ',
                     'request' => $request->all(),
                     'user' => session('user'),
-                    'has' => session()->has('user')
+                    'has' => session()->has('user'),
                 ], 401);
             }
 
@@ -39,7 +39,7 @@ class MercurioAuthenticated
                 'msj' => 'No autenticado checkeo de session.',
                 'code' => 401,
             ]);
-            dd("Error no autenticado");
+
             return redirect()->route('web.salir');
         }
 
@@ -48,7 +48,7 @@ class MercurioAuthenticated
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No autorizado para acceder al modulo, tipo: ' . session('tipo') . '. ',
+                    'message' => 'No autorizado para acceder al modulo, tipo: '.session('tipo').'. ',
                 ], 401);
             }
 
@@ -56,7 +56,7 @@ class MercurioAuthenticated
                 'msj' => 'No autorizado para acceder al modulo. ',
                 'code' => 401,
             ]);
-            if (!($this->controller == 'PrincipalController' && $this->actionMethod == 'index')) {
+            if (! ($this->controller == 'PrincipalController' && $this->actionMethod == 'index')) {
                 return redirect('mercurio/principal/index');
             }
         }
@@ -111,7 +111,9 @@ class MercurioAuthenticated
         $tipo = session('tipo');
         $estado_afiliado = session('estado_afiliado');
 
-        if ($estado_afiliado == 'I') $tipo = 'P';
+        if ($estado_afiliado == 'I') {
+            $tipo = 'P';
+        }
 
         // Verificar si el tipfun tiene permiso para la acción
         $hasPermission = MenuItem::select(
@@ -122,7 +124,9 @@ class MercurioAuthenticated
             ->where('menu_items.codapl', 'ME')
             ->where('menu_tipos.tipo', $tipo);
 
-        if (!$hasPermission->exists()) return false; // No autorizado
+        if (! $hasPermission->exists()) {
+            return false;
+        } // No autorizado
 
         return true; // Autorizado
     }

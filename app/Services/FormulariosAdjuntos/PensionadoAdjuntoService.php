@@ -132,6 +132,14 @@ class PensionadoAdjuntoService
 
     public static function generarComprobanteRadicacion(Mercurio38 $mercurio38): string
     {
+        $procesadorComando = new ApiSubsidio;
+        $procesadorComando->send([
+            'servicio' => 'ComfacaAfilia',
+            'metodo' => 'parametros_pensionado',
+        ]);
+        $paramsPensionado = new ParamsPensionado;
+        $paramsPensionado->setDatosCaptura($procesadorComando->toArray());
+
         $filename = 'comprobante-pensionado-'.$mercurio38->ruuid.'.pdf';
         $manager = new DocumentGenerationManager;
         $documento = $manager->generate('local', 'comprobante', [

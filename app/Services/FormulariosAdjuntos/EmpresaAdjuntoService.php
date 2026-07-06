@@ -128,6 +128,14 @@ class EmpresaAdjuntoService
 
     public static function generarComprobanteRadicacion(Mercurio30 $mercurio30): string
     {
+        $procesadorComando = new ApiSubsidio;
+        $procesadorComando->send([
+            'servicio' => 'ComfacaAfilia',
+            'metodo' => 'parametros_empresa',
+        ]);
+        $paramsEmpresa = new ParamsEmpresa;
+        $paramsEmpresa->setDatosCaptura($procesadorComando->toArray());
+
         $filename = 'comprobante-empresa-'.$mercurio30->ruuid.'.pdf';
         $manager = new DocumentGenerationManager;
         $documento = $manager->generate('local', 'comprobante', [

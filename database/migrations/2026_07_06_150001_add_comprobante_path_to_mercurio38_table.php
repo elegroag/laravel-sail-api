@@ -1,22 +1,26 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('mercurio38', function (Blueprint $table) {
-            $table->string('comprobante_path')->nullable()->after('ruuid');
-        });
+        if (! Schema::hasTable('mercurio38') || Schema::hasColumn('mercurio38', 'comprobante_path')) {
+            return;
+        }
+
+        DB::statement('ALTER TABLE `mercurio38` ADD COLUMN `comprobante_path` VARCHAR(255) NULL AFTER `ruuid`');
     }
 
     public function down(): void
     {
-        Schema::table('mercurio38', function (Blueprint $table) {
-            $table->dropColumn('comprobante_path');
-        });
+        if (! Schema::hasTable('mercurio38') || ! Schema::hasColumn('mercurio38', 'comprobante_path')) {
+            return;
+        }
+
+        DB::statement('ALTER TABLE `mercurio38` DROP COLUMN `comprobante_path`');
     }
 };
