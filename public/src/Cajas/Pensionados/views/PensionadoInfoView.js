@@ -73,11 +73,23 @@ class PensionadoInfoView extends FormInfoView {
 			this.$el.find('#numcue').prop('disabled', true);
 		}
 
-		flatpickr(this.$el.find('#fecafi, #fecapr'), {
+		flatpickr(this.$el.find('#fecafi'), {
 			enableTime: false,
 			dateFormat: 'Y-m-d',
 			locale: Spanish,
 		});
+
+		let fechaPasada2 = new Date();
+        fechaPasada2.setDate(fechaPasada2.getDate() - 10);
+        flatpickr(this.$el.find('#fecapr'), {
+            enableTime: false,
+            dateFormat: 'Y-m-d',
+            locale: Spanish,
+            allowInput: true,
+            maxDate: 'today',
+            minDate: fechaPasada2,
+            defaultDate: new Date(),
+        });
 	}
 
 	aprobarSolicitud(e) {

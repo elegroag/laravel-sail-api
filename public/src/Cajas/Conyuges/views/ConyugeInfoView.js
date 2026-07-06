@@ -52,13 +52,25 @@ class ConyugeInfoView extends FormInfoView {
         let fechaPasada = new Date();
         fechaPasada.setDate(fechaPasada.getDate() - 8110);
 
-        flatpickr(this.$el.find('#fecafi, #fecapr'), {
+        flatpickr(this.$el.find('#fecafi'), {
             enableTime: false,
             dateFormat: 'Y-m-d',
             locale: Spanish,
             allowInput: true,
             maxDate: 'today',
             minDate: fechaPasada,
+        });
+
+        let fechaPasada2 = new Date();
+        fechaPasada2.setDate(fechaPasada2.getDate() - 10);
+        flatpickr(this.$el.find('#fecapr'), {
+            enableTime: false,
+            dateFormat: 'Y-m-d',
+            locale: Spanish,
+            allowInput: true,
+            maxDate: 'today',
+            minDate: fechaPasada2,
+            defaultDate: new Date(),
         });
 
         this.$el.find('.js-basic-multiple, #codind, #tipsoc, #tipapo, #codban, #codgir').select2();

@@ -59,10 +59,22 @@ export default class FacultativoInfoView extends FormInfoView {
         this.actualizaForm();
         this.$el.find('.js-basic-multiple, #codind, #tipsoc, #tipapo, #codgir').select2();
 
-        flatpickr(this.$el.find('#fecafi, #fecapr'), {
+        flatpickr(this.$el.find('#fecafi'), {
             enableTime: false,
             dateFormat: 'Y-m-d',
             locale: Spanish,
+        });
+
+        let fechaPasada2 = new Date();
+        fechaPasada2.setDate(fechaPasada2.getDate() - 10);
+        flatpickr(this.$el.find('#fecapr'), {
+            enableTime: false,
+            dateFormat: 'Y-m-d',
+            locale: Spanish,
+            allowInput: true,
+            maxDate: 'today',
+            minDate: fechaPasada2,
+            defaultDate: new Date(),
         });
 
         if (this.model.get('tippag') == 'T') {

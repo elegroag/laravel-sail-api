@@ -45,18 +45,8 @@ export default class TrabajadorInfoView extends FormInfoView {
 
     #afterRender() {
         this.__afterRender();
-        // Inicializa Select2 sobre los <select> propios del template
-        // (#tippag, #codban, #tipcue, #giro, #codgir) y sobre cualquier
-        // <select class="js-basic-multiple"> que se haya inyectado desde
-        // sub-vistas (por ejemplo el de tmp_devolver.blade.php).
-        //
-        // Se delega al wrapper del tema (window.Select2.init) porque ese
-        // wrapper detecta selects con `multiple` o `data-tags` y, si los hay,
-        // carga dinámicamente `select2.full.min.js` (que incluye los módulos
-        // `select2/compat/inputData` y `select2/compat/multipleSelection`
-        // que la versión core no trae). Así evitamos el error
-        // `No select2/compat/inputData` al inicializar un <select multiple>.
-        if (typeof window !== 'undefined' && typeof window.Select2?.init === 'function') {
+        if (typeof window !== 'undefined' && 
+            typeof window.Select2?.init === 'function') {
             window.Select2.init(this.$el);
         }
 
@@ -75,13 +65,25 @@ export default class TrabajadorInfoView extends FormInfoView {
         let fechaPasada = new Date();
         fechaPasada.setDate(fechaPasada.getDate() - 8110);
 
-        flatpickr(this.$el.find('#fecafi, #fecapr'), {
+        flatpickr(this.$el.find('#fecafi'), {
             enableTime: false,
             dateFormat: 'Y-m-d',
             locale: Spanish,
             allowInput: true,
             maxDate: 'today',
             minDate: fechaPasada,
+        });
+
+        let fechaPasada2 = new Date();
+        fechaPasada2.setDate(fechaPasada2.getDate() - 10);
+        flatpickr(this.$el.find('#fecapr'), {
+            enableTime: false,
+            dateFormat: 'Y-m-d',
+            locale: Spanish,
+            allowInput: true,
+            maxDate: 'today',
+            minDate: fechaPasada2,
+            defaultDate: new Date(),
         });
 
         if (this.model.get('tippag') == 'T') {
@@ -91,7 +93,9 @@ export default class TrabajadorInfoView extends FormInfoView {
             this.$el.find('#numcue').prop('disabled', true);
         }
 
-        if (this.collection && this.collection.trabajador_sisu && typeof this.collection.trabajador_sisu === 'object') {
+        if (this.collection && 
+            this.collection.trabajador_sisu && 
+            typeof this.collection.trabajador_sisu === 'object') {
             if (this.collection.trabajador_sisu.estado === 'A') {
                 $App.trigger('alert:warning', {
                     message: 'La persona ya tiene una afiliación vigente. Si desea continuar, se creará una multiafiliación.',
