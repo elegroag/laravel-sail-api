@@ -1,4 +1,14 @@
-var dataTableConfig = {
+import { $App } from '@/App';
+import Logger from '@/Common/Logger';
+import { Messages } from '@/Utils';
+
+const logger = new Logger();
+
+window.App = $App;
+
+const controller = () => window.ServerController ?? 'admproductos';
+
+const dataTableConfig = {
     processing: 'Procesando...',
     lengthMenu: 'Mostrar _MENU_ resultados por pagínas',
     zeroRecords: 'No se encontraron resultados',
@@ -20,196 +30,197 @@ var dataTableConfig = {
         colvis: 'Visibilidad',
         collection: 'Colección',
         colvisRestore: 'Restaurar visibilidad',
-        copyKeys: 'Presione ctrl o u2318 + C para copiar los datos de la tabla al portapapeles del sistema. <br /> <br /> Para cancelar, haga clic en este mensaje o presione escape.',
+        copyKeys:
+            'Presione ctrl o u2318 + C para copiar los datos de la tabla al portapapeles del sistema. <br /> <br /> Para cancelar, haga clic en este mensaje o presione escape.',
         copySuccess: {
             1: 'Copiada 1 fila al portapapeles',
             _: 'Copiadas %d fila al portapapeles',
         },
     },
 };
-var _datatable = void 0;
 
-const loadData = function(servicios) {
-    if (_datatable == void 0) {
-        _datatable = $('#datatable').DataTable({
-            "paging": true,
-            "pageLength": 10,
-            "pagingType": "full_numbers",
-            "info": true,
-            "columns": [{
-                    "title": "Código",
-                    "data": "codser"
-                },
-                {
-                    "title": "Servicio",
-                    "data": "servicio"
-                },
-                {
-                    "title": "Estado",
-                    "data": "estado"
-                },
-                {
-                    "title": "Cupos",
-                    "data": "cupos"
-                },
-                {
-                    "title": "#Trabajadores",
-                    "data": "cantidad_trabajadores"
-                },
-                {
-                    "title": "#Beneficiarios",
-                    "data": "cantidad_beneficiarios"
-                },
-                {
-                    "title": "Opciones",
-                    "data": "options"
-                }
-            ],
-            "language": dataTableConfig
-        }).draw(false);
+const estadosServicio = {
+    A: 'Activo',
+    P: 'Pendiente',
+    F: 'Finalizado',
+};
+
+let _datatable;
+
+const loadData = (servicios) => {
+    if (_datatable === undefined) {
+        _datatable = $('#datatable')
+            .DataTable({
+                paging: true,
+                pageLength: 10,
+                pagingType: 'full_numbers',
+                info: true,
+                columns: [
+                    { title: 'Código', data: 'codser' },
+                    { title: 'Servicio', data: 'servicio' },
+                    { title: 'Estado', data: 'estado' },
+                    { title: 'Cupos', data: 'cupos' },
+                    { title: '#Trabajadores', data: 'cantidad_trabajadores' },
+                    { title: '#Beneficiarios', data: 'cantidad_beneficiarios' },
+                    { title: 'Opciones', data: 'options' },
+                ],
+                language: dataTableConfig,
+            })
+            .draw(false);
     } else {
         _datatable.rows().clear().draw();
     }
-    if (_.size(servicios) == 0) {} else {
-        let _data = new Array();
+
+    if (_.size(servicios) > 0) {
+        const _data = [];
         for (const ai in servicios) {
-            let servicio = servicios[ai];
+            const servicio = servicios[ai];
             let _btrechazo = '';
-            if (servicio.estado == 'A') {
+            if (servicio.estado === 'A') {
                 _btrechazo = `<button type="button" toggle='finalizar' data-cid='${servicio.id}' class="btn btn-sm btn-danger">Finalizar</button>`;
             }
-            let _estado = _.map(servicio.estado, function(estado) {
-                let estados = {
-                    'A': 'Activo',
-                    'P': 'Pendiente',
-                    'F': 'Finalizado'
-                };
-                return (servicio.estado) ? estados[servicio.estado] : 'No definida';
-            });
+            const estadoLabel = estadosServicio[servicio.estado] ?? 'No definida';
 
             _data[ai] = {
-                "id": servicio.id,
-                "codser": servicio.codser,
-                "servicio": servicio.servicio,
-                "estado": _estado,
-                "cupos": servicio.cupos,
-                "cantidad_trabajadores": servicio.cantidad_trabajadores,
-                "cantidad_beneficiarios": servicio.cantidad_beneficiarios,
-                "options": `<button type="button" toggle='aplicados' data-cid='${servicio.codser}' class="btn btn-sm btn-success">Aplicados</button>
-                    <button type="button" toggle='editar' data-cid='${servicio.id}' class="btn btn-sm btn-info">Editar</button> ${_btrechazo}`
+                id: servicio.id,
+                codser: servicio.codser,
+                servicio: servicio.servicio,
+                estado: estadoLabel,
+                cupos: servicio.cupos,
+                cantidad_trabajadores: servicio.cantidad_trabajadores,
+                cantidad_beneficiarios: servicio.cantidad_beneficiarios,
+                options: `<button type="button" toggle='aplicados' data-cid='${servicio.codser}' class="btn btn-sm btn-success">Aplicados</button>
+                    <button type="button" toggle='editar' data-cid='${servicio.id}' class="btn btn-sm btn-info">Editar</button> ${_btrechazo}`,
             };
         }
         _datatable.rows.add(_data).draw();
     }
+
     $('table').attr('class', 'table table-sm table-bordered');
     $('[type="search"]').addClass('row form-control');
     $('[type="search"]').css('display', 'inline-block');
     $('[type="search"]').css('width', '200px');
 };
 
-const buscarLista = function() {
-    $.get(Utils.getKumbiaURL($Kumbia.controller + "/buscarLista")).done(function(response) {
-        if (response.success) {
-            loadData(response.data);
-        }
-    }).fail(function(err) {
-        console.log(err.responseText);
-        return false;
+const buscarLista = () => {
+    logger.info('AdmProductos:buscarLista - solicitando lista');
+
+    window.App.trigger('ajax', {
+        url: `${controller()}/buscar_lista`,
+        data: {},
+        callback: (response) => {
+            if (response?.success) {
+                logger.info('AdmProductos:buscarLista - datos recibidos', {
+                    count: response.data?.length ?? 0,
+                });
+                loadData(response.data ?? []);
+                return;
+            }
+
+            logger.warn('AdmProductos:buscarLista - respuesta sin éxito', response);
+            Messages.display(response?.msj ?? 'No se pudo cargar la lista de productos.', 'error');
+        },
     });
 };
 
-const finalizaServicio = function(target) {
-    $.ajax({
-        method: "POST",
-        url: Utils.getKumbiaURL($Kumbia.controller + "/changeEstado"),
-        dataType: "JSON",
-        cache: false,
+const finalizaServicio = (target) => {
+    const id = target.attr('data-cid');
+    logger.info('AdmProductos:finalizaServicio - solicitando cambio de estado', { id });
+
+    window.App.trigger('ajax', {
+        url: `${controller()}/cambio_estado`,
         data: {
-            "id": target.attr("data-cid"),
-            'estado': 'F'
-        }
-    }).done(function(response) {
-        if (response.success) {
-            buscarLista();
+            id,
+            estado: 'F',
+        },
+        callback: (response) => {
+            if (response?.success) {
+                logger.info('AdmProductos:finalizaServicio - servicio finalizado', { id });
+                buscarLista();
+                swal.fire({
+                    title: 'Notificación',
+                    text: response.msj,
+                    icon: 'warning',
+                    showConfirmButton: false,
+                    showCloseButton: true,
+                    timer: 10000,
+                });
+                return;
+            }
+
+            logger.warn('AdmProductos:finalizaServicio - respuesta sin éxito', response);
             swal.fire({
-                "title": "Notificación",
-                "text": response.msj,
-                "icon": "warning",
-                "showConfirmButton": false,
-                "showCloseButton": true,
-                "timer": 10000
+                title: 'Notificación Alerta',
+                text: response?.msj ?? 'No fue posible finalizar el servicio.',
+                icon: 'warning',
+                showConfirmButton: false,
+                showCloseButton: true,
+                timer: 10000,
             });
-        } else {
-            swal.fire({
-                "title": "Notificación Alerta",
-                "text": response.msj,
-                "icon": "warning",
-                "showConfirmButton": false,
-                "showCloseButton": true,
-                "timer": 10000
-            });
-        }
-    }).fail(function(err) {
-        console.log(err.responseText);
-        return false;
+        },
     });
 };
 
-$(document).ready(function() {
-    $.fn.DTbl_columnCount = function() {
+$(() => {
+    window.App.initialize();
+
+    $.fn.DTbl_columnCount = function () {
         return $('th', $(this).find('thead')).length;
     };
 
     buscarLista();
 
-    $(document).on("click", "button[toggle='aplicados']", function(e) {
+    $(document).on('click', "button[toggle='aplicados']", (e) => {
         e.preventDefault();
-        var target = $(e.currentTarget);
+        const target = $(e.currentTarget);
         swal.fire({
-            title: "¡Confirmar!",
+            title: '¡Confirmar!',
             html: "<p style='font-size:0.97rem'>¿Está seguro que desea salir, para ver los beneficiarios aplicados al servicio.?</p>",
             showCancelButton: true,
-            confirmButtonClass: "btn btn-sm btn-success",
-            cancelButtonClass: "btn btn-sm btn-danger",
-            confirmButtonText: "SI",
-            cancelButtonText: "NO"
-        }).then(function(result) {
+            confirmButtonClass: 'btn btn-sm btn-success',
+            cancelButtonClass: 'btn btn-sm btn-danger',
+            confirmButtonText: 'SI',
+            cancelButtonText: 'NO',
+        }).then((result) => {
             if (result.value) {
-                window.location.href = Utils.getKumbiaURL($Kumbia.controller + "/aplicados/" + target.attr('data-cid'));
+                window.location.href = window.App.url(
+                    `aplicados/${target.attr('data-cid')}`,
+                    controller(),
+                );
             }
         });
     });
 
-    $(document).on("click", "button[toggle='editar']", function(e) {
+    $(document).on('click', "button[toggle='editar']", (e) => {
         e.preventDefault();
-        var target = $(e.currentTarget);
+        const target = $(e.currentTarget);
         swal.fire({
-            title: "¡Confirmar!",
+            title: '¡Confirmar!',
             html: "<p style='font-size:0.97rem'>¿Está seguro que desea salir, para editar el registro del servicio producto.?</p>",
             showCancelButton: true,
-            confirmButtonClass: "btn btn-sm btn-success",
-            cancelButtonClass: "btn btn-sm btn-danger",
-            confirmButtonText: "SI",
-            cancelButtonText: "NO"
-        }).then(function(result) {
+            confirmButtonClass: 'btn btn-sm btn-success',
+            cancelButtonClass: 'btn btn-sm btn-danger',
+            confirmButtonText: 'SI',
+            cancelButtonText: 'NO',
+        }).then((result) => {
             if (result.value) {
-                window.location.href = Utils.getKumbiaURL($Kumbia.controller + "/editar/" + target.attr('data-cid'));
+                window.location.href = window.App.url(`editar/${target.attr('data-cid')}`, controller());
             }
         });
     });
 
-    $(document).on("click", "button[toggle='finalizar']", function(e) {
+    $(document).on('click', "button[toggle='finalizar']", (e) => {
         e.preventDefault();
-        var target = $(e.currentTarget);
+        const target = $(e.currentTarget);
         swal.fire({
-            title: "¡Confirmar!",
+            title: '¡Confirmar!',
             html: "<p style='font-size:0.97rem'>¿Está seguro que desea finalizar el servicio o producto.?</p>",
             showCancelButton: true,
-            confirmButtonClass: "btn btn-sm btn-success",
-            cancelButtonClass: "btn btn-sm btn-danger",
-            confirmButtonText: "SI",
-            cancelButtonText: "NO"
-        }).then(function(result) {
+            confirmButtonClass: 'btn btn-sm btn-success',
+            cancelButtonClass: 'btn btn-sm btn-danger',
+            confirmButtonText: 'SI',
+            cancelButtonText: 'NO',
+        }).then((result) => {
             if (result.value) {
                 finalizaServicio(target);
             }

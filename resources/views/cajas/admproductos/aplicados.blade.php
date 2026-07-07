@@ -103,11 +103,11 @@
                 </div>
                 <div class='col-md-6 border-top border-right border-left border-bottom'>
                     <label class='form-control-label'>Trabajador</label>
-                    <p class='pl-2 description'><%=trabajador.prinom + ' '+ trabajador.segnom + ' ' + trabajador.priape + ' ' + trabajador.segape%></p>
+                    <p class='pl-2 description'><% if (trabajador) { %><%= trabajador.prinom + ' '+ trabajador.segnom + ' ' + trabajador.priape + ' ' + trabajador.segape %><% } else { %>NO DISPONIBLE<% } %></p>
                 </div>
                 <div class='col-md-6 border-top border-right border-left border-bottom'>
                     <label class='form-control-label'>Beneficiario</label>
-                    <p class='pl-2 description'><%=(beneficiario)? beneficiario.prinom+ ' '+beneficiario.segnom + ' '+beneficiario.priape+' '+beneficiario.segape : 'NO EXISTE'%></p>
+                    <p class='pl-2 description'><% if (beneficiario) { %><%= beneficiario.prinom + ' '+ beneficiario.segnom + ' '+ beneficiario.priape + ' '+ beneficiario.segape %><% } else { %>NO EXISTE<% } %></p>
                 </div>
                 <div class='col-md-6 border-top border-right border-left border-bottom'>
                     <label class='form-control-label'>Cedula trabajador</label>
@@ -119,17 +119,21 @@
                 </div>
                 <div class='col-md-6 border-top border-right border-left border-bottom'>
                     <label class='form-control-label'>Empresa</label>
-                    <p class='pl-2 description'><%=trabajador.nit%></p>
+                    <p class='pl-2 description'><% if (trabajador) { %><%= trabajador.nit %><% } else { %>NO DISPONIBLE<% } %></p>
                 </div>
                 <div class='col-md-6 border-top border-right border-left border-bottom'>
                     <label class='form-control-label'>Zona</label>
-                    <p class='pl-2 description'><%=trabajador.zona_detalle%></p>
+                    <p class='pl-2 description'><% if (trabajador && trabajador.zona_detalle) { %><%= trabajador.zona_detalle %><% } else { %>NO DISPONIBLE<% } %></p>
                 </div>
             </div>
         </div>
     </script>
 
-    <script src="{{ asset('src/Cajas/ProductoAplicados/main.js') }}"></script>
+    <script>
+        window.ServerController = 'admproductos';
+    </script>
+
+    <script src="{{ asset('cajas/build/ProductoAplicados.js') }}"></script>
 @endpush
 
 @section('content')
@@ -143,7 +147,7 @@
                         <a href="{{ route('admproductos.lista') }}" class='btn btn-md btn-primary'><i class="fas fa-home"></i> Salir</a>&nbsp;
                     </div>
                     <div class="card-body p-0 m-3">
-                        <h3 class="p-1">{{ ($servicio) ? $servicio->getServicio() : '' }}</h3>
+                        <h3 class="p-1">{{ ($servicio) ? $servicio->getServicio() : 'Servicio ' . $codser }}</h3>
                         <p>Lista de afiliados que han aplicado al servicio o producto</p>
                         <input style="display:none" id="codser" value="{{ $codser }}" />
                         <div class="col-md-8">

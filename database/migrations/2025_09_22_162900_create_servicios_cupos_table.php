@@ -19,10 +19,10 @@ return new class extends Migration
             $table->increments('id');
 
             // Columnas según SQL
-            $table->char('codser', 1);
+            $table->string('codser', 20);
             $table->string('cupos', 10);
             $table->string('servicio', 100);
-            $table->integer('estado');
+            $table->string('estado', 1)->nullable();
             $table->string('url', 255);
         });
     }

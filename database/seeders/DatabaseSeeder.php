@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             NotificacionesSeeder::class,
             RecepcionSatSeeder::class,
             ServiciosCuposSeeder::class,
+            PinesAfiliadoSeeder::class,
             Subsi54Seeder::class,
             TranomsSeeder::class,
 

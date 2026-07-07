@@ -19,6 +19,12 @@ class PinesAfiliado extends ModelBase
         'estado',
         'fecha',
         'codser',
+        'fecres',
+        'horres',
+        'fecent',
+        'horent',
+        'medio',
+        'userent',
     ];
 
     public function getDocben()
@@ -89,5 +95,21 @@ class PinesAfiliado extends ModelBase
     public function getCodser()
     {
         return $this->codser;
+    }
+
+    public function getEstadoArray()
+    {
+        return [
+            'A' => 'Activo',
+            'I' => 'Inactivo',
+            'R' => 'Rechazado',
+        ];
+    }
+
+    public function getEstadoDetalle()
+    {
+        $estados = $this->getEstadoArray();
+
+        return $estados[$this->estado] ?? '';
     }
 }

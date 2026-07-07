@@ -92,6 +92,8 @@ const appModules = {
         'Auditoria',
         'OportunidadAfiliacion',
         'ReporteSolicitudes',
+        'AdmProductos',
+        'ProductoAplicados',
     ],
 };
 

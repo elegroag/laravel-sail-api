@@ -88,7 +88,13 @@ class ServiciosCupos extends ModelBase
     // Métodos auxiliares
     public function getEstadoArray()
     {
-        return ['1' => 'ACTIVO', '0' => 'INACTIVO'];
+        return [
+            'A' => 'Activo',
+            'P' => 'Pendiente',
+            'F' => 'Finalizado',
+            '1' => 'ACTIVO',
+            '0' => 'INACTIVO',
+        ];
     }
 
     public function getEstadoDetalle()

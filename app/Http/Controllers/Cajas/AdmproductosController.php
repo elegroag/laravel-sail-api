@@ -9,8 +9,9 @@ use App\Models\Adapter\DbBase;
 use App\Models\PinesAfiliado;
 use App\Models\ServiciosCupos;
 use App\Services\Api\ApiSubsidio;
-use App\Services\Utils\Comman;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class AdmproductosController extends ApplicationController
 {
@@ -41,27 +42,45 @@ class AdmproductosController extends ApplicationController
 
     public function buscarLista()
     {
-        $serviciosCupos = new ServiciosCupos;
-        $todosServicios = [];
-        $collect = $serviciosCupos->find();
-        $ai = 0;
-        foreach ($collect as $servicioCupo) {
-            $todosServicios[$ai] = $servicioCupo->getArray();
-            $model = $this->db->fetchOne("SELECT count(DISTINCT cedtra) as numtra, count(DISTINCT docben) as numben
-            FROM pines_afiliado
-            WHERE codser='{$servicioCupo->getCodser()}'");
+        $this->setResponse('ajax');
 
-            $todosServicios[$ai]['cantidad_trabajadores'] = $model['numtra'];
-            $todosServicios[$ai]['cantidad_beneficiarios'] = $model['numben'];
-            $ai++;
-        }
+        try {
+            Log::info('AdmproductosController@buscarLista - iniciando consulta');
 
-        return $this->renderObject(
-            [
+            $serviciosCupos = new ServiciosCupos;
+            $todosServicios = [];
+            $collect = $serviciosCupos->getFind();
+            $ai = 0;
+
+            Log::info('AdmproductosController@buscarLista - servicios encontrados', ['count' => $collect->count()]);
+
+            foreach ($collect as $servicioCupo) {
+                $todosServicios[$ai] = $servicioCupo->getArray();
+                $model = $this->db->fetchOne("SELECT count(DISTINCT cedtra) as numtra, count(DISTINCT docben) as numben
+                FROM pines_afiliado
+                WHERE codser='{$servicioCupo->getCodser()}'");
+
+                $todosServicios[$ai]['cantidad_trabajadores'] = $model['numtra'] ?? 0;
+                $todosServicios[$ai]['cantidad_beneficiarios'] = $model['numben'] ?? 0;
+                $ai++;
+            }
+
+            return $this->renderObject([
                 'success' => true,
-                'data' => $todosServicios,
-            ]
-        );
+                'data' => array_values($todosServicios),
+            ]);
+        } catch (Throwable $e) {
+            Log::error('AdmproductosController@buscarLista - error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return $this->renderObject([
+                'success' => false,
+                'msj' => 'Error al consultar productos y servicios.',
+                'data' => [],
+            ]);
+        }
     }
 
     public function nuevo()
@@ -102,9 +121,9 @@ class AdmproductosController extends ApplicationController
             if (! $serviciosCupos->save()) {
                 $msj = '';
                 foreach ($serviciosCupos->getMessages() as $message) {
-                    $msj .= $message->getMessage() . "\n";
+                    $msj .= $message->getMessage()."\n";
                 }
-                throw new DebugException('Error al guardar el servicio.' . $msj, 501);
+                throw new DebugException('Error al guardar el servicio.'.$msj, 501);
             }
 
             $salida = [
@@ -157,16 +176,25 @@ class AdmproductosController extends ApplicationController
             $id = $request->input('id');
             $estado = $request->input('estado');
 
+            Log::info('AdmproductosController@changeEstado - actualizando estado', [
+                'id' => $id,
+                'estado' => $estado,
+            ]);
+
             $model = new ServiciosCupos;
             $serviciosCupo = $model->findFirst(" id='{$id}'");
+            if ($serviciosCupo === null) {
+                throw new DebugException('Error el servicio no es valido para continuar.', 501);
+            }
+
             $serviciosCupo->setEstado($estado);
 
             if (! $serviciosCupo->save()) {
                 $msj = '';
                 foreach ($serviciosCupo->getMessages() as $message) {
-                    $msj .= $message->getMessage() . "\n";
+                    $msj .= $message->getMessage()."\n";
                 }
-                throw new DebugException('Error al guardar el servicio.' . $msj, 501);
+                throw new DebugException('Error al guardar el servicio.'.$msj, 501);
             }
 
             $salida = [
@@ -175,9 +203,19 @@ class AdmproductosController extends ApplicationController
                 'data' => $serviciosCupo->getArray(),
             ];
         } catch (DebugException $err) {
+            Log::warning('AdmproductosController@changeEstado - validación', ['message' => $err->getMessage()]);
             $salida = [
                 'success' => false,
                 'msj' => $err->getMessage(),
+            ];
+        } catch (Throwable $e) {
+            Log::error('AdmproductosController@changeEstado - error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            $salida = [
+                'success' => false,
+                'msj' => 'Error al actualizar el estado del servicio.',
             ];
         }
 
@@ -186,7 +224,9 @@ class AdmproductosController extends ApplicationController
 
     public function aplicados($codser = '')
     {
-        if ($codser == '') {
+        $codser = $this->normalizeCodser($codser);
+
+        if ($codser === '') {
             set_flashdata('error', [
                 'msj' => 'El servicio no está disponible.',
                 'code' => '505',
@@ -195,7 +235,12 @@ class AdmproductosController extends ApplicationController
             return redirect('admproductos/lista');
             exit;
         }
-        $servicioCupo = ServiciosCupos::where('codser', $codser)->first();
+
+        $servicioCupo = $this->findServicioCupoByCodser($codser);
+        if ($servicioCupo === null) {
+            Log::warning('AdmproductosController@aplicados - servicio no configurado en cupos', ['codser' => $codser]);
+        }
+
         $pinesAfiliado = PinesAfiliado::where('codser', $codser)->get();
 
         return view('cajas.admproductos.aplicados', [
@@ -211,30 +256,56 @@ class AdmproductosController extends ApplicationController
         $this->setResponse('ajax');
 
         try {
-            if ($codser == '') {
+            $codser = $this->normalizeCodser($codser);
+
+            if ($codser === '') {
                 throw new DebugException('Error el servicio no es valido para continuar.', 501);
             }
 
-            $pinesAfiliado = new PinesAfiliado;
-            $servicioCupo = $this->ServiciosCupos->findFirst(" codser='{$codser}'");
+            Log::info('AdmproductosController@buscarAfiliadosAplicados - iniciando consulta', ['codser' => $codser]);
 
-            $collect = $pinesAfiliado->find(" codser='{$servicioCupo->getCodser()}'");
-            $ai = 0;
-            $todosAplicados = [];
-            foreach ($collect as $pinAfiliado) {
-                $todosAplicados[$ai] = $pinAfiliado->getArray();
-                $ai++;
+            $servicioCupo = $this->findServicioCupoByCodser($codser);
+            if ($servicioCupo === null) {
+                Log::warning('AdmproductosController@buscarAfiliadosAplicados - servicio no configurado en cupos, consultando pines por codser', [
+                    'codser' => $codser,
+                ]);
             }
+
+            $todosAplicados = PinesAfiliado::where('codser', $codser)
+                ->get()
+                ->map(fn (PinesAfiliado $pinAfiliado) => $pinAfiliado->getArray())
+                ->values()
+                ->all();
+
+            Log::info('AdmproductosController@buscarAfiliadosAplicados - aplicados encontrados', [
+                'codser' => $codser,
+                'count' => count($todosAplicados),
+            ]);
 
             $salida = [
                 'success' => true,
-                'data' => $todosAplicados,
+                'data' => array_values($todosAplicados),
             ];
         } catch (DebugException $err) {
+            Log::warning('AdmproductosController@buscarAfiliadosAplicados - validación', [
+                'codser' => $codser,
+                'message' => $err->getMessage(),
+            ]);
             $salida = [
                 'msj' => $err->getMessage(),
                 'success' => false,
-                'data' => false,
+                'data' => [],
+            ];
+        } catch (Throwable $e) {
+            Log::error('AdmproductosController@buscarAfiliadosAplicados - error', [
+                'codser' => $codser,
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            $salida = [
+                'msj' => 'Error al consultar afiliados aplicados.',
+                'success' => false,
+                'data' => [],
             ];
         }
 
@@ -252,33 +323,48 @@ class AdmproductosController extends ApplicationController
             return redirect('admproductos/lista');
             exit;
         }
-        $servicioCupo = $this->ServiciosCupos->findFirst(" codser='{$codser}'");
-        $pinesAfiliado = new PinesAfiliado;
-        $collect = $pinesAfiliado->find(" codser='{$servicioCupo->getCodser()}'");
 
-        $this->setParamToView('hide_header', true);
-        $this->setParamToView('servicio', $servicioCupo);
-        $this->setParamToView('codser', $codser);
-        $this->setParamToView('aplicados', $collect);
-        $this->setParamToView('title', 'Productos y Servicios');
+        Log::info('AdmproductosController@carguePagos - cargando vista', ['codser' => $codser]);
+
+        $codser = $this->normalizeCodser($codser);
+        $servicioCupo = $this->findServicioCupoByCodser($codser);
+        if ($servicioCupo === null) {
+            Log::warning('AdmproductosController@carguePagos - servicio no configurado en cupos', ['codser' => $codser]);
+        }
+
+        $collect = PinesAfiliado::where('codser', $codser)->get();
+
+        return view('cajas.admproductos.cargue_pagos', [
+            'title' => 'Productos y Servicios',
+            'servicio' => $servicioCupo,
+            'codser' => $codser,
+            'aplicados' => $collect,
+            'hide_header' => true,
+        ]);
     }
 
     public function detalleAplicado(Request $request, $id)
     {
         $this->setResponse('ajax');
+
         try {
             if ($id == '') {
                 throw new DebugException('Error el servicio no es valido para continuar.', 501);
             }
 
-            $model = new PinesAfiliado;
-            $pineAfiliado = $model->findfirst(" id='{$id}'");
+            Log::info('AdmproductosController@detalleAplicado - iniciando consulta', ['id' => $id]);
+
+            $pineAfiliado = (new PinesAfiliado)->findFirst(" id='{$id}'");
+            if ($pineAfiliado === null) {
+                throw new DebugException('Error el servicio no es valido para continuar.', 501);
+            }
+
             $pinAfiliado = $pineAfiliado->getArray();
             $pinAfiliado['beneficiario'] = false;
             $pinAfiliado['trabajador'] = false;
-            $pinAfiliado['estado_detalle'] = $model->getEstadoDetalle();
+            $pinAfiliado['estado_detalle'] = $pineAfiliado->getEstadoDetalle();
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -293,7 +379,7 @@ class AdmproductosController extends ApplicationController
                 $paramsTrabajador->setDatosCaptura($datos_captura);
             }
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -313,7 +399,7 @@ class AdmproductosController extends ApplicationController
                 }
             }
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -333,9 +419,26 @@ class AdmproductosController extends ApplicationController
                 'success' => true,
                 'data' => $pinAfiliado,
             ];
+
+            Log::info('AdmproductosController@detalleAplicado - detalle generado', ['id' => $id]);
         } catch (DebugException $err) {
+            Log::warning('AdmproductosController@detalleAplicado - validación', [
+                'id' => $id,
+                'message' => $err->getMessage(),
+            ]);
             $salida = [
                 'msj' => $err->getMessage(),
+                'success' => false,
+                'data' => false,
+            ];
+        } catch (Throwable $e) {
+            Log::error('AdmproductosController@detalleAplicado - error', [
+                'id' => $id,
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            $salida = [
+                'msj' => 'Error al consultar el detalle del aplicado.',
                 'success' => false,
                 'data' => false,
             ];
@@ -347,20 +450,34 @@ class AdmproductosController extends ApplicationController
     public function rechazar(Request $request, $id = '')
     {
         $this->setResponse('ajax');
+
         try {
             if ($id == '') {
                 throw new DebugException('Error el servicio no es valido para continuar.', 501);
             }
 
-            $model = new PinesAfiliado;
-            $pineAfiliado = $model->findfirst(" id='{$id}'");
+            Log::info('AdmproductosController@rechazar - iniciando rechazo', ['id' => $id]);
+
+            $pineAfiliado = (new PinesAfiliado)->findFirst(" id='{$id}'");
+            if ($pineAfiliado === null) {
+                throw new DebugException('Error el servicio no es valido para continuar.', 501);
+            }
+
             $pineAfiliado->setEstado('R');
             $pineAfiliado->save();
 
-            $servicioCupo = new ServiciosCupos;
-            $servicioCupo->findFirst("codser='{$pineAfiliado->getCodser()}'");
+            $servicioCupo = (new ServiciosCupos)->findFirst("codser='{$pineAfiliado->getCodser()}'");
+            if ($servicioCupo === null) {
+                throw new DebugException('Error el servicio no es valido para continuar.', 501);
+            }
+
             $servicioCupo->setCupos($servicioCupo->getCupos() + 1);
             $servicioCupo->save();
+
+            Log::info('AdmproductosController@rechazar - aplicado rechazado', [
+                'id' => $id,
+                'codser' => $pineAfiliado->getCodser(),
+            ]);
 
             $salida = [
                 'success' => true,
@@ -368,13 +485,48 @@ class AdmproductosController extends ApplicationController
                 'data' => $pineAfiliado->getArray(),
             ];
         } catch (DebugException $err) {
+            Log::warning('AdmproductosController@rechazar - validación', [
+                'id' => $id,
+                'message' => $err->getMessage(),
+            ]);
             $salida = [
                 'msj' => $err->getMessage(),
+                'success' => false,
+                'data' => false,
+            ];
+        } catch (Throwable $e) {
+            Log::error('AdmproductosController@rechazar - error', [
+                'id' => $id,
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            $salida = [
+                'msj' => 'Error al rechazar el aplicado.',
                 'success' => false,
                 'data' => false,
             ];
         }
 
         return $this->renderObject($salida);
+    }
+
+    private function normalizeCodser(string $codser): string
+    {
+        return trim($codser);
+    }
+
+    private function findServicioCupoByCodser(string $codser): ?ServiciosCupos
+    {
+        $codser = $this->normalizeCodser($codser);
+        if ($codser === '') {
+            return null;
+        }
+
+        $servicio = (new ServiciosCupos)->findFirst(" codser='{$codser}'");
+        if ($servicio !== null) {
+            return $servicio;
+        }
+
+        return ServiciosCupos::where('codser', $codser)->first();
     }
 }
