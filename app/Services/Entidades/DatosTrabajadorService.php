@@ -449,6 +449,7 @@ class DatosTrabajadorService
         $tipact = 'T';
 
         switch ($tipo_consulta) {
+            case 'auditoria':
             case 'all':
                 $response["datos"] = Mercurio47::query()
                     ->join('mercurio10', function ($join) use ($tipopc) {

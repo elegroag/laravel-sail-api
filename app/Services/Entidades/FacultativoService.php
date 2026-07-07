@@ -412,6 +412,7 @@ class FacultativoService
         $numero = $request->getParam('numero');
 
         switch ($tipo_consulta) {
+            case 'auditoria':
             case 'all':
                 $response['datos'] = Mercurio36::query()
                     ->join('mercurio10', function ($join) use ($tipopc) {

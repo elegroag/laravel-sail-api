@@ -13,7 +13,9 @@ use App\Services\Utils\RegistroSeguimiento;
 use App\Support\AuditoriaSolicitudFieldsBuilder;
 use App\Support\AuditoriaSolicitudResolver;
 use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class AuditoriaController extends ApplicationController
 {
@@ -46,12 +48,19 @@ class AuditoriaController extends ApplicationController
 
         $condi = "mercurio10.fecsis>='{$fecini}' and mercurio10.fecsis<='{$fecfin}'";
         $consultasOldServices = new GeneralService;
-        $mercurio = $consultasOldServices->consultaTipopc($tipopc, 'all', '', '', $condi);
+        $mercurio = $consultasOldServices->consultaTipopc($tipopc, 'auditoria', '', '', $condi);
 
         $hasExtra = in_array($tipopc, ['8', '5']);
         $result = [];
+        $datos = $mercurio['datos'] ?? [];
 
-        foreach ($mercurio['datos'] ?? [] as $mmercurio) {
+        if ($datos instanceof Paginator) {
+            $datos = $datos->items();
+        } elseif ($datos instanceof Collection) {
+            $datos = $datos->all();
+        }
+
+        foreach ($datos as $mmercurio) {
             $dias_vencidos = CalculatorDias::calcular($tipopc, $mmercurio->getId());
             $result[] = [
                 'id' => $mmercurio->getId(),
@@ -69,9 +78,18 @@ class AuditoriaController extends ApplicationController
             ];
         }
 
+        $columns = ['Documento', 'Nombre', 'Responsable', 'Fecha', 'Fecsol', 'Fecapr', 'Radicado', 'Días'];
+        if ($hasExtra) {
+            $columns[] = 'Extra';
+        }
+        $columns[] = 'Estado';
+        $columns[] = 'Acciones';
+
         return response()->json([
             'data' => $result,
             'hasExtra' => $hasExtra,
+            'total' => count($result),
+            'columns' => $columns,
         ]);
     }
 
@@ -196,7 +214,7 @@ class AuditoriaController extends ApplicationController
 
         $condi = "mercurio10.fecsis>='{$fecini}' and mercurio10.fecsis<='{$fecfin}'";
         $consultasOldServices = new GeneralService;
-        $mercurio = $consultasOldServices->consultaTipopc($tipopc, 'all', '', '', $condi);
+        $mercurio = $consultasOldServices->consultaTipopc($tipopc, 'auditoria', '', '', $condi);
 
         $hasExtra = in_array($tipopc, ['8', '5']);
         $headers = ['Documento', 'Nombre', 'Responsable', 'Fecha', 'Fecsol', 'Fecapr', 'Radicado', 'Dias'];
@@ -206,7 +224,15 @@ class AuditoriaController extends ApplicationController
         $headers[] = 'Estado';
 
         $rows = [];
-        foreach ($mercurio['datos'] ?? [] as $mmercurio) {
+        $datos = $mercurio['datos'] ?? [];
+
+        if ($datos instanceof Paginator) {
+            $datos = $datos->items();
+        } elseif ($datos instanceof Collection) {
+            $datos = $datos->all();
+        }
+
+        foreach ($datos as $mmercurio) {
             $dias_vencidos = CalculatorDias::calcular($tipopc, $mmercurio->getId());
             $fila = [
                 $this->getDocumento($mmercurio, $tipopc),

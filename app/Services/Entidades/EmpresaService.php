@@ -582,6 +582,7 @@ class EmpresaService
         $numero = $request->getParam('numero');
 
         switch ($tipo_consulta) {
+            case 'auditoria':
             case 'all':
                 $response['datos'] = Mercurio30::query()
                     ->join('mercurio10', function ($join) use ($tipopc) {

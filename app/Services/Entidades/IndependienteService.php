@@ -535,6 +535,7 @@ class IndependienteService
         $numero = $request->getParam('numero');
 
         switch ($tipo_consulta) {
+            case 'auditoria':
             case 'all':
                 $response['datos'] = Mercurio41::query()
                     ->join('mercurio10', function ($join) use ($tipopc) {

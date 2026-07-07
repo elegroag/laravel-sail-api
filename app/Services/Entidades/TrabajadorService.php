@@ -16,8 +16,8 @@ use App\Models\Mercurio34;
 use App\Models\Mercurio37;
 use App\Models\Mercurio45;
 use App\Models\Mercurio47;
-use App\Services\Srequest;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Srequest;
 use App\Services\Utils\SenderValidationCaja;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -25,8 +25,11 @@ use Illuminate\Support\Facades\DB;
 class TrabajadorService
 {
     private string $tipopc = '1';
+
     private DbBase $db;
+
     private ?array $user;
+
     private ?string $tipo;
 
     public function __construct()
@@ -39,7 +42,6 @@ class TrabajadorService
     /**
      * findAllByEstado function
      *
-     * @param  string  $estado
      * @return array
      */
     public function findAllByEstado(?string $estado = null)
@@ -51,7 +53,7 @@ class TrabajadorService
             return [];
         }
 
-        if (!$estado) {
+        if (! $estado) {
             $conditions = "and m31.estado NOT IN('I') ";
         } else {
             $conditions = "and m31.estado='{$estado}' ";
@@ -76,6 +78,7 @@ class TrabajadorService
             ORDER BY m31.fecsol ASC";
 
         $results = DB::select($sql);
+
         return json_decode(json_encode($results), true);
     }
 
@@ -83,18 +86,21 @@ class TrabajadorService
      * buscarEmpresaSubsidio function
      * buscar empresa en subsidio sin importar el estado
      *
-     * @param string $nit
+     * @param  string  $nit
      * @return void
      */
     public function buscarEmpresaSubsidio($nit)
     {
-        $empresaService = new EmpresaService();
+        $empresaService = new EmpresaService;
+
         return $empresaService->buscarEmpresaSubsidio($nit);
     }
 
     public function archivosRequeridos(?Mercurio31 $solicitud)
     {
-        if (!$solicitud) return false;
+        if (! $solicitud) {
+            return false;
+        }
         $archivos = [];
         $mercurio10 = Mercurio10::where('numero', $solicitud->getId())
             ->where('tipopc', $this->tipopc)
@@ -147,7 +153,9 @@ class TrabajadorService
 
     public function dataArchivosRequeridos(?Mercurio31 $solicitud)
     {
-        if (!$solicitud) return false;
+        if (! $solicitud) {
+            return false;
+        }
         $archivos = [];
 
         $mercurio10 = Mercurio10::where('numero', $solicitud->getId())
@@ -212,8 +220,9 @@ class TrabajadorService
             $trabajador->fill($data);
             $validator = $trabajador->isValid();
             if ($validator->fails()) {
-                throw new DebugException("No cumple con los datos necesarios proceso de validación de datos.", 501, $validator->errors());
+                throw new DebugException('No cumple con los datos necesarios proceso de validación de datos.', 501, $validator->errors());
             }
+
             return $trabajador->save();
         } else {
             return false;
@@ -252,13 +261,14 @@ class TrabajadorService
         $trabajador->regenerateUuid();
         $validator = $trabajador->isValid();
         if ($validator->fails()) {
-            throw new DebugException("No cumple con los datos necesarios proceso de validación de datos.", 501, $validator->errors());
+            throw new DebugException('No cumple con los datos necesarios proceso de validación de datos.', 501, $validator->errors());
         }
         $trabajador->save();
 
         $id = $trabajador->getId();
         Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
         Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
+
         return $trabajador;
     }
 
@@ -266,7 +276,6 @@ class TrabajadorService
      * findById function
      *
      * @param  int  $id
-     * @return Mercurio31
      */
     public function findById($id): Mercurio31
     {
@@ -276,7 +285,6 @@ class TrabajadorService
     /**
      * enviarCaja function
      *
-     * @param  SenderValidationCaja  $senderValidationCaja
      * @param  int  $id
      * @param  string  $usuario
      * @return void
@@ -333,12 +341,12 @@ class TrabajadorService
      *
      * @author elegroag <elegroag@ibero.edu.co>
      *
-     * @param string $cedtra
+     * @param  string  $cedtra
      * @return array|bool
      */
     public function buscarTrabajadorSubsidio($cedtra)
     {
-        $ps = new ApiSubsidio();
+        $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'ComfacaEmpresas',
@@ -353,6 +361,7 @@ class TrabajadorService
         if ($isSuccess) {
             return $out['data'] ?? false;
         }
+
         return false;
     }
 
@@ -379,7 +388,7 @@ class TrabajadorService
 
     public function paramsApi()
     {
-        $ps = new ApiSubsidio();
+        $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -398,8 +407,8 @@ class TrabajadorService
      *
      * @author elegroag <elegroag@ibero.edu.co>
      *
-     * @param string $documento
-     * @param string $coddoc
+     * @param  string  $documento
+     * @param  string  $coddoc
      * @return array|bool
      */
     public function findRequestByDocumentoCoddoc($documento, $coddoc)
@@ -415,7 +424,7 @@ class TrabajadorService
         )
             ->where([
                 ['documento', $documento],
-                ['coddoc', $coddoc]
+                ['coddoc', $coddoc],
             ])
             ->get()
             ->toArray();
@@ -425,7 +434,7 @@ class TrabajadorService
 
     public function findApiTrabajadoresByNit(string $nit)
     {
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
@@ -436,7 +445,7 @@ class TrabajadorService
             ]
         );
 
-        //dd($procesadorComando->toArray());
+        // dd($procesadorComando->toArray());
         if ($procesadorComando->isJson() == false) {
             throw new DebugException('Error resultado de api', 501, base64_encode($procesadorComando->getLineaComando()));
         }
@@ -542,6 +551,27 @@ class TrabajadorService
         $numero = $request->getParam('numero');
 
         switch ($tipo_consulta) {
+            case 'auditoria':
+                $response['datos'] = Mercurio31::query()
+                    ->join('mercurio10', function ($join) use ($tipopc) {
+                        $join->on('mercurio31.id', '=', 'mercurio10.numero')
+                            ->where('mercurio10.tipopc', '=', $tipopc);
+                    })
+                    ->select([
+                        'mercurio31.*',
+                        'mercurio10.estado as estado',
+                        'mercurio10.fecsis as fecest',
+                    ])
+                    ->when($condi_extra, function ($q) use ($condi_extra) {
+                        if (is_array($condi_extra)) {
+                            $q->where($condi_extra);
+                        }
+                        if (is_string($condi_extra) && strlen($condi_extra) > 0) {
+                            $q->whereRaw($condi_extra);
+                        }
+                    })
+                    ->get();
+                break;
             case 'all':
                 $page = (int) $request->getParam('page', 1);
                 $perPage = 50;
@@ -556,12 +586,16 @@ class TrabajadorService
                         'mercurio10.fecsis as fecest',
                     ])
                     ->when($condi_extra, function ($q) use ($condi_extra) {
-                        if (is_array($condi_extra)) $q->where($condi_extra);
-                        if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
+                        if (is_array($condi_extra)) {
+                            $q->where($condi_extra);
+                        }
+                        if (is_string($condi_extra) && strlen($condi_extra) > 0) {
+                            $q->whereRaw($condi_extra);
+                        }
                     })
                     ->paginate($perPage, ['*'], 'page', $page);
-                $response["datos"] = $paginator->items();
-                $response["paginate"] = [
+                $response['datos'] = $paginator->items();
+                $response['paginate'] = [
                     'current_page' => $paginator->currentPage(),
                     'per_page' => $paginator->perPage(),
                     'total' => $paginator->total(),
@@ -569,30 +603,35 @@ class TrabajadorService
                 ];
                 break;
             case 'alluser':
-                $response["datos"] = Mercurio31::where("usuario", $usuario)->where("estado", 'P')->get();
+                $response['datos'] = Mercurio31::where('usuario', $usuario)->where('estado', 'P')->get();
                 break;
             case 'count':
-                $res = Mercurio31::where("mercurio31.usuario", $usuario)
+                $res = Mercurio31::where('mercurio31.usuario', $usuario)
                     ->when($condi_extra, function ($q) use ($condi_extra) {
-                        if (is_array($condi_extra)) $q->where($condi_extra);
-                        if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
+                        if (is_array($condi_extra)) {
+                            $q->where($condi_extra);
+                        }
+                        if (is_string($condi_extra) && strlen($condi_extra) > 0) {
+                            $q->whereRaw($condi_extra);
+                        }
                     })
                     ->get();
 
-                $response["all"] = $res;
-                $response["count"] = $res->count();
+                $response['all'] = $res;
+                $response['count'] = $res->count();
                 break;
             case 'one':
-                $response["datos"] = Mercurio31::where("id", $numero)->where("estado", 'P')->first();
+                $response['datos'] = Mercurio31::where('id', $numero)->where('estado', 'P')->first();
                 break;
             case 'info':
-                $mercurio = Mercurio31::where("id", $numero)->first();
-                $response["consulta"] = $this->buscarTrabajadorSubsidio($mercurio->getCedtra());
+                $mercurio = Mercurio31::where('id', $numero)->first();
+                $response['consulta'] = $this->buscarTrabajadorSubsidio($mercurio->getCedtra());
                 break;
             default:
                 $response = false;
                 break;
         }
+
         return $response;
     }
 }

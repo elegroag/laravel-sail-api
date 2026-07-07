@@ -34,6 +34,8 @@
         "btnShowModal" => 'auditDetailShow',
         "idModal" => 'auditDetailModal'])
 
+    <script src="{{ asset('assets/datatables.net/js/dataTables.min.js') }}"></script>
+    <script src="{{ asset('assets/datatables.net.bs5/js/dataTables.bootstrap5.min.js') }}"></script>
     <script src="{{ asset('cajas/build/Auditoria.js') }}"></script>
 @endpush
 

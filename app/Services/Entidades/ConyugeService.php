@@ -425,6 +425,27 @@ class ConyugeService
         $numero = $request->getParam('numero');
 
         switch ($tipo_consulta) {
+            case 'auditoria':
+                $response['datos'] = Mercurio32::query()
+                    ->join('mercurio10', function ($join) use ($tipopc) {
+                        $join->on('mercurio32.id', '=', 'mercurio10.numero')
+                            ->where('mercurio10.tipopc', '=', $tipopc);
+                    })
+                    ->select([
+                        'mercurio32.*',
+                        'mercurio10.estado as estado',
+                        'mercurio10.fecsis as fecest',
+                    ])
+                    ->when($condi_extra, function ($q) use ($condi_extra) {
+                        if (is_array($condi_extra)) {
+                            $q->where($condi_extra);
+                        }
+                        if (is_string($condi_extra) && strlen($condi_extra) > 0) {
+                            $q->whereRaw($condi_extra);
+                        }
+                    })
+                    ->get();
+                break;
             case 'all':
                 $response['datos'] = Mercurio32::query()
                     ->join('mercurio10', function ($join) use ($tipopc) {

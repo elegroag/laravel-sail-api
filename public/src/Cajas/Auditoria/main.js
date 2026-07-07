@@ -1,7 +1,6 @@
 import flatpickr from 'flatpickr';
 import { Spanish } from 'flatpickr/dist/l10n/es';
 import { $App } from '@/App';
-import { Messages } from '@/Utils';
 
 window.App = $App;
 let validator;
@@ -10,25 +9,136 @@ const validatorInit = () => {
     validator = $('#form').validate({
         rules: {
             tipopc: {
-                required: true
+                required: true,
             },
             fecini: {
-                required: true
+                required: true,
             },
             fecfin: {
-                required: true
+                required: true,
             },
         },
     });
 };
 
-const buildAuditoriaTable = (data, hasExtra) => {
-    let headers = ['Documento', 'Nombre', 'Responsable', 'Fecha', 'Fecsol', 'Fecapr', 'Radicado', 'Días'];
+const getAuditoriaHeaders = (hasExtra) => {
+    const headers = ['Documento', 'Nombre', 'Responsable', 'Fecha', 'Fecsol', 'Fecapr', 'Radicado', 'Días'];
     if (hasExtra) {
         headers.push('Extra');
     }
     headers.push('Estado');
     headers.push('Acciones');
+
+    return headers;
+};
+
+const destroyAuditoriaDataTable = () => {
+    const $tbl = $('#tabla-auditoria');
+    if ($.fn.DataTable && $tbl.length && $.fn.DataTable.isDataTable($tbl)) {
+        $tbl.DataTable().destroy();
+    }
+};
+
+const initAuditoriaDataTable = () => {
+    const $tbl = $('#tabla-auditoria');
+    if ($tbl.length === 0 || !$.fn.DataTable) {
+        return;
+    }
+
+    if ($.fn.DataTable.isDataTable($tbl)) {
+        $tbl.DataTable().destroy();
+    }
+
+    const actionsColumnIndex = $tbl.find('thead th').length - 1;
+
+    $tbl.DataTable({
+        responsive: true,
+        autoWidth: false,
+        searching: true,
+        paging: true,
+        lengthChange: true,
+        pageLength: 25,
+        ordering: true,
+        order: [],
+        columnDefs: [
+            {
+                targets: actionsColumnIndex,
+                orderable: false,
+                searchable: false,
+            },
+        ],
+        language: {
+            url: typeof window.DATATABLES_LANG_URL !== 'undefined' ? window.DATATABLES_LANG_URL : undefined,
+            decimal: ',',
+            thousands: '.',
+            processing: 'Procesando...',
+            search: 'Buscar:',
+            lengthMenu: 'Mostrar _MENU_ registros',
+            info: 'Mostrando _START_ a _END_ de _TOTAL_ registros',
+            infoEmpty: 'Mostrando 0 a 0 de 0 registros',
+            infoFiltered: '(filtrado de _MAX_ registros en total)',
+            loadingRecords: 'Cargando...',
+            zeroRecords: 'No se encontraron resultados',
+            emptyTable: 'No hay datos disponibles',
+            paginate: {
+                first: '<<',
+                previous: '<',
+                next: '>',
+                last: '>>',
+            },
+        },
+    });
+};
+
+const parseFecha = (valor) => {
+    const [anio, mes, dia] = String(valor).split('-').map(Number);
+    return new Date(anio, mes - 1, dia);
+};
+
+const rangoSuperaTresMeses = (fecini, fecfin) => {
+    const inicio = parseFecha(fecini);
+    const fin = parseFecha(fecfin);
+
+    if (Number.isNaN(inicio.getTime()) || Number.isNaN(fin.getTime())) {
+        return false;
+    }
+
+    const limite = new Date(inicio);
+    limite.setMonth(limite.getMonth() + 3);
+
+    return fin > limite;
+};
+
+const confirmarRangoAmplio = () => Swal.fire({
+    title: 'Rango de fechas amplio',
+    html: 'El rango seleccionado supera <strong>3 meses</strong>. Por el volumen de datos, la consulta puede tardar más de lo esperado.<br><br>¿Desea continuar?',
+    type: 'warning',
+    showCancelButton: true,
+    confirmButtonClass: 'btn btn-success btn-fill',
+    cancelButtonClass: 'btn btn-danger btn-fill',
+    confirmButtonText: 'Sí, continuar',
+    cancelButtonText: 'Cancelar',
+    allowOutsideClick: false,
+}).then((result) => result.value === true);
+
+const validarRangoAntesDeContinuar = (onConfirm) => {
+    const fecini = $('#fecini').val();
+    const fecfin = $('#fecfin').val();
+
+    if (!rangoSuperaTresMeses(fecini, fecfin)) {
+        onConfirm();
+        return;
+    }
+
+    confirmarRangoAmplio().then((confirmed) => {
+        if (confirmed) {
+            onConfirm();
+        }
+    });
+};
+
+const buildAuditoriaTable = (data, hasExtra) => {
+    const headers = getAuditoriaHeaders(hasExtra);
 
     let thead = '<thead><tr>';
     for (const h of headers) {
@@ -38,8 +148,8 @@ const buildAuditoriaTable = (data, hasExtra) => {
 
     const tipopc = $('#tipopc').val();
 
-    let rows = data.map(item => {
-        let cells = [
+    const rows = data.map((item) => {
+        const cells = [
             item.documento,
             item.nombre,
             item.responsable,
@@ -49,9 +159,11 @@ const buildAuditoriaTable = (data, hasExtra) => {
             item.radicado,
             item.dias_vencidos,
         ];
-        if (hasExtra && item.extra) {
-            cells.push(item.extra);
+
+        if (hasExtra) {
+            cells.push(item.extra ?? '');
         }
+
         cells.push(item.estado);
         cells.push(`
             <button type="button"
@@ -62,7 +174,7 @@ const buildAuditoriaTable = (data, hasExtra) => {
                 <i class="fa fa-eye"></i> Ver detalle
             </button>`);
 
-        return '<tr>' + cells.map(c => `<td>${c ?? ''}</td>`).join('') + '</tr>';
+        return `<tr>${cells.map((c) => `<td>${c ?? ''}</td>`).join('')}</tr>`;
     }).join('');
 
     const csrfToken = document.querySelector("[name='csrf-token']")
@@ -90,11 +202,41 @@ const buildAuditoriaTable = (data, hasExtra) => {
 
     return `<div class="table-responsive mt-2">
 ${toolbar}
-<table class="table table-striped table-bordered datatable-auditoria" id="tabla-auditoria">
+<table class="table table-striped table-bordered datatable-auditoria w-100" id="tabla-auditoria">
 ${thead}
 <tbody>${rows}</tbody>
 </table>
 </div>`;
+};
+
+const ejecutarConsultaAuditoria = () => {
+    destroyAuditoriaDataTable();
+
+    window.App.trigger('ajax', {
+        url: `${window.ServerController}/consulta`,
+        data: {
+            tipopc: $('#tipopc').val(),
+            fecini: $('#fecini').val(),
+            fecfin: $('#fecfin').val(),
+        },
+        callback: (response) => {
+            if (response && Array.isArray(response.data)) {
+                if (response.data.length === 0) {
+                    $('#consulta').html('<div class="alert alert-info mt-2">No se encontraron resultados</div>');
+                    return;
+                }
+
+                $('#consulta').html(buildAuditoriaTable(response.data, response.hasExtra === true));
+                initAuditoriaDataTable();
+                return;
+            }
+
+            $('#consulta').html('<div class="alert alert-info mt-2">No se encontraron resultados</div>');
+        },
+        error: (jqXHR, textStatus) => {
+            alert(`Request failed: ${textStatus}`);
+        },
+    });
 };
 
 const consulta_auditoria = () => {
@@ -102,24 +244,8 @@ const consulta_auditoria = () => {
     if (!$('#form').valid()) {
         return;
     }
-    window.App.trigger('ajax', {
-        url: window.ServerController + '/consulta',
-        data: {
-            tipopc: $('#tipopc').val(),
-            fecini: $('#fecini').val(),
-            fecfin: $('#fecfin').val(),
-        },
-        callback: (response) => {
-            if (response && response.data) {
-                $('#consulta').html(buildAuditoriaTable(response.data, response.hasExtra));
-            } else {
-                $('#consulta').html('<div class="alert alert-info">No se encontraron resultados</div>');
-            }
-        },
-        error: (jqXHR, textStatus) => {
-            alert('Request failed: ' + textStatus);
-        }
-    });
+
+    validarRangoAntesDeContinuar(ejecutarConsultaAuditoria);
 };
 
 const reporte_auditoria = () => {
@@ -127,7 +253,10 @@ const reporte_auditoria = () => {
     if (!$('#form').valid()) {
         return;
     }
-    $('#form').submit();
+
+    validarRangoAntesDeContinuar(() => {
+        $('#form').submit();
+    });
 };
 
 $(() => {
@@ -141,7 +270,6 @@ $(() => {
     });
 
     window.App.initialize();
-    const modalCapture = new bootstrap.Modal(document.getElementById('captureModal'));
     const auditDetailModal = new bootstrap.Modal(document.getElementById('auditDetailModal'));
 
     $(document).on('click', "[data-toggle='consulta']", (e) => {
@@ -182,5 +310,4 @@ $(() => {
             },
         });
     });
-
 });
