@@ -10,10 +10,11 @@ use Illuminate\Support\Facades\DB;
 
 class CajasAuthenticated
 {
+    protected ?string $controller = null;
 
-    protected string $controller;
-    protected string $actionMethod;
-    protected ?string $application;
+    protected ?string $actionMethod = null;
+
+    protected ?string $application = null;
 
     /**
      * Manejar una solicitud entrante.
@@ -31,26 +32,27 @@ class CajasAuthenticated
             }
 
             set_flashdata('error', [
-                'msj' => 'No autenticado para acceder al modulo. ' . __LINE__ . ' ' . $this->controller,
+                'msj' => 'No autenticado para acceder al módulo.',
                 'code' => 401,
             ]);
 
-            return redirect()->route('cajas.salir');
+            return redirect()->route('cajas.login');
         }
 
         if ($this->autorization($request) === false) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No autorizado para acceder al modulo. ' . $this->controller,
+                    'message' => 'No autorizado para acceder al modulo. '.$this->controller,
                 ], 401);
             }
 
-            if (!($this->controller == 'PrincipalController' && $this->actionMethod == 'index')) {
+            if (! ($this->controller == 'PrincipalController' && $this->actionMethod == 'index')) {
                 set_flashdata('error', [
-                    'msj' => 'No autorizado para acceder al modulo. ' . __LINE__ . ' ' . $this->controller,
+                    'msj' => 'No autorizado para acceder al modulo. '.__LINE__.' '.$this->controller,
                     'code' => 401,
                 ]);
+
                 return redirect()->route('cajas.principal');
             }
         }
@@ -59,15 +61,16 @@ class CajasAuthenticated
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No autorizado para acceder a la acción. ' . $this->controller . ' ' . $this->actionMethod,
+                    'message' => 'No autorizado para acceder a la acción. '.$this->controller.' '.$this->actionMethod,
                 ], 401);
             }
-            if (!($this->controller == 'PrincipalController' && $this->actionMethod == 'index')) {
+            if (! ($this->controller == 'PrincipalController' && $this->actionMethod == 'index')) {
 
                 set_flashdata('error', [
-                    'msj' => 'No autorizado para acceder a la acción. ' . __LINE__ . ' ' . $this->controller . ' ' . $this->actionMethod,
+                    'msj' => 'No autorizado para acceder a la acción. '.__LINE__.' '.$this->controller.' '.$this->actionMethod,
                     'code' => 401,
                 ]);
+
                 return redirect()->route('cajas.principal');
             }
         }
@@ -108,6 +111,7 @@ class CajasAuthenticated
                 'msj' => 'No autenticado.',
                 'code' => 401,
             ]);
+
             return redirect()->route('cajas.login');
         }
 
@@ -138,11 +142,12 @@ class CajasAuthenticated
             ->where('menu_items.controller', $this->controller)
             ->where('menu_permissions.tipfun', $tipfun);
 
-        if (!$hasPermission->exists()) {
+        if (! $hasPermission->exists()) {
             return false; // No autorizado
         }
         $permisos = $hasPermission->first();
         $request->attributes->set('opciones', json_decode($permisos->opciones ?? '{}', true));
+
         return true; // Autorizado
     }
 
@@ -150,12 +155,13 @@ class CajasAuthenticated
     {
         $opciones = $request->attributes->get('opciones');
         if (is_array($opciones)) {
-            if (key_exists(strtolower($this->actionMethod), $opciones)) {
+            if (array_key_exists(strtolower($this->actionMethod), $opciones)) {
                 if ($opciones[strtolower($this->actionMethod)] == false) {
                     return false;
                 }
             }
         }
+
         return true;
     }
 }
