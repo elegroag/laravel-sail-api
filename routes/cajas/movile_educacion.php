@@ -8,10 +8,10 @@ Route::middleware(['cajas.auth'])->group(function () {
     Route::prefix('/cajas/mercurio73')->group(function () {
         // Rutas para Mercurio73Controller - Promociones Educación
         Route::get('/index', [Mercurio73Controller::class, 'index']);
-        Route::get('/galeria', [Mercurio73Controller::class, 'galeria']);
+        Route::post('/galeria', [Mercurio73Controller::class, 'galeria']);
         Route::post('/guardar', [Mercurio73Controller::class, 'guardar']);
         Route::post('/arriba', [Mercurio73Controller::class, 'arriba']);
         Route::post('/abajo', [Mercurio73Controller::class, 'abajo']);
-        Route::delete('/borrar', [Mercurio73Controller::class, 'borrar']);
+        Route::post('/borrar', [Mercurio73Controller::class, 'borrar']);
     });
 });

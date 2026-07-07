@@ -257,7 +257,8 @@ const validePk = (e) => {
 const EventsPagination = () => {
     aplicarFiltro();
 
-    const modalFilter = new bootstrap.Modal(document.getElementById('filtrar-modal'));
+    const filtrarModalEl = document.getElementById('filtrar-modal');
+    const modalFilter = filtrarModalEl ? new bootstrap.Modal(filtrarModalEl) : null;
 
     //Events DOM Filter
     $(document).on('click', "[data-toggle='reporte']", (e) => {
@@ -278,7 +279,9 @@ const EventsPagination = () => {
     //Events DOM Filtros
     $(document).on('click', "[data-toggle='header-filtrar']", (e) => {
         e.preventDefault();
-        modalFilter.show();
+        if (modalFilter) {
+            modalFilter.show();
+        }
     });
     $(document).on('click', "[data-toggle='filter-aplicate']", aplicarFiltro);
     $(document).on('click', "[data-toggle='filter-add']", addFiltro);

@@ -7,9 +7,8 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio73;
-use App\Services\Utils\UploadFile;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 
 class Mercurio73Controller extends ApplicationController
 {
@@ -35,46 +34,68 @@ class Mercurio73Controller extends ApplicationController
 
     public function galeria()
     {
-        $instancePath = config('app.url');
-        $mercurio01 = Mercurio01::first();
-        $response = Mercurio73::select('numedu', 'archivo')
-            ->addSelect(
-                DB::raw("concat('{$instancePath}{$mercurio01->getPath()}galeria/', archivo) as archivo")
-            )
-            ->orderBy('orden', 'asc')
-            ->get();
-        $this->renderObject($response, false);
+        try {
+            $mercurio01 = Mercurio01::first();
+            if (! $mercurio01) {
+                throw new DebugException('Configuración básica no encontrada.');
+            }
+
+            $path = url($mercurio01->getPath().'galeria');
+            $galeria = Mercurio73::where('estado', 'A')->orderBy('orden', 'ASC')->get();
+
+            $data = $galeria->map(function ($item) use ($path) {
+                return [
+                    'numedu' => $item->numedu,
+                    'archivo' => $path.'/'.$item->archivo,
+                    'url' => $item->url,
+                ];
+            })->values();
+
+            $response = parent::successFunc('Consulta exitosa');
+            $response['data'] = $data;
+
+            return $this->renderObject($response);
+        } catch (DebugException $e) {
+            return $this->renderObject(parent::errorFunc($e->getMessage()));
+        }
     }
 
     public function guardar(Request $request)
     {
         try {
-            $numedu = Mercurio73::max('numedu') + 1;
-            $orden = Mercurio73::max('orden') + 1;
+            $this->setResponse('ajax');
+            $this->db->begin();
+
+            $numedu = (Mercurio73::max('numedu') ?? 0) + 1;
+            $orden = (Mercurio73::max('orden') ?? 0) + 1;
             $url = $request->input('url');
 
-            $this->db->begin();
             $mercurio73 = new Mercurio73;
-
             $mercurio73->setNumedu($numedu);
             $mercurio73->setOrden($orden);
             $mercurio73->setUrl($url);
             $mercurio73->setEstado('A');
 
             $mercurio01 = Mercurio01::first();
+            if (! $mercurio01) {
+                throw new DebugException('Configuración básica no encontrada.');
+            }
 
-            if (isset($_FILES['archivo']['name']) && $_FILES['archivo']['name'] != '') {
-                $name = 'promo_educacion' . $numedu . '.' . substr($_FILES['archivo']['name'], -3);
-                $_FILES['archivo']['name'] = $name;
-
-                $uploadFile = new UploadFile;
-                $uploadFile->upload('archivo', "{$mercurio01->getPath()}galeria");
-                $mercurio73->setArchivo($_FILES['archivo']['name']);
+            if ($request->hasFile('archivo') && $request->file('archivo')->isValid()) {
+                $file = $request->file('archivo');
+                $extension = $file->getClientOriginalExtension();
+                $fileName = 'promo_educacion_'.$numedu.'.'.$extension;
+                $destinationPath = public_path($mercurio01->getPath().'galeria');
+                $file->move($destinationPath, $fileName);
+                $mercurio73->setArchivo($fileName);
+            } else {
+                throw new DebugException('No se ha subido ningún archivo o el archivo no es válido.');
             }
 
             if (! $mercurio73->save()) {
                 parent::setLogger($mercurio73->getMessages());
                 $this->db->rollback();
+                throw new DebugException('Error al guardar la promoción.');
             }
 
             $this->db->commit();
@@ -82,7 +103,8 @@ class Mercurio73Controller extends ApplicationController
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $response = parent::errorFunc('No se puede guardar el Registro' . $e->getMessage());
+            $this->db->rollback();
+            $response = parent::errorFunc('No se puede guardar el Registro: '.$e->getMessage());
 
             return $this->renderObject($response, false);
         }
@@ -93,25 +115,34 @@ class Mercurio73Controller extends ApplicationController
         try {
             $this->setResponse('ajax');
             $numpro = $request->input('numpro');
-            $objetivo = Mercurio73::where("numedu", $numpro)->first();
+
+            $this->db->begin();
+            $objetivo = Mercurio73::where('numedu', $numpro)->first();
+            if (! $objetivo) {
+                throw new DebugException('Registro no encontrado.');
+            }
+
             $orden_obj = $objetivo->getOrden();
             $minimo = Mercurio73::min('orden');
 
             if ($orden_obj != $minimo) {
-                $superior = Mercurio73::whereRaw("orden < $orden_obj")->orderBy('orden', 'desc')->first();
-                $orden_sup = $superior->getOrden();
-                $objetivo->orden = $orden_sup;
-                $objetivo->update();
-                $superior->orden = $orden_obj;
-                $superior->update();
-                $response = 'Ordenado Con Exito';
-            } else {
-                $response = 'No se puede Ordenar el Registro';
+                $superior = Mercurio73::where('orden', '<', $orden_obj)->orderBy('orden', 'desc')->first();
+                if ($superior) {
+                    $orden_sup = $superior->getOrden();
+                    $objetivo->orden = $orden_sup;
+                    $superior->orden = $orden_obj;
+                    $objetivo->save();
+                    $superior->save();
+                }
             }
+            $this->db->commit();
+            $response = parent::successFunc('Ordenado Con Exito');
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $response = 'No se puede Ordenar el Registro';
+            $this->db->rollback();
+            $response = parent::errorFunc('No se puede Ordenar el Registro: '.$e->getMessage());
+
             return $this->renderObject($response, false);
         }
     }
@@ -121,27 +152,33 @@ class Mercurio73Controller extends ApplicationController
         try {
             $this->setResponse('ajax');
             $numpro = $request->input('numpro');
-            $objetivo = Mercurio73::where("numedu", $numpro)->first();
+
+            $this->db->begin();
+            $objetivo = Mercurio73::where('numedu', $numpro)->first();
+            if (! $objetivo) {
+                throw new DebugException('Registro no encontrado.');
+            }
+
             $orden_obj = $objetivo->getOrden();
             $maximo = Mercurio73::max('orden');
 
             if ($orden_obj != $maximo) {
-                $inferior = Mercurio73::whereRaw("orden > $orden_obj")->orderBy('orden', 'asc')->first();
-                $orden_inf = $inferior->getOrden();
-
-                $objetivo->orden = $orden_inf;
-                $objetivo->update();
-                $inferior->orden = $orden_obj;
-                $inferior->update();
-
-                $response = parent::successFunc('Ordenado Con Exito');
-            } else {
-                $response = parent::successFunc('No se puede Ordenar el Registro');
+                $inferior = Mercurio73::where('orden', '>', $orden_obj)->orderBy('orden', 'asc')->first();
+                if ($inferior) {
+                    $orden_inf = $inferior->getOrden();
+                    $objetivo->orden = $orden_inf;
+                    $inferior->orden = $orden_obj;
+                    $objetivo->save();
+                    $inferior->save();
+                }
             }
+            $this->db->commit();
+            $response = parent::successFunc('Ordenado Con Exito');
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $response = parent::errorFunc('No se puede Ordenar el Registro');
+            $this->db->rollback();
+            $response = parent::errorFunc('No se puede Ordenar el Registro: '.$e->getMessage());
 
             return $this->renderObject($response, false);
         }
@@ -152,20 +189,33 @@ class Mercurio73Controller extends ApplicationController
         try {
             $this->setResponse('ajax');
             $numpro = $request->input('numpro');
-            $archivo = Mercurio73::where("numedu", $numpro)->first()->getArchivo();
-            $mercurio01 = Mercurio01::first();
-            if (! empty($archivo) && file_exists("{$mercurio01->getPath()}galeria/" . $archivo)) {
-                unlink("{$mercurio01->getPath()}galeria/" . $archivo);
+
+            $this->db->begin();
+            $mercurio73 = Mercurio73::where('numedu', $numpro)->first();
+
+            if ($mercurio73) {
+                $archivo = $mercurio73->getArchivo();
+                $mercurio01 = Mercurio01::first();
+
+                if ($mercurio01 && ! empty($archivo)) {
+                    $filePath = public_path($mercurio01->getPath().'galeria/'.$archivo);
+                    if (File::exists($filePath)) {
+                        File::delete($filePath);
+                    }
+                }
+                $mercurio73->delete();
+            } else {
+                throw new DebugException('El registro a borrar no existe.');
             }
 
-            $response = $this->db->begin();
-            Mercurio73::where("numedu", $numpro)->delete();
             $this->db->commit();
-            $response = 'Inactivado Con Exito';
+            $response = parent::successFunc('Borrado Con Exito');
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $response = 'No se puede Borrar el Registro';
+            $this->db->rollback();
+            $response = parent::errorFunc('No se puede Borrar el Registro: '.$e->getMessage());
+
             return $this->renderObject($response, false);
         }
     }

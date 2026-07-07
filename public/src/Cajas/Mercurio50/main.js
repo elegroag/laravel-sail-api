@@ -1,117 +1,105 @@
 import { $App } from '@/App';
 import { Messages } from '@/Utils';
-import { buscar, EventsPagination, validePk } from '../Glob/Glob';
+import { buscar, EventsPagination } from '../Glob/Glob';
 
 window.App = $App;
 let validator = undefined;
 
+const emptyForm = () => ({
+    codapl: '',
+    webser: '',
+    path: '',
+    urlonl: '',
+    puncom: '',
+});
+
 const validatorInit = () => {
-	validator = $("#form").validate({
-		rules: {
-			codapl: { required: false },
-			webser: { required: false },
-			path: { required: false },
-			urlonl: { required: false },
-			puncom: { required: false }
-		}
-	});
+    validator = $('#form').validate({
+        rules: {
+            codapl: { required: false },
+            webser: { required: false },
+            path: { required: false },
+            urlonl: { required: false },
+            puncom: { required: false },
+        },
+    });
+};
+
+const renderForm = (data = emptyForm()) => {
+    const tpl = _.template(document.getElementById('tmp_form').innerHTML);
+    $('#captureModalbody').html(tpl(data));
+};
+
+const focusField = (selector) => {
+    setTimeout(() => {
+        $(selector).focus().select();
+    }, 300);
 };
 
 $(() => {
-	window.App.initialize();
-	const modalCapture = new bootstrap.Modal(document.getElementById('captureModal'));
-	EventsPagination();
+    window.App.initialize();
+    const modalCapture = new bootstrap.Modal(document.getElementById('captureModal'));
+    EventsPagination();
 
-	const focus_nuevo = () => {
-		$("#codapl").focus().select();
-	}
+    $(document).on('click', "[data-toggle='editar']", (e) => {
+        e.preventDefault();
+        const codapl = $(e.currentTarget).attr('data-cid');
 
-	const focus_editar = () => {
-		$("#webser").focus().select();
-	}
+        window.App.trigger('syncro', {
+            url: window.App.url(window.ServerController + '/editar'),
+            data: { codapl },
+            callback: (response) => {
+                if (!response) {
+                    Messages.display('No fue posible cargar el registro.', 'error');
+                    return;
+                }
 
-	$("#codapl").blur(function() {
-		validePk();
-	});
+                renderForm(response);
+                $.each(response, (key, value) => {
+                    $('#' + key).val(value);
+                });
+                $('#codapl').attr('disabled', true);
+                modalCapture.show();
+                focusField('#webser');
+                validatorInit();
+            },
+        });
+    });
 
-	$("[data-toggle='editar']").on("click", function() {
-		const codapl = $(this).data("cid");
+    $(document).on('click', "[data-toggle='guardar']", (e) => {
+        e.preventDefault();
+        if (!$('#form').valid()) {
+            return;
+        }
 
-		window.App.trigger('ajax', {
-			url: window.ServerController + "/editar",
-			data: {
-				codapl
-			},
-			callback: (response) => {
-				if (response) {
-					modalCapture.show();
-					const tpl = _.template(document.getElementById('tmp_form').innerHTML);
-                    $('#captureModalbody').html(tpl(response));
+        $('#form :input').each(function () {
+            $(this).removeAttr('disabled');
+        });
 
-					$("#form :input").each(function(elem) {
-						$(this).val("");
-						$(this).attr("disabled", false);
-					});
-					$.each(response, function(key, value) {
-						$("#" + key).val(value);
-					});
-					$("#codapl").attr("disabled", true);
-					setTimeout("focus_editar()", 500);
-					validatorInit();
-				} else {
-					Messages.display(response["msg"], "error");
-				}
-			},
-			error: (response) => {
-				Messages.display(response.error, "error");
-			}
-		});
-	});
+        window.App.trigger('syncro', {
+            url: window.App.url(window.ServerController + '/guardar'),
+            data: $('#form').serialize(),
+            callback: (response) => {
+                if (response && response.flag === true) {
+                    buscar();
+                    Messages.display(response.msg, 'success');
+                    modalCapture.hide();
+                } else {
+                    Messages.display(response?.msg || 'No fue posible guardar el registro.', 'error');
+                }
+            },
+        });
+    });
 
-	$('[data-toggle="guardar"]').on('click', function() {
-		if (!$("#form").valid()) {
-			return;
-		}
-		$("#form :input").each(function(elem) {
-			$(this).attr("disabled", false);
-		});
-
-		window.App.trigger('ajax', {
-			url: window.ServerController + "/guardar",
-			data: $("#form").serialize(),
-			callback: (response) => {
-				if (response) {
-					buscar();
-					Messages.display(response["msg"], "success");
-					modalCapture.hide();
-				} else {
-					Messages.display(response["msg"], "error");
-				}
-			},
-			error: (response) => {
-				Messages.display(response.error, "error");
-			}
-		});
-	});
-
-	$(document).on('click', "[data-toggle='header-nuevo']", (e) => {
-		e.preventDefault();
-		modalCapture.show();
-		const tpl = _.template(document.getElementById('tmp_form').innerHTML);
-		$('#captureModalbody').html(tpl({
-			codapl: '',
-			webser: '',
-			path: '',
-			urlonl: '',
-			puncom: ''
-		}));
-
-		$("#form :input").each(function(elem) {
-			$(this).val("");
-			$(this).attr("disabled", false);
-		});
-		setTimeout("focus_nuevo()", 500);
-		validatorInit();
-	});
-
+    $(document).on('click', "[data-toggle='header-nuevo']", (e) => {
+        e.preventDefault();
+        renderForm(emptyForm());
+        $('#form :input').each(function () {
+            $(this).val('');
+            $(this).removeAttr('disabled');
+        });
+        modalCapture.show();
+        focusField('#codapl');
+        validatorInit();
+    });
 });

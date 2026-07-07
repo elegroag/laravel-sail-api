@@ -31,19 +31,21 @@ class Mercurio50Controller extends ApplicationController
 
     public function showTabla($paginate)
     {
-        return view('cajas.mercurio50._tabla', compact('paginate'));
+        return view('cajas.mercurio50._tabla', compact('paginate'))->render();
     }
 
     public function aplicarFiltro(Request $request)
     {
         $consultasOldServices = new GeneralService;
         $this->query = $consultasOldServices->converQuery($request);
+
         return $this->buscar($request);
     }
 
     public function changeCantidadPagina(Request $request)
     {
         $this->cantidad_pagina = $request->input('numero');
+
         return $this->buscar($request);
     }
 
@@ -75,7 +77,7 @@ class Mercurio50Controller extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    public function editar()
+    public function editar(Request $request)
     {
         try {
             $this->setResponse('ajax');
@@ -126,7 +128,7 @@ class Mercurio50Controller extends ApplicationController
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $this->db->rollback();
-            $response = parent::errorFunc('No se puede guardar/editar el Registro: ' . $e->getMessage());
+            $response = parent::errorFunc('No se puede guardar/editar el Registro: '.$e->getMessage());
 
             return $this->renderObject($response, false);
         }
