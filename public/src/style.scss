@@ -83,3 +83,128 @@
         p:last-child { margin-bottom: 0; }
     }
 }
+
+.solicitudes-list {
+    width: 100%;
+}
+
+.solicitudes-toolbar {
+    margin-bottom: 1rem;
+}
+
+.solicitudes-search {
+    max-width: 360px;
+}
+
+.solicitudes-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@media (min-width: 576px) {
+    .solicitudes-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 768px) {
+    .solicitudes-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 992px) {
+    .solicitudes-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1200px) {
+    .solicitudes-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+}
+
+.solicitud-card {
+    background: var(--bs-body-bg, #fff);
+    border: 1px solid var(--bs-border-color, rgba(0, 0, 0, 0.12));
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-height: 100%;
+    padding: 0.9rem 1rem;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+
+    &:hover {
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+        transform: translateY(-1px);
+    }
+}
+
+.solicitud-card__header {
+    align-items: center;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: space-between;
+}
+
+.solicitud-card__radicado {
+    color: var(--bs-secondary-color, #6c757d);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.solicitud-card__estado {
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.2;
+    padding: 0.2rem 0.55rem;
+    white-space: nowrap;
+}
+
+.solicitud-card__estado--t { background: #e7f1ff; color: #0d6efd; }
+.solicitud-card__estado--d { background: #cff4fc; color: #055160; }
+.solicitud-card__estado--a { background: #d1e7dd; color: #0f5132; }
+.solicitud-card__estado--p { background: #fff3cd; color: #664d03; }
+.solicitud-card__estado--x { background: #e2e3e5; color: #41464b; }
+
+.solicitud-card__titulo {
+    color: var(--bs-emphasis-color, #212529);
+    font-size: 0.98rem;
+    font-weight: 600;
+    line-height: 1.35;
+    margin: 0;
+}
+
+.solicitud-card__subtitulo,
+.solicitud-card__fecha {
+    color: var(--bs-secondary-color, #6c757d);
+    font-size: 0.84rem;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.solicitud-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: auto;
+    padding-top: 0.35rem;
+}
+
+.solicitudes-empty,
+.solicitudes-grid__empty {
+    background: var(--bs-light, #f8f9fa);
+    border: 1px dashed var(--bs-border-color, rgba(0, 0, 0, 0.15));
+    border-radius: 0.75rem;
+    color: var(--bs-secondary-color, #6c757d);
+    font-size: 0.92rem;
+    padding: 1.25rem;
+    text-align: center;
+}

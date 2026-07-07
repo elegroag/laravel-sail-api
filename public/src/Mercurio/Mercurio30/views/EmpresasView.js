@@ -1,4 +1,4 @@
-import { langDataTable } from '@/Core';
+import { SolicitudesGridView } from '@/Componentes/Views/SolicitudesGridView';
 
 class EmpresasView extends Backbone.View {
     constructor(options) {
@@ -7,12 +7,11 @@ class EmpresasView extends Backbone.View {
     }
 
     get className() {
-        return 'table-responsive-md';
+        return 'solicitudes-list';
     }
 
     initialize() {
         this.template = document.getElementById('tmp_table').innerHTML;
-        this.tableView = void 0;
     }
 
     render() {
@@ -24,8 +23,7 @@ class EmpresasView extends Backbone.View {
             url,
             callback: (html) => {
                 this.$el.find('#consulta').html(html);
-                this.__initTable();
-                this.__setStyles();
+                SolicitudesGridView.initSearch(this.$el);
             },
             silent: false,
         });
@@ -59,52 +57,6 @@ class EmpresasView extends Backbone.View {
                     this.trigger('admin:cuenta', { id });
                 }
             },
-        });
-    }
-
-    __setStyles() {
-        $('[type="search"]').addClass('row form-control');
-        $('[type="search"]').css('display', 'inline-block');
-        $('[type="search"]').css('width', '220px');
-    }
-
-    __initTable() {
-        this.tableView = this.$el.find('#tb_empresas').DataTable({
-            paging: true,
-            ordering: true,
-            pageLength: 10,
-            pagingType: 'numbers',
-            info: true,
-            searching: true,
-            columnDefs: [
-                {
-                    targets: 0,
-                    width: '5%',
-                    orderable: false,
-                },
-                {
-                    targets: 1,
-                    width: '5%',
-                },
-                {
-                    targets: 2,
-                    width: '40%',
-                },
-                {
-                    targets: 3,
-                    width: '10%',
-                },
-                {
-                    targets: 4,
-                    width: '10%',
-                },
-                {
-                    targets: 5,
-                    width: '10%',
-                },
-            ],
-            order: [[1, 'desc']],
-            language: langDataTable,
         });
     }
 

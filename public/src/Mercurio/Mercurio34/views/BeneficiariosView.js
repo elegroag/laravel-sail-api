@@ -1,4 +1,4 @@
-import { langDataTable } from '@/Core';
+import { SolicitudesGridView } from '@/Componentes/Views/SolicitudesGridView';
 
 class BeneficiariosView extends Backbone.View {
     constructor(options) {
@@ -7,12 +7,11 @@ class BeneficiariosView extends Backbone.View {
     }
 
     get className() {
-        return 'table-responsive-md';
+        return 'solicitudes-list';
     }
 
     initialize() {
         this.template = document.getElementById('tmp_table').innerHTML;
-        this.tableView = void 0;
     }
 
     render() {
@@ -23,8 +22,7 @@ class BeneficiariosView extends Backbone.View {
             url: this.model.tipo ? 'beneficiario/render_table/' + this.model.tipo : 'beneficiario/render_table',
             callback: (html) => {
                 this.$el.find('#consulta').html(html);
-                this.__initTable();
-                this.__setStyles();
+                SolicitudesGridView.initSearch(this.$el);
             },
             silent: false,
         });
@@ -61,52 +59,6 @@ class BeneficiariosView extends Backbone.View {
                 let _url = this.App.kumbiaURL('' + target.attr('data-href'));
                 window.location.href = _url;
             }
-        });
-    }
-
-    __setStyles() {
-        $('[type="search"]').addClass('row form-control');
-        $('[type="search"]').css('display', 'inline-block');
-        $('[type="search"]').css('width', '220px');
-    }
-
-    __initTable() {
-        this.tableView = new DataTable(document.getElementById('tb_beneficiario'), {
-            paging: true,
-            ordering: true,
-            pageLength: 10,
-            pagingType: 'numbers',
-            info: true,
-            searching: true,
-            columnDefs: [
-                {
-                    targets: 0,
-                    width: '5%',
-                    orderable: false,
-                },
-                {
-                    targets: 1,
-                    width: '5%',
-                },
-                {
-                    targets: 2,
-                    width: '30%',
-                },
-                {
-                    targets: 3,
-                    width: '30%',
-                },
-                {
-                    targets: 4,
-                    width: '20%',
-                },
-                {
-                    targets: 5,
-                    width: '10%',
-                },
-            ],
-            order: [[1, 'desc']],
-            language: langDataTable,
         });
     }
 

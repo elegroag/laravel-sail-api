@@ -1,4 +1,4 @@
-import { langDataTable } from '@/Core';
+import { SolicitudesGridView } from '@/Componentes/Views/SolicitudesGridView';
 
 class ConyugesView extends Backbone.View {
     constructor(options = {}) {
@@ -7,11 +7,7 @@ class ConyugesView extends Backbone.View {
     }
 
     get className() {
-        return 'table-responsive-md';
-    }
-
-    initialize() {
-        this.tableView = void 0;
+        return 'solicitudes-list';
     }
 
     render() {
@@ -22,8 +18,7 @@ class ConyugesView extends Backbone.View {
             url: this.model.tipo ? 'conyuge/render_table/' + this.model.tipo : 'conyuge/render_table',
             callback: (html) => {
                 this.$el.find('#consulta').html(html);
-                this.__initTable();
-                this.__setStyles();
+                SolicitudesGridView.initSearch(this.$el);
             },
             silent: false,
         });
@@ -60,57 +55,6 @@ class ConyugesView extends Backbone.View {
                 let _url = this.App.kumbiaURL('' + target.attr('data-href'));
                 window.location.href = _url;
             }
-        });
-    }
-
-    __setStyles() {
-        $('[type="search"]').addClass('row form-control');
-        $('[type="search"]').css('display', 'inline-block');
-        $('[type="search"]').css('width', '220px');
-    }
-
-    __initTable() {
-        this.tableView = new DataTable(document.getElementById('tb_conyuge'), {
-            paging: true,
-            ordering: true,
-            pageLength: 10,
-            pagingType: 'numbers',
-            info: true,
-            searching: true,
-            columnDefs: [
-                {
-                    targets: 0,
-                    width: '5%',
-                    orderable: false,
-                },
-                {
-                    targets: 1,
-                    width: '10%',
-                },
-                {
-                    targets: 2,
-                    width: '35%',
-                },
-                {
-                    targets: 3,
-                    width: '10%',
-                },
-                {
-                    targets: 4,
-                    width: '25%',
-                },
-                {
-                    targets: 5,
-                    width: '20%',
-                },
-                {
-                    targets: 6,
-                    visible: false,
-                    searchable: false,
-                },
-            ],
-            order: [[6, 'desc']],
-            language: langDataTable,
         });
     }
 
