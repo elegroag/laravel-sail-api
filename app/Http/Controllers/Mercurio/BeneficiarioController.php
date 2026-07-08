@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
+use App\Http\Controllers\Mercurio\Concerns\RendersSolicitudesGrid;
 use App\Library\Collections\ParamsBeneficiario;
 use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
@@ -16,12 +17,12 @@ use App\Models\Mercurio31;
 use App\Models\Mercurio32;
 use App\Models\Mercurio34;
 use App\Models\Mercurio37;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Entidades\BeneficiarioService;
 use App\Services\Entidades\ConyugeService;
 use App\Services\Entidades\TrabajadorService;
 use App\Services\FormulariosAdjuntos\BeneficiarioAdjuntoService;
 use App\Services\FormulariosAdjuntos\Formularios;
-use App\Services\Api\ApiSubsidio;
 use App\Services\Srequest;
 use App\Services\Tag;
 use App\Services\Utils\AsignarFuncionario;
@@ -35,6 +36,8 @@ use Illuminate\Support\Facades\DB;
 
 class BeneficiarioController extends ApplicationController
 {
+    use RendersSolicitudesGrid;
+
     protected string $tipopc = '4';
 
     protected DbBase $db;
@@ -64,7 +67,7 @@ class BeneficiarioController extends ApplicationController
                 $this->tipo == 'O' ||
                 $this->tipo == 'F'
             ) {
-                $procesadorComando = new ApiSubsidio();
+                $procesadorComando = new ApiSubsidio;
                 $procesadorComando->send(
                     [
                         'servicio' => 'ComfacaEmpresas',
@@ -119,11 +122,11 @@ class BeneficiarioController extends ApplicationController
                 ->get(['cedcon', 'priape', 'segape', 'prinom'])
                 ->pluck('cedcon', 'priape', 'segape', 'prinom')
                 ->map(function ($conyuge) {
-                    return $conyuge->cedcon . '-' . $conyuge->priape . ' ' . $conyuge->segape . ' ' . $conyuge->prinom;
+                    return $conyuge->cedcon.'-'.$conyuge->priape.' '.$conyuge->segape.' '.$conyuge->prinom;
                 })
                 ->toArray();
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -139,7 +142,7 @@ class BeneficiarioController extends ApplicationController
                 $subsi20 = $subsi20['data'];
                 if (count($subsi20) > 0) {
                     foreach ($subsi20 as $msubsi20) {
-                        $cedcons[$msubsi20['cedcon']] = $msubsi20['cedcon'] . '-' . $msubsi20['priape'] . ' ' . $msubsi20['prinom'];
+                        $cedcons[$msubsi20['cedcon']] = $msubsi20['cedcon'].'-'.$msubsi20['priape'].' '.$msubsi20['prinom'];
                     }
                 }
             }
@@ -149,12 +152,13 @@ class BeneficiarioController extends ApplicationController
                     'cedcon' => $cedcons,
                     'use_dummy' => true,
                     'dummyValue' => '',
-                    'class' => 'form-control'
+                    'class' => 'form-control',
                 ])
             );
         } catch (\Throwable $e) {
             return $this->handleException($e, request());
         }
+
         return response()->json($response);
     }
 
@@ -165,7 +169,7 @@ class BeneficiarioController extends ApplicationController
             $coddoc = $request->input('coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
+            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -202,6 +206,7 @@ class BeneficiarioController extends ApplicationController
             $this->db->commit();
         } catch (\Throwable $e) {
             $this->db->rollBack();
+
             return $this->handleException($e, $request);
         }
 
@@ -215,7 +220,7 @@ class BeneficiarioController extends ApplicationController
 
             $datos_beneficiario = [];
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -257,7 +262,7 @@ class BeneficiarioController extends ApplicationController
         return response()->json($response);
     }
 
-    function buscarBeneficiarios(string $estado)
+    public function buscarBeneficiarios(string $estado)
     {
         $documento = $this->user['documento'];
         $tipo = $this->user['tipo'];
@@ -357,7 +362,7 @@ class BeneficiarioController extends ApplicationController
             $cedtra = $request->input('cedtra');
             $documento = $this->user['documento'];
             $tipo = $this->user['tipo'];
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $datos_captura = [];
 
             // solo conyuges activas a buscar
@@ -400,10 +405,10 @@ class BeneficiarioController extends ApplicationController
             $_cedcon = [];
             foreach ($datos_captura as $data) {
                 if ($cedtra == '') {
-                    $_cedcon[$data['cedcon']] = $data['cedcon'] . ' - ' . $data['nombre'];
+                    $_cedcon[$data['cedcon']] = $data['cedcon'].' - '.$data['nombre'];
                 } else {
                     if ($cedtra == $data['cedtra']) {
-                        $_cedcon[$data['cedcon']] = $data['cedcon'] . ' - ' . $data['nombre'];
+                        $_cedcon[$data['cedcon']] = $data['cedcon'].' - '.$data['nombre'];
                     }
                 }
             }
@@ -411,7 +416,7 @@ class BeneficiarioController extends ApplicationController
             $conyuguesPendientes = Mercurio32::where('documento', $documento)->whereNotIn('estado', ['I', 'X'])->get();
             foreach ($conyuguesPendientes as $conCp) {
                 if (! isset($_cedcon[$conCp->getCedcon()])) {
-                    $_cedcon[$conCp->getCedcon()] = $conCp->getCedcon() . ' - ' . $conCp->getPrinom() . ' ' . $conCp->getSegnom() . ' ' . $conCp->getPriape() . ' ' . $conCp->getSegape();
+                    $_cedcon[$conCp->getCedcon()] = $conCp->getCedcon().' - '.$conCp->getPrinom().' '.$conCp->getSegnom().' '.$conCp->getPriape().' '.$conCp->getSegape();
                 }
             }
 
@@ -420,7 +425,7 @@ class BeneficiarioController extends ApplicationController
                     'cedcon' => $_cedcon,
                     'use_dummy' => true,
                     'dummyValue' => '',
-                    'class' => 'form-control'
+                    'class' => 'form-control',
                 ])
             );
 
@@ -436,7 +441,7 @@ class BeneficiarioController extends ApplicationController
         return response()->json($salida);
     }
 
-    function mapper()
+    public function mapper()
     {
         return [
             'cedtra' => 'cedula',
@@ -475,7 +480,7 @@ class BeneficiarioController extends ApplicationController
 
     public function downloadDocs($archivo = '')
     {
-        $fichero = 'public/docs/formulario_mercurio/' . $archivo;
+        $fichero = 'public/docs/formulario_mercurio/'.$archivo;
         $ext = substr(strrchr($archivo, '.'), 1);
         if (file_exists($fichero)) {
             header('Content-Description: File Transfer');
@@ -484,7 +489,7 @@ class BeneficiarioController extends ApplicationController
             header('Cache-Control: must-revalidate');
             header('Expires: 0');
             header('Pragma: public');
-            header('Content-Length: ' . filesize($fichero));
+            header('Content-Length: '.filesize($fichero));
             ob_clean();
             readfile($fichero);
             exit;
@@ -496,7 +501,7 @@ class BeneficiarioController extends ApplicationController
 
     public function downloadReporte($archivo = '')
     {
-        $fichero = 'public/temp/' . $archivo;
+        $fichero = 'public/temp/'.$archivo;
         if (file_exists($fichero)) {
             header('Content-Description: File Transfer');
             header('Content-Type: application/csv');
@@ -504,7 +509,7 @@ class BeneficiarioController extends ApplicationController
             header('Cache-Control: must-revalidate');
             header('Expires: 0');
             header('Pragma: public');
-            header('Content-Length: ' . filesize($fichero));
+            header('Content-Length: '.filesize($fichero));
             ob_clean();
             readfile($fichero);
             exit;
@@ -518,7 +523,7 @@ class BeneficiarioController extends ApplicationController
     {
         $this->setResponse('view');
         $archivo = 'declaracion_juramentada_nueva.pdf';
-        $fichero = 'public/docs/formulario_mercurio/' . $archivo;
+        $fichero = 'public/docs/formulario_mercurio/'.$archivo;
         $ext = substr(strrchr($archivo, '.'), 1);
         header('Content-Description: File Transfer');
         header("Content-Type: application/{$ext}");
@@ -526,7 +531,7 @@ class BeneficiarioController extends ApplicationController
         header('Cache-Control: must-revalidate');
         header('Expires: 0');
         header('Pragma: public');
-        header('Content-Length: ' . filesize($fichero));
+        header('Content-Length: '.filesize($fichero));
         ob_clean();
         readfile($fichero);
         exit;
@@ -562,14 +567,14 @@ class BeneficiarioController extends ApplicationController
 
                 $listAfiliados = array_merge($listAfiliados->toArray(), $mercurio31);
 
-                $procesadorComando = new ApiSubsidio();
+                $procesadorComando = new ApiSubsidio;
                 $procesadorComando->send(
                     [
                         'servicio' => 'ComfacaEmpresas',
-                        'metodo' => "basicas_empresa",
+                        'metodo' => 'basicas_empresa',
                         'params' => [
                             'nit' => $this->user['documento'],
-                        ]
+                        ],
                     ]
                 );
 
@@ -607,7 +612,7 @@ class BeneficiarioController extends ApplicationController
                 }
             } else {
                 $conyuges = $conyugeService->findRequestByCedtra($documento);
-                //para tipo trabajador
+                // para tipo trabajador
             }
 
             $codzons = Gener09::where('codzon', '>=', 18000)
@@ -615,11 +620,11 @@ class BeneficiarioController extends ApplicationController
                 ->pluck('detzon', 'codzon')
                 ->toArray();
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
-                    'metodo' => 'parametros_beneficiarios'
+                    'metodo' => 'parametros_beneficiarios',
                 ]
             );
 
@@ -659,7 +664,7 @@ class BeneficiarioController extends ApplicationController
                 'cedtra' => $cedtras,
                 'tipo' => $this->tipo,
                 'indipais' => indicativos_paises_array(),
-                'indidepa' => indicativos_departamentos_array()
+                'indidepa' => indicativos_departamentos_array(),
             ];
 
             $formulario = FormularioDinamico::where('name', 'mercurio34')->first();
@@ -675,7 +680,7 @@ class BeneficiarioController extends ApplicationController
 
                 if ($data['tipo'] === 'E' && ($componente->name == 'nit' || $componente->name == 'cedtra')) {
                     $_componente['form_type'] = 'select';
-                    $_componente['search_type'] = "collection";
+                    $_componente['search_type'] = 'collection';
                     $_componente['type'] = 'text';
                 }
 
@@ -709,22 +714,15 @@ class BeneficiarioController extends ApplicationController
         return response()->json($salida);
     }
 
-    public function renderTable($estado = '')
+    public function renderTable(Request $request, $estado = '')
     {
-        try {
-            $benService = new BeneficiarioService;
-            $html = view(
-                'mercurio/beneficiario/tmp/solicitudes',
-                [
-                    'path' => base_path(),
-                    'beneficiarios' => $benService->findAllByEstado($estado),
-                ]
-            )->render();
-            $this->setResponse('view');
-            return $this->renderText($html);
-        } catch (\Throwable $e) {
-            return $this->handleException($e, request());
-        }
+        return $this->renderSolicitudesGrid(
+            $request,
+            $estado !== '' ? $estado : null,
+            new BeneficiarioService,
+            'mercurio/beneficiario/tmp/solicitudes',
+            'beneficiarios'
+        );
     }
 
     public function searchRequest(?string $id = null)
@@ -818,7 +816,7 @@ class BeneficiarioController extends ApplicationController
             'tiphij' => $request->input('tiphij'),
             'nivedu' => $request->input('nivedu'),
             'captra' => $request->input('captra'),
-            'tipdis' => $request->input('captra') == 'N' ? '00' :  $request->input('tipdis'),
+            'tipdis' => $request->input('captra') == 'N' ? '00' : $request->input('tipdis'),
             'calendario' => $request->input('calendario'),
             'cedacu' => $request->input('cedacu'),
             'biocedu' => $request->input('biocedu'),
@@ -879,9 +877,11 @@ class BeneficiarioController extends ApplicationController
             ];
 
             $this->db->commit();
+
             return response()->json($salida);
         } catch (\Throwable $e) {
             $this->db->rollBack();
+
             return $this->handleException($e, $request);
         }
     }
@@ -922,7 +922,7 @@ class BeneficiarioController extends ApplicationController
             $tipo = $this->user['tipo'];
             $documento = $this->user['documento'];
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -1045,7 +1045,7 @@ class BeneficiarioController extends ApplicationController
 
                 if (! $mercurio32) {
 
-                    $procesadorComando = new ApiSubsidio();
+                    $procesadorComando = new ApiSubsidio;
                     $procesadorComando->send(
                         [
                             'servicio' => 'ComfacaAfilia',
@@ -1098,7 +1098,7 @@ class BeneficiarioController extends ApplicationController
             $response = $this->captureException($e);
             set_flashdata('error', [
                 'msj' => $response['msj'],
-                'code' => $e->getCode()
+                'code' => $e->getCode(),
             ]);
 
             return redirect('beneficiario.index');

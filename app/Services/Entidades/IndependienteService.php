@@ -17,6 +17,7 @@ use App\Models\Mercurio37;
 use App\Models\Mercurio41;
 use App\Models\Mercurio47;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Entidades\Concerns\PaginatesSolicitudQueries;
 use App\Services\FormulariosAdjuntos\IndependienteAdjuntoService;
 use App\Services\Srequest;
 use App\Services\Utils\AsignarFuncionario;
@@ -24,6 +25,8 @@ use App\Services\Utils\SenderValidationCaja;
 
 class IndependienteService
 {
+    use PaginatesSolicitudQueries;
+
     private string $tipopc = '13';
 
     private string $tipsoc = '08';
@@ -88,6 +91,48 @@ class IndependienteService
             ORDER BY m41.fecini ASC;";
 
         return $this->db->inQueryAssoc($sql);
+    }
+
+    /**
+     * @return array{items: array<int, array<string, mixed>>, total: int, page: int, per_page: int}
+     */
+    public function findByEstadoPaginated(?string $estado, int $page, int $perPage): array
+    {
+        $documento = $this->user['documento'];
+        $coddoc = $this->user['coddoc'];
+
+        if (empty($estado)) {
+            $conditions = "and m41.estado NOT IN('I') ";
+        } else {
+            $conditions = "and m41.estado='{$estado}' ";
+        }
+
+        $sql = "SELECT
+            m41.*,
+            concat_ws(' ', m41.prinom, m41.segnom, m41.priape, m41.segape) as razsoc,
+            concat_ws(' ', m41.prinom, m41.segnom, m41.priape, m41.segape) as repleg,
+            m41.codzon,
+            m41.codciu,
+            (SELECT COUNT(*) FROM mercurio10 as me10 WHERE me10.tipopc='{$this->tipopc}' and m41.id = me10.numero) as cantidad_eventos,
+            (SELECT MAX(fecsis) FROM mercurio10 as mr10 WHERE mr10.tipopc='{$this->tipopc}' and m41.id = mr10.numero) as fecha_ultima_solicitud,
+            (CASE
+                WHEN m41.estado = 'T' THEN 'Temporal'
+                WHEN m41.estado = 'D' THEN 'Devuelto'
+                WHEN m41.estado = 'A' THEN 'Aprobado'
+                WHEN m41.estado = 'X' THEN 'Rechazado'
+                WHEN m41.estado = 'P' THEN 'Pendiente de validación'
+                WHEN m41.estado = 'I' THEN 'Inactiva'
+            END) as estado_detalle,
+            'NATURAL' as tipo_persona,
+            m41.coddoc as tipo_documento,
+            gener09.detzon as detalle_zona
+            FROM mercurio41 as m41
+            LEFT JOIN gener09 ON gener09.codzon = m41.codzon
+            WHERE m41.documento='{$documento}' and
+            m41.coddoc='{$coddoc}' {$conditions}
+            ORDER BY m41.fecini ASC";
+
+        return $this->paginateRawQuery($sql, $page, $perPage, true);
     }
 
     /**

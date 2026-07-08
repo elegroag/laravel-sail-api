@@ -12,11 +12,13 @@ use App\Models\Mercurio14;
 use App\Models\Mercurio33;
 use App\Models\Mercurio37;
 use App\Models\Mercurio47;
+use App\Services\Entidades\Concerns\PaginatesSolicitudQueries;
 use App\Services\Srequest;
-use App\Services\Api\ApiSubsidio;
 
 class ActualizaEmpresaService
 {
+    use PaginatesSolicitudQueries;
+
     private $tipopc = '5';
 
     private $user;
@@ -43,17 +45,40 @@ class ActualizaEmpresaService
      */
     public function findAllByEstado($estado = '')
     {
-        // usuario empresa, unica solicitud de afiliación
+        $sql = $this->buildSolicitudesSql($estado);
+        $mercurio47 = $this->db->inQueryAssoc($sql);
+
+        return $this->enrichSolicitudes($mercurio47);
+    }
+
+    /**
+     * @return array{items: array<int, array<string, mixed>>, total: int, page: int, per_page: int}
+     */
+    public function findByEstadoPaginated(?string $estado, int $page, int $perPage): array
+    {
+        $sql = $this->buildSolicitudesSql($estado ?? '');
+        $paginated = $this->paginateRawQuery($sql, $page, $perPage, true);
+
+        return [
+            'items' => $this->enrichSolicitudes($paginated['items']),
+            'total' => $paginated['total'],
+            'page' => $paginated['page'],
+            'per_page' => $paginated['per_page'],
+        ];
+    }
+
+    private function buildSolicitudesSql(string $estado = ''): string
+    {
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
 
-        if (is_null($estado) || $estado == '') {
+        if ($estado === '') {
             $where = " solis.documento='{$documento}' AND solis.coddoc='{$coddoc}' ";
         } else {
             $where = "solis.documento='{$documento}' AND solis.coddoc='{$coddoc}' AND solis.estado='{$estado}' ";
         }
 
-        $mercurio47 = $this->db->inQueryAssoc("SELECT solis.*,
+        return "SELECT solis.*,
             (CASE
                 WHEN solis.estado = 'T' THEN 'Temporal en edición'
                 WHEN solis.estado = 'D' THEN 'Devuelto'
@@ -64,9 +89,15 @@ class ActualizaEmpresaService
             END) as estado_detalle
             FROM mercurio47 as solis
             WHERE {$where} AND solis.tipact='E'
-            ORDER BY solis.id DESC;
-        ");
+            ORDER BY solis.id DESC";
+    }
 
+    /**
+     * @param  array<int, array<string, mixed>>  $mercurio47
+     * @return array<int, array<string, mixed>>
+     */
+    private function enrichSolicitudes(array $mercurio47): array
+    {
         foreach ($mercurio47 as $ai => $row) {
             $rqs = $this->db->fetchOne("SELECT count(mercurio10.numero) as cantidad
                 FROM mercurio10
@@ -83,12 +114,12 @@ class ActualizaEmpresaService
             ");
 
             $mercurio47[$ai] = $row;
-            $actualizacion = Mercurio33::where("actualizacion", $row['id'])->get();
+            $actualizacion = Mercurio33::where('actualizacion', $row['id'])->get();
             foreach ($actualizacion as $item) {
                 $mercurio47[$ai][$item->campo] = $item->valor;
             }
             $mercurio47[$ai]['cantidad_eventos'] = $rqs['cantidad'];
-            $mercurio47[$ai]['fecha_ultima_solicitud'] = $trayecto['fecsis'];
+            $mercurio47[$ai]['fecha_ultima_solicitud'] = $trayecto['fecsis'] ?? null;
             $mercurio47[$ai]['estado_detalle'] = solicitud_estado_detalle($row['estado']);
             $mercurio47[$ai]['tipact_detalle'] = solicitud_tipo_actualizacion_detalle($row['tipact']);
         }
@@ -105,7 +136,8 @@ class ActualizaEmpresaService
      */
     public function buscarEmpresaSubsidio($nit)
     {
-        $empresaService = new EmpresaService();
+        $empresaService = new EmpresaService;
+
         return $empresaService->buscarEmpresaSubsidio($nit);
     }
 
@@ -256,8 +288,10 @@ class ActualizaEmpresaService
         if ($empresa != false) {
             $empresa->fill($data);
             $empresa->save();
+
             return $empresa;
         }
+
         return false;
     }
 
@@ -273,8 +307,10 @@ class ActualizaEmpresaService
         $empresa = $this->findById($id);
         if ($empresa) {
             $empresa->fill($data);
+
             return $empresa->save();
         }
+
         return false;
     }
 
@@ -289,6 +325,7 @@ class ActualizaEmpresaService
         $solicitud = new Mercurio47($data);
         $solicitud->estado = 'T';
         $solicitud->save();
+
         return $solicitud;
     }
 
@@ -403,7 +440,7 @@ class ActualizaEmpresaService
         switch ($tipo_consulta) {
             case 'auditoria':
             case 'all':
-                $response["datos"] = Mercurio47::query()
+                $response['datos'] = Mercurio47::query()
                     ->join('mercurio10', function ($join) use ($tipopc) {
                         $join->on('mercurio47.id', '=', 'mercurio10.numero')
                             ->where('mercurio10.tipopc', '=', $tipopc);
@@ -415,37 +452,46 @@ class ActualizaEmpresaService
                     ])
                     ->where('mercurio47.tipact', $tipact)
                     ->when($condi_extra, function ($q) use ($condi_extra) {
-                        if (is_array($condi_extra)) $q->where($condi_extra);
-                        if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
+                        if (is_array($condi_extra)) {
+                            $q->where($condi_extra);
+                        }
+                        if (is_string($condi_extra) && strlen($condi_extra) > 0) {
+                            $q->whereRaw($condi_extra);
+                        }
                     })
                     ->get();
                 break;
             case 'alluser':
-                $response["datos"] = Mercurio47::whereRaw("usuario='{$usuario}' and estado='P' and tipact='$tipact'")->get();
+                $response['datos'] = Mercurio47::whereRaw("usuario='{$usuario}' and estado='P' and tipact='$tipact'")->get();
                 break;
             case 'count':
-                $res = Mercurio47::where("mercurio47.usuario", $usuario)
-                    ->where("mercurio47.tipact", $tipact)
+                $res = Mercurio47::where('mercurio47.usuario', $usuario)
+                    ->where('mercurio47.tipact', $tipact)
                     ->when($condi_extra, function ($q) use ($condi_extra) {
-                        if (is_array($condi_extra)) $q->where($condi_extra);
-                        if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
+                        if (is_array($condi_extra)) {
+                            $q->where($condi_extra);
+                        }
+                        if (is_string($condi_extra) && strlen($condi_extra) > 0) {
+                            $q->whereRaw($condi_extra);
+                        }
                     })
                     ->get();
 
-                $response["count"] = $res->count();
-                $response["all"] = $res;
+                $response['count'] = $res->count();
+                $response['all'] = $res;
                 break;
             case 'one':
-                $response["datos"] = Mercurio47::whereRaw("id='$numero' and estado='P' and tipact='$tipact'")->first();
+                $response['datos'] = Mercurio47::whereRaw("id='$numero' and estado='P' and tipact='$tipact'")->first();
                 break;
             case 'info':
-                $mercurio = Mercurio47::where("id", $numero)->first();
-                $response["consulta"] = $this->buscarEmpresaSubsidio($mercurio->getNit());
+                $mercurio = Mercurio47::where('id', $numero)->first();
+                $response['consulta'] = $this->buscarEmpresaSubsidio($mercurio->getNit());
                 break;
             default:
                 $response = false;
                 break;
         }
+
         return $response;
     }
 }

@@ -17,6 +17,7 @@ use App\Models\Mercurio37;
 use App\Models\Mercurio45;
 use App\Models\Mercurio47;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Entidades\Concerns\PaginatesSolicitudQueries;
 use App\Services\Srequest;
 use App\Services\Utils\SenderValidationCaja;
 use Carbon\Carbon;
@@ -24,6 +25,8 @@ use Illuminate\Support\Facades\DB;
 
 class TrabajadorService
 {
+    use PaginatesSolicitudQueries;
+
     private string $tipopc = '1';
 
     private DbBase $db;
@@ -80,6 +83,45 @@ class TrabajadorService
         $results = DB::select($sql);
 
         return json_decode(json_encode($results), true);
+    }
+
+    /**
+     * @return array{items: array<int, array<string, mixed>>, total: int, page: int, per_page: int}
+     */
+    public function findByEstadoPaginated(?string $estado, int $page, int $perPage): array
+    {
+        $documento = $this->user['documento'];
+        $coddoc = $this->user['coddoc'];
+
+        if (Mercurio31::whereRaw("documento='{$documento}' and coddoc='{$coddoc}'")->count() == 0) {
+            return ['items' => [], 'total' => 0, 'page' => 1, 'per_page' => max(1, min(100, $perPage))];
+        }
+
+        if (! $estado) {
+            $conditions = "and m31.estado NOT IN('I') ";
+        } else {
+            $conditions = "and m31.estado='{$estado}' ";
+        }
+
+        $sql = "SELECT m31.*,
+            (SELECT COUNT(*) FROM mercurio10 as me10 WHERE me10.tipopc='13' and m31.id = me10.numero) as cantidad_eventos,
+            (SELECT MAX(fecsis) FROM mercurio10 as mr10 WHERE mr10.tipopc='13' and m31.id = mr10.numero) as fecha_ultima_solicitud,
+            (CASE
+                WHEN m31.estado = 'T' THEN 'Temporal en edición'
+                WHEN m31.estado = 'D' THEN 'Devuelto'
+                WHEN m31.estado = 'A' THEN 'Aprobado'
+                WHEN m31.estado = 'X' THEN 'Rechazado'
+                WHEN m31.estado = 'P' THEN 'Pendiente De Validación CAJA'
+                WHEN m31.estado = 'I' THEN 'Inactiva'
+                WHEN m31.estado = 'C' THEN 'Cancelada'
+                ELSE 'NO Definido'
+            END) as estado_detalle,
+            coddoc as tipo_documento
+            FROM mercurio31 as m31
+            WHERE m31.documento='{$documento}' and m31.coddoc='{$coddoc}' {$conditions}
+            ORDER BY m31.fecsol ASC";
+
+        return $this->paginateRawQuery($sql, $page, $perPage);
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
+use App\Http\Controllers\Mercurio\Concerns\RendersSolicitudesGrid;
 use App\Library\Collections\ParamsPensionado;
 use App\Models\Adapter\DbBase;
 use App\Models\FormularioDinamico;
@@ -31,6 +32,8 @@ use Illuminate\View\View;
 
 class PensionadoController extends ApplicationController
 {
+    use RendersSolicitudesGrid;
+
     /**
      * pensionadoService variable
      *
@@ -673,23 +676,13 @@ class PensionadoController extends ApplicationController
 
     public function renderTable(Request $request, ?string $estado = null)
     {
-        try {
-
-            $pensionadoService = new PensionadoService;
-            $html = view(
-                'mercurio/pensionado/tmp/solicitudes',
-                [
-                    'path' => base_path(),
-                    'pensionados' => $pensionadoService->findAllByEstado($estado),
-                ]
-            )->render();
-
-            $this->setResponse('view');
-
-            return $this->renderText($html);
-        } catch (Exception $e) {
-            return $this->handleException($e, $request);
-        }
+        return $this->renderSolicitudesGrid(
+            $request,
+            $estado,
+            new PensionadoService,
+            'mercurio/pensionado/tmp/solicitudes',
+            'pensionados'
+        );
     }
 
     public function seguimiento(Request $request): JsonResponse

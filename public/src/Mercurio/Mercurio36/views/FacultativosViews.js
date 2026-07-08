@@ -1,5 +1,5 @@
 import { $App } from '@/App';
-import { langDataTable } from '@/Core';
+import { SolicitudesGridView } from '@/Componentes/Views/SolicitudesGridView';
 
 class FacultativosView extends Backbone.View {
     constructor(options) {
@@ -7,28 +7,51 @@ class FacultativosView extends Backbone.View {
     }
 
     get className() {
-        return 'table-responsive-md';
+        return 'solicitudes-list';
     }
 
     initialize() {
         this.template = document.getElementById('tmp_table').innerHTML;
-        this.tableView = void 0;
     }
 
     render() {
         const template = _.template(this.template);
         this.$el.html(template());
+        this.__loadGrid();
+        return this;
+    }
+
+    __loadGrid({ page = 1, perPage = null } = {}) {
+        const url = this.model.tipo ? 'facultativo/render_table/' + this.model.tipo : 'facultativo/render_table';
+        const $pageSize = this.$el.find('#solicitudes-page-size');
+        const resolvedPerPage = perPage || parseInt($pageSize.val(), 10) || 10;
 
         this.trigger('load:table', {
-            url: this.model.tipo ? 'facultativo/render_table/' + this.model.tipo : 'facultativo/render_table',
-            callback: (html) => {
+            url,
+            page,
+            perPage: resolvedPerPage,
+            callback: (response) => {
+                if (!response) {
+                    $App.trigger('alert:error', { message: 'No se pudo cargar el listado de solicitudes.' });
+                    return;
+                }
+
+                const html = response?.consulta ?? response;
+                const meta = response?.meta ?? null;
+
+                if (!html) {
+                    $App.trigger('alert:error', { message: 'No se pudo cargar el listado de solicitudes.' });
+                    return;
+                }
+
                 this.$el.find('#consulta').html(html);
-                this.__initTable();
-                this.__setStyles();
+                SolicitudesGridView.init(this.$el, {
+                    onReload: (params) => this.__loadGrid(params),
+                    meta,
+                });
             },
             silent: false,
         });
-        return this;
     }
 
     get events() {
@@ -58,47 +81,6 @@ class FacultativosView extends Backbone.View {
                     window.location.href = $App.url('administrar_cuenta/' + id);
                 }
             },
-        });
-    }
-
-    __setStyles() {
-        $('[type="search"]').addClass('row form-control');
-        $('[type="search"]').css('display', 'inline-block');
-        $('[type="search"]').css('width', '220px');
-    }
-
-    __initTable() {
-        this.tableView = this.$el.find('#tb_facultativo').DataTable({
-            paging: true,
-            ordering: false,
-            pageLength: 10,
-            pagingType: 'numbers',
-            info: true,
-            searching: true,
-            columnDefs: [
-                {
-                    targets: 0,
-                    width: '10%',
-                },
-                {
-                    targets: 1,
-                    width: '30%',
-                },
-                {
-                    targets: 2,
-                    width: '10%',
-                },
-                {
-                    targets: 3,
-                    width: '30%',
-                },
-                {
-                    targets: 4,
-                    width: '20%',
-                },
-            ],
-            order: [[3, 'desc']],
-            language: langDataTable,
         });
     }
 
