@@ -32,6 +32,10 @@ class ApiEpayco extends ApiAbstract
             ->where('service_name', $servicio)
             ->first();
 
+        if (! $endpoint) {
+            throw new DebugException("Error no existe configuración de endpoint para el servicio {$servicio}", 501);
+        }
+
         $host = $this->mode == 'development' ? $endpoint->host_dev : $endpoint->host_pro;
 
         $url = "{$endpoint->endpoint_name}/" . urlencode($metodo);
@@ -54,7 +58,14 @@ class ApiEpayco extends ApiAbstract
             ->where('service_name', 'Epayco-Reference')
             ->first();
 
-        $host = $this->mode === 'development' ? $endpoint->host_dev :  $endpoint->host_pro;
+        if (! $endpoint) {
+            return [
+                'success' => false,
+                'errors' => 'No existe configuración de endpoint para validar pagos ePayco (Epayco-Reference)',
+            ];
+        }
+
+        $host = $this->mode === 'development' ? $endpoint->host_dev : $endpoint->host_pro;
         $url = $host . "/{$endpoint->endpoint_name}/" . urlencode($refPayco);
 
         $response = Http::timeout(30)

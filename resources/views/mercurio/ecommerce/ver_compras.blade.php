@@ -1,79 +1,67 @@
 @extends('layouts.bone')
 
 @section('content')
-<div class="col mt-2">
-    <div class="card">
-        <div class="card-header py-2 bg-blue-400 text-white">
-            <b>Mis Compras</b>
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
+<div class="col mt-2 servicios-catalog compras-catalog">
+    <div class="card shadow-sm">
+        <div class="card-header servicios-catalog__header py-3">
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2">
+                <div>
+                    <h1 class="servicios-catalog__title mb-1">Mis Compras</h1>
+                    <p class="servicios-catalog__subtitle mb-0">
+                        Consulte el historial de servicios adquiridos.
+                    </p>
+                </div>
+                <a href="{{ route('servicios.index') }}" class="btn btn-sm servicios-catalog__btn-compras align-self-start align-self-md-center">
+                    <i class="fas fa-store"></i> Volver al catálogo
+                </a>
+            </div>
         </div>
 
         <div class="card-body">
-            <div class="col-xs-12">
+            <div id="loader_compras" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="sr-only">Cargando...</span>
+                </div>
+                <p class="mt-3 text-muted">Consultando compras realizadas...</p>
+            </div>
 
-                <!-- ============================================ -->
-                <!-- LOADER -->
-                <!-- ============================================ -->
-                <div id="loader_compras" class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-                        <span class="sr-only">Cargando...</span>
-                    </div>
-                    <p class="mt-3 text-muted">Consultando compras realizadas...</p>
+            <div id="error_compras" class="compras-estado text-center py-5" style="display:none;">
+                <i class="fas fa-exclamation-triangle compras-estado__icon compras-estado__icon--warning"></i>
+                <p id="error_mensaje" class="mt-3 servicios-catalog__error-msg"></p>
+                <button type="button" id="btn_reintentar" class="btn btn-primary btn-sm mt-2">
+                    <i class="fas fa-redo"></i> Reintentar
+                </button>
+            </div>
+
+            <div id="sin_compras" class="compras-estado text-center py-5" style="display:none;">
+                <i class="fas fa-shopping-cart compras-estado__icon"></i>
+                <p class="mt-3 compras-estado__texto">No se encontraron compras realizadas</p>
+                <a href="{{ route('servicios.index') }}" class="btn btn-primary btn-sm mt-2">
+                    <i class="fas fa-store"></i> Ir al catálogo
+                </a>
+            </div>
+
+            <div id="contenido_compras" class="compras-contenido" style="display:none;">
+                <div class="compras-toolbar">
+                    <span id="info_total" class="compras-toolbar__info badge"></span>
+                    <span id="info_pagina" class="compras-toolbar__info text-muted"></span>
                 </div>
 
-                <!-- ============================================ -->
-                <!-- ERROR -->
-                <!-- ============================================ -->
-                <div id="error_compras" class="text-center py-5" style="display:none;">
-                    <i class="fas fa-exclamation-triangle text-warning" style="font-size: 60px;"></i>
-                    <p id="error_mensaje" class="mt-3" style="font-size: 16px; color: #e65100; font-weight: 500;"></p>
-                    <a id="btn_volver_error" href="{{ route('servicios.ver-compras') }}" class="btn btn-primary mt-2">
-                        <i class="fas fa-arrow-left"></i> Volver
-                    </a>
+                <div class="compras-grid-scroll">
+                    <div id="grid_compras" class="compras-grid" role="list" aria-label="Compras realizadas"></div>
                 </div>
 
-                <!-- ============================================ -->
-                <!-- SIN COMPRAS -->
-                <!-- ============================================ -->
-                <div id="sin_compras" class="text-center py-5" style="display:none;">
-                    <i class="fas fa-shopping-cart text-muted" style="font-size: 60px;"></i>
-                    <p class="mt-3 text-muted" style="font-size: 16px;">No se encontraron compras realizadas</p>
-                    <a id="btn_volver_sin" href="{{ route('principal.index') }}" class="btn btn-primary mt-2">
-                        <i class="fas fa-arrow-left"></i> Volver
-                    </a>
+                <div class="compras-paginador">
+                    <button type="button" id="btn_anterior" class="btn btn-primary btn-sm" disabled>
+                        <i class="fas fa-arrow-left"></i> Anterior
+                    </button>
+                    <span id="paginador_texto" class="compras-paginador__texto">1 de 1</span>
+                    <button type="button" id="btn_siguiente" class="btn btn-primary btn-sm" disabled>
+                        Siguiente <i class="fas fa-arrow-right"></i>
+                    </button>
                 </div>
-
-                <!-- ============================================ -->
-                <!-- CONTENIDO -->
-                <!-- ============================================ -->
-                <div id="contenido_compras" style="display:none;">
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <span class="text-muted" id="info_total">Total: 0 compras</span>
-                        </div>
-                        <div class="col-md-6 text-right">
-                            <span class="text-muted" id="info_pagina">Pagina 1 de 1</span>
-                        </div>
-                    </div>
-
-                    <div id="grid_compras" class="row"></div>
-
-                    <div class="row mt-3 mb-3">
-                        <div class="col-12 text-center">
-                            <div class="d-inline-flex align-items-center">
-                                <button type="button" id="btn_anterior" class="btn btn-primary btn-sm" disabled>
-                                    <i class="fas fa-arrow-left"></i> Anterior
-                                </button>
-                                <span id="paginador_texto" class="mx-3 font-weight-bold" style="font-size: 1em;">1 de 1</span>
-                                <button type="button" id="btn_siguiente" class="btn btn-primary btn-sm" disabled>
-                                    Siguiente <i class="fas fa-arrow-right"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
             </div>
         </div>
     </div>
@@ -92,12 +80,20 @@
         misCompras: "{{ route('servicios.mis-compras') }}",
     };
 
-    // CSRF token para todas las peticiones AJAX
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
+
+    function escapeHtml(texto) {
+        if (!texto) return '';
+        return String(texto)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
 
     function formatearValor(valor) {
         var num = parseFloat(valor) || 0;
@@ -109,89 +105,85 @@
 
     function calcularItemsPorPagina() {
         var ancho = $(window).width();
-        if (ancho >= 992) return 3;
-        else if (ancho >= 768) return 2;
-        else return 1;
+        if (ancho >= 1200) return 3;
+        if (ancho >= 768) return 2;
+        return 1;
     }
 
-    function colorEstado(estado) {
-        if (!estado) return '#6c757d';
-        var est = estado.toUpperCase();
-        if (est === 'A') return '#28a745';
-        if (est === 'C') return '#dc3545';
-        if (est === 'D') return '#fd7e14';
-        return '#6c757d';
+    function claseEstado(estado) {
+        if (!estado) return 'compra-card__estado--x';
+        var est = String(estado).toUpperCase();
+        if (est === 'A') return 'compra-card__estado--a';
+        if (est === 'C') return 'compra-card__estado--c';
+        if (est === 'D') return 'compra-card__estado--d';
+        return 'compra-card__estado--x';
     }
 
     function textoEstado(estado) {
         if (!estado) return 'Desconocido';
-        var est = estado.toUpperCase();
+        var est = String(estado).toUpperCase();
         if (est === 'A') return 'Activo';
         if (est === 'C') return 'Cancelado';
         if (est === 'D') return 'Devuelto';
         return estado;
     }
 
-    function buildDetalle(label, valor) {
-        return '<div class="row mb-1">' +
-            '<div class="col-4"><span class="campo-label">' + label + '</span></div>' +
-            '<div class="col-8"><span class="campo-valor">' + valor + '</span></div>' +
+    function buildFila(label, valor) {
+        return '<div class="compra-card__row">' +
+            '<span class="compra-card__label">' + escapeHtml(label) + '</span>' +
+            '<span class="compra-card__value">' + valor + '</span>' +
             '</div>';
     }
 
     function buildCardCompra(compra) {
         var estado = compra.estado || '';
-        var badgeColor = colorEstado(estado);
         var badgeTexto = compra.estado_texto || textoEstado(estado);
-
         var fecha = compra.fecha || '-';
         var hora = compra.hora || '';
-        var servicio = compra.nombre_servicio || '-';
-        var beneficiario = compra.nombre_beneficiario || '-';
-        var tipbenTexto = compra.tipben_texto || '';
-        var edad = compra.edad || '-';
-        var categoria = compra.codcat || '-';
+        var servicio = escapeHtml(compra.nombre_servicio || '-');
+        var beneficiario = escapeHtml(compra.nombre_beneficiario || '-');
+        var tipbenTexto = escapeHtml(compra.tipben_texto || '');
+        var edad = escapeHtml(compra.edad || '-');
+        var categoria = escapeHtml(compra.detcat || compra.codcat || '-');
         var valor = formatearValor(compra.valpago || compra.valser || 0);
-        var formaPago = compra.forma_pago_detalle || '-';
-        var refpago = compra.refpago || '-';
+        var formaPago = escapeHtml(compra.forma_pago_detalle || '-');
+        var refpago = escapeHtml(compra.refpago || '-');
         var nota = compra.nota || '';
-        var marca = compra.marca || '';
-        var documento = compra.documento || '';
-        var titular = compra.nombre_titular || '';
+        var marca = escapeHtml(compra.marca || '');
+        var documento = escapeHtml(compra.documento || '');
+        var titular = escapeHtml(compra.nombre_titular || '');
 
-        var html = '<div class="card card-compra mb-3">';
+        var tituloDoc = marca ? marca + ' - ' + documento : documento;
 
-        html += '<div class="card-header py-2" style="background-color: #3f51b5; color: white;">';
-        html += '<div class="d-flex justify-content-between align-items-center">';
-        html += '<span class="font-weight-bold">';
-        if (marca) html += marca + ' - ';
-        html += documento;
-        html += '</span>';
-        html += '<span class="badge" style="background-color:' + badgeColor + '; color: white; font-size: 0.85em; padding: 4px 10px; border-radius: 10px;">' + badgeTexto + '</span>';
+        var html = '<article class="compra-card">';
+        html += '<div class="compra-card__header">';
+        html += '<span class="compra-card__doc">' + tituloDoc + '</span>';
+        html += '<span class="compra-card__estado ' + claseEstado(estado) + '">' + escapeHtml(badgeTexto) + '</span>';
         html += '</div>';
-        html += '</div>';
-
-        html += '<div class="card-body py-2">';
-
-        html += buildDetalle('Fecha', fecha + ' ' + hora);
-        html += buildDetalle('Servicio', servicio);
-        html += buildDetalle('Beneficiario', beneficiario + (tipbenTexto ? ' (' + tipbenTexto + ')' : ''));
+        html += '<h3 class="compra-card__servicio">' + servicio + '</h3>';
+        html += '<div class="compra-card__body">';
+        html += buildFila('Fecha', escapeHtml(fecha + (hora ? ' ' + hora : '')));
+        html += buildFila('Beneficiario', beneficiario + (tipbenTexto ? ' (' + tipbenTexto + ')' : ''));
 
         if (titular && String(compra.cedtra_titular) !== String(compra.codben)) {
-            html += buildDetalle('Titular', titular + ' (' + (compra.cedtra_titular || '') + ')');
+            html += buildFila('Titular', titular + ' (' + escapeHtml(compra.cedtra_titular || '') + ')');
         }
 
-        html += buildDetalle('Edad', edad);
-        html += buildDetalle('Categoria', categoria);
-        html += buildDetalle('Valor', '<span class="font-weight-bold text-success">' + valor + '</span>');
-        html += buildDetalle('Forma de pago', formaPago);
-        html += buildDetalle('Ref. Pago', '<span style="word-break:break-all; font-size:0.85em;">' + refpago + '</span>');
+        html += buildFila('Edad', edad);
+        html += buildFila('Categoría', categoria);
+        html += buildFila('Forma de pago', formaPago);
+        html += buildFila('Ref. pago', '<span class="compra-card__ref">' + refpago + '</span>');
 
         if (nota && nota.trim() !== '') {
-            html += buildDetalle('Nota', nota);
+            html += buildFila('Nota', escapeHtml(nota));
         }
 
-        html += '</div></div>';
+        html += '</div>';
+        html += '<div class="compra-card__footer">';
+        html += '<span class="compra-card__valor-label">Valor pagado</span>';
+        html += '<span class="compra-card__valor">' + valor + '</span>';
+        html += '</div>';
+        html += '</article>';
 
         return html;
     }
@@ -201,27 +193,21 @@
         grid.empty();
 
         var totalCompras = comprasData.length;
-        var totalPaginas = Math.ceil(totalCompras / itemsPorPagina);
+        var totalPaginas = Math.max(1, Math.ceil(totalCompras / itemsPorPagina));
 
         if (paginaActual < 0) paginaActual = 0;
         if (paginaActual >= totalPaginas) paginaActual = totalPaginas - 1;
-        if (paginaActual < 0) paginaActual = 0;
 
         var inicio = paginaActual * itemsPorPagina;
         var fin = Math.min(inicio + itemsPorPagina, totalCompras);
 
-        var colClass = 'col-12';
-        if (itemsPorPagina === 2) colClass = 'col-md-6';
-        if (itemsPorPagina === 3) colClass = 'col-md-4';
-
         for (var i = inicio; i < fin; i++) {
-            var cardHtml = '<div class="' + colClass + '">' + buildCardCompra(comprasData[i]) + '</div>';
-            grid.append(cardHtml);
+            grid.append(buildCardCompra(comprasData[i]));
         }
 
         $('#paginador_texto').text((paginaActual + 1) + ' de ' + totalPaginas);
-        $('#info_pagina').text('Pagina ' + (paginaActual + 1) + ' de ' + totalPaginas);
-        $('#info_total').text('Total: ' + totalCompras + ' compras');
+        $('#info_pagina').text('Página ' + (paginaActual + 1) + ' de ' + totalPaginas);
+        $('#info_total').text(totalCompras + ' compra' + (totalCompras === 1 ? '' : 's'));
 
         $('#btn_anterior').prop('disabled', paginaActual <= 0);
         $('#btn_siguiente').prop('disabled', paginaActual >= totalPaginas - 1);
@@ -258,27 +244,31 @@
                 }
 
                 if (comprasData.length === 0) {
-                    $('#sin_compras').fadeIn();
+                    $('#sin_compras').show();
                     return;
                 }
 
                 itemsPorPagina = calcularItemsPorPagina();
                 paginaActual = 0;
-                $('#contenido_compras').fadeIn();
+                $('#contenido_compras').css('display', 'flex');
                 renderizarPagina();
             } else {
                 $('#error_mensaje').text(response.message || 'Error al cargar las compras');
-                $('#error_compras').fadeIn();
+                $('#error_compras').show();
             }
-        }).fail(function(err) {
+        }).fail(function() {
             ocultarLoader('loader_compras');
-            $('#error_mensaje').text('Error de conexion al consultar las compras');
-            $('#error_compras').fadeIn();
+            $('#error_mensaje').text('Error de conexión al consultar las compras');
+            $('#error_compras').show();
         });
     }
 
     $(document).ready(function() {
         cargarCompras();
+
+        $(document).on('click', '#btn_reintentar', function() {
+            cargarCompras();
+        });
 
         $(document).on('click', '#btn_anterior', function() {
             if (paginaActual > 0) {
@@ -299,6 +289,7 @@
         $(window).on('resize', function() {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(function() {
+                if (!$('#contenido_compras').is(':visible')) return;
                 var nuevoItems = calcularItemsPorPagina();
                 if (nuevoItems !== itemsPorPagina) {
                     itemsPorPagina = nuevoItems;
@@ -310,39 +301,4 @@
         });
     });
 </script>
-
-<style>
-    .card-compra {
-        border: 1px solid #dee2e6;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        transition: transform 0.2s;
-    }
-    .card-compra:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-    }
-    .card-compra .card-header {
-        border-radius: 10px 10px 0 0;
-        padding: 8px 15px;
-    }
-    .card-compra .card-body {
-        padding: 12px 15px;
-    }
-    .campo-label {
-        font-size: 0.82em;
-        color: #777;
-        font-weight: 600;
-    }
-    .campo-valor {
-        font-size: 0.9em;
-        color: #333;
-    }
-    #btn_anterior, #btn_siguiente {
-        min-width: 100px;
-    }
-    #paginador_texto {
-        color: #3f51b5;
-    }
-</style>
 @endpush

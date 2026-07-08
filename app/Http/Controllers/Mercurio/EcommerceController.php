@@ -275,6 +275,35 @@ class EcommerceController extends ApplicationController
             $nota = $request->input('nota', '');
             $codben = $request->input('codben');
 
+            if (empty(trim((string) $refpago))) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Referencia de pago no proporcionada',
+                ]);
+            }
+
+            $pago = $this->epayco->validarReferencia($refpago);
+
+            if (! ($pago['success'] ?? false)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $pago['errors'] ?? 'No se pudo validar el pago en ePayco',
+                ]);
+            }
+
+            $datosPago = $pago['data'] ?? [];
+            $pagoAprobado = ($datosPago['aprobado'] ?? false) === true && (int) ($datosPago['cod_estado'] ?? 0) === 1;
+
+            if (! $pagoAprobado) {
+                $estado = $datosPago['cod_estado'] ?? 'desconocido';
+                $motivo = $datosPago['motivo'] ?? $datosPago['respuesta'] ?? 'Pago no aprobado';
+
+                return response()->json([
+                    'success' => false,
+                    'message' => "El pago no fue aprobado en ePayco. Estado: {$estado}. {$motivo}",
+                ]);
+            }
+
             $params = [
                 'cedtra' => $cedtra,
                 'codser' => $codser,

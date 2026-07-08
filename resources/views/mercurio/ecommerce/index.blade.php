@@ -14,7 +14,7 @@
                         Elija el beneficiario, seleccione un servicio y complete el pago.
                     </p>
                 </div>
-                <a href="{{ route('servicios.ver-compras') }}" class="btn btn-outline-light btn-sm align-self-start align-self-md-center">
+                <a href="{{ route('servicios.ver-compras') }}" class="btn btn-sm servicios-catalog__btn-compras align-self-start align-self-md-center">
                     <i class="fas fa-receipt"></i> Mis compras
                 </a>
             </div>
@@ -62,15 +62,27 @@
 
                             <div id="contenedor_servicios" class="servicios-catalog__servicios-wrap" style="display:none;">
                                 <div class="servicios-catalog__toolbar">
-                                    <div class="input-group servicios-catalog__search">
-                                        <span class="input-group-text"><i class="fas fa-search"></i></span>
-                                        <input
-                                            type="search"
-                                            id="buscar_servicio"
-                                            class="form-control"
-                                            placeholder="Buscar por nombre, categoría o código..."
-                                            autocomplete="off"
-                                        >
+                                    <div class="servicios-catalog__filters">
+                                        <div class="input-group servicios-catalog__search">
+                                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                            <input
+                                                type="search"
+                                                id="buscar_servicio"
+                                                class="form-control"
+                                                placeholder="Buscar por nombre, categoría o código..."
+                                                autocomplete="off"
+                                            >
+                                        </div>
+                                        <div class="servicios-catalog__filter-wrap">
+                                            <select
+                                                id="filtro_codser"
+                                                class="form-control servicios-catalog__filter"
+                                                data-toggle="select"
+                                                aria-label="Filtrar por servicio"
+                                            >
+                                                <option value="">Todos los servicios</option>
+                                            </select>
+                                        </div>
                                     </div>
                                     <span id="contador_servicios" class="servicios-catalog__counter badge"></span>
                                 </div>
@@ -85,44 +97,75 @@
                         </section>
                     </div>
 
-                    <aside id="panel_compra" class="panel-compra" style="display:none;">
-                        <div class="panel-compra__inner">
-                            <h3 class="panel-compra__title">Resumen de compra</h3>
-                            <p id="panel_servicio_nombre" class="panel-compra__servicio"></p>
+                    <div id="panel_compra_slot" class="panel-compra-slot">
+                        <aside id="panel_compra" class="panel-compra" style="display:none;">
+                            <div class="panel-compra__inner">
+                                <h3 class="panel-compra__title">Resumen de compra</h3>
 
-                            <div id="loader_tarifa" class="text-center py-3" style="display:none;">
-                                <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                                <span class="ml-2 text-muted">Validando tarifa...</span>
-                            </div>
-
-                            <div id="error_tarifa" class="alert alert-warning py-2" style="display:none;">
-                                <i class="fas fa-exclamation-circle"></i>
-                                <span id="error_tarifa_msg"></span>
-                            </div>
-
-                            <div id="detalle_tarifa" style="display:none;">
-                                <div class="panel-compra__valor-wrap">
-                                    <span class="panel-compra__valor-label">Valor del servicio</span>
-                                    <span id="txt_valor" class="panel-compra__valor"></span>
-                                    <input type="hidden" id="hid_valor_raw">
+                                <div id="panel_beneficiario" class="panel-compra__beneficiario" style="display:none;">
+                                    <span class="panel-compra__beneficiario-label">Beneficiario</span>
+                                    <span id="panel_beneficiario_nombre" class="panel-compra__beneficiario-nombre"></span>
+                                    <span id="panel_beneficiario_doc" class="panel-compra__beneficiario-doc"></span>
                                 </div>
 
-                                <input type="hidden" id="txt_tarifa_categoria">
-                                <input type="hidden" id="txt_temporada">
-                                <input type="hidden" id="txt_tarifa_cupos">
+                                <p id="panel_servicio_nombre" class="panel-compra__servicio"></p>
 
-                                <div class="form-group mt-3">
-                                    <label for="txt_nota" class="form-label">Nota (opcional)</label>
-                                    <textarea id="txt_nota" class="form-control" rows="2" placeholder="Escriba una nota si lo desea..."></textarea>
+                                <div id="loader_tarifa" class="text-center py-3" style="display:none;">
+                                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                    <span class="ml-2 text-muted">Validando tarifa...</span>
                                 </div>
 
-                                <button type="button" id="btn_procesar_pago" class="btn btn-primary btn-lg w-100 mt-3">
-                                    <i class="fas fa-credit-card"></i> Procesar pago
-                                </button>
+                                <div id="error_tarifa" class="alert alert-warning py-2" style="display:none;">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    <span id="error_tarifa_msg"></span>
+                                </div>
+
+                                <div id="detalle_tarifa" style="display:none;">
+                                    <div class="panel-compra__valor-wrap">
+                                        <span class="panel-compra__valor-label">Valor del servicio</span>
+                                        <span id="txt_valor" class="panel-compra__valor"></span>
+                                        <input type="hidden" id="hid_valor_raw">
+                                    </div>
+
+                                    <div class="panel-compra__cupos-wrap mt-2">
+                                        <span class="panel-compra__valor-label">Cupos disponibles este mes</span>
+                                        <span id="txt_cupos_mes" class="panel-compra__cupos-mes">-</span>
+                                    </div>
+
+                                    <input type="hidden" id="txt_tarifa_categoria">
+                                    <input type="hidden" id="txt_temporada">
+                                    <input type="hidden" id="txt_tarifa_cupos">
+                                    <input type="hidden" id="hid_cupos_mes" value="">
+
+                                    <div class="form-group mt-3">
+                                        <label for="txt_nota" class="form-label">Nota (opcional)</label>
+                                        <textarea id="txt_nota" class="form-control" rows="2" placeholder="Escriba una nota si lo desea..."></textarea>
+                                    </div>
+
+                                    <button type="button" id="btn_procesar_pago" class="btn btn-primary btn-lg w-100 mt-3">
+                                        <i class="fas fa-credit-card"></i> Procesar pago
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    </aside>
+                        </aside>
+                    </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <button type="button" id="btn_carrito_movil" class="servicios-cart-fab" aria-label="Ver resumen de compra" style="display:none;">
+        <i class="fas fa-shopping-cart"></i>
+    </button>
+
+    <div class="modal fade" id="modal_resumen_compra" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Resumen de compra</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body" id="modal_resumen_compra_body"></div>
             </div>
         </div>
     </div>
@@ -156,6 +199,8 @@
     var serviciosData = [];
     var servicioSeleccionado = null;
     var busquedaServicio = '';
+    var filtroCodserServicio = '';
+    var modalResumenCompra = null;
 
     var TIPOS_BEN = { T: 'Trabajador', C: 'Conyuge', B: 'Beneficiario' };
 
@@ -215,24 +260,206 @@
         return ben.codben || ben.cedtra || '';
     }
 
+    function actualizarPanelBeneficiario() {
+        var ben = beneficiarioSeleccionado;
+        if (!ben) {
+            $('#panel_beneficiario').hide();
+            $('#panel_beneficiario_nombre').text('');
+            $('#panel_beneficiario_doc').text('');
+            return;
+        }
+
+        $('#panel_beneficiario_nombre').text(ben.nombre || '-');
+        $('#panel_beneficiario_doc').text(obtenerCodben(ben));
+        $('#panel_beneficiario').show();
+    }
+
     function limpiarSeleccionServicio() {
         servicioSeleccionado = null;
         $('#hid_codser').val('');
         $('#hid_numero').val('');
+        $('#hid_cupos_mes').val('');
+        $('#txt_cupos_mes').text('-').removeClass('panel-compra__cupos-mes--cero');
+        $('#btn_procesar_pago').prop('disabled', false).show();
         $('.servicio-card--selected').removeClass('servicio-card--selected');
+        cerrarResumenCompraMovil();
+        restaurarPanelAlSlot();
         $('#panel_compra').hide();
+        $('#btn_carrito_movil').hide();
         $('#detalle_tarifa').hide();
         $('#error_tarifa').hide();
         $('#panel_servicio_nombre').text('');
     }
 
+    function esVistaMovil() {
+        return window.matchMedia('(max-width: 991.98px)').matches;
+    }
+
+    function moverPanelAlModal() {
+        $('#modal_resumen_compra_body').append($('#panel_compra'));
+    }
+
+    function restaurarPanelAlSlot() {
+        $('#panel_compra_slot').append($('#panel_compra'));
+    }
+
+    function actualizarFabCarrito() {
+        if (esVistaMovil() && servicioSeleccionado) {
+            $('#btn_carrito_movil').css('display', 'flex');
+        } else {
+            $('#btn_carrito_movil').hide();
+        }
+    }
+
+    function mostrarPanelCompra() {
+        if (esVistaMovil()) {
+            if ($('#modal_resumen_compra').hasClass('show')) {
+                cerrarResumenCompraMovil();
+            } else {
+                restaurarPanelAlSlot();
+                $('#panel_compra').hide();
+            }
+            actualizarFabCarrito();
+            return;
+        }
+
+        restaurarPanelAlSlot();
+        $('#panel_compra').show();
+        $('#btn_carrito_movil').hide();
+    }
+
+    function abrirResumenCompraMovil() {
+        if (!servicioSeleccionado) {
+            Swal.fire({
+                title: 'Atención',
+                text: 'Seleccione un beneficiario y un servicio para ver el resumen.',
+                icon: 'warning',
+                confirmButtonText: 'Entendido'
+            });
+            return;
+        }
+
+        moverPanelAlModal();
+        $('#panel_compra').show();
+
+        if (modalResumenCompra) {
+            modalResumenCompra.show();
+        }
+    }
+
+    function cerrarResumenCompraMovil() {
+        if (modalResumenCompra && $('#modal_resumen_compra').hasClass('show')) {
+            modalResumenCompra.hide();
+        }
+    }
+
+    function sincronizarVistaCompra() {
+        if (!esVistaMovil()) {
+            cerrarResumenCompraMovil();
+            restaurarPanelAlSlot();
+            if (servicioSeleccionado) {
+                $('#panel_compra').show();
+            } else {
+                $('#panel_compra').hide();
+            }
+            $('#btn_carrito_movil').hide();
+            return;
+        }
+
+        if ($('#modal_resumen_compra').hasClass('show')) {
+            return;
+        }
+
+        restaurarPanelAlSlot();
+        if (servicioSeleccionado) {
+            $('#panel_compra').hide();
+            actualizarFabCarrito();
+        } else {
+            $('#panel_compra').hide();
+            $('#btn_carrito_movil').hide();
+        }
+    }
+
+    function obtenerCuposMes(data, srv) {
+        var valor = null;
+
+        if (data && data.cupos_mes !== undefined && data.cupos_mes !== null && data.cupos_mes !== '') {
+            valor = data.cupos_mes;
+        } else if (srv && srv.cupos_mes !== undefined && srv.cupos_mes !== null && srv.cupos_mes !== '') {
+            valor = srv.cupos_mes;
+        }
+
+        if (valor === null) {
+            return null;
+        }
+
+        return parseInt(valor, 10) || 0;
+    }
+
+    function actualizarCuposMesResumen(cuposMes) {
+        var texto = cuposMes === null ? '-' : String(cuposMes);
+        $('#txt_cupos_mes').text(texto);
+        $('#hid_cupos_mes').val(cuposMes === null ? '' : String(cuposMes));
+        $('#txt_cupos_mes').toggleClass('panel-compra__cupos-mes--cero', cuposMes === 0);
+
+        if (cuposMes === 0) {
+            $('#btn_procesar_pago').prop('disabled', true).hide();
+            return false;
+        }
+
+        $('#btn_procesar_pago').prop('disabled', false).show();
+        return true;
+    }
+
+    function mostrarAlertaCuposMesCero() {
+        Swal.fire({
+            title: 'Sin cupos disponibles',
+            html: '<p>No hay cupos disponibles para este servicio en el mes actual.</p>' +
+                '<p class="text-muted mb-0">No es posible continuar con la compra.</p>',
+            icon: 'warning',
+            confirmButtonText: 'Entendido'
+        });
+    }
+
+    function limpiarSessionEpayco() {
+        sessionStorage.removeItem('epayco_cedtra');
+        sessionStorage.removeItem('epayco_codser');
+        sessionStorage.removeItem('epayco_numero');
+        sessionStorage.removeItem('epayco_nota');
+        sessionStorage.removeItem('epayco_codben');
+    }
+
+    function pagoEpaycoAprobado(datos) {
+        return datos && parseInt(datos.cod_estado) === 1 && datos.aprobado === true;
+    }
+
+    function mostrarPagoNoRegistrado(codEstado, refPayco, motivo) {
+        var estadoTexto = obtenerTextoEstadoEpayco(codEstado);
+        limpiarSessionEpayco();
+
+        Swal.fire({
+            title: 'Pago no completado',
+            html: '<p>Estado: <b>' + estadoTexto + '</b></p>' +
+                '<p>Referencia: ' + (refPayco || '-') + '</p>' +
+                (motivo ? '<p>Motivo: ' + motivo + '</p>' : '') +
+                '<p class="text-muted mt-2">La venta no fue registrada.</p>',
+            icon: 'warning',
+            showConfirmButton: true,
+            confirmButtonText: 'Entendido'
+        });
+    }
+
     function verificarRespuestaEpayco() {
         var urlParams = window.location.search;
         var refPayco = '';
+        var codEstadoUrl = 0;
+        var motivoUrl = '';
 
         if (urlParams) {
             var params = new URLSearchParams(urlParams);
             refPayco = params.get('ref_payco') || params.get('refPayco') || params.get('x_ref_payco') || '';
+            codEstadoUrl = parseInt(params.get('x_cod_transaction_state') || params.get('cod_transaction_state') || '0') || 0;
+            motivoUrl = params.get('x_response_reason_text') || params.get('x_response') || '';
         }
 
         if (!refPayco) {
@@ -246,6 +473,11 @@
         if (refPayco) {
             if (window.history && window.history.replaceState) {
                 window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            if (codEstadoUrl && codEstadoUrl !== 1) {
+                mostrarPagoNoRegistrado(codEstadoUrl, refPayco, motivoUrl);
+                return;
             }
 
             Swal.fire({
@@ -270,31 +502,11 @@
             if (response.success && response.data) {
                 var datos = response.data;
                 var codEstado = parseInt(datos.cod_estado) || 0;
-                var estadoTexto = obtenerTextoEstadoEpayco(codEstado);
-                var motivo = datos.motivo || datos.respuesta || 'Sin detalle';
 
-                if (codEstado === 10 || codEstado === 11) {
-                    Swal.fire({
-                        title: 'Transaccion ' + (codEstado === 11 ? 'cancelada' : 'abandonada'),
-                        html: '<p>Estado: <b>' + estadoTexto + '</b></p>' +
-                            '<p>Referencia: ' + refPayco + '</p>' +
-                            '<p class="text-muted mt-2">La venta NO fue registrada. Puede intentar nuevamente.</p>',
-                        icon: 'error',
-                        showConfirmButton: true,
-                        confirmButtonText: 'Entendido'
-                    });
-                    sessionStorage.removeItem('epayco_cedtra');
-                    sessionStorage.removeItem('epayco_codser');
-                    sessionStorage.removeItem('epayco_numero');
-                    sessionStorage.removeItem('epayco_nota');
-                    sessionStorage.removeItem('epayco_codben');
-                    return;
-                }
-
-                if (codEstado === 1) {
+                if (pagoEpaycoAprobado(datos)) {
                     Swal.fire({
                         title: 'Pago aprobado',
-                        html: '<p>Estado: <b>' + estadoTexto + '</b></p>' +
+                        html: '<p>Estado: <b>' + obtenerTextoEstadoEpayco(codEstado) + '</b></p>' +
                             '<p>Referencia: <b>' + (datos.ref_payco || refPayco) + '</b></p>' +
                             '<p>Monto: <b>$' + datos.monto + '</b></p>' +
                             '<p>Guardando la venta...</p>',
@@ -303,42 +515,31 @@
                         allowOutsideClick: false
                     });
                     guardarVenta(datos.ref_payco || refPayco);
-                } else {
-                    Swal.fire({
-                        title: 'Estado ePayco: ' + estadoTexto,
-                        html: '<p>Motivo: ' + motivo + '</p>' +
-                            '<p>Referencia: ' + refPayco + '</p>' +
-                            '<hr><p class="text-info">Se registrara la venta.</p>',
-                        icon: 'warning',
-                        showConfirmButton: false,
-                        allowOutsideClick: false,
-                        timer: 4000
-                    });
-                    setTimeout(function() { guardarVenta(refPayco); }, 2000);
+                    return;
                 }
+
+                mostrarPagoNoRegistrado(codEstado, refPayco, datos.motivo || datos.respuesta || 'Sin detalle');
             } else {
+                limpiarSessionEpayco();
                 Swal.fire({
                     title: 'No se pudo verificar el pago',
                     html: '<p>' + (response.message || 'Error al consultar ePayco') + '</p>' +
-                        '<p>Referencia: ' + refPayco + '</p>' +
-                        '<hr><p class="text-info">Se registrara la venta de todas formas.</p>',
-                    icon: 'warning',
-                    showConfirmButton: false,
-                    timer: 4000
+                        '<p>La venta no fue registrada.</p>',
+                    icon: 'error',
+                    showConfirmButton: true,
+                    confirmButtonText: 'Entendido'
                 });
-                setTimeout(function() { guardarVenta(refPayco); }, 2000);
             }
         }).fail(function() {
+            limpiarSessionEpayco();
             Swal.fire({
                 title: 'Error de conexion',
                 html: '<p>No se pudo verificar el pago con ePayco.</p>' +
-                    '<p>Referencia: ' + refPayco + '</p>' +
-                    '<hr><p class="text-info">Se registrara la venta de todas formas.</p>',
-                icon: 'warning',
-                showConfirmButton: false,
-                timer: 4000
+                    '<p>La venta no fue registrada.</p>',
+                icon: 'error',
+                showConfirmButton: true,
+                confirmButtonText: 'Entendido'
             });
-            setTimeout(function() { guardarVenta(refPayco); }, 2000);
         });
     }
 
@@ -439,6 +640,7 @@
         $('#hid_codben').val(codben);
         $('.beneficiario-card').removeClass('beneficiario-card--selected');
         $('.beneficiario-card[data-codben="' + codben + '"]').addClass('beneficiario-card--selected');
+        actualizarPanelBeneficiario();
         limpiarSeleccionServicio();
     }
 
@@ -447,37 +649,120 @@
         var texto = (
             (srv.nombre || '') + ' ' +
             (srv.detalle || '') + ' ' +
-            (srv.codser || '')
+            (srv.codser || '') + ' ' +
+            (srv.uis_ciudad || '')
         ).toLowerCase();
         return texto.indexOf(query.toLowerCase()) !== -1;
     }
 
-    function contarServiciosDisponibles(servicios, query) {
+    function servicioCoincideCodser(srv, codser) {
+        if (!codser) return true;
+        return String(srv.codser) === String(codser);
+    }
+
+    function servicioPasaFiltros(srv, query, codser) {
+        return servicioCoincideBusqueda(srv, query) && servicioCoincideCodser(srv, codser);
+    }
+
+    function initFiltroCodserSelect2() {
+        var $select = $('#filtro_codser');
+
+        if (!$select.length || typeof $.fn.select2 === 'undefined') {
+            return;
+        }
+
+        if ($select.hasClass('select2-hidden-accessible')) {
+            $select.select2('destroy');
+        }
+
+        $select.select2({
+            allowClear: true,
+            placeholder: 'Todos los servicios',
+            width: '100%',
+            minimumResultsForSearch: 6,
+            language: {
+                noResults: function() {
+                    return 'Sin resultados';
+                },
+                searching: function() {
+                    return 'Buscando...';
+                }
+            }
+        });
+    }
+
+    function poblarFiltroCodser(servicios) {
+        var select = $('#filtro_codser');
+        var valorActual = filtroCodserServicio;
+        var opciones = {};
+
+        if (select.hasClass('select2-hidden-accessible')) {
+            select.select2('destroy');
+        }
+
+        $.each(servicios || [], function(i, srv) {
+            if (!srv.codser || opciones[srv.codser]) {
+                return;
+            }
+            opciones[srv.codser] = srv.detalle || srv.nombre || String(srv.codser);
+        });
+
+        var items = Object.keys(opciones).map(function(codser) {
+            return { codser: codser, detalle: opciones[codser] };
+        });
+
+        items.sort(function(a, b) {
+            return String(a.detalle).localeCompare(String(b.detalle), 'es', { sensitivity: 'base' });
+        });
+
+        select.find('option:not(:first)').remove();
+
+        $.each(items, function(i, item) {
+            select.append(
+                $('<option></option>')
+                    .val(item.codser)
+                    .text(item.detalle)
+            );
+        });
+
+        if (valorActual && opciones[valorActual]) {
+            select.val(valorActual);
+        } else {
+            filtroCodserServicio = '';
+            select.val('');
+        }
+
+        initFiltroCodserSelect2();
+    }
+
+    function contarServiciosDisponibles(servicios, query, codser) {
         var count = 0;
         $.each(servicios, function(i, srv) {
             var cupos = parseInt(srv.cupos_disponibles, 10) || 0;
-            if (cupos > 0 && servicioCoincideBusqueda(srv, query)) {
+            if (cupos > 0 && servicioPasaFiltros(srv, query, codser)) {
                 count++;
             }
         });
         return count;
     }
 
-    function renderServiciosGrid(servicios, query) {
+    function renderServiciosGrid(servicios, query, codser) {
         var grid = $('#grid_servicios');
         grid.empty();
         query = query || '';
+        codser = codser || '';
         busquedaServicio = query;
+        filtroCodserServicio = codser;
 
         var visibles = 0;
-        var disponibles = contarServiciosDisponibles(servicios, query);
+        var disponibles = contarServiciosDisponibles(servicios, query, codser);
 
         $('#contador_servicios').text(
             disponibles + ' servicio' + (disponibles === 1 ? '' : 's') + ' disponible' + (disponibles === 1 ? '' : 's')
         );
 
         $.each(servicios, function(i, srv) {
-            if (!servicioCoincideBusqueda(srv, query)) {
+            if (!servicioPasaFiltros(srv, query, codser)) {
                 return;
             }
 
@@ -486,6 +771,9 @@
             var sinCupos = cupos <= 0;
             var valmes = srv.valmes === 'S';
             var cardKey = srv.codser + '|' + srv.numero;
+            var ciudadHtml = srv.uis_ciudad
+                ? '<span><i class="fas fa-map-marker-alt"></i> ' + escapeHtml(srv.uis_ciudad) + '</span>'
+                : '';
 
             var card = $(
                 '<button type="button" class="servicio-card' + (sinCupos ? ' servicio-card--disabled' : '') + '"' +
@@ -501,6 +789,7 @@
                     '<h3 class="servicio-card__titulo">' + escapeHtml(srv.nombre || '') + '</h3>' +
                     '<p class="servicio-card__detalle">' + escapeHtml(srv.detalle || '') + '</p>' +
                     '<div class="servicio-card__meta">' +
+                        ciudadHtml +
                         '<span><i class="fas fa-child"></i> ' + escapeHtml(String(srv.edadini)) + '–' + escapeHtml(String(srv.edadfin)) + ' años</span>' +
                         '<span><i class="far fa-calendar-alt"></i> ' + escapeHtml(srv.fecini || '') + ' – ' + escapeHtml(srv.fecfin || '') + '</span>' +
                     '</div>' +
@@ -521,8 +810,15 @@
         $('#sin_servicios').toggle(visibles === 0);
     }
 
-    function filtrarServicios(query) {
-        renderServiciosGrid(serviciosData, query);
+    function filtrarServicios() {
+        var query = $('#buscar_servicio').val().trim();
+        var codser = $('#filtro_codser').val();
+
+        if (servicioSeleccionado && !servicioPasaFiltros(servicioSeleccionado, query, codser)) {
+            limpiarSeleccionServicio();
+        }
+
+        renderServiciosGrid(serviciosData, query, codser);
     }
 
     function cargarServicios() {
@@ -540,7 +836,8 @@
 
             if (response.success) {
                 serviciosData = response.data || [];
-                renderServiciosGrid(serviciosData, busquedaServicio);
+                poblarFiltroCodser(serviciosData);
+                renderServiciosGrid(serviciosData, busquedaServicio, filtroCodserServicio);
                 $('#contenedor_servicios').css('display', 'flex');
             } else {
                 Swal.fire({
@@ -564,13 +861,26 @@
     }
 
     function seleccionarServicio(srv) {
+        var codben = $('#hid_codben').val();
+
+        if (!codben || !beneficiarioSeleccionado) {
+            Swal.fire({
+                title: 'Atención',
+                text: 'Debe seleccionar un beneficiario antes de elegir un servicio.',
+                icon: 'warning',
+                confirmButtonText: 'Entendido'
+            });
+            return;
+        }
+
         servicioSeleccionado = srv;
         var cardKey = srv.codser + '|' + srv.numero;
 
         $('.servicio-card').removeClass('servicio-card--selected');
         $('.servicio-card[data-key="' + cardKey + '"]').addClass('servicio-card--selected');
 
-        $('#panel_compra').show();
+        mostrarPanelCompra();
+        actualizarPanelBeneficiario();
         $('#panel_servicio_nombre').text(srv.nombre || '');
         $('#detalle_tarifa').hide();
         $('#error_tarifa').hide();
@@ -583,6 +893,8 @@
 
         $('#detalle_tarifa').hide();
         $('#error_tarifa').hide();
+        $('#txt_cupos_mes').text('-').removeClass('panel-compra__cupos-mes--cero');
+        $('#btn_procesar_pago').prop('disabled', false).show();
         mostrarLoader('loader_tarifa');
 
         $('#hid_codser').val(codser);
@@ -604,20 +916,32 @@
 
             if (response.success) {
                 var data = response.data;
+                var cuposMes = obtenerCuposMes(data, servicioSeleccionado);
+
                 $('#txt_valor').text(formatearValor(data.valser));
                 $('#hid_valor_raw').val(data.valser);
                 $('#txt_tarifa_categoria').val(data.categoria || '');
                 $('#txt_temporada').val(data.temporada || '');
                 $('#txt_tarifa_cupos').val(data.cupos_disponibles || '0');
+
+                var puedeComprar = actualizarCuposMesResumen(cuposMes);
                 $('#detalle_tarifa').fadeIn();
+
+                if (!puedeComprar) {
+                    mostrarAlertaCuposMesCero();
+                }
+
+                actualizarFabCarrito();
             } else {
                 $('#error_tarifa_msg').text(response.message || 'No se pudo validar la tarifa');
                 $('#error_tarifa').fadeIn();
+                actualizarFabCarrito();
             }
         }).fail(function() {
             ocultarLoader('loader_tarifa');
             $('#error_tarifa_msg').text('Error de conexion al validar tarifa');
             $('#error_tarifa').fadeIn();
+            actualizarFabCarrito();
         });
     }
 
@@ -662,7 +986,7 @@
                 setTimeout(function() {
                     limpiarSeleccionServicio();
                     $('#txt_nota').val('');
-                    renderServiciosGrid(serviciosData, busquedaServicio);
+                    renderServiciosGrid(serviciosData, busquedaServicio, filtroCodserServicio);
                 }, 3000);
             } else {
                 Swal.fire({
@@ -685,6 +1009,27 @@
     }
 
     $(document).ready(function() {
+        var modalEl = document.getElementById('modal_resumen_compra');
+        if (modalEl && typeof bootstrap !== 'undefined') {
+            modalResumenCompra = new bootstrap.Modal(modalEl);
+        }
+
+        $('#btn_carrito_movil').on('click', abrirResumenCompraMovil);
+
+        $('#modal_resumen_compra').on('hidden.bs.modal', function() {
+            restaurarPanelAlSlot();
+            if (esVistaMovil()) {
+                $('#panel_compra').hide();
+                actualizarFabCarrito();
+            }
+        });
+
+        var resizeTimer;
+        $(window).on('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(sincronizarVistaCompra, 150);
+        });
+
         identificarTrabajador();
         verificarRespuestaEpayco();
 
@@ -698,7 +1043,11 @@
         });
 
         $(document).on('input', '#buscar_servicio', function() {
-            filtrarServicios($(this).val().trim());
+            filtrarServicios();
+        });
+
+        $(document).on('change', '#filtro_codser', function() {
+            filtrarServicios();
         });
 
         $(document).on('click', '.servicio-card:not(.servicio-card--disabled)', function() {
@@ -721,6 +1070,17 @@
                     showConfirmButton: false,
                     timer: 3000
                 });
+                target.removeAttr('disabled');
+                return;
+            }
+
+            var cuposMes = obtenerCuposMes(null, servicioSeleccionado);
+            if (cuposMes === null && $('#hid_cupos_mes').val() !== '') {
+                cuposMes = parseInt($('#hid_cupos_mes').val(), 10) || 0;
+            }
+
+            if (cuposMes === 0) {
+                mostrarAlertaCuposMesCero();
                 target.removeAttr('disabled');
                 return;
             }
