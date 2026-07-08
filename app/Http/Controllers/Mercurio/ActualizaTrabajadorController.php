@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
+use App\Http\Controllers\Mercurio\Concerns\RendersSolicitudesGrid;
 use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
 use App\Models\FormularioDinamico;
@@ -18,18 +19,20 @@ use App\Models\Mercurio33;
 use App\Models\Mercurio37;
 use App\Models\Mercurio47;
 use App\Models\Subsi54;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Entidades\DatosTrabajadorService;
+use App\Services\Entidades\EmpresaService;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\Logger;
 use App\Services\Utils\SenderValidationCaja;
-use App\Services\Api\ApiSubsidio;
-use App\Services\Entidades\EmpresaService;
 use Illuminate\Http\Request;
 use TCPDF;
 
 class ActualizaTrabajadorController extends ApplicationController
 {
+    use RendersSolicitudesGrid;
+
     protected $tipopc = '14';
 
     protected $db;
@@ -106,7 +109,7 @@ class ActualizaTrabajadorController extends ApplicationController
                 $codciu["{$entity->getCodzon()}"] = $entity->getDetzon();
             }
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -116,7 +119,7 @@ class ActualizaTrabajadorController extends ApplicationController
             $paramsTrabajador = new ParamsTrabajador;
             $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -134,7 +137,7 @@ class ActualizaTrabajadorController extends ApplicationController
                         continue;
                     }
                     if (isset($codciu[$data['codzon']])) {
-                        $codsuc["{$data['codsuc']}"] = $data['detalle'] . ' - DE ' . $codciu[$data['codzon']];
+                        $codsuc["{$data['codsuc']}"] = $data['detalle'].' - DE '.$codciu[$data['codzon']];
                     } else {
                         $codsuc["{$data['codsuc']}"] = $data['detalle'];
                     }
@@ -179,7 +182,7 @@ class ActualizaTrabajadorController extends ApplicationController
                 'codban' => ParamsTrabajador::getBancos(),
                 'codsuc' => $codsuc,
                 'indipais' => indicativos_paises_array(),
-                'indidepa' => indicativos_departamentos_array()
+                'indidepa' => indicativos_departamentos_array(),
             ];
 
             $formulario = FormularioDinamico::where('name', 'mercurio472')->first();
@@ -190,6 +193,7 @@ class ActualizaTrabajadorController extends ApplicationController
                     $_componente['data_source'] = $data[$componente->name];
                 }
                 $_componente['id'] = $componente->name;
+
                 return $_componente;
             });
 
@@ -241,7 +245,7 @@ class ActualizaTrabajadorController extends ApplicationController
 
     public function buscarTrabajadorSubsidio($cedtra)
     {
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
@@ -273,9 +277,10 @@ class ActualizaTrabajadorController extends ApplicationController
         return response()->json($salida);
     }
 
-    function buscarEmpresaSubsidio($nit)
+    public function buscarEmpresaSubsidio($nit)
     {
         $empresaService = new EmpresaService;
+
         return $empresaService->buscarEmpresaSubsidio($nit);
     }
 
@@ -364,6 +369,7 @@ class ActualizaTrabajadorController extends ApplicationController
             return response()->json($salida);
         } catch (\Throwable $e) {
             $this->db->rollBack();
+
             return $this->handleException($e, $request);
         }
     }
@@ -390,9 +396,11 @@ class ActualizaTrabajadorController extends ApplicationController
                 'msj' => 'El registro se borro con éxito del sistema.',
             ];
             $this->db->commit();
+
             return response()->json($salida);
         } catch (\Throwable $e) {
             $this->db->rollBack();
+
             return $this->handleException($e);
         }
     }
@@ -452,14 +460,16 @@ class ActualizaTrabajadorController extends ApplicationController
                 'id' => $id,
             ];
             $this->db->commit();
+
             return response()->json($salida);
         } catch (\Throwable $e) {
             $this->db->rollBack();
+
             return $this->handleException($e);
         }
     }
 
-    function archivosRequeridos($mercurio47)
+    public function archivosRequeridos($mercurio47)
     {
         $archivos = [];
         $mercurio13 = Mercurio13::where('tipopc', $this->tipopc)->get();
@@ -529,6 +539,7 @@ class ActualizaTrabajadorController extends ApplicationController
         } catch (\Throwable $e) {
             return $this->handleException($e, $request);
         }
+
         return response()->json($salida);
     }
 
@@ -540,7 +551,7 @@ class ActualizaTrabajadorController extends ApplicationController
             $coddoc = $request->input('coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
+            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -557,6 +568,7 @@ class ActualizaTrabajadorController extends ApplicationController
             $this->db->commit();
         } catch (\Throwable $e) {
             $this->db->rollBack();
+
             return $this->handleException($e, $request);
         }
 
@@ -591,6 +603,7 @@ class ActualizaTrabajadorController extends ApplicationController
             $this->db->commit();
         } catch (\Throwable $e) {
             $this->db->rollBack();
+
             return $this->handleException($e, $request);
         }
 
@@ -613,15 +626,16 @@ class ActualizaTrabajadorController extends ApplicationController
             $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
             $datosService->enviarCaja(new SenderValidationCaja, $id, $usuario);
 
-
             $salida = [
                 'success' => true,
                 'msj' => 'El envio de la solicitud se ha completado con éxito',
             ];
             $this->db->commit();
+
             return response()->json($salida);
         } catch (\Throwable $e) {
             $this->db->rollBack();
+
             return $this->handleException($e, $request);
         }
     }
@@ -660,7 +674,7 @@ class ActualizaTrabajadorController extends ApplicationController
             }
         }
 
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -673,7 +687,7 @@ class ActualizaTrabajadorController extends ApplicationController
             $_bancos[$data['codcue']] = $data['detalle'];
         }
 
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -704,17 +718,17 @@ class ActualizaTrabajadorController extends ApplicationController
         $pdf->AddPage();
         $pdf->SetTextColor(0);
         $pdf->SetFont('Arial', '', 9);
-        $pdf->Image(base_path() . 'public/docs/formulario_mercurio/fomulario_actualizacion_trabajador_parte_1.jpeg', 0, 0, '216', '280');
+        $pdf->Image(base_path().'public/docs/formulario_mercurio/fomulario_actualizacion_trabajador_parte_1.jpeg', 0, 0, '216', '280');
         $tipos_documentos = $this->getTiposDocumentos();
 
         $pdf->setY(57);
         $pdf->setX(20);
-        $pdf->Cell(180, 5, $campos->prinom . ' ' . $campos->segnom . ' ' . $campos->priape . ' ' . $campos->segape, 0, 0, 'L');
+        $pdf->Cell(180, 5, $campos->prinom.' '.$campos->segnom.' '.$campos->priape.' '.$campos->segape, 0, 0, 'L');
 
         $pdf->SetFont('Arial', '', 8);
         $pdf->setY(53);
         $pdf->setX(150);
-        $pdf->Cell(53, 6, '(' . @$tipos_documentos["{$trabajador['coddoc']}"] . ') ' . $documento, 0, 0, 'L');
+        $pdf->Cell(53, 6, '('.@$tipos_documentos["{$trabajador['coddoc']}"].') '.$documento, 0, 0, 'L');
 
         $pdf->setY(62);
         $pdf->setX(150);
@@ -794,23 +808,15 @@ class ActualizaTrabajadorController extends ApplicationController
         $pdf->Output('formulario_afiliacion.pdf', 'D');
     }
 
-    public function renderTable($estado = '')
+    public function renderTable(Request $request, ?string $estado = null)
     {
-        try {
-            $datosTrabajadorService = new DatosTrabajadorService;
-            $html = view(
-                'mercurio/actualizadatostra/tmp/solicitudes',
-                [
-                    'path' => base_path(),
-                    'solicitudes' => $datosTrabajadorService->findAllByEstado($estado),
-                ]
-            )->render();
-
-            $this->setResponse('view');
-            return $this->renderText($html);
-        } catch (\Throwable $e) {
-            return $this->handleException($e, request());
-        }
+        return $this->renderSolicitudesGrid(
+            $request,
+            $estado,
+            new DatosTrabajadorService,
+            'mercurio/actualizadatostra/tmp/solicitudes',
+            'solicitudes'
+        );
     }
 
     public function searchRequest($id)

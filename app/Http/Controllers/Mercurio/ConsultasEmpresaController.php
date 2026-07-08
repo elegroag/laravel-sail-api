@@ -19,14 +19,14 @@ use App\Models\Mercurio33;
 use App\Models\Mercurio34;
 use App\Models\Mercurio35;
 use App\Models\Mercurio37;
-use App\Services\Utils\AsignarFuncionario;
-use App\Services\Utils\GeneralService;
-use App\Services\Utils\Logger;
-use App\Services\Utils\UploadFile;
 use App\Services\Api\ApiSubsidio;
 use App\Services\Certificados\CertiEmpleador;
 use App\Services\Certificados\Certificado;
 use App\Services\Certificados\CertiTrabajador;
+use App\Services\Utils\AsignarFuncionario;
+use App\Services\Utils\GeneralService;
+use App\Services\Utils\Logger;
+use App\Services\Utils\UploadFile;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -112,7 +112,7 @@ class ConsultasEmpresaController extends ApplicationController
             $nit = $request->input('nit') ? $request->input('nit') : $this->user['documento'];
             $estado = $estado == 'T' ? '' : $estado;
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -164,7 +164,7 @@ class ConsultasEmpresaController extends ApplicationController
             $perini = $request->input('perini');
             $perfin = $request->input('perfin');
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'CuotaMonetaria',
@@ -211,7 +211,7 @@ class ConsultasEmpresaController extends ApplicationController
             $periodo = $request->input('periodo');
             $nit = $this->user['documento'];
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'AportesEmpresas',
@@ -224,7 +224,7 @@ class ConsultasEmpresaController extends ApplicationController
             );
 
             $out = $ps->toArray();
-            if (! $out['success'] || count($out['data']) == 0) {
+            if (! ($out['success'] ?? false) || empty($out['data'])) {
                 throw new DebugException('Error no hay respuesta del servidor SISU', 501);
             }
 
@@ -261,7 +261,7 @@ class ConsultasEmpresaController extends ApplicationController
             $perfin = $request->input('perfin');
             $nit = $this->user['documento'];
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'AportesEmpresas',
@@ -275,7 +275,7 @@ class ConsultasEmpresaController extends ApplicationController
             );
 
             $out = $ps->toArray();
-            if (! $out['success'] || count($out['data']) == 0) {
+            if (! ($out['success'] ?? false) || empty($out['data'])) {
                 throw new DebugException('Error no hay respuesta del servidor SISU', 501);
             }
 
@@ -306,7 +306,7 @@ class ConsultasEmpresaController extends ApplicationController
             $salida = $this->captureException($e);
             set_flashdata('error', [
                 'msj' => $salida['msj'],
-                'code' => $e->getCode()
+                'code' => $e->getCode(),
             ]);
 
             return redirect()->route('principal/index');
@@ -317,12 +317,12 @@ class ConsultasEmpresaController extends ApplicationController
     {
         try {
             $nit = $this->user['documento'];
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send([
                 'servicio' => 'AportesEmpresas',
                 'metodo' => 'mora_presunta_by_nit',
                 'params' => [
-                    'nit' => $nit
+                    'nit' => $nit,
                 ],
             ]);
 
@@ -333,7 +333,7 @@ class ConsultasEmpresaController extends ApplicationController
             $moras = $out['data']['moras'];
             $periodos = $out['data']['periodos'];
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send([
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'buscar_sucursales_en_empresa',
@@ -348,6 +348,7 @@ class ConsultasEmpresaController extends ApplicationController
             }
 
             $sucursales = $out['data'];
+
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -364,7 +365,7 @@ class ConsultasEmpresaController extends ApplicationController
     public function novedadRetiroView()
     {
         try {
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -398,7 +399,7 @@ class ConsultasEmpresaController extends ApplicationController
         try {
             $cedtra = $request->input('cedtra');
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send([
                 'servicio' => 'PoblacionAfiliada',
                 'metodo' => 'datosTrabajador',
@@ -418,6 +419,7 @@ class ConsultasEmpresaController extends ApplicationController
                     $salida = ['flag' => true, 'success' => true, 'data' => $subsi15];
                 }
             }
+
             return response()->json($salida);
         } catch (\Throwable $e) {
             return $this->handleException($e, $request);
@@ -480,7 +482,7 @@ class ConsultasEmpresaController extends ApplicationController
 
             if (isset($_FILES['archivo']['name']) && $_FILES['archivo']['name'] != '') {
                 $extension = explode('.', $_FILES['archivo']['name']);
-                $name = "{$mercurio35->getNit()}_{$mercurio35->getCedtra()}_{$id_log}_retiro." . end($extension);
+                $name = "{$mercurio35->getNit()}_{$mercurio35->getCedtra()}_{$id_log}_retiro.".end($extension);
                 $_FILES['archivo']['name'] = $name;
 
                 $estado = UploadFile::upload('archivo', $mercurio01->getPath());
@@ -547,7 +549,9 @@ class ConsultasEmpresaController extends ApplicationController
 
         $empresa = false;
         $empresa_sisu = $this->buscarEmpresaSubsidio($solicitante->getNit());
-        if ($empresa_sisu && count($empresa_sisu) > 0) $empresa = $empresa_sisu;
+        if ($empresa_sisu && count($empresa_sisu) > 0) {
+            $empresa = $empresa_sisu;
+        }
 
         $mercurio14 = Mercurio14::where('tipopc', '5')->get();
 
@@ -584,7 +588,7 @@ class ConsultasEmpresaController extends ApplicationController
             return $this->renderObject(['success' => false, 'msj' => 'No se puede realizar el registro, comuniquese con la atención al cliente']);
         }
         foreach ($mercurio28 as $mmercurio28) {
-            $antval = $request->input($mmercurio28->getCampo() . '_ant');
+            $antval = $request->input($mmercurio28->getCampo().'_ant');
             $valor = $request->input($mmercurio28->getCampo());
             $cedrep = $request->input($mmercurio28->getCampo());
             $repleg = $request->input($mmercurio28->getCampo());
@@ -641,11 +645,11 @@ class ConsultasEmpresaController extends ApplicationController
                 $mercurio37->setTipopc('5');
                 $mercurio37->setNumero($mercurio33->getId());
                 $mercurio37->setCoddoc($coddoc);
-                if (isset($_FILES['archivo_' . $coddoc]['name']) && $_FILES['archivo_' . $coddoc]['name'] != '') {
-                    $extension = explode('.', $_FILES['archivo_' . $coddoc]['name']);
-                    $name = '5_' . $mercurio33->getId() . "_{$coddoc}." . end($extension);
-                    $_FILES['archivo_' . $coddoc]['name'] = $name;
-                    $estado = UploadFile::upload('archivo_' . $coddoc, $mercurio01->getPath());
+                if (isset($_FILES['archivo_'.$coddoc]['name']) && $_FILES['archivo_'.$coddoc]['name'] != '') {
+                    $extension = explode('.', $_FILES['archivo_'.$coddoc]['name']);
+                    $name = '5_'.$mercurio33->getId()."_{$coddoc}.".end($extension);
+                    $_FILES['archivo_'.$coddoc]['name'] = $name;
+                    $estado = UploadFile::upload('archivo_'.$coddoc, $mercurio01->getPath());
                     if ($estado != false) {
                         $mercurio37->setArchivo($name);
                         $mercurio37->save();
@@ -693,13 +697,13 @@ class ConsultasEmpresaController extends ApplicationController
 
     public function ejemploPlanillaMasiva()
     {
-        $file = 'public/docs/' . 'ejemplo_planilla_masiva.xlsx';
+        $file = 'public/docs/'.'ejemplo_planilla_masiva.xlsx';
     }
 
     public function certificadoAfiliacionView()
     {
         return view('mercurio/subsidioemp/certificado_afiliacion', [
-            'title' => 'Certificado Afiliacion'
+            'title' => 'Certificado Afiliacion',
         ]);
     }
 
@@ -708,21 +712,22 @@ class ConsultasEmpresaController extends ApplicationController
         $nit = $this->user['documento'];
         $certificado = new Certificado(new CertiEmpleador($nit, 'A'));
         $certificado->generate();
+
         return response()->file($certificado->getFilePath(), [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="' . $certificado->getDownloadName() . '"',
+            'Content-Disposition' => 'inline; filename="'.$certificado->getDownloadName().'"',
         ]);
     }
 
     public function certificadoParaTrabajadorView()
     {
         try {
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'listar_trabajadores',
-                    'params' => $this->user['documento']
+                    'params' => $this->user['documento'],
                 ]
             );
 
@@ -747,8 +752,9 @@ class ConsultasEmpresaController extends ApplicationController
             $salida = $this->captureException($e);
             set_flashdata('error', [
                 'msj' => $salida['msj'],
-                'code' => $e->getCode()
+                'code' => $e->getCode(),
             ]);
+
             return redirect()->route('principal/index');
         }
     }
@@ -759,15 +765,16 @@ class ConsultasEmpresaController extends ApplicationController
         $tipo = $request->input('tipo');
         $certificado = new Certificado(new CertiTrabajador($cedtra, $tipo));
         $certificado->generate();
+
         return response()->file($certificado->getFilePath(), [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="' . $certificado->getDownloadName() . '"',
+            'Content-Disposition' => 'inline; filename="'.$certificado->getDownloadName().'"',
         ]);
     }
 
     public function ejemploPlanillaActivacionMasiva()
     {
-        $file = 'public/docs/' . 'ejemplo_planilla_activacion_masiva.csv';
+        $file = 'public/docs/'.'ejemplo_planilla_activacion_masiva.csv';
     }
 
     public function activacionMasivaTrabajadorView()
@@ -782,7 +789,7 @@ class ConsultasEmpresaController extends ApplicationController
 
     public function loadParametrosView()
     {
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -798,17 +805,17 @@ class ConsultasEmpresaController extends ApplicationController
 
         $_ciupri = [];
         foreach ($datos_captura['ciudad_comercial'] as $data) {
-            $_ciupri["{$data['codciu']}"] = $data['codciu'] . '-' . $data['detciu'];
+            $_ciupri["{$data['codciu']}"] = $data['codciu'].'-'.$data['detciu'];
         }
 
         $_codciu = [];
         foreach ($datos_captura['ciudades'] as $data) {
-            $_codciu["{$data['codciu']}"] = $data['codciu'] . '-' . $data['detciu'];
+            $_codciu["{$data['codciu']}"] = $data['codciu'].'-'.$data['detciu'];
         }
 
         $_codzon = [];
         foreach ($datos_captura['zonas'] as $data) {
-            $_codzon[$data['codzon']] = $data['codzon'] . '-' . $data['detzon'];
+            $_codzon[$data['codzon']] = $data['codzon'].'-'.$data['detzon'];
         }
 
         $_codcaj = [];
@@ -831,7 +838,7 @@ class ConsultasEmpresaController extends ApplicationController
 
         $_codact = [];
         foreach ($datos_captura['actividades'] as $data) {
-            $_codact["{$data['codact']}"] = "{$data['codact']} - " . $data['detalle'];
+            $_codact["{$data['codact']}"] = "{$data['codact']} - ".$data['detalle'];
         }
 
         $_tipper = [];
@@ -861,7 +868,7 @@ class ConsultasEmpresaController extends ApplicationController
 
     public function buscarEmpresaSubsidio($nit)
     {
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
@@ -881,7 +888,7 @@ class ConsultasEmpresaController extends ApplicationController
     {
         try {
             $cedtra = $request->input('cedtra');
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'PoblacionAfiliada',
@@ -894,8 +901,8 @@ class ConsultasEmpresaController extends ApplicationController
             $salida = $ps->toArray();
             $isSuccess = $salida['success'] ?? null;
 
-            if (!$isSuccess) {
-                throw new DebugException("No hay respuesta del servicio de nucleo familiar");
+            if (! $isSuccess) {
+                throw new DebugException('No hay respuesta del servicio de nucleo familiar');
             }
 
             $data = $salida['data'] ?? null;
@@ -903,7 +910,7 @@ class ConsultasEmpresaController extends ApplicationController
             $conyuges = $data['conyuges'] ?? [];
             $beneficiarios = $data['beneficiarios'] ?? [];
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -913,7 +920,7 @@ class ConsultasEmpresaController extends ApplicationController
             $paramsTrabajador = new ParamsTrabajador;
             $paramsTrabajador->setDatosCaptura($ps->toArray());
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -923,7 +930,7 @@ class ConsultasEmpresaController extends ApplicationController
             $paramsConyuge = new ParamsConyuge;
             $paramsConyuge->setDatosCaptura($ps->toArray());
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
