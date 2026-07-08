@@ -8,7 +8,7 @@ Route::middleware(['cajas.auth'])->group(function () {
     Route::prefix('cajas/mercurio74')->group(function () {
         // Definir rutas para el controlador Mercurio74
         Route::get('/index', [Mercurio74Controller::class, 'index']);
-        Route::get('/galeria', [Mercurio74Controller::class, 'galeria']);
+        Route::post('/galeria', [Mercurio74Controller::class, 'galeria']);
         Route::post('/guardar', [Mercurio74Controller::class, 'guardar']);
         Route::post('/arriba', [Mercurio74Controller::class, 'arriba']);
         Route::post('/abajo', [Mercurio74Controller::class, 'abajo']);
