@@ -2,239 +2,132 @@
 
 @section('content')
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<!-- Epayco Standard Checkout JS -->
 <script src="https://checkout.epayco.co/checkout.js"></script>
 
-<div class="col mt-2">
-    <div class="card">
-        <div class="card-header py-2 bg-blue-400 text-white">
-            <b>Compra de Servicio</b>
+<div class="col mt-2 servicios-catalog">
+    <div class="card shadow-sm">
+        <div class="card-header servicios-catalog__header py-3">
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2">
+                <div>
+                    <h1 class="servicios-catalog__title mb-1">Catálogo de Servicios</h1>
+                    <p class="servicios-catalog__subtitle mb-0">
+                        Elija el beneficiario, seleccione un servicio y complete el pago.
+                    </p>
+                </div>
+                <a href="{{ route('servicios.ver-compras') }}" class="btn btn-outline-light btn-sm align-self-start align-self-md-center">
+                    <i class="fas fa-receipt"></i> Mis compras
+                </a>
+            </div>
         </div>
 
         <div class="card-body">
-            <div class="col-xs-12">
-
-                <!-- ============================================ -->
-                <!-- LOADER: Se muestra mientras carga el trabajador -->
-                <!-- ============================================ -->
-                <div id="loader_trabajador" class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-                        <span class="sr-only">Cargando...</span>
-                    </div>
-                    <p class="mt-3 text-muted">Verificando datos del trabajador...</p>
+            <div id="loader_trabajador" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="sr-only">Cargando...</span>
                 </div>
+                <p class="mt-3 text-muted">Cargando beneficiarios y servicios...</p>
+            </div>
 
-                <!-- ============================================ -->
-                <!-- ERROR: Se muestra si falla la identificacion -->
-                <!-- ============================================ -->
-                <div id="error_trabajador" class="text-center py-5" style="display:none;">
-                    <i class="fas fa-exclamation-triangle text-warning" style="font-size: 60px;"></i>
-                    <p id="error_mensaje" class="mt-3" style="font-size: 16px; color: #e65100; font-weight: 500;"></p>
-                    <a id="btn_volver_error" href="{{ route('principal.index') }}" class="btn btn-primary mt-2">
-                        <i class="fas fa-arrow-left"></i> Volver
-                    </a>
-                </div>
+            <div id="error_trabajador" class="text-center py-5" style="display:none;">
+                <i class="fas fa-exclamation-triangle text-warning" style="font-size: 60px;"></i>
+                <p id="error_mensaje" class="mt-3 servicios-catalog__error-msg"></p>
+                <a id="btn_volver_error" href="{{ route('principal.index') }}" class="btn btn-primary mt-2">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+            </div>
 
-                <!-- ============================================ -->
-                <!-- FORMULARIO: Se muestra cuando el trabajador es valido -->
-                <!-- ============================================ -->
-                <div id="formulario_servicio" style="display:none;">
+            <div id="formulario_servicio" style="display:none;">
+                <section class="servicios-catalog__section mb-4">
+                    <h2 class="servicios-catalog__section-title">
+                        <i class="fas fa-users"></i> Beneficiarios disponibles
+                    </h2>
+                    <p class="servicios-catalog__section-desc">Seleccione para quién adquirirá el servicio.</p>
+                    <div id="grid_beneficiarios" class="beneficiarios-grid" role="listbox" aria-label="Beneficiarios disponibles"></div>
+                    <p id="sin_beneficiarios" class="text-muted text-center py-3" style="display:none;">
+                        No hay beneficiarios disponibles en su núcleo familiar.
+                    </p>
+                </section>
 
-                    <!-- Datos del trabajador (solo lectura) -->
-                    <div class="card mb-3">
-                        <div class="card-header bg-primary text-white py-2">
-                            <b>Datos del Trabajador</b>
-                        </div>
-                        <div class="card-body py-2">
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <div class="form-group mb-2">
-                                        <label class="form-control-label"><b>Documento</b></label>
-                                        <input type="text" id="txt_cedtra" class="form-control form-control-sm" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-md-5">
-                                    <div class="form-group mb-2">
-                                        <label class="form-control-label"><b>Nombre</b></label>
-                                        <input type="text" id="txt_nombre" class="form-control form-control-sm" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="form-group mb-2">
-                                        <label class="form-control-label"><b>Estado</b></label>
-                                        <input type="text" id="txt_estado" class="form-control form-control-sm" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="form-group mb-2">
-                                        <label class="form-control-label"><b>Categoria</b></label>
-                                        <input type="text" id="txt_categoria" class="form-control form-control-sm" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group mb-2">
-                                        <label class="form-control-label"><b>Empresa</b></label>
-                                        <input type="text" id="txt_empresa" class="form-control form-control-sm" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="form-group mb-2">
-                                        <label class="form-control-label"><b>Edad</b></label>
-                                        <input type="text" id="txt_edad" class="form-control form-control-sm" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="form-group mb-2">
-                                        <label class="form-control-label"><b>Tipo Beneficiario</b></label>
-                                        <input type="text" id="txt_tipbenef" class="form-control form-control-sm" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="form-group mb-2">
-                                        <label class="form-control-label"><b>NIT</b></label>
-                                        <input type="text" id="txt_nit" class="form-control form-control-sm" readonly>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="servicios-catalog__main">
+                    <div class="servicios-catalog__content">
+                        <section class="servicios-catalog__section">
+                            <h2 class="servicios-catalog__section-title">
+                                <i class="fas fa-store"></i> Servicios activos
+                            </h2>
 
-                    <!-- Seleccion de beneficiario (nucleo familiar) -->
-                    <div class="card mb-3">
-                        <div class="card-header py-2 bg-blue-400 text-white">
-                            <b>Seleccionar Beneficiario</b>
-                        </div>
-                        <div class="card-body py-2">
-                            <div id="loader_nucleo" class="text-center py-3" style="display:none;">
-                                <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                                <span class="ml-2 text-muted">Cargando nucleo familiar...</span>
-                            </div>
-
-                            <div id="contenedor_nucleo">
-                                <div class="form-group mb-2">
-                                    <label for="sel_beneficiario" class="form-control-label"><b>Beneficiario del servicio</b></label>
-                                    <select id="sel_beneficiario" class="form-control">
-                                        <option value="">-- Seleccione un beneficiario --</option>
-                                    </select>
-                                </div>
-                                <div id="info_beneficiario" style="display:none;">
-                                    <div class="row">
-                                        <div class="col-md-3">
-                                            <small class="text-muted">Documento:</small>
-                                            <span id="txt_ben_documento" class="font-weight-bold"></span>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <small class="text-muted">Parentesco:</small>
-                                            <span id="txt_ben_parentesco" class="font-weight-bold"></span>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <small class="text-muted">Edad:</small>
-                                            <span id="txt_ben_edad" class="font-weight-bold"></span>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <small class="text-muted">Categoria:</small>
-                                            <span id="txt_ben_categoria" class="font-weight-bold"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Seleccion de servicio -->
-                    <div class="card mb-3">
-                        <div class="card-header text-white py-2" style="background-color: #afafaf">
-                            <b>Seleccionar Servicio</b>
-                        </div>
-                        <div class="card-body">
-
-                            <div id="loader_servicios" class="text-center py-3">
+                            <div id="loader_servicios" class="text-center py-4">
                                 <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
                                 <span class="ml-2 text-muted">Cargando servicios...</span>
                             </div>
 
-                            <div id="contenedor_servicios" style="display:none;">
-                                <div class="row">
-                                    <div class="col-md-8">
-                                        <div class="form-group">
-                                            <label for="sel_servicio" class="form-control-label"><b>Servicio</b></label>
-                                            <select id="sel_servicio" class="form-control">
-                                                <option value="">-- Seleccione un servicio --</option>
-                                            </select>
-                                        </div>
+                            <div id="contenedor_servicios" class="servicios-catalog__servicios-wrap" style="display:none;">
+                                <div class="servicios-catalog__toolbar">
+                                    <div class="input-group servicios-catalog__search">
+                                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                        <input
+                                            type="search"
+                                            id="buscar_servicio"
+                                            class="form-control"
+                                            placeholder="Buscar por nombre, categoría o código..."
+                                            autocomplete="off"
+                                        >
                                     </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label class="form-control-label"><b>Cupos disponibles</b></label>
-                                            <input type="text" id="txt_cupos" class="form-control" readonly placeholder="-">
-                                        </div>
-                                    </div>
+                                    <span id="contador_servicios" class="servicios-catalog__counter badge"></span>
                                 </div>
 
-                                <div id="loader_tarifa" class="text-center py-3" style="display:none;">
-                                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                                    <span class="ml-2 text-muted">Validando tarifa...</span>
-                                </div>
-
-                                <div id="error_tarifa" class="alert alert-warning text-center" style="display:none;">
-                                    <i class="fas fa-exclamation-circle"></i> <span id="error_tarifa_msg"></span>
-                                </div>
-
-                                <div id="detalle_tarifa" style="display:none;">
-                                    <hr>
-                                    <div class="row">
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label class="form-control-label"><b>Valor del servicio</b></label>
-                                                <input type="text" id="txt_valor" class="form-control font-weight-bold text-success" readonly>
-                                                <input type="hidden" id="hid_valor_raw">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-9">
-                                            <div class="form-group">
-                                                <label for="txt_nota" class="form-control-label"><b>Nota (opcional)</b></label>
-                                                <textarea id="txt_nota" class="form-control" rows="2" placeholder="Escriba una nota si lo desea..."></textarea>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3" style="display:none;">
-                                            <div class="form-group">
-                                                <label class="form-control-label"><b>Categoria</b></label>
-                                                <input type="text" id="txt_tarifa_categoria" class="form-control" readonly>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3" style="display:none;">
-                                            <div class="form-group">
-                                                <label class="form-control-label"><b>Temporada</b></label>
-                                                <input type="text" id="txt_temporada" class="form-control" readonly>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3" style="display:none;">
-                                            <div class="form-group">
-                                                <label class="form-control-label"><b>Cupos</b></label>
-                                                <input type="text" id="txt_tarifa_cupos" class="form-control" readonly>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="text-center mt-3">
-                                        <button type="button" id="btn_procesar_pago" class="btn btn-primary btn-lg">
-                                            <i class="fas fa-credit-card"></i> Procesar Pago
-                                        </button>
-                                    </div>
+                                <div class="servicios-catalog__grid-scroll">
+                                    <div id="grid_servicios" class="servicios-grid" role="listbox" aria-label="Servicios disponibles"></div>
+                                    <p id="sin_servicios" class="text-muted text-center py-4" style="display:none;">
+                                        No hay servicios que coincidan con su búsqueda.
+                                    </p>
                                 </div>
                             </div>
-                        </div>
+                        </section>
                     </div>
 
-                </div>
-                <!-- /formulario_servicio -->
+                    <aside id="panel_compra" class="panel-compra" style="display:none;">
+                        <div class="panel-compra__inner">
+                            <h3 class="panel-compra__title">Resumen de compra</h3>
+                            <p id="panel_servicio_nombre" class="panel-compra__servicio"></p>
 
+                            <div id="loader_tarifa" class="text-center py-3" style="display:none;">
+                                <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                <span class="ml-2 text-muted">Validando tarifa...</span>
+                            </div>
+
+                            <div id="error_tarifa" class="alert alert-warning py-2" style="display:none;">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span id="error_tarifa_msg"></span>
+                            </div>
+
+                            <div id="detalle_tarifa" style="display:none;">
+                                <div class="panel-compra__valor-wrap">
+                                    <span class="panel-compra__valor-label">Valor del servicio</span>
+                                    <span id="txt_valor" class="panel-compra__valor"></span>
+                                    <input type="hidden" id="hid_valor_raw">
+                                </div>
+
+                                <input type="hidden" id="txt_tarifa_categoria">
+                                <input type="hidden" id="txt_temporada">
+                                <input type="hidden" id="txt_tarifa_cupos">
+
+                                <div class="form-group mt-3">
+                                    <label for="txt_nota" class="form-label">Nota (opcional)</label>
+                                    <textarea id="txt_nota" class="form-control" rows="2" placeholder="Escriba una nota si lo desea..."></textarea>
+                                </div>
+
+                                <button type="button" id="btn_procesar_pago" class="btn btn-primary btn-lg w-100 mt-3">
+                                    <i class="fas fa-credit-card"></i> Procesar pago
+                                </button>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Variables ocultas -->
 <input type="hidden" id="hid_documento" value="{{ $documento }}">
 <input type="hidden" id="hid_codser" value="">
 <input type="hidden" id="hid_numero" value="">
@@ -243,9 +136,6 @@
 
 @push('scripts')
 <script>
-    // ================================================
-    // Configuracion Epayco
-    // ================================================
     var EPAYCO_PUBLIC_KEY = '{{ $EPAYCO_PUBLIC_KEY }}';
     var EPAYCO_TEST = {{ $EPAYCO_TEST ? 'true' : 'false' }};
 
@@ -260,18 +150,15 @@
         console.log('Error inicializando ePayco:', e);
     }
 
-    // ================================================
-    // Variables globales
-    // ================================================
     var trabajadorData = null;
     var nucleoFamiliar = [];
     var beneficiarioSeleccionado = null;
     var serviciosData = [];
     var servicioSeleccionado = null;
+    var busquedaServicio = '';
 
-    // ================================================
-    // Rutas AJAX (Laravel named routes)
-    // ================================================
+    var TIPOS_BEN = { T: 'Trabajador', C: 'Conyuge', B: 'Beneficiario' };
+
     var routes = {
         identificarTrabajador: "{{ route('servicios.identificar-trabajador') }}",
         listarServicios: "{{ route('servicios.listar-servicios') }}",
@@ -280,16 +167,12 @@
         guardarVenta: "{{ route('servicios.guardar-venta') }}",
     };
 
-    // CSRF token para todas las peticiones AJAX
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
 
-    // ================================================
-    // Funciones utilitarias
-    // ================================================
     function formatearValor(valor) {
         var num = parseFloat(valor) || 0;
         return '$' + num.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
@@ -315,9 +198,34 @@
             .replace(/[^a-zA-Z0-9\s.\-]/g, '');
     }
 
-    // ================================================
-    // Capturar respuesta de Epayco al volver a la pagina
-    // ================================================
+    function escapeHtml(texto) {
+        if (!texto) return '';
+        return String(texto)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    function obtenerTipoBeneficiario(ben) {
+        return ben.descripcion_tipo || TIPOS_BEN[ben.tipben] || ben.tipben || '';
+    }
+
+    function obtenerCodben(ben) {
+        return ben.codben || ben.cedtra || '';
+    }
+
+    function limpiarSeleccionServicio() {
+        servicioSeleccionado = null;
+        $('#hid_codser').val('');
+        $('#hid_numero').val('');
+        $('.servicio-card--selected').removeClass('servicio-card--selected');
+        $('#panel_compra').hide();
+        $('#detalle_tarifa').hide();
+        $('#error_tarifa').hide();
+        $('#panel_servicio_nombre').text('');
+    }
+
     function verificarRespuestaEpayco() {
         var urlParams = window.location.search;
         var refPayco = '';
@@ -336,10 +244,8 @@
         }
 
         if (refPayco) {
-            console.log('ref_payco detectado:', refPayco);
             if (window.history && window.history.replaceState) {
-                var cleanUrl = window.location.pathname;
-                window.history.replaceState({}, document.title, cleanUrl);
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
 
             Swal.fire({
@@ -422,7 +328,7 @@
                 });
                 setTimeout(function() { guardarVenta(refPayco); }, 2000);
             }
-        }).fail(function(err) {
+        }).fail(function() {
             Swal.fire({
                 title: 'Error de conexion',
                 html: '<p>No se pudo verificar el pago con ePayco.</p>' +
@@ -445,9 +351,6 @@
         return estados[codigo] || 'Desconocido (' + codigo + ')';
     }
 
-    // ================================================
-    // 1. Identificar trabajador
-    // ================================================
     function identificarTrabajador() {
         var cedtra = $('#hid_documento').val();
 
@@ -473,59 +376,155 @@
                     trabajadorData = rawTrabajador;
                     nucleoFamiliar = response.data.nucleo_familiar || [];
                 }
-                llenarDatosTrabajador(trabajadorData);
-                llenarNucleoFamiliar(nucleoFamiliar);
-                $('#formulario_servicio').fadeIn();
+                renderBeneficiariosGrid(nucleoFamiliar, trabajadorData.detcat);
+                $('#formulario_servicio').css('display', 'flex');
                 cargarServicios();
             } else {
                 $('#error_mensaje').text(response.message || 'Trabajador no encontrado');
                 $('#error_trabajador').fadeIn();
             }
-        }).fail(function(err) {
+        }).fail(function() {
             ocultarLoader('loader_trabajador');
-            $('#error_mensaje').text('Error de conexion al verificar el trabajador');
+            $('#error_mensaje').text('Error de conexion al cargar beneficiarios y servicios');
             $('#error_trabajador').fadeIn();
         });
     }
 
-    function llenarDatosTrabajador(data) {
-        $('#txt_cedtra').val(data.cedtra || '');
-        $('#txt_nombre').val(data.nombre || '');
-        $('#txt_estado').val(data.estado || '');
-        $('#txt_categoria').val((data.codcat || '') + ' - ' + (data.detcat || ''));
-        $('#txt_empresa').val(data.razsoc || '');
-        $('#txt_edad').val(data.edad || '');
-        $('#txt_tipbenef').val(data.tipbenef || '');
-        $('#txt_nit').val(data.nit || '');
-    }
+    function renderBeneficiariosGrid(nucleo, detcat) {
+        var grid = $('#grid_beneficiarios');
+        grid.empty();
 
-    function llenarNucleoFamiliar(nucleo) {
-        var select = $('#sel_beneficiario');
-        select.empty();
-        select.append('<option value="">-- Seleccione un beneficiario --</option>');
+        if (!nucleo || nucleo.length === 0) {
+            $('#sin_beneficiarios').show();
+            return;
+        }
 
-        var tiposBen = { 'T': 'Trabajador', 'C': 'Conyuge', 'B': 'Beneficiario' };
+        $('#sin_beneficiarios').hide();
 
         $.each(nucleo, function(i, ben) {
-            var codben = ben.codben || ben.cedtra || '';
-            var nombre = ben.nombre || '';
-            var tipo = ben.descripcion_tipo || tiposBen[ben.tipben] || ben.tipben || '';
-            var edad = ben.edad || '';
-            var texto = nombre + ' (' + tipo + ' - Edad: ' + edad + ')';
-            select.append(
-                $('<option></option>').val(codben).text(texto).data('ben', ben)
+            var codben = obtenerCodben(ben);
+            var tipo = obtenerTipoBeneficiario(ben);
+            var categoria = detcat || '';
+
+            var card = $(
+                '<button type="button" class="beneficiario-card" role="option" data-codben="' + escapeHtml(codben) + '">' +
+                    '<span class="beneficiario-card__tipo">' + escapeHtml(tipo) + '</span>' +
+                    '<span class="beneficiario-card__nombre">' + escapeHtml(ben.nombre || '') + '</span>' +
+                    '<span class="beneficiario-card__meta">' +
+                        '<span><i class="far fa-id-card"></i> ' + escapeHtml(codben) + '</span>' +
+                        (ben.edad ? '<span><i class="fas fa-birthday-cake"></i> ' + escapeHtml(String(ben.edad)) + ' años</span>' : '') +
+                        (categoria ? '<span>' + escapeHtml(categoria) + '</span>' : '') +
+                    '</span>' +
+                '</button>'
             );
+            card.data('ben', ben);
+            grid.append(card);
         });
 
         if (nucleo.length === 1) {
-            var primerCodben = nucleo[0].codben || nucleo[0].cedtra || '';
-            select.val(primerCodben).trigger('change');
+            seleccionarBeneficiario(obtenerCodben(nucleo[0]), nucleo[0]);
         }
     }
 
-    // ================================================
-    // 2. Cargar lista de servicios
-    // ================================================
+    function seleccionarBeneficiario(codben, benData) {
+        if (!codben) {
+            beneficiarioSeleccionado = null;
+            $('#hid_codben').val('');
+            $('.beneficiario-card--selected').removeClass('beneficiario-card--selected');
+            limpiarSeleccionServicio();
+            return;
+        }
+
+        beneficiarioSeleccionado = benData;
+        $('#hid_codben').val(codben);
+        $('.beneficiario-card').removeClass('beneficiario-card--selected');
+        $('.beneficiario-card[data-codben="' + codben + '"]').addClass('beneficiario-card--selected');
+        limpiarSeleccionServicio();
+    }
+
+    function servicioCoincideBusqueda(srv, query) {
+        if (!query) return true;
+        var texto = (
+            (srv.nombre || '') + ' ' +
+            (srv.detalle || '') + ' ' +
+            (srv.codser || '')
+        ).toLowerCase();
+        return texto.indexOf(query.toLowerCase()) !== -1;
+    }
+
+    function contarServiciosDisponibles(servicios, query) {
+        var count = 0;
+        $.each(servicios, function(i, srv) {
+            var cupos = parseInt(srv.cupos_disponibles, 10) || 0;
+            if (cupos > 0 && servicioCoincideBusqueda(srv, query)) {
+                count++;
+            }
+        });
+        return count;
+    }
+
+    function renderServiciosGrid(servicios, query) {
+        var grid = $('#grid_servicios');
+        grid.empty();
+        query = query || '';
+        busquedaServicio = query;
+
+        var visibles = 0;
+        var disponibles = contarServiciosDisponibles(servicios, query);
+
+        $('#contador_servicios').text(
+            disponibles + ' servicio' + (disponibles === 1 ? '' : 's') + ' disponible' + (disponibles === 1 ? '' : 's')
+        );
+
+        $.each(servicios, function(i, srv) {
+            if (!servicioCoincideBusqueda(srv, query)) {
+                return;
+            }
+
+            visibles++;
+            var cupos = parseInt(srv.cupos_disponibles, 10) || 0;
+            var sinCupos = cupos <= 0;
+            var valmes = srv.valmes === 'S';
+            var cardKey = srv.codser + '|' + srv.numero;
+
+            var card = $(
+                '<button type="button" class="servicio-card' + (sinCupos ? ' servicio-card--disabled' : '') + '"' +
+                    ' role="option"' +
+                    ' data-key="' + escapeHtml(cardKey) + '"' +
+                    (sinCupos ? ' disabled' : '') + '>' +
+                    '<div class="servicio-card__header">' +
+                        '<span class="servicio-card__badge' + (sinCupos ? ' servicio-card__badge--muted' : '') + '">' +
+                            (sinCupos ? 'Sin cupos' : cupos + ' cupos') +
+                        '</span>' +
+                        (valmes ? '<span class="servicio-card__badge servicio-card__badge--info">Mensual</span>' : '') +
+                    '</div>' +
+                    '<h3 class="servicio-card__titulo">' + escapeHtml(srv.nombre || '') + '</h3>' +
+                    '<p class="servicio-card__detalle">' + escapeHtml(srv.detalle || '') + '</p>' +
+                    '<div class="servicio-card__meta">' +
+                        '<span><i class="fas fa-child"></i> ' + escapeHtml(String(srv.edadini)) + '–' + escapeHtml(String(srv.edadfin)) + ' años</span>' +
+                        '<span><i class="far fa-calendar-alt"></i> ' + escapeHtml(srv.fecini || '') + ' – ' + escapeHtml(srv.fecfin || '') + '</span>' +
+                    '</div>' +
+                '</button>'
+            );
+
+            card.data('srv', srv);
+            grid.append(card);
+
+            if (servicioSeleccionado &&
+                String(servicioSeleccionado.codser) === String(srv.codser) &&
+                String(servicioSeleccionado.numero) === String(srv.numero) &&
+                !sinCupos) {
+                card.addClass('servicio-card--selected');
+            }
+        });
+
+        $('#sin_servicios').toggle(visibles === 0);
+    }
+
+    function filtrarServicios(query) {
+        renderServiciosGrid(serviciosData, query);
+    }
+
     function cargarServicios() {
         mostrarLoader('loader_servicios');
         $('#contenedor_servicios').hide();
@@ -540,23 +539,9 @@
             ocultarLoader('loader_servicios');
 
             if (response.success) {
-                serviciosData = response.data;
-                var select = $('#sel_servicio');
-                select.empty();
-                select.append('<option value="">-- Seleccione un servicio --</option>');
-
-                $.each(serviciosData, function(i, srv) {
-                    var cupos = srv.cupos_disponibles || '0';
-                    var texto = srv.nombre + ' (Cupos: ' + cupos + ')';
-                    select.append(
-                        $('<option></option>')
-                            .val(srv.codser + '|' + srv.numero)
-                            .text(texto)
-                            .data('cupos', cupos)
-                    );
-                });
-
-                $('#contenedor_servicios').fadeIn();
+                serviciosData = response.data || [];
+                renderServiciosGrid(serviciosData, busquedaServicio);
+                $('#contenedor_servicios').css('display', 'flex');
             } else {
                 Swal.fire({
                     title: 'Error',
@@ -566,7 +551,7 @@
                     timer: 5000
                 });
             }
-        }).fail(function(err) {
+        }).fail(function() {
             ocultarLoader('loader_servicios');
             Swal.fire({
                 title: 'Error',
@@ -578,9 +563,21 @@
         });
     }
 
-    // ================================================
-    // 3. Validar tarifa
-    // ================================================
+    function seleccionarServicio(srv) {
+        servicioSeleccionado = srv;
+        var cardKey = srv.codser + '|' + srv.numero;
+
+        $('.servicio-card').removeClass('servicio-card--selected');
+        $('.servicio-card[data-key="' + cardKey + '"]').addClass('servicio-card--selected');
+
+        $('#panel_compra').show();
+        $('#panel_servicio_nombre').text(srv.nombre || '');
+        $('#detalle_tarifa').hide();
+        $('#error_tarifa').hide();
+
+        validarTarifa(srv.codser, srv.numero);
+    }
+
     function validarTarifa(codser, numero) {
         var cedtra = $('#hid_documento').val();
 
@@ -607,7 +604,7 @@
 
             if (response.success) {
                 var data = response.data;
-                $('#txt_valor').val(formatearValor(data.valser));
+                $('#txt_valor').text(formatearValor(data.valser));
                 $('#hid_valor_raw').val(data.valser);
                 $('#txt_tarifa_categoria').val(data.categoria || '');
                 $('#txt_temporada').val(data.temporada || '');
@@ -617,16 +614,13 @@
                 $('#error_tarifa_msg').text(response.message || 'No se pudo validar la tarifa');
                 $('#error_tarifa').fadeIn();
             }
-        }).fail(function(err) {
+        }).fail(function() {
             ocultarLoader('loader_tarifa');
             $('#error_tarifa_msg').text('Error de conexion al validar tarifa');
             $('#error_tarifa').fadeIn();
         });
     }
 
-    // ================================================
-    // 4. Guardar venta
-    // ================================================
     function guardarVenta(refpago) {
         var cedtra = $('#hid_documento').val() || sessionStorage.getItem('epayco_cedtra') || '';
         var codser = $('#hid_codser').val() || sessionStorage.getItem('epayco_codser') || '';
@@ -666,9 +660,9 @@
                     timer: 5000
                 });
                 setTimeout(function() {
-                    $('#sel_servicio').val('').trigger('change');
-                    $('#detalle_tarifa').hide();
+                    limpiarSeleccionServicio();
                     $('#txt_nota').val('');
+                    renderServiciosGrid(serviciosData, busquedaServicio);
                 }, 3000);
             } else {
                 Swal.fire({
@@ -679,7 +673,7 @@
                     timer: 5000
                 });
             }
-        }).fail(function(err) {
+        }).fail(function() {
             Swal.fire({
                 title: 'Error',
                 text: 'Error de conexion al guardar la venta',
@@ -690,60 +684,27 @@
         });
     }
 
-    // ================================================
-    // Eventos
-    // ================================================
     $(document).ready(function() {
         identificarTrabajador();
         verificarRespuestaEpayco();
 
-        $(document).on('change', '#sel_beneficiario', function() {
-            var codben = $(this).val();
-            $('#hid_codben').val(codben);
-
-            if (codben === '') {
-                beneficiarioSeleccionado = null;
-                $('#info_beneficiario').hide();
-                $('#sel_servicio').val('').trigger('change');
+        $(document).on('click', '.beneficiario-card', function() {
+            var ben = $(this).data('ben');
+            var codben = obtenerCodben(ben);
+            if ($(this).hasClass('beneficiario-card--selected')) {
                 return;
             }
-
-            var benData = $(this).find(':selected').data('ben');
-            beneficiarioSeleccionado = benData;
-
-            if (benData) {
-                var tiposBen = { 'T': 'Trabajador', 'C': 'Conyuge', 'B': 'Beneficiario' };
-                $('#txt_ben_documento').text(benData.codben || benData.cedtra || '');
-                $('#txt_ben_parentesco').text(benData.descripcion_tipo || tiposBen[benData.tipben] || benData.tipben || '');
-                $('#txt_ben_edad').text(benData.edad || '');
-                $('#txt_ben_categoria').text(benData.codcat || '');
-                $('#info_beneficiario').fadeIn();
-            }
-
-            $('#sel_servicio').val('');
-            $('#detalle_tarifa').hide();
-            $('#error_tarifa').hide();
+            seleccionarBeneficiario(codben, ben);
         });
 
-        $(document).on('change', '#sel_servicio', function() {
-            var val = $(this).val();
-            $('#detalle_tarifa').hide();
-            $('#error_tarifa').hide();
-            $('#txt_cupos').val('-');
+        $(document).on('input', '#buscar_servicio', function() {
+            filtrarServicios($(this).val().trim());
+        });
 
-            if (val === '') {
-                servicioSeleccionado = null;
-                return;
-            }
-
-            var partes = val.split('|');
-            var codser = partes[0];
-            var numero = partes[1];
-
-            var cupos = $(this).find(':selected').data('cupos');
-            $('#txt_cupos').val(cupos);
-
-            validarTarifa(codser, numero);
+        $(document).on('click', '.servicio-card:not(.servicio-card--disabled)', function() {
+            var srv = $(this).data('srv');
+            if (!srv) return;
+            seleccionarServicio(srv);
         });
 
         $(document).on('click', '#btn_procesar_pago', function(event) {
@@ -776,15 +737,14 @@
                 return;
             }
 
-            var nombre = sanitizarTexto($('#txt_nombre').val() || 'Cliente');
+            var nombre = sanitizarTexto((trabajadorData && trabajadorData.nombre) ? trabajadorData.nombre : 'Cliente');
             var email = (trabajadorData && trabajadorData.email) ? trabajadorData.email.trim() : 'sin@email.com';
             var documento = $('#hid_documento').val();
             var invoice = 'ORD' + Date.now();
-
             var servicioNombre = 'Compra de servicio';
-            var selText = $('#sel_servicio option:selected').text();
-            if (selText) {
-                servicioNombre = sanitizarTexto(selText.split('(')[0].trim());
+
+            if (servicioSeleccionado && servicioSeleccionado.nombre) {
+                servicioNombre = sanitizarTexto(servicioSeleccionado.nombre);
             }
 
             var data = {
@@ -819,10 +779,4 @@
         });
     });
 </script>
-
-<style>
-    .form-control-label { font-size: 0.85em; color: #555; margin-bottom: 2px; }
-    .form-control-sm { font-size: 0.9em; }
-    #formulario_servicio .card-header { padding: 8px 15px; }
-</style>
 @endpush

@@ -26,7 +26,7 @@ class EcommerceController extends ApplicationController
 
     public function __construct(ApiEpayco $epayco)
     {
-        $this->api = new ApiSubsidio();
+        $this->api = new ApiSubsidio;
         $this->epayco = $epayco;
     }
 
@@ -42,7 +42,7 @@ class EcommerceController extends ApplicationController
                 'EPAYCO_PUBLIC_KEY' => config('app.epayco.public_key'),
                 'EPAYCO_TEST' => config('app.epayco.mode') === 'development' ? 'true' : 'false',
                 'documento' => self::getActUser('documento'),
-                'title' => 'Compra de Servicio',
+                'title' => 'Catálogo de Servicios',
             ]
         );
     }
@@ -73,7 +73,7 @@ class EcommerceController extends ApplicationController
                 return response()->json(
                     [
                         'success' => false,
-                        'message' => 'Debe ingresar una cedula valida'
+                        'message' => 'Debe ingresar una cedula valida',
                     ]
                 );
             }
@@ -89,7 +89,7 @@ class EcommerceController extends ApplicationController
             if (! ($resultado['flag'] ?? false)) {
                 return response()->json([
                     'success' => false,
-                    'message' => $resultado['message'] ?? 'Trabajador no encontrado'
+                    'message' => $resultado['message'] ?? 'Trabajador no encontrado',
                 ]);
             }
 
@@ -98,15 +98,16 @@ class EcommerceController extends ApplicationController
             return response()->json([
                 'success' => true,
                 'data' => $data,
-                'message' => 'Trabajador encontrado'
+                'message' => 'Trabajador encontrado',
             ]);
         } catch (\Throwable $e) {
             $this->setLogger($e->getMessage());
+
             return response()->json(
                 [
                     'success' => false,
                     'message' => 'Error al buscar el trabajador',
-                    'errors' => $e->getMessage()
+                    'errors' => $e->getMessage(),
                 ]
             );
         }
@@ -129,21 +130,22 @@ class EcommerceController extends ApplicationController
             if (! ($resultado['flag'] ?? false)) {
                 return response()->json([
                     'success' => false,
-                    'message' => $resultado['message'] ?? 'Error al cargar servicios'
+                    'message' => $resultado['message'] ?? 'Error al cargar servicios',
                 ]);
             }
 
             return response()->json([
                 'success' => true,
                 'data' => $resultado['data'] ?? [],
-                'message' => 'Proceso completado con éxito'
+                'message' => 'Proceso completado con éxito',
             ]);
         } catch (\Throwable $e) {
             $this->setLogger($e->getMessage());
+
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al cargar servicios: ' . $e->getMessage()
+                    'message' => 'Error al cargar servicios: '.$e->getMessage(),
                 ]
             );
         }
@@ -164,7 +166,7 @@ class EcommerceController extends ApplicationController
             if (empty($codser)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Debe seleccionar un servicio'
+                    'message' => 'Debe seleccionar un servicio',
                 ]);
             }
 
@@ -185,23 +187,25 @@ class EcommerceController extends ApplicationController
 
             if (! ($resultado['flag'] ?? false)) {
                 $msg = $resultado['message'] ?? 'Error al validar tarifa';
+
                 return response()->json([
                     'success' => false,
-                    'message' => $msg
+                    'message' => $msg,
                 ]);
             }
 
             return response()->json([
                 'success' => true,
                 'data' => $resultado['data'] ?? [],
-                'message' => 'Tarifa obtenida'
+                'message' => 'Tarifa obtenida',
             ]);
         } catch (\Throwable $e) {
             $this->setLogger($e->getMessage());
+
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al validar tarifa: ' . $e->getMessage()
+                    'message' => 'Error al validar tarifa: '.$e->getMessage(),
                 ]
             );
         }
@@ -224,7 +228,7 @@ class EcommerceController extends ApplicationController
             if (empty(trim($ref_payco))) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Referencia de pago no proporcionada'
+                    'message' => 'Referencia de pago no proporcionada',
                 ]);
             }
 
@@ -233,7 +237,7 @@ class EcommerceController extends ApplicationController
             if (! $resultado['success']) {
                 return response()->json([
                     'success' => false,
-                    'message' => $resultado['errors'] ?? 'Error al validar referencia'
+                    'message' => $resultado['errors'] ?? 'Error al validar referencia',
                 ]);
             }
 
@@ -243,14 +247,15 @@ class EcommerceController extends ApplicationController
             return response()->json([
                 'success' => true,
                 'data' => $data,
-                'message' => $msg
+                'message' => $msg,
             ]);
         } catch (\Throwable $e) {
             $this->setLogger($e->getMessage());
+
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al validar pago: ' . $e->getMessage()
+                    'message' => 'Error al validar pago: '.$e->getMessage(),
                 ]
             );
         }
@@ -289,9 +294,10 @@ class EcommerceController extends ApplicationController
 
             if (! ($resultado['flag'] ?? false)) {
                 $msg = $resultado['message'] ?? 'Error al guardar la venta';
+
                 return response()->json([
                     'success' => false,
-                    'message' => $msg
+                    'message' => $msg,
                 ]);
             }
 
@@ -301,14 +307,15 @@ class EcommerceController extends ApplicationController
             return response()->json([
                 'success' => true,
                 'data' => $resultado['data'] ?? [],
-                'message' => 'Venta guardada exitosamente'
+                'message' => 'Venta guardada exitosamente',
             ]);
         } catch (\Throwable $e) {
             $this->setLogger($e->getMessage());
+
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al guardar la venta: ' . $e->getMessage()
+                    'message' => 'Error al guardar la venta: '.$e->getMessage(),
                 ]
             );
         }
@@ -326,7 +333,7 @@ class EcommerceController extends ApplicationController
             if (empty(trim($cedtra))) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Debe ingresar una cedula valida'
+                    'message' => 'Debe ingresar una cedula valida',
                 ]);
             }
 
@@ -345,23 +352,25 @@ class EcommerceController extends ApplicationController
 
             if (! ($resultado['flag'] ?? false)) {
                 $msg = $resultado['message'] ?? 'Error al cargar compras';
+
                 return response()->json([
                     'success' => false,
-                    'message' => $msg
+                    'message' => $msg,
                 ]);
             }
 
             return response()->json([
                 'success' => true,
                 'data' => $resultado['data'] ?? [],
-                'message' => ''
+                'message' => '',
             ]);
         } catch (\Throwable $e) {
             $this->setLogger($e->getMessage());
+
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al cargar compras: ' . $e->getMessage()
+                    'message' => 'Error al cargar compras: '.$e->getMessage(),
                 ]
             );
         }
