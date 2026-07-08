@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Log;
 
 class ApiSubsidio extends ApiAbstract
 {
-
     public function __construct()
     {
         $this->mode = config('app.api_mode', 'development');
@@ -32,7 +31,7 @@ class ApiSubsidio extends ApiAbstract
             ]);
         } else {
             if (is_null($params) == false) {
-                $metodo .= '/' . $params;
+                $metodo .= '/'.$params;
             }
             $params = [
                 '_user' => 2,
@@ -51,10 +50,12 @@ class ApiSubsidio extends ApiAbstract
             ->where('service_name', $servicio)
             ->first();
 
-        //Log::info('[ApiSubsidio] Servicio: ' . $servicio . ' | Metodo: ' . $metodo . ' | Endpoint: ' . ($endpoint ? $endpoint->endpoint_name : 'NULL'));
+        if (! $endpoint) {
+            throw new DebugException("Error no existe configuración de endpoint para el servicio {$servicio}", 501);
+        }
 
         $hostConnection = $this->mode == 'development' ? $endpoint->host_dev : $endpoint->host_pro;
-        #Log::info('[ApiSubsidio] Host: ' . $hostConnection . ' | Mode: ' . $this->mode);
+        // Log::info('[ApiSubsidio] Host: ' . $hostConnection . ' | Mode: ' . $this->mode);
         // $basicAuth->encript($this->app->encryption, $this->app->portal_clave);
 
         $url = "{$endpoint->endpoint_name}/{$metodo}";
@@ -67,7 +68,7 @@ class ApiSubsidio extends ApiAbstract
             $params
         );
 
-        //log::info('[ApiSubsidio] Respuesta API:', is_string($this->output) ? [$this->output] : (array) $this->output);
+        // log::info('[ApiSubsidio] Respuesta API:', is_string($this->output) ? [$this->output] : (array) $this->output);
 
         return $this;
     }
@@ -75,9 +76,9 @@ class ApiSubsidio extends ApiAbstract
     public function setCurlCommand(string $hostConnection, string $url, array $params, BasicAuth $basicAuth)
     {
         $token = $basicAuth->authenticate();
-        $this->lineaComando = "curl -X POST {$hostConnection}/{$url} \"" .
-            " -H 'Content-Type: application/json' " .
-            " -H 'Authorization: Basic {$token}'" .
-            " -d \"" . json_encode($params) . "\" \"";
+        $this->lineaComando = "curl -X POST {$hostConnection}/{$url} \"".
+            " -H 'Content-Type: application/json' ".
+            " -H 'Authorization: Basic {$token}'".
+            ' -d "'.json_encode($params).'" "';
     }
 }
