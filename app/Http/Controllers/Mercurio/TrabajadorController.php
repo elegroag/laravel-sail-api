@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
+use App\Http\Controllers\Mercurio\Concerns\RendersSolicitudesGrid;
 use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
 use App\Models\FormularioDinamico;
@@ -14,10 +15,10 @@ use App\Models\Mercurio30;
 use App\Models\Mercurio31;
 use App\Models\Mercurio37;
 use App\Models\Subsi54;
-use App\Services\Entidades\TrabajadorService;
-use App\Services\FormulariosAdjuntos\TrabajadorAdjuntoService;
 use App\Services\Api\ApiSubsidio;
 use App\Services\Entidades\EmpresaService;
+use App\Services\Entidades\TrabajadorService;
+use App\Services\FormulariosAdjuntos\TrabajadorAdjuntoService;
 use App\Services\Srequest;
 use App\Services\Tag;
 use App\Services\Utils\AsignarFuncionario;
@@ -30,6 +31,8 @@ use Illuminate\Http\Request;
 
 class TrabajadorController extends ApplicationController
 {
+    use RendersSolicitudesGrid;
+
     protected DbBase $db;
 
     protected ?array $user;
@@ -58,7 +61,7 @@ class TrabajadorController extends ApplicationController
 
             $data = (new EmpresaService)->buscarEmpresaSubsidio($this->user['documento']);
             if ($data) {
-                $mempresa = new Mercurio30();
+                $mempresa = new Mercurio30;
                 $mempresa->fill($data);
             } else {
                 $mempresa = Mercurio30::where('documento', $this->user['documento'])
@@ -101,6 +104,7 @@ class TrabajadorController extends ApplicationController
                 'msj' => $response['msj'],
                 'code' => $e->getCode(),
             ]);
+
             return redirect()->route('principal/index');
         }
     }
@@ -117,7 +121,7 @@ class TrabajadorController extends ApplicationController
                 throw new DebugException('El nit es requerido', 422);
             }
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send([
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_empresa',
@@ -132,6 +136,7 @@ class TrabajadorController extends ApplicationController
             } else {
                 $response = ['success' => true, 'msj' => '', 'data' => $datos['data']['razsoc'] ?? null];
             }
+
             return response()->json($response);
         } catch (\Throwable $e) {
             return $this->handleException($e, $request);
@@ -148,7 +153,7 @@ class TrabajadorController extends ApplicationController
             $coddoc = $request->input('coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
+            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -162,6 +167,7 @@ class TrabajadorController extends ApplicationController
                 'success' => true,
                 'msj' => 'El archivo se borro de forma correcta',
             ];
+
             return response()->json($response);
         } catch (\Throwable $e) {
             return $this->handleException($e, $request);
@@ -189,6 +195,7 @@ class TrabajadorController extends ApplicationController
                 'msj' => 'Ok archivo procesado',
                 'data' => method_exists($mercurio37, 'getArray') ? $mercurio37->getArray() : null,
             ];
+
             return response()->json($response);
         } catch (\Throwable $e) {
             return $this->handleException($e, $request);
@@ -207,7 +214,7 @@ class TrabajadorController extends ApplicationController
 
             $datos_trabajador = [];
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send([
                 'servicio' => 'ComfacaEmpresas',
                 'metodo' => 'informacion_trabajador',
@@ -241,6 +248,7 @@ class TrabajadorController extends ApplicationController
             }
 
             $response['data'] = $mercurio31->toArray();
+
             return response()->json($response);
         } catch (\Throwable $e) {
             return $this->handleException($e, $request);
@@ -259,6 +267,7 @@ class TrabajadorController extends ApplicationController
             $usuario = $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']);
             $trabajadorService->enviarCaja(new SenderValidationCaja, $id, $usuario); // TODO: importar/clase correcta si existe
             $salida = ['success' => true, 'msj' => 'El envio de la solicitud se ha completado con éxito'];
+
             return response()->json($salida);
         } catch (\Throwable $e) {
             return $this->handleException($e, $request);
@@ -273,8 +282,9 @@ class TrabajadorController extends ApplicationController
             $out = $trabajadorService->consultaSeguimiento($id);
             $salida = [
                 'success' => true,
-                'data' => $out
+                'data' => $out,
             ];
+
             return response()->json($salida);
         } catch (\Throwable $e) {
             return $this->handleException($e, $request);
@@ -292,13 +302,13 @@ class TrabajadorController extends ApplicationController
             unset($coddocrepleg['NI']);
 
             $tipsoc = Subsi54::all()->pluck('detalle', 'tipsoc');
-            $codzon = Gener09::where("codzon", '>=', 18000)
-                ->where("codzon", "<=", 19000)
+            $codzon = Gener09::where('codzon', '>=', 18000)
+                ->where('codzon', '<=', 19000)
                 ->pluck('detzon', 'codzon');
 
             $codciu = Gener09::all()->pluck('detzon', 'codzon');
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -308,14 +318,14 @@ class TrabajadorController extends ApplicationController
             $paramsTrabajador = new ParamsTrabajador;
             $paramsTrabajador->setDatosCaptura($procesadorComando->toArray());
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
-                    'metodo' => "informacion_empresa",
+                    'metodo' => 'informacion_empresa',
                     'params' => [
                         'nit' => $nit,
-                    ]
+                    ],
                 ]
             );
             $rqs = $procesadorComando->toArray();
@@ -328,7 +338,7 @@ class TrabajadorController extends ApplicationController
                         continue;
                     }
                     if (isset($codciu[$data['codzon']])) {
-                        $codsuc["{$data['codsuc']}"] = $data['detalle'] . ' - DE ' . $codciu[$data['codzon']];
+                        $codsuc["{$data['codsuc']}"] = $data['detalle'].' - DE '.$codciu[$data['codzon']];
                     } else {
                         $codsuc["{$data['codsuc']}"] = $data['detalle'];
                     }
@@ -376,7 +386,7 @@ class TrabajadorController extends ApplicationController
                 'comision' => condicionSN(),
                 'captra' => captra_array(),
                 'indipais' => indicativos_paises_array(),
-                'indidepa' => indicativos_departamentos_array()
+                'indidepa' => indicativos_departamentos_array(),
             ];
 
             $formulario = FormularioDinamico::where('name', 'mercurio31')->first();
@@ -387,6 +397,7 @@ class TrabajadorController extends ApplicationController
                     $_componente['data_source'] = $data[$componente->name];
                 }
                 $_componente['id'] = $componente->name;
+
                 return $_componente;
             });
 
@@ -410,28 +421,22 @@ class TrabajadorController extends ApplicationController
 
     /**
      * renderTable function
+     *
      * @changed [2023-12-00]
+     *
      * @author elegroag <elegroag@ibero.edu.co>
-     * @param  string  $estado
+     *
      * @return string
      */
     public function renderTable(Request $request, ?string $estado = null)
     {
-        try {
-            $trabajadorService = new TrabajadorService();
-            $html = view(
-                'mercurio/trabajador/tmp/solicitudes',
-                [
-                    'path' => base_path(),
-                    'trabajadores' => $trabajadorService->findAllByEstado($estado),
-                ]
-            )->render();
-
-            $this->setResponse('view');
-            return $this->renderText($html);
-        } catch (\Throwable $e) {
-            return $this->renderText($this->handleException($e, $request));
-        }
+        return $this->renderSolicitudesGrid(
+            $request,
+            $estado,
+            new TrabajadorService,
+            'mercurio/trabajador/tmp/solicitudes',
+            'trabajadores'
+        );
     }
 
     public function searchRequest(Request $request, string $id)
@@ -448,7 +453,7 @@ class TrabajadorController extends ApplicationController
                 ->where('coddoc', $coddoc)
                 ->first();
 
-            if (!$solicitud) {
+            if (! $solicitud) {
                 throw new DebugException('Error la solicitud no está disponible para acceder.', 301);
             }
 
@@ -466,15 +471,16 @@ class TrabajadorController extends ApplicationController
 
     /**
      * guardar function
+     *
      * @changed [2024-03-10]
+     *
      * @author elegroag <elegroag@ibero.edu.co>
-     * @return JsonResponse
      */
     public function guardar(Request $request): JsonResponse
     {
         $this->db->begin();
         try {
-            $trabajadorService = new TrabajadorService();
+            $trabajadorService = new TrabajadorService;
             $clave_certificado = $request->input('clave');
             $id = $request->input('id');
 
@@ -511,6 +517,7 @@ class TrabajadorController extends ApplicationController
             return response()->json($salida);
         } catch (Exception $e) {
             $this->db->rollBack();
+
             return $this->handleException($e, $request);
         }
     }
@@ -547,7 +554,7 @@ class TrabajadorController extends ApplicationController
             'salario' => $request->input('salario'),
             'tipsal' => $request->input('tipsal'),
             'captra' => $request->input('captra'),
-            'tipdis' => $request->input('captra') == 'N' ? '00' :  $request->input('tipdis'),
+            'tipdis' => $request->input('captra') == 'N' ? '00' : $request->input('tipdis'),
             'nivedu' => $request->input('nivedu'),
             'rural' => $request->input('rural'),
             'horas' => $request->input('horas'),
@@ -598,6 +605,7 @@ class TrabajadorController extends ApplicationController
                 'data' => $traService->dataArchivosRequeridos($mtrabajador),
                 'msj' => 'OK',
             ];
+
             return response()->json($salida);
         } catch (Exception $e) {
             return $this->handleException($e, $request);
@@ -607,7 +615,7 @@ class TrabajadorController extends ApplicationController
     public function borrar(Request $request)
     {
         try {
-            if (!$request->input('id')) {
+            if (! $request->input('id')) {
                 throw new DebugException('Error no se puede identificar el propietario de la solicitud', 301);
             }
             $id = $request->input('id');
@@ -646,7 +654,7 @@ class TrabajadorController extends ApplicationController
             $coddoc = $this->user['coddoc'];
             $cedtra = $request->get('cedtra');
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -685,6 +693,7 @@ class TrabajadorController extends ApplicationController
                 'solicitud_previa' => ($solicitud_previa > 0) ? true : false,
                 'trabajador' => $trabajador,
             ];
+
             return response()->json($response);
         } catch (\Throwable $e) {
             return $this->handleException($e, $request);
@@ -696,7 +705,7 @@ class TrabajadorController extends ApplicationController
         try {
 
             $cedtra = $request->input('cedtra');
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send([
                 'servicio' => 'PoblacionAfiliada',
                 'metodo' => 'datosTrabajador',
@@ -734,10 +743,12 @@ class TrabajadorController extends ApplicationController
                 'success' => true,
                 'data' => $subsi15,
             ];
+
             return response()->json($salida);
         } catch (\Throwable $e) {
             $salida = $this->captureException($e, $request);
             $salida['flag'] = false;
+
             return response()->json($salida);
         }
     }

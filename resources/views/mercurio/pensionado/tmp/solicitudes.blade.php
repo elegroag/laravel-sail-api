@@ -1,4 +1,4 @@
-@if (count($pensionados) == 0)
+@if (count($pensionados) == 0 && (!($paginated ?? false) || ($total ?? 0) === 0))
     <div class="solicitudes-grid__empty" role="status">
         ¡No hay solicitudes disponibles para mostrar!
     </div>

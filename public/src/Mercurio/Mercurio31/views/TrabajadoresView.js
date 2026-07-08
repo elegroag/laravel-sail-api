@@ -21,16 +21,34 @@ class TrabajadoresView extends Backbone.View {
         return this;
     }
 
-    __loadGrid() {
+    __loadGrid({ page = 1, perPage = null } = {}) {
+        const url = this.model['tipo'] ? 'trabajador/render_table/' + this.model['tipo'] : 'trabajador/render_table';
+        const $pageSize = this.$el.find('#solicitudes-page-size');
+        const resolvedPerPage = perPage || parseInt($pageSize.val(), 10) || 10;
+
         this.trigger('load:table', {
-            url: this.model['tipo'] ? 'trabajador/render_table/' + this.model['tipo'] : 'trabajador/render_table',
-            callback: (html) => {
+            url,
+            page,
+            perPage: resolvedPerPage,
+            callback: (response) => {
+                if (!response) {
+                    this.App.trigger('alert:error', { message: 'No se pudo cargar el listado de solicitudes.' });
+                    return;
+                }
+
+                const html = response?.consulta ?? response;
+                const meta = response?.meta ?? null;
+
                 if (!html) {
                     this.App.trigger('alert:error', { message: 'No se pudo cargar el listado de solicitudes.' });
                     return;
                 }
+
                 this.$el.find('#consulta').html(html);
-                SolicitudesGridView.init(this.$el, { onReload: () => this.__loadGrid() });
+                SolicitudesGridView.init(this.$el, {
+                    onReload: (params) => this.__loadGrid(params),
+                    meta,
+                });
             },
             silent: false,
         });

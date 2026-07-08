@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
+use App\Http\Controllers\Mercurio\Concerns\RendersSolicitudesGrid;
 use App\Library\Collections\ParamsEmpresa;
 use App\Library\Collections\ParamsTrabajador;
 use App\Models\Adapter\DbBase;
@@ -28,6 +29,8 @@ use Illuminate\Http\Response;
 
 class EmpresaController extends ApplicationController
 {
+    use RendersSolicitudesGrid;
+
     protected DbBase $db;
 
     protected ?array $user;
@@ -65,22 +68,13 @@ class EmpresaController extends ApplicationController
 
     public function renderTable(Request $request, ?string $estado = null)
     {
-        try {
-            $empresaService = new EmpresaService;
-            $html = view(
-                'mercurio/empresa/tmp/solicitudes',
-                [
-                    'path' => base_path(),
-                    'empresas' => $empresaService->findAllByEstado($estado),
-                ]
-            )->render();
-
-            $this->setResponse('view');
-
-            return $this->renderText($html);
-        } catch (\Throwable $e) {
-            return $this->renderObject($this->captureException($e));
-        }
+        return $this->renderSolicitudesGrid(
+            $request,
+            $estado,
+            new EmpresaService,
+            'mercurio/empresa/tmp/solicitudes',
+            'empresas'
+        );
     }
 
     /**

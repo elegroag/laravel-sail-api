@@ -8,16 +8,25 @@ class AfiliationService {
     }
 
     findDataTable(transfer = {}) {
-        const { url, callback, silent = false } = transfer;
+        const { url, callback, silent = false, page, perPage } = transfer;
+        const data = {};
+
+        if (page !== undefined && page !== null) {
+            data.page = page;
+            data.per_page = perPage || 10;
+        }
+
         $App.trigger('ajax', {
             url: url,
-            data: {},
+            data,
             silent,
             callback: (response) => {
                 if (response) {
-                    if (response) {
+                    if (typeof response === 'object' && response.consulta !== undefined) {
                         return callback(response);
                     }
+
+                    return callback(response);
                 }
                 return callback(false);
             },

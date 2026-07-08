@@ -14,11 +14,14 @@ use App\Models\Mercurio14;
 use App\Models\Mercurio36;
 use App\Models\Mercurio37;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Entidades\Concerns\PaginatesSolicitudQueries;
 use App\Services\Srequest;
 use App\Services\Utils\SenderValidationCaja;
 
 class FacultativoService
 {
+    use PaginatesSolicitudQueries;
+
     private string $tipopc = '10';
 
     private string $tipsoc = '08';
@@ -70,6 +73,43 @@ class FacultativoService
         $solicitudes = $this->db->inQueryAssoc($sql);
 
         return $solicitudes;
+    }
+
+    /**
+     * @return array{items: array<int, array<string, mixed>>, total: int, page: int, per_page: int}
+     */
+    public function findByEstadoPaginated(?string $estado, int $page, int $perPage): array
+    {
+        $documento = $this->user['documento'];
+        $coddoc = $this->user['coddoc'];
+
+        if (empty($estado)) {
+            $conditions = "and solis.estado NOT IN('I') ";
+        } else {
+            $conditions = "and solis.estado='{$estado}' ";
+        }
+
+        $sql = "SELECT solis.*,
+            CONCAT_WS(' ', solis.priape, solis.segape, solis.prinom, solis.segnom) as razsoc,
+            (SELECT COUNT(*) FROM mercurio10 as me10 WHERE me10.tipopc='{$this->tipopc}' and solis.id = me10.numero) as cantidad_eventos,
+            (SELECT MAX(fecsis) FROM mercurio10 as mr10 WHERE mr10.tipopc='{$this->tipopc}' and solis.id = mr10.numero) as fecha_ultima_solicitud,
+            (CASE
+                WHEN solis.estado = 'T' THEN 'Temporal en edición'
+                WHEN solis.estado = 'D' THEN 'Devuelto'
+                WHEN solis.estado = 'A' THEN 'Aprobado'
+                WHEN solis.estado = 'X' THEN 'Rechazado'
+                WHEN solis.estado = 'P' THEN 'Pendiente De Validación CAJA'
+                WHEN solis.estado = 'I' THEN 'Inactiva'
+            END) as estado_detalle,
+            'NATURAL' as tipo_persona,
+            solis.coddoc as tipo_documento,
+            gener09.detzon as detalle_zona
+            FROM mercurio36 as solis
+            LEFT JOIN gener09 ON gener09.codzon = solis.codzon
+            WHERE solis.documento='{$documento}' and solis.coddoc='{$coddoc}' {$conditions}
+            ORDER BY solis.fecsol ASC";
+
+        return $this->paginateRawQuery($sql, $page, $perPage, true);
     }
 
     /**

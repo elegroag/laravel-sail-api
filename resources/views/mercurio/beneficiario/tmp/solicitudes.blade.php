@@ -2,7 +2,7 @@
     $parentescos = parentesco_array();
 @endphp
 
-@if (count($beneficiarios) == 0)
+@if (count($beneficiarios) == 0 && (!($paginated ?? false) || ($total ?? 0) === 0))
     <div class="solicitudes-grid__empty" role="status">
         ¡No hay solicitudes disponibles para mostrar!
     </div>

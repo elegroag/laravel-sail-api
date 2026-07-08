@@ -4,36 +4,36 @@ namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
+use App\Http\Controllers\Mercurio\Concerns\RendersSolicitudesGrid;
 use App\Library\Collections\ParamsEmpresa;
 use App\Models\Adapter\DbBase;
 use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
 use App\Models\Mercurio01;
-
 use App\Models\Mercurio10;
 use App\Models\Mercurio12;
 use App\Models\Mercurio14;
 use App\Models\Mercurio28;
 use App\Models\Mercurio30;
-
 use App\Models\Mercurio33;
 use App\Models\Mercurio37;
 use App\Models\Mercurio47;
 use App\Models\Subsi54;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Entidades\ActualizaEmpresaService;
 use App\Services\FormulariosAdjuntos\DatosEmpresaService;
 use App\Services\FormulariosAdjuntos\Formularios;
 use App\Services\Utils\AsignarFuncionario;
-
 use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\Logger;
 use App\Services\Utils\SenderValidationCaja;
-use App\Services\Api\ApiSubsidio;
 use Illuminate\Http\Request;
 
 class ActualizaEmpresaController extends ApplicationController
 {
+    use RendersSolicitudesGrid;
+
     protected $tipopc = '5';
 
     protected $db;
@@ -63,8 +63,9 @@ class ActualizaEmpresaController extends ApplicationController
             $salida = $this->captureException($e);
             set_flashdata('error', [
                 'msj' => $salida['msj'],
-                'code' => $e->getCode()
+                'code' => $e->getCode(),
             ]);
+
             return redirect()->route('principal/index');
         }
     }
@@ -149,7 +150,7 @@ class ActualizaEmpresaController extends ApplicationController
                                 'fecest' => date('Y-m-d'),
                                 'usuario' => $solicitud->usuario,
                                 'actualizacion' => $solicitud->id,
-                                'log' => $log
+                                'log' => $log,
                             ]
                         );
                     }
@@ -170,16 +171,16 @@ class ActualizaEmpresaController extends ApplicationController
 
             $empresa_sisu = $actualizaEmpresaService->buscarEmpresaSubsidio($documento);
             if ($empresa_sisu && count($empresa_sisu) > 0) {
-                $empresa = new Mercurio30();
+                $empresa = new Mercurio30;
                 $empresa->fill($empresa_sisu);
             } else {
-                $empresa = new Mercurio30();
+                $empresa = new Mercurio30;
             }
 
             $data = array_merge($solicitud->toArray(), $data);
             DatosEmpresaService::generarAdjuntos([
                 $empresa,
-                $data
+                $data,
             ], $this->tipopc, $clave_certificado);
 
             $salida = [
@@ -190,8 +191,10 @@ class ActualizaEmpresaController extends ApplicationController
             $this->db->commit();
         } catch (\Throwable $e) {
             $this->db->rollBack();
+
             return $this->handleException($e, $request);
         }
+
         return response()->json($salida);
     }
 
@@ -237,7 +240,7 @@ class ActualizaEmpresaController extends ApplicationController
                 $zonas["{$entity->getCodzon()}"] = $entity->getDetzon();
             }
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -257,7 +260,7 @@ class ActualizaEmpresaController extends ApplicationController
                 if ($sucursales) {
                     foreach ($sucursales as $sucursal) {
                         if ($sucursal['estado'] != 'I') {
-                            $list_sucursales[$sucursal['codsuc']] = $sucursal['detalle'] . ' - ' . $ciudades[$sucursal['codzon']];
+                            $list_sucursales[$sucursal['codsuc']] = $sucursal['detalle'].' - '.$ciudades[$sucursal['codzon']];
                         }
                     }
                 }
@@ -284,7 +287,7 @@ class ActualizaEmpresaController extends ApplicationController
                 'ciupri' => ParamsEmpresa::getCiudades(),
                 'codsuc' => $list_sucursales,
                 'indipais' => indicativos_paises_array(),
-                'indidepa' => indicativos_departamentos_array()
+                'indidepa' => indicativos_departamentos_array(),
             ];
 
             $formulario = FormularioDinamico::where('name', 'mercurio471')->first();
@@ -295,6 +298,7 @@ class ActualizaEmpresaController extends ApplicationController
                     $_componente['data_source'] = $data[$componente->name];
                 }
                 $_componente['id'] = $componente->name;
+
                 return $_componente;
             });
 
@@ -391,7 +395,7 @@ class ActualizaEmpresaController extends ApplicationController
             $coddoc = $this->clp($request, 'coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
+            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -467,7 +471,7 @@ class ActualizaEmpresaController extends ApplicationController
             })->toArray();
         }
 
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -493,23 +497,15 @@ class ActualizaEmpresaController extends ApplicationController
         );
     }
 
-    public function renderTable($estado = '')
+    public function renderTable(Request $request, $estado = '')
     {
-        try {
-            $actualizaEmpresaService = new ActualizaEmpresaService;
-            $html = view(
-                'mercurio/actualizadatos/tmp/solicitudes',
-                [
-                    'path' => base_path(),
-                    'solicitudes' => $actualizaEmpresaService->findAllByEstado($estado),
-                ]
-            )->render();
-
-            $this->setResponse('view');
-            return $this->renderText($html);
-        } catch (\Throwable $e) {
-            return $this->handleException($e, request());
-        }
+        return $this->renderSolicitudesGrid(
+            $request,
+            $estado !== '' ? $estado : null,
+            new ActualizaEmpresaService,
+            'mercurio/actualizadatos/tmp/solicitudes',
+            'solicitudes'
+        );
     }
 
     public function sucursales()
@@ -524,7 +520,7 @@ class ActualizaEmpresaController extends ApplicationController
                 if ($sucursales) {
                     foreach ($sucursales as $sucursal) {
                         if ($sucursal['estado'] != 'I') {
-                            $list_sucursales[$sucursal['codsuc']] = $sucursal['detalle'] . ' ' . $sucursal['codzon'];
+                            $list_sucursales[$sucursal['codsuc']] = $sucursal['detalle'].' '.$sucursal['codzon'];
                         }
                     }
                 }
@@ -629,6 +625,7 @@ class ActualizaEmpresaController extends ApplicationController
         } catch (\Throwable $e) {
             return $this->handleException($e, $request);
         }
+
         return response()->json($salida);
     }
 }

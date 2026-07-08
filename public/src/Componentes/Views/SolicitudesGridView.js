@@ -18,71 +18,83 @@ const SolicitudesGridView = {
         const $grid = $root.find('#consulta');
         const $empty = $root.find('#solicitudes-empty');
         const $summary = $root.find('#solicitudes-summary');
-        const { onReload } = options;
+        const { onReload, meta } = options;
 
         if (!$search.length || !$grid.length) {
             return;
         }
 
-        const state = {
+        const state = $root.data('solicitudesGridState') || {
             searchTerm: '',
             currentPage: 1,
             pageSize: parseInt($pageSize.val(), 10) || 10,
+            total: 0,
+            totalPages: 0,
+            from: 0,
+            to: 0,
         };
 
-        const applyState = () => {
+        if (meta) {
+            state.currentPage = meta.current || 1;
+            state.pageSize = meta.per_page || state.pageSize;
+            state.total = meta.total || 0;
+            state.totalPages = meta.total_pages || 0;
+            state.from = meta.from || 0;
+            state.to = meta.to || 0;
+            $pageSize.val(String(state.pageSize));
+        }
+
+        $root.data('solicitudesGridState', state);
+
+        const applyClientSearch = () => {
             const cards = $grid.find('.solicitud-card').toArray();
             const matched = cards.filter((card) => {
                 const haystack = normalizeSearch($(card).attr('data-search') || '');
                 return state.searchTerm === '' || haystack.includes(state.searchTerm);
             });
 
-            const totalMatched = matched.length;
-            const totalExisting = cards.length;
-            const totalPages = totalMatched > 0 ? Math.ceil(totalMatched / state.pageSize) : 0;
-
-            if (totalPages > 0 && state.currentPage > totalPages) {
-                state.currentPage = totalPages;
-            }
-            if (totalPages === 0) {
-                state.currentPage = 1;
-            }
-
-            const start = (state.currentPage - 1) * state.pageSize;
-            const end = start + state.pageSize;
-            const visibleSet = new Set(matched.slice(start, end));
-            const visibleCount = visibleSet.size;
-
             cards.forEach((card) => {
-                $(card).toggleClass('d-none', !visibleSet.has(card));
+                $(card).toggleClass('d-none', !matched.includes(card));
             });
 
             const hasCards = cards.length > 0;
-            const showEmpty = hasCards && totalMatched === 0;
+            const showEmpty = hasCards && matched.length === 0 && state.searchTerm !== '';
             $empty.toggleClass('d-none', !showEmpty);
+        };
 
-            if (totalPages === 0) {
+        const updatePaginationUi = () => {
+            if (state.totalPages === 0) {
                 $pageInfo.text('0 / 0');
             } else {
-                $pageInfo.text(`${state.currentPage} / ${totalPages}`);
+                $pageInfo.text(`${state.currentPage} / ${state.totalPages}`);
             }
 
-            if (totalMatched === 0) {
-                $summary.text(`Mostrando 0 registros · Total existentes: ${totalExisting}`);
+            if (state.total === 0) {
+                $summary.text('Mostrando 0 registros · Total existentes: 0');
+            } else if (state.from > 0 && state.to > 0) {
+                $summary.text(`Mostrando ${state.from}-${state.to} de ${state.total} registros · Total existentes: ${state.total}`);
             } else {
-                const visibleStart = start + 1;
-                const visibleEnd = start + visibleCount;
-                $summary.text(`Mostrando ${visibleStart}-${visibleEnd} de ${totalMatched} registros · Total existentes: ${totalExisting}`);
+                $summary.text(`Mostrando ${state.total} registros · Total existentes: ${state.total}`);
             }
 
-            $prevBtn.prop('disabled', state.currentPage <= 1 || totalPages === 0);
-            $nextBtn.prop('disabled', state.currentPage >= totalPages || totalPages === 0);
+            $prevBtn.prop('disabled', state.currentPage <= 1 || state.totalPages === 0);
+            $nextBtn.prop('disabled', state.currentPage >= state.totalPages || state.totalPages === 0);
         };
 
         const runSearch = () => {
             state.searchTerm = normalizeSearch($search.val());
-            state.currentPage = 1;
-            applyState();
+            applyClientSearch();
+        };
+
+        const reloadGrid = (page = state.currentPage, perPage = state.pageSize) => {
+            if (typeof onReload !== 'function') {
+                return;
+            }
+
+            onReload({
+                page,
+                perPage,
+            });
         };
 
         const ns = '.solicitudesGrid';
@@ -96,37 +108,30 @@ const SolicitudesGridView = {
         });
 
         $reloadBtn.off(`click${ns}`).on(`click${ns}`, () => {
-            if (typeof onReload === 'function') {
-                $search.val('');
-                onReload();
-                return;
-            }
             $search.val('');
             state.searchTerm = '';
-            state.currentPage = 1;
-            state.pageSize = parseInt($pageSize.val(), 10) || 10;
-            applyState();
+            reloadGrid(state.currentPage, state.pageSize);
         });
 
         $pageSize.off(`change${ns}`).on(`change${ns}`, () => {
             state.pageSize = parseInt($pageSize.val(), 10) || 10;
-            state.currentPage = 1;
-            applyState();
+            reloadGrid(1, state.pageSize);
         });
 
         $prevBtn.off(`click${ns}`).on(`click${ns}`, () => {
             if (state.currentPage > 1) {
-                state.currentPage -= 1;
-                applyState();
+                reloadGrid(state.currentPage - 1, state.pageSize);
             }
         });
 
         $nextBtn.off(`click${ns}`).on(`click${ns}`, () => {
-            state.currentPage += 1;
-            applyState();
+            if (state.totalPages > 0 && state.currentPage < state.totalPages) {
+                reloadGrid(state.currentPage + 1, state.pageSize);
+            }
         });
 
-        applyState();
+        updatePaginationUi();
+        applyClientSearch();
     },
 
     initSearch($container, options = {}) {

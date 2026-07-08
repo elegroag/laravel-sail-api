@@ -2,7 +2,6 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
-<link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.css') }}" />
 <link rel="stylesheet" href="{{ asset('mercurio/build/Mercurio471.css') }}">
 @endpush
 
@@ -11,9 +10,6 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/datatables.net/js/dataTables.min.js') }}"></script>
-<script src="{{ asset('assets/datatables.net.bs5/js/dataTables.bootstrap5.min.js') }}"></script>
-
 @include('mercurio/templates/tmp_clave_firma')
 
 <script type="text/template" id='tmp_layout'>

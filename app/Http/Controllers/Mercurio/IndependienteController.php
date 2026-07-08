@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Mercurio;
 use App\Exceptions\AuthException;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
+use App\Http\Controllers\Mercurio\Concerns\RendersSolicitudesGrid;
 use App\Library\Collections\ParamsEmpresa;
 use App\Library\Collections\ParamsIndependiente;
 use App\Models\Adapter\DbBase;
@@ -32,6 +33,8 @@ use Illuminate\Http\Response;
 
 class IndependienteController extends ApplicationController
 {
+    use RendersSolicitudesGrid;
+
     /**
      * independienteService variable
      *
@@ -90,21 +93,13 @@ class IndependienteController extends ApplicationController
 
     public function renderTable(Request $request, string $estado = '')
     {
-        try {
-            $independienteService = new IndependienteService;
-            $html = view(
-                'mercurio/independiente/tmp/solicitudes',
-                [
-                    'path' => base_path(),
-                    'empresas' => $independienteService->findAllByEstado($estado),
-                ]
-            )->render();
-            $this->setResponse('view');
-
-            return $this->renderText($html);
-        } catch (\Throwable $e) {
-            return $this->handleException($e, $request);
-        }
+        return $this->renderSolicitudesGrid(
+            $request,
+            $estado !== '' ? $estado : null,
+            new IndependienteService,
+            'mercurio/independiente/tmp/solicitudes',
+            'empresas'
+        );
     }
 
     /**
