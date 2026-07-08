@@ -17,17 +17,25 @@ class EmpresasView extends Backbone.View {
     render() {
         const template = _.template(this.template);
         this.$el.html(template());
+        this.__loadGrid();
+        return this;
+    }
+
+    __loadGrid() {
         const url = this.model.tipo ? 'empresa/render_table/' + this.model.tipo : 'empresa/render_table';
 
         this.trigger('load:table', {
             url,
             callback: (html) => {
+                if (!html) {
+                    this.App.trigger('alert:error', { message: 'No se pudo cargar el listado de solicitudes.' });
+                    return;
+                }
                 this.$el.find('#consulta').html(html);
-                SolicitudesGridView.initSearch(this.$el);
+                SolicitudesGridView.init(this.$el, { onReload: () => this.__loadGrid() });
             },
             silent: false,
         });
-        return this;
     }
 
     get events() {

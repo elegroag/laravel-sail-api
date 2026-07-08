@@ -17,16 +17,23 @@ class TrabajadoresView extends Backbone.View {
     render() {
         const template = _.template(this.template);
         this.$el.html(template());
+        this.__loadGrid();
+        return this;
+    }
 
+    __loadGrid() {
         this.trigger('load:table', {
             url: this.model['tipo'] ? 'trabajador/render_table/' + this.model['tipo'] : 'trabajador/render_table',
             callback: (html) => {
+                if (!html) {
+                    this.App.trigger('alert:error', { message: 'No se pudo cargar el listado de solicitudes.' });
+                    return;
+                }
                 this.$el.find('#consulta').html(html);
-                SolicitudesGridView.initSearch(this.$el);
+                SolicitudesGridView.init(this.$el, { onReload: () => this.__loadGrid() });
             },
             silent: false,
         });
-        return this;
     }
 
     get events() {

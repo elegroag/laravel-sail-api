@@ -11,7 +11,7 @@
                 <button type='button' data-toggle='linkFilter' data-valor='T' class="dropdown-item <%=(estado=='T')?'disabled':'' %>"><i class="fas fa-angle-right text-primary"></i> Temporales</button>
                 <button type='button' data-toggle='linkFilter' data-valor='P' class="dropdown-item <%=(estado=='P')?'disabled':'' %>"><i class=" fas fa-angle-right text-primary"></i> Pendiente</button>
                 <button type='button' data-toggle='linkFilter' data-valor='D' class="dropdown-item <%=(estado=='D')?'disabled':'' %>"><i class=" fas fa-angle-right text-primary"></i> Devueltas</button>
-                <button type='button' data-toggle='linkFilter' data-valor='R' class="dropdown-item <%=(estado=='R')?'disabled':'' %>"><i class=" fas fa-angle-right text-primary"></i> Rechazadas</button>
+                <button type='button' data-toggle='linkFilter' data-valor='X' class="dropdown-item <%=(estado=='X')?'disabled':'' %>"><i class=" fas fa-angle-right text-primary"></i> Rechazadas</button>
                 <button type='button' data-toggle='linkFilter' data-valor='A' class="dropdown-item <%=(estado=='A')?'disabled':'' %>"><i class=" fas fa-angle-right text-primary"></i> Aprobadas</button>
             </div>
         </div>

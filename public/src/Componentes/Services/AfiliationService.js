@@ -123,7 +123,7 @@ class AfiliationService {
             case 'D':
                 estado_detalle = 'Devueltos';
                 break;
-            case 'R':
+            case 'X':
                 estado_detalle = 'Rechazados';
                 break;
             case 'A':
