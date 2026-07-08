@@ -23,7 +23,7 @@ class SubHeaderView extends Backbone.View {
 	}
 
 	get className() {
-		return 'row align-content-between';
+		return 'row g-0 w-100';
 	}
 
 	get events() {

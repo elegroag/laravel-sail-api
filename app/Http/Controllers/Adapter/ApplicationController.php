@@ -56,7 +56,7 @@ class ApplicationController extends Controller
     {
         return response()->json($object, 203, [
             'Content-Type' => 'application/json',
-            'Charset' => 'utf-8'
+            'Charset' => 'utf-8',
         ]);
     }
 
@@ -66,11 +66,11 @@ class ApplicationController extends Controller
         $mimes = self::mimeType();
         $mime = (isset($mimes["{$ext}"])) ? $mimes["{$ext}"] : 'application/*.*';
         header("Content-Type: {$mime}; charset=utf-8");
-        header('Content-Disposition: attachment; filename=' . basename($filepath) . '');
+        header('Content-Disposition: attachment; filename='.basename($filepath).'');
         header('Cache-Control: must-revalidate');
         header('Expires: 0');
         header('Pragma: public');
-        header('Content-Length: ' . filesize($filepath));
+        header('Content-Length: '.filesize($filepath));
         ob_clean();
         readfile($filepath);
         exit();
@@ -188,7 +188,7 @@ class ApplicationController extends Controller
         if ($e instanceof DebugException) {
             $debug = $e;
         } elseif ($e instanceof QueryException || $e instanceof PDOException) {
-            $debug = new DebugException('Error de base de datos (SQL) ' . $e->getMessage(), 500);
+            $debug = new DebugException('Error de base de datos (SQL) '.$e->getMessage(), 500);
         } elseif ($e instanceof AuthException) {
             $debug = new DebugException('Error de autenticación', 501, $e->getMessage());
         } else {
@@ -196,21 +196,24 @@ class ApplicationController extends Controller
                 $e->getMessage(),
                 $e->getLine(),
                 basename($e->getFile()),
-                $e->getTraceAsString()
+                $e->getTraceAsString(),
             ]);
         }
+
         return $debug;
     }
 
-    protected function handleException(\Throwable $e, ?Request $request = null): JsonResponse
+    protected function handleException(Throwable $e, ?Request $request = null): JsonResponse
     {
         $debug = $this->getDebug($e);
-        return $debug->render($request);
+
+        return $debug->render($request ?? request());
     }
 
-    protected function captureException(\Throwable $e, ?Request $request = null): array
+    protected function captureException(Throwable $e, ?Request $request = null): array
     {
         $debug = $this->getDebug($e);
-        return $debug->getErrors($request);
+
+        return $debug->getErrors($request ?? request());
     }
 }

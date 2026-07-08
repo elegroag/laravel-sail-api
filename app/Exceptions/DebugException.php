@@ -9,8 +9,8 @@ use Throwable;
 
 class DebugException extends Exception
 {
-
     protected array|string|null $errors = null;
+
     protected int $orderId;
 
     public function __construct(
@@ -44,7 +44,7 @@ class DebugException extends Exception
             'exception' => 1,
             'message' => $this->getMessage(),
             'msj' => $this->getMessage(),
-            'errors' => is_array($this->errors) || is_object($this->errors) ?  $this->errors : json_decode($this->errors)
+            'errors' => is_array($this->errors) || is_object($this->errors) ? $this->errors : json_decode($this->errors),
         ];
         if (config('app.debug') == 'local') {
             $data['out'] = [
@@ -53,12 +53,13 @@ class DebugException extends Exception
                 'line' => $this->getLine(),
                 'trace' => $this->getTraceAsString(),
             ];
-            $data['request'] = $request->all() ?? [];
+            $data['request'] = $request?->all() ?? [];
         }
+
         return $data;
     }
 
-    public function render(Request $request): JsonResponse
+    public function render(?Request $request = null): JsonResponse
     {
         return response()->json($this->getErrors($request), 203);
     }

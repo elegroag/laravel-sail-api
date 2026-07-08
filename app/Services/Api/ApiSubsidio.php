@@ -51,7 +51,7 @@ class ApiSubsidio extends ApiAbstract
             ->where('service_name', $servicio)
             ->first();
 
-        #Log::info('[ApiSubsidio] Servicio: ' . $servicio . ' | Metodo: ' . $metodo . ' | Endpoint: ' . ($endpoint ? $endpoint->endpoint_name : 'NULL'));
+        //Log::info('[ApiSubsidio] Servicio: ' . $servicio . ' | Metodo: ' . $metodo . ' | Endpoint: ' . ($endpoint ? $endpoint->endpoint_name : 'NULL'));
 
         $hostConnection = $this->mode == 'development' ? $endpoint->host_dev : $endpoint->host_pro;
         #Log::info('[ApiSubsidio] Host: ' . $hostConnection . ' | Mode: ' . $this->mode);
@@ -67,7 +67,7 @@ class ApiSubsidio extends ApiAbstract
             $params
         );
 
-        log::info('[ApiSubsidio] Respuesta API:', is_string($this->output) ? [$this->output] : (array) $this->output);
+        //log::info('[ApiSubsidio] Respuesta API:', is_string($this->output) ? [$this->output] : (array) $this->output);
 
         return $this;
     }

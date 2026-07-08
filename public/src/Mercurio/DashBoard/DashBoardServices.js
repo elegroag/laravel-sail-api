@@ -90,7 +90,7 @@ const TraerAportesEmpresa = () => {
                 destroyChartIfExists('aportes');
                 const ctx = canvas.getContext('2d');
                 const store = getOrCreateChartStore();
-                const values = (response.data || []).map(toNumber);
+                const values = extractChartValues(response.data);
                 if (values.length === 0) {
                     setChartState('#render_chart_aportes', 'empty');
                     return;
@@ -162,6 +162,9 @@ const TraerCategoriasEmpresa = () => {
     });
 };
 
+const extractChartValues = (items) =>
+    (items || []).map((item) => (item && typeof item === 'object' ? toNumber(item.valor ?? item.valcon) : toNumber(item)));
+
 const TraerGiroEmpresa = () => {
     setChartState('#render_chart_giro', 'loading');
     window.App.trigger('syncro', {
@@ -175,7 +178,7 @@ const TraerGiroEmpresa = () => {
                 destroyChartIfExists('giro');
                 const ctx = canvas.getContext('2d');
                 const store = getOrCreateChartStore();
-                const values = (response.data || []).map(toNumber);
+                const values = extractChartValues(response.data);
                 if (values.length === 0) {
                     setChartState('#render_chart_giro', 'empty');
                     return;
@@ -183,7 +186,7 @@ const TraerGiroEmpresa = () => {
                 store.giro = new Chart(ctx, {
                     type: 'bar',
                     data: {
-                        labels: response.labels,
+                        labels: response.labels || [],
                         datasets: [
                             {
                                 data: values,

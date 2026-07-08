@@ -20,16 +20,17 @@ use App\Services\Entidades\ParticularService;
 use App\Services\Entidades\TrabajadorService;
 use App\Services\PreparaFormularios\GestionFirmaNoImage;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class PrincipalController extends ApplicationController
 {
-    protected $db;
+    protected ?DbBase $db;
 
-    protected $user;
+    protected ?array $user;
 
-    protected $tipo;
+    protected ?string $tipo;
 
     public function __construct()
     {
@@ -41,7 +42,7 @@ class PrincipalController extends ApplicationController
     public function index()
     {
         if ($this->user == null) {
-            return redirect()->route('login');
+            return redirect()->to('mercurio/login');
         }
 
         return view('mercurio/principal/index', [
@@ -125,10 +126,10 @@ class PrincipalController extends ApplicationController
         ]);
     }
 
-    public function traerAportesEmpresa()
+    public function traerAportesEmpresa(Request $request)
     {
         try {
-            $response['labels'] = [
+            $labels = [
                 'Enero',
                 'Febrero',
                 'Marzo',
@@ -162,29 +163,26 @@ class PrincipalController extends ApplicationController
             if (! $isSuccess) {
                 return response()->json([
                     'success' => false,
-                    'msj' => 'No se pudo traer las categorias',
-                    'message' => 'No se pudo traer el giro',
+                    'msj' => 'No se pudo traer los aportes',
+                    'message' => 'No se pudo traer los aportes',
                     'flag' => false,
                 ]);
             }
 
-            if ($isSuccess) {
-                foreach ($out['data'] as $item) {
-                    $data[] = $item['valcon'];
-                }
+            foreach ($out['data'] ?? [] as $item) {
+                $data[] = $item['valcon'] ?? 0;
             }
 
-            $response = [
+            return response()->json([
                 'success' => true,
                 'data' => $data,
-            ];
-
-            return response()->json($response);
-        } catch (\Throwable $e) {
+                'labels' => $labels,
+            ]);
+        } catch (DebugException $e) {
+            return $e->render($request);
+        } catch (Exception $e) {
             return $this->handleException($e);
         }
-
-        return response()->json($response);
     }
 
     public function traerCategoriasEmpresa()
@@ -227,30 +225,14 @@ class PrincipalController extends ApplicationController
             ];
 
             return response()->json($response);
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             return $this->handleException($e);
         }
     }
 
-    public function traerGiroEmpresa()
+    public function traerGiroEmpresa(Request $request)
     {
         try {
-            $data = [];
-            $response['labels'] = [
-                'Enero',
-                'Febrero',
-                'Marzo',
-                'Abril',
-                'Mayo',
-                'Junio',
-                'Julio',
-                'Agosto',
-                'Septiembre',
-                'Octubre',
-                'Noviembre',
-                'Diciembre',
-            ];
-
             $ps = new ApiSubsidio;
             $ps->send(
                 [
@@ -267,23 +249,32 @@ class PrincipalController extends ApplicationController
             if (! $isSuccess) {
                 return response()->json([
                     'success' => false,
-                    'msj' => 'No se pudo traer el giro',
-                    'message' => 'No se pudo traer el giro',
+                    'msj' => 'No se pudo traer la cuota monetaria',
+                    'message' => 'No se pudo traer la cuota monetaria',
                     'flag' => false,
                 ]);
             }
-            $data = $out['data'] ?? [];
 
-            foreach ($data as $item) {
-                $data[] = $item['valor'];
+            $data = [];
+            $labels = [];
+
+            foreach ($out['data'] ?? [] as $item) {
+                $periodo = (string) ($item['periodo'] ?? '');
+                $monthIndex = strlen($periodo) === 6 ? (int) substr($periodo, 4, 2) : null;
+                $labels[] = $monthIndex !== null
+                    ? get_mes_name($monthIndex + 1)
+                    : $periodo;
+                $data[] = $item['valor'] ?? 0;
             }
-            $response = [
+
+            return response()->json([
                 'success' => true,
                 'data' => $data,
-            ];
-
-            return response()->json($response);
-        } catch (\Throwable $e) {
+                'labels' => $labels,
+            ]);
+        } catch (DebugException $e) {
+            return $e->render($request);
+        } catch (Exception $e) {
             return $this->handleException($e);
         }
     }
