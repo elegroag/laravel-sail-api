@@ -76,7 +76,7 @@ export default function Show({ formulario }: Props) {
                         </Link>
                         <Link
                             href="/cajas/formulario-dinamico"
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-cajas-border hover:opacity-90 text-cajas-text-active"
                         >
                             Volver al listado
                         </Link>
@@ -200,7 +200,7 @@ export default function Show({ formulario }: Props) {
                                 {formulario.componentes.map((componente: any) => (
                                     <div key={componente.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                                         <div className="flex items-center space-x-3">
-                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-white text-sm font-semibold">
+                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-cajas-border text-cajas-text-active text-sm font-semibold">
                                                 {componente.label?.charAt(0)?.toUpperCase() || componente.name?.charAt(0)?.toUpperCase()}
                                             </div>
                                             <div>

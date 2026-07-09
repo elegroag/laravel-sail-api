@@ -351,6 +351,11 @@ label.is-invalid {
     flex-shrink: 0;
 }
 
+#formulario_servicio > .servicios-catalog__main {
+    flex: 1;
+    min-height: 0;
+}
+
 .servicios-catalog__header {
     background: linear-gradient(135deg, var(--catalog-primary) 0%, var(--catalog-accent) 100%);
     border: 0;
@@ -433,7 +438,7 @@ label.is-invalid {
     .servicios-catalog > .card {
         display: flex;
         flex-direction: column;
-        max-height: calc(100vh - 5.5rem);
+        max-height: calc(100dvh - 5.5rem);
         overflow: hidden;
     }
 
@@ -450,33 +455,49 @@ label.is-invalid {
     }
 
     .servicios-catalog__main {
-        align-items: start;
+        align-items: stretch;
         flex: 1;
         grid-template-columns: 1fr 300px;
+        grid-template-rows: minmax(0, 1fr);
         min-height: 0;
     }
 
     .servicios-catalog__content {
+        display: flex;
+        flex-direction: column;
         min-height: 0;
+        overflow: hidden;
     }
 
     .servicios-catalog__content > .servicios-catalog__section {
+        display: flex;
         flex: 1;
+        flex-direction: column;
         min-height: 0;
     }
 
     .servicios-catalog__servicios-wrap {
+        display: flex;
         flex: 1;
+        flex-direction: column;
         min-height: 0;
     }
 
     .servicios-catalog__grid-scroll {
-        max-height: clamp(14rem, calc(100vh - 24rem), 65vh);
+        flex: 1 1 auto;
+        max-height: none;
+        min-height: 0;
+        overflow-x: hidden;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
         overscroll-behavior: contain;
+        padding-bottom: 1rem;
         padding-right: 0.15rem;
         scrollbar-gutter: stable;
+    }
+
+    .servicios-grid {
+        padding-bottom: 0.5rem;
     }
 }
 
@@ -552,7 +573,7 @@ label.is-invalid {
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
-    min-height: 100%;
+    min-height: 0;
     padding: 0.9rem 1rem;
     text-align: left;
     transition:
@@ -730,9 +751,17 @@ label.is-invalid {
 }
 
 .panel-compra__servicio {
-    color: var(--catalog-body);
-    font-size: 0.88rem;
+    color: var(--catalog-heading);
+    font-size: 0.92rem;
+    font-weight: 600;
     line-height: 1.4;
+    margin-bottom: 0.35rem;
+}
+
+.panel-compra__servicio-descripcion {
+    color: var(--catalog-body);
+    font-size: 0.84rem;
+    line-height: 1.45;
     margin-bottom: 0.75rem;
 }
 
@@ -859,12 +888,55 @@ label.is-invalid {
 }
 
 .compras-toolbar {
-    align-items: center;
+    align-items: flex-end;
     display: flex;
     flex-shrink: 0;
     flex-wrap: wrap;
     gap: 0.75rem;
     justify-content: space-between;
+}
+
+.compras-toolbar__controls {
+    align-items: flex-end;
+    display: flex;
+    flex: 1 1 320px;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.compras-toolbar__search {
+    flex: 1 1 260px;
+    max-width: 100%;
+    min-width: 200px;
+}
+
+.compras-toolbar__por-pagina {
+    align-items: center;
+    display: flex;
+    flex: 0 0 auto;
+    gap: 0.5rem;
+}
+
+.compras-toolbar__por-pagina-label {
+    color: var(--catalog-body);
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.compras-toolbar__por-pagina .form-select {
+    min-width: 5rem;
+    width: auto;
+}
+
+.compras-toolbar__meta {
+    align-items: center;
+    display: flex;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
 .compras-toolbar__info.badge {

@@ -218,7 +218,7 @@ export default function Index({ formularios_dinamicos }: Props) {
                     </div>
                     <Link
                         href="/cajas/formulario-dinamico/create"
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-cajas-border hover:opacity-90 text-cajas-text-active"
                     >
                         Nuevo Formulario Dinámico
                     </Link>
@@ -232,7 +232,7 @@ export default function Index({ formularios_dinamicos }: Props) {
                             <input
                                 id="q"
                                 type="text"
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-600 p-2"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm text-gray-600 p-2"
                                 placeholder="Nombre, título, descripción..."
                                 value={q}
                                 onChange={(e) => setQ(e.target.value)}
@@ -244,15 +244,15 @@ export default function Index({ formularios_dinamicos }: Props) {
                             <input
                                 id="module"
                                 type="text"
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-600 p-2"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm text-gray-600 p-2"
                                 placeholder="Ej: auth, creditos"
                                 value={module}
                                 onChange={(e) => setModule(e.target.value)}
                             />
                         </div>
                         <div className="flex items-end gap-2">
-                            <button onClick={applyFilters} className="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">Filtrar</button>
-                            <button onClick={clearFilters} className="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500">Limpiar</button>
+                            <button onClick={applyFilters} className="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-cajas-border/10 hover:border-cajas-border/40 focus:outline-none focus:ring-2 focus:ring-cajas-border">Filtrar</button>
+                            <button onClick={clearFilters} className="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-cajas-border">Limpiar</button>
                         </div>
                     </div>
                 </div>
@@ -261,7 +261,7 @@ export default function Index({ formularios_dinamicos }: Props) {
                 <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <div className="text-center">
-                            <div className="text-2xl font-bold text-indigo-600">{meta.total_formularios}</div>
+                            <div className="text-2xl font-bold text-cajas-border">{meta.total_formularios}</div>
                             <div className="text-sm text-gray-500">Total Formularios</div>
                         </div>
                         <div className="text-center">
@@ -285,7 +285,7 @@ export default function Index({ formularios_dinamicos }: Props) {
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center">
                                                 <div className="flex-shrink-0">
-                                                    <div className="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center" onClick={() => handleDetail(formulario.id)}>
+                                                    <div className="h-10 w-10 rounded-full bg-cajas-border/100 flex items-center justify-center" onClick={() => handleDetail(formulario.id)}>
                                                         <span className="text-sm font-medium text-white">
                                                             {formulario.title.charAt(0).toUpperCase()}
                                                         </span>
@@ -326,7 +326,7 @@ export default function Index({ formularios_dinamicos }: Props) {
                                                 <div className="flex space-x-2">
                                                     <Link
                                                         href={`/cajas/formulario-dinamico/${formulario.id}/show`}
-                                                        className="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+                                                        className="text-cajas-border hover:opacity-80 text-sm font-medium"
                                                     >
                                                         Ver
                                                     </Link>
@@ -381,7 +381,7 @@ export default function Index({ formularios_dinamicos }: Props) {
                                         </span>
                                         <button
                                             onClick={openAddChild}
-                                            className="inline-flex items-center h-8 px-2.5 rounded-md border border-gray-300 text-xs font-medium text-gray-700 hover:bg-indigo-50 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                            className="inline-flex items-center h-8 px-2.5 rounded-md border border-gray-300 text-xs font-medium text-gray-700 hover:bg-cajas-border/10 hover:border-cajas-border/40 focus:outline-none focus:ring-2 focus:ring-cajas-border"
                                         >
                                             Agregar
                                         </button>
@@ -410,7 +410,7 @@ export default function Index({ formularios_dinamicos }: Props) {
                                                 {children.map((componente) => (
                                                     <li key={componente.id} className="px-4 py-4 sm:px-6">
                                                         <div className="flex items-start gap-3">
-                                                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-white text-sm font-semibold">
+                                                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-cajas-border text-cajas-text-active text-sm font-semibold">
                                                                 {componente.label?.charAt(0)?.toUpperCase() || componente.name?.charAt(0)?.toUpperCase()}
                                                             </div>
                                                             <div className="flex-1 min-w-0">
@@ -478,19 +478,19 @@ export default function Index({ formularios_dinamicos }: Props) {
                                     <div className="mt-1 flex gap-2">
                                         <input
                                             type="text"
-                                            className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-600"
+                                            className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm text-gray-600"
                                             placeholder="Nombre, etiqueta, tipo..."
                                             value={searchOption}
                                             onChange={(e) => setSearchOption(e.target.value)}
                                             onKeyDown={(e) => { if (e.key === 'Enter') loadOptions(searchOption); }}
                                         />
-                                        <button onClick={() => loadOptions(searchOption)} className="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:border-indigo-300">Buscar</button>
+                                        <button onClick={() => loadOptions(searchOption)} className="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-cajas-border/10 hover:border-cajas-border/40">Buscar</button>
                                     </div>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Seleccionar componente</label>
                                     <select
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-600 p-2"
+                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm text-gray-600 p-2"
                                         value={selectedChildId}
                                         onChange={(e) => setSelectedChildId(e.target.value)}
                                     >
@@ -507,7 +507,7 @@ export default function Index({ formularios_dinamicos }: Props) {
                             </div>
                             <div className="px-4 py-3 border-t flex justify-end gap-2">
                                 <button onClick={() => setAddOpen(false)} className="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancelar</button>
-                                <button onClick={attachChild} disabled={!selectedChildId || attaching} className="inline-flex items-center h-9 px-3 rounded-md border border-transparent text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50">
+                                <button onClick={attachChild} disabled={!selectedChildId || attaching} className="inline-flex items-center h-9 px-3 rounded-md border border-transparent text-sm font-medium text-white bg-cajas-border hover:opacity-90 text-cajas-text-active disabled:opacity-50">
                                     {attaching ? 'Agregando…' : 'Agregar'}
                                 </button>
                             </div>
@@ -541,7 +541,7 @@ export default function Index({ formularios_dinamicos }: Props) {
                                 <label htmlFor="per_page" className="text-gray-600">Por página</label>
                                 <select
                                     id="per_page"
-                                    className="rounded-md border border-gray-300 px-2 py-1 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="rounded-md border border-gray-300 px-2 py-1 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-cajas-border focus:border-cajas-border"
                                     value={meta.pagination.per_page}
                                     onChange={(e) => router.get('/cajas/formulario-dinamico', { ...currentFilterParams, page: 1, per_page: Number(e.target.value) }, { preserveState: true, preserveScroll: true })}
                                 >
@@ -555,7 +555,7 @@ export default function Index({ formularios_dinamicos }: Props) {
                             <button
                                 onClick={() => router.get('/cajas/formulario-dinamico', { ...currentFilterParams, page: 1 }, { preserveState: true, preserveScroll: true })}
                                 disabled={meta.pagination.current_page === 1}
-                                className="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-cajas-border/10 hover:border-cajas-border/40 focus:outline-none focus:ring-2 focus:ring-cajas-border disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Primera
                             </button>
@@ -578,7 +578,7 @@ export default function Index({ formularios_dinamicos }: Props) {
                                             <button
                                                 key={num}
                                                 onClick={() => router.get('/cajas/formulario-dinamico', { ...currentFilterParams, page: num }, { preserveState: true, preserveScroll: true })}
-                                                className={`inline-flex items-center h-9 px-3 rounded-md border text-sm font-medium ${num === p.current_page ? 'bg-indigo-600 text-gray border-indigo-600' : 'text-gray-700 border-gray-300 hover:bg-indigo-50 hover:border-indigo-300'} focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                                                className={`inline-flex items-center h-9 px-3 rounded-md border text-sm font-medium ${num === p.current_page ? 'bg-cajas-border text-cajas-text-active border-cajas-border' : 'text-gray-700 border-gray-300 hover:bg-cajas-border/10 hover:border-cajas-border/40'} focus:outline-none focus:ring-2 focus:ring-cajas-border`}
                                             >
                                                 {num}
                                             </button>
@@ -614,7 +614,7 @@ export default function Index({ formularios_dinamicos }: Props) {
                         <div className="mt-6">
                             <Link
                                 href="/cajas/formulario-dinamico/create"
-                                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-cajas-border hover:opacity-90 text-cajas-text-active"
                             >
                                 Nuevo Formulario Dinámico
                             </Link>

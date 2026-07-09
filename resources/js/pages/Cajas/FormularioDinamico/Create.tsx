@@ -86,7 +86,7 @@ export default function Create() {
                     </div>
                     <Link
                         href="/cajas/formulario-dinamico"
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-cajas-border hover:opacity-90 text-cajas-text-active"
                     >
                         Volver
                     </Link>
@@ -101,7 +101,7 @@ export default function Create() {
                                     name="name"
                                     id="name"
                                     required
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.name ? 'border-red-300' : ''}`}
+                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.name ? 'border-red-300' : ''}`}
                                     value={formData.name}
                                     onChange={handleChange}
                                 />
@@ -116,7 +116,7 @@ export default function Create() {
                                     name="title"
                                     id="title"
                                     required
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.title ? 'border-red-300' : ''}`}
+                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.title ? 'border-red-300' : ''}`}
                                     value={formData.title}
                                     onChange={handleChange}
                                 />
@@ -130,7 +130,7 @@ export default function Create() {
                                     name="description"
                                     id="description"
                                     rows={3}
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.description ? 'border-red-300' : ''}`}
+                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.description ? 'border-red-300' : ''}`}
                                     value={formData.description}
                                     onChange={handleChange}
                                 />
@@ -145,7 +145,7 @@ export default function Create() {
                                     name="module"
                                     id="module"
                                     required
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.module ? 'border-red-300' : ''}`}
+                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.module ? 'border-red-300' : ''}`}
                                     value={formData.module}
                                     onChange={handleChange}
                                 />
@@ -160,7 +160,7 @@ export default function Create() {
                                     name="endpoint"
                                     id="endpoint"
                                     required
-                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.endpoint ? 'border-red-300' : ''}`}
+                                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 ${errors.endpoint ? 'border-red-300' : ''}`}
                                     value={formData.endpoint}
                                     onChange={handleChange}
                                 />
@@ -173,7 +173,7 @@ export default function Create() {
                                 <select
                                     name="method"
                                     id="method"
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2"
                                     value={formData.method}
                                     onChange={handleChange}
                                 >
@@ -194,7 +194,7 @@ export default function Create() {
                                             type="checkbox"
                                             name="is_active"
                                             id="is_active"
-                                            className="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                            className="rounded border-gray-300 text-cajas-border shadow-sm focus:border-cajas-border focus:ring-cajas-border"
                                             checked={formData.is_active}
                                             onChange={handleChange}
                                         />
@@ -211,7 +211,7 @@ export default function Create() {
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700">Columnas</label>
                                             <select
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm p-2"
                                                 value={formData.layout_config.columns}
                                                 onChange={(e) => handleJsonChange('layout_config', { ...formData.layout_config, columns: Number(e.target.value) })}
                                             >
@@ -223,7 +223,7 @@ export default function Create() {
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700">Espaciado</label>
                                             <select
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm p-2"
                                                 value={formData.layout_config.spacing}
                                                 onChange={(e) => handleJsonChange('layout_config', { ...formData.layout_config, spacing: e.target.value })}
                                             >
@@ -235,7 +235,7 @@ export default function Create() {
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700">Tema</label>
                                             <select
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm p-2"
                                                 value={formData.layout_config.theme}
                                                 onChange={(e) => handleJsonChange('layout_config', { ...formData.layout_config, theme: e.target.value })}
                                             >
@@ -258,7 +258,7 @@ export default function Create() {
                                             <label className="inline-flex items-center">
                                                 <input
                                                     type="checkbox"
-                                                    className="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                    className="rounded border-gray-300 text-cajas-border shadow-sm focus:border-cajas-border focus:ring-cajas-border"
                                                     checked={formData.permissions.public}
                                                     onChange={(e) => handleJsonChange('permissions', { ...formData.permissions, public: e.target.checked })}
                                                 />
@@ -273,7 +273,7 @@ export default function Create() {
                                                         <label key={role} className="inline-flex items-center">
                                                             <input
                                                                 type="checkbox"
-                                                                className="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                                className="rounded border-gray-300 text-cajas-border shadow-sm focus:border-cajas-border focus:ring-cajas-border"
                                                                 checked={formData.permissions.roles.includes(role)}
                                                                 onChange={(e) => {
                                                                     const roles = e.target.checked
@@ -297,7 +297,7 @@ export default function Create() {
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-cajas-border hover:opacity-90 text-cajas-text-active focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cajas-border disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {processing ? 'Guardando...' : 'Guardar Formulario'}
                             </button>

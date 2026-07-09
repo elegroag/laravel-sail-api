@@ -45,8 +45,8 @@ const footerNavItems: NavItem[] = [
 
 export function AppSidebar() {
     return (
-        <Sidebar collapsible="icon" variant="inset">
-            <SidebarHeader className="bg-[rgb(52,73,94)]">
+        <Sidebar collapsible="icon" variant="inset" className="bg-cajas-bg text-cajas-text">
+            <SidebarHeader className="cajas-sidebar-header">
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>

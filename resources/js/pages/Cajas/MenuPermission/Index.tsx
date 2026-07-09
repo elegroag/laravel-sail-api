@@ -178,7 +178,7 @@ export default function Index({ menu_items }: Props) {
                             <input
                                 id="q"
                                 type="text"
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-600 p-2"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm text-gray-600 p-2"
                                 placeholder="Título, controller, action..."
                                 value={q}
                                 onChange={(e) => setQ(e.target.value)}
@@ -189,7 +189,7 @@ export default function Index({ menu_items }: Props) {
                             <label htmlFor="tipo" className="block text-sm font-medium text-gray-700">Tipo Menú</label>
                             <select
                                 id="tipo"
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white text-gray-600 p-2"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm bg-white text-gray-600 p-2"
                                 value={tipo}
                                 onChange={(e) => setTipo(e.target.value)}
                             >
@@ -205,7 +205,7 @@ export default function Index({ menu_items }: Props) {
                             <label htmlFor="codapl" className="block text-sm font-medium text-gray-700">Aplicación</label>
                             <select
                                 id="codapl"
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white text-gray-600 p-2"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm bg-white text-gray-600 p-2"
                                 value={codapl}
                                 onChange={(e) => setCodapl(e.target.value)}
                             >
@@ -215,8 +215,8 @@ export default function Index({ menu_items }: Props) {
                             </select>
                         </div>
                         <div className="flex items-end gap-2">
-                            <button onClick={applyFilters} className="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">Filtrar</button>
-                            <button onClick={clearFilters} className="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500">Limpiar</button>
+                            <button onClick={applyFilters} className="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-cajas-border/10 hover:border-cajas-border/40 focus:outline-none focus:ring-2 focus:ring-cajas-border">Filtrar</button>
+                            <button onClick={clearFilters} className="inline-flex items-center h-9 px-3 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-cajas-border">Limpiar</button>
                         </div>
                     </div>
                 </div>
@@ -225,10 +225,10 @@ export default function Index({ menu_items }: Props) {
                     <div className="lg:col-span-1">
                         <ul className="divide-y divide-gray-200 h-[75vh] overflow-y-auto">
                             {data.map((menu_item) => (
-                                <li key={menu_item.id} onClick={() => handleSelectItem(menu_item)} className={`cursor-pointer hover:bg-gray-50 ${selectedItem?.id === menu_item.id ? 'bg-indigo-50' : ''}`}>
+                                <li key={menu_item.id} onClick={() => handleSelectItem(menu_item)} className={`cursor-pointer hover:bg-gray-50 ${selectedItem?.id === menu_item.id ? 'bg-cajas-border/10' : ''}`}>
                                     <div className="px-4 py-4 sm:px-6">
                                         <div className="flex items-center justify-between">
-                                            <div className="text-sm font-medium text-indigo-600 truncate">{menu_item.title}</div>
+                                            <div className="text-sm font-medium text-cajas-border truncate">{menu_item.title}</div>
                                             <div className="ml-2 flex-shrink-0 flex">
                                                 <p className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${menu_item.codapl === 'CA' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                                                     {menu_item.codapl}
@@ -263,7 +263,7 @@ export default function Index({ menu_items }: Props) {
                                     )}
                                 </div>
                                 {selectedItem && (
-                                    <button onClick={savePermissions} disabled={saving} className="inline-flex items-center h-8 px-2.5 rounded-md border border-transparent text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50">
+                                    <button onClick={savePermissions} disabled={saving} className="inline-flex items-center h-8 px-2.5 rounded-md border border-transparent text-xs font-medium text-white bg-cajas-border hover:opacity-90 text-cajas-text-active disabled:opacity-50">
                                         {saving ? 'Guardando...' : 'Guardar Cambios'}
                                     </button>
                                 )}
@@ -295,7 +295,7 @@ export default function Index({ menu_items }: Props) {
                                                         <td className="px-6 py-4 whitespace-nowrap">
                                                             <input
                                                                 type="checkbox"
-                                                                className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                                                                className="focus:ring-cajas-border h-4 w-4 text-cajas-border border-gray-300 rounded"
                                                                 checked={permission?.can_view || false}
                                                                 onChange={e => handlePermissionChange(tf.tipfun, 'can_view', e.target.checked)}
                                                             />
@@ -303,7 +303,7 @@ export default function Index({ menu_items }: Props) {
                                                         <td className="px-6 py-4 whitespace-nowrap">
                                                             <input
                                                                 type="text"
-                                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-600 p-2"
+                                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm text-gray-600 p-2"
                                                                 value={permission?.opciones || ''}
                                                                 onChange={e => handlePermissionChange(tf.tipfun, 'opciones', e.target.value)}
                                                             />

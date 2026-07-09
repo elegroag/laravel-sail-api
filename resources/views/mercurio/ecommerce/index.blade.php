@@ -109,6 +109,7 @@
                                 </div>
 
                                 <p id="panel_servicio_nombre" class="panel-compra__servicio"></p>
+                                <p id="panel_servicio_descripcion" class="panel-compra__servicio-descripcion" style="display:none;"></p>
 
                                 <div id="loader_tarifa" class="text-center py-3" style="display:none;">
                                     <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
@@ -289,6 +290,24 @@
         $('#detalle_tarifa').hide();
         $('#error_tarifa').hide();
         $('#panel_servicio_nombre').text('');
+        $('#panel_servicio_descripcion').text('').hide();
+    }
+
+    function actualizarPanelServicio(srv) {
+        if (!srv) {
+            $('#panel_servicio_nombre').text('');
+            $('#panel_servicio_descripcion').text('').hide();
+            return;
+        }
+
+        $('#panel_servicio_nombre').text(srv.nombre || '');
+
+        var descripcion = srv.descripcion;
+        if (descripcion !== null && descripcion !== undefined && String(descripcion).trim() !== '') {
+            $('#panel_servicio_descripcion').text(descripcion).show();
+        } else {
+            $('#panel_servicio_descripcion').text('').hide();
+        }
     }
 
     function esVistaMovil() {
@@ -881,7 +900,7 @@
 
         mostrarPanelCompra();
         actualizarPanelBeneficiario();
-        $('#panel_servicio_nombre').text(srv.nombre || '');
+        actualizarPanelServicio(srv);
         $('#detalle_tarifa').hide();
         $('#error_tarifa').hide();
 

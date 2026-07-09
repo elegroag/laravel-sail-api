@@ -76,7 +76,7 @@ export default function Show({ menu_item }: Props) {
                         </Link>
                         <Link
                             href="/cajas/menu"
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-cajas-border hover:opacity-90 text-cajas-text-active"
                         >
                             Volver al listado
                         </Link>
@@ -199,7 +199,7 @@ export default function Show({ menu_item }: Props) {
                                         </div>
                                         <Link
                                             href={`/web/trabajadores/${trabajador.id}`}
-                                            className="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+                                            className="text-cajas-border hover:opacity-80 text-sm font-medium"
                                         >
                                             Ver detalles
                                         </Link>

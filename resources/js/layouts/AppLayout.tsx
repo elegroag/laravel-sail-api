@@ -26,7 +26,7 @@ export default function AppLayout({ variant = 'sidebar', title, description, bre
     return (
         <AppShell variant="sidebar">
             <AppSidebar />
-            <AppContent variant="sidebar" className="overflow-x-hidden bg-[rgb(250,244,232)]">
+            <AppContent variant="sidebar" className="overflow-x-hidden cajas-content-bg">
                 <AppSidebarHeader breadcrumbs={breadcrumbs} title={title} description={description} />
                 {children}
             </AppContent>

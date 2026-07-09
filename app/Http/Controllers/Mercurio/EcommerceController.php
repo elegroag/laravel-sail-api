@@ -368,7 +368,7 @@ class EcommerceController extends ApplicationController
 
             $params = [
                 'cedtra' => $cedtra,
-                'limit' => 20,
+                'limit' => (int) $request->input('limit', 500),
             ];
 
             $this->api->send([

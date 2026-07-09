@@ -69,7 +69,7 @@ export default function Edit({ permission, errors }: Props) {
                             <input
                                 id="opciones"
                                 type="text"
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-600 p-2"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm text-gray-600 p-2"
                                 value={data.opciones}
                                 onChange={(e) => setData('opciones', e.target.value)}
                             />
@@ -81,7 +81,7 @@ export default function Edit({ permission, errors }: Props) {
                                 <input
                                     id="can_view"
                                     type="checkbox"
-                                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                                    className="focus:ring-cajas-border h-4 w-4 text-cajas-border border-gray-300 rounded"
                                     checked={data.can_view}
                                     onChange={(e) => setData('can_view', e.target.checked)}
                                 />
@@ -100,7 +100,7 @@ export default function Edit({ permission, errors }: Props) {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="inline-flex items-center h-9 px-3 rounded-md border border-transparent text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
+                            className="inline-flex items-center h-9 px-3 rounded-md border border-transparent text-sm font-medium text-white bg-cajas-border hover:opacity-90 text-cajas-text-active disabled:opacity-50"
                         >
                             {processing ? 'Actualizando...' : 'Actualizar Permiso'}
                         </button>

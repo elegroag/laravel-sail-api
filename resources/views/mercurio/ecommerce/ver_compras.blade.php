@@ -43,13 +43,40 @@
                 </a>
             </div>
 
+            <div id="sin_resultados_busqueda" class="compras-estado text-center py-4" style="display:none;">
+                <i class="fas fa-search compras-estado__icon"></i>
+                <p class="mt-3 compras-estado__texto">No hay compras que coincidan con su búsqueda</p>
+            </div>
+
             <div id="contenido_compras" class="compras-contenido" style="display:none;">
                 <div class="compras-toolbar">
-                    <span id="info_total" class="compras-toolbar__info badge"></span>
-                    <span id="info_pagina" class="compras-toolbar__info text-muted"></span>
+                    <div class="compras-toolbar__controls">
+                        <div class="input-group compras-toolbar__search">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input
+                                type="search"
+                                id="buscar_compra"
+                                class="form-control"
+                                placeholder="Buscar por servicio, beneficiario, referencia, estado..."
+                                autocomplete="off"
+                            >
+                        </div>
+                        <div class="compras-toolbar__por-pagina">
+                            <label for="select_por_pagina" class="compras-toolbar__por-pagina-label">Por página</label>
+                            <select id="select_por_pagina" class="form-select form-select-sm">
+                                <option value="10" selected>10</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="compras-toolbar__meta">
+                        <span id="info_total" class="compras-toolbar__info badge"></span>
+                        <span id="info_pagina" class="compras-toolbar__info text-muted"></span>
+                    </div>
                 </div>
 
-                <div class="compras-grid-scroll">
+                <div id="compras-grid-scroll-wrap" class="compras-grid-scroll">
                     <div id="grid_compras" class="compras-grid" role="list" aria-label="Compras realizadas"></div>
                 </div>
 
@@ -73,8 +100,9 @@
 @push('scripts')
 <script>
     var comprasData = [];
+    var busquedaCompras = '';
     var paginaActual = 0;
-    var itemsPorPagina = 1;
+    var itemsPorPagina = 10;
 
     var routes = {
         misCompras: "{{ route('servicios.mis-compras') }}",
@@ -103,11 +131,35 @@
     function mostrarLoader(id) { $('#' + id).show(); }
     function ocultarLoader(id) { $('#' + id).hide(); }
 
-    function calcularItemsPorPagina() {
-        var ancho = $(window).width();
-        if (ancho >= 1200) return 3;
-        if (ancho >= 768) return 2;
-        return 1;
+    function compraCoincideBusqueda(compra, query) {
+        if (!query) return true;
+        var texto = (
+            (compra.nombre_servicio || '') + ' ' +
+            (compra.nombre_beneficiario || '') + ' ' +
+            (compra.nombre_titular || '') + ' ' +
+            (compra.documento || '') + ' ' +
+            (compra.codben || '') + ' ' +
+            (compra.cedtra_titular || '') + ' ' +
+            (compra.refpago || '') + ' ' +
+            (compra.forma_pago_detalle || '') + ' ' +
+            (compra.estado_texto || '') + ' ' +
+            (compra.estado || '') + ' ' +
+            (compra.detcat || '') + ' ' +
+            (compra.codcat || '') + ' ' +
+            (compra.marca || '') + ' ' +
+            (compra.nota || '') + ' ' +
+            (compra.fecha || '') + ' ' +
+            (compra.tipben_texto || '')
+        ).toLowerCase();
+        return texto.indexOf(query.toLowerCase()) !== -1;
+    }
+
+    function obtenerComprasFiltradas() {
+        var query = busquedaCompras.trim();
+        if (!query) return comprasData.slice();
+        return comprasData.filter(function(compra) {
+            return compraCoincideBusqueda(compra, query);
+        });
     }
 
     function claseEstado(estado) {
@@ -192,8 +244,22 @@
         var grid = $('#grid_compras');
         grid.empty();
 
-        var totalCompras = comprasData.length;
-        var totalPaginas = Math.max(1, Math.ceil(totalCompras / itemsPorPagina));
+        var comprasFiltradas = obtenerComprasFiltradas();
+        var totalCompras = comprasFiltradas.length;
+        var totalPaginas = Math.max(1, Math.ceil(totalCompras / itemsPorPagina) || 1);
+
+        if (totalCompras === 0) {
+            $('#compras-grid-scroll-wrap').hide();
+            $('#sin_resultados_busqueda').toggle(comprasData.length > 0 && busquedaCompras.trim() !== '');
+            $('.compras-paginador').hide();
+            $('#info_total').text('0 compras');
+            $('#info_pagina').text('');
+            return;
+        }
+
+        $('#compras-grid-scroll-wrap').show();
+        $('#sin_resultados_busqueda').hide();
+        $('.compras-paginador').show();
 
         if (paginaActual < 0) paginaActual = 0;
         if (paginaActual >= totalPaginas) paginaActual = totalPaginas - 1;
@@ -202,15 +268,25 @@
         var fin = Math.min(inicio + itemsPorPagina, totalCompras);
 
         for (var i = inicio; i < fin; i++) {
-            grid.append(buildCardCompra(comprasData[i]));
+            grid.append(buildCardCompra(comprasFiltradas[i]));
+        }
+
+        var textoTotal = totalCompras + ' compra' + (totalCompras === 1 ? '' : 's');
+        if (busquedaCompras.trim() && comprasData.length !== totalCompras) {
+            textoTotal += ' (de ' + comprasData.length + ')';
         }
 
         $('#paginador_texto').text((paginaActual + 1) + ' de ' + totalPaginas);
         $('#info_pagina').text('Página ' + (paginaActual + 1) + ' de ' + totalPaginas);
-        $('#info_total').text(totalCompras + ' compra' + (totalCompras === 1 ? '' : 's'));
+        $('#info_total').text(textoTotal);
 
         $('#btn_anterior').prop('disabled', paginaActual <= 0);
         $('#btn_siguiente').prop('disabled', paginaActual >= totalPaginas - 1);
+    }
+
+    function aplicarFiltrosCompras() {
+        paginaActual = 0;
+        renderizarPagina();
     }
 
     function cargarCompras() {
@@ -226,7 +302,7 @@
             method: 'POST',
             dataType: 'JSON',
             cache: false,
-            data: { cedtra: cedtra }
+            data: { cedtra: cedtra, limit: 500 }
         }).done(function(response) {
             ocultarLoader('loader_compras');
 
@@ -248,8 +324,10 @@
                     return;
                 }
 
-                itemsPorPagina = calcularItemsPorPagina();
                 paginaActual = 0;
+                busquedaCompras = '';
+                $('#buscar_compra').val('');
+                itemsPorPagina = parseInt($('#select_por_pagina').val(), 10) || 10;
                 $('#contenido_compras').css('display', 'flex');
                 renderizarPagina();
             } else {
@@ -278,26 +356,22 @@
         });
 
         $(document).on('click', '#btn_siguiente', function() {
-            var totalPaginas = Math.ceil(comprasData.length / itemsPorPagina);
+            var totalPaginas = Math.ceil(obtenerComprasFiltradas().length / itemsPorPagina);
             if (paginaActual < totalPaginas - 1) {
                 paginaActual++;
                 renderizarPagina();
             }
         });
 
-        var resizeTimer;
-        $(window).on('resize', function() {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(function() {
-                if (!$('#contenido_compras').is(':visible')) return;
-                var nuevoItems = calcularItemsPorPagina();
-                if (nuevoItems !== itemsPorPagina) {
-                    itemsPorPagina = nuevoItems;
-                    var primerItem = paginaActual * itemsPorPagina;
-                    paginaActual = Math.floor(primerItem / itemsPorPagina);
-                    renderizarPagina();
-                }
-            }, 250);
+        $(document).on('input', '#buscar_compra', function() {
+            busquedaCompras = $(this).val().trim();
+            aplicarFiltrosCompras();
+        });
+
+        $(document).on('change', '#select_por_pagina', function() {
+            itemsPorPagina = parseInt($(this).val(), 10) || 10;
+            paginaActual = 0;
+            renderizarPagina();
         });
     });
 </script>

@@ -219,7 +219,7 @@ export default function Edit({ componente }: Props) {
                         <DialogClose asChild>
                             <button
                                 type="button"
-                                className="px-4 py-2 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 inline-flex items-center border border-transparent"
+                                className="px-4 py-2 text-sm font-medium rounded-md text-white bg-cajas-border hover:opacity-90 text-cajas-text-active inline-flex items-center border border-transparent"
                             >
                                 Cerrar
                             </button>
@@ -236,14 +236,14 @@ export default function Edit({ componente }: Props) {
                     <div className="space-x-2 flex">
                         <Link
                             href={`/cajas/componente-dinamico?formulario_id=${componente.formulario_id}`}
-                            className="px-4 py-2 text-sm font-medium rounded-md text-white bg-indigo-400 hover:bg-indigo-400 inline-flex items-center border border-transparent"
+                            className="px-4 py-2 text-sm font-medium rounded-md text-white bg-cajas-border/60 hover:bg-cajas-border/60 text-cajas-text-active inline-flex items-center border border-transparent"
                         >
                             Volver con formulario
                         </Link>
 
                         <Link
                             href="/cajas/componente-dinamico"
-                            className="px-4 py-2 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 inline-flex items-center border border-transparent"
+                            className="px-4 py-2 text-sm font-medium rounded-md text-white bg-cajas-border hover:opacity-90 text-cajas-text-active inline-flex items-center border border-transparent"
                         >
                             Volver
                         </Link>
@@ -262,7 +262,7 @@ export default function Edit({ componente }: Props) {
                                     name="name"
                                     id="name"
                                     required
-                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.name ? 'border-red-300' : ''}`}
+                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.name ? 'border-red-300' : ''}`}
                                     value={data.name}
                                     onChange={handleChange}
                                 />
@@ -279,7 +279,7 @@ export default function Edit({ componente }: Props) {
                                     name="type"
                                     id="type"
                                     required
-                                    className="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full"
+                                    className="mt-1 rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full"
                                     value={data.type}
                                     onChange={handleChange}
                                 >
@@ -302,7 +302,7 @@ export default function Edit({ componente }: Props) {
                                     name="form_type"
                                     id="form_type"
                                     required
-                                    className="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full"
+                                    className="mt-1 rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full"
                                     value={data.form_type}
                                     onChange={handleChange}
                                 >
@@ -327,7 +327,7 @@ export default function Edit({ componente }: Props) {
                                     <select
                                         name="search_type"
                                         id="search_type"
-                                        className="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full"
+                                        className="mt-1 rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full"
                                         value={data.search_type}
                                         onChange={handleChange}
                                     >
@@ -353,7 +353,7 @@ export default function Edit({ componente }: Props) {
                                         name="search_endpoint"
                                         id="search_endpoint"
                                         minLength={160}
-                                        className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.search_endpoint ? 'border-red-300' : ''}`}
+                                        className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.search_endpoint ? 'border-red-300' : ''}`}
                                         value={data.search_endpoint}
                                         onChange={handleChange}
                                         placeholder="https://api.midominio.com/recurso?param1=... (mínimo 160 caracteres)"
@@ -372,7 +372,7 @@ export default function Edit({ componente }: Props) {
                                     name="label"
                                     id="label"
                                     required
-                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.label ? 'border-red-300' : ''}`}
+                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.label ? 'border-red-300' : ''}`}
                                     value={data.label}
                                     onChange={handleChange}
                                 />
@@ -389,7 +389,7 @@ export default function Edit({ componente }: Props) {
                                     type="text"
                                     name="placeholder"
                                     id="placeholder"
-                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.placeholder ? 'border-red-300' : ''}`}
+                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.placeholder ? 'border-red-300' : ''}`}
                                     value={data.placeholder}
                                     onChange={handleChange}
                                 />
@@ -407,7 +407,7 @@ export default function Edit({ componente }: Props) {
                                     id="group_id"
                                     required
                                     min="1"
-                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.group_id ? 'border-red-300' : ''}`}
+                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.group_id ? 'border-red-300' : ''}`}
                                     value={data.group_id}
                                     onChange={handleChange}
                                 />
@@ -424,7 +424,7 @@ export default function Edit({ componente }: Props) {
                                     id="order"
                                     required
                                     min="1"
-                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.order ? 'border-red-300' : ''}`}
+                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.order ? 'border-red-300' : ''}`}
                                     value={data.order}
                                     onChange={handleChange}
                                 />
@@ -440,7 +440,7 @@ export default function Edit({ componente }: Props) {
                                                 type="checkbox"
                                                 name="is_disabled"
                                                 id="is_disabled"
-                                                className="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                className="rounded border-gray-300 text-cajas-border shadow-sm focus:border-cajas-border focus:ring-cajas-border"
                                                 checked={data.is_disabled}
                                                 onChange={handleChange}
                                             />
@@ -453,7 +453,7 @@ export default function Edit({ componente }: Props) {
                                                 type="checkbox"
                                                 name="is_readonly"
                                                 id="is_readonly"
-                                                className="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                className="rounded border-gray-300 text-cajas-border shadow-sm focus:border-cajas-border focus:ring-cajas-border"
                                                 checked={data.is_readonly}
                                                 onChange={handleChange}
                                             />
@@ -472,7 +472,7 @@ export default function Edit({ componente }: Props) {
                                     type="number"
                                     name="target"
                                     id="target"
-                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.target ? 'border-red-300' : ''}`}
+                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.target ? 'border-red-300' : ''}`}
                                     value={data.target}
                                     onChange={handleChange}
                                 />
@@ -489,7 +489,7 @@ export default function Edit({ componente }: Props) {
                                     type="text"
                                     name="default_value"
                                     id="default_value"
-                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.default_value ? 'border-red-300' : ''}`}
+                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.default_value ? 'border-red-300' : ''}`}
                                     value={data.default_value}
                                     onChange={handleChange}
                                 />
@@ -504,7 +504,7 @@ export default function Edit({ componente }: Props) {
                                     name="help_text"
                                     id="help_text"
                                     rows={2}
-                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.help_text ? 'border-red-300' : ''}`}
+                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.help_text ? 'border-red-300' : ''}`}
                                     value={data.help_text}
                                     onChange={handleChange}
                                 />
@@ -519,7 +519,7 @@ export default function Edit({ componente }: Props) {
                                     type="text"
                                     name="css_classes"
                                     id="css_classes"
-                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.css_classes ? 'border-red-300' : ''}`}
+                                    className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.css_classes ? 'border-red-300' : ''}`}
                                     value={data.css_classes}
                                     onChange={handleChange}
                                 />
@@ -539,7 +539,7 @@ export default function Edit({ componente }: Props) {
                                                         <label className="text-sm font-medium text-gray-700 block">Valor</label>
                                                         <input
                                                             type="text"
-                                                            className="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 block w-full"
+                                                            className="mt-1 rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm p-2 block w-full"
                                                             value={item.value}
                                                             onChange={(e) => handleDataSourceChange(index, 'value', e.target.value)}
                                                             placeholder="Valor interno"
@@ -549,7 +549,7 @@ export default function Edit({ componente }: Props) {
                                                         <label className="text-sm font-medium text-gray-700 block">Etiqueta</label>
                                                         <input
                                                             type="text"
-                                                            className="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 block w-full"
+                                                            className="mt-1 rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm p-2 block w-full"
                                                             value={item.label}
                                                             onChange={(e) => handleDataSourceChange(index, 'label', e.target.value)}
                                                             placeholder="Texto visible"
@@ -586,7 +586,7 @@ export default function Edit({ componente }: Props) {
                                         type="date"
                                         name="date_max"
                                         id="date_max"
-                                        className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.date_max ? 'border-red-300' : ''}`}
+                                        className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.date_max ? 'border-red-300' : ''}`}
                                         value={data.date_max}
                                         onChange={handleChange}
                                     />
@@ -604,7 +604,7 @@ export default function Edit({ componente }: Props) {
                                             step="any"
                                             name="number_min"
                                             id="number_min"
-                                            className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.number_min ? 'border-red-300' : ''}`}
+                                            className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.number_min ? 'border-red-300' : ''}`}
                                             value={data.number_min as number | string | undefined}
                                             onChange={handleChange}
                                         />
@@ -618,7 +618,7 @@ export default function Edit({ componente }: Props) {
                                             step="any"
                                             name="number_max"
                                             id="number_max"
-                                            className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.number_max ? 'border-red-300' : ''}`}
+                                            className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.number_max ? 'border-red-300' : ''}`}
                                             value={data.number_max as number | string | undefined}
                                             onChange={handleChange}
                                         />
@@ -634,7 +634,7 @@ export default function Edit({ componente }: Props) {
                                             id="number_step"
                                             required
                                             min="0.01"
-                                            className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.number_step ? 'border-red-300' : ''}`}
+                                            className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.number_step ? 'border-red-300' : ''}`}
                                             value={data.number_step}
                                             onChange={handleChange}
                                         />
@@ -647,7 +647,7 @@ export default function Edit({ componente }: Props) {
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="px-4 py-2 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 inline-flex items-center border border-transparent focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                                className="px-4 py-2 text-sm font-medium rounded-md text-white bg-cajas-border hover:opacity-90 text-cajas-text-active focus:ring-cajas-border inline-flex items-center border border-transparent focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 {processing ? 'Actualizando...' : 'Actualizar Componente'}
                             </button>

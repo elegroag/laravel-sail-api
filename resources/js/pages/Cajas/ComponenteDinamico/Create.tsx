@@ -100,7 +100,7 @@ export default function Create({ formulario, formularios = [] }: Props) {
                         <DialogClose asChild>
                             <button
                                 type="button"
-                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-cajas-border hover:opacity-90 text-cajas-text-active"
                             >
                                 Cerrar
                             </button>
@@ -194,14 +194,14 @@ export default function Create({ formulario, formularios = [] }: Props) {
                                 value={formPickerQuery}
                                 onChange={(e) => { setPage(1); setFormPickerQuery(e.target.value); }}
                                 placeholder="Buscar por nombre o título..."
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm p-2"
                             />
                             <input
                                 type="text"
                                 value={formPickerModule}
                                 onChange={(e) => { setPage(1); setFormPickerModule(e.target.value); }}
                                 placeholder="Filtrar por módulo (opcional)"
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm p-2"
                             />
                         </div>
                         <div className="max-h-64 overflow-auto divide-y divide-gray-200 rounded border">
@@ -220,7 +220,7 @@ export default function Create({ formulario, formularios = [] }: Props) {
                                             setSelectedFormulario(f);
                                             setFormPickerOpen(false);
                                         }}
-                                        className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                                        className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-cajas-border hover:opacity-90 text-cajas-text-active"
                                     >
                                         Seleccionar
                                     </button>
