@@ -26,6 +26,26 @@ export const cajasSidebarSubMenuButtonClass =
 export const cajasCheckboxClass =
     'rounded border-border text-cajas-border shadow-sm focus:border-cajas-border focus:ring-cajas-border';
 
+export const cajasPageClass = 'space-y-4 p-4 md:p-6';
+
+export const cajasCardClass = 'overflow-hidden rounded-xl border border-border bg-card shadow-sm';
+
+export const cajasCardHeaderClass = 'border-b border-border bg-muted/40 px-4 py-3 sm:px-5';
+
+export const cajasCardBodyClass = 'p-4 sm:p-5';
+
+export const cajasBadgeClass =
+    'inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset';
+
+export const cajasActionLinkClass =
+    'inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-cajas-border transition-colors hover:bg-cajas-border/10';
+
+export const cajasActionMutedClass =
+    'inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted';
+
+export const cajasActionDangerClass =
+    'inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-cajas-danger transition-colors hover:bg-cajas-danger/10';
+
 /** @deprecated Usar cajasFormInputClass */
 export const menuFormInputClass = cajasFormInputClass;
 
