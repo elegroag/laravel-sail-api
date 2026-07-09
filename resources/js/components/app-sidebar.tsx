@@ -1,49 +1,13 @@
-import { NavFooter } from '@/components/nav-footer';
-import { NavMain } from '@/components/nav-main';
-import { NavUser } from '@/components/nav-user';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, List, ShieldCheck } from 'lucide-react';
+import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import { CajasNavMenu } from '@/pages/Cajas/components/CajasNavMenu';
+import { CajasSidebarFooter } from '@/pages/Cajas/components/CajasSidebarFooter';
+import { type SharedData } from '@/types';
+import { Link, usePage } from '@inertiajs/react';
 import AppLogo from './app-logo';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: '/cajas/principal',
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Menu',
-        href: '/cajas/menu',
-        icon: List,
-    },
-    {
-        title: 'Permission',
-        href: '/cajas/menu_permission',
-        icon: ShieldCheck,
-    },
-    {
-        title: 'Formulario dinámico',
-        href: '/cajas/formulario-dinamico',
-        icon: Folder,
-    }
-];
-
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
-];
-
 export function AppSidebar() {
+    const { cajasMenu = [] } = usePage<SharedData>().props;
+
     return (
         <Sidebar collapsible="icon" variant="inset" className="bg-cajas-bg text-cajas-text">
             <SidebarHeader className="cajas-sidebar-header">
@@ -59,13 +23,10 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <CajasNavMenu items={cajasMenu} />
             </SidebarContent>
 
-            <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
-                <NavUser />
-            </SidebarFooter>
+            <CajasSidebarFooter />
         </Sidebar>
     );
 }

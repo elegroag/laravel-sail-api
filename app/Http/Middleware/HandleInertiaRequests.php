@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\Menu\MenuCajas;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -52,7 +53,7 @@ class HandleInertiaRequests extends Middleware
         }
 
         if ($request->is('mercurio/*') || $request->is('cajas/*')) {
-            return [
+            $shared = [
                 ...parent::share($request),
                 'auth' => [
                     'user' => $authUser,
@@ -67,6 +68,12 @@ class HandleInertiaRequests extends Middleware
                     'error' => fn () => $request->session()->get('error'),
                 ],
             ];
+
+            if ($request->is('cajas/*')) {
+                $shared['cajasMenu'] = fn () => MenuCajas::getTree('CA');
+            }
+
+            return $shared;
         }
 
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');

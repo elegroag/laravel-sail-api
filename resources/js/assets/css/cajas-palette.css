@@ -108,4 +108,60 @@
     .cajas-content-bg {
         background-color: var(--cajas-content-bg);
     }
+
+    /* Colores de iconos del menú (compatibles con Argon / menu_items.color) */
+    .cajas-menu-icon.text-primary {
+        color: #0fb0b5 !important;
+    }
+
+    .cajas-menu-icon.text-info {
+        color: #11cdef !important;
+    }
+
+    .cajas-menu-icon.text-success {
+        color: #2dce89 !important;
+    }
+
+    .cajas-menu-icon.text-warning {
+        color: #ed7129 !important;
+    }
+
+    .cajas-menu-icon.text-danger {
+        color: #dc5656 !important;
+    }
+
+    .cajas-menu-icon.text-secondary {
+        color: #8392ab !important;
+    }
+
+    .cajas-menu-icon {
+        display: inline-block;
+        width: 1rem;
+        min-width: 1rem;
+        font-size: 0.875rem;
+        line-height: 1;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    .cajas-menu-icon.fas,
+    .cajas-menu-icon.fa {
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+    }
+
+    .cajas-menu-icon.far {
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 400;
+    }
+
+    .cajas-menu-icon.fab {
+        font-family: 'Font Awesome 5 Brands';
+        font-weight: 400;
+    }
+
+    .cajas-menu-icon.ni {
+        font-family: nucleoicons;
+        font-size: 0.875rem;
+    }
 }

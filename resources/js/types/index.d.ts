@@ -22,12 +22,23 @@ export interface NavItem {
     isActive?: boolean;
 }
 
+export interface CajasMenuItem {
+    id: number;
+    title: string;
+    href: string;
+    icon?: string | null;
+    color?: string | null;
+    children?: CajasMenuItem[];
+    isActive?: boolean;
+}
+
 export interface SharedData {
     name: string;
     quote: { message: string; author: string };
     auth: Auth;
     ziggy: Config & { location: string };
     sidebarOpen: boolean;
+    cajasMenu?: CajasMenuItem[];
     [key: string]: unknown;
 }
 

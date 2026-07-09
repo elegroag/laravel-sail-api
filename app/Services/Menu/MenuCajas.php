@@ -34,7 +34,7 @@ class MenuCajas
     {
         $this->menuItems = '';
         if (config('app.env') === 'local') {
-            $this->path = config('app.dominio') . ':' . config('app.port');
+            $this->path = config('app.dominio').':'.config('app.port');
         } else {
             $this->path = config('app.dominio');
         }
@@ -55,7 +55,7 @@ class MenuCajas
         if ($parentId === null) {
             $query .= ' AND menu_items.parent_id IS NULL';
         } else {
-            $query .= ' AND menu_items.parent_id = ' . intval($parentId);
+            $query .= ' AND menu_items.parent_id = '.intval($parentId);
         }
         $query .= ' ORDER BY menu_tipos.position ASC';
         $sql = $this->db->inQueryAssoc($query);
@@ -80,7 +80,7 @@ class MenuCajas
                 'icon' => $menu['icon'] ?? null,
                 'title' => $menu['title'] ?? '',
                 'is_active' => true,
-                'url' => ($menu['default_url']) ? $this->path . '/' . $menu['default_url'] : '#',
+                'url' => ($menu['default_url']) ? $this->path.'/'.$menu['default_url'] : '#',
             ];
             $this->pageTitle = $menu['title'];
         }
@@ -112,14 +112,14 @@ class MenuCajas
                     'icon' => $menu['icon'] ?? null,
                     'title' => $menu['title'] ?? '',
                     'is_active' => false,
-                    'url' => ($menu['default_url']) ? $this->path . '/' . $menu['default_url'] : '#',
+                    'url' => ($menu['default_url']) ? $this->path.'/'.$menu['default_url'] : '#',
                 ];
                 // Agregar breadcrumb del hijo como activo
                 $this->breadcrumbs[] = [
                     'icon' => $child['icon'] ?? null,
                     'title' => $child['title'] ?? '',
                     'is_active' => true,
-                    'url' => ($child['default_url']) ? $this->path . '/' . $child['default_url'] : '#',
+                    'url' => ($child['default_url']) ? $this->path.'/'.$child['default_url'] : '#',
                 ];
                 $this->pageTitle = $menu['title'];
             }
@@ -151,7 +151,7 @@ class MenuCajas
 
         return "
             <li class='nav-item'>
-                <a data-id='{$title}' href='{$this->path}/" . $child['default_url'] . "'
+                <a data-id='{$title}' href='{$this->path}/".$child['default_url']."'
                    class='nav-link {$activeClass}'>
                     {$child['title']}
                 </a>
@@ -164,7 +164,7 @@ class MenuCajas
 
         return "
             <li class='nav-item'>
-                <a class='nav-link {$activeClass}' href='{$this->path}/" . $menu['default_url'] . "'>
+                <a class='nav-link {$activeClass}' href='{$this->path}/".$menu['default_url']."'>
                     {$icon}
                     {$linkText}
                 </a>
@@ -187,5 +187,72 @@ class MenuCajas
         $menu = new MenuCajas($codapl);
 
         return $menu->mainMenu();
+    }
+
+    public static function getTree(string $codapl): array
+    {
+        if (! session('tipfun')) {
+            return [];
+        }
+
+        $menu = new MenuCajas($codapl);
+
+        return $menu->buildTree();
+    }
+
+    private function buildTree(): array
+    {
+        $this->currentUrl = request()->path();
+        $parentMenuItems = $this->getMenuItems(null);
+        $tree = [];
+
+        foreach ($parentMenuItems as $menu) {
+            $tree[] = $this->buildTreeItem($menu, true);
+        }
+
+        return $tree;
+    }
+
+    private function buildTreeItem(array $menu, bool $isParent = false): array
+    {
+        $isActive = ($menu['default_url'] ?? '') === $this->currentUrl;
+        $children = [];
+
+        if ($isParent) {
+            $childItems = $this->getMenuItems($menu['id']);
+
+            foreach ($childItems as $child) {
+                $childActive = ($child['default_url'] ?? '') === $this->currentUrl;
+                if ($childActive) {
+                    $isActive = true;
+                }
+
+                $children[] = $this->buildTreeItem($child, false);
+            }
+        }
+
+        $item = [
+            'id' => (int) $menu['id'],
+            'title' => $menu['title'] ?? '',
+            'href' => $this->normalizeHref($menu['default_url'] ?? null),
+            'icon' => $menu['icon'] ?? null,
+            'color' => $menu['color'] ?? null,
+            'isActive' => $isActive,
+        ];
+
+        if (count($children) > 0) {
+            $item['children'] = $children;
+        }
+
+        return $item;
+    }
+
+    private function normalizeHref(?string $defaultUrl): string
+    {
+        if (! $defaultUrl) {
+            return '#';
+        }
+
+        return str_starts_with($defaultUrl, '/') ? $defaultUrl : '/'.$defaultUrl;
     }
 }
