@@ -80,7 +80,7 @@ function CajasNavMenuItem({ item, currentPath }: { item: CajasMenuItem; currentP
                     </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                    <SidebarMenuSub className="mx-1 border-cajas-border/40 px-1 py-1">
+                    <SidebarMenuSub className="mx-1 border-cajas-border/40 px-1 py-0.5">
                         {children.map((child) => {
                             const childActive = child.isActive || isHrefActive(child.href, currentPath);
 
@@ -116,7 +116,7 @@ export function CajasNavMenu({ items = [] }: CajasNavMenuProps) {
     return (
         <SidebarGroup className="px-3 py-1">
             <SidebarGroupLabel className="px-1 text-cajas-text/70">Menú</SidebarGroupLabel>
-            <SidebarMenu className="gap-1.5">
+            <SidebarMenu className="gap-px">
                 {items.map((item) => (
                     <CajasNavMenuItem key={item.id} item={item} currentPath={currentPath} />
                 ))}

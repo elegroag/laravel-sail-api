@@ -17,7 +17,7 @@ import {
     cajasPageClass,
 } from '@/pages/Cajas/styles/cajas-classes';
 import { Link, router } from '@inertiajs/react';
-import { Eye, ListTree, Pencil, Plus, Search, Trash2 } from 'lucide-react';
+import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Eye, ListTree, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 type Props = {
@@ -52,6 +52,8 @@ type OptionsResponse = {
 
 const paginationButtonClass =
     'inline-flex h-9 items-center rounded-md border border-border px-3 text-sm font-medium text-foreground transition-colors hover:bg-cajas-border/10 hover:border-cajas-border/40 focus:outline-none focus:ring-2 focus:ring-cajas-border disabled:cursor-not-allowed disabled:opacity-50';
+
+const paginationIconButtonClass = `${paginationButtonClass} justify-center px-2.5`;
 
 export default function Index({ menu_items }: Props) {
     const { data, meta } = menu_items;
@@ -337,7 +339,7 @@ export default function Index({ menu_items }: Props) {
                                                         </div>
                                                     </button>
 
-                                                    <div className="flex items-center gap-1 border-t border-border pt-3 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-4">
+                                                    <div className="flex items-center gap-2">
                                                         <Link href={`/cajas/menu/${menu_item.id}/show`} className={cajasActionLinkClass}>
                                                             <Eye className="size-3.5" />
                                                             Ver
@@ -364,11 +366,11 @@ export default function Index({ menu_items }: Props) {
 
                             {meta.pagination && data.length > 0 && (
                                 <div className="flex flex-col gap-3 border-t border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-                                    <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                                    <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-muted-foreground">
                                         <span>
                                             Mostrando {meta.pagination.from || 0}–{meta.pagination.to || 0} de {meta.pagination.total}
                                         </span>
-                                        <label className="flex items-center gap-2">
+                                        <label className="flex shrink-0 items-center gap-2">
                                             Por página
                                             <select
                                                 id="per_page"
@@ -390,7 +392,7 @@ export default function Index({ menu_items }: Props) {
                                             </select>
                                         </label>
                                     </div>
-                                    <div className="flex flex-wrap items-center gap-2">
+                                    <div className="flex shrink-0 items-center gap-1">
                                         <button
                                             type="button"
                                             onClick={() =>
@@ -401,9 +403,11 @@ export default function Index({ menu_items }: Props) {
                                                 )
                                             }
                                             disabled={meta.pagination.current_page === 1}
-                                            className={paginationButtonClass}
+                                            className={paginationIconButtonClass}
+                                            aria-label="Primera página"
+                                            title="Primera página"
                                         >
-                                            Primera
+                                            <ChevronFirst className="size-4" />
                                         </button>
                                         <button
                                             type="button"
@@ -419,9 +423,11 @@ export default function Index({ menu_items }: Props) {
                                                 )
                                             }
                                             disabled={meta.pagination.current_page === 1}
-                                            className={paginationButtonClass}
+                                            className={paginationIconButtonClass}
+                                            aria-label="Página anterior"
+                                            title="Página anterior"
                                         >
-                                            Anterior
+                                            <ChevronLeft className="size-4" />
                                         </button>
                                         {(() => {
                                             const p = meta.pagination!;
@@ -462,9 +468,11 @@ export default function Index({ menu_items }: Props) {
                                                 )
                                             }
                                             disabled={meta.pagination.current_page === meta.pagination.last_page}
-                                            className={paginationButtonClass}
+                                            className={paginationIconButtonClass}
+                                            aria-label="Página siguiente"
+                                            title="Página siguiente"
                                         >
-                                            Siguiente
+                                            <ChevronRight className="size-4" />
                                         </button>
                                         <button
                                             type="button"
@@ -476,9 +484,11 @@ export default function Index({ menu_items }: Props) {
                                                 )
                                             }
                                             disabled={meta.pagination.current_page === meta.pagination.last_page}
-                                            className={paginationButtonClass}
+                                            className={paginationIconButtonClass}
+                                            aria-label="Última página"
+                                            title="Última página"
                                         >
-                                            Última
+                                            <ChevronLast className="size-4" />
                                         </button>
                                     </div>
                                 </div>
