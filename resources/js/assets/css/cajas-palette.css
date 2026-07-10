@@ -105,6 +105,14 @@
         background-color: var(--cajas-header-bg);
     }
 
+    .cajas-sidebar-header:is([data-collapsible='icon']) {
+        justify-content: center;
+    }
+
+    .cajas-sidebar-header [data-sidebar='header'] {
+        justify-content: center;
+    }
+
     .cajas-content-bg {
         background-color: var(--cajas-content-bg);
     }

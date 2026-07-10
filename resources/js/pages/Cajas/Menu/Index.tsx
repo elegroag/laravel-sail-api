@@ -20,6 +20,11 @@ import { Link, router } from '@inertiajs/react';
 import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Eye, ListTree, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+type TipoOption = {
+    value: string;
+    label: string;
+};
+
 type Props = {
     menu_items: {
         data: any[];
@@ -36,6 +41,7 @@ type Props = {
             };
         };
     };
+    tipos: TipoOption[];
 };
 
 type ChildrenResponse = {
@@ -55,7 +61,7 @@ const paginationButtonClass =
 
 const paginationIconButtonClass = `${paginationButtonClass} justify-center px-2.5`;
 
-export default function Index({ menu_items }: Props) {
+export default function Index({ menu_items, tipos }: Props) {
     const { data, meta } = menu_items;
 
     const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -228,11 +234,11 @@ export default function Index({ menu_items }: Props) {
                                 </label>
                                 <select id="tipo" className={cajasFormSelectClass} value={tipo} onChange={(e) => setTipo(e.target.value)}>
                                     <option value="">Todos</option>
-                                    <option value="A">Administrador</option>
-                                    <option value="E">Empresa</option>
-                                    <option value="P">Particular</option>
-                                    <option value="T">Trabajador</option>
-                                    <option value="F">Foniñez</option>
+                                    {tipos.map((opt) => (
+                                        <option key={opt.value} value={opt.value}>
+                                            {opt.label}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                             <div>

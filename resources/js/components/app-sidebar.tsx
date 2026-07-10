@@ -10,10 +10,10 @@ export function AppSidebar() {
 
     return (
         <Sidebar collapsible="icon" variant="inset" className="bg-cajas-bg text-cajas-text">
-            <SidebarHeader className="cajas-sidebar-header">
+            <SidebarHeader className="cajas-sidebar-header justify-center">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
+                        <SidebarMenuButton size="lg" asChild tooltip={{ children: 'Comfaca en línea' }}>
                             <Link href="/cajas/principal" prefetch>
                                 <AppLogo />
                             </Link>

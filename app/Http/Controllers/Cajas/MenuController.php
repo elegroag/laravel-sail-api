@@ -8,6 +8,7 @@ use App\Models\Adapter\DbBase;
 use App\Models\Gener42;
 use App\Models\MenuItem;
 use App\Models\MenuTipo;
+use App\Models\Mercurio06;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -79,7 +80,15 @@ class MenuController extends Controller
             ],
         ];
 
-        return Inertia::render('Cajas/Menu/Index', compact('menu_items'));
+        $tipos = Mercurio06::orderBy('detalle')
+            ->get(['tipo', 'detalle'])
+            ->map(fn ($row) => [
+                'value' => $row->tipo,
+                'label' => $row->detalle,
+            ])
+            ->all();
+
+        return Inertia::render('Cajas/Menu/Index', compact('menu_items', 'tipos'));
     }
 
     public function create()
