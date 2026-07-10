@@ -4,35 +4,35 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <script src="https://checkout.epayco.co/checkout.js"></script>
 
-<div class="col mt-2 servicios-catalog">
-    <div class="card shadow-sm">
-        <div class="card-header servicios-catalog__header py-3">
-            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2">
+<div class="col-12 col-xl-11 mx-auto mt-3 servicios-catalog">
+    <div class="card shadow-sm border-0 servicios-page-card">
+        <div class="card-header border-0 servicios-catalog__header py-3 px-3 px-md-4">
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
                 <div>
-                    <h1 class="servicios-catalog__title mb-1">Catálogo de Servicios</h1>
+                    <h1 class="servicios-catalog__title mb-1">Catálogo de servicios</h1>
                     <p class="servicios-catalog__subtitle mb-0">
-                        Elija el beneficiario, seleccione un servicio y complete el pago.
+                        Elija el beneficiario, seleccione un servicio y complete el pago de forma segura.
                     </p>
                 </div>
                 <a href="{{ route('servicios.ver-compras') }}" class="btn btn-sm servicios-catalog__btn-compras align-self-start align-self-md-center">
-                    <i class="fas fa-receipt"></i> Mis compras
+                    <i class="fas fa-receipt me-1"></i> Mis compras
                 </a>
             </div>
         </div>
 
-        <div class="card-body">
-            <div id="loader_trabajador" class="text-center py-5">
+        <div class="card-body px-3 px-md-4 pb-4">
+            <div id="loader_trabajador" class="servicios-empty-state py-5">
                 <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
                     <span class="sr-only">Cargando...</span>
                 </div>
-                <p class="mt-3 text-muted">Cargando beneficiarios y servicios...</p>
+                <p class="mt-3 mb-0">Cargando beneficiarios y servicios...</p>
             </div>
 
-            <div id="error_trabajador" class="text-center py-5" style="display:none;">
-                <i class="fas fa-exclamation-triangle text-warning" style="font-size: 60px;"></i>
-                <p id="error_mensaje" class="mt-3 servicios-catalog__error-msg"></p>
-                <a id="btn_volver_error" href="{{ route('principal.index') }}" class="btn btn-primary mt-2">
-                    <i class="fas fa-arrow-left"></i> Volver
+            <div id="error_trabajador" class="servicios-empty-state py-5" style="display:none;">
+                <i class="fas fa-exclamation-triangle text-warning" aria-hidden="true"></i>
+                <p id="error_mensaje" class="mt-3 mb-0 servicios-catalog__error-msg"></p>
+                <a id="btn_volver_error" href="{{ route('principal.index') }}" class="btn btn-primary mt-3">
+                    <i class="fas fa-arrow-left me-1"></i> Volver
                 </a>
             </div>
 
@@ -43,9 +43,10 @@
                     </h2>
                     <p class="servicios-catalog__section-desc">Seleccione para quién adquirirá el servicio.</p>
                     <div id="grid_beneficiarios" class="beneficiarios-grid" role="listbox" aria-label="Beneficiarios disponibles"></div>
-                    <p id="sin_beneficiarios" class="text-muted text-center py-3" style="display:none;">
-                        No hay beneficiarios disponibles en su núcleo familiar.
-                    </p>
+                    <div id="sin_beneficiarios" class="servicios-empty-state py-4" style="display:none;">
+                        <i class="fas fa-users" aria-hidden="true"></i>
+                        <span>No hay beneficiarios disponibles en su núcleo familiar.</span>
+                    </div>
                 </section>
 
                 <div class="servicios-catalog__main">
@@ -55,9 +56,9 @@
                                 <i class="fas fa-store"></i> Servicios activos
                             </h2>
 
-                            <div id="loader_servicios" class="text-center py-4">
+                            <div id="loader_servicios" class="servicios-inline-loader py-4">
                                 <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                                <span class="ml-2 text-muted">Cargando servicios...</span>
+                                <span class="ms-2">Cargando servicios...</span>
                             </div>
 
                             <div id="contenedor_servicios" class="servicios-catalog__servicios-wrap" style="display:none;">
@@ -89,9 +90,10 @@
 
                                 <div class="servicios-catalog__grid-scroll">
                                     <div id="grid_servicios" class="servicios-grid" role="listbox" aria-label="Servicios disponibles"></div>
-                                    <p id="sin_servicios" class="text-muted text-center py-4" style="display:none;">
-                                        No hay servicios que coincidan con su búsqueda.
-                                    </p>
+                                    <div id="sin_servicios" class="servicios-empty-state py-4" style="display:none;">
+                                        <i class="fas fa-search" aria-hidden="true"></i>
+                                        <span>No hay servicios que coincidan con su búsqueda.</span>
+                                    </div>
                                 </div>
                             </div>
                         </section>

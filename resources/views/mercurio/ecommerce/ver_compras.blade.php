@@ -3,49 +3,49 @@
 @section('content')
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
-<div class="col mt-2 servicios-catalog compras-catalog">
-    <div class="card shadow-sm">
-        <div class="card-header servicios-catalog__header py-3">
-            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2">
+<div class="col-12 col-xl-11 mx-auto mt-3 servicios-catalog compras-catalog">
+    <div class="card shadow-sm border-0 servicios-page-card">
+        <div class="card-header border-0 servicios-catalog__header py-3 px-3 px-md-4">
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
                 <div>
-                    <h1 class="servicios-catalog__title mb-1">Mis Compras</h1>
+                    <h1 class="servicios-catalog__title mb-1">Mis compras</h1>
                     <p class="servicios-catalog__subtitle mb-0">
-                        Consulte el historial de servicios adquiridos.
+                        Consulte el historial de servicios adquiridos y el estado de cada transacción.
                     </p>
                 </div>
                 <a href="{{ route('servicios.index') }}" class="btn btn-sm servicios-catalog__btn-compras align-self-start align-self-md-center">
-                    <i class="fas fa-store"></i> Volver al catálogo
+                    <i class="fas fa-store me-1"></i> Volver al catálogo
                 </a>
             </div>
         </div>
 
-        <div class="card-body">
-            <div id="loader_compras" class="text-center py-5">
+        <div class="card-body px-3 px-md-4 pb-4">
+            <div id="loader_compras" class="servicios-empty-state py-5">
                 <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
                     <span class="sr-only">Cargando...</span>
                 </div>
-                <p class="mt-3 text-muted">Consultando compras realizadas...</p>
+                <p class="mt-3 mb-0">Consultando compras realizadas...</p>
             </div>
 
-            <div id="error_compras" class="compras-estado text-center py-5" style="display:none;">
-                <i class="fas fa-exclamation-triangle compras-estado__icon compras-estado__icon--warning"></i>
-                <p id="error_mensaje" class="mt-3 servicios-catalog__error-msg"></p>
-                <button type="button" id="btn_reintentar" class="btn btn-primary btn-sm mt-2">
-                    <i class="fas fa-redo"></i> Reintentar
+            <div id="error_compras" class="servicios-empty-state py-5" style="display:none;">
+                <i class="fas fa-exclamation-triangle text-warning" aria-hidden="true"></i>
+                <p id="error_mensaje" class="mt-3 mb-0 servicios-catalog__error-msg"></p>
+                <button type="button" id="btn_reintentar" class="btn btn-primary btn-sm mt-3">
+                    <i class="fas fa-redo me-1"></i> Reintentar
                 </button>
             </div>
 
-            <div id="sin_compras" class="compras-estado text-center py-5" style="display:none;">
-                <i class="fas fa-shopping-cart compras-estado__icon"></i>
-                <p class="mt-3 compras-estado__texto">No se encontraron compras realizadas</p>
-                <a href="{{ route('servicios.index') }}" class="btn btn-primary btn-sm mt-2">
-                    <i class="fas fa-store"></i> Ir al catálogo
+            <div id="sin_compras" class="servicios-empty-state py-5" style="display:none;">
+                <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+                <span class="compras-estado__texto">No se encontraron compras realizadas</span>
+                <a href="{{ route('servicios.index') }}" class="btn btn-primary btn-sm mt-3">
+                    <i class="fas fa-store me-1"></i> Ir al catálogo
                 </a>
             </div>
 
-            <div id="sin_resultados_busqueda" class="compras-estado text-center py-4" style="display:none;">
-                <i class="fas fa-search compras-estado__icon"></i>
-                <p class="mt-3 compras-estado__texto">No hay compras que coincidan con su búsqueda</p>
+            <div id="sin_resultados_busqueda" class="servicios-empty-state py-4" style="display:none;">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <span class="compras-estado__texto">No hay compras que coincidan con su búsqueda</span>
             </div>
 
             <div id="contenido_compras" class="compras-contenido" style="display:none;">
@@ -57,7 +57,7 @@
                                 type="search"
                                 id="buscar_compra"
                                 class="form-control"
-                                placeholder="Buscar por servicio, beneficiario, referencia, estado..."
+                                placeholder="Buscar por servicio, beneficiario, referencia o estado..."
                                 autocomplete="off"
                             >
                         </div>
