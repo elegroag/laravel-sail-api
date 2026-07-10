@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import {
     MenuFormShell,
     MenuItemFields,
+    composeDefaultUrl,
+    splitDefaultUrl,
     type MenuItemFormData,
 } from '@/pages/Cajas/Menu/components/MenuItemForm';
 
@@ -20,28 +22,37 @@ type Props = {
         controller: string;
         action: string;
     };
+    parent?: { id: number; title: string } | null;
 };
 
-export default function Edit({ menu_item }: Props) {
-    const [formData, setFormData] = useState<MenuItemFormData>({
-        title: '',
-        default_url: '',
-        icon: '',
-        color: '',
-        nota: '',
-        parent_id: '',
-        codapl: 'CA',
-        controller: '',
-        action: '',
+export default function Edit({ menu_item, parent = null }: Props) {
+    const [formData, setFormData] = useState<MenuItemFormData>(() => {
+        const split = splitDefaultUrl(menu_item.default_url || '');
+        return {
+            title: '',
+            default_url: '',
+            url_app: split.app || 'cajas',
+            url_path: split.path,
+            icon: '',
+            color: '',
+            nota: '',
+            parent_id: '',
+            codapl: 'CA',
+            controller: '',
+            action: '',
+        };
     });
 
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [processing, setProcessing] = useState(false);
 
     useEffect(() => {
+        const split = splitDefaultUrl(menu_item.default_url || '');
         setFormData({
             title: menu_item.title || '',
             default_url: menu_item.default_url || '',
+            url_app: split.app || 'cajas',
+            url_path: split.path,
             icon: menu_item.icon || '',
             color: menu_item.color || '',
             nota: menu_item.nota || '',
@@ -81,6 +92,7 @@ export default function Edit({ menu_item }: Props) {
                 },
                 body: JSON.stringify({
                     ...formData,
+                    default_url: composeDefaultUrl(formData.url_app, formData.url_path),
                     parent_id: formData.parent_id ? Number(formData.parent_id) : null,
                 }),
             });
@@ -116,7 +128,13 @@ export default function Edit({ menu_item }: Props) {
                 processing={processing}
                 onSubmit={handleSubmit}
             >
-                <MenuItemFields formData={formData} errors={errors} onChange={handleChange} />
+                <MenuItemFields
+                    formData={formData}
+                    errors={errors}
+                    onChange={handleChange}
+                    excludeItemId={menu_item.id}
+                    initialParent={parent}
+                />
             </MenuFormShell>
         </AppLayout>
     );

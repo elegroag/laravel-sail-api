@@ -133,8 +133,11 @@ class MenuController extends Controller
     public function edit(int $id)
     {
         $menu_item = MenuItem::findOrFail($id);
+        $parent = $menu_item->parent_id
+            ? MenuItem::query()->whereKey($menu_item->parent_id)->first(['id', 'title'])
+            : null;
 
-        return Inertia::render('Cajas/Menu/Edit', compact('menu_item'));
+        return Inertia::render('Cajas/Menu/Edit', compact('menu_item', 'parent'));
     }
 
     public function update(Request $request, int $id)
@@ -195,6 +198,37 @@ class MenuController extends Controller
             'success' => true,
             'data' => $children,
             'message' => 'Items hijos cargados correctamente',
+        ]);
+    }
+
+    public function parentOptions(Request $request)
+    {
+        $q = trim((string) $request->input('q', ''));
+        $codapl = trim((string) $request->input('codapl', ''));
+        $excludeId = $request->input('exclude_id');
+
+        $query = MenuItem::query()
+            ->when($codapl !== '', fn ($builder) => $builder->where('codapl', $codapl))
+            ->when($excludeId, fn ($builder) => $builder->where('id', '!=', $excludeId))
+            ->when($q !== '', function ($builder) use ($q) {
+                $like = '%'.str_replace(['%', '_'], ['\%', '\_'], $q).'%';
+                $builder->where(function ($sub) use ($like, $q) {
+                    $sub->where('title', 'like', $like)
+                        ->orWhere('controller', 'like', $like)
+                        ->orWhere('action', 'like', $like);
+
+                    if (ctype_digit($q)) {
+                        $sub->orWhere('id', (int) $q);
+                    }
+                });
+            })
+            ->orderBy('title')
+            ->limit(100)
+            ->get(['id', 'title', 'controller', 'action', 'parent_id', 'default_url']);
+
+        return response()->json([
+            'success' => true,
+            'data' => $query,
         ]);
     }
 

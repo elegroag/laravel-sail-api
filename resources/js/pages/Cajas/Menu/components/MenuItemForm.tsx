@@ -1,5 +1,7 @@
 import { Link } from '@inertiajs/react';
 import type { FormEvent, ChangeEvent } from 'react';
+import { CajasMenuIcon } from '@/pages/Cajas/components/CajasMenuIcon';
+import { ParentItemPicker } from '@/pages/Cajas/Menu/components/ParentItemPicker';
 import {
     cajasFormBtnPrimary,
     cajasFormBtnSecondary,
@@ -13,6 +15,8 @@ import {
 export type MenuItemFormData = {
     title: string;
     default_url: string;
+    url_app: 'cajas' | 'mercurio' | 'web' | '';
+    url_path: string;
     icon: string;
     color: string;
     nota: string;
@@ -21,6 +25,38 @@ export type MenuItemFormData = {
     controller: string;
     action: string;
 };
+
+export const URL_APP_OPTIONS: { value: MenuItemFormData['url_app']; label: string; prefix: string }[] = [
+    { value: '', label: 'Sin ruta', prefix: '' },
+    { value: 'cajas', label: 'Cajas', prefix: '/cajas' },
+    { value: 'mercurio', label: 'Mercurio', prefix: '/mercurio' },
+    { value: 'web', label: 'Web', prefix: '/web' },
+];
+
+export function splitDefaultUrl(raw: string): { app: MenuItemFormData['url_app']; path: string } {
+    const value = (raw || '').trim();
+    if (!value) return { app: '', path: '' };
+
+    for (const opt of URL_APP_OPTIONS) {
+        if (!opt.prefix) continue;
+        if (value === opt.prefix || value.startsWith(`${opt.prefix}/`)) {
+            return { app: opt.value, path: value.slice(opt.prefix.length).replace(/^\/+/, '') };
+        }
+    }
+
+    const normalized = value.startsWith('/') ? value.slice(1) : value;
+    return { app: '', path: normalized };
+}
+
+export function composeDefaultUrl(app: MenuItemFormData['url_app'], path: string): string {
+    const cleanPath = path.replace(/^\/+/, '').trim();
+    const opt = URL_APP_OPTIONS.find((o) => o.value === app);
+    if (!opt || !opt.prefix) {
+        return cleanPath;
+    }
+    if (!cleanPath) return opt.prefix;
+    return `${opt.prefix}/${cleanPath}`;
+}
 
 export const menuFormInputClass = cajasFormInputClass;
 
@@ -32,156 +68,313 @@ export const menuFormBtnPrimary = cajasFormBtnPrimary;
 
 export const menuFormBtnSecondary = cajasFormBtnSecondary;
 
+function FieldRow({ children }: { children: React.ReactNode }) {
+    return <div className="grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-6">{children}</div>;
+}
+
+function UrlField({
+    formData,
+    errors,
+    onChange,
+}: {
+    formData: MenuItemFormData;
+    errors: Record<string, string>;
+    onChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+}) {
+    const errorClass = errors.default_url ? cajasInputErrorClass : '';
+    const appErrorClass = errors.default_url ? cajasInputErrorClass : '';
+    const pathErrorClass = errors.default_url ? cajasInputErrorClass : '';
+    const composed = composeDefaultUrl(formData.url_app, formData.url_path);
+
+    return (
+        <div>
+            <div className="flex flex-col gap-2 sm:flex-row">
+                <select
+                    name="url_app"
+                    id="url_app"
+                    aria-label="Aplicación de la URL"
+                    className={`${menuFormSelectClass} sm:w-44 ${appErrorClass}`}
+                    value={formData.url_app}
+                    onChange={onChange}
+                >
+                    {URL_APP_OPTIONS.map((opt) => (
+                        <option key={opt.value || 'none'} value={opt.value}>
+                            {opt.label}
+                        </option>
+                    ))}
+                </select>
+                <input
+                    type="text"
+                    name="url_path"
+                    id="url_path"
+                    placeholder="aprueba-empresa"
+                    disabled={!formData.url_app}
+                    aria-label="Ruta"
+                    className={`${menuFormInputClass} flex-1 ${pathErrorClass} disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground`}
+                    value={formData.url_path}
+                    onChange={onChange}
+                />
+            </div>
+
+            <input type="hidden" name="default_url" id="default_url" value={composed} readOnly />
+
+            <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="font-medium text-foreground">Resultado:</span>
+                <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] text-foreground">
+                    {composed || '— sin ruta —'}
+                </code>
+            </div>
+            {errors.default_url && <p className="mt-1 text-xs text-cajas-danger">{errors.default_url}</p>}
+        </div>
+    );
+}
+
+function Field({
+    label,
+    htmlFor,
+    required,
+    error,
+    helper,
+    className = '',
+    children,
+}: {
+    label: string;
+    htmlFor: string;
+    required?: boolean;
+    error?: string;
+    helper?: string;
+    className?: string;
+    children: React.ReactNode;
+}) {
+    return (
+        <div className={className}>
+            <label htmlFor={htmlFor} className="mb-1.5 flex items-center justify-between">
+                <span className={cajasFormLabelClass}>
+                    {label}
+                    {required && <span className="ml-1 text-cajas-danger">*</span>}
+                </span>
+                {helper && <span className="text-xs font-normal text-muted-foreground">{helper}</span>}
+            </label>
+            {children}
+            {error && <p className="mt-1 text-xs text-cajas-danger">{error}</p>}
+        </div>
+    );
+}
+
+function SectionHeader({
+    title,
+    description,
+}: {
+    title: string;
+    description: string;
+}) {
+    return (
+        <div className="border-b border-border pb-3 mb-5">
+            <h4 className="text-sm font-semibold tracking-wide text-foreground">{title}</h4>
+            <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
+        </div>
+    );
+}
+
 type MenuItemFieldsProps = {
     formData: MenuItemFormData;
     errors: Record<string, string>;
     onChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+    excludeItemId?: number;
+    initialParent?: { id: number; title: string } | null;
 };
 
-export function MenuItemFields({ formData, errors, onChange }: MenuItemFieldsProps) {
+export function MenuItemFields({ formData, errors, onChange, excludeItemId, initialParent }: MenuItemFieldsProps) {
     const inputErrorClass = (field: string) => (errors[field] ? cajasInputErrorClass : '');
 
+    const handleParentChange = (parentId: string) => {
+        onChange({
+            target: { name: 'parent_id', value: parentId },
+        } as ChangeEvent<HTMLInputElement>);
+    };
+
     return (
-        <div className="grid grid-cols-6 gap-6">
-            <div className="col-span-6 sm:col-span-3">
-                <label htmlFor="title" className={cajasFormLabelClass}>
-                    Título *
-                </label>
-                <input
-                    type="text"
-                    name="title"
-                    id="title"
-                    required
-                    className={`${menuFormInputClass} ${inputErrorClass('title')}`}
-                    value={formData.title}
-                    onChange={onChange}
+        <div className="space-y-8">
+            <section>
+                <SectionHeader
+                    title="Identificación"
+                    description="Información visible del item en el menú del sistema."
                 />
-                {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
-            </div>
+                <FieldRow>
+                    <Field label="Título" htmlFor="title" required error={errors.title} className="md:col-span-3">
+                        <input
+                            type="text"
+                            name="title"
+                            id="title"
+                            required
+                            placeholder="Ej. Empresas"
+                            className={`${menuFormInputClass} ${inputErrorClass('title')}`}
+                            value={formData.title}
+                            onChange={onChange}
+                        />
+                    </Field>
 
-            <div className="col-span-6 sm:col-span-3">
-                <label htmlFor="codapl" className={cajasFormLabelClass}>
-                    Aplicación *
-                </label>
-                <select
-                    name="codapl"
-                    id="codapl"
-                    className={menuFormSelectClass}
-                    value={formData.codapl}
-                    onChange={onChange}
-                >
-                    <option value="CA">CA</option>
-                    <option value="ME">ME</option>
-                </select>
-                {errors.codapl && <p className="mt-1 text-sm text-red-600">{errors.codapl}</p>}
-            </div>
+                    <Field label="Aplicación" htmlFor="codapl" required error={errors.codapl} className="md:col-span-3">
+                        <select
+                            name="codapl"
+                            id="codapl"
+                            className={menuFormSelectClass}
+                            value={formData.codapl}
+                            onChange={onChange}
+                        >
+                            <option value="CA">CA — Cajas</option>
+                            <option value="ME">ME — Mercurio</option>
+                        </select>
+                    </Field>
+                </FieldRow>
+            </section>
 
-            <div className="col-span-6 sm:col-span-3">
-                <label htmlFor="controller" className={cajasFormLabelClass}>
-                    Controller *
-                </label>
-                <input
-                    type="text"
-                    name="controller"
-                    id="controller"
-                    required
-                    className={`${menuFormInputClass} ${inputErrorClass('controller')}`}
-                    value={formData.controller}
-                    onChange={onChange}
+            <section>
+                <SectionHeader
+                    title="Comportamiento de ruta"
+                    description="Cómo se resolverá la navegación cuando el usuario seleccione el item."
                 />
-                {errors.controller && <p className="mt-1 text-sm text-red-600">{errors.controller}</p>}
-            </div>
+                <FieldRow>
+                    <Field
+                        label="Controller"
+                        htmlFor="controller"
+                        required
+                        error={errors.controller}
+                        className="md:col-span-3"
+                    >
+                        <input
+                            type="text"
+                            name="controller"
+                            id="controller"
+                            required
+                            placeholder="Ej. ApruebaEmpresaController"
+                            className={`${menuFormInputClass} ${inputErrorClass('controller')}`}
+                            value={formData.controller}
+                            onChange={onChange}
+                        />
+                    </Field>
 
-            <div className="col-span-6 sm:col-span-3">
-                <label htmlFor="action" className={cajasFormLabelClass}>
-                    Action *
-                </label>
-                <input
-                    type="text"
-                    name="action"
-                    id="action"
-                    required
-                    className={`${menuFormInputClass} ${inputErrorClass('action')}`}
-                    value={formData.action}
-                    onChange={onChange}
-                />
-                {errors.action && <p className="mt-1 text-sm text-red-600">{errors.action}</p>}
-            </div>
+                    <Field label="Action" htmlFor="action" required error={errors.action} className="md:col-span-3">
+                        <input
+                            type="text"
+                            name="action"
+                            id="action"
+                            required
+                            placeholder="Ej. index"
+                            className={`${menuFormInputClass} ${inputErrorClass('action')}`}
+                            value={formData.action}
+                            onChange={onChange}
+                        />
+                    </Field>
 
-            <div className="col-span-6">
-                <label htmlFor="default_url" className={cajasFormLabelClass}>
-                    URL por defecto
-                </label>
-                <input
-                    type="text"
-                    name="default_url"
-                    id="default_url"
-                    className={`${menuFormInputClass} ${inputErrorClass('default_url')}`}
-                    value={formData.default_url}
-                    onChange={onChange}
-                />
-                {errors.default_url && <p className="mt-1 text-sm text-red-600">{errors.default_url}</p>}
-            </div>
+                    <Field
+                        label="URL por defecto"
+                        htmlFor="default_url"
+                        error={errors.default_url}
+                        helper="Opcional — usada como fallback"
+                        className="md:col-span-6"
+                    >
+                        <UrlField formData={formData} errors={errors} onChange={onChange} />
+                    </Field>
 
-            <div className="col-span-6 sm:col-span-3">
-                <label htmlFor="icon" className={cajasFormLabelClass}>
-                    Icono
-                </label>
-                <input
-                    type="text"
-                    name="icon"
-                    id="icon"
-                    className={`${menuFormInputClass} ${inputErrorClass('icon')}`}
-                    value={formData.icon}
-                    onChange={onChange}
-                />
-                {errors.icon && <p className="mt-1 text-sm text-red-600">{errors.icon}</p>}
-            </div>
+                    <Field
+                        label="Item padre"
+                        htmlFor="parent_id"
+                        error={errors.parent_id}
+                        helper="Déjelo vacío para items raíz"
+                        className="md:col-span-6"
+                    >
+                        <ParentItemPicker
+                            value={formData.parent_id}
+                            codapl={formData.codapl}
+                            excludeItemId={excludeItemId}
+                            initialParent={initialParent}
+                            error={errors.parent_id}
+                            onChange={handleParentChange}
+                        />
+                    </Field>
+                </FieldRow>
+            </section>
 
-            <div className="col-span-6 sm:col-span-3">
-                <label htmlFor="color" className={cajasFormLabelClass}>
-                    Color
-                </label>
-                <input
-                    type="text"
-                    name="color"
-                    id="color"
-                    className={`${menuFormInputClass} ${inputErrorClass('color')}`}
-                    value={formData.color}
-                    onChange={onChange}
+            <section>
+                <SectionHeader
+                    title="Apariencia"
+                    description="Icono y color que se muestran en el sidebar."
                 />
-                {errors.color && <p className="mt-1 text-sm text-red-600">{errors.color}</p>}
-            </div>
+                <FieldRow>
+                    <Field
+                        label="Icono"
+                        htmlFor="icon"
+                        error={errors.icon}
+                        helper="fa-solid fa-users · ni ni-building"
+                        className="md:col-span-3"
+                    >
+                        <input
+                            type="text"
+                            name="icon"
+                            id="icon"
+                            placeholder="fa-solid fa-users"
+                            className={`${menuFormInputClass} ${inputErrorClass('icon')}`}
+                            value={formData.icon}
+                            onChange={onChange}
+                        />
+                    </Field>
 
-            <div className="col-span-6 sm:col-span-3">
-                <label htmlFor="parent_id" className={cajasFormLabelClass}>
-                    Padre (ID)
-                </label>
-                <input
-                    type="number"
-                    name="parent_id"
-                    id="parent_id"
-                    className={`${menuFormInputClass} ${inputErrorClass('parent_id')}`}
-                    value={formData.parent_id}
-                    onChange={onChange}
-                />
-                {errors.parent_id && <p className="mt-1 text-sm text-red-600">{errors.parent_id}</p>}
-            </div>
+                    <Field
+                        label="Color"
+                        htmlFor="color"
+                        error={errors.color}
+                        helper="text-primary · text-success"
+                        className="md:col-span-3"
+                    >
+                        <input
+                            type="text"
+                            name="color"
+                            id="color"
+                            placeholder="text-primary"
+                            className={`${menuFormInputClass} ${inputErrorClass('color')}`}
+                            value={formData.color}
+                            onChange={onChange}
+                        />
+                    </Field>
 
-            <div className="col-span-6">
-                <label htmlFor="nota" className={cajasFormLabelClass}>
-                    Nota
-                </label>
-                <textarea
-                    name="nota"
-                    id="nota"
-                    rows={3}
-                    className={menuFormTextareaClass}
-                    value={formData.nota}
-                    onChange={onChange}
-                />
-                {errors.nota && <p className="mt-1 text-sm text-red-600">{errors.nota}</p>}
-            </div>
+                    <div className="md:col-span-6">
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">Vista previa</label>
+                        <div className="flex items-center gap-3 rounded-lg border border-dashed border-border bg-muted/30 px-4 py-3">
+                            <span className="flex h-9 w-9 items-center justify-center rounded-md bg-cajas-bg text-cajas-text">
+                                <CajasMenuIcon icon={formData.icon} color={formData.color} />
+                            </span>
+                            <div className="min-w-0">
+                                <p className="truncate text-sm font-medium text-foreground">
+                                    {formData.title || 'Título del item'}
+                                </p>
+                                <p className="truncate text-xs text-muted-foreground">
+                                    {formData.controller && formData.action
+                                        ? `${formData.controller}@${formData.action}`
+                                        : 'controller@action'}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </FieldRow>
+            </section>
+
+            <section>
+                <SectionHeader title="Notas" description="Información adicional para auditoría o seguimiento." />
+                <FieldRow>
+                    <Field label="Nota" htmlFor="nota" error={errors.nota} className="md:col-span-6">
+                        <textarea
+                            name="nota"
+                            id="nota"
+                            rows={3}
+                            placeholder="Observaciones internas sobre este item…"
+                            className={`${menuFormTextareaClass} ${inputErrorClass('nota')}`}
+                            value={formData.nota}
+                            onChange={onChange}
+                        />
+                    </Field>
+                </FieldRow>
+            </section>
         </div>
     );
 }
@@ -206,29 +399,35 @@ export function MenuFormShell({
     children,
 }: MenuFormShellProps) {
     return (
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm m-2 overflow-hidden">
-            <div className="px-4 py-5 sm:px-6 border-b border-gray-200 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
-                <div>
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">{title}</h3>
-                    <p className="mt-1 max-w-2xl text-sm text-gray-500">{subtitle}</p>
-                </div>
-                <Link href={cancelHref} className={menuFormBtnSecondary}>
-                    Volver
-                </Link>
-            </div>
-
-            <form onSubmit={onSubmit} className="px-4 py-5 sm:px-6">
-                {children}
-
-                <div className="flex justify-end gap-3 pt-6 mt-2 border-t border-gray-100">
-                    <Link href={cancelHref} className={menuFormBtnSecondary}>
-                        Cancelar
+        <div className="mx-auto w-full max-w-4xl p-2 md:p-4">
+            <div className="cajas-card">
+                <div className="cajas-card-header flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h3 className="text-lg font-semibold text-foreground">{title}</h3>
+                        <p className="mt-0.5 text-sm text-muted-foreground">{subtitle}</p>
+                    </div>
+                    <Link href={cancelHref} className={cajasFormBtnSecondary}>
+                        Volver
                     </Link>
-                    <button type="submit" disabled={processing} className={menuFormBtnPrimary}>
-                        {processing ? 'Guardando...' : submitLabel}
-                    </button>
                 </div>
-            </form>
+
+                <form onSubmit={onSubmit} className="cajas-card-body">
+                    {children}
+
+                    <div className="mt-8 flex flex-col-reverse items-stretch justify-end gap-3 border-t border-border pt-5 sm:flex-row sm:items-center">
+                        <Link href={cancelHref} className={cajasFormBtnSecondary}>
+                            Cancelar
+                        </Link>
+                        <button
+                            type="submit"
+                            disabled={processing}
+                            className={`${cajasFormBtnPrimary} disabled:cursor-not-allowed disabled:opacity-60`}
+                        >
+                            {processing ? 'Guardando...' : submitLabel}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 }

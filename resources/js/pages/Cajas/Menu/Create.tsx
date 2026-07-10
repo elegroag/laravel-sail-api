@@ -4,12 +4,15 @@ import { useState } from 'react';
 import {
     MenuFormShell,
     MenuItemFields,
+    composeDefaultUrl,
     type MenuItemFormData,
 } from '@/pages/Cajas/Menu/components/MenuItemForm';
 
 const initialFormData: MenuItemFormData = {
     title: '',
     default_url: '',
+    url_app: 'cajas',
+    url_path: '',
     icon: '',
     color: '',
     nota: '',
@@ -53,6 +56,7 @@ export default function Create() {
                 },
                 body: JSON.stringify({
                     ...formData,
+                    default_url: composeDefaultUrl(formData.url_app, formData.url_path),
                     parent_id: formData.parent_id ? Number(formData.parent_id) : null,
                 }),
             });

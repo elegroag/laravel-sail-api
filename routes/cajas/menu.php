@@ -13,6 +13,7 @@ Route::prefix('/cajas/menu')->group(function () {
     Route::put('/{id}', [MenuController::class, 'update'])->name('cajas.menu.update');
     Route::delete('/{id}', [MenuController::class, 'destroy'])->name('cajas.menu.destroy');
     Route::post('/children', [MenuController::class, 'children'])->name('cajas.menu.children');
+    Route::post('/parent-options', [MenuController::class, 'parentOptions'])->name('cajas.menu.parentOptions');
     Route::post('/options', [MenuController::class, 'options'])->name('cajas.menu.options');
     Route::post('/attach-child', [MenuController::class, 'attachChild'])->name('cajas.menu.attachChild');
 });
