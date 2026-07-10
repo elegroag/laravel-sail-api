@@ -11,6 +11,7 @@ use App\Models\MenuTipo;
 use App\Models\Mercurio06;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class MenuController extends Controller
@@ -80,20 +81,16 @@ class MenuController extends Controller
             ],
         ];
 
-        $tipos = Mercurio06::orderBy('detalle')
-            ->get(['tipo', 'detalle'])
-            ->map(fn ($row) => [
-                'value' => $row->tipo,
-                'label' => $row->detalle,
-            ])
-            ->all();
+        $tipos = $this->tiposCatalog();
 
         return Inertia::render('Cajas/Menu/Index', compact('menu_items', 'tipos'));
     }
 
     public function create()
     {
-        return Inertia::render('Cajas/Menu/Create');
+        $tipos = $this->tiposCatalog();
+
+        return Inertia::render('Cajas/Menu/Create', compact('tipos'));
     }
 
     public function store(Request $request)
@@ -108,26 +105,58 @@ class MenuController extends Controller
             'codapl' => 'required|string|max:5',
             'controller' => 'required|string|max:150',
             'action' => 'required|string|max:150',
+            'tipos' => ['required', 'array', 'min:1'],
+            'tipos.*.tipo' => ['required', 'string', 'max:5', Rule::exists('mercurio06', 'tipo')],
+            'tipos.*.is_visible' => ['boolean'],
+            'tipos.*.position' => ['integer', 'min:0'],
         ]);
 
-        $item = MenuItem::create($data);
+        $tipos = $data['tipos'];
+        unset($data['tipos']);
+
+        $item = DB::transaction(function () use ($data, $tipos) {
+            $item = MenuItem::create($data);
+            $this->syncMenuTipos($item->id, $tipos);
+
+            return $item;
+        });
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Item de menú creado correctamente',
+                'redirect' => '/cajas/menu/'.$item->id.'/show',
+            ]);
+        }
 
         return redirect()->to('/cajas/menu/'.$item->id.'/show');
     }
 
     public function show(int $id)
     {
-        $menu_item = MenuItem::select(
-            DB::raw('menu_items.*'),
-            'menu_tipos.is_visible',
-            'menu_tipos.tipo',
-            'menu_tipos.position'
-        )
-            ->leftJoin('menu_tipos', 'menu_tipos.menu_item', '=', 'menu_items.id')
-            ->where('menu_items.id', $id)
-            ->firstOrFail();
+        $menu_item = MenuItem::findOrFail($id);
+        $parent = $menu_item->parent_id
+            ? MenuItem::query()->whereKey($menu_item->parent_id)->first(['id', 'title'])
+            : null;
 
-        return Inertia::render('Cajas/Menu/Show', compact('menu_item'));
+        $itemTipos = MenuTipo::query()
+            ->where('menu_item', $id)
+            ->orderBy('position')
+            ->orderBy('id')
+            ->get(['id', 'tipo', 'is_visible', 'position']);
+
+        $tipoLabels = Mercurio06::query()
+            ->whereIn('tipo', $itemTipos->pluck('tipo'))
+            ->pluck('detalle', 'tipo');
+
+        $menu_tipos = $itemTipos->map(fn ($row) => [
+            'id' => $row->id,
+            'tipo' => $row->tipo,
+            'detalle' => $tipoLabels[$row->tipo] ?? $row->tipo,
+            'is_visible' => (bool) $row->is_visible,
+            'position' => (int) $row->position,
+        ])->values()->all();
+
+        return Inertia::render('Cajas/Menu/Show', compact('menu_item', 'menu_tipos', 'parent'));
     }
 
     public function edit(int $id)
@@ -137,7 +166,21 @@ class MenuController extends Controller
             ? MenuItem::query()->whereKey($menu_item->parent_id)->first(['id', 'title'])
             : null;
 
-        return Inertia::render('Cajas/Menu/Edit', compact('menu_item', 'parent'));
+        $tipos = $this->tiposCatalog();
+        $menu_tipos = MenuTipo::query()
+            ->where('menu_item', $id)
+            ->orderBy('position')
+            ->orderBy('id')
+            ->get(['tipo', 'is_visible', 'position'])
+            ->map(fn ($row) => [
+                'tipo' => $row->tipo,
+                'is_visible' => (bool) $row->is_visible,
+                'position' => (int) $row->position,
+            ])
+            ->values()
+            ->all();
+
+        return Inertia::render('Cajas/Menu/Edit', compact('menu_item', 'parent', 'tipos', 'menu_tipos'));
     }
 
     public function update(Request $request, int $id)
@@ -152,10 +195,28 @@ class MenuController extends Controller
             'codapl' => 'required|string|max:5',
             'controller' => 'required|string|max:150',
             'action' => 'required|string|max:150',
+            'tipos' => ['required', 'array', 'min:1'],
+            'tipos.*.tipo' => ['required', 'string', 'max:5', Rule::exists('mercurio06', 'tipo')],
+            'tipos.*.is_visible' => ['boolean'],
+            'tipos.*.position' => ['integer', 'min:0'],
         ]);
 
+        $tipos = $data['tipos'];
+        unset($data['tipos']);
+
         $item = MenuItem::findOrFail($id);
-        $item->update($data);
+
+        DB::transaction(function () use ($item, $data, $tipos) {
+            $item->update($data);
+            $this->syncMenuTipos($item->id, $tipos);
+        });
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Item de menú actualizado correctamente',
+                'redirect' => '/cajas/menu/'.$item->id.'/show',
+            ]);
+        }
 
         return redirect()->to('/cajas/menu/'.$item->id.'/show');
     }
@@ -422,5 +483,52 @@ class MenuController extends Controller
         }
 
         return response()->json($response);
+    }
+
+    /**
+     * @return array<int, array{value: string, label: string}>
+     */
+    private function tiposCatalog(): array
+    {
+        return Mercurio06::orderBy('detalle')
+            ->get(['tipo', 'detalle'])
+            ->map(fn ($row) => [
+                'value' => $row->tipo,
+                'label' => $row->detalle,
+            ])
+            ->all();
+    }
+
+    /**
+     * @param  array<int, array{tipo: string, is_visible?: bool, position?: int}>  $tipos
+     */
+    private function syncMenuTipos(int $menuItemId, array $tipos): void
+    {
+        $validTipos = Mercurio06::pluck('tipo')->all();
+
+        $normalized = collect($tipos)
+            ->filter(fn ($row) => in_array($row['tipo'] ?? '', $validTipos, true))
+            ->unique('tipo')
+            ->values();
+
+        $incomingTipos = $normalized->pluck('tipo')->all();
+
+        MenuTipo::query()
+            ->where('menu_item', $menuItemId)
+            ->whereNotIn('tipo', $incomingTipos)
+            ->delete();
+
+        foreach ($normalized as $row) {
+            MenuTipo::updateOrCreate(
+                [
+                    'menu_item' => $menuItemId,
+                    'tipo' => $row['tipo'],
+                ],
+                [
+                    'is_visible' => (bool) ($row['is_visible'] ?? true),
+                    'position' => (int) ($row['position'] ?? 1),
+                ]
+            );
+        }
     }
 }

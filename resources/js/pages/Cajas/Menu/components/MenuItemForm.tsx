@@ -1,8 +1,10 @@
 import { Link } from '@inertiajs/react';
 import type { FormEvent, ChangeEvent } from 'react';
+import { Plus, Trash2 } from 'lucide-react';
 import { CajasMenuIcon } from '@/pages/Cajas/components/CajasMenuIcon';
 import { ParentItemPicker } from '@/pages/Cajas/Menu/components/ParentItemPicker';
 import {
+    cajasCheckboxClass,
     cajasFormBtnPrimary,
     cajasFormBtnSecondary,
     cajasFormInputClass,
@@ -11,6 +13,17 @@ import {
     cajasFormTextareaClass,
     cajasInputErrorClass,
 } from '@/pages/Cajas/styles/cajas-classes';
+
+export type TipoOption = {
+    value: string;
+    label: string;
+};
+
+export type MenuTipoFormRow = {
+    tipo: string;
+    is_visible: boolean;
+    position: number;
+};
 
 export type MenuItemFormData = {
     title: string;
@@ -182,9 +195,139 @@ type MenuItemFieldsProps = {
     onChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
     excludeItemId?: number;
     initialParent?: { id: number; title: string } | null;
+    tiposCatalog: TipoOption[];
+    menuTipos: MenuTipoFormRow[];
+    onMenuTiposChange: (tipos: MenuTipoFormRow[]) => void;
 };
 
-export function MenuItemFields({ formData, errors, onChange, excludeItemId, initialParent }: MenuItemFieldsProps) {
+function MenuTiposField({
+    tiposCatalog,
+    menuTipos,
+    onChange,
+    errors,
+}: {
+    tiposCatalog: TipoOption[];
+    menuTipos: MenuTipoFormRow[];
+    onChange: (tipos: MenuTipoFormRow[]) => void;
+    errors: Record<string, string>;
+}) {
+    const usedTipos = new Set(menuTipos.map((row) => row.tipo).filter(Boolean));
+
+    const addRow = () => {
+        const nextTipo = tiposCatalog.find((opt) => !usedTipos.has(opt.value));
+        if (!nextTipo) return;
+
+        const nextPosition = menuTipos.reduce((max, row) => Math.max(max, row.position), 0) + 1;
+        onChange([...menuTipos, { tipo: nextTipo.value, is_visible: true, position: nextPosition }]);
+    };
+
+    const updateRow = (index: number, patch: Partial<MenuTipoFormRow>) => {
+        onChange(menuTipos.map((row, i) => (i === index ? { ...row, ...patch } : row)));
+    };
+
+    const removeRow = (index: number) => {
+        onChange(menuTipos.filter((_, i) => i !== index));
+    };
+
+    const canAddMore = tiposCatalog.some((opt) => !usedTipos.has(opt.value));
+
+    return (
+        <div className="space-y-3">
+            {menuTipos.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Agregue al menos un tipo de usuario para este item.</p>
+            ) : (
+                <ul className="space-y-3">
+                    {menuTipos.map((row, index) => {
+                        const availableOptions = tiposCatalog.filter(
+                            (opt) => opt.value === row.tipo || !usedTipos.has(opt.value),
+                        );
+
+                        return (
+                            <li key={`${row.tipo}-${index}`} className="rounded-lg border border-border p-3">
+                                <div className="grid grid-cols-1 gap-3 md:grid-cols-12 md:items-end">
+                                    <div className="md:col-span-5">
+                                        <label className={cajasFormLabelClass}>Tipo *</label>
+                                        <select
+                                            className={menuFormSelectClass}
+                                            value={row.tipo}
+                                            onChange={(e) => updateRow(index, { tipo: e.target.value })}
+                                        >
+                                            <option value="">— Seleccione —</option>
+                                            {availableOptions.map((opt) => (
+                                                <option key={opt.value} value={opt.value}>
+                                                    {opt.label} ({opt.value})
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="md:col-span-3">
+                                        <label className={cajasFormLabelClass}>Posición</label>
+                                        <input
+                                            type="number"
+                                            min={0}
+                                            className={menuFormInputClass}
+                                            value={row.position}
+                                            onChange={(e) => updateRow(index, { position: Number(e.target.value) || 0 })}
+                                        />
+                                    </div>
+
+                                    <div className="md:col-span-3">
+                                        <label className={`${cajasFormLabelClass} mb-2 block`}>Visible</label>
+                                        <label className="inline-flex items-center gap-2 text-sm text-foreground">
+                                            <input
+                                                type="checkbox"
+                                                className={cajasCheckboxClass}
+                                                checked={row.is_visible}
+                                                onChange={(e) => updateRow(index, { is_visible: e.target.checked })}
+                                            />
+                                            Mostrar en menú
+                                        </label>
+                                    </div>
+
+                                    <div className="md:col-span-1 md:flex md:justify-end">
+                                        <button
+                                            type="button"
+                                            onClick={() => removeRow(index)}
+                                            className={cajasFormBtnSecondary}
+                                            aria-label="Quitar tipo"
+                                            title="Quitar tipo"
+                                        >
+                                            <Trash2 className="size-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </li>
+                        );
+                    })}
+                </ul>
+            )}
+
+            <div className="flex items-center justify-between gap-3">
+                <button type="button" onClick={addRow} disabled={!canAddMore} className={cajasFormBtnSecondary}>
+                    <Plus className="size-4" />
+                    Agregar tipo
+                </button>
+                {!canAddMore && menuTipos.length > 0 && (
+                    <span className="text-xs text-muted-foreground">Todos los tipos disponibles ya están asignados.</span>
+                )}
+            </div>
+
+            {errors.tipos && <p className="text-xs text-cajas-danger">{errors.tipos}</p>}
+        </div>
+    );
+}
+
+export function MenuItemFields({
+    formData,
+    errors,
+    onChange,
+    excludeItemId,
+    initialParent,
+    tiposCatalog,
+    menuTipos,
+    onMenuTiposChange,
+}: MenuItemFieldsProps) {
     const inputErrorClass = (field: string) => (errors[field] ? cajasInputErrorClass : '');
 
     const handleParentChange = (parentId: string) => {
@@ -294,6 +437,19 @@ export function MenuItemFields({ formData, errors, onChange, excludeItemId, init
                         />
                     </Field>
                 </FieldRow>
+            </section>
+
+            <section>
+                <SectionHeader
+                    title="Tipos de usuario"
+                    description="Define para qué tipos de usuario estará disponible este item en el menú."
+                />
+                <MenuTiposField
+                    tiposCatalog={tiposCatalog}
+                    menuTipos={menuTipos}
+                    onChange={onMenuTiposChange}
+                    errors={errors}
+                />
             </section>
 
             <section>

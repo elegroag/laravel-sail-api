@@ -1,6 +1,24 @@
-import AppLayout from '@/layouts/AppLayoutTemplate';
+import AppLayout from '@/layouts/AppLayout';
+import { CajasMenuIcon } from '@/pages/Cajas/components/CajasMenuIcon';
+import {
+    cajasBadgeClass,
+    cajasCardBodyClass,
+    cajasCardClass,
+    cajasCardHeaderClass,
+    cajasFormBtnPrimary,
+    cajasFormBtnSecondary,
+    cajasPageClass,
+} from '@/pages/Cajas/styles/cajas-classes';
 import { Link, router } from '@inertiajs/react';
 import { useState } from 'react';
+
+type MenuTipoRow = {
+    id: number;
+    tipo: string;
+    detalle: string;
+    is_visible: boolean;
+    position: number;
+};
 
 type Props = {
     menu_item: {
@@ -14,13 +32,21 @@ type Props = {
         codapl: string;
         controller: string;
         action: string;
-        is_visible?: number | null;
-        tipo?: string | null;
-        position?: number | null;
     };
+    menu_tipos: MenuTipoRow[];
+    parent?: { id: number; title: string } | null;
 };
 
-export default function Show({ menu_item }: Props) {
+function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
+    return (
+        <div className="grid grid-cols-1 gap-1 border-b border-border px-4 py-4 last:border-b-0 sm:grid-cols-3 sm:gap-4 sm:px-5">
+            <dt className="text-sm font-medium text-muted-foreground">{label}</dt>
+            <dd className="text-sm text-foreground sm:col-span-2">{value}</dd>
+        </div>
+    );
+}
+
+export default function Show({ menu_item, menu_tipos, parent = null }: Props) {
     const [deleting, setDeleting] = useState(false);
 
     const handleDelete = async () => {
@@ -37,198 +63,107 @@ export default function Show({ menu_item }: Props) {
                 },
                 onError: () => {
                     setDeleting(false);
-                }
+                },
             });
         } catch (error) {
-            console.error('Error al eliminar empresa:', error);
+            console.error('Error al eliminar item de menú:', error);
             setDeleting(false);
         }
     };
 
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('es-ES', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
-
     return (
         <AppLayout title={`Menu Item: ${menu_item.title}`}>
-            <div className="bg-white shadow overflow-hidden sm:rounded-md">
-                <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
-                    <div>
-                        <h3 className="text-lg leading-6 font-medium text-gray-900">
-                            Detalles de Menu Item
-                        </h3>
-                        <p className="mt-1 max-w-2xl text-sm text-gray-500">
-                            Información completa del item de menú
-                        </p>
-                    </div>
-                    <div className="flex space-x-2">
-                        <Link
-                            href={`/cajas/menu/${menu_item.id}/edit`}
-                            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                        >
-                            Editar
-                        </Link>
-                        <Link
-                            href="/cajas/menu"
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-cajas-border hover:opacity-90 text-cajas-text-active"
-                        >
-                            Volver al listado
-                        </Link>
-                    </div>
-                </div>
-
-                <div className="border-t border-gray-200">
-                    <dl>
-                        {/* Título */}
-                        <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">Título</dt>
-                            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                {menu_item.title}
-                            </dd>
-                        </div>
-
-                        {/* Controller / Action */}
-                        <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">Controller / Action</dt>
-                            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                {menu_item.controller} / {menu_item.action}
-                            </dd>
-                        </div>
-
-                        {/* URL por defecto */}
-                        <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">URL por defecto</dt>
-                            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                {menu_item.default_url || 'N/A'}
-                            </dd>
-                        </div>
-
-                        {/* Icono / Color */}
-                        <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">Icono / Color</dt>
-                            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                {(menu_item.icon || 'N/A')} / {(menu_item.color || 'N/A')}
-                            </dd>
-                        </div>
-
-                        {/* Padre */}
-                        <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">Padre</dt>
-                            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                {menu_item.parent_id ?? 'N/A'}
-                            </dd>
-                        </div>
-
-                        {/* Aplicación */}
-                        <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">Aplicación</dt>
-                            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                {menu_item.codapl}
-                            </dd>
-                        </div>
-
-                        {/* Visible / Tipo / Posición */}
-                        <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">Visible / Tipo / Posición</dt>
-                            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                {(menu_item.is_visible ?? 'N/A')} / {(menu_item.tipo ?? 'N/A')} / {(menu_item.position ?? 'N/A')}
-                            </dd>
-                        </div>
-
-                        {/* Nota */}
-                        {menu_item.nota && (
-                            <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                <dt className="text-sm font-medium text-gray-500">Nota</dt>
-                                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                    {menu_item.nota}
-                                </dd>
+            <div className={cajasPageClass}>
+                <section className={`${cajasCardClass} mx-auto max-w-4xl`}>
+                    <div className={`${cajasCardHeaderClass} flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between`}>
+                        <div className="flex items-start gap-3">
+                            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-cajas-header-bg ring-1 ring-cajas-border/30">
+                                <CajasMenuIcon icon={menu_item.icon} color={menu_item.color} className="text-sm" />
                             </div>
-                        )}
-
-                        {/* Descripción */}
-                        {empresa.descripcion && (
-                            <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                <dt className="text-sm font-medium text-gray-500">Descripción</dt>
-                                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                    {empresa.descripcion}
-                                </dd>
+                            <div>
+                                <h3 className="text-lg font-semibold text-foreground">Detalles del item de menú</h3>
+                                <p className="mt-0.5 text-sm text-muted-foreground">Información completa del item #{menu_item.id}</p>
                             </div>
-                        )}
-
-                        {/* Identificador */}
-                        <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">ID</dt>
-                            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                {menu_item.id}
-                            </dd>
                         </div>
-
-                        {/* Controller.Action para permisos */}
-                        <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">Permiso</dt>
-                            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                {`${menu_item.controller}.${menu_item.action}`}
-                            </dd>
+                        <div className="flex flex-wrap gap-2">
+                            <Link href={`/cajas/menu/${menu_item.id}/edit`} className={cajasFormBtnSecondary}>
+                                Editar
+                            </Link>
+                            <Link href="/cajas/menu" className={cajasFormBtnPrimary}>
+                                Volver al listado
+                            </Link>
                         </div>
-                    </dl>
-                </div>
+                    </div>
 
-                {/* Trabajadores asociados (si existen) */}
-                {empresa.trabajadores && empresa.trabajadores.length > 0 && (
-                    <div className="border-t border-gray-200">
-                        <div className="px-4 py-5 sm:px-6">
-                            <h4 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                                Trabajadores Asociados ({empresa.trabajadores.length})
-                            </h4>
-                            <div className="space-y-3">
-                                {empresa.trabajadores.map((trabajador: any) => (
-                                    <div key={trabajador.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                        <div>
-                                            <div className="text-sm font-medium text-gray-900">
-                                                {trabajador.nombre}
-                                            </div>
-                                            <div className="text-sm text-gray-500">
-                                                {trabajador.cargo}
-                                            </div>
-                                        </div>
-                                        <Link
-                                            href={`/web/trabajadores/${trabajador.id}`}
-                                            className="text-cajas-border hover:opacity-80 text-sm font-medium"
+                    <div className={cajasCardBodyClass}>
+                        <dl>
+                            <DetailRow label="Título" value={menu_item.title} />
+                            <DetailRow label="Controller / Action" value={`${menu_item.controller} / ${menu_item.action}`} />
+                            <DetailRow label="URL por defecto" value={menu_item.default_url || 'N/A'} />
+                            <DetailRow label="Icono / Color" value={`${menu_item.icon || 'N/A'} / ${menu_item.color || 'N/A'}`} />
+                            <DetailRow
+                                label="Item padre"
+                                value={parent ? `#${parent.id} — ${parent.title}` : menu_item.parent_id ? `#${menu_item.parent_id}` : 'Raíz'}
+                            />
+                            <DetailRow label="Aplicación" value={menu_item.codapl} />
+                            <DetailRow label="Permiso" value={`${menu_item.controller}.${menu_item.action}`} />
+                            {menu_item.nota && <DetailRow label="Nota" value={menu_item.nota} />}
+                        </dl>
+
+                        <div className="mt-6 border-t border-border pt-5">
+                            <div className="mb-3 flex items-center justify-between gap-2">
+                                <h4 className="text-sm font-semibold text-foreground">Tipos asociados</h4>
+                                <span className="text-xs text-muted-foreground">
+                                    {menu_tipos.length} tipo{menu_tipos.length === 1 ? '' : 's'}
+                                </span>
+                            </div>
+
+                            {menu_tipos.length === 0 ? (
+                                <p className="text-sm text-muted-foreground">Este item no tiene tipos asociados.</p>
+                            ) : (
+                                <ul className="space-y-2">
+                                    {menu_tipos.map((tipoItem) => (
+                                        <li
+                                            key={tipoItem.id}
+                                            className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2.5"
                                         >
-                                            Ver detalles
-                                        </Link>
-                                    </div>
-                                ))}
-                            </div>
+                                            <div>
+                                                <p className="text-sm font-medium text-foreground">{tipoItem.detalle}</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Código: {tipoItem.tipo} · Pos: {tipoItem.position}
+                                                </p>
+                                            </div>
+                                            <span
+                                                className={`${cajasBadgeClass} shrink-0 ${
+                                                    tipoItem.is_visible
+                                                        ? 'bg-cajas-success/10 text-cajas-success ring-cajas-success/20'
+                                                        : 'bg-cajas-danger/10 text-cajas-danger ring-cajas-danger/20'
+                                                }`}
+                                            >
+                                                {tipoItem.is_visible ? 'Visible' : 'Oculto'}
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+
+                        <div className="mt-6 flex flex-col-reverse justify-between gap-3 border-t border-border pt-5 sm:flex-row sm:items-center">
+                            <button
+                                type="button"
+                                onClick={handleDelete}
+                                disabled={deleting}
+                                className="inline-flex items-center rounded-md border border-cajas-danger/50 px-4 py-2 text-sm font-medium text-cajas-danger transition-colors hover:bg-cajas-danger/10 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                {deleting ? 'Eliminando...' : 'Eliminar item'}
+                            </button>
+                            <Link href={`/cajas/menu/${menu_item.id}/edit`} className={cajasFormBtnSecondary}>
+                                Editar item
+                            </Link>
                         </div>
                     </div>
-                )}
-
-                {/* Botones de acción */}
-                <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
-                    <div className="flex justify-between">
-                        <button
-                            onClick={handleDelete}
-                            disabled={deleting}
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {deleting ? 'Eliminando...' : 'Eliminar Item'}
-                        </button>
-                        <Link
-                            href={`/cajas/menu/${menu_item.id}/edit`}
-                            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                        >
-                            Editar Item
-                        </Link>
-                    </div>
-                </div>
+                </section>
             </div>
         </AppLayout>
-    )
+    );
 }

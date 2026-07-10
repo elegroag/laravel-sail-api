@@ -7,6 +7,8 @@ import {
     composeDefaultUrl,
     splitDefaultUrl,
     type MenuItemFormData,
+    type MenuTipoFormRow,
+    type TipoOption,
 } from '@/pages/Cajas/Menu/components/MenuItemForm';
 
 type Props = {
@@ -23,9 +25,11 @@ type Props = {
         action: string;
     };
     parent?: { id: number; title: string } | null;
+    tipos: TipoOption[];
+    menu_tipos: MenuTipoFormRow[];
 };
 
-export default function Edit({ menu_item, parent = null }: Props) {
+export default function Edit({ menu_item, parent = null, tipos, menu_tipos }: Props) {
     const [formData, setFormData] = useState<MenuItemFormData>(() => {
         const split = splitDefaultUrl(menu_item.default_url || '');
         return {
@@ -43,6 +47,7 @@ export default function Edit({ menu_item, parent = null }: Props) {
         };
     });
 
+    const [menuTipos, setMenuTipos] = useState<MenuTipoFormRow[]>(menu_tipos);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [processing, setProcessing] = useState(false);
 
@@ -61,7 +66,8 @@ export default function Edit({ menu_item, parent = null }: Props) {
             controller: menu_item.controller || '',
             action: menu_item.action || '',
         });
-    }, [menu_item]);
+        setMenuTipos(menu_tipos);
+    }, [menu_item, menu_tipos]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -94,6 +100,7 @@ export default function Edit({ menu_item, parent = null }: Props) {
                     ...formData,
                     default_url: composeDefaultUrl(formData.url_app, formData.url_path),
                     parent_id: formData.parent_id ? Number(formData.parent_id) : null,
+                    tipos: menuTipos.filter((row) => row.tipo),
                 }),
             });
 
@@ -134,6 +141,9 @@ export default function Edit({ menu_item, parent = null }: Props) {
                     onChange={handleChange}
                     excludeItemId={menu_item.id}
                     initialParent={parent}
+                    tiposCatalog={tipos}
+                    menuTipos={menuTipos}
+                    onMenuTiposChange={setMenuTipos}
                 />
             </MenuFormShell>
         </AppLayout>

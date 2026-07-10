@@ -6,7 +6,13 @@ import {
     MenuItemFields,
     composeDefaultUrl,
     type MenuItemFormData,
+    type MenuTipoFormRow,
+    type TipoOption,
 } from '@/pages/Cajas/Menu/components/MenuItemForm';
+
+type Props = {
+    tipos: TipoOption[];
+};
 
 const initialFormData: MenuItemFormData = {
     title: '',
@@ -22,8 +28,9 @@ const initialFormData: MenuItemFormData = {
     action: '',
 };
 
-export default function Create() {
+export default function Create({ tipos }: Props) {
     const [formData, setFormData] = useState<MenuItemFormData>(initialFormData);
+    const [menuTipos, setMenuTipos] = useState<MenuTipoFormRow[]>([]);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [processing, setProcessing] = useState(false);
 
@@ -58,6 +65,7 @@ export default function Create() {
                     ...formData,
                     default_url: composeDefaultUrl(formData.url_app, formData.url_path),
                     parent_id: formData.parent_id ? Number(formData.parent_id) : null,
+                    tipos: menuTipos.filter((row) => row.tipo),
                 }),
             });
 
@@ -92,7 +100,14 @@ export default function Create() {
                 processing={processing}
                 onSubmit={handleSubmit}
             >
-                <MenuItemFields formData={formData} errors={errors} onChange={handleChange} />
+                <MenuItemFields
+                    formData={formData}
+                    errors={errors}
+                    onChange={handleChange}
+                    tiposCatalog={tipos}
+                    menuTipos={menuTipos}
+                    onMenuTiposChange={setMenuTipos}
+                />
             </MenuFormShell>
         </AppLayout>
     );
