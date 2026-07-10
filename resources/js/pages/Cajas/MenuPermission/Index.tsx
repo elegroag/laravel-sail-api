@@ -14,7 +14,7 @@ import {
     cajasPageClass,
 } from '@/pages/Cajas/styles/cajas-classes';
 import { router } from '@inertiajs/react';
-import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, ListTree, Search, ShieldCheck } from 'lucide-react';
+import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Filter, ListTree, Search, ShieldCheck } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 type MenuItem = {
@@ -72,6 +72,8 @@ const paginationButtonClass =
     'inline-flex h-9 items-center rounded-md border border-border px-3 text-sm font-medium text-foreground transition-colors hover:bg-cajas-border/10 hover:border-cajas-border/40 focus:outline-none focus:ring-2 focus:ring-cajas-border disabled:cursor-not-allowed disabled:opacity-50';
 
 const paginationIconButtonClass = `${paginationButtonClass} justify-center px-2.5`;
+
+const PERMISSIONS_PER_PAGE = 8;
 
 function parseOpcionesJson(raw: string | null | undefined): Record<string, boolean> | null {
     if (!raw?.trim()) return null;
@@ -146,6 +148,9 @@ export default function Index({ menu_items, tipos }: Props) {
     const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
     const [permissions, setPermissions] = useState<Permission[]>([]);
     const [tiposFuncionarios, setTiposFuncionarios] = useState<TipFun[]>([]);
+    const [tiposFuncionariosCache, setTiposFuncionariosCache] = useState<TipFun[]>([]);
+    const [permissionsByItem, setPermissionsByItem] = useState<Record<number, Permission[]>>({});
+    const [permissionsPage, setPermissionsPage] = useState(1);
     const [loadingPermissions, setLoadingPermissions] = useState(false);
     const [permissionsError, setPermissionsError] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
@@ -182,8 +187,19 @@ export default function Index({ menu_items, tipos }: Props) {
 
     const handleSelectItem = async (item: MenuItem) => {
         setSelectedItem(item);
-        setLoadingPermissions(true);
+        setPermissionsPage(1);
         setPermissionsError(null);
+
+        const cachedPermissions = permissionsByItem[item.id];
+        const cachedTipos = tiposFuncionariosCache;
+
+        if (cachedPermissions && cachedTipos.length > 0) {
+            setPermissions(cachedPermissions);
+            setTiposFuncionarios(cachedTipos);
+            return;
+        }
+
+        setLoadingPermissions(true);
 
         try {
             const res = await fetch(`/cajas/menu-permission/${item.id}/permissions`, {
@@ -204,8 +220,15 @@ export default function Index({ menu_items, tipos }: Props) {
             }
 
             const json = await res.json();
-            setPermissions(json.permissions || []);
-            setTiposFuncionarios(json.tipos_funcionarios || []);
+            const loadedPermissions = json.permissions || [];
+            const loadedTipos = json.tipos_funcionarios || [];
+
+            setPermissions(loadedPermissions);
+            setTiposFuncionarios(loadedTipos);
+            setPermissionsByItem((prev) => ({ ...prev, [item.id]: loadedPermissions }));
+            if (loadedTipos.length > 0) {
+                setTiposFuncionariosCache(loadedTipos);
+            }
         } catch (e: unknown) {
             setPermissions([]);
             setTiposFuncionarios([]);
@@ -213,6 +236,13 @@ export default function Index({ menu_items, tipos }: Props) {
             setPermissionsError(message);
         } finally {
             setLoadingPermissions(false);
+        }
+    };
+
+    const updatePermissionsState = (nextPermissions: Permission[]) => {
+        setPermissions(nextPermissions);
+        if (selectedItem) {
+            setPermissionsByItem((prev) => ({ ...prev, [selectedItem.id]: nextPermissions }));
         }
     };
 
@@ -235,8 +265,24 @@ export default function Index({ menu_items, tipos }: Props) {
             });
         }
 
-        setPermissions(updatedPermissions);
+        updatePermissionsState(updatedPermissions);
     };
+
+    const permissionsPagination = useMemo(() => {
+        const total = tiposFuncionarios.length;
+        const lastPage = Math.max(1, Math.ceil(total / PERMISSIONS_PER_PAGE));
+        const currentPage = Math.min(permissionsPage, lastPage);
+        const offset = (currentPage - 1) * PERMISSIONS_PER_PAGE;
+
+        return {
+            total,
+            lastPage,
+            currentPage,
+            from: total ? offset + 1 : 0,
+            to: Math.min(offset + PERMISSIONS_PER_PAGE, total),
+            items: tiposFuncionarios.slice(offset, offset + PERMISSIONS_PER_PAGE),
+        };
+    }, [tiposFuncionarios, permissionsPage]);
 
     const savePermissions = async () => {
         if (!selectedItem) return;
@@ -267,7 +313,7 @@ export default function Index({ menu_items, tipos }: Props) {
                 }
             }
 
-            await handleSelectItem(selectedItem);
+            updatePermissionsState(permissions);
             setToast({ type: 'success', message: 'Permisos guardados correctamente' });
         } catch (error) {
             console.error('Error saving permissions', error);
@@ -327,8 +373,14 @@ export default function Index({ menu_items, tipos }: Props) {
                             </div>
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
-                            <button type="button" onClick={applyFilters} className={cajasFormBtnSecondary}>
-                                Filtrar
+                            <button
+                                type="button"
+                                onClick={applyFilters}
+                                className={`${cajasFormBtnSecondary} justify-center px-2.5`}
+                                aria-label="Filtrar"
+                                title="Filtrar"
+                            >
+                                <Filter className="size-4" />
                             </button>
                             <button type="button" onClick={clearFilters} className={cajasFormBtnSecondary}>
                                 Limpiar
@@ -359,7 +411,7 @@ export default function Index({ menu_items, tipos }: Props) {
                                         const isSelected = selectedItem?.id === menu_item.id;
 
                                         return (
-                                            <li key={menu_item.id}>
+                                            <li key={`${menu_item.id}-${menu_item.tipo}`}>
                                                 <button
                                                     type="button"
                                                     onClick={() => handleSelectItem(menu_item)}
@@ -412,16 +464,16 @@ export default function Index({ menu_items, tipos }: Props) {
                             )}
 
                             {meta.pagination && data.length > 0 && (
-                                <div className="flex flex-col gap-3 border-t border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-                                    <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-muted-foreground">
-                                        <span>
-                                            Mostrando {meta.pagination.from || 0}–{meta.pagination.to || 0} de {meta.pagination.total}
-                                        </span>
-                                        <label className="flex shrink-0 items-center gap-2">
+                                <div className="space-y-2 border-t border-border px-4 py-2.5 sm:px-5">
+                                    <p className="text-xs text-muted-foreground">
+                                        Mostrando {meta.pagination.from || 0}–{meta.pagination.to || 0} de {meta.pagination.total}
+                                    </p>
+                                    <div className="flex items-center justify-between gap-2">
+                                        <label className="flex items-center gap-1.5 whitespace-nowrap text-xs text-muted-foreground">
                                             Por página
                                             <select
                                                 id="per_page"
-                                                className={`${cajasFormSelectClass} !mt-0 w-auto py-1`}
+                                                className={`${cajasFormSelectClass} !mt-0 h-8 w-14 py-0 text-xs`}
                                                 value={meta.pagination.per_page}
                                                 onChange={(e) =>
                                                     router.get(
@@ -438,8 +490,7 @@ export default function Index({ menu_items, tipos }: Props) {
                                                 ))}
                                             </select>
                                         </label>
-                                    </div>
-                                    <div className="flex shrink-0 items-center gap-1">
+                                        <div className="flex items-center gap-0.5">
                                         <button
                                             type="button"
                                             onClick={() =>
@@ -537,6 +588,7 @@ export default function Index({ menu_items, tipos }: Props) {
                                         >
                                             <ChevronLast className="size-4" />
                                         </button>
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -568,7 +620,7 @@ export default function Index({ menu_items, tipos }: Props) {
                                 )}
                             </div>
 
-                            <div className={`${cajasCardBodyClass} max-h-[70vh] overflow-auto`}>
+                            <div className={cajasCardBodyClass}>
                                 {!selectedItem && (
                                     <div className="flex flex-col items-center justify-center py-10 text-center">
                                         <ShieldCheck className="mb-3 size-10 text-muted-foreground/50" />
@@ -591,44 +643,103 @@ export default function Index({ menu_items, tipos }: Props) {
                                 )}
 
                                 {!loadingPermissions && !permissionsError && selectedItem && (
-                                    <div className="overflow-hidden rounded-lg border border-border">
-                                        <table className="min-w-full divide-y divide-border text-sm">
-                                            <thead className="bg-muted/60">
-                                                <tr>
-                                                    <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">Tipo funcionario</th>
-                                                    <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">Puede ver</th>
-                                                    <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">Opciones</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-border bg-card">
-                                                {tiposFuncionarios.map((tf) => {
-                                                    const permission = permissions.find((p) => p.tipfun === tf.tipfun);
+                                    <>
+                                        <div className="overflow-hidden rounded-lg border border-border">
+                                            <table className="min-w-full divide-y divide-border text-sm">
+                                                <thead className="bg-muted/60">
+                                                    <tr>
+                                                        <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">Tipo funcionario</th>
+                                                        <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">Puede ver</th>
+                                                        <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">Opciones</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-border bg-card">
+                                                    {permissionsPagination.items.map((tf) => {
+                                                        const permission = permissions.find((p) => p.tipfun === tf.tipfun);
 
-                                                    return (
-                                                        <tr key={tf.tipfun} className="transition-colors hover:bg-muted/20">
-                                                            <td className="px-3 py-3 font-medium text-foreground">{tf.detalle}</td>
-                                                            <td className="px-3 py-3">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    className={cajasCheckboxClass}
-                                                                    checked={permission?.can_view || false}
-                                                                    onChange={(e) => handlePermissionChange(tf.tipfun, 'can_view', e.target.checked)}
-                                                                />
-                                                            </td>
-                                                            <td className="px-3 py-3 align-top">
-                                                                <OpcionesField
-                                                                    value={permission?.opciones ?? null}
-                                                                    onChange={(nextValue) =>
-                                                                        handlePermissionChange(tf.tipfun, 'opciones', nextValue)
-                                                                    }
-                                                                />
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                })}
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                                        return (
+                                                            <tr key={tf.tipfun} className="transition-colors hover:bg-muted/20">
+                                                                <td className="px-3 py-3 font-medium text-foreground">{tf.detalle}</td>
+                                                                <td className="px-3 py-3">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        className={cajasCheckboxClass}
+                                                                        checked={permission?.can_view || false}
+                                                                        onChange={(e) => handlePermissionChange(tf.tipfun, 'can_view', e.target.checked)}
+                                                                    />
+                                                                </td>
+                                                                <td className="px-3 py-3 align-top">
+                                                                    <OpcionesField
+                                                                        value={permission?.opciones ?? null}
+                                                                        onChange={(nextValue) =>
+                                                                            handlePermissionChange(tf.tipfun, 'opciones', nextValue)
+                                                                        }
+                                                                    />
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        {permissionsPagination.total > PERMISSIONS_PER_PAGE && (
+                                            <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3 sm:flex-row sm:items-center sm:justify-between">
+                                                <span className="text-xs text-muted-foreground">
+                                                    Mostrando {permissionsPagination.from}–{permissionsPagination.to} de {permissionsPagination.total} tipos
+                                                </span>
+                                                <div className="flex items-center gap-1">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setPermissionsPage(1)}
+                                                        disabled={permissionsPagination.currentPage === 1}
+                                                        className={paginationIconButtonClass}
+                                                        aria-label="Primera página"
+                                                        title="Primera página"
+                                                    >
+                                                        <ChevronFirst className="size-4" />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setPermissionsPage((page) => Math.max(1, page - 1))}
+                                                        disabled={permissionsPagination.currentPage === 1}
+                                                        className={paginationIconButtonClass}
+                                                        aria-label="Página anterior"
+                                                        title="Página anterior"
+                                                    >
+                                                        <ChevronLeft className="size-4" />
+                                                    </button>
+                                                    <span className="px-2 text-xs text-muted-foreground">
+                                                        {permissionsPagination.currentPage} / {permissionsPagination.lastPage}
+                                                    </span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            setPermissionsPage((page) =>
+                                                                Math.min(permissionsPagination.lastPage, page + 1),
+                                                            )
+                                                        }
+                                                        disabled={permissionsPagination.currentPage === permissionsPagination.lastPage}
+                                                        className={paginationIconButtonClass}
+                                                        aria-label="Página siguiente"
+                                                        title="Página siguiente"
+                                                    >
+                                                        <ChevronRight className="size-4" />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setPermissionsPage(permissionsPagination.lastPage)}
+                                                        disabled={permissionsPagination.currentPage === permissionsPagination.lastPage}
+                                                        className={paginationIconButtonClass}
+                                                        aria-label="Última página"
+                                                        title="Última página"
+                                                    >
+                                                        <ChevronLast className="size-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         </div>

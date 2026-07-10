@@ -17,7 +17,7 @@ import {
     cajasPageClass,
 } from '@/pages/Cajas/styles/cajas-classes';
 import { Link, router } from '@inertiajs/react';
-import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Eye, ListTree, Pencil, Plus, Search, Trash2 } from 'lucide-react';
+import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Eye, Filter, ListTree, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 type TipoOption = {
@@ -273,8 +273,14 @@ export default function Index({ menu_items, tipos }: Props) {
                             </div>
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
-                            <button type="button" onClick={applyFilters} className={cajasFormBtnSecondary}>
-                                Filtrar
+                            <button
+                                type="button"
+                                onClick={applyFilters}
+                                className={`${cajasFormBtnSecondary} justify-center px-2.5`}
+                                aria-label="Filtrar"
+                                title="Filtrar"
+                            >
+                                <Filter className="size-4" />
                             </button>
                             <button type="button" onClick={clearFilters} className={cajasFormBtnSecondary}>
                                 Limpiar
@@ -315,7 +321,7 @@ export default function Index({ menu_items, tipos }: Props) {
                                         const isSelected = selectedId === menu_item.id;
 
                                         return (
-                                            <li key={menu_item.id}>
+                                            <li key={`${menu_item.id}-${menu_item.tipo}`}>
                                                 <div
                                                     className={`flex flex-col gap-3 px-4 py-4 transition-colors sm:px-5 lg:flex-row lg:items-center lg:justify-between ${
                                                         isSelected ? 'bg-cajas-border/10' : 'hover:bg-muted/30'
@@ -391,16 +397,16 @@ export default function Index({ menu_items, tipos }: Props) {
                             )}
 
                             {meta.pagination && data.length > 0 && (
-                                <div className="flex flex-col gap-3 border-t border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-                                    <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-muted-foreground">
-                                        <span>
-                                            Mostrando {meta.pagination.from || 0}–{meta.pagination.to || 0} de {meta.pagination.total}
-                                        </span>
-                                        <label className="flex shrink-0 items-center gap-2">
+                                <div className="space-y-2 border-t border-border px-4 py-2.5 sm:px-5">
+                                    <p className="text-xs text-muted-foreground">
+                                        Mostrando {meta.pagination.from || 0}–{meta.pagination.to || 0} de {meta.pagination.total}
+                                    </p>
+                                    <div className="flex items-center justify-between gap-2">
+                                        <label className="flex items-center gap-1.5 whitespace-nowrap text-xs text-muted-foreground">
                                             Por página
                                             <select
                                                 id="per_page"
-                                                className={`${cajasFormSelectClass} !mt-0 w-auto py-1`}
+                                                className={`${cajasFormSelectClass} !mt-0 h-8 w-14 py-0 text-xs`}
                                                 value={meta.pagination.per_page}
                                                 onChange={(e) =>
                                                     router.get(
@@ -417,8 +423,7 @@ export default function Index({ menu_items, tipos }: Props) {
                                                 ))}
                                             </select>
                                         </label>
-                                    </div>
-                                    <div className="flex shrink-0 items-center gap-1">
+                                        <div className="flex items-center gap-0.5">
                                         <button
                                             type="button"
                                             onClick={() =>
@@ -516,6 +521,7 @@ export default function Index({ menu_items, tipos }: Props) {
                                         >
                                             <ChevronLast className="size-4" />
                                         </button>
+                                        </div>
                                     </div>
                                 </div>
                             )}
