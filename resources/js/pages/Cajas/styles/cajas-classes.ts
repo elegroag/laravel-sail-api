@@ -18,10 +18,10 @@ export const cajasInputErrorClass = 'border-cajas-danger focus:border-cajas-dang
 export const cajasLinkClass = 'text-cajas-border hover:opacity-80';
 
 export const cajasSidebarMenuButtonClass =
-    'h-auto min-h-10 gap-2.5 px-3 py-2.5 text-cajas-text hover:bg-cajas-hover-bg hover:text-cajas-text-active data-[active=true]:bg-cajas-active-bg data-[active=true]:text-cajas-text-active [&>span:last-child]:whitespace-normal [&>span:last-child]:leading-snug';
+    'h-auto min-h-8 gap-2 px-2 py-1.5 text-cajas-text hover:bg-cajas-hover-bg hover:text-cajas-text-active data-[active=true]:bg-cajas-active-bg data-[active=true]:text-cajas-text-active [&>span:last-child]:whitespace-normal [&>span:last-child]:leading-snug';
 
 export const cajasSidebarSubMenuButtonClass =
-    'h-auto min-h-8 gap-2 px-3 py-1 text-cajas-text hover:bg-cajas-hover-bg hover:text-cajas-text-active data-[active=true]:bg-cajas-active-bg data-[active=true]:text-cajas-text-active [&>span:last-child]:whitespace-normal [&>span:last-child]:leading-snug';
+    'h-auto min-h-7 gap-1.5 px-2 py-0.5 text-cajas-text hover:bg-cajas-hover-bg hover:text-cajas-text-active data-[active=true]:bg-cajas-active-bg data-[active=true]:text-cajas-text-active [&>span:last-child]:whitespace-normal [&>span:last-child]:leading-snug';
 
 export const cajasCheckboxClass =
     'rounded border-border text-cajas-border shadow-sm focus:border-cajas-border focus:ring-cajas-border';

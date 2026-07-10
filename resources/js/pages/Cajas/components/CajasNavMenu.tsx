@@ -114,8 +114,8 @@ export function CajasNavMenu({ items = [] }: CajasNavMenuProps) {
     }
 
     return (
-        <SidebarGroup className="px-3 py-1">
-            <SidebarGroupLabel className="px-1 text-cajas-text/70">Menú</SidebarGroupLabel>
+        <SidebarGroup className="p-1">
+            <SidebarGroupLabel className="h-6 px-0.5 text-cajas-text/70">Menú</SidebarGroupLabel>
             <SidebarMenu className="gap-px">
                 {items.map((item) => (
                     <CajasNavMenuItem key={item.id} item={item} currentPath={currentPath} />

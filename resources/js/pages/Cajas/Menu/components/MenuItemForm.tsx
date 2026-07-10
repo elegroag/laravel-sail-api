@@ -41,13 +41,13 @@ export type MenuItemFormData = {
 
 export const URL_APP_OPTIONS: { value: MenuItemFormData['url_app']; label: string; prefix: string }[] = [
     { value: '', label: 'Sin ruta', prefix: '' },
-    { value: 'cajas', label: 'Cajas', prefix: '/cajas' },
-    { value: 'mercurio', label: 'Mercurio', prefix: '/mercurio' },
-    { value: 'web', label: 'Web', prefix: '/web' },
+    { value: 'cajas', label: 'Cajas', prefix: 'cajas' },
+    { value: 'mercurio', label: 'Mercurio', prefix: 'mercurio' },
+    { value: 'web', label: 'Web', prefix: 'web' },
 ];
 
 export function splitDefaultUrl(raw: string): { app: MenuItemFormData['url_app']; path: string } {
-    const value = (raw || '').trim();
+    const value = (raw || '').trim().replace(/^\/+/, '');
     if (!value) return { app: '', path: '' };
 
     for (const opt of URL_APP_OPTIONS) {
@@ -57,8 +57,7 @@ export function splitDefaultUrl(raw: string): { app: MenuItemFormData['url_app']
         }
     }
 
-    const normalized = value.startsWith('/') ? value.slice(1) : value;
-    return { app: '', path: normalized };
+    return { app: '', path: value };
 }
 
 export function composeDefaultUrl(app: MenuItemFormData['url_app'], path: string): string {
