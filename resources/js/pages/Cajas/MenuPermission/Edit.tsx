@@ -14,7 +14,7 @@ type Permission = {
     };
     tipfun: {
         tipfun: string;
-        destipfun: string;
+        detalle: string;
     };
 };
 
@@ -61,7 +61,7 @@ export default function Edit({ permission, errors }: Props) {
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Tipo de Funcionario</label>
-                            <p className="mt-1 text-sm text-gray-900 p-2 bg-gray-100 rounded-md">{permission.tipfun.destipfun}</p>
+                            <p className="mt-1 text-sm text-gray-900 p-2 bg-gray-100 rounded-md">{permission.tipfun.detalle}</p>
                         </div>
 
                         <div>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Gener21;
 use App\Models\MenuItem;
 use App\Models\MenuPermission;
+use App\Models\Mercurio06;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -25,7 +26,7 @@ class MenuPermissionController extends Controller
         $q = trim((string) $request->query('q', ''));
         if ($q !== '') {
             $query->where(function ($sub) use ($q) {
-                $like = '%' . str_replace(['%', '_'], ['\%', '\_'], $q) . '%';
+                $like = '%'.str_replace(['%', '_'], ['\%', '\_'], $q).'%';
                 $sub->where('menu_items.title', 'like', $like)
                     ->orWhere('menu_items.controller', 'like', $like)
                     ->orWhere('menu_items.action', 'like', $like)
@@ -63,25 +64,35 @@ class MenuPermissionController extends Controller
             ],
         ];
 
-        return Inertia::render('Cajas/MenuPermission/Index', compact('menu_items'));
+        $tipos = Mercurio06::orderBy('detalle')
+            ->get(['tipo', 'detalle'])
+            ->map(fn ($row) => [
+                'value' => $row->tipo,
+                'label' => $row->detalle,
+            ])
+            ->all();
+
+        return Inertia::render('Cajas/MenuPermission/Index', compact('menu_items', 'tipos'));
     }
 
     public function create()
     {
         return Inertia::render('Cajas/MenuPermission/Create', [
             'menu_items' => MenuItem::orderBy('title')->get(['id', 'title']),
-            'tipos_funcionarios' => Gener21::orderBy('destipfun')->get(['tipfun', 'destipfun']),
+            'tipos_funcionarios' => $this->tiposFuncionariosCatalog(),
         ]);
     }
 
     public function permissions(Request $request, int $menu_item_id)
     {
-        $permissions = MenuPermission::where('menu_item', $menu_item_id)->with('tipfun')->get();
-        $tipos_funcionarios = Gener21::orderBy('destipfun')->get();
+        MenuItem::findOrFail($menu_item_id);
+
+        $permissions = MenuPermission::where('menu_item', $menu_item_id)
+            ->get(['id', 'menu_item', 'tipfun', 'can_view', 'opciones']);
 
         return response()->json([
             'permissions' => $permissions,
-            'tipos_funcionarios' => $tipos_funcionarios,
+            'tipos_funcionarios' => $this->tiposFuncionariosCatalog(),
         ]);
     }
 
@@ -129,6 +140,7 @@ class MenuPermissionController extends Controller
     public function edit(int $id)
     {
         $permission = MenuPermission::with(['menuItem', 'tipfun'])->findOrFail($id);
+
         return Inertia::render('Cajas/MenuPermission/Edit', [
             'permission' => $permission,
         ]);
@@ -140,7 +152,7 @@ class MenuPermissionController extends Controller
             'can_view' => 'sometimes|boolean',
             'opciones' => 'nullable|string',
         ]);
-        
+
         $data['can_view'] = $request->has('can_view');
 
         $permission = MenuPermission::findOrFail($id);
@@ -155,5 +167,19 @@ class MenuPermissionController extends Controller
         $permission->delete();
 
         return response()->json(['message' => 'Permiso eliminado correctamente.']);
+    }
+
+    /**
+     * @return array<int, array{tipfun: string, detalle: string}>
+     */
+    private function tiposFuncionariosCatalog(): array
+    {
+        return Gener21::orderBy('detalle')
+            ->get(['tipfun', 'detalle'])
+            ->map(fn ($row) => [
+                'tipfun' => $row->tipfun,
+                'detalle' => $row->detalle,
+            ])
+            ->all();
     }
 }

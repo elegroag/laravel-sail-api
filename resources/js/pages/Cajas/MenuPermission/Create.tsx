@@ -9,7 +9,7 @@ type SelectOption = {
 
 type Props = {
     menu_items: Array<{ id: number; title: string }>;
-    tipos_funcionarios: Array<{ tipfun: string; destipfun: string }>;
+    tipos_funcionarios: Array<{ tipfun: string; detalle: string }>;
     errors: Record<string, string>;
 };
 
@@ -28,7 +28,7 @@ export default function Create({ menu_items, tipos_funcionarios, errors }: Props
 
     const tipFunOptions: SelectOption[] = tipos_funcionarios.map(tf => ({
         value: tf.tipfun,
-        label: tf.destipfun,
+        label: tf.detalle,
     }));
 
     const handleSubmit = (e: React.FormEvent) => {
