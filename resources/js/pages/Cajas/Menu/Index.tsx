@@ -44,9 +44,18 @@ type Props = {
     tipos: TipoOption[];
 };
 
+type MenuTipoRelation = {
+    id: number;
+    tipo: string;
+    detalle: string;
+    is_visible: boolean;
+    position: number | null;
+};
+
 type ChildrenResponse = {
     success: boolean;
     data: any[];
+    tipos?: MenuTipoRelation[];
     message: string;
 };
 
@@ -65,7 +74,9 @@ export default function Index({ menu_items, tipos }: Props) {
     const { data, meta } = menu_items;
 
     const [selectedId, setSelectedId] = useState<number | null>(null);
+    const [selectedItem, setSelectedItem] = useState<any | null>(null);
     const [children, setChildren] = useState<any[]>([]);
+    const [itemTipos, setItemTipos] = useState<MenuTipoRelation[]>([]);
     const [loadingChildren, setLoadingChildren] = useState(false);
     const [childrenError, setChildrenError] = useState<string | null>(null);
 
@@ -99,9 +110,11 @@ export default function Index({ menu_items, tipos }: Props) {
     useEffect(() => {
         if (fetchChildren.data) {
             setChildren(Array.isArray(fetchChildren.data.data) ? fetchChildren.data.data : []);
+            setItemTipos(Array.isArray(fetchChildren.data.tipos) ? fetchChildren.data.tipos : []);
         }
         if (fetchChildren.error) {
             setChildren([]);
+            setItemTipos([]);
             setChildrenError(fetchChildren.error);
         }
         if (!fetchChildren.loading) {
@@ -123,8 +136,10 @@ export default function Index({ menu_items, tipos }: Props) {
 
     const handleDetail = useCallback(async (menu_item: any) => {
         setSelectedId(menu_item.id);
+        setSelectedItem(menu_item);
         setLoadingChildren(true);
         setChildrenError(null);
+        setItemTipos([]);
         await fetchChildren.execute(`/cajas/menu/children`, {
             id: menu_item.id,
             tipo: menu_item.tipo,
@@ -135,7 +150,7 @@ export default function Index({ menu_items, tipos }: Props) {
     useEffect(() => {
         if (fetchAttach.data) {
             setAttaching(false);
-            handleDetail({ id: selectedId, tipo, codapl });
+            handleDetail(selectedItem ?? { id: selectedId, tipo, codapl });
             setAddOpen(false);
             setSelectedChildId('');
             setSearchOption('');
@@ -145,7 +160,7 @@ export default function Index({ menu_items, tipos }: Props) {
             setAttaching(false);
             setToast({ type: 'error', message: fetchAttach.error });
         }
-    }, [fetchAttach.data, fetchAttach.error, handleDetail, selectedId, tipo, codapl]);
+    }, [fetchAttach.data, fetchAttach.error, handleDetail, selectedId, selectedItem, tipo, codapl]);
 
     const currentFilterParams = useMemo(() => ({ q: q || undefined, tipo: tipo || undefined, codapl: codapl || undefined }), [q, tipo, codapl]);
 
@@ -189,7 +204,12 @@ export default function Index({ menu_items, tipos }: Props) {
         setOptionsError(null);
         const url = new URL(window.location.origin + `/cajas/menu/options`);
         if (query) url.searchParams.set('q', query);
-        await fetchOptions.execute(url.toString(), { q: query, id: selectedId, tipo, codapl });
+        await fetchOptions.execute(url.toString(), {
+            q: query,
+            id: selectedId,
+            tipo: selectedItem?.tipo || tipo,
+            codapl: selectedItem?.codapl || codapl,
+        });
     };
 
     const attachChild = async () => {
@@ -198,8 +218,8 @@ export default function Index({ menu_items, tipos }: Props) {
         await fetchAttach.execute(`/cajas/menu/attach-child`, {
             id: selectedId,
             child_id: Number(selectedChildId),
-            tipo,
-            codapl,
+            tipo: selectedItem?.tipo || tipo,
+            codapl: selectedItem?.codapl || codapl,
         });
     };
 
@@ -512,7 +532,7 @@ export default function Index({ menu_items, tipos }: Props) {
                                             Item seleccionado: <span className="font-medium text-foreground">#{selectedId}</span>
                                         </p>
                                     ) : (
-                                        <p className="text-xs text-muted-foreground">Selecciona un item para ver sus hijos</p>
+                                        <p className="text-xs text-muted-foreground">Selecciona un item para ver tipos e hijos</p>
                                     )}
                                 </div>
                                 {selectedId && (
@@ -550,64 +570,140 @@ export default function Index({ menu_items, tipos }: Props) {
                                     </div>
                                 )}
 
-                                {!loadingChildren && !childrenError && selectedId && (
-                                    <>
-                                        {children.length === 0 ? (
-                                            <p className="text-sm text-muted-foreground">Este item no tiene hijos.</p>
-                                        ) : (
-                                            <ul className="space-y-3">
-                                                {children.map((child) => (
-                                                    <li
-                                                        key={child.id}
-                                                        className="rounded-lg border border-border p-3 transition-colors hover:border-cajas-border/40 hover:bg-muted/20"
-                                                    >
-                                                        <div className="flex items-start gap-3">
-                                                            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-cajas-header-bg ring-1 ring-cajas-border/30">
-                                                                <CajasMenuIcon icon={child.icon} color={child.color} className="text-sm" />
-                                                            </div>
-                                                            <div className="min-w-0 flex-1">
-                                                                <div className="flex items-center justify-between gap-2">
-                                                                    <div className="truncate text-sm font-medium text-foreground" title={child.title}>
-                                                                        {child.title}
-                                                                    </div>
-                                                                    <Link href={`/cajas/menu/${child.id}/edit`} className={cajasActionLinkClass}>
-                                                                        <Pencil className="size-3.5" />
-                                                                        Editar
-                                                                    </Link>
-                                                                </div>
-                                                                <p
-                                                                    className="mt-0.5 truncate text-xs text-muted-foreground"
-                                                                    title={`${child.controller || '—'} | ${child.action || '—'}`}
-                                                                >
-                                                                    {child.controller || '—'} · {child.action || '—'}
-                                                                </p>
-                                                                <div className="mt-2 flex flex-wrap items-center gap-2">
-                                                                    <span className={`${cajasBadgeClass} bg-muted text-muted-foreground ring-border`}>
-                                                                        Tipo: {child.tipo ?? 'N/A'}
-                                                                    </span>
-                                                                    <span className={`${cajasBadgeClass} bg-muted text-muted-foreground ring-border`}>
-                                                                        Pos: {child.position ?? '—'}
-                                                                    </span>
-                                                                    <span
-                                                                        className={`${cajasBadgeClass} ${
-                                                                            child.is_visible
-                                                                                ? 'bg-cajas-success/10 text-cajas-success ring-cajas-success/20'
-                                                                                : 'bg-cajas-danger/10 text-cajas-danger ring-cajas-danger/20'
-                                                                        }`}
-                                                                    >
-                                                                        {child.is_visible ? 'Visible' : 'Oculto'}
-                                                                    </span>
-                                                                </div>
-                                                                {child.default_url && (
-                                                                    <p className="mt-2 break-all text-[11px] text-muted-foreground">{child.default_url}</p>
-                                                                )}
-                                                            </div>
+                                {!loadingChildren && !childrenError && selectedId && selectedItem && (
+                                    <div className="space-y-5">
+                                        <div className="rounded-lg border border-border p-3">
+                                            <div className="flex items-start gap-3">
+                                                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-cajas-header-bg ring-1 ring-cajas-border/30">
+                                                    <CajasMenuIcon icon={selectedItem.icon} color={selectedItem.color} className="text-sm" />
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="flex items-center justify-between gap-2">
+                                                        <div className="truncate text-sm font-medium text-foreground" title={selectedItem.title}>
+                                                            {selectedItem.title}
                                                         </div>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        )}
-                                    </>
+                                                        <Link href={`/cajas/menu/${selectedItem.id}/edit`} className={cajasActionLinkClass}>
+                                                            <Pencil className="size-3.5" />
+                                                            Editar
+                                                        </Link>
+                                                    </div>
+                                                    <p
+                                                        className="mt-0.5 truncate text-xs text-muted-foreground"
+                                                        title={`${selectedItem.controller || '—'} | ${selectedItem.action || '—'}`}
+                                                    >
+                                                        {selectedItem.controller || '—'} · {selectedItem.action || '—'}
+                                                    </p>
+                                                    {selectedItem.default_url && (
+                                                        <p className="mt-2 break-all text-[11px] text-muted-foreground">{selectedItem.default_url}</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <div className="mb-2 flex items-center justify-between gap-2">
+                                                <h5 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                                    Tipos asociados
+                                                </h5>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {itemTipos.length} tipo{itemTipos.length === 1 ? '' : 's'}
+                                                </span>
+                                            </div>
+                                            {itemTipos.length === 0 ? (
+                                                <p className="text-sm text-muted-foreground">Este item no tiene tipos asociados.</p>
+                                            ) : (
+                                                <ul className="space-y-2">
+                                                    {itemTipos.map((tipoItem) => (
+                                                        <li
+                                                            key={tipoItem.id}
+                                                            className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2"
+                                                        >
+                                                            <div className="min-w-0">
+                                                                <p className="truncate text-sm font-medium text-foreground">{tipoItem.detalle}</p>
+                                                                <p className="text-xs text-muted-foreground">
+                                                                    Código: {tipoItem.tipo}
+                                                                    {tipoItem.position != null ? ` · Pos: ${tipoItem.position}` : ''}
+                                                                </p>
+                                                            </div>
+                                                            <span
+                                                                className={`${cajasBadgeClass} shrink-0 ${
+                                                                    tipoItem.is_visible
+                                                                        ? 'bg-cajas-success/10 text-cajas-success ring-cajas-success/20'
+                                                                        : 'bg-cajas-danger/10 text-cajas-danger ring-cajas-danger/20'
+                                                                }`}
+                                                            >
+                                                                {tipoItem.is_visible ? 'Visible' : 'Oculto'}
+                                                            </span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <div className="mb-2 flex items-center justify-between gap-2">
+                                                <h5 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Items hijos</h5>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {children.length} hijo{children.length === 1 ? '' : 's'}
+                                                </span>
+                                            </div>
+                                            {children.length === 0 ? (
+                                                <p className="text-sm text-muted-foreground">Este item no tiene hijos.</p>
+                                            ) : (
+                                                <ul className="space-y-3">
+                                                    {children.map((child) => (
+                                                        <li
+                                                            key={child.id}
+                                                            className="rounded-lg border border-border p-3 transition-colors hover:border-cajas-border/40 hover:bg-muted/20"
+                                                        >
+                                                            <div className="flex items-start gap-3">
+                                                                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-cajas-header-bg ring-1 ring-cajas-border/30">
+                                                                    <CajasMenuIcon icon={child.icon} color={child.color} className="text-sm" />
+                                                                </div>
+                                                                <div className="min-w-0 flex-1">
+                                                                    <div className="flex items-center justify-between gap-2">
+                                                                        <div className="truncate text-sm font-medium text-foreground" title={child.title}>
+                                                                            {child.title}
+                                                                        </div>
+                                                                        <Link href={`/cajas/menu/${child.id}/edit`} className={cajasActionLinkClass}>
+                                                                            <Pencil className="size-3.5" />
+                                                                            Editar
+                                                                        </Link>
+                                                                    </div>
+                                                                    <p
+                                                                        className="mt-0.5 truncate text-xs text-muted-foreground"
+                                                                        title={`${child.controller || '—'} | ${child.action || '—'}`}
+                                                                    >
+                                                                        {child.controller || '—'} · {child.action || '—'}
+                                                                    </p>
+                                                                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                                                                        <span className={`${cajasBadgeClass} bg-muted text-muted-foreground ring-border`}>
+                                                                            Tipo: {child.tipo ?? 'N/A'}
+                                                                        </span>
+                                                                        <span className={`${cajasBadgeClass} bg-muted text-muted-foreground ring-border`}>
+                                                                            Pos: {child.position ?? '—'}
+                                                                        </span>
+                                                                        <span
+                                                                            className={`${cajasBadgeClass} ${
+                                                                                child.is_visible
+                                                                                    ? 'bg-cajas-success/10 text-cajas-success ring-cajas-success/20'
+                                                                                    : 'bg-cajas-danger/10 text-cajas-danger ring-cajas-danger/20'
+                                                                            }`}
+                                                                        >
+                                                                            {child.is_visible ? 'Visible' : 'Oculto'}
+                                                                        </span>
+                                                                    </div>
+                                                                    {child.default_url && (
+                                                                        <p className="mt-2 break-all text-[11px] text-muted-foreground">{child.default_url}</p>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            )}
+                                        </div>
+                                    </div>
                                 )}
                             </div>
                         </div>

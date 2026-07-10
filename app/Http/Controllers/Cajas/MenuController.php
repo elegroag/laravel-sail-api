@@ -194,9 +194,28 @@ class MenuController extends Controller
             ->orderBy('menu_items.id', 'ASC')
             ->get();
 
+        $itemTipos = MenuTipo::query()
+            ->where('menu_item', $id)
+            ->orderBy('position')
+            ->orderBy('id')
+            ->get(['id', 'tipo', 'is_visible', 'position']);
+
+        $tipoLabels = Mercurio06::query()
+            ->whereIn('tipo', $itemTipos->pluck('tipo'))
+            ->pluck('detalle', 'tipo');
+
+        $tipos = $itemTipos->map(fn ($row) => [
+            'id' => $row->id,
+            'tipo' => $row->tipo,
+            'detalle' => $tipoLabels[$row->tipo] ?? $row->tipo,
+            'is_visible' => (bool) $row->is_visible,
+            'position' => $row->position,
+        ])->values();
+
         return response()->json([
             'success' => true,
             'data' => $children,
+            'tipos' => $tipos,
             'message' => 'Items hijos cargados correctamente',
         ]);
     }
@@ -237,11 +256,22 @@ class MenuController extends Controller
         $q = trim((string) $request->input('q', ''));
         $id = $request->input('id');
         $codapl = $request->input('codapl');
-        $alreadyChildrenIds = MenuItem::where('codapl', $codapl)->pluck('id');
+        $tipo = trim((string) $request->input('tipo', ''));
 
         $options = MenuItem::query()
-            ->where('id', '!=', $id)
-            ->whereIn('id', $alreadyChildrenIds)
+            ->where('menu_items.id', '!=', $id)
+            ->where('menu_items.codapl', $codapl)
+            ->where(function ($sub) use ($id) {
+                $sub->whereNull('menu_items.parent_id')->orWhere('menu_items.parent_id', '!=', $id);
+            })
+            ->when($tipo !== '', function ($query) use ($tipo) {
+                $query->whereExists(function ($sub) use ($tipo) {
+                    $sub->selectRaw('1')
+                        ->from('menu_tipos')
+                        ->whereColumn('menu_tipos.menu_item', 'menu_items.id')
+                        ->where('menu_tipos.tipo', $tipo);
+                });
+            })
             ->when($q !== '', function ($query) use ($q) {
                 $like = '%'.str_replace(['%', '_'], ['\%', '\_'], $q).'%';
                 $query->where(function ($sub) use ($like) {
@@ -250,10 +280,11 @@ class MenuController extends Controller
                         ->orWhere('action', 'like', $like);
                 });
             })
-            ->groupBy('controller', 'action')
+            ->selectRaw('MIN(menu_items.id) as id, MIN(menu_items.title) as title, menu_items.controller, menu_items.action')
+            ->groupBy('menu_items.controller', 'menu_items.action')
             ->orderBy('title')
             ->limit(100)
-            ->get(['id', 'title', 'controller', 'action']);
+            ->get();
 
         return response()->json([
             'data' => $options,
